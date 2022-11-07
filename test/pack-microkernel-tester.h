@@ -106,7 +106,7 @@ class PackMicrokernelTester {
       // Verify results.
       for (size_t i = 0; i < mr(); i++) {
         for (size_t j = 0; j < k(); j++) {
-          ASSERT_EQ(y_ref[j * mr() + i], y[j * mr() + i])
+          EXPECT_EQ(y_ref[j * mr() + i], y[j * mr() + i])
             << "at pixel = " << i << ", channel = " << j << ", "
             << "m = " << m() << ", k = " << k();
         }

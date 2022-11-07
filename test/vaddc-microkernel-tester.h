@@ -181,13 +181,13 @@ class VAddCMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_LE(uint32_t(y[i]), uint32_t(qmax()))
+        EXPECT_LE(uint32_t(y[i]), uint32_t(qmax()))
           << "at element " << i << " / " << batch_size();
-        ASSERT_GE(uint32_t(y[i]), uint32_t(qmin()))
+        EXPECT_GE(uint32_t(y[i]), uint32_t(qmin()))
           << "at element " << i << " / " << batch_size();
-        ASSERT_NEAR(float(int32_t(y[i])), y_fp[i], 0.6f)
+        EXPECT_NEAR(float(int32_t(y[i])), y_fp[i], 0.6f)
           << "at element " << i << " / " << batch_size();
-        ASSERT_EQ(uint32_t(y_ref[i]), uint32_t(y[i]))
+        EXPECT_EQ(uint32_t(y_ref[i]), uint32_t(y[i]))
           << "at element " << i << " / " << batch_size();
       }
     }
@@ -242,13 +242,13 @@ class VAddCMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_LE(int32_t(y[i]), int32_t(qmax() - 0x80))
+        EXPECT_LE(int32_t(y[i]), int32_t(qmax() - 0x80))
           << "at element " << i << " / " << batch_size();
-        ASSERT_GE(int32_t(y[i]), int32_t(qmin() - 0x80))
+        EXPECT_GE(int32_t(y[i]), int32_t(qmin() - 0x80))
           << "at element " << i << " / " << batch_size();
-        ASSERT_EQ(int32_t(y_ref[i]), int32_t(y[i]))
+        EXPECT_EQ(int32_t(y_ref[i]), int32_t(y[i]))
           << "at element " << i << " / " << batch_size();
-        ASSERT_NEAR(float(int32_t(y[i])), y_fp[i], 0.6f)
+        EXPECT_NEAR(float(int32_t(y[i])), y_fp[i], 0.6f)
           << "at element " << i << " / " << batch_size();
       }
     }

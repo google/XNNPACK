@@ -130,11 +130,11 @@ class GAvgPoolCWMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < channels(); i++) {
-        ASSERT_LE(y[i], y_max)
+        EXPECT_LE(y[i], y_max)
           << "at position " << i << ", elements = " << elements() << ", channels = " << channels();
-        ASSERT_GE(y[i], y_min)
+        EXPECT_GE(y[i], y_min)
           << "at position " << i << ", elements = " << elements() << ", channels = " << channels();
-        ASSERT_NEAR(y[i], y_ref[i], std::abs(y_ref[i]) * 1.0e-6f)
+        EXPECT_NEAR(y[i], y_ref[i], std::abs(y_ref[i]) * 1.0e-6f)
           << "at position " << i << ", elements = " << elements() << ", channels = " << channels();
       }
     }
@@ -183,11 +183,11 @@ void Test(xnn_f16_gavgpool_cw_ukernel_function gavgpool, xnn_init_f16_gavgpool_n
 
       // Verify results.
       for (size_t i = 0; i < channels(); i++) {
-        ASSERT_LE(fp16_ieee_to_fp32_value(y[i]), y_max)
+        EXPECT_LE(fp16_ieee_to_fp32_value(y[i]), y_max)
           << "at position " << i << ", elements = " << elements() << ", channels = " << channels();
-        ASSERT_GE(fp16_ieee_to_fp32_value(y[i]), y_min)
+        EXPECT_GE(fp16_ieee_to_fp32_value(y[i]), y_min)
           << "at position " << i << ", elements = " << elements() << ", channels = " << channels();
-        ASSERT_NEAR(fp16_ieee_to_fp32_value(y[i]), y_ref[i], 1.0e-2f * std::abs(y_ref[i]))
+        EXPECT_NEAR(fp16_ieee_to_fp32_value(y[i]), y_ref[i], 1.0e-2f * std::abs(y_ref[i]))
           << "at position " << i << ", elements = " << elements() << ", channels = " << channels();
       }
     }

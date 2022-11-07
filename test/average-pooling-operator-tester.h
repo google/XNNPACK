@@ -540,9 +540,9 @@ class AveragePoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_max);
-              ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_min);
-              ASSERT_NEAR(
+              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_max);
+              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_min);
+              EXPECT_NEAR(
                   fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]),
                   output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                   std::max(1.0e-3f, std::abs(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]) * 1.0e-2f)) <<
@@ -637,9 +637,9 @@ class AveragePoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max);
-              ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min);
-              ASSERT_NEAR(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c],
+              EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max);
+              EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min);
+              EXPECT_NEAR(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c],
                   output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                   std::abs(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]) * 1.0e-6f) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
@@ -723,9 +723,9 @@ class AveragePoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
-              ASSERT_GE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
-              ASSERT_NEAR(float(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])),
+              EXPECT_LE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
+              EXPECT_GE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
+              EXPECT_NEAR(float(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])),
                 output_ref[((i * output_height() + y) * output_width() + x) * channels() + c], 0.80f) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
@@ -831,9 +831,9 @@ class AveragePoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_max);
-              ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_min);
-              ASSERT_NEAR(
+              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_max);
+              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_min);
+              EXPECT_NEAR(
                   fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]),
                   output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                   std::max(1.0e-3f, std::abs(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]) * 1.0e-2f)) <<
@@ -891,9 +891,9 @@ class AveragePoolingOperatorTester {
         for (size_t y = 0; y < next_output_height(); y++) {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), output_max);
-              ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), output_min);
-              ASSERT_NEAR(
+              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), output_max);
+              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), output_min);
+              EXPECT_NEAR(
                   fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]),
                   next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c],
                   std::max(1.0e-3f, std::abs(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c]) * 1.0e-2f)) <<
@@ -990,9 +990,9 @@ class AveragePoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max);
-              ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min);
-              ASSERT_NEAR(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c],
+              EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max);
+              EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min);
+              EXPECT_NEAR(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c],
                   output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                   std::abs(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]) * 1.0e-6f) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
@@ -1049,9 +1049,9 @@ class AveragePoolingOperatorTester {
         for (size_t y = 0; y < next_output_height(); y++) {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c], output_max);
-              ASSERT_GE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c], output_min);
-              ASSERT_NEAR(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c],
+              EXPECT_LE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c], output_max);
+              EXPECT_GE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c], output_min);
+              EXPECT_NEAR(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c],
                   next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c],
                   std::abs(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c]) * 1.0e-6f) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
@@ -1137,9 +1137,9 @@ class AveragePoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
-              ASSERT_GE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
-              ASSERT_NEAR(float(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])),
+              EXPECT_LE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
+              EXPECT_GE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
+              EXPECT_NEAR(float(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])),
                 output_ref[((i * output_height() + y) * output_width() + x) * channels() + c], 0.80f) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
@@ -1196,9 +1196,9 @@ class AveragePoolingOperatorTester {
         for (size_t y = 0; y < next_output_height(); y++) {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
-              ASSERT_GE(uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
-              ASSERT_NEAR(float(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c])),
+              EXPECT_LE(uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
+              EXPECT_GE(uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
+              EXPECT_NEAR(float(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c])),
                 next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c], 0.80f) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }

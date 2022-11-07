@@ -252,7 +252,7 @@ class LeakyReLUOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output[i * output_stride() + c], output_ref[i * channels() + c])
+          EXPECT_EQ(output[i * output_stride() + c], output_ref[i * channels() + c])
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
             << ", input " << input[i * input_stride() + c] << ", negative slope " << negative_slope();
         }
@@ -318,7 +318,7 @@ class LeakyReLUOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.9f)
+          EXPECT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.9f)
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
             << ", input " << int32_t(input[i * input_stride() + c])
             << ", input zero point " << input_zero_point() << ", output zero point " << output_zero_point()
@@ -387,7 +387,7 @@ class LeakyReLUOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.9f)
+          EXPECT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.9f)
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
             << ", input " << int32_t(input[i * input_stride() + c])
             << ", input zero point " << input_zero_point() << ", output zero point " << output_zero_point()
@@ -437,7 +437,7 @@ class LeakyReLUOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output[i * output_stride() + c], output_ref[i * channels() + c])
+          EXPECT_EQ(output[i * output_stride() + c], output_ref[i * channels() + c])
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
             << ", input " << input[i * input_stride() + c] << ", negative slope " << negative_slope();
         }

@@ -77,7 +77,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < elements(); i++) {
-      ASSERT_NEAR(y_ref[i], fp16_ieee_to_fp32_value(y[i]), std::abs(y_ref[i]) * 5.0e-3f)
+      EXPECT_NEAR(y_ref[i], fp16_ieee_to_fp32_value(y[i]), std::abs(y_ref[i]) * 5.0e-3f)
         << "element " << i << " / " << elements() << ", x_max " << x_max_as_float;
       }
       ASSERT_NEAR(sum_ref, fp16_ieee_to_fp32_value(sum), std::abs(sum_ref) * 5.0e-3f)
@@ -116,7 +116,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < elements(); i++) {
-      ASSERT_NEAR(y_ref[i], double(y[i]), std::abs(y_ref[i]) * 1.0e-6)
+      EXPECT_NEAR(y_ref[i], double(y[i]), std::abs(y_ref[i]) * 1.0e-6)
         << "element " << i << " / " << elements() << ", x_max " << x_max;
       }
       ASSERT_NEAR(sum_ref, double(sum), std::abs(sum_ref) * 1.0e-6)

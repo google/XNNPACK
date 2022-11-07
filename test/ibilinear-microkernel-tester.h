@@ -191,7 +191,7 @@ class IBilinearMicrokernelTester {
       // Verify results.
       for (size_t i = 0; i < pixels(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_NEAR(
+          EXPECT_NEAR(
               output_ref[i * channels() + c],
               output[i * output_stride() + c],
               std::abs(output_ref[i * channels() + c]) * 1.0e-4)
@@ -251,7 +251,7 @@ class IBilinearMicrokernelTester {
       // Verify results.
       for (size_t i = 0; i < pixels(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(int32_t(output_ref[i * channels() + c]), int32_t(output[i * output_stride() + c]))
+          EXPECT_EQ(int32_t(output_ref[i * channels() + c]), int32_t(output[i * output_stride() + c]))
             << "pixel " << i << " / " << pixels() << ", channel " << c << " / " << channels();
         }
       }
@@ -306,7 +306,7 @@ class IBilinearMicrokernelTester {
       // Verify results.
       for (size_t i = 0; i < pixels(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(uint32_t(output_ref[i * channels() + c]), uint32_t(output[i * output_stride() + c]))
+          EXPECT_EQ(uint32_t(output_ref[i * channels() + c]), uint32_t(output[i * output_stride() + c]))
             << "pixel " << i << " / " << pixels() << ", channel " << c << " / " << channels();
         }
       }
@@ -419,7 +419,7 @@ class IBilinearMicrokernelTester {
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
         for (size_t i = 0; i < pixels(); i++) {
-          ASSERT_NEAR(
+          EXPECT_NEAR(
               output_ref[c * pixels() + i],
               output[c * pixels() + i],
               std::abs(output_ref[c * pixels() + i]) * 1.0e-4)

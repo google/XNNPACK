@@ -520,9 +520,9 @@ class MaxPoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), int32_t(qmax() - 0x80));
-              ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), int32_t(qmin() - 0x80));
-              ASSERT_EQ(int32_t(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]),
+              EXPECT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), int32_t(qmax() - 0x80));
+              EXPECT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), int32_t(qmin() - 0x80));
+              EXPECT_EQ(int32_t(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]),
                 int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
@@ -604,9 +604,9 @@ class MaxPoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
-              ASSERT_GE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
-              ASSERT_EQ(uint32_t(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]),
+              EXPECT_LE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
+              EXPECT_GE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
+              EXPECT_EQ(uint32_t(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]),
                 uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
@@ -714,9 +714,9 @@ class MaxPoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_max);
-              ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_min);
-              ASSERT_EQ(
+              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_max);
+              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_min);
+              EXPECT_EQ(
                   fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]),
                   output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c
@@ -813,9 +813,9 @@ class MaxPoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max);
-              ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min);
-              ASSERT_EQ(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
+              EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max);
+              EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min);
+              EXPECT_EQ(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                 output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c
                 << ", min = " << output_min << ", max = " << output_max;
@@ -901,9 +901,9 @@ class MaxPoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), int32_t(qmax() - 0x80));
-              ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), int32_t(qmin() - 0x80));
-              ASSERT_EQ(int32_t(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]),
+              EXPECT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), int32_t(qmax() - 0x80));
+              EXPECT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), int32_t(qmin() - 0x80));
+              EXPECT_EQ(int32_t(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]),
                 int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
@@ -955,9 +955,9 @@ class MaxPoolingOperatorTester {
         for (size_t y = 0; y < next_output_height(); y++) {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), int32_t(qmax() - 0x80));
-              ASSERT_GE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), int32_t(qmin() - 0x80));
-              ASSERT_EQ(int32_t(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c]),
+              EXPECT_LE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), int32_t(qmax() - 0x80));
+              EXPECT_GE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), int32_t(qmin() - 0x80));
+              EXPECT_EQ(int32_t(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c]),
                 int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c])) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
@@ -1042,9 +1042,9 @@ class MaxPoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
-              ASSERT_GE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
-              ASSERT_EQ(uint32_t(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]),
+              EXPECT_LE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
+              EXPECT_GE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
+              EXPECT_EQ(uint32_t(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]),
                 uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
@@ -1096,9 +1096,9 @@ class MaxPoolingOperatorTester {
         for (size_t y = 0; y < next_output_height(); y++) {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
-              ASSERT_GE(uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
-              ASSERT_EQ(uint32_t(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c]),
+              EXPECT_LE(uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
+              EXPECT_GE(uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
+              EXPECT_EQ(uint32_t(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c]),
                 uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c])) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
@@ -1209,9 +1209,9 @@ class MaxPoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_max);
-              ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_min);
-              ASSERT_EQ(
+              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_max);
+              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), output_min);
+              EXPECT_EQ(
                   fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]),
                   output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c
@@ -1265,9 +1265,9 @@ class MaxPoolingOperatorTester {
         for (size_t y = 0; y < next_output_height(); y++) {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), output_max);
-              ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), output_min);
-              ASSERT_EQ(
+              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), output_max);
+              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]), output_min);
+              EXPECT_EQ(
                   fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]),
                   next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c]) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c
@@ -1367,9 +1367,9 @@ class MaxPoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max);
-              ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min);
-              ASSERT_EQ(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
+              EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max);
+              EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min);
+              EXPECT_EQ(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                 output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
@@ -1421,9 +1421,9 @@ class MaxPoolingOperatorTester {
         for (size_t y = 0; y < next_output_height(); y++) {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_LE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c], output_max);
-              ASSERT_GE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c], output_min);
-              ASSERT_EQ(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c],
+              EXPECT_LE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c], output_max);
+              EXPECT_GE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c], output_min);
+              EXPECT_EQ(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c],
                 output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c]) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }

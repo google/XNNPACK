@@ -130,7 +130,7 @@ class BankersRoundingOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -183,7 +183,7 @@ class BankersRoundingOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -227,7 +227,7 @@ class BankersRoundingOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }

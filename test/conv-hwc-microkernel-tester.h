@@ -367,11 +367,11 @@ public:
         for (size_t y = output_y_start(); y < output_y_end(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < output_channels(); c++) {
-              ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min)
+              EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min)
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
-              ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max)
+              EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max)
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
-              ASSERT_NEAR(
+              EXPECT_NEAR(
                   output_ref[((i * output_height() + y) * output_width() + x) * output_channels() + c],
                   output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c],
                   1.0e-4 * std::abs(output_ref[((i * output_height() + y) * output_width() + x) * output_channels() + c]))

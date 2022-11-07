@@ -237,7 +237,7 @@ class BFly4MicrokernelTester {
 
       // Verify results.
       for (size_t n = 0; n < fft_size * 2; n++) {
-        ASSERT_EQ(y[n], y_ref[n])
+        EXPECT_EQ(y[n], y_ref[n])
             << "at sample " << n << " / " << fft_size
             << "\nsamples " << samples()
             << "\nstride " << stride();

@@ -217,7 +217,7 @@ class MaxPoolMicrokernelTester {
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_EQ(int32_t(output_ref[x * channels() + c]), int32_t(output[x * output_stride() + c]))
+          EXPECT_EQ(int32_t(output_ref[x * channels() + c]), int32_t(output[x * output_stride() + c]))
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
@@ -289,7 +289,7 @@ class MaxPoolMicrokernelTester {
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_EQ(int32_t(output_ref[x * channels() + c]), int32_t(output[x * output_stride() + c]))
+          EXPECT_EQ(int32_t(output_ref[x * channels() + c]), int32_t(output[x * output_stride() + c]))
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
@@ -378,7 +378,7 @@ class MaxPoolMicrokernelTester {
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_EQ(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_ref[x * channels() + c])
+          EXPECT_EQ(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_ref[x * channels() + c])
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
@@ -465,7 +465,7 @@ class MaxPoolMicrokernelTester {
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_EQ(output_ref[x * channels() + c], output[x * output_stride() + c])
+          EXPECT_EQ(output_ref[x * channels() + c], output[x * output_stride() + c])
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();

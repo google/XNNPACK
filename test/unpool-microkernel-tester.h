@@ -107,7 +107,7 @@ class UnpoolMicrokernelTester {
       // Verify results.
       for (size_t i = 0; i < p(); i++) {
         for (size_t k = 0; k < c(); k++) {
-          ASSERT_EQ(y_ref[i * y_stride() + k], y[i * y_stride() + k])
+          EXPECT_EQ(y_ref[i * y_stride() + k], y[i * y_stride() + k])
             << "at pixel " << i << ", channel " << k
             << ", p = " << p() << ", c = " << c();
         }

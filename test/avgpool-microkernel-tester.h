@@ -277,15 +277,15 @@ class AvgPoolMicrokernelTester {
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_GE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_min_as_float)
+          EXPECT_GE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_min_as_float)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_LE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_max_as_float)
+          EXPECT_LE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_max_as_float)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_NEAR(
+          EXPECT_NEAR(
               fp16_ieee_to_fp32_value(output[x * output_stride() + c]),
               output_ref[x * channels() + c],
               std::max(1.0e-4f, std::abs(output_ref[x * channels() + c]) * 3.0e-3f))
@@ -369,15 +369,15 @@ class AvgPoolMicrokernelTester {
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_GE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_min_as_float)
+          EXPECT_GE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_min_as_float)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_LE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_max_as_float)
+          EXPECT_LE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_max_as_float)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_NEAR(
+          EXPECT_NEAR(
               fp16_ieee_to_fp32_value(output[x * output_stride() + c]),
               output_ref[x * channels() + c],
               std::max(1.0e-4f, std::abs(output_ref[x * channels() + c]) * 3.0e-3f))
@@ -456,15 +456,15 @@ class AvgPoolMicrokernelTester {
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_GE(output[x * output_stride() + c], output_min)
+          EXPECT_GE(output[x * output_stride() + c], output_min)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_LE(output[x * output_stride() + c], output_max)
+          EXPECT_LE(output[x * output_stride() + c], output_max)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_NEAR(
+          EXPECT_NEAR(
               output[x * output_stride() + c],
               output_ref[x * channels() + c],
               std::abs(output_ref[x * channels() + c]) * 1.0e-6f)
@@ -544,15 +544,15 @@ class AvgPoolMicrokernelTester {
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_GE(output[x * output_stride() + c], output_min)
+          EXPECT_GE(output[x * output_stride() + c], output_min)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_LE(output[x * output_stride() + c], output_max)
+          EXPECT_LE(output[x * output_stride() + c], output_max)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_NEAR(
+          EXPECT_NEAR(
               output[x * output_stride() + c],
               output_ref[x * channels() + c],
               std::abs(output_ref[x * channels() + c]) * 1.0e-6f)
@@ -634,19 +634,19 @@ class AvgPoolMicrokernelTester {
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_GE(uint32_t(output[x * output_stride() + c]), uint32_t(qmin()))
+          EXPECT_GE(uint32_t(output[x * output_stride() + c]), uint32_t(qmin()))
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_LE(uint32_t(output[x * output_stride() + c]), uint32_t(qmax()))
+          EXPECT_LE(uint32_t(output[x * output_stride() + c]), uint32_t(qmax()))
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_NEAR(float(int32_t(output[x * output_stride() + c])), output_real[x * channels() + c], 0.5f)
+          EXPECT_NEAR(float(int32_t(output[x * output_stride() + c])), output_real[x * channels() + c], 0.5f)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset() << ", accumulator = " << accumulator[x * channels() + c];
-          ASSERT_EQ(uint32_t(output_ref[x * channels() + c]), uint32_t(output[x * output_stride() + c]))
+          EXPECT_EQ(uint32_t(output_ref[x * channels() + c]), uint32_t(output[x * output_stride() + c]))
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset() << ", accumulator = " << accumulator[x * channels() + c];
@@ -726,19 +726,19 @@ class AvgPoolMicrokernelTester {
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_GE(uint32_t(output[x * output_stride() + c]), uint32_t(qmin()))
+          EXPECT_GE(uint32_t(output[x * output_stride() + c]), uint32_t(qmin()))
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_LE(uint32_t(output[x * output_stride() + c]), uint32_t(qmax()))
+          EXPECT_LE(uint32_t(output[x * output_stride() + c]), uint32_t(qmax()))
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_NEAR(float(int32_t(output[x * output_stride() + c])), output_real[x * channels() + c], 0.5f)
+          EXPECT_NEAR(float(int32_t(output[x * output_stride() + c])), output_real[x * channels() + c], 0.5f)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset() << ", accumulator = " << accumulator[x * channels() + c];
-          ASSERT_EQ(uint32_t(output_ref[x * channels() + c]), uint32_t(output[x * output_stride() + c]))
+          EXPECT_EQ(uint32_t(output_ref[x * channels() + c]), uint32_t(output[x * output_stride() + c]))
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset() << ", accumulator = " << accumulator[x * channels() + c];
@@ -821,15 +821,15 @@ class AvgPoolMicrokernelTester {
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_GE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_min_as_float)
+          EXPECT_GE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_min_as_float)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_LE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_max_as_float)
+          EXPECT_LE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_max_as_float)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_NEAR(
+          EXPECT_NEAR(
               fp16_ieee_to_fp32_value(output[x * output_stride() + c]),
               output_ref[x * channels() + c],
               std::max(1.0e-4f, std::abs(output_ref[x * channels() + c]) * 3.0e-3f))
@@ -916,15 +916,15 @@ class AvgPoolMicrokernelTester {
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_GE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_min_as_float)
+          EXPECT_GE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_min_as_float)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_LE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_max_as_float)
+          EXPECT_LE(fp16_ieee_to_fp32_value(output[x * output_stride() + c]), output_max_as_float)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_NEAR(
+          EXPECT_NEAR(
               fp16_ieee_to_fp32_value(output[x * output_stride() + c]),
               output_ref[x * channels() + c],
               std::max(1.0e-4f, std::abs(output_ref[x * channels() + c]) * 3.0e-3f))
@@ -1006,15 +1006,15 @@ class AvgPoolMicrokernelTester {
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_GE(output[x * output_stride() + c], output_min)
+          EXPECT_GE(output[x * output_stride() + c], output_min)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_LE(output[x * output_stride() + c], output_max)
+          EXPECT_LE(output[x * output_stride() + c], output_max)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_NEAR(
+          EXPECT_NEAR(
               output[x * output_stride() + c],
               output_ref[x * channels() + c],
               std::abs(output_ref[x * channels() + c]) * 1.0e-6f)
@@ -1097,15 +1097,15 @@ class AvgPoolMicrokernelTester {
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_GE(output[x * output_stride() + c], output_min)
+          EXPECT_GE(output[x * output_stride() + c], output_min)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_LE(output[x * output_stride() + c], output_max)
+          EXPECT_LE(output[x * output_stride() + c], output_max)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_NEAR(
+          EXPECT_NEAR(
               output[x * output_stride() + c],
               output_ref[x * channels() + c],
               std::abs(output_ref[x * channels() + c]) * 1.0e-6f)

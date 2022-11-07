@@ -326,7 +326,7 @@ class FullyConnectedOperatorTester {
             << "batch index = " << i << ", channel = " << c;
         ASSERT_GE(int32_t(output[i * output_stride() + c]), int32_t(qmin() - 0x80))
             << "batch index = " << i << ", channel = " << c;
-        ASSERT_NEAR(output_ref[i * output_channels() + c],
+        EXPECT_NEAR(output_ref[i * output_channels() + c],
                     double(output[i * output_stride() + c]) - output_zero_point,
                     0.9)
             << "batch index = " << i << ", channel = " << c;
@@ -501,7 +501,7 @@ class FullyConnectedOperatorTester {
             << "batch index = " << i << ", channel = " << c;
         ASSERT_GE(int32_t(output[i * output_stride() + c]), int32_t(qmin()))
             << "batch index = " << i << ", channel = " << c;
-        ASSERT_NEAR(output_ref[i * output_channels() + c],
+        EXPECT_NEAR(output_ref[i * output_channels() + c],
                     double(output[i * output_stride() + c]) - output_zero_point,
                     0.9)
             << "batch index = " << i << ", channel = " << c;
@@ -662,7 +662,7 @@ class FullyConnectedOperatorTester {
             << "batch index = " << i << ", channel = " << c;
         ASSERT_GE(output[i * output_stride() + c], output_min)
             << "batch index = " << i << ", channel = " << c;
-        ASSERT_NEAR(output_ref[i * output_channels() + c],
+        EXPECT_NEAR(output_ref[i * output_channels() + c],
                     output[i * output_stride() + c],
                     1.0e-4 * std::abs(output_ref[i * output_channels() + c]))
             << "batch index = " << i << ", channel = " << c;
@@ -850,7 +850,7 @@ class FullyConnectedOperatorTester {
           << "batch index = " << i << ", channel = " << c;
         ASSERT_GE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_min)
           << "batch index = " << i << ", channel = " << c;
-        ASSERT_NEAR(
+        EXPECT_NEAR(
             output_ref[i * output_channels() + c],
             fp16_ieee_to_fp32_value(output[i * output_stride() + c]),
             1.0e-2f * std::abs(output_ref[i * output_channels() + c]))

@@ -161,7 +161,7 @@ class FftrMicrokernelTester {
 
       // Verify results.
       for (size_t n = 0; n < sample_size; n++) {
-        ASSERT_EQ(y[n], y_ref[n])
+        EXPECT_EQ(y[n], y_ref[n])
             << "at sample " << n << " / " << sample_size;
       }
     }

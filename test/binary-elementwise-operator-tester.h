@@ -364,7 +364,7 @@ class BinaryElementwiseOperatorTester {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_NEAR(float(output[index]), output_ref[index], 0.6f)
+                  EXPECT_NEAR(float(output[index]), output_ref[index], 0.6f)
                     << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
                     << ", input1 zero point = " << input1_zero_point() << ", input1 scale = " << input1_scale()
                     << ", input2 zero point = " << input2_zero_point() << ", input2 scale = " << input2_scale()
@@ -546,7 +546,7 @@ class BinaryElementwiseOperatorTester {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_NEAR(float(int32_t(output[index])), output_ref[index], 0.6f)
+                  EXPECT_NEAR(float(int32_t(output[index])), output_ref[index], 0.6f)
                     << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
                     << ", input1 zero point = " << input1_zero_point() << ", input1 scale = " << input1_scale()
                     << ", input2 zero point = " << input2_zero_point() << ", input2 scale = " << input2_scale()
@@ -770,7 +770,7 @@ class BinaryElementwiseOperatorTester {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_NEAR(fp16_ieee_to_fp32_value(output[index]), output_ref[index], std::max(1.0e-4f, std::abs(output_ref[index]) * 1.0e-2f))
+                  EXPECT_NEAR(fp16_ieee_to_fp32_value(output[index]), output_ref[index], std::max(1.0e-4f, std::abs(output_ref[index]) * 1.0e-2f))
                     << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")";
                 }
               }
@@ -1002,7 +1002,7 @@ class BinaryElementwiseOperatorTester {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_NEAR(output[index], output_ref[index], 1.0e-6f * std::abs(output_ref[index]))
+                  EXPECT_NEAR(output[index], output_ref[index], 1.0e-6f * std::abs(output_ref[index]))
                     << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")";
                 }
               }
@@ -1198,7 +1198,7 @@ class BinaryElementwiseOperatorTester {
                       i * output_strides[0] + j * output_strides[1] +
                       k * output_strides[2] + l * output_strides[3] +
                       m * output_strides[4] + n * output_strides[5];
-                  ASSERT_NEAR(output[index], output_ref[index],
+                  EXPECT_NEAR(output[index], output_ref[index],
                               1.0e-6f * std::abs(output_ref[index]))
                       << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
                       << ", " << l << ", " << m << ", " << n << ")";
@@ -1336,7 +1336,7 @@ void TestRunQS8() const {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_NEAR(float(output[index]), output_ref[index], 0.6f)
+                  EXPECT_NEAR(float(output[index]), output_ref[index], 0.6f)
                     << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
                     << ", input1 zero point = " << input1_zero_point() << ", input1 scale = " << input1_scale()
                     << ", input2 zero point = " << input2_zero_point() << ", input2 scale = " << input2_scale()
@@ -1475,7 +1475,7 @@ void TestRunQS8() const {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_NEAR(float(int32_t(output[index])), output_ref[index], 0.6f)
+                  EXPECT_NEAR(float(int32_t(output[index])), output_ref[index], 0.6f)
                     << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
                     << ", input1 zero point = " << input1_zero_point() << ", input1 scale = " << input1_scale()
                     << ", input2 zero point = " << input2_zero_point() << ", input2 scale = " << input2_scale()

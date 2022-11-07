@@ -375,11 +375,11 @@ public:
         for (size_t y = output_y_start(); y < output_y_end(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < output_channels(); c++) {
-              ASSERT_GE(output[((i * output_channels() + c) * output_height() + y) * output_width() + x], output_min)
+              EXPECT_GE(output[((i * output_channels() + c) * output_height() + y) * output_width() + x], output_min)
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
-              ASSERT_LE(output[((i * output_channels() + c) * output_height() + y) * output_width() + x], output_max)
+              EXPECT_LE(output[((i * output_channels() + c) * output_height() + y) * output_width() + x], output_max)
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
-              ASSERT_NEAR(
+              EXPECT_NEAR(
                   output_ref[((i * output_channels() + c) * output_height() + y) * output_width() + x],
                   output[((i * output_channels() + c) * output_height() + y) * output_width() + x],
                   1.0e-4 * std::abs(output_ref[((i * output_channels() + c) * output_height() + y) * output_width() + x]))
@@ -483,11 +483,11 @@ public:
         for (size_t y = output_y_start(); y < output_y_end(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < output_channels(); c++) {
-              ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * output_channels() + c) * output_height() + y) * output_width() + x]), output_min)
+              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * output_channels() + c) * output_height() + y) * output_width() + x]), output_min)
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
-              ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * output_channels() + c) * output_height() + y) * output_width() + x]), output_max)
+              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * output_channels() + c) * output_height() + y) * output_width() + x]), output_max)
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
-              ASSERT_NEAR(
+              EXPECT_NEAR(
                   output_ref[((i * output_channels() + c) * output_height() + y) * output_width() + x],
                   fp16_ieee_to_fp32_value(output[((i * output_channels() + c) * output_height() + y) * output_width() + x]),
                   std::max(1.0e-4f, 1.0e-2f * std::abs(output_ref[((i * output_channels() + c) * output_height() + y) * output_width() + x])))

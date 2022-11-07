@@ -131,7 +131,7 @@ class HardSwishOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_NEAR(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_ref[i * channels() + c], std::max(1.0e-3f, std::abs(output_ref[i * channels() + c]) * 1.0e-2f))
+          EXPECT_NEAR(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_ref[i * channels() + c], std::max(1.0e-3f, std::abs(output_ref[i * channels() + c]) * 1.0e-2f))
             << "at position " << i << ", batch size = " << batch_size() << ", channels = " << channels();
         }
       }
@@ -186,7 +186,7 @@ class HardSwishOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_NEAR(output_ref[i * channels() + c], output[i * output_stride() + c], std::max(1.0e-7f, std::abs(output[i * output_stride() + c]) * 1.0e-6f))
+          EXPECT_NEAR(output_ref[i * channels() + c], output[i * output_stride() + c], std::max(1.0e-7f, std::abs(output[i * output_stride() + c]) * 1.0e-6f))
             << "at position " << i << ", batch size = " << batch_size() << ", channels = " << channels();
         }
       }
@@ -232,7 +232,7 @@ void TestRunF32() const {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_NEAR(output_ref[i * channels() + c], output[i * output_stride() + c], std::max(1.0e-7f, std::abs(output[i * output_stride() + c]) * 1.0e-6f))
+          EXPECT_NEAR(output_ref[i * channels() + c], output[i * output_stride() + c], std::max(1.0e-7f, std::abs(output[i * output_stride() + c]) * 1.0e-6f))
             << "at position " << i << ", batch size = " << batch_size() << ", channels = " << channels();
         }
       }

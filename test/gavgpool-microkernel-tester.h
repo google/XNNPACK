@@ -201,7 +201,7 @@ class GAvgPoolMicrokernelTester {
         ASSERT_NEAR(float(int32_t(output[c])), output_fp[c], 0.55f)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels()
           << ", acc = " << accumulators[c];
-        ASSERT_EQ(uint32_t(output_ref[c]), uint32_t(output[c]))
+        EXPECT_EQ(uint32_t(output_ref[c]), uint32_t(output[c]))
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels()
           << ", acc = " << accumulators[c];
       }
@@ -270,7 +270,7 @@ class GAvgPoolMicrokernelTester {
         ASSERT_NEAR(float(int32_t(output[c])), output_fp[c], 0.55f)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels()
           << ", acc = " << accumulators[c];
-        ASSERT_EQ(uint32_t(output_ref[c]), uint32_t(output[c]))
+        EXPECT_EQ(uint32_t(output_ref[c]), uint32_t(output[c]))
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels()
           << ", acc = " << accumulators[c];
       }
@@ -336,7 +336,7 @@ class GAvgPoolMicrokernelTester {
         ASSERT_NEAR(float(int32_t(output[c])), output_fp[c], 0.55f)
           << "at channel " << c << " / " << channels() << ", rows = " << rows()
           << ", accumulator = " << accumulators[c];
-        ASSERT_EQ(int32_t(output_ref[c]), int32_t(output[c]))
+        EXPECT_EQ(int32_t(output_ref[c]), int32_t(output[c]))
           << "at channel " << c << " / " << channels() << ", rows = " << rows()
           << ", accumulator = " << accumulators[c];
       }
@@ -404,7 +404,7 @@ class GAvgPoolMicrokernelTester {
         ASSERT_NEAR(float(int32_t(output[c])), output_fp[c], 0.55f)
           << "at channel " << c << " / " << channels() << ", rows = " << rows()
           << ", accumulator = " << accumulators[c];
-        ASSERT_EQ(int32_t(output_ref[c]), int32_t(output[c]))
+        EXPECT_EQ(int32_t(output_ref[c]), int32_t(output[c]))
           << "at channel " << c << " / " << channels() << ", rows = " << rows()
           << ", accumulator = " << accumulators[c];
       }
@@ -467,7 +467,7 @@ class GAvgPoolMicrokernelTester {
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
         ASSERT_GE(fp16_ieee_to_fp32_value(output[c]), output_min)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
-        ASSERT_NEAR(fp16_ieee_to_fp32_value(output[c]), output_ref[c], std::max(1.0e-4f, std::abs(output_ref[c]) * 1.0e-2f))
+        EXPECT_NEAR(fp16_ieee_to_fp32_value(output[c]), output_ref[c], std::max(1.0e-4f, std::abs(output_ref[c]) * 1.0e-2f))
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
       }
     }
@@ -529,7 +529,7 @@ class GAvgPoolMicrokernelTester {
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
         ASSERT_GE(fp16_ieee_to_fp32_value(output[c]), output_min)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
-        ASSERT_NEAR(fp16_ieee_to_fp32_value(output[c]), output_ref[c], std::abs(output_ref[c]) * 1.0e-0f)
+        EXPECT_NEAR(fp16_ieee_to_fp32_value(output[c]), output_ref[c], std::abs(output_ref[c]) * 1.0e-0f)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
       }
     }
@@ -588,7 +588,7 @@ class GAvgPoolMicrokernelTester {
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
         ASSERT_GE(output[c], output_min)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
-        ASSERT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-6f)
+        EXPECT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-6f)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
       }
     }
@@ -647,7 +647,7 @@ class GAvgPoolMicrokernelTester {
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
         ASSERT_GE(output[c], output_min)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
-        ASSERT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-6f)
+        EXPECT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-6f)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
       }
     }

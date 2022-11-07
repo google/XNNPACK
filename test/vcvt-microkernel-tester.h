@@ -187,7 +187,7 @@ class VCvtMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
+        EXPECT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
           << "at " << i << " / " << batch_size()
           << ", x[" << i << "] = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(input[i])
           << " (" << input[i] << ")";
@@ -230,7 +230,7 @@ class VCvtMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
+        EXPECT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
           << "at " << i << " / " << batch_size()
           << ", x[" << i << "] = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(input[i])
           << " (" << input[i] << ")";
@@ -274,7 +274,7 @@ class VCvtMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
+        EXPECT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
           << "at " << i << " / " << batch_size()
           << ", x[" << i << "] = " << int32_t(input[i]);
       }
@@ -310,7 +310,7 @@ class VCvtMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(output[i], output_ref[i])
+        EXPECT_EQ(output[i], output_ref[i])
           << "at " << i << " / " << batch_size()
           << ", x[" << i << "] = " << int32_t(input[i]);
       }
@@ -353,7 +353,7 @@ class VCvtMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
+        EXPECT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
           << "at " << i << " / " << batch_size()
           << ", x[" << i << "] = " << int32_t(input[i]);
       }
@@ -389,7 +389,7 @@ class VCvtMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(output[i], output_ref[i])
+        EXPECT_EQ(output[i], output_ref[i])
           << "at " << i << " / " << batch_size()
           << ", x[" << i << "] = " << int32_t(input[i]);
       }

@@ -85,7 +85,7 @@ class VLShiftMicrokernelTester {
 
       // Verify results.
       for (size_t n = 0; n < batch(); n++) {
-        ASSERT_EQ(output[n], output_ref[n])
+        EXPECT_EQ(output[n], output_ref[n])
           << ", shift " << shift()
           << ", batch " << n << " / " << batch();
       }

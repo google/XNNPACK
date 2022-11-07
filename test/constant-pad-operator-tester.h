@@ -204,7 +204,7 @@ class ConstantPadOperatorTester {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] +
                     l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_EQ(output[index], output_ref[index])
+                  EXPECT_EQ(output[index], output_ref[index])
                     << "(i, j, k, l, m, n) = ("
                     << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
                     << ", padding value = " << padding_value;
@@ -309,7 +309,7 @@ class ConstantPadOperatorTester {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] +
                     l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_EQ(output[index], output_ref[index])
+                  EXPECT_EQ(output[index], output_ref[index])
                     << "(i, j, k, l, m, n) = ("
                     << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
                     << ", padding value = " << padding_value;
@@ -424,7 +424,7 @@ class ConstantPadOperatorTester {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] +
                     l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_EQ(output[index], output_ref[index])
+                  EXPECT_EQ(output[index], output_ref[index])
                     << "(i, j, k, l, m, n) = ("
                     << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
                     << ", padding value = " << padding_value;
@@ -528,7 +528,7 @@ class ConstantPadOperatorTester {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] +
                     l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_EQ(output[index], output_ref[index])
+                  EXPECT_EQ(output[index], output_ref[index])
                     << "(i, j, k, l, m, n) = ("
                     << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
                     << ", padding value = " << padding_value;
@@ -643,7 +643,7 @@ class ConstantPadOperatorTester {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] +
                     l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_EQ(output[index], output_ref[index])
+                  EXPECT_EQ(output[index], output_ref[index])
                     << "(i, j, k, l, m, n) = ("
                     << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
                     << ", padding value = " << padding_value;
@@ -747,7 +747,7 @@ class ConstantPadOperatorTester {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] +
                     l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_EQ(output[index], output_ref[index])
+                  EXPECT_EQ(output[index], output_ref[index])
                     << "(i, j, k, l, m, n) = ("
                     << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")"
                     << ", padding value = " << padding_value;

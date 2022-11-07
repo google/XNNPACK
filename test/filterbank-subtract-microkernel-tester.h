@@ -120,9 +120,9 @@ class FilterbankSubtractMicrokernelTester {
 
       // Verify results.
       for (size_t n = 0; n < batch(); n++) {
-        ASSERT_EQ(y[n], y_ref[n])
+        EXPECT_EQ(y[n], y_ref[n])
             << "at n " << n << " / " << batch();
-        ASSERT_EQ(noise[n], noise_ref[n])
+        EXPECT_EQ(noise[n], noise_ref[n])
             << "at n " << n << " / " << batch();
       }
     }

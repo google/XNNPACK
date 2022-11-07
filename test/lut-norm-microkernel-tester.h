@@ -89,7 +89,7 @@ class LUTNormMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < n(); i++) {
-        ASSERT_NEAR(y_ref[i], float(y[i]), 0.5f)
+        EXPECT_NEAR(y_ref[i], float(y[i]), 0.5f)
           << "at position " << i << ", n = " << n() << ", sum = " << sum;
       }
     }

@@ -169,11 +169,11 @@ class ClampOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_max)
+          EXPECT_LE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_max)
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-          ASSERT_GE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_min)
+          EXPECT_GE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_min)
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-          ASSERT_NEAR(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_ref[i * channels() + c], std::max(1.0e-4f, std::abs(output_ref[i * channels() + c]) * 1.0e-2f))
+          EXPECT_NEAR(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_ref[i * channels() + c], std::max(1.0e-4f, std::abs(output_ref[i * channels() + c]) * 1.0e-2f))
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
             << ", min " << output_min << ", max " << output_max;
         }
@@ -236,11 +236,11 @@ class ClampOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(output[i * output_stride() + c], output_max)
+          EXPECT_LE(output[i * output_stride() + c], output_max)
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-          ASSERT_GE(output[i * output_stride() + c], output_min)
+          EXPECT_GE(output[i * output_stride() + c], output_min)
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
             << ", min " << output_min << ", max " << output_max;
         }
@@ -302,11 +302,11 @@ class ClampOperatorTester {
       // Verify results .
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(int16_t(output[i * output_stride() + c]), qmax())
+          EXPECT_LE(int16_t(output[i * output_stride() + c]), qmax())
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-          ASSERT_GE(int16_t(output[i * output_stride() + c]), qmin())
+          EXPECT_GE(int16_t(output[i * output_stride() + c]), qmin())
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-          ASSERT_EQ(int16_t(output[i * output_stride() + c]), int16_t(output_ref[i * channels() + c]))
+          EXPECT_EQ(int16_t(output[i * output_stride() + c]), int16_t(output_ref[i * channels() + c]))
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
             << ", min " << qmin() << ", max " << qmax();
         }
@@ -368,11 +368,11 @@ class ClampOperatorTester {
       // Verify results .
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(int16_t(output[i * output_stride() + c]), qmax())
+          EXPECT_LE(int16_t(output[i * output_stride() + c]), qmax())
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-          ASSERT_GE(int16_t(output[i * output_stride() + c]), qmin())
+          EXPECT_GE(int16_t(output[i * output_stride() + c]), qmin())
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-          ASSERT_EQ(int16_t(output[i * output_stride() + c]), int16_t(output_ref[i * channels() + c]))
+          EXPECT_EQ(int16_t(output[i * output_stride() + c]), int16_t(output_ref[i * channels() + c]))
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
             << ", min " << qmin() << ", max " << qmax();
         }
@@ -426,11 +426,11 @@ class ClampOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(output[i * output_stride() + c], output_max)
+          EXPECT_LE(output[i * output_stride() + c], output_max)
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-          ASSERT_GE(output[i * output_stride() + c], output_min)
+          EXPECT_GE(output[i * output_stride() + c], output_min)
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
-          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << channels()
             << ", min " << output_min << ", max " << output_max;
         }

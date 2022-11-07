@@ -154,7 +154,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(y[i], y_ref[i])
+        EXPECT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -193,7 +193,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(y[i], y_ref[i])
+        EXPECT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -232,7 +232,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(y[i], y_ref[i])
+        EXPECT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -269,7 +269,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(y[i], y_ref[i])
+        EXPECT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -347,7 +347,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
+        EXPECT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -386,7 +386,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(y_ref[i], fp16_ieee_to_fp32_value(y[i]), std::max(1.0e-3f, std::abs(y_ref[i]) * 1.0e-2f))
+        EXPECT_NEAR(y_ref[i], fp16_ieee_to_fp32_value(y[i]), std::max(1.0e-3f, std::abs(y_ref[i]) * 1.0e-2f))
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
       }
     }
@@ -423,7 +423,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
+        EXPECT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -504,7 +504,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(y[i], y_ref[i])
+        EXPECT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -543,7 +543,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(y[i], y_ref[i])
+        EXPECT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -582,7 +582,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(y[i], y_ref[i])
+        EXPECT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -637,7 +637,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(y[i], y_ref[i])
+        EXPECT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -692,7 +692,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(y[i], y_ref[i])
+        EXPECT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -773,7 +773,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
+        EXPECT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -855,7 +855,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(y[i], y_ref[i])
+        EXPECT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -936,7 +936,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(y[i], y_ref[i])
+        EXPECT_EQ(y[i], y_ref[i])
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
       }
     }
@@ -974,7 +974,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(y_ref[i], fp16_ieee_to_fp32_value(y[i]), std::max(1.0e-3f, std::abs(y_ref[i]) * 1.0e-2f))
+        EXPECT_NEAR(y_ref[i], fp16_ieee_to_fp32_value(y[i]), std::max(1.0e-3f, std::abs(y_ref[i]) * 1.0e-2f))
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << fp16_ieee_to_fp32_value(x[i]);
       }
     }
@@ -1013,7 +1013,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(int32_t(y_ref[i]), int32_t(y[i]))
+        EXPECT_EQ(int32_t(y_ref[i]), int32_t(y[i]))
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << int32_t(x[i]);
       }
     }
@@ -1051,7 +1051,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(uint32_t(y_ref[i]), uint32_t(y[i]))
+        EXPECT_EQ(uint32_t(y_ref[i]), uint32_t(y[i]))
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << uint32_t(x[i]);
       }
     }
@@ -1101,7 +1101,7 @@ class VUnaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(y_ref[i], y[i])
+        EXPECT_EQ(y_ref[i], y[i])
           << "at " << i << " / " << batch_size()
           << ", x[" << i << "]: " << x[i]
           << ", shift: " << shift();

@@ -144,7 +144,7 @@ class VLogMicrokernelTester {
 
       // Verify results.
       for (size_t n = 0; n < batch(); n++) {
-        ASSERT_EQ(y[n], y_ref[n])
+        EXPECT_EQ(y[n], y_ref[n])
           << ", input_lshift " << input_lshift()
           << ", output_scale " << output_scale()
           << ", batch " << n << " / " << batch();

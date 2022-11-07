@@ -403,10 +403,10 @@ class ArgmaxPoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_EQ(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
+              EXPECT_EQ(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                 output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
-              ASSERT_EQ(index_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
+              EXPECT_EQ(index_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                 index[((i * output_height() + y) * output_width() + x) * channels() + c]) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
@@ -495,13 +495,11 @@ class ArgmaxPoolingOperatorTester {
         for (size_t y = 0; y < output_height(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_EQ(
-                  output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
-                  output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])
+              EXPECT_EQ(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
+                        output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])
                 << "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
-              ASSERT_EQ(
-                  index_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
-                  index[((i * output_height() + y) * output_width() + x) * channels() + c])
+              EXPECT_EQ(index_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
+                        index[((i * output_height() + y) * output_width() + x) * channels() + c])
                 << "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
           }
@@ -562,11 +560,11 @@ class ArgmaxPoolingOperatorTester {
         for (size_t y = 0; y < next_output_height(); y++) {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t c = 0; c < channels(); c++) {
-              ASSERT_EQ(
+              EXPECT_EQ(
                   next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c],
                   output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c])
                 << "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
-              ASSERT_EQ(
+              EXPECT_EQ(
                   next_index_ref[((i * next_output_height() + y) * next_output_width() + x) * channels() + c],
                   index[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + c])
                 << "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;

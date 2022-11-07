@@ -84,7 +84,7 @@ class LUTMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(uint32_t(y_ref[i]), uint32_t(y[i]))
+        EXPECT_EQ(uint32_t(y_ref[i]), uint32_t(y[i]))
           << "at position " << i << " / " << batch_size();
       }
     }

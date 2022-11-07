@@ -121,7 +121,7 @@ class VLReLUMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
+        EXPECT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
           << "at " << i << " / " << batch_size()
           << ", x[" << i << "] = " << int32_t(input[i]);
       }
@@ -166,7 +166,7 @@ class VLReLUMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
+        EXPECT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
           << "at " << i << " / " << batch_size()
           << ", x[" << i << "] = " << int32_t(input[i]);
       }

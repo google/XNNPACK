@@ -130,7 +130,7 @@ class PReLUMicrokernelTester {
       // Verify results.
       for (size_t n = 0; n < rows(); n++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(fp16_ieee_to_fp32_value(y[n * output_stride() + c]), y_ref[n * channels() + c])
+          EXPECT_EQ(fp16_ieee_to_fp32_value(y[n * output_stride() + c]), y_ref[n * channels() + c])
             << "at row " << n << " / " << rows()
             << ", channel " << c << " / " << channels();
         }
@@ -175,7 +175,7 @@ class PReLUMicrokernelTester {
       // Verify results.
       for (size_t n = 0; n < rows(); n++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(y[n * output_stride() + c], y_ref[n * channels() + c])
+          EXPECT_EQ(y[n * output_stride() + c], y_ref[n * channels() + c])
             << "at row " << n << " / " << rows()
             << ", channel " << c << " / " << channels();
         }

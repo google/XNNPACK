@@ -761,11 +761,11 @@ class ConvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
+              EXPECT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
+              EXPECT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              ASSERT_NEAR(
+              EXPECT_NEAR(
                   output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
                   double(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]),
                   0.9)
@@ -978,11 +978,11 @@ class ConvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
+              EXPECT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
+              EXPECT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              ASSERT_NEAR(
+              EXPECT_NEAR(
                   output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
                   double(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
                   0.9)
@@ -1216,11 +1216,11 @@ class ConvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
+              EXPECT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
+              EXPECT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              ASSERT_NEAR(
+              EXPECT_NEAR(
                   output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
                   double(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
                   0.9)
@@ -1476,11 +1476,11 @@ class ConvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_min)
+              EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_min)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_max)
+              EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_max)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              ASSERT_NEAR(
+              EXPECT_NEAR(
                   output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
                   output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c],
                   1.0e-4 * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]))
@@ -1720,12 +1720,12 @@ class ConvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-             ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
+             EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-             ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
+             EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              ASSERT_NEAR(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), std::max(1.0e-4f, std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
-                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+             EXPECT_NEAR(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), std::max(1.0e-4f, std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
+               << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
             }
           }
         }
@@ -1970,11 +1970,11 @@ class ConvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              ASSERT_GE(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x], output_min)
+              EXPECT_GE(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x], output_min)
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
-              ASSERT_LE(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x], output_max)
+              EXPECT_LE(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x], output_max)
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
-              ASSERT_NEAR(
+              EXPECT_NEAR(
                   output_ref[(((i * groups() + g) * group_output_channels() + c) * output_height() + y) * output_width() + x],
                   output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x],
                   1.0e-4 * std::abs(output_ref[(((i * groups() + g) * group_output_channels() + c) * output_height() + y) * output_width() + x]))
@@ -2141,11 +2141,11 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
+                EXPECT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
+                EXPECT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(
+                EXPECT_NEAR(
                     output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
                     double(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]),
                     0.9)
@@ -2230,11 +2230,11 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_LE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
+                EXPECT_LE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_GE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
+                EXPECT_GE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(
+                EXPECT_NEAR(
                     next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c],
                     double(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]),
                     0.9)
@@ -2379,11 +2379,11 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
+                EXPECT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
+                EXPECT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(
+                EXPECT_NEAR(
                     output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
                     double(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
                     0.9)
@@ -2462,11 +2462,11 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_LE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
+                EXPECT_LE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_GE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
+                EXPECT_GE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(
+                EXPECT_NEAR(
                     next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c],
                     double(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
                     0.9)
@@ -2611,11 +2611,11 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
+                EXPECT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
+                EXPECT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(
+                EXPECT_NEAR(
                     output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
                     double(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
                     0.9)
@@ -2694,11 +2694,11 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_LE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
+                EXPECT_LE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_GE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
+                EXPECT_GE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(
+                EXPECT_NEAR(
                     next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c],
                     double(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
                     0.9)
@@ -2832,11 +2832,11 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
+                EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
+                EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), std::max(1.0e-4f, std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
+                EXPECT_NEAR(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), std::max(1.0e-4f, std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
               }
             }
@@ -2911,11 +2911,11 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_GE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
+                EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_LE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
+                EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), std::max(1.0e-4f, std::abs(next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
+                EXPECT_NEAR(next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), std::max(1.0e-4f, std::abs(next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
               }
             }
@@ -3045,11 +3045,11 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_GE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_min)
+                EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_min)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_LE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_max)
+                EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_max)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(
+                EXPECT_NEAR(
                     output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
                     output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c],
                     1.0e-4 * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]))
@@ -3127,11 +3127,11 @@ class ConvolutionOperatorTester {
           for (size_t x = 0; x < next_output_width(); x++) {
             for (size_t g = 0; g < groups(); g++) {
               for (size_t c = 0; c < group_output_channels(); c++) {
-                ASSERT_GE(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_min)
+                EXPECT_GE(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_min)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_LE(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_max)
+                EXPECT_LE(output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c], output_max)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                ASSERT_NEAR(
+                EXPECT_NEAR(
                     next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c],
                     output[((i * next_output_height() + y) * next_output_width() + x) * output_channel_stride() + g * group_output_channels() + c],
                     1.0e-4 * std::abs(next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c]))

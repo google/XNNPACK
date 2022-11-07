@@ -191,17 +191,17 @@ class ArgMaxPoolMicrokernelTester {
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output_ref[x * channels() + c], output[x * output_stride() + c])
+          EXPECT_EQ(output_ref[x * channels() + c], output[x * output_stride() + c])
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_EQ(
+          EXPECT_EQ(
               indirect_input[x * step() + index_ref[x * channels() + c]][c + input_offset()],
               indirect_input[x * step() + index[x * channels() + c]][c + input_offset()])
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_EQ(index_ref[x * channels() + c], index[x * channels() + c])
+          EXPECT_EQ(index_ref[x * channels() + c], index[x * channels() + c])
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
@@ -264,17 +264,17 @@ class ArgMaxPoolMicrokernelTester {
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output_ref[x * channels() + c], output[x * output_stride() + c])
+          EXPECT_EQ(output_ref[x * channels() + c], output[x * output_stride() + c])
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_EQ(
+          EXPECT_EQ(
               indirect_input[x * step() + index_ref[x * channels() + c]][c + input_offset()],
               indirect_input[x * step() + index[x * channels() + c]][c + input_offset()])
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_EQ(index_ref[x * channels() + c], index[x * channels() + c])
+          EXPECT_EQ(index_ref[x * channels() + c], index[x * channels() + c])
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();

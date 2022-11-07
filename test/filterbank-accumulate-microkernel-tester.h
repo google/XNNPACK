@@ -85,7 +85,7 @@ class FilterbankAccumulateMicrokernelTester {
 
       // Verify results.
       for (size_t m = 0; m < rows(); m++) {
-        ASSERT_EQ(output[m], output_ref[m])
+        EXPECT_EQ(output[m], output_ref[m])
             << "at row " << m << " / " << rows();
       }
     }

@@ -165,7 +165,7 @@ class ConvertOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -218,7 +218,7 @@ class ConvertOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -283,7 +283,7 @@ class ConvertOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(int32_t(output_ref[i * channels() + c]), int32_t(output[i * output_stride() + c]))
+          EXPECT_EQ(int32_t(output_ref[i * channels() + c]), int32_t(output[i * output_stride() + c]))
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -348,7 +348,7 @@ class ConvertOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(uint32_t(output_ref[i * channels() + c]), uint32_t(output[i * output_stride() + c]))
+          EXPECT_EQ(uint32_t(output_ref[i * channels() + c]), uint32_t(output[i * output_stride() + c]))
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -406,7 +406,7 @@ class ConvertOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -464,7 +464,7 @@ class ConvertOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -506,7 +506,7 @@ class ConvertOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -548,7 +548,7 @@ class ConvertOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -599,7 +599,7 @@ class ConvertOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(int32_t(output_ref[i * channels() + c]), int32_t(output[i * output_stride() + c]))
+          EXPECT_EQ(int32_t(output_ref[i * channels() + c]), int32_t(output[i * output_stride() + c]))
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -643,7 +643,7 @@ class ConvertOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -694,7 +694,7 @@ class ConvertOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(uint32_t(output_ref[i * channels() + c]), uint32_t(output[i * output_stride() + c]))
+          EXPECT_EQ(uint32_t(output_ref[i * channels() + c]), uint32_t(output[i * output_stride() + c]))
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -737,7 +737,7 @@ class ConvertOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+          EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }

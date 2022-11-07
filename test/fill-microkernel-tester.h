@@ -93,7 +93,7 @@ class FillMicrokernelTester {
       // Verify results.
       for (size_t i = 0; i < rows(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_EQ(uint32_t(output[i * output_stride() + c]), uint32_t(fill_pattern[c % fill_pattern.size()]))
+          EXPECT_EQ(uint32_t(output[i * output_stride() + c]), uint32_t(fill_pattern[c % fill_pattern.size()]))
             << "at row " << i << " / " << rows()
             << ", channel " << c << " / " << channels()
             << ", fill value 0x" << std::hex << std::setw(8) << std::setfill('0') << fill_value
@@ -102,7 +102,7 @@ class FillMicrokernelTester {
       }
       for (size_t i = 0; i + 1 < rows(); i++) {
         for (size_t c = channels(); c < output_stride(); c++) {
-          ASSERT_EQ(uint32_t(output[i * output_stride() + c]), uint32_t(output_copy[i * output_stride() + c]))
+          EXPECT_EQ(uint32_t(output[i * output_stride() + c]), uint32_t(output_copy[i * output_stride() + c]))
             << "at row " << i << " / " << rows()
             << ", channel " << c << " / " << channels()
             << ", original value 0x" << std::hex << std::setw(8) << std::setfill('0')

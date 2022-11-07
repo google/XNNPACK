@@ -211,9 +211,9 @@ class GlobalAveragePoolingOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(uint32_t(output[i * output_stride() + c]), uint32_t(qmax()));
-          ASSERT_GE(uint32_t(output[i * output_stride() + c]), uint32_t(qmin()));
-          ASSERT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.80f)
+          EXPECT_LE(uint32_t(output[i * output_stride() + c]), uint32_t(qmax()));
+          EXPECT_GE(uint32_t(output[i * output_stride() + c]), uint32_t(qmin()));
+          EXPECT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.80f)
             << "at batch index " << i << " / " << batch_size()
             << ", channel " << c << " / " << channels();
         }
@@ -280,9 +280,9 @@ class GlobalAveragePoolingOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(int32_t(output[i * output_stride() + c]), int32_t(qmax() - 0x80));
-          ASSERT_GE(int32_t(output[i * output_stride() + c]), int32_t(qmin() - 0x80));
-          ASSERT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.80f)
+          EXPECT_LE(int32_t(output[i * output_stride() + c]), int32_t(qmax() - 0x80));
+          EXPECT_GE(int32_t(output[i * output_stride() + c]), int32_t(qmin() - 0x80));
+          EXPECT_NEAR(float(int32_t(output[i * output_stride() + c])), output_ref[i * channels() + c], 0.80f)
             << "at batch index " << i << " / " << batch_size()
             << ", channel " << c << " / " << channels();
         }
@@ -357,9 +357,9 @@ class GlobalAveragePoolingOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_max);
-          ASSERT_GE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_min);
-          ASSERT_NEAR(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_ref[i * channels() + c], std::max(1.0e-4f, std::abs(output_ref[i * channels() + c]) * 1.0e-2f))
+          EXPECT_LE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_max);
+          EXPECT_GE(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_min);
+          EXPECT_NEAR(fp16_ieee_to_fp32_value(output[i * output_stride() + c]), output_ref[i * channels() + c], std::max(1.0e-4f, std::abs(output_ref[i * channels() + c]) * 1.0e-2f))
             << "at batch index " << i << " / " << batch_size()
             << ", channel " << c << " / " << channels();
         }
@@ -436,9 +436,9 @@ class GlobalAveragePoolingOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(output[i * output_stride() + c], output_max);
-          ASSERT_GE(output[i * output_stride() + c], output_min);
-          ASSERT_NEAR(output[i * output_stride() + c], output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-6f)
+          EXPECT_LE(output[i * output_stride() + c], output_max);
+          EXPECT_GE(output[i * output_stride() + c], output_min);
+          EXPECT_NEAR(output[i * output_stride() + c], output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-6f)
             << "at batch index " << i << " / " << batch_size()
             << ", channel " << c << " / " << channels();
         }
@@ -511,9 +511,9 @@ class GlobalAveragePoolingOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(fp16_ieee_to_fp32_value(output[i * channels() + c]), output_max);
-          ASSERT_GE(fp16_ieee_to_fp32_value(output[i * channels() + c]), output_min);
-          ASSERT_NEAR(fp16_ieee_to_fp32_value(output[i * channels() + c]), output_ref[i * channels() + c], std::max(1.0e-4f, std::abs(output_ref[i * channels() + c]) * 1.0e-2f))
+          EXPECT_LE(fp16_ieee_to_fp32_value(output[i * channels() + c]), output_max);
+          EXPECT_GE(fp16_ieee_to_fp32_value(output[i * channels() + c]), output_min);
+          EXPECT_NEAR(fp16_ieee_to_fp32_value(output[i * channels() + c]), output_ref[i * channels() + c], std::max(1.0e-4f, std::abs(output_ref[i * channels() + c]) * 1.0e-2f))
             << "at batch index " << i << " / " << batch_size()
             << ", channel " << c << " / " << channels();
         }
@@ -588,9 +588,9 @@ class GlobalAveragePoolingOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_LE(output[i * channels() + c], output_max);
-          ASSERT_GE(output[i * channels() + c], output_min);
-          ASSERT_NEAR(output[i * channels() + c], output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-5f)
+          EXPECT_LE(output[i * channels() + c], output_max);
+          EXPECT_GE(output[i * channels() + c], output_min);
+          EXPECT_NEAR(output[i * channels() + c], output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-5f)
             << "at batch index " << i << " / " << batch_size()
             << ", channel " << c << " / " << channels();
         }
