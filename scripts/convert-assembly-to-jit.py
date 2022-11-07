@@ -13,6 +13,7 @@ from collections import defaultdict
 import datetime
 import re
 import sys
+from typing import List, Tuple
 
 SPACES = r'\s*'
 COMMA = r',' + SPACES
@@ -135,27 +136,27 @@ COND = r'([A-Z]+)'
 INSTR_REG_REG_REG_COND_RE = re.compile(INSTR + REG + COMMA + REG + COMMA + REG + COMMA + COND + COMMENTS)
 
 
-def remove_brackets(s):
+def remove_brackets(s : str) -> str:
   return s.replace('[', '').replace(']', '')
 
 
-def fix_replicate_instruction(s):
+def fix_replicate_instruction(s : str) -> str:
   return re.sub(r'_(\d+)', r'r_\1', s, 1)
 
 
-def fix_instr_name(s):
+def fix_instr_name(s : str) -> str:
   return s.lower().replace('.', '_', 2).replace('and', 'and_', 1)
 
 
-def fix_comments(s):
+def fix_comments(s : str) -> str:
   return s.replace('#', '//', 1)
 
 
-def maybe_wb(wb):
+def maybe_wb(wb : bool) -> str:
   return '++' if wb else ''
 
 
-def fix_fn_name(name):
+def fix_fn_name(name : str) -> str:
   if name.startswith('xnn_'):
     name = name[len('xnn_'):]
   # remove any type of activations from name
@@ -165,12 +166,12 @@ def fix_fn_name(name):
   return f'xnn_generate_{name}'
 
 
-def remove_prfm_from_fn_name(name):
+def remove_prfm_from_fn_name(name : str) -> str:
   assert('_prfm_' in name)
   return name.replace('prfm_', '')
 
 
-def fix_regs(regs):
+def fix_regs(regs : str) -> str:
   # Vector registers with datatype need to be method calls.
   # e.g. v2.4s -> v2.v4s(), v2.s -> v2.s()
   def repl(m):
@@ -189,7 +190,13 @@ GEMM = 'GEMM'
 IGEMM = 'IGEMM'
 
 
-def parse_prologue(input_file, lines, arch, minmax, kernel_type, prfm, mr):
+def parse_prologue(input_file : str,
+                   lines : List[str],
+                   arch : str,
+                   minmax : bool,
+                   kernel_type : str,
+                   prfm : bool,
+                   mr : int) -> List[str]:
   prologue = []
   # Whether we are in the auto-generated comment.
   in_autogen = False
@@ -337,18 +344,19 @@ def parse_prologue(input_file, lines, arch, minmax, kernel_type, prfm, mr):
   return prologue
 
 
-def emit_prefetch_instruction(instr, prfm, instructions):
+def emit_prefetch_instruction(instr : str, prfm : bool, instructions : List[str]) -> None:
   """
   Emit instructions depending on prfm.
   If prfm is True, guard instruction behind a prefetch check.
   instr should be the generated prefetch instruction (not the assembly instruction).
   """
-  instructions.append('if (prefetch) {')
-  instructions.append('  ' + instr)
-  instructions.append('}')
+  if prfm:
+    instructions.append('if (prefetch) {')
+    instructions.append('  ' + instr)
+    instructions.append('}')
 
 
-def parse_microkernel(lines, prfm):
+def parse_microkernel(lines : List[str], prfm : bool) -> Tuple[List[str], List[str]]:
   # All labels need to be declared first, collect them and output them after
   # function signature.
   labels = []
@@ -570,7 +578,7 @@ def parse_microkernel(lines, prfm):
 
   return instructions, labels
 
-def main(input_file):
+def main(input_file : str) -> None:
   arch = None
   kernel_type = GEMM
   minmax = False
