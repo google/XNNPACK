@@ -7282,9 +7282,9 @@ IF(XNNPACK_BUILD_LIBRARY)
   ADD_LIBRARY(allocator OBJECT src/allocator.c)
   ADD_LIBRARY(cache OBJECT src/cache.c)
   ADD_LIBRARY(memory OBJECT src/memory.c)
-  ADD_LIBRARY(mutex OBJECT src/mutex.c
+  ADD_LIBRARY(mutex OBJECT src/mutex.c)
   ADD_LIBRARY(operators OBJECT ${OPERATOR_SRCS})
-  ADD_LIBRARY(operator-run OBJECT src/operator-run.c))
+  ADD_LIBRARY(operator-run OBJECT src/operator-run.c)
   ADD_LIBRARY(subgraph OBJECT ${SUBGRAPH_SRCS})
   # Need C_EXTENSIONS to get constants for mmap (MAP_ANONYMOUS).
   SET_TARGET_PROPERTIES(memory PROPERTIES C_EXTENSIONS YES)
