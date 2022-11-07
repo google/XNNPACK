@@ -28,9 +28,9 @@ public:
 //     size_t nc,                         x1
 //     size_t kc,                         x2 / x0
 //     size_t ks,                         x3 / x9
-//     const float**restrict a,           x4
-//     const void*restrict w,             x5
-//     uint8_t*restrict c,                x6
+//     const float** a,                   x4
+//     const void* w,                     x5
+//     uint8_t* c,                        x6
 //     size_t cm_stride,                  x7
 //     size_t cn_stride,                  [sp] -> (x0)
 //     size_t a_offset,                   [sp + 8] -> x11
@@ -142,32 +142,40 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
   if (max_mr > 2) {
     mov(v24.v16b(), v20.v16b());
-    mov(v25.v16b(), v21.v16b());
   }
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 64]);
   }
-  if (max_mr > 3) {
-    mov(v26.v16b(), v20.v16b());
-    mov(v27.v16b(), v21.v16b());
+  if (max_mr > 2) {
+    mov(v25.v16b(), v21.v16b());
   }
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 128]);
   }
-  if (max_mr > 4) {
-    mov(v28.v16b(), v20.v16b());
-    mov(v29.v16b(), v21.v16b());
+  if (max_mr > 3) {
+    mov(v26.v16b(), v20.v16b());
   }
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 192]);
   }
-  if (max_mr > 5) {
-    mov(v30.v16b(), v20.v16b());
-    mov(v31.v16b(), v21.v16b());
+  if (max_mr > 3) {
+    mov(v27.v16b(), v21.v16b());
   }
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 256]);
+  }
+  if (max_mr > 4) {
+    mov(v28.v16b(), v20.v16b());
+  }
+  if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 320]);
+  }
+  if (max_mr > 4) {
+    mov(v29.v16b(), v21.v16b());
+  }
+  if (max_mr > 5) {
+    mov(v30.v16b(), v20.v16b());
+    mov(v31.v16b(), v21.v16b());
   }
 
   mov(x9, x3); // p = ks

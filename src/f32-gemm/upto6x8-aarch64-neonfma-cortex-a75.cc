@@ -12,7 +12,6 @@
 #include <xnnpack/gemm.h>
 #include <xnnpack/memory.h>
 
-
 namespace xnnpack {
 namespace aarch64 {
 namespace {
@@ -23,16 +22,16 @@ class Generator : public MacroAssembler {
 };
 
 // void xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75(
-//     size_t mr,                x0
-//     size_t nc,                x1
-//     size_t kc,                x2 / x0
-//     const uint8_t*restrict a, x3
-//     size_t a_stride,          x4
-//     const void*restrict w,    x5
-//     uint8_t*restrict c,       x6
-//     size_t cm_stride,         x7
-//     size_t cn_stride,         [sp] -> (x0)
-//     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> x8
+//     size_t mr,                         x0
+//     size_t nc,                         x1
+//     size_t kc,                         x2 / x0
+//     const uint8_t* a,                  x3
+//     size_t a_stride,                   x4
+//     const void* w,                     x5
+//     uint8_t* c,                        x6
+//     size_t cm_stride,                  x7
+//     size_t cn_stride,                  [sp] -> (x0)
+//     const xnn_f32_minmax_params params [sp + 8] -> x8
 
 // d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -133,72 +132,52 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Load initial bias from w into accumulators
   ldp(q20, q21, mem[x5], 32);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x3]); // Prefetch A
-  }
-  if (prefetch && max_mr > 1) {
-    prfm(kPLDL1KEEP, mem[x9]);
-  }
-  if (max_mr > 1) {
-    mov(v23.v16b(), v21.v16b());
-  }
-  if (prefetch && max_mr > 2) {
-    prfm(kPLDL1KEEP, mem[x10]);
-  }
-  if (prefetch && max_mr > 3) {
-    prfm(kPLDL1KEEP, mem[x11]);
-  }
-  if (max_mr > 1) {
-    mov(v22.v16b(), v20.v16b());
-  }
-  if (prefetch && max_mr > 4) {
-    prfm(kPLDL1KEEP, mem[x12]);
-  }
-  if (prefetch && max_mr > 5) {
-    prfm(kPLDL1KEEP, mem[x4]);
-  }
-  if (max_mr > 2) {
-    mov(v24.v16b(), v20.v16b());
-  }
-  if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 0]); // Prefetch B
   }
-  if (max_mr > 2) {
-    mov(v25.v16b(), v21.v16b());
-  }
+  subs(x0, x2, 32);  // k = kc - 32
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 64]);
   }
-  if (max_mr > 3) {
-    mov(v26.v16b(), v20.v16b());
-  }
+  mov(v22.v16b(), v20.v16b());
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 128]);
   }
-  if (max_mr > 3) {
-    mov(v27.v16b(), v21.v16b());
-  }
+  mov(v23.v16b(), v21.v16b());
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 192]);
   }
-  if (max_mr > 4) {
-    mov(v28.v16b(), v20.v16b());
-  }
+  mov(v24.v16b(), v20.v16b());
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 256]);
   }
-  if (max_mr > 4) {
-    mov(v29.v16b(), v21.v16b());
-  }
+  mov(v25.v16b(), v21.v16b());
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 320]);
   }
-  if (max_mr > 5) {
-    mov(v30.v16b(), v20.v16b());
-    mov(v31.v16b(), v21.v16b());
+  mov(v26.v16b(), v20.v16b());
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x3]);  // Prefetch A
   }
-
-  // Is there at least 8 floats (32 bytes) for prologue + epilogue?
-  subs(x0, x2, 32); // k = kc - 32
+  mov(v27.v16b(), v21.v16b());
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x9]);
+  }
+  mov(v28.v16b(), v20.v16b());
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x10]);
+  }
+  mov(v29.v16b(), v21.v16b());
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x11]);
+  }
+  mov(v30.v16b(), v20.v16b());
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x12]);
+  }
+  mov(v31.v16b(), v21.v16b());
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x4]);
+  }
   b_lo(l4);
 
   // Prologue - loads for main loop of 96 FMA
