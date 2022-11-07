@@ -11,6 +11,7 @@
 
 #include <arm_neon.h>
 
+#include <xnnpack/prefetch.h>
 #include <xnnpack/spmm.h>
 
 
@@ -69,11 +70,11 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
           vaccOPQR = vfmaq_f32(vaccOPQR, viOPQR, vw);
           vaccSTUV = vfmaq_f32(vaccSTUV, viSTUV, vw);
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-          __builtin_prefetch(input + 16);
-          __builtin_prefetch(input + 32);
+          xnn_prefetch_to_l1(input + 16);
+          xnn_prefetch_to_l1(input + 32);
           diff = *dmap++;
           vw = vld1q_dup_f32(w); w += 1;
-          __builtin_prefetch(w + 32);
+          xnn_prefetch_to_l1(w + 32);
           vi0123 = vld1q_f32(input);
           vi4567 = vld1q_f32(input + 4);
           vi89AB = vld1q_f32(input + 8);
@@ -135,10 +136,10 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
             const float32x4_t vi89AB = vld1q_f32(input + 8);
             const float32x4_t viCDEF = vld1q_f32(input + 12);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-            __builtin_prefetch(input + 16);
-            __builtin_prefetch(input + 32);
+            xnn_prefetch_to_l1(input + 16);
+            xnn_prefetch_to_l1(input + 32);
             const float32x4_t vb = vld1q_dup_f32(w); w += 1;
-            __builtin_prefetch(w + 32);
+            xnn_prefetch_to_l1(w + 32);
             vacc0123 = vfmaq_f32(vacc0123, vi0123, vb);
             vacc4567 = vfmaq_f32(vacc4567, vi4567, vb);
             vacc89AB = vfmaq_f32(vacc89AB, vi89AB, vb);
@@ -178,10 +179,10 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
             const float32x4_t vi0123 = vld1q_f32(input);
             const float32x4_t vi4567 = vld1q_f32(input + 4);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-            __builtin_prefetch(input + 16);
-            __builtin_prefetch(input + 32);
+            xnn_prefetch_to_l1(input + 16);
+            xnn_prefetch_to_l1(input + 32);
             const float32x4_t vb = vld1q_dup_f32(w); w += 1;
-            __builtin_prefetch(w + 32);
+            xnn_prefetch_to_l1(w + 32);
             vacc0123 = vfmaq_f32(vacc0123, vi0123, vb);
             vacc4567 = vfmaq_f32(vacc4567, vi4567, vb);
           } while (--nnz != 0);
@@ -211,10 +212,10 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
             const intptr_t diff = *dmap++;
             const float32x4_t vi0123 = vld1q_f32(input);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-            __builtin_prefetch(input + 16);
-            __builtin_prefetch(input + 32);
+            xnn_prefetch_to_l1(input + 16);
+            xnn_prefetch_to_l1(input + 32);
             const float32x4_t vb = vld1q_dup_f32(w); w += 1;
-            __builtin_prefetch(w + 32);
+            xnn_prefetch_to_l1(w + 32);
             vacc0123 = vfmaq_f32(vacc0123, vi0123, vb);
           } while (--nnz != 0);
         }
@@ -240,10 +241,10 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
             const intptr_t diff = *dmap++;
             const float32x2_t vi01 = vld1_f32(input);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-            __builtin_prefetch(input + 16);
-            __builtin_prefetch(input + 32);
+            xnn_prefetch_to_l1(input + 16);
+            xnn_prefetch_to_l1(input + 32);
             const float32x2_t vb = vld1_dup_f32(w); w += 1;
-            __builtin_prefetch(w + 32);
+            xnn_prefetch_to_l1(w + 32);
             vacc01 = vfma_f32(vacc01, vi01, vb);
           } while (--nnz != 0);
         }
@@ -269,10 +270,10 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma_pipelined(
             const intptr_t diff = *dmap++;
             const float32x2_t vi0 = vld1_dup_f32(input);
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-            __builtin_prefetch(input + 16);
-            __builtin_prefetch(input + 32);
+            xnn_prefetch_to_l1(input + 16);
+            xnn_prefetch_to_l1(input + 32);
             const float32x2_t vb = vld1_dup_f32(w); w += 1;
-            __builtin_prefetch(w + 32);
+            xnn_prefetch_to_l1(w + 32);
             vacc0 = vfma_f32(vacc0, vi0, vb);
           } while (--nnz != 0);
         }

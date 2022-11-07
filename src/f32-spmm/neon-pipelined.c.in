@@ -11,6 +11,7 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 
 #include <arm_neon.h>
 
+#include <xnnpack/prefetch.h>
 #include <xnnpack/spmm.h>
 
 
@@ -53,10 +54,10 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_pi
             vacc${ABC[M:M+4]} = ${VMULADDQ_F32}(vacc${ABC[M:M+4]}, vi${ABC[M:M+4]}, vw);
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
           $for M in range(0, MR, 16):
-            __builtin_prefetch(input + ${M+16});
+            xnn_prefetch_to_l1(input + ${M+16});
           diff = *dmap++;
           vw = vld1q_dup_f32(w); w += 1;
-          __builtin_prefetch(w + 32);
+          xnn_prefetch_to_l1(w + 32);
           vi0123 = vld1q_f32(input);
           $for M in range(4, MR, 4):
             vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
@@ -108,12 +109,12 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_pi
                 const float32x4_t vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
               input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
               $for M in range(0, MR, 16):
-                __builtin_prefetch(input + ${M+16});
+                xnn_prefetch_to_l1(input + ${M+16});
               $if SUBMR <= 2:
                 const float32x2_t vb = vld1_dup_f32(w); w += 1;
               $else:
                 const float32x4_t vb = vld1q_dup_f32(w); w += 1;
-              __builtin_prefetch(w + 32);
+              xnn_prefetch_to_l1(w + 32);
               $if SUBMR <= 2:
                 vacc${ABC[0:SUBMR]} = ${VMULADD_F32}(vacc${ABC[0:SUBMR]}, vi${ABC[0:SUBMR]}, vb);
               $else:

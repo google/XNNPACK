@@ -13,6 +13,7 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/igemm.h>
+#include <xnnpack/prefetch.h>
 
 
 void xnn_qs8_igemm_minmax_rndnu_ukernel_4x16__neon_mlal_lane_prfm(
@@ -192,8 +193,8 @@ void xnn_qs8_igemm_minmax_rndnu_ukernel_4x16__neon_mlal_lane_prfm(
         vacc3x89AB = vmlal_lane_s16(vacc3x89AB, vget_low_s16(vxb89ABCDEFc3), vget_low_s16(vxa3), 3);
         vacc3xCDEF = vmlal_lane_s16(vacc3xCDEF, vget_high_s16(vxb89ABCDEFc3), vget_low_s16(vxa3), 3);
 
-        __builtin_prefetch((const int8_t*) w + 448);
-        __builtin_prefetch((const int8_t*) w + 512);
+        xnn_prefetch_to_l1((const int8_t*) w + 448);
+        xnn_prefetch_to_l1((const int8_t*) w + 512);
 
         const int8x8_t vb01234567c4 = vld1_s8(w); w = (const void*) ((const int8_t*) w + 8);
         const int16x8_t vxb01234567c4 = vmovl_s8(vb01234567c4);

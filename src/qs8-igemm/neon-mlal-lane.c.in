@@ -17,6 +17,8 @@ $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 #include <xnnpack/igemm.h>
 $if REQUANTIZATION == "FP32" and ARMV8:
   #include <xnnpack/intrinsics-polyfill.h>
+$if PREFETCH:
+  #include <xnnpack/prefetch.h>
 
 
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if REQUANTIZATION == "FP32" and ARMV8 else "neon")
@@ -129,7 +131,7 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR
 
         $if PREFETCH:
           $for N in range(0, NR, 8):
-            __builtin_prefetch((const ${XINT8_T}*) w + ${N * 8 + 448});
+            xnn_prefetch_to_l1((const ${XINT8_T}*) w + ${N * 8 + 448});
 
         $for K in range(4, 8):
           $for N in range(0, NR, 8):
