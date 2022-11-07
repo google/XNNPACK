@@ -2018,6 +2018,49 @@ void xnn_pack_f32_chw_dwconv_hwg_w(
   }
 }
 
+void xnn_pack_f16_chw_dwconv_hwg_w(
+  size_t kernel_size,
+  size_t groups,
+  const uint16_t* kernel,
+  const uint16_t* bias,
+  uint16_t* packed_weights,
+  const void* params)
+{
+  for (size_t g = 0; g < groups; g++) {
+    if XNN_LIKELY(bias != NULL) {
+      *packed_weights = *bias++;
+    } else {
+      *packed_weights = 0;
+    }
+    packed_weights += 1;
+    for (size_t i = 0; i < kernel_size; i++) {
+      *packed_weights++ = kernel[i * groups + g];
+    }
+  }
+}
+
+void xnn_pack_f32_to_f16_chw_dwconv_hwg_w(
+  size_t kernel_size,
+  size_t groups,
+  const float* kernel,
+  const float* bias,
+  uint16_t* packed_weights,
+  const void* params)
+{
+  for (size_t g = 0; g < groups; g++) {
+    if XNN_LIKELY(bias != NULL) {
+      *packed_weights = fp16_ieee_from_fp32_value(*bias++);
+    } else {
+      *packed_weights = 0;
+    }
+    packed_weights += 1;
+    for (size_t i = 0; i < kernel_size; i++) {
+      *packed_weights++ = fp16_ieee_from_fp32_value(kernel[i * groups + g]);
+    }
+  }
+}
+
+
 void xnn_pack_f32_vmulcaddc_w(
   size_t c,
   size_t cr,

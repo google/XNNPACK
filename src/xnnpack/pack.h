@@ -679,6 +679,21 @@ XNN_INTERNAL void xnn_pack_f32_chw_dwconv_hwg_w(
   float* packed_weights,
   const void* params);
 
+XNN_INTERNAL void xnn_pack_f16_chw_dwconv_hwg_w(
+  size_t kernel_size,
+  size_t groups,
+  const uint16_t* kernel,
+  const uint16_t* bias,
+  uint16_t* packed_weights,
+  const void* params);
+
+XNN_INTERNAL void xnn_pack_f32_to_f16_chw_dwconv_hwg_w(
+  size_t kernel_size,
+  size_t groups,
+  const float* kernel,
+  const float* bias,
+  uint16_t* packed_weights,
+  const void* params);
 
 typedef void (*xnn_pack_vmulcaddc_w_function)(
   size_t c,

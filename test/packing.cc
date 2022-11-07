@@ -54,7 +54,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
     3, 6,
     4, 7,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -115,7 +115,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     17, 0, 18, 0, 19, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
@@ -165,7 +165,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -238,7 +238,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     21, 0, 23, 0, 22, 0, 24, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
@@ -283,7 +283,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
     4, 5,
     6, 7,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -342,7 +342,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     9, 0, 14, 0, 19, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
@@ -392,7 +392,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -459,7 +459,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     9, 0, 19, 0, 14, 0, 24, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
@@ -501,7 +501,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
     3, 6,
     4, 7,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -559,7 +559,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     17, 0, 18, 0, 19, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
@@ -606,7 +606,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -676,7 +676,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     21, 0, 23, 0, 22, 0, 24, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
@@ -718,7 +718,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
     4, 5,
     6, 7,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -774,7 +774,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     9, 0, 14, 0, 19, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
@@ -821,7 +821,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -885,7 +885,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     9, 0, 19, 0, 14, 0, 24, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
@@ -921,7 +921,7 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
     3, 6,
     4, 7,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -969,7 +969,7 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     17, 0, 18, 0, 19, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
@@ -1011,7 +1011,7 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -1071,7 +1071,7 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     21, 0, 23, 0, 22, 0, 24, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
@@ -1107,7 +1107,7 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
     4, 5,
     6, 7,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -1153,7 +1153,7 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     9, 0, 14, 0, 19, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
@@ -1195,7 +1195,7 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -1249,7 +1249,7 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     9, 0, 19, 0, 14, 0, 24, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
@@ -1285,7 +1285,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
     3.0f, 6.0f,
     4.0f, 7.0f,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -1333,7 +1333,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     17.0f, 0.0f, 18.0f, 0.0f, 19.0f, 0.0f,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
@@ -1375,7 +1375,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -1435,7 +1435,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     21.0f, 0.0f, 23.0f, 0.0f, 22.0f, 0.0f, 24.0f, 0.0f,
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
@@ -1471,7 +1471,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
     4.0f, 5.0f,
     6.0f, 7.0f,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -1517,7 +1517,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
     // then weights, channels first
     9.0f, 0.0f, 14.0f, 0.0f, 19.0f, 0.0f,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
@@ -1559,7 +1559,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
     // followed by 10 zeros to make up the difference with primary_tile
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -1613,7 +1613,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
     9.0f, 0.0f, 19.0f, 0.0f, 14.0f, 0.0f, 24.0f, 0.0f,
     0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   };
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
@@ -1652,7 +1652,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
   std::vector<uint16_t> expected(expected_float.size());
   std::transform(expected_float.begin(), expected_float.end(), expected.begin(),
                  [](float f) { return fp16_ieee_from_fp32_value(f); });
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -1703,7 +1703,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
   std::vector<uint16_t> expected(expected_float.size());
   std::transform(expected_float.begin(), expected_float.end(), expected.begin(),
                  [](float f) { return fp16_ieee_from_fp32_value(f); });
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
@@ -1748,7 +1748,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
   std::vector<uint16_t> expected(expected_float.size());
   std::transform(expected_float.begin(), expected_float.end(), expected.begin(),
                  [](float f) { return fp16_ieee_from_fp32_value(f); });
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -1811,7 +1811,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
   std::vector<uint16_t> expected(expected_float.size());
   std::transform(expected_float.begin(), expected_float.end(), expected.begin(),
                  [](float f) { return fp16_ieee_from_fp32_value(f); });
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
@@ -1850,7 +1850,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
   std::vector<uint16_t> expected(expected_float.size());
   std::transform(expected_float.begin(), expected_float.end(), expected.begin(),
                  [](float f) { return fp16_ieee_from_fp32_value(f); });
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
@@ -1899,7 +1899,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
   std::vector<uint16_t> expected(expected_float.size());
   std::transform(expected_float.begin(), expected_float.end(), expected.begin(),
                  [](float f) { return fp16_ieee_from_fp32_value(f); });
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
@@ -1944,7 +1944,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
   std::vector<uint16_t> expected(expected_float.size());
   std::transform(expected_float.begin(), expected_float.end(), expected.begin(),
                  [](float f) { return fp16_ieee_from_fp32_value(f); });
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
@@ -2001,5 +2001,162 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
   std::vector<uint16_t> expected(expected_float.size());
   std::transform(expected_float.begin(), expected_float.end(), expected.begin(),
                  [](float f) { return fp16_ieee_from_fp32_value(f); });
-  ASSERT_EQ(expected, packed_weights);
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F32_TO_F16_CHW_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
+  size_t primary_tile = 3;
+  size_t h = 3;
+  size_t w = 1;
+
+  std::vector<float> b(1);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0]
+  std::vector<float> k(h * w);  // k = [1, 2, 3]
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  std::vector<uint16_t> packed_weights(primary_tile + 1);
+
+  xnn_pack_f32_to_f16_chw_dwconv_hwg_w(
+      primary_tile,  // kernel size
+      1, // groups
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      nullptr);
+
+  std::vector<float> expected_float = {
+    // bias first
+    0.0f,
+    // then weights
+    1.0f,
+    2.0f,
+    3.0f,
+  };
+  std::vector<uint16_t> expected(expected_float.size());
+  std::transform(expected_float.begin(), expected_float.end(), expected.begin(),
+                 [](float f) { return fp16_ieee_from_fp32_value(f); });
+  EXPECT_EQ(expected, packed_weights);
+}
+
+
+TEST(PACK_F32_TO_F16_CHW_DWCONV_HWG_W, groups_gt_1) {
+  size_t primary_tile = 3;
+  size_t g = 3;
+  size_t h = 3;
+  size_t w = 1;
+
+  std::vector<float> b(g);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2]
+  std::vector<float> k(g * h * w);  // k = [3, 4, 5, 6, 7, 8, 9, 10, 11 ]
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  std::vector<uint16_t> packed_weights(g + g * h * w);
+
+  xnn_pack_f32_to_f16_chw_dwconv_hwg_w(
+      primary_tile,  // kernel size
+      g, // groups
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      nullptr);
+
+  std::vector<float> expected_float = {
+    // bias first
+    0.0f,
+    // then weights
+    3.0f,
+    6.0f,
+    9.0f,
+
+    // 2nd group, bias first
+    1.0f,
+    // then weights
+    4.0f,
+    7.0f,
+    10.0f,
+
+    // 3rd group, bias first
+    2.0f,
+    // then weights
+    5.0f,
+    8.0f,
+    11.0f,
+  };
+  std::vector<uint16_t> expected(expected_float.size());
+  std::transform(expected_float.begin(), expected_float.end(), expected.begin(),
+                 [](float f) { return fp16_ieee_from_fp32_value(f); });
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F16_CHW_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
+  size_t primary_tile = 3;
+  size_t h = 3;
+  size_t w = 1;
+
+  std::vector<uint16_t> b(1);
+  std::iota(b.begin(), b.end(), 0);  // b = [0]
+  std::vector<uint16_t> k(h * w);  // k = [1, 2, 3]
+  std::iota(k.begin(), k.end(), static_cast<uint16_t>(b.size()));
+  std::vector<uint16_t> packed_weights(primary_tile + 1);
+
+  xnn_pack_f16_chw_dwconv_hwg_w(
+      primary_tile,  // kernel size
+      1, // groups
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      nullptr);
+
+  std::vector<uint16_t> expected = {
+    // bias first
+    0,
+    // then weights
+    1,
+    2,
+    3,
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F16_CHW_DWCONV_HWG_W, groups_gt_1) {
+  size_t primary_tile = 3;
+  size_t g = 3;
+  size_t h = 3;
+  size_t w = 1;
+
+  std::vector<uint16_t> b(g);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2]
+  std::vector<uint16_t> k(g * h * w);  // k = [3, 4, 5, 6, 7, 8, 9, 10, 11 ]
+  std::iota(k.begin(), k.end(), static_cast<uint16_t>(b.size()));
+  std::vector<uint16_t> packed_weights(g + g * h * w);
+
+  xnn_pack_f16_chw_dwconv_hwg_w(
+      primary_tile,  // kernel size
+      g, // groups
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      nullptr);
+
+  std::vector<uint16_t> expected = {
+    // bias first
+    0,
+    // then weights
+    3,
+    6,
+    9,
+
+    // 2nd group, bias first
+    1,
+    // then weights
+    4,
+    7,
+    10,
+
+    // 3rd group, bias first
+    2,
+    // then weights
+    5,
+    8,
+    11,
+  };
+  EXPECT_EQ(expected, packed_weights);
 }
