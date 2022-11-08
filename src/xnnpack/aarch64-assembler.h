@@ -58,14 +58,14 @@ struct VRegisterLane {
   uint8_t code;
   uint8_t size;
   uint8_t lane;
-  const bool is_s() { return size == 2; };
+  bool is_s() const { return size == 2; };
 };
 
 struct ScalarVRegister{
   uint8_t code;
   uint8_t size;
 
-  const VRegisterLane operator[](std::size_t pos) const {
+  VRegisterLane operator[](std::size_t pos) const {
     return VRegisterLane{code, size, static_cast<uint8_t>(pos)};
   }
 };
@@ -87,7 +87,7 @@ struct VRegister {
   ScalarVRegister s() const { return {code, 2}; }
   ScalarVRegister d() const { return {code, 3}; }
 
-  const bool is_s() { return size == 2; };
+  bool is_s() const { return size == 2; };
 };
 
 constexpr VRegister v0{0};

@@ -78,10 +78,10 @@ class AssemblerBase {
   const byte* start() const { return buffer_; }
   const byte* offset() const { return cursor_; }
   template<typename T>
-  const T offset() const { return reinterpret_cast<T>(cursor_); }
+  T offset() const { return reinterpret_cast<T>(cursor_); }
   // Returns the number of bytes of code actually in the buffer.
   size_t code_size_in_bytes() const { return (cursor_ - buffer_); }
-  const Error error() const { return error_; }
+  Error error() const { return error_; }
 
  protected:
   // Pointer into code buffer to start writing code.

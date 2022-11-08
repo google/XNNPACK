@@ -192,7 +192,7 @@ struct DRegister {
   uint8_t d() const { return (code & 0x10) >> 4; }
   uint8_t vd() const { return code & 0xf; }
 
-  const DRegisterLane operator[](std::size_t pos) const {
+  DRegisterLane operator[](std::size_t pos) const {
     return DRegisterLane{code, static_cast<uint8_t>(pos)};
   }
 };
@@ -389,7 +389,7 @@ static inline MemOperand operator,(CoreRegister r, int32_t offset) {
 
 // Helper struct for some syntax sugar to look like native assembly, see mem.
 struct MemOperandHelper {
-  const MemOperand operator[](MemOperand op) const { return op; }
+  MemOperand operator[](MemOperand op) const { return op; }
   MemOperand operator[](CoreRegister r) const { return MemOperand(r, 0); }
 };
 
