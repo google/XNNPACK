@@ -38,14 +38,30 @@ static enum xnn_status create_depth_to_space_operator(
   enum xnn_status status;
   if (values[input_id].layout == xnn_layout_type_nchw) {
     assert(values[output_id].layout == xnn_layout_type_nhwc);
-    assert(node->compute_type == xnn_compute_type_fp32);
-    status = xnn_create_depth_to_space_nchw2nhwc_x32(
-        output_channel_dim /* output channels */,
-        input_channel_dim /* input stride */,
-        output_channel_dim /* output stride */,
-        node->params.depth_to_space.block_size,
-        node->flags,
-        &opdata->operator_objects[0]);
+    switch (node->compute_type) {
+#ifndef XNN_NO_F16_OPERATORS
+      case xnn_compute_type_fp16:
+        status = xnn_create_depth_to_space_nchw2nhwc_x16(
+            output_channel_dim /* output channels */,
+            input_channel_dim /* input stride */,
+            output_channel_dim /* output stride */,
+            node->params.depth_to_space.block_size,
+            node->flags,
+            &opdata->operator_objects[0]);
+        break;
+#endif  // XNN_NO_F16_OPERATORS
+      case xnn_compute_type_fp32:
+        status = xnn_create_depth_to_space_nchw2nhwc_x32(
+            output_channel_dim /* output channels */,
+            input_channel_dim /* input stride */,
+            output_channel_dim /* output stride */,
+            node->params.depth_to_space.block_size,
+            node->flags,
+            &opdata->operator_objects[0]);
+        break;
+      default:
+        XNN_UNREACHABLE;
+    }
   } else {
     assert(values[input_id].layout == xnn_layout_type_nhwc);
     assert(values[output_id].layout == xnn_layout_type_nhwc);
@@ -121,6 +137,17 @@ static enum xnn_status setup_depth_to_space_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
+#ifndef XNN_NO_F16_OPERATORS
+    case xnn_operator_type_depth_to_space_nchw2nhwc_x16:
+      return xnn_setup_depth_to_space_nchw2nhwc_x16(
+          opdata->operator_objects[0],
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          input_data,
+          output_data,
+          threadpool);
+#endif  // XNN_NO_F16_OPERATORS
     case xnn_operator_type_depth_to_space_nchw2nhwc_x32:
       return xnn_setup_depth_to_space_nchw2nhwc_x32(
           opdata->operator_objects[0],
