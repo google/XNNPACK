@@ -246,8 +246,12 @@ enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buffer) {
 
   // Flush icache, do it before changing permissions due to bugs on older ARM64 kernels.
   #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_PLATFORM_JIT
-    // iOS toolchain doesn't support this, use sys_icache_invalidate, when we support iOS.
-    __builtin___clear_cache(buffer->start, (void*) ((uint8_t*) buffer->start + buffer->capacity));
+    #if XNN_PLATFORM_WINDOWS
+      FlushInstructionCache(GetCurrentProcess(), buffer->start, buffer->capacity);
+    #else
+      // iOS toolchain doesn't support this, use sys_icache_invalidate, when we support iOS.
+      __builtin___clear_cache(buffer->start, (void*) ((uint8_t*) buffer->start + buffer->capacity));
+    #endif  // XNN_PLATFORM_WINDOWS
   #endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
 
   // Set permissions to RX (no write).
