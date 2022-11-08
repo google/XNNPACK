@@ -6,7 +6,7 @@ concurrency:
 jobs:
   cmake-linux-local:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v3
       - name: Update apt
