@@ -351,9 +351,19 @@ def emit_prefetch_instruction(instr : str, prfm : bool, instructions : List[str]
   instr should be the generated prefetch instruction (not the assembly instruction).
   """
   if prfm:
-    instructions.append('if (prefetch) {')
-    instructions.append('  ' + instr)
-    instructions.append('}')
+    instructions.append(f'if (prefetch) {{ {instr} }}')
+
+
+def emit_clamp_instruction(instr : str, instructions : List[str]) -> None:
+  """
+  Guard fmax/fmin instructions behind a clamp_min/clamp_max check.
+  """
+  if instr.strip().startswith('fmax'):
+    instructions.append(f'if (clamp_min) {{ {instr} }}')
+  elif instr.strip().startswith('fmin'):
+    instructions.append(f'if (clamp_max) {{ {instr} }}')
+  else:
+    instructions.append(instr)
 
 
 def parse_microkernel(lines : List[str], prfm : bool) -> Tuple[List[str], List[str]]:
@@ -461,9 +471,9 @@ def parse_microkernel(lines : List[str], prfm : bool) -> Tuple[List[str], List[s
       continue
     m = re.fullmatch(INSTR_REG_REG_REG_RE, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({fix_regs(m[2])}, {fix_regs(m[3])}, {fix_regs(m[4])}){sc} {m[5]}'
-      )
+      emit_clamp_instruction(
+          f'{fix_instr_name(m[1])}({fix_regs(m[2])}, {fix_regs(m[3])}, {fix_regs(m[4])}){sc} {m[5]}',
+          instructions)
       continue
     m = re.fullmatch(INSTR_REG_REG_REG_IMM_RE, line)
     if m:
@@ -578,6 +588,71 @@ def parse_microkernel(lines : List[str], prfm : bool) -> Tuple[List[str], List[s
 
   return instructions, labels
 
+
+def emit_instructions_with_same_check(check : str, instrs : List[str], output : List[str]) -> None:
+  """
+  A helper method to emit a list of instructions which share the same check.
+  """
+  if not instrs:
+    return
+  m = re.search(r'if \((\w+)\) \{', instrs[0])
+  check = m.group(1)
+  output.append(f'if ({check}) {{')
+  for instr in instrs:
+    # Each instruction is of the form "if (check) { instr(); }", we only want the instr,
+    # so find the opening and closing brace, and only output what's in between.
+    start = instr.index('{')
+    end = instr.index('}', start)
+    output.append(f'  {instr[start+1:end].strip()}')
+  output.append('}')
+
+
+def merge_consecutive_checks(instructions : List[str]) -> List[str]:
+  """
+  Each instruction has its own check, leading to excessive number of checks, e.g.
+
+    if (clamp) { fmin(v0) }
+    if (clamp) { fmin(v1) }
+    ...
+    if (clamp) { fmin(v10) }
+
+  This walks the instructions stream, checks for consecutive checks for the same condition,
+  and merge them:
+
+    if (clamp) {
+      fmin(v0);
+      fmin(v1);
+      ...
+      fmin(v10);
+  }
+
+  This assumes that checks should be on the same line as the instruction, e.g.
+  `if (clamp) { ... }`
+  """
+  previous_check = None
+  current_check = None
+  # Avoid mutating the input instructions stream, write all output to this new list.
+  output = []
+  # Holds the list of instructions that have the same check.
+  instructions_with_same_check = []
+  for instr in instructions:
+    m = re.search(r'if \((\w+)\) \{', instr)
+    if m:
+      current_check = m.group(1)
+      if (current_check == previous_check):
+        instructions_with_same_check.append(instr)
+      else:
+        emit_instructions_with_same_check(previous_check, instructions_with_same_check, output)
+        previous_check = current_check
+        instructions_with_same_check = [instr]
+    else:
+      emit_instructions_with_same_check(previous_check, instructions_with_same_check, output)
+      previous_check = None
+      output.append(instr)
+      instructions_with_same_check = []
+  return output
+
+
 def main(input_file : str) -> None:
   arch = None
   kernel_type = GEMM
@@ -634,6 +709,7 @@ def main(input_file : str) -> None:
   prologue = parse_prologue(input_file, prologue_lines, arch, minmax,
                             kernel_type, prfm, mr)
   instructions, labels = parse_microkernel(microkernel_body, prfm)
+  instructions = merge_consecutive_checks(instructions)
 
   # Actually emit the JIT codegen (to stdout).
   for p in prologue:
