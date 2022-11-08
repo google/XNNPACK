@@ -337,7 +337,18 @@ def parse_prologue(input_file, lines, arch, minmax, kernel_type, prfm, mr):
   return prologue
 
 
-def parse_microkernel(lines):
+def emit_prefetch_instruction(instr, prfm, instructions):
+  """
+  Emit instructions depending on prfm.
+  If prfm is True, guard instruction behind a prefetch check.
+  instr should be the generated prefetch instruction (not the assembly instruction).
+  """
+  instructions.append('if (prefetch) {')
+  instructions.append('  ' + instr)
+  instructions.append('}')
+
+
+def parse_microkernel(lines, prfm):
   # All labels need to be declared first, collect them and output them after
   # function signature.
   labels = []
@@ -527,13 +538,13 @@ def parse_microkernel(lines):
       continue
     m = re.fullmatch(INSTR_PLD_MEMOP, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}]){sc} {m[4]}')
+      emit_prefetch_instruction(
+          f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}]){sc} {m[4]}', prfm, instructions)
       continue
     m = re.fullmatch(INSTR_PLD_MEMOP_OFFSET, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[5]}')
+      emit_prefetch_instruction(
+          f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[5]}', prfm, instructions)
       continue
     m = re.fullmatch(INSTR_REG_REG_REG_COND_RE, line)
     if m:
@@ -614,7 +625,7 @@ def main(input_file):
 
   prologue = parse_prologue(input_file, prologue_lines, arch, minmax,
                             kernel_type, prfm, mr)
-  instructions, labels = parse_microkernel(microkernel_body)
+  instructions, labels = parse_microkernel(microkernel_body, prfm)
 
   # Actually emit the JIT codegen (to stdout).
   for p in prologue:
