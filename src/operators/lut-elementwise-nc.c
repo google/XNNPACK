@@ -392,14 +392,14 @@ static enum xnn_status setup_lut_elementwise_nc(
 }
 
 enum xnn_status xnn_setup_elu_nc_qs8(
-    xnn_operator_t sigmoid_op,
+    xnn_operator_t elu_op,
     size_t batch_size,
     const int8_t* input,
     int8_t* output,
     pthreadpool_t threadpool)
 {
   return setup_lut_elementwise_nc(
-    sigmoid_op, xnn_operator_type_elu_nc_qs8,
+    elu_op, xnn_operator_type_elu_nc_qs8,
     batch_size, input, output);
 }
 
