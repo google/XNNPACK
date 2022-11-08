@@ -56,7 +56,7 @@ static const int16_t xnn_reference_table_fftr_twiddle[256] = {
   -32745, -1206, -32757,  -804, -32765,  -402, -32767,     0,
 };
 
-void xnn_cs16_fftr_reference(
+static void xnn_cs16_fftr_reference(
     size_t samples,
     const int16_t* input,
     int16_t* output,

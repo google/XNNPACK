@@ -75,7 +75,7 @@ static const int16_t xnn_reference_table_fft256_twiddle[384] = {
    -3212, 32609,  -2410, 32678,  -1608, 32728,   -804, 32757
 };
 
-void xnn_cs16_bfly4_reference(
+static void xnn_cs16_bfly4_reference(
     size_t batch,
     size_t samples,
     int16_t* data,
