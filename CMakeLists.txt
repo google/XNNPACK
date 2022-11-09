@@ -621,11 +621,11 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/x32-zip/x32-zip-x4-scalar.c)
 
 SET(ALL_SCALAR_MICROKERNEL_SRCS
+  src/cs16-bfly4/cs16-bfly4-samples1-scalar.c
+  src/cs16-bfly4/cs16-bfly4-samples4-scalar.c
   src/cs16-bfly4/gen/cs16-bfly4-scalar-x1.c
   src/cs16-bfly4/gen/cs16-bfly4-scalar-x2.c
   src/cs16-bfly4/gen/cs16-bfly4-scalar-x4.c
-  src/cs16-bfly4/cs16-bfly4-samples1-scalar.c
-  src/cs16-bfly4/cs16-bfly4-samples4-scalar.c
   src/cs16-fftr/gen/cs16-fftr-scalar-x1.c
   src/cs16-fftr/gen/cs16-fftr-scalar-x2.c
   src/cs16-fftr/gen/cs16-fftr-scalar-x4.c
