@@ -13,7 +13,7 @@ from collections import defaultdict
 import datetime
 import re
 import sys
-from typing import List, Tuple
+from typing import List, Tuple, Mapping
 
 SPACES = r'\s*'
 COMMA = r',' + SPACES
@@ -182,6 +182,10 @@ def fix_regs(regs : str) -> str:
   return re.sub(r'(\w+\.)(\d+)?(\w+)', repl, regs)
 
 
+def get_callee_saved() -> List[str]:
+  return ['d8', 'd9', 'd10', 'd11', 'd12', 'd13', 'd14', 'd15']
+
+
 IGNORE_LINES = [r'\s*\.\w+']
 
 AARCH32 = 'aarch32'
@@ -190,13 +194,9 @@ GEMM = 'GEMM'
 IGEMM = 'IGEMM'
 
 
-def parse_prologue(input_file : str,
-                   lines : List[str],
-                   arch : str,
-                   minmax : bool,
-                   kernel_type : str,
-                   prfm : bool,
-                   mr : int) -> List[str]:
+def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
+                   kernel_type: str, prfm: bool,
+                   mr: int) -> Tuple[List[str], Mapping[str, int]]:
   prologue = []
   # Whether we are in the auto-generated comment.
   in_autogen = False
@@ -256,6 +256,7 @@ def parse_prologue(input_file : str,
       prologue.append('namespace {')
       prologue.append('class Generator : public MacroAssembler {')
       prologue.append('  using MacroAssembler::MacroAssembler;')
+      prologue.append('')
       prologue.append(' public:')
       params = 'float min, float max' if minmax else 'void* params'
       prefetch = 'bool prefetch, ' if prfm else ''
@@ -306,7 +307,10 @@ def parse_prologue(input_file : str,
         continue
       if 'clamp' in line.lower() or 'unused' in line.lower():
         continue
-      m = re.search(r'#\W+(\w)\d?\W+((v\d+\W*)+)', line)
+      # Skip b vector registers
+      if re.search(r'#\W+B', line):
+        continue
+      m = re.search(r'#\W+(A|C)\d?\W+((v\d+\W*)+)', line)
       if not m:
         print(
             f'ERROR failed to parse vector register usage: {line}',
@@ -336,12 +340,22 @@ def parse_prologue(input_file : str,
     print('len(c_pointers) != mr', file=sys.stderr)
     sys.exit(1)
 
-  for _, v in vector_register_usage.items():
+  for i, v in enumerate(a_pointers):
+    vector_register_map[v] = i
+  for i, v in enumerate(c_pointers):
+    vector_register_map[v] = i
+
+  for reg_alphabet, v in vector_register_usage.items():
     for i, _ in enumerate(v):
       for j, _ in enumerate(v[i]):
-        vector_register_map[v[i][j]] = i
+        # register maps specify v registers, but we sometimes refer to the q/s/d registers as well.
+        reg = v[i][j]
+        vector_register_map[reg] = i
+        vector_register_map[reg.replace('v', 'q')] = i
+        vector_register_map[reg.replace('v', 's')] = i
+        vector_register_map[reg.replace('v', 'd')] = i
 
-  return prologue
+  return prologue, vector_register_map
 
 
 def emit_prefetch_instruction(instr : str, prfm : bool, instructions : List[str]) -> None:
@@ -358,15 +372,67 @@ def emit_clamp_instruction(instr : str, instructions : List[str]) -> None:
   """
   Guard fmax/fmin instructions behind a clamp_min/clamp_max check.
   """
-  if instr.strip().startswith('fmax'):
+  if 'fmax' in instr:
     instructions.append(f'if (clamp_min) {{ {instr} }}')
-  elif instr.strip().startswith('fmin'):
+  elif 'fmin' in instr:
     instructions.append(f'if (clamp_max) {{ {instr} }}')
   else:
     instructions.append(instr)
 
 
-def parse_microkernel(lines : List[str], prfm : bool) -> Tuple[List[str], List[str]]:
+def emit_instruction(instr: str, instructions: List[str],
+                     vector_register_map: Mapping[str, int]) -> None:
+  # emit a guard for instruction if it is using a particular register
+  # mapping is a map from register to the mr it is used, e.g. v0 -> 0 to guard v0 behind max_mr > 0.
+  # parse the dest register from this instruction
+  pat = re.compile(r'(\w+)\(\{?((?:v|x|q|s|d)\d+)')
+  m = re.search(pat, instr)
+  if not m:
+    instructions.append(instr)
+    return
+
+  instr_name = m.group(1)
+  reg = m.group(2)
+
+  if instr_name == 'fmin' or instr_name == 'fmax':
+    max_mr = vector_register_map[reg]
+    if (max_mr == 0):
+      return emit_clamp_instruction(instr, instructions)
+    else:
+      return emit_clamp_instruction(
+          f'if (max_mr > {max_mr}) {{ {instr.rstrip()} }}', instructions)
+
+  if instr_name == 'ld2r':  # loading min/max
+    instructions.append(f'if (clamp_min || clamp_max) {{ {instr} }}')
+    return
+
+  if ((instr_name == 'stp' or instr_name == 'ldp') and
+      reg in get_callee_saved()
+     ):  # pushing and popping from stack, no max_mr guard.
+    instructions.append(instr)
+    return
+
+  if instr_name == 'cmp' and reg == 'x0':  # comparing mr
+    cmp_m = re.search(r'cmp\(x0, (\d+)\);', instr)
+    assert (cmp_m)
+    instructions.append(f'if (max_mr > {int(cmp_m[1])-1}) {{ {instr} }}')
+    return
+
+  if reg not in vector_register_map:
+    instructions.append(instr)
+    return
+
+  max_mr = vector_register_map[reg]
+  if (max_mr == 0):
+    instructions.append(instr)
+    return
+
+  instructions.append(f'if (max_mr > {max_mr}) {{ {instr} }}')
+
+
+def parse_microkernel(
+    lines: List[str], prfm: bool,
+    vector_register_map: Mapping[str, int]) -> Tuple[List[str], List[str]]:
   # All labels need to be declared first, collect them and output them after
   # function signature.
   labels = []
@@ -381,7 +447,7 @@ def parse_microkernel(lines : List[str], prfm : bool) -> Tuple[List[str], List[s
     # But keep other comments.
     m = re.fullmatch(COMMENT_RE, line)
     if m:
-      instructions.append(m[1])
+      emit_instruction(m[1], instructions, vector_register_map)
       continue
 
     m = re.fullmatch(LABEL, line)
@@ -391,120 +457,134 @@ def parse_microkernel(lines : List[str], prfm : bool) -> Tuple[List[str], List[s
       continue
     m = re.fullmatch(INSTR_RE, line)
     if m:
-      instructions.append(f'{fix_instr_name(m[1])}(){sc} {m[2]}')
+      emit_instruction(f'{fix_instr_name(m[1])}(){sc} {m[2]}', instructions,
+                       vector_register_map)
       continue
     m = re.fullmatch(INSTR_OP_RE, line)
     if m:
-      instructions.append(f'{fix_instr_name(m[1])}({m[2]}){sc} {m[3]}')
+      emit_instruction(f'{fix_instr_name(m[1])}({m[2]}){sc} {m[3]}',
+                       instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REGLIST_CONSEC_MEMOP_REG, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({{{m[2]}-{m[3]}}}, mem[{m[4]}], {m[5]}){sc} {m[6]}'
-      )
+      emit_instruction(
+          f'{fix_instr_name(m[1])}({{{m[2]}-{m[3]}}}, mem[{m[4]}], {m[5]}){sc} {m[6]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REGLIST_INDIV_MEMOP_REG, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({{{fix_regs(m[2])}}}, mem[{m[3]}], {m[4]}){sc} {m[5]}'
-      )
+      emit_instruction(
+          f'{fix_instr_name(m[1])}({{{fix_regs(m[2])}}}, mem[{m[3]}], {m[4]}){sc} {m[5]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REGLIST_CONSEC_RE, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({{{m[2]}-{m[3]}}}){sc} {m[4]}')
+      emit_instruction(f'{fix_instr_name(m[1])}({{{m[2]}-{m[3]}}}){sc} {m[4]}',
+                       instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REGLIST_LIST_RE, line)
     if m:
-      instructions.append(f'{fix_instr_name(m[1])}({{{m[2]}}}){sc} {m[3]}')
+      emit_instruction(f'{fix_instr_name(m[1])}({{{m[2]}}}){sc} {m[3]}',
+                       instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_MEMOP_OFFSET_RE, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}(mem[{m[2]}, {m[3]}]){sc} {m[4]}')
+      emit_instruction(
+          f'{fix_instr_name(m[1])}(mem[{m[2]}, {m[3]}]){sc} {m[4]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REG_MEMOP_RE, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}]){sc} {m[4]}')
+      emit_instruction(
+          f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}]){sc} {m[4]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REG_MEMOP_IMM_RE, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}], {m[4]}){sc} {m[5]}')
+      emit_instruction(
+          f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}], {m[4]}){sc} {m[5]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REG_MEMOP_OFFSET_RE, line)
     if m:
       if m[5]:  # wb
-        instructions.append(
-            f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]++){sc} {m[6]}')
+        emit_instruction(
+            f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]++){sc} {m[6]}',
+            instructions, vector_register_map)
       else:  # no wb
-        instructions.append(
-            f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[6]}')
+        emit_instruction(
+            f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[6]}',
+            instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REG_REG_MEMOP_RE, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}]){sc} {m[5]}')
+      emit_instruction(
+          f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}]){sc} {m[5]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REG_REG_MEMOP_OFFSET_RE, line)
     if m:
       if m[6]:  # wb
-        instructions.append(
-            f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}, {m[5]}]++){sc} {m[7]}'
-        )
+        emit_instruction(
+            f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}, {m[5]}]++){sc} {m[7]}',
+            instructions, vector_register_map)
       else:  # no wb
-        instructions.append(
-            f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}, {m[5]}]){sc} {m[7]}'
-        )
+        emit_instruction(
+            f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}, {m[5]}]){sc} {m[7]}',
+            instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REG_REG_MEMOP_IMM_RE, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}], {m[5]}){sc} {m[6]}'
-      )
+      emit_instruction(
+          f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}], {m[5]}){sc} {m[6]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REG_IMM_RE, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({fix_regs(m[2])}, {m[3]}){sc} {m[4]}')
+      emit_instruction(
+          f'{fix_instr_name(m[1])}({fix_regs(m[2])}, {m[3]}){sc} {m[4]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REG_REG_REG_RE, line)
     if m:
-      emit_clamp_instruction(
+      emit_instruction(
           f'{fix_instr_name(m[1])}({fix_regs(m[2])}, {fix_regs(m[3])}, {fix_regs(m[4])}){sc} {m[5]}',
-          instructions)
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REG_REG_REG_IMM_RE, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, {m[4]}, {m[5]}){sc} {m[6]}')
+      emit_instruction(
+          f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, {m[4]}, {m[5]}){sc} {m[6]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REG_REG_RE, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({fix_regs(m[2])}, {fix_regs(m[3])}){sc} {m[4]}'
-      )
+      emit_instruction(
+          f'{fix_instr_name(m[1])}({fix_regs(m[2])}, {fix_regs(m[3])}){sc} {m[4]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REG_REGLIST_CONSECT, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}(mem[{m[2]}], {{{m[3]}-{m[4]}}}){sc} {m[5]}')
+      emit_instruction(
+          f'{fix_instr_name(m[1])}(mem[{m[2]}], {{{m[3]}-{m[4]}}}){sc} {m[5]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REG_REGLIST_CONSECT_WB, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}(mem[{m[2]}]++, {{{m[3]}-{m[4]}}}){sc} {m[5]}'
-      )
+      emit_instruction(
+          f'{fix_instr_name(m[1])}(mem[{m[2]}]++, {{{m[3]}-{m[4]}}}){sc} {m[5]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REG_REGLIST_INDIV_WB, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}(mem[{m[2]}]++, {{{m[3]}}}){sc} {m[4]}')
+      emit_instruction(
+          f'{fix_instr_name(m[1])}(mem[{m[2]}]++, {{{m[3]}}}){sc} {m[4]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_B_IMM, line)
     if m:
-      instructions.append(f'{fix_instr_name(m[1])}(l{m[2]}){sc} {m[4]}')
+      emit_instruction(f'{fix_instr_name(m[1])}(l{m[2]}){sc} {m[4]}',
+                       instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_B_REG_IMM_IMM, line)
     if m:
@@ -513,38 +593,38 @@ def parse_microkernel(lines : List[str], prfm : bool) -> Tuple[List[str], List[s
       continue
     m = re.fullmatch(INSTR_REGLIST_INDIV_MEMOP, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({{{fix_regs(m[2])}}}, mem[{m[3]}]{maybe_wb(m[4])}){sc} {m[5]}'
-      )
+      emit_instruction(
+          f'{fix_instr_name(m[1])}({{{fix_regs(m[2])}}}, mem[{m[3]}]{maybe_wb(m[4])}){sc} {m[5]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REGLIST_INDIV_MEMOP_IMM, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({{{fix_regs(m[2])}}}, mem[{m[3]}], {m[4]}){sc} {m[5]}'
-      )
+      emit_instruction(
+          f'{fix_instr_name(m[1])}({{{fix_regs(m[2])}}}, mem[{m[3]}], {m[4]}){sc} {m[5]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REGLIST_CONSEC_MEMOP, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({{{m[2]}-{m[3]}}}, mem[{m[4]}]{maybe_wb(m[5])}){sc} {m[6]}'
-      )
+      emit_instruction(
+          f'{fix_instr_name(m[1])}({{{m[2]}-{m[3]}}}, mem[{m[4]}]{maybe_wb(m[5])}){sc} {m[6]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REGLIST_REPLICATE_MEMOP, line)
     if m:
       if m[5]:
-        instructions.append(
-            f'{fix_replicate_instruction(fix_instr_name(m[1]))}({{{remove_brackets(m[2])}}}, mem[{m[4]}]++){sc} {m[6]}'
-        )
+        emit_instruction(
+            f'{fix_replicate_instruction(fix_instr_name(m[1]))}({{{remove_brackets(m[2])}}}, mem[{m[4]}]++){sc} {m[6]}',
+            instructions, vector_register_map)
       else:
-        instructions.append(
-            f'{fix_replicate_instruction(fix_instr_name(m[1]))}({{{remove_brackets(m[2])}}}, mem[{m[4]}]){sc} {m[6]}'
-        )
+        emit_instruction(
+            f'{fix_replicate_instruction(fix_instr_name(m[1]))}({{{remove_brackets(m[2])}}}, mem[{m[4]}]){sc} {m[6]}',
+            instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REGLIST_INDEX_MEMOP, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({{{m[2]}}}, mem[{m[3]}]{maybe_wb(m[4])}){sc} {m[5]}'
-      )
+      emit_instruction(
+          f'{fix_instr_name(m[1])}({{{m[2]}}}, mem[{m[3]}]{maybe_wb(m[4])}){sc} {m[5]}',
+          instructions, vector_register_map)
       continue
     m = re.fullmatch(P2ALIGN_RE, line)
     if m:
@@ -566,8 +646,9 @@ def parse_microkernel(lines : List[str], prfm : bool) -> Tuple[List[str], List[s
       continue
     m = re.fullmatch(INSTR_REG_REG_REG_COND_RE, line)
     if m:
-      instructions.append(
-          f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, {m[4]}, k{m[5]}){sc} {m[6]}')
+      emit_instruction(
+          f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, {m[4]}, k{m[5]}){sc} {m[6]}',
+          instructions, vector_register_map)
       continue
 
     # Keep empty lines for formatting
@@ -595,16 +676,23 @@ def emit_instructions_with_same_check(check : str, instrs : List[str], output : 
   """
   if not instrs:
     return
-  m = re.search(r'if \((\w+)\) \{', instrs[0])
-  check = m.group(1)
-  output.append(f'if ({check}) {{')
+  m = re.search(r'(\W*)if \(([^)]+)\) \{', instrs[0])
+  indent = ''
+  check = ''
+  if m:
+    indent = m[1]
+    check = m[2]
+  output.append(f'{indent}if ({check}) {{')
   for instr in instrs:
+    if instr.strip().startswith('//'):  # comment line
+      output.append(f'  {instr}')
+      continue
     # Each instruction is of the form "if (check) { instr(); }", we only want the instr,
     # so find the opening and closing brace, and only output what's in between.
     start = instr.index('{')
-    end = instr.index('}', start)
-    output.append(f'  {instr[start+1:end].strip()}')
-  output.append('}')
+    end = instr.rindex('}')
+    output.append(f'  {indent}{instr[start+1:end].strip()}')
+  output.append(f'{indent}}}')
 
 
 def merge_consecutive_checks(instructions : List[str]) -> List[str]:
@@ -636,7 +724,7 @@ def merge_consecutive_checks(instructions : List[str]) -> List[str]:
   # Holds the list of instructions that have the same check.
   instructions_with_same_check = []
   for instr in instructions:
-    m = re.search(r'if \((\w+)\) \{', instr)
+    m = re.search(r'if \(([^)]+)\) \{ .+', instr)
     if m:
       current_check = m.group(1)
       if (current_check == previous_check):
@@ -645,6 +733,9 @@ def merge_consecutive_checks(instructions : List[str]) -> List[str]:
         emit_instructions_with_same_check(previous_check, instructions_with_same_check, output)
         previous_check = current_check
         instructions_with_same_check = [instr]
+    elif re.fullmatch(r'\W*//.+', instr) and len(
+        instructions_with_same_check) != 0:  # purely comment line
+      instructions_with_same_check.append(instr)
     else:
       emit_instructions_with_same_check(previous_check, instructions_with_same_check, output)
       previous_check = None
@@ -706,9 +797,13 @@ def main(input_file : str) -> None:
   # Microkernel body does not include the BEGIN_FUNCION.
   microkernel_body = lines[begin_function_index + 1:]
 
-  prologue = parse_prologue(input_file, prologue_lines, arch, minmax,
-                            kernel_type, prfm, mr)
-  instructions, labels = parse_microkernel(microkernel_body, prfm)
+  prologue, vector_register_map = parse_prologue(input_file, prologue_lines,
+                                                 arch, minmax, kernel_type,
+                                                 prfm, mr)
+  instructions, labels = parse_microkernel(microkernel_body, prfm,
+                                           vector_register_map)
+  # TODO(zhin): iterate until fixpoint instead.
+  instructions = merge_consecutive_checks(instructions)
   instructions = merge_consecutive_checks(instructions)
 
   # Actually emit the JIT codegen (to stdout).
@@ -722,10 +817,13 @@ def main(input_file : str) -> None:
   print(f'  assert(kc % sizeof({ctype}) == 0);')
   print()
   print(f'  Label {labels_str};')
-  print()
   if minmax:
-    print('  // const bool clamp_min = min != -std::numeric_limits<float>::infinity();')
-    print('  // const bool clamp_max = max != +std::numeric_limits<float>::infinity();')
+    print(
+        '  const bool clamp_min = min != -std::numeric_limits<float>::infinity();'
+    )
+    print(
+        '  const bool clamp_max = max != +std::numeric_limits<float>::infinity();'
+    )
 
   indent = '  '
   for i in instructions:
@@ -741,8 +839,8 @@ def main(input_file : str) -> None:
 
   print('}')
   print('}  // namespace')
-  print(f'}}  // {arch}')
-  print('}  // xnnpack')
+  print(f'}}  // namespace {arch}')
+  print('}  // namespace xnnpack')
   print('')
   if prfm:
     print_generator_definition(kernel_type, remove_prfm_from_fn_name(fn_name), arch, minmax, prefetch='false, ')

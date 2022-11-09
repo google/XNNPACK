@@ -18,6 +18,7 @@ namespace aarch64 {
 namespace {
 class Generator : public MacroAssembler {
   using MacroAssembler::MacroAssembler;
+
  public:
   void generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, float min, float max);
 };
@@ -97,7 +98,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 2) {
     add(x10, x9, x4); // a2 = a1 + a_stride
     add(x17, x16, x7); // c2 = c1 + cm_stride
-                       // if mr <= 2
+    // if mr <= 2
     csel(x10, x9, x10, kLS); //   a2 = a1
     csel(x17, x16, x17, kLS); //   c2 = c1
   }
@@ -115,7 +116,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 4) {
     add(x12, x11, x4); // a4 = a3 + a_stride
     add(x13, x14, x7); // c4 = c3 + cm_stride
-                       // if mr <= 4
+    // if mr <= 4
     csel(x12, x11, x12, kLS); //   a4 = a3
     csel(x13, x14, x13, kLS); //   c4 = c3
   }
@@ -169,7 +170,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     mov(v26.v16b(), v20.v16b());
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x3]);  // Prefetch A
+    prfm(kPLDL1KEEP, mem[x3]); // Prefetch A
   }
   if (max_mr > 3) {
     mov(v27.v16b(), v21.v16b());
@@ -1352,8 +1353,8 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   align(16, AlignInstruction::kHlt);
 }
 }  // namespace
-}  // aarch64
-}  // xnnpack
+}  // namespace aarch64
+}  // namespace xnnpack
 
 xnn_status_t xnn_generate_f32_gemm_ukernel_upto6x8__aarch64_neonfma_cortex_a75(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params) {
   using namespace xnnpack::aarch64;
