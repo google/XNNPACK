@@ -688,6 +688,9 @@ class ConvolutionOperatorTester {
           &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
+        if (use_weights_cache()) {
+          xnn_release_weights_cache(&weights_cache);
+        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -901,6 +904,9 @@ class ConvolutionOperatorTester {
           &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
+        if (use_weights_cache()) {
+          xnn_release_weights_cache(&weights_cache);
+        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -1137,6 +1143,9 @@ class ConvolutionOperatorTester {
           &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
+        if (use_weights_cache()) {
+          xnn_release_weights_cache(&weights_cache);
+        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -1367,6 +1376,9 @@ class ConvolutionOperatorTester {
           &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
+        if (use_weights_cache()) {
+          xnn_release_weights_cache(&weights_cache);
+        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -1649,6 +1661,9 @@ class ConvolutionOperatorTester {
           &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
+        if (use_weights_cache()) {
+          xnn_release_weights_cache(&weights_cache);
+        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -1894,7 +1909,10 @@ class ConvolutionOperatorTester {
           (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (force_nhwc_input() ? XNN_FLAG_INPUT_NHWC : 0),
           &caches,
           &convolution_op);
-      if (status == xnn_status_unsupported_parameter) {
+      if (status == xnn_status_unsupported_hardware) {
+        if (use_weights_cache()) {
+          xnn_release_weights_cache(&weights_cache);
+        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
