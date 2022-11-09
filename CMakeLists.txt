@@ -455,20 +455,20 @@ SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
   src/xx-fill/xx-fill-scalar-x16.c
   src/xx-pad/xx-pad-scalar.c
   src/x8-transposec/gen/x8-transposec-2x4-scalar-int.c
-  src/x8-zip/xm-scalar.c
-  src/x8-zip/x2-scalar.c
-  src/x8-zip/x3-scalar.c
-  src/x8-zip/x4-scalar.c
+  src/x8-zip/x8-zip-xm-scalar.c
+  src/x8-zip/x8-zip-x2-scalar.c
+  src/x8-zip/x8-zip-x3-scalar.c
+  src/x8-zip/x8-zip-x4-scalar.c
   src/x16-transposec/gen/x16-transposec-2x4-scalar-int.c
-  src/x32-packx/x2-scalar.c
-  src/x32-packx/x3-scalar.c
-  src/x32-packx/x4-scalar.c
+  src/x32-packx/x32-packx-x2-scalar.c
+  src/x32-packx/x32-packx-x3-scalar.c
+  src/x32-packx/x32-packx-x4-scalar.c
   src/x32-transposec/gen/x32-transposec-2x4-scalar-int.c
-  src/x32-unpool/scalar.c
-  src/x32-zip/xm-scalar.c
-  src/x32-zip/x2-scalar.c
-  src/x32-zip/x3-scalar.c
-  src/x32-zip/x4-scalar.c)
+  src/x32-unpool/x32-unpool-scalar.c
+  src/x32-zip/x32-zip-xm-scalar.c
+  src/x32-zip/x32-zip-x2-scalar.c
+  src/x32-zip/x32-zip-x3-scalar.c
+  src/x32-zip/x32-zip-x4-scalar.c)
 
 SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-x4.c
@@ -605,30 +605,30 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/xx-fill/xx-fill-scalar-x16.c
   src/xx-pad/xx-pad-scalar.c
   src/x8-transposec/gen/x8-transposec-2x4-scalar-int.c
-  src/x8-zip/xm-scalar.c
-  src/x8-zip/x2-scalar.c
-  src/x8-zip/x3-scalar.c
-  src/x8-zip/x4-scalar.c
+  src/x8-zip/x8-zip-xm-scalar.c
+  src/x8-zip/x8-zip-x2-scalar.c
+  src/x8-zip/x8-zip-x3-scalar.c
+  src/x8-zip/x8-zip-x4-scalar.c
   src/x16-transposec/gen/x16-transposec-2x4-scalar-int.c
-  src/x32-packx/x2-scalar.c
-  src/x32-packx/x3-scalar.c
-  src/x32-packx/x4-scalar.c
+  src/x32-packx/x32-packx-x2-scalar.c
+  src/x32-packx/x32-packx-x3-scalar.c
+  src/x32-packx/x32-packx-x4-scalar.c
   src/x32-transposec/gen/x32-transposec-2x4-scalar-int.c
-  src/x32-unpool/scalar.c
-  src/x32-zip/xm-scalar.c
-  src/x32-zip/x2-scalar.c
-  src/x32-zip/x3-scalar.c
-  src/x32-zip/x4-scalar.c)
+  src/x32-unpool/x32-unpool-scalar.c
+  src/x32-zip/x32-zip-xm-scalar.c
+  src/x32-zip/x32-zip-x2-scalar.c
+  src/x32-zip/x32-zip-x3-scalar.c
+  src/x32-zip/x32-zip-x4-scalar.c)
 
 SET(ALL_SCALAR_MICROKERNEL_SRCS
-  src/cs16-bfly4/gen/scalar-x1.c
-  src/cs16-bfly4/gen/scalar-x2.c
-  src/cs16-bfly4/gen/scalar-x4.c
-  src/cs16-bfly4/samples1-scalar.c
-  src/cs16-bfly4/samples4-scalar.c
-  src/cs16-fftr/gen/scalar-x1.c
-  src/cs16-fftr/gen/scalar-x2.c
-  src/cs16-fftr/gen/scalar-x4.c
+  src/cs16-bfly4/gen/cs16-bfly4-scalar-x1.c
+  src/cs16-bfly4/gen/cs16-bfly4-scalar-x2.c
+  src/cs16-bfly4/gen/cs16-bfly4-scalar-x4.c
+  src/cs16-bfly4/cs16-bfly4-samples1-scalar.c
+  src/cs16-bfly4/cs16-bfly4-samples4-scalar.c
+  src/cs16-fftr/gen/cs16-fftr-scalar-x1.c
+  src/cs16-fftr/gen/cs16-fftr-scalar-x2.c
+  src/cs16-fftr/gen/cs16-fftr-scalar-x4.c
   src/cs16-vsquareabs/gen/cs16-vsquareabs-scalar-x1.c
   src/cs16-vsquareabs/gen/cs16-vsquareabs-scalar-x2.c
   src/cs16-vsquareabs/gen/cs16-vsquareabs-scalar-x3.c
@@ -1240,13 +1240,13 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qs8-igemm/gen/qs8-igemm-4x4-minmax-fp32-scalar-imagic.c
   src/qs8-igemm/gen/qs8-igemm-4x4-minmax-fp32-scalar-lrintf.c
   src/qs8-igemm/gen/qs8-igemm-4x4-minmax-rndnu-scalar.c
-  src/qs8-requantization/fp32-scalar-fmagic.c
-  src/qs8-requantization/fp32-scalar-lrintf.c
-  src/qs8-requantization/gemmlowp-scalar.c
-  src/qs8-requantization/rndna-scalar-signed64.c
-  src/qs8-requantization/rndna-scalar-unsigned32.c
-  src/qs8-requantization/rndna-scalar-unsigned64.c
-  src/qs8-requantization/rndnu-scalar.c
+  src/qs8-requantization/qs8-requantization-fp32-scalar-fmagic.c
+  src/qs8-requantization/qs8-requantization-fp32-scalar-lrintf.c
+  src/qs8-requantization/qs8-requantization-gemmlowp-scalar.c
+  src/qs8-requantization/qs8-requantization-rndna-scalar-signed64.c
+  src/qs8-requantization/qs8-requantization-rndna-scalar-unsigned32.c
+  src/qs8-requantization/qs8-requantization-rndna-scalar-unsigned64.c
+  src/qs8-requantization/qs8-requantization-rndnu-scalar.c
   src/qs8-vadd/gen/qs8-vadd-minmax-scalar-x1.c
   src/qs8-vadd/gen/qs8-vadd-minmax-scalar-x2.c
   src/qs8-vadd/gen/qs8-vadd-minmax-scalar-x4.c
@@ -1377,12 +1377,12 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-4x4-minmax-fp32-scalar-imagic.c
   src/qu8-igemm/gen/qu8-igemm-4x4-minmax-fp32-scalar-lrintf.c
   src/qu8-igemm/gen/qu8-igemm-4x4-minmax-rndnu-scalar.c
-  src/qu8-requantization/fp32-scalar-fmagic.c
-  src/qu8-requantization/fp32-scalar-lrintf.c
-  src/qu8-requantization/gemmlowp-scalar.c
-  src/qu8-requantization/rndna-scalar-signed64.c
-  src/qu8-requantization/rndna-scalar-unsigned32.c
-  src/qu8-requantization/rndna-scalar-unsigned64.c
+  src/qu8-requantization/qu8-requantization-fp32-scalar-fmagic.c
+  src/qu8-requantization/qu8-requantization-fp32-scalar-lrintf.c
+  src/qu8-requantization/qu8-requantization-gemmlowp-scalar.c
+  src/qu8-requantization/qu8-requantization-rndna-scalar-signed64.c
+  src/qu8-requantization/qu8-requantization-rndna-scalar-unsigned32.c
+  src/qu8-requantization/qu8-requantization-rndna-scalar-unsigned64.c
   src/qu8-vadd/gen/qu8-vadd-minmax-scalar-x1.c
   src/qu8-vadd/gen/qu8-vadd-minmax-scalar-x2.c
   src/qu8-vadd/gen/qu8-vadd-minmax-scalar-x4.c
@@ -1448,10 +1448,10 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x8-transposec/gen/x8-transposec-4x1-scalar-int.c
   src/x8-transposec/gen/x8-transposec-4x2-scalar-int.c
   src/x8-transposec/gen/x8-transposec-4x4-scalar-int.c
-  src/x8-zip/xm-scalar.c
-  src/x8-zip/x2-scalar.c
-  src/x8-zip/x3-scalar.c
-  src/x8-zip/x4-scalar.c
+  src/x8-zip/x8-zip-xm-scalar.c
+  src/x8-zip/x8-zip-x2-scalar.c
+  src/x8-zip/x8-zip-x3-scalar.c
+  src/x8-zip/x8-zip-x4-scalar.c
   src/x16-transposec/gen/x16-transposec-1x2-scalar-int.c
   src/x16-transposec/gen/x16-transposec-1x4-scalar-int.c
   src/x16-transposec/gen/x16-transposec-2x1-scalar-int.c
@@ -1468,9 +1468,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x24-transposec/gen/x24-transposec-4x1-scalar.c
   src/x24-transposec/gen/x24-transposec-4x2-scalar.c
   src/x24-transposec/gen/x24-transposec-4x4-scalar.c
-  src/x32-packx/x2-scalar.c
-  src/x32-packx/x3-scalar.c
-  src/x32-packx/x4-scalar.c
+  src/x32-packx/x32-packx-x2-scalar.c
+  src/x32-packx/x32-packx-x3-scalar.c
+  src/x32-packx/x32-packx-x4-scalar.c
   src/x32-transposec/gen/x32-transposec-1x2-scalar-float.c
   src/x32-transposec/gen/x32-transposec-1x2-scalar-int.c
   src/x32-transposec/gen/x32-transposec-1x4-scalar-float.c
@@ -1487,11 +1487,11 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x32-transposec/gen/x32-transposec-4x2-scalar-int.c
   src/x32-transposec/gen/x32-transposec-4x4-scalar-float.c
   src/x32-transposec/gen/x32-transposec-4x4-scalar-int.c
-  src/x32-unpool/scalar.c
-  src/x32-zip/xm-scalar.c
-  src/x32-zip/x2-scalar.c
-  src/x32-zip/x3-scalar.c
-  src/x32-zip/x4-scalar.c
+  src/x32-unpool/x32-unpool-scalar.c
+  src/x32-zip/x32-zip-xm-scalar.c
+  src/x32-zip/x32-zip-x2-scalar.c
+  src/x32-zip/x32-zip-x3-scalar.c
+  src/x32-zip/x32-zip-x4-scalar.c
   src/x64-transposec/gen/x64-transposec-1x2-scalar-float.c
   src/x64-transposec/gen/x64-transposec-1x2-scalar-int.c
   src/x64-transposec/gen/x64-transposec-2x1-scalar-float.c
@@ -1743,25 +1743,25 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/xx-fill/xx-fill-neon-x64.c
   src/xx-pad/xx-pad-neon.c
   src/x8-transposec/gen/x8-transposec-16x16-reuse-dec-zip-neon.c
-  src/x8-zip/xm-neon.c
-  src/x8-zip/x2-neon.c
-  src/x8-zip/x3-neon.c
-  src/x8-zip/x4-neon.c
+  src/x8-zip/x8-zip-xm-neon.c
+  src/x8-zip/x8-zip-x2-neon.c
+  src/x8-zip/x8-zip-x3-neon.c
+  src/x8-zip/x8-zip-x4-neon.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-dec-zip-neon.c
-  src/x32-packx/x4-neon-st4.c
+  src/x32-packx/x32-packx-x4-neon-st4.c
   src/x32-transposec/gen/x32-transposec-4x4-reuse-dec-zip-neon.c
-  src/x32-unpool/neon.c
-  src/x32-zip/xm-neon.c
-  src/x32-zip/x2-neon.c
-  src/x32-zip/x3-neon.c
-  src/x32-zip/x4-neon.c)
+  src/x32-unpool/x32-unpool-neon.c
+  src/x32-zip/x32-zip-xm-neon.c
+  src/x32-zip/x32-zip-x2-neon.c
+  src/x32-zip/x32-zip-x3-neon.c
+  src/x32-zip/x32-zip-x4-neon.c)
 
 SET(ALL_NEON_MICROKERNEL_SRCS
-  src/cs16-bfly4/neon-x1.c
-  src/cs16-bfly4/neon-x4.c
-  src/cs16-bfly4/samples1-neon.c
-  src/cs16-bfly4/samples4-neon.c
-  src/cs16-fftr/neon-x4.c
+  src/cs16-bfly4/cs16-bfly4-neon-x1.c
+  src/cs16-bfly4/cs16-bfly4-neon-x4.c
+  src/cs16-bfly4/cs16-bfly4-samples1-neon.c
+  src/cs16-bfly4/cs16-bfly4-samples4-neon.c
+  src/cs16-fftr/cs16-fftr-neon-x4.c
   src/cs16-vsquareabs/gen/cs16-vsquareabs-neon-mlal-ld128-x4.c
   src/cs16-vsquareabs/gen/cs16-vsquareabs-neon-mlal-ld128-x8.c
   src/cs16-vsquareabs/gen/cs16-vsquareabs-neon-mlal-ld128-x12.c
@@ -2658,11 +2658,11 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-igemm/gen/qs8-igemm-6x8-minmax-rndnu-neon-mlal-lane.c
   src/qs8-igemm/gen/qs8-igemm-6x16-minmax-rndnu-neon-mlal-lane-prfm.c
   src/qs8-igemm/gen/qs8-igemm-6x16-minmax-rndnu-neon-mlal-lane.c
-  src/qs8-requantization/fp32-neon.c
-  src/qs8-requantization/gemmlowp-neon.c
-  src/qs8-requantization/rndna-neon.c
-  src/qs8-requantization/rndnu-neon-mull.c
-  src/qs8-requantization/rndnu-neon-qdmulh.c
+  src/qs8-requantization/qs8-requantization-fp32-neon.c
+  src/qs8-requantization/qs8-requantization-gemmlowp-neon.c
+  src/qs8-requantization/qs8-requantization-rndna-neon.c
+  src/qs8-requantization/qs8-requantization-rndnu-neon-mull.c
+  src/qs8-requantization/qs8-requantization-rndnu-neon-qdmulh.c
   src/qs8-vadd/gen/qs8-vadd-minmax-neon-ld64-x8.c
   src/qs8-vadd/gen/qs8-vadd-minmax-neon-ld64-x16.c
   src/qs8-vadd/gen/qs8-vadd-minmax-neon-ld64-x24.c
@@ -2767,9 +2767,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-4x16-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/qu8-igemm-6x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/qu8-igemm-6x16-minmax-rndnu-neon-mlal-lane.c
-  src/qu8-requantization/fp32-neon.c
-  src/qu8-requantization/gemmlowp-neon.c
-  src/qu8-requantization/rndna-neon.c
+  src/qu8-requantization/qu8-requantization-fp32-neon.c
+  src/qu8-requantization/qu8-requantization-gemmlowp-neon.c
+  src/qu8-requantization/qu8-requantization-rndna-neon.c
   src/qu8-vadd/gen/qu8-vadd-minmax-neon-ld64-x8.c
   src/qu8-vadd/gen/qu8-vadd-minmax-neon-ld64-x16.c
   src/qu8-vadd/gen/qu8-vadd-minmax-neon-ld64-x32.c
@@ -2837,10 +2837,10 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x8-transposec/gen/x8-transposec-16x16-reuse-dec-zip-neon.c
   src/x8-transposec/gen/x8-transposec-16x16-reuse-mov-zip-neon.c
   src/x8-transposec/gen/x8-transposec-16x16-reuse-switch-zip-neon.c
-  src/x8-zip/xm-neon.c
-  src/x8-zip/x2-neon.c
-  src/x8-zip/x3-neon.c
-  src/x8-zip/x4-neon.c
+  src/x8-zip/x8-zip-xm-neon.c
+  src/x8-zip/x8-zip-x2-neon.c
+  src/x8-zip/x8-zip-x3-neon.c
+  src/x8-zip/x8-zip-x4-neon.c
   src/x16-transposec/gen/x16-transposec-4x4-multi-dec-zip-neon.c
   src/x16-transposec/gen/x16-transposec-4x4-multi-mov-zip-neon.c
   src/x16-transposec/gen/x16-transposec-4x4-multi-multi-zip-neon.c
@@ -2857,7 +2857,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x16-transposec/gen/x16-transposec-8x8-reuse-multi-zip-neon.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-switch-zip-neon.c
   src/x24-transposec/2x2-neon-tbl64.c
-  src/x32-packx/x4-neon-st4.c
+  src/x32-packx/x32-packx-x4-neon-st4.c
   src/x32-transposec/gen/x32-transposec-2x2-multi-dec-zip-neon.c
   src/x32-transposec/gen/x32-transposec-2x2-multi-mov-zip-neon.c
   src/x32-transposec/gen/x32-transposec-2x2-multi-multi-zip-neon.c
@@ -2874,11 +2874,11 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x32-transposec/gen/x32-transposec-4x4-reuse-mov-zip-neon.c
   src/x32-transposec/gen/x32-transposec-4x4-reuse-multi-zip-neon.c
   src/x32-transposec/gen/x32-transposec-4x4-reuse-switch-zip-neon.c
-  src/x32-unpool/neon.c
-  src/x32-zip/xm-neon.c
-  src/x32-zip/x2-neon.c
-  src/x32-zip/x3-neon.c
-  src/x32-zip/x4-neon.c)
+  src/x32-unpool/x32-unpool-neon.c
+  src/x32-zip/x32-zip-xm-neon.c
+  src/x32-zip/x32-zip-x2-neon.c
+  src/x32-zip/x32-zip-x3-neon.c
+  src/x32-zip/x32-zip-x4-neon.c)
 
 SET(PROD_NEONFP16_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neonfp16-x16.c
@@ -4034,7 +4034,7 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-vunary/gen/f32-vabs-sse-x8.c
   src/f32-vunary/gen/f32-vneg-sse-x8.c
   src/f32-vunary/gen/f32-vsqr-sse-x8.c
-  src/x32-packx/x4-sse.c
+  src/x32-packx/x32-packx-x4-sse.c
   src/x32-transposec/4x4-sse.c)
 
 SET(ALL_SSE_MICROKERNEL_SRCS
@@ -4212,7 +4212,7 @@ SET(ALL_SSE_MICROKERNEL_SRCS
   src/math/sqrt-f32-sse-hh1mac.c
   src/math/sqrt-f32-sse-nr1mac.c
   src/math/sqrt-f32-sse-nr2mac.c
-  src/x32-packx/x4-sse.c
+  src/x32-packx/x32-packx-x4-sse.c
   src/x32-transposec/4x4-sse.c)
 
 SET(PROD_SSE2_MICROKERNEL_SRCS
@@ -4283,16 +4283,16 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/xx-fill/xx-fill-sse2-x64.c
   src/xx-pad/xx-pad-sse2.c
   src/x8-transposec/gen/x8-transposec-16x16-reuse-mov-sse2.c
-  src/x8-zip/xm-sse2.c
-  src/x8-zip/x2-sse2.c
-  src/x8-zip/x3-sse2.c
-  src/x8-zip/x4-sse2.c
+  src/x8-zip/x8-zip-xm-sse2.c
+  src/x8-zip/x8-zip-x2-sse2.c
+  src/x8-zip/x8-zip-x3-sse2.c
+  src/x8-zip/x8-zip-x4-sse2.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-multi-sse2.c
-  src/x32-unpool/sse2.c
-  src/x32-zip/xm-sse2.c
-  src/x32-zip/x2-sse2.c
-  src/x32-zip/x3-sse2.c
-  src/x32-zip/x4-sse2.c)
+  src/x32-unpool/x32-unpool-sse2.c
+  src/x32-zip/x32-zip-xm-sse2.c
+  src/x32-zip/x32-zip-x2-sse2.c
+  src/x32-zip/x32-zip-x3-sse2.c
+  src/x32-zip/x32-zip-x4-sse2.c)
 
 SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-sse2-int16-x8.c
@@ -4530,9 +4530,9 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qs8-igemm/gen/qs8-igemm-4x4c2-minmax-fp32-sse2-ld128.c
   src/qs8-igemm/gen/qs8-igemm-4x4c2s4-minmax-fp32-sse2-ld64.c
   src/qs8-igemm/gen/qs8-igemm-4x4c2s4-minmax-fp32-sse2-ld128.c
-  src/qs8-requantization/fp32-sse2.c
-  src/qs8-requantization/gemmlowp-sse2.c
-  src/qs8-requantization/rndna-sse2.c
+  src/qs8-requantization/qs8-requantization-fp32-sse2.c
+  src/qs8-requantization/qs8-requantization-gemmlowp-sse2.c
+  src/qs8-requantization/qs8-requantization-rndna-sse2.c
   src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-x8.c
   src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-x16.c
   src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-x24.c
@@ -4609,9 +4609,9 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-4x4c2-minmax-fp32-sse2-ld128.c
   src/qu8-igemm/gen/qu8-igemm-4x4c2s4-minmax-fp32-sse2-ld64.c
   src/qu8-igemm/gen/qu8-igemm-4x4c2s4-minmax-fp32-sse2-ld128.c
-  src/qu8-requantization/fp32-sse2.c
-  src/qu8-requantization/gemmlowp-sse2.c
-  src/qu8-requantization/rndna-sse2.c
+  src/qu8-requantization/qu8-requantization-fp32-sse2.c
+  src/qu8-requantization/qu8-requantization-gemmlowp-sse2.c
+  src/qu8-requantization/qu8-requantization-rndna-sse2.c
   src/qu8-vadd/gen/qu8-vadd-minmax-sse2-mul16-ld64-x8.c
   src/qu8-vadd/gen/qu8-vadd-minmax-sse2-mul16-ld64-x16.c
   src/qu8-vaddc/gen/qu8-vaddc-minmax-sse2-mul16-ld64-x8.c
@@ -4637,10 +4637,10 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/xx-pad/xx-pad-sse2.c
   src/x8-transposec/gen/x8-transposec-16x16-reuse-mov-sse2.c
   src/x8-transposec/gen/x8-transposec-16x16-reuse-switch-sse2.c
-  src/x8-zip/xm-sse2.c
-  src/x8-zip/x2-sse2.c
-  src/x8-zip/x3-sse2.c
-  src/x8-zip/x4-sse2.c
+  src/x8-zip/x8-zip-xm-sse2.c
+  src/x8-zip/x8-zip-x2-sse2.c
+  src/x8-zip/x8-zip-x3-sse2.c
+  src/x8-zip/x8-zip-x4-sse2.c
   src/x16-transposec/gen/x16-transposec-8x8-multi-mov-sse2.c
   src/x16-transposec/gen/x16-transposec-8x8-multi-switch-sse2.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-mov-sse2.c
@@ -4653,11 +4653,11 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/x32-transposec/gen/x32-transposec-4x4-reuse-mov-sse2.c
   src/x32-transposec/gen/x32-transposec-4x4-reuse-multi-sse2.c
   src/x32-transposec/gen/x32-transposec-4x4-reuse-switch-sse2.c
-  src/x32-unpool/sse2.c
-  src/x32-zip/xm-sse2.c
-  src/x32-zip/x2-sse2.c
-  src/x32-zip/x3-sse2.c
-  src/x32-zip/x4-sse2.c
+  src/x32-unpool/x32-unpool-sse2.c
+  src/x32-zip/x32-zip-xm-sse2.c
+  src/x32-zip/x32-zip-x2-sse2.c
+  src/x32-zip/x32-zip-x3-sse2.c
+  src/x32-zip/x32-zip-x4-sse2.c
   src/x64-transposec/gen/x64-transposec-2x2-multi-mov-sse2.c
   src/x64-transposec/gen/x64-transposec-2x2-multi-multi-sse2.c
   src/x64-transposec/gen/x64-transposec-2x2-multi-switch-sse2.c
@@ -4698,14 +4698,14 @@ SET(ALL_SSSE3_MICROKERNEL_SRCS
   src/qs8-igemm/gen/qs8-igemm-2x4c8-minmax-fp32-ssse3-ld128.c
   src/qs8-igemm/gen/qs8-igemm-3x4c8-minmax-fp32-ssse3-ld64.c
   src/qs8-igemm/gen/qs8-igemm-3x4c8-minmax-fp32-ssse3-ld128.c
-  src/qs8-requantization/gemmlowp-ssse3.c
-  src/qs8-requantization/rndna-ssse3.c
+  src/qs8-requantization/qs8-requantization-gemmlowp-ssse3.c
+  src/qs8-requantization/qs8-requantization-rndna-ssse3.c
   src/qs8-vcvt/gen/qs8-vcvt-ssse3-x16.c
   src/qs8-vcvt/gen/qs8-vcvt-ssse3-x32.c
   src/qs8-vlrelu/gen/qs8-vlrelu-ssse3-x16.c
   src/qs8-vlrelu/gen/qs8-vlrelu-ssse3-x32.c
-  src/qu8-requantization/gemmlowp-ssse3.c
-  src/qu8-requantization/rndna-ssse3.c
+  src/qu8-requantization/qu8-requantization-gemmlowp-ssse3.c
+  src/qu8-requantization/qu8-requantization-rndna-ssse3.c
   src/qu8-vcvt/gen/qu8-vcvt-ssse3-x16.c
   src/qu8-vcvt/gen/qu8-vcvt-ssse3-x32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-ssse3-x16.c
@@ -4969,11 +4969,11 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qs8-igemm/gen/qs8-igemm-4x4c2-minmax-fp32-sse41-ld128.c
   src/qs8-igemm/gen/qs8-igemm-4x4c2s4-minmax-fp32-sse41-ld64.c
   src/qs8-igemm/gen/qs8-igemm-4x4c2s4-minmax-fp32-sse41-ld128.c
-  src/qs8-requantization/fp32-sse4.c
-  src/qs8-requantization/gemmlowp-sse4.c
-  src/qs8-requantization/rndna-sse4.c
-  src/qs8-requantization/rndnu-sse4-sra.c
-  src/qs8-requantization/rndnu-sse4-srl.c
+  src/qs8-requantization/qs8-requantization-fp32-sse4.c
+  src/qs8-requantization/qs8-requantization-gemmlowp-sse4.c
+  src/qs8-requantization/qs8-requantization-rndna-sse4.c
+  src/qs8-requantization/qs8-requantization-rndnu-sse4-sra.c
+  src/qs8-requantization/qs8-requantization-rndnu-sse4-srl.c
   src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-x8.c
   src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-x16.c
   src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-x24.c
@@ -5062,8 +5062,8 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-4x4c2-minmax-fp32-sse41-ld128.c
   src/qu8-igemm/gen/qu8-igemm-4x4c2s4-minmax-fp32-sse41-ld64.c
   src/qu8-igemm/gen/qu8-igemm-4x4c2s4-minmax-fp32-sse41-ld128.c
-  src/qu8-requantization/gemmlowp-sse4.c
-  src/qu8-requantization/rndna-sse4.c
+  src/qu8-requantization/qu8-requantization-gemmlowp-sse4.c
+  src/qu8-requantization/qu8-requantization-rndna-sse4.c
   src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul16-ld64-x8.c
   src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul16-ld64-x16.c
   src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul32-ld32-x8.c
@@ -6821,11 +6821,11 @@ SET(ALL_AVX512VBMI_MICROKERNEL_SRCS
   src/x8-lut/gen/x8-lut-avx512vbmi-vpermx2b-x256.c)
 
 SET(AARCH32_ASM_MICROKERNEL_SRCS
-  src/cs16-bfly4/samples1-aarch32-neon-x1.S
-  src/cs16-bfly4/samples1-aarch32-neon-x2.S
-  src/cs16-bfly4/samples1-aarch32-neon-x4.S
-  src/cs16-fftr/aarch32-neon-x1.S
-  src/cs16-fftr/aarch32-neon-x4.S
+  src/cs16-bfly4/cs16-bfly4-samples1-aarch32-neon-x1.S
+  src/cs16-bfly4/cs16-bfly4-samples1-aarch32-neon-x2.S
+  src/cs16-bfly4/cs16-bfly4-samples1-aarch32-neon-x4.S
+  src/cs16-fftr/cs16-fftr-aarch32-neon-x1.S
+  src/cs16-fftr/cs16-fftr-aarch32-neon-x4.S
   src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-cortex-a7.S
   src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-cortex-a53.S
   src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-cortex-a75.S
