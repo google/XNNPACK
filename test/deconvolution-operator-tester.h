@@ -973,6 +973,9 @@ class DeconvolutionOperatorTester {
         output_min, output_max,
         flags, &caches, &deconvolution_op);
       if (status == xnn_status_unsupported_hardware) {
+        if (use_weights_cache()) {
+          xnn_release_weights_cache(&weights_cache);
+        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);

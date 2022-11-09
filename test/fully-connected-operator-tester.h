@@ -251,6 +251,9 @@ class FullyConnectedOperatorTester {
           &caches,
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
+        if (use_weights_cache()) {
+          xnn_release_weights_cache(&weights_cache);
+        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -429,6 +432,9 @@ class FullyConnectedOperatorTester {
           &caches,
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
+        if (use_weights_cache()) {
+          xnn_release_weights_cache(&weights_cache);
+        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -593,6 +599,9 @@ class FullyConnectedOperatorTester {
           &caches,
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
+        if (use_weights_cache()) {
+          xnn_release_weights_cache(&weights_cache);
+        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -778,6 +787,9 @@ class FullyConnectedOperatorTester {
           &caches,
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
+        if (use_weights_cache()) {
+          xnn_release_weights_cache(&weights_cache);
+        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -813,6 +825,7 @@ class FullyConnectedOperatorTester {
                       has_bias() ? bias_data : nullptr, output_min, output_max,
                       flags, &caches, &fully_connected_op2));
         if (status == xnn_status_unsupported_hardware) {
+          xnn_release_weights_cache(&weights_cache);
           GTEST_SKIP();
         }
         ASSERT_EQ(xnn_status_success, status);
