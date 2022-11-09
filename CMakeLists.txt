@@ -329,9 +329,9 @@ SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
   src/f32-argmaxpool/f32-argmaxpool-9x-scalar-c1.c
   src/f32-avgpool/f32-avgpool-9p8x-minmax-scalar-c1.c
   src/f32-avgpool/f32-avgpool-9x-minmax-scalar-c1.c
-  src/f32-conv-hwc/3x3s2p0p1c3x4-scalar-1x1.c
-  src/f32-conv-hwc/3x3s2p1c3x4-scalar-1x1.c
-  src/f32-conv-hwc2chw/3x3s2p1c3x4-scalar-1x1.c
+  src/f32-conv-hwc/f32-conv-hwc-3x3s2p0p1c3x4-scalar-1x1.c
+  src/f32-conv-hwc/f32-conv-hwc-3x3s2p1c3x4-scalar-1x1.c
+  src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-scalar-1x1.c
   src/f32-dwconv/gen/f32-dwconv-up1x3-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-up1x3-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-up1x4-minmax-scalar-acc2.c
@@ -446,10 +446,10 @@ SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-scalar-x4.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-scalar-x4.c
   src/s8-ibilinear/gen/s8-ibilinear-scalar-c1.c
-  src/s8-maxpool/9p8x-minmax-scalar-c1.c
+  src/s8-maxpool/s8-maxpool-9p8x-minmax-scalar-c1.c
   src/s8-vclamp/s8-vclamp-scalar-x4.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c1.c
-  src/u8-maxpool/9p8x-minmax-scalar-c1.c
+  src/u8-maxpool/u8-maxpool-9p8x-minmax-scalar-c1.c
   src/u8-rmax/u8-rmax-scalar.c
   src/u8-vclamp/u8-vclamp-scalar-x4.c
   src/xx-fill/xx-fill-scalar-x16.c
@@ -477,9 +477,9 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/f32-argmaxpool/f32-argmaxpool-9x-scalar-c1.c
   src/f32-avgpool/f32-avgpool-9p8x-minmax-scalar-c1.c
   src/f32-avgpool/f32-avgpool-9x-minmax-scalar-c1.c
-  src/f32-conv-hwc/3x3s2p0p1c3x4-scalar-1x1.c
-  src/f32-conv-hwc/3x3s2p1c3x4-scalar-1x1.c
-  src/f32-conv-hwc2chw/3x3s2p1c3x4-scalar-1x1.c
+  src/f32-conv-hwc/f32-conv-hwc-3x3s2p0p1c3x4-scalar-1x1.c
+  src/f32-conv-hwc/f32-conv-hwc-3x3s2p1c3x4-scalar-1x1.c
+  src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-scalar-1x1.c
   src/f32-dwconv/gen/f32-dwconv-up1x3-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-up1x3-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-up1x4-minmax-scalar-acc2.c
@@ -596,10 +596,10 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-scalar-x4.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-scalar-x4.c
   src/s8-ibilinear/gen/s8-ibilinear-scalar-c1.c
-  src/s8-maxpool/9p8x-minmax-scalar-c1.c
+  src/s8-maxpool/s8-maxpool-9p8x-minmax-scalar-c1.c
   src/s8-vclamp/s8-vclamp-scalar-x4.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c1.c
-  src/u8-maxpool/9p8x-minmax-scalar-c1.c
+  src/u8-maxpool/u8-maxpool-9p8x-minmax-scalar-c1.c
   src/u8-rmax/u8-rmax-scalar.c
   src/u8-vclamp/u8-vclamp-scalar-x4.c
   src/xx-fill/xx-fill-scalar-x16.c
@@ -642,9 +642,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-argmaxpool/f32-argmaxpool-9x-scalar-c1.c
   src/f32-avgpool/f32-avgpool-9p8x-minmax-scalar-c1.c
   src/f32-avgpool/f32-avgpool-9x-minmax-scalar-c1.c
-  src/f32-conv-hwc/3x3s2p0p1c3x4-scalar-1x1.c
-  src/f32-conv-hwc/3x3s2p1c3x4-scalar-1x1.c
-  src/f32-conv-hwc2chw/3x3s2p1c3x4-scalar-1x1.c
+  src/f32-conv-hwc/f32-conv-hwc-3x3s2p0p1c3x4-scalar-1x1.c
+  src/f32-conv-hwc/f32-conv-hwc-3x3s2p1c3x4-scalar-1x1.c
+  src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-scalar-1x1.c
   src/f32-dwconv/gen/f32-dwconv-up1x3-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-up1x3-minmax-scalar.c
   src/f32-dwconv/gen/f32-dwconv-up1x3-scalar-acc2.c
@@ -1407,7 +1407,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/s8-ibilinear/gen/s8-ibilinear-scalar-c1.c
   src/s8-ibilinear/gen/s8-ibilinear-scalar-c2.c
   src/s8-ibilinear/gen/s8-ibilinear-scalar-c4.c
-  src/s8-maxpool/9p8x-minmax-scalar-c1.c
+  src/s8-maxpool/s8-maxpool-9p8x-minmax-scalar-c1.c
   src/s8-vclamp/s8-vclamp-scalar-x4.c
   src/s16-rmaxabs/gen/s16-rmaxabs-scalar-x1.c
   src/s16-rmaxabs/gen/s16-rmaxabs-scalar-x2.c
@@ -1421,7 +1421,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c2.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c4.c
   src/u8-lut32norm/u8-lut32norm-scalar.c
-  src/u8-maxpool/9p8x-minmax-scalar-c1.c
+  src/u8-maxpool/u8-maxpool-9p8x-minmax-scalar-c1.c
   src/u8-rmax/u8-rmax-scalar.c
   src/u8-vclamp/u8-vclamp-scalar-x4.c
   src/u32-filterbank-accumulate/gen/u32-filterbank-accumulate-scalar-x1.c
@@ -1620,7 +1620,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-argmaxpool/f32-argmaxpool-9x-neon-c4.c
   src/f32-avgpool/f32-avgpool-9p8x-minmax-neon-c4.c
   src/f32-avgpool/f32-avgpool-9x-minmax-neon-c4.c
-  src/f32-conv-hwc2chw/3x3s2p1c3x4-neon-2x2.c
+  src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-neon-2x2.c
   src/f32-dwconv/gen/f32-dwconv-up8x3-minmax-neon.c
   src/f32-dwconv/gen/f32-dwconv-up8x4-minmax-neon.c
   src/f32-dwconv/gen/f32-dwconv-up8x9-minmax-neon.c
@@ -1733,11 +1733,11 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/qu8-vmulc-minmax-rndnu-neon-ld64-x16.c
   src/s8-ibilinear/gen/s8-ibilinear-neon-c8.c
   src/s8-ibilinear/gen/s8-ibilinear-neon-c16.c
-  src/s8-maxpool/9p8x-minmax-neon-c16.c
+  src/s8-maxpool/s8-maxpool-9p8x-minmax-neon-c16.c
   src/s8-vclamp/s8-vclamp-neon-x64.c
   src/u8-ibilinear/gen/u8-ibilinear-neon-c8.c
   src/u8-ibilinear/gen/u8-ibilinear-neon-c16.c
-  src/u8-maxpool/9p8x-minmax-neon-c16.c
+  src/u8-maxpool/u8-maxpool-9p8x-minmax-neon-c16.c
   src/u8-rmax/u8-rmax-neon.c
   src/u8-vclamp/u8-vclamp-neon-x64.c
   src/xx-fill/xx-fill-neon-x64.c
@@ -1779,15 +1779,15 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-argmaxpool/f32-argmaxpool-9x-neon-c4.c
   src/f32-avgpool/f32-avgpool-9p8x-minmax-neon-c4.c
   src/f32-avgpool/f32-avgpool-9x-minmax-neon-c4.c
-  src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neon-2x1.c
-  src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neon-2x2.c
-  src/f32-conv-hwc/gen/3x3s2p0p1c3x8-neon-2x1.c
-  src/f32-conv-hwc/gen/3x3s2p0p1c3x8-neon-2x2.c
-  src/f32-conv-hwc/gen/3x3s2p1c3x4-neon-2x1.c
-  src/f32-conv-hwc/gen/3x3s2p1c3x4-neon-2x2.c
-  src/f32-conv-hwc/gen/3x3s2p1c3x8-neon-2x1.c
-  src/f32-conv-hwc/gen/3x3s2p1c3x8-neon-2x2.c
-  src/f32-conv-hwc2chw/3x3s2p1c3x4-neon-2x2.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x4-neon-2x1.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x4-neon-2x2.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x8-neon-2x1.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x8-neon-2x2.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p1c3x4-neon-2x1.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p1c3x4-neon-2x2.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p1c3x8-neon-2x1.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p1c3x8-neon-2x2.c
+  src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-neon-2x2.c
   src/f32-dwconv/gen/f32-dwconv-up4x3-minmax-neon-acc2.c
   src/f32-dwconv/gen/f32-dwconv-up4x3-minmax-neon.c
   src/f32-dwconv/gen/f32-dwconv-up4x4-minmax-neon-acc2.c
@@ -2798,9 +2798,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/qu8-vmulc-minmax-rndnu-neon-ld128-x16.c
   src/s8-ibilinear/gen/s8-ibilinear-neon-c8.c
   src/s8-ibilinear/gen/s8-ibilinear-neon-c16.c
-  src/s8-maxpool/2p2x-minmax-neon-c16.c
-  src/s8-maxpool/4p3x-minmax-neon-c16.c
-  src/s8-maxpool/9p8x-minmax-neon-c16.c
+  src/s8-maxpool/s8-maxpool-2p2x-minmax-neon-c16.c
+  src/s8-maxpool/s8-maxpool-4p3x-minmax-neon-c16.c
+  src/s8-maxpool/s8-maxpool-9p8x-minmax-neon-c16.c
   src/s8-vclamp/s8-vclamp-neon-x64.c
   src/s16-rmaxabs/gen/s16-rmaxabs-neon-x8.c
   src/s16-rmaxabs/gen/s16-rmaxabs-neon-x16.c
@@ -2820,7 +2820,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/s16-window/gen/s16-window-shift15-neon-x32.c
   src/u8-ibilinear/gen/u8-ibilinear-neon-c8.c
   src/u8-ibilinear/gen/u8-ibilinear-neon-c16.c
-  src/u8-maxpool/9p8x-minmax-neon-c16.c
+  src/u8-maxpool/u8-maxpool-9p8x-minmax-neon-c16.c
   src/u8-rmax/u8-rmax-neon.c
   src/u8-vclamp/u8-vclamp-neon-x64.c
   src/u32-filterbank-accumulate/gen/u32-filterbank-accumulate-neon-x1.c
@@ -3139,7 +3139,7 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/math/sqrt-f32-neonfma-nr3fma.c)
 
 SET(PROD_AARCH64_NEON_MICROKERNEL_SRCS
-  src/f32-conv-hwc2chw/3x3s2p1c3x4-neonfma-2x2.c
+  src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-neonfma-2x2.c
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-neonfma-3x4.c
   src/f32-dwconv2d-chw/gen/3x3s2p1-minmax-neonfma-2x4-acc2.c
   src/f32-dwconv2d-chw/gen/5x5p2-minmax-neonfma-4x4.c
@@ -3167,15 +3167,15 @@ SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
   src/bf16-gemm/gen/bf16-gemm-3x4c8-minmax-neonfma-zip.c
   src/bf16-gemm/gen/bf16-gemm-4x4c8-minmax-neonfma-zip.c
   src/bf16-gemm/gen/bf16-gemm-5x4c8-minmax-neonfma-zip.c
-  src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neonfma-2x1.c
-  src/f32-conv-hwc/gen/3x3s2p0p1c3x4-neonfma-2x2.c
-  src/f32-conv-hwc/gen/3x3s2p0p1c3x8-neonfma-2x1.c
-  src/f32-conv-hwc/gen/3x3s2p0p1c3x8-neonfma-2x2.c
-  src/f32-conv-hwc/gen/3x3s2p1c3x4-neonfma-2x1.c
-  src/f32-conv-hwc/gen/3x3s2p1c3x4-neonfma-2x2.c
-  src/f32-conv-hwc/gen/3x3s2p1c3x8-neonfma-2x1.c
-  src/f32-conv-hwc/gen/3x3s2p1c3x8-neonfma-2x2.c
-  src/f32-conv-hwc2chw/3x3s2p1c3x4-neonfma-2x2.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x4-neonfma-2x1.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x4-neonfma-2x2.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x8-neonfma-2x1.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x8-neonfma-2x2.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p1c3x4-neonfma-2x1.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p1c3x4-neonfma-2x2.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p1c3x8-neonfma-2x1.c
+  src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p1c3x8-neonfma-2x2.c
+  src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-neonfma-2x2.c
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-neonfma-1x4-acc2.c
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-neonfma-1x4-acc3.c
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-neonfma-1x4-acc4.c
@@ -3985,7 +3985,7 @@ SET(ALL_HEXAGON_MICROKERNEL_SRCS
 SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/f32-avgpool-9p8x-minmax-sse-c4.c
   src/f32-avgpool/f32-avgpool-9x-minmax-sse-c4.c
-  src/f32-conv-hwc2chw/3x3s2p1c3x4-sse-2x2.c
+  src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-sse-2x2.c
   src/f32-dwconv/gen/f32-dwconv-up8x3-minmax-sse.c
   src/f32-dwconv/gen/f32-dwconv-up8x4-minmax-sse.c
   src/f32-dwconv/gen/f32-dwconv-up8x9-minmax-sse.c
@@ -4040,8 +4040,8 @@ SET(PROD_SSE_MICROKERNEL_SRCS
 SET(ALL_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/f32-avgpool-9p8x-minmax-sse-c4.c
   src/f32-avgpool/f32-avgpool-9x-minmax-sse-c4.c
-  src/f32-conv-hwc2chw/3x3s2p1c3x4-sse-1x1.c
-  src/f32-conv-hwc2chw/3x3s2p1c3x4-sse-2x2.c
+  src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-sse-1x1.c
+  src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-sse-2x2.c
   src/f32-dwconv/gen/f32-dwconv-up4x3-minmax-sse-acc2.c
   src/f32-dwconv/gen/f32-dwconv-up4x3-minmax-sse.c
   src/f32-dwconv/gen/f32-dwconv-up4x4-minmax-sse-acc2.c
@@ -4274,10 +4274,10 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse2-mul16-ld64-x8.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse2-mul16-ld64-x8.c
   src/s8-ibilinear/gen/s8-ibilinear-sse2-c8.c
-  src/s8-maxpool/9p8x-minmax-sse2-c16.c
+  src/s8-maxpool/s8-maxpool-9p8x-minmax-sse2-c16.c
   src/s8-vclamp/s8-vclamp-sse2-x64.c
   src/u8-ibilinear/gen/u8-ibilinear-sse2-c8.c
-  src/u8-maxpool/9p8x-minmax-sse2-c16.c
+  src/u8-maxpool/u8-maxpool-9p8x-minmax-sse2-c16.c
   src/u8-rmax/u8-rmax-sse2.c
   src/u8-vclamp/u8-vclamp-sse2-x64.c
   src/xx-fill/xx-fill-sse2-x64.c
@@ -4626,11 +4626,11 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse2-mul16-ld64-x16.c
   src/s8-ibilinear/gen/s8-ibilinear-sse2-c8.c
   src/s8-ibilinear/gen/s8-ibilinear-sse2-c16.c
-  src/s8-maxpool/9p8x-minmax-sse2-c16.c
+  src/s8-maxpool/s8-maxpool-9p8x-minmax-sse2-c16.c
   src/s8-vclamp/s8-vclamp-sse2-x64.c
   src/u8-ibilinear/gen/u8-ibilinear-sse2-c8.c
   src/u8-ibilinear/gen/u8-ibilinear-sse2-c16.c
-  src/u8-maxpool/9p8x-minmax-sse2-c16.c
+  src/u8-maxpool/u8-maxpool-9p8x-minmax-sse2-c16.c
   src/u8-rmax/u8-rmax-sse2.c
   src/u8-vclamp/u8-vclamp-sse2-x64.c
   src/xx-fill/xx-fill-sse2-x64.c
@@ -4763,7 +4763,7 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse41-mul16-ld64-x16.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse41-mul16-ld64-x16.c
   src/s8-ibilinear/gen/s8-ibilinear-sse41-c16.c
-  src/s8-maxpool/9p8x-minmax-sse41-c16.c
+  src/s8-maxpool/s8-maxpool-9p8x-minmax-sse41-c16.c
   src/s8-vclamp/s8-vclamp-sse41-x64.c
   src/u8-ibilinear/gen/u8-ibilinear-sse41-c16.c)
 
@@ -5084,7 +5084,7 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse41-mul16-ld64-x16.c
   src/s8-ibilinear/gen/s8-ibilinear-sse41-c8.c
   src/s8-ibilinear/gen/s8-ibilinear-sse41-c16.c
-  src/s8-maxpool/9p8x-minmax-sse41-c16.c
+  src/s8-maxpool/s8-maxpool-9p8x-minmax-sse41-c16.c
   src/s8-vclamp/s8-vclamp-sse41-x64.c
   src/u8-ibilinear/gen/u8-ibilinear-sse41-c8.c
   src/u8-ibilinear/gen/u8-ibilinear-sse41-c16.c)
