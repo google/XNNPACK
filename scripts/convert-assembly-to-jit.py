@@ -183,7 +183,8 @@ def fix_regs(regs : str) -> str:
 
 
 def get_callee_saved() -> List[str]:
-  return ['d8', 'd9', 'd10', 'd11', 'd12', 'd13', 'd14', 'd15']
+  return ['d8', 'd9', 'd10', 'd11', 'd12', 'd13', 'd14', 'd15',
+          'x19', 'x20', 'x21', 'x22']
 
 
 IGNORE_LINES = [r'\s*\.\w+']
@@ -227,8 +228,9 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
         prologue.append('{')
       else:
         prologue.append(
-            f'void Generator::generate({prefetch}size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, {params}) {{'
+            f'void Generator::generate({prefetch}size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, {params})'
         )
+        prologue.append('{')
       continue
     elif 'Copyright ' in line:
       in_autogen = False
@@ -723,6 +725,17 @@ def merge_consecutive_checks(instructions : List[str]) -> List[str]:
   output = []
   # Holds the list of instructions that have the same check.
   instructions_with_same_check = []
+  # cases we consider:
+  # 1. Same check
+  #     if (checkA) {}
+  #     if (checkA) {}
+  # 2. Different check
+  #     if (checkA) {}
+  #     if (checkB) {}
+  # 3. Comment line
+  #     // comment
+  # 4. Everything else
+  #     instruction
   for instr in instructions:
     m = re.search(r'if \(([^)]+)\) \{ .+', instr)
     if m:
@@ -730,9 +743,17 @@ def merge_consecutive_checks(instructions : List[str]) -> List[str]:
       if (current_check == previous_check):
         instructions_with_same_check.append(instr)
       else:
+        # Special case if the previous line is a comment.
+        comment = ''
+        if output and output[-1].strip().startswith('//'):
+          comment = output.pop()
         emit_instructions_with_same_check(previous_check, instructions_with_same_check, output)
         previous_check = current_check
         instructions_with_same_check = [instr]
+        if comment:
+          # Need to wrap comment with this check so that we can merge the checks correctly, this is not valid C code due
+          # to the // comment, but we will remove that.
+          instructions_with_same_check.insert(0, f'if ({current_check}) {{ {comment} }}')
     elif re.fullmatch(r'\W*//.+', instr) and len(
         instructions_with_same_check) != 0:  # purely comment line
       instructions_with_same_check.append(instr)
@@ -815,6 +836,8 @@ def main(input_file : str) -> None:
   print(f'  assert(nc_mod_nr < {nr});')
   print('  assert(kc != 0);')
   print(f'  assert(kc % sizeof({ctype}) == 0);')
+  if kernel_type == IGEMM:
+    print('  assert(ks != 0);')
   print()
   print(f'  Label {labels_str};')
   if minmax:

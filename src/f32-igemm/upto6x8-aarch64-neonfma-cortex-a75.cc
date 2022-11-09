@@ -11,7 +11,7 @@
 #include <xnnpack/aarch64-assembler.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/memory.h>
-
+#include <xnnpack/microparams.h>
 
 namespace xnnpack {
 namespace aarch64 {
@@ -19,7 +19,7 @@ namespace {
 class Generator : public MacroAssembler {
   using MacroAssembler::MacroAssembler;
 
-public:
+ public:
   void generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, float min, float max);
 };
 
@@ -72,7 +72,7 @@ public:
 // C   v30 v31
 // Clamp v6 v7
 
-// Converted from: src/f32-igemm/gen/6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
+// Converted from: src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
 void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, float min, float max)
 {
   assert(max_mr <= 6);
@@ -86,49 +86,55 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   const bool clamp_max = max != +std::numeric_limits<float>::infinity();
 
   // Clamp C pointers / Save d8-d15 on stack
+  if (max_mr > 1) {
+    cmp(x0, 2); // if mr < 2
+  }
   stp(d8, d9, mem[sp, -96]++);
   if (max_mr > 1) {
-    cmp(x0, 2);              // if mr < 2
-    add(x16, x6, x7);        // c1 = c0 + cm_stride
+    add(x16, x6, x7); // c1 = c0 + cm_stride
+  }
+  stp(d10, d11, mem[sp, 16]);
+  if (max_mr > 1) {
     csel(x16, x6, x16, kLO); //   c1 = c0
   }
+  stp(d12, d13, mem[sp, 32]);
 
-  stp(d10, d11, mem[sp, 16]);
   if (max_mr > 2) {
     add(x17, x16, x7); // c2 = c1 + cm_stride
+  }
+  stp(d14, d15, mem[sp, 48]);
+  if (max_mr > 2) {
     // if mr <= 2
     csel(x17, x16, x17, kLS); //   c2 = c1
   }
+  stp(x20, x21, mem[sp, 64]);
 
-  stp(d12, d13, mem[sp, 32]);
   if (max_mr > 3) {
-    cmp(x0, 4);               // if mr < 4
-    add(x10, x17, x7);        // c3 = c2 + cm_stride
+    cmp(x0, 4); // if mr < 4
+  }
+  stp(x22, x23, mem[sp, 80]);
+  if (max_mr > 3) {
+    add(x10, x17, x7); // c3 = c2 + cm_stride
     csel(x10, x17, x10, kLO); //   c3 = c2
   }
 
-  stp(d14, d15, mem[sp, 48]);
   if (max_mr > 4) {
     add(x13, x10, x7); // c4 = c3 + cm_stride
-                       // if mr <= 4
+    // if mr <= 4
     csel(x13, x10, x13, kLS); //   c4 = c3
   }
 
-  // Save x20,x21,x22,x23 on stack
-  stp(x20, x21, mem[sp, 64]);
-  stp(x22, x23, mem[sp, 80]);
-
-  if (max_mr > 5) {
-    cmp(x0, 6);             // if mr < 6
-    add(x7, x13, x7);       // c5 = c4 + cm_stride
-    csel(x7, x13, x7, kLO); //   c5 = c4
-  }
-
-  // Load a_offset
-  ldr(x11, mem[sp, 104]);
-
   // Load zero, params pointer
   ldp(x12, x8, mem[sp, 112]);
+
+  if (max_mr > 5) {
+    cmp(x0, 6); // if mr < 6
+    add(x7, x13, x7); // c5 = c4 + cm_stride
+  }
+  ldr(x11, mem[sp, 104]); // Load a_offset
+  if (max_mr > 5) {
+    csel(x7, x13, x7, kLO); //   c5 = c4
+  }
 
   bind(l0);
   // Load initial bias from w into accumulators
@@ -209,32 +215,32 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
       break;
   }
 
-  cmp(x14, x12);            // if a0 == zero
-  add(x14, x14, x11);       // a0 += a_offset
+  cmp(x14, x12); // if a0 == zero
+  add(x14, x14, x11); // a0 += a_offset
   csel(x14, x12, x14, kEQ); //   a0 = zero, else += a0 + a_offset
   if (max_mr > 1) {
-    cmp(x15, x12);            // if a1 == zero
-    add(x15, x15, x11);       // a1 += a_offset
+    cmp(x15, x12); // if a1 == zero
+    add(x15, x15, x11); // a1 += a_offset
     csel(x15, x12, x15, kEQ); //   a1 = zero, else += a1 + a_offset
   }
   if (max_mr > 2) {
-    cmp(x20, x12);            // if a2 == zero
-    add(x20, x20, x11);       // a2 += a_offset
+    cmp(x20, x12); // if a2 == zero
+    add(x20, x20, x11); // a2 += a_offset
     csel(x20, x12, x20, kEQ); //   a2 = zero, else += a2 + a_offset
   }
   if (max_mr > 3) {
-    cmp(x21, x12);            // if a3 == zero
-    add(x21, x21, x11);       // a3 += a_offset
+    cmp(x21, x12); // if a3 == zero
+    add(x21, x21, x11); // a3 += a_offset
     csel(x21, x12, x21, kEQ); //   a3 = zero, else += a3 + a_offset
   }
   if (max_mr > 4) {
-    cmp(x22, x12);            // if a4 == zero
-    add(x22, x22, x11);       // a4 += a_offset
+    cmp(x22, x12); // if a4 == zero
+    add(x22, x22, x11); // a4 += a_offset
     csel(x22, x12, x22, kEQ); //   a4 = zero, else += a4 + a_offset
   }
   if (max_mr > 5) {
-    cmp(x23, x12);            // if a5 == zero
-    add(x23, x23, x11);       // a5 += a_offset
+    cmp(x23, x12); // if a5 == zero
+    add(x23, x23, x11); // a5 += a_offset
     csel(x23, x12, x23, kEQ); //   a5 = zero, else += a5 + a_offset
   }
 
@@ -266,8 +272,10 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Is there at least 8 floats (32 bytes) for main loop?
   subs(x0, x0, 32);
   b_lo(l3);
+
   // Main loop - 8 floats of A (32 bytes)
   // 96 FMA + 6 LDP A + 8 LDP B
+  // 64 float weights = 256 bytes.  4 cache lines.
   bind(l2);
   // First group of 4 A.  48 FMA.
   fmla(v20.v4s(), v12.v4s(), v0.s()[0]);
@@ -358,8 +366,6 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
   if (max_mr > 2) {
     fmla(v24.v4s(), v16.v4s(), v2.s()[2]);
-  }
-  if (max_mr > 2) {
     ldr(q8, mem[x20], 16);
   }
   if (max_mr > 3) {
@@ -459,8 +465,6 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
   if (max_mr > 2) {
     fmla(v25.v4s(), v13.v4s(), v8.s()[0]);
-  }
-  if (max_mr > 2) {
     ldr(q2, mem[x20], 16);
   }
   if (max_mr > 3) {
@@ -494,8 +498,6 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
   if (max_mr > 5) {
     fmla(v30.v4s(), v14.v4s(), v11.s()[1]);
-  }
-  if (max_mr > 5) {
     ldr(q5, mem[x23], 16);
   }
   fmla(v21.v4s(), v15.v4s(), v6.s()[1]);
@@ -549,13 +551,12 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 5) {
     fmla(v31.v4s(), v17.v4s(), v11.s()[2]);
   }
-  ldp(q16, q17, mem[x5], 32);
 
   fmla(v20.v4s(), v18.v4s(), v6.s()[3]);
   if (max_mr > 1) {
     fmla(v22.v4s(), v18.v4s(), v7.s()[3]);
   }
-  subs(x0, x0, 32);
+  ldp(q16, q17, mem[x5], 32);
   if (max_mr > 2) {
     fmla(v24.v4s(), v18.v4s(), v8.s()[3]);
   }
@@ -568,6 +569,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 5) {
     fmla(v30.v4s(), v18.v4s(), v11.s()[3]);
   }
+  subs(x0, x0, 32);
   fmla(v21.v4s(), v19.v4s(), v6.s()[3]);
   if (max_mr > 1) {
     fmla(v23.v4s(), v19.v4s(), v7.s()[3]);
@@ -608,12 +610,18 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 5) {
     fmla(v30.v4s(), v12.v4s(), v5.s()[0]);
   }
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x5, 256]); // Prefetch B
+  }
   fmla(v21.v4s(), v13.v4s(), v0.s()[0]);
   if (max_mr > 1) {
     fmla(v23.v4s(), v13.v4s(), v1.s()[0]);
   }
   if (max_mr > 2) {
     fmla(v25.v4s(), v13.v4s(), v2.s()[0]);
+  }
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x5, 320]);
   }
   if (max_mr > 3) {
     fmla(v27.v4s(), v13.v4s(), v3.s()[0]);
@@ -624,24 +632,24 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 5) {
     fmla(v31.v4s(), v13.v4s(), v5.s()[0]);
   }
-  fmla(v20.v4s(), v14.v4s(), v0.s()[1]);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 128]); // Prefetch B
+    prfm(kPLDL1KEEP, mem[x5, 384]);
   }
+  fmla(v20.v4s(), v14.v4s(), v0.s()[1]);
   if (max_mr > 1) {
     fmla(v22.v4s(), v14.v4s(), v1.s()[1]);
   }
   if (max_mr > 2) {
     fmla(v24.v4s(), v14.v4s(), v2.s()[1]);
   }
+  if (prefetch) {
+    prfm(kPLDL1KEEP, mem[x5, 448]);
+  }
   if (max_mr > 3) {
     fmla(v26.v4s(), v14.v4s(), v3.s()[1]);
   }
   if (max_mr > 4) {
     fmla(v28.v4s(), v14.v4s(), v4.s()[1]);
-  }
-  if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 256]);
   }
   if (max_mr > 5) {
     fmla(v30.v4s(), v14.v4s(), v5.s()[1]);
@@ -673,8 +681,6 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
   if (max_mr > 2) {
     fmla(v24.v4s(), v16.v4s(), v2.s()[2]);
-  }
-  if (max_mr > 2) {
     ldr(q8, mem[x20], 16);
   }
   if (max_mr > 3) {
@@ -707,8 +713,6 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
   if (max_mr > 5) {
     fmla(v31.v4s(), v17.v4s(), v5.s()[2]);
-  }
-  if (max_mr > 5) {
     ldr(q11, mem[x23], 16);
   }
 
@@ -849,6 +853,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     fmla(v31.v4s(), v17.v4s(), v11.s()[2]);
   }
 
+
   fmla(v20.v4s(), v18.v4s(), v6.s()[3]);
   if (max_mr > 1) {
     fmla(v22.v4s(), v18.v4s(), v7.s()[3]);
@@ -865,8 +870,10 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 5) {
     fmla(v30.v4s(), v18.v4s(), v11.s()[3]);
   }
+
   // Is there a remainder?- 4 floats of A (16 bytes) or less
   tst(x0, 31);
+
   fmla(v21.v4s(), v19.v4s(), v6.s()[3]);
   if (max_mr > 1) {
     fmla(v23.v4s(), v19.v4s(), v7.s()[3]);
@@ -874,9 +881,8 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 2) {
     fmla(v25.v4s(), v19.v4s(), v8.s()[3]);
   }
-  // Load min/max values
   if (clamp_min || clamp_max) {
-    ld2r({v6.v4s(), v7.v4s()}, mem[x8]);
+    ld2r({v6.v4s(), v7.v4s()}, mem[x8]); // Load min/max values
   }
   if (max_mr > 3) {
     fmla(v27.v4s(), v19.v4s(), v9.s()[3]);
@@ -894,10 +900,6 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   subs(x9, x9, max_mr * 8); // ks -= MR * sizeof(void*)
   b_hi(l1);
 
-  // Load cn_stride
-  ldr(x0, mem[sp, 96]);
-  subs(x1, x1, 8);
-
   // Clamp
   if (clamp_min) {
     fmax(v20.v4s(), v20.v4s(), v6.v4s());
@@ -906,6 +908,9 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
       fmax(v22.v4s(), v22.v4s(), v6.v4s());
       fmax(v23.v4s(), v23.v4s(), v6.v4s());
     }
+  }
+  ldr(x0, mem[sp, 96]); // Load cn_stride
+  if (clamp_min) {
     if (max_mr > 2) {
       fmax(v24.v4s(), v24.v4s(), v6.v4s());
       fmax(v25.v4s(), v25.v4s(), v6.v4s());
@@ -923,6 +928,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
       fmax(v31.v4s(), v31.v4s(), v6.v4s());
     }
   }
+  subs(x1, x1, 8);
   if (clamp_max) {
     fmin(v20.v4s(), v20.v4s(), v7.v4s());
     fmin(v21.v4s(), v21.v4s(), v7.v4s());
@@ -980,9 +986,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   b_hi(l0);
 
   // Restore x20,x21,x22,x23 from stack
-  if (max_mr > 4) {
-    ldp(x22, x23, mem[sp, 80]);
-  }
+  ldp(x22, x23, mem[sp, 80]);
   ldp(x20, x21, mem[sp, 64]);
 
   // Restore d8-d15 from stack
@@ -1337,25 +1341,35 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   tbz(x1, 1, l10);
   if (max_mr > 5) {
     str(d30, mem[x7], 8);
-    dup(d30, v30.d()[1]);
   }
   if (max_mr > 4) {
     str(d28, mem[x13], 8);
+  }
+  if (max_mr > 5) {
+    dup(d30, v30.d()[1]);
+  }
+  if (max_mr > 4) {
     dup(d28, v28.d()[1]);
   }
   if (max_mr > 3) {
     str(d26, mem[x10], 8);
-    dup(d26, v26.d()[1]);
   }
   if (max_mr > 2) {
     str(d24, mem[x17], 8);
+  }
+  if (max_mr > 3) {
+    dup(d26, v26.d()[1]);
+  }
+  if (max_mr > 2) {
     dup(d24, v24.d()[1]);
   }
   if (max_mr > 1) {
     str(d22, mem[x16], 8);
-    dup(d22, v22.d()[1]);
   }
   str(d20, mem[x6], 8);
+  if (max_mr > 1) {
+    dup(d22, v22.d()[1]);
+  }
   dup(d20, v20.d()[1]);
 
   bind(l10);
@@ -1390,9 +1404,9 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   align(16, AlignInstruction::kHlt);
 }
-} // namespace
-} // namespace aarch64
-} // namespace xnnpack
+}  // namespace
+}  // namespace aarch64
+}  // namespace xnnpack
 
 xnn_status_t xnn_generate_f32_igemm_ukernel_upto6x8__aarch64_neonfma_cortex_a75(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const void* params) {
   using namespace xnnpack::aarch64;
@@ -1405,7 +1419,6 @@ xnn_status_t xnn_generate_f32_igemm_ukernel_upto6x8__aarch64_neonfma_cortex_a75(
     return xnn_status_invalid_state;
   }
   return xnn_status_success;
-
 }
 
 xnn_status_t xnn_generate_f32_igemm_ukernel_upto6x8__aarch64_neonfma_prfm_cortex_a75(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const void* params) {
