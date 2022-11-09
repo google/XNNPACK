@@ -13,7 +13,7 @@ from collections import defaultdict
 import datetime
 import re
 import sys
-from typing import List, Tuple, Mapping
+from typing import List, Tuple, Mapping, Union
 
 SPACES = r'\s*'
 COMMA = r',' + SPACES
@@ -152,7 +152,7 @@ def fix_comments(s : str) -> str:
   return s.replace('#', '//', 1)
 
 
-def maybe_wb(wb : bool) -> str:
+def maybe_wb(wb : str) -> str:
   return '++' if wb else ''
 
 
@@ -670,7 +670,7 @@ def parse_microkernel(
   return instructions, labels
 
 
-def emit_instructions_with_same_check(check : str, instrs : List[str], output : List[str]) -> None:
+def emit_instructions_with_same_check(check : Union[str,None], instrs : List[str], output : List[str]) -> None:
   """
   A helper method to emit a list of instructions which share the same check.
   """
