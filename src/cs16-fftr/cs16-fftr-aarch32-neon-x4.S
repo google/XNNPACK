@@ -19,12 +19,9 @@
 // vili      d1
 // virr   r3 d2
 // viri      d3
-
 // vdiv2     d4
-
 // vtwr   r2 d6
 // vtwi      d7
-
 // vacc1r    q8 = vilr + virr;
 // vacc1i    q9 = vili + viri;
 // vacc2r    d0 = vilr - virr;

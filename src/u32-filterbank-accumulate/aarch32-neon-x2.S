@@ -20,9 +20,7 @@
 // input   r1  d2
 // weights r3  d3 d4 d5
 // output  r12 d0 d1
-
 // weight_widths r2 r4
-
 BEGIN_FUNCTION xnn_u32_filterbank_accumulate_ukernel__aarch32_neon_x2
         .arm
 #ifndef __APPLE__

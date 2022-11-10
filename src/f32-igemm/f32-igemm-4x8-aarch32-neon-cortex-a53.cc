@@ -39,14 +39,11 @@ class Generator : public MacroAssembler {
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
 // Register usage
-
 // r0, r2   scratch temporaries for loads
-
 // A0   r3  d0
 // A1  r12  d1
 // A2  r10  d2
 // A3   r7  d3
-
 // B    r9  d8,  d9, d10, d11
 // B       d12, d13, d14, d15
 

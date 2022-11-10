@@ -39,9 +39,7 @@ $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 // A1  r12  d2-d3 q1
 // A2  r10  d4-d5 q2
 // A3   r0  d6-d7 q3
-
 // B    r9  d10-d11 q5
-
 // C0  r11 d16-d17  q8  d18-d19  q9
 // C1   r4 d20-d21 q10  d22-d23 q11
 // C2   r8 d24-d25 q12  d26-d27 q13

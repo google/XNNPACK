@@ -25,13 +25,9 @@
 // A0   r5  d4
 // A1   r6  d5
 // A2   r8  d6
-
 // B    r3/lr  d7 d16 d17
-
 // C0  r10 q12 q13 q14 q15
-
 // Prod q0 q1
-
 // params structure is 4 bytes
 //   struct {
 //     int16_t output_zero_point;  d20[0] q10

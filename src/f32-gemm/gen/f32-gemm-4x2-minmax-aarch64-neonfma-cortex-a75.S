@@ -23,7 +23,7 @@
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# Register usage
+// Register usage
 # A0  x3 v0  v4
 # A1 x11 v1  v5
 # A2 x12 v2  v6

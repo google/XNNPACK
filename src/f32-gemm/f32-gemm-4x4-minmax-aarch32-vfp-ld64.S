@@ -22,15 +22,12 @@
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
 // Register usage
-
 // A0   r3  s0-s1  d0
 // A1  r12  s2-s3  d1
 // A2  r10  s4-s5  d2
 // A3   r0  s6-s7  d3
-
 // B    r9  s12, s13, s14, s15 d6-d7
 // B        s10, s11, s12, s13 d5-d6
-
 // C0   r6 s16-s17  d8  s18-s19  d9
 // C1   r4 s20-s21 d10  s22-s23 d11
 // C2   r8 s24-s25 d12  s26-s27 d13

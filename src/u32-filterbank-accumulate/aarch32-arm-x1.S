@@ -22,7 +22,6 @@
 // weight_accumulator   r12 r8 r9
 // unweight_accumulator r10 r11
 // weight_widths        r2  r4
-
 BEGIN_FUNCTION xnn_u32_filterbank_accumulate_ukernel__aarch32_arm_x1
         .arm
 #ifndef __APPLE__
