@@ -487,7 +487,7 @@ def emit_instruction(instr: str, instructions: List[str],
     instructions.append(f'if (max_mr > {int(cmp_m[1])-1}) {{ {instr} }}')
     return
 
-  if instr_name == 'pop':
+  if instr_name == 'push' or instr_name == 'pop':
     instructions.append(instr)
     return
 

@@ -79,22 +79,28 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   ldr(r9, mem[sp, 100]); // w
 
   // Clamp A and C pointers
-  cmp(r0, 2); // if mr >= 2
-  add(r12, r3, r7); //   a1 = a0 + a_stride
-  add(r4, r11, r6); //   c1 = c0 + cm_stride
-  movlo(r12, r3); // a1
-  movlo(r4, r11); // c1
-  // if mr > 2
-  add(r10, r12, r7); //   a2 = a1 + a_stride
-  add(r8, r4, r6); //   c2 = c1 + cm_stride
-  movls(r10, r12); // a2
-  movls(r8, r4); // c2
+  if (max_mr > 1) {
+    cmp(r0, 2); // if mr >= 2
+    add(r12, r3, r7); //   a1 = a0 + a_stride
+    add(r4, r11, r6); //   c1 = c0 + cm_stride
+    movlo(r12, r3); // a1
+    movlo(r4, r11); // c1
+  }
+  if (max_mr > 2) {
+    // if mr > 2
+    add(r10, r12, r7); //   a2 = a1 + a_stride
+    add(r8, r4, r6); //   c2 = c1 + cm_stride
+    movls(r10, r12); // a2
+    movls(r8, r4); // c2
+  }
 
-  cmp(r0, 4); // if mr >=4
-  add(r0, r10, r7); //   a3 = a2 + a_stride
-  add(r6, r8, r6); //   c3 = c2 + cm_stride
-  movlo(r0, r10); // a3
-  movlo(r6, r8); // c3
+  if (max_mr > 3) {
+    cmp(r0, 4); // if mr >=4
+    add(r0, r10, r7); //   a3 = a2 + a_stride
+    add(r6, r8, r6); //   c3 = c2 + cm_stride
+    movlo(r0, r10); // a3
+    movlo(r6, r8); // c3
+  }
 
   ldr(r7, mem[sp, 112]); // cn_stride
 
@@ -427,15 +433,19 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Store full 4 x 8
   blo(l6);
   vst1_32({d16-d19}, mem[r11], r7);
-  sub(r0, r0, r2);
+  if (max_mr > 3) {
+    sub(r0, r0, r2);
+  }
   if (max_mr > 1) {
     vst1_32({d20-d23}, mem[r4], r7);
   }
-  sub(r10, r10, r2);
   if (max_mr > 2) {
+    sub(r10, r10, r2);
     vst1_32({d24-d27}, mem[r8], r7);
   }
-  sub(r12, r12, r2);
+  if (max_mr > 1) {
+    sub(r12, r12, r2);
+  }
   if (max_mr > 3) {
     vst1_32({d28-d31}, mem[r6], r7);
   }
