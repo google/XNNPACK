@@ -9571,7 +9571,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(bench-utils PUBLIC include src)
   TARGET_LINK_LIBRARIES(bench-utils PRIVATE benchmark cpuinfo pthreadpool)
   IF(XNNPACK_BUILD_LIBRARY)
-    TARGET_LINK_LIBRARIES(bench-utils PRIVATE memory)
+    TARGET_LINK_LIBRARIES(bench-utils PRIVATE logging memory)
   ENDIF()
 
   # ---[ Build accuracy microbenchmarks

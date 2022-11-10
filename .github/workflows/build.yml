@@ -106,6 +106,20 @@ jobs:
       - name: Run tests
         run: ctest -C Release --output-on-failure --parallel %NUMBER_OF_PROCESSORS%
         working-directory: ${{ github.workspace }}/build/windows/x86
+  cmake-macos-arm64:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create output directory
+        run: mkdir -p build/macos/arm64
+        working-directory: ${{ github.workspace }}
+      - name: Generate CMake project
+        run: cmake -G Xcode -DCMAKE_OSX_ARCHITECTURES=arm64 -DHAVE_STD_REGEX=TRUE ../../..
+        working-directory: ${{ github.workspace }}/build/macos/arm64
+      - name: Build with Xcode
+        run: cmake --build build/macos/arm64 --parallel $(sysctl -n hw.ncpu) -- -quiet
+        working-directory: ${{ github.workspace }}
   cmake-macos-x86_64:
     runs-on: macos-latest
     timeout-minutes: 60
@@ -115,7 +129,7 @@ jobs:
         run: mkdir -p build/macos/x86_64
         working-directory: ${{ github.workspace }}
       - name: Generate CMake project
-        run: cmake -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64 ../../..
+        run: cmake -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64 -DHAVE_STD_REGEX=TRUE ../../..
         working-directory: ${{ github.workspace }}/build/macos/x86_64
       - name: Build with Xcode
         run: cmake --build build/macos/x86_64 --parallel $(sysctl -n hw.ncpu) -- -quiet
