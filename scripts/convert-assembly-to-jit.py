@@ -257,7 +257,7 @@ AARCH64_POST_OP='''void Generator::perform_post_operations(
 
 def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
                    kernel_type: str, prfm: bool,
-                   mr: int) -> Tuple[List[str], Mapping[str, int]]:
+                   mr: int, post_op : bool) -> Tuple[List[str], Mapping[str, int]]:
   prologue = []
   # Whether we are in the auto-generated comment.
   in_autogen = False
@@ -335,7 +335,8 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
             f'  void generate({prefetch}size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, {params});'
         )
 
-      prologue.append('  void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);');
+      if post_op:
+        prologue.append('  void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);');
       prologue.append('};')
       continue
     elif in_a_pointers:
@@ -870,7 +871,7 @@ def insert_post_operations(instructions : List[str]):
   return instructions
 
 
-def main(input_file : str) -> None:
+def main(input_file : str, post_op : bool) -> None:
   arch = None
   kernel_type = GEMM
   minmax = False
@@ -925,13 +926,14 @@ def main(input_file : str) -> None:
 
   prologue, vector_register_map = parse_prologue(input_file, prologue_lines,
                                                  arch, minmax, kernel_type,
-                                                 prfm, mr)
+                                                 prfm, mr, post_op)
   instructions, labels = parse_microkernel(microkernel_body, prfm,
                                            vector_register_map)
   # TODO(zhin): iterate until fixpoint instead.
   instructions = merge_consecutive_checks(instructions)
   instructions = merge_consecutive_checks(instructions)
-  instructions = insert_post_operations(instructions)
+  if post_op:
+    instructions = insert_post_operations(instructions)
 
   # Actually emit the JIT codegen (to stdout).
   for p in prologue:
@@ -947,7 +949,8 @@ def main(input_file : str) -> None:
   print()
   print(f'  Label {labels_str};')
   print('  const size_t num_post_operations = jit_gemm_params->num_post_operations;')
-  print('  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;')
+  if post_op:
+    print('  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;')
   print('  const float min = jit_gemm_params->f32_minmax.min;')
   print('  const float max = jit_gemm_params->f32_minmax.max;')
   if minmax:
@@ -976,11 +979,11 @@ def main(input_file : str) -> None:
 
   print('}')
   # print post operations definition
-  if arch == AARCH32:
+  if arch == AARCH32 and post_op:
     print()
     print(AARCH32_POST_OP)
     print()
-  else:
+  elif arch == AARCH64 and post_op:
     print()
     print(AARCH64_POST_OP)
     print()
@@ -1030,5 +1033,7 @@ def print_generator_definition(kernel_type, fn_name, arch, minmax, prefetch=''):
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='Convert assembly to to JIT C++, writes to stdout.')
   parser.add_argument('input_file', help='Input assembly filename')
+  parser.add_argument(
+      '--post-op', help='Should support post operation', default=True, action=argparse.BooleanOptionalAction)
   args = parser.parse_args()
-  main(args.input_file)
+  main(args.input_file, args.post_op)
