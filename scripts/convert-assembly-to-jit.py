@@ -949,6 +949,8 @@ def main(input_file : str, post_op : bool) -> None:
   print()
   print(f'  Label {labels_str};')
   print('  const size_t num_post_operations = jit_gemm_params->num_post_operations;')
+  if not post_op:
+    print('  (void) num_post_operations;  // Silence unused warning.');
   if post_op:
     print('  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;')
   print('  const float min = jit_gemm_params->f32_minmax.min;')
