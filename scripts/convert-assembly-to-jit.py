@@ -455,7 +455,7 @@ def emit_instruction(instr: str, instructions: List[str],
   # emit a guard for instruction if it is using a particular register
   # mapping is a map from register to the mr it is used, e.g. v0 -> 0 to guard v0 behind max_mr > 0.
   # parse the dest register from this instruction
-  pat = re.compile(r'(\w+)\(\{?((?:v|x|q|s|d)\d+)')
+  pat = re.compile(r'(\w+)\(\{?((?:v|x|q|s|d|r)\d+)')
   m = re.search(pat, instr)
   if not m:
     instructions.append(instr)
@@ -482,10 +482,25 @@ def emit_instruction(instr: str, instructions: List[str],
     instructions.append(instr)
     return
 
-  if instr_name == 'cmp' and reg == 'x0':  # comparing mr
-    cmp_m = re.search(r'cmp\(x0, (\d+)\);', instr)
-    assert (cmp_m)
+  cmp_m = re.search(r'cmp\((?:x|r)0, (\d+)\);', instr)
+  if cmp_m:
     instructions.append(f'if (max_mr > {int(cmp_m[1])-1}) {{ {instr} }}')
+    return
+
+  if instr_name == 'pop':
+    instructions.append(instr)
+    return
+
+  if 'mem[sp' in instr: # loading from stack is almost always a parameter load.
+    instructions.append(instr)
+    return
+
+  if '// ks -= MR' in instr or '// a += MR' in instr:
+    # Rewrite based on max_mr (since the actual number depends on max_mr).
+    instructions.append(
+        re.sub(r'(add|subs)\((\w\d+), (\w\d+), (\d+)\);',
+               r'\1(\2, \3, max_mr * sizeof(void*));',
+               instr))
     return
 
   if reg not in vector_register_map:
@@ -820,6 +835,8 @@ def merge_consecutive_checks(instructions : List[str]) -> List[str]:
         comment = ''
         if output and output[-1].strip().startswith('//'):
           comment = output.pop()
+        elif instructions_with_same_check and instructions_with_same_check[-1].strip().startswith('//'):
+          comment = instructions_with_same_check.pop()
         emit_instructions_with_same_check(previous_check, instructions_with_same_check, output)
         previous_check = current_check
         instructions_with_same_check = [instr]

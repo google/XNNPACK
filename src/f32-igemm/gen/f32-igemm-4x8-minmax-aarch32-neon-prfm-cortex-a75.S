@@ -94,7 +94,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_prfm_cortex_a75
         LDR     r12, [r2,  4]
         LDR     r10, [r2,  8]
         LDR     r0, [r2, 12]
-        ADD     r2, r2, 16
+        ADD     r2, r2, 16              // a += MR * sizeof(void*)
 
         # Add a_offset
         LDR     r5, [sp, 132]           // a_offset
