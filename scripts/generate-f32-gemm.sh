@@ -603,8 +603,8 @@ tools/generate-gemm-test.py --spec test/f32-gemm-minmax.yaml --output test/f32-g
 tools/generate-gemm-test.py --spec test/f32-gemm-minmax.yaml --output test/f32-gemm-minmax.cc --output test/f32-gemm-minmax-2.cc &
 
 ##################################### JIT #####################################
-scripts/convert-assembly-to-jit.py src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-prfm-cortex-a75.S > src/f32-gemm/f32-gemm-4x8-aarch32-neon-cortex-a75.cc
-scripts/convert-assembly-to-jit.py src/f32-gemm/gen/f32-gemm-6x8-minmax-aarch64-neonfma-ld128.S > src/f32-gemm/f32-gemm-6x8-aarch64-neonfma-ld128.cc
-scripts/convert-assembly-to-jit.py src/f32-gemm/gen/f32-gemm-6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S > src/f32-gemm/f32-gemm-upto6x8-aarch64-neonfma-cortex-a75.cc
+scripts/convert-assembly-to-jit.py src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-prfm-cortex-a75.S > src/f32-gemm/f32-gemm-4x8-aarch32-neon-cortex-a75.cc &
+scripts/convert-assembly-to-jit.py src/f32-gemm/gen/f32-gemm-6x8-minmax-aarch64-neonfma-ld128.S > src/f32-gemm/f32-gemm-6x8-aarch64-neonfma-ld128.cc &
+scripts/convert-assembly-to-jit.py src/f32-gemm/gen/f32-gemm-6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S > src/f32-gemm/f32-gemm-upto6x8-aarch64-neonfma-cortex-a75.cc &
 
 wait
