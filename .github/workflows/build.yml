@@ -73,17 +73,6 @@ jobs:
       - name: Run tests
         run: ctest --output-on-failure --parallel $(nproc)
         working-directory: ${{ github.workspace }}/build/linux/riscv64
-  cmake-windows:
-    runs-on: windows-latest
-    timeout-minutes: 40
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install ninja
-        run: choco install ninja
-      - name: Configure and build
-        run: scripts/build-windows.sh
-        shell: bash  # Specify bash so we can reuse the build script on Windows (runs on Git bash)
-        working-directory: ${{ github.workspace }}
   cmake-windows-arm64:
     runs-on: windows-latest
     timeout-minutes: 120
