@@ -259,7 +259,7 @@ static enum xnn_status setup_transpose_nd(
   switch (normalized_dims) {
     case 1:
       transpose_op->compute.type = xnn_parallelization_type_1d_tile_1d;
-      transpose_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_univector_contiguous;
+      transpose_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
       transpose_op->compute.range[0] = normalized_element_size;
       univector_context->ukernel = xnn_params.xx.copy;
       univector_context->log2_xsize = 0;
