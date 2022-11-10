@@ -31,9 +31,17 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4(
   assert(input_width % sizeof(__fp16) == 0);
   assert(padding_top == 1);
 
+  #if XNN_ARCH_ARM64
+    const uint16x8x2_t vminmax = vld2q_dup_u16(&params->neonfp16arith.min);
+    const float16x8_t vmin = vreinterpretq_f16_u16(vminmax.val[0]);
+    const float16x8_t vmax = vreinterpretq_f16_u16(vminmax.val[1]);
+  #else
+    // vld2_dup is to work around aarch32 clang bug with vld1q_dup
+    const uint16x4x2_t vminmax = vld2_dup_u16(&params->neonfp16arith.min);
+    const float16x8_t vmin = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[0],vminmax.val[0]));
+    const float16x8_t vmax = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[1],vminmax.val[1]));
+  #endif
   const uint16x8_t vmask = vld1q_u16(params->neonfp16arith.mask);
-  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith.max));
-  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith.min));
 
   const __fp16* w0 = (const __fp16*)weights;
   const float16x8_t vw01234567 = vld1q_f16(w0);
