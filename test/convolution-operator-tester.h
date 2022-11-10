@@ -2004,6 +2004,282 @@ class ConvolutionOperatorTester {
     }
   }
 
+  void TestNCHWxF16() {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
+    std::uniform_real_distribution<float> pdist;
+
+    std::vector<uint16_t> input(2 * XNN_EXTRA_BYTES / sizeof(uint16_t) +
+      ((batch_size() - 1) * input_channel_stride() + groups() * group_input_channels()) * input_height() * input_width());
+    std::vector<uint16_t> kernel(
+      groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    std::vector<float> kernel_as_float(kernel.size());
+    std::vector<uint16_t> bias(groups() * group_output_channels());
+    std::vector<float> bias_as_float(bias.size());
+    std::vector<uint16_t> output(
+      ((batch_size() - 1) * output_channel_stride() + groups() * group_output_channels()) * output_height() * output_width());
+    std::vector<float> output_ref(batch_size() * groups() * group_output_channels() * output_height() * output_width());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(kernel.begin(), kernel.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      for (uint16_t& k : kernel) {
+        if (pdist(rng) <= sparsity()) {
+          k = 0;
+        }
+      }
+      std::transform(kernel.cbegin(), kernel.cend(), kernel_as_float.begin(), fp16_ieee_to_fp32_value);
+      std::generate(bias.begin(), bias.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::transform(bias.cbegin(), bias.cend(), bias_as_float.begin(), fp16_ieee_to_fp32_value);
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+
+      // Compute reference results, without clamping.
+      if (has_bias()) {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oy = 0; oy < output_height(); oy++) {
+            for (size_t ox = 0; ox < output_width(); ox++) {
+              for (size_t g = 0; g < groups(); g++) {
+                for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                  output_ref[(((i * groups() + g) * group_output_channels() + oc) * output_height() + oy) * output_width() + ox] =
+                    fp16_ieee_to_fp32_value(bias[g * group_output_channels() + oc]);
+                }
+              }
+            }
+          }
+        }
+      } else {
+        std::fill(output_ref.begin(), output_ref.end(), 0.0f);
+      }
+      if (force_nhwc_input()) {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oy = 0; oy < output_height(); oy++) {
+            for (size_t ox = 0; ox < output_width(); ox++) {
+              for (size_t ky = 0; ky < kernel_height(); ky++) {
+                const size_t iy = oy * subsampling_height() + ky * dilation_height() - padding_top();
+                if (iy < input_height()) {
+                  for (size_t kx = 0; kx < kernel_width(); kx++) {
+                    const size_t ix = ox * subsampling_width() + kx * dilation_width() - padding_left();
+                    if (ix < input_width()) {
+                      for (size_t g = 0; g < groups(); g++) {
+                        for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                          for (size_t ic = 0; ic < group_input_channels(); ic++) {
+                            output_ref[(((i * groups() + g) * group_output_channels() + oc) * output_height() + oy) * output_width() + ox] +=
+                              fp16_ieee_to_fp32_value(input[((((i * input_height() + iy) * input_width() + ix) * groups() + g) * group_input_channels() + ic)]) *
+                              fp16_ieee_to_fp32_value(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } else if (depthwise_layout()) {
+        ASSERT_EQ(group_input_channels(), 1);
+
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oy = 0; oy < output_height(); oy++) {
+            for (size_t ox = 0; ox < output_width(); ox++) {
+              for (size_t ky = 0; ky < kernel_height(); ky++) {
+                const size_t iy = oy * subsampling_height() + ky * dilation_height() - padding_top();
+                if (iy < input_height()) {
+                  for (size_t kx = 0; kx < kernel_width(); kx++) {
+                    const size_t ix = ox * subsampling_width() + kx * dilation_width() - padding_left();
+                    if (ix < input_width()) {
+                      for (size_t g = 0; g < groups(); g++) {
+                        for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                          output_ref[(((i * groups() + g) * group_output_channels() + oc) * output_height() + oy) * output_width() + ox] +=
+                            fp16_ieee_to_fp32_value(input[((i * input_channel_stride() + g) * input_height() + iy) * input_width() + ix]) *
+                            fp16_ieee_to_fp32_value(kernel[((ky * kernel_width() + kx) * groups() + g) * group_output_channels() + oc]);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } else {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oy = 0; oy < output_height(); oy++) {
+            for (size_t ox = 0; ox < output_width(); ox++) {
+              for (size_t ky = 0; ky < kernel_height(); ky++) {
+                const size_t iy = oy * subsampling_height() + ky * dilation_height() - padding_top();
+                if (iy < input_height()) {
+                  for (size_t kx = 0; kx < kernel_width(); kx++) {
+                    const size_t ix = ox * subsampling_width() + kx * dilation_width() - padding_left();
+                    if (ix < input_width()) {
+                      for (size_t g = 0; g < groups(); g++) {
+                        for (size_t oc = 0; oc < group_output_channels(); oc++) {
+                          for (size_t ic = 0; ic < group_input_channels(); ic++) {
+                            output_ref[(((i * groups() + g) * group_output_channels() + oc) * output_height() + oy) * output_width() + ox] +=
+                              fp16_ieee_to_fp32_value(input[((i * input_channel_stride() + g * group_input_channels() + ic) * input_height() + iy) * input_width() + ix]) *
+                              fp16_ieee_to_fp32_value(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Compute clamping parameters.
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_range = accumulated_max - accumulated_min;
+      const float scaled_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + accumulated_range / 255.0f * float(qmin())));
+      const float scaled_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
+      const float output_min = scaled_min == scaled_max ? -std::numeric_limits<float>::infinity() : scaled_min;
+      const float output_max = scaled_min == scaled_max ? +std::numeric_limits<float>::infinity() : scaled_max;
+
+      // Clamp reference results.
+      for (float& value : output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
+      }
+
+      // Create, setup, run, and destroy Convolution operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t convolution_op = nullptr;
+      xnn_caches caches = {};
+      xnn_weights_cache weights_cache;
+      if (use_weights_cache()) {
+        xnn_init_weights_cache(&weights_cache);
+        caches.weights_cache = &weights_cache;
+      }
+
+      const void* kernel_data = kernel.data();
+      const void* bias_data = bias.data();
+      if (weights_type() == WeightsType::FP32) {
+        kernel_data = kernel_as_float.data();
+        bias_data = bias_as_float.data();
+      }
+      uint32_t flags = 0;
+      if (depthwise_layout()) {
+        flags |= XNN_FLAG_DEPTHWISE_CONVOLUTION;
+      }
+      if (force_nhwc_input()) {
+        flags |= XNN_FLAG_INPUT_NHWC;
+      }
+      if (weights_type() == WeightsType::FP32) {
+        flags |= XNN_FLAG_FP32_STATIC_WEIGHTS;
+      }
+      xnn_status status = xnn_create_convolution2d_nchw_f16(
+          padding_top(), padding_right(), padding_bottom(), padding_left(),
+          kernel_height(), kernel_width(),
+          subsampling_height(), subsampling_width(),
+          dilation_height(), dilation_width(),
+          groups(), group_input_channels(), group_output_channels(),
+          input_channel_stride(), output_channel_stride(),
+          kernel_data, has_bias() ? bias_data : nullptr,
+          output_min, output_max,
+          flags,
+          &caches,
+          &convolution_op);
+      if (status == xnn_status_unsupported_hardware) {
+        if (use_weights_cache()) {
+          xnn_release_weights_cache(&weights_cache);
+        }
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, convolution_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
+
+      // Smart pointer to automatically delete convolution_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_convolution2d_nchw_f16(
+          convolution_op,
+          batch_size(), input_height(), input_width(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+
+      VerifyNCHWxF16(output, output_ref, output_min, output_max);
+
+      if (use_weights_cache()) {
+        xnn_operator_t convolution_op2 = nullptr;
+        size_t old_weights_cache_size = weights_cache.cache.weights.size;
+        ASSERT_EQ(
+            xnn_status_success,
+
+            xnn_create_convolution2d_nchw_f16(
+                padding_top(), padding_right(), padding_bottom(), padding_left(),
+                kernel_height(), kernel_width(),
+                subsampling_height(), subsampling_width(),
+                dilation_height(), dilation_width(),
+                groups(), group_input_channels(), group_output_channels(),
+                input_channel_stride(), output_channel_stride(),
+                kernel_data, has_bias() ? bias_data : nullptr,
+                output_min, output_max,
+                flags,
+                &caches,
+                &convolution_op2));
+
+        ASSERT_NE(nullptr, convolution_op2);
+
+        // Smart pointer to automatically delete convolution_op2.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op2, xnn_delete_operator);
+        std::vector<uint16_t> output2(output.size(), UINT16_C(0x7E00) /* NaN */);
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_convolution2d_nchw_f16(
+                      convolution_op2,
+                      batch_size(), input_height(), input_width(),
+                      input.data(), output2.data(),
+                      nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(convolution_op2, nullptr /* thread pool */));
+
+        VerifyNCHWxF16(output2, output_ref, output_min, output_max);
+        if (IsSpmm()) {
+          VerifyWeightsCacheUnused(weights_cache);
+        } else {
+          VerifyWeightsCache(weights_cache, old_weights_cache_size);
+        }
+        xnn_release_weights_cache(&weights_cache);
+      }
+    }
+  }
+
+  void VerifyNCHWxF16(const std::vector<uint16_t> &output,
+                      const std::vector<float> &output_ref,
+                      const float output_min, const float output_max) const {
+    for (size_t i = 0; i < batch_size(); i++) {
+      for (size_t y = 0; y < output_height(); y++) {
+        for (size_t x = 0; x < output_width(); x++) {
+          for (size_t g = 0; g < groups(); g++) {
+            for (size_t c = 0; c < group_output_channels(); c++) {
+              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x]), output_min)
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
+              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x]), output_max)
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
+              EXPECT_NEAR(output_ref[(((i * groups() + g) * group_output_channels() + c) * output_height() + y) * output_width() + x], fp16_ieee_to_fp32_value(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x]), std::max(1.0e-4f, std::abs(output_ref[(((i * groups() + g) * group_output_channels() + c) * output_height() + y) * output_width() + x]) * 1.0e-2f))
+                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
+            }
+          }
+        }
+      }
+    }
+  }
+
   void TestSetupNHWCxQC8() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
