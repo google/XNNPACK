@@ -3,24 +3,23 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <cassert>
+#include <cstddef>
 #include <limits>
 
 #include <xnnpack.h>
 #include <xnnpack/aarch32-assembler.h>
-#include <xnnpack/common.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/memory.h>
 #include <xnnpack/microparams.h>
 #include <xnnpack/post-operation.h>
-
 
 namespace xnnpack {
 namespace aarch32 {
 namespace {
 class Generator : public MacroAssembler {
   using MacroAssembler::MacroAssembler;
+
  public:
   void generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params);
   void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);
@@ -42,10 +41,10 @@ class Generator : public MacroAssembler {
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
 // Register usage
-// A0   r3  d0
-// A1  r12  d1
-// A2  r10  d2
-// A3   r0  d3
+// A0   r3  d0 d4
+// A1  r12  d1 d5
+// A2  r10  d2 d6
+// A3   r0  d3 d7
 // B    r9  d8,  d9, d10, d11
 // B       d12, d13, d14, d15
 // C0  r11 d16-d17  q8  d18-d19  q9
@@ -54,22 +53,22 @@ class Generator : public MacroAssembler {
 // C3   r6 d28-d29 q14  d30-d31 q15
 // Clamp (r5) d4 d5 d6 d7
 
-// Converted from: src/f32-gemm/gen/4x8-minmax-aarch32-neon-prfm-cortex-a75.S
+// Converted from: src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-prfm-cortex-a75.S
 void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
 {
   assert(max_mr <= 4);
   assert(nc_mod_nr < 8);
   assert(kc != 0);
   assert(kc % sizeof(float) == 0);
+
+  Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9;
   const size_t num_post_operations = jit_gemm_params->num_post_operations;
   const xnn_post_operation* post_operations = jit_gemm_params->post_operations;
   const float min = jit_gemm_params->f32_minmax.min;
   const float max = jit_gemm_params->f32_minmax.max;
   const bool clamp_min = min != -std::numeric_limits<float>::infinity();
   const bool clamp_max = max != +std::numeric_limits<float>::infinity();
-
-  Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9;
-
+  assert(num_post_operations == 0 || (!clamp_min && !clamp_max));
   // Push 96 bytes
   push({r4, r5, r6, r7, r8, r9, r10, r11}); // 32
   vpush({d8-d15}); // +64 = 96
@@ -104,12 +103,18 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Load initial bias from w into accumulators
   vldm(mem[r9]++, {d16-d19}); // Bias
   subs(r5, r2, 16);
-  vmov(q10, q8);
-  vmov(q11, q9);
-  vmov(q12, q8);
-  vmov(q13, q9);
-  vmov(q14, q8);
-  vmov(q15, q9);
+  if (max_mr > 1) {
+    vmov(q10, q8);
+    vmov(q11, q9);
+  }
+  if (max_mr > 2) {
+    vmov(q12, q8);
+    vmov(q13, q9);
+  }
+  if (max_mr > 3) {
+    vmov(q14, q8);
+    vmov(q15, q9);
+  }
 
   if (prefetch) {
     pld(mem[r3, 0]); // Prefetch A
@@ -134,9 +139,15 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Prologue
   vld1_32({d0}, mem[r3]++); // A0
   vldm(mem[r9]++, {d8-d11}); // B0
-  vld1_32({d1}, mem[r12]++); // A1
-  vld1_32({d2}, mem[r10]++); // A2
-  vld1_32({d3}, mem[r0]++); // A3
+  if (max_mr > 1) {
+    vld1_32({d1}, mem[r12]++); // A1
+  }
+  if (max_mr > 2) {
+    vld1_32({d2}, mem[r10]++); // A2
+  }
+  if (max_mr > 3) {
+    vld1_32({d3}, mem[r0]++); // A3
+  }
 
   subs(r5, r5, 16);
   blo(l2); // less than 4 channels?  skip main loop
@@ -147,113 +158,219 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   bind(l1);
   vmla_f32(q8, q4, d0[0]);
   vldm(mem[r9]++, {d12-d15}); // B1
-  vmla_f32(q10, q4, d1[0]);
-  vmla_f32(q12, q4, d2[0]);
+  if (max_mr > 1) {
+    vmla_f32(q10, q4, d1[0]);
+  }
+  if (max_mr > 2) {
+    vmla_f32(q12, q4, d2[0]);
+  }
   vld1_32({d4}, mem[r3]++); // A0
-  vmla_f32(q14, q4, d3[0]);
+  if (max_mr > 3) {
+    vmla_f32(q14, q4, d3[0]);
+  }
   vmla_f32(q9, q5, d0[0]);
-  vld1_32({d5}, mem[r12]++); // A1
-  vmla_f32(q11, q5, d1[0]);
-  vmla_f32(q13, q5, d2[0]);
-  vmla_f32(q15, q5, d3[0]);
-  vld1_32({d6}, mem[r10]++); // A2
+  if (max_mr > 1) {
+    vld1_32({d5}, mem[r12]++); // A1
+    vmla_f32(q11, q5, d1[0]);
+  }
+  if (max_mr > 2) {
+    vmla_f32(q13, q5, d2[0]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q15, q5, d3[0]);
+  }
+  if (max_mr > 2) {
+    vld1_32({d6}, mem[r10]++); // A2
+  }
   vmla_f32(q8, q6, d0[1]);
-  vmla_f32(q10, q6, d1[1]);
-  vld1_32({d7}, mem[r0]++); // A3
-  vmla_f32(q12, q6, d2[1]);
-  vmla_f32(q14, q6, d3[1]);
+  if (max_mr > 1) {
+    vmla_f32(q10, q6, d1[1]);
+  }
+  if (max_mr > 3) {
+    vld1_32({d7}, mem[r0]++); // A3
+  }
+  if (max_mr > 2) {
+    vmla_f32(q12, q6, d2[1]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q14, q6, d3[1]);
+  }
   vldm(mem[r9]++, {d8-d11}); // B0
   vmla_f32(q9, q7, d0[1]);
-  vmla_f32(q11, q7, d1[1]);
-  vmla_f32(q13, q7, d2[1]);
-  vmla_f32(q15, q7, d3[1]);
+  if (max_mr > 1) {
+    vmla_f32(q11, q7, d1[1]);
+  }
+  if (max_mr > 2) {
+    vmla_f32(q13, q7, d2[1]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q15, q7, d3[1]);
+  }
 
   vmla_f32(q8, q4, d4[0]);
   vldm(mem[r9]++, {d12-d15}); // B1
-  vmla_f32(q10, q4, d5[0]);
+  if (max_mr > 1) {
+    vmla_f32(q10, q4, d5[0]);
+  }
   if (prefetch) {
     pld(mem[r3, 128]); // Prefetch A0
   }
-  vmla_f32(q12, q4, d6[0]);
+  if (max_mr > 2) {
+    vmla_f32(q12, q4, d6[0]);
+  }
   vld1_32({d0}, mem[r3]++); // A0
-  vmla_f32(q14, q4, d7[0]);
+  if (max_mr > 3) {
+    vmla_f32(q14, q4, d7[0]);
+  }
   if (prefetch) {
     pld(mem[r12, 128]); // Prefetch A1
   }
   vmla_f32(q9, q5, d4[0]);
-  vld1_32({d1}, mem[r12]++); // A1
-  vmla_f32(q11, q5, d5[0]);
+  if (max_mr > 1) {
+    vld1_32({d1}, mem[r12]++); // A1
+    vmla_f32(q11, q5, d5[0]);
+  }
   if (prefetch) {
     pld(mem[r10, 128]); // Prefetch A2
   }
-  vmla_f32(q13, q5, d6[0]);
-  vld1_32({d2}, mem[r10]++); // A2
-  vmla_f32(q15, q5, d7[0]);
+  if (max_mr > 2) {
+    vmla_f32(q13, q5, d6[0]);
+    vld1_32({d2}, mem[r10]++); // A2
+  }
+  if (max_mr > 3) {
+    vmla_f32(q15, q5, d7[0]);
+  }
   if (prefetch) {
     pld(mem[r0, 128]); // Prefetch A3
   }
   vmla_f32(q8, q6, d4[1]);
-  vld1_32({d3}, mem[r0]++); // A3
-  vmla_f32(q10, q6, d5[1]);
+  if (max_mr > 3) {
+    vld1_32({d3}, mem[r0]++); // A3
+  }
+  if (max_mr > 1) {
+    vmla_f32(q10, q6, d5[1]);
+  }
   if (prefetch) {
     pld(mem[r9, 352]); // Prefetch B
   }
-  vmla_f32(q12, q6, d6[1]);
+  if (max_mr > 2) {
+    vmla_f32(q12, q6, d6[1]);
+  }
   if (prefetch) {
     pld(mem[r9, 416]); // Prefetch B
   }
-  vmla_f32(q14, q6, d7[1]);
+  if (max_mr > 3) {
+    vmla_f32(q14, q6, d7[1]);
+  }
   vldm(mem[r9]++, {d8-d11}); // B0
   vmla_f32(q9, q7, d4[1]);
-  vmla_f32(q11, q7, d5[1]);
+  if (max_mr > 1) {
+    vmla_f32(q11, q7, d5[1]);
+  }
   subs(r5, r5, 16);
-  vmla_f32(q13, q7, d6[1]);
-  vmla_f32(q15, q7, d7[1]);
+  if (max_mr > 2) {
+    vmla_f32(q13, q7, d6[1]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q15, q7, d7[1]);
+  }
   bhs(l1);
 
   // Epilogue
   bind(l2);
   vmla_f32(q8, q4, d0[0]);
   vldm(mem[r9]++, {d12-d15}); // B1
-  vmla_f32(q10, q4, d1[0]);
-  vmla_f32(q12, q4, d2[0]);
+  if (max_mr > 1) {
+    vmla_f32(q10, q4, d1[0]);
+  }
+  if (max_mr > 2) {
+    vmla_f32(q12, q4, d2[0]);
+  }
   vld1_32({d4}, mem[r3]++); // A0
-  vmla_f32(q14, q4, d3[0]);
+  if (max_mr > 3) {
+    vmla_f32(q14, q4, d3[0]);
+  }
   vmla_f32(q9, q5, d0[0]);
-  vld1_32({d5}, mem[r12]++); // A1
-  vmla_f32(q11, q5, d1[0]);
-  vmla_f32(q13, q5, d2[0]);
-  vmla_f32(q15, q5, d3[0]);
-  vld1_32({d6}, mem[r10]++); // A2
+  if (max_mr > 1) {
+    vld1_32({d5}, mem[r12]++); // A1
+    vmla_f32(q11, q5, d1[0]);
+  }
+  if (max_mr > 2) {
+    vmla_f32(q13, q5, d2[0]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q15, q5, d3[0]);
+  }
+  if (max_mr > 2) {
+    vld1_32({d6}, mem[r10]++); // A2
+  }
   vmla_f32(q8, q6, d0[1]);
-  vmla_f32(q10, q6, d1[1]);
-  vld1_32({d7}, mem[r0]++); // A3
-  vmla_f32(q12, q6, d2[1]);
-  vmla_f32(q14, q6, d3[1]);
+  if (max_mr > 1) {
+    vmla_f32(q10, q6, d1[1]);
+  }
+  if (max_mr > 3) {
+    vld1_32({d7}, mem[r0]++); // A3
+  }
+  if (max_mr > 2) {
+    vmla_f32(q12, q6, d2[1]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q14, q6, d3[1]);
+  }
   vldm(mem[r9]++, {d8-d11}); // B0
   vmla_f32(q9, q7, d0[1]);
-  vmla_f32(q11, q7, d1[1]);
-  vmla_f32(q13, q7, d2[1]);
-  vmla_f32(q15, q7, d3[1]);
+  if (max_mr > 1) {
+    vmla_f32(q11, q7, d1[1]);
+  }
+  if (max_mr > 2) {
+    vmla_f32(q13, q7, d2[1]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q15, q7, d3[1]);
+  }
 
   vmla_f32(q8, q4, d4[0]);
   vldm(mem[r9]++, {d12-d15}); // B1
-  vmla_f32(q10, q4, d5[0]);
-  vmla_f32(q12, q4, d6[0]);
-  vmla_f32(q14, q4, d7[0]);
+  if (max_mr > 1) {
+    vmla_f32(q10, q4, d5[0]);
+  }
+  if (max_mr > 2) {
+    vmla_f32(q12, q4, d6[0]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q14, q4, d7[0]);
+  }
   vmla_f32(q9, q5, d4[0]);
-  vmla_f32(q11, q5, d5[0]);
-  vmla_f32(q13, q5, d6[0]);
-  vmla_f32(q15, q5, d7[0]);
+  if (max_mr > 1) {
+    vmla_f32(q11, q5, d5[0]);
+  }
+  if (max_mr > 2) {
+    vmla_f32(q13, q5, d6[0]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q15, q5, d7[0]);
+  }
   vmla_f32(q8, q6, d4[1]);
-  vmla_f32(q10, q6, d5[1]);
-  vmla_f32(q12, q6, d6[1]);
-  vmla_f32(q14, q6, d7[1]);
+  if (max_mr > 1) {
+    vmla_f32(q10, q6, d5[1]);
+  }
+  if (max_mr > 2) {
+    vmla_f32(q12, q6, d6[1]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q14, q6, d7[1]);
+  }
   vmla_f32(q9, q7, d4[1]);
-  vmla_f32(q11, q7, d5[1]);
+  if (max_mr > 1) {
+    vmla_f32(q11, q7, d5[1]);
+  }
   tst(r5, 15);
-  vmla_f32(q13, q7, d6[1]);
-  vmla_f32(q15, q7, d7[1]);
+  if (max_mr > 2) {
+    vmla_f32(q13, q7, d6[1]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q15, q7, d7[1]);
+  }
 
   // Is there a remainder?- 1 to 3 floats of A (4, 8 or 12 bytes)
   bne(l4);
@@ -263,11 +380,12 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Load params pointer
   ldr(r5, mem[sp, 116]); // params
 
+  // Load min/max values
+  if (clamp_min || clamp_max) {
+    vld1r_32({d4,d5}, mem[r5]++);
+  }
   subs(r1, r1, 8);
   if (clamp_min || clamp_max) {
-    assert(num_post_operations == 0);
-    // Load min/max values
-    vld1r_32({d4,d5}, mem[r5]++);
     vld1r_32({d6,d7}, mem[r5]);
   }
 
@@ -275,35 +393,52 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (clamp_min) {
     vmax_f32(q8, q8, q2);
     vmax_f32(q9, q9, q2);
-    vmax_f32(q10, q10, q2);
-    vmax_f32(q11, q11, q2);
-    vmax_f32(q12, q12, q2);
-    vmax_f32(q13, q13, q2);
-    vmax_f32(q14, q14, q2);
-    vmax_f32(q15, q15, q2);
+    if (max_mr > 1) {
+      vmax_f32(q10, q10, q2);
+      vmax_f32(q11, q11, q2);
+    }
+    if (max_mr > 2) {
+      vmax_f32(q12, q12, q2);
+      vmax_f32(q13, q13, q2);
+    }
+    if (max_mr > 3) {
+      vmax_f32(q14, q14, q2);
+      vmax_f32(q15, q15, q2);
+    }
   }
   if (clamp_max) {
     vmin_f32(q8, q8, q3);
     vmin_f32(q9, q9, q3);
-    vmin_f32(q10, q10, q3);
-    vmin_f32(q11, q11, q3);
-    vmin_f32(q12, q12, q3);
-    vmin_f32(q13, q13, q3);
-    vmin_f32(q14, q14, q3);
-    vmin_f32(q15, q15, q3);
+    if (max_mr > 1) {
+      vmin_f32(q10, q10, q3);
+      vmin_f32(q11, q11, q3);
+    }
+    if (max_mr > 2) {
+      vmin_f32(q12, q12, q3);
+      vmin_f32(q13, q13, q3);
+    }
+    if (max_mr > 3) {
+      vmin_f32(q14, q14, q3);
+      vmin_f32(q15, q15, q3);
+    }
   }
-  assert(num_post_operations == 0 || (!clamp_min && !clamp_max));
   perform_post_operations(max_mr, num_post_operations, post_operations);
 
   // Store full 4 x 8
   blo(l6);
   vst1_32({d16-d19}, mem[r11], r7);
   sub(r0, r0, r2);
-  vst1_32({d20-d23}, mem[r4], r7);
+  if (max_mr > 1) {
+    vst1_32({d20-d23}, mem[r4], r7);
+  }
   sub(r10, r10, r2);
-  vst1_32({d24-d27}, mem[r8], r7);
+  if (max_mr > 2) {
+    vst1_32({d24-d27}, mem[r8], r7);
+  }
   sub(r12, r12, r2);
-  vst1_32({d28-d31}, mem[r6], r7);
+  if (max_mr > 3) {
+    vst1_32({d28-d31}, mem[r6], r7);
+  }
   sub(r3, r3, r2);
   bhi(l0);
 
@@ -320,27 +455,45 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Remainder - 2 floats of A (8 bytes)
   vld1_32({d0}, mem[r3]++); // A0
   vldm(mem[r9]++, {d8-d11}); // B0
-  vld1_32({d1}, mem[r12]++); // A1
-  vld1_32({d2}, mem[r10]++); // A2
-  vld1_32({d3}, mem[r0]++); // A3
+  if (max_mr > 1) {
+    vld1_32({d1}, mem[r12]++); // A1
+  }
+  if (max_mr > 2) {
+    vld1_32({d2}, mem[r10]++); // A2
+  }
+  if (max_mr > 3) {
+    vld1_32({d3}, mem[r0]++); // A3
+  }
 
   vmla_f32(q8, q4, d0[0]);
   vmla_f32(q9, q5, d0[0]);
-  vmla_f32(q10, q4, d1[0]);
-  vmla_f32(q11, q5, d1[0]);
+  if (max_mr > 1) {
+    vmla_f32(q10, q4, d1[0]);
+    vmla_f32(q11, q5, d1[0]);
+  }
   vldm(mem[r9]++, {d12-d15}); // B1
-  vmla_f32(q12, q4, d2[0]);
-  vmla_f32(q13, q5, d2[0]);
-  vmla_f32(q14, q4, d3[0]);
-  vmla_f32(q15, q5, d3[0]);
+  if (max_mr > 2) {
+    vmla_f32(q12, q4, d2[0]);
+    vmla_f32(q13, q5, d2[0]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q14, q4, d3[0]);
+    vmla_f32(q15, q5, d3[0]);
+  }
   vmla_f32(q8, q6, d0[1]);
   vmla_f32(q9, q7, d0[1]);
-  vmla_f32(q10, q6, d1[1]);
-  vmla_f32(q11, q7, d1[1]);
-  vmla_f32(q12, q6, d2[1]);
-  vmla_f32(q13, q7, d2[1]);
-  vmla_f32(q14, q6, d3[1]);
-  vmla_f32(q15, q7, d3[1]);
+  if (max_mr > 1) {
+    vmla_f32(q10, q6, d1[1]);
+    vmla_f32(q11, q7, d1[1]);
+  }
+  if (max_mr > 2) {
+    vmla_f32(q12, q6, d2[1]);
+    vmla_f32(q13, q7, d2[1]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q14, q6, d3[1]);
+    vmla_f32(q15, q7, d3[1]);
+  }
 
   // Is there a remainder?- 1 float of A (4 bytes)
   tst(r5, 4);
@@ -355,12 +508,18 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   vldm(mem[r0]++, {s6}); // A3
   vmla_f32(q8, q4, d0[0]);
   vmla_f32(q9, q5, d0[0]);
-  vmla_f32(q10, q4, d1[0]);
-  vmla_f32(q11, q5, d1[0]);
-  vmla_f32(q12, q4, d2[0]);
-  vmla_f32(q13, q5, d2[0]);
-  vmla_f32(q14, q4, d3[0]);
-  vmla_f32(q15, q5, d3[0]);
+  if (max_mr > 1) {
+    vmla_f32(q10, q4, d1[0]);
+    vmla_f32(q11, q5, d1[0]);
+  }
+  if (max_mr > 2) {
+    vmla_f32(q12, q4, d2[0]);
+    vmla_f32(q13, q5, d2[0]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q14, q4, d3[0]);
+    vmla_f32(q15, q5, d3[0]);
+  }
   b(l3);
 
   // Store odd width
@@ -368,38 +527,70 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   tst(r1, 4);
   beq(l7);
   vst1_32({d16-d17}, mem[r11]++);
-  vst1_32({d20-d21}, mem[r4]++);
+  if (max_mr > 1) {
+    vst1_32({d20-d21}, mem[r4]++);
+  }
   vmov(q8, q9);
-  vmov(q10, q11);
-  vst1_32({d24-d25}, mem[r8]++);
-  vst1_32({d28-d29}, mem[r6]++);
-  vmov(q12, q13);
-  vmov(q14, q15);
+  if (max_mr > 1) {
+    vmov(q10, q11);
+  }
+  if (max_mr > 2) {
+    vst1_32({d24-d25}, mem[r8]++);
+  }
+  if (max_mr > 3) {
+    vst1_32({d28-d29}, mem[r6]++);
+  }
+  if (max_mr > 2) {
+    vmov(q12, q13);
+  }
+  if (max_mr > 3) {
+    vmov(q14, q15);
+  }
 
   bind(l7);
   tst(r1, 2);
   beq(l8);
   vst1_32({d16}, mem[r11]++);
-  vst1_32({d20}, mem[r4]++);
+  if (max_mr > 1) {
+    vst1_32({d20}, mem[r4]++);
+  }
   vmov(d16, d17);
-  vmov(d20, d21);
-  vst1_32({d24}, mem[r8]++);
-  vst1_32({d28}, mem[r6]++);
-  vmov(d24, d25);
-  vmov(d28, d29);
+  if (max_mr > 1) {
+    vmov(d20, d21);
+  }
+  if (max_mr > 2) {
+    vst1_32({d24}, mem[r8]++);
+  }
+  if (max_mr > 3) {
+    vst1_32({d28}, mem[r6]++);
+  }
+  if (max_mr > 2) {
+    vmov(d24, d25);
+  }
+  if (max_mr > 3) {
+    vmov(d28, d29);
+  }
 
   bind(l8);
   tst(r1, 1);
   beq(l9);
   vst1_32({d16[0]}, mem[r11]);
-  vst1_32({d20[0]}, mem[r4]);
-  vst1_32({d24[0]}, mem[r8]);
-  vst1_32({d28[0]}, mem[r6]);
+  if (max_mr > 1) {
+    vst1_32({d20[0]}, mem[r4]);
+  }
+  if (max_mr > 2) {
+    vst1_32({d24[0]}, mem[r8]);
+  }
+  if (max_mr > 3) {
+    vst1_32({d28[0]}, mem[r6]);
+  }
 
   bind(l9);
   vpop({d8-d15});
   pop({r4, r5, r6, r7, r8, r9, r10, r11});
   bx(lr);
+
+  align(16);
 }
 
 void Generator::perform_post_operations(
@@ -430,8 +621,8 @@ void Generator::perform_post_operations(
 }
 
 }  // namespace
-}  // aarch32
-}  // xnnpack
+}  // namespace aarch32
+}  // namespace xnnpack
 
 xnn_status_t xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params) {
   using namespace xnnpack::aarch32;

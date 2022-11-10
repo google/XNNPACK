@@ -162,7 +162,6 @@ def fix_fn_name(name : str) -> str:
   # remove any type of activations from name
   if 'minmax' in name:
     name = name.replace('minmax_', '')
-  name = re.sub(r'(\dx\d)', r'upto\1', name, 1)
   return f'xnn_generate_{name}'
 
 
@@ -344,7 +343,7 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
       if not line.strip():
         in_a_pointers = False
         continue
-      m = re.search(r'#\W+(\w\d+)', line)
+      m = re.search(r'(?:#|//)\W+(\w\d+)', line)
       if not m:
         print(f'ERROR expected to find A pointers: {line}', file=sys.stderr)
         sys.exit(1)
@@ -359,7 +358,7 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
       if not line.strip():
         in_c_pointers = False
         continue
-      m = re.search(r'#\W+(\w\d+)', line)
+      m = re.search(r'(?:#|//)\W+(\w\d+)', line)
       if not m:
         print(f'ERROR expected to find C pointers: {line}', file=sys.stderr)
         sys.exit(1)
@@ -371,15 +370,15 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
       continue
     elif in_vector_register_usage:
       prologue.append(fix_comments(line.rstrip()))
-      if not line.strip():
+      if line.strip() == '':
         in_vector_register_usage = False
         continue
       if 'clamp' in line.lower() or 'unused' in line.lower():
         continue
-      # Skip b vector registers
-      if re.search(r'#\W+B', line):
+      # Skip b vector registers.
+      if re.search(r'(?:#|//)\W+B', line):
         continue
-      m = re.search(r'#\W+(A|C)\d?\W+(((?:v|d|q)\d+(?:\W*|-))+)', line)
+      m = re.search(r'(?:#|//)\W+(A|C)\d?\W+(((?:v|d|q|r)\d+(?:\W*|-))+)', line)
       if not m:
         print(
             f'ERROR failed to parse vector register usage: {line}',
@@ -402,10 +401,10 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
       continue
 
   # check that number of registers matches mr
-  if len(a_pointers) != int(mr):
+  if a_pointers and len(a_pointers) != int(mr):
     print(f'len(a_pointers) {len(a_pointers)} != mr {mr}', file=sys.stderr)
     sys.exit(1)
-  if len(c_pointers) != int(mr):
+  if c_pointers and len(c_pointers) != int(mr):
     print('len(c_pointers) != mr', file=sys.stderr)
     sys.exit(1)
 
@@ -473,7 +472,7 @@ def emit_instruction(instr: str, instructions: List[str],
       return emit_clamp_instruction(
           f'if (max_mr > {max_mr}) {{ {instr.rstrip()} }}', instructions)
 
-  if instr_name == 'ld2r':  # loading min/max
+  if instr_name == 'ld2r' or instr_name == 'vld1r_32':  # loading min/max
     instructions.append(f'if (clamp_min || clamp_max) {{ {instr} }}')
     return
 
