@@ -228,7 +228,7 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__aarch64_n
         RET
 
 END_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a75
-# LINT.ThenChange(1x8-aarch64-neonfma-cortex-a75.cc)
+# LINT.ThenChange(f32-gemm-1x8-aarch64-neonfma-cortex-a75.cc)
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
