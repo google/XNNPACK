@@ -195,6 +195,67 @@ GEMM = 'GEMM'
 IGEMM = 'IGEMM'
 
 
+# Hard-coded post operations.
+# TODO(zhin): parametrize this with vector register usage mappings.
+AARCH32_POST_OP = '''void Generator::perform_post_operations(
+  size_t max_mr,
+  size_t num_post_operations,
+  const xnn_post_operation* post_operations)
+{
+  for (size_t i = 0; i < num_post_operations; i++) {
+    switch (post_operations[i].op_type) {
+      case xnn_post_operation_type_hardswish: {
+        const auto sixth = q0;
+        const auto three = q1;
+        const auto six = q2;
+        const auto zero = q3;
+        vld3r_32({sixth.low(), three.low(), six.low()}, mem[r5]++);
+        vmov(zero, 0);
+        vmov(three.high(), three.low());
+        vmov(six.high(), six.low());
+        const QRegister accs[] = {q8, q9, q10, q11, q12, q13, q14, q15};
+        const QRegister tmps[] = {q4, q5, q6, q7};
+        f32_hardswish(sixth, three, six, zero, &accs[0], XNN_COUNT_OF(accs), &tmps[0], XNN_COUNT_OF(tmps));
+        break;
+      }
+      default:
+        XNN_UNREACHABLE;
+    }
+  }
+}'''
+
+
+AARCH64_POST_OP='''void Generator::perform_post_operations(
+  size_t max_mr,
+  size_t num_post_operations,
+  const xnn_post_operation* post_operations)
+{
+  for (size_t i = 0; i < num_post_operations; i++) {
+    switch (post_operations[i].op_type) {
+      case xnn_post_operation_type_hardswish: {
+        // Reuse A pointers (don't use v8-v15 as they are callee saved).
+        const auto sixth = v0.v4s();
+        const auto three = v1.v4s();
+        const auto six = v2.v4s();
+        const auto zero = v3.v4s();
+        // v4, v5, v6, v7 available for temporaries.
+        ld3r({sixth, three, six}, mem[x8]++);
+        movi(zero, 0);
+        const VRegister accs[] = {
+          v20.v4s(), v21.v4s(), v22.v4s(), v23.v4s(),
+          v24.v4s(), v25.v4s(), v26.v4s(), v27.v4s(),
+          v28.v4s(), v29.v4s(), v30.v4s(), v31.v4s(),
+        };
+        const VRegister tmps[] = {v4.v4s(), v5.v4s(), v6.v4s(), v7.v4s()};
+        f32_hardswish(sixth, three, six, zero, &accs[0], XNN_COUNT_OF(accs), &tmps[0], XNN_COUNT_OF(tmps));
+        break;
+      }
+      default:
+        XNN_UNREACHABLE;
+    }
+  }
+}'''
+
 def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
                    kernel_type: str, prfm: bool,
                    mr: int) -> Tuple[List[str], Mapping[str, int]]:
@@ -217,9 +278,11 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
     if 'Auto-generated file' in line:
       in_autogen = True
       continue
+    elif line.startswith('.syntax'):
+      continue
     elif 'BEGIN_FUNCTION' in line:
       prologue.append(f'// Converted from: {input_file[20:]}')
-      params = 'float min, float max' if minmax else 'void* params'
+      params = 'const jit_gemm_params* jit_gemm_params'
       prefetch = 'bool prefetch, ' if prfm else ''
       if kernel_type == GEMM:
         prologue.append(
@@ -252,6 +315,7 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
         prologue.append('#include <xnnpack/igemm.h>')
       prologue.append('#include <xnnpack/memory.h>')
       prologue.append('#include <xnnpack/microparams.h>')
+      prologue.append('#include <xnnpack/post-operation.h>')
       prologue.append('')
       prologue.append('namespace xnnpack {')
       prologue.append(f'namespace {arch} {{')
@@ -261,6 +325,7 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
       prologue.append('')
       prologue.append(' public:')
       params = 'float min, float max' if minmax else 'void* params'
+      params = 'const jit_gemm_params* jit_gemm_params'
       prefetch = 'bool prefetch, ' if prfm else ''
       if kernel_type == GEMM:
         prologue.append(
@@ -270,6 +335,8 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
         prologue.append(
             f'  void generate({prefetch}size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, {params});'
         )
+
+      prologue.append('  void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);');
       prologue.append('};')
       continue
     elif in_a_pointers:
@@ -312,7 +379,7 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
       # Skip b vector registers
       if re.search(r'#\W+B', line):
         continue
-      m = re.search(r'#\W+(A|C)\d?\W+((v\d+\W*)+)', line)
+      m = re.search(r'#\W+(A|C)\d?\W+(((?:v|d|q)\d+(?:\W*|-))+)', line)
       if not m:
         print(
             f'ERROR failed to parse vector register usage: {line}',
@@ -322,7 +389,7 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
       vec_regs = m.group(2).split()
       vector_register_usage[param_reg].append(vec_regs)
       continue
-    elif 'Vector register usage' in line:
+    elif 'register usage' in line.lower():
       prologue.append(fix_comments(line.rstrip()))
       in_vector_register_usage = True
       continue
@@ -351,11 +418,13 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
     for i, _ in enumerate(v):
       for j, _ in enumerate(v[i]):
         # register maps specify v registers, but we sometimes refer to the q/s/d registers as well.
-        reg = v[i][j]
-        vector_register_map[reg] = i
-        vector_register_map[reg.replace('v', 'q')] = i
-        vector_register_map[reg.replace('v', 's')] = i
-        vector_register_map[reg.replace('v', 'd')] = i
+        regs = v[i][j].split('-')
+        for reg in regs:
+          vector_register_map[reg] = i
+          vector_register_map[reg.replace('v', 'q')] = i
+          vector_register_map[reg.replace('v', 's')] = i
+          vector_register_map[reg.replace('v', 'd')] = i
+          # TODO d registers and aarch32 should use q
 
   return prologue, vector_register_map
 
@@ -374,9 +443,9 @@ def emit_clamp_instruction(instr : str, instructions : List[str]) -> None:
   """
   Guard fmax/fmin instructions behind a clamp_min/clamp_max check.
   """
-  if 'fmax' in instr:
+  if 'fmax' in instr or 'vmax' in instr:
     instructions.append(f'if (clamp_min) {{ {instr} }}')
-  elif 'fmin' in instr:
+  elif 'fmin' in instr or 'vmin' in instr:
     instructions.append(f'if (clamp_max) {{ {instr} }}')
   else:
     instructions.append(instr)
@@ -396,7 +465,7 @@ def emit_instruction(instr: str, instructions: List[str],
   instr_name = m.group(1)
   reg = m.group(2)
 
-  if instr_name == 'fmin' or instr_name == 'fmax':
+  if instr_name in ['fmin', 'fmax', 'vmin_f32', 'vmax_f32']:
     max_mr = vector_register_map[reg]
     if (max_mr == 0):
       return emit_clamp_instruction(instr, instructions)
@@ -491,9 +560,14 @@ def parse_microkernel(
       continue
     m = re.fullmatch(INSTR_MEMOP_OFFSET_RE, line)
     if m:
-      emit_instruction(
+      if m[1].lower() == 'pld':
+        emit_prefetch_instruction(
           f'{fix_instr_name(m[1])}(mem[{m[2]}, {m[3]}]){sc} {m[4]}',
-          instructions, vector_register_map)
+          prfm, instructions)
+      else:
+        emit_instruction(
+            f'{fix_instr_name(m[1])}(mem[{m[2]}, {m[3]}]){sc} {m[4]}',
+            instructions, vector_register_map)
       continue
     m = re.fullmatch(INSTR_REG_MEMOP_RE, line)
     if m:
@@ -765,6 +839,21 @@ def merge_consecutive_checks(instructions : List[str]) -> List[str]:
   return output
 
 
+def insert_post_operations(instructions : List[str]):
+  index = 0
+  # Look for the comment marking where we store full tile, that's where we will
+  # perform post operations.
+  for i, l in enumerate(instructions):
+    if 'Store full ' in l:
+      index = i
+      break
+  assert(instructions[index-1].strip() == '')
+  instructions.insert(
+      index-1,
+      "perform_post_operations(max_mr, num_post_operations, post_operations);")
+  return instructions
+
+
 def main(input_file : str) -> None:
   arch = None
   kernel_type = GEMM
@@ -826,6 +915,7 @@ def main(input_file : str) -> None:
   # TODO(zhin): iterate until fixpoint instead.
   instructions = merge_consecutive_checks(instructions)
   instructions = merge_consecutive_checks(instructions)
+  instructions = insert_post_operations(instructions)
 
   # Actually emit the JIT codegen (to stdout).
   for p in prologue:
@@ -840,6 +930,10 @@ def main(input_file : str) -> None:
     print('  assert(ks != 0);')
   print()
   print(f'  Label {labels_str};')
+  print('  const size_t num_post_operations = jit_gemm_params->num_post_operations;')
+  print('  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;')
+  print('  const float min = jit_gemm_params->f32_minmax.min;')
+  print('  const float max = jit_gemm_params->f32_minmax.max;')
   if minmax:
     print(
         '  const bool clamp_min = min != -std::numeric_limits<float>::infinity();'
@@ -847,6 +941,7 @@ def main(input_file : str) -> None:
     print(
         '  const bool clamp_max = max != +std::numeric_limits<float>::infinity();'
     )
+    print('  assert(num_post_operations == 0 || (!clamp_min && !clamp_max));')
 
   indent = '  '
   for i in instructions:
@@ -858,9 +953,21 @@ def main(input_file : str) -> None:
       print()
     else:
       print(indent + (i).rstrip())
-  print(indent + 'align(16, AlignInstruction::kHlt);')
+  if arch == AARCH32:
+    print(indent + 'align(16);')
+  else:
+    print(indent + 'align(16, AlignInstruction::kHlt);')
 
   print('}')
+  # print post operations definition
+  if arch == AARCH32:
+    print()
+    print(AARCH32_POST_OP)
+    print()
+  else:
+    print()
+    print(AARCH64_POST_OP)
+    print()
   print('}  // namespace')
   print(f'}}  // namespace {arch}')
   print('}  // namespace xnnpack')
@@ -886,15 +993,14 @@ def print_generator_definition(kernel_type, fn_name, arch, minmax, prefetch=''):
   print('  Generator g(code);')
   if minmax:
     print('  assert(params != nullptr);')
-    print('  const jit_gemm_params* gemm_params = static_cast<const jit_gemm_params*>(params);')
   if kernel_type == GEMM:
     if minmax:
-      print(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);')
+      print(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, static_cast<const jit_gemm_params*>(params));')
     else:
       print(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, nullptr);')
   else:
     if minmax:
-      print(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, ks, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);')
+      print(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, ks, static_cast<const jit_gemm_params*>(params));')
     else:
       print(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, ks, nullptr);')
   print('  g.finalize();')
