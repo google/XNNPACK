@@ -2856,7 +2856,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x16-transposec/gen/x16-transposec-8x8-reuse-mov-zip-neon.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-multi-zip-neon.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-switch-zip-neon.c
-  src/x24-transposec/2x2-neon-tbl64.c
+  src/x24-transposec/x24-transposec-2x2-neon-tbl64.c
   src/x32-packx/x32-packx-x4-neon-st4.c
   src/x32-transposec/gen/x32-transposec-2x2-multi-dec-zip-neon.c
   src/x32-transposec/gen/x32-transposec-2x2-multi-mov-zip-neon.c
@@ -3159,7 +3159,7 @@ SET(PROD_AARCH64_NEON_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vrdivc-minmax-neon-x8.c
   src/f32-vsqrt/gen/f32-vsqrt-neon-sqrt-x4.c
   src/x8-lut/gen/x8-lut-neon-tbx128x4-x64.c
-  src/x32-transposec/4x4-neon-tbl128.c)
+  src/x32-transposec/x32-transposec-4x4-neon-tbl128.c)
 
 SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
   src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-neonfma-zip.c
@@ -3285,8 +3285,8 @@ SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
   src/x8-lut/gen/x8-lut-neon-tbx128x4-x32.c
   src/x8-lut/gen/x8-lut-neon-tbx128x4-x48.c
   src/x8-lut/gen/x8-lut-neon-tbx128x4-x64.c
-  src/x24-transposec/4x4-neon-tbl128.c
-  src/x32-transposec/4x4-neon-tbl128.c)
+  src/x24-transposec/x24-transposec-4x4-neon-tbl128.c
+  src/x32-transposec/x32-transposec-4x4-neon-tbl128.c)
 
 SET(PROD_NEONV8_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-x32.c
@@ -4035,7 +4035,7 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-vunary/gen/f32-vneg-sse-x8.c
   src/f32-vunary/gen/f32-vsqr-sse-x8.c
   src/x32-packx/x32-packx-x4-sse.c
-  src/x32-transposec/4x4-sse.c)
+  src/x32-transposec/x32-transposec-4x4-sse.c)
 
 SET(ALL_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/f32-avgpool-9p8x-minmax-sse-c4.c
@@ -4213,7 +4213,7 @@ SET(ALL_SSE_MICROKERNEL_SRCS
   src/math/sqrt-f32-sse-nr1mac.c
   src/math/sqrt-f32-sse-nr2mac.c
   src/x32-packx/x32-packx-x4-sse.c
-  src/x32-transposec/4x4-sse.c)
+  src/x32-transposec/x32-transposec-4x4-sse.c)
 
 SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-sse2-int16-x32.c
@@ -4646,7 +4646,7 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/x16-transposec/gen/x16-transposec-8x8-reuse-mov-sse2.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-multi-sse2.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-switch-sse2.c
-  src/x16-transposec/4x8-sse2.c
+  src/x16-transposec/x16-transposec-4x8-sse2.c
   src/x32-transposec/gen/x32-transposec-4x4-multi-mov-sse2.c
   src/x32-transposec/gen/x32-transposec-4x4-multi-multi-sse2.c
   src/x32-transposec/gen/x32-transposec-4x4-multi-switch-sse2.c
@@ -4712,7 +4712,7 @@ SET(ALL_SSSE3_MICROKERNEL_SRCS
   src/qu8-vlrelu/gen/qu8-vlrelu-ssse3-x32.c
   src/x8-lut/gen/x8-lut-ssse3-x16.c
   src/x8-lut/gen/x8-lut-ssse3-x32.c
-  src/x24-transposec/4x4-ssse3.c)
+  src/x24-transposec/x24-transposec-4x4-ssse3.c)
 
 SET(PROD_SSE41_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-sse41-int16-x16.c
