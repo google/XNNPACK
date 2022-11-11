@@ -157,3 +157,32 @@ jobs:
         working-directory: ${{ github.workspace }}
         env:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
+  cmake-ios-arm64:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create output directory
+        run: mkdir -p build/ios/arm64
+        working-directory: ${{ github.workspace }}
+      - name: Generate CMake project
+        run: cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DXNNPACK_BUILD_BENCHMARKS=OFF -DXNNPACK_BUILD_TESTS=OFF ../../..
+        working-directory: ${{ github.workspace }}/build/ios/arm64
+      - name: Build with Xcode
+        run: cmake --build build/ios/arm64 --parallel $(sysctl -n hw.ncpu)
+        working-directory: ${{ github.workspace }}
+  cmake-ios-x86_64:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create output directory
+        run: mkdir -p build/ios/x86_64
+        working-directory: ${{ github.workspace }}
+      - name: Generate CMake project
+        run: cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=x86_64 -DXNNPACK_BUILD_BENCHMARKS=OFF -DXNNPACK_BUILD_TESTS=OFF ../../..
+        working-directory: ${{ github.workspace }}/build/ios/x86_64
+      - name: Build with Xcode
+        run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator
+        working-directory: ${{ github.workspace }}
+
