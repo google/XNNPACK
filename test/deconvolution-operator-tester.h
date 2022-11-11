@@ -1235,7 +1235,6 @@ class DeconvolutionOperatorTester {
     xnn_weights_cache weights_cache;
     xnn_init_weights_cache(&weights_cache);
     caches.weights_cache = &weights_cache;
-    void* old_weights_cache_start = weights_cache.cache.weights.start;
     size_t old_weights_cache_size = weights_cache.cache.weights.size;
 
     std::vector<xnn_operator_t> operators;
@@ -1370,9 +1369,8 @@ class DeconvolutionOperatorTester {
       xnn_delete_operator(deconvolution_op);
     }
 
-    // Check that the weights cache grew and moved. If these assertion fails,
-    // might have to increase the number of test iterations.
-    ASSERT_NE(old_weights_cache_start, weights_cache.cache.weights.start);
+    // Check that the weights cache grew. We don't check that it moved because that can be flaky (depends if initial
+    // allocation is big enough, and future allocations can land on the old pointer).
     ASSERT_LT(old_weights_cache_size, weights_cache.cache.weights.size);
     // Since the weights are randomized, it is very unlikely to have any hits.
     ASSERT_EQ(iterations(), weights_cache.cache.misses);
