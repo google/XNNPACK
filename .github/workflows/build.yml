@@ -140,6 +140,9 @@ jobs:
       - name: Build with Xcode
         run: cmake --build build/macos/x86_64 --parallel $(sysctl -n hw.ncpu) -- -quiet
         working-directory: ${{ github.workspace }}
+      - name: Run tests
+        run: ctest --build-config Debug --output-on-failure --parallel $(sysctl -n hw.ncpu)
+        working-directory: ${{ github.workspace }}/build/macos/x86_64
   cmake-android:
     strategy:
       matrix:
