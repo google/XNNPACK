@@ -199,9 +199,12 @@ jobs:
         run: mkdir -p build/ios/x86_64
         working-directory: ${{ github.workspace }}
       - name: Generate CMake project
-        run: cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=x86_64 -DXNNPACK_BUILD_BENCHMARKS=OFF -DXNNPACK_BUILD_TESTS=OFF ../../..
+        run: cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=x86_64 -DXNNPACK_BUILD_BENCHMARKS=OFF ../../..
         working-directory: ${{ github.workspace }}/build/ios/x86_64
       - name: Build with Xcode
         run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator -quiet
         working-directory: ${{ github.workspace }}
+      - name: Run tests
+        run: ctest --build-config Debug --output-on-failure --parallel $(sysctl -n hw.ncpu)
+        working-directory: ${{ github.workspace }}/build/ios/x86_64
 
