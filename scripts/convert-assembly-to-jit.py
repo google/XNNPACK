@@ -9,8 +9,10 @@ Takes a single argument, an assembly file, and prints converted output to stdout
 """
 
 import argparse
+import codecs
 from collections import defaultdict
 import datetime
+import os
 import re
 import sys
 from typing import List, Tuple, Mapping
@@ -871,7 +873,8 @@ def insert_post_operations(instructions : List[str]):
   return instructions
 
 
-def main(input_file : str, post_op : bool) -> None:
+def convert(input_file : str, post_op : bool) -> None:
+  output = []
   arch = None
   kernel_type = GEMM
   minmax = False
@@ -937,105 +940,125 @@ def main(input_file : str, post_op : bool) -> None:
 
   # Actually emit the JIT codegen (to stdout).
   for p in prologue:
-    print(p)
+    output.append(p)
 
   labels_str = ', '.join(f'l{l}' for l in labels)
-  print(f'  assert(max_mr <= {mr});')
-  print(f'  assert(nc_mod_nr < {nr});')
-  print('  assert(kc != 0);')
-  print(f'  assert(kc % sizeof({ctype}) == 0);')
+  output.append(f'  assert(max_mr <= {mr});')
+  output.append(f'  assert(nc_mod_nr < {nr});')
+  output.append('  assert(kc != 0);')
+  output.append(f'  assert(kc % sizeof({ctype}) == 0);')
   if kernel_type == IGEMM:
-    print('  assert(ks != 0);')
-  print()
-  print(f'  Label {labels_str};')
-  print('  const size_t num_post_operations = jit_gemm_params->num_post_operations;')
+    output.append('  assert(ks != 0);')
+  output.append('')
+  output.append(f'  Label {labels_str};')
+  output.append('  const size_t num_post_operations = jit_gemm_params->num_post_operations;')
   if not post_op:
-    print('  (void) num_post_operations;  // Silence unused warning.');
+    output.append('  (void) num_post_operations;  // Silence unused warning.');
   if post_op:
-    print('  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;')
-  print('  const float min = jit_gemm_params->f32_minmax.min;')
-  print('  const float max = jit_gemm_params->f32_minmax.max;')
+    output.append('  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;')
+  output.append('  const float min = jit_gemm_params->f32_minmax.min;')
+  output.append('  const float max = jit_gemm_params->f32_minmax.max;')
   if minmax:
-    print(
+    output.append(
         '  const bool clamp_min = min != -std::numeric_limits<float>::infinity();'
     )
-    print(
+    output.append(
         '  const bool clamp_max = max != +std::numeric_limits<float>::infinity();'
     )
-    print('  assert(num_post_operations == 0 || (!clamp_min && !clamp_max));')
+    output.append('  assert(num_post_operations == 0 || (!clamp_min && !clamp_max));')
 
   indent = '  '
   for i in instructions:
     if i.strip().startswith('#'):
-      print(indent + fix_comments(i))
+      output.append(indent + fix_comments(i))
     elif i.strip().startswith('//'):
-      print(indent + i)
+      output.append(indent + i)
     elif i.strip() == '':
-      print()
+      output.append('')
     else:
-      print(indent + (i).rstrip())
+      output.append(indent + (i).rstrip())
   if arch == AARCH32:
-    print(indent + 'align(16);')
+    output.append(indent + 'align(16);')
   else:
-    print(indent + 'align(16, AlignInstruction::kHlt);')
+    output.append(indent + 'align(16, AlignInstruction::kHlt);')
 
-  print('}')
+  output.append('}')
   # print post operations definition
   if arch == AARCH32 and post_op:
-    print()
-    print(AARCH32_POST_OP)
-    print()
+    output.append('')
+    output.append(AARCH32_POST_OP)
+    output.append('')
   elif arch == AARCH64 and post_op:
-    print()
-    print(AARCH64_POST_OP)
-    print()
-  print('}  // namespace')
-  print(f'}}  // namespace {arch}')
-  print('}  // namespace xnnpack')
-  print('')
+    output.append('')
+    output.append(AARCH64_POST_OP)
+    output.append('')
+  output.append('}  // namespace')
+  output.append(f'}}  // namespace {arch}')
+  output.append('}  // namespace xnnpack')
+  output.append('')
   if prfm:
-    print_generator_definition(kernel_type, remove_prfm_from_fn_name(fn_name), arch, minmax, prefetch='false, ')
-    print()
-    print_generator_definition(kernel_type, fn_name, arch, minmax, prefetch='true, ')
+    print_generator_definition(output, kernel_type, remove_prfm_from_fn_name(fn_name), arch, minmax, prefetch='false, ')
+    output.append('')
+    print_generator_definition(output, kernel_type, fn_name, arch, minmax, prefetch='true, ')
   else:
-    print_generator_definition(kernel_type, fn_name, arch, minmax)
+    print_generator_definition(output, kernel_type, fn_name, arch, minmax)
+
+  return output
 
 
-def print_generator_definition(kernel_type, fn_name, arch, minmax, prefetch=''):
+def print_generator_definition(output, kernel_type, fn_name, arch, minmax, prefetch=''):
   if kernel_type == GEMM:
-    print(
+    output.append(
         f'xnn_status_t {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params) {{'
     )
   else:
-    print(
+    output.append(
         f'xnn_status_t {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const void* params) {{'
     )
-  print(f'  using namespace xnnpack::{arch};')
-  print('  Generator g(code);')
+  output.append(f'  using namespace xnnpack::{arch};')
+  output.append('  Generator g(code);')
   if minmax:
-    print('  assert(params != nullptr);')
+    output.append('  assert(params != nullptr);')
   if kernel_type == GEMM:
     if minmax:
-      print(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, static_cast<const jit_gemm_params*>(params));')
+      output.append(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, static_cast<const jit_gemm_params*>(params));')
     else:
-      print(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, nullptr);')
+      output.append(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, nullptr);')
   else:
     if minmax:
-      print(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, ks, static_cast<const jit_gemm_params*>(params));')
+      output.append(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, ks, static_cast<const jit_gemm_params*>(params));')
     else:
-      print(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, ks, nullptr);')
-  print('  g.finalize();')
-  print('  if (g.error() != xnnpack::Error::kNoError) {')
-  print('    return xnn_status_invalid_state;')
-  print('  }')
-  print('  return xnn_status_success;')
-  print('}')
+      output.append(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, ks, nullptr);')
+  output.append('  g.finalize();')
+  output.append('  if (g.error() != xnnpack::Error::kNoError) {')
+  output.append('    return xnn_status_invalid_state;')
+  output.append('  }')
+  output.append('  return xnn_status_success;')
+  output.append('}')
+
+
+def main(sys_args):
+  parser = argparse.ArgumentParser(description='Convert assembly to to JIT C++, writes to stdout.')
+  parser.add_argument('-i', '--input', metavar='input_file', help='Input assembly filename', required=True)
+  parser.add_argument('-o', '--output', metavar='output_file', help='Output cc filename', required=True)
+  parser.add_argument(
+      '--post-op', help='Should support post operation', default=True, action=argparse.BooleanOptionalAction)
+  args = parser.parse_args(sys_args)
+
+  output = '\n'.join(convert(args.input, args.post_op))
+  # Add trailing new line.
+  output += '\n'
+
+  output_name = args.output
+  txt_changed = True
+  if os.path.exists(output_name):
+    with codecs.open(output_name, "r", encoding="utf-8") as output_file:
+      ofr = output_file.read()
+      txt_changed = ofr != output
+  if txt_changed:
+    with codecs.open(output_name, "w", encoding="utf-8") as output_file:
+      output_file.write(output)
 
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(description='Convert assembly to to JIT C++, writes to stdout.')
-  parser.add_argument('input_file', help='Input assembly filename')
-  parser.add_argument(
-      '--post-op', help='Should support post operation', default=True, action=argparse.BooleanOptionalAction)
-  args = parser.parse_args()
-  main(args.input_file, args.post_op)
+  main(sys.argv[1:])

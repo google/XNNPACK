@@ -342,7 +342,7 @@ tools/generate-gemm-test.py --spec test/f32-igemm-relu.yaml --output test/f32-ig
 tools/generate-gemm-test.py --spec test/f32-igemm-minmax.yaml --output test/f32-igemm-minmax.cc --output test/f32-igemm-minmax-2.cc &
 
 ###################################### JIT ####################################
-scripts/convert-assembly-to-jit.py src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-ld128.S > src/f32-igemm/f32-igemm-6x8-aarch64-neonfma-ld128.cc &
-scripts/convert-assembly-to-jit.py src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-prfm-cortex-a75.S > src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a75.cc &
+scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-ld128.S -o src/f32-igemm/f32-igemm-6x8-aarch64-neonfma-ld128.cc &
+scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-prfm-cortex-a75.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a75.cc &
 
 wait
