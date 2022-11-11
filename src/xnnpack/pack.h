@@ -654,12 +654,28 @@ XNN_INTERNAL void xnn_pack_f16_dconv_oki_w(
   const void* params);
 
 
+typedef void (*xnn_pack_chw_dwconv_ghw_w_function)(
+  size_t kernel_size,
+  size_t groups,
+  const void* kernel,
+  const void* bias,
+  void* packed_weights,
+  const void* params);
+
 XNN_INTERNAL void xnn_pack_f32_chw_dwconv_ghw_w(
   size_t kernel_size,
   size_t groups,
   const float* kernel,
   const float* bias,
   float* packed_weights,
+  const void* params);
+
+XNN_INTERNAL void xnn_pack_f32_to_f16_chw_dwconv_ghw_w(
+  size_t kernel_size,
+  size_t groups,
+  const float* kernel,
+  const float* bias,
+  uint16_t* packed_weights,
   const void* params);
 
 XNN_INTERNAL void xnn_pack_f16_chw_dwconv_ghw_w(
@@ -670,6 +686,14 @@ XNN_INTERNAL void xnn_pack_f16_chw_dwconv_ghw_w(
   uint16_t* packed_weights,
   const void* params);
 
+
+typedef void (*xnn_pack_chw_dwconv_hwg_w_function)(
+  size_t kernel_size,
+  size_t groups,
+  const void* kernel,
+  const void* bias,
+  void* packed_weights,
+  const void* params);
 
 XNN_INTERNAL void xnn_pack_f32_chw_dwconv_hwg_w(
   size_t kernel_size,

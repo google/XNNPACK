@@ -2005,7 +2005,14 @@ class ConvolutionOperatorTester {
   }
 
   void TestNCHWxF16() {
-    ASSERT_EQ(weights_type(), WeightsType::Default);
+    switch (weights_type()) {
+      case WeightsType::Default:
+        break;
+      case WeightsType::FP32:
+        break;
+      default:
+        GTEST_FAIL() << "unexpected weights type";
+    }
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());

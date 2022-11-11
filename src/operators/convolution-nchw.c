@@ -69,12 +69,6 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
 
   status = xnn_status_invalid_parameter;
 
-  if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-    xnn_log_error("failed to create %s operator: XNN_FLAG_FP32_STATIC_WEIGHTS not supported",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f16));
-    goto error;
-  }
-
   if (kernel_width == 0 || kernel_height == 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel: kernel dimensions must be non-zero",
@@ -296,12 +290,19 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
         goto error;
       }
 
+      xnn_pack_chw_dwconv_hwg_w_function pack_chw_dwconv_hwg_w = (xnn_pack_chw_dwconv_hwg_w_function) xnn_pack_f16_chw_dwconv_hwg_w;
+      xnn_pack_chw_dwconv_ghw_w_function pack_chw_dwconv_ghw_w = (xnn_pack_chw_dwconv_ghw_w_function) xnn_pack_f16_chw_dwconv_ghw_w;
+      if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+        pack_chw_dwconv_hwg_w = (xnn_pack_chw_dwconv_hwg_w_function) xnn_pack_f32_to_f16_chw_dwconv_hwg_w;
+        pack_chw_dwconv_ghw_w = (xnn_pack_chw_dwconv_ghw_w_function) xnn_pack_f32_to_f16_chw_dwconv_ghw_w;
+      }
+
       if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
-        xnn_pack_f16_chw_dwconv_hwg_w(
+        pack_chw_dwconv_hwg_w(
           kernel_height * kernel_width, groups,
           kernel, bias, weights_ptr, NULL);
       } else {
-        xnn_pack_f16_chw_dwconv_ghw_w(
+        pack_chw_dwconv_ghw_w(
           kernel_height * kernel_width, groups,
           kernel, bias, weights_ptr, NULL);
       }
