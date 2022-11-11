@@ -91,6 +91,9 @@ jobs:
         run: scripts/build-windows-x64.cmd
         shell: cmd
         working-directory: ${{ github.workspace }}
+        env:
+          CFLAGS: "/UNDEBUG"
+          CXXFLAGS: "/UNDEBUG"
       - name: Run tests
         run: ctest -C Release --output-on-failure --parallel %NUMBER_OF_PROCESSORS%
         working-directory: ${{ github.workspace }}/build/windows/x64
@@ -103,6 +106,9 @@ jobs:
         run: scripts/build-windows-x86.cmd
         shell: cmd
         working-directory: ${{ github.workspace }}
+        env:
+          CFLAGS: "/UNDEBUG"
+          CXXFLAGS: "/UNDEBUG"
       - name: Run tests
         run: ctest -C Release --output-on-failure --parallel %NUMBER_OF_PROCESSORS%
         working-directory: ${{ github.workspace }}/build/windows/x86
