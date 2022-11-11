@@ -999,6 +999,7 @@ static void init(void) {
             .ukernel = (xnn_vunary_ukernel_function) xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x8,
             .element_tile = 8,
           };
+
           #ifndef XNN_NO_NCHW_OPERATORS
             init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
@@ -1007,25 +1008,32 @@ static void init(void) {
               .mr = 32,
               .nr = 1,
             };
+            xnn_params.f16.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
+              .ukernel_with_symm_padding =
+                (xnn_conv_hwc2chw_ukernel_function) xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2,
+              .output_channel_tile = 4,
+              .output_height_tile = 2,
+              .output_width_tile = 2,
+            };
             xnn_params.f16.dwconv2d_chw_3x3 = (struct dwconv2d_chw_parameters) {
               .ukernel = (xnn_dwconv2d_chw_ukernel_function) xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8,
-              .output_width_tile = 8,
               .output_height_tile = 2,
+              .output_width_tile = 8,
             };
             xnn_params.f16.dwconv2d_chw_3x3s2 = (struct dwconv2d_chw_parameters) {
               .ukernel = (xnn_dwconv2d_chw_ukernel_function) xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8,
-              .output_width_tile = 8,
               .output_height_tile = 1,
+              .output_width_tile = 8,
             };
             xnn_params.f16.dwconv2d_chw_5x5 = (struct dwconv2d_chw_parameters) {
               .ukernel = (xnn_dwconv2d_chw_ukernel_function) xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8,
-              .output_width_tile = 8,
               .output_height_tile = 1,
+              .output_width_tile = 8,
             };
             xnn_params.f16.dwconv2d_chw_5x5s2 = (struct dwconv2d_chw_parameters) {
               .ukernel = (xnn_dwconv2d_chw_ukernel_function) xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8,
-              .output_width_tile = 8,
               .output_height_tile = 1,
+              .output_width_tile = 8,
             };
             xnn_params.f16.gavgpool_cw = (struct gavgpool_cw_parameters) {
               .ukernel = (xnn_gavgpool_cw_ukernel_function) xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8,
