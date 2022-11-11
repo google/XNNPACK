@@ -279,7 +279,7 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
     if 'Auto-generated file' in line:
       in_autogen = True
       continue
-    elif line.startswith('.syntax'):
+    elif line.startswith('.syntax') or 'LINT.' in line:
       continue
     elif 'BEGIN_FUNCTION' in line:
       prologue.append(f'// Converted from: {input_file[20:]}')
