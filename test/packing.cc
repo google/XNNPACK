@@ -2160,3 +2160,79 @@ TEST(PACK_F16_CHW_DWCONV_HWG_W, groups_gt_1) {
   };
   EXPECT_EQ(expected, packed_weights);
 }
+
+
+TEST(PACK_F16_CHW_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
+  size_t primary_tile = 3;
+  size_t h = 3;
+  size_t w = 1;
+
+  std::vector<uint16_t> b(1);
+  std::iota(b.begin(), b.end(), 0);  // b = [0]
+  std::vector<uint16_t> k(h * w);  // k = [1, 2, 3]
+  std::iota(k.begin(), k.end(), static_cast<uint16_t>(b.size()));
+  std::vector<uint16_t> packed_weights(primary_tile + 1);
+
+  xnn_pack_f16_chw_dwconv_ghw_w(
+      primary_tile,  // kernel size
+      1, // groups
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      nullptr);
+
+  std::vector<uint16_t> expected = {
+    // bias first
+    0,
+    // then weights
+    1,
+    2,
+    3,
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F16_CHW_DWCONV_GHW_W, groups_gt_1) {
+  size_t primary_tile = 3;
+  size_t g = 3;
+  size_t h = 3;
+  size_t w = 1;
+
+  std::vector<uint16_t> b(g);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2]
+  std::vector<uint16_t> k(g * h * w);  // k = [3, 4, 5, 6, 7, 8, 9, 10, 11 ]
+  std::iota(k.begin(), k.end(), static_cast<uint16_t>(b.size()));
+  std::vector<uint16_t> packed_weights(g + g * h * w);
+
+  xnn_pack_f16_chw_dwconv_ghw_w(
+      primary_tile,  // kernel size
+      g, // groups
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      nullptr);
+
+  std::vector<uint16_t> expected = {
+    // bias first
+    0,
+    // then weights
+    3,
+    4,
+    5,
+
+    // 2nd group, bias first
+    1,
+    // then weights
+    6,
+    7,
+    8,
+
+    // 3rd group, bias first
+    2,
+    // then weights
+    9,
+    10,
+    11,
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
