@@ -23,7 +23,6 @@
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
 // Register usage
-// r14 (lr) unused
 // A0   r3  d0
 // A1  r12  d1
 // A2  r10  d2
@@ -35,6 +34,7 @@
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
 // clamp  (r5) d4 d5 d6 d7
+// unused r14 (lr)
 
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         .arm

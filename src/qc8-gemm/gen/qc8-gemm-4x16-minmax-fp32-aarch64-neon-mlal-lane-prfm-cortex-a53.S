@@ -34,8 +34,8 @@
 // C1  x8 v17 v21 v25 v29
 // C2  x9 v18 v22 v26 v30
 // C3  x7 v19 v23 v27 v31
-# unused v7 v8 v9 v10 v11 v12 v13 v14 v15
 // temp x10 x17 for Cortex-A53 loads
+// unused v7 v8 v9 v10 v11 v12 v13 v14 v15
 
 BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_prfm_cortex_a53
 
