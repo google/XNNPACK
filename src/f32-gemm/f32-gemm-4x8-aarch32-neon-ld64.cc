@@ -3,22 +3,25 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <cassert>
+#include <cstddef>
+#include <limits>
 
 #include <xnnpack.h>
 #include <xnnpack/aarch32-assembler.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/memory.h>
-
+#include <xnnpack/microparams.h>
+#include <xnnpack/post-operation.h>
 
 namespace xnnpack {
 namespace aarch32 {
 namespace {
 class Generator : public MacroAssembler {
   using MacroAssembler::MacroAssembler;
+
  public:
-  void generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params);
+  void generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params);
 };
 
 
@@ -49,15 +52,22 @@ class Generator : public MacroAssembler {
 // C3   r6 d28-d29 q14  d30-d31 q15
 // clamp  (r5) d4 d5 d6 d7
 
-// Converted from: src/f32-gemm/gen/4x8-minmax-aarch32-neon-ld64.S
-void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params)
+// Converted from: src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-ld64.S
+void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
 {
+  assert(max_mr <= 4);
   assert(nc_mod_nr < 8);
   assert(kc != 0);
   assert(kc % sizeof(float) == 0);
 
   Label l0, l1, l2, l3, l4, l5, l6, l7;
-
+  const size_t num_post_operations = jit_gemm_params->num_post_operations;
+  (void) num_post_operations;  // Silence unused warning.
+  const float min = jit_gemm_params->f32_minmax.min;
+  const float max = jit_gemm_params->f32_minmax.max;
+  const bool clamp_min = min != -std::numeric_limits<float>::infinity();
+  const bool clamp_max = max != +std::numeric_limits<float>::infinity();
+  assert(num_post_operations == 0 || (!clamp_min && !clamp_max));
   // Push 96 bytes
   push({r4, r5, r6, r7, r8, r9, r10, r11}); // 32
   vpush({d8-d15}); // +64 = 96
@@ -69,38 +79,54 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const void*
   ldr(r5, mem[sp, 116]); // params
 
   // Clamp A and C pointers
-  cmp(r0, 2); // if mr >= 2
-  add(r12, r3, r7); //   a1 = a0 + a_stride
-  add(r4, r11, r6); //   c1 = c0 + cm_stride
-  movlo(r12, r3); // a1
-  movlo(r4, r11); // c1
-  // if mr > 2
-  add(r10, r12, r7); //   a2 = a1 + a_stride
-  add(r8, r4, r6); //   c2 = c1 + cm_stride
-  movls(r10, r12); // a2
-  movls(r8, r4); // c2
+  if (max_mr > 1) {
+    cmp(r0, 2); // if mr >= 2
+    add(r12, r3, r7); //   a1 = a0 + a_stride
+    add(r4, r11, r6); //   c1 = c0 + cm_stride
+    movlo(r12, r3); // a1
+    movlo(r4, r11); // c1
+  }
+  if (max_mr > 2) {
+    // if mr > 2
+    add(r10, r12, r7); //   a2 = a1 + a_stride
+    add(r8, r4, r6); //   c2 = c1 + cm_stride
+    movls(r10, r12); // a2
+    movls(r8, r4); // c2
+  }
 
-  cmp(r0, 4); // if mr >=4
-  add(r0, r10, r7); //   a3 = a2 + a_stride
-  add(r6, r8, r6); //   c3 = c2 + cm_stride
-  movlo(r0, r10); // a3
-  movlo(r6, r8); // c3
+  if (max_mr > 3) {
+    cmp(r0, 4); // if mr >=4
+    add(r0, r10, r7); //   a3 = a2 + a_stride
+    add(r6, r8, r6); //   c3 = c2 + cm_stride
+    movlo(r0, r10); // a3
+    movlo(r6, r8); // c3
+  }
 
   // Load min/max values
-  vld1r_32({d4, d5}, mem[r5]++);
+  if (clamp_min || clamp_max) {
+    vld1r_32({d4, d5}, mem[r5]++);
+  }
   ldr(r7, mem[sp, 112]); // cn_stride
-  vld1r_32({d6, d7}, mem[r5]);
+  if (clamp_min || clamp_max) {
+    vld1r_32({d6, d7}, mem[r5]);
+  }
 
   bind(l0);
   // Load initial bias from w into accumulators
   vldm(mem[r9]++, {d16-d19}); // Bias
   subs(r5, r2, 8);
-  vmov(q10, q8);
-  vmov(q11, q9);
-  vmov(q12, q8);
-  vmov(q13, q9);
-  vmov(q14, q8);
-  vmov(q15, q9);
+  if (max_mr > 1) {
+    vmov(q10, q8);
+    vmov(q11, q9);
+  }
+  if (max_mr > 2) {
+    vmov(q12, q8);
+    vmov(q13, q9);
+  }
+  if (max_mr > 3) {
+    vmov(q14, q8);
+    vmov(q15, q9);
+  }
 
   blo(l3); // less than 2 channels?
 
@@ -108,28 +134,50 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const void*
   bind(l1);
   vld1_32({d0}, mem[r3]++); // A0
   vldm(mem[r9]++, {d8-d11}); // B0
-  vld1_32({d1}, mem[r12]++); // A1
-  vld1_32({d2}, mem[r10]++); // A2
-  vld1_32({d3}, mem[r0]++); // A3
+  if (max_mr > 1) {
+    vld1_32({d1}, mem[r12]++); // A1
+  }
+  if (max_mr > 2) {
+    vld1_32({d2}, mem[r10]++); // A2
+  }
+  if (max_mr > 3) {
+    vld1_32({d3}, mem[r0]++); // A3
+  }
   vldm(mem[r9]++, {d12-d15}); // B1
 
   vmla_f32(q8, q4, d0[0]);
   vmla_f32(q9, q5, d0[0]);
-  vmla_f32(q10, q4, d1[0]);
-  vmla_f32(q13, q5, d2[0]);
-  vmla_f32(q11, q5, d1[0]);
-  vmla_f32(q12, q4, d2[0]);
-  vmla_f32(q14, q4, d3[0]);
-  vmla_f32(q15, q5, d3[0]);
+  if (max_mr > 1) {
+    vmla_f32(q10, q4, d1[0]);
+  }
+  if (max_mr > 2) {
+    vmla_f32(q13, q5, d2[0]);
+  }
+  if (max_mr > 1) {
+    vmla_f32(q11, q5, d1[0]);
+  }
+  if (max_mr > 2) {
+    vmla_f32(q12, q4, d2[0]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q14, q4, d3[0]);
+    vmla_f32(q15, q5, d3[0]);
+  }
   vmla_f32(q8, q6, d0[1]);
   vmla_f32(q9, q7, d0[1]);
-  vmla_f32(q10, q6, d1[1]);
-  vmla_f32(q11, q7, d1[1]);
+  if (max_mr > 1) {
+    vmla_f32(q10, q6, d1[1]);
+    vmla_f32(q11, q7, d1[1]);
+  }
   subs(r5, r5, 8);
-  vmla_f32(q12, q6, d2[1]);
-  vmla_f32(q13, q7, d2[1]);
-  vmla_f32(q14, q6, d3[1]);
-  vmla_f32(q15, q7, d3[1]);
+  if (max_mr > 2) {
+    vmla_f32(q12, q6, d2[1]);
+    vmla_f32(q13, q7, d2[1]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q14, q6, d3[1]);
+    vmla_f32(q15, q7, d3[1]);
+  }
   bhs(l1);
 
   // Is there a remainder?- 1 float of A (4 bytes)
@@ -138,33 +186,61 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const void*
 
   bind(l2);
   // Clamp
-  vmax_f32(q8, q8, q2);
+  if (clamp_min) {
+    vmax_f32(q8, q8, q2);
+  }
   subs(r1, r1, 8);
-  vmax_f32(q9, q9, q2);
-  vmax_f32(q10, q10, q2);
-  vmax_f32(q11, q11, q2);
-  vmax_f32(q12, q12, q2);
-  vmax_f32(q13, q13, q2);
-  vmax_f32(q14, q14, q2);
-  vmax_f32(q15, q15, q2);
-  vmin_f32(q8, q8, q3);
-  vmin_f32(q9, q9, q3);
-  vmin_f32(q10, q10, q3);
-  vmin_f32(q11, q11, q3);
-  vmin_f32(q12, q12, q3);
-  vmin_f32(q13, q13, q3);
-  vmin_f32(q14, q14, q3);
-  vmin_f32(q15, q15, q3);
+  if (clamp_min) {
+    vmax_f32(q9, q9, q2);
+    if (max_mr > 1) {
+      vmax_f32(q10, q10, q2);
+      vmax_f32(q11, q11, q2);
+    }
+    if (max_mr > 2) {
+      vmax_f32(q12, q12, q2);
+      vmax_f32(q13, q13, q2);
+    }
+    if (max_mr > 3) {
+      vmax_f32(q14, q14, q2);
+      vmax_f32(q15, q15, q2);
+    }
+  }
+  if (clamp_max) {
+    vmin_f32(q8, q8, q3);
+    vmin_f32(q9, q9, q3);
+    if (max_mr > 1) {
+      vmin_f32(q10, q10, q3);
+      vmin_f32(q11, q11, q3);
+    }
+    if (max_mr > 2) {
+      vmin_f32(q12, q12, q3);
+      vmin_f32(q13, q13, q3);
+    }
+    if (max_mr > 3) {
+      vmin_f32(q14, q14, q3);
+      vmin_f32(q15, q15, q3);
+    }
+  }
 
   // Store full 4 x 8
   blo(l4);
   vst1_32({d16-d19}, mem[r11], r7);
-  sub(r0, r0, r2);
-  vst1_32({d20-d23}, mem[r4], r7);
-  sub(r10, r10, r2);
-  vst1_32({d24-d27}, mem[r8], r7);
-  sub(r12, r12, r2);
-  vst1_32({d28-d31}, mem[r6], r7);
+  if (max_mr > 3) {
+    sub(r0, r0, r2);
+  }
+  if (max_mr > 1) {
+    vst1_32({d20-d23}, mem[r4], r7);
+  }
+  if (max_mr > 2) {
+    sub(r10, r10, r2);
+    vst1_32({d24-d27}, mem[r8], r7);
+  }
+  if (max_mr > 1) {
+    sub(r12, r12, r2);
+  }
+  if (max_mr > 3) {
+    vst1_32({d28-d31}, mem[r6], r7);
+  }
   sub(r3, r3, r2);
   bhi(l0);
 
@@ -181,12 +257,18 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const void*
   vldm(mem[r0]++, {s6}); // A3
   vmla_f32(q8, q4, d0[0]);
   vmla_f32(q9, q5, d0[0]);
-  vmla_f32(q10, q4, d1[0]);
-  vmla_f32(q11, q5, d1[0]);
-  vmla_f32(q12, q4, d2[0]);
-  vmla_f32(q13, q5, d2[0]);
-  vmla_f32(q14, q4, d3[0]);
-  vmla_f32(q15, q5, d3[0]);
+  if (max_mr > 1) {
+    vmla_f32(q10, q4, d1[0]);
+    vmla_f32(q11, q5, d1[0]);
+  }
+  if (max_mr > 2) {
+    vmla_f32(q12, q4, d2[0]);
+    vmla_f32(q13, q5, d2[0]);
+  }
+  if (max_mr > 3) {
+    vmla_f32(q14, q4, d3[0]);
+    vmla_f32(q15, q5, d3[0]);
+  }
   b(l2);
 
   // Store odd width
@@ -194,48 +276,80 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const void*
   tst(r1, 4);
   beq(l5);
   vst1_32({d16-d17}, mem[r11]++);
-  vst1_32({d20-d21}, mem[r4]++);
+  if (max_mr > 1) {
+    vst1_32({d20-d21}, mem[r4]++);
+  }
   vmov(q8, q9);
-  vmov(q10, q11);
-  vst1_32({d24-d25}, mem[r8]++);
-  vst1_32({d28-d29}, mem[r6]++);
-  vmov(q12, q13);
-  vmov(q14, q15);
+  if (max_mr > 1) {
+    vmov(q10, q11);
+  }
+  if (max_mr > 2) {
+    vst1_32({d24-d25}, mem[r8]++);
+  }
+  if (max_mr > 3) {
+    vst1_32({d28-d29}, mem[r6]++);
+  }
+  if (max_mr > 2) {
+    vmov(q12, q13);
+  }
+  if (max_mr > 3) {
+    vmov(q14, q15);
+  }
 
   bind(l5);
   tst(r1, 2);
   beq(l6);
   vst1_32({d16}, mem[r11]++);
-  vst1_32({d20}, mem[r4]++);
+  if (max_mr > 1) {
+    vst1_32({d20}, mem[r4]++);
+  }
   vmov(d16, d17);
-  vmov(d20, d21);
-  vst1_32({d24}, mem[r8]++);
-  vst1_32({d28}, mem[r6]++);
-  vmov(d24, d25);
-  vmov(d28, d29);
+  if (max_mr > 1) {
+    vmov(d20, d21);
+  }
+  if (max_mr > 2) {
+    vst1_32({d24}, mem[r8]++);
+  }
+  if (max_mr > 3) {
+    vst1_32({d28}, mem[r6]++);
+  }
+  if (max_mr > 2) {
+    vmov(d24, d25);
+  }
+  if (max_mr > 3) {
+    vmov(d28, d29);
+  }
 
   bind(l6);
   tst(r1, 1);
   beq(l7);
   vst1_32({d16[0]}, mem[r11]);
-  vst1_32({d20[0]}, mem[r4]);
-  vst1_32({d24[0]}, mem[r8]);
-  vst1_32({d28[0]}, mem[r6]);
+  if (max_mr > 1) {
+    vst1_32({d20[0]}, mem[r4]);
+  }
+  if (max_mr > 2) {
+    vst1_32({d24[0]}, mem[r8]);
+  }
+  if (max_mr > 3) {
+    vst1_32({d28[0]}, mem[r6]);
+  }
 
   bind(l7);
   vpop({d8-d15});
   pop({r4, r5, r6, r7, r8, r9, r10, r11});
   bx(lr);
+
+  align(16);
 }
 }  // namespace
-}  // aarch32
-}  // xnnpack
+}  // namespace aarch32
+}  // namespace xnnpack
 
 xnn_status_t xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
   assert(params != nullptr);
-  g.generate(max_mr, nc_mod_nr, kc, nullptr);
+  g.generate(max_mr, nc_mod_nr, kc, static_cast<const jit_gemm_params*>(params));
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
