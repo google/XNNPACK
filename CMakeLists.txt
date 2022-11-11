@@ -309,7 +309,6 @@ SET(JIT_AARCH32_SRCS
 SET(JIT_AARCH64_SRCS
   src/f32-gemm/f32-gemm-upto6x8-aarch64-neonfma-cortex-a75.cc
   src/f32-gemm/f32-gemm-1x8-aarch64-neonfma-cortex-a75.cc
-  src/f32-gemm/f32-gemm-4x8-aarch64-neonfma-cortex-a75.cc
   src/f32-gemm/f32-gemm-6x8-aarch64-neonfma-ld128.cc
   src/f32-igemm/f32-igemm-upto6x8-aarch64-neonfma-cortex-a75.cc
   src/f32-igemm/f32-igemm-1x8-aarch64-neonfma-cortex-a75.cc
