@@ -26,19 +26,18 @@
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# Register usage
-# A0  x13  v0  v4
-# A1  x14  v1  v5
-# A2  x15  v2  v6
-# A3  x10  v3  (v0)
-# B    x5  v8  v9 v10 v11
-# C0   x6 v16 v20 v24 v28
-# C1  x16 v17 v21 v25 v29
-# C2  x17 v18 v22 v26 v30
-# C3   x7 v19 v23 v27 v31
-# zero point v7 v12 v13 v14 v15
-
-# x11 temp for Cortex-A55 loads
+// Register usage
+// A0  x13  v0  v4
+// A1  x14  v1  v5
+// A2  x15  v2  v6
+// A3  x10  v3  (v0)
+// B    x5  v8  v9 v10 v11
+// C0   x6 v16 v20 v24 v28
+// C1  x16 v17 v21 v25 v29
+// C2  x17 v18 v22 v26 v30
+// C3   x7 v19 v23 v27 v31
+// zero point v7 v12 v13 v14 v15
+// x11 temp for Cortex-A55 loads
 
 BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_cortex_a55
 

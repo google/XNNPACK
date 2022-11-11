@@ -25,11 +25,8 @@
 // A0   r5  d4
 // A1   r6  d5
 // A2   r8  d6
-
 // B    r3/lr  d7 d16 d17
-
 // C0  r10 q12 q13 q14 q15
-
 // Prod q0 q1
 
 // params structure is 4 bytes
@@ -38,7 +35,6 @@
 //     int8_t output_min;          d20[2] d18 q9
 //     int8_t output_max;          d20[3] d19
 //   } xnn_qs8_minmax_params.neonv8;
-
 // unused q4 q5 q6 q7 q11
 
 BEGIN_FUNCTION xnn_qc8_dwconv_minmax_fp32_ukernel_up8x3__aarch32_neonv8_mla8_cortex_a35

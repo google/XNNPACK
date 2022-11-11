@@ -39,21 +39,17 @@ class Generator : public MacroAssembler {
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
 // Register usage
-
 // A0   r3  d0
 // A1  r12  d1
 // A2  r10  d2
 // A3   r7  d3
-
 // B    r9  d8,  d9, d10, d11
 // B       d12, d13, d14, d15
-
 // C0  r11 d16-d17  q8  d18-d19  q9
 // C1   r4 d20-d21 q10  d22-d23 q11
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
-
-// Clamp (r5) d4 d5 d6 d7
+// clamp  (r5) d4 d5 d6 d7
 
 // Converted from: src/f32-igemm/4x8-minmax-aarch32-neon-cortex-a55.S
 void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params)

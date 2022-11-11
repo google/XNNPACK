@@ -31,14 +31,11 @@
 // A1  r12  d1
 // A2  r10  d2
 // A3   r0  d3
-
 // B    r9  q2 q3 q4 q5
-
 // C0  r11 d16-d17  q8  d18-d19  q9
 // C1   r4 d20-d21 q10  d22-d23 q11
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
-
 // unused q7
 
 // params structure is 4 bytes
@@ -50,6 +47,7 @@
 
 // iOS does not support 32 bit ARM with Neon DotProduct.
 #ifndef __APPLE__
+
 BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_cortex_a55
         # Push 80 bytes
         PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32

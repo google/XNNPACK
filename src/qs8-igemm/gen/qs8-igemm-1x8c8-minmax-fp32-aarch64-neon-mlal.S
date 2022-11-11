@@ -26,15 +26,13 @@
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# Register usage
-# A0 x13  v0  v6
-# B   x5  v4  v5  v2  v3
-# C0  x6 v16 v18 v20 v22 v24 v26 v28 v30
-# temp0  v17 v19 v21 v23
-
+// Register usage
+// A0 x13  v0  v6
+// B   x5  v4  v5  v2  v3
+// C0  x6 v16 v18 v20 v22 v24 v26 v28 v30
+// temp0  v17 v19 v21 v23
 
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_1x8c8__aarch64_neon_mlal
-
         # Clamp C pointers
         LDP     x10, x8, [sp]           // Load cn_stride, a_offset
         ADD     x2, x2, 7               // kc = (kc + 7) & ~7

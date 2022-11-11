@@ -24,16 +24,16 @@
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# Register usage
-# A0  x3 v0
-# A1 x15 v1
-# A2 x13 v2
-# A3  x4 v3
-# B   x5 v4  v5
-# C0  x6 v16 v20 v24 v28
-# C1  x8 v17 v21 v25 v29
-# C2  x9 v18 v22 v26 v30
-# C3  x7 v19 v23 v27 v31
+// Register usage
+// A0  x3 v0
+// A1 x15 v1
+// A2 x13 v2
+// A3  x4 v3
+// B   x5 v4  v5
+// C0  x6 v16 v20 v24 v28
+// C1  x8 v17 v21 v25 v29
+// C2  x9 v18 v22 v26 v30
+// C3  x7 v19 v23 v27 v31
 # unused v7 v8 v9 v10 v11 v12 v13 v14 v15
 
 BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16__aarch64_neon_mlal_lane_prfm_ld64

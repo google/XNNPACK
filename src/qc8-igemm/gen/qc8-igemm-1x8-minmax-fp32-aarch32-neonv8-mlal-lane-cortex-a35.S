@@ -32,14 +32,10 @@
 
 // Register usage
 // A0   r3  d0-d1 q0
-
 // B    r9  d8-d9 q4 q5
-
 // C0  r11 d16-d17  q8  d18-d19  q9
 //         q2, q3 acc2
-
-// Unused r4, r8, r10, d15, q10-q15, q1-q3
-
+// unused r4, r8, r10, d15, q10-q15, q1-q3
 // params structure is 4 bytes
 //  struct {
 //    int16_t output_zero_point;  d13[2]

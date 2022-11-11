@@ -22,20 +22,19 @@ $REWIND_DECREMENT = {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# Register usage
-# A0  x3  v0  v4
-# A1 x15  v1  v5
-# A2 x13  v2  v6
-# A3  x4  v3  v7
-# B   x5  v28  v29 v30 v31
-# C0  x6 v16 v20
-# C1  x8 v17 v21
-# C2  x9 v18 v22
-# C3  x7 v19 v23
-# zero_point v24 v25 v26 v27 v8
-# unused v12 v13 v14 v15 v29 v30 v31
-
-# x14 temp for Cortex-A55 loads
+// Register usage
+// A0  x3  v0  v4
+// A1 x15  v1  v5
+// A2 x13  v2  v6
+// A3  x4  v3  v7
+// B   x5  v28  v29 v30 v31
+// C0  x6 v16 v20
+// C1  x8 v17 v21
+// C2  x9 v18 v22
+// C3  x7 v19 v23
+// zero_point v24 v25 v26 v27 v8
+// unused v12 v13 v14 v15 v29 v30 v31
+// temp x14 for Cortex-A55 loads
 
 BEGIN_FUNCTION xnn_qu8_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch64_neondot_cortex_a55
 

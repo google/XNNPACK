@@ -19,9 +19,7 @@
 // vili      d1
 // virr   r3 d2
 // viri      d3
-
 // vdiv2     d4
-
 // vtwr   r2 d6
 // vtwi      d7
 
@@ -36,7 +34,6 @@
 // voutli   q13 (vacci + vacc1i) / 2
 // voutrr   q14 (vacc1r - vaccr) / 2
 // voutri   q15 (vacci - vacc1i) / 2
-
 // unused d5, d8-d15
 
 BEGIN_FUNCTION xnn_cs16_fftr_ukernel__aarch32_neon_x1

@@ -25,11 +25,8 @@
 // A0   r5  q4
 // A1   r6  q5
 // A2   r8  q6
-
 // B    r7/r3/lr  q12 q13 q14
-
 // C0  r10 q12 q13 q14 q15
-
 // Prod q0 q1 q2 q3
 
 // params structure is 4 bytes
@@ -41,7 +38,6 @@
 
 // r7 temp B
 // r9 B post increment 80 or 16
-
 // unused q7
 
 BEGIN_FUNCTION xnn_qc8_dwconv_minmax_fp32_ukernel_up16x3__aarch32_neonv8_mla8_cortex_a35

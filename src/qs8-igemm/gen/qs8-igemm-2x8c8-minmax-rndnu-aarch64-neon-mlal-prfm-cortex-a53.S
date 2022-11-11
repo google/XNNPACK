@@ -26,15 +26,15 @@
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# Register usage
-# A0 x13  v0  v6
-# A1 x15  v1  v7
-# B   x5  v4  v5  v8  v9
-# C0  x6 v16 v18 v20 v22 v24 v26 v28 v30
-# C1  x7 v17 v19 v21 v23 v25 v27 v29 v31
-# temp0   v2 v10 v12 v14
-# temp1   v3 v11 v13 v15
-# x16, x17, x20, x21 tenporary a53 gpr load data
+// Register usage
+// A0 x13  v0  v6
+// A1 x15  v1  v7
+// B   x5  v4  v5  v8  v9
+// C0  x6 v16 v18 v20 v22 v24 v26 v28 v30
+// C1  x7 v17 v19 v21 v23 v25 v27 v29 v31
+// temp0   v2 v10 v12 v14
+// temp1   v3 v11 v13 v15
+// x16, x17, x20, x21 tenporary a53 gpr load data
 
 
 BEGIN_FUNCTION xnn_qs8_igemm_minmax_rndnu_ukernel_2x8c8__aarch64_neon_mlal_prfm_cortex_a53

@@ -21,17 +21,13 @@
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# Register usage
-# A0  x8 v0
-
-# B   x5 v20 v21 v22 v23
-
-# C0  x6 v24 v25
-
-# Clamp v4, v5
+// Register usage
+// A0  x8 v0
+// B   x5 v20 v21 v22 v23
+// C0  x6 v24 v25
+// clamp  v4, v5
 
 BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_1x16__aarch64_neonfp16arith_ld32
-
         # Load cn_stride, a_offset
         LDP     x10, x11, [sp]
 

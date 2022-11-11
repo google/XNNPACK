@@ -51,7 +51,7 @@ class Generator : public MacroAssembler {
 // C1   r4 d20-d21 q10  d22-d23 q11
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
-// Clamp (r5) d4 d5 d6 d7
+// clamp  (r5) d4 d5 d6 d7
 
 // Converted from: src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-prfm-cortex-a75.S
 void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
