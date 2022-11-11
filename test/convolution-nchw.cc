@@ -13,7 +13,7 @@
 TEST(CONVOLUTION_NCHW_F16, depthwise_3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -24,7 +24,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3) {
 TEST(CONVOLUTION_NCHW_F16, depthwise_3x3_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -37,7 +37,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(3, 3)
       .padding(1)
       .groups(19)
@@ -48,7 +48,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F16, depthwise_3x3_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .input_size(27, input_width)
       .kernel_size(3, 3)
@@ -63,7 +63,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3_varying_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .groups(channels)
@@ -74,7 +74,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3_varying_channels) {
 
 TEST(CONVOLUTION_NCHW_F16, depthwise_3x3_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -85,7 +85,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3_with_qmin) {
 
 TEST(CONVOLUTION_NCHW_F16, depthwise_3x3_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -97,7 +97,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3_with_qmax) {
 TEST(CONVOLUTION_NCHW_F16, depthwise_3x3_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -108,7 +108,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3_without_bias) {
 TEST(CONVOLUTION_NCHW_F16, weights_cache_depthwise_3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -123,7 +123,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -135,7 +135,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -149,7 +149,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3_varying_input_height) {
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(3, 3)
       .padding(1)
       .groups(19)
@@ -160,7 +160,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .batch_size(2)
       .input_size(27, input_width)
@@ -177,7 +177,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .groups(channels)
@@ -189,7 +189,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3_varying_channels) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3_with_input_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .input_channel_stride(21)
@@ -201,7 +201,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3_with_input_stride) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3_with_output_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .output_channel_stride(23)
@@ -213,7 +213,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3_with_output_stride) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3_with_qmin) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -225,7 +225,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3_with_qmin) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3_with_qmax) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -238,7 +238,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -250,7 +250,7 @@ TEST(CONVOLUTION_NCHW_F16, weights_cache_batched_depthwise_3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -264,7 +264,7 @@ TEST(CONVOLUTION_NCHW_F16, weights_cache_batched_depthwise_3x3) {
 TEST(CONVOLUTION_NCHW_F16, depthwise_3x3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -276,7 +276,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3s2) {
 TEST(CONVOLUTION_NCHW_F16, depthwise_3x3s2_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -290,7 +290,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3s2_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(3, 3)
       .padding(1)
       .subsampling(2)
@@ -302,7 +302,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3s2_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F16, depthwise_3x3s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .input_size(27, input_width)
       .kernel_size(3, 3)
@@ -318,7 +318,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3s2_varying_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .subsampling(2)
@@ -330,7 +330,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3s2_varying_channels) {
 
 TEST(CONVOLUTION_NCHW_F16, depthwise_3x3s2_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -342,7 +342,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3s2_with_qmin) {
 
 TEST(CONVOLUTION_NCHW_F16, depthwise_3x3s2_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -355,7 +355,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_3x3s2_with_qmax) {
 TEST(CONVOLUTION_NCHW_F16, depthwise_3x3s2_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -370,7 +370,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -383,7 +383,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -398,7 +398,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_varying_input_height) {
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(3, 3)
       .padding(1)
       .subsampling(2)
@@ -410,10 +410,10 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(27, 33) //input_width)
+      .input_size(27, 37) //input_width)
       .kernel_size(3, 3)
       .padding(1)
       .subsampling(2)
@@ -428,7 +428,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .subsampling(2)
@@ -441,7 +441,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_varying_channels) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_with_input_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -454,7 +454,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_with_input_stride) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_with_output_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -467,7 +467,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_with_output_stride) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_with_qmin) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -480,7 +480,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_with_qmin) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_with_qmax) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -494,7 +494,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -508,7 +508,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_3x3s2_without_bias) {
 TEST(CONVOLUTION_NCHW_F16, depthwise_5x5) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -519,7 +519,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_5x5) {
 TEST(CONVOLUTION_NCHW_F16, depthwise_5x5_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -532,7 +532,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_5x5_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(5, 5)
       .padding(2)
       .groups(19)
@@ -543,7 +543,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_5x5_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F16, depthwise_5x5_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .input_size(27, input_width)
       .kernel_size(5, 5)
@@ -558,7 +558,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_5x5_varying_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .groups(channels)
@@ -569,7 +569,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_5x5_varying_channels) {
 
 TEST(CONVOLUTION_NCHW_F16, depthwise_5x5_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -580,7 +580,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_5x5_with_qmin) {
 
 TEST(CONVOLUTION_NCHW_F16, depthwise_5x5_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -592,7 +592,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_5x5_with_qmax) {
 TEST(CONVOLUTION_NCHW_F16, depthwise_5x5_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -606,7 +606,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -618,7 +618,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -632,7 +632,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_varying_input_height) {
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(5, 5)
       .padding(2)
       .groups(19)
@@ -643,7 +643,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .batch_size(2)
       .input_size(27, input_width)
@@ -660,7 +660,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .groups(channels)
@@ -672,7 +672,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_varying_channels) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_with_input_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .input_channel_stride(21)
@@ -684,7 +684,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_with_input_stride) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_with_output_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .output_channel_stride(23)
@@ -696,7 +696,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_with_output_stride) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_with_qmin) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -708,7 +708,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_with_qmin) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_with_qmax) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -721,7 +721,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -734,7 +734,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5_without_bias) {
 TEST(CONVOLUTION_NCHW_F16, depthwise_5x5s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -746,7 +746,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_5x5s2) {
 TEST(CONVOLUTION_NCHW_F16, depthwise_5x5s2_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -760,7 +760,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_5x5s2_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(5, 5)
       .padding(2)
       .subsampling(2)
@@ -772,7 +772,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_5x5s2_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F16, depthwise_5x5s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .input_size(27, input_width)
       .kernel_size(5, 5)
@@ -788,7 +788,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_5x5s2_varying_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .subsampling(2)
@@ -800,7 +800,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_5x5s2_varying_channels) {
 
 TEST(CONVOLUTION_NCHW_F16, depthwise_5x5s2_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -812,7 +812,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_5x5s2_with_qmin) {
 
 TEST(CONVOLUTION_NCHW_F16, depthwise_5x5s2_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -825,7 +825,7 @@ TEST(CONVOLUTION_NCHW_F16, depthwise_5x5s2_with_qmax) {
 TEST(CONVOLUTION_NCHW_F16, depthwise_5x5s2_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -840,7 +840,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -854,7 +854,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -869,7 +869,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2_varying_input_height) {
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(5, 5)
       .padding(2)
       .subsampling(2)
@@ -881,7 +881,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .batch_size(2)
       .input_size(27, input_width)
@@ -899,7 +899,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .subsampling(2)
@@ -912,7 +912,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2_varying_channels) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2_with_input_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -925,7 +925,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2_with_input_stride) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2_with_output_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -938,7 +938,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2_with_output_stride) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2_with_qmin) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -951,7 +951,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2_with_qmin) {
 TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2_with_qmax) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -965,7 +965,7 @@ TEST(CONVOLUTION_NCHW_F16, batched_depthwise_5x5s2_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -980,7 +980,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, 3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .depthwise_layout(true)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -993,7 +993,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, 3x3_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .groups(channels)
@@ -1006,7 +1006,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, 3x3_without_bias) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -1018,7 +1018,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, weights_cache_3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .depthwise_layout(true)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -1034,7 +1034,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, batched_3x3) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -1048,7 +1048,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, batched_3x3_varying_channels) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .groups(channels)
@@ -1062,7 +1062,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, batched_3x3_without_bias) {
     .depthwise_layout(true)
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -1075,7 +1075,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, weights_cache_batched_3x3) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -1090,7 +1090,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, 3x3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .depthwise_layout(true)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -1104,7 +1104,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, 3x3s2_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .subsampling(2)
@@ -1118,7 +1118,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, 3x3s2_without_bias) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -1134,7 +1134,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, batched_3x3s2) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -1149,7 +1149,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, batched_3x3s2_varying_channels) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .subsampling(2)
@@ -1164,7 +1164,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, batched_3x3s2_without_bias) {
     .depthwise_layout(true)
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -1179,7 +1179,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, 5x5) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .depthwise_layout(true)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -1192,7 +1192,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, 5x5_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .groups(channels)
@@ -1205,7 +1205,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, 5x5_without_bias) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -1220,7 +1220,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, batched_5x5) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -1234,7 +1234,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, batched_5x5_varying_channels) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .groups(channels)
@@ -1248,7 +1248,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, batched_5x5_without_bias) {
     .depthwise_layout(true)
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -1262,7 +1262,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, 5x5s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .depthwise_layout(true)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -1276,7 +1276,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, 5x5s2_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .subsampling(2)
@@ -1290,7 +1290,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, 5x5s2_without_bias) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -1306,7 +1306,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, batched_5x5s2) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -1321,7 +1321,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, batched_5x5s2_varying_channels) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .subsampling(2)
@@ -1336,7 +1336,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, batched_5x5s2_without_bias) {
     .depthwise_layout(true)
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -1350,7 +1350,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F16, batched_5x5s2_without_bias) {
 TEST(CONVOLUTION_NCHW_F32, 1x1) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1362,7 +1362,7 @@ TEST(CONVOLUTION_NCHW_F32, 1x1) {
 TEST(CONVOLUTION_NCHW_F32, 1x1_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1375,7 +1375,7 @@ TEST(CONVOLUTION_NCHW_F32, 1x1_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(1, 1)
       .group_input_channels(23)
       .group_output_channels(19)
@@ -1387,7 +1387,7 @@ TEST(CONVOLUTION_NCHW_F32, 1x1_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F32, 1x1_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .input_size(27, input_width)
       .kernel_size(1, 1)
@@ -1403,7 +1403,7 @@ TEST(CONVOLUTION_NCHW_F32, 1x1_varying_input_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     ConvolutionOperatorTester()
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(1, 1)
       .group_input_channels(input_channels)
       .group_output_channels(19)
@@ -1417,7 +1417,7 @@ TEST(CONVOLUTION_NCHW_F32, 1x1_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t output_channels = 1; output_channels < 19; output_channels *= 2) {
     ConvolutionOperatorTester()
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(1, 1)
       .group_input_channels(23)
       .group_output_channels(output_channels)
@@ -1429,7 +1429,7 @@ TEST(CONVOLUTION_NCHW_F32, 1x1_varying_output_channels) {
 
 TEST(CONVOLUTION_NCHW_F32, 1x1_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1441,7 +1441,7 @@ TEST(CONVOLUTION_NCHW_F32, 1x1_with_qmin) {
 
 TEST(CONVOLUTION_NCHW_F32, 1x1_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1454,7 +1454,7 @@ TEST(CONVOLUTION_NCHW_F32, 1x1_with_qmax) {
 TEST(CONVOLUTION_NCHW_F32, 1x1_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1467,7 +1467,7 @@ TEST(CONVOLUTION_NCHW_F32, 1x1_without_bias) {
 TEST(CONVOLUTION_NCHW_F32, weights_cache_1x1) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1483,7 +1483,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_1x1) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1496,7 +1496,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_1x1_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1510,7 +1510,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_1x1_varying_input_height) {
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(1, 1)
       .group_input_channels(23)
       .group_output_channels(19)
@@ -1522,7 +1522,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_1x1_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F32, batched_1x1_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .batch_size(2)
       .input_size(27, input_width)
@@ -1540,7 +1540,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_1x1_varying_input_channels) {
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(1, 1)
       .group_input_channels(input_channels)
       .group_output_channels(19)
@@ -1555,7 +1555,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_1x1_varying_output_channels) {
   for (size_t output_channels = 1; output_channels < 19; output_channels *= 2) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(1, 1)
       .group_input_channels(23)
       .group_output_channels(output_channels)
@@ -1568,7 +1568,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_1x1_varying_output_channels) {
 TEST(CONVOLUTION_NCHW_F32, batched_1x1_with_input_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .input_channel_stride(25)
     .group_input_channels(23)
@@ -1581,7 +1581,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_1x1_with_input_stride) {
 TEST(CONVOLUTION_NCHW_F32, batched_1x1_with_output_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .output_channel_stride(21)
     .group_input_channels(23)
@@ -1594,7 +1594,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_1x1_with_output_stride) {
 TEST(CONVOLUTION_NCHW_F32, batched_1x1_with_qmin) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1607,7 +1607,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_1x1_with_qmin) {
 TEST(CONVOLUTION_NCHW_F32, batched_1x1_with_qmax) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1621,7 +1621,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_1x1_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1635,7 +1635,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_1x1_without_bias) {
 TEST(CONVOLUTION_NHWC2NCHW_OP_F32, 3x3c3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2)
@@ -1650,7 +1650,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, 3x3c3s2_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .padding(1)
       .kernel_size(3, 3)
       .subsampling(2)
@@ -1664,7 +1664,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, 3x3c3s2_varying_input_height) {
 
 TEST(CONVOLUTION_NHWC2NCHW_OP_F32, 3x3c3s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .input_size(27, input_width)
       .padding(1)
@@ -1682,7 +1682,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, 3x3c3s2_varying_output_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t output_channels = 1; output_channels < 19; output_channels *= 2) {
     ConvolutionOperatorTester()
-      .input_size(27, 33)
+      .input_size(27, 37)
       .padding(1)
       .kernel_size(3, 3)
       .subsampling(2)
@@ -1696,7 +1696,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, 3x3c3s2_varying_output_channels) {
 
 TEST(CONVOLUTION_NHWC2NCHW_OP_F32, 3x3c3s2_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2)
@@ -1710,7 +1710,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, 3x3c3s2_with_qmin) {
 
 TEST(CONVOLUTION_NHWC2NCHW_OP_F32, 3x3c3s2_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2)
@@ -1725,7 +1725,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, 3x3c3s2_with_qmax) {
 TEST(CONVOLUTION_NHWC2NCHW_OP_F32, 3x3c3s2_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2)
@@ -1739,7 +1739,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, 3x3c3s2_without_bias) {
 TEST(CONVOLUTION_NHWC2NCHW_OP_F32, weights_cache_3x3c3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2)
@@ -1757,7 +1757,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2)
@@ -1773,7 +1773,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2_varying_input_height) {
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .padding(1)
       .kernel_size(3, 3)
       .subsampling(2)
@@ -1787,7 +1787,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2_varying_input_height) {
 
 TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .batch_size(2)
       .input_size(27, input_width)
@@ -1807,7 +1807,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2_varying_output_channels) {
   for (size_t output_channels = 1; output_channels < 19; output_channels *= 2) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .padding(1)
       .kernel_size(3, 3)
       .subsampling(2)
@@ -1822,7 +1822,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2_varying_output_channels) {
 TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2_with_output_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2)
@@ -1837,7 +1837,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2_with_output_stride) {
 TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2_with_qmin) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2)
@@ -1852,7 +1852,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2_with_qmin) {
 TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2_with_qmax) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2)
@@ -1868,7 +1868,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, batched_3x3c3s2_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2)
@@ -1883,7 +1883,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, weights_cache_batched_3x3c3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .padding(1)
     .kernel_size(3, 3)
     .subsampling(2)
@@ -1900,7 +1900,7 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F32, weights_cache_batched_3x3c3s2) {
 TEST(CONVOLUTION_NCHW_F32, depthwise_3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -1911,7 +1911,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3) {
 TEST(CONVOLUTION_NCHW_F32, depthwise_3x3_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -1924,7 +1924,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(3, 3)
       .padding(1)
       .groups(19)
@@ -1935,7 +1935,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F32, depthwise_3x3_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .input_size(27, input_width)
       .kernel_size(3, 3)
@@ -1950,7 +1950,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3_varying_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .groups(channels)
@@ -1961,7 +1961,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3_varying_channels) {
 
 TEST(CONVOLUTION_NCHW_F32, depthwise_3x3_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -1972,7 +1972,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3_with_qmin) {
 
 TEST(CONVOLUTION_NCHW_F32, depthwise_3x3_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -1984,7 +1984,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3_with_qmax) {
 TEST(CONVOLUTION_NCHW_F32, depthwise_3x3_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -1995,7 +1995,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3_without_bias) {
 TEST(CONVOLUTION_NCHW_F32, weights_cache_depthwise_3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -2010,7 +2010,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -2022,7 +2022,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -2036,7 +2036,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_varying_input_height) {
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(3, 3)
       .padding(1)
       .groups(19)
@@ -2047,7 +2047,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .batch_size(2)
       .input_size(27, input_width)
@@ -2064,7 +2064,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .groups(channels)
@@ -2076,7 +2076,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_varying_channels) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_with_input_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .input_channel_stride(21)
@@ -2088,7 +2088,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_with_input_stride) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_with_output_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .output_channel_stride(23)
@@ -2100,7 +2100,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_with_output_stride) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_with_qmin) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -2112,7 +2112,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_with_qmin) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_with_qmax) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -2125,7 +2125,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -2137,7 +2137,7 @@ TEST(CONVOLUTION_NCHW_F32, weights_cache_batched_depthwise_3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -2151,7 +2151,7 @@ TEST(CONVOLUTION_NCHW_F32, weights_cache_batched_depthwise_3x3) {
 TEST(CONVOLUTION_NCHW_F32, depthwise_3x3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -2163,7 +2163,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3s2) {
 TEST(CONVOLUTION_NCHW_F32, depthwise_3x3s2_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -2177,7 +2177,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3s2_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(3, 3)
       .padding(1)
       .subsampling(2)
@@ -2189,7 +2189,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3s2_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F32, depthwise_3x3s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .input_size(27, input_width)
       .kernel_size(3, 3)
@@ -2205,7 +2205,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3s2_varying_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .subsampling(2)
@@ -2217,7 +2217,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3s2_varying_channels) {
 
 TEST(CONVOLUTION_NCHW_F32, depthwise_3x3s2_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -2229,7 +2229,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3s2_with_qmin) {
 
 TEST(CONVOLUTION_NCHW_F32, depthwise_3x3s2_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -2242,7 +2242,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_3x3s2_with_qmax) {
 TEST(CONVOLUTION_NCHW_F32, depthwise_3x3s2_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -2257,7 +2257,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -2270,7 +2270,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -2285,7 +2285,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_varying_input_height) {
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(3, 3)
       .padding(1)
       .subsampling(2)
@@ -2297,7 +2297,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .batch_size(2)
       .input_size(27, input_width)
@@ -2315,7 +2315,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .subsampling(2)
@@ -2328,7 +2328,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_varying_channels) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_with_input_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -2341,7 +2341,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_with_input_stride) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_with_output_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -2354,7 +2354,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_with_output_stride) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_with_qmin) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -2367,7 +2367,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_with_qmin) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_with_qmax) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -2381,7 +2381,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -2395,7 +2395,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_3x3s2_without_bias) {
 TEST(CONVOLUTION_NCHW_F32, depthwise_5x5) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -2406,7 +2406,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_5x5) {
 TEST(CONVOLUTION_NCHW_F32, depthwise_5x5_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -2419,7 +2419,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_5x5_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(5, 5)
       .padding(2)
       .groups(19)
@@ -2430,7 +2430,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_5x5_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F32, depthwise_5x5_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .input_size(27, input_width)
       .kernel_size(5, 5)
@@ -2445,7 +2445,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_5x5_varying_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .groups(channels)
@@ -2456,7 +2456,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_5x5_varying_channels) {
 
 TEST(CONVOLUTION_NCHW_F32, depthwise_5x5_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -2467,7 +2467,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_5x5_with_qmin) {
 
 TEST(CONVOLUTION_NCHW_F32, depthwise_5x5_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -2479,7 +2479,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_5x5_with_qmax) {
 TEST(CONVOLUTION_NCHW_F32, depthwise_5x5_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -2493,7 +2493,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -2505,7 +2505,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -2519,7 +2519,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_varying_input_height) {
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(5, 5)
       .padding(2)
       .groups(19)
@@ -2530,7 +2530,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .batch_size(2)
       .input_size(27, input_width)
@@ -2547,7 +2547,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .groups(channels)
@@ -2559,7 +2559,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_varying_channels) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_with_input_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .input_channel_stride(21)
@@ -2571,7 +2571,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_with_input_stride) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_with_output_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .output_channel_stride(23)
@@ -2583,7 +2583,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_with_output_stride) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_with_qmin) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -2595,7 +2595,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_with_qmin) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_with_qmax) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -2608,7 +2608,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -2621,7 +2621,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5_without_bias) {
 TEST(CONVOLUTION_NCHW_F32, depthwise_5x5s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -2633,7 +2633,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_5x5s2) {
 TEST(CONVOLUTION_NCHW_F32, depthwise_5x5s2_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -2647,7 +2647,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_5x5s2_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(5, 5)
       .padding(2)
       .subsampling(2)
@@ -2659,7 +2659,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_5x5s2_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F32, depthwise_5x5s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .input_size(27, input_width)
       .kernel_size(5, 5)
@@ -2675,7 +2675,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_5x5s2_varying_channels) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .subsampling(2)
@@ -2687,7 +2687,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_5x5s2_varying_channels) {
 
 TEST(CONVOLUTION_NCHW_F32, depthwise_5x5s2_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -2699,7 +2699,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_5x5s2_with_qmin) {
 
 TEST(CONVOLUTION_NCHW_F32, depthwise_5x5s2_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -2712,7 +2712,7 @@ TEST(CONVOLUTION_NCHW_F32, depthwise_5x5s2_with_qmax) {
 TEST(CONVOLUTION_NCHW_F32, depthwise_5x5s2_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -2727,7 +2727,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -2740,7 +2740,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_zero_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -2755,7 +2755,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_varying_input_height) {
   for (size_t input_height = 25; input_height <= 31; input_height++) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(input_height, 33)
+      .input_size(input_height, 37)
       .kernel_size(5, 5)
       .padding(2)
       .subsampling(2)
@@ -2767,7 +2767,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_varying_input_height) {
 
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_varying_input_width) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t input_width = 27; input_width <= 33; input_width++) {
+  for (size_t input_width = 27; input_width <= 37; input_width++) {
     ConvolutionOperatorTester()
       .batch_size(2)
       .input_size(27, input_width)
@@ -2785,7 +2785,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .subsampling(2)
@@ -2798,7 +2798,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_varying_channels) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_with_input_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -2811,7 +2811,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_with_input_stride) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_with_output_stride) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -2824,7 +2824,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_with_output_stride) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_with_qmin) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -2837,7 +2837,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_with_qmin) {
 TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_with_qmax) {
   ConvolutionOperatorTester()
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -2851,7 +2851,7 @@ TEST(CONVOLUTION_NCHW_F32, batched_depthwise_5x5s2_without_bias) {
   ConvolutionOperatorTester()
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -2866,7 +2866,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .depthwise_layout(true)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -2879,7 +2879,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 3x3_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .groups(channels)
@@ -2892,7 +2892,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 3x3_without_bias) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -2904,7 +2904,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, weights_cache_3x3) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .depthwise_layout(true)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -2920,7 +2920,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_3x3) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -2934,7 +2934,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_3x3_varying_channels) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .groups(channels)
@@ -2948,7 +2948,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_3x3_without_bias) {
     .depthwise_layout(true)
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -2961,7 +2961,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, weights_cache_batched_3x3) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .groups(19)
@@ -2976,7 +2976,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 3x3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .depthwise_layout(true)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -2990,7 +2990,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 3x3s2_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .subsampling(2)
@@ -3004,7 +3004,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 3x3s2_without_bias) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -3020,7 +3020,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_3x3s2) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -3035,7 +3035,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_3x3s2_varying_channels) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(3, 3)
       .padding(1)
       .subsampling(2)
@@ -3050,7 +3050,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_3x3s2_without_bias) {
     .depthwise_layout(true)
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(3, 3)
     .padding(1)
     .subsampling(2)
@@ -3065,7 +3065,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 5x5) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .depthwise_layout(true)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -3078,7 +3078,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 5x5_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .groups(channels)
@@ -3091,7 +3091,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 5x5_without_bias) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -3106,7 +3106,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_5x5) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -3120,7 +3120,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_5x5_varying_channels) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .groups(channels)
@@ -3134,7 +3134,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_5x5_without_bias) {
     .depthwise_layout(true)
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .groups(19)
@@ -3148,7 +3148,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 5x5s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
     .depthwise_layout(true)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -3162,7 +3162,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 5x5s2_varying_channels) {
   for (size_t channels = 1; channels <= 16; channels *= 4) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .subsampling(2)
@@ -3176,7 +3176,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, 5x5s2_without_bias) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .has_bias(false)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -3192,7 +3192,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_5x5s2) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)
@@ -3207,7 +3207,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_5x5s2_varying_channels) {
     ConvolutionOperatorTester()
       .depthwise_layout(true)
       .batch_size(2)
-      .input_size(27, 33)
+      .input_size(27, 37)
       .kernel_size(5, 5)
       .padding(2)
       .subsampling(2)
@@ -3222,7 +3222,7 @@ TEST(DEPTHWISE_CONVOLUTION_NCHW_F32, batched_5x5s2_without_bias) {
     .depthwise_layout(true)
     .has_bias(false)
     .batch_size(2)
-    .input_size(27, 33)
+    .input_size(27, 37)
     .kernel_size(5, 5)
     .padding(2)
     .subsampling(2)

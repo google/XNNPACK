@@ -15,7 +15,7 @@
 
 TEST(CONVOLUTION_NHWC_QC8, 1x1) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -25,7 +25,7 @@ TEST(CONVOLUTION_NHWC_QC8, 1x1) {
 
 TEST(CONVOLUTION_NHWC_QC8, 1x1_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -36,7 +36,7 @@ TEST(CONVOLUTION_NHWC_QC8, 1x1_with_qmin) {
 
 TEST(CONVOLUTION_NHWC_QC8, 1x1_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -47,7 +47,7 @@ TEST(CONVOLUTION_NHWC_QC8, 1x1_with_qmax) {
 
 TEST(CONVOLUTION_NHWC_QC8, 1x1_with_input_stride) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .input_channel_stride(28)
     .group_input_channels(23)
@@ -58,7 +58,7 @@ TEST(CONVOLUTION_NHWC_QC8, 1x1_with_input_stride) {
 
 TEST(CONVOLUTION_NHWC_QC8, 1x1_with_output_stride) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .output_channel_stride(29)
     .group_input_channels(23)
@@ -729,7 +729,7 @@ TEST(CONVOLUTION_NHWC_QC8, depthwise_3x3d2x1) {
 // Tests GEMM microkernel with weights_cache.
 TEST(CONVOLUTION_NHWC_QC8, weights_cache_1x1) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1306,7 +1306,7 @@ TEST(CONVOLUTION_NHWC_QC8, setup_swap_height_and_width_depthwise) {
 
 TEST(CONVOLUTION_NHWC_QS8, 1x1) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1316,7 +1316,7 @@ TEST(CONVOLUTION_NHWC_QS8, 1x1) {
 
 TEST(CONVOLUTION_NHWC_QS8, 1x1_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1327,7 +1327,7 @@ TEST(CONVOLUTION_NHWC_QS8, 1x1_with_qmin) {
 
 TEST(CONVOLUTION_NHWC_QS8, 1x1_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -1338,7 +1338,7 @@ TEST(CONVOLUTION_NHWC_QS8, 1x1_with_qmax) {
 
 TEST(CONVOLUTION_NHWC_QS8, 1x1_with_input_stride) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .input_channel_stride(28)
     .group_input_channels(23)
@@ -1349,7 +1349,7 @@ TEST(CONVOLUTION_NHWC_QS8, 1x1_with_input_stride) {
 
 TEST(CONVOLUTION_NHWC_QS8, 1x1_with_output_stride) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .output_channel_stride(29)
     .group_input_channels(23)
@@ -2020,7 +2020,7 @@ TEST(CONVOLUTION_NHWC_QS8, depthwise_3x3d2x1) {
 // Tests GEMM microkernel with weights_cache.
 TEST(CONVOLUTION_NHWC_QS8, weights_cache_1x1) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -2596,7 +2596,7 @@ TEST(CONVOLUTION_NHWC_QS8, setup_swap_height_and_width_depthwise) {
 
 TEST(CONVOLUTION_NHWC_QU8, 1x1) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -2606,7 +2606,7 @@ TEST(CONVOLUTION_NHWC_QU8, 1x1) {
 
 TEST(CONVOLUTION_NHWC_QU8, 1x1_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -2617,7 +2617,7 @@ TEST(CONVOLUTION_NHWC_QU8, 1x1_with_qmin) {
 
 TEST(CONVOLUTION_NHWC_QU8, 1x1_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -2628,7 +2628,7 @@ TEST(CONVOLUTION_NHWC_QU8, 1x1_with_qmax) {
 
 TEST(CONVOLUTION_NHWC_QU8, 1x1_with_input_stride) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .input_channel_stride(28)
     .group_input_channels(23)
@@ -2639,7 +2639,7 @@ TEST(CONVOLUTION_NHWC_QU8, 1x1_with_input_stride) {
 
 TEST(CONVOLUTION_NHWC_QU8, 1x1_with_output_stride) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .output_channel_stride(29)
     .group_input_channels(23)
@@ -3310,7 +3310,7 @@ TEST(CONVOLUTION_NHWC_QU8, depthwise_3x3d2x1) {
 // Tests GEMM microkernel with weights_cache.
 TEST(CONVOLUTION_NHWC_QU8, weights_cache_1x1) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -3886,7 +3886,7 @@ TEST(CONVOLUTION_NHWC_QU8, setup_swap_height_and_width_depthwise) {
 
 TEST(CONVOLUTION_NHWC_F32, 1x1) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -3896,7 +3896,7 @@ TEST(CONVOLUTION_NHWC_F32, 1x1) {
 
 TEST(CONVOLUTION_NHWC_F32, 1x1_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -3907,7 +3907,7 @@ TEST(CONVOLUTION_NHWC_F32, 1x1_with_qmin) {
 
 TEST(CONVOLUTION_NHWC_F32, 1x1_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -3918,7 +3918,7 @@ TEST(CONVOLUTION_NHWC_F32, 1x1_with_qmax) {
 
 TEST(CONVOLUTION_NHWC_F32, 1x1_with_input_stride) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .input_channel_stride(28)
     .group_input_channels(23)
@@ -3929,7 +3929,7 @@ TEST(CONVOLUTION_NHWC_F32, 1x1_with_input_stride) {
 
 TEST(CONVOLUTION_NHWC_F32, 1x1_with_output_stride) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .output_channel_stride(29)
     .group_input_channels(23)
@@ -5029,7 +5029,7 @@ TEST(CONVOLUTION_NHWC_F32, depthwise_5x5d2x1) {
 // Tests GEMM microkernel with weights_cache.
 TEST(CONVOLUTION_NHWC_F32, weights_cache_1x1) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -5079,7 +5079,7 @@ TEST(CONVOLUTION_NHWC_F32, weights_cache_depthwise_2x2d2) {
 #if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
 TEST(CONVOLUTION_NHWC_F32, jit_1x1) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -5090,7 +5090,7 @@ TEST(CONVOLUTION_NHWC_F32, jit_1x1) {
 
 TEST(CONVOLUTION_NHWC_F32, jit_1x1_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -5102,7 +5102,7 @@ TEST(CONVOLUTION_NHWC_F32, jit_1x1_with_qmin) {
 
 TEST(CONVOLUTION_NHWC_F32, jit_1x1_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -5114,7 +5114,7 @@ TEST(CONVOLUTION_NHWC_F32, jit_1x1_with_qmax) {
 
 TEST(CONVOLUTION_NHWC_F32, jit_1x1_with_input_stride) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .input_channel_stride(28)
     .group_input_channels(23)
@@ -5126,7 +5126,7 @@ TEST(CONVOLUTION_NHWC_F32, jit_1x1_with_input_stride) {
 
 TEST(CONVOLUTION_NHWC_F32, jit_1x1_with_output_stride) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .output_channel_stride(29)
     .group_input_channels(23)
@@ -6297,7 +6297,7 @@ TEST(CONVOLUTION_NHWC_F32, DISABLED_jit_depthwise_5x5d2x1) {
 // Test interaction of JIT with weights cache.
 TEST(CONVOLUTION_NHWC_F32, jit_weights_cache_1x1) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -6838,7 +6838,7 @@ TEST(CONVOLUTION_NHWC_F32, setup_swap_height_and_width_depthwise) {
 
 TEST(CONVOLUTION_NHWC_F16, 1x1) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -6848,7 +6848,7 @@ TEST(CONVOLUTION_NHWC_F16, 1x1) {
 
 TEST(CONVOLUTION_NHWC_F16, 1x1_with_fp32_weights) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -6859,7 +6859,7 @@ TEST(CONVOLUTION_NHWC_F16, 1x1_with_fp32_weights) {
 
 TEST(CONVOLUTION_NHWC_F16, 1x1_with_qmin) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -6870,7 +6870,7 @@ TEST(CONVOLUTION_NHWC_F16, 1x1_with_qmin) {
 
 TEST(CONVOLUTION_NHWC_F16, 1x1_with_qmax) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
@@ -6881,7 +6881,7 @@ TEST(CONVOLUTION_NHWC_F16, 1x1_with_qmax) {
 
 TEST(CONVOLUTION_NHWC_F16, 1x1_with_input_stride) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .input_channel_stride(28)
     .group_input_channels(23)
@@ -6892,7 +6892,7 @@ TEST(CONVOLUTION_NHWC_F16, 1x1_with_input_stride) {
 
 TEST(CONVOLUTION_NHWC_F16, 1x1_with_output_stride) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .output_channel_stride(29)
     .group_input_channels(23)
@@ -8050,7 +8050,7 @@ TEST(CONVOLUTION_NHWC_F16, depthwise_5x5d2x1) {
 // Tests GEMM microkernel with weights_cache.
 TEST(CONVOLUTION_NHWC_F16, weights_cache_1x1) {
   ConvolutionOperatorTester()
-    .input_size(27, 29)
+    .input_size(27, 37)
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(19)
