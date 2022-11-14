@@ -28,7 +28,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4(
 {
   assert(input_height != 0);
   assert(input_width != 0);
-  assert(input_width % sizeof(__fp16) == 0);
+  assert(input_width % sizeof(uint16_t) == 0);
   assert(padding_top >= 1);
   assert(padding_top <= 2);
 
@@ -45,26 +45,26 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4(
   const uint16x8_t vmask_even = vld1q_u16(params->neonfp16arith.mask_even);
   const uint16x8_t vmask_odd = vld1q_u16(params->neonfp16arith.mask_odd);
 
-  const __fp16* w0 = (const __fp16*)weights;
-  const float16x8_t vw01234567 = vld1q_f16(w0);
-  const float16x8_t vw89ABCDEF = vld1q_f16(w0 + 8);
-  const float16x8_t vwGHIJKLMN = vld1q_f16(w0 + 16);
+  const uint16_t* w0 = (const uint16_t*)weights;
+  const float16x8_t vw01234567 = vreinterpretq_f16_u16(vld1q_u16(w0));
+  const float16x8_t vw89ABCDEF = vreinterpretq_f16_u16(vld1q_u16(w0 + 8));
+  const float16x8_t vwGHIJKLMN = vreinterpretq_f16_u16(vld1q_u16(w0 + 16));
   const float16x4_t vwOP = vreinterpret_f16_u32(vld1_dup_u32((const void*)(w0 + 24)));
 
   const uint32_t padding_top_less_1 = padding_top - 1;
-  const size_t input_decrement = round_up_po2(input_width, 16 * sizeof(__fp16));
+  const size_t input_decrement = round_up_po2(input_width, 16 * sizeof(uint16_t));
 
-  const __fp16* i0 = zero;
-  const __fp16* i1 = (const __fp16*) ((uintptr_t) input - ((-padding_top_less_1) & input_width));
-  const __fp16* i2 = (const __fp16*) ((uintptr_t) i1 + input_width);
+  const uint16_t* i0 = zero;
+  const uint16_t* i1 = (const uint16_t*) ((uintptr_t) input - ((-padding_top_less_1) & input_width));
+  const uint16_t* i2 = (const uint16_t*) ((uintptr_t) i1 + input_width);
   if XNN_UNPREDICTABLE(padding_top_less_1 != 0) {
     i1 = zero;
   }
-  const __fp16* i3 = (const __fp16*) ((uintptr_t) i2 + input_width);
-  const __fp16* i4 = (const __fp16*) ((uintptr_t) i3 + input_width);
+  const uint16_t* i3 = (const uint16_t*) ((uintptr_t) i2 + input_width);
+  const uint16_t* i4 = (const uint16_t*) ((uintptr_t) i3 + input_width);
 
 
-  __fp16* o0 = output;
+  uint16_t* o0 = output;
 
   size_t padded_input_height = input_height + (padding_top_less_1 + 1) + 2 /* padding bottom */;
   size_t output_height = (padded_input_height - 5 /* kernel size */ + 2 /* subsampling */) / 2;
@@ -88,14 +88,14 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4(
     float16x8_t vi3x13579BDF = vmovq_n_f16(0);
     float16x8_t vi4x13579BDF = vmovq_n_f16(0);
 
-    float16x8x2_t vi0xGIKMOQSUHJLNPRTV = vld2q_f16(i0); i0 += 16;
-    float16x8x2_t vi1xGIKMOQSUHJLNPRTV = vld2q_f16(i1); i1 += 16;
-    float16x8x2_t vi2xGIKMOQSUHJLNPRTV = vld2q_f16(i2); i2 += 16;
-    float16x8x2_t vi3xGIKMOQSUHJLNPRTV = vld2q_f16(i3); i3 += 16;
-    float16x8x2_t vi4xGIKMOQSUHJLNPRTV = vld2q_f16(i4); i4 += 16;
+    float16x8x2_t vi0xGIKMOQSUHJLNPRTV = vld2q_f16((const void*) i0); i0 += 16;
+    float16x8x2_t vi1xGIKMOQSUHJLNPRTV = vld2q_f16((const void*) i1); i1 += 16;
+    float16x8x2_t vi2xGIKMOQSUHJLNPRTV = vld2q_f16((const void*) i2); i2 += 16;
+    float16x8x2_t vi3xGIKMOQSUHJLNPRTV = vld2q_f16((const void*) i3); i3 += 16;
+    float16x8x2_t vi4xGIKMOQSUHJLNPRTV = vld2q_f16((const void*) i4); i4 += 16;
 
     size_t w = input_width;
-    for (; w > 16 * sizeof(__fp16); w -= 16 * sizeof(__fp16)) {
+    for (; w > 16 * sizeof(uint16_t); w -= 16 * sizeof(uint16_t)) {
       float16x8_t vo0p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
 
       // Center column
@@ -187,11 +187,11 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4(
       const float16x8_t vi4xFHJLNPRT = vextq_f16(vi4x13579BDF, vi4xGIKMOQSUHJLNPRTV.val[1], 7);
       vi4x13579BDF = vi4xGIKMOQSUHJLNPRTV.val[1];
 
-      const float16x8x2_t vi0xWYacegikXZbdfhjl = vld2q_f16(i0); i0 += 16;
-      const float16x8x2_t vi1xWYacegikXZbdfhjl = vld2q_f16(i1); i1 += 16;
-      const float16x8x2_t vi2xWYacegikXZbdfhjl = vld2q_f16(i2); i2 += 16;
-      const float16x8x2_t vi3xWYacegikXZbdfhjl = vld2q_f16(i3); i3 += 16;
-      const float16x8x2_t vi4xWYacegikXZbdfhjl = vld2q_f16(i4); i4 += 16;
+      const float16x8x2_t vi0xWYacegikXZbdfhjl = vld2q_f16((const void*) i0); i0 += 16;
+      const float16x8x2_t vi1xWYacegikXZbdfhjl = vld2q_f16((const void*) i1); i1 += 16;
+      const float16x8x2_t vi2xWYacegikXZbdfhjl = vld2q_f16((const void*) i2); i2 += 16;
+      const float16x8x2_t vi3xWYacegikXZbdfhjl = vld2q_f16((const void*) i3); i3 += 16;
+      const float16x8x2_t vi4xWYacegikXZbdfhjl = vld2q_f16((const void*) i4); i4 += 16;
 
       #if XNN_ARCH_ARM64
         vo0p1 = vfmaq_laneq_f16(vo0p1, vi0xFHJLNPRT, vw01234567, 2);
@@ -263,12 +263,12 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4(
 
       vo0 = vminq_f16(vo0, vmax);
 
-      vst1q_f16(o0, vo0); o0 += 8;
+      vst1q_u16(o0, vreinterpretq_u16_f16(vo0)); o0 += 8;
     }
 
     // Last block has 1-16 pixels to process.
-    assert(w <= 16 * sizeof(__fp16));
-    assert(w >= 1 * sizeof(__fp16));
+    assert(w <= 16 * sizeof(uint16_t));
+    assert(w >= 1 * sizeof(uint16_t));
     {
       float16x8_t vo0p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
 
@@ -429,15 +429,15 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4(
 
       vo0 = vminq_f16(vo0, vmax);
 
-      const size_t w_tmp = (w + 1 * sizeof(__fp16)) / (2 * sizeof(__fp16));
+      const size_t w_tmp = (w + 1 * sizeof(uint16_t)) / (2 * sizeof(uint16_t));
 
       if XNN_LIKELY(w_tmp == 8) {
-        vst1q_f16(o0, vo0); o0 += 8;
+        vst1q_u16(o0, vreinterpretq_u16_f16(vo0)); o0 += 8;
       } else {
         float16x4_t vo0_lo = vget_low_f16(vo0);
 
         if (w_tmp & 4) {
-         vst1_f16(o0, vo0_lo); o0 += 4;
+         vst1_u16(o0, vreinterpret_u16_f16(vo0_lo)); o0 += 4;
 
           vo0_lo = vget_high_f16(vo0);
         }
@@ -452,11 +452,11 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4(
       }
     }
 
-    i0 = (const __fp16*) ((uintptr_t) i2 - input_decrement);
-    i1 = (const __fp16*) ((uintptr_t) i3 - input_decrement);
-    i2 = (const __fp16*) ((uintptr_t) i4 - input_decrement);
-    i3 = (const __fp16*) ((uintptr_t) i2 + input_width);
-    i4 = (const __fp16*) ((uintptr_t) i3 + input_width);
+    i0 = (const uint16_t*) ((uintptr_t) i2 - input_decrement);
+    i1 = (const uint16_t*) ((uintptr_t) i3 - input_decrement);
+    i2 = (const uint16_t*) ((uintptr_t) i4 - input_decrement);
+    i3 = (const uint16_t*) ((uintptr_t) i2 + input_width);
+    i4 = (const uint16_t*) ((uintptr_t) i3 + input_width);
 
 
     output_height -= 1;

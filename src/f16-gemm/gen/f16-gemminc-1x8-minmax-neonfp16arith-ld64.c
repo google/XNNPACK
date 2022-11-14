@@ -35,44 +35,44 @@ void xnn_f16_gemminc_minmax_ukernel_1x8__neonfp16arith_ld64(
   assert(mr <= 1);
   assert(nc != 0);
   assert(kc != 0);
-  assert(kc % sizeof(__fp16) == 0);
+  assert(kc % sizeof(uint16_t) == 0);
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);
   assert(acc != NULL);
 
-  const __fp16* a0 = (const __fp16*) a;
-  __fp16* c0 = (__fp16*) c;
+  const uint16_t* a0 = (const uint16_t*) a;
+  uint16_t* c0 = (uint16_t*) c;
 
   do {
-    float16x8_t vacc0x01234567 = vld1q_f16(acc); acc = (const void*) ((uintptr_t) acc + sizeof(float16x8_t));
+    float16x8_t vacc0x01234567 = vreinterpretq_f16_u16(vld1q_u16(acc)); acc = (const void*) ((uintptr_t) acc + sizeof(float16x8_t));
 
     size_t k = kc;
-    while (k >= 4 * sizeof(__fp16)) {
-      const float16x4_t va0 = vld1_f16(a0); a0 += 4;
+    while (k >= 4 * sizeof(uint16_t)) {
+      const float16x4_t va0 = vreinterpret_f16_u16(vld1_u16(a0)); a0 += 4;
 
-      const float16x8_t vb01234567c0 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
+      const float16x8_t vb01234567c0 = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
       #if XNN_ARCH_ARM64
         vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c0, va0, 0);
       #else
         vacc0x01234567 = vmlaq_lane_f16(vacc0x01234567, vb01234567c0, va0, 0);
       #endif
-      const float16x8_t vb01234567c1 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
+      const float16x8_t vb01234567c1 = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
       #if XNN_ARCH_ARM64
         vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c1, va0, 1);
       #else
         vacc0x01234567 = vmlaq_lane_f16(vacc0x01234567, vb01234567c1, va0, 1);
       #endif
-      const float16x8_t vb01234567c2 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
+      const float16x8_t vb01234567c2 = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
       #if XNN_ARCH_ARM64
         vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c2, va0, 2);
       #else
         vacc0x01234567 = vmlaq_lane_f16(vacc0x01234567, vb01234567c2, va0, 2);
       #endif
-      const float16x8_t vb01234567c3 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
+      const float16x8_t vb01234567c3 = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
       #if XNN_ARCH_ARM64
         vacc0x01234567 = vfmaq_lane_f16(vacc0x01234567, vb01234567c3, va0, 3);
@@ -80,17 +80,17 @@ void xnn_f16_gemminc_minmax_ukernel_1x8__neonfp16arith_ld64(
         vacc0x01234567 = vmlaq_lane_f16(vacc0x01234567, vb01234567c3, va0, 3);
       #endif
 
-      k -= 4 * sizeof(__fp16);
+      k -= 4 * sizeof(uint16_t);
     }
     if XNN_UNLIKELY(k != 0) {
       do {
         const float16x8_t va0 = vld1q_dup_f16(a0); a0 += 1;
 
-        const float16x8_t vb01234567 = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
+        const float16x8_t vb01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
         vacc0x01234567 = vfmaq_f16(vacc0x01234567, va0, vb01234567);
 
-        k -= sizeof(__fp16);
+        k -= sizeof(uint16_t);
       } while (k != 0);
     }
 
@@ -102,16 +102,16 @@ void xnn_f16_gemminc_minmax_ukernel_1x8__neonfp16arith_ld64(
     vacc0x01234567 = vminq_f16(vacc0x01234567, vmax);
 
     if XNN_LIKELY(nc >= 8) {
-      vst1q_f16(c0, vacc0x01234567);
-      c0 = (__fp16*) ((uintptr_t) c0 + cn_stride);
+      vst1q_u16(c0, vreinterpretq_u16_f16(vacc0x01234567));
+      c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 
-      a0 = (const __fp16*) ((uintptr_t) a0 - kc);
+      a0 = (const uint16_t*) ((uintptr_t) a0 - kc);
 
       nc -= 8;
     } else {
       float16x4_t vacc0x0123 = vget_low_f16(vacc0x01234567);
       if (nc & 4) {
-        vst1_f16(c0, vacc0x0123); c0 += 4;
+        vst1_u16(c0, vreinterpret_u16_f16(vacc0x0123)); c0 += 4;
 
         vacc0x0123 = vget_high_f16(vacc0x01234567);
       }

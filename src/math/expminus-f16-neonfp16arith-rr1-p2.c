@@ -16,7 +16,7 @@ void xnn_math_f16_expminus__neonfp16arith_rr1_p2(
     const void* input,
     void* output)
 {
-  assert(n % (8 * sizeof(__fp16)) == 0);
+  assert(n % (8 * sizeof(uint16_t)) == 0);
 
   // Large number such that ulp(magic bias) == 1 and magic bias === 15 mod 2**9.
   const float16x8_t vmagic_bias = vmovq_n_f16(0x1.83Cp+10f);
@@ -30,10 +30,10 @@ void xnn_math_f16_expminus__neonfp16arith_rr1_p2(
   // The smallest x for which exph(x) is normalized.
   const float16x8_t vdenorm_cutoff = vmovq_n_f16(-0x1.368p3f);
 
-  const __fp16* i = (const __fp16*) input;
-  __fp16* o = (__fp16*) output;
-  for (; n != 0; n -= 8 * sizeof(__fp16)) {
-    const float16x8_t vx = vld1q_f16(i); i += 8;
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  for (; n != 0; n -= 8 * sizeof(uint16_t)) {
+    const float16x8_t vx = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 
     // Compute reduced argument n := round(x / log(2)).
     // We do it by adding a large number (magic bias) to the product x * (1/log(2)), which cause rounding of the result
@@ -68,6 +68,6 @@ void xnn_math_f16_expminus__neonfp16arith_rr1_p2(
     // For inputs below denormal cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
     vf = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf), vcltq_f16(vx, vdenorm_cutoff)));
-    vst1q_f16(o, vf); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf)); o += 8;
   }
 }

@@ -26,7 +26,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_${ROW_TILE}x8${"_acc%d"
 {
   assert(input_height != 0);
   assert(input_width != 0);
-  assert(input_width % sizeof(__fp16) == 0);
+  assert(input_width % sizeof(uint16_t) == 0);
   assert(padding_top >= 1);
   assert(padding_top <= 2);
 
@@ -43,30 +43,30 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_${ROW_TILE}x8${"_acc%d"
   const uint16x8_t vmask_even = vld1q_u16(params->neonfp16arith.mask_even);
   const uint16x8_t vmask_odd = vld1q_u16(params->neonfp16arith.mask_odd);
 
-  const __fp16* w0 = (const __fp16*)weights;
-  const float16x8_t vw01234567 = vld1q_f16(w0);
-  const float16x8_t vw89ABCDEF = vld1q_f16(w0 + 8);
-  const float16x8_t vwGHIJKLMN = vld1q_f16(w0 + 16);
+  const uint16_t* w0 = (const uint16_t*)weights;
+  const float16x8_t vw01234567 = vreinterpretq_f16_u16(vld1q_u16(w0));
+  const float16x8_t vw89ABCDEF = vreinterpretq_f16_u16(vld1q_u16(w0 + 8));
+  const float16x8_t vwGHIJKLMN = vreinterpretq_f16_u16(vld1q_u16(w0 + 16));
   const float16x4_t vwOP = vreinterpret_f16_u32(vld1_dup_u32((const void*)(w0 + 24)));
 
   const uint32_t padding_top_less_1 = padding_top - 1;
-  const size_t input_decrement = round_up_po2(input_width, 16 * sizeof(__fp16));
+  const size_t input_decrement = round_up_po2(input_width, 16 * sizeof(uint16_t));
 
-  const __fp16* i0 = zero;
-  const __fp16* i1 = (const __fp16*) ((uintptr_t) input - ((-padding_top_less_1) & input_width));
-  const __fp16* i2 = (const __fp16*) ((uintptr_t) i1 + input_width);
+  const uint16_t* i0 = zero;
+  const uint16_t* i1 = (const uint16_t*) ((uintptr_t) input - ((-padding_top_less_1) & input_width));
+  const uint16_t* i2 = (const uint16_t*) ((uintptr_t) i1 + input_width);
   if XNN_UNPREDICTABLE(padding_top_less_1 != 0) {
     i1 = zero;
   }
   $for M in range(3, 3 + 2 * ROW_TILE):
-    const __fp16* i${M} = (const __fp16*) ((uintptr_t) i${M-1} + input_width);
+    const uint16_t* i${M} = (const uint16_t*) ((uintptr_t) i${M-1} + input_width);
 
   $if ROW_TILE > 1:
-    const size_t output_width = round_down_po2((input_width + (2 /* padding */ - 3 /* kernel size */ + 2 /* subsampling */) * sizeof(__fp16)) / 2, sizeof(__fp16));
+    const size_t output_width = round_down_po2((input_width + (2 /* padding */ - 3 /* kernel size */ + 2 /* subsampling */) * sizeof(uint16_t)) / 2, sizeof(uint16_t));
 
-  __fp16* o0 = output;
+  uint16_t* o0 = output;
   $for M in range(1, ROW_TILE):
-    __fp16* o${M} = (__fp16*) ((uintptr_t) o${M-1} + output_width);
+    uint16_t* o${M} = (uint16_t*) ((uintptr_t) o${M-1} + output_width);
 
   size_t padded_input_height = input_height + (padding_top_less_1 + 1) + 2 /* padding bottom */;
   size_t output_height = (padded_input_height - 5 /* kernel size */ + 2 /* subsampling */) / 2;
@@ -85,10 +85,10 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_${ROW_TILE}x8${"_acc%d"
       float16x8_t vi${M}x13579BDF = vmovq_n_f16(0);
 
     $for M in range(3 + 2 * ROW_TILE):
-      float16x8x2_t vi${M}xGIKMOQSUHJLNPRTV = vld2q_f16(i${M}); i${M} += 16;
+      float16x8x2_t vi${M}xGIKMOQSUHJLNPRTV = vld2q_f16((const void*) i${M}); i${M} += 16;
 
     size_t w = input_width;
-    for (; w > 16 * sizeof(__fp16); w -= 16 * sizeof(__fp16)) {
+    for (; w > 16 * sizeof(uint16_t); w -= 16 * sizeof(uint16_t)) {
       $for M in range(ROW_TILE):
         float16x8_t vo${M}p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
 
@@ -210,7 +210,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_${ROW_TILE}x8${"_acc%d"
         vi${M}x13579BDF = vi${M}xGIKMOQSUHJLNPRTV.val[1];
 
       $for M in range(3 + 2 * ROW_TILE):
-        const float16x8x2_t vi${M}xWYacegikXZbdfhjl = vld2q_f16(i${M}); i${M} += 16;
+        const float16x8x2_t vi${M}xWYacegikXZbdfhjl = vld2q_f16((const void*) i${M}); i${M} += 16;
 
       $for M in range(ROW_TILE):
         #if XNN_ARCH_ARM64
@@ -293,12 +293,12 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_${ROW_TILE}x8${"_acc%d"
         vo${M} = vminq_f16(vo${M}, vmax);
 
       $for M in reversed(range(ROW_TILE)):
-        vst1q_f16(o${M}, vo${M}); o${M} += 8;
+        vst1q_u16(o${M}, vreinterpretq_u16_f16(vo${M})); o${M} += 8;
     }
 
     // Last block has 1-16 pixels to process.
-    assert(w <= 16 * sizeof(__fp16));
-    assert(w >= 1 * sizeof(__fp16));
+    assert(w <= 16 * sizeof(uint16_t));
+    assert(w >= 1 * sizeof(uint16_t));
     {
       $for M in range(ROW_TILE):
         float16x8_t vo${M}p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
@@ -504,18 +504,18 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_${ROW_TILE}x8${"_acc%d"
       $for M in range(ROW_TILE):
         vo${M} = vminq_f16(vo${M}, vmax);
 
-      const size_t w_tmp = (w + 1 * sizeof(__fp16)) / (2 * sizeof(__fp16));
+      const size_t w_tmp = (w + 1 * sizeof(uint16_t)) / (2 * sizeof(uint16_t));
 
       if XNN_LIKELY(w_tmp == 8) {
         $for M in reversed(range(ROW_TILE)):
-          vst1q_f16(o${M}, vo${M}); o${M} += 8;
+          vst1q_u16(o${M}, vreinterpretq_u16_f16(vo${M})); o${M} += 8;
       } else {
         $for M in reversed(range(ROW_TILE)):
           float16x4_t vo${M}_lo = vget_low_f16(vo${M});
 
         if (w_tmp & 4) {
          $for M in reversed(range(ROW_TILE)):
-            vst1_f16(o${M}, vo${M}_lo); o${M} += 4;
+            vst1_u16(o${M}, vreinterpret_u16_f16(vo${M}_lo)); o${M} += 4;
 
           $for M in reversed(range(ROW_TILE)):
             vo${M}_lo = vget_high_f16(vo${M});
@@ -534,16 +534,16 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_${ROW_TILE}x8${"_acc%d"
       }
     }
 
-    i0 = (const __fp16*) ((uintptr_t) i${2 * ROW_TILE} - input_decrement);
-    i1 = (const __fp16*) ((uintptr_t) i${2 * ROW_TILE + 1} - input_decrement);
-    i2 = (const __fp16*) ((uintptr_t) i${2 * ROW_TILE + 2} - input_decrement);
+    i0 = (const uint16_t*) ((uintptr_t) i${2 * ROW_TILE} - input_decrement);
+    i1 = (const uint16_t*) ((uintptr_t) i${2 * ROW_TILE + 1} - input_decrement);
+    i2 = (const uint16_t*) ((uintptr_t) i${2 * ROW_TILE + 2} - input_decrement);
     $for M in range(3, 3 + 2 * ROW_TILE):
-      i${M} = (const __fp16*) ((uintptr_t) i${M-1} + input_width);
+      i${M} = (const uint16_t*) ((uintptr_t) i${M-1} + input_width);
 
     $if ROW_TILE > 1:
       o0 = o${ROW_TILE - 1};
       $for M in range(1, ROW_TILE):
-        o${M} = (__fp16*) ((uintptr_t) o${M-1} + output_width);
+        o${M} = (uint16_t*) ((uintptr_t) o${M-1} + output_width);
 
     $if ROW_TILE > 1:
       output_height = doz(output_height, ${ROW_TILE});

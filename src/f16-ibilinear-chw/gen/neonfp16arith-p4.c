@@ -25,27 +25,27 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p4(
 {
   assert(output_pixels != 0);
   assert(channels != 0);
-  assert(input_increment % sizeof(__fp16) == 0);
+  assert(input_increment % sizeof(uint16_t) == 0);
 
-  __fp16* o = (__fp16*) output;
+  uint16_t* o = (uint16_t*) output;
   do {
-    const __fp16** i = (const __fp16**)input;
-    const __fp16* w = weights;
+    const uint16_t** i = (const uint16_t**)input;
+    const uint16_t* w = weights;
     size_t p = output_pixels;
 
 
     for (; p >= 4; p -= 4) {
-      const __fp16* itl0 = (const __fp16*) ((uintptr_t) i[0] + input_offset);
-      const __fp16* ibl0 = (const __fp16*) ((uintptr_t) i[1] + input_offset);
-      const __fp16* itl1 = (const __fp16*) ((uintptr_t) i[2] + input_offset);
-      const __fp16* ibl1 = (const __fp16*) ((uintptr_t) i[3] + input_offset);
-      const __fp16* itl2 = (const __fp16*) ((uintptr_t) i[4] + input_offset);
-      const __fp16* ibl2 = (const __fp16*) ((uintptr_t) i[5] + input_offset);
-      const __fp16* itl3 = (const __fp16*) ((uintptr_t) i[6] + input_offset);
-      const __fp16* ibl3 = (const __fp16*) ((uintptr_t) i[7] + input_offset);
+      const uint16_t* itl0 = (const uint16_t*) ((uintptr_t) i[0] + input_offset);
+      const uint16_t* ibl0 = (const uint16_t*) ((uintptr_t) i[1] + input_offset);
+      const uint16_t* itl1 = (const uint16_t*) ((uintptr_t) i[2] + input_offset);
+      const uint16_t* ibl1 = (const uint16_t*) ((uintptr_t) i[3] + input_offset);
+      const uint16_t* itl2 = (const uint16_t*) ((uintptr_t) i[4] + input_offset);
+      const uint16_t* ibl2 = (const uint16_t*) ((uintptr_t) i[5] + input_offset);
+      const uint16_t* itl3 = (const uint16_t*) ((uintptr_t) i[6] + input_offset);
+      const uint16_t* ibl3 = (const uint16_t*) ((uintptr_t) i[7] + input_offset);
       i += 8;
 
-      const float16x4x2_t vw = vld2_f16(w);
+      const float16x4x2_t vw = vld2_f16((const void*) w);
       w += 8;
 
       float16x8_t vtltr = vmovq_n_f16(0);  // vmov for uninitialized var warning
@@ -78,19 +78,19 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p4(
       const float16x4_t vd = vsub_f16(vr, vl);
       const float16x4_t vo = vfma_f16(vl, vd, valphah);
 
-      vst1_f16(o, vo);
+      vst1_u16(o, vreinterpret_u16_f16(vo));
       o += 4;
     }
 
     if XNN_UNLIKELY(p != 0) {
       if (p & 2) {
-        const __fp16* itl0 = (const __fp16*) ((uintptr_t) i[0] + input_offset);
-        const __fp16* ibl0 = (const __fp16*) ((uintptr_t) i[1] + input_offset);
-        const __fp16* itl1 = (const __fp16*) ((uintptr_t) i[2] + input_offset);
-        const __fp16* ibl1 = (const __fp16*) ((uintptr_t) i[3] + input_offset);
+        const uint16_t* itl0 = (const uint16_t*) ((uintptr_t) i[0] + input_offset);
+        const uint16_t* ibl0 = (const uint16_t*) ((uintptr_t) i[1] + input_offset);
+        const uint16_t* itl1 = (const uint16_t*) ((uintptr_t) i[2] + input_offset);
+        const uint16_t* ibl1 = (const uint16_t*) ((uintptr_t) i[3] + input_offset);
         i += 4;
 
-        const float16x4_t vw = vld1_f16(w);
+        const float16x4_t vw = vreinterpret_f16_u16(vld1_u16(w));
         w += 4;
 
         const float16x4x2_t vwhv = vuzp_f16(vw, vw);
@@ -138,8 +138,8 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p4(
         //   left =  top_left + alpha_v * (bottom_left  - top_left),
         //  right = top_right + alpha_v * (bottom_right - top_right).
 
-        const __fp16* itl = (const __fp16*) ((uintptr_t) i[0] + input_offset);
-        const __fp16* ibl = (const __fp16*) ((uintptr_t) i[1] + input_offset);
+        const uint16_t* itl = (const uint16_t*) ((uintptr_t) i[0] + input_offset);
+        const uint16_t* ibl = (const uint16_t*) ((uintptr_t) i[1] + input_offset);
         i += 2;
 
         float16x4_t vw = vmov_n_f16(0);

@@ -22,7 +22,7 @@ void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x8(
     const union xnn_f16_elu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
-  assert(batch % sizeof(__fp16) == 0);
+  assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -36,10 +36,10 @@ void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x8(
   const float16x8_t vminus_alpha = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.minus_alpha));
   const float16x8_t vbeta = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr1_p3.beta));
 
-  const __fp16* i = (const __fp16*) input;
-  __fp16* o = (__fp16*) output;
-  for (; batch >= 8 * sizeof(__fp16); batch -= 8 * sizeof(__fp16)) {
-    float16x8_t vx = vld1q_f16(i); i += 8;
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
+    float16x8_t vx = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
     float16x8_t vz = vmulq_f16(vx, vprescale);
     vz = vmaxq_f16(vz, vsat_cutoff);
 
@@ -58,10 +58,10 @@ void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x8(
     const uint16x8_t vm = vcltq_s16(vreinterpretq_s16_f16(vx), vmovq_n_s16(0));
     vx = vmulq_f16(vx, vbeta);
     const float16x8_t vy = vbslq_f16(vm, ve, vx);
-    vst1q_f16(o, vy); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vy)); o += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
-    float16x8_t vx = vld1q_f16(i); i += 8;
+    float16x8_t vx = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
     float16x8_t vz = vmulq_f16(vx, vprescale);
     vz = vmaxq_f16(vz, vsat_cutoff);
 
@@ -81,15 +81,15 @@ void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x8(
     vx = vmulq_f16(vx, vbeta);
     float16x8_t vy = vbslq_f16(vm, ve, vx);
     float16x4_t vy_lo = vget_low_f16(vy);
-    if (batch & (4 * sizeof(__fp16))) {
-      vst1_f16(o, vy_lo); o += 4;
+    if (batch & (4 * sizeof(uint16_t))) {
+      vst1_u16(o, vreinterpret_u16_f16(vy_lo)); o += 4;
       vy_lo = vget_high_f16(vy);
     }
-    if (batch & (2 * sizeof(__fp16))) {
+    if (batch & (2 * sizeof(uint16_t))) {
       vst1_lane_u32((void*) o, vreinterpret_u32_f16(vy_lo), 0); o += 2;
       vy_lo = vext_f16(vy_lo, vy_lo, 2);
     }
-    if (batch & (1 * sizeof(__fp16))) {
+    if (batch & (1 * sizeof(uint16_t))) {
       vst1_lane_f16(o, vy_lo, 0);
     }
   }

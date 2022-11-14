@@ -28,7 +28,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8(
 {
   assert(input_height != 0);
   assert(input_width != 0);
-  assert(input_width % sizeof(__fp16) == 0);
+  assert(input_width % sizeof(uint16_t) == 0);
   assert(padding_top <= 1);
 
   #if XNN_ARCH_ARM64
@@ -44,20 +44,20 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8(
   const uint16x8_t vmask_even = vld1q_u16(params->neonfp16arith.mask_even);
   const uint16x8_t vmask_odd  = vld1q_u16(params->neonfp16arith.mask_odd);
 
-  const __fp16* w0 = (const __fp16*)weights;
-  const float16x8_t vw01234567 = vld1q_f16(w0);
+  const uint16_t* w0 = (const uint16_t*)weights;
+  const float16x8_t vw01234567 = vreinterpretq_f16_u16(vld1q_u16(w0));
   const float16x4_t vw89 = vreinterpret_f16_u32(vld1_dup_u32((const void*)(w0 + 8)));
 
-  const size_t input_decrement = round_down_po2(input_width, 8 /* SIMD output width */ * 2 /* subsampling */ * sizeof(__fp16));
+  const size_t input_decrement = round_down_po2(input_width, 8 /* SIMD output width */ * 2 /* subsampling */ * sizeof(uint16_t));
 
-  const __fp16* i0 = (const __fp16*) ((uintptr_t) input - ((-padding_top) & input_width));
-  const __fp16* i1 = (const __fp16*) ((uintptr_t) i0 + input_width);
+  const uint16_t* i0 = (const uint16_t*) ((uintptr_t) input - ((-padding_top) & input_width));
+  const uint16_t* i1 = (const uint16_t*) ((uintptr_t) i0 + input_width);
   if XNN_UNPREDICTABLE(padding_top != 0) {
     i0 = zero;
   }
-  const __fp16* i2 = (const __fp16*) ((uintptr_t) i1 + input_width);
+  const uint16_t* i2 = (const uint16_t*) ((uintptr_t) i1 + input_width);
 
-  __fp16* o0 = output;
+  uint16_t* o0 = output;
 
   size_t padded_input_height = input_height + padding_top + 1 /* padding bottom */;
   size_t output_height = (padded_input_height - 3 /* kernel size */ + 2 /* subsampling */) / 2;
@@ -71,12 +71,12 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8(
     float16x8_t vi2x13579BDF = vmovq_n_f16(0);
 
     size_t w = input_width;
-    for (; w >= 16 * sizeof(__fp16); w -= 16 * sizeof(__fp16)) {
+    for (; w >= 16 * sizeof(uint16_t); w -= 16 * sizeof(uint16_t)) {
       float16x8_t vo0p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
 
-      const float16x8x2_t vi0xGIKMOQSUHJLNPRTV = vld2q_f16(i0); i0 += 16;
-      const float16x8x2_t vi1xGIKMOQSUHJLNPRTV = vld2q_f16(i1); i1 += 16;
-      const float16x8x2_t vi2xGIKMOQSUHJLNPRTV = vld2q_f16(i2); i2 += 16;
+      const float16x8x2_t vi0xGIKMOQSUHJLNPRTV = vld2q_f16((const void*) i0); i0 += 16;
+      const float16x8x2_t vi1xGIKMOQSUHJLNPRTV = vld2q_f16((const void*) i1); i1 += 16;
+      const float16x8x2_t vi2xGIKMOQSUHJLNPRTV = vld2q_f16((const void*) i2); i2 += 16;
 
       // Center column
       #if XNN_ARCH_ARM64
@@ -138,17 +138,17 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8(
 
       vo0 = vminq_f16(vo0, vmax);
 
-      vst1q_f16(o0, vo0); o0 += 8;
+      vst1q_u16(o0, vreinterpretq_u16_f16(vo0)); o0 += 8;
     }
 
     // Last block has 0-15 pixels to process.
-    assert(w < 16 * sizeof(__fp16));
+    assert(w < 16 * sizeof(uint16_t));
     if XNN_LIKELY(w != 0) {
       float16x8_t vo0p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);
 
-      const float16x8x2_t vi0xGIKMOQSUHJLNPRTV = vld2q_f16(i0);
-      const float16x8x2_t vi1xGIKMOQSUHJLNPRTV = vld2q_f16(i1);
-      const float16x8x2_t vi2xGIKMOQSUHJLNPRTV = vld2q_f16(i2);
+      const float16x8x2_t vi0xGIKMOQSUHJLNPRTV = vld2q_f16((const void*) i0);
+      const float16x8x2_t vi1xGIKMOQSUHJLNPRTV = vld2q_f16((const void*) i1);
+      const float16x8x2_t vi2xGIKMOQSUHJLNPRTV = vld2q_f16((const void*) i2);
 
       const float16x8_t vi0xGIKMOQSU = vreinterpretq_f16_u16(vandq_u16(vmask_even, vreinterpretq_u16_f16(vi0xGIKMOQSUHJLNPRTV.val[0])));
       const float16x8_t vi0xHJLNPRTV = vreinterpretq_f16_u16(vandq_u16(vmask_odd,  vreinterpretq_u16_f16(vi0xGIKMOQSUHJLNPRTV.val[1])));
@@ -214,32 +214,32 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8(
 
       vo0 = vminq_f16(vo0, vmax);
 
-      w += 1 * sizeof(__fp16);
+      w += 1 * sizeof(uint16_t);
 
-      if XNN_LIKELY(w == 16 * sizeof(__fp16)) {
-        vst1q_f16(o0, vo0); o0 += 8;
+      if XNN_LIKELY(w == 16 * sizeof(uint16_t)) {
+        vst1q_u16(o0, vreinterpretq_u16_f16(vo0)); o0 += 8;
       } else {
         float16x4_t vo0_lo = vget_low_f16(vo0);
 
-        if (w & (8 * sizeof(__fp16))) {
-         vst1_f16(o0, vo0_lo); o0 += 4;
+        if (w & (8 * sizeof(uint16_t))) {
+         vst1_u16(o0, vreinterpret_u16_f16(vo0_lo)); o0 += 4;
 
           vo0_lo = vget_high_f16(vo0);
         }
-        if (w & (4 * sizeof(__fp16))) {
+        if (w & (4 * sizeof(uint16_t))) {
           vst1_lane_u32((void*) o0, vreinterpret_u32_f16(vo0_lo), 0); o0 += 2;
 
           vo0_lo = vext_f16(vo0_lo, vo0_lo, 2);
         }
-        if (w & (2 * sizeof(__fp16))) {
+        if (w & (2 * sizeof(uint16_t))) {
           vst1_lane_f16(o0, vo0_lo, 0); o0 += 1;
         }
       }
     }
 
-    i0 = (const __fp16*) ((uintptr_t) i2 - input_decrement);
-    i1 = (const __fp16*) ((uintptr_t) i0 + input_width);
-    i2 = (const __fp16*) ((uintptr_t) i1 + input_width);
+    i0 = (const uint16_t*) ((uintptr_t) i2 - input_decrement);
+    i1 = (const uint16_t*) ((uintptr_t) i0 + input_width);
+    i2 = (const uint16_t*) ((uintptr_t) i1 + input_width);
 
 
     output_height -= 1;

@@ -22,7 +22,7 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x24(
     const union xnn_f16_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
-  assert(batch % sizeof(__fp16) == 0);
+  assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
@@ -35,12 +35,12 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x24(
   const float16x8_t vone = vmovq_n_f16(1.0f);
   const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.denorm_cutoff));
 
-  const __fp16* i = (const __fp16*) input;
-  __fp16* o = (__fp16*) output;
-  for (; batch >= 24 * sizeof(__fp16); batch -= 24 * sizeof(__fp16)) {
-    const float16x8_t vx0 = vld1q_f16(i); i += 8;
-    const float16x8_t vx1 = vld1q_f16(i); i += 8;
-    const float16x8_t vx2 = vld1q_f16(i); i += 8;
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  for (; batch >= 24 * sizeof(uint16_t); batch -= 24 * sizeof(uint16_t)) {
+    const float16x8_t vx0 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t vx1 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t vx2 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 
     const float16x8_t vz0 = vabsq_f16(vx0);
     const float16x8_t vz1 = vabsq_f16(vx1);
@@ -98,12 +98,12 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x24(
     vf1 = vbslq_f16(vm1, vf1, vsubq_f16(vone, vf1));
     vf2 = vbslq_f16(vm2, vf2, vsubq_f16(vone, vf2));
 
-    vst1q_f16(o, vf0); o += 8;
-    vst1q_f16(o, vf1); o += 8;
-    vst1q_f16(o, vf2); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf0)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf1)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf2)); o += 8;
   }
-  for (; batch >= 8 * sizeof(__fp16); batch -= 8 * sizeof(__fp16)) {
-    const float16x8_t vx = vld1q_f16(i); i += 8;
+  for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
+    const float16x8_t vx = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 
     const float16x8_t vz = vabsq_f16(vx);
 
@@ -124,10 +124,10 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x24(
     const uint16x8_t vm = vcltq_f16(vx, vmovq_n_f16(0.0f));
     vf = vbslq_f16(vm, vf, vsubq_f16(vone, vf));
 
-    vst1q_f16(o, vf); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf)); o += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
-    const float16x8_t vx = vld1q_f16(i);
+    const float16x8_t vx = vreinterpretq_f16_u16(vld1q_u16(i));
 
     const float16x8_t vz = vabsq_f16(vx);
 
@@ -149,15 +149,15 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x24(
     vf = vbslq_f16(vm, vf, vsubq_f16(vone, vf));
 
     float16x4_t vf_lo = vget_low_f16(vf);
-    if (batch & (4 * sizeof(__fp16))) {
-      vst1_f16(o, vf_lo); o += 4;
+    if (batch & (4 * sizeof(uint16_t))) {
+      vst1_u16(o, vreinterpret_u16_f16(vf_lo)); o += 4;
       vf_lo = vget_high_f16(vf);
     }
-    if (batch & (2 * sizeof(__fp16))) {
-      vst1_f16(o, vf_lo); o += 2;
+    if (batch & (2 * sizeof(uint16_t))) {
+      vst1_u16(o, vreinterpret_u16_f16(vf_lo)); o += 2;
       vf_lo = vext_f16(vf_lo, vf_lo, 2);
     }
-    if (batch & (1 * sizeof(__fp16))) {
+    if (batch & (1 * sizeof(uint16_t))) {
       vst1_lane_f16(o, vf_lo, 0);
     }
   }

@@ -16,7 +16,7 @@ void xnn_math_f16_expm1minus__neonfp16arith_rr2_p3(
     const void* input,
     void* output)
 {
-  assert(n % (8 * sizeof(__fp16)) == 0);
+  assert(n % (8 * sizeof(uint16_t)) == 0);
 
   // The largest x for which expm1f(x) is saturated at -1.0f.
   const float16x8_t vsat_cutoff = vmovq_n_f16(-0x1.0A4p+3f);
@@ -32,10 +32,10 @@ void xnn_math_f16_expm1minus__neonfp16arith_rr2_p3(
   const float16x8_t vc2 = vmovq_n_f16(0x1.020p-1f);
   const float16x8_t vone = vmovq_n_f16(1.0f);
 
-  const __fp16* i = (const __fp16*) input;
-  __fp16* o = (__fp16*) output;
-  for (; n != 0; n -= 8 * sizeof(__fp16)) {
-    float16x8_t vx = vld1q_f16(i); i += 8;
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  for (; n != 0; n -= 8 * sizeof(uint16_t)) {
+    float16x8_t vx = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 
     // The function saturates at -1 for large negative inputs: expm1h(x) == -1.0h for x <= sat_cutoff ~= -8.3203125.
     // To guarantee this behaviour, we clip input at sat_cutoff, and leverage the fact that for our implementation
@@ -80,6 +80,6 @@ void xnn_math_f16_expm1minus__neonfp16arith_rr2_p3(
     vp = vfmaq_f16(vt, vp, vt);
     const float16x8_t vf = vaddq_f16(vp, vsm1);
 
-    vst1q_f16(o, vf); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf)); o += 8;
   }
 }

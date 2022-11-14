@@ -24,7 +24,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x96(
     const union xnn_f16_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
-  assert(batch % sizeof(__fp16) == 0);
+  assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(max != NULL);
   assert(output != NULL);
@@ -39,22 +39,22 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x96(
   const float16x8_t vc1 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.c1));
   const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.denorm_cutoff));
 
-  const __fp16* i = (const __fp16*) input;
-  __fp16* o = (__fp16*) output;
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
   float16x8_t vacc0 = vmovq_n_f16(0.0f);
-  for (; batch >= 96 * sizeof(__fp16); batch -= 96 * sizeof(__fp16)) {
-    const float16x8_t vi0 = vld1q_f16(i); i += 8;
-    const float16x8_t vi1 = vld1q_f16(i); i += 8;
-    const float16x8_t vi2 = vld1q_f16(i); i += 8;
-    const float16x8_t vi3 = vld1q_f16(i); i += 8;
-    const float16x8_t vi4 = vld1q_f16(i); i += 8;
-    const float16x8_t vi5 = vld1q_f16(i); i += 8;
-    const float16x8_t vi6 = vld1q_f16(i); i += 8;
-    const float16x8_t vi7 = vld1q_f16(i); i += 8;
-    const float16x8_t vi8 = vld1q_f16(i); i += 8;
-    const float16x8_t vi9 = vld1q_f16(i); i += 8;
-    const float16x8_t viA = vld1q_f16(i); i += 8;
-    const float16x8_t viB = vld1q_f16(i); i += 8;
+  for (; batch >= 96 * sizeof(uint16_t); batch -= 96 * sizeof(uint16_t)) {
+    const float16x8_t vi0 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t vi1 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t vi2 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t vi3 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t vi4 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t vi5 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t vi6 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t vi7 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t vi8 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t vi9 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t viA = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    const float16x8_t viB = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 
     const float16x8_t vx0 = vsubq_f16(vi0, vi_max);
     const float16x8_t vx1 = vsubq_f16(vi1, vi_max);
@@ -198,18 +198,18 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x96(
     vfA = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vfA), vmA));
     vfB = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vfB), vmB));
 
-    vst1q_f16(o, vf0); o += 8;
-    vst1q_f16(o, vf1); o += 8;
-    vst1q_f16(o, vf2); o += 8;
-    vst1q_f16(o, vf3); o += 8;
-    vst1q_f16(o, vf4); o += 8;
-    vst1q_f16(o, vf5); o += 8;
-    vst1q_f16(o, vf6); o += 8;
-    vst1q_f16(o, vf7); o += 8;
-    vst1q_f16(o, vf8); o += 8;
-    vst1q_f16(o, vf9); o += 8;
-    vst1q_f16(o, vfA); o += 8;
-    vst1q_f16(o, vfB); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf0)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf1)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf2)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf3)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf4)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf5)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf6)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf7)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf8)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf9)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vfA)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vfB)); o += 8;
 
     vacc0 = vaddq_f16(vacc0, vf0);
     vacc0 = vaddq_f16(vacc0, vf1);
@@ -226,8 +226,8 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x96(
   }
 
   float16x8_t vacc = vacc0;
-  for (; batch >= 8 * sizeof(__fp16); batch -= 8 * sizeof(__fp16)) {
-    const float16x8_t vi = vld1q_f16(i); i += 8;
+  for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
+    const float16x8_t vi = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 
     const float16x8_t vx = vsubq_f16(vi, vi_max);
 
@@ -245,15 +245,15 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x96(
     const uint16x8_t vm = vcltq_f16(vx, vdenorm_cutoff);
     vf = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf), vm));
 
-    vst1q_f16(o, vf); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf)); o += 8;
 
     vacc = vaddq_f16(vacc, vf);
   }
   float16x4_t vacc_lo = vadd_f16(vget_low_f16(vacc), vget_high_f16(vacc));
   if (batch != 0) {
-    assert(batch >= 1 * sizeof(__fp16));
-    assert(batch <= 7 * sizeof(__fp16));
-    const float16x8_t vi = vld1q_f16(i);
+    assert(batch >= 1 * sizeof(uint16_t));
+    assert(batch <= 7 * sizeof(uint16_t));
+    const float16x8_t vi = vreinterpretq_f16_u16(vld1q_u16(i));
 
     const float16x8_t vx = vsubq_f16(vi, vi_max);
 
@@ -272,21 +272,22 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x96(
     vf = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf), vm));
 
     float16x4_t vf_lo = vget_low_f16(vf);
-    if (batch & (4 * sizeof(__fp16))) {
-      vst1_f16(o, vf_lo); o += 4;
+    if (batch & (4 * sizeof(uint16_t))) {
+      vst1_u16(o, vreinterpret_u16_f16(vf_lo)); o += 4;
       vacc_lo = vadd_f16(vacc_lo, vf_lo);
       vf_lo = vget_high_f16(vf);
     }
-    if (batch & (2 * sizeof(__fp16))) {
+    if (batch & (2 * sizeof(uint16_t))) {
       vst1_lane_u32((void*) o, vreinterpret_u32_f16(vf_lo), 0); o += 2;
       vacc_lo = vadd_f16(vacc_lo, vreinterpret_f16_u64(vshl_n_u64(vreinterpret_u64_f16(vf_lo), 32)));
       vf_lo = vext_f16(vf_lo, vf_lo, 2);
     }
-    if (batch & (1 * sizeof(__fp16))) {
+    if (batch & (1 * sizeof(uint16_t))) {
       vst1_lane_f16(o, vf_lo, 0);
       vacc_lo = vadd_f16(vacc_lo, vreinterpret_f16_u64(vshl_n_u64(vreinterpret_u64_f16(vf_lo), 48)));
     }
   }
   vacc_lo = vpadd_f16(vacc_lo, vacc_lo);
-  *((__fp16*) sum) = vget_lane_f16(vacc_lo, 0) + vget_lane_f16(vacc_lo, 1);
+  vacc_lo = vpadd_f16(vacc_lo, vacc_lo);
+  vst1_lane_u16(sum, vreinterpret_u16_f16(vacc_lo), 0);
 }

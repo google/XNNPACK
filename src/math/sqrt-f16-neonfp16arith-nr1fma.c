@@ -17,13 +17,13 @@ void xnn_math_f16_sqrt__neonfp16arith_nr1fma(
     const void* input,
     void* output)
 {
-  assert(n % (8 * sizeof(__fp16)) == 0);
+  assert(n % (8 * sizeof(uint16_t)) == 0);
 
   const float16x8_t vhalf = vmovq_n_f16(0.5f);
-  const __fp16* i = (const __fp16*) input;
-  __fp16* o = (__fp16*) output;
-  for (; n != 0; n -= 8 * sizeof(__fp16)) {
-    const float16x8_t vx = vld1q_f16(i); i += 8;
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  for (; n != 0; n -= 8 * sizeof(uint16_t)) {
+    const float16x8_t vx = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 
     // Initial approximation
     const float16x8_t vrsqrtx = vrsqrteq_f16(vx);
@@ -38,6 +38,6 @@ void xnn_math_f16_sqrt__neonfp16arith_nr1fma(
 
     const float16x8_t vy = vsqrtx;
 
-    vst1q_f16(o, vy); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vy)); o += 8;
   }
 }

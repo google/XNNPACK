@@ -17,7 +17,7 @@ void xnn_math_f16_exp__neonfp16arith_rr2_p3(
     const void* input,
     void* output)
 {
-  assert(n % (8 * sizeof(__fp16)) == 0);
+  assert(n % (8 * sizeof(uint16_t)) == 0);
 
   const float16x8_t vmagic_bias = vmovq_n_f16(0x1.800p+10f);
   // The smallest x for which exph(x) is non-zero.
@@ -37,10 +37,10 @@ void xnn_math_f16_exp__neonfp16arith_rr2_p3(
   const int16x8_t vmax_exponent = vreinterpretq_s16_f16(vone);
   const int16x8_t vdefault_exponent = vmax_exponent;
 
-  const __fp16* i = (const __fp16*) input;
-  __fp16* o = (__fp16*) output;
-  for (; n != 0; n -= 8 * sizeof(__fp16)) {
-    const float16x8_t vx = vld1q_f16(i); i += 8;
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  for (; n != 0; n -= 8 * sizeof(uint16_t)) {
+    const float16x8_t vx = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 
     // Compute reduced argument n := round(x / log(2)).
     // We do it by adding a large number (magic bias), which cause rounding of result to an integer, then subtracing the
@@ -89,6 +89,6 @@ void xnn_math_f16_exp__neonfp16arith_rr2_p3(
     // For inputs above inf cutoff, replace output with +inf.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
     vf = vbslq_f16(vcgtq_f16(vx, vinf_cutoff), vplus_inf, vf);
-    vst1q_f16(o, vf); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vf)); o += 8;
   }
 }

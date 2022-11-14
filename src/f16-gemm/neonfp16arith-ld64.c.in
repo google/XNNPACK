@@ -34,18 +34,18 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
   assert(mr <= ${MR});
   assert(nc != 0);
   assert(kc != 0);
-  assert(kc % sizeof(__fp16) == 0);
+  assert(kc % sizeof(uint16_t) == 0);
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);
   $if INC:
     assert(acc != NULL);
 
-  const __fp16* a0 = (const __fp16*) a;
-  __fp16* c0 = (__fp16*) c;
+  const uint16_t* a0 = (const uint16_t*) a;
+  uint16_t* c0 = (uint16_t*) c;
   $for M in range(1, MR):
-    const __fp16* a${M} = (const __fp16*) ((uintptr_t) a${M-1} + a_stride);
-    __fp16* c${M} = (__fp16*) ((uintptr_t) c${M-1} + cm_stride);
+    const uint16_t* a${M} = (const uint16_t*) ((uintptr_t) a${M-1} + a_stride);
+    uint16_t* c${M} = (uint16_t*) ((uintptr_t) c${M-1} + cm_stride);
     $if M % 2 == 0:
       if XNN_UNPREDICTABLE(mr <= ${M}) {
         a${M} = a${M-1};
@@ -66,22 +66,22 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
     $if INC:
       $for M in range(MR):
         $for N in range(0, NR, 8):
-          float16x8_t vacc${M}x${ABC[N:N+8]} = vld1q_f16(acc); acc = (const void*) ((uintptr_t) acc + sizeof(float16x8_t));
+          float16x8_t vacc${M}x${ABC[N:N+8]} = vreinterpretq_f16_u16(vld1q_u16(acc)); acc = (const void*) ((uintptr_t) acc + sizeof(float16x8_t));
     $else:
       $for N in range(0, NR, 8):
-        float16x8_t vacc0x${ABC[N:N+8]} = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
+        float16x8_t vacc0x${ABC[N:N+8]} = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
       $for M in range(1, MR):
         $for N in range(0, NR, 8):
           float16x8_t vacc${M}x${ABC[N:N+8]} = vacc0x${ABC[N:N+8]};
 
     size_t k = kc;
-    while (k >= 4 * sizeof(__fp16)) {
+    while (k >= 4 * sizeof(uint16_t)) {
       $for M in range(MR):
-        const float16x4_t va${M} = vld1_f16(a${M}); a${M} += 4;
+        const float16x4_t va${M} = vreinterpret_f16_u16(vld1_u16(a${M})); a${M} += 4;
 
       $for L in range(4):
         $for N in range(0, NR, 8):
-          const float16x8_t vb${ABC[N:N+8]}c${L} = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
+          const float16x8_t vb${ABC[N:N+8]}c${L} = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
         #if XNN_ARCH_ARM64
           $for N in range(0, NR, 8):
@@ -93,7 +93,7 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
               vacc${M}x${ABC[N:N+8]} = vmlaq_lane_f16(vacc${M}x${ABC[N:N+8]}, vb${ABC[N:N+8]}c${L}, va${M}, ${L});
         #endif
 
-      k -= 4 * sizeof(__fp16);
+      k -= 4 * sizeof(uint16_t);
     }
     if XNN_UNLIKELY(k != 0) {
       do {
@@ -101,13 +101,13 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
           const float16x8_t va${M} = vld1q_dup_f16(a${M}); a${M} += 1;
 
         $for N in range(0, NR, 8):
-          const float16x8_t vb${ABC[N:N+8]} = vld1q_f16(w); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
+          const float16x8_t vb${ABC[N:N+8]} = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
 
         $for N in range(0, NR, 8):
           $for M in range(MR):
             vacc${M}x${ABC[N:N+8]} = vfmaq_f16(vacc${M}x${ABC[N:N+8]}, va${M}, vb${ABC[N:N+8]});
 
-        k -= sizeof(__fp16);
+        k -= sizeof(uint16_t);
       } while (k != 0);
     }
 
@@ -124,13 +124,13 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in range(MR):
-        vst1q_f16(c${M}, vacc${M}x${ABC[0:8]});
+        vst1q_u16(c${M}, vreinterpretq_u16_f16(vacc${M}x${ABC[0:8]}));
         $for N in range(8, NR, 8):
-          vst1q_f16(c${M} + ${N}, vacc${M}x${ABC[N:N+8]});
-        c${M} = (__fp16*) ((uintptr_t) c${M} + cn_stride);
+          vst1q_u16(c${M} + ${N}, vreinterpretq_u16_f16(vacc${M}x${ABC[N:N+8]}));
+        c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
 
       $for M in range(MR):
-        a${M} = (const __fp16*) ((uintptr_t) a${M} - kc);
+        a${M} = (const uint16_t*) ((uintptr_t) a${M} - kc);
 
       nc -= ${NR};
     } else {
@@ -140,14 +140,14 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
             $if LOG2N >= 3:
               $for N in range(0, 1 << LOG2N, 8):
                 $for M in range(MR):
-                  vst1q_f16(c${M}, vacc${M}x${ABC[N:N+8]}); c${M} += 8;
+                  vst1q_u16(c${M}, vreinterpretq_u16_f16(vacc${M}x${ABC[N:N+8]})); c${M} += 8;
 
               $for M in range(MR):
                 $for N in range(0, 1 << (LOG2N - 1), 8):
                   vacc${M}x${ABC[N:N+8]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+8]};
             $elif LOG2N == 2:
               $for M in range(MR):
-                vst1_f16(c${M}, vacc${M}x${ABC[0:4]}); c${M} += 4;
+                vst1_u16(c${M}, vreinterpret_u16_f16(vacc${M}x${ABC[0:4]})); c${M} += 4;
 
               $for M in range(MR):
                 vacc${M}x${ABC[0:4]} = vget_high_f16(vacc${M}x${ABC[0:8]});

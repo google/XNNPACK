@@ -27,13 +27,13 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__neonfp16arith_${ROW_TILE
 {
   assert(rows != 0);
   assert(channels != 0);
-  assert(channels % sizeof(__fp16) == 0);
+  assert(channels % sizeof(uint16_t) == 0);
 
-  const __fp16* i0 = (const __fp16*) input;
-  __fp16* o0 = (__fp16*) output;
+  const uint16_t* i0 = (const uint16_t*) input;
+  uint16_t* o0 = (uint16_t*) output;
   $for M in range(1, ROW_TILE):
-    const __fp16* i${M} = (const __fp16*) ((uintptr_t) i${M-1} + input_stride);
-    __fp16* o${M} = (__fp16*) ((uintptr_t) o${M-1} + output_stride);
+    const uint16_t* i${M} = (const uint16_t*) ((uintptr_t) i${M-1} + input_stride);
+    uint16_t* o${M} = (uint16_t*) ((uintptr_t) o${M-1} + output_stride);
 
   const size_t input_increment = input_stride * ${ROW_TILE} - channels;
   const size_t output_increment = output_stride * ${ROW_TILE} - channels;
@@ -53,19 +53,19 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__neonfp16arith_${ROW_TILE
           o${M} = o${M-1};
         }
 
-    const __fp16* w = (const __fp16*) weights;
+    const uint16_t* w = (const uint16_t*) weights;
     size_t c = channels;
     $if CHANNEL_TILE > 8:
-      for (; c >= ${CHANNEL_TILE} * sizeof(__fp16); c -= ${CHANNEL_TILE} * sizeof(__fp16)) {
+      for (; c >= ${CHANNEL_TILE} * sizeof(uint16_t); c -= ${CHANNEL_TILE} * sizeof(uint16_t)) {
         $for C in range(0, CHANNEL_TILE, 8):
-          const float16x8_t vscale${ABC[C:C+8]} = vld1q_f16(w); w += 8;
+          const float16x8_t vscale${ABC[C:C+8]} = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
 
         $for M in range(ROW_TILE):
           $for C in range(0, CHANNEL_TILE, 8):
-            float16x8_t vacc${M}x${ABC[C:C+8]} = vld1q_f16(i${M}); i${M} += 8;
+            float16x8_t vacc${M}x${ABC[C:C+8]} = vreinterpretq_f16_u16(vld1q_u16(i${M})); i${M} += 8;
 
         $for C in range(0, CHANNEL_TILE, 8):
-          const float16x8_t vbias${ABC[C:C+8]} = vld1q_f16(w); w += 8;
+          const float16x8_t vbias${ABC[C:C+8]} = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
 
         $for M in range(ROW_TILE):
           $for C in range(0, CHANNEL_TILE, 8):
@@ -81,15 +81,15 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__neonfp16arith_${ROW_TILE
 
         $for M in range(ROW_TILE):
           $for C in range(0, CHANNEL_TILE, 8):
-            vst1q_f16(o${M}, vacc${M}x${ABC[C:C+8]}); o${M} += 8;
+            vst1q_u16(o${M}, vreinterpretq_u16_f16(vacc${M}x${ABC[C:C+8]})); o${M} += 8;
       }
-    for (; c >= 8 * sizeof(__fp16); c -= 8 * sizeof(__fp16)) {
-      const float16x8_t vscale01234567 = vld1q_f16(w);
+    for (; c >= 8 * sizeof(uint16_t); c -= 8 * sizeof(uint16_t)) {
+      const float16x8_t vscale01234567 = vreinterpretq_f16_u16(vld1q_u16(w));
 
       $for M in range(ROW_TILE):
-        float16x8_t vacc${M}x01234567 = vld1q_f16(i${M}); i${M} += 8;
+        float16x8_t vacc${M}x01234567 = vreinterpretq_f16_u16(vld1q_u16(i${M})); i${M} += 8;
 
-      const float16x8_t vbias01234567 = vld1q_f16(w + ${CHANNEL_TILE});
+      const float16x8_t vbias01234567 = vreinterpretq_f16_u16(vld1q_u16(w + ${CHANNEL_TILE}));
       w += ${8 if CHANNEL_TILE > 8 else CHANNEL_TILE * 2};
 
       $for M in range(ROW_TILE):
@@ -102,15 +102,15 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__neonfp16arith_${ROW_TILE
         vacc${M}x01234567 = vminq_f16(vacc${M}x01234567, vmax);
 
       $for M in range(ROW_TILE):
-        vst1q_f16(o${M}, vacc${M}x01234567); o${M} += 8;
+        vst1q_u16(o${M}, vreinterpretq_u16_f16(vacc${M}x01234567)); o${M} += 8;
     }
     if XNN_UNLIKELY(c != 0) {
-      const float16x8_t vscale01234567 = vld1q_f16(w);
+      const float16x8_t vscale01234567 = vreinterpretq_f16_u16(vld1q_u16(w));
 
       $for M in range(ROW_TILE):
-        float16x8_t vacc${M}x01234567 = vld1q_f16(i${M}); i${M} = (const __fp16*) ((uintptr_t) i${M} + c);
+        float16x8_t vacc${M}x01234567 = vreinterpretq_f16_u16(vld1q_u16(i${M})); i${M} = (const uint16_t*) ((uintptr_t) i${M} + c);
 
-      const float16x8_t vbias01234567 = vld1q_f16(w + ${CHANNEL_TILE});
+      const float16x8_t vbias01234567 = vreinterpretq_f16_u16(vld1q_u16(w + ${CHANNEL_TILE}));
 
       $for M in range(ROW_TILE):
         vacc${M}x01234567 = vfmaq_f16(vbias01234567, vscale01234567, vacc${M}x01234567);
@@ -123,28 +123,28 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__neonfp16arith_${ROW_TILE
 
       $for M in range(ROW_TILE):
         float16x4_t vacc${M}x0123 = vget_low_f16(vacc${M}x01234567);
-      if (c & (4 * sizeof(__fp16))) {
+      if (c & (4 * sizeof(uint16_t))) {
         $for M in range(ROW_TILE):
-          vst1_f16(o${M}, vacc${M}x0123); o${M} += 4;
+          vst1_u16(o${M}, vreinterpret_u16_f16(vacc${M}x0123)); o${M} += 4;
 
         $for M in range(ROW_TILE):
           vacc${M}x0123 = vget_high_f16(vacc${M}x01234567);
       }
-      if (c & (2 * sizeof(__fp16))) {
+      if (c & (2 * sizeof(uint16_t))) {
         $for M in range(ROW_TILE):
           vst1_lane_u32((void*) o${M}, vreinterpret_u32_f16(vacc${M}x0123), 0); o${M} += 2;
 
         $for M in range(ROW_TILE):
           vacc${M}x0123 = vext_f16(vacc${M}x0123, vacc${M}x0123, 2);
       }
-      if (c & (1 * sizeof(__fp16))) {
+      if (c & (1 * sizeof(uint16_t))) {
         $for M in range(ROW_TILE):
           vst1_lane_f16(o${M}, vacc${M}x0123, 0); o${M} += 1;
       }
     }
     $for M in range(ROW_TILE):
-      i${M} = (const __fp16*) ((uintptr_t) i${M} + input_increment);
-      o${M} = (__fp16*) ((uintptr_t) o${M} + output_increment);
+      i${M} = (const uint16_t*) ((uintptr_t) i${M} + input_increment);
+      o${M} = (uint16_t*) ((uintptr_t) o${M} + output_increment);
     rows = doz(rows, ${ROW_TILE});
   } while (rows != 0);
 }

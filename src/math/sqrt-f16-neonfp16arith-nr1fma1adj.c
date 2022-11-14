@@ -17,7 +17,7 @@ void xnn_math_f16_sqrt__neonfp16arith_nr1fma1adj(
     const void* input,
     void* output)
 {
-  assert(n % (8 * sizeof(__fp16)) == 0);
+  assert(n % (8 * sizeof(uint16_t)) == 0);
 
   // Positive infininity in bit representation.
   const uint16x8_t vpositive_infinity = vmovq_n_u16(UINT16_C(0x7C00));
@@ -26,10 +26,10 @@ void xnn_math_f16_sqrt__neonfp16arith_nr1fma1adj(
   // Mask for the top 4 exponent bits of a IEEE FP16 number.
   const uint16x8_t vexp4_mask = vmovq_n_u16(UINT16_C(0x7800));
 
-  const __fp16* i = (const __fp16*) input;
-  __fp16* o = (__fp16*) output;
-  for (; n != 0; n -= 8 * sizeof(__fp16)) {
-    const float16x8_t vi = vld1q_f16(i); i += 8;
+  const uint16_t* i = (const uint16_t*) input;
+  uint16_t* o = (uint16_t*) output;
+  for (; n != 0; n -= 8 * sizeof(uint16_t)) {
+    const float16x8_t vi = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 
 
     // Mask for positive infininty, NaN, and negative inputs.
@@ -76,6 +76,6 @@ void xnn_math_f16_sqrt__neonfp16arith_nr1fma1adj(
     // Replace results for positive infinity and NaN inputs with the input itself.
     vy = vbslq_f16(vspecial_mask, vreinterpretq_f16_u16(vspecial_value), vy);
 
-    vst1q_f16(o, vy); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vy)); o += 8;
   }
 }
