@@ -251,8 +251,11 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
                       xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f16));
         goto error;
       }
-
-      xnn_pack_f16_dconv_oki_w(
+      xnn_pack_dconv_oki_w_function xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_function) xnn_pack_f16_dconv_oki_w;
+      if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+        xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_function) xnn_pack_f32_to_f16_dconv_oki_w;
+      }
+      xnn_pack_dconv_oki_w(
         group_output_channels,
         group_input_channels,
         xnn_params.f16.conv_hwc2chw_3x3c3s2.output_channel_tile,

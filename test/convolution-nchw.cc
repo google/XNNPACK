@@ -24,6 +24,21 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F16, 3x3c3s2) {
     .TestNCHWxF16();
 }
 
+TEST(CONVOLUTION_NHWC2NCHW_OP_F16, 3x3c3s2_with_fp32_weights) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .weights_type(ConvolutionOperatorTester::WeightsType::FP32)
+    .input_size(27, 37)
+    .padding(1)
+    .kernel_size(3, 3)
+    .subsampling(2)
+    .group_input_channels(3)
+    .group_output_channels(19)
+    .force_nhwc_input(true)
+    .iterations(3)
+    .TestNCHWxF16();
+}
+
 TEST(CONVOLUTION_NHWC2NCHW_OP_F16, 3x3c3s2_varying_input_height) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   for (size_t input_height = 25; input_height <= 31; input_height++) {
@@ -134,6 +149,22 @@ TEST(CONVOLUTION_NHWC2NCHW_OP_F16, weights_cache_3x3c3s2) {
 TEST(CONVOLUTION_NHWC2NCHW_OP_F16, batched_3x3c3s2) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()
+    .batch_size(2)
+    .input_size(27, 37)
+    .padding(1)
+    .kernel_size(3, 3)
+    .subsampling(2)
+    .group_input_channels(3)
+    .group_output_channels(19)
+    .force_nhwc_input(true)
+    .iterations(3)
+    .TestNCHWxF16();
+}
+
+TEST(CONVOLUTION_NHWC2NCHW_OP_F16, batched_3x3c3s2_with_fp32_weights) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .weights_type(ConvolutionOperatorTester::WeightsType::FP32)
     .batch_size(2)
     .input_size(27, 37)
     .padding(1)
