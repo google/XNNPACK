@@ -23,12 +23,12 @@
 //     size_t cn_stride,         sp + 128 -> (r0)
 //     size_t a_offset,          sp + 132 -> (r5)
 //     const float* zero,        sp + 136 -> (r0)
-//     minmax_params*params,     sp + 140 -> (r5)
+//     minmax_params*params,     sp + 140 -> (r2)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
 // Register usage
-// r0, r2   scratch temporaries for loads
+// temp r0, r2   scratch temporaries for loads
 // A0   r3  d0
 // A1  r12  d1
 // A2  r10  d2
@@ -39,7 +39,7 @@
 // C1   r4 d20-d21 q10  d22-d23 q11
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
-// clamp  (r5) d4 d5 d6 d7
+// clamp  (r2) d4 d5 d6 d7
 
 BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         .arm
@@ -89,7 +89,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a53
         LDR     r12, [r5,  4]
         LDR     r10, [r5,  8]
         LDR     r7, [r5, 12]
-        ADD     r5, r5, 16
+        ADD     r5, r5, 16              // a += MR * sizeof(void*)
         STR     r5, [sp, 112]           // a
         LDR     r0, [sp, 136]           // zero
         LDR     r5, [sp, 132]           // a_offset

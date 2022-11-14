@@ -216,7 +216,7 @@ AARCH32_POST_OP = """void Generator::perform_post_operations(
         const auto three = q1;
         const auto six = q2;
         const auto zero = q3;
-        vld3r_32({sixth.low(), three.low(), six.low()}, mem[r5]++);
+        vld3r_32({sixth.low(), three.low(), six.low()}, mem[PARAMS_REG_PLACEHOLDER]++);
         vmov(zero, 0);
         vmov(three.high(), three.low());
         vmov(six.high(), six.low());
@@ -274,29 +274,43 @@ AARCH64_MR1_POST_OP_TMPS = """v4.v4s(), v5.v4s()"""
 AARCH64_MR6_POST_OP_TMPS = """v4.v4s(), v5.v4s(), v6.v4s(), v7.v4s()"""
 
 
+def replace_template(template: str, replacements: Mapping[str, str]):
+  result = template
+  for k, v in replacements.items():
+    result = result.replace(k, v)
+  return result
+
+
 # We use placeholder strings rather than formatted strings due to the many braces in the template (we are generating C++
 # after all), and to avoid copious escaping.
-def get_post_operation_implementation(arch, mr: int):
+def get_post_operation_implementation(arch, mr: int, params_register: str):
   if arch == AARCH32:
-    return AARCH32_POST_OP
+    return replace_template(AARCH32_POST_OP,
+                            {'PARAMS_REG_PLACEHOLDER': params_register})
   elif arch == AARCH64:
     # MR 1 microkernels have less accumulators.
     # TODO(zhin): we already parsed this form the vector usage, use that instead of hardcoding the registers.
     if mr == 1:
-      return AARCH64_POST_OP.replace('ACCS_PLACEHOLDER',
-                                     AARCH64_MR1_POST_OP_ACCS).replace(
-                                         'TMPS_PLACEHOLDER',
-                                         AARCH64_MR1_POST_OP_TMPS)
+      return replace_template(
+          AARCH64_POST_OP, {
+              'ACCS_PLACEHOLDER': AARCH64_MR1_POST_OP_ACCS,
+              'TMPS_PLACEHOLDER': AARCH64_MR1_POST_OP_TMPS,
+              'PARAMS_REG_PLACEHOLDER': params_register
+          })
     elif mr == 4:
-      return AARCH64_POST_OP.replace('ACCS_PLACEHOLDER',
-                                     AARCH64_MR4_POST_OP_ACCS).replace(
-                                         'TMPS_PLACEHOLDER',
-                                         AARCH64_MR6_POST_OP_TMPS)
+      return replace_template(
+          AARCH64_POST_OP, {
+              'ACCS_PLACEHOLDER': AARCH64_MR4_POST_OP_ACCS,
+              'TMPS_PLACEHOLDER': AARCH64_MR6_POST_OP_TMPS,
+              'PARAMS_REG_PLACEHOLDER': params_register
+          })
     elif mr == 6:
-      return AARCH64_POST_OP.replace('ACCS_PLACEHOLDER',
-                                     AARCH64_MR6_POST_OP_ACCS).replace(
-                                         'TMPS_PLACEHOLDER',
-                                         AARCH64_MR6_POST_OP_TMPS)
+      return replace_template(
+          AARCH64_POST_OP, {
+              'ACCS_PLACEHOLDER': AARCH64_MR6_POST_OP_ACCS,
+              'TMPS_PLACEHOLDER': AARCH64_MR6_POST_OP_TMPS,
+              'PARAMS_REG_PLACEHOLDER': params_register
+          })
     else:
       print(f'unsupported mr {mr} for post operations', file=sys.stderr)
       sys.exit(1)
@@ -652,18 +666,18 @@ def parse_microkernel(
     if m:
       emit_instruction(
           f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}], {m[4]}){sc} {m[5]}',
-          instructions, vector_register_map)
+          instructions, vector_register_map, is_gemm)
       continue
     m = re.fullmatch(INSTR_REG_MEMOP_OFFSET_RE, line)
     if m:
       if m[5]:  # wb
         emit_instruction(
             f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]++){sc} {m[6]}',
-            instructions, vector_register_map)
+            instructions, vector_register_map, is_gemm)
       else:  # no wb
         emit_instruction(
             f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[6]}',
-            instructions, vector_register_map)
+            instructions, vector_register_map, is_gemm)
       continue
     m = re.fullmatch(INSTR_REG_REG_MEMOP_RE, line)
     if m:
@@ -935,6 +949,15 @@ def insert_post_operations(instructions: List[str]):
   return instructions
 
 
+def find_params_register(lines: List[str]):
+  for line in lines:
+    if 'params' in line:
+      reg_m = re.search(r'((?:r|x)\d+)', line.split()[-1])
+      if reg_m:
+        return reg_m[1]
+  return None
+
+
 def convert(input_file: str, post_op: bool) -> None:
   output = []
   arch = None
@@ -992,6 +1015,12 @@ def convert(input_file: str, post_op: bool) -> None:
   prologue, vector_register_map = parse_prologue(input_file, prologue_lines,
                                                  arch, minmax, kernel_type,
                                                  prfm, mr, post_op)
+  params_register = find_params_register(prologue_lines)
+  if not params_register:
+    print(fn_name)
+    print('Unable to find params register')
+    sys.exit(1)
+
   instructions, labels = parse_microkernel(microkernel_body, prfm,
                                            kernel_type == GEMM,
                                            vector_register_map)
@@ -1054,7 +1083,7 @@ def convert(input_file: str, post_op: bool) -> None:
   # print post operations definition
   if post_op:
     output.append('')
-    output.append(get_post_operation_implementation(arch, mr))
+    output.append(get_post_operation_implementation(arch, mr, params_register))
     output.append('')
   output.append('}  // namespace')
   output.append(f'}}  // namespace {arch}')
