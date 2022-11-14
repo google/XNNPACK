@@ -54,44 +54,48 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_lut64_p2_div_x16(
     v128_t vn89AB = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz89AB, vminus_log2e));
     v128_t vnCDEF = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vzCDEF, vminus_log2e));
 
+    const v128_t vidx0123 = wasm_i32x4_shl(wasm_v128_and(vn0123, vindex_mask), 2);
     const v128_t ve0123 = wasm_i32x4_shl(vn0123, 17);
+    const v128_t vidx4567 = wasm_i32x4_shl(wasm_v128_and(vn4567, vindex_mask), 2);
     const v128_t ve4567 = wasm_i32x4_shl(vn4567, 17);
+    const v128_t vidx89AB = wasm_i32x4_shl(wasm_v128_and(vn89AB, vindex_mask), 2);
     const v128_t ve89AB = wasm_i32x4_shl(vn89AB, 17);
+    const v128_t vidxCDEF = wasm_i32x4_shl(wasm_v128_and(vnCDEF, vindex_mask), 2);
     const v128_t veCDEF = wasm_i32x4_shl(vnCDEF, 17);
 
-    const v128_t vidx0123 = wasm_i32x4_shl(wasm_v128_and(vn0123, vindex_mask), 2);
-    const v128_t vidx4567 = wasm_i32x4_shl(wasm_v128_and(vn4567, vindex_mask), 2);
-    const v128_t vidx89AB = wasm_i32x4_shl(wasm_v128_and(vn89AB, vindex_mask), 2);
-    const v128_t vidxCDEF = wasm_i32x4_shl(wasm_v128_and(vnCDEF, vindex_mask), 2);
+    const uint32_t vidx0 = wasm_u32x4_extract_lane(vidx0123, 0);
+    v128_t vl0123 = wasm_v128_load32_zero((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx0));
+    const uint32_t vidx4 = wasm_u32x4_extract_lane(vidx4567, 0);
+    v128_t vl4567 = wasm_v128_load32_zero((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx4));
+    const uint32_t vidx8 = wasm_u32x4_extract_lane(vidx89AB, 0);
+    v128_t vl89AB = wasm_v128_load32_zero((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx8));
+    const uint32_t vidxC = wasm_u32x4_extract_lane(vidxCDEF, 0);
+    v128_t vlCDEF = wasm_v128_load32_zero((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidxC));
 
-    const uint64_t vidx01 = wasm_i64x2_extract_lane(vidx0123, 0);
-    const uint64_t vidx23 = wasm_i64x2_extract_lane(vidx0123, 1);
-    const float vl0   = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx01));
-    const float vl1 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx01 >> 32)));
-    const float vl2 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx23));
-    const float vl3 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx23 >> 32)));
-    const v128_t vl0123 = wasm_f32x4_make(vl0, vl1, vl2, vl3);
-    const uint64_t vidx45 = wasm_i64x2_extract_lane(vidx4567, 0);
-    const uint64_t vidx67 = wasm_i64x2_extract_lane(vidx4567, 1);
-    const float vl4   = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx45));
-    const float vl5 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx45 >> 32)));
-    const float vl6 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx67));
-    const float vl7 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx67 >> 32)));
-    const v128_t vl4567 = wasm_f32x4_make(vl4, vl5, vl6, vl7);
-    const uint64_t vidx89 = wasm_i64x2_extract_lane(vidx89AB, 0);
-    const uint64_t vidxAB = wasm_i64x2_extract_lane(vidx89AB, 1);
-    const float vl8   = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx89));
-    const float vl9 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx89 >> 32)));
-    const float vlA = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidxAB));
-    const float vlB = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidxAB >> 32)));
-    const v128_t vl89AB = wasm_f32x4_make(vl8, vl9, vlA, vlB);
-    const uint64_t vidxCD = wasm_i64x2_extract_lane(vidxCDEF, 0);
-    const uint64_t vidxEF = wasm_i64x2_extract_lane(vidxCDEF, 1);
-    const float vlC   = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidxCD));
-    const float vlD = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidxCD >> 32)));
-    const float vlE = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidxEF));
-    const float vlF = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidxEF >> 32)));
-    const v128_t vlCDEF = wasm_f32x4_make(vlC, vlD, vlE, vlF);
+    const uint32_t vidx1 = wasm_u32x4_extract_lane(vidx0123, 1);
+    vl0123 = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx1), vl0123, 1);
+    const uint32_t vidx5 = wasm_u32x4_extract_lane(vidx4567, 1);
+    vl4567 = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx5), vl4567, 1);
+    const uint32_t vidx9 = wasm_u32x4_extract_lane(vidx89AB, 1);
+    vl89AB = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx9), vl89AB, 1);
+    const uint32_t vidxD = wasm_u32x4_extract_lane(vidxCDEF, 1);
+    vlCDEF = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidxD), vlCDEF, 1);
+    const uint32_t vidx2 = wasm_u32x4_extract_lane(vidx0123, 2);
+    vl0123 = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx2), vl0123, 2);
+    const uint32_t vidx6 = wasm_u32x4_extract_lane(vidx4567, 2);
+    vl4567 = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx6), vl4567, 2);
+    const uint32_t vidxA = wasm_u32x4_extract_lane(vidx89AB, 2);
+    vl89AB = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidxA), vl89AB, 2);
+    const uint32_t vidxE = wasm_u32x4_extract_lane(vidxCDEF, 2);
+    vlCDEF = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidxE), vlCDEF, 2);
+    const uint32_t vidx3 = wasm_u32x4_extract_lane(vidx0123, 3);
+    vl0123 = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx3), vl0123, 3);
+    const uint32_t vidx7 = wasm_u32x4_extract_lane(vidx4567, 3);
+    vl4567 = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx7), vl4567, 3);
+    const uint32_t vidxB = wasm_u32x4_extract_lane(vidx89AB, 3);
+    vl89AB = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidxB), vl89AB, 3);
+    const uint32_t vidxF = wasm_u32x4_extract_lane(vidxCDEF, 3);
+    vlCDEF = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidxF), vlCDEF, 3);
 
     const v128_t vs0123 = wasm_i32x4_add(vl0123, ve0123);
     const v128_t vs4567 = wasm_i32x4_add(vl4567, ve4567);
@@ -164,13 +168,18 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_lut64_p2_div_x16(
     const v128_t ve = wasm_i32x4_shl(vn, 17);
 
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
-    const uint64_t vidx_lo = wasm_i64x2_extract_lane(vidx, 0);
-    const uint64_t vidx_hi = wasm_i64x2_extract_lane(vidx, 1);
-    const float vl0 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_lo));
-    const float vl1 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_lo >> 32)));
-    const float vl2 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_hi));
-    const float vl3 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_hi >> 32)));
-    const v128_t vl = wasm_f32x4_make(vl0, vl1, vl2, vl3);
+
+    const uint32_t vidx0 = wasm_u32x4_extract_lane(vidx, 0);
+    v128_t vl = wasm_v128_load32_zero((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx0));
+
+    const uint32_t vidx1 = wasm_u32x4_extract_lane(vidx, 1);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx1), vl, 1);
+
+    const uint32_t vidx2 = wasm_u32x4_extract_lane(vidx, 2);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx2), vl, 2);
+
+    const uint32_t vidx3 = wasm_u32x4_extract_lane(vidx, 3);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx3), vl, 3);
 
     const v128_t vs = wasm_i32x4_add(vl, ve);
     vn = wasm_f32x4_sub(vn, vmagic_bias);
@@ -200,13 +209,18 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_lut64_p2_div_x16(
     const v128_t ve = wasm_i32x4_shl(vn, 17);
 
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
-    const uint64_t vidx_lo = wasm_i64x2_extract_lane(vidx, 0);
-    const uint64_t vidx_hi = wasm_i64x2_extract_lane(vidx, 1);
-    const float vl0 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_lo));
-    const float vl1 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_lo >> 32)));
-    const float vl2 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_hi));
-    const float vl3 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_hi >> 32)));
-    const v128_t vl = wasm_f32x4_make(vl0, vl1, vl2, vl3);
+
+    const uint32_t vidx0 = wasm_u32x4_extract_lane(vidx, 0);
+    v128_t vl = wasm_v128_load32_zero((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx0));
+
+    const uint32_t vidx1 = wasm_u32x4_extract_lane(vidx, 1);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx1), vl, 1);
+
+    const uint32_t vidx2 = wasm_u32x4_extract_lane(vidx, 2);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx2), vl, 2);
+
+    const uint32_t vidx3 = wasm_u32x4_extract_lane(vidx, 3);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx3), vl, 3);
 
     const v128_t vs = wasm_i32x4_add(vl, ve);
     vn = wasm_f32x4_sub(vn, vmagic_bias);

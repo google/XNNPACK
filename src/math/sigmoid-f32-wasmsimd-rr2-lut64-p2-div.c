@@ -73,13 +73,15 @@ void xnn_math_f32_sigmoid__wasmsimd_rr2_lut64_p2_div(
 
     // Use bits 0:6 of n, as integer, as an index for table lookup of l := 2**frac(n).
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
-    const uint64_t vidx_lo = wasm_i64x2_extract_lane(vidx, 0);
-    const uint64_t vidx_hi = wasm_i64x2_extract_lane(vidx, 1);
-    const float vl0 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_lo));
-    const float vl1 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_lo >> 32)));
-    const float vl2 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx_hi));
-    const float vl3 = *((const float*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) (vidx_hi >> 32)));
-    const v128_t vl = wasm_f32x4_make(vl0, vl1, vl2, vl3);
+    const uint32_t vidx0 = wasm_u32x4_extract_lane(vidx, 0);
+    v128_t vl = wasm_v128_load32_zero((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx0));
+    const uint32_t vidx1 = wasm_u32x4_extract_lane(vidx, 1);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx1), vl, 1);
+    const uint32_t vidx2 = wasm_u32x4_extract_lane(vidx, 2);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx2), vl, 2);
+    const uint32_t vidx3 = wasm_u32x4_extract_lane(vidx, 3);
+    vl = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_64 + (uint32_t) vidx3), vl, 3);
+
     // Adjust exponent of the value l fetched from the table to get the final s value.
     const v128_t vs = wasm_i32x4_add(vl, ve);
 
