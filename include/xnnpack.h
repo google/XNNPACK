@@ -1683,6 +1683,60 @@ enum xnn_status xnn_setup_bankers_rounding_nc_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_batch_to_space_nhwc_x8(
+  xnn_operator_t* batch_to_space_op_out);
+
+enum xnn_status xnn_create_batch_to_space_nhwc_x16(
+  xnn_operator_t* batch_to_space_op_out);
+
+enum xnn_status xnn_create_batch_to_space_nhwc_x32(
+  xnn_operator_t* batch_to_space_op_out);
+
+enum xnn_status xnn_setup_batch_to_space_nhwc_x8(
+  xnn_operator_t batch_to_space_op,
+  size_t input_batch,
+  size_t input_height,
+  size_t input_width,
+  size_t input_channels,
+  size_t block_height,
+  size_t block_width,
+  size_t crop_top,
+  size_t crop_bottom,
+  size_t crop_left,
+  size_t crop_right,
+  const void* input,
+  void* output);
+
+enum xnn_status xnn_setup_batch_to_space_nhwc_x16(
+  xnn_operator_t batch_to_space_op,
+  size_t input_batch,
+  size_t input_height,
+  size_t input_width,
+  size_t input_channels,
+  size_t block_height,
+  size_t block_width,
+  size_t crop_top,
+  size_t crop_bottom,
+  size_t crop_left,
+  size_t crop_right,
+  const void* input,
+  void* output);
+
+enum xnn_status xnn_setup_batch_to_space_nhwc_x32(
+  xnn_operator_t batch_to_space_op,
+  size_t input_batch,
+  size_t input_height,
+  size_t input_width,
+  size_t input_channels,
+  size_t block_height,
+  size_t block_width,
+  size_t crop_top,
+  size_t crop_bottom,
+  size_t crop_left,
+  size_t crop_right,
+  const void* input,
+  void* output);
+
 enum xnn_status xnn_run_bankers_rounding_nc_f32(
   size_t channels,
   size_t input_stride,

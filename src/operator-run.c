@@ -21,6 +21,551 @@
 #include <xnnpack/params.h>
 #include <xnnpack/compute.h>
 
+void xnn_compute_batch_to_space_v1d(
+    const struct batch_to_space_context* context,
+    size_t offset,
+    size_t size)
+{
+  // This is never tiled, we ignore those arguments.
+  (void) size;
+  (void) offset;
+
+  // We are running through the output buffer and computing the corresponding
+  // input offsets. This is easier and avoids branching out of the cropped
+  // areas.
+  const size_t input_batch_stride = context->identity.input_batch_stride;
+  const size_t input_row_stride = context->identity.input_row_stride;
+  const size_t output_batch = context->identity.output_batch;
+  const size_t output_height = context->output_height;
+  const size_t output_row_stride = context->identity.output_row_stride;
+
+  const xnn_vunary_ukernel_fn ukernel = context->univector_contiguous.ukernel;
+  const void* const params = &context->univector_contiguous.params;
+
+  uintptr_t x_base = (uintptr_t) context->univector_contiguous.x + context->identity.initial_input_offset;
+  uintptr_t y = (uintptr_t) context->univector_contiguous.y;
+
+  for (size_t b = 0; b < output_batch; ++b) {
+    uintptr_t x = x_base;
+    for (size_t i = 0; i < output_height; ++i) {
+      ukernel(output_row_stride, (void*)x, (void*)y, params);
+      y += output_row_stride;
+      x += input_row_stride;
+    }
+    x_base += input_batch_stride;
+  }
+}
+
+struct batch_to_space_subtile {
+  uintptr_t x;
+  size_t height;
+  size_t width;
+  uintptr_t y_offset;
+};
+
+void transpose_subtile_v2d(
+    const struct batch_to_space_context* const context,
+    uintptr_t x,
+    uintptr_t y,
+    size_t height,
+    size_t width)
+{
+
+  context->transpose.variable_size_ukernel(
+      (void*)x,
+      (void*)y,
+      context->tile_2d.ld_input,
+      context->tile_2d.ld_output,
+      context->tile_2d.input_element_stride,
+      context->tile_2d.output_element_stride,
+      context->tile_2d.element_size,
+      height,
+      width);
+}
+
+void transpose_subtile_c2d(
+    const struct batch_to_space_context* const context,
+    uintptr_t x,
+    uintptr_t y,
+    size_t height,
+    size_t width)
+{
+  context->transpose.const_size_ukernel(
+      (void*)x,
+      (void*)y,
+      context->tile_2d.ld_input,
+      context->tile_2d.ld_output,
+      height,
+      width,
+      &context->transpose.params);
+}
+
+void transpose_subtile_v2d_by_row(
+    const struct batch_to_space_context* const context,
+    size_t row,
+    uintptr_t x,
+    uintptr_t y,
+    size_t height,
+    size_t width)
+{
+  const struct batch_to_space_context_tile_2d* const tile_2d = &context->tile_2d;
+  for (size_t a = 0; a < height; ++a) {
+    const size_t b_start = row > tile_2d->top_crop_row ? row : tile_2d->top_crop_row;
+    const size_t b_end = row + width < tile_2d->bottom_crop_row ? row + width : tile_2d->bottom_crop_row;
+    if (b_end > b_start) {
+      transpose_subtile_v2d(
+          context,
+          x + (b_start - row) * tile_2d->ld_input,
+          y + (b_start - row) * tile_2d->output_element_stride,
+          1,
+          b_end - b_start);
+    }
+    // We never overshoot by more than one output batch element because
+    // output_height = block_height * input_height.
+    row += context->block_height;
+    if (row >= context->output_height_nocrop) {
+      row -= context->output_height_nocrop;
+      y += tile_2d->output_batch_stride_compensation;
+    }
+    x += tile_2d->input_element_stride;
+    y += tile_2d->ld_output;
+  }
+}
+
+// In this case, the initial 4D transposition is reduced to a 2D transposition
+// where each element will be a full row in the output tensor.
+//
+// Let's note:
+//   - o: an input tensor element (an output row).
+//   - x: a tile element (an output row).
+//   - |: the delimiter between batch items.
+//
+// The final output tensor will be:
+//
+// o1 | o5 | o9
+// o2 | o6 | o10
+// o3 | o7 | o11  ...
+// o4 | o8 | o12
+//
+// The kernel input tensor will be (x is the current tile):
+//
+// x1  x2  x3  o4  o5
+// x6  x7  x8  o9  o10
+// o11 o12 o13 o14 o15
+// ...
+void xnn_compute_batch_to_space_2dv(
+    const struct batch_to_space_context* const context,
+    size_t i,
+    size_t j,
+    size_t tile_i,
+    size_t tile_j)
+{
+  const struct batch_to_space_context_tile_2d* const tile_2d = &context->tile_2d;
+  const size_t global_first_row = i * context->block_height + j;
+  const size_t batch = global_first_row / context->output_height_nocrop;
+  const size_t start_row = global_first_row % context->output_height_nocrop;
+  // The end row is computed from the start row to the last element held by this
+  // subtile. It may overshoot the output tensor height, which means the tile
+  // covers multiple batch items.
+  //
+  // Note: subtile rows may not be contiguous in the final output tensor, which
+  // is why we don't do `tile_i * tile_j`.
+  const size_t end_row = start_row + (tile_i-1) * context->block_height + tile_j;
+
+  uintptr_t x = (uintptr_t)context->transpose.x
+      + i * context->transpose.input_stride[0]
+      + j * context->transpose.input_stride[1]
+      + tile_2d->base_input_offset;
+  uintptr_t y = (uintptr_t)context->transpose.y
+      + i * context->transpose.output_stride[0]
+      + j * context->transpose.output_stride[1]
+      // Previous top and bottom crops.
+      - batch * tile_2d->vertical_crop_bytes - tile_2d->crop_top_bytes
+      // Previous left and right crops.
+      - (batch * context->output_height + start_row - tile_2d->top_crop_row)
+        * tile_2d->horizontal_crop_bytes;
+
+  // The full tile can be transposed in one call when the output stride is constant.
+  if (tile_2d->vertical_crop == 0 || (start_row > tile_2d->top_crop_row
+                                     && end_row <= tile_2d->bottom_crop_row))
+  {
+    transpose_subtile_v2d(context, x, y, tile_i, tile_j);
+  } else {
+    transpose_subtile_v2d_by_row(context, start_row, x, y, tile_i, tile_j);
+  }
+}
+
+void xnn_compute_batch_to_space_2dh(
+    void (*kernel)(const struct batch_to_space_context*, size_t, size_t, size_t, size_t),
+    const struct batch_to_space_context* const context,
+    size_t i,
+    size_t j,
+    size_t tile_i,
+    size_t tile_j)
+{
+  const size_t input_stride_i = context->transpose.input_stride[0];
+  const size_t input_stride_j = context->transpose.input_stride[1];
+  const size_t output_stride_i = context->transpose.output_stride[0];
+  const size_t output_stride_j = context->transpose.output_stride[1];
+  const size_t output_height_nocrop = context->output_height_nocrop;
+  const size_t output_width_nocrop = context->output_width_nocrop;
+  const size_t left_crop_col = context->tile_2d.left_crop_col;
+  const size_t right_crop_col = context->tile_2d.right_crop_col;
+  const size_t top_crop_row = context->tile_2d.top_crop_row;
+  const size_t bottom_crop_row = context->tile_2d.bottom_crop_row;
+  const size_t crop_left_bytes = context->tile_2d.crop_left_bytes;
+  const size_t vertical_crop_bytes = context->tile_2d.vertical_crop_bytes;
+  const size_t horizontal_crop_bytes = context->tile_2d.horizontal_crop_bytes;
+  const size_t crop_top_bytes = context->tile_2d.crop_top_bytes;
+  const size_t crop_left = context->crop_left;
+  const size_t block_width = context->block_width;
+
+  size_t row_idx = i * block_width + j;
+  size_t output_row_global = row_idx / output_width_nocrop;
+  size_t batch = output_row_global / output_height_nocrop ;
+  size_t output_row = output_row_global % output_height_nocrop;
+  size_t output_col = row_idx % output_width_nocrop;
+
+  size_t last_element_idx = (i + tile_i - 1) * block_width + j + tile_j - 1;
+  size_t last_output_row_global = last_element_idx / output_width_nocrop;
+  size_t last_output_col = last_element_idx % output_width_nocrop;
+
+  size_t horizontal_crop_offset = output_row_global * horizontal_crop_bytes + crop_left_bytes;
+  size_t vertical_crop_offset = batch * vertical_crop_bytes + crop_top_bytes;
+
+  uintptr_t x = (uintptr_t)context->transpose.x + i * input_stride_i + j * input_stride_j;
+  uintptr_t y = (uintptr_t)context->transpose.y + i * output_stride_i + j * output_stride_j;
+
+  // Transpose full tile at once.
+  if (last_output_row_global == output_row_global
+     && output_col >= left_crop_col
+     && last_output_col < right_crop_col
+     && output_row >= top_crop_row
+     && output_row < bottom_crop_row)
+  {
+    uintptr_t yy = y - horizontal_crop_offset - vertical_crop_offset;
+    kernel(context, x, yy, tile_i, tile_j);
+    return;
+  }
+
+  // Transpose tile one row at a time.
+  for (size_t tile_row = 0; tile_row < tile_i; ++tile_row) {
+    uintptr_t xx = x;
+    uintptr_t yy = y;
+    size_t width = tile_j;
+    // Check that the output row is not within the vertical crop spec.
+    if (output_row < top_crop_row || output_row >= bottom_crop_row) {
+      goto next_row;
+    }
+    // Left crop.
+    if (output_col < left_crop_col) {
+      const size_t shift = crop_left - output_col;
+      if (width > shift) {
+        width -= shift;
+        xx += input_stride_j * shift;
+        yy += output_stride_j * shift;
+      } else {
+        goto next_row;
+      }
+    }
+    // Right crop.
+    const size_t row_last_output_col = output_col + tile_j - 1;
+    if (row_last_output_col >= right_crop_col) {
+      const size_t shift = row_last_output_col - right_crop_col + 1;
+      if (width > shift) {
+        width -= shift;
+      } else {
+        goto next_row;
+      }
+    }
+    // Transpose row.
+    yy -= horizontal_crop_offset + vertical_crop_offset;
+    kernel(context, xx, yy, 1, width);
+next_row:;
+    x += input_stride_i;
+    y += output_stride_i;
+    if ((output_col += block_width) >= output_width_nocrop) {
+      // Update output line.
+      output_col -= output_width_nocrop;
+      ++output_row_global;
+      ++output_row;
+      horizontal_crop_offset += horizontal_crop_bytes;
+      if (output_row >= output_height_nocrop) {
+        // Update output image.
+        output_row = 0;
+        ++batch;
+        vertical_crop_offset += vertical_crop_bytes;
+      }
+    }
+  }
+}
+
+void xnn_compute_batch_to_space_c2dh(
+    const struct batch_to_space_context* context,
+    size_t i,
+    size_t j,
+    size_t tile_i,
+    size_t tile_j)
+{
+  xnn_compute_batch_to_space_2dh(transpose_subtile_c2d, context, i, j, tile_i, tile_j);
+}
+
+void xnn_compute_batch_to_space_v2dh(
+    const struct batch_to_space_context* context,
+    size_t i,
+    size_t j,
+    size_t tile_i,
+    size_t tile_j)
+{
+  xnn_compute_batch_to_space_2dh(transpose_subtile_v2d, context, i, j, tile_i, tile_j);
+}
+
+
+struct batch_to_space_compute_subtiles_4d {
+  bool skip;
+  uintptr_t y;
+  struct batch_to_space_subtile same_line_subtile;
+  struct batch_to_space_subtile left_crop_subtile;
+  struct batch_to_space_subtile full_subtile;
+  struct batch_to_space_subtile right_crop_subtile;
+};
+
+struct batch_to_space_compute_subtiles_4d batch_to_space_setup_subtiles_4d(
+    const struct batch_to_space_context * restrict context,
+    size_t i,
+    size_t j,
+    size_t k,
+    size_t l,
+    size_t tile_k,
+    size_t tile_l)
+{
+  const size_t output_width_nocrop = context->output_width_nocrop;
+  const size_t output_height_nocrop = context->output_height_nocrop;
+  const size_t k_output_stride = context->tile_4d.k_output_stride;
+  const size_t block_height = context->block_height;
+  const size_t top_crop_row = context->tile_4d.top_crop_row;
+  const size_t bottom_crop_row = context->tile_4d.bottom_crop_row;
+  const size_t crop_left = context->crop_left;
+  const size_t crop_right = context->crop_right;
+  const size_t crop_top_bytes = context->tile_4d.crop_top_bytes;
+  const size_t crop_left_bytes = context->tile_4d.crop_left_bytes;
+  const size_t vertical_crop_bytes = context->tile_4d.vertical_crop_bytes;
+  const size_t horizontal_crop_bytes = context->tile_4d.horizontal_crop_bytes;
+  const size_t element_size = context->element_size;
+  const size_t ld_output = context->tile_4d.ld_output;
+  const struct transpose_context* const transpose = &context->transpose;
+  struct batch_to_space_compute_subtiles_4d precompute = {0};
+
+  // The line in the output tensor assuming all images are stacked along the
+  // height.
+  const size_t line = (i * block_height + j);
+  const size_t batch = line / output_height_nocrop;
+  const size_t output_row = line % output_height_nocrop;
+
+  // The output line is within the top/bottom crop specification, skip this
+  // tile.
+  if (output_row < top_crop_row || output_row >= bottom_crop_row) {
+    precompute.skip = true;
+    return precompute;
+  }
+
+  const size_t tile_size = (tile_k-1) * k_output_stride + tile_l;
+  const size_t elements_left_to_tile = k * k_output_stride + l;
+  const size_t remaining_left_crop = elements_left_to_tile <= crop_left ?
+      crop_left - elements_left_to_tile : 0;
+  if (remaining_left_crop >= tile_size) {
+    precompute.skip = true;
+    return precompute;
+  }
+
+  // Position of first element that isn't cropped in the tile.
+  const size_t extended_tile_left_crop_k = remaining_left_crop / k_output_stride;
+  const size_t extended_tile_left_crop_l = remaining_left_crop % k_output_stride;
+  const bool left_crop_oob = (extended_tile_left_crop_l >= tile_l);
+  const size_t left_crop_k = extended_tile_left_crop_k + left_crop_oob;
+  const size_t left_crop_l = left_crop_oob ? 0 : extended_tile_left_crop_l;
+
+  const size_t elements_right_to_tile = output_width_nocrop - elements_left_to_tile - tile_size;
+  const size_t remaining_right_crop = elements_right_to_tile <= crop_right
+        ? crop_right - elements_right_to_tile : 0;
+
+  if (remaining_right_crop >= tile_size) {
+    precompute.skip = true;
+    return precompute;
+  }
+
+  const size_t remaining_right_crop_idx = tile_size - remaining_right_crop;
+  const size_t extended_tile_right_crop_k = remaining_right_crop_idx / k_output_stride;
+  const size_t extended_tile_right_crop_l = remaining_right_crop_idx % k_output_stride;
+
+  // Position of first element that is cropped by the righ crop specification.
+  const bool right_crop_oob = (extended_tile_right_crop_l >= tile_l);
+  const size_t right_crop_k = extended_tile_right_crop_k + right_crop_oob;
+  const size_t right_crop_l = right_crop_oob ? 0 : extended_tile_right_crop_l;
+
+  if (left_crop_k > right_crop_k || (left_crop_k == right_crop_k && left_crop_l >= right_crop_l)) {
+    precompute.skip = true;
+    return precompute;
+  }
+
+  const uintptr_t x = ((uintptr_t) transpose->x
+                       + i * transpose->input_stride[0]
+                       + j * transpose->input_stride[1]
+                       + k * transpose->input_stride[2]
+                       + l * transpose->input_stride[3]);
+  const uintptr_t y = ((uintptr_t) transpose->y
+                       + i * transpose->output_stride[0]
+                       + j * transpose->output_stride[1]
+                       + k * transpose->output_stride[2]
+                       + l * transpose->output_stride[3]
+                       // Compensate for in-tile cropping. i.e. elements must be
+                       // at their output position as if there weren't any
+                       // cropping.
+                       + left_crop_k * transpose->output_stride[2]
+                       + left_crop_l * transpose->output_stride[3]
+                       // Take cropping into account.
+                       - crop_top_bytes
+                       - crop_left_bytes
+                       - batch * vertical_crop_bytes
+                       - line * horizontal_crop_bytes
+                       );
+  precompute.y = y;
+
+  precompute.same_line_subtile = (struct batch_to_space_subtile) {
+    .x = x + left_crop_k * transpose->input_stride[2]
+           + left_crop_l * transpose->input_stride[3],
+    .height = left_crop_k == right_crop_k,
+    .width = right_crop_l - left_crop_l,
+    .y_offset = 1,
+  };
+
+
+  if (precompute.same_line_subtile.height) {
+    return precompute;
+  }
+
+  precompute.left_crop_subtile = (struct batch_to_space_subtile) {
+    .x = x + left_crop_k * transpose->input_stride[2]
+           + left_crop_l * transpose->input_stride[3],
+    .height = left_crop_l != 0,
+    .width = tile_l - left_crop_l,
+    .y_offset = ld_output - left_crop_l * element_size,
+  };
+
+  const size_t full_subtile_height = right_crop_k - left_crop_k - precompute.left_crop_subtile.height;
+  precompute.full_subtile = (struct batch_to_space_subtile) {
+    .x = x + (left_crop_k + precompute.left_crop_subtile.height) * transpose->input_stride[2],
+    .height = full_subtile_height,
+    .width = tile_l,
+    .y_offset = full_subtile_height * ld_output,
+  };
+
+  precompute.right_crop_subtile = (struct batch_to_space_subtile) {
+    .x = x + right_crop_k * transpose->input_stride[2],
+    .height = right_crop_l != tile_l && right_crop_k < tile_k,
+    .width = right_crop_l,
+    .y_offset = 0,
+  };
+
+  return precompute;
+}
+
+size_t transpose_subtile_const_size_ukernel(
+    const struct batch_to_space_context* const context,
+    const struct batch_to_space_subtile* const subtile,
+    uintptr_t y,
+    size_t i,
+    size_t j)
+{
+  if (subtile->height == 0) {
+    return 0;
+  }
+  context->transpose.const_size_ukernel(
+      (void*)subtile->x,
+      (void*)y,
+      context->tile_4d.ld_input,
+      context->tile_4d.ld_output,
+      subtile->height,
+      subtile->width,
+      &context->transpose.params);
+  return subtile->y_offset;
+}
+
+size_t transpose_subtile_variable_size_ukernel(
+    const struct batch_to_space_context* const context,
+    const struct batch_to_space_subtile* const subtile,
+    uintptr_t y,
+    size_t i,
+    size_t j)
+{
+  if (subtile->height == 0) {
+    return 0;
+  }
+  context->transpose.variable_size_ukernel(
+      (void*)subtile->x,
+      (void*)y,
+      context->tile_4d.ld_input,
+      context->tile_4d.ld_output,
+      context->element_size,
+      context->element_size,
+      context->element_size,
+      subtile->height,
+      subtile->width);
+  return subtile->y_offset;
+}
+
+void xnn_compute_batch_to_space_4d(
+    size_t (transpose_subtile) (
+        const struct batch_to_space_context* const,
+        const struct batch_to_space_subtile* const,
+        uintptr_t, size_t, size_t),
+    const struct batch_to_space_context* context,
+    size_t i,
+    size_t j,
+    size_t k,
+    size_t l,
+    size_t tile_k,
+    size_t tile_l)
+{
+  const struct batch_to_space_compute_subtiles_4d precompute = batch_to_space_setup_subtiles_4d(
+      context, i, j, k, l, tile_k, tile_l);
+  if (precompute.skip) {
+    return;
+  }
+
+  uintptr_t y = precompute.y;
+  if (!transpose_subtile(context, &precompute.same_line_subtile, y, i, j)) {
+    y += transpose_subtile(context, &precompute.left_crop_subtile, y, i, j);
+    y += transpose_subtile(context, &precompute.full_subtile, y, i, j);
+    transpose_subtile(context, &precompute.right_crop_subtile, y, i, j);
+  }
+}
+
+void xnn_compute_batch_to_space_c4d(
+    const struct batch_to_space_context* context,
+    size_t i,
+    size_t j,
+    size_t k,
+    size_t l,
+    size_t tile_k,
+    size_t tile_l)
+{
+  xnn_compute_batch_to_space_4d(transpose_subtile_const_size_ukernel,
+                                context, i, j, k, l, tile_k, tile_l);
+}
+
+void xnn_compute_batch_to_space_v4d(
+    const struct batch_to_space_context* context,
+    size_t i,
+    size_t j,
+    size_t k,
+    size_t l,
+    size_t tile_k,
+    size_t tile_l)
+{
+  xnn_compute_batch_to_space_4d(transpose_subtile_variable_size_ukernel,
+                                context, i, j, k, l, tile_k, tile_l);
+}
 
 void xnn_compute_transposec_2d(
     const struct transpose_context* context,

@@ -93,7 +93,8 @@ static enum xnn_status setup_transpose_nd(
   const size_t* perm,
   const size_t* input_stride,
   const size_t* output_stride,
-  size_t element_size)
+  size_t element_size,
+  const bool prevent_perm_normalization)
 {
   transpose_op->state = xnn_run_state_invalid;
   enum xnn_status status = xnn_status_invalid_parameter;
@@ -187,8 +188,22 @@ static enum xnn_status setup_transpose_nd(
   size_t normalized_shape[XNN_MAX_TENSOR_DIMS];
   size_t normalized_perm[XNN_MAX_TENSOR_DIMS];
   size_t normalized_element_size;
-  xnn_normalize_transpose_permutation(num_dims, element_size, perm, input_shape, input_stride, output_stride, &normalized_dims,
-                                      &normalized_element_size, normalized_perm, normalized_shape, context->input_stride, context->output_stride);
+  if (!prevent_perm_normalization) {
+    xnn_normalize_transpose_permutation(num_dims, element_size, perm, input_shape, input_stride, output_stride,
+                                        &normalized_dims, &normalized_element_size, normalized_perm, normalized_shape,
+                                        context->input_stride, context->output_stride);
+  } else {
+    normalized_dims = num_dims;
+    memcpy(normalized_shape, input_shape, num_dims * sizeof(size_t));
+    memcpy(normalized_perm, perm, num_dims * sizeof(size_t));
+    normalized_element_size = element_size;
+    context->input_stride[normalized_dims - 1] = normalized_element_size;
+    context->output_stride[normalized_dims - 1] = normalized_element_size;
+    for (size_t i = normalized_dims - 1; i > 0; --i) {
+      context->input_stride[i - 1] = context->input_stride[i] * normalized_shape[i];
+      context->output_stride[i - 1] = context->output_stride[i] * normalized_shape[normalized_perm[i]];
+    }
+  }
 
   size_t loop_order[XNN_MAX_TENSOR_DIMS];
   memcpy(loop_order, normalized_perm, sizeof(size_t) * normalized_dims);
@@ -314,6 +329,7 @@ static enum xnn_status setup_transpose_nd(
       XNN_UNREACHABLE;
   }
 
+  context->variable_ukernel = variable_size_ukernel;
   if (transpose_op->channels == 1) {
     transpose_op->context.univector_contiguous.x = input;
     transpose_op->context.univector_contiguous.y = output;
@@ -380,7 +396,7 @@ enum xnn_status xnn_setup_transpose_nd_x32(
     transpose_op,
     input, output,
     num_dims, shape, perm, NULL, NULL,
-    sizeof(uint32_t));
+    sizeof(uint32_t), false);
 }
 
 enum xnn_status xnn_setup_transpose_nd_x16(
@@ -403,7 +419,7 @@ enum xnn_status xnn_setup_transpose_nd_x16(
     transpose_op,
     input, output,
     num_dims, shape, perm, NULL, NULL,
-    sizeof(uint16_t));
+    sizeof(uint16_t), false);
 }
 
 enum xnn_status xnn_setup_transpose_nd_x8(
@@ -426,7 +442,7 @@ enum xnn_status xnn_setup_transpose_nd_x8(
     transpose_op,
     input, output,
     num_dims, shape, perm, NULL, NULL,
-    sizeof(uint8_t));
+    sizeof(uint8_t), false);
 }
 
 enum xnn_status run_transpose_nd(
@@ -448,7 +464,7 @@ enum xnn_status run_transpose_nd(
     &transpose_op,
     input, output,
     num_dims, input_shape, output_perm, NULL, NULL,
-    element_size);
+    element_size, false);
   if (status != xnn_status_success) {
     return status;
   }
@@ -673,7 +689,7 @@ enum xnn_status setup_depth_to_space_nchw2nhwc(
     depth_to_space_op,
     input, output,
     6, input_shape, perm, input_stride, output_stride,
-    element_size);
+    element_size, false);
 }
 
 enum xnn_status xnn_setup_depth_to_space_nchw2nhwc_x16(
@@ -720,6 +736,342 @@ enum xnn_status xnn_setup_depth_to_space_nchw2nhwc_x32(
     batch_size, input_height, input_width,
     input, output,
     xnn_operator_type_depth_to_space_nchw2nhwc_x32, /*element_size=*/4);
+}
+
+
+enum xnn_status xnn_create_batch_to_space_nhwc(
+  xnn_operator_t* const batch_to_space_op_out,
+  const enum xnn_operator_type operator_type)
+{
+  xnn_operator_t batch_to_space_op = NULL;
+  enum xnn_status status = xnn_status_out_of_memory;
+
+  batch_to_space_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
+  if (batch_to_space_op == NULL) {
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator descriptor",
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
+  batch_to_space_op->state = xnn_run_state_invalid;
+  batch_to_space_op->type = operator_type;
+
+  *batch_to_space_op_out = batch_to_space_op;
+  return xnn_status_success;
+
+error:
+  xnn_delete_operator(batch_to_space_op);
+  return status;
+}
+
+enum xnn_status xnn_create_batch_to_space_nhwc_x8(xnn_operator_t* batch_to_space_op_out)
+{
+  return xnn_create_batch_to_space_nhwc(
+      batch_to_space_op_out,
+      xnn_operator_type_batch_to_space_nhwc_x8);
+}
+
+enum xnn_status xnn_create_batch_to_space_nhwc_x16(xnn_operator_t* batch_to_space_op_out)
+{
+  return xnn_create_batch_to_space_nhwc(
+      batch_to_space_op_out,
+      xnn_operator_type_batch_to_space_nhwc_x16);
+}
+
+enum xnn_status xnn_create_batch_to_space_nhwc_x32(xnn_operator_t* batch_to_space_op_out)
+{
+  return xnn_create_batch_to_space_nhwc(
+      batch_to_space_op_out,
+      xnn_operator_type_batch_to_space_nhwc_x32);
+}
+
+void setup_batch_to_space_identity(xnn_operator_t op)
+{
+  op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_batch_to_space_v1d;
+  struct batch_to_space_context* const context = &op->context.batch_to_space;
+  const size_t output_batch = context->input_batch / context->block_height / context->block_width;
+  const size_t input_row_stride = context->output_width_nocrop * context->element_size;
+  context->identity = (struct batch_to_space_context_identity){
+    .input_batch_stride
+        = context->output_height_nocrop * context->output_width_nocrop * context->element_size,
+    .input_row_stride = input_row_stride,
+    .output_row_stride = context->output_width * context->element_size,
+    .output_batch = output_batch,
+    .initial_input_offset = context->crop_top * input_row_stride + context->crop_left * context->element_size,
+  };
+}
+
+void setup_batch_to_space_tile_2d_h(
+    xnn_operator_t op,
+    size_t vertical_crop,
+    size_t horizontal_crop)
+{
+  struct batch_to_space_context* const context = &op->context.batch_to_space;
+  if (context->transpose.variable_ukernel) {
+    op->compute.task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_batch_to_space_v2dh;
+  } else {
+    op->compute.task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_batch_to_space_c2dh;
+  }
+  const size_t tile_element_size = context->transpose.input_stride[0];
+  context->tile_2d = (struct batch_to_space_context_tile_2d) {
+    .left_crop_col = context->crop_left,
+    .right_crop_col = context->output_width_nocrop - context->crop_right,
+    .top_crop_row = context->crop_top,
+    .bottom_crop_row = context->output_height_nocrop - context->crop_bottom,
+    .crop_top_bytes = context->crop_top * context->output_width * context->element_size,
+    .crop_left_bytes = context->crop_left * context->element_size,
+    .vertical_crop = vertical_crop,
+    .vertical_crop_bytes = vertical_crop * context->output_width * context->element_size,
+    .horizontal_crop = horizontal_crop,
+    .horizontal_crop_bytes = horizontal_crop * context->element_size,
+    .ld_input = context->transpose.input_stride[1],
+    .ld_output = context->transpose.output_stride[0],
+    .input_element_stride = tile_element_size,
+    .output_element_stride = tile_element_size,
+    .element_size = tile_element_size,
+  };
+}
+
+void setup_batch_to_space_tile_2d_v(
+    xnn_operator_t op,
+    const struct xnn_transpose_config* const xnn_transpose_conf,
+    size_t vertical_crop,
+    size_t horizontal_crop)
+{
+  // Because cropping affects the elements size in this case, we force the use of the variable size ukernel.
+  op->compute.task_2d_tile_2d
+      = (pthreadpool_task_2d_tile_2d_t) xnn_compute_batch_to_space_2dv;
+  op->context.transpose.variable_size_ukernel
+      = xnn_transpose_conf->xx.variable_size_ukernel;
+  struct batch_to_space_context* const context = &op->context.batch_to_space;
+  const size_t tile_element_size = context->transpose.input_stride[0];
+  const size_t output_element_stride = context->transpose.output_stride[1]
+            - horizontal_crop * context->element_size;
+  context->tile_2d = (struct batch_to_space_context_tile_2d) {
+    .top_crop_row = context->crop_top,
+    .bottom_crop_row = context->output_height_nocrop - context->crop_bottom,
+    .crop_top_bytes = context->crop_top * tile_element_size,
+    .vertical_crop = vertical_crop,
+    .vertical_crop_bytes = vertical_crop * tile_element_size,
+    .horizontal_crop = horizontal_crop,
+    .horizontal_crop_bytes = horizontal_crop * context->element_size,
+    .base_input_offset = context->crop_left * context->element_size,
+    .output_batch_stride_compensation =
+        vertical_crop * horizontal_crop * context->element_size
+        - vertical_crop * tile_element_size,
+    .ld_input = context->transpose.input_stride[1],
+    .ld_output = context->transpose.output_stride[0]
+        - horizontal_crop * context->element_size * context->block_height,
+    .input_element_stride = context->transpose.input_stride[0],
+    .output_element_stride = output_element_stride,
+    .element_size = output_element_stride,
+  };
+}
+
+void setup_batch_to_space_tile_4d(
+    xnn_operator_t op,
+    size_t vertical_crop,
+    size_t horizontal_crop)
+{
+  struct batch_to_space_context* const context = &op->context.batch_to_space;
+  if (context->transpose.variable_ukernel) {
+    op->compute.task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_batch_to_space_v4d;
+  } else {
+    op->compute.task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_batch_to_space_c4d;
+  }
+  context->tile_4d =  (struct batch_to_space_context_tile_4d) {
+    .top_crop_row = context->crop_top,
+    .bottom_crop_row = context->output_height_nocrop - context->crop_bottom,
+    .k_output_stride = context->transpose.output_stride[2] / context->element_size,
+    .crop_left_bytes = context->crop_left * context->element_size,
+    .crop_top_bytes = context->output_width * context->crop_top * context->element_size,
+    .vertical_crop_bytes = context->output_width * vertical_crop * context->element_size,
+    .horizontal_crop_bytes = horizontal_crop * context->element_size,
+    .ld_input = context->transpose.input_stride[3],
+    .ld_output = context->transpose.output_stride[2],
+  };
+}
+
+enum xnn_status xnn_setup_batch_to_space_nhwc(
+  const size_t type_size,
+  xnn_operator_t batch_to_space_op,
+  size_t input_batch,
+  size_t input_height,
+  size_t input_width,
+  size_t input_channels,
+  size_t block_height,
+  size_t block_width,
+  size_t crop_top,
+  size_t crop_bottom,
+  size_t crop_left,
+  size_t crop_right,
+  const void* input,
+  void* output)
+{
+  enum xnn_status status = xnn_status_unsupported_hardware;
+  batch_to_space_op->state = xnn_run_state_invalid;
+  const struct xnn_transpose_config* const xnn_transpose_conf = xnn_init_transpose_config();
+  if (xnn_transpose_conf == NULL) {
+    xnn_log_error("failed to create %s operator: hardware is not supported.",
+                  xnn_operator_type_to_string(batch_to_space_op->type));
+    goto error;
+  }
+
+  const size_t output_height_nocrop = input_height * block_height;
+  const size_t output_width_nocrop = input_width * block_width;
+  const size_t vertical_crop = crop_top + crop_bottom;
+  const size_t horizontal_crop = crop_left + crop_right;
+
+  if (output_height_nocrop <= vertical_crop || output_width_nocrop <= horizontal_crop) {
+    batch_to_space_op->state = xnn_run_state_skip;
+    return xnn_status_success;
+  }
+
+  // Set up the underlying transposition.
+  const size_t input_shape[4] = {
+    block_height,
+    block_width,
+    input_batch / (block_height * block_width) * input_height,
+    input_width};
+  const size_t perm[4] = {2, 0, 3, 1};
+
+  const bool cropped = crop_top || crop_bottom || crop_left || crop_right;
+  const bool prevent_perm_normalization = cropped && block_height == 1;
+
+  status = setup_transpose_nd(
+      batch_to_space_op,
+      input,
+      output,
+      4,
+      input_shape,
+      perm,
+      NULL,
+      NULL,
+      type_size * input_channels,
+      prevent_perm_normalization);
+
+  if (status != xnn_status_success) {
+    // Don't goto error, setup_transpose_nd has already cleaned up.
+    return status;
+  }
+
+  // If there is no crop specification, a simple transpose will do the right thing.
+  if (!cropped) {
+    return xnn_status_success;
+  }
+
+  const size_t output_height = output_height_nocrop - vertical_crop;
+  const size_t output_width = output_width_nocrop - horizontal_crop;
+
+  struct batch_to_space_context* const context = &batch_to_space_op->context.batch_to_space;
+  context->type_size = type_size;
+  context->element_size = type_size * input_channels;
+  context->input_batch = input_batch;
+  context->input_height = input_height;
+  context->input_width = input_width;
+  context->input_channels = input_channels;
+  context->block_height = block_height;
+  context->block_width = block_width;
+  context->crop_top = crop_top;
+  context->crop_bottom = crop_bottom;
+  context->crop_left = crop_left;
+  context->crop_right = crop_right;
+  context->output_height_nocrop = output_height_nocrop;
+  context->output_width_nocrop = output_width_nocrop;
+  context->output_height = output_height;
+  context->output_width = output_width;
+
+  const enum xnn_parallelization_type compute_type = batch_to_space_op->compute.type;
+  if (compute_type == xnn_parallelization_type_1d_tile_1d) {
+    setup_batch_to_space_identity(batch_to_space_op);
+  } else if (compute_type == xnn_parallelization_type_2d_tile_2d && block_height == 1) {
+    setup_batch_to_space_tile_2d_h(batch_to_space_op, vertical_crop, horizontal_crop);
+  } else if (compute_type == xnn_parallelization_type_2d_tile_2d && block_width == 1) {
+    // TODO(qkhan): test for const size transpose handling
+    setup_batch_to_space_tile_2d_v(batch_to_space_op, xnn_transpose_conf, vertical_crop, horizontal_crop);
+  } else if (compute_type == xnn_parallelization_type_4d_tile_2d) {
+    setup_batch_to_space_tile_4d(batch_to_space_op, vertical_crop, horizontal_crop);
+  } else {
+    XNN_UNREACHABLE;
+  }
+  return xnn_status_success;
+
+error:
+  xnn_delete_operator(batch_to_space_op);
+  return status;
+}
+
+enum xnn_status xnn_setup_batch_to_space_nhwc_x8(
+  xnn_operator_t batch_to_space_op,
+  size_t input_batch,
+  size_t input_height,
+  size_t input_width,
+  size_t input_channels,
+  size_t block_height,
+  size_t block_width,
+  size_t crop_top,
+  size_t crop_bottom,
+  size_t crop_left,
+  size_t crop_right,
+  const void* input,
+  void* output)
+{
+  return xnn_setup_batch_to_space_nhwc(
+      sizeof(int8_t),
+      batch_to_space_op,
+      input_batch, input_height, input_width, input_channels,
+      block_height, block_width,
+      crop_top, crop_bottom, crop_left, crop_right,
+      input, output);
+}
+
+enum xnn_status xnn_setup_batch_to_space_nhwc_x16(
+  xnn_operator_t batch_to_space_op,
+  size_t input_batch,
+  size_t input_height,
+  size_t input_width,
+  size_t input_channels,
+  size_t block_height,
+  size_t block_width,
+  size_t crop_top,
+  size_t crop_bottom,
+  size_t crop_left,
+  size_t crop_right,
+  const void* input,
+  void* output)
+{
+  return xnn_setup_batch_to_space_nhwc(
+      sizeof(int16_t),
+      batch_to_space_op,
+      input_batch, input_height, input_width, input_channels,
+      block_height, block_width,
+      crop_top, crop_bottom, crop_left, crop_right,
+      input, output);
+}
+
+enum xnn_status xnn_setup_batch_to_space_nhwc_x32(
+  xnn_operator_t batch_to_space_op,
+  size_t input_batch,
+  size_t input_height,
+  size_t input_width,
+  size_t input_channels,
+  size_t block_height,
+  size_t block_width,
+  size_t crop_top,
+  size_t crop_bottom,
+  size_t crop_left,
+  size_t crop_right,
+  const void* input,
+  void* output)
+{
+  return xnn_setup_batch_to_space_nhwc(
+      sizeof(int32_t),
+      batch_to_space_op,
+      input_batch, input_height, input_width, input_channels,
+      block_height, block_width,
+      crop_top, crop_bottom, crop_left, crop_right,
+      input, output);
 }
 
 static enum xnn_status create_depth_to_space_nhwc(
@@ -918,7 +1270,7 @@ static enum xnn_status setup_depth_to_space_nhwc(
     depth_to_space_op,
     input, output,
     5, input_shape, perm, input_stride, output_stride,
-    element_size);
+    element_size, false);
 }
 
 enum xnn_status xnn_setup_depth_to_space_nhwc_x8(
@@ -1184,7 +1536,7 @@ static enum xnn_status setup_space_to_depth_nhwc(
     space_to_depth_op,
     input, output,
     5, input_shape, perm, input_stride, output_stride,
-    element_size);
+    element_size, false);
 }
 
 enum xnn_status xnn_setup_space_to_depth_nhwc_x8(
