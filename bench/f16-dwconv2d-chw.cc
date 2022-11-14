@@ -151,7 +151,7 @@ static void f16_dwconv2d_chw(benchmark::State& state,
 }
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void dwconv2d_chw_3x3p1__neonfp16arith_1x8(benchmark::State& state, const char* net) {
     f16_dwconv2d_chw(state, xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8, 3, 3, 1, 1,
       benchmark::utils::CheckNEONFP16ARITH);
@@ -364,7 +364,7 @@ static void f16_dwconv2d_chw(benchmark::State& state,
   BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_2x8_acc2)
   BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_2x8_acc3)
   BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__neonfp16arith_3x8_acc2)
-#endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

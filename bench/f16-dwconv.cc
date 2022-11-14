@@ -153,7 +153,7 @@ static void f16_dwconv(benchmark::State& state,
     benchmark::Counter::kIsRate);
 }
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void f16_dwconv_8x4__neonfp16arith_acc2(benchmark::State& state, const char* net) {
     f16_dwconv(state,
       xnn_f16_dwconv_minmax_ukernel_up8x4__neonfp16arith_acc2,
@@ -298,7 +298,7 @@ static void f16_dwconv(benchmark::State& state,
   BENCHMARK_DWCONV(f16_dwconv_32x9__neonfp16arith)
   BENCHMARK_DWCONV(f16_dwconv_32x25__neonfp16arith_acc2)
   BENCHMARK_DWCONV(f16_dwconv_32x25__neonfp16arith)
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

@@ -10850,8 +10850,11 @@ xnnpack_aggregate_library(
         ":asm_microkernels",
     ],
     defines = select({
-        ":arm_fp16_enabled": ["XNN_ENABLE_ARM_FP16=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_FP16=0"],
+        ":arm_fp16_scalar_enabled": ["XNN_ENABLE_ARM_FP16_SCALAR=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_FP16_SCALAR=0"],
+    }) + select({
+        ":arm_fp16_vector_enabled": ["XNN_ENABLE_ARM_FP16_VECTOR=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_FP16_VECTOR=0"],
     }) + select({
         ":arm_bf16_enabled": ["XNN_ENABLE_ARM_BF16=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_BF16=0"],
@@ -10862,10 +10865,10 @@ xnnpack_aggregate_library(
     generic_deps = [
         ":scalar_prod_microkernels",
     ] + select({
-        ":arm_fp16_enabled": [
-            ":fp16arith_prod_microkernels",
-            ":neonfp16arith_prod_microkernels",
-        ],
+        ":arm_fp16_scalar_enabled": [":fp16arith_prod_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":arm_fp16_vector_enabled": [":neonfp16arith_prod_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":arm_bf16_enabled": [":neonbf16_prod_microkernels"],
@@ -10919,8 +10922,11 @@ xnnpack_aggregate_library(
         ":asm_microkernels",
     ],
     defines = select({
-        ":arm_fp16_enabled": ["XNN_ENABLE_ARM_FP16=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_FP16=0"],
+        ":arm_fp16_scalar_enabled": ["XNN_ENABLE_ARM_FP16_SCALAR=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_FP16_SCALAR=0"],
+    }) + select({
+        ":arm_fp16_vector_enabled": ["XNN_ENABLE_ARM_FP16_VECTOR=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_FP16_VECTOR=0"],
     }) + select({
         ":arm_bf16_enabled": ["XNN_ENABLE_ARM_BF16=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_BF16=0"],
@@ -10931,10 +10937,10 @@ xnnpack_aggregate_library(
     generic_deps = [
         ":scalar_bench_microkernels",
     ] + select({
-        ":arm_fp16_enabled": [
-            ":fp16arith_bench_microkernels",
-            ":neonfp16arith_bench_microkernels",
-        ],
+        ":arm_fp16_scalar_enabled": [":fp16arith_bench_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":arm_fp16_vector_enabled": [":neonfp16arith_bench_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":arm_bf16_enabled": [":neonbf16_bench_microkernels"],
@@ -10988,8 +10994,11 @@ xnnpack_aggregate_library(
         ":asm_microkernels",
     ],
     defines = select({
-        ":arm_fp16_enabled": ["XNN_ENABLE_ARM_FP16=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_FP16=0"],
+        ":arm_fp16_scalar_enabled": ["XNN_ENABLE_ARM_FP16_SCALAR=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_FP16_SCALAR=0"],
+    }) + select({
+        ":arm_fp16_vector_enabled": ["XNN_ENABLE_ARM_FP16_VECTOR=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_FP16_VECTOR=0"],
     }) + select({
         ":arm_bf16_enabled": ["XNN_ENABLE_ARM_BF16=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_BF16=0"],
@@ -11000,10 +11009,10 @@ xnnpack_aggregate_library(
     generic_deps = [
         ":scalar_prod_microkernels",
     ] + select({
-        ":arm_fp16_enabled": [
-            ":fp16arith_prod_microkernels",
-            ":neonfp16arith_prod_microkernels",
-        ],
+        ":arm_fp16_scalar_enabled": [":fp16arith_prod_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":arm_fp16_vector_enabled": [":neonfp16arith_prod_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":arm_bf16_enabled": [":neonbf16_prod_microkernels"],
@@ -11057,8 +11066,11 @@ xnnpack_aggregate_library(
         ":asm_microkernels",
     ],
     defines = select({
-        ":arm_fp16_enabled": ["XNN_ENABLE_ARM_FP16=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_FP16=0"],
+        ":arm_fp16_scalar_enabled": ["XNN_ENABLE_ARM_FP16_SCALAR=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_FP16_SCALAR=0"],
+    }) + select({
+        ":arm_fp16_vector_enabled": ["XNN_ENABLE_ARM_FP16_VECTOR=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_FP16_VECTOR=0"],
     }) + select({
         ":arm_bf16_enabled": ["XNN_ENABLE_ARM_BF16=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_BF16=0"],
@@ -11069,10 +11081,10 @@ xnnpack_aggregate_library(
     generic_deps = [
         ":scalar_test_microkernels",
     ] + select({
-        ":arm_fp16_enabled": [
-            ":fp16arith_test_microkernels",
-            ":neonfp16arith_test_microkernels",
-        ],
+        ":arm_fp16_scalar_enabled": [":fp16arith_test_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":arm_fp16_vector_enabled": [":neonfp16arith_test_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":arm_bf16_enabled": [":neonbf16_test_microkernels"],
@@ -16630,16 +16642,28 @@ xnnpack_unit_test(
 
 ############################# Build configurations #############################
 
-# Enables usage of ARM FP16 (FP16 arithmetics) kernels.
+# Enables usage of ARM FP16 (FP16 arithmetics) scalar kernels.
 config_setting(
-    name = "xnn_enable_arm_fp16_explicit_true",
-    define_values = {"xnn_enable_arm_fp16": "true"},
+    name = "xnn_enable_arm_fp16_scalar_explicit_true",
+    define_values = {"xnn_enable_arm_fp16_scalar": "true"},
 )
 
-# Disables usage of ARM FP16 (FP16 arithmetics) kernels.
+# Disables usage of ARM FP16 (FP16 arithmetics) scalar kernels.
 config_setting(
-    name = "xnn_enable_arm_fp16_explicit_false",
-    define_values = {"xnn_enable_arm_fp16": "false"},
+    name = "xnn_enable_arm_fp16_scalar_explicit_false",
+    define_values = {"xnn_enable_arm_fp16_scalar": "false"},
+)
+
+# Enables usage of ARM FP16 (FP16 arithmetics) vector kernels.
+config_setting(
+    name = "xnn_enable_arm_fp16_vector_explicit_true",
+    define_values = {"xnn_enable_arm_fp16_vector": "true"},
+)
+
+# Disables usage of ARM FP16 (FP16 arithmetics) vector kernels.
+config_setting(
+    name = "xnn_enable_arm_fp16_vector_explicit_false",
+    define_values = {"xnn_enable_arm_fp16_vector": "false"},
 )
 
 # Enables usage of ARM BF16 (BF16 arithmetics) kernels.
@@ -17076,7 +17100,15 @@ selects.config_setting_group(
 )
 
 selects.config_setting_group(
-    name = "arm_fp16_enabled_by_default",
+    name = "arm_fp16_scalar_enabled_by_default",
+    match_any = [
+        ":aarch32",
+        ":aarch64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "arm_fp16_vector_enabled_by_default",
     match_any = [
         ":aarch32",
         ":aarch64",
@@ -17084,11 +17116,20 @@ selects.config_setting_group(
 )
 
 alias(
-    name = "arm_fp16_enabled",
+    name = "arm_fp16_scalar_enabled",
     actual = select({
-        ":xnn_enable_arm_fp16_explicit_true": ":xnn_enable_arm_fp16_explicit_true",
-        ":xnn_enable_arm_fp16_explicit_false": ":xnn_enable_arm_fp16_explicit_true",
-        "//conditions:default": ":arm_fp16_enabled_by_default",
+        ":xnn_enable_arm_fp16_scalar_explicit_true": ":xnn_enable_arm_fp16_scalar_explicit_true",
+        ":xnn_enable_arm_fp16_scalar_explicit_false": ":xnn_enable_arm_fp16_scalar_explicit_true",
+        "//conditions:default": ":arm_fp16_scalar_enabled_by_default",
+    }),
+)
+
+alias(
+    name = "arm_fp16_vector_enabled",
+    actual = select({
+        ":xnn_enable_arm_fp16_vector_explicit_true": ":xnn_enable_arm_fp16_vector_explicit_true",
+        ":xnn_enable_arm_fp16_vector_explicit_false": ":xnn_enable_arm_fp16_vector_explicit_true",
+        "//conditions:default": ":arm_fp16_vector_enabled_by_default",
     }),
 )
 

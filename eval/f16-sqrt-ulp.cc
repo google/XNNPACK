@@ -111,7 +111,7 @@ static void SqrtError(benchmark::State& state,
   state.counters["ULPERROR"] = benchmark::Counter(max_ulp_error);
 }
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   BENCHMARK_CAPTURE(SqrtError, neonfp16arith_nr1fma,
                     xnn_math_f16_sqrt__neonfp16arith_nr1fma,
                     benchmark::utils::CheckNEONFP16ARITH)
@@ -127,7 +127,7 @@ static void SqrtError(benchmark::State& state,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

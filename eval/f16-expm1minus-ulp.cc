@@ -112,7 +112,7 @@ static void ExpM1Error(
   state.counters["ULPERROR"] = benchmark::Counter(max_ulp_error);
 }
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   BENCHMARK_CAPTURE(ExpM1Error, neonfp16arith_rr1_p3,
                     xnn_math_f16_expm1minus__neonfp16arith_rr1_p3,
                     benchmark::utils::CheckNEONFP16ARITH)
@@ -123,7 +123,7 @@ static void ExpM1Error(
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(ExpM1Error, avx2_rr1_p3,

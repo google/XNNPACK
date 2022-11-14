@@ -805,7 +805,7 @@ static void init(void) {
 
     /**************************** F16 AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_F16_OPERATORS
-      #if XNN_ENABLE_ARM_FP16
+      #if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
         if (cpuinfo_has_arm_neon_fp16_arith()) {
           init_flags |= XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE;
 
@@ -1048,7 +1048,7 @@ static void init(void) {
             };
           #endif  // XNN_NO_NCHW_OPERATORS
         }
-      #endif  // XNN_ENABLE_ARM_FP16
+      #endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
     #endif  // XNN_NO_F16_OPERATORS
 
     /**************************** F32 AArch32 micro-kernels ****************************/
@@ -2822,7 +2822,7 @@ static void init(void) {
 
   /**************************** F16 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_F16_OPERATORS
-    #if XNN_ENABLE_ARM_FP16
+    #if XNN_ENABLE_ARM_FP16_VECTOR
       if (cpuinfo_has_arm_neon_fp16_arith()) {
         init_flags |= XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE;
 
@@ -3153,7 +3153,7 @@ static void init(void) {
           };
         #endif  // XNN_NO_NCHW_OPERATORS
       }
-    #endif  // XNN_ENABLE_ARM_FP16
+    #endif  // XNN_ENABLE_ARM_FP16_VECTOR
   #endif  // XNN_NO_F16_OPERATORS
 
   /**************************** F32 AArch64 micro-kernels ****************************/

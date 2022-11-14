@@ -165,7 +165,7 @@ static void f16_spmm(benchmark::State& state,
 }
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void spmm80_8x1__neonfp16arith(benchmark::State& state, const char* net) {
     f16_spmm(state, xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith, 8, 1, 0.8f,
       xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
@@ -207,7 +207,7 @@ static void f16_spmm(benchmark::State& state,
   BENCHMARK_SPMM(spmm80_24x1__neonfp16arith_x2)
   BENCHMARK_SPMM(spmm80_32x1__neonfp16arith)
   BENCHMARK_SPMM(spmm80_32x1__neonfp16arith_x2)
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

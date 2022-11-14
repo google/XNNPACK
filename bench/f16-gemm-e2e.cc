@@ -89,7 +89,7 @@ static void GEMMEnd2EndBenchmark(
   }
 }
 
-#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64 & XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 & XNN_ENABLE_ASSEMBLY
   static void f16_gemm_4x8__aarch64_neonfp16arith_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_f16_gemm_minmax_ukernel_4x8__aarch64_neonfp16arith_ld64,
@@ -210,9 +210,9 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_FP16_END2END(f16_gemm_6x16__aarch64_neonfp16arith_cortex_a55);
   BENCHMARK_FP16_END2END(f16_gemm_6x16__aarch64_neonfp16arith_cortex_a55r0);
   BENCHMARK_FP16_END2END(f16_gemm_6x16__aarch64_neonfp16arith_cortex_a75);
-#endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64 & XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 & XNN_ENABLE_ASSEMBLY
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void f16_gemm_4x8__neonfp16arith_ld64(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_f16_gemm_minmax_ukernel_4x8__neonfp16arith_ld64,
@@ -285,7 +285,7 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_FP16_END2END(f16_gemm_4x16__neonfp16arith_ld64);
   BENCHMARK_FP16_END2END(f16_gemm_6x16__neonfp16arith_ld64);
   BENCHMARK_FP16_END2END(f16_gemm_8x16__neonfp16arith_ld64);
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

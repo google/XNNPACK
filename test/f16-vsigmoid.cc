@@ -17,7 +17,7 @@
 #include "vunary-microkernel-tester.h"
 
 
-#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_DIV_X8, batch_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -61,10 +61,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x8, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_DIV_X16, batch_eq_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -108,10 +108,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x16, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_DIV_X24, batch_eq_24) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -155,10 +155,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x24, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_DIV_X32, batch_eq_32) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -202,10 +202,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x32, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_DIV_X40, batch_eq_40) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -249,10 +249,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x40, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_DIV_X48, batch_eq_48) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -296,10 +296,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x48, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_DIV_X56, batch_eq_56) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -343,10 +343,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x56, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_DIV_X64, batch_eq_64) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -390,10 +390,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x64, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1FMA_X8, batch_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -437,10 +437,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x8, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1FMA_X16, batch_eq_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -484,10 +484,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x16, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1FMA_X24, batch_eq_24) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -531,10 +531,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x24, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1FMA_X32, batch_eq_32) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -578,10 +578,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x32, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1FMA_X40, batch_eq_40) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -625,10 +625,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x40, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1FMA_X48, batch_eq_48) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -672,10 +672,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x48, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1FMA_X56, batch_eq_56) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -719,10 +719,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x56, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1FMA_X64, batch_eq_64) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -766,10 +766,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x64, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1RECPS_X8, batch_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -813,10 +813,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x8, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1RECPS_X16, batch_eq_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -860,10 +860,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x16, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1RECPS_X24, batch_eq_24) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -907,10 +907,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x24, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1RECPS_X32, batch_eq_32) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -954,10 +954,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x32, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1RECPS_X40, batch_eq_40) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -1001,10 +1001,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x40, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1RECPS_X48, batch_eq_48) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -1048,10 +1048,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x48, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1RECPS_X56, batch_eq_56) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -1095,10 +1095,10 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x56, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSIGMOID__NEONFP16ARITH_RR2_P2_NR1RECPS_X64, batch_eq_64) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -1142,7 +1142,7 @@
         .Test(xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x64, xnn_init_f16_sigmoid_fp16arith_rr2_p2_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

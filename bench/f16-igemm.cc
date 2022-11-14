@@ -204,7 +204,7 @@ static void f16_igemm(benchmark::State& state,
   BENCHMARK_CONV(f16_igemm_1x16__aarch64_neonfp16arith_ld64)
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   static void f16_igemm_1x8__neonfp16arith_ld64(benchmark::State& state, const char* net) {
     f16_igemm(state, xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64, 1, 8, 1, 1,
       xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
@@ -246,7 +246,7 @@ static void f16_igemm(benchmark::State& state,
   BENCHMARK_CONV(f16_igemm_4x16__neonfp16arith_ld64)
   BENCHMARK_CONV(f16_igemm_6x16__neonfp16arith_ld64)
   BENCHMARK_CONV(f16_igemm_8x16__neonfp16arith_ld64)
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void f16_igemm_1x8__avx2_broadcast(benchmark::State& state, const char* net) {

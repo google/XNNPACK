@@ -63,7 +63,7 @@ static void f16_vsigmoid(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-#if XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(f16_vsigmoid, neonfp16arith_rr2_p2_div_x8,
                     xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x8,
                     xnn_init_f16_sigmoid_fp16arith_rr2_p2_params,
@@ -112,9 +112,9 @@ static void f16_vsigmoid(
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
-#endif  // XNN_ENABLE_ARM_FP16 && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   BENCHMARK_CAPTURE(f16_vsigmoid, neonfp16arith_rr2_p2_nr1fma_x8,
                     xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x8,
                     xnn_init_f16_sigmoid_fp16arith_rr2_p2_params,
@@ -212,7 +212,7 @@ static void f16_vsigmoid(
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f16_vsigmoid, avx2_rr1_p2_div_x8,

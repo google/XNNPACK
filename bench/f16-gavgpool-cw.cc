@@ -63,14 +63,14 @@ static void BenchmarkBatch(benchmark::internal::Benchmark* b)
   b->Args({1024, 1024});
 }
 
-#if XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   BENCHMARK_CAPTURE(f16_gavgpool_cw, f16_neon_x8,
                     xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8,
                     xnn_init_f16_gavgpool_neonfp16arith_params,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(BenchmarkBatch)
     ->UseRealTime();
-#endif  // XNN_ENABLE_ARM_FP16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
