@@ -2244,7 +2244,7 @@ TEST(PACK_F32_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
   const size_t w = 1;
 
   std::vector<float> b(3);
-  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2]
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0]
   std::vector<float> k(h * w);  // k = [3, 4, 5]
   std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
   std::vector<float> packed_weights(primary_tile * 2);
@@ -2276,3 +2276,86 @@ TEST(PACK_F32_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
   };
   EXPECT_EQ(expected, packed_weights);
 }
+
+TEST(PACK_F32_TO_F16_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+
+  std::vector<float> b(3);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0]
+  std::vector<float> k(h * w);  // k = [3, 4, 5]
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  std::vector<uint16_t> packed_weights(primary_tile * 2);
+
+  xnn_pack_f32_to_f16_dconv_oki_w(
+      h, // nc
+      1, // kc
+      w, // nr
+      1, // kh
+      1, // kw
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      nullptr);
+
+  std::vector<float> expected_float = {
+    // bias first
+    0.0f,
+    // then weight
+    3.0f,
+    // bias first
+    1.0f,
+    // then weight
+    4.0f,
+    // bias first
+    2.0f,
+    // then weight
+    5.0f,
+  };
+  std::vector<uint16_t> expected(expected_float.size());
+  std::transform(expected_float.begin(), expected_float.end(), expected.begin(),
+                 [](float f) { return fp16_ieee_from_fp32_value(f); });
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F16_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+
+  std::vector<uint16_t> b(3);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2]
+  std::vector<uint16_t> k(h * w);  // k = [3, 4, 5]
+  std::iota(k.begin(), k.end(), static_cast<uint16_t>(b.size()));
+  std::vector<uint16_t> packed_weights(primary_tile * 2);
+
+  xnn_pack_f16_dconv_oki_w(
+      h, // nc
+      1, // kc
+      w, // nr
+      1, // kh
+      1, // kw
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      nullptr);
+
+  std::vector<uint16_t> expected = {
+    // bias first
+    0,
+    // then weight
+    3,
+    // bias first
+    1,
+    // then weight
+    4,
+    // bias first
+    2,
+    // then weight
+    5,
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+

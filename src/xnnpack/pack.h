@@ -631,6 +631,17 @@ XNN_INTERNAL void xnn_pack_f16_gemminc_goi_w(
   const void* params);
 
 
+typedef void (*xnn_pack_dconv_oki_w_function)(
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kh,
+  size_t kw,
+  const void* k,
+  const void* b,
+  void* packed_w,
+  const void* params);
+
 XNN_INTERNAL void xnn_pack_f32_dconv_oki_w(
   size_t nc,
   size_t kc,
@@ -640,6 +651,17 @@ XNN_INTERNAL void xnn_pack_f32_dconv_oki_w(
   const float* k,
   const float* b,
   float* packed_w,
+  const void* params);
+
+XNN_INTERNAL void xnn_pack_f32_to_f16_dconv_oki_w(
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kh,
+  size_t kw,
+  const float* k,
+  const float* b,
+  uint16_t* packed_w,
   const void* params);
 
 XNN_INTERNAL void xnn_pack_f16_dconv_oki_w(
