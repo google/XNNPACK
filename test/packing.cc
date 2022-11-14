@@ -13,11 +13,11 @@
 #include <fp16.h>
 
 TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
@@ -58,11 +58,11 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
 }
 
 TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
@@ -119,11 +119,11 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
@@ -169,11 +169,11 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
 }
 
 TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
@@ -242,11 +242,11 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
@@ -287,11 +287,11 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
 }
 
 TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
@@ -346,11 +346,11 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
@@ -396,11 +396,11 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
 }
 
 TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
@@ -463,11 +463,11 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
@@ -505,11 +505,11 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
 }
 
 TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
@@ -563,11 +563,11 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
@@ -610,11 +610,11 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
 }
 
 TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
@@ -680,11 +680,11 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
@@ -722,11 +722,11 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
 }
 
 TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
@@ -778,11 +778,11 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
@@ -825,11 +825,11 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
 }
 
 TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<int32_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
@@ -889,11 +889,11 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<uint16_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
@@ -925,11 +925,11 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
 }
 
 TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<uint16_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
@@ -973,11 +973,11 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<uint16_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
@@ -1015,11 +1015,11 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
 }
 
 TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<uint16_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
@@ -1075,11 +1075,11 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<uint16_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
@@ -1111,11 +1111,11 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
 }
 
 TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<uint16_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
@@ -1157,11 +1157,11 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<uint16_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
@@ -1199,11 +1199,11 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
 }
 
 TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<uint16_t> b(c);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
@@ -1253,11 +1253,11 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1]
@@ -1289,11 +1289,11 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
 }
 
 TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4]
@@ -1337,11 +1337,11 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1]
@@ -1379,11 +1379,11 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
 }
 
 TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4]
@@ -1439,11 +1439,11 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1]
@@ -1475,11 +1475,11 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
 }
 
 TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4]
@@ -1521,11 +1521,11 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1]
@@ -1563,11 +1563,11 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
 }
 
 TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4]
@@ -1617,11 +1617,11 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1]
@@ -1656,11 +1656,11 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4]
@@ -1707,11 +1707,11 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1]
@@ -1752,11 +1752,11 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4]
@@ -1815,11 +1815,11 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1]
@@ -1854,11 +1854,11 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4]
@@ -1903,11 +1903,11 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 2;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 2;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1]
@@ -1948,11 +1948,11 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
 }
 
 TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
-  size_t primary_tile = 9;
-  size_t h = 2;
-  size_t w = 2;
-  size_t c = 5;
-  size_t cr = 2;
+  const size_t primary_tile = 9;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 2;
 
   std::vector<float> b(c);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4]
@@ -2005,9 +2005,9 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 }
 
 TEST(PACK_F32_TO_F16_CHW_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
 
   std::vector<float> b(1);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0]
@@ -2039,10 +2039,10 @@ TEST(PACK_F32_TO_F16_CHW_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
 
 
 TEST(PACK_F32_TO_F16_CHW_DWCONV_HWG_W, groups_gt_1) {
-  size_t primary_tile = 3;
-  size_t g = 3;
-  size_t h = 3;
-  size_t w = 1;
+  const size_t primary_tile = 3;
+  const size_t g = 3;
+  const size_t h = 3;
+  const size_t w = 1;
 
   std::vector<float> b(g);
   std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2]
@@ -2087,9 +2087,9 @@ TEST(PACK_F32_TO_F16_CHW_DWCONV_HWG_W, groups_gt_1) {
 }
 
 TEST(PACK_F16_CHW_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
 
   std::vector<uint16_t> b(1);
   std::iota(b.begin(), b.end(), 0);  // b = [0]
@@ -2117,10 +2117,10 @@ TEST(PACK_F16_CHW_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
 }
 
 TEST(PACK_F16_CHW_DWCONV_HWG_W, groups_gt_1) {
-  size_t primary_tile = 3;
-  size_t g = 3;
-  size_t h = 3;
-  size_t w = 1;
+  const size_t primary_tile = 3;
+  const size_t g = 3;
+  const size_t h = 3;
+  const size_t w = 1;
 
   std::vector<uint16_t> b(g);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2]
@@ -2163,9 +2163,9 @@ TEST(PACK_F16_CHW_DWCONV_HWG_W, groups_gt_1) {
 
 
 TEST(PACK_F16_CHW_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
-  size_t primary_tile = 3;
-  size_t h = 3;
-  size_t w = 1;
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
 
   std::vector<uint16_t> b(1);
   std::iota(b.begin(), b.end(), 0);  // b = [0]
@@ -2193,10 +2193,10 @@ TEST(PACK_F16_CHW_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
 }
 
 TEST(PACK_F16_CHW_DWCONV_GHW_W, groups_gt_1) {
-  size_t primary_tile = 3;
-  size_t g = 3;
-  size_t h = 3;
-  size_t w = 1;
+  const size_t primary_tile = 3;
+  const size_t g = 3;
+  const size_t h = 3;
+  const size_t w = 1;
 
   std::vector<uint16_t> b(g);
   std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2]
@@ -2233,6 +2233,46 @@ TEST(PACK_F16_CHW_DWCONV_GHW_W, groups_gt_1) {
     9,
     10,
     11,
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+
+TEST(PACK_F32_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
+  const size_t primary_tile = 3;
+  const size_t h = 3;
+  const size_t w = 1;
+
+  std::vector<float> b(3);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2]
+  std::vector<float> k(h * w);  // k = [3, 4, 5]
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  std::vector<float> packed_weights(primary_tile * 2);
+
+  xnn_pack_f32_dconv_oki_w(
+      h, // nc
+      1, // kc
+      w, // nr
+      1, // kh
+      1, // kw
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      nullptr);
+
+  std::vector<float> expected = {
+    // bias first
+    0.0f,
+    // then weight
+    3.0f,
+    // bias first
+    1.0f,
+    // then weight
+    4.0f,
+    // bias first
+    2.0f,
+    // then weight
+    5.0f,
   };
   EXPECT_EQ(expected, packed_weights);
 }
