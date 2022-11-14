@@ -848,7 +848,7 @@ $if DATATYPE == "qu8":
     }
   }
 
-$if TEST_NAME.startswith('GENERATE') and 'UPTO' in TEST_NAME:
+$if TEST_NAME.startswith('GENERATE') and (UKERNEL_TYPE.startswith('GEMM') or 'UPTO' in TEST_NAME):
   TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile_m_upto_mr) {
     $if ISA_CHECK:
       ${ISA_CHECK};
