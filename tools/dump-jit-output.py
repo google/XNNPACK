@@ -9,7 +9,7 @@
 #   dump-jit-output.py <path to JIT cc file> --max_mr=6 [--clamp_min]
 # E.g.
 #   ./tools/dump-jit-output.py \
-#     src/f32-gemm/upto6x8-aarch64-neonfma-cortex-a75.cc
+#     src/f32-gemm/6x8-aarch64-neonfma-cortex-a75.cc
 #     --max_mr=6
 #
 # The parameters prefetch, clamp_min, clamp_max defaults to True if not

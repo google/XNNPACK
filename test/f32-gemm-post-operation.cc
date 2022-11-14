@@ -98,7 +98,7 @@ TEST(XNN_GENERATE_F32_GEMM_UKERNEL_6X8__AARCH64_NEONFMA_LD128, hardswish) {
         fused_operators);
 }
 
-TEST(XNN_GENERATE_F32_GEMM_UKERNEL_UPTO6X8__AARCH64_NEONFMA_A75, hardswish) {
+TEST(XNN_GENERATE_F32_GEMM_UKERNEL_6X8__AARCH64_NEONFMA_A75, hardswish) {
   TEST_REQUIRES_ARM_NEON_FMA;
   std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
   GemmMicrokernelTester()
@@ -110,7 +110,7 @@ TEST(XNN_GENERATE_F32_GEMM_UKERNEL_UPTO6X8__AARCH64_NEONFMA_A75, hardswish) {
     .n(8)
     .k(8)
     .Test(
-        xnn_generate_f32_gemm_ukernel_upto6x8__aarch64_neonfma_cortex_a75,
+        xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a75,
         fused_operators);
 }
 
