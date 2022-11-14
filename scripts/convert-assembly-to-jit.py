@@ -500,8 +500,10 @@ def emit_clamp_instruction(instr: str, instructions: List[str]) -> None:
     instructions.append(instr)
 
 
-def emit_instruction(instr: str, instructions: List[str],
-                     vector_register_map: Mapping[str, int]) -> None:
+def emit_instruction(instr: str,
+                     instructions: List[str],
+                     vector_register_map: Mapping[str, int],
+                     is_gemm: bool = False) -> None:
   # emit a guard for instruction if it is using a particular register
   # mapping is a map from register to the mr it is used, e.g. v0 -> 0 to guard v0 behind max_mr > 0.
   # parse the dest register from this instruction
@@ -552,7 +554,9 @@ def emit_instruction(instr: str, instructions: List[str],
                r'\1(\2, \3, max_mr * sizeof(void*));', instr))
     return
 
-  if instr_name == 'ldr':
+  # this workaround is specifically for 4x8 A53 kernel where it loads from A low
+  # and A high into GPR then moves into vector registers.
+  if instr_name == 'ldr' and is_gemm:
     # extract register from the load
     ldr_m = re.search(r'mem\[(r\d+)', instr)
     if ldr_m:
@@ -571,7 +575,7 @@ def emit_instruction(instr: str, instructions: List[str],
 
 
 def parse_microkernel(
-    lines: List[str], prfm: bool,
+    lines: List[str], prfm: bool, is_gemm: bool,
     vector_register_map: Mapping[str, int]) -> Tuple[List[str], List[str]]:
   # All labels need to be declared first, collect them and output them after
   # function signature.
@@ -642,7 +646,7 @@ def parse_microkernel(
     if m:
       emit_instruction(
           f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}]){sc} {m[4]}',
-          instructions, vector_register_map)
+          instructions, vector_register_map, is_gemm)
       continue
     m = re.fullmatch(INSTR_REG_MEMOP_IMM_RE, line)
     if m:
@@ -989,6 +993,7 @@ def convert(input_file: str, post_op: bool) -> None:
                                                  arch, minmax, kernel_type,
                                                  prfm, mr, post_op)
   instructions, labels = parse_microkernel(microkernel_body, prfm,
+                                           kernel_type == GEMM,
                                            vector_register_map)
   # TODO(zhin): iterate until fixpoint instead.
   instructions = merge_consecutive_checks(instructions)
