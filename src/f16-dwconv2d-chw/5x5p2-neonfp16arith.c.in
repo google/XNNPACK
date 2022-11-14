@@ -69,7 +69,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
       }
 
     $for M in range(4 + ROW_TILE):
-      float16x8_t vi${M}x01234567 = vmovq_n_f16(0);
+      float16x8_t vi${M}x01234567 = vreinterpretq_f16_u16(vmovq_n_u16(0));
 
     $for M in range(4 + ROW_TILE):
       float16x8_t vi${M}x89ABCDEF = vreinterpretq_f16_u16(vld1q_u16(i${M})); i${M} += 8;
@@ -626,7 +626,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
           vo${M}p${16 % ACCUMULATORS} = vmlaq_lane_f16(vo${M}p${16 % ACCUMULATORS}, vi${M+4}x6789ABCD, vget_high_f16(vwGHIJKLMN), 1);
         #endif
       // Right by 1 column
-      const float16x8_t vzero = vmovq_n_f16(0);
+      const float16x8_t vzero = vreinterpretq_f16_u16(vmovq_n_u16(0));
       $for M in range(4 + ROW_TILE):
         const float16x8_t vi${M}x9ABCDEFG = vextq_f16(vi${M}x89ABCDEF, vzero, 1);
 

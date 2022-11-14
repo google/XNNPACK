@@ -52,13 +52,13 @@ void xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2(
     do {
       uint32_t nnz = *nnzmap++;
       float16x8_t vacc01234567x0 = vld1q_dup_f16(w); w += 1;
-      float16x8_t vacc01234567x1 = vmovq_n_f16(0.0f);
+      float16x8_t vacc01234567x1 = vreinterpretq_f16_u16(vmovq_n_u16(0));
       float16x8_t vacc89ABCDEFx0 = vacc01234567x0;
-      float16x8_t vacc89ABCDEFx1 = vmovq_n_f16(0.0f);
+      float16x8_t vacc89ABCDEFx1 = vreinterpretq_f16_u16(vmovq_n_u16(0));
       float16x8_t vaccGHIJKLMNx0 = vacc01234567x0;
-      float16x8_t vaccGHIJKLMNx1 = vmovq_n_f16(0.0f);
+      float16x8_t vaccGHIJKLMNx1 = vreinterpretq_f16_u16(vmovq_n_u16(0));
       float16x8_t vaccOPQRSTUVx0 = vacc01234567x0;
-      float16x8_t vaccOPQRSTUVx1 = vmovq_n_f16(0.0f);
+      float16x8_t vaccOPQRSTUVx1 = vreinterpretq_f16_u16(vmovq_n_u16(0));
       for (; nnz >= 2; nnz -= 2) {
         const intptr_t diff0 = dmap[0];
         const intptr_t diff1 = dmap[1];

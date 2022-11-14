@@ -41,7 +41,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x64(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
-  float16x8_t vacc0 = vmovq_n_f16(0.0f);
+  float16x8_t vacc0 = vreinterpretq_f16_u16(vmovq_n_u16(0));
   for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
     const float16x8_t vi0 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
     const float16x8_t vi1 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;

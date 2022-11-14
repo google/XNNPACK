@@ -22,7 +22,7 @@ void xnn_math_f16_sqrt__neonfp16arith_nr1fma1adj(
   // Positive infininity in bit representation.
   const uint16x8_t vpositive_infinity = vmovq_n_u16(UINT16_C(0x7C00));
   // 0.5f constant used in Newton-Raphson iterations.
-  const float16x8_t vhalf = vmovq_n_f16(0.5f);
+  const float16x8_t vhalf = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3800)));  // 0.5h
   // Mask for the top 4 exponent bits of a IEEE FP16 number.
   const uint16x8_t vexp4_mask = vmovq_n_u16(UINT16_C(0x7800));
 
@@ -38,7 +38,7 @@ void xnn_math_f16_sqrt__neonfp16arith_nr1fma1adj(
     uint16x8_t vspecial_value = vmovq_n_u16(UINT16_C(0x7E00));
 
     // Mask for signed zero inputs, both positive and negative. Results for such inputs must be replaced with the input itself.
-    const uint16x8_t vzero_mask = vceqq_f16(vi, vmovq_n_f16(0.0f));
+    const uint16x8_t vzero_mask = vceqq_f16(vi, vreinterpretq_f16_u16(vmovq_n_u16(0)));
     vspecial_mask = vorrq_u16(vspecial_mask, vzero_mask);
 
     // Mask for positive infininty inputs. Results for such inputs are replaced with the input itself.

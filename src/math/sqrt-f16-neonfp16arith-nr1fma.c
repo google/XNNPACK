@@ -19,7 +19,7 @@ void xnn_math_f16_sqrt__neonfp16arith_nr1fma(
 {
   assert(n % (8 * sizeof(uint16_t)) == 0);
 
-  const float16x8_t vhalf = vmovq_n_f16(0.5f);
+  const float16x8_t vhalf = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3800)));  // 0.5h
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
   for (; n != 0; n -= 8 * sizeof(uint16_t)) {

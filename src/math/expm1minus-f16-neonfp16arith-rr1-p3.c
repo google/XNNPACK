@@ -29,7 +29,7 @@ void xnn_math_f16_expm1minus__neonfp16arith_rr1_p3(
   // on [-log(2)/2, log(2)/2]
   const float16x8_t vc3 = vmovq_n_f16(0x1.56Cp-3f);
   const float16x8_t vc2 = vmovq_n_f16(0x1.020p-1f);
-  const float16x8_t vone = vmovq_n_f16(1.0f);
+  const float16x8_t vone = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C00)));  // 1.0h
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;

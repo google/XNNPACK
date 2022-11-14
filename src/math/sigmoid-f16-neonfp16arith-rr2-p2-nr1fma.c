@@ -28,7 +28,7 @@ void xnn_math_f16_sigmoid__neonfp16arith_rr2_p2_nr1fma(
   // on [-log(2)/2, log(2)/2]
   const float16x8_t vc2 = vmovq_n_f16(0x1.FE4p-2f);
   const float16x8_t vc1 = vmovq_n_f16(-0x1.038p+0f);
-  const float16x8_t vone = vmovq_n_f16(1.0f);
+  const float16x8_t vone = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C00)));  // 1.0h
   // The largest z for which sigmoidh(-z) is normalized.
   // This number is also the largest z for which exph(-z) is normalized.
   const float16x8_t vdenorm_cutoff = vmovq_n_f16(-0x1.368p+3f);
@@ -97,7 +97,7 @@ void xnn_math_f16_sigmoid__neonfp16arith_rr2_p2_nr1fma(
     vf = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf), vcagtq_f16(vx, vdenorm_cutoff)));
 
     // Reconstruct sigmoid(x) = x < 0 ? sigmoid(-z) : 1.0 - sigmoid(-z)
-    const uint16x8_t vm = vcltq_f16(vx, vmovq_n_f16(0.0f));
+    const uint16x8_t vm = vcltq_f16(vx, vreinterpretq_f16_u16(vmovq_n_u16(0)));
     vf = vbslq_f16(vm, vf, vsubq_f16(vone, vf));
 
     vst1q_u16(o, vreinterpretq_u16_f16(vf)); o += 8;

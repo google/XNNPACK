@@ -87,21 +87,21 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2(
       i6 = zero;
     }
 
-    float16x8_t vi0x02468ACE = vmovq_n_f16(0);
-    float16x8_t vi1x02468ACE = vmovq_n_f16(0);
-    float16x8_t vi2x02468ACE = vmovq_n_f16(0);
-    float16x8_t vi3x02468ACE = vmovq_n_f16(0);
-    float16x8_t vi4x02468ACE = vmovq_n_f16(0);
-    float16x8_t vi5x02468ACE = vmovq_n_f16(0);
-    float16x8_t vi6x02468ACE = vmovq_n_f16(0);
+    float16x8_t vi0x02468ACE = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi1x02468ACE = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi2x02468ACE = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi3x02468ACE = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi4x02468ACE = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi5x02468ACE = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi6x02468ACE = vreinterpretq_f16_u16(vmovq_n_u16(0));
 
-    float16x8_t vi0x13579BDF = vmovq_n_f16(0);
-    float16x8_t vi1x13579BDF = vmovq_n_f16(0);
-    float16x8_t vi2x13579BDF = vmovq_n_f16(0);
-    float16x8_t vi3x13579BDF = vmovq_n_f16(0);
-    float16x8_t vi4x13579BDF = vmovq_n_f16(0);
-    float16x8_t vi5x13579BDF = vmovq_n_f16(0);
-    float16x8_t vi6x13579BDF = vmovq_n_f16(0);
+    float16x8_t vi0x13579BDF = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi1x13579BDF = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi2x13579BDF = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi3x13579BDF = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi4x13579BDF = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi5x13579BDF = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi6x13579BDF = vreinterpretq_f16_u16(vmovq_n_u16(0));
 
     float16x8x2_t vi0xGIKMOQSUHJLNPRTV = vld2q_f16((const void*) i0); i0 += 16;
     float16x8x2_t vi1xGIKMOQSUHJLNPRTV = vld2q_f16((const void*) i1); i1 += 16;
@@ -665,7 +665,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2(
         vo1p1 = vmlaq_lane_f16(vo1p1, vi6xFHJLNPRT, vget_high_f16(vwGHIJKLMN), 2);
       #endif
       // Right by 2 columns
-      const float16x8_t vzero = vmovq_n_f16(0);
+      const float16x8_t vzero = vreinterpretq_f16_u16(vmovq_n_u16(0));
       const float16x8_t vi0xIKMOQSUW = vextq_f16(vi0xGIKMOQSU, vzero, 1);
       const float16x8_t vi1xIKMOQSUW = vextq_f16(vi1xGIKMOQSU, vzero, 1);
       const float16x8_t vi2xIKMOQSUW = vextq_f16(vi2xGIKMOQSU, vzero, 1);

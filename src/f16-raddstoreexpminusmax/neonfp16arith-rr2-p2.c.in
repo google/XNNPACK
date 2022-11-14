@@ -43,7 +43,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x${BATCH_TILE}${
   uint16_t* o = (uint16_t*) output;
   $if BATCH_TILE > 8:
     $for K in range(ACCUMULATORS):
-      float16x8_t vacc${K} = vmovq_n_f16(0.0f);
+      float16x8_t vacc${K} = vreinterpretq_f16_u16(vmovq_n_u16(0));
     for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
       $for N in range(SIMD_TILE):
         const float16x8_t vi${ABC[N]} = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
@@ -95,7 +95,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x${BATCH_TILE}${
 
     float16x8_t vacc = vacc0;
   $else:
-    float16x8_t vacc = vmovq_n_f16(0.0f);
+    float16x8_t vacc = vreinterpretq_f16_u16(vmovq_n_u16(0));
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const float16x8_t vi = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 

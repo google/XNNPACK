@@ -32,7 +32,7 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x24(
   const float16x8_t vln2_lo = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.ln2_lo));
   const float16x8_t vc2 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.c2));
   const float16x8_t vc1 = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.c1));
-  const float16x8_t vone = vmovq_n_f16(1.0f);
+  const float16x8_t vone = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C00)));  // 1.0h
   const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.denorm_cutoff));
 
   const uint16_t* i = (const uint16_t*) input;
@@ -90,9 +90,9 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x24(
     vf1 = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf1), vcagtq_f16(vx1, vdenorm_cutoff)));
     vf2 = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf2), vcagtq_f16(vx2, vdenorm_cutoff)));
 
-    const uint16x8_t vm0 = vcltq_f16(vx0, vmovq_n_f16(0.0f));
-    const uint16x8_t vm1 = vcltq_f16(vx1, vmovq_n_f16(0.0f));
-    const uint16x8_t vm2 = vcltq_f16(vx2, vmovq_n_f16(0.0f));
+    const uint16x8_t vm0 = vcltq_f16(vx0, vreinterpretq_f16_u16(vmovq_n_u16(0)));
+    const uint16x8_t vm1 = vcltq_f16(vx1, vreinterpretq_f16_u16(vmovq_n_u16(0)));
+    const uint16x8_t vm2 = vcltq_f16(vx2, vreinterpretq_f16_u16(vmovq_n_u16(0)));
 
     vf0 = vbslq_f16(vm0, vf0, vsubq_f16(vone, vf0));
     vf1 = vbslq_f16(vm1, vf1, vsubq_f16(vone, vf1));
@@ -121,7 +121,7 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x24(
 
     float16x8_t vf = vdivq_f16(ve, vd);
     vf = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf), vcagtq_f16(vx, vdenorm_cutoff)));
-    const uint16x8_t vm = vcltq_f16(vx, vmovq_n_f16(0.0f));
+    const uint16x8_t vm = vcltq_f16(vx, vreinterpretq_f16_u16(vmovq_n_u16(0)));
     vf = vbslq_f16(vm, vf, vsubq_f16(vone, vf));
 
     vst1q_u16(o, vreinterpretq_u16_f16(vf)); o += 8;
@@ -145,7 +145,7 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x24(
 
     float16x8_t vf = vdivq_f16(ve, vd);
     vf = vreinterpretq_f16_u16(vbicq_u16(vreinterpretq_u16_f16(vf), vcagtq_f16(vx, vdenorm_cutoff)));
-    const uint16x8_t vm = vcltq_f16(vx, vmovq_n_f16(0.0f));
+    const uint16x8_t vm = vcltq_f16(vx, vreinterpretq_f16_u16(vmovq_n_u16(0)));
     vf = vbslq_f16(vm, vf, vsubq_f16(vone, vf));
 
     float16x4_t vf_lo = vget_low_f16(vf);

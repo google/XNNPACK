@@ -29,7 +29,7 @@ void xnn_math_f16_exp__neonfp16arith_rr2_p3(
   const float16x8_t vminus_ln2_lo = vmovq_n_f16(0x1.BD0p-13f);
   const float16x8_t vplus_inf = vmovq_n_f16(INFINITY);
 
-  const float16x8_t vone = vmovq_n_f16(1.0f);
+  const float16x8_t vone = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C00)));  // 1.0h
   const float16x8_t vc2 = vmovq_n_f16(0x1.020p-1f);
   const float16x8_t vc3 = vmovq_n_f16(0x1.558p-3f);
 

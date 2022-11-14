@@ -94,11 +94,11 @@ void xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2(
       }
 
       // viMx0 = ( iM0c2, iM0c1, iM0c0, --- )
-      float16x4_t vi0x0 = vmov_n_f16(0);
-      float16x4_t vi1x0 = vmov_n_f16(0);
-      float16x4_t vi2x0 = vmov_n_f16(0);
-      float16x4_t vi3x0 = vmov_n_f16(0);
-      float16x4_t vi4x0 = vmov_n_f16(0);
+      float16x4_t vi0x0 = vreinterpret_f16_u16(vmov_n_u16(0));
+      float16x4_t vi1x0 = vreinterpret_f16_u16(vmov_n_u16(0));
+      float16x4_t vi2x0 = vreinterpret_f16_u16(vmov_n_u16(0));
+      float16x4_t vi3x0 = vreinterpret_f16_u16(vmov_n_u16(0));
+      float16x4_t vi4x0 = vreinterpret_f16_u16(vmov_n_u16(0));
 
       size_t iw = input_width;
       for (; iw >= 4; iw -= 4) {
@@ -576,11 +576,11 @@ void xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2(
 #endif
         const float16x4_t vk00c1 = vreinterpret_f16_u16(vld1_u16(w + 16));
 
-        float16x4_t vi0x2 = vmov_n_f16(0.0f);
-        float16x4_t vi1x2 = vmov_n_f16(0.0f);
-        float16x4_t vi2x2 = vmov_n_f16(0.0f);
-        float16x4_t vi3x2 = vmov_n_f16(0.0f);
-        float16x4_t vi4x2 = vmov_n_f16(0.0f);
+        float16x4_t vi0x2 = vreinterpret_f16_u16(vmov_n_u16(0));
+        float16x4_t vi1x2 = vreinterpret_f16_u16(vmov_n_u16(0));
+        float16x4_t vi2x2 = vreinterpret_f16_u16(vmov_n_u16(0));
+        float16x4_t vi3x2 = vreinterpret_f16_u16(vmov_n_u16(0));
+        float16x4_t vi4x2 = vreinterpret_f16_u16(vmov_n_u16(0));
         if (iw >= 2) {
           // viMx2 = ( iM3c1, iM3c0, iM2c2, iM2c1 )
           vi0x2 = vreinterpret_f16_u16(vld1_u16(i0 + 4));
@@ -770,11 +770,11 @@ void xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2(
 #endif
         const float16x4_t vk01c2 = vreinterpret_f16_u16(vld1_u16(w + 64));
 
-        float16x4_t vi0x3 = vmov_n_f16(0.0f);
-        float16x4_t vi1x3 = vmov_n_f16(0.0f);
-        float16x4_t vi2x3 = vmov_n_f16(0.0f);
-        float16x4_t vi3x3 = vmov_n_f16(0.0f);
-        float16x4_t vi4x3 = vmov_n_f16(0.0f);
+        float16x4_t vi0x3 = vreinterpret_f16_u16(vmov_n_u16(0));
+        float16x4_t vi1x3 = vreinterpret_f16_u16(vmov_n_u16(0));
+        float16x4_t vi2x3 = vreinterpret_f16_u16(vmov_n_u16(0));
+        float16x4_t vi3x3 = vreinterpret_f16_u16(vmov_n_u16(0));
+        float16x4_t vi4x3 = vreinterpret_f16_u16(vmov_n_u16(0));
         if (iw > 2) {
           // viMx3 = ( 0.0, 0.0, 0.0, iM3c2 )
           vi0x3 = vld1_lane_f16(i0 + 8, vi0x3, 0);

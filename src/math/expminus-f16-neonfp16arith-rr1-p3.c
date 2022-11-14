@@ -27,7 +27,7 @@ void xnn_math_f16_expminus__neonfp16arith_rr1_p3(
   // on [-log(2)/2, log(2)/2]
   const float16x8_t vc3 = vmovq_n_f16(0x1.558p-3f);
   const float16x8_t vc2 = vmovq_n_f16(0x1.020p-1f);
-  const float16x8_t vone = vmovq_n_f16(1.0f);
+  const float16x8_t vone = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C00)));  // 1.0h
   // The smallest x for which exph(x) is normalized.
   const float16x8_t vdenorm_cutoff = vmovq_n_f16(-0x1.368p3f);
 

@@ -91,14 +91,14 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8(
       i7 = zero;
     }
 
-    float16x8_t vi0x01234567 = vmovq_n_f16(0);
-    float16x8_t vi1x01234567 = vmovq_n_f16(0);
-    float16x8_t vi2x01234567 = vmovq_n_f16(0);
-    float16x8_t vi3x01234567 = vmovq_n_f16(0);
-    float16x8_t vi4x01234567 = vmovq_n_f16(0);
-    float16x8_t vi5x01234567 = vmovq_n_f16(0);
-    float16x8_t vi6x01234567 = vmovq_n_f16(0);
-    float16x8_t vi7x01234567 = vmovq_n_f16(0);
+    float16x8_t vi0x01234567 = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi1x01234567 = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi2x01234567 = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi3x01234567 = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi4x01234567 = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi5x01234567 = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi6x01234567 = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi7x01234567 = vreinterpretq_f16_u16(vmovq_n_u16(0));
 
     float16x8_t vi0x89ABCDEF = vreinterpretq_f16_u16(vld1q_u16(i0)); i0 += 8;
     float16x8_t vi1x89ABCDEF = vreinterpretq_f16_u16(vld1q_u16(i1)); i1 += 8;
@@ -671,7 +671,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8(
         vo5p0 = vmlaq_lane_f16(vo5p0, vi7x789ABCDE, vget_high_f16(vw01234567), 3);
       #endif
       // Right column
-      const float16x8_t vzero = vmovq_n_f16(0);
+      const float16x8_t vzero = vreinterpretq_f16_u16(vmovq_n_u16(0));
       const float16x8_t vi0x9ABCDEFG = vextq_f16(vi0x89ABCDEF, vzero, 1);
       const float16x8_t vi1x9ABCDEFG = vextq_f16(vi1x89ABCDEF, vzero, 1);
       const float16x8_t vi2x9ABCDEFG = vextq_f16(vi2x89ABCDEF, vzero, 1);

@@ -27,7 +27,7 @@ void xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x32(
   assert(output != NULL);
 
   const uint16x8_t vpositive_infinity = vmovq_n_u16(UINT16_C(0x7C00));
-  const float16x8_t vhalf = vmovq_n_f16(0.5f);
+  const float16x8_t vhalf = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3800)));  // 0.5h
   const uint16x8_t vexp4_mask = vmovq_n_u16(UINT16_C(0x7800));
 
   const uint16_t* i = (const uint16_t*) input;
@@ -46,7 +46,7 @@ void xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x32(
     uint16x8_t vspecial_mask = vcgeq_u16(vreinterpretq_u16_f16(vi), vpositive_infinity);
 
     const float16x8_t vresidual = vfmsq_f16(vhalf, vsqrtx, vhalfrsqrtx);
-    const uint16x8_t vzero_mask = vceqq_f16(vi, vmovq_n_f16(0.0f));
+    const uint16x8_t vzero_mask = vceqq_f16(vi, vreinterpretq_f16_u16(vmovq_n_u16(0)));
     uint16x8_t vspecial_value = vmovq_n_u16(UINT16_C(0x7E00));
     
     vsqrtx = vfmaq_f16(vsqrtx, vresidual, vsqrtx);
@@ -79,7 +79,7 @@ void xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x32(
     uint16x8_t vspecial_mask = vcgeq_u16(vreinterpretq_u16_f16(vi), vpositive_infinity);
 
     const float16x8_t vresidual = vfmsq_f16(vhalf, vsqrtx, vhalfrsqrtx);
-    const uint16x8_t vzero_mask = vceqq_f16(vi, vmovq_n_f16(0.0f));
+    const uint16x8_t vzero_mask = vceqq_f16(vi, vreinterpretq_f16_u16(vmovq_n_u16(0)));
     uint16x8_t vspecial_value = vmovq_n_u16(UINT16_C(0x7E00));
     
     vsqrtx = vfmaq_f16(vsqrtx, vresidual, vsqrtx);

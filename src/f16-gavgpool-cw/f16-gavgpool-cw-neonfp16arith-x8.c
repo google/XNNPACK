@@ -30,10 +30,10 @@ void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8(
   uint16_t* o = (uint16_t*) output;
   const uint16_t* i = input;
   do {
-    float16x8_t vsum0 = vmovq_n_f16(0);
+    float16x8_t vsum0 = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vsum1 = vreinterpretq_f16_u16(vmovq_n_u16(0));
     size_t n = elements;
     if (n >= 32 * sizeof(uint16_t)) {
-      float16x8_t vsum1 = vmovq_n_f16(0);
       do {
         const float16x8_t vi0 = vreinterpretq_f16_u16(vld1q_u16(i));
         const float16x8_t vi1 = vreinterpretq_f16_u16(vld1q_u16(i + 8));
@@ -46,8 +46,8 @@ void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8(
         vsum1 = vaddq_f16(vsum1, acc1);
         n -= 32 * sizeof(uint16_t);
       } while (n >= 32 * sizeof(uint16_t));
-      vsum0 = vaddq_f16(vsum0, vsum1);
     }
+    vsum0 = vaddq_f16(vsum0, vsum1);
 
     while (n >= 8 * sizeof(uint16_t)) {
       const float16x8_t vi0 = vreinterpretq_f16_u16(vld1q_u16(i));

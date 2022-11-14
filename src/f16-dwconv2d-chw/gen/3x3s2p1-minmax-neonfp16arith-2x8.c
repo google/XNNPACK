@@ -77,11 +77,11 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8(
       i4 = zero;
     }
 
-    float16x8_t vi0x13579BDF = vmovq_n_f16(0);
-    float16x8_t vi1x13579BDF = vmovq_n_f16(0);
-    float16x8_t vi2x13579BDF = vmovq_n_f16(0);
-    float16x8_t vi3x13579BDF = vmovq_n_f16(0);
-    float16x8_t vi4x13579BDF = vmovq_n_f16(0);
+    float16x8_t vi0x13579BDF = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi1x13579BDF = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi2x13579BDF = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi3x13579BDF = vreinterpretq_f16_u16(vmovq_n_u16(0));
+    float16x8_t vi4x13579BDF = vreinterpretq_f16_u16(vmovq_n_u16(0));
 
     size_t w = input_width;
     for (; w >= 16 * sizeof(uint16_t); w -= 16 * sizeof(uint16_t)) {
