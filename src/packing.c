@@ -1904,6 +1904,7 @@ void xnn_pack_f32_gemminc_goi_w(
   float* packed_weights,
   const void* params)
 {
+  assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
 
@@ -1940,6 +1941,7 @@ void xnn_pack_f16_gemminc_goi_w(
   uint16_t* packed_weights,
   const void* params)
 {
+  assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
 
