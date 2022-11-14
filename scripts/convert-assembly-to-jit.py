@@ -266,8 +266,8 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
   in_a_pointers = False
   # Whether we are in the comment section that lists C (output) registers.
   in_c_pointers = False
-  # Whether we are in the comment section that lists vector register usage.
-  in_vector_register_usage = False
+  # Whether we are in the comment section that lists register usage.
+  in_register_usage = False
   a_pointers = []
   c_pointers = []
   # Mapping from register type (A, B, or C), to the list of list of registers.
@@ -371,12 +371,13 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
       prologue.append(fix_comments(line.rstrip()))
       in_c_pointers = True
       continue
-    elif in_vector_register_usage:
+    elif in_register_usage:
       prologue.append(fix_comments(line.rstrip()))
       if line.strip() == '':
-        in_vector_register_usage = False
+        in_register_usage = False
         continue
-      if 'clamp' in line.lower() or 'unused' in line.lower():
+      if any(word in line.lower()
+             for word in ['clamp', 'unused', 'scratch', 'temp']):
         continue
       # Skip b vector registers.
       if re.search(r'(?:#|//)\W+B', line):
@@ -393,7 +394,7 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
       continue
     elif 'register usage' in line.lower():
       prologue.append(fix_comments(line.rstrip()))
-      in_vector_register_usage = True
+      in_register_usage = True
       continue
     elif any(re.fullmatch(p, line) for p in IGNORE_LINES):
       continue
