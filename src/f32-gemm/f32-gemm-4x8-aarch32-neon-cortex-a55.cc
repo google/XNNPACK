@@ -41,10 +41,10 @@ class Generator : public MacroAssembler {
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
 // Register usage
-// A0   r3  d0
-// A1  r12  d1
-// A2  r10  d2
-// A3   r7  d3
+// A0   r3  d0 d4
+// A1  r12  d1 d5
+// A2  r10  d2 d6
+// A3   r7  d3 d7
 // B    r9  d8,  d9, d10, d11
 // B       d12, d13, d14, d15
 // C0  r11 d16-d17  q8  d18-d19  q9
@@ -150,8 +150,8 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   vld1_32({d4}, mem[r3]++); // A0
   if (max_mr > 1) {
     vmla_f32(q10, q4, d1[0]);
+    vld1_32({d5}, mem[r12]++); // A1
   }
-  vld1_32({d5}, mem[r12]++); // A1
   if (max_mr > 2) {
     vmla_f32(q12, q4, d2[0]);
   }
@@ -170,12 +170,12 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   // BLOCK 2
   if (max_mr > 2) {
     vmla_f32(q13, q5, d2[0]);
+    vld1_32({d6}, mem[r10]++); // A2
   }
-  vld1_32({d6}, mem[r10]++); // A2
   if (max_mr > 3) {
     vmla_f32(q15, q5, d3[0]);
+    vld1_32({d7}, mem[r7]++); // A3
   }
-  vld1_32({d7}, mem[r7]++); // A3
   vmla_f32(q8, q6, d0[1]);
 
   // BLOCK 3
@@ -286,8 +286,8 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   vld1_32({d4}, mem[r3]++); // A0
   if (max_mr > 1) {
     vmla_f32(q10, q4, d1[0]);
+    vld1_32({d5}, mem[r12]++); // A1
   }
-  vld1_32({d5}, mem[r12]++); // A1
   if (max_mr > 2) {
     vmla_f32(q12, q4, d2[0]);
   }
@@ -306,12 +306,12 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   // BLOCK 2
   if (max_mr > 2) {
     vmla_f32(q13, q5, d2[0]);
+    vld1_32({d6}, mem[r10]++); // A2
   }
-  vld1_32({d6}, mem[r10]++); // A2
   if (max_mr > 3) {
     vmla_f32(q15, q5, d3[0]);
+    vld1_32({d7}, mem[r7]++); // A3
   }
-  vld1_32({d7}, mem[r7]++); // A3
   vmla_f32(q8, q6, d0[1]);
 
   // BLOCK 3
