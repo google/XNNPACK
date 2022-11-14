@@ -668,8 +668,11 @@ class ConvolutionOperatorTester {
       xnn_operator_t convolution_op = nullptr;
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -688,9 +691,6 @@ class ConvolutionOperatorTester {
           &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
-        if (use_weights_cache()) {
-          xnn_release_weights_cache(&weights_cache);
-        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -752,7 +752,6 @@ class ConvolutionOperatorTester {
 
         VerifyNHWCxQC8(output2, output_ref);
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
-        xnn_release_weights_cache(&weights_cache);
       }
     }
   }
@@ -884,8 +883,11 @@ class ConvolutionOperatorTester {
       xnn_operator_t convolution_op = nullptr;
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -904,9 +906,6 @@ class ConvolutionOperatorTester {
           &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
-        if (use_weights_cache()) {
-          xnn_release_weights_cache(&weights_cache);
-        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -971,7 +970,6 @@ class ConvolutionOperatorTester {
 
         VerifyNHWCxQS8(output2, output_ref, output_zero_point);
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
-        xnn_release_weights_cache(&weights_cache);
       }
     }
   }
@@ -1122,8 +1120,11 @@ class ConvolutionOperatorTester {
 
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -1143,9 +1144,6 @@ class ConvolutionOperatorTester {
           &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
-        if (use_weights_cache()) {
-          xnn_release_weights_cache(&weights_cache);
-        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -1212,7 +1210,6 @@ class ConvolutionOperatorTester {
         // Verify results.
         VerifyNHWCxQU8(output2, output_ref, output_zero_point);
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
-        xnn_release_weights_cache(&weights_cache);
       }
     }
   }
@@ -1357,8 +1354,11 @@ class ConvolutionOperatorTester {
         }
       #endif
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -1376,9 +1376,6 @@ class ConvolutionOperatorTester {
           &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
-        if (use_weights_cache()) {
-          xnn_release_weights_cache(&weights_cache);
-        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -1476,9 +1473,6 @@ class ConvolutionOperatorTester {
           xnn_release_code_cache(&code_cache);
         }
       #endif
-      if (use_weights_cache()) {
-        xnn_release_weights_cache(&weights_cache);
-      }
     }
   }
 
@@ -1626,8 +1620,11 @@ class ConvolutionOperatorTester {
       xnn_operator_t convolution_op = nullptr;
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -1661,9 +1658,6 @@ class ConvolutionOperatorTester {
           &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
-        if (use_weights_cache()) {
-          xnn_release_weights_cache(&weights_cache);
-        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -1722,7 +1716,6 @@ class ConvolutionOperatorTester {
 
         VerifyNHWCxF16(output2, output_ref, output_min, output_max);
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
-        xnn_release_weights_cache(&weights_cache);
       }
     }
   }
@@ -1892,8 +1885,11 @@ class ConvolutionOperatorTester {
       xnn_operator_t convolution_op = nullptr;
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -1910,9 +1906,6 @@ class ConvolutionOperatorTester {
           &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
-        if (use_weights_cache()) {
-          xnn_release_weights_cache(&weights_cache);
-        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -1975,7 +1968,6 @@ class ConvolutionOperatorTester {
         } else {
           VerifyWeightsCache(weights_cache, old_weights_cache_size);
         }
-        xnn_release_weights_cache(&weights_cache);
       }
     }
   }
@@ -2159,8 +2151,11 @@ class ConvolutionOperatorTester {
       xnn_operator_t convolution_op = nullptr;
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -2193,9 +2188,6 @@ class ConvolutionOperatorTester {
           &caches,
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
-        if (use_weights_cache()) {
-          xnn_release_weights_cache(&weights_cache);
-        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -2261,7 +2253,6 @@ class ConvolutionOperatorTester {
         } else {
           VerifyWeightsCache(weights_cache, old_weights_cache_size);
         }
-        xnn_release_weights_cache(&weights_cache);
       }
     }
   }

@@ -146,8 +146,11 @@ class PReLUOperatorTester {
 
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -212,7 +215,6 @@ class PReLUOperatorTester {
 
         VerifyF16(y2, y_ref);
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
-        xnn_release_weights_cache(&weights_cache);
       }
     }
   }
@@ -259,8 +261,11 @@ class PReLUOperatorTester {
 
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -317,7 +322,6 @@ class PReLUOperatorTester {
 
         VerifyF32(y, y_ref);
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
-        xnn_release_weights_cache(&weights_cache);
       }
     }
   }

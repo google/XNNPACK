@@ -538,8 +538,11 @@ class DeconvolutionOperatorTester {
 
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -610,7 +613,6 @@ class DeconvolutionOperatorTester {
 
         VerifyWeightsCache(&weights_cache, old_weights_cache_size);
         VerifyQS8(output2, output_ref, output_zero_point);
-        xnn_release_weights_cache(&weights_cache);
       }
 
     }
@@ -738,8 +740,11 @@ class DeconvolutionOperatorTester {
 
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -813,7 +818,6 @@ class DeconvolutionOperatorTester {
 
         VerifyWeightsCache(&weights_cache, old_weights_cache_size);
         VerifyQU8(output, output_ref, output_zero_point);
-        xnn_release_weights_cache(&weights_cache);
       }
     }
   }
@@ -948,8 +952,11 @@ class DeconvolutionOperatorTester {
 
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -973,9 +980,6 @@ class DeconvolutionOperatorTester {
         output_min, output_max,
         flags, &caches, &deconvolution_op);
       if (status == xnn_status_unsupported_hardware) {
-        if (use_weights_cache()) {
-          xnn_release_weights_cache(&weights_cache);
-        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -1034,7 +1038,6 @@ class DeconvolutionOperatorTester {
 
         VerifyWeightsCache(&weights_cache, old_weights_cache_size);
         VerifyF16(output2, output_ref, output_max, output_min);
-        xnn_release_weights_cache(&weights_cache);
       }
     }
   }
@@ -1149,8 +1152,11 @@ class DeconvolutionOperatorTester {
 
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -1217,7 +1223,6 @@ class DeconvolutionOperatorTester {
 
         VerifyWeightsCache(&weights_cache, old_weights_cache_size);
         VerifyF32(output2, output_ref, output_max, output_min);
-        xnn_release_weights_cache(&weights_cache);
       }
     }
   }

@@ -235,8 +235,11 @@ class FullyConnectedOperatorTester {
 
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -251,9 +254,6 @@ class FullyConnectedOperatorTester {
           &caches,
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
-        if (use_weights_cache()) {
-          xnn_release_weights_cache(&weights_cache);
-        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -313,7 +313,6 @@ class FullyConnectedOperatorTester {
             xnn_run_operator(fully_connected_op2, nullptr /* thread pool */));
 
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
-        xnn_release_weights_cache(&weights_cache);
 
         VerifyQS8(output, output_ref, double(output_zero_point));
       }
@@ -416,8 +415,11 @@ class FullyConnectedOperatorTester {
 
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -432,9 +434,6 @@ class FullyConnectedOperatorTester {
           &caches,
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
-        if (use_weights_cache()) {
-          xnn_release_weights_cache(&weights_cache);
-        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -490,7 +489,6 @@ class FullyConnectedOperatorTester {
             xnn_run_operator(fully_connected_op2, nullptr /* thread pool */));
 
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
-        xnn_release_weights_cache(&weights_cache);
 
         VerifyQU8(output2, output_ref, double(output_zero_point));
       }
@@ -585,8 +583,11 @@ class FullyConnectedOperatorTester {
 
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -599,9 +600,6 @@ class FullyConnectedOperatorTester {
           &caches,
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
-        if (use_weights_cache()) {
-          xnn_release_weights_cache(&weights_cache);
-        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -653,7 +651,6 @@ class FullyConnectedOperatorTester {
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(fully_connected_op2, nullptr /* thread pool */));
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
-        xnn_release_weights_cache(&weights_cache);
 
         VerifyF32(output, output_ref, output_max, output_min);
       }
@@ -760,8 +757,11 @@ class FullyConnectedOperatorTester {
 
       xnn_caches caches = {};
       xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
         caches.weights_cache = &weights_cache;
       }
 
@@ -787,9 +787,6 @@ class FullyConnectedOperatorTester {
           &caches,
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
-        if (use_weights_cache()) {
-          xnn_release_weights_cache(&weights_cache);
-        }
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);
@@ -825,7 +822,6 @@ class FullyConnectedOperatorTester {
                       has_bias() ? bias_data : nullptr, output_min, output_max,
                       flags, &caches, &fully_connected_op2));
         if (status == xnn_status_unsupported_hardware) {
-          xnn_release_weights_cache(&weights_cache);
           GTEST_SKIP();
         }
         ASSERT_EQ(xnn_status_success, status);
@@ -848,7 +844,6 @@ class FullyConnectedOperatorTester {
         // Verify results.
         VerifyF16(output2, output_ref, output_max, output_min);
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
-        xnn_release_weights_cache(&weights_cache);
       }
     }
   }
