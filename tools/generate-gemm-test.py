@@ -36,8 +36,6 @@ def split_ukernel_name(name):
   common_parts = common_name.split("_")
   xw = "gemm_xw_" in common_name
   param_spec = common_parts[-1]
-  if param_spec.startswith('upto'):
-    param_spec = param_spec[len('upto'):]
   if "s" in param_spec:
     param_spec, sr = param_spec.split("s", 1)
     sr = int(sr)
@@ -997,9 +995,10 @@ def main(args):
 
       # Hash the name of each microkernel and figure out which output file to
       # write it to.
-      output_index = zlib.crc32(bytes(name, 'utf-8')) % num_output_files
-      outputs[options.output[output_index]] += "\n\n" + xnncommon.postprocess_test_case(
-          test_case, arch, isa, assembly, jit)
+      output_index = zlib.crc32(bytes(name, "utf-8")) % num_output_files
+      outputs[options.
+              output[output_index]] += "\n\n" + xnncommon.postprocess_test_case(
+                  test_case, arch, isa, assembly, jit)
 
     for output_name in options.output:
       txt_changed = True
