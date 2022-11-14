@@ -5,7 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 """Converts hand written assembly (.S files) to C++ files using the JIT.
 
-Takes a single argument, an assembly file, and prints converted output to stdout.
+Takes a single argument, an assembly file, and prints converted output to
+stdout.
 """
 
 import argparse
@@ -63,7 +64,8 @@ INSTR_OP_RE = re.compile(INSTR + REG + COMMENTS)
 # e.g. BLO 2f
 INSTR_B_IMM = re.compile(INSTR + B_IMM + COMMENTS)
 # e.g. TBNZ x0, 4, 5f
-INSTR_B_REG_IMM_IMM = re.compile(INSTR + REG + COMMA + IMM + COMMA + B_IMM + COMMENTS)
+INSTR_B_REG_IMM_IMM = re.compile(INSTR + REG + COMMA + IMM + COMMA + B_IMM +
+                                 COMMENTS)
 # e.g. .p2align 3
 P2ALIGN_RE = re.compile(SPACES + r'\.p2align\s+(\d+)')
 # e.g. CMP r0, 2
@@ -71,19 +73,20 @@ INSTR_REG_IMM_RE = re.compile(INSTR + REG + COMMA + IMM + COMMENTS)
 # e.g. LDR r0, [r12]
 INSTR_REG_MEMOP_RE = re.compile(INSTR + REG + COMMA + MEMOP + COMMENTS)
 # e.g. LDR q0, [x4], 16
-INSTR_REG_MEMOP_IMM_RE = re.compile(INSTR + REG + COMMA + MEMOP + COMMA + IMM + COMMENTS)
+INSTR_REG_MEMOP_IMM_RE = re.compile(INSTR + REG + COMMA + MEMOP + COMMA + IMM +
+                                    COMMENTS)
 # e.g. LDR r0, [sp, 112], STR x20, [sp, -80]!
-INSTR_REG_MEMOP_OFFSET_RE = re.compile(INSTR + REG + COMMA + MEMOP_OFFSET_MAYBE_WB +
-                                       COMMENTS)
+INSTR_REG_MEMOP_OFFSET_RE = re.compile(INSTR + REG + COMMA +
+                                       MEMOP_OFFSET_MAYBE_WB + COMMENTS)
 # e.g. LDRD r6, r7, [sp]
-INSTR_REG_REG_MEMOP_RE = re.compile(INSTR + REG + COMMA + REG + COMMA +
-                                           MEMOP + COMMENTS)
+INSTR_REG_REG_MEMOP_RE = re.compile(INSTR + REG + COMMA + REG + COMMA + MEMOP +
+                                    COMMENTS)
 # e.g. LDRD r6, r7, [sp, 104], STP d8, d9, [sp, -64]!
 INSTR_REG_REG_MEMOP_OFFSET_RE = re.compile(INSTR + REG + COMMA + REG + COMMA +
                                            MEMOP_OFFSET_MAYBE_WB + COMMENTS)
 # e.g. LDP q20, q21, [x5], 32
 INSTR_REG_REG_MEMOP_IMM_RE = re.compile(INSTR + REG + COMMA + REG + COMMA +
-                                           MEMOP + COMMA + IMM + COMMENTS)
+                                        MEMOP + COMMA + IMM + COMMENTS)
 # e.g. PLD [r4, 64]
 INSTR_MEMOP_OFFSET_RE = re.compile(INSTR + MEMOP_OFFSET + COMMENTS)
 # e.g. movlo r12, r3, vdup.32 q0, d14[0]
@@ -114,7 +117,7 @@ INSTR_REGLIST_INDIV_MEMOP = re.compile(INSTR + REGLIST_INDIV + COMMA +
                                        MEMOP_MAYBE_WB + COMMENTS)
 # e.g. LD1 {v16.16b, v17.16b, v18.16b}, [x5], 48
 INSTR_REGLIST_INDIV_MEMOP_IMM = re.compile(INSTR + REGLIST_INDIV + COMMA +
-                                       MEMOP + COMMA + IMM + COMMENTS)
+                                           MEMOP + COMMA + IMM + COMMENTS)
 # e.g. VST1.32 {d24-d25}, [r11]{!}
 INSTR_REGLIST_CONSEC_MEMOP = re.compile(INSTR + REGLIST_CONSEC + COMMA +
                                         MEMOP_MAYBE_WB + COMMENTS)
@@ -131,34 +134,36 @@ INSTR_REG_FPSCR = re.compile(INSTR + f'({APSR}|{REG_NO_GROUP})' + COMMA +
 # e.g. PRFM PLDL1KEEP, [x5]
 INSTR_PLD_MEMOP = re.compile(INSTR + f'(PLDL1KEEP)' + COMMA + MEMOP + COMMENTS)
 # e.g. PRFM PLDL1KEEP, [x5, 64]
-INSTR_PLD_MEMOP_OFFSET = re.compile(INSTR + f'(PLDL1KEEP)' + COMMA + MEMOP_OFFSET + COMMENTS)
+INSTR_PLD_MEMOP_OFFSET = re.compile(INSTR + f'(PLDL1KEEP)' + COMMA +
+                                    MEMOP_OFFSET + COMMENTS)
 
 COND = r'([A-Z]+)'
 # e.g. CSEL x9, x3, x9, LO
-INSTR_REG_REG_REG_COND_RE = re.compile(INSTR + REG + COMMA + REG + COMMA + REG + COMMA + COND + COMMENTS)
+INSTR_REG_REG_REG_COND_RE = re.compile(INSTR + REG + COMMA + REG + COMMA + REG +
+                                       COMMA + COND + COMMENTS)
 
 
-def remove_brackets(s : str) -> str:
+def remove_brackets(s: str) -> str:
   return s.replace('[', '').replace(']', '')
 
 
-def fix_replicate_instruction(s : str) -> str:
+def fix_replicate_instruction(s: str) -> str:
   return re.sub(r'_(\d+)', r'r_\1', s, 1)
 
 
-def fix_instr_name(s : str) -> str:
+def fix_instr_name(s: str) -> str:
   return s.lower().replace('.', '_', 2).replace('and', 'and_', 1)
 
 
-def fix_comments(s : str) -> str:
+def fix_comments(s: str) -> str:
   return s.replace('#', '//', 1)
 
 
-def maybe_wb(wb : bool) -> str:
+def maybe_wb(wb: bool) -> str:
   return '++' if wb else ''
 
 
-def fix_fn_name(name : str) -> str:
+def fix_fn_name(name: str) -> str:
   if name.startswith('xnn_'):
     name = name[len('xnn_'):]
   # remove any type of activations from name
@@ -167,12 +172,12 @@ def fix_fn_name(name : str) -> str:
   return f'xnn_generate_{name}'
 
 
-def remove_prfm_from_fn_name(name : str) -> str:
-  assert('_prfm_' in name)
+def remove_prfm_from_fn_name(name: str) -> str:
+  assert ('_prfm_' in name)
   return name.replace('prfm_', '')
 
 
-def fix_regs(regs : str) -> str:
+def fix_regs(regs: str) -> str:
   # Vector registers with datatype need to be method calls.
   # e.g. v2.4s -> v2.v4s(), v2.s -> v2.s()
   def repl(m):
@@ -180,12 +185,15 @@ def fix_regs(regs : str) -> str:
       return f'{m[1]}v{m[2]}{m[3]}()'
     else:
       return f'{m[1]}{m[3]}()'
+
   return re.sub(r'(\w+\.)(\d+)?(\w+)', repl, regs)
 
 
 def get_callee_saved() -> List[str]:
-  return ['d8', 'd9', 'd10', 'd11', 'd12', 'd13', 'd14', 'd15',
-          'x19', 'x20', 'x21', 'x22']
+  return [
+      'd8', 'd9', 'd10', 'd11', 'd12', 'd13', 'd14', 'd15', 'x19', 'x20', 'x21',
+      'x22'
+  ]
 
 
 IGNORE_LINES = [r'\s*\.\w+']
@@ -195,9 +203,8 @@ AARCH64 = 'aarch64'
 GEMM = 'GEMM'
 IGEMM = 'IGEMM'
 
-
 # Hard-coded post operations.
-AARCH32_POST_OP = '''void Generator::perform_post_operations(
+AARCH32_POST_OP = """void Generator::perform_post_operations(
   size_t max_mr,
   size_t num_post_operations,
   const xnn_post_operation* post_operations)
@@ -222,10 +229,9 @@ AARCH32_POST_OP = '''void Generator::perform_post_operations(
         XNN_UNREACHABLE;
     }
   }
-}'''
+}"""
 
-
-AARCH64_POST_OP='''void Generator::perform_post_operations(
+AARCH64_POST_OP = """void Generator::perform_post_operations(
   size_t max_mr,
   size_t num_post_operations,
   const xnn_post_operation* post_operations)
@@ -251,7 +257,7 @@ AARCH64_POST_OP='''void Generator::perform_post_operations(
         XNN_UNREACHABLE;
     }
   }
-}'''
+}"""
 
 AARCH64_MR1_POST_OP_ACCS = """
           v16.v4s(), v17.v4s(),"""
@@ -297,8 +303,8 @@ def get_post_operation_implementation(arch, mr: int):
 
 
 def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
-                   kernel_type: str, prfm: bool,
-                   mr: int, post_op : bool) -> Tuple[List[str], Mapping[str, int]]:
+                   kernel_type: str, prfm: bool, mr: int,
+                   post_op: bool) -> Tuple[List[str], Mapping[str, int]]:
   prologue = []
   # Whether we are in the auto-generated comment.
   in_autogen = False
@@ -377,7 +383,9 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
         )
 
       if post_op:
-        prologue.append('  void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);');
+        prologue.append(
+            '  void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);'
+        )
       prologue.append('};')
       continue
     elif in_a_pointers:
@@ -471,20 +479,19 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
   return prologue, vector_register_map
 
 
-def emit_prefetch_instruction(instr : str, prfm : bool, instructions : List[str]) -> None:
-  """
-  Emit instructions depending on prfm.
-  If prfm is True, guard instruction behind a prefetch check.
-  instr should be the generated prefetch instruction (not the assembly instruction).
+def emit_prefetch_instruction(instr: str, prfm: bool,
+                              instructions: List[str]) -> None:
+  """Emit instructions depending on prfm.
+
+  If prfm is True, guard instruction behind a prefetch check. instr should be
+  the generated prefetch instruction (not the assembly instruction).
   """
   if prfm:
     instructions.append(f'if (prefetch) {{ {instr} }}')
 
 
-def emit_clamp_instruction(instr : str, instructions : List[str]) -> None:
-  """
-  Guard fmax/fmin instructions behind a clamp_min/clamp_max check.
-  """
+def emit_clamp_instruction(instr: str, instructions: List[str]) -> None:
+  """Guard fmax/fmin instructions behind a clamp_min/clamp_max check."""
   if 'fmax' in instr or 'vmax' in instr:
     instructions.append(f'if (clamp_min) {{ {instr} }}')
   elif 'fmin' in instr or 'vmin' in instr:
@@ -534,7 +541,7 @@ def emit_instruction(instr: str, instructions: List[str],
     instructions.append(instr)
     return
 
-  if 'mem[sp' in instr: # loading from stack is almost always a parameter load.
+  if 'mem[sp' in instr:  # loading from stack is almost always a parameter load.
     instructions.append(instr)
     return
 
@@ -542,8 +549,7 @@ def emit_instruction(instr: str, instructions: List[str],
     # Rewrite based on max_mr (since the actual number depends on max_mr).
     instructions.append(
         re.sub(r'(add|subs)\((\w\d+), (\w\d+), (\d+)\);',
-               r'\1(\2, \3, max_mr * sizeof(void*));',
-               instr))
+               r'\1(\2, \3, max_mr * sizeof(void*));', instr))
     return
 
   if instr_name == 'ldr':
@@ -625,8 +631,8 @@ def parse_microkernel(
     if m:
       if m[1].lower() == 'pld':
         emit_prefetch_instruction(
-          f'{fix_instr_name(m[1])}(mem[{m[2]}, {m[3]}]){sc} {m[4]}',
-          prfm, instructions)
+            f'{fix_instr_name(m[1])}(mem[{m[2]}, {m[3]}]){sc} {m[4]}', prfm,
+            instructions)
       else:
         emit_instruction(
             f'{fix_instr_name(m[1])}(mem[{m[2]}, {m[3]}]){sc} {m[4]}',
@@ -776,12 +782,14 @@ def parse_microkernel(
     m = re.fullmatch(INSTR_PLD_MEMOP, line)
     if m:
       emit_prefetch_instruction(
-          f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}]){sc} {m[4]}', prfm, instructions)
+          f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}]){sc} {m[4]}', prfm,
+          instructions)
       continue
     m = re.fullmatch(INSTR_PLD_MEMOP_OFFSET, line)
     if m:
       emit_prefetch_instruction(
-          f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[5]}', prfm, instructions)
+          f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[5]}',
+          prfm, instructions)
       continue
     m = re.fullmatch(INSTR_REG_REG_REG_COND_RE, line)
     if m:
@@ -809,9 +817,9 @@ def parse_microkernel(
   return instructions, labels
 
 
-def emit_instructions_with_same_check(check : str, instrs : List[str], output : List[str]) -> None:
-  """
-  A helper method to emit a list of instructions which share the same check.
+def emit_instructions_with_same_check(check: str, instrs: List[str],
+                                      output: List[str]) -> None:
+  """A helper method to emit a list of instructions which share the same check.
   """
   if not instrs:
     return
@@ -834,16 +842,16 @@ def emit_instructions_with_same_check(check : str, instrs : List[str], output : 
   output.append(f'{indent}}}')
 
 
-def merge_consecutive_checks(instructions : List[str]) -> List[str]:
-  """
-  Each instruction has its own check, leading to excessive number of checks, e.g.
+def merge_consecutive_checks(instructions: List[str]) -> List[str]:
+  """Each instruction has its own check, leading to excessive number of checks, e.g.
 
     if (clamp) { fmin(v0) }
     if (clamp) { fmin(v1) }
     ...
     if (clamp) { fmin(v10) }
 
-  This walks the instructions stream, checks for consecutive checks for the same condition,
+  This walks the instructions stream, checks for consecutive checks for the same
+  condition,
   and merge them:
 
     if (clamp) {
@@ -884,27 +892,31 @@ def merge_consecutive_checks(instructions : List[str]) -> List[str]:
         comment = ''
         if output and output[-1].strip().startswith('//'):
           comment = output.pop()
-        elif instructions_with_same_check and instructions_with_same_check[-1].strip().startswith('//'):
+        elif instructions_with_same_check and instructions_with_same_check[
+            -1].strip().startswith('//'):
           comment = instructions_with_same_check.pop()
-        emit_instructions_with_same_check(previous_check, instructions_with_same_check, output)
+        emit_instructions_with_same_check(previous_check,
+                                          instructions_with_same_check, output)
         previous_check = current_check
         instructions_with_same_check = [instr]
         if comment:
           # Need to wrap comment with this check so that we can merge the checks correctly, this is not valid C code due
           # to the // comment, but we will remove that.
-          instructions_with_same_check.insert(0, f'if ({current_check}) {{ {comment} }}')
+          instructions_with_same_check.insert(
+              0, f'if ({current_check}) {{ {comment} }}')
     elif re.fullmatch(r'\W*//.+', instr) and len(
         instructions_with_same_check) != 0:  # purely comment line
       instructions_with_same_check.append(instr)
     else:
-      emit_instructions_with_same_check(previous_check, instructions_with_same_check, output)
+      emit_instructions_with_same_check(previous_check,
+                                        instructions_with_same_check, output)
       previous_check = None
       output.append(instr)
       instructions_with_same_check = []
   return output
 
 
-def insert_post_operations(instructions : List[str]):
+def insert_post_operations(instructions: List[str]):
   index = 0
   # Look for the comment marking where we store full tile, that's where we will
   # perform post operations.
@@ -912,14 +924,14 @@ def insert_post_operations(instructions : List[str]):
     if 'Store full ' in l:
       index = i
       break
-  assert(instructions[index-1].strip() == '')
+  assert (instructions[index - 1].strip() == '')
   instructions.insert(
-      index-1,
-      "perform_post_operations(max_mr, num_post_operations, post_operations);")
+      index - 1,
+      'perform_post_operations(max_mr, num_post_operations, post_operations);')
   return instructions
 
 
-def convert(input_file : str, post_op : bool) -> None:
+def convert(input_file: str, post_op: bool) -> None:
   output = []
   arch = None
   kernel_type = GEMM
@@ -997,11 +1009,15 @@ def convert(input_file : str, post_op : bool) -> None:
     output.append('  assert(ks != 0);')
   output.append('')
   output.append(f'  Label {labels_str};')
-  output.append('  const size_t num_post_operations = jit_gemm_params->num_post_operations;')
+  output.append(
+      '  const size_t num_post_operations = jit_gemm_params->num_post_operations;'
+  )
   if not post_op:
-    output.append('  (void) num_post_operations;  // Silence unused warning.');
+    output.append('  (void) num_post_operations;  // Silence unused warning.')
   if post_op:
-    output.append('  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;')
+    output.append(
+        '  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;'
+    )
   output.append('  const float min = jit_gemm_params->f32_minmax.min;')
   output.append('  const float max = jit_gemm_params->f32_minmax.max;')
   if minmax:
@@ -1011,7 +1027,8 @@ def convert(input_file : str, post_op : bool) -> None:
     output.append(
         '  const bool clamp_max = max != +std::numeric_limits<float>::infinity();'
     )
-    output.append('  assert(num_post_operations == 0 || (!clamp_min && !clamp_max));')
+    output.append(
+        '  assert(num_post_operations == 0 || (!clamp_min && !clamp_max));')
 
   indent = '  '
   for i in instructions:
@@ -1039,16 +1056,28 @@ def convert(input_file : str, post_op : bool) -> None:
   output.append('}  // namespace xnnpack')
   output.append('')
   if prfm:
-    print_generator_definition(output, kernel_type, remove_prfm_from_fn_name(fn_name), arch, minmax, prefetch='false, ')
+    print_generator_definition(
+        output,
+        kernel_type,
+        remove_prfm_from_fn_name(fn_name),
+        arch,
+        minmax,
+        prefetch='false, ')
     output.append('')
-    print_generator_definition(output, kernel_type, fn_name, arch, minmax, prefetch='true, ')
+    print_generator_definition(
+        output, kernel_type, fn_name, arch, minmax, prefetch='true, ')
   else:
     print_generator_definition(output, kernel_type, fn_name, arch, minmax)
 
   return output
 
 
-def print_generator_definition(output, kernel_type, fn_name, arch, minmax, prefetch=''):
+def print_generator_definition(output,
+                               kernel_type,
+                               fn_name,
+                               arch,
+                               minmax,
+                               prefetch=''):
   if kernel_type == GEMM:
     output.append(
         f'xnn_status_t {fix_fn_name(fn_name)}(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params) {{'
@@ -1063,14 +1092,19 @@ def print_generator_definition(output, kernel_type, fn_name, arch, minmax, prefe
     output.append('  assert(params != nullptr);')
   if kernel_type == GEMM:
     if minmax:
-      output.append(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, static_cast<const jit_gemm_params*>(params));')
+      output.append(
+          f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, static_cast<const jit_gemm_params*>(params));'
+      )
     else:
       output.append(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, nullptr);')
   else:
     if minmax:
-      output.append(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, ks, static_cast<const jit_gemm_params*>(params));')
+      output.append(
+          f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, ks, static_cast<const jit_gemm_params*>(params));'
+      )
     else:
-      output.append(f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, ks, nullptr);')
+      output.append(
+          f'  g.generate({prefetch}max_mr, nc_mod_nr, kc, ks, nullptr);')
   output.append('  g.finalize();')
   output.append('  if (g.error() != xnnpack::Error::kNoError) {')
   output.append('    return xnn_status_invalid_state;')
@@ -1080,11 +1114,25 @@ def print_generator_definition(output, kernel_type, fn_name, arch, minmax, prefe
 
 
 def main(sys_args):
-  parser = argparse.ArgumentParser(description='Convert assembly to to JIT C++, writes to stdout.')
-  parser.add_argument('-i', '--input', metavar='input_file', help='Input assembly filename', required=True)
-  parser.add_argument('-o', '--output', metavar='output_file', help='Output cc filename', required=True)
+  parser = argparse.ArgumentParser(
+      description='Convert assembly to to JIT C++, writes to stdout.')
   parser.add_argument(
-      '--post-op', help='Should support post operation', default=True, action=argparse.BooleanOptionalAction)
+      '-i',
+      '--input',
+      metavar='input_file',
+      help='Input assembly filename',
+      required=True)
+  parser.add_argument(
+      '-o',
+      '--output',
+      metavar='output_file',
+      help='Output cc filename',
+      required=True)
+  parser.add_argument(
+      '--post-op',
+      help='Should support post operation',
+      default=True,
+      action=argparse.BooleanOptionalAction)
   args = parser.parse_args(sys_args)
 
   output = '\n'.join(convert(args.input, args.post_op))
@@ -1094,11 +1142,11 @@ def main(sys_args):
   output_name = args.output
   txt_changed = True
   if os.path.exists(output_name):
-    with codecs.open(output_name, "r", encoding="utf-8") as output_file:
+    with codecs.open(output_name, 'r', encoding='utf-8') as output_file:
       ofr = output_file.read()
       txt_changed = ofr != output
   if txt_changed:
-    with codecs.open(output_name, "w", encoding="utf-8") as output_file:
+    with codecs.open(output_name, 'w', encoding='utf-8') as output_file:
       output_file.write(output)
 
 
