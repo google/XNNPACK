@@ -255,6 +255,11 @@ AARCH64_POST_OP='''void Generator::perform_post_operations(
 
 AARCH64_MR1_POST_OP_ACCS = """
           v16.v4s(), v17.v4s(),"""
+AARCH64_MR4_POST_OP_ACCS = """
+          v24.v4s(), v25.v4s(),
+          v26.v4s(), v27.v4s(),
+          v28.v4s(), v29.v4s(),
+          v30.v4s(), v31.v4s(),"""
 AARCH64_MR6_POST_OP_ACCS = """
           v20.v4s(), v21.v4s(), v22.v4s(), v23.v4s(),
           v24.v4s(), v25.v4s(), v26.v4s(), v27.v4s(),
@@ -276,7 +281,12 @@ def get_post_operation_implementation(arch, mr: int):
                                      AARCH64_MR1_POST_OP_ACCS).replace(
                                          'TMPS_PLACEHOLDER',
                                          AARCH64_MR1_POST_OP_TMPS)
-    elif mr >= 4:
+    elif mr == 4:
+      return AARCH64_POST_OP.replace('ACCS_PLACEHOLDER',
+                                     AARCH64_MR4_POST_OP_ACCS).replace(
+                                         'TMPS_PLACEHOLDER',
+                                         AARCH64_MR6_POST_OP_TMPS)
+    elif mr == 6:
       return AARCH64_POST_OP.replace('ACCS_PLACEHOLDER',
                                      AARCH64_MR6_POST_OP_ACCS).replace(
                                          'TMPS_PLACEHOLDER',
