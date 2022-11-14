@@ -546,6 +546,12 @@ def emit_instruction(instr: str, instructions: List[str],
                instr))
     return
 
+  if instr_name == 'ldr':
+    # extract register from the load
+    ldr_m = re.search(r'mem\[(r\d+)', instr)
+    if ldr_m:
+      reg = ldr_m[1]
+
   if reg not in vector_register_map:
     instructions.append(instr)
     return
