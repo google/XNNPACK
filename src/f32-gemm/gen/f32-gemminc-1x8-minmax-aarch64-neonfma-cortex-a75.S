@@ -30,6 +30,11 @@
 # C pointer
 # x6  c0
 
+# Vector register usage
+# A0 v0 v1
+# B  v20 v21 v22 v23
+# B  v24 v25 v26 v27
+# C0 v16 v17
 # Clamp v4 v5
 
 BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_cortex_a75

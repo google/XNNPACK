@@ -611,5 +611,6 @@ scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-6x8-minmax-aarch
 scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-cortex-a53.S -o src/f32-gemm/f32-gemm-4x8-aarch32-neon-cortex-a53.cc &
 # uncomment after all the upto microkernels are removed.
 # scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-gemm/f32-gemm-upto6x8-aarch64-neonfma-cortex-a75.cc
+scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-1x8-minmax-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-gemm/f32-gemm-1x8-aarch64-neonfma-cortex-a75.cc &
 
 wait

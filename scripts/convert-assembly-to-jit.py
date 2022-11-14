@@ -197,7 +197,6 @@ IGEMM = 'IGEMM'
 
 
 # Hard-coded post operations.
-# TODO(zhin): parametrize this with vector register usage mappings.
 AARCH32_POST_OP = '''void Generator::perform_post_operations(
   size_t max_mr,
   size_t num_post_operations,
@@ -242,12 +241,9 @@ AARCH64_POST_OP='''void Generator::perform_post_operations(
         // v4, v5, v6, v7 available for temporaries.
         ld3r({sixth, three, six}, mem[x8]++);
         movi(zero, 0);
-        const VRegister accs[] = {
-          v20.v4s(), v21.v4s(), v22.v4s(), v23.v4s(),
-          v24.v4s(), v25.v4s(), v26.v4s(), v27.v4s(),
-          v28.v4s(), v29.v4s(), v30.v4s(), v31.v4s(),
+        const VRegister accs[] = {ACCS_PLACEHOLDER
         };
-        const VRegister tmps[] = {v4.v4s(), v5.v4s(), v6.v4s(), v7.v4s()};
+        const VRegister tmps[] = {TMPS_PLACEHOLDER};
         f32_hardswish(sixth, three, six, zero, &accs[0], XNN_COUNT_OF(accs), &tmps[0], XNN_COUNT_OF(tmps));
         break;
       }
@@ -256,6 +252,39 @@ AARCH64_POST_OP='''void Generator::perform_post_operations(
     }
   }
 }'''
+
+AARCH64_MR1_POST_OP_ACCS = """
+          v16.v4s(), v17.v4s(),"""
+AARCH64_MR6_POST_OP_ACCS = """
+          v20.v4s(), v21.v4s(), v22.v4s(), v23.v4s(),
+          v24.v4s(), v25.v4s(), v26.v4s(), v27.v4s(),
+          v28.v4s(), v29.v4s(), v30.v4s(), v31.v4s(),"""
+AARCH64_MR1_POST_OP_TMPS = """v4.v4s(), v5.v4s()"""
+AARCH64_MR6_POST_OP_TMPS = """v4.v4s(), v5.v4s(), v6.v4s(), v7.v4s()"""
+
+
+# We use placeholder strings rather than formatted strings due to the many braces in the template (we are generating C++
+# after all), and to avoid copious escaping.
+def get_post_operation_implementation(arch, mr: int):
+  if arch == AARCH32:
+    return AARCH32_POST_OP
+  elif arch == AARCH64:
+    # MR 1 microkernels have less accumulators.
+    # TODO(zhin): we already parsed this form the vector usage, use that instead of hardcoding the registers.
+    if mr == 1:
+      return AARCH64_POST_OP.replace('ACCS_PLACEHOLDER',
+                                     AARCH64_MR1_POST_OP_ACCS).replace(
+                                         'TMPS_PLACEHOLDER',
+                                         AARCH64_MR1_POST_OP_TMPS)
+    elif mr >= 4:
+      return AARCH64_POST_OP.replace('ACCS_PLACEHOLDER',
+                                     AARCH64_MR6_POST_OP_ACCS).replace(
+                                         'TMPS_PLACEHOLDER',
+                                         AARCH64_MR6_POST_OP_TMPS)
+    else:
+      print(f'unsupported mr {mr} for post operations', file=sys.stderr)
+      sys.exit(1)
+
 
 def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
                    kernel_type: str, prfm: bool,
@@ -985,13 +1014,9 @@ def convert(input_file : str, post_op : bool) -> None:
 
   output.append('}')
   # print post operations definition
-  if arch == AARCH32 and post_op:
+  if post_op:
     output.append('')
-    output.append(AARCH32_POST_OP)
-    output.append('')
-  elif arch == AARCH64 and post_op:
-    output.append('')
-    output.append(AARCH64_POST_OP)
+    output.append(get_post_operation_implementation(arch, mr))
     output.append('')
   output.append('}  // namespace')
   output.append(f'}}  // namespace {arch}')

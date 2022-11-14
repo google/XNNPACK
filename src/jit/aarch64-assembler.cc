@@ -742,6 +742,26 @@ void MacroAssembler::f32_hardswish(VRegister sixth, VRegister three,
                                    VRegister six, VRegister zero,
                                    const VRegister* accs, size_t num_accs,
                                    const VRegister* tmps, size_t num_tmps) {
+  if (num_accs < 4) {
+    assert(num_tmps == num_accs);
+    for (size_t i = 0; i < num_accs; i++) {
+      fmul(tmps[i], accs[i], sixth);
+    }
+    for (size_t i = 0; i < num_accs; i++) {
+      fadd(accs[i], accs[i], three);
+    }
+    for (size_t i = 0; i < num_accs; i++) {
+      fmax(accs[i], accs[i], zero);
+    }
+    for (size_t i = 0; i < num_accs; i++) {
+      fmin(accs[i], accs[i], six);
+    }
+    for (size_t i = 0; i < num_accs; i++) {
+      fmul(accs[i], accs[i], tmps[i]);
+    }
+    return;
+  }
+
   assert(num_accs >= 4);
   assert(num_accs % 4 == 0);
   assert(num_tmps == 4);
