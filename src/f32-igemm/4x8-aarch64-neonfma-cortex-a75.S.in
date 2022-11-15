@@ -96,8 +96,10 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma${"_prfm" if PRE
 
 1:
         # Load next 4 A pointers
-        LDP     x20, x13, [x4], 16
-        LDP     x14, x15, [x4], 16
+        LDR     x20, [x4], 8
+        LDR     x13, [x4], 8
+        LDR     x14, [x4], 8
+        LDR     x15, [x4], 8
 
         CMP     x20, x12                // if a0 == zero
         ADD     x20, x20, x11           // a0 += a_offset

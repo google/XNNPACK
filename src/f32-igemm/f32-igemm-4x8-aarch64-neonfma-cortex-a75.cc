@@ -11,15 +11,18 @@
 #include <xnnpack/aarch64-assembler.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/memory.h>
-
+#include <xnnpack/microparams.h>
+#include <xnnpack/post-operation.h>
 
 namespace xnnpack {
 namespace aarch64 {
 namespace {
 class Generator : public MacroAssembler {
   using MacroAssembler::MacroAssembler;
+
  public:
-  void generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, float min, float max);
+  void generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const jit_gemm_params* jit_gemm_params);
+  void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);
 };
 
 // void xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75(
@@ -37,7 +40,6 @@ class Generator : public MacroAssembler {
 //     const xnn_f32_minmax_params params [sp + 24] -> x8
 
 // d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
-// x21 used to store params->max if (!clamp_min && clamp_max).
 
 // A pointers
 // x20 a0
@@ -66,15 +68,23 @@ class Generator : public MacroAssembler {
 // C  v30 v31
 // Clamp v4 v5
 
-// Converted from: src/f32-igemm/gen/4x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
-void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, float min, float max) {
+// Converted from: src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
+void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const jit_gemm_params* jit_gemm_params)
+{
+  assert(max_mr <= 4);
   assert(nc_mod_nr < 8);
   assert(kc != 0);
   assert(kc % sizeof(float) == 0);
+  assert(ks != 0);
 
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11;
+  const size_t num_post_operations = jit_gemm_params->num_post_operations;
+  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;
+  const float min = jit_gemm_params->f32_minmax.min;
+  const float max = jit_gemm_params->f32_minmax.max;
   const bool clamp_min = min != -std::numeric_limits<float>::infinity();
   const bool clamp_max = max != +std::numeric_limits<float>::infinity();
+  assert(num_post_operations == 0 || (!clamp_min && !clamp_max));
 
   // Load cn_stride, a_offset
   ldp(x10, x11, mem[sp]);
@@ -83,17 +93,12 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   ldp(x12, x8, mem[sp, 16]);
 
   // Load min/max values
-  if (clamp_min && clamp_max) {
+  if (clamp_min || clamp_max) {
     ld2r({v4.v4s(), v5.v4s()}, mem[x8]);
-  } else if (clamp_min) {
-    ld1r({v4.v4s()}, mem[x8]);
-  } else if (clamp_max) {
-    add(x21, x8, 4);
-    ld1r({v5.v4s()}, mem[x21]);
   }
 
-  // Save x20, x21 on stack
-  stp(x20, x21, mem[sp, -80]++);
+  // Save x20 on stack
+  str(x20, mem[sp, -80]++);
 
   // Save d8-d15 on stack
   stp(d8, d9, mem[sp, 16]);
@@ -102,47 +107,73 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   stp(d14, d15, mem[sp, 64]);
 
   // Clamp C pointers
-  cmp(x0, 2); // if mr < 2
-  add(x16, x6, x7); // c1 = c0 + cm_stride
-  csel(x16, x6, x16, kLO); //   c1 = c0
+  if (max_mr > 1) {
+    cmp(x0, 2); // if mr < 2
+    add(x16, x6, x7); // c1 = c0 + cm_stride
+    csel(x16, x6, x16, kLO); //   c1 = c0
+  }
 
-  add(x17, x16, x7); // c2 = c1 + cm_stride
-  // if mr <= 2
-  csel(x17, x16, x17, kLS); //   c2 = c1
+  if (max_mr > 2) {
+    add(x17, x16, x7); // c2 = c1 + cm_stride
+    // if mr <= 2
+    csel(x17, x16, x17, kLS); //   c2 = c1
+  }
 
-  cmp(x0, 4); // if mr < 4
-  add(x7, x17, x7); // c3 = c2 + cm_stride
-  csel(x7, x17, x7, kLO); //   c3 = c2
+  if (max_mr > 3) {
+    cmp(x0, 4); // if mr < 4
+    add(x7, x17, x7); // c3 = c2 + cm_stride
+    csel(x7, x17, x7, kLO); //   c3 = c2
+  }
 
   bind(l0);
   // Load initial bias from w into accumulators
   ldp(q24, q25, mem[x5], 32);
-  mov(v26.v16b(), v24.v16b());
-  mov(v27.v16b(), v25.v16b());
-  mov(v28.v16b(), v24.v16b());
-  mov(v29.v16b(), v25.v16b());
-  mov(v30.v16b(), v24.v16b());
-  mov(v31.v16b(), v25.v16b());
+  if (max_mr > 1) {
+    mov(v26.v16b(), v24.v16b());
+    mov(v27.v16b(), v25.v16b());
+  }
+  if (max_mr > 2) {
+    mov(v28.v16b(), v24.v16b());
+    mov(v29.v16b(), v25.v16b());
+  }
+  if (max_mr > 3) {
+    mov(v30.v16b(), v24.v16b());
+    mov(v31.v16b(), v25.v16b());
+  }
 
   mov(x9, x3); // p = ks
 
   bind(l1);
   // Load next 4 A pointers
-  ldp(x20, x13, mem[x4], 16);
-  ldp(x14, x15, mem[x4], 16);
+  ldr(x20, mem[x4], 8);
+  if (max_mr > 1) {
+    ldr(x13, mem[x4], 8);
+  }
+  if (max_mr > 2) {
+    ldr(x14, mem[x4], 8);
+  }
+  if (max_mr > 3) {
+    ldr(x15, mem[x4], 8);
+  }
 
   cmp(x20, x12); // if a0 == zero
   add(x20, x20, x11); // a0 += a_offset
   csel(x20, x12, x20, kEQ); //   a0 = zero, else += a0 + a_offset
-  cmp(x13, x12); // if a1 == zero
-  add(x13, x13, x11); // a1 += a_offset
-  csel(x13, x12, x13, kEQ); //   a1 = zero, else += a1 + a_offset
-  cmp(x14, x12); // if a2 == zero
-  add(x14, x14, x11); // a2 += a_offset
-  csel(x14, x12, x14, kEQ); //   a2 = zero, else += a2 + a_offset
-  cmp(x15, x12); // if a3 == zero
-  add(x15, x15, x11); // a3 += a_offset
-  csel(x15, x12, x15, kEQ); //   a3 = zero, else += a3 + a_offset
+  if (max_mr > 1) {
+    cmp(x13, x12); // if a1 == zero
+    add(x13, x13, x11); // a1 += a_offset
+    csel(x13, x12, x13, kEQ); //   a1 = zero, else += a1 + a_offset
+  }
+  if (max_mr > 2) {
+    cmp(x14, x12); // if a2 == zero
+    add(x14, x14, x11); // a2 += a_offset
+    csel(x14, x12, x14, kEQ); //   a2 = zero, else += a2 + a_offset
+  }
+  if (max_mr > 3) {
+    cmp(x15, x12); // if a3 == zero
+    add(x15, x15, x11); // a3 += a_offset
+    csel(x15, x12, x15, kEQ); //   a3 = zero, else += a3 + a_offset
+  }
 
   // Is there at least 8 floats (32 bytes) for prologue + epilogue?
   subs(x0, x2, 32); // k = kc - 32
@@ -152,9 +183,15 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Read first block of 4 A and B.
   ldr(q0, mem[x20], 16);
   ldp(q16, q17, mem[x5], 32);
-  ldr(q1, mem[x13], 16);
-  ldr(q2, mem[x14], 16);
-  ldr(q3, mem[x15], 16);
+  if (max_mr > 1) {
+    ldr(q1, mem[x13], 16);
+  }
+  if (max_mr > 2) {
+    ldr(q2, mem[x14], 16);
+  }
+  if (max_mr > 3) {
+    ldr(q3, mem[x15], 16);
+  }
   ldp(q18, q19, mem[x5], 32);
   ldp(q20, q21, mem[x5], 32);
   ldp(q22, q23, mem[x5], 32);
@@ -169,98 +206,164 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   fmla(v24.v4s(), v16.v4s(), v0.s()[0]);
   ldp(q8, q9, mem[x5], 32);
   fmla(v25.v4s(), v17.v4s(), v0.s()[0]);
-  fmla(v26.v4s(), v16.v4s(), v1.s()[0]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v16.v4s(), v1.s()[0]);
+  }
   ldp(q10, q11, mem[x5], 32);
-  fmla(v27.v4s(), v17.v4s(), v1.s()[0]);
-  fmla(v28.v4s(), v16.v4s(), v2.s()[0]);
+  if (max_mr > 1) {
+    fmla(v27.v4s(), v17.v4s(), v1.s()[0]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v16.v4s(), v2.s()[0]);
+  }
   ldp(q12, q13, mem[x5], 32);
-  fmla(v29.v4s(), v17.v4s(), v2.s()[0]);
-  fmla(v30.v4s(), v16.v4s(), v3.s()[0]);
+  if (max_mr > 2) {
+    fmla(v29.v4s(), v17.v4s(), v2.s()[0]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v16.v4s(), v3.s()[0]);
+  }
   ldp(q14, q15, mem[x5], 32);
-  fmla(v31.v4s(), v17.v4s(), v3.s()[0]);
+  if (max_mr > 3) {
+    fmla(v31.v4s(), v17.v4s(), v3.s()[0]);
+  }
   fmla(v24.v4s(), v18.v4s(), v0.s()[1]);
   ldr(q4, mem[x20], 16);
   fmla(v25.v4s(), v19.v4s(), v0.s()[1]);
-  fmla(v26.v4s(), v18.v4s(), v1.s()[1]);
-  ldr(q5, mem[x13], 16);
-  fmla(v27.v4s(), v19.v4s(), v1.s()[1]);
-  fmla(v28.v4s(), v18.v4s(), v2.s()[1]);
-  ldr(q6, mem[x14], 16);
-  fmla(v29.v4s(), v19.v4s(), v2.s()[1]);
-  fmla(v30.v4s(), v18.v4s(), v3.s()[1]);
-  ldr(q7, mem[x15], 16);
-  fmla(v31.v4s(), v19.v4s(), v3.s()[1]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v18.v4s(), v1.s()[1]);
+    ldr(q5, mem[x13], 16);
+    fmla(v27.v4s(), v19.v4s(), v1.s()[1]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v18.v4s(), v2.s()[1]);
+    ldr(q6, mem[x14], 16);
+    fmla(v29.v4s(), v19.v4s(), v2.s()[1]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v18.v4s(), v3.s()[1]);
+    ldr(q7, mem[x15], 16);
+    fmla(v31.v4s(), v19.v4s(), v3.s()[1]);
+  }
   fmla(v24.v4s(), v20.v4s(), v0.s()[2]);
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 128]);
   }
   fmla(v25.v4s(), v21.v4s(), v0.s()[2]);
-  fmla(v26.v4s(), v20.v4s(), v1.s()[2]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v20.v4s(), v1.s()[2]);
+  }
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 192]);
   }
-  fmla(v27.v4s(), v21.v4s(), v1.s()[2]);
-  fmla(v28.v4s(), v20.v4s(), v2.s()[2]);
+  if (max_mr > 1) {
+    fmla(v27.v4s(), v21.v4s(), v1.s()[2]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v20.v4s(), v2.s()[2]);
+  }
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 256]);
   }
-  fmla(v29.v4s(), v21.v4s(), v2.s()[2]);
-  fmla(v30.v4s(), v20.v4s(), v3.s()[2]);
+  if (max_mr > 2) {
+    fmla(v29.v4s(), v21.v4s(), v2.s()[2]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v20.v4s(), v3.s()[2]);
+  }
   if (prefetch) {
     prfm(kPLDL1KEEP, mem[x5, 320]);
   }
-  fmla(v31.v4s(), v21.v4s(), v3.s()[2]);
+  if (max_mr > 3) {
+    fmla(v31.v4s(), v21.v4s(), v3.s()[2]);
+  }
   fmla(v24.v4s(), v22.v4s(), v0.s()[3]);
   fmla(v25.v4s(), v23.v4s(), v0.s()[3]);
-  fmla(v26.v4s(), v22.v4s(), v1.s()[3]);
-  fmla(v27.v4s(), v23.v4s(), v1.s()[3]);
-  fmla(v28.v4s(), v22.v4s(), v2.s()[3]);
-  fmla(v29.v4s(), v23.v4s(), v2.s()[3]);
-  fmla(v30.v4s(), v22.v4s(), v3.s()[3]);
-  fmla(v31.v4s(), v23.v4s(), v3.s()[3]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v22.v4s(), v1.s()[3]);
+    fmla(v27.v4s(), v23.v4s(), v1.s()[3]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v22.v4s(), v2.s()[3]);
+    fmla(v29.v4s(), v23.v4s(), v2.s()[3]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v22.v4s(), v3.s()[3]);
+    fmla(v31.v4s(), v23.v4s(), v3.s()[3]);
+  }
 
   // Second block of 4.  FMA for second 4, loads for 1st block of 4.
   fmla(v24.v4s(), v8.v4s(), v4.s()[0]);
   ldp(q16, q17, mem[x5], 32);
   fmla(v25.v4s(), v9.v4s(), v4.s()[0]);
-  fmla(v26.v4s(), v8.v4s(), v5.s()[0]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v8.v4s(), v5.s()[0]);
+  }
   ldp(q18, q19, mem[x5], 32);
-  fmla(v27.v4s(), v9.v4s(), v5.s()[0]);
-  fmla(v28.v4s(), v8.v4s(), v6.s()[0]);
+  if (max_mr > 1) {
+    fmla(v27.v4s(), v9.v4s(), v5.s()[0]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v8.v4s(), v6.s()[0]);
+  }
   ldp(q20, q21, mem[x5], 32);
-  fmla(v29.v4s(), v9.v4s(), v6.s()[0]);
-  fmla(v30.v4s(), v8.v4s(), v7.s()[0]);
+  if (max_mr > 2) {
+    fmla(v29.v4s(), v9.v4s(), v6.s()[0]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v8.v4s(), v7.s()[0]);
+  }
   ldp(q22, q23, mem[x5], 32);
-  fmla(v31.v4s(), v9.v4s(), v7.s()[0]);
+  if (max_mr > 3) {
+    fmla(v31.v4s(), v9.v4s(), v7.s()[0]);
+  }
   fmla(v24.v4s(), v10.v4s(), v4.s()[1]);
   ldr(q0, mem[x20], 16);
   fmla(v25.v4s(), v11.v4s(), v4.s()[1]);
-  fmla(v26.v4s(), v10.v4s(), v5.s()[1]);
-  ldr(q1, mem[x13], 16);
-  fmla(v27.v4s(), v11.v4s(), v5.s()[1]);
-  fmla(v28.v4s(), v10.v4s(), v6.s()[1]);
-  ldr(q2, mem[x14], 16);
-  fmla(v29.v4s(), v11.v4s(), v6.s()[1]);
-  fmla(v30.v4s(), v10.v4s(), v7.s()[1]);
-  ldr(q3, mem[x15], 16);
-  fmla(v31.v4s(), v11.v4s(), v7.s()[1]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v10.v4s(), v5.s()[1]);
+    ldr(q1, mem[x13], 16);
+    fmla(v27.v4s(), v11.v4s(), v5.s()[1]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v10.v4s(), v6.s()[1]);
+    ldr(q2, mem[x14], 16);
+    fmla(v29.v4s(), v11.v4s(), v6.s()[1]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v10.v4s(), v7.s()[1]);
+    ldr(q3, mem[x15], 16);
+    fmla(v31.v4s(), v11.v4s(), v7.s()[1]);
+  }
   fmla(v24.v4s(), v12.v4s(), v4.s()[2]);
   fmla(v25.v4s(), v13.v4s(), v4.s()[2]);
-  fmla(v26.v4s(), v12.v4s(), v5.s()[2]);
-  fmla(v27.v4s(), v13.v4s(), v5.s()[2]);
-  fmla(v28.v4s(), v12.v4s(), v6.s()[2]);
-  fmla(v29.v4s(), v13.v4s(), v6.s()[2]);
-  fmla(v30.v4s(), v12.v4s(), v7.s()[2]);
-  fmla(v31.v4s(), v13.v4s(), v7.s()[2]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v12.v4s(), v5.s()[2]);
+    fmla(v27.v4s(), v13.v4s(), v5.s()[2]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v12.v4s(), v6.s()[2]);
+    fmla(v29.v4s(), v13.v4s(), v6.s()[2]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v12.v4s(), v7.s()[2]);
+    fmla(v31.v4s(), v13.v4s(), v7.s()[2]);
+  }
   fmla(v24.v4s(), v14.v4s(), v4.s()[3]);
   fmla(v25.v4s(), v15.v4s(), v4.s()[3]);
-  fmla(v26.v4s(), v14.v4s(), v5.s()[3]);
-  fmla(v27.v4s(), v15.v4s(), v5.s()[3]);
-  fmla(v28.v4s(), v14.v4s(), v6.s()[3]);
-  fmla(v29.v4s(), v15.v4s(), v6.s()[3]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v14.v4s(), v5.s()[3]);
+    fmla(v27.v4s(), v15.v4s(), v5.s()[3]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v14.v4s(), v6.s()[3]);
+    fmla(v29.v4s(), v15.v4s(), v6.s()[3]);
+  }
   subs(x0, x0, 32);
-  fmla(v30.v4s(), v14.v4s(), v7.s()[3]);
-  fmla(v31.v4s(), v15.v4s(), v7.s()[3]);
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v14.v4s(), v7.s()[3]);
+    fmla(v31.v4s(), v15.v4s(), v7.s()[3]);
+  }
 
   b_hs(l2);
 
@@ -270,89 +373,138 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   fmla(v24.v4s(), v16.v4s(), v0.s()[0]);
   ldp(q8, q9, mem[x5], 32);
   fmla(v25.v4s(), v17.v4s(), v0.s()[0]);
-  fmla(v26.v4s(), v16.v4s(), v1.s()[0]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v16.v4s(), v1.s()[0]);
+  }
   ldp(q10, q11, mem[x5], 32);
-  fmla(v27.v4s(), v17.v4s(), v1.s()[0]);
-  fmla(v28.v4s(), v16.v4s(), v2.s()[0]);
+  if (max_mr > 1) {
+    fmla(v27.v4s(), v17.v4s(), v1.s()[0]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v16.v4s(), v2.s()[0]);
+  }
   ldp(q12, q13, mem[x5], 32);
-  fmla(v29.v4s(), v17.v4s(), v2.s()[0]);
-  fmla(v30.v4s(), v16.v4s(), v3.s()[0]);
+  if (max_mr > 2) {
+    fmla(v29.v4s(), v17.v4s(), v2.s()[0]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v16.v4s(), v3.s()[0]);
+  }
   ldp(q14, q15, mem[x5], 32);
-  fmla(v31.v4s(), v17.v4s(), v3.s()[0]);
+  if (max_mr > 3) {
+    fmla(v31.v4s(), v17.v4s(), v3.s()[0]);
+  }
   fmla(v24.v4s(), v18.v4s(), v0.s()[1]);
   ldr(q4, mem[x20], 16);
   fmla(v25.v4s(), v19.v4s(), v0.s()[1]);
-  fmla(v26.v4s(), v18.v4s(), v1.s()[1]);
-  ldr(q5, mem[x13], 16);
-  fmla(v27.v4s(), v19.v4s(), v1.s()[1]);
-  fmla(v28.v4s(), v18.v4s(), v2.s()[1]);
-  ldr(q6, mem[x14], 16);
-  fmla(v29.v4s(), v19.v4s(), v2.s()[1]);
-  fmla(v30.v4s(), v18.v4s(), v3.s()[1]);
-  ldr(q7, mem[x15], 16);
-  fmla(v31.v4s(), v19.v4s(), v3.s()[1]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v18.v4s(), v1.s()[1]);
+    ldr(q5, mem[x13], 16);
+    fmla(v27.v4s(), v19.v4s(), v1.s()[1]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v18.v4s(), v2.s()[1]);
+    ldr(q6, mem[x14], 16);
+    fmla(v29.v4s(), v19.v4s(), v2.s()[1]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v18.v4s(), v3.s()[1]);
+    ldr(q7, mem[x15], 16);
+    fmla(v31.v4s(), v19.v4s(), v3.s()[1]);
+  }
   fmla(v24.v4s(), v20.v4s(), v0.s()[2]);
   fmla(v25.v4s(), v21.v4s(), v0.s()[2]);
-  fmla(v26.v4s(), v20.v4s(), v1.s()[2]);
-  fmla(v27.v4s(), v21.v4s(), v1.s()[2]);
-  fmla(v28.v4s(), v20.v4s(), v2.s()[2]);
-  fmla(v29.v4s(), v21.v4s(), v2.s()[2]);
-  fmla(v30.v4s(), v20.v4s(), v3.s()[2]);
-  fmla(v31.v4s(), v21.v4s(), v3.s()[2]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v20.v4s(), v1.s()[2]);
+    fmla(v27.v4s(), v21.v4s(), v1.s()[2]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v20.v4s(), v2.s()[2]);
+    fmla(v29.v4s(), v21.v4s(), v2.s()[2]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v20.v4s(), v3.s()[2]);
+    fmla(v31.v4s(), v21.v4s(), v3.s()[2]);
+  }
   fmla(v24.v4s(), v22.v4s(), v0.s()[3]);
   fmla(v25.v4s(), v23.v4s(), v0.s()[3]);
-  fmla(v26.v4s(), v22.v4s(), v1.s()[3]);
-  fmla(v27.v4s(), v23.v4s(), v1.s()[3]);
-  fmla(v28.v4s(), v22.v4s(), v2.s()[3]);
-  fmla(v29.v4s(), v23.v4s(), v2.s()[3]);
-  fmla(v30.v4s(), v22.v4s(), v3.s()[3]);
-  fmla(v31.v4s(), v23.v4s(), v3.s()[3]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v22.v4s(), v1.s()[3]);
+    fmla(v27.v4s(), v23.v4s(), v1.s()[3]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v22.v4s(), v2.s()[3]);
+    fmla(v29.v4s(), v23.v4s(), v2.s()[3]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v22.v4s(), v3.s()[3]);
+    fmla(v31.v4s(), v23.v4s(), v3.s()[3]);
+  }
 
   // Second block of 4.  FMA for second 4, noloads
   fmla(v24.v4s(), v8.v4s(), v4.s()[0]);
   fmla(v25.v4s(), v9.v4s(), v4.s()[0]);
-  fmla(v26.v4s(), v8.v4s(), v5.s()[0]);
-  fmla(v27.v4s(), v9.v4s(), v5.s()[0]);
-  fmla(v28.v4s(), v8.v4s(), v6.s()[0]);
-  fmla(v29.v4s(), v9.v4s(), v6.s()[0]);
-  fmla(v30.v4s(), v8.v4s(), v7.s()[0]);
-  fmla(v31.v4s(), v9.v4s(), v7.s()[0]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v8.v4s(), v5.s()[0]);
+    fmla(v27.v4s(), v9.v4s(), v5.s()[0]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v8.v4s(), v6.s()[0]);
+    fmla(v29.v4s(), v9.v4s(), v6.s()[0]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v8.v4s(), v7.s()[0]);
+    fmla(v31.v4s(), v9.v4s(), v7.s()[0]);
+  }
   fmla(v24.v4s(), v10.v4s(), v4.s()[1]);
   fmla(v25.v4s(), v11.v4s(), v4.s()[1]);
-  fmla(v26.v4s(), v10.v4s(), v5.s()[1]);
-  fmla(v27.v4s(), v11.v4s(), v5.s()[1]);
-  fmla(v28.v4s(), v10.v4s(), v6.s()[1]);
-  fmla(v29.v4s(), v11.v4s(), v6.s()[1]);
-  fmla(v30.v4s(), v10.v4s(), v7.s()[1]);
-  fmla(v31.v4s(), v11.v4s(), v7.s()[1]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v10.v4s(), v5.s()[1]);
+    fmla(v27.v4s(), v11.v4s(), v5.s()[1]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v10.v4s(), v6.s()[1]);
+    fmla(v29.v4s(), v11.v4s(), v6.s()[1]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v10.v4s(), v7.s()[1]);
+    fmla(v31.v4s(), v11.v4s(), v7.s()[1]);
+  }
   fmla(v24.v4s(), v12.v4s(), v4.s()[2]);
   fmla(v25.v4s(), v13.v4s(), v4.s()[2]);
-  fmla(v26.v4s(), v12.v4s(), v5.s()[2]);
-  fmla(v27.v4s(), v13.v4s(), v5.s()[2]);
-  fmla(v28.v4s(), v12.v4s(), v6.s()[2]);
-  fmla(v29.v4s(), v13.v4s(), v6.s()[2]);
-  fmla(v30.v4s(), v12.v4s(), v7.s()[2]);
-  fmla(v31.v4s(), v13.v4s(), v7.s()[2]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v12.v4s(), v5.s()[2]);
+    fmla(v27.v4s(), v13.v4s(), v5.s()[2]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v12.v4s(), v6.s()[2]);
+    fmla(v29.v4s(), v13.v4s(), v6.s()[2]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v12.v4s(), v7.s()[2]);
+    fmla(v31.v4s(), v13.v4s(), v7.s()[2]);
+  }
 
   fmla(v24.v4s(), v14.v4s(), v4.s()[3]);
   fmla(v25.v4s(), v15.v4s(), v4.s()[3]);
-  fmla(v26.v4s(), v14.v4s(), v5.s()[3]);
-  fmla(v27.v4s(), v15.v4s(), v5.s()[3]);
-
-  // Load min/max values
-  if (clamp_min && clamp_max) {
-    ld2r({v4.v4s(), v5.v4s()}, mem[x8]);
-  } else if (clamp_min) {
-    ld1r({v4.v4s()}, mem[x8]);
-  } else if (clamp_max) {
-    add(x13, x8, 4);
-    ld1r({v5.v4s()}, mem[x13]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v14.v4s(), v5.s()[3]);
+    fmla(v27.v4s(), v15.v4s(), v5.s()[3]);
   }
 
-  fmla(v28.v4s(), v14.v4s(), v6.s()[3]);
-  fmla(v29.v4s(), v15.v4s(), v6.s()[3]);
-  fmla(v30.v4s(), v14.v4s(), v7.s()[3]);
-  fmla(v31.v4s(), v15.v4s(), v7.s()[3]);
+  // Load min/max values
+  if (clamp_min || clamp_max) {
+    ld2r({v4.v4s(), v5.v4s()}, mem[x8]);
+  }
+
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v14.v4s(), v6.s()[3]);
+    fmla(v29.v4s(), v15.v4s(), v6.s()[3]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v14.v4s(), v7.s()[3]);
+    fmla(v31.v4s(), v15.v4s(), v7.s()[3]);
+  }
 
   bind(l4);
   // Remainder- 4 floats of A
@@ -360,44 +512,74 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   ldr(q0, mem[x20], 16);
   ldp(q16, q17, mem[x5], 32);
-  ldr(q1, mem[x13], 16);
-  ldr(q2, mem[x14], 16);
-  ldr(q3, mem[x15], 16);
+  if (max_mr > 1) {
+    ldr(q1, mem[x13], 16);
+  }
+  if (max_mr > 2) {
+    ldr(q2, mem[x14], 16);
+  }
+  if (max_mr > 3) {
+    ldr(q3, mem[x15], 16);
+  }
   fmla(v24.v4s(), v16.v4s(), v0.s()[0]);
   fmla(v25.v4s(), v17.v4s(), v0.s()[0]);
   ldp(q18, q19, mem[x5], 32);
-  fmla(v26.v4s(), v16.v4s(), v1.s()[0]);
-  fmla(v27.v4s(), v17.v4s(), v1.s()[0]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v16.v4s(), v1.s()[0]);
+    fmla(v27.v4s(), v17.v4s(), v1.s()[0]);
+  }
   ldp(q20, q21, mem[x5], 32);
-  fmla(v28.v4s(), v16.v4s(), v2.s()[0]);
-  fmla(v29.v4s(), v17.v4s(), v2.s()[0]);
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v16.v4s(), v2.s()[0]);
+    fmla(v29.v4s(), v17.v4s(), v2.s()[0]);
+  }
   ldp(q22, q23, mem[x5], 32);
-  fmla(v30.v4s(), v16.v4s(), v3.s()[0]);
-  fmla(v31.v4s(), v17.v4s(), v3.s()[0]);
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v16.v4s(), v3.s()[0]);
+    fmla(v31.v4s(), v17.v4s(), v3.s()[0]);
+  }
   fmla(v24.v4s(), v18.v4s(), v0.s()[1]);
   fmla(v25.v4s(), v19.v4s(), v0.s()[1]);
-  fmla(v26.v4s(), v18.v4s(), v1.s()[1]);
-  fmla(v27.v4s(), v19.v4s(), v1.s()[1]);
-  fmla(v28.v4s(), v18.v4s(), v2.s()[1]);
-  fmla(v29.v4s(), v19.v4s(), v2.s()[1]);
-  fmla(v30.v4s(), v18.v4s(), v3.s()[1]);
-  fmla(v31.v4s(), v19.v4s(), v3.s()[1]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v18.v4s(), v1.s()[1]);
+    fmla(v27.v4s(), v19.v4s(), v1.s()[1]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v18.v4s(), v2.s()[1]);
+    fmla(v29.v4s(), v19.v4s(), v2.s()[1]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v18.v4s(), v3.s()[1]);
+    fmla(v31.v4s(), v19.v4s(), v3.s()[1]);
+  }
   fmla(v24.v4s(), v20.v4s(), v0.s()[2]);
   fmla(v25.v4s(), v21.v4s(), v0.s()[2]);
-  fmla(v26.v4s(), v20.v4s(), v1.s()[2]);
-  fmla(v27.v4s(), v21.v4s(), v1.s()[2]);
-  fmla(v28.v4s(), v20.v4s(), v2.s()[2]);
-  fmla(v29.v4s(), v21.v4s(), v2.s()[2]);
-  fmla(v30.v4s(), v20.v4s(), v3.s()[2]);
-  fmla(v31.v4s(), v21.v4s(), v3.s()[2]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v20.v4s(), v1.s()[2]);
+    fmla(v27.v4s(), v21.v4s(), v1.s()[2]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v20.v4s(), v2.s()[2]);
+    fmla(v29.v4s(), v21.v4s(), v2.s()[2]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v20.v4s(), v3.s()[2]);
+    fmla(v31.v4s(), v21.v4s(), v3.s()[2]);
+  }
   fmla(v24.v4s(), v22.v4s(), v0.s()[3]);
   fmla(v25.v4s(), v23.v4s(), v0.s()[3]);
-  fmla(v26.v4s(), v22.v4s(), v1.s()[3]);
-  fmla(v27.v4s(), v23.v4s(), v1.s()[3]);
-  fmla(v28.v4s(), v22.v4s(), v2.s()[3]);
-  fmla(v29.v4s(), v23.v4s(), v2.s()[3]);
-  fmla(v30.v4s(), v22.v4s(), v3.s()[3]);
-  fmla(v31.v4s(), v23.v4s(), v3.s()[3]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v22.v4s(), v1.s()[3]);
+    fmla(v27.v4s(), v23.v4s(), v1.s()[3]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v22.v4s(), v2.s()[3]);
+    fmla(v29.v4s(), v23.v4s(), v2.s()[3]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v22.v4s(), v3.s()[3]);
+    fmla(v31.v4s(), v23.v4s(), v3.s()[3]);
+  }
 
   bind(l5);
   // Remainder- 2 floats of A
@@ -405,26 +587,44 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   ldr(d0, mem[x20], 8);
   ldp(q16, q17, mem[x5], 32);
-  ldr(d1, mem[x13], 8);
-  ldr(d2, mem[x14], 8);
-  ldr(d3, mem[x15], 8);
+  if (max_mr > 1) {
+    ldr(d1, mem[x13], 8);
+  }
+  if (max_mr > 2) {
+    ldr(d2, mem[x14], 8);
+  }
+  if (max_mr > 3) {
+    ldr(d3, mem[x15], 8);
+  }
   fmla(v24.v4s(), v16.v4s(), v0.s()[0]);
   fmla(v25.v4s(), v17.v4s(), v0.s()[0]);
   ldp(q18, q19, mem[x5], 32);
-  fmla(v26.v4s(), v16.v4s(), v1.s()[0]);
-  fmla(v27.v4s(), v17.v4s(), v1.s()[0]);
-  fmla(v28.v4s(), v16.v4s(), v2.s()[0]);
-  fmla(v29.v4s(), v17.v4s(), v2.s()[0]);
-  fmla(v30.v4s(), v16.v4s(), v3.s()[0]);
-  fmla(v31.v4s(), v17.v4s(), v3.s()[0]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v16.v4s(), v1.s()[0]);
+    fmla(v27.v4s(), v17.v4s(), v1.s()[0]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v16.v4s(), v2.s()[0]);
+    fmla(v29.v4s(), v17.v4s(), v2.s()[0]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v16.v4s(), v3.s()[0]);
+    fmla(v31.v4s(), v17.v4s(), v3.s()[0]);
+  }
   fmla(v24.v4s(), v18.v4s(), v0.s()[1]);
   fmla(v25.v4s(), v19.v4s(), v0.s()[1]);
-  fmla(v26.v4s(), v18.v4s(), v1.s()[1]);
-  fmla(v27.v4s(), v19.v4s(), v1.s()[1]);
-  fmla(v28.v4s(), v18.v4s(), v2.s()[1]);
-  fmla(v29.v4s(), v19.v4s(), v2.s()[1]);
-  fmla(v30.v4s(), v18.v4s(), v3.s()[1]);
-  fmla(v31.v4s(), v19.v4s(), v3.s()[1]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v18.v4s(), v1.s()[1]);
+    fmla(v27.v4s(), v19.v4s(), v1.s()[1]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v18.v4s(), v2.s()[1]);
+    fmla(v29.v4s(), v19.v4s(), v2.s()[1]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v18.v4s(), v3.s()[1]);
+    fmla(v31.v4s(), v19.v4s(), v3.s()[1]);
+  }
 
   bind(l6);
   // Remainder- 1 float of A
@@ -432,55 +632,86 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   ldr(s0, mem[x20], 4);
   ldp(q16, q17, mem[x5], 32);
-  ldr(s1, mem[x13], 4);
-  ldr(s2, mem[x14], 4);
-  ldr(s3, mem[x15], 4);
+  if (max_mr > 1) {
+    ldr(s1, mem[x13], 4);
+  }
+  if (max_mr > 2) {
+    ldr(s2, mem[x14], 4);
+  }
+  if (max_mr > 3) {
+    ldr(s3, mem[x15], 4);
+  }
   fmla(v24.v4s(), v16.v4s(), v0.s()[0]);
   fmla(v25.v4s(), v17.v4s(), v0.s()[0]);
-  fmla(v26.v4s(), v16.v4s(), v1.s()[0]);
-  fmla(v27.v4s(), v17.v4s(), v1.s()[0]);
-  fmla(v28.v4s(), v16.v4s(), v2.s()[0]);
-  fmla(v29.v4s(), v17.v4s(), v2.s()[0]);
-  fmla(v30.v4s(), v16.v4s(), v3.s()[0]);
-  fmla(v31.v4s(), v17.v4s(), v3.s()[0]);
+  if (max_mr > 1) {
+    fmla(v26.v4s(), v16.v4s(), v1.s()[0]);
+    fmla(v27.v4s(), v17.v4s(), v1.s()[0]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v16.v4s(), v2.s()[0]);
+    fmla(v29.v4s(), v17.v4s(), v2.s()[0]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v16.v4s(), v3.s()[0]);
+    fmla(v31.v4s(), v17.v4s(), v3.s()[0]);
+  }
 
   bind(l7);
   // ks loop
-  subs(x9, x9, 32); // ks -= MR * sizeof(void*)
+  subs(x9, x9, max_mr * sizeof(void*)); // ks -= MR * sizeof(void*)
   b_hi(l1);
 
   // Clamp
   if (clamp_min) {
     fmax(v24.v4s(), v24.v4s(), v4.v4s());
     fmax(v25.v4s(), v25.v4s(), v4.v4s());
-    fmax(v26.v4s(), v26.v4s(), v4.v4s());
-    fmax(v27.v4s(), v27.v4s(), v4.v4s());
-    fmax(v28.v4s(), v28.v4s(), v4.v4s());
-    fmax(v29.v4s(), v29.v4s(), v4.v4s());
-    fmax(v30.v4s(), v30.v4s(), v4.v4s());
-    fmax(v31.v4s(), v31.v4s(), v4.v4s());
+    if (max_mr > 1) {
+      fmax(v26.v4s(), v26.v4s(), v4.v4s());
+      fmax(v27.v4s(), v27.v4s(), v4.v4s());
+    }
+    if (max_mr > 2) {
+      fmax(v28.v4s(), v28.v4s(), v4.v4s());
+      fmax(v29.v4s(), v29.v4s(), v4.v4s());
+    }
+    if (max_mr > 3) {
+      fmax(v30.v4s(), v30.v4s(), v4.v4s());
+      fmax(v31.v4s(), v31.v4s(), v4.v4s());
+    }
   }
   if (clamp_max) {
     fmin(v24.v4s(), v24.v4s(), v5.v4s());
     fmin(v25.v4s(), v25.v4s(), v5.v4s());
-    fmin(v26.v4s(), v26.v4s(), v5.v4s());
-    fmin(v27.v4s(), v27.v4s(), v5.v4s());
-    fmin(v28.v4s(), v28.v4s(), v5.v4s());
-    fmin(v29.v4s(), v29.v4s(), v5.v4s());
-    fmin(v30.v4s(), v30.v4s(), v5.v4s());
-    fmin(v31.v4s(), v31.v4s(), v5.v4s());
+    if (max_mr > 1) {
+      fmin(v26.v4s(), v26.v4s(), v5.v4s());
+      fmin(v27.v4s(), v27.v4s(), v5.v4s());
+    }
+    if (max_mr > 2) {
+      fmin(v28.v4s(), v28.v4s(), v5.v4s());
+      fmin(v29.v4s(), v29.v4s(), v5.v4s());
+    }
+    if (max_mr > 3) {
+      fmin(v30.v4s(), v30.v4s(), v5.v4s());
+      fmin(v31.v4s(), v31.v4s(), v5.v4s());
+    }
   }
+  perform_post_operations(max_mr, num_post_operations, post_operations);
 
   // Store full 4 x 8
   subs(x1, x1, 8);
   b_lo(l8);
 
-  stp(q30, q31, mem[x7]);
-  add(x7, x7, x10);
-  stp(q28, q29, mem[x17]);
-  add(x17, x17, x10);
-  stp(q26, q27, mem[x16]);
-  add(x16, x16, x10);
+  if (max_mr > 3) {
+    stp(q30, q31, mem[x7]);
+    add(x7, x7, x10);
+  }
+  if (max_mr > 2) {
+    stp(q28, q29, mem[x17]);
+    add(x17, x17, x10);
+  }
+  if (max_mr > 1) {
+    stp(q26, q27, mem[x16]);
+    add(x16, x16, x10);
+  }
   stp(q24, q25, mem[x6]);
   add(x6, x6, x10);
 
@@ -502,31 +733,55 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Store odd width
   bind(l8);
   tbz(x1, 2, l9);
-  str(q30, mem[x7], 16);
-  mov(v30.v16b(), v31.v16b());
-  str(q28, mem[x17], 16);
-  mov(v28.v16b(), v29.v16b());
-  str(q26, mem[x16], 16);
-  mov(v26.v16b(), v27.v16b());
+  if (max_mr > 3) {
+    str(q30, mem[x7], 16);
+    mov(v30.v16b(), v31.v16b());
+  }
+  if (max_mr > 2) {
+    str(q28, mem[x17], 16);
+    mov(v28.v16b(), v29.v16b());
+  }
+  if (max_mr > 1) {
+    str(q26, mem[x16], 16);
+    mov(v26.v16b(), v27.v16b());
+  }
   str(q24, mem[x6], 16);
   mov(v24.v16b(), v25.v16b());
 
   bind(l9);
   tbz(x1, 1, l10);
-  str(d30, mem[x7], 8);
-  str(d28, mem[x17], 8);
-  dup(d30, v30.d()[1]);
-  dup(d28, v28.d()[1]);
-  str(d26, mem[x16], 8);
+  if (max_mr > 3) {
+    str(d30, mem[x7], 8);
+  }
+  if (max_mr > 2) {
+    str(d28, mem[x17], 8);
+  }
+  if (max_mr > 3) {
+    dup(d30, v30.d()[1]);
+  }
+  if (max_mr > 2) {
+    dup(d28, v28.d()[1]);
+  }
+  if (max_mr > 1) {
+    str(d26, mem[x16], 8);
+  }
   str(d24, mem[x6], 8);
-  dup(d26, v26.d()[1]);
+  if (max_mr > 1) {
+    dup(d26, v26.d()[1]);
+  }
   dup(d24, v24.d()[1]);
 
   bind(l10);
   tbz(x1, 0, l11);
-  str(s30, mem[x7]);
-  str(s28, mem[x17]);
-  str(s26, mem[x16]);
+  if (max_mr > 3) {
+    str(s30, mem[x7]);
+  }
+  if (max_mr > 2) {
+    str(s28, mem[x17]);
+  }
+  if (max_mr > 1) {
+    str(s26, mem[x16]);
+  }
   str(s24, mem[x6]);
   bind(l11);
   // Restore d8-d15 from stack
@@ -535,22 +790,54 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   ldp(d10, d11, mem[sp, 32]);
   ldp(d8, d9, mem[sp, 16]);
 
-  // Restore x20, x21 from stack
-  ldp(x20, x21, mem[sp], 80);
+  // Restore x20 from stack
+  ldr(x20, mem[sp], 80);
   ret();
 
   align(16, AlignInstruction::kHlt);
 }
+
+void Generator::perform_post_operations(
+  size_t max_mr,
+  size_t num_post_operations,
+  const xnn_post_operation* post_operations)
+{
+  for (size_t i = 0; i < num_post_operations; i++) {
+    switch (post_operations[i].op_type) {
+      case xnn_post_operation_type_hardswish: {
+        // Reuse A pointers (don't use v8-v15 as they are callee saved).
+        const auto sixth = v0.v4s();
+        const auto three = v1.v4s();
+        const auto six = v2.v4s();
+        const auto zero = v3.v4s();
+        // v4, v5, v6, v7 available for temporaries.
+        ld3r({sixth, three, six}, mem[x8]++);
+        movi(zero, 0);
+        const VRegister accs[] = {
+          v24.v4s(), v25.v4s(),
+          v26.v4s(), v27.v4s(),
+          v28.v4s(), v29.v4s(),
+          v30.v4s(), v31.v4s(),
+        };
+        const VRegister tmps[] = {v4.v4s(), v5.v4s(), v6.v4s(), v7.v4s()};
+        f32_hardswish(sixth, three, six, zero, &accs[0], XNN_COUNT_OF(accs), &tmps[0], XNN_COUNT_OF(tmps));
+        break;
+      }
+      default:
+        XNN_UNREACHABLE;
+    }
+  }
+}
+
 }  // namespace
-}  // aarch64
-}  // xnnpack
+}  // namespace aarch64
+}  // namespace xnnpack
 
 xnn_status_t xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const void* params) {
   using namespace xnnpack::aarch64;
   Generator g(code);
   assert(params != nullptr);
-  const jit_gemm_params* gemm_params = static_cast<const jit_gemm_params*>(params);
-  g.generate(false, max_mr, nc_mod_nr, kc, ks, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);
+  g.generate(false, max_mr, nc_mod_nr, kc, ks, static_cast<const jit_gemm_params*>(params));
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
@@ -562,8 +849,7 @@ xnn_status_t xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75
   using namespace xnnpack::aarch64;
   Generator g(code);
   assert(params != nullptr);
-  const jit_gemm_params* gemm_params = static_cast<const jit_gemm_params*>(params);
-  g.generate(true, max_mr, nc_mod_nr, kc, ks, gemm_params->f32_minmax.min, gemm_params->f32_minmax.max);
+  g.generate(true, max_mr, nc_mod_nr, kc, ks, static_cast<const jit_gemm_params*>(params));
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
