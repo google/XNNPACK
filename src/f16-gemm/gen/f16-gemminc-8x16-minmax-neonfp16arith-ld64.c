@@ -272,14 +272,14 @@ void xnn_f16_gemminc_minmax_ukernel_8x16__neonfp16arith_ld64(
     }
     if XNN_UNLIKELY(k != 0) {
       do {
-        const float16x8_t va0 = vld1q_dup_f16(a0); a0 += 1;
-        const float16x8_t va1 = vld1q_dup_f16(a1); a1 += 1;
-        const float16x8_t va2 = vld1q_dup_f16(a2); a2 += 1;
-        const float16x8_t va3 = vld1q_dup_f16(a3); a3 += 1;
-        const float16x8_t va4 = vld1q_dup_f16(a4); a4 += 1;
-        const float16x8_t va5 = vld1q_dup_f16(a5); a5 += 1;
-        const float16x8_t va6 = vld1q_dup_f16(a6); a6 += 1;
-        const float16x8_t va7 = vld1q_dup_f16(a7); a7 += 1;
+        const float16x8_t va0 = vreinterpretq_f16_u16(vld1q_dup_u16(a0)); a0 += 1;
+        const float16x8_t va1 = vreinterpretq_f16_u16(vld1q_dup_u16(a1)); a1 += 1;
+        const float16x8_t va2 = vreinterpretq_f16_u16(vld1q_dup_u16(a2)); a2 += 1;
+        const float16x8_t va3 = vreinterpretq_f16_u16(vld1q_dup_u16(a3)); a3 += 1;
+        const float16x8_t va4 = vreinterpretq_f16_u16(vld1q_dup_u16(a4)); a4 += 1;
+        const float16x8_t va5 = vreinterpretq_f16_u16(vld1q_dup_u16(a5)); a5 += 1;
+        const float16x8_t va6 = vreinterpretq_f16_u16(vld1q_dup_u16(a6)); a6 += 1;
+        const float16x8_t va7 = vreinterpretq_f16_u16(vld1q_dup_u16(a7)); a7 += 1;
 
         const float16x8_t vb01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
         const float16x8_t vb89ABCDEF = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));

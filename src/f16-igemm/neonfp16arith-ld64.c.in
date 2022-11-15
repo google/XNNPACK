@@ -95,7 +95,7 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
       if XNN_UNLIKELY(k != 0) {
         do {
           $for M in range(MR):
-            const float16x8_t va${M} = vld1q_dup_f16(a${M}); a${M} += 1;
+            const float16x8_t va${M} = vreinterpretq_f16_u16(vld1q_dup_u16(a${M})); a${M} += 1;
 
           $for N in range(0, NR, 8):
             const float16x8_t vb${ABC[N:N+8]} = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));

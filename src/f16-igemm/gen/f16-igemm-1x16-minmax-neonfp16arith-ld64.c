@@ -104,7 +104,7 @@ void xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64(
       }
       if XNN_UNLIKELY(k != 0) {
         do {
-          const float16x8_t va0 = vld1q_dup_f16(a0); a0 += 1;
+          const float16x8_t va0 = vreinterpretq_f16_u16(vld1q_dup_u16(a0)); a0 += 1;
 
           const float16x8_t vb01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
           const float16x8_t vb89ABCDEF = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const void*) ((uintptr_t) w + sizeof(float16x8_t));
