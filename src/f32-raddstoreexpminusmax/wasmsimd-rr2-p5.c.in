@@ -15,7 +15,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/raddstoreexpminusmax.h>
 
 
-void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+$ISA = "wasmrelaxedsimd" if FMA else "wasmsimd"
+void xnn_f32_raddstoreexpminusmax_ukernel__${ISA}_rr2_p5_x${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t batch,
     const float* input,
     const float* max,
@@ -52,66 +53,74 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x${BATCH_TILE}${"" if
       const v128_t vi${ABC[N:N+4]} = wasm_v128_load(input + ${N});
     input += ${BATCH_TILE};
 
-    // Subtract maximum input x := i - i_max. This implies x <= 0.
     $for N in range(0, BATCH_TILE, 4):
       const v128_t vx${ABC[N:N+4]} = wasm_f32x4_sub(vi${ABC[N:N+4]}, vi_max);
 
-    // Compute reduced argument batch := round(x / log(2)).
     $for N in range(0, BATCH_TILE, 4):
-      v128_t vn${ABC[N:N+4]} = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vx${ABC[N:N+4]}, vlog2e));
+      $if FMA:
+        v128_t vn${ABC[N:N+4]} = __builtin_wasm_fma_f32x4(vmagic_bias, vx${ABC[N:N+4]}, vlog2e);
+      $else:
+        v128_t vn${ABC[N:N+4]} = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vx${ABC[N:N+4]}, vlog2e));
 
-    // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
-    // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
     $for N in range(0, BATCH_TILE, 4):
       const v128_t vs${ABC[N:N+4]} = wasm_i32x4_shl(vn${ABC[N:N+4]}, 23);
 
-    // Subtract the large number back to get final batch := round(x / log(2)).
     $for N in range(0, BATCH_TILE, 4):
       vn${ABC[N:N+4]} = wasm_f32x4_sub(vn${ABC[N:N+4]}, vmagic_bias);
 
-    // Compute reduced argument t := x - batch * log(2).
-    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     $for N in range(0, BATCH_TILE, 4):
-      v128_t vt${ABC[N:N+4]} = wasm_f32x4_add(vx${ABC[N:N+4]}, wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_hi));
+      $if FMA:
+        v128_t vt${ABC[N:N+4]} = __builtin_wasm_fma_f32x4(vx${ABC[N:N+4]}, vn${ABC[N:N+4]}, vminus_ln2_hi);
+      $else:
+        v128_t vt${ABC[N:N+4]} = wasm_f32x4_add(vx${ABC[N:N+4]}, wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_hi));
 
     $for N in range(0, BATCH_TILE, 4):
-      vt${ABC[N:N+4]} = wasm_f32x4_add(vt${ABC[N:N+4]}, wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_lo));
-
-    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
-    $for N in range(0, BATCH_TILE, 4):
-      v128_t vp${ABC[N:N+4]} = wasm_f32x4_add(vc4, wasm_f32x4_mul(vc5, vt${ABC[N:N+4]}));
-
-    $for N in range(0, BATCH_TILE, 4):
-      vp${ABC[N:N+4]} = wasm_f32x4_add(vc3, wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}));
+      $if FMA:
+        vt${ABC[N:N+4]} = __builtin_wasm_fma_f32x4(vt${ABC[N:N+4]}, vn${ABC[N:N+4]}, vminus_ln2_lo);
+      $else:
+        vt${ABC[N:N+4]} = wasm_f32x4_add(vt${ABC[N:N+4]}, wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_lo));
 
     $for N in range(0, BATCH_TILE, 4):
-      vp${ABC[N:N+4]} = wasm_f32x4_add(vc2, wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}));
+      $if FMA:
+        v128_t vp${ABC[N:N+4]} = __builtin_wasm_fma_f32x4(vc4, vc5, vt${ABC[N:N+4]});
+      $else:
+        v128_t vp${ABC[N:N+4]} = wasm_f32x4_add(vc4, wasm_f32x4_mul(vc5, vt${ABC[N:N+4]}));
 
     $for N in range(0, BATCH_TILE, 4):
-      vp${ABC[N:N+4]} = wasm_f32x4_add(vc1, wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}));
+      $if FMA:
+        vp${ABC[N:N+4]} = __builtin_wasm_fma_f32x4(vc3, vp${ABC[N:N+4]}, vt${ABC[N:N+4]});
+      $else:
+        vp${ABC[N:N+4]} = wasm_f32x4_add(vc3, wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}));
 
-    // Reconstruct the final f value:
-    //   f = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
-    //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
-    //     = s + (t * s) * p
+    $for N in range(0, BATCH_TILE, 4):
+      $if FMA:
+        vp${ABC[N:N+4]} = __builtin_wasm_fma_f32x4(vc2, vp${ABC[N:N+4]}, vt${ABC[N:N+4]});
+      $else:
+        vp${ABC[N:N+4]} = wasm_f32x4_add(vc2, wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}));
+
+    $for N in range(0, BATCH_TILE, 4):
+      $if FMA:
+        vp${ABC[N:N+4]} = __builtin_wasm_fma_f32x4(vc1, vp${ABC[N:N+4]}, vt${ABC[N:N+4]});
+      $else:
+        vp${ABC[N:N+4]} = wasm_f32x4_add(vc1, wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}));
+
     $for N in range(0, BATCH_TILE, 4):
       vt${ABC[N:N+4]} = wasm_f32x4_mul(vt${ABC[N:N+4]}, vs${ABC[N:N+4]});
 
     $for N in range(0, BATCH_TILE, 4):
-      v128_t vf${ABC[N:N+4]} = wasm_f32x4_add(vs${ABC[N:N+4]}, wasm_f32x4_mul(vt${ABC[N:N+4]}, vp${ABC[N:N+4]}));
+      $if FMA:
+        v128_t vf${ABC[N:N+4]} = __builtin_wasm_fma_f32x4(vs${ABC[N:N+4]}, vt${ABC[N:N+4]}, vp${ABC[N:N+4]});
+      $else:
+        v128_t vf${ABC[N:N+4]} = wasm_f32x4_add(vs${ABC[N:N+4]}, wasm_f32x4_mul(vt${ABC[N:N+4]}, vp${ABC[N:N+4]}));
 
-    // For inputs below zero cutoff, replace output with +0.0f.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
     $for N in range(0, BATCH_TILE, 4):
       vf${ABC[N:N+4]} = wasm_v128_andnot(vf${ABC[N:N+4]}, wasm_f32x4_lt(vx${ABC[N:N+4]}, vdenorm_cutoff));
 
-    // Store ${BATCH_TILE} (${SIMD_TILE}x4) outputs at a time.
     wasm_v128_store(output, vf${ABC[0:4]});
     $for N in range(4, BATCH_TILE, 4):
       wasm_v128_store(output + ${N}, vf${ABC[N:N+4]});
     output += ${BATCH_TILE};
 
-    // Accumulate computed exponents.
     $for N in range(0, BATCH_TILE, 4):
       vacc${N % ACCUMULATORS} = wasm_f32x4_add(vacc${N % ACCUMULATORS}, vf${ABC[N:N+4]});
   }
@@ -126,115 +135,107 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x${BATCH_TILE}${"" if
 
   v128_t vacc = vacc0;
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
-    // Load 4 inputs at a time.
     const v128_t vi = wasm_v128_load(input);
     input += 4;
 
-    // Subtract maximum input x := i - i_max. This implies x <= 0.
     const v128_t vx = wasm_f32x4_sub(vi, vi_max);
 
-    // Compute reduced argument batch := round(x / log(2)).
-    v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vx, vlog2e));
+    $if FMA:
+      v128_t vn = __builtin_wasm_fma_f32x4(vmagic_bias, vx, vlog2e);
+    $else:
+      v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vx, vlog2e));
 
-    // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
-    // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
     const v128_t vs = wasm_i32x4_shl(vn, 23);
 
-    // Subtract the large number back to get final batch := round(x / log(2)).
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
-    // Compute reduced argument t := x - batch * log(2).
-    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    v128_t vt = wasm_f32x4_add(vx, wasm_f32x4_mul(vn, vminus_ln2_hi));
-    vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vminus_ln2_lo));
+    $if FMA:
+      v128_t vt = __builtin_wasm_fma_f32x4(vx, vn, vminus_ln2_hi);
+      vt = __builtin_wasm_fma_f32x4(vt, vn, vminus_ln2_lo);
+    $else:
+      v128_t vt = wasm_f32x4_add(vx, wasm_f32x4_mul(vn, vminus_ln2_hi));
+      vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vminus_ln2_lo));
 
-    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
-    v128_t vp = wasm_f32x4_add(vc4, wasm_f32x4_mul(vc5, vt));
-    vp = wasm_f32x4_add(vc3, wasm_f32x4_mul(vp, vt));
-    vp = wasm_f32x4_add(vc2, wasm_f32x4_mul(vp, vt));
-    vp = wasm_f32x4_add(vc1, wasm_f32x4_mul(vp, vt));
+    $if FMA:
+      v128_t vp = __builtin_wasm_fma_f32x4(vc4, vc5, vt);
+      vp = __builtin_wasm_fma_f32x4(vc3, vp, vt);
+      vp = __builtin_wasm_fma_f32x4(vc2, vp, vt);
+      vp = __builtin_wasm_fma_f32x4(vc1, vp, vt);
+    $else:
+      v128_t vp = wasm_f32x4_add(vc4, wasm_f32x4_mul(vc5, vt));
+      vp = wasm_f32x4_add(vc3, wasm_f32x4_mul(vp, vt));
+      vp = wasm_f32x4_add(vc2, wasm_f32x4_mul(vp, vt));
+      vp = wasm_f32x4_add(vc1, wasm_f32x4_mul(vp, vt));
 
-    // Reconstruct the final f value:
-    //   f = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
-    //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
-    //     = s + (t * s) * p
     vt = wasm_f32x4_mul(vt, vs);
-    v128_t vf = wasm_f32x4_add(vs, wasm_f32x4_mul(vt, vp));
+    $if FMA:
+      v128_t vf = __builtin_wasm_fma_f32x4(vs, vt, vp);
+    $else:
+      v128_t vf = wasm_f32x4_add(vs, wasm_f32x4_mul(vt, vp));
 
-    // For inputs below zero cutoff, replace output with +0.0f.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
     vf = wasm_v128_andnot(vf, wasm_f32x4_lt(vx, vdenorm_cutoff));
 
-    // Store 4 outputs at a time.
     wasm_v128_store(output, vf);
     output += 4;
 
-    // Accumulate computed exponents.
     vacc = wasm_f32x4_add(vacc, vf);
   }
-  vacc = wasm_f32x4_add(vacc, wasm_v32x4_shuffle(vacc, vacc, 2, 3, 2, 3));
+  vacc = wasm_f32x4_add(vacc, wasm_v64x2_shuffle(vacc, vacc, 1, 1));
   float vsum = wasm_f32x4_extract_lane(vacc, 0) + wasm_f32x4_extract_lane(vacc, 1);
   if (batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 3 * sizeof(float));
-    // Load 4 inputs at a time.
+
     const v128_t vi = wasm_v128_load(input);
 
-    // Subtract maximum input x := i - i_max. This implies x <= 0.
     const v128_t vx = wasm_f32x4_sub(vi, vi_max);
 
-    // Compute reduced argument batch := round(x / log(2)).
-    v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vx, vlog2e));
+    $if FMA:
+      v128_t vn = __builtin_wasm_fma_f32x4(vmagic_bias, vx, vlog2e);
+    $else:
+      v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vx, vlog2e));
 
-    // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
-    // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
     const v128_t vs = wasm_i32x4_shl(vn, 23);
 
-    // Subtract the large number back to get final batch := round(x / log(2)).
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
-    // Compute reduced argument t := x - batch * log(2).
-    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    v128_t vt = wasm_f32x4_add(vx, wasm_f32x4_mul(vn, vminus_ln2_hi));
-    vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vminus_ln2_lo));
+    $if FMA:
+      v128_t vt = __builtin_wasm_fma_f32x4(vx, vn, vminus_ln2_hi);
+      vt = __builtin_wasm_fma_f32x4(vt, vn, vminus_ln2_lo);
+    $else:
+      v128_t vt = wasm_f32x4_add(vx, wasm_f32x4_mul(vn, vminus_ln2_hi));
+      vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vminus_ln2_lo));
 
-    // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
-    v128_t vp = wasm_f32x4_add(vc4, wasm_f32x4_mul(vc5, vt));
-    vp = wasm_f32x4_add(vc3, wasm_f32x4_mul(vp, vt));
-    vp = wasm_f32x4_add(vc2, wasm_f32x4_mul(vp, vt));
-    vp = wasm_f32x4_add(vc1, wasm_f32x4_mul(vp, vt));
+    $if FMA:
+      v128_t vp = __builtin_wasm_fma_f32x4(vc4, vc5, vt);
+      vp = __builtin_wasm_fma_f32x4(vc3, vp, vt);
+      vp = __builtin_wasm_fma_f32x4(vc2, vp, vt);
+      vp = __builtin_wasm_fma_f32x4(vc1, vp, vt);
+    $else:
+      v128_t vp = wasm_f32x4_add(vc4, wasm_f32x4_mul(vc5, vt));
+      vp = wasm_f32x4_add(vc3, wasm_f32x4_mul(vp, vt));
+      vp = wasm_f32x4_add(vc2, wasm_f32x4_mul(vp, vt));
+      vp = wasm_f32x4_add(vc1, wasm_f32x4_mul(vp, vt));
 
-    // Reconstruct the final f value:
-    //   f = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
-    //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
-    //     = s + (t * s) * p
     vt = wasm_f32x4_mul(vt, vs);
-    v128_t vf = wasm_f32x4_add(vs, wasm_f32x4_mul(vt, vp));
+    $if FMA:
+      v128_t vf = __builtin_wasm_fma_f32x4(vs, vt, vp);
+    $else:
+      v128_t vf = wasm_f32x4_add(vs, wasm_f32x4_mul(vt, vp));
 
-    // For inputs below zero cutoff, replace output with +0.0f.
-    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
     vf = wasm_v128_andnot(vf, wasm_f32x4_lt(vx, vdenorm_cutoff));
 
     if (batch & (2 * sizeof(float))) {
-      // Store and accumulate 2 outputs at a time.
-      const float vf0 = wasm_f32x4_extract_lane(vf, 0);
-      output[0] = vf0;
-      vsum += vf0;
-
-      const float vf1 = wasm_f32x4_extract_lane(vf, 1);
-      output[1] = vf1;
-      vsum += vf1;
-
-      vf = wasm_v32x4_shuffle(vf, vf, 2, 3, 2, 3);
+      wasm_v128_store64_lane(output, vf, 0);
       output += 2;
+
+      vsum += wasm_f32x4_extract_lane(vf, 0) + wasm_f32x4_extract_lane(vf, 1);
+      vf = wasm_v64x2_shuffle(vf, vf, 1, 1);
     }
     if (batch & (1 * sizeof(float))) {
-      // Store 1 output at a time.
-      const float vf0 = wasm_f32x4_extract_lane(vf, 0);
-      *output = vf0;
-      vsum += vf0;
+      wasm_v128_store32_lane(output, vf, 0);
+      vsum += wasm_f32x4_extract_lane(vf, 0);
     }
   }
-  // Reduce 4 batch in the SIMD register
   *sum = vsum;
 }
