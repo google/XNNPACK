@@ -1338,6 +1338,70 @@ static void f32_vsigmoid(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmrelaxedsimd_rr2_lut64_p2_div_x4,
+                    xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_lut64_p2_div_x4,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_lut64_p2_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmrelaxedsimd_rr2_lut64_p2_div_x8,
+                    xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_lut64_p2_div_x8,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_lut64_p2_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmrelaxedsimd_rr2_lut64_p2_div_x12,
+                    xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_lut64_p2_div_x12,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_lut64_p2_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmrelaxedsimd_rr2_lut64_p2_div_x16,
+                    xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_lut64_p2_div_x16,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_lut64_p2_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmrelaxedsimd_rr2_lut64_p2_div_x20,
+                    xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_lut64_p2_div_x20,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_lut64_p2_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmrelaxedsimd_rr2_lut64_p2_div_x24,
+                    xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_lut64_p2_div_x24,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_lut64_p2_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmrelaxedsimd_rr2_p5_div_x4,
+                    xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_x4,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmrelaxedsimd_rr2_p5_div_x8,
+                    xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_x8,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmrelaxedsimd_rr2_p5_div_x12,
+                    xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_x12,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmrelaxedsimd_rr2_p5_div_x16,
+                    xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_x16,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmrelaxedsimd_rr2_p5_div_x20,
+                    xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_x20,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmrelaxedsimd_rr2_p5_div_x24,
+                    xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_x24,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_vsigmoid, wasmsimd_rr2_lut64_p2_div_x4,
                     xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_lut64_p2_div_x4,

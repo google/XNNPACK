@@ -251,19 +251,33 @@ tools/xngen src/f32-vsigmoid/avx512f-rr2-lut32-p2-perm2-scalef.c.in -D BATCH_TIL
 tools/xngen src/f32-vsigmoid/avx512f-rr2-lut32-p2-perm2-scalef.c.in -D BATCH_TILE=128 -D RR_STEPS=2 -D DIV_ALGO=nr1fma -o src/f32-vsigmoid/gen/f32-vsigmoid-avx512f-rr2-lut32-p2-perm2-scalef-nr1fma-x128.c &
 
 ################################## WAsm SIMD ##################################
-tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=4  -D BLEND=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x4.c &
-tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=8  -D BLEND=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x8.c &
-tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=12 -D BLEND=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x12.c &
-tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=16 -D BLEND=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x16.c &
-tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=20 -D BLEND=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x20.c &
-tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=24 -D BLEND=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x24.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=4  -D FMA=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x4.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=8  -D FMA=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x8.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=12 -D FMA=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x12.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=16 -D FMA=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x16.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=20 -D FMA=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x20.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=24 -D FMA=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x24.c &
 
-tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=4  -D BLEND=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-x4.c &
-tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=8  -D BLEND=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-x8.c &
-tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=12 -D BLEND=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-x12.c &
-tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=16 -D BLEND=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-x16.c &
-tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=20 -D BLEND=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-x20.c &
-tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=24 -D BLEND=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-x24.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=4  -D FMA=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-rr2-p5-div-x4.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=8  -D FMA=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-rr2-p5-div-x8.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=12 -D FMA=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-rr2-p5-div-x12.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=16 -D FMA=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-rr2-p5-div-x16.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=20 -D FMA=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-rr2-p5-div-x20.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-p5-div.c.in -D BATCH_TILE=24 -D FMA=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-rr2-p5-div-x24.c &
+
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=4  -D FMA=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-x4.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=8  -D FMA=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-x8.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=12 -D FMA=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-x12.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=16 -D FMA=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-x16.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=20 -D FMA=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-x20.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=24 -D FMA=0 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-lut64-p2-div-x24.c &
+
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=4  -D FMA=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-rr2-lut64-p2-div-x4.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=8  -D FMA=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-rr2-lut64-p2-div-x8.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=12 -D FMA=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-rr2-lut64-p2-div-x12.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=16 -D FMA=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-rr2-lut64-p2-div-x16.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=20 -D FMA=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-rr2-lut64-p2-div-x20.c &
+tools/xngen src/f32-vsigmoid/wasmsimd-rr2-lut64-p2-div.c.in -D BATCH_TILE=24 -D FMA=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-rr2-lut64-p2-div-x24.c &
 
 ################################### Scalar ####################################
 tools/xngen src/f32-vsigmoid/scalar-rr2-lut2048-p1-div.c.in -D BATCH_TILE=1 -o src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-lut2048-p1-div-x1.c &
