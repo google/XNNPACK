@@ -36,8 +36,8 @@ void xnn_f16_ibilinear_ukernel__neonfp16arith_c${CHANNEL_TILE}${"" if PIXEL_TILE
     const uint16_t* i3 = (const uint16_t*) ((uintptr_t) input[3] + input_offset);
     input += 4;
 
-    const float16x8_t valphah = vld1q_dup_f16(weights); weights = (const uint16_t*) weights + 1;
-    const float16x8_t valphav = vld1q_dup_f16(weights); weights = (const uint16_t*) weights + 1;
+    const float16x8_t valphah = vreinterpretq_f16_u16(vld1q_dup_u16(weights)); weights = (const uint16_t*) weights + 1;
+    const float16x8_t valphav = vreinterpretq_f16_u16(vld1q_dup_u16(weights)); weights = (const uint16_t*) weights + 1;
 
     size_t c = channels;
     $if CHANNEL_TILE > 8:
