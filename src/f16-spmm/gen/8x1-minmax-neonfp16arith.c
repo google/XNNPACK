@@ -51,13 +51,13 @@ void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith(
     size_t n = nc;
     do {
       uint32_t nnz = *nnzmap++;
-      float16x8_t vacc01234567 = vld1q_dup_f16(w); w += 1;
+      float16x8_t vacc01234567 = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
       if XNN_LIKELY(nnz != 0) {
         do {
           const intptr_t diff = *dmap++;
           const float16x8_t va01234567 = vreinterpretq_f16_u16(vld1q_u16(i));
           i = (const uint16_t*restrict) ((uintptr_t) i + (uintptr_t) diff);
-          const float16x8_t vb = vld1q_dup_f16(w); w += 1;
+          const float16x8_t vb = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
           vacc01234567 = vfmaq_f16(vacc01234567, va01234567, vb);
         } while (--nnz != 0);
       }
@@ -79,13 +79,13 @@ void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith(
       size_t n = nc;
       do {
         uint32_t nnz = *nnzmap++;
-        float16x4_t vacc0123 = vld1_dup_f16(w); w += 1;
+        float16x4_t vacc0123 = vreinterpret_f16_u16(vld1_dup_u16(w)); w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
             const float16x4_t va0123 = vreinterpret_f16_u16(vld1_u16(i));
             i = (const uint16_t*restrict) ((uintptr_t) i + (uintptr_t) diff);
-            const float16x4_t vb = vld1_dup_f16(w); w += 1;
+            const float16x4_t vb = vreinterpret_f16_u16(vld1_dup_u16(w)); w += 1;
             vacc0123 = vfma_f16(vacc0123, va0123, vb);
           } while (--nnz != 0);
         }
@@ -105,13 +105,13 @@ void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith(
       size_t n = nc;
       do {
         uint32_t nnz = *nnzmap++;
-        float16x4_t vacc01 = vld1_dup_f16(w); w += 1;
+        float16x4_t vacc01 = vreinterpret_f16_u16(vld1_dup_u16(w)); w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
             const float16x4_t va01 = vreinterpret_f16_u32(vld1_dup_u32((const void*) i));
             i = (const uint16_t*restrict) ((uintptr_t) i + (uintptr_t) diff);
-            const float16x4_t vb = vld1_dup_f16(w); w += 1;
+            const float16x4_t vb = vreinterpret_f16_u16(vld1_dup_u16(w)); w += 1;
             vacc01 = vfma_f16(vacc01, va01, vb);
           } while (--nnz != 0);
         }
@@ -131,13 +131,13 @@ void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith(
       size_t n = nc;
       do {
         uint32_t nnz = *nnzmap++;
-        float16x4_t vacc0 = vld1_dup_f16(w); w += 1;
+        float16x4_t vacc0 = vreinterpret_f16_u16(vld1_dup_u16(w)); w += 1;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
-            const float16x4_t va0 = vld1_dup_f16(i);
+            const float16x4_t va0 = vreinterpret_f16_u16(vld1_dup_u16(i));
             i = (const uint16_t*restrict) ((uintptr_t) i + (uintptr_t) diff);
-            const float16x4_t vb = vld1_dup_f16(w); w += 1;
+            const float16x4_t vb = vreinterpret_f16_u16(vld1_dup_u16(w)); w += 1;
             vacc0 = vfma_f16(vacc0, va0, vb);
           } while (--nnz != 0);
         }
