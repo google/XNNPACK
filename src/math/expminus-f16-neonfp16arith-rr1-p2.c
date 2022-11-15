@@ -19,16 +19,16 @@ void xnn_math_f16_expminus__neonfp16arith_rr1_p2(
   assert(n % (8 * sizeof(uint16_t)) == 0);
 
   // Large number such that ulp(magic bias) == 1 and magic bias === 15 mod 2**9.
-  const float16x8_t vmagic_bias = vmovq_n_f16(0x1.83Cp+10f);
-  const float16x8_t vlog2e = vmovq_n_f16(0x1.714p+0f);
-  const float16x8_t vminus_ln2 = vmovq_n_f16(-0x1.630p-1f);
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x660F)));  // 0x1.83Cp+10h
+  const float16x8_t vlog2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3DC5)));  // 0x1.714p+0h
+  const float16x8_t vminus_ln2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xB98C)));  // -0x1.630p-1h
   // Coefficient of polynomial approximation
   //   exp(t) ~ 1 + t * (c1 + t * c2)
   // on [-log(2)/2, log(2)/2]
-  const float16x8_t vc2 = vmovq_n_f16(0x1.FE4p-2f);
-  const float16x8_t vc1 = vmovq_n_f16(0x1.038p0f);
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x37F9)));  // 0x1.FE4p-2h
+  const float16x8_t vc1 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C0E)));  // 0x1.038p+0h
   // The smallest x for which exph(x) is normalized.
-  const float16x8_t vdenorm_cutoff = vmovq_n_f16(-0x1.368p3f);
+  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xC8DA)));  // -0x1.368p+3h
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
