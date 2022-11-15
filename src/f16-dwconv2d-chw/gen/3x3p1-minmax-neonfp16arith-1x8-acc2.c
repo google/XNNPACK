@@ -43,9 +43,9 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc2(
   #endif
   const uint16x8_t vmask = vld1q_u16(params->neonfp16arith.mask);
 
-  const uint16_t* w0 = (const uint16_t*)weights;
-  const float16x8_t vw01234567 = vreinterpretq_f16_u16(vld1q_u16(w0));
-  const float16x4_t vw89 = vreinterpret_f16_u32(vld1_dup_u32((const void*)(w0 + 8)));
+  const uint16_t* w = (const uint16_t*) weights;
+  const float16x8_t vw01234567 = vreinterpretq_f16_u16(vld1q_u16(w));
+  const float16x4_t vw89 = vreinterpret_f16_u32(vld1_dup_u32((const void*) (w + 8)));
 
   const size_t input_decrement = round_up_po2(input_width, 8 * sizeof(uint16_t));
 
@@ -231,7 +231,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc2(
           vo0_lo = vext_f16(vo0_lo, vo0_lo, 2);
         }
         if (w & (1 * sizeof(uint16_t))) {
-          vst1_lane_f16(o0, vo0_lo, 0); o0 += 1;
+          vst1_lane_u16(o0, vreinterpret_u16_f16(vo0_lo), 0); o0 += 1;
         }
       }
     }

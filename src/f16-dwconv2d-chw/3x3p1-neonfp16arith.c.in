@@ -41,9 +41,9 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
   #endif
   const uint16x8_t vmask = vld1q_u16(params->neonfp16arith.mask);
 
-  const uint16_t* w0 = (const uint16_t*)weights;
-  const float16x8_t vw01234567 = vreinterpretq_f16_u16(vld1q_u16(w0));
-  const float16x4_t vw89 = vreinterpret_f16_u32(vld1_dup_u32((const void*)(w0 + 8)));
+  const uint16_t* w = (const uint16_t*) weights;
+  const float16x8_t vw01234567 = vreinterpretq_f16_u16(vld1q_u16(w));
+  const float16x4_t vw89 = vreinterpret_f16_u32(vld1_dup_u32((const void*) (w + 8)));
 
   const size_t input_decrement = round_up_po2(input_width, 8 * sizeof(uint16_t));
 
@@ -297,7 +297,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_${ROW_TILE}x8${"_acc%d" %
         }
         if (w & (1 * sizeof(uint16_t))) {
           $for M in reversed(range(ROW_TILE)):
-            vst1_lane_f16(o${M}, vo${M}_lo, 0); o${M} += 1;
+            vst1_lane_u16(o${M}, vreinterpret_u16_f16(vo${M}_lo), 0); o${M} += 1;
         }
       }
     }
