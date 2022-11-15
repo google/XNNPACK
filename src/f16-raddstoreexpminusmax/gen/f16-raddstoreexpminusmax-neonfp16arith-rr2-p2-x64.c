@@ -30,7 +30,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x64(
   assert(output != NULL);
   assert(sum != NULL);
 
-  const float16x8_t vi_max = vld1q_dup_f16(max);
+  const float16x8_t vi_max = vreinterpretq_f16_u16(vld1q_dup_u16(max));
   const float16x8_t vlog2e = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.log2e));
   const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.magic_bias));
   const float16x8_t vminus_ln2_hi = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith_rr2_p2.minus_ln2_hi));
