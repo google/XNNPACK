@@ -349,7 +349,9 @@ scripts/convert-assembly-to-jit.py --no-post-op -i src/f32-igemm/gen/f32-igemm-4
 scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-prfm-cortex-a75.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a75.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-prfm-cortex-a53.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a53.cc &
 # AArch64
+scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-1x8-minmax-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-igemm/f32-igemm-1x8-aarch64-neonfma-cortex-a75.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-igemm/f32-igemm-4x8-aarch64-neonfma-cortex-a75.cc &
+scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-igemm/f32-igemm-6x8-aarch64-neonfma-cortex-a75.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-ld128.S -o src/f32-igemm/f32-igemm-6x8-aarch64-neonfma-ld128.cc &
 
 wait

@@ -245,7 +245,7 @@ AARCH64_POST_OP = """void Generator::perform_post_operations(
         const auto six = v2.v4s();
         const auto zero = v3.v4s();
         // v4, v5, v6, v7 available for temporaries.
-        ld3r({sixth, three, six}, mem[x8]++);
+        ld3r({sixth, three, six}, mem[PARAMS_REG_PLACEHOLDER]++);
         movi(zero, 0);
         const VRegister accs[] = {ACCS_PLACEHOLDER
         };

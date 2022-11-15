@@ -115,9 +115,12 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75
 
 1:
         # Load next 6 A pointers
-        LDP     x14, x15, [x4], 16
-        LDP     x20, x21, [x4], 16
-        LDP     x22, x23, [x4], 16
+        LDR     x14, [x4], 8
+        LDR     x15, [x4], 8
+        LDR     x20, [x4], 8
+        LDR     x21, [x4], 8
+        LDR     x22, [x4], 8
+        LDR     x23, [x4], 8
 
         CMP     x14, x12                // if a0 == zero
         ADD     x14, x14, x11           // a0 += a_offset
