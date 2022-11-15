@@ -19,19 +19,19 @@ void xnn_math_f16_sigmoid__neonfp16arith_rr2_p3_recpe(
   assert(n % (8 * sizeof(uint16_t)) == 0);
 
   // Large number such that ulp(magic bias) == 1 and magic bias === 15 mod 2**9.
-  const float16x8_t vmagic_bias = vmovq_n_f16(0x1.83Cp+10f);
-  const float16x8_t vminus_log2e = vmovq_n_f16(-0x1.714p+0f);
-  const float16x8_t vln2_hi = vmovq_n_f16(0x1.630p-1f);
-  const float16x8_t vln2_lo = vmovq_n_f16(-0x1.BD0p-13f);
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x660F)));  // 0x1.83Cp+10h
+  const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xBDC5)));  // -0x1.714p+0h
+  const float16x8_t vln2_hi = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x398C)));  // 0x1.630p-1h
+  const float16x8_t vln2_lo = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x8AF4)));  // -0x1.BD0p-13h
   // Coefficient of polynomial approximation
-  //   exp(-t) ~ 1 + t * (-1 + t * (c2 + t * c3))
+  //   exp(-t) ~ 1 + t * (c1 + t * c2)
   // on [-log(2)/2, log(2)/2]
-  const float16x8_t vc3 = vmovq_n_f16(-0x1.558p-3f);
-  const float16x8_t vc2 = vmovq_n_f16(0x1.020p-1f);
+  const float16x8_t vc3 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xB156)));  // -0x1.558p-3h
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3808)));  // 0x1.020p-1h
   const float16x8_t vone = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C00)));  // 1.0h
   // The largest z for which sigmoidh(-z) is normalized.
   // This number is also the largest z for which exph(-z) is normalized.
-  const float16x8_t vdenorm_cutoff = vmovq_n_f16(-0x1.368p+3f);
+  const float16x8_t vdenorm_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xC8DA)));  // -0x1.368p+3h
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
