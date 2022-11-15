@@ -40,8 +40,7 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p${PIXEL_TILE}(
         i += 2 * ${PIXEL_TILE};
 
         $for P in range(0, PIXEL_TILE, 4):
-          const float16x4x2_t vw${ABC[P:P+4]} = vld2_f16((const void*) (w + ${2 * P}));
-        w += 2 * ${PIXEL_TILE};
+          const uint16x4x2_t vw${ABC[P:P+4]} = vld2_u16(w); w += 8;
 
         $for P in range(0, PIXEL_TILE, 4):
           float16x8_t vtltr${ABC[P:P+4]} = vreinterpretq_f16_u32(vld1q_dup_u32((const void*) itl${ABC[P]}));
@@ -53,8 +52,8 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p${PIXEL_TILE}(
             vblbr${ABC[P:P+4]} = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) ibl${ABC[P+L]}, vreinterpretq_u32_f16(vblbr${ABC[P:P+4]}), ${L}));
 
         $for P in range(0, PIXEL_TILE, 8):
-          const float16x8_t valphah${ABC[P:P+8]} = vcombine_f16(vw${ABC[P:P+4]}.val[0], vw${ABC[P+4:P+8]}.val[0]);
-          const float16x8_t valphav${ABC[P:P+8]} = vcombine_f16(vw${ABC[P:P+4]}.val[1], vw${ABC[P+4:P+8]}.val[1]);
+          const float16x8_t valphah${ABC[P:P+8]} = vreinterpretq_f16_u16(vcombine_u16(vw${ABC[P:P+4]}.val[0], vw${ABC[P+4:P+8]}.val[0]));
+          const float16x8_t valphav${ABC[P:P+8]} = vreinterpretq_f16_u16(vcombine_u16(vw${ABC[P:P+4]}.val[1], vw${ABC[P+4:P+8]}.val[1]));
 
         $for P in range(0, PIXEL_TILE, 4):
           const float16x8_t vldrd${ABC[P:P+4]} = vsubq_f16(vblbr${ABC[P:P+4]}, vtltr${ABC[P:P+4]});
@@ -79,8 +78,7 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p${PIXEL_TILE}(
           const float16x8_t vo${ABC[P:P+8]} = vfmaq_f16(vl${ABC[P:P+8]}, vd${ABC[P:P+8]}, valphah${ABC[P:P+8]});
 
         $for P in range(0, PIXEL_TILE, 8):
-          vst1q_u16(o + ${P}, vreinterpretq_u16_f16(vo${ABC[P:P+8]}));
-        o += ${PIXEL_TILE};
+          vst1q_u16(o, vreinterpretq_u16_f16(vo${ABC[P:P+8]})); o += 8;
       }
     for (; p >= 4; p -= 4) {
       $for P in range(4):
@@ -88,8 +86,7 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p${PIXEL_TILE}(
         const uint16_t* ibl${ABC[P]} = (const uint16_t*) ((uintptr_t) i[${2 * P + 1}] + input_offset);
       i += 8;
 
-      const float16x4x2_t vw = vld2_f16((const void*) w);
-      w += 8;
+      const uint16x4x2_t vw = vld2_u16(w); w += 8;
 
       float16x8_t vtltr = vreinterpretq_f16_u32(vld1q_dup_u32((const void*) itl${ABC[0]}));
       float16x8_t vblbr = vreinterpretq_f16_u32(vld1q_dup_u32((const void*) ibl${ABC[0]}));
@@ -97,8 +94,8 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p${PIXEL_TILE}(
         vtltr = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) itl${ABC[P]}, vreinterpretq_u32_f16(vtltr), ${P}));
         vblbr = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) ibl${ABC[P]}, vreinterpretq_u32_f16(vblbr), ${P}));
 
-      const float16x4_t valphah = vw.val[0];
-      const float16x4_t valphav = vw.val[1];
+      const float16x4_t valphah = vreinterpret_f16_u16(vw.val[0]);
+      const float16x4_t valphav = vreinterpret_f16_u16(vw.val[1]);
 
       const float16x8_t vldrd = vsubq_f16(vblbr, vtltr);
 
@@ -125,8 +122,7 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p${PIXEL_TILE}(
           const uint16_t* ibl${ABC[P]} = (const uint16_t*) ((uintptr_t) i[${2 * P + 1}] + input_offset);
         i += 4;
 
-        const float16x4_t vw = vreinterpret_f16_u16(vld1_u16(w));
-        w += 4;
+        const float16x4_t vw = vreinterpret_f16_u16(vld1_u16(w)); w += 4;
 
         const float16x4x2_t vwhv = vuzp_f16(vw, vw);
         const float16x4_t valphah = vwhv.val[0];
@@ -154,10 +150,8 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p${PIXEL_TILE}(
         const float16x4_t vd = vsub_f16(vr, vl);
         const float16x4_t vo = vfma_f16(vl, vd, valphah);
 
-        vst1_lane_u32((void*) o, vreinterpret_u32_f16(vo), 0);
-        o += 2;
+        vst1_lane_u32((void*) o, vreinterpret_u32_f16(vo), 0); o += 2;
       }
-
       if (p & 1) {
         // We are computing the following formula:
         //   result = (1 - alpha_h) * (1 - alpha_v) * top_left +
@@ -175,8 +169,7 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p${PIXEL_TILE}(
         const uint16_t* ibl = (const uint16_t*) ((uintptr_t) i[1] + input_offset);
         i += 2;
 
-        const float16x4_t vw = vreinterpret_f16_u32(vld1_dup_u32((const void*) w));
-        w += 2;
+        const float16x4_t vw = vreinterpret_f16_u32(vld1_dup_u32((const void*) w)); w += 2;
 
         const float16x4x2_t vwhv = vuzp_f16(vw, vw);
         const float16x4_t valphah = vwhv.val[0];
@@ -201,8 +194,7 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p${PIXEL_TILE}(
         const float16x4_t vd = vsub_f16(vr, vl);
         const float16x4_t vo = vfma_f16(vl, vd, valphah);
 
-        vst1_lane_f16(o, vo, 0);
-        o += 1;
+        vst1_lane_f16(o, vo, 0); o += 1;
       }
     }
 

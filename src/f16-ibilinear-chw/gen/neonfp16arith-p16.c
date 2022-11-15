@@ -68,11 +68,10 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p16(
       const uint16_t* iblF = (const uint16_t*) ((uintptr_t) i[31] + input_offset);
       i += 2 * 16;
 
-      const float16x4x2_t vw0123 = vld2_f16((const void*) (w + 0));
-      const float16x4x2_t vw4567 = vld2_f16((const void*) (w + 8));
-      const float16x4x2_t vw89AB = vld2_f16((const void*) (w + 16));
-      const float16x4x2_t vwCDEF = vld2_f16((const void*) (w + 24));
-      w += 2 * 16;
+      const uint16x4x2_t vw0123 = vld2_u16(w); w += 8;
+      const uint16x4x2_t vw4567 = vld2_u16(w); w += 8;
+      const uint16x4x2_t vw89AB = vld2_u16(w); w += 8;
+      const uint16x4x2_t vwCDEF = vld2_u16(w); w += 8;
 
       float16x8_t vtltr0123 = vreinterpretq_f16_u32(vld1q_dup_u32((const void*) itl0));
       float16x8_t vblbr0123 = vreinterpretq_f16_u32(vld1q_dup_u32((const void*) ibl0));
@@ -108,10 +107,10 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p16(
       vtltrCDEF = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) itlF, vreinterpretq_u32_f16(vtltrCDEF), 3));
       vblbrCDEF = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) iblF, vreinterpretq_u32_f16(vblbrCDEF), 3));
 
-      const float16x8_t valphah01234567 = vcombine_f16(vw0123.val[0], vw4567.val[0]);
-      const float16x8_t valphav01234567 = vcombine_f16(vw0123.val[1], vw4567.val[1]);
-      const float16x8_t valphah89ABCDEF = vcombine_f16(vw89AB.val[0], vwCDEF.val[0]);
-      const float16x8_t valphav89ABCDEF = vcombine_f16(vw89AB.val[1], vwCDEF.val[1]);
+      const float16x8_t valphah01234567 = vreinterpretq_f16_u16(vcombine_u16(vw0123.val[0], vw4567.val[0]));
+      const float16x8_t valphav01234567 = vreinterpretq_f16_u16(vcombine_u16(vw0123.val[1], vw4567.val[1]));
+      const float16x8_t valphah89ABCDEF = vreinterpretq_f16_u16(vcombine_u16(vw89AB.val[0], vwCDEF.val[0]));
+      const float16x8_t valphav89ABCDEF = vreinterpretq_f16_u16(vcombine_u16(vw89AB.val[1], vwCDEF.val[1]));
 
       const float16x8_t vldrd0123 = vsubq_f16(vblbr0123, vtltr0123);
       const float16x8_t vldrd4567 = vsubq_f16(vblbr4567, vtltr4567);
@@ -142,9 +141,8 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p16(
       const float16x8_t vo01234567 = vfmaq_f16(vl01234567, vd01234567, valphah01234567);
       const float16x8_t vo89ABCDEF = vfmaq_f16(vl89ABCDEF, vd89ABCDEF, valphah89ABCDEF);
 
-      vst1q_u16(o + 0, vreinterpretq_u16_f16(vo01234567));
-      vst1q_u16(o + 8, vreinterpretq_u16_f16(vo89ABCDEF));
-      o += 16;
+      vst1q_u16(o, vreinterpretq_u16_f16(vo01234567)); o += 8;
+      vst1q_u16(o, vreinterpretq_u16_f16(vo89ABCDEF)); o += 8;
     }
     for (; p >= 4; p -= 4) {
       const uint16_t* itl0 = (const uint16_t*) ((uintptr_t) i[0] + input_offset);
@@ -157,8 +155,7 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p16(
       const uint16_t* ibl3 = (const uint16_t*) ((uintptr_t) i[7] + input_offset);
       i += 8;
 
-      const float16x4x2_t vw = vld2_f16((const void*) w);
-      w += 8;
+      const uint16x4x2_t vw = vld2_u16(w); w += 8;
 
       float16x8_t vtltr = vreinterpretq_f16_u32(vld1q_dup_u32((const void*) itl0));
       float16x8_t vblbr = vreinterpretq_f16_u32(vld1q_dup_u32((const void*) ibl0));
@@ -169,8 +166,8 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p16(
       vtltr = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) itl3, vreinterpretq_u32_f16(vtltr), 3));
       vblbr = vreinterpretq_f16_u32(vld1q_lane_u32((const void*) ibl3, vreinterpretq_u32_f16(vblbr), 3));
 
-      const float16x4_t valphah = vw.val[0];
-      const float16x4_t valphav = vw.val[1];
+      const float16x4_t valphah = vreinterpret_f16_u16(vw.val[0]);
+      const float16x4_t valphav = vreinterpret_f16_u16(vw.val[1]);
 
       const float16x8_t vldrd = vsubq_f16(vblbr, vtltr);
 
@@ -198,8 +195,7 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p16(
         const uint16_t* ibl1 = (const uint16_t*) ((uintptr_t) i[3] + input_offset);
         i += 4;
 
-        const float16x4_t vw = vreinterpret_f16_u16(vld1_u16(w));
-        w += 4;
+        const float16x4_t vw = vreinterpret_f16_u16(vld1_u16(w)); w += 4;
 
         const float16x4x2_t vwhv = vuzp_f16(vw, vw);
         const float16x4_t valphah = vwhv.val[0];
@@ -227,10 +223,8 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p16(
         const float16x4_t vd = vsub_f16(vr, vl);
         const float16x4_t vo = vfma_f16(vl, vd, valphah);
 
-        vst1_lane_u32((void*) o, vreinterpret_u32_f16(vo), 0);
-        o += 2;
+        vst1_lane_u32((void*) o, vreinterpret_u32_f16(vo), 0); o += 2;
       }
-
       if (p & 1) {
         // We are computing the following formula:
         //   result = (1 - alpha_h) * (1 - alpha_v) * top_left +
@@ -248,8 +242,7 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p16(
         const uint16_t* ibl = (const uint16_t*) ((uintptr_t) i[1] + input_offset);
         i += 2;
 
-        const float16x4_t vw = vreinterpret_f16_u32(vld1_dup_u32((const void*) w));
-        w += 2;
+        const float16x4_t vw = vreinterpret_f16_u32(vld1_dup_u32((const void*) w)); w += 2;
 
         const float16x4x2_t vwhv = vuzp_f16(vw, vw);
         const float16x4_t valphah = vwhv.val[0];
@@ -274,8 +267,7 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p16(
         const float16x4_t vd = vsub_f16(vr, vl);
         const float16x4_t vo = vfma_f16(vl, vd, valphah);
 
-        vst1_lane_f16(o, vo, 0);
-        o += 1;
+        vst1_lane_f16(o, vo, 0); o += 1;
       }
     }
 
