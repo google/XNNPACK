@@ -19,19 +19,22 @@ void xnn_math_f16_exp__neonfp16arith_rr2_p3(
 {
   assert(n % (8 * sizeof(uint16_t)) == 0);
 
-  const float16x8_t vmagic_bias = vmovq_n_f16(0x1.800p+10f);
+  const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x6600)));  // 0x1.800p+10h
   // The smallest x for which exph(x) is non-zero.
-  const float16x8_t vzero_cutoff = vmovq_n_f16(-0x1.154p+4f);
+  const float16x8_t vzero_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xCC55)));  // -0x1.154p+4h
   // The largest x for which exph(x) is finite.
-  const float16x8_t vinf_cutoff = vmovq_n_f16(0x1.63Cp+3f);
-  const float16x8_t vlog2e = vmovq_n_f16(0x1.714p+0f);
-  const float16x8_t vminus_ln2_hi = vmovq_n_f16(-0x1.630p-1f);
-  const float16x8_t vminus_ln2_lo = vmovq_n_f16(0x1.BD0p-13f);
-  const float16x8_t vplus_inf = vmovq_n_f16(INFINITY);
+  const float16x8_t vinf_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x498F)));  // 0x1.63Cp+3h
+  const float16x8_t vlog2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3DC5)));  // 0x1.714p+0h
+  const float16x8_t vminus_ln2_hi = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xB98C)));  // -0x1.630p-1h
+  const float16x8_t vminus_ln2_lo = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x0AF4)));  // 0x1.BD0p-13h
+  const float16x8_t vplus_inf = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x7C00)));
 
+  // Coefficient of polynomial approximation
+  //   exp(t) - 1 ~ t * (1 + t * (c2 + t * c3))
+  // on [-log(2)/2, log(2)/2]
+  const float16x8_t vc3 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x315B)));  // 0x1.56Cp-3h
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3808)));  // 0x1.020p-1h
   const float16x8_t vone = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C00)));  // 1.0h
-  const float16x8_t vc2 = vmovq_n_f16(0x1.020p-1f);
-  const float16x8_t vc3 = vmovq_n_f16(0x1.558p-3f);
 
   const int16x8_t vmin_exponent = vmovq_n_s16(INT16_C(0xC800));
   const int16x8_t vmax_exponent = vreinterpretq_s16_f16(vone);
