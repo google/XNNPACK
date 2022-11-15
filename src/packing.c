@@ -31,6 +31,7 @@ void xnn_pack_f32_gemm_goi_w(
   size_t extra_bytes,
   const void* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -80,6 +81,7 @@ void xnn_pack_f16_gemm_goi_w(
   size_t extra_bytes,
   const void* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -129,6 +131,7 @@ void xnn_pack_f32_to_f16_gemm_goi_w(
   size_t extra_bytes,
   const void* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -178,6 +181,7 @@ void xnn_pack_qu8_gemm_goi_w(
   size_t extra_bytes,
   const struct xnn_qu8_packing_params* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -241,6 +245,7 @@ void xnn_pack_qs8_gemm_goi_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -303,6 +308,7 @@ void xnn_pack_qs8_gemm_xw_goi_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -593,6 +599,7 @@ void xnn_pack_f32_conv_goki_w(
   size_t extra_bytes,
   const void* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -645,6 +652,7 @@ void xnn_pack_f16_conv_goki_w(
   size_t extra_bytes,
   const void* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -697,6 +705,7 @@ void xnn_pack_f32_to_f16_conv_goki_w(
   size_t extra_bytes,
   const void* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -749,6 +758,7 @@ void xnn_pack_qu8_conv_goki_w(
   size_t extra_bytes,
   const struct xnn_qu8_packing_params* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -815,6 +825,7 @@ void xnn_pack_qs8_conv_goki_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -879,6 +890,7 @@ void xnn_pack_f32_conv_kgo_w(
   size_t extra_bytes,
   const void* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -923,6 +935,7 @@ void xnn_pack_f16_conv_kgo_w(
   size_t extra_bytes,
   const void* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -967,6 +980,7 @@ void xnn_pack_f32_to_f16_conv_kgo_w(
   size_t extra_bytes,
   const void* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -1011,6 +1025,7 @@ void xnn_pack_qu8_conv_kgo_w(
   size_t extra_bytes,
   const struct xnn_qu8_packing_params* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -1067,6 +1082,7 @@ void xnn_pack_qs8_conv_kgo_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -1126,6 +1142,7 @@ void xnn_pack_f32_deconv_goki_w(
   struct subconvolution_params* subconv_params,
   const void* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -1188,6 +1205,7 @@ void xnn_pack_f16_deconv_goki_w(
   struct subconvolution_params* subconv_params,
   const void* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -1250,6 +1268,7 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
   struct subconvolution_params* subconv_params,
   const void* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -1312,6 +1331,7 @@ void xnn_pack_qs8_deconv_goki_w(
   struct subconvolution_params* subconv_params,
   const struct xnn_qs8_packing_params* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -1387,6 +1407,7 @@ void xnn_pack_qu8_deconv_goki_w(
   struct subconvolution_params* subconv_params,
   const struct xnn_qu8_packing_params* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -1904,6 +1925,7 @@ void xnn_pack_f32_gemminc_goi_w(
   float* packed_weights,
   const void* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
@@ -1941,6 +1963,7 @@ void xnn_pack_f16_gemminc_goi_w(
   uint16_t* packed_weights,
   const void* params)
 {
+  assert(g != 0);
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
