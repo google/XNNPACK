@@ -517,7 +517,7 @@ def emit_clamp_instruction(instr: str, instructions: List[str]) -> None:
 def emit_instruction(instr: str,
                      instructions: List[str],
                      vector_register_map: Mapping[str, int],
-                     is_gemm: bool = False) -> None:
+                     is_a53: bool = False) -> None:
   # emit a guard for instruction if it is using a particular register
   # mapping is a map from register to the mr it is used, e.g. v0 -> 0 to guard v0 behind max_mr > 0.
   # parse the dest register from this instruction
@@ -570,11 +570,16 @@ def emit_instruction(instr: str,
 
   # this workaround is specifically for 4x8 A53 kernel where it loads from A low
   # and A high into GPR then moves into vector registers.
-  if instr_name == 'ldr' and is_gemm:
-    # extract register from the load
-    ldr_m = re.search(r'mem\[(r\d+)', instr)
-    if ldr_m:
-      reg = ldr_m[1]
+  if instr_name == 'ldr' and is_a53:
+    # A53 microkernels use ldr in 2 ways, load A, and load A high. If the
+    # destination register is in the vector register map, we will emit a guard.
+    # Otherwise we try to look at the source register, because it could be a
+    # load A high.
+    if reg not in vector_register_map:
+      # extract register from the load
+      ldr_m = re.search(r'mem\[(r\d+)', instr)
+      if ldr_m:
+        reg = ldr_m[1]
 
   if reg not in vector_register_map:
     instructions.append(instr)
@@ -589,7 +594,7 @@ def emit_instruction(instr: str,
 
 
 def parse_microkernel(
-    lines: List[str], prfm: bool, is_gemm: bool,
+    lines: List[str], prfm: bool, is_a53: bool,
     vector_register_map: Mapping[str, int]) -> Tuple[List[str], List[str]]:
   # All labels need to be declared first, collect them and output them after
   # function signature.
@@ -660,24 +665,24 @@ def parse_microkernel(
     if m:
       emit_instruction(
           f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}]){sc} {m[4]}',
-          instructions, vector_register_map, is_gemm)
+          instructions, vector_register_map, is_a53)
       continue
     m = re.fullmatch(INSTR_REG_MEMOP_IMM_RE, line)
     if m:
       emit_instruction(
           f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}], {m[4]}){sc} {m[5]}',
-          instructions, vector_register_map, is_gemm)
+          instructions, vector_register_map, is_a53)
       continue
     m = re.fullmatch(INSTR_REG_MEMOP_OFFSET_RE, line)
     if m:
       if m[5]:  # wb
         emit_instruction(
             f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]++){sc} {m[6]}',
-            instructions, vector_register_map, is_gemm)
+            instructions, vector_register_map, is_a53)
       else:  # no wb
         emit_instruction(
             f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[6]}',
-            instructions, vector_register_map, is_gemm)
+            instructions, vector_register_map, is_a53)
       continue
     m = re.fullmatch(INSTR_REG_REG_MEMOP_RE, line)
     if m:
@@ -1021,8 +1026,8 @@ def convert(input_file: str, post_op: bool) -> None:
     print('Unable to find params register')
     sys.exit(1)
 
-  instructions, labels = parse_microkernel(microkernel_body, prfm,
-                                           kernel_type == GEMM,
+  is_a53 = 'cortex_a53' in fn_name
+  instructions, labels = parse_microkernel(microkernel_body, prfm, is_a53,
                                            vector_register_map)
   # TODO(zhin): iterate until fixpoint instead.
   instructions = merge_consecutive_checks(instructions)

@@ -43,10 +43,10 @@ class Generator : public MacroAssembler {
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
 // Register usage
-// A0   r3  d0
-// A1  r12  d1
-// A2  r10  d2
-// A3   r7  d3
+// A0   r3  d0 d4
+// A1  r12  d1 d5
+// A2  r10  d2 d6
+// A3   r7  d3 d7
 // B    r9  d8,  d9, d10, d11
 // B       d12, d13, d14, d15
 // C0  r11 d16-d17  q8  d18-d19  q9
@@ -232,11 +232,11 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   vld1_32({d4}, mem[r3]++); // A0
   vmov(d15, r0, r2); // b1 VMOV b from second group
   vmla_f32(q8, q4, d0[0]);
-  ldr(r0, mem[r12]); // A1 low
   if (max_mr > 1) {
+    ldr(r0, mem[r12]); // A1 low
     vmla_f32(q10, q4, d1[0]);
+    ldr(r2, mem[r12, 4]); // A1 high
   }
-  ldr(r2, mem[r12, 4]); // A1 high
   if (max_mr > 2) {
     vmla_f32(q12, q4, d2[0]);
   }
@@ -246,7 +246,9 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   // BLOCK 1
   vldr(d12, mem[r9, 32]); // B1
-  vmov(d5, r0, r2); // a1 VMOV
+  if (max_mr > 1) {
+    vmov(d5, r0, r2); // a1 VMOV
+  }
   if (max_mr > 3) {
     vmla_f32(q14, q4, d3[0]);
   }
@@ -261,16 +263,18 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
 
   // BLOCK 2
-  vld1_32({d6}, mem[r10]++); // A2
+  if (max_mr > 2) {
+    vld1_32({d6}, mem[r10]++); // A2
+  }
   vmov(d9, r0, r2); // b0 VMOV
   if (max_mr > 2) {
     vmla_f32(q13, q5, d2[0]);
   }
-  ldr(r0, mem[r7]); // A3 low
   if (max_mr > 3) {
+    ldr(r0, mem[r7]); // A3 low
     vmla_f32(q15, q5, d3[0]);
+    ldr(r2, mem[r7, 4]); // A3 high
   }
-  ldr(r2, mem[r7, 4]); // A3 high
   vmla_f32(q8, q6, d0[1]);
   if (prefetch) {
     pld(mem[r10, 128]); // Prefetch A2
@@ -278,7 +282,9 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   // BLOCK 3
   vldr(d14, mem[r9, 48]); // B1
-  vmov(d7, r0, r2); // a3 VMOV
+  if (max_mr > 3) {
+    vmov(d7, r0, r2); // a3 VMOV
+  }
   if (max_mr > 1) {
     vmla_f32(q10, q6, d1[1]);
   }
@@ -329,11 +335,11 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   vld1_32({d0}, mem[r3]++); // A0
   vmov(d15, r0, r2); // b1 VMOV b from second group
   vmla_f32(q8, q4, d4[0]);
-  ldr(r0, mem[r12, 8]); // A1 low
   if (max_mr > 1) {
+    ldr(r0, mem[r12, 8]); // A1 low
     vmla_f32(q10, q4, d5[0]);
+    ldr(r2, mem[r12, 12]); // A1 high
   }
-  ldr(r2, mem[r12, 12]); // A1 high
   if (max_mr > 2) {
     vmla_f32(q12, q4, d6[0]);
   }
@@ -363,11 +369,11 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 2) {
     vmla_f32(q13, q5, d6[0]);
   }
-  ldr(r0, mem[r7, 8]); // A3 low
   if (max_mr > 3) {
+    ldr(r0, mem[r7, 8]); // A3 low
     vmla_f32(q15, q5, d7[0]);
+    ldr(r2, mem[r7, 12]); // A3 high
   }
-  ldr(r2, mem[r7, 12]); // A3 high
   vmla_f32(q8, q6, d4[1]);
   // NOP
 
@@ -426,11 +432,11 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   vld1_32({d4}, mem[r3]++); // A0
   vmov(d15, r0, r2); // b1 VMOV b from second group
   vmla_f32(q8, q4, d0[0]);
-  ldr(r0, mem[r12]); // A1 low
   if (max_mr > 1) {
+    ldr(r0, mem[r12]); // A1 low
     vmla_f32(q10, q4, d1[0]);
+    ldr(r2, mem[r12, 4]); // A1 high
   }
-  ldr(r2, mem[r12, 4]); // A1 high
   if (max_mr > 2) {
     vmla_f32(q12, q4, d2[0]);
   }
@@ -438,7 +444,9 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   // BLOCK 1
   vldr(d12, mem[r9, 32]); // B1
-  vmov(d5, r0, r2); // a1 VMOV
+  if (max_mr > 1) {
+    vmov(d5, r0, r2); // a1 VMOV
+  }
   if (max_mr > 3) {
     vmla_f32(q14, q4, d3[0]);
   }
@@ -451,22 +459,26 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // NOP
 
   // BLOCK 2
-  vld1_32({d6}, mem[r10]++); // A2
+  if (max_mr > 2) {
+    vld1_32({d6}, mem[r10]++); // A2
+  }
   vmov(d9, r0, r2); // b0 VMOV
   if (max_mr > 2) {
     vmla_f32(q13, q5, d2[0]);
   }
-  ldr(r0, mem[r7]); // A3 low
   if (max_mr > 3) {
+    ldr(r0, mem[r7]); // A3 low
     vmla_f32(q15, q5, d3[0]);
+    ldr(r2, mem[r7, 4]); // A3 high
   }
-  ldr(r2, mem[r7, 4]); // A3 high
   vmla_f32(q8, q6, d0[1]);
   // NOP
 
   // BLOCK 3
   vldr(d14, mem[r9, 48]); // B1
-  vmov(d7, r0, r2); // a3 VMOV
+  if (max_mr > 3) {
+    vmov(d7, r0, r2); // a3 VMOV
+  }
   if (max_mr > 1) {
     vmla_f32(q10, q6, d1[1]);
   }
