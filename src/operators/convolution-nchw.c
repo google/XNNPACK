@@ -397,6 +397,15 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     goto error;
   }
 
+  status = xnn_status_unsupported_hardware;
+
+  const uint32_t datatype_init_flags = XNN_INIT_FLAG_F32;
+  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
+    xnn_log_error("failed to create %s operator: operations on data type are not supported",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
+    goto error;
+  }
+
   status = xnn_status_invalid_parameter;
 
   if (kernel_width == 0 || kernel_height == 0) {
