@@ -103,7 +103,7 @@ void xnn_f16_pavgpool_minmax_ukernel_9x__neonfp16arith_c8(
       i8 = (const uint16_t*) ((uintptr_t) i8 + input_offset);
     }
 
-    const float16x8_t vmultiplier = vld1q_dup_f16(multiplier); multiplier = (const uint16_t*) multiplier + 1;
+    const float16x8_t vmultiplier = vreinterpretq_f16_u16(vld1q_dup_u16(multiplier)); multiplier = (const uint16_t*) multiplier + 1;
 
     size_t c = channels;
     while (c >= 8) {
