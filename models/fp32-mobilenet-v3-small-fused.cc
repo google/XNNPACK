@@ -433,7 +433,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   std::array<xnn_post_operation, 1> post_ops {xnn_post_operation{xnn_post_operation_type_hardswish}};
 
   xnn_operator_t op0 = nullptr;
-  status = xnn_create_convolution2d_nhwc_f32(
+  status = xnn_create_fused_convolution2d_nhwc_f32(
     0 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 0 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -445,7 +445,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     3 /* input pixel stride */,
     16 /* output pixel stride */,
     w100.data(), w101.data(),
-    -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
+    post_ops.size(), post_ops.data(),
     0 /* flags */,
     &caches,
     &op0);
@@ -454,19 +454,6 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
   operators.emplace_back(op0, xnn_delete_operator);
-
-  xnn_operator_t op1 = nullptr;
-  status = xnn_create_hardswish_nc_f32(
-    16 /* channels */,
-    16 /* input stride */,
-    16 /* output stride */,
-    0 /* flags */,
-    &op1);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to create operation #1" << std::endl;
-    return ExecutionPlan();
-  }
-  operators.emplace_back(op1, xnn_delete_operator);
 
   xnn_operator_t op2 = nullptr;
   status = xnn_create_convolution2d_nhwc_f32(
@@ -2095,20 +2082,10 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   status = xnn_setup_convolution2d_nhwc_f32(
     op0,
     1 /* batch size */, 224 /* input height */, 224 /* input width */,
-    v0.data() /* input */, v1.data() /* output */,
+    v0.data() /* input */, v2.data() /* output */,
     threadpool /* threadpool */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #0" << std::endl;
-    return ExecutionPlan();
-  }
-
-  status = xnn_setup_hardswish_nc_f32(
-    op1,
-    12544 /* batch size */,
-    v1.data() /* input */, v2.data() /* output */,
-    threadpool /* threadpool */);
-  if (status != xnn_status_success) {
-    std::cerr << "failed to setup operation #1" << std::endl;
     return ExecutionPlan();
   }
 

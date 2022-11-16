@@ -385,11 +385,11 @@ static enum xnn_status create_convolution2d_nhwc(
   }
   assert(ukernel_type != xnn_ukernel_type_default);
 
-  if (num_post_operations != 0 && ukernel_type != xnn_ukernel_type_gemm) {
+  if (num_post_operations != 0 && (ukernel_type != xnn_ukernel_type_gemm && ukernel_type != xnn_ukernel_type_igemm)) {
     xnn_log_error(
         "convolution with post operations not support for these parameters: "
-        "kernel_size: %zu unit_subsampling: %d padding: %d",
-        kernel_size, unit_subsampling, any_padding);
+        "kernel_size: %zu unit_subsampling: %d padding: %d, ukernel_type: %d",
+        kernel_size, unit_subsampling, any_padding, ukernel_type);
     goto error;
   }
 
