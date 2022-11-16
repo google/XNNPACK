@@ -231,6 +231,34 @@ AARCH32_POST_OP = """void Generator::perform_post_operations(
   }
 }"""
 
+AARCH32_POST_OP_RELOAD = """void Generator::perform_post_operations(
+  size_t max_mr,
+  size_t num_post_operations,
+  const xnn_post_operation* post_operations)
+{
+  ldr(PARAMS_REG_PLACEHOLDER, mem[sp, PARAMS_OFFSET_PLACEHOLDER]);  // params
+  for (size_t i = 0; i < num_post_operations; i++) {
+    switch (post_operations[i].op_type) {
+      case xnn_post_operation_type_hardswish: {
+        const auto sixth = q0;
+        const auto three = q1;
+        const auto six = q2;
+        const auto zero = q3;
+        vld3r_32({sixth.low(), three.low(), six.low()}, mem[PARAMS_REG_PLACEHOLDER]++);
+        vmov(zero, 0);
+        vmov(three.high(), three.low());
+        vmov(six.high(), six.low());
+        const QRegister accs[] = {q8, q9, q10, q11, q12, q13, q14, q15};
+        const QRegister tmps[] = {q4, q5, q6, q7};
+        f32_hardswish(sixth, three, six, zero, &accs[0], XNN_COUNT_OF(accs), &tmps[0], XNN_COUNT_OF(tmps));
+        break;
+      }
+      default:
+        XNN_UNREACHABLE;
+    }
+  }
+}"""
+
 AARCH64_POST_OP = """void Generator::perform_post_operations(
   size_t max_mr,
   size_t num_post_operations,
@@ -283,10 +311,19 @@ def replace_template(template: str, replacements: Mapping[str, str]):
 
 # We use placeholder strings rather than formatted strings due to the many braces in the template (we are generating C++
 # after all), and to avoid copious escaping.
-def get_post_operation_implementation(arch, mr: int, params_register: str):
+def get_post_operation_implementation(arch, mr: int, params_register: str,
+                                      params_offset: str, reload_params: bool):
   if arch == AARCH32:
-    return replace_template(AARCH32_POST_OP,
-                            {'PARAMS_REG_PLACEHOLDER': params_register})
+    if reload_params:
+      return replace_template(
+          AARCH32_POST_OP_RELOAD, {
+              'PARAMS_REG_PLACEHOLDER': params_register,
+              'PARAMS_OFFSET_PLACEHOLDER': params_offset,
+          })
+    else:
+      return replace_template(AARCH32_POST_OP, {
+          'PARAMS_REG_PLACEHOLDER': params_register,
+      })
   elif arch == AARCH64:
     # MR 1 microkernels have less accumulators.
     # TODO(zhin): we already parsed this form the vector usage, use that instead of hardcoding the registers.
@@ -954,16 +991,17 @@ def insert_post_operations(instructions: List[str]):
   return instructions
 
 
-def find_params_register(lines: List[str]):
+def find_params_offset_and_register(lines: List[str]) -> Tuple[str, str]:
   for line in lines:
     if 'params' in line:
+      params_m = re.search(r'sp\W+\+\W+(\d+)', line)
       reg_m = re.search(r'((?:r|x)\d+)', line.split()[-1])
-      if reg_m:
-        return reg_m[1]
-  return None
+      if params_m and reg_m:
+        return params_m[1], reg_m[1]
+  return None, None
 
 
-def convert(input_file: str, post_op: bool) -> None:
+def convert(input_file: str, post_op: bool, reload_params: bool) -> None:
   output = []
   arch = None
   kernel_type = GEMM
@@ -1020,7 +1058,8 @@ def convert(input_file: str, post_op: bool) -> None:
   prologue, vector_register_map = parse_prologue(input_file, prologue_lines,
                                                  arch, minmax, kernel_type,
                                                  prfm, mr, post_op)
-  params_register = find_params_register(prologue_lines)
+  params_offset, params_register = find_params_offset_and_register(
+      prologue_lines)
   if not params_register:
     print(fn_name)
     print('Unable to find params register')
@@ -1088,7 +1127,9 @@ def convert(input_file: str, post_op: bool) -> None:
   # print post operations definition
   if post_op:
     output.append('')
-    output.append(get_post_operation_implementation(arch, mr, params_register))
+    output.append(
+        get_post_operation_implementation(arch, mr, params_register,
+                                          params_offset, reload_params))
     output.append('')
   output.append('}  // namespace')
   output.append(f'}}  // namespace {arch}')
@@ -1172,9 +1213,14 @@ def main(sys_args):
       help='Should support post operation',
       default=True,
       action=argparse.BooleanOptionalAction)
+  parser.add_argument(
+      '--reload-params',
+      help='Should reload params pointer before post operation',
+      default=False,
+      action=argparse.BooleanOptionalAction)
   args = parser.parse_args(sys_args)
 
-  output = '\n'.join(convert(args.input, args.post_op))
+  output = '\n'.join(convert(args.input, args.post_op, args.reload_params))
   # Add trailing new line.
   output += '\n'
 

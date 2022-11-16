@@ -22,6 +22,7 @@ class Generator : public MacroAssembler {
 
  public:
   void generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params);
+  void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);
 };
 
 
@@ -35,7 +36,7 @@ class Generator : public MacroAssembler {
 //     uint8_t*restrict c,       sp + 104 -> r11
 //     size_t cm_stride,         sp + 108 -> (r6)
 //     size_t cn_stride,         sp + 112 -> r7
-//     const union xnn_f32_minmax_params params)  sp + 116 -> (r7)
+//     const union xnn_f32_minmax_params params)  sp + 116 -> (r5)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
@@ -62,7 +63,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
 
   Label l0, l1, l2, l3, l4, l5, l6, l7;
   const size_t num_post_operations = jit_gemm_params->num_post_operations;
-  (void) num_post_operations;  // Silence unused warning.
+  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;
   const float min = jit_gemm_params->f32_minmax.min;
   const float max = jit_gemm_params->f32_minmax.max;
   const bool clamp_min = min != -std::numeric_limits<float>::infinity();
@@ -221,6 +222,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
       vmin_f32(q15, q15, q3);
     }
   }
+  perform_post_operations(max_mr, num_post_operations, post_operations);
 
   // Store full 4 x 8
   blo(l4);
@@ -341,6 +343,35 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
 
   align(16);
 }
+
+void Generator::perform_post_operations(
+  size_t max_mr,
+  size_t num_post_operations,
+  const xnn_post_operation* post_operations)
+{
+  ldr(r5, mem[sp, 116]);  // params
+  for (size_t i = 0; i < num_post_operations; i++) {
+    switch (post_operations[i].op_type) {
+      case xnn_post_operation_type_hardswish: {
+        const auto sixth = q0;
+        const auto three = q1;
+        const auto six = q2;
+        const auto zero = q3;
+        vld3r_32({sixth.low(), three.low(), six.low()}, mem[r5]++);
+        vmov(zero, 0);
+        vmov(three.high(), three.low());
+        vmov(six.high(), six.low());
+        const QRegister accs[] = {q8, q9, q10, q11, q12, q13, q14, q15};
+        const QRegister tmps[] = {q4, q5, q6, q7};
+        f32_hardswish(sixth, three, six, zero, &accs[0], XNN_COUNT_OF(accs), &tmps[0], XNN_COUNT_OF(tmps));
+        break;
+      }
+      default:
+        XNN_UNREACHABLE;
+    }
+  }
+}
+
 }  // namespace
 }  // namespace aarch32
 }  // namespace xnnpack

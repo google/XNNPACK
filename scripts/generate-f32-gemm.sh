@@ -604,8 +604,8 @@ tools/generate-gemm-test.py --spec test/f32-gemm-minmax.yaml --output test/f32-g
 
 ##################################### JIT #####################################
 # AArch32
-scripts/convert-assembly-to-jit.py --no-post-op -i src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-cortex-a7.S -o src/f32-gemm/f32-gemm-4x8-aarch32-neon-cortex-a7.cc &
-scripts/convert-assembly-to-jit.py --no-post-op -i src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-ld64.S -o src/f32-gemm/f32-gemm-4x8-aarch32-neon-ld64.cc &
+scripts/convert-assembly-to-jit.py --reload-params -i src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-cortex-a7.S -o src/f32-gemm/f32-gemm-4x8-aarch32-neon-cortex-a7.cc &
+scripts/convert-assembly-to-jit.py --reload-params -i src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-ld64.S -o src/f32-gemm/f32-gemm-4x8-aarch32-neon-ld64.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-gemm/f32-gemm-4x8-minmax-aarch32-neon-cortex-a55.S -o src/f32-gemm/f32-gemm-4x8-aarch32-neon-cortex-a55.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-cortex-a53.S -o src/f32-gemm/f32-gemm-4x8-aarch32-neon-cortex-a53.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-prfm-cortex-a75.S -o src/f32-gemm/f32-gemm-4x8-aarch32-neon-cortex-a75.cc &
