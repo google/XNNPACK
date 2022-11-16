@@ -50,12 +50,12 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x24(
     v128_t vxKLMN = wasm_v128_load(input + 20);
     input += 24;
 
-    const v128_t vz0123 = wasm_f32x4_mul(vx0123, vprescale);
-    const v128_t vz4567 = wasm_f32x4_mul(vx4567, vprescale);
-    const v128_t vz89AB = wasm_f32x4_mul(vx89AB, vprescale);
-    const v128_t vzCDEF = wasm_f32x4_mul(vxCDEF, vprescale);
-    const v128_t vzGHIJ = wasm_f32x4_mul(vxGHIJ, vprescale);
-    const v128_t vzKLMN = wasm_f32x4_mul(vxKLMN, vprescale);
+    const v128_t vz0123 = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vx0123, vprescale));
+    const v128_t vz4567 = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vx4567, vprescale));
+    const v128_t vz89AB = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vx89AB, vprescale));
+    const v128_t vzCDEF = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vxCDEF, vprescale));
+    const v128_t vzGHIJ = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vxGHIJ, vprescale));
+    const v128_t vzKLMN = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vxKLMN, vprescale));
 
     v128_t vn0123 = wasm_f32x4_add(wasm_f32x4_mul(vz0123, vlog2e), vmagic_bias);
     v128_t vn4567 = wasm_f32x4_add(wasm_f32x4_mul(vz4567, vlog2e), vmagic_bias);
@@ -141,42 +141,24 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x24(
     v128_t vsKLMN = wasm_i32x4_add(vlKLMN, venKLMN);
 
     v128_t vt0123 = wasm_f32x4_add(wasm_f32x4_mul(vn0123, vminus_ln2_hi), vz0123);
-    const v128_t vsatm0123 = wasm_f32x4_le(vz0123, vsat_cutoff);
     v128_t vt4567 = wasm_f32x4_add(wasm_f32x4_mul(vn4567, vminus_ln2_hi), vz4567);
-    const v128_t vsatm4567 = wasm_f32x4_le(vz4567, vsat_cutoff);
     v128_t vt89AB = wasm_f32x4_add(wasm_f32x4_mul(vn89AB, vminus_ln2_hi), vz89AB);
-    const v128_t vsatm89AB = wasm_f32x4_le(vz89AB, vsat_cutoff);
     v128_t vtCDEF = wasm_f32x4_add(wasm_f32x4_mul(vnCDEF, vminus_ln2_hi), vzCDEF);
-    const v128_t vsatmCDEF = wasm_f32x4_le(vzCDEF, vsat_cutoff);
     v128_t vtGHIJ = wasm_f32x4_add(wasm_f32x4_mul(vnGHIJ, vminus_ln2_hi), vzGHIJ);
-    const v128_t vsatmGHIJ = wasm_f32x4_le(vzGHIJ, vsat_cutoff);
     v128_t vtKLMN = wasm_f32x4_add(wasm_f32x4_mul(vnKLMN, vminus_ln2_hi), vzKLMN);
-    const v128_t vsatmKLMN = wasm_f32x4_le(vzKLMN, vsat_cutoff);
 
     vt0123 = wasm_f32x4_add(wasm_f32x4_mul(vn0123, vminus_ln2_lo), vt0123);
-    vs0123 = wasm_v128_andnot(vs0123, vsatm0123);
     vt4567 = wasm_f32x4_add(wasm_f32x4_mul(vn4567, vminus_ln2_lo), vt4567);
-    vs4567 = wasm_v128_andnot(vs4567, vsatm4567);
     vt89AB = wasm_f32x4_add(wasm_f32x4_mul(vn89AB, vminus_ln2_lo), vt89AB);
-    vs89AB = wasm_v128_andnot(vs89AB, vsatm89AB);
     vtCDEF = wasm_f32x4_add(wasm_f32x4_mul(vnCDEF, vminus_ln2_lo), vtCDEF);
-    vsCDEF = wasm_v128_andnot(vsCDEF, vsatmCDEF);
     vtGHIJ = wasm_f32x4_add(wasm_f32x4_mul(vnGHIJ, vminus_ln2_lo), vtGHIJ);
-    vsGHIJ = wasm_v128_andnot(vsGHIJ, vsatmGHIJ);
     vtKLMN = wasm_f32x4_add(wasm_f32x4_mul(vnKLMN, vminus_ln2_lo), vtKLMN);
-    vsKLMN = wasm_v128_andnot(vsKLMN, vsatmKLMN);
 
-    vt0123 = wasm_v128_andnot(vt0123, vsatm0123);
     v128_t vp0123 = wasm_f32x4_add(wasm_f32x4_mul(vc3, vt0123), vc2);
-    vt4567 = wasm_v128_andnot(vt4567, vsatm4567);
     v128_t vp4567 = wasm_f32x4_add(wasm_f32x4_mul(vc3, vt4567), vc2);
-    vt89AB = wasm_v128_andnot(vt89AB, vsatm89AB);
     v128_t vp89AB = wasm_f32x4_add(wasm_f32x4_mul(vc3, vt89AB), vc2);
-    vtCDEF = wasm_v128_andnot(vtCDEF, vsatmCDEF);
     v128_t vpCDEF = wasm_f32x4_add(wasm_f32x4_mul(vc3, vtCDEF), vc2);
-    vtGHIJ = wasm_v128_andnot(vtGHIJ, vsatmGHIJ);
     v128_t vpGHIJ = wasm_f32x4_add(wasm_f32x4_mul(vc3, vtGHIJ), vc2);
-    vtKLMN = wasm_v128_andnot(vtKLMN, vsatmKLMN);
     v128_t vpKLMN = wasm_f32x4_add(wasm_f32x4_mul(vc3, vtKLMN), vc2);
 
     vp0123 = wasm_f32x4_mul(vp0123, vt0123);
@@ -245,7 +227,7 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x24(
     v128_t vx = wasm_v128_load(input);
     input += 4;
 
-    const v128_t vz = wasm_f32x4_mul(vx, vprescale);
+    const v128_t vz = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
 
     v128_t vn = wasm_f32x4_add(wasm_f32x4_mul(vz, vlog2e), vmagic_bias);
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
@@ -267,10 +249,7 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x24(
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
     v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_hi), vz);
-    const v128_t vsatm = wasm_f32x4_le(vz, vsat_cutoff);
     vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_lo), vt);
-    vs = wasm_v128_andnot(vs, vsatm);
-    vt = wasm_v128_andnot(vt, vsatm);
 
     v128_t vp = wasm_f32x4_add(wasm_f32x4_mul(vc3, vt), vc2);
     vp = wasm_f32x4_mul(vp, vt);
@@ -290,7 +269,7 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x24(
   if XNN_UNLIKELY(batch != 0) {
     v128_t vx = wasm_v128_load(input);
 
-    const v128_t vz = wasm_f32x4_mul(vx, vprescale);
+    const v128_t vz = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
 
     v128_t vn = wasm_f32x4_add(wasm_f32x4_mul(vz, vlog2e), vmagic_bias);
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
@@ -312,10 +291,7 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x24(
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
     v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_hi), vz);
-    const v128_t vsatm = wasm_f32x4_le(vz, vsat_cutoff);
     vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_lo), vt);
-    vs = wasm_v128_andnot(vs, vsatm);
-    vt = wasm_v128_andnot(vt, vsatm);
 
     v128_t vp = wasm_f32x4_add(wasm_f32x4_mul(vc3, vt), vc2);
     vp = wasm_f32x4_mul(vp, vt);
