@@ -20,7 +20,7 @@
 //     size_t cn_stride,         sp + 120 -> (r0)
 //     size_t a_offset,          sp + 124 -> (r5)
 //     const float* zero,        sp + 128 -> (r0)
-//     minmax_params*params,     sp + 132 -> (r0)
+//     minmax_params*params,     sp + 132 -> (r14)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
@@ -35,7 +35,7 @@
 // C1   r4 d20-d21 q10  d22-d23 q11
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
-// clamp  (r0) d4 d5 d6 d7
+// clamp  (r14) d4 d5 d6 d7
 
 BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         .arm
@@ -308,11 +308,10 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         BHI     1b
 
         # Load params pointer
-        LDR     r0, [sp, 132]           // params
-        LDR     r14, [sp, 64]           // p = ks
+        LDR     r14, [sp, 132]          // params
         # Load min/max values
-        VLD1.32 {d4[],d5[]}, [r0]!
-        VLD1.32 {d6[],d7[]}, [r0]
+        VLD1.32 {d4[],d5[]}, [r14]!
+        VLD1.32 {d6[],d7[]}, [r14]
         SUBS    r1, r1, 8
         LDR     r0, [sp, 120]           // cn_stride
 
@@ -335,6 +334,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_cortex_a55
         VMIN.F32 q15, q15, q3
 
         # Store full 4 x 8
+        LDR     r14, [sp, 64]           // p = ks
         BLO     7f
         VST1.32 {d28-d31},  [r6], r0
         VST1.32 {d24-d27},  [r8], r0

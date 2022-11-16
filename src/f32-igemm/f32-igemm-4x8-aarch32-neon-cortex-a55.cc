@@ -22,6 +22,7 @@ class Generator : public MacroAssembler {
 
  public:
   void generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const jit_gemm_params* jit_gemm_params);
+  void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);
 };
 
 
@@ -37,7 +38,7 @@ class Generator : public MacroAssembler {
 //     size_t cn_stride,         sp + 120 -> (r0)
 //     size_t a_offset,          sp + 124 -> (r5)
 //     const float* zero,        sp + 128 -> (r0)
-//     minmax_params*params,     sp + 132 -> (r0)
+//     minmax_params*params,     sp + 132 -> (r14)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
@@ -52,7 +53,7 @@ class Generator : public MacroAssembler {
 // C1   r4 d20-d21 q10  d22-d23 q11
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
-// clamp  (r0) d4 d5 d6 d7
+// clamp  (r14) d4 d5 d6 d7
 
 // Converted from: src/f32-igemm/f32-igemm-4x8-minmax-aarch32-neon-cortex-a55.S
 void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const jit_gemm_params* jit_gemm_params)
@@ -65,7 +66,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
 
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10;
   const size_t num_post_operations = jit_gemm_params->num_post_operations;
-  (void) num_post_operations;  // Silence unused warning.
+  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;
   const float min = jit_gemm_params->f32_minmax.min;
   const float max = jit_gemm_params->f32_minmax.max;
   const bool clamp_min = min != -std::numeric_limits<float>::infinity();
@@ -448,12 +449,11 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   bhi(l1);
 
   // Load params pointer
-  ldr(r0, mem[sp, 132]); // params
-  ldr(r14, mem[sp, 64]); // p = ks
+  ldr(r14, mem[sp, 132]); // params
   // Load min/max values
   if (clamp_min || clamp_max) {
-    vld1r_32({d4,d5}, mem[r0]++);
-    vld1r_32({d6,d7}, mem[r0]);
+    vld1r_32({d4,d5}, mem[r14]++);
+    vld1r_32({d6,d7}, mem[r14]);
   }
   subs(r1, r1, 8);
   ldr(r0, mem[sp, 120]); // cn_stride
@@ -491,8 +491,10 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
       vmin_f32(q15, q15, q3);
     }
   }
+  perform_post_operations(max_mr, num_post_operations, post_operations);
 
   // Store full 4 x 8
+  ldr(r14, mem[sp, 64]); // p = ks
   blo(l7);
   if (max_mr > 3) {
     vst1_32({d28-d31}, mem[r6], r0);
@@ -659,6 +661,35 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
 
   align(16);
 }
+
+void Generator::perform_post_operations(
+  size_t max_mr,
+  size_t num_post_operations,
+  const xnn_post_operation* post_operations)
+{
+  ldr(r14, mem[sp, 132]);  // params
+  for (size_t i = 0; i < num_post_operations; i++) {
+    switch (post_operations[i].op_type) {
+      case xnn_post_operation_type_hardswish: {
+        const auto sixth = q0;
+        const auto three = q1;
+        const auto six = q2;
+        const auto zero = q3;
+        vld3r_32({sixth.low(), three.low(), six.low()}, mem[r14]++);
+        vmov(zero, 0);
+        vmov(three.high(), three.low());
+        vmov(six.high(), six.low());
+        const QRegister accs[] = {q8, q9, q10, q11, q12, q13, q14, q15};
+        const QRegister tmps[] = {q4, q5, q6, q7};
+        f32_hardswish(sixth, three, six, zero, &accs[0], XNN_COUNT_OF(accs), &tmps[0], XNN_COUNT_OF(tmps));
+        break;
+      }
+      default:
+        XNN_UNREACHABLE;
+    }
+  }
+}
+
 }  // namespace
 }  // namespace aarch32
 }  // namespace xnnpack

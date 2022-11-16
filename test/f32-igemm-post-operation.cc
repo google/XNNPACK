@@ -84,6 +84,22 @@ TEST(XNN_GENERATE_F32_IGEMM_UKERNEL_4X8__AARCH32_NEON_PRFM_CORTEX_A53, hardswish
         fused_operators);
 }
 
+TEST(XNN_GENERATE_F32_IGEMM_UKERNEL_4X8__AARCH32_NEON_CORTEX_A55, hardswish) {
+  TEST_REQUIRES_ARM_NEON_FMA;
+  std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+  GemmMicrokernelTester()
+    .mr(4)
+    .nr(8)
+    .kr(1)
+    .sr(1)
+    .m(4)
+    .n(8)
+    .k(8)
+    .Test(
+        xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55,
+        fused_operators);
+}
+
 TEST(XNN_GENERATE_F32_IGEMM_UKERNEL_4X8__AARCH32_NEON_CORTEX_A75, hardswish) {
   TEST_REQUIRES_ARM_NEON_FMA;
   std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };

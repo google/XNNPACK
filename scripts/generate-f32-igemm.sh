@@ -343,7 +343,7 @@ tools/generate-gemm-test.py --spec test/f32-igemm-minmax.yaml --output test/f32-
 
 ###################################### JIT ####################################
 # AArch32
-scripts/convert-assembly-to-jit.py --no-post-op -i src/f32-igemm/f32-igemm-4x8-minmax-aarch32-neon-cortex-a55.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a55.cc &
+scripts/convert-assembly-to-jit.py --reload-params -i src/f32-igemm/f32-igemm-4x8-minmax-aarch32-neon-cortex-a55.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a55.cc &
 scripts/convert-assembly-to-jit.py --reload-params -i src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-cortex-a7.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a7.cc &
 scripts/convert-assembly-to-jit.py --reload-params -i src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-ld64.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-ld64.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-prfm-cortex-a75.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a75.cc &
