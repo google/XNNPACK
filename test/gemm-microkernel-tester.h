@@ -276,9 +276,11 @@ class GemmMicrokernelTester {
     xnn_qs8_requantize_fn requantize) const;
   void Test(
     xnn_jit_gemm_code_generator_function gemm_generator,
+    xnn_init_f32_minmax_params_fn init_params,
     const std::vector<xnn_post_operation>& fused_operators) const;
   void Test(
     xnn_jit_igemm_code_generator_function gemm_generator,
+    xnn_init_f32_minmax_params_fn init_params,
     const std::vector<xnn_post_operation>& fused_operators) const;
 #endif  // XNN_PLATFORM_JIT
 

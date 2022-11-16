@@ -867,6 +867,26 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE == 'f32':
       }
     }
   }
+
+$if TEST_NAME.startswith('GENERATE') and DATATYPE == 'f32':
+  TEST(${TEST_NAME}, hardswish) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    GemmMicrokernelTester()
+      $if EXTENDED_WEIGHTS:
+        .extended_weights(true)
+      .mr(${MR})
+      .nr(${NR})
+      .kr(${KR})
+      .sr(${SR})
+      .m(${MR})
+      .n(${NR})
+      .k(${KBLOCK})
+      .Test(
+          ${", ".join(TEST_ARGS)},
+          fused_operators);
+  }
 """
 
 

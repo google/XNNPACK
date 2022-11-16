@@ -13701,18 +13701,18 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
-        ":jit_test_mode",
     ],
 )
 
 xnnpack_unit_test(
-    name = "f32_igemm_post_operation_test",
+    name = "f32_igemm_jit_test",
     srcs = [
-        "test/f32-igemm-post-operation.cc",
+        "test/f32-igemm-jit.cc",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
-        ":post_operation",
+        ":jit_test_mode",
     ],
 )
 
@@ -13838,6 +13838,17 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "f32_gemm_jit_test",
+    srcs = [
+        "test/f32-gemm-jit.cc",
+    ],
+    shard_count = 5,
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
         ":jit_test_mode",
     ],
 )
@@ -13851,17 +13862,6 @@ xnnpack_unit_test(
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "f32_gemm_post_operation_test",
-    srcs = [
-        "test/f32-gemm-post-operation.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS + [
-        ":gemm_microkernel_tester",
-        ":post_operation",
     ],
 )
 

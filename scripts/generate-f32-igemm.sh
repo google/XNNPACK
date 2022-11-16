@@ -340,6 +340,7 @@ tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=8 -D NR=16 -o src/f32-igem
 tools/generate-gemm-test.py --spec test/f32-igemm.yaml --output test/f32-igemm.cc --output test/f32-igemm-2.cc &
 tools/generate-gemm-test.py --spec test/f32-igemm-relu.yaml --output test/f32-igemm-relu.cc --output test/f32-igemm-relu-2.cc &
 tools/generate-gemm-test.py --spec test/f32-igemm-minmax.yaml --output test/f32-igemm-minmax.cc --output test/f32-igemm-minmax-2.cc &
+tools/generate-gemm-test.py --spec test/f32-igemm-jit.yaml --output test/f32-igemm-jit.cc &
 
 ###################################### JIT ####################################
 # AArch32

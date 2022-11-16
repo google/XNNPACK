@@ -600,7 +600,7 @@ tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=8 -D NR=16 -D INC=1 -o src/
 tools/generate-gemm-test.py --spec test/f32-gemm.yaml --output test/f32-gemm.cc --output test/f32-gemm-2.cc &
 tools/generate-gemm-test.py --spec test/f32-gemm-relu.yaml --output test/f32-gemm-relu.cc --output test/f32-gemm-relu-2.cc &
 tools/generate-gemm-test.py --spec test/f32-gemm-minmax.yaml --output test/f32-gemm-minmax.cc --output test/f32-gemm-minmax-2.cc &
-tools/generate-gemm-test.py --spec test/f32-gemm-minmax.yaml --output test/f32-gemm-minmax.cc --output test/f32-gemm-minmax-2.cc &
+tools/generate-gemm-test.py --spec test/f32-gemm-jit.yaml --output test/f32-gemm-jit.cc &
 
 ##################################### JIT #####################################
 # AArch32

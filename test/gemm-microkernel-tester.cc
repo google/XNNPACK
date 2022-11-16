@@ -2430,6 +2430,7 @@ void PerformUnaryOperation(std::vector<float>& v, const std::vector<xnn_post_ope
 
 void GemmMicrokernelTester::Test(
     xnn_jit_gemm_code_generator_function gemm_generator,
+    xnn_init_f32_minmax_params_fn init_params,
     const std::vector<xnn_post_operation>& post_operations) const
 {
   ASSERT_LE(m(), mr());
@@ -2524,6 +2525,7 @@ void GemmMicrokernelTester::Test(
 
 void GemmMicrokernelTester::Test(
     xnn_jit_igemm_code_generator_function igemm_generator,
+    xnn_init_f32_minmax_params_fn init_params,
     const std::vector<xnn_post_operation>& post_operations) const
 {
   ASSERT_LE(m(), mr());
