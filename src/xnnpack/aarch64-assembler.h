@@ -402,6 +402,7 @@ class Assembler : public AssemblerBase {
  private:
   void b(Condition c, Label& l);
   void branch_to_label(uint32_t opcode, BranchType bt, Label& l);
+  void ld1_st1_multiple_structures(VRegisterList vs, MemOperand xn, int32_t imm, bool load);
   void ldr(uint32_t size, uint32_t opc, MemOperand xn, int32_t imm, uint8_t rt_code);
   void str(uint32_t size, uint32_t opc, MemOperand xn, int32_t imm, uint8_t rt_code);
   void tb_helper(uint32_t op, XRegister xd, uint8_t bit, Label& l);
