@@ -383,6 +383,7 @@ class Assembler : public AssemblerBase {
   void ldr(SRegister st, MemOperand xn, int32_t imm);
   void mov(VRegister vd, VRegister vn);
   void movi(VRegister vd, uint8_t imm);
+  void st1(VRegisterList vs, MemOperand xn, int32_t imm);
   void st1(VRegisterList vs, MemOperand xn, XRegister xm);
   void stp(DRegister dt1, DRegister dt2, MemOperand xn);
   void stp(QRegister qt1, QRegister qt2, MemOperand xn);

@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <algorithm>
+
 // clang-format off
 #define EXPECT_INSTR(expected, actual)                                                                        \
   EXPECT_EQ(expected, actual) << "expected = 0x" << std::hex << std::setw(8) << std::setfill('0') << expected \
@@ -21,3 +23,15 @@
   a.reset();                         \
   call;                              \
   EXPECT_EQ(expected, a.error());
+
+namespace xnnpack {
+
+// Arguments are: input (r0|x0), output (r1|x1), params (r2|x2).
+typedef void (*JitF32HardswishFn)(float*, float*, void*);
+
+// Reference implementation of hardswish
+constexpr float hardswish(float x) {
+  return x * std::min(std::max(0.0f, (x + 3.0f)), 6.0f) / 6.0f;
+}
+
+}  // namespace xnnpack

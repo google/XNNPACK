@@ -3,12 +3,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
 #include <ios>
+#include <random>
 
 #include <gtest/gtest.h>
 
 #include <xnnpack/aarch32-assembler.h>
 #include <xnnpack/memory.h>
+#include <xnnpack/microparams.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/common.h>
 #include "assembler-helpers.h"
 
@@ -494,11 +498,92 @@ TEST(AArch32Assembler, JitAllocCodeBuffer) {
   a.bx(lr);
 
   Func fn = reinterpret_cast<Func>(a.finalize());
+  xnn_finalize_code_memory(&b);
 
   ASSERT_EQ(3, fn(1));
 
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
 #endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
+
+#if XNN_ARCH_ARM && XNN_PLATFORM_JIT
+JitF32HardswishFn GenerateF32Hardswish(MacroAssembler& a, std::vector<QRegister> accs, std::vector<QRegister> tmps) {
+  const QRegister sixth = q0;
+  const QRegister three = q1;
+  const QRegister six = q2;
+  const QRegister zero = q3;
+
+  // Load params.
+  a.vld3r_32({sixth.low(), three.low(), six.low()}, mem[r2]);
+  a.vmov(three.high(), three.low());
+  a.vmov(six.high(), six.low());
+  a.vmov(zero, 0);
+  // Load inputs.
+  for (size_t i = 0; i < accs.size(); i++) {
+    a.vld1_32({accs[i].low(), accs[i].high()}, mem[r0]++);
+  }
+  a.f32_hardswish(
+      sixth, three, six, zero,
+      accs.data(),
+      accs.size(),
+      tmps.data(),
+      tmps.size());
+  // Write results of hardswish.
+  for (size_t i = 0; i < accs.size(); i++) {
+    a.vst1_32({accs[i].low(), accs[i].high()}, mem[r1]++);
+  }
+  a.bx(lr);
+
+  return reinterpret_cast<JitF32HardswishFn>(a.finalize());
+}
+
+class F32HardswishTest : public testing::TestWithParam<std::vector<QRegister>> {};
+
+TEST_P(F32HardswishTest, F32Hardswish) {
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  MacroAssembler a(&b);
+
+  const std::vector<QRegister> accs = GetParam();
+  const std::vector<QRegister> tmps = {q8, q9, q10, q11};
+
+  std::random_device random_device;
+  std::mt19937 rng(random_device());
+  std::uniform_real_distribution<float> f32dist(-6.0f, 6.0f);
+
+  xnn_f32_hswish_params params;
+  xnn_init_f32_hswish_scalar_params(&params);
+
+  std::vector<float> input(4 * accs.size());
+  std::vector<float> output(4 * accs.size());
+  std::vector<float> expected_output(output);
+
+  std::generate(input.begin(), input.end(), [&]{ return f32dist(rng); });
+  std::fill(output.begin(), output.end(), std::nanf(""));
+  std::fill(expected_output.begin(), expected_output.end(), std::nanf(""));
+
+  // Call generated function.
+  JitF32HardswishFn jit_f32_hardswish_fn = GenerateF32Hardswish(a, accs, tmps);
+  EXPECT_EQ(Error::kNoError, a.error());
+  xnn_finalize_code_memory(&b);
+  jit_f32_hardswish_fn(input.data(), output.data(), &params);
+
+  // Compute reference results.
+  std::transform(input.begin(), input.end(), expected_output.begin(), hardswish);
+
+  // Verify results.
+  for (size_t i = 0; i < output.size(); i++) {
+    EXPECT_NEAR(output[i], expected_output[i], std::max(5.0e-6, std::abs(expected_output[i]) * 1.0e-5))
+        << "at " << i << " / " << output.size() << ", x[" << i << "] = " << input[i];
+  }
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+  AArch32Assembler,
+  F32HardswishTest,
+  testing::Values(
+    std::vector<QRegister>({q4, q5, q6, q7}), std::vector<QRegister>({q4, q5, q6, q7, q12, q13, q14, q15})));
+#endif
 }  // namespace aarch32
 }  // namespace xnnpack

@@ -573,6 +573,24 @@ void Assembler::movi(VRegister vd, uint8_t imm) {
   emit32(0x0F000400 | q(vd) | cmode << 12 | vd.code);
 }
 
+void Assembler::st1(VRegisterList vs, MemOperand xn, int32_t imm) {
+  if (!is_same_shape(vs) || !is_consecutive(vs)) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+
+  const VRegister vt = vs.vt1;
+
+  // imm must match number of bytes loaded.
+  if ((vt.q + 1) * 8 * vs.length != imm) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+
+  const uint8_t opcode = load_store_opcode(vs.length);
+  emit32(0x0C800000 | q(vt) | rm(sp) | opcode << 12 | size(vt) | rn(xn.base) | rt(vt));
+}
+
 void Assembler::st1(VRegisterList vs, MemOperand xn, XRegister xm) {
   if (!is_same_shape(vs) || !is_consecutive(vs)) {
     error_ = Error::kInvalidOperand;
@@ -743,7 +761,7 @@ void MacroAssembler::f32_hardswish(VRegister sixth, VRegister three,
                                    const VRegister* accs, size_t num_accs,
                                    const VRegister* tmps, size_t num_tmps) {
   if (num_accs < 4) {
-    assert(num_tmps == num_accs);
+    assert(num_tmps >= num_accs);
     for (size_t i = 0; i < num_accs; i++) {
       fmul(tmps[i], accs[i], sixth);
     }

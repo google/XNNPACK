@@ -16588,6 +16588,8 @@ xnnpack_unit_test(
         ":common",
         ":jit_test_mode",
         ":memory",
+        ":microparams",
+        ":microparams_init",
     ],
 )
 
@@ -16601,6 +16603,8 @@ xnnpack_unit_test(
         ":common",
         ":jit_test_mode",
         ":memory",
+        ":microparams",
+        ":microparams_init",
     ],
 )
 

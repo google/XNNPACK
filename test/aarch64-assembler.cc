@@ -3,11 +3,16 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
+#include <random>
+
 #include <gtest/gtest.h>
 
 #include <xnnpack/aarch64-assembler.h>
 #include <xnnpack/common.h>
 #include <xnnpack/memory.h>
+#include <xnnpack/microparams.h>
+#include <xnnpack/microparams-init.h>
 #include "assembler-helpers.h"
 
 
@@ -200,6 +205,28 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   CHECK_ENCODING(0x4F008405, a.movi(v5.v8h(), 0));
   CHECK_ENCODING(0x4F00E405, a.movi(v5.v16b(), 0));
   EXPECT_ERROR(Error::kUnimplemented, a.movi(v5.v16b(), 0xFF));
+
+  CHECK_ENCODING(0x0C9F786F, a.st1({v15.v2s()}, mem[x3], 8));
+  CHECK_ENCODING(0x4C9F786F, a.st1({v15.v4s()}, mem[x3], 16));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v15.v4s()}, mem[x3], 8));
+
+  CHECK_ENCODING(0x0C9FA86F, a.st1({v15.v2s(), v16.v2s()}, mem[x3], 16));
+  CHECK_ENCODING(0x4C9FA86F, a.st1({v15.v4s(), v16.v4s()}, mem[x3], 32));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v15.v4s(), v16.v4s()}, mem[x3], 16));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v15.v4s(), v17.v4s()}, mem[x3], 16));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v15.v4s(), v16.v2s()}, mem[x3], 16));
+
+  CHECK_ENCODING(0x0C9F686F, a.st1({v15.v2s(), v16.v2s(), v17.v2s()}, mem[x3], 24));
+  CHECK_ENCODING(0x4C9F686F, a.st1({v15.v4s(), v16.v4s(), v17.v4s()}, mem[x3], 48));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v15.v4s(), v16.v4s(), v17.v4s()}, mem[x3], 24));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v15.v4s(), v17.v4s(), v17.v4s()}, mem[x3], 48));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v15.v4s(), v16.v2s(), v17.v4s()}, mem[x3], 48));
+
+  CHECK_ENCODING(0x0C9F286F, a.st1({v15.v2s(), v16.v2s(), v17.v2s(), v18.v2s()}, mem[x3], 32));
+  CHECK_ENCODING(0x4C9F286F, a.st1({v15.v4s(), v16.v4s(), v17.v4s(), v18.v4s()}, mem[x3], 64));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v15.v4s(), v16.v4s(), v17.v4s(), v18.v4s()}, mem[x3], 32));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v15.v4s(), v17.v4s(), v17.v4s(), v18.v4s()}, mem[x3], 64));
+  EXPECT_ERROR(Error::kInvalidOperand, a.st1({v15.v4s(), v16.v2s(), v17.v4s(), v18.v4s()}, mem[x3], 64));
 
   CHECK_ENCODING(0x4C82746F, a.st1({v15.v8h()}, mem[x3], x2));
 
@@ -504,6 +531,87 @@ TEST(AArch64Assembler, BindOverflow) {
 
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }
+
+#if XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
+JitF32HardswishFn GenerateF32Hardswish(MacroAssembler& a, std::vector<VRegister> accs, std::vector<VRegister> tmps) {
+  const VRegister sixth = v0.v4s();
+  const VRegister three = v1.v4s();
+  const VRegister six = v2.v4s();
+  const VRegister zero = v3.v4s();
+
+  // Load params.
+  a.ld3r({sixth, three, six}, mem[x2]);
+  a.movi(zero, 0);
+  // Load inputs.
+  for (size_t i = 0; i < accs.size(); i++) {
+    a.ld1({accs[i].v4s()}, mem[x0], 16);
+  }
+  a.f32_hardswish(
+      sixth, three, six, zero,
+      accs.data(),
+      accs.size(),
+      tmps.data(),
+      tmps.size());
+  // Write results of hardswish.
+  for (size_t i = 0; i < accs.size(); i++) {
+    a.st1({accs[i].v4s()}, mem[x1], 16);
+  }
+  a.ret();
+
+  return reinterpret_cast<JitF32HardswishFn>(a.finalize());
+}
+
+class F32HardswishTest : public testing::TestWithParam<std::vector<VRegister>> {};
+
+TEST_P(F32HardswishTest, F32Hardswish) {
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  MacroAssembler a(&b);
+
+  const std::vector<VRegister> accs = GetParam();
+  const std::vector<VRegister> tmps = {v8.v4s(), v9.v4s(), v10.v4s(), v11.v4s()};
+
+  std::random_device random_device;
+  std::mt19937 rng(random_device());
+  std::uniform_real_distribution<float> f32dist(-6.0f, 6.0f);
+
+  xnn_f32_hswish_params params;
+  xnn_init_f32_hswish_scalar_params(&params);
+
+  std::vector<float> input(4 * accs.size());
+  std::vector<float> output(4 * accs.size());
+  std::vector<float> expected_output(output);
+
+  std::generate(input.begin(), input.end(), [&]{ return f32dist(rng); });
+  std::fill(output.begin(), output.end(), std::nanf(""));
+  std::fill(expected_output.begin(), expected_output.end(), std::nanf(""));
+
+  // Call generated function.
+  JitF32HardswishFn jit_f32_hardswish_fn = GenerateF32Hardswish(a, accs, tmps);
+  EXPECT_EQ(Error::kNoError, a.error());
+  xnn_finalize_code_memory(&b);
+  jit_f32_hardswish_fn(input.data(), output.data(), &params);
+
+  // Compute reference results.
+  std::transform(input.begin(), input.end(), expected_output.begin(), hardswish);
+
+  // Verify results.
+  for (size_t i = 0; i < output.size(); i++) {
+    EXPECT_NEAR(output[i], expected_output[i], std::max(5.0e-6, std::abs(expected_output[i]) * 1.0e-5))
+        << "at " << i << " / " << output.size() << ", x[" << i << "] = " << input[i];
+  }
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+  AArch64Assembler,
+  F32HardswishTest,
+  testing::Values(
+    std::vector<VRegister>({v4.v4s()}),
+    std::vector<VRegister>({v4.v4s(), v5.v4s(), v6.v4s(), v7.v4s()}),
+    std::vector<VRegister>({v4.v4s(), v5.v4s(), v6.v4s(), v7.v4s(), v12.v4s(), v13.v4s(), v14.v4s(), v15.v4s()})));
+
+#endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 }  // namespace aarch64
 }  // namespace xnnpack
