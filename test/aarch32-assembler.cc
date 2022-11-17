@@ -513,6 +513,8 @@ JitF32HardswishFn GenerateF32Hardswish(MacroAssembler& a, std::vector<QRegister>
   const QRegister six = q2;
   const QRegister zero = q3;
 
+  // No callee-saved GPR registers used.
+  a.vpush({d8-d15});  // callee-saved NEON registers
   // Load params.
   a.vld3r_32({sixth.low(), three.low(), six.low()}, mem[r2]);
   a.vmov(three.high(), three.low());
@@ -532,6 +534,7 @@ JitF32HardswishFn GenerateF32Hardswish(MacroAssembler& a, std::vector<QRegister>
   for (size_t i = 0; i < accs.size(); i++) {
     a.vst1_32({accs[i].low(), accs[i].high()}, mem[r1]++);
   }
+  a.vpop({d8-d15});
   a.bx(lr);
 
   return reinterpret_cast<JitF32HardswishFn>(a.finalize());
@@ -540,9 +543,9 @@ JitF32HardswishFn GenerateF32Hardswish(MacroAssembler& a, std::vector<QRegister>
 class F32HardswishTest : public testing::TestWithParam<std::vector<QRegister>> {};
 
 TEST_P(F32HardswishTest, F32Hardswish) {
-  xnn_code_buffer b;
-  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
-  MacroAssembler a(&b);
+  xnn_code_buffer buffer;
+  xnn_allocate_code_memory(&buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  MacroAssembler assembler(&buffer);
 
   const std::vector<QRegister> accs = GetParam();
   const std::vector<QRegister> tmps = {q8, q9, q10, q11};
@@ -563,9 +566,9 @@ TEST_P(F32HardswishTest, F32Hardswish) {
   std::fill(expected_output.begin(), expected_output.end(), std::nanf(""));
 
   // Call generated function.
-  JitF32HardswishFn jit_f32_hardswish_fn = GenerateF32Hardswish(a, accs, tmps);
-  EXPECT_EQ(Error::kNoError, a.error());
-  xnn_finalize_code_memory(&b);
+  JitF32HardswishFn jit_f32_hardswish_fn = GenerateF32Hardswish(assembler, accs, tmps);
+  EXPECT_EQ(Error::kNoError, assembler.error());
+  xnn_finalize_code_memory(&buffer);
   jit_f32_hardswish_fn(input.data(), output.data(), &params);
 
   // Compute reference results.
@@ -576,7 +579,7 @@ TEST_P(F32HardswishTest, F32Hardswish) {
     EXPECT_NEAR(output[i], expected_output[i], std::max(5.0e-6, std::abs(expected_output[i]) * 1.0e-5))
         << "at " << i << " / " << output.size() << ", x[" << i << "] = " << input[i];
   }
-  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&buffer));
 }
 
 INSTANTIATE_TEST_SUITE_P(

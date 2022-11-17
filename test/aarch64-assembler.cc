@@ -564,12 +564,12 @@ JitF32HardswishFn GenerateF32Hardswish(MacroAssembler& a, std::vector<VRegister>
 class F32HardswishTest : public testing::TestWithParam<std::vector<VRegister>> {};
 
 TEST_P(F32HardswishTest, F32Hardswish) {
-  xnn_code_buffer b;
-  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
-  MacroAssembler a(&b);
+  xnn_code_buffer buffer;
+  xnn_allocate_code_memory(&buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  MacroAssembler assembler(&buffer);
 
   const std::vector<VRegister> accs = GetParam();
-  const std::vector<VRegister> tmps = {v8.v4s(), v9.v4s(), v10.v4s(), v11.v4s()};
+  const std::vector<VRegister> tmps = {v16.v4s(), v17.v4s(), v18.v4s(), v19.v4s()};
 
   std::random_device random_device;
   std::mt19937 rng(random_device());
@@ -587,9 +587,9 @@ TEST_P(F32HardswishTest, F32Hardswish) {
   std::fill(expected_output.begin(), expected_output.end(), std::nanf(""));
 
   // Call generated function.
-  JitF32HardswishFn jit_f32_hardswish_fn = GenerateF32Hardswish(a, accs, tmps);
-  EXPECT_EQ(Error::kNoError, a.error());
-  xnn_finalize_code_memory(&b);
+  JitF32HardswishFn jit_f32_hardswish_fn = GenerateF32Hardswish(assembler, accs, tmps);
+  EXPECT_EQ(Error::kNoError, assembler.error());
+  xnn_finalize_code_memory(&buffer);
   jit_f32_hardswish_fn(input.data(), output.data(), &params);
 
   // Compute reference results.
@@ -600,7 +600,7 @@ TEST_P(F32HardswishTest, F32Hardswish) {
     EXPECT_NEAR(output[i], expected_output[i], std::max(5.0e-6, std::abs(expected_output[i]) * 1.0e-5))
         << "at " << i << " / " << output.size() << ", x[" << i << "] = " << input[i];
   }
-  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&buffer));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -609,7 +609,7 @@ INSTANTIATE_TEST_SUITE_P(
   testing::Values(
     std::vector<VRegister>({v4.v4s()}),
     std::vector<VRegister>({v4.v4s(), v5.v4s(), v6.v4s(), v7.v4s()}),
-    std::vector<VRegister>({v4.v4s(), v5.v4s(), v6.v4s(), v7.v4s(), v12.v4s(), v13.v4s(), v14.v4s(), v15.v4s()})));
+    std::vector<VRegister>({v4.v4s(), v5.v4s(), v6.v4s(), v7.v4s(), v20.v4s(), v21.v4s(), v22.v4s(), v23.v4s()})));
 
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
