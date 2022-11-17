@@ -17,7 +17,7 @@
 
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_16[16];
 
-void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x24(
+void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x24(
     size_t batch,
     const float* input,
     float* output,
@@ -50,12 +50,12 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x24(
     v128_t vxKLMN = wasm_v128_load(input + 20);
     input += 24;
 
-    const v128_t vz0123 = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vx0123, vprescale));
-    const v128_t vz4567 = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vx4567, vprescale));
-    const v128_t vz89AB = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vx89AB, vprescale));
-    const v128_t vzCDEF = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vxCDEF, vprescale));
-    const v128_t vzGHIJ = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vxGHIJ, vprescale));
-    const v128_t vzKLMN = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vxKLMN, vprescale));
+    const v128_t vz0123 = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vx0123, vprescale));
+    const v128_t vz4567 = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vx4567, vprescale));
+    const v128_t vz89AB = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vx89AB, vprescale));
+    const v128_t vzCDEF = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vxCDEF, vprescale));
+    const v128_t vzGHIJ = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vxGHIJ, vprescale));
+    const v128_t vzKLMN = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vxKLMN, vprescale));
 
     v128_t vn0123 = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz0123, vlog2e));
     v128_t vn4567 = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz4567, vlog2e));
@@ -227,7 +227,7 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x24(
     v128_t vx = wasm_v128_load(input);
     input += 4;
 
-    const v128_t vz = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
+    const v128_t vz = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
 
     v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz, vlog2e));
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
@@ -269,7 +269,7 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x24(
   if XNN_UNLIKELY(batch != 0) {
     v128_t vx = wasm_v128_load(input);
 
-    const v128_t vz = wasm_f32x4_pmax(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
+    const v128_t vz = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
 
     v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz, vlog2e));
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);

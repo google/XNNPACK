@@ -35,33 +35,61 @@ tools/xngen src/f32-velu/scalar-rr2-p6.c.in -D BATCH_TILE=5 -D WASM=1 -o src/f32
 tools/xngen src/f32-velu/scalar-rr2-p6.c.in -D BATCH_TILE=6 -D WASM=1 -o src/f32-velu/gen/f32-velu-wasm-rr2-p6-x6.c &
 
 ################################## WAsm SIMD ##################################
-tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=4  -D X86=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x4.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=8  -D X86=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x8.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=12 -D X86=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x12.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=16 -D X86=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x16.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=20 -D X86=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x20.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=24 -D X86=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x24.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=4  -D ARCH=ARM     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x4.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=8  -D ARCH=ARM     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x8.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=12 -D ARCH=ARM     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x12.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=16 -D ARCH=ARM     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x16.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=20 -D ARCH=ARM     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x20.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=24 -D ARCH=ARM     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x24.c &
 
-tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=4  -D X86=1 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-lut16-p3-x4.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=8  -D X86=1 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-lut16-p3-x8.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=12 -D X86=1 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-lut16-p3-x12.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=16 -D X86=1 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-lut16-p3-x16.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=20 -D X86=1 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-lut16-p3-x20.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=24 -D X86=1 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-lut16-p3-x24.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=4  -D ARCH=X86     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-lut16-p3-x4.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=8  -D ARCH=X86     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-lut16-p3-x8.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=12 -D ARCH=X86     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-lut16-p3-x12.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=16 -D ARCH=X86     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-lut16-p3-x16.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=20 -D ARCH=X86     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-lut16-p3-x20.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=24 -D ARCH=X86     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-lut16-p3-x24.c &
 
-tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=4  -D X86=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-x4.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=8  -D X86=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-x8.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=12 -D X86=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-x12.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=16 -D X86=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-x16.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=20 -D X86=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-x20.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=24 -D X86=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-x24.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=4  -D ARCH=RELAXED -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-rr2-lut16-p3-x4.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=8  -D ARCH=RELAXED -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-rr2-lut16-p3-x8.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=12 -D ARCH=RELAXED -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-rr2-lut16-p3-x12.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=16 -D ARCH=RELAXED -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-rr2-lut16-p3-x16.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=20 -D ARCH=RELAXED -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-rr2-lut16-p3-x20.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=24 -D ARCH=RELAXED -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-rr2-lut16-p3-x24.c &
 
-tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=4  -D X86=1 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-x4.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=8  -D X86=1 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-x8.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=12 -D X86=1 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-x12.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=16 -D X86=1 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-x16.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=20 -D X86=1 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-x20.c &
-tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=24 -D X86=1 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-x24.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=4  -D ARCH=RELAXED -D FMA=1 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-fma-rr2-lut16-p3-x4.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=8  -D ARCH=RELAXED -D FMA=1 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-fma-rr2-lut16-p3-x8.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=12 -D ARCH=RELAXED -D FMA=1 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-fma-rr2-lut16-p3-x12.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=16 -D ARCH=RELAXED -D FMA=1 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-fma-rr2-lut16-p3-x16.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=20 -D ARCH=RELAXED -D FMA=1 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-fma-rr2-lut16-p3-x20.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-lut16-p3.c.in -D BATCH_TILE=24 -D ARCH=RELAXED -D FMA=1 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-fma-rr2-lut16-p3-x24.c &
+
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=4  -D ARCH=ARM     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-x4.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=8  -D ARCH=ARM     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-x8.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=12 -D ARCH=ARM     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-x12.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=16 -D ARCH=ARM     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-x16.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=20 -D ARCH=ARM     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-x20.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=24 -D ARCH=ARM     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-x24.c &
+
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=4  -D ARCH=X86     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-x4.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=8  -D ARCH=X86     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-x8.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=12 -D ARCH=X86     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-x12.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=16 -D ARCH=X86     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-x16.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=20 -D ARCH=X86     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-x20.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=24 -D ARCH=X86     -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-x24.c &
+
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=4  -D ARCH=RELAXED -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-rr2-p6-x4.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=8  -D ARCH=RELAXED -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-rr2-p6-x8.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=12 -D ARCH=RELAXED -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-rr2-p6-x12.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=16 -D ARCH=RELAXED -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-rr2-p6-x16.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=20 -D ARCH=RELAXED -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-rr2-p6-x20.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=24 -D ARCH=RELAXED -D FMA=0 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-rr2-p6-x24.c &
+
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=4  -D ARCH=RELAXED -D FMA=1 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-fma-rr2-p6-x4.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=8  -D ARCH=RELAXED -D FMA=1 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-fma-rr2-p6-x8.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=12 -D ARCH=RELAXED -D FMA=1 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-fma-rr2-p6-x12.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=16 -D ARCH=RELAXED -D FMA=1 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-fma-rr2-p6-x16.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=20 -D ARCH=RELAXED -D FMA=1 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-fma-rr2-p6-x20.c &
+tools/xngen src/f32-velu/wasmsimd-rr2-p6.c.in -D BATCH_TILE=24 -D ARCH=RELAXED -D FMA=1 -o src/f32-velu/gen/f32-velu-wasmrelaxedsimd-fma-rr2-p6-x24.c &
 
 ################################### ARM NEON ##################################
 tools/xngen src/f32-velu/neon-lut16-p3.c.in -D BATCH_TILE=4  -D FMA=0 -o src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-x4.c &

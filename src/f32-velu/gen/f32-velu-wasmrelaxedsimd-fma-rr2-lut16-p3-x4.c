@@ -1,11 +1,12 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-velu/wasmsimd-rr2-lut16-p3.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert BATCH_TILE % 4 == 0
-$assert BATCH_TILE >= 4
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <wasm_simd128.h>
@@ -16,10 +17,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_16[16];
 
-$WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "__builtin_wasm_relaxed_max_f32x4"}[ARCH]
-$ISA = "wasmsimd" if ARCH != "RELAXED" else "wasmrelaxedsimd"
-$ARCH_SUFFIX = "" if ARCH == "RELAXED" and not FMA else "_" + ("fma" if FMA else ARCH.lower())
-void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_lut16_p3_x${BATCH_TILE}(
+void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x4(
     size_t batch,
     const float* input,
     float* output,
@@ -43,75 +41,11 @@ void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_lut16_p3_x${BATCH_TILE}(
   const v128_t vc2 = wasm_v128_load64_splat(params->wasmsimd_rr2_lut16_p3.c2);
   const v128_t vone = wasm_v128_load64_splat(params->wasmsimd_rr2_lut16_p3.one);
 
-  $if BATCH_TILE > 4:
-    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-      v128_t vx${ABC[0:4]} = wasm_v128_load(input);
-      $for N in range(4, BATCH_TILE, 4):
-        v128_t vx${ABC[N:N+4]} = wasm_v128_load(input + ${N});
-      input += ${BATCH_TILE};
-
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t vz${ABC[N:N+4]} = ${WASM_F32X4_MAX}(vsat_cutoff, wasm_f32x4_mul(vx${ABC[N:N+4]}, vprescale));
-
-      $for N in range(0, BATCH_TILE, 4):
-        v128_t vn${ABC[N:N+4]} = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz${ABC[N:N+4]}, vlog2e));
-
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t vidx${ABC[N:N+4]} = wasm_i32x4_shl(wasm_v128_and(vn${ABC[N:N+4]}, vindex_mask), 2);
-        const v128_t ven${ABC[N:N+4]} = wasm_i32x4_shl(vn${ABC[N:N+4]}, 19);
-
-      $for N in range(0, BATCH_TILE, 4):
-        const uint32_t vidx${ABC[N]} = wasm_u32x4_extract_lane(vidx${ABC[N:N+4]}, 0);
-        v128_t vl${ABC[N:N+4]} = wasm_v128_load32_zero((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) vidx${ABC[N]}));
-
-      $for L in range(1, 4):
-        $for N in range(0, BATCH_TILE, 4):
-          const uint32_t vidx${ABC[N+L]} = wasm_u32x4_extract_lane(vidx${ABC[N:N+4]}, ${L});
-          vl${ABC[N:N+4]} = wasm_v128_load32_lane((const void*) ((uintptr_t) xnn_table_exp2minus_k_over_16 + (uint32_t) vidx${ABC[N+L]}), vl${ABC[N:N+4]}, ${L});
-
-      $for N in range(0, BATCH_TILE, 4):
-        vn${ABC[N:N+4]} = wasm_f32x4_sub(vn${ABC[N:N+4]}, vmagic_bias);
-        v128_t vs${ABC[N:N+4]} = wasm_i32x4_add(vl${ABC[N:N+4]}, ven${ABC[N:N+4]});
-
-      $for N in range(0, BATCH_TILE, 4):
-        v128_t vt${ABC[N:N+4]} = wasm_f32x4_add(vz${ABC[N:N+4]}, wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_hi));
-
-      $for N in range(0, BATCH_TILE, 4):
-        vt${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_lo), vt${ABC[N:N+4]});
-
-      $for N in range(0, BATCH_TILE, 4):
-        v128_t vp${ABC[N:N+4]} = wasm_f32x4_add(vc2, wasm_f32x4_mul(vc3, vt${ABC[N:N+4]}));
-
-      $for N in range(0, BATCH_TILE, 4):
-        vp${ABC[N:N+4]} = wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]});
-
-      $for N in range(0, BATCH_TILE, 4):
-        vt${ABC[N:N+4]} = wasm_f32x4_mul(vt${ABC[N:N+4]}, vs${ABC[N:N+4]});
-        vs${ABC[N:N+4]} = wasm_f32x4_sub(vs${ABC[N:N+4]}, vone);
-
-      $for N in range(0, BATCH_TILE, 4):
-        vp${ABC[N:N+4]} = wasm_f32x4_add(vt${ABC[N:N+4]}, wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}));
-
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t ve${ABC[N:N+4]} = wasm_f32x4_mul(valpha, wasm_f32x4_add(vp${ABC[N:N+4]}, vs${ABC[N:N+4]}));
-
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t vsignm${ABC[N:N+4]} = wasm_i32x4_shr(vx${ABC[N:N+4]}, 31);
-        vx${ABC[N:N+4]} = wasm_f32x4_mul(vx${ABC[N:N+4]}, vbeta);
-
-      $for N in range(0, BATCH_TILE, 4):
-        const v128_t vy${ABC[N:N+4]} = wasm_v128_bitselect(ve${ABC[N:N+4]}, vx${ABC[N:N+4]}, vsignm${ABC[N:N+4]});
-
-      wasm_v128_store(output, vy${ABC[0:4]});
-      $for N in range(4, BATCH_TILE, 4):
-        wasm_v128_store(output + ${N}, vy${ABC[N:N+4]});
-      output += ${BATCH_TILE};
-    }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     v128_t vx = wasm_v128_load(input);
     input += 4;
 
-    const v128_t vz = ${WASM_F32X4_MAX}(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
+    const v128_t vz = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
 
     v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz, vlog2e));
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
@@ -153,7 +87,7 @@ void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_lut16_p3_x${BATCH_TILE}(
   if XNN_UNLIKELY(batch != 0) {
     v128_t vx = wasm_v128_load(input);
 
-    const v128_t vz = ${WASM_F32X4_MAX}(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
+    const v128_t vz = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
 
     v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz, vlog2e));
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
