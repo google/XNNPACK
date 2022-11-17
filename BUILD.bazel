@@ -8868,6 +8868,58 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "configs",
+    srcs = [
+        "src/hardware-config.c",
+        "src/transpose-config.c",
+    ],
+    hdrs = [
+        "src/xnnpack/config.h",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":amalgam_microkernels",
+        ":common",
+        ":logging",
+        ":microparams_init",
+        ":microkernels_h",
+        ":params",
+    ] + select({
+        ":emscripten": [],
+        "//conditions:default": ["@cpuinfo"],
+    }),
+)
+
+xnnpack_cc_library(
+    name = "configs_test_mode",
+    srcs = [
+        "src/hardware-config.c",
+        "src/transpose-config.c",
+    ],
+    hdrs = [
+        "src/xnnpack/config.h",
+    ],
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":amalgam_microkernels",
+        ":common",
+        ":logging",
+        ":microparams_init",
+        ":microkernels_h",
+        ":params",
+    ] + select({
+        ":emscripten": [],
+        "//conditions:default": ["@cpuinfo"],
+    }),
+)
+
+xnnpack_cc_library(
     name = "params",
     srcs = ["src/params.c"],
     hdrs = [
@@ -11349,6 +11401,7 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":common",
+        ":configs",
         ":enable_gemm_m_specialization",
         ":enable_jit",
         ":indirection",
@@ -11391,6 +11444,7 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":common",
+        ":configs_test_mode",
         ":enable_gemm_m_specialization",
         ":enable_jit",
         ":indirection_test_mode",
@@ -11608,7 +11662,9 @@ xnnpack_cc_library(
     srcs = [
         "src/init.c",
     ],
-    hdrs = ["include/xnnpack.h"],
+    hdrs = [
+        "include/xnnpack.h",
+    ],
     copts = select({
         ":debug_build": [],
         "//conditions:default": xnnpack_min_size_copts(),
@@ -11622,6 +11678,7 @@ xnnpack_cc_library(
     deps = [
         ":allocator",
         ":common",
+        ":configs",
         ":enable_assembly",
         ":enable_gemm_m_specialization",
         ":enable_jit",
@@ -11646,7 +11703,9 @@ xnnpack_cc_library(
     srcs = [
         "src/init.c",
     ],
-    hdrs = ["include/xnnpack.h"],
+    hdrs = [
+        "include/xnnpack.h",
+    ],
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -11663,6 +11722,7 @@ xnnpack_cc_library(
     deps = [
         ":allocator",
         ":common",
+        ":configs_test_mode",
         ":enable_assembly",
         ":enable_gemm_m_specialization",
         ":enable_jit",

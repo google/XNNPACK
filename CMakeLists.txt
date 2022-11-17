@@ -273,6 +273,8 @@ SET(LOGGING_SRCS
 
 SET(XNNPACK_SRCS
   src/init.c
+  src/hardware-config.c
+  src/transpose-config.c
   src/params.c)
 
 SET(TABLE_SRCS

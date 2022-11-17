@@ -88,20 +88,6 @@ struct gemm_fused_ukernels {
   struct xnn_hmp_igemm_ukernel igemm[XNN_MAX_MR];
 };
 
-struct transpose_parameters {
-  union {
-    xnn_transposec_ukernel_function const_size_ukernel;
-    xnn_transposev_ukernel_function variable_size_ukernel;
-  };
-  union {
-    xnn_init_x24_transpose_params_fn x24;
-    xnn_init_x32_transpose_params_fn x32;
-    xnn_init_x64_transpose_params_fn x64;
-  } init;
-  // Maximum number of elements to process per ukernel call.
-  uint8_t tile_size;
-};
-
 #if XNN_PLATFORM_JIT
 struct xnn_hmp_gemm_codegen {
   xnn_jit_gemm_code_generator_function function[XNN_MAX_UARCH_TYPES];
@@ -654,12 +640,6 @@ struct xnn_parameters {
     // Bilinear interpolation (2D) in CHW layout.
     struct ibilinear_chw_parameters ibilinear_chw;
   } f32;
-  struct {
-    struct transpose_parameters x8;
-    struct transpose_parameters x16;
-    struct transpose_parameters x32;
-    struct transpose_parameters xx;
-  } transpose;
   struct {
     struct vunary_parameters f16_to_f32;
     struct vunary_parameters f32_to_f16;

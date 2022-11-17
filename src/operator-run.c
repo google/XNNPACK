@@ -1427,10 +1427,6 @@ enum xnn_status xnn_run_operator_with_index(
   size_t operator_object_index,
   pthreadpool_t threadpool)
 {
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to run operator: XNNPACK is not initialized");
-    return xnn_status_uninitialized;
-  }
   switch (op->state) {
     case xnn_run_state_invalid:
       xnn_log_error("failed to run operator: operator was not successfully setup");

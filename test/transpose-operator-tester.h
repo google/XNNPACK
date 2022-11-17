@@ -109,7 +109,6 @@ class TransposeOperatorTester {
       input_stride[i - 1] = input_stride[i] * shape_[i];
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
     }
-    ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     std::iota(input.begin(), input.end(), 0);
     std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
@@ -178,7 +177,6 @@ class TransposeOperatorTester {
       input_stride[i - 1] = input_stride[i] * shape_[i];
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
     }
-    ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     std::iota(input.begin(), input.end(), 0);
     std::fill(output.begin(), output.end(), UINT16_C(0xDEADBEEF));
 
@@ -247,7 +245,6 @@ class TransposeOperatorTester {
       input_stride[i - 1] = input_stride[i] * shape_[i];
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
     }
-    ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     std::iota(input.begin(), input.end(), 0);
     std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
 

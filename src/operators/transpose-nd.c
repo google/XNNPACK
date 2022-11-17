@@ -12,6 +12,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/config.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
 #include <xnnpack/normalization.h>
@@ -48,24 +49,7 @@ static enum xnn_status create_transpose_nd(
     enum xnn_operator_type operator_type,
     xnn_operator_t* transpose_op_out)
 {
-  enum xnn_status status = xnn_status_uninitialized;
-
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(operator_type));
-    return status;
-  }
-
-  status = xnn_status_unsupported_hardware;
-
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_TRANSPOSE) == 0) {
-    xnn_log_error(
-      "failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(operator_type));
-    return status;
-  }
-
-  status = xnn_status_out_of_memory;
+  enum xnn_status status = xnn_status_out_of_memory;
   xnn_operator_t transpose_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (transpose_op == NULL) {
     xnn_log_error(
@@ -107,9 +91,17 @@ static enum xnn_status setup_transpose_nd(
   const size_t* output_stride,
   size_t element_size)
 {
-  enum xnn_status status = xnn_status_invalid_parameter;
-  transpose_op->state = xnn_run_state_invalid;
+  enum xnn_status status = xnn_status_unsupported_hardware;
+  const struct xnn_transpose_config* xnn_transpose_conf = xnn_init_transpose_config();
+  if (xnn_transpose_conf == NULL) {
+     xnn_log_error(
+      "failed to create %s operator: hardware is not supported",
+      xnn_operator_type_to_string(transpose_op->type));
+    goto error;
+  }
 
+  transpose_op->state = xnn_run_state_invalid;
+  status = xnn_status_invalid_parameter;
   if (num_dims == 0) {
     xnn_log_error(
       "failed to create %s operator with %zu num_dims: num_dims must be non-zero",
@@ -228,30 +220,30 @@ static enum xnn_status setup_transpose_nd(
   switch (normalized_element_size) {
     case 1:
       context->log2_element_size = 0;
-      context->const_size_ukernel = xnn_params.transpose.x8.const_size_ukernel;
-      transpose_op->compute.tile[0] = xnn_params.transpose.x8.tile_size;
-      transpose_op->compute.tile[1] = xnn_params.transpose.x8.tile_size;
+      context->const_size_ukernel = xnn_transpose_conf->x8.const_size_ukernel;
+      transpose_op->compute.tile[0] = xnn_transpose_conf->x8.tile_size;
+      transpose_op->compute.tile[1] = xnn_transpose_conf->x8.tile_size;
       break;
     case 2:
       context->log2_element_size = 1;
-      transpose_op->compute.tile[0] = xnn_params.transpose.x16.tile_size;
-      transpose_op->compute.tile[1] = xnn_params.transpose.x16.tile_size;
-      context->const_size_ukernel = xnn_params.transpose.x16.const_size_ukernel;
+      transpose_op->compute.tile[0] = xnn_transpose_conf->x16.tile_size;
+      transpose_op->compute.tile[1] = xnn_transpose_conf->x16.tile_size;
+      context->const_size_ukernel = xnn_transpose_conf->x16.const_size_ukernel;
       break;
     case 4:
       context->log2_element_size = 2;
-      transpose_op->compute.tile[0] = xnn_params.transpose.x32.tile_size;
-      transpose_op->compute.tile[1] = xnn_params.transpose.x32.tile_size;
-      context->const_size_ukernel = xnn_params.transpose.x32.const_size_ukernel;
-      if (xnn_params.transpose.x32.init.x32 != NULL) {
-        xnn_params.transpose.x32.init.x32(&context->params.x32_params);
+      transpose_op->compute.tile[0] = xnn_transpose_conf->x32.tile_size;
+      transpose_op->compute.tile[1] = xnn_transpose_conf->x32.tile_size;
+      context->const_size_ukernel = xnn_transpose_conf->x32.const_size_ukernel;
+      if (xnn_transpose_conf->x32.init.x32 != NULL) {
+        xnn_transpose_conf->x32.init.x32(&context->params.x32_params);
       }
       break;
     default:
       context->element_size = normalized_element_size;
-      transpose_op->compute.tile[0] = xnn_params.transpose.xx.tile_size;
-      transpose_op->compute.tile[1] = xnn_params.transpose.xx.tile_size;
-      context->variable_size_ukernel = xnn_params.transpose.xx.variable_size_ukernel;
+      transpose_op->compute.tile[0] = xnn_transpose_conf->xx.tile_size;
+      transpose_op->compute.tile[1] = xnn_transpose_conf->xx.tile_size;
+      context->variable_size_ukernel = xnn_transpose_conf->xx.variable_size_ukernel;
       variable_size_ukernel = true;
   }
 
@@ -261,7 +253,7 @@ static enum xnn_status setup_transpose_nd(
       transpose_op->compute.type = xnn_parallelization_type_1d_tile_1d;
       transpose_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
       transpose_op->compute.range[0] = normalized_element_size;
-      univector_context->ukernel = xnn_params.xx.copy;
+      univector_context->ukernel = xnn_transpose_conf->copy;
       univector_context->log2_xsize = 0;
       univector_context->log2_ysize = 0;
       break;
@@ -434,18 +426,11 @@ enum xnn_status run_transpose_nd(
     size_t element_size,
     enum xnn_operator_type operator_type,
     pthreadpool_t threadpool) {
-  enum xnn_status status = xnn_status_uninitialized;
-
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(operator_type));
-    return status;
-  }
 
   struct xnn_operator transpose_op;
   memset(&transpose_op, 0, sizeof(transpose_op));
 
-  status = init_transpose_nd(
+  enum xnn_status status = init_transpose_nd(
       flags,
       operator_type,
       &transpose_op);
