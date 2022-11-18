@@ -92,6 +92,17 @@ jobs:
         run: scripts/build-windows-arm64.cmd
         shell: cmd
         working-directory: ${{ github.workspace }}
+  cmake-windows-arm64ec:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v3
+      - name: Report CMake version
+        run: cmake --version
+      - name: Configure and build
+        run: scripts/build-windows-arm64ec.cmd
+        shell: cmd
+        working-directory: ${{ github.workspace }}
   cmake-windows-x64:
     runs-on: windows-latest
     timeout-minutes: 120
