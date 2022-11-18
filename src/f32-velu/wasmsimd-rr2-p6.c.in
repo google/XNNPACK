@@ -5,6 +5,8 @@
 
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
+$assert ARCH in ["ARM", "X86", "RELAXED"]
+$assert not FMA or ARCH == "RELAXED"
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
@@ -15,6 +17,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 $WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "__builtin_wasm_relaxed_max_f32x4"}[ARCH]
+$WASM_V32X4_LANESELECT="__builtin_wasm_laneselect_i32x4" if ARCH == "RELAXED" else "wasm_v128_bitselect"
 $ISA = "wasmsimd" if ARCH != "RELAXED" else "wasmrelaxedsimd"
 $ARCH_SUFFIX = "" if ARCH == "RELAXED" and not FMA else "_" + ("fma" if FMA else ARCH.lower())
 void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p6_x${BATCH_TILE}(
@@ -122,7 +125,7 @@ void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p6_x${BATCH_TILE}(
         vx${ABC[N:N+4]} = wasm_f32x4_mul(vx${ABC[N:N+4]}, vbeta);
 
       $for N in range(0, BATCH_TILE, 4):
-        const v128_t vy${ABC[N:N+4]} = wasm_v128_bitselect(ve${ABC[N:N+4]}, vx${ABC[N:N+4]}, vsignm${ABC[N:N+4]});
+        const v128_t vy${ABC[N:N+4]} = ${WASM_V32X4_LANESELECT}(ve${ABC[N:N+4]}, vx${ABC[N:N+4]}, vsignm${ABC[N:N+4]});
 
       wasm_v128_store(output, vy${ABC[0:4]});
       $for N in range(4, BATCH_TILE, 4):
@@ -171,7 +174,7 @@ void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p6_x${BATCH_TILE}(
 
     const v128_t vsignm = wasm_i32x4_shr(vx, 31);
     vx = wasm_f32x4_mul(vx, vbeta);
-    const v128_t vy = wasm_v128_bitselect(ve, vx, vsignm);
+    const v128_t vy = ${WASM_V32X4_LANESELECT}(ve, vx, vsignm);
 
     wasm_v128_store(output, vy);
     output += 4;
@@ -217,7 +220,7 @@ void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p6_x${BATCH_TILE}(
 
     const v128_t vsignm = wasm_i32x4_shr(vx, 31);
     vx = wasm_f32x4_mul(vx, vbeta);
-    v128_t vy = wasm_v128_bitselect(ve, vx, vsignm);
+    v128_t vy = ${WASM_V32X4_LANESELECT}(ve, vx, vsignm);
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vy, 0);
