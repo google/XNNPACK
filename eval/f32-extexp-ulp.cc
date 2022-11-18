@@ -52,7 +52,7 @@ static void ComputeError(
 }
 
 static void ExtExpError(benchmark::State& state,
-  xnn_f32_ext_unary_math_function extexp,
+  xnn_f32_ext_unary_math_fn extexp,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (!cpuinfo_initialize()) {

@@ -70,7 +70,7 @@ class WindowMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_s16_window_ukernel_function window) const {
+  void Test(xnn_s16_window_ukernel_fn window) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));

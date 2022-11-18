@@ -22,7 +22,7 @@
 
 static void u64_u32_vsqrtshift(
   benchmark::State& state,
-  xnn_u64_u32_vsqrtshift_ukernel_function vsqrtshift,
+  xnn_u64_u32_vsqrtshift_ukernel_fn vsqrtshift,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {

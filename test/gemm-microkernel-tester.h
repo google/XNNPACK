@@ -200,86 +200,86 @@ class GemmMicrokernelTester {
   }
 
   void Test(
-    xnn_qu8_gemm_minmax_ukernel_function gemm,
+    xnn_qu8_gemm_minmax_ukernel_fn gemm,
     xnn_init_qu8_conv_minmax_params_fn init_params,
     xnn_qu8_requantize_fn requantize) const;
 
   void Test(
-    xnn_qu8_igemm_minmax_ukernel_function igemm,
+    xnn_qu8_igemm_minmax_ukernel_fn igemm,
     xnn_init_qu8_conv_minmax_params_fn init_params,
     xnn_qu8_requantize_fn requantize);
 
   void Test(
-    xnn_qc8_gemm_minmax_ukernel_function gemm,
+    xnn_qc8_gemm_minmax_ukernel_fn gemm,
     xnn_init_qc8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const;
 
   void Test(
-    xnn_qc8_igemm_minmax_ukernel_function igemm,
+    xnn_qc8_igemm_minmax_ukernel_fn igemm,
     xnn_init_qc8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const;
 
   void Test(
-    xnn_qs8_gemm_minmax_ukernel_function gemm,
+    xnn_qs8_gemm_minmax_ukernel_fn gemm,
     xnn_init_qs8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const;
 
   void Test(
-    xnn_qs8_igemm_minmax_ukernel_function igemm,
+    xnn_qs8_igemm_minmax_ukernel_fn igemm,
     xnn_init_qs8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const;
 
-  void Test(xnn_bf16_gemm_minmax_ukernel_function gemm_minmax, xnn_init_bf16_minmax_params_fn init_params) const;
+  void Test(xnn_bf16_gemm_minmax_ukernel_fn gemm_minmax, xnn_init_bf16_minmax_params_fn init_params) const;
 
-  void Test(xnn_f16_gemm_minmax_ukernel_function gemm_minmax, xnn_init_f16_minmax_params_fn init_params) const;
+  void Test(xnn_f16_gemm_minmax_ukernel_fn gemm_minmax, xnn_init_f16_minmax_params_fn init_params) const;
 
-  void Test(xnn_f16_igemm_minmax_ukernel_function igemm_minmax, xnn_init_f16_minmax_params_fn init_params) const;
+  void Test(xnn_f16_igemm_minmax_ukernel_fn igemm_minmax, xnn_init_f16_minmax_params_fn init_params) const;
 
-  void Test(xnn_f32_ppmm_minmax_ukernel_function ppmm_minmax, xnn_init_f32_minmax_params_fn init_params) const;
+  void Test(xnn_f32_ppmm_minmax_ukernel_fn ppmm_minmax, xnn_init_f32_minmax_params_fn init_params) const;
 
-  void Test(xnn_f32_gemm_ukernel_function gemm) const;
+  void Test(xnn_f32_gemm_ukernel_fn gemm) const;
 
-  void Test(xnn_f32_gemm_relu_ukernel_function gemm_relu) const;
+  void Test(xnn_f32_gemm_relu_ukernel_fn gemm_relu) const;
 
-  void Test(xnn_f32_gemm_minmax_ukernel_function gemm_minmax, xnn_init_f32_minmax_params_fn init_params) const;
+  void Test(xnn_f32_gemm_minmax_ukernel_fn gemm_minmax, xnn_init_f32_minmax_params_fn init_params) const;
 
-  void Test(xnn_f32_gemminc_minmax_ukernel_function gemminc, xnn_init_f32_minmax_params_fn init_params) const;
+  void Test(xnn_f32_gemminc_minmax_ukernel_fn gemminc, xnn_init_f32_minmax_params_fn init_params) const;
 
-  void Test(xnn_f32_igemm_ukernel_function igemm) const;
+  void Test(xnn_f32_igemm_ukernel_fn igemm) const;
 
-  void Test(xnn_f32_igemm_relu_ukernel_function igemm_relu) const;
+  void Test(xnn_f32_igemm_relu_ukernel_fn igemm_relu) const;
 
-  void Test(xnn_f32_igemm_minmax_ukernel_function igemm_minmax, xnn_init_f32_minmax_params_fn init_params) const;
+  void Test(xnn_f32_igemm_minmax_ukernel_fn igemm_minmax, xnn_init_f32_minmax_params_fn init_params) const;
 
 #if XNN_PLATFORM_JIT
   void Test(
-    xnn_jit_gemm_code_generator_function gemm_generator,
+    xnn_jit_gemm_code_generator_fn gemm_generator,
     xnn_init_f32_minmax_params_fn init_params) const;
   void Test(
-    xnn_jit_igemm_code_generator_function igemm_generator,
+    xnn_jit_igemm_code_generator_fn igemm_generator,
     xnn_init_f32_minmax_params_fn init_params) const;
   void Test(
-    xnn_jit_gemm_code_generator_function gemm_generator,
+    xnn_jit_gemm_code_generator_fn gemm_generator,
     xnn_init_qc8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const;
   void Test(
-    xnn_jit_igemm_code_generator_function igemm_generator,
+    xnn_jit_igemm_code_generator_fn igemm_generator,
     xnn_init_qc8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const;
   void Test(
-    xnn_jit_gemm_code_generator_function gemm_generator,
+    xnn_jit_gemm_code_generator_fn gemm_generator,
     xnn_init_qs8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const;
   void Test(
-    xnn_jit_igemm_code_generator_function igemm_generator,
+    xnn_jit_igemm_code_generator_fn igemm_generator,
     xnn_init_qs8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const;
   void Test(
-    xnn_jit_gemm_code_generator_function gemm_generator,
+    xnn_jit_gemm_code_generator_fn gemm_generator,
     xnn_init_f32_minmax_params_fn init_params,
     const std::vector<xnn_post_operation>& fused_operators) const;
   void Test(
-    xnn_jit_igemm_code_generator_function gemm_generator,
+    xnn_jit_igemm_code_generator_fn gemm_generator,
     xnn_init_f32_minmax_params_fn init_params,
     const std::vector<xnn_post_operation>& fused_operators) const;
 #endif  // XNN_PLATFORM_JIT

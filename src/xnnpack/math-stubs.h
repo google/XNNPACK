@@ -12,22 +12,22 @@
 extern "C" {
 #endif
 
-typedef void (*xnn_f16_unary_math_function)(
+typedef void (*xnn_f16_unary_math_fn)(
   size_t n,
   const void* input,
   void* output);
 
-typedef void (*xnn_f32_unary_math_function)(
+typedef void (*xnn_f32_unary_math_fn)(
   size_t n,
   const float* input,
   float* output);
 
-typedef void (*xnn_u32_unary_math_function)(
+typedef void (*xnn_u32_unary_math_fn)(
   size_t n,
   const uint32_t* input,
   uint32_t* output);
 
-typedef void (*xnn_f32_ext_unary_math_function)(
+typedef void (*xnn_f32_ext_unary_math_fn)(
   size_t n,
   const float* input,
   float* output_mantissa,

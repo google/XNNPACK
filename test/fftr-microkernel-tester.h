@@ -140,7 +140,7 @@ class FftrMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_cs16_fftr_ukernel_function fftr) const {
+  void Test(xnn_cs16_fftr_ukernel_fn fftr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));

@@ -94,7 +94,7 @@ class TransposeMicrokernelTester {
 
   inline size_t iterations() const { return this->iterations_; }
 
-  void Test(xnn_transposev_ukernel_function transpose) const {
+  void Test(xnn_transposev_ukernel_fn transpose) const {
     std::vector<uint8_t> input(input_stride() * block_height() * input_element_stride() + XNN_EXTRA_BYTES);
     std::vector<uint8_t> output(output_stride() * block_width() * output_element_stride());
     std::iota(input.begin(), input.end(), 0);
@@ -123,7 +123,7 @@ class TransposeMicrokernelTester {
     }
   }
 
-  void Test(xnn_x64_transposec_ukernel_function transpose, const xnn_init_x64_transpose_params_fn init_params = nullptr) const {
+  void Test(xnn_x64_transposec_ukernel_fn transpose, const xnn_init_x64_transpose_params_fn init_params = nullptr) const {
     std::vector<uint64_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES / sizeof(uint64_t));
     std::vector<uint64_t> output(input_stride() * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -155,7 +155,7 @@ class TransposeMicrokernelTester {
     }
   }
 
-  void Test(xnn_x32_transposec_ukernel_function transpose, const xnn_init_x32_transpose_params_fn init_params = nullptr) const {
+  void Test(xnn_x32_transposec_ukernel_fn transpose, const xnn_init_x32_transpose_params_fn init_params = nullptr) const {
     std::vector<uint32_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES / sizeof(uint32_t));
     std::vector<uint32_t> output(input_stride() * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -186,7 +186,7 @@ class TransposeMicrokernelTester {
       }
     }
   }
-  void Test(xnn_x24_transposec_ukernel_function transpose, const xnn_init_x24_transpose_params_fn init_params = nullptr) const {
+  void Test(xnn_x24_transposec_ukernel_fn transpose, const xnn_init_x24_transpose_params_fn init_params = nullptr) const {
     std::vector<uint8_t> input(input_stride() * output_stride() * element_size() + XNN_EXTRA_BYTES);
     std::vector<uint8_t> output(input_stride() * output_stride() * element_size());
     std::iota(input.begin(), input.end(), 0);
@@ -217,7 +217,7 @@ class TransposeMicrokernelTester {
     }
   }
 
-  void Test(xnn_x16_transposec_ukernel_function transpose) const {
+  void Test(xnn_x16_transposec_ukernel_fn transpose) const {
     std::vector<uint16_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> output(input_stride() * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -244,7 +244,7 @@ class TransposeMicrokernelTester {
     }
   }
 
-  void Test(xnn_x8_transposec_ukernel_function transpose) const {
+  void Test(xnn_x8_transposec_ukernel_fn transpose) const {
     std::vector<uint8_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES);
     std::vector<uint8_t> output(input_stride() * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {

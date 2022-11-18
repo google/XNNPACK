@@ -45,7 +45,7 @@ class RMaxMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f16_rmax_ukernel_function rmax) const {
+  void Test(xnn_f16_rmax_ukernel_fn rmax) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
@@ -70,7 +70,7 @@ class RMaxMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_rmax_ukernel_function rmax) const {
+  void Test(xnn_f32_rmax_ukernel_fn rmax) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
@@ -95,7 +95,7 @@ class RMaxMicrokernelTester {
     }
   }
 
-  void Test(xnn_u8_rmax_ukernel_function rmax) const {
+  void Test(xnn_u8_rmax_ukernel_fn rmax) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_int_distribution<int32_t> u8dist(

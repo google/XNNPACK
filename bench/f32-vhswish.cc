@@ -22,7 +22,7 @@
 
 static void f32_vhswish(
   benchmark::State& state,
-  xnn_f32_vhswish_ukernel_function hswish,
+  xnn_f32_vhswish_ukernel_fn hswish,
   xnn_init_f32_hswish_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

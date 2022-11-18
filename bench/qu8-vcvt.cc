@@ -22,7 +22,7 @@
 
 static void qu8_vcvt(
   benchmark::State& state,
-  xnn_qu8_vcvt_ukernel_function cvt,
+  xnn_qu8_vcvt_ukernel_fn cvt,
   xnn_init_qu8_cvt_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

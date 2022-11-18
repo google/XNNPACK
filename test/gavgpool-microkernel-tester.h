@@ -143,7 +143,7 @@ class GAvgPoolMicrokernelTester {
   }
 
   void Test(
-      xnn_qu8_gavgpool_minmax_unipass_ukernel_function gavgpool_minmax,
+      xnn_qu8_gavgpool_minmax_unipass_ukernel_fn gavgpool_minmax,
       xnn_init_qu8_avgpool_minmax_params_fn init_params,
       xnn_qu8_requantize_fn requantize) const
   {
@@ -209,7 +209,7 @@ class GAvgPoolMicrokernelTester {
   }
 
   void Test(
-      xnn_qu8_gavgpool_minmax_multipass_ukernel_function gavgpool_minmax,
+      xnn_qu8_gavgpool_minmax_multipass_ukernel_fn gavgpool_minmax,
       xnn_init_qu8_avgpool_minmax_params_fn init_params,
       xnn_qu8_requantize_fn requantize) const
   {
@@ -278,7 +278,7 @@ class GAvgPoolMicrokernelTester {
   }
 
   void Test(
-      xnn_qs8_gavgpool_minmax_unipass_ukernel_function gavgpool_minmax,
+      xnn_qs8_gavgpool_minmax_unipass_ukernel_fn gavgpool_minmax,
       xnn_init_qs8_avgpool_minmax_params_fn init_params,
       xnn_qs8_requantize_fn requantize) const
   {
@@ -344,7 +344,7 @@ class GAvgPoolMicrokernelTester {
   }
 
   void Test(
-      xnn_qs8_gavgpool_minmax_multipass_ukernel_function gavgpool_minmax,
+      xnn_qs8_gavgpool_minmax_multipass_ukernel_fn gavgpool_minmax,
       xnn_init_qs8_avgpool_minmax_params_fn init_params,
       xnn_qs8_requantize_fn requantize) const
   {
@@ -411,7 +411,7 @@ class GAvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_gavgpool_minmax_unipass_ukernel_function gavgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
+  void Test(xnn_f16_gavgpool_minmax_unipass_ukernel_fn gavgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
@@ -473,7 +473,7 @@ class GAvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_gavgpool_minmax_multipass_ukernel_function gavgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
+  void Test(xnn_f16_gavgpool_minmax_multipass_ukernel_fn gavgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
@@ -535,7 +535,7 @@ class GAvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_gavgpool_minmax_unipass_ukernel_function gavgpool_minmax, xnn_init_f32_scaleminmax_params_fn init_params) const {
+  void Test(xnn_f32_gavgpool_minmax_unipass_ukernel_fn gavgpool_minmax, xnn_init_f32_scaleminmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
@@ -594,7 +594,7 @@ class GAvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_gavgpool_minmax_multipass_ukernel_function gavgpool_minmax, xnn_init_f32_scaleminmax_params_fn init_params) const {
+  void Test(xnn_f32_gavgpool_minmax_multipass_ukernel_fn gavgpool_minmax, xnn_init_f32_scaleminmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;

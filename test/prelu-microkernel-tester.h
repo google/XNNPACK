@@ -92,7 +92,7 @@ class PReLUMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f16_prelu_ukernel_function prelu) const {
+  void Test(xnn_f16_prelu_ukernel_fn prelu) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
@@ -138,7 +138,7 @@ class PReLUMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_prelu_ukernel_function prelu) const {
+  void Test(xnn_f32_prelu_ukernel_fn prelu) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);

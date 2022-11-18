@@ -21,7 +21,7 @@
 
 void filterbank_accumulate(
     benchmark::State& state,
-    xnn_u32_filterbank_accumulate_ukernel_function filterbank_accumulate,
+    xnn_u32_filterbank_accumulate_ukernel_fn filterbank_accumulate,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {

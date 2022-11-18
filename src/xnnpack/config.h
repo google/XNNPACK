@@ -12,8 +12,8 @@
 
 struct xnn_transpose_subconfig {
   union {
-    xnn_transposec_ukernel_function const_size_ukernel;
-    xnn_transposev_ukernel_function variable_size_ukernel;
+    xnn_transposec_ukernel_fn const_size_ukernel;
+    xnn_transposev_ukernel_fn variable_size_ukernel;
   };
   union {
     xnn_init_x24_transpose_params_fn x24;
@@ -29,7 +29,7 @@ struct xnn_transpose_config {
   struct xnn_transpose_subconfig x16;
   struct xnn_transpose_subconfig x32;
   struct xnn_transpose_subconfig xx;
-  xnn_vunary_ukernel_function copy;
+  xnn_vunary_ukernel_fn copy;
 };
 
 XNN_INTERNAL const struct xnn_transpose_config* xnn_init_transpose_config();

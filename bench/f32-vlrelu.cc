@@ -22,7 +22,7 @@
 
 static void f32_vlrelu(
   benchmark::State& state,
-  xnn_f32_vlrelu_ukernel_function vlrelu,
+  xnn_f32_vlrelu_ukernel_fn vlrelu,
   xnn_init_f32_lrelu_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

@@ -22,7 +22,7 @@
 
 static void f32_vsqrt(
   benchmark::State& state,
-  xnn_f32_vsqrt_ukernel_function vsqrt,
+  xnn_f32_vsqrt_ukernel_fn vsqrt,
   xnn_init_f32_sqrt_params_fn init_params = nullptr,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

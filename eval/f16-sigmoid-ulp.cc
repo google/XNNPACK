@@ -55,7 +55,7 @@ static void ComputeError(
 }
 
 static void SigmoidError(benchmark::State& state,
-  xnn_f16_unary_math_function sigmoid,
+  xnn_f16_unary_math_fn sigmoid,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (!cpuinfo_initialize()) {

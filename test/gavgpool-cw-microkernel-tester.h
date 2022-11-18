@@ -79,7 +79,7 @@ class GAvgPoolCWMicrokernelTester {
   }
 
 
-  void Test(xnn_f32_gavgpool_cw_ukernel_function gavgpool, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_gavgpool_cw_ukernel_fn gavgpool, Variant variant = Variant::Native) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
@@ -140,7 +140,7 @@ class GAvgPoolCWMicrokernelTester {
     }
   }
 
-void Test(xnn_f16_gavgpool_cw_ukernel_function gavgpool, xnn_init_f16_gavgpool_neonfp16arith_params_fn init_params) const {
+void Test(xnn_f16_gavgpool_cw_ukernel_fn gavgpool, xnn_init_f16_gavgpool_neonfp16arith_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(0.1f, 10.0f);

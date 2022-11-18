@@ -40,7 +40,7 @@ class RAddExpMinusMaxMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_raddexpminusmax_ukernel_function raddexpminusmax) const {
+  void Test(xnn_f32_raddexpminusmax_ukernel_fn raddexpminusmax) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     // Choose such range that expf(x[i]) overflows, but expf(x[i] - x_max) doesn't.

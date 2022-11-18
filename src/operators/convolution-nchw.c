@@ -251,9 +251,9 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
                       xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f16));
         goto error;
       }
-      xnn_pack_dconv_oki_w_function xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_function) xnn_pack_f16_dconv_oki_w;
+      xnn_pack_dconv_oki_w_fn xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_fn) xnn_pack_f16_dconv_oki_w;
       if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-        xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_function) xnn_pack_f32_to_f16_dconv_oki_w;
+        xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_fn) xnn_pack_f32_to_f16_dconv_oki_w;
       }
       xnn_pack_dconv_oki_w(
         group_output_channels,
@@ -268,7 +268,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
       }
 
       convolution_op->ukernel.conv2d = (struct xnn_ukernel_conv2d) {
-        .hwc2chw_function = xnn_params.f16.conv_hwc2chw_3x3c3s2.ukernel_with_symm_padding,
+        .hwc2chw_fn = xnn_params.f16.conv_hwc2chw_3x3c3s2.ukernel_with_symm_padding,
         .output_height_tile = xnn_params.f16.conv_hwc2chw_3x3c3s2.output_height_tile,
         .output_channel_tile = xnn_params.f16.conv_hwc2chw_3x3c3s2.output_channel_tile,
       };
@@ -293,11 +293,11 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
         goto error;
       }
 
-      xnn_pack_chw_dwconv_hwg_w_function pack_chw_dwconv_hwg_w = (xnn_pack_chw_dwconv_hwg_w_function) xnn_pack_f16_chw_dwconv_hwg_w;
-      xnn_pack_chw_dwconv_ghw_w_function pack_chw_dwconv_ghw_w = (xnn_pack_chw_dwconv_ghw_w_function) xnn_pack_f16_chw_dwconv_ghw_w;
+      xnn_pack_chw_dwconv_hwg_w_fn pack_chw_dwconv_hwg_w = (xnn_pack_chw_dwconv_hwg_w_fn) xnn_pack_f16_chw_dwconv_hwg_w;
+      xnn_pack_chw_dwconv_ghw_w_fn pack_chw_dwconv_ghw_w = (xnn_pack_chw_dwconv_ghw_w_fn) xnn_pack_f16_chw_dwconv_ghw_w;
       if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-        pack_chw_dwconv_hwg_w = (xnn_pack_chw_dwconv_hwg_w_function) xnn_pack_f32_to_f16_chw_dwconv_hwg_w;
-        pack_chw_dwconv_ghw_w = (xnn_pack_chw_dwconv_ghw_w_function) xnn_pack_f32_to_f16_chw_dwconv_ghw_w;
+        pack_chw_dwconv_hwg_w = (xnn_pack_chw_dwconv_hwg_w_fn) xnn_pack_f32_to_f16_chw_dwconv_hwg_w;
+        pack_chw_dwconv_ghw_w = (xnn_pack_chw_dwconv_ghw_w_fn) xnn_pack_f32_to_f16_chw_dwconv_ghw_w;
       }
 
       if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
@@ -316,7 +316,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
       }
 
       convolution_op->ukernel.dwconv2d = (struct xnn_ukernel_dwconv2d) {
-        .chw_function = dwconv2d_parameters->ukernel,
+        .chw_fn = dwconv2d_parameters->ukernel,
         .output_width_tile = dwconv2d_parameters->output_width_tile,
       };
 
@@ -782,7 +782,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       }
 
       convolution_op->ukernel.conv2d = (struct xnn_ukernel_conv2d) {
-        .hwc2chw_function = xnn_params.f32.conv_hwc2chw_3x3c3s2.ukernel_with_symm_padding,
+        .hwc2chw_fn = xnn_params.f32.conv_hwc2chw_3x3c3s2.ukernel_with_symm_padding,
         .output_height_tile = xnn_params.f32.conv_hwc2chw_3x3c3s2.output_height_tile,
         .output_channel_tile = xnn_params.f32.conv_hwc2chw_3x3c3s2.output_channel_tile,
       };
@@ -822,7 +822,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       }
 
       convolution_op->ukernel.dwconv2d = (struct xnn_ukernel_dwconv2d) {
-        .chw_function = dwconv2d_parameters->ukernel,
+        .chw_fn = dwconv2d_parameters->ukernel,
         .output_width_tile = dwconv2d_parameters->output_width_tile,
       };
 
@@ -1038,7 +1038,7 @@ static enum xnn_status setup_convolution2d_nchw(
         .output_channels = convolution_op->group_output_channels,
         .output_height_stride = output_width << log2_output_element_size,
         .output_channel_stride = output_height * output_width << log2_output_element_size,
-        .hwc2chw_ukernel = convolution_op->ukernel.conv2d.hwc2chw_function,
+        .hwc2chw_ukernel = convolution_op->ukernel.conv2d.hwc2chw_fn,
       };
       memcpy(&convolution_op->context.conv2d.params, params, sizeof(convolution_op->context.conv2d.params));
 
@@ -1095,7 +1095,7 @@ static enum xnn_status setup_convolution2d_nchw(
         .output = output,
         .output_channel_stride = output_height * output_width << log2_output_element_size,
         .output_batch_stride = output_batch_stride,
-        .chw_ukernel = convolution_op->ukernel.dwconv2d.chw_function,
+        .chw_ukernel = convolution_op->ukernel.dwconv2d.chw_fn,
       };
       memcpy(&convolution_op->context.dwconv2d.params, chw_params, sizeof(convolution_op->context.dwconv2d.params));
 

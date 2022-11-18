@@ -275,7 +275,7 @@ public:
     return this->iterations_;
   }
 
-  void Test(xnn_f32_conv_hwc_ukernel_function conv, xnn_init_f32_minmax_params_fn init_params) const {
+  void Test(xnn_f32_conv_hwc_ukernel_fn conv, xnn_init_f32_minmax_params_fn init_params) const {
     ASSERT_LT(output_y_start(), output_height());
     ASSERT_LE(output_y_end(), output_height());
     ASSERT_GT(output_y_end(), output_y_start());

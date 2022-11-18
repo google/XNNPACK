@@ -181,9 +181,9 @@ static void DNNLSoftArgMax(
 
 static void ThreePassSoftMaxWithRecomputing(
   benchmark::State& state,
-  xnn_f32_rmax_ukernel_function rmax,
-  xnn_f32_raddexpminusmax_ukernel_function raddexpminusmax,
-  xnn_f32_vscaleexpminusmax_ukernel_function vscaleexpminusmax,
+  xnn_f32_rmax_ukernel_fn rmax,
+  xnn_f32_raddexpminusmax_ukernel_fn raddexpminusmax,
+  xnn_f32_vscaleexpminusmax_ukernel_fn vscaleexpminusmax,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {
@@ -243,10 +243,10 @@ static void ThreePassSoftMaxWithRecomputing(
 
 static void ThreePassSoftMaxWithReloading(
   benchmark::State& state,
-  xnn_f32_rmax_ukernel_function rmax,
-  xnn_f32_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax,
+  xnn_f32_rmax_ukernel_fn rmax,
+  xnn_f32_raddstoreexpminusmax_ukernel_fn raddstoreexpminusmax,
   xnn_init_f32_expminus_params_fn init_expminus_params,
-  xnn_f32_vbinary_minmax_ukernel_function vmulc,
+  xnn_f32_vbinary_minmax_ukernel_fn vmulc,
   xnn_init_f32_minmax_params_fn init_minmax_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
@@ -313,8 +313,8 @@ static void ThreePassSoftMaxWithReloading(
 
 static void TwoPassSoftMax(
   benchmark::State& state,
-  xnn_f32_raddextexp_ukernel_function raddextexp,
-  xnn_f32_vscaleextexp_ukernel_function vscaleextexp,
+  xnn_f32_raddextexp_ukernel_fn raddextexp,
+  xnn_f32_vscaleextexp_ukernel_fn vscaleextexp,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {

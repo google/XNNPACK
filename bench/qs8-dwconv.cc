@@ -26,7 +26,7 @@
 
 
 static void DWConvBenchmark(benchmark::State& state,
-  xnn_qs8_dwconv_minmax_unipass_ukernel_function dwconv,
+  xnn_qs8_dwconv_minmax_unipass_ukernel_fn dwconv,
   xnn_init_qs8_conv_minmax_params_fn init_params,
   uint32_t channel_tile, uint32_t primary_tile,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)

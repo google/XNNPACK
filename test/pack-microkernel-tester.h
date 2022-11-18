@@ -76,7 +76,7 @@ class PackMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_x32_packx_ukernel_function packx) const {
+  void Test(xnn_x32_packx_ukernel_fn packx) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), rng);

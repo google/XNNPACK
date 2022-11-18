@@ -76,7 +76,7 @@ static size_t get_generated_gemm(
     struct xnn_code_cache* code_cache)
 {
   size_t offset = XNN_CACHE_NOT_FOUND;
-  xnn_jit_gemm_code_generator_function generator = generators.function[XNN_UARCH_DEFAULT];
+  xnn_jit_gemm_code_generator_fn generator = generators.function[XNN_UARCH_DEFAULT];
   if (generator == NULL) {
     goto error;
   }
@@ -143,7 +143,7 @@ static size_t get_generated_igemm(
     struct xnn_code_cache* code_cache)
 {
   size_t offset = XNN_CACHE_NOT_FOUND;
-  xnn_jit_igemm_code_generator_function generator = generators.function[XNN_UARCH_DEFAULT];
+  xnn_jit_igemm_code_generator_fn generator = generators.function[XNN_UARCH_DEFAULT];
   if (generator == NULL) {
     goto error;
   }
@@ -220,12 +220,12 @@ static enum xnn_status create_convolution2d_nhwc(
     uint32_t log2_input_element_size,
     uint32_t log2_filter_element_size,
     uint32_t bias_element_size,
-    xnn_pack_vmulcaddc_w_function pack_vmulcaddc_w,
-    xnn_pack_dwconv_hwg_w_function pack_dwconv_hwg_w,
-    xnn_pack_dwconv_ghw_w_function pack_dwconv_ghw_w,
-    xnn_pack_gemm_goi_w_function pack_gemm_goi_w,
-    xnn_pack_conv_kgo_w_function pack_conv_kgo_w,
-    xnn_pack_conv_goki_w_function pack_conv_goki_w,
+    xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w,
+    xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w,
+    xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w,
+    xnn_pack_gemm_goi_w_fn pack_gemm_goi_w,
+    xnn_pack_conv_kgo_w_fn pack_conv_kgo_w,
+    xnn_pack_conv_goki_w_fn pack_conv_goki_w,
     const void* packing_params,
     int input_padding_byte,
     int packed_weights_padding_byte,
@@ -484,7 +484,7 @@ static enum xnn_status create_convolution2d_nhwc(
         ukernels = &dwconv_ukernel->linear;
       }
       convolution_op->ukernel.dwconv = (struct xnn_ukernel_dwconv) {
-        .unipass_function = ukernels->unipass,
+        .unipass_fn = ukernels->unipass,
         .primary_tile = dwconv_ukernel->primary_tile,
         .incremental_tile = dwconv_ukernel->incremental_tile,
       };
@@ -754,12 +754,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     0 /* log2(sizeof(input element)) = log2(sizeof(uint8_t)) */,
     0 /* log2(sizeof(filter element)) = log2(sizeof(uint8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
-    (xnn_pack_vmulcaddc_w_function) NULL,
-    (xnn_pack_dwconv_hwg_w_function) xnn_pack_qu8_dwconv_hwg_w,
-    (xnn_pack_dwconv_ghw_w_function) xnn_pack_qu8_dwconv_ghw_w,
-    (xnn_pack_gemm_goi_w_function) xnn_pack_qu8_gemm_goi_w,
-    (xnn_pack_conv_kgo_w_function) xnn_pack_qu8_conv_kgo_w,
-    (xnn_pack_conv_goki_w_function) xnn_pack_qu8_conv_goki_w,
+    (xnn_pack_vmulcaddc_w_fn) NULL,
+    (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qu8_dwconv_hwg_w,
+    (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qu8_dwconv_ghw_w,
+    (xnn_pack_gemm_goi_w_fn) xnn_pack_qu8_gemm_goi_w,
+    (xnn_pack_conv_kgo_w_fn) xnn_pack_qu8_conv_kgo_w,
+    (xnn_pack_conv_goki_w_fn) xnn_pack_qu8_conv_goki_w,
     &packing_params, input_zero_point /* input padding byte */, kernel_zero_point /* packed weights padding byte */,
     0 /* extra weights bytes */, NULL /* init scale params fn */, NULL /* scale params */,
     &gemm_params, sizeof(gemm_params),
@@ -868,12 +868,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     0 /* log2(sizeof(input element)) = log2(sizeof(int8_t)) */,
     0 /* log2(sizeof(filter element)) = log2(sizeof(int8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
-    (xnn_pack_vmulcaddc_w_function) NULL,
-    (xnn_pack_dwconv_hwg_w_function) xnn_pack_qs8_dwconv_hwg_w,
-    (xnn_pack_dwconv_ghw_w_function) xnn_pack_qs8_dwconv_ghw_w,
-    (xnn_pack_gemm_goi_w_function) xnn_pack_qs8_gemm_goi_w,
-    (xnn_pack_conv_kgo_w_function) xnn_pack_qs8_conv_kgo_w,
-    (xnn_pack_conv_goki_w_function) xnn_pack_qs8_conv_goki_w,
+    (xnn_pack_vmulcaddc_w_fn) NULL,
+    (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qs8_dwconv_hwg_w,
+    (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qs8_dwconv_ghw_w,
+    (xnn_pack_gemm_goi_w_fn) xnn_pack_qs8_gemm_goi_w,
+    (xnn_pack_conv_kgo_w_fn) xnn_pack_qs8_conv_kgo_w,
+    (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_conv_goki_w,
     &packing_params, input_zero_point /* input padding byte */, 0 /* packed weights padding byte */,
     0 /* extra weights bytes */, NULL /* init scale params fn */, NULL /* scale params */,
     &gemm_params, sizeof(gemm_params),
@@ -990,12 +990,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     0 /* log2(sizeof(input element)) = log2(sizeof(int8_t)) */,
     0 /* log2(sizeof(filter element)) = log2(sizeof(int8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
-    (xnn_pack_vmulcaddc_w_function) NULL,
-    (xnn_pack_dwconv_hwg_w_function) xnn_pack_qs8_dwconv_hwg_w,
-    (xnn_pack_dwconv_ghw_w_function) xnn_pack_qs8_dwconv_ghw_w,
-    (xnn_pack_gemm_goi_w_function) xnn_pack_qs8_gemm_goi_w,
-    (xnn_pack_conv_kgo_w_function) xnn_pack_qs8_conv_kgo_w,
-    (xnn_pack_conv_goki_w_function) xnn_pack_qs8_conv_goki_w,
+    (xnn_pack_vmulcaddc_w_fn) NULL,
+    (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qs8_dwconv_hwg_w,
+    (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qs8_dwconv_ghw_w,
+    (xnn_pack_gemm_goi_w_fn) xnn_pack_qs8_gemm_goi_w,
+    (xnn_pack_conv_kgo_w_fn) xnn_pack_qs8_conv_kgo_w,
+    (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_conv_goki_w,
     &packing_params, input_zero_point /* input padding byte */, 0 /* packed weights padding byte */,
     sizeof(float) /* extra weights bytes */, xnn_init_qc8_scale_fp32_params, requantization_scale,
     &gemm_params, sizeof(gemm_params),
@@ -1077,19 +1077,19 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     xnn_params.f16.vmulcaddc.init.f16(&vmulcaddc_params, fp16_output_min, fp16_output_max);
   }
 
-  xnn_pack_vmulcaddc_w_function pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_function) xnn_pack_f16_vmulcaddc_w;
-  xnn_pack_dwconv_hwg_w_function pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_function) xnn_pack_f16_dwconv_hwg_w;
-  xnn_pack_dwconv_ghw_w_function pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_function) xnn_pack_f16_dwconv_ghw_w;
-  xnn_pack_gemm_goi_w_function pack_gemm_goi_w = (xnn_pack_gemm_goi_w_function) xnn_pack_f16_gemm_goi_w;
-  xnn_pack_conv_kgo_w_function pack_conv_kgo_w = (xnn_pack_conv_kgo_w_function) xnn_pack_f16_conv_kgo_w;
-  xnn_pack_conv_goki_w_function pack_conv_goki_w = (xnn_pack_conv_goki_w_function) xnn_pack_f16_conv_goki_w;
+  xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_fn) xnn_pack_f16_vmulcaddc_w;
+  xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f16_dwconv_hwg_w;
+  xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f16_dwconv_ghw_w;
+  xnn_pack_gemm_goi_w_fn pack_gemm_goi_w = (xnn_pack_gemm_goi_w_fn) xnn_pack_f16_gemm_goi_w;
+  xnn_pack_conv_kgo_w_fn pack_conv_kgo_w = (xnn_pack_conv_kgo_w_fn) xnn_pack_f16_conv_kgo_w;
+  xnn_pack_conv_goki_w_fn pack_conv_goki_w = (xnn_pack_conv_goki_w_fn) xnn_pack_f16_conv_goki_w;
   if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-    pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_function) xnn_pack_f32_to_f16_vmulcaddc_w;
-    pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_function) xnn_pack_f32_to_f16_dwconv_hwg_w;
-    pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_function) xnn_pack_f32_to_f16_dwconv_ghw_w;
-    pack_gemm_goi_w = (xnn_pack_gemm_goi_w_function) xnn_pack_f32_to_f16_gemm_goi_w;
-    pack_conv_kgo_w = (xnn_pack_conv_kgo_w_function) xnn_pack_f32_to_f16_conv_kgo_w;
-    pack_conv_goki_w = (xnn_pack_conv_goki_w_function) xnn_pack_f32_to_f16_conv_goki_w;
+    pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_to_f16_vmulcaddc_w;
+    pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_to_f16_dwconv_hwg_w;
+    pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_to_f16_dwconv_ghw_w;
+    pack_gemm_goi_w = (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_to_f16_gemm_goi_w;
+    pack_conv_kgo_w = (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_to_f16_conv_kgo_w;
+    pack_conv_goki_w = (xnn_pack_conv_goki_w_fn) xnn_pack_f32_to_f16_conv_goki_w;
   }
 
   return create_convolution2d_nhwc(
@@ -1215,12 +1215,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     2 /* log2(sizeof(input element)) = log2(sizeof(float)) */,
     2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
     sizeof(float) /* sizeof(bias element) */,
-    (xnn_pack_vmulcaddc_w_function) xnn_pack_f32_vmulcaddc_w,
-    (xnn_pack_dwconv_hwg_w_function) xnn_pack_f32_dwconv_hwg_w,
-    (xnn_pack_dwconv_ghw_w_function) xnn_pack_f32_dwconv_ghw_w,
-    (xnn_pack_gemm_goi_w_function) xnn_pack_f32_gemm_goi_w,
-    (xnn_pack_conv_kgo_w_function) xnn_pack_f32_conv_kgo_w,
-    (xnn_pack_conv_goki_w_function) xnn_pack_f32_conv_goki_w,
+    (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_vmulcaddc_w,
+    (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_dwconv_hwg_w,
+    (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_dwconv_ghw_w,
+    (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_gemm_goi_w,
+    (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w,
+    (xnn_pack_conv_goki_w_fn) xnn_pack_f32_conv_goki_w,
     NULL /* packing params */, 0 /* input padding byte */, 0 /* packed weights padding byte */,
     0 /* extra weights bytes */, NULL /* init scale params fn */, NULL /* scale params */,
     &gemm_params, sizeof(gemm_params),
@@ -1309,12 +1309,12 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     2 /* log2(sizeof(input element)) = log2(sizeof(float)) */,
     2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
     sizeof(float) /* sizeof(bias element) */,
-    (xnn_pack_vmulcaddc_w_function) xnn_pack_f32_vmulcaddc_w,
-    (xnn_pack_dwconv_hwg_w_function) xnn_pack_f32_dwconv_hwg_w,
-    (xnn_pack_dwconv_ghw_w_function) xnn_pack_f32_dwconv_ghw_w,
-    (xnn_pack_gemm_goi_w_function) xnn_pack_f32_gemm_goi_w,
-    (xnn_pack_conv_kgo_w_function) xnn_pack_f32_conv_kgo_w,
-    (xnn_pack_conv_goki_w_function) xnn_pack_f32_conv_goki_w,
+    (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_vmulcaddc_w,
+    (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_dwconv_hwg_w,
+    (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_dwconv_ghw_w,
+    (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_gemm_goi_w,
+    (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w,
+    (xnn_pack_conv_goki_w_fn) xnn_pack_f32_conv_goki_w,
     NULL /* packing params */, 0 /* input padding byte */, 0 /* packed weights padding byte */,
     0 /* extra weights bytes */, NULL /* init scale params fn */, NULL /* scale params */,
     (void*) &gemm_params, sizeof(gemm_params),
@@ -1451,7 +1451,7 @@ static enum xnn_status setup_convolution2d_nhwc(
           const size_t jit_code_offset = gemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT];
           if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
             gemm_cases[mr - 1].function[XNN_UARCH_DEFAULT] =
-                (xnn_gemm_ukernel_function) cached_code_at_offset(convolution_op, jit_code_offset);
+                (xnn_gemm_ukernel_fn) cached_code_at_offset(convolution_op, jit_code_offset);
           }
         }
       #endif  // XNN_PLATFORM_JIT
@@ -1558,7 +1558,7 @@ static enum xnn_status setup_convolution2d_nhwc(
           const size_t jit_code_offset = igemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT];
           if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
             igemm_cases[mr - 1].function[XNN_UARCH_DEFAULT] =
-                (xnn_igemm_ukernel_function) cached_code_at_offset(convolution_op, jit_code_offset);
+                (xnn_igemm_ukernel_fn) cached_code_at_offset(convolution_op, jit_code_offset);
           }
         }
       #endif  // XNN_PLATFORM_JIT
@@ -1765,7 +1765,7 @@ static enum xnn_status setup_convolution2d_nhwc(
           .groups = groups,
           .zero = convolution_op->zero_buffer,
           .output_increment = (convolution_op->output_pixel_stride - groups) << log2_output_element_size,
-          .unipass_ukernel = convolution_op->ukernel.dwconv.unipass_function,
+          .unipass_ukernel = convolution_op->ukernel.dwconv.unipass_fn,
       };
       memcpy(&convolution_op->context.dwconv.params, &convolution_op->params, sizeof(convolution_op->context.dwconv.params));
 

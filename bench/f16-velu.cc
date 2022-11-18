@@ -23,7 +23,7 @@
 
 static void f16_velu(
   benchmark::State& state,
-  xnn_f16_velu_ukernel_function elu,
+  xnn_f16_velu_ukernel_fn elu,
   xnn_init_f16_elu_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

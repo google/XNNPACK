@@ -40,7 +40,7 @@ class VScaleExtExpMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_vscaleextexp_ukernel_function vscaleextexp) const {
+  void Test(xnn_f32_vscaleextexp_ukernel_fn vscaleextexp) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     // Choose such range that expf(x[i]) overflows, but double-precision exp doesn't overflow.

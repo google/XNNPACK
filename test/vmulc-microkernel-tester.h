@@ -131,7 +131,7 @@ class VMulCMicrokernelTester {
   }
 
   void Test(
-      xnn_qu8_vmul_minmax_ukernel_function vmul_minmax,
+      xnn_qu8_vmul_minmax_ukernel_fn vmul_minmax,
       xnn_init_qu8_mul_minmax_params_fn init_params,
       xnn_qu8_requantize_fn requantize) const
   {
@@ -191,7 +191,7 @@ class VMulCMicrokernelTester {
   }
 
   void Test(
-      xnn_qs8_vmul_minmax_ukernel_function vmul_minmax,
+      xnn_qs8_vmul_minmax_ukernel_fn vmul_minmax,
       xnn_init_qs8_mul_minmax_params_fn init_params,
       xnn_qs8_requantize_fn requantize) const
   {

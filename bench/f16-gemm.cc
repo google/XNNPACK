@@ -29,7 +29,7 @@
 
 
 static void f16_gemm(benchmark::State& state,
-  xnn_f16_gemm_minmax_ukernel_function gemm,
+  xnn_f16_gemm_minmax_ukernel_fn gemm,
   size_t mr, size_t nr, size_t kr, size_t sr,
   xnn_init_f16_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)

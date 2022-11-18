@@ -49,7 +49,7 @@ static void ComputeError(
 }
 
 static void SqrtError(benchmark::State& state,
-  xnn_f16_unary_math_function sqrt,
+  xnn_f16_unary_math_fn sqrt,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (!cpuinfo_initialize()) {

@@ -73,7 +73,7 @@ class UnpoolMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_x32_unpool_ukernel_function unpool) const {
+  void Test(xnn_x32_unpool_ukernel_fn unpool) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto x_rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));

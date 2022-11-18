@@ -42,7 +42,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f16_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax, xnn_init_f16_expminus_params_fn init_params) const {
+  void Test(xnn_f16_raddstoreexpminusmax_ukernel_fn raddstoreexpminusmax, xnn_init_f16_expminus_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     // Choose such range that exph(x[i]) overflows, but exph(x[i] - x_max) doesn't.
@@ -85,7 +85,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax, xnn_init_f32_expminus_params_fn init_params) const {
+  void Test(xnn_f32_raddstoreexpminusmax_ukernel_fn raddstoreexpminusmax, xnn_init_f32_expminus_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     // Choose such range that expf(x[i]) overflows, but expf(x[i] - x_max) doesn't.

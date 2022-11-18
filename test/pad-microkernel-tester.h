@@ -103,7 +103,7 @@ class PadMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_pad_ukernel_function pad) const {
+  void Test(xnn_pad_ukernel_fn pad) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);

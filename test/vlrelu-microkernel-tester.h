@@ -83,7 +83,7 @@ class VLReLUMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_qs8_vlrelu_ukernel_function vlrelu, xnn_init_qs8_lrelu_params_fn init_params) const {
+  void Test(xnn_qs8_vlrelu_ukernel_fn vlrelu, xnn_init_qs8_lrelu_params_fn init_params) const {
     ASSERT_GE(input_zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(input_zero_point(), std::numeric_limits<int8_t>::max());
     ASSERT_GE(output_zero_point(), std::numeric_limits<int8_t>::min());
@@ -128,7 +128,7 @@ class VLReLUMicrokernelTester {
     }
   }
 
-  void Test(xnn_qu8_vlrelu_ukernel_function vlrelu, xnn_init_qu8_lrelu_params_fn init_params) const {
+  void Test(xnn_qu8_vlrelu_ukernel_fn vlrelu, xnn_init_qu8_lrelu_params_fn init_params) const {
     ASSERT_GE(input_zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(input_zero_point(), std::numeric_limits<uint8_t>::max());
     ASSERT_GE(output_zero_point(), std::numeric_limits<uint8_t>::min());

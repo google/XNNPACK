@@ -24,8 +24,8 @@
 
 static void f16_raddstoreexpminusmax(
   benchmark::State& state,
-  xnn_f16_rmax_ukernel_function rmax,
-  xnn_f16_raddstoreexpminusmax_ukernel_function raddstoreexpminusmax,
+  xnn_f16_rmax_ukernel_fn rmax,
+  xnn_f16_raddstoreexpminusmax_ukernel_fn raddstoreexpminusmax,
   xnn_init_f16_expminus_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

@@ -72,7 +72,7 @@ class VLogMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_u32_vlog_ukernel_function vlog) const {
+  void Test(xnn_u32_vlog_ukernel_fn vlog) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i16rng = std::bind(std::uniform_int_distribution<uint16_t>(), std::ref(rng));

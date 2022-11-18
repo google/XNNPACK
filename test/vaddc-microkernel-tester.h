@@ -133,7 +133,7 @@ class VAddCMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_qu8_vadd_minmax_ukernel_function vaddc_minmax, xnn_init_qu8_add_minmax_params_fn init_params) const {
+  void Test(xnn_qu8_vadd_minmax_ukernel_fn vaddc_minmax, xnn_init_qu8_add_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
@@ -193,7 +193,7 @@ class VAddCMicrokernelTester {
     }
   }
 
-  void Test(xnn_qs8_vadd_minmax_ukernel_function vaddc_minmax, xnn_init_qs8_add_minmax_params_fn init_params) const {
+  void Test(xnn_qs8_vadd_minmax_ukernel_fn vaddc_minmax, xnn_init_qs8_add_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i8rng = std::bind(

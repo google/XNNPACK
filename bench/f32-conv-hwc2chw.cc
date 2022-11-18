@@ -24,7 +24,7 @@
 
 
 static void f32_conv_hwc2chw(benchmark::State& state,
-  xnn_f32_conv_hwc2chw_ukernel_function conv,
+  xnn_f32_conv_hwc2chw_ukernel_fn conv,
   xnn_init_f32_minmax_params_fn init_params,
   uint32_t output_channels_tile,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)

@@ -93,7 +93,7 @@ class IBilinearMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_ibilinear_ukernel_function ibilinear) const {
+  void Test(xnn_f16_ibilinear_ukernel_fn ibilinear) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
@@ -147,7 +147,7 @@ class IBilinearMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_ibilinear_ukernel_function ibilinear) const {
+  void Test(xnn_f32_ibilinear_ukernel_fn ibilinear) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
@@ -201,7 +201,7 @@ class IBilinearMicrokernelTester {
     }
   }
 
-  void Test(xnn_s8_ibilinear_ukernel_function ibilinear) const {
+  void Test(xnn_s8_ibilinear_ukernel_fn ibilinear) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_int_distribution<int32_t> i8dist(
@@ -258,7 +258,7 @@ class IBilinearMicrokernelTester {
     }
   }
 
-  void Test(xnn_u8_ibilinear_ukernel_function ibilinear) const {
+  void Test(xnn_u8_ibilinear_ukernel_fn ibilinear) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_int_distribution<int32_t> u8dist(
@@ -313,7 +313,7 @@ class IBilinearMicrokernelTester {
     }
   }
 
-  void TestCHW(xnn_f16_ibilinear_chw_ukernel_function ibilinear) const {
+  void TestCHW(xnn_f16_ibilinear_chw_ukernel_fn ibilinear) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
@@ -371,7 +371,7 @@ class IBilinearMicrokernelTester {
     }
   }
 
-  void TestCHW(xnn_f32_ibilinear_chw_ukernel_function ibilinear) const {
+  void TestCHW(xnn_f32_ibilinear_chw_ukernel_fn ibilinear) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;

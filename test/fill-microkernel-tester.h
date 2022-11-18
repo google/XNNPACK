@@ -65,7 +65,7 @@ class FillMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_fill_ukernel_function fill) const {
+  void Test(xnn_fill_ukernel_fn fill) const {
     ASSERT_GE(output_stride(), channels());
 
     std::random_device random_device;

@@ -26,7 +26,7 @@
 static void DWConvEnd2EndBenchmark(
   benchmark::State& state,
   models::ExecutionPlanFactory model_factory,
-  xnn_qu8_dwconv_minmax_unipass_ukernel_function dwconv,
+  xnn_qu8_dwconv_minmax_unipass_ukernel_fn dwconv,
   xnn_init_qu8_conv_minmax_params_fn init_params,
   uint8_t channel_tile, uint8_t primary_tile,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -44,7 +44,7 @@ static void DWConvEnd2EndBenchmark(
     // Replace only the microkernel the matching kernel size.
     if (xnn_params.qu8.dwconv[i].primary_tile == primary_tile) {
       // Note: do not directly assign to xnn_params.qu8.dwconv[i] because it breaks older gcc.
-      xnn_params.qu8.dwconv[i].minmax.unipass = xnn_dwconv_unipass_ukernel_function(dwconv);
+      xnn_params.qu8.dwconv[i].minmax.unipass = xnn_dwconv_unipass_ukernel_fn(dwconv);
       xnn_params.qu8.dwconv[i].channel_tile = channel_tile;
       xnn_params.qu8.dwconv[i].primary_tile = primary_tile;
       xnn_params.qu8.dwconv[i].incremental_tile = 0;

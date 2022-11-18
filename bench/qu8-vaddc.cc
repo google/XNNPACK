@@ -22,7 +22,7 @@
 
 static void qu8_vaddc(
   benchmark::State& state,
-  xnn_qu8_vadd_minmax_ukernel_function vaddc,
+  xnn_qu8_vadd_minmax_ukernel_fn vaddc,
   xnn_init_qu8_add_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

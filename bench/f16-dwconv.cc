@@ -27,7 +27,7 @@
 
 
 static void f16_dwconv(benchmark::State& state,
-  xnn_f16_dwconv_minmax_unipass_ukernel_function dwconv,
+  xnn_f16_dwconv_minmax_unipass_ukernel_fn dwconv,
   xnn_init_f16_minmax_params_fn init_params,
   uint32_t channel_tile, uint32_t primary_tile,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)

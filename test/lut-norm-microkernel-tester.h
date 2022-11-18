@@ -52,7 +52,7 @@ class LUTNormMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_u8_lut32norm_ukernel_function lutnorm) const {
+  void Test(xnn_u8_lut32norm_ukernel_fn lutnorm) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);

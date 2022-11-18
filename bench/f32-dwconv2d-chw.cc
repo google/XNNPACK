@@ -26,7 +26,7 @@
 
 
 static void f32_dwconv2d_chw(benchmark::State& state,
-  xnn_f32_dwconv2d_chw_ukernel_function dwconv,
+  xnn_f32_dwconv2d_chw_ukernel_fn dwconv,
   uint32_t kh, uint32_t kw, uint32_t pw, uint32_t s,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

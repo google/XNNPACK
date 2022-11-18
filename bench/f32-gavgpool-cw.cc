@@ -22,7 +22,7 @@
 
 void f32_gavgpool_cw(
     benchmark::State& state,
-    xnn_f32_gavgpool_cw_ukernel_function gavgpool_cw,
+    xnn_f32_gavgpool_cw_ukernel_fn gavgpool_cw,
     xnn_init_f32_gavgpool_params_fn init_params,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

@@ -42,7 +42,7 @@ class RMaxAbsMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_s16_rmaxabs_ukernel_function rmaxabs) const {
+  void Test(xnn_s16_rmaxabs_ukernel_fn rmaxabs) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));

@@ -35,7 +35,7 @@
 
 
 static void GEMMBenchmark(benchmark::State& state,
-  xnn_f32_gemm_minmax_ukernel_function gemm,
+  xnn_f32_gemm_minmax_ukernel_fn gemm,
   size_t mr, size_t nr, size_t kr, size_t sr,
   xnn_init_f32_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -110,8 +110,8 @@ static void GEMMBenchmark(benchmark::State& state,
 }
 
 static void PPMM1PBenchmark(benchmark::State& state,
-  xnn_f32_ppmm_minmax_ukernel_function ppmm,
-  xnn_x32_packx_ukernel_function packx,
+  xnn_f32_ppmm_minmax_ukernel_fn ppmm,
+  xnn_x32_packx_ukernel_fn packx,
   size_t mr, size_t nr,
   xnn_init_f32_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -188,8 +188,8 @@ static void PPMM1PBenchmark(benchmark::State& state,
 }
 
 static void PPMM2PBenchmark(benchmark::State& state,
-  xnn_f32_ppmm_minmax_ukernel_function ppmm,
-  xnn_x32_packx_ukernel_function packx,
+  xnn_f32_ppmm_minmax_ukernel_fn ppmm,
+  xnn_x32_packx_ukernel_fn packx,
   size_t mr, size_t nr,
   xnn_init_f32_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -359,7 +359,7 @@ static void ruy_st(benchmark::State& state, const char* net)
 
 #if XNN_PLATFORM_JIT
 static void GEMMBenchmark(benchmark::State& state,
-  xnn_jit_gemm_code_generator_function generator,
+  xnn_jit_gemm_code_generator_fn generator,
   size_t mr, size_t nr, size_t kr, size_t sr,
   xnn_init_f32_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -409,7 +409,7 @@ static void GEMMBenchmark(benchmark::State& state,
   jit_params.f32_minmax.max = +std::numeric_limits<float>::infinity();
   generator(&code_buffer, mr, nc % nr, kc * sizeof(float), &jit_params);
   xnn_finalize_code_memory(&code_buffer);
-  xnn_f32_gemm_minmax_ukernel_function gemm = reinterpret_cast<xnn_f32_gemm_minmax_ukernel_function>(code_buffer.start);
+  xnn_f32_gemm_minmax_ukernel_fn gemm = reinterpret_cast<xnn_f32_gemm_minmax_ukernel_fn>(code_buffer.start);
 
   size_t buffer_index = 0;
   for (auto _ : state) {

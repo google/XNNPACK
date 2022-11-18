@@ -126,7 +126,7 @@ class SpMMMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_spmm_minmax_ukernel_function spmm, xnn_init_f32_minmax_params_fn init_params) const {
+  void Test(xnn_f32_spmm_minmax_ukernel_fn spmm, xnn_init_f32_minmax_params_fn init_params) const {
     ASSERT_GE(m(), 1);
     ASSERT_GE(n(), 1);
     ASSERT_GE(k(), 1);
@@ -291,7 +291,7 @@ class SpMMMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_spmm_minmax_ukernel_function spmm, xnn_init_f16_minmax_params_fn init_params) const {
+  void Test(xnn_f16_spmm_minmax_ukernel_fn spmm, xnn_init_f16_minmax_params_fn init_params) const {
     ASSERT_GE(m(), 1);
     ASSERT_GE(n(), 1);
     ASSERT_GE(k(), 1);

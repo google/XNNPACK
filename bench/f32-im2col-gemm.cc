@@ -26,7 +26,7 @@
 
 
 static void Im2ColGEMMBenchmark(benchmark::State& state,
-  xnn_f32_gemm_minmax_ukernel_function f32_gemm,
+  xnn_f32_gemm_minmax_ukernel_fn f32_gemm,
   uint32_t mr, uint32_t nr, uint32_t kr, uint32_t sr,
   xnn_init_f32_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)

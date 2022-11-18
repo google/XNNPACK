@@ -24,7 +24,7 @@
 
 
 static void f16_spmm(benchmark::State& state,
-  xnn_f16_spmm_minmax_ukernel_function spmm, uint32_t mr, uint32_t nr, float sparsity,
+  xnn_f16_spmm_minmax_ukernel_fn spmm, uint32_t mr, uint32_t nr, float sparsity,
   xnn_init_f16_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

@@ -52,7 +52,7 @@ class FilterbankSubtractMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_u32_filterbank_subtract_ukernel_function filterbank_subtract) const {
+  void Test(xnn_u32_filterbank_subtract_ukernel_fn filterbank_subtract) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));

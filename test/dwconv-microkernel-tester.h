@@ -164,7 +164,7 @@ class DWConvMicrokernelTester {
   }
 
   void Test(
-    xnn_qu8_dwconv_minmax_unipass_ukernel_function dwconv_minmax,
+    xnn_qu8_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
     xnn_init_qu8_conv_minmax_params_fn init_params,
     xnn_qu8_requantize_fn requantize) const
   {
@@ -273,7 +273,7 @@ class DWConvMicrokernelTester {
   }
 
   void Test(
-    xnn_qc8_dwconv_minmax_unipass_ukernel_function dwconv_minmax,
+    xnn_qc8_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
     xnn_init_qc8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const
   {
@@ -393,7 +393,7 @@ class DWConvMicrokernelTester {
   }
 
   void Test(
-    xnn_qs8_dwconv_minmax_unipass_ukernel_function dwconv_minmax,
+    xnn_qs8_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
     xnn_init_qs8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const
   {
@@ -503,7 +503,7 @@ class DWConvMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_dwconv_minmax_unipass_ukernel_function dwconv_minmax, xnn_init_f16_minmax_params_fn init_params) const {
+  void Test(xnn_f16_dwconv_minmax_unipass_ukernel_fn dwconv_minmax, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
@@ -594,7 +594,7 @@ class DWConvMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_dwconv_unipass_ukernel_function dwconv) const {
+  void Test(xnn_f32_dwconv_unipass_ukernel_fn dwconv) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
@@ -666,7 +666,7 @@ class DWConvMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_dwconv_minmax_unipass_ukernel_function dwconv_minmax, xnn_init_f32_minmax_params_fn init_params) const {
+  void Test(xnn_f32_dwconv_minmax_unipass_ukernel_fn dwconv_minmax, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;

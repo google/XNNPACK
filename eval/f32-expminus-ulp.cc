@@ -49,7 +49,7 @@ static void ComputeError(
 }
 
 static void ExpError(benchmark::State& state,
-  xnn_f32_unary_math_function exp,
+  xnn_f32_unary_math_fn exp,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (!cpuinfo_initialize()) {

@@ -26,7 +26,7 @@ static enum xnn_status create_prelu_nc(
     const void* negative_slope,
     uint32_t flags,
     uint32_t log2_weights_element_size,
-    xnn_pack_prelu_w_function pack_prelu_w,
+    xnn_pack_prelu_w_fn pack_prelu_w,
     uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
     xnn_caches_t caches,
@@ -126,9 +126,9 @@ enum xnn_status xnn_create_prelu_nc_f16(
     xnn_caches_t caches,
     xnn_operator_t* prelu_op_out)
 {
-  xnn_pack_prelu_w_function pack_prelu_w = (xnn_pack_prelu_w_function) xnn_pack_f16_prelu_w;
+  xnn_pack_prelu_w_fn pack_prelu_w = (xnn_pack_prelu_w_fn) xnn_pack_f16_prelu_w;
   if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-    pack_prelu_w = (xnn_pack_prelu_w_function) xnn_pack_f32_to_f16_prelu_w;
+    pack_prelu_w = (xnn_pack_prelu_w_fn) xnn_pack_f32_to_f16_prelu_w;
   }
 
   return create_prelu_nc(
@@ -154,7 +154,7 @@ enum xnn_status xnn_create_prelu_nc_f32(
     channels, input_stride, output_stride,
     negative_slope, flags,
     2 /* log2(sizeof(float)) */,
-    (xnn_pack_prelu_w_function) xnn_pack_f32_prelu_w,
+    (xnn_pack_prelu_w_fn) xnn_pack_f32_prelu_w,
     XNN_INIT_FLAG_F32, xnn_operator_type_prelu_nc_f32,
     caches,
     prelu_op_out);

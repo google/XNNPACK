@@ -30,9 +30,9 @@ static void init_binary_elementwise_nd(
     memcpy(&binary_elementwise_op->params, params, params_size);
   }
 
-  binary_elementwise_op->ukernel.vbinary.op_function   = vbinary_fused_ukernels->op_ukernel;
-  binary_elementwise_op->ukernel.vbinary.opc_function  = vbinary_fused_ukernels->opc_ukernel;
-  binary_elementwise_op->ukernel.vbinary.ropc_function = vbinary_fused_ukernels->ropc_ukernel;
+  binary_elementwise_op->ukernel.vbinary.op_fn   = vbinary_fused_ukernels->op_ukernel;
+  binary_elementwise_op->ukernel.vbinary.opc_fn  = vbinary_fused_ukernels->opc_ukernel;
+  binary_elementwise_op->ukernel.vbinary.ropc_fn = vbinary_fused_ukernels->ropc_ukernel;
 
   binary_elementwise_op->type = operator_type;
   binary_elementwise_op->flags = flags;
@@ -993,7 +993,7 @@ static enum xnn_status setup_binary_elementwise_nd(
   const size_t* compressed_a_shape = compressed_input1_shape;
   const size_t* compressed_b_shape = compressed_input2_shape;
   if (compressed_input1_shape[0] == 1) {
-    binary_elementwise_op->context.elementwise_binary.ukernel = binary_elementwise_op->ukernel.vbinary.ropc_function;
+    binary_elementwise_op->context.elementwise_binary.ukernel = binary_elementwise_op->ukernel.vbinary.ropc_fn;
     binary_elementwise_op->context.elementwise_binary.a = input2;
     binary_elementwise_op->context.elementwise_binary.b = input1;
     compressed_a_shape = compressed_input2_shape;
@@ -1002,9 +1002,9 @@ static enum xnn_status setup_binary_elementwise_nd(
       memcpy(&binary_elementwise_op->context.elementwise_binary.params, reversed_params, reversed_params_size);
     }
   } else if (compressed_input2_shape[0] == 1) {
-    binary_elementwise_op->context.elementwise_binary.ukernel = binary_elementwise_op->ukernel.vbinary.opc_function;
+    binary_elementwise_op->context.elementwise_binary.ukernel = binary_elementwise_op->ukernel.vbinary.opc_fn;
   } else if (compressed_input1_shape[0] == compressed_input2_shape[0]) {
-    binary_elementwise_op->context.elementwise_binary.ukernel = binary_elementwise_op->ukernel.vbinary.op_function;
+    binary_elementwise_op->context.elementwise_binary.ukernel = binary_elementwise_op->ukernel.vbinary.op_fn;
   }
   size_t a_stride = compressed_a_shape[0], b_stride = compressed_b_shape[0], y_stride = compressed_output_shape[0];
   for (size_t i = 1; i < num_compressed_dims; i++) {

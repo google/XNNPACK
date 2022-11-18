@@ -50,8 +50,8 @@ static enum xnn_status create_deconvolution2d_nhwc(
     uint32_t log2_input_element_size,
     uint32_t log2_filter_element_size,
     uint32_t bias_element_size,
-    xnn_pack_conv_goki_w_function pack_conv_goki_w,
-    xnn_pack_deconv_goki_w_function pack_deconv_goki_w,
+    xnn_pack_conv_goki_w_fn pack_conv_goki_w,
+    xnn_pack_deconv_goki_w_fn pack_deconv_goki_w,
     const void* packing_params,
     int input_padding_byte,
     int packed_weights_padding_byte,
@@ -371,8 +371,8 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
     0 /* log2(sizeof(input element)) = log2(sizeof(int8_t)) */,
     0 /* log2(sizeof(filter element)) = log2(sizeof(int8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
-    (xnn_pack_conv_goki_w_function) xnn_pack_qs8_conv_goki_w,
-    (xnn_pack_deconv_goki_w_function) xnn_pack_qs8_deconv_goki_w,
+    (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_conv_goki_w,
+    (xnn_pack_deconv_goki_w_fn) xnn_pack_qs8_deconv_goki_w,
     &packing_params, input_zero_point /* input padding byte */, 0 /* packed weights padding byte */,
     &params, sizeof(params),
     &xnn_params.qs8.gemm, &xnn_params.qs8.gemm.minmax,
@@ -469,8 +469,8 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
     0 /* log2(sizeof(input element)) = log2(sizeof(uint8_t)) */,
     0 /* log2(sizeof(filter element)) = log2(sizeof(uint8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
-    (xnn_pack_conv_goki_w_function) xnn_pack_qu8_conv_goki_w,
-    (xnn_pack_deconv_goki_w_function) xnn_pack_qu8_deconv_goki_w,
+    (xnn_pack_conv_goki_w_fn) xnn_pack_qu8_conv_goki_w,
+    (xnn_pack_deconv_goki_w_fn) xnn_pack_qu8_deconv_goki_w,
     &packing_params, input_zero_point /* input padding byte */, kernel_zero_point /* packed weights padding byte */,
     &params, sizeof(params),
     &xnn_params.qu8.gemm, &xnn_params.qu8.gemm.minmax,
@@ -546,11 +546,11 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f16(
     gemm_parameters->init.f16(&params, output_min_as_half, output_max_as_half);
   }
 
-  xnn_pack_conv_goki_w_function pack_conv_goki_w = (xnn_pack_conv_goki_w_function) xnn_pack_f16_conv_goki_w;
-  xnn_pack_deconv_goki_w_function pack_deconv_goki_w = (xnn_pack_deconv_goki_w_function) xnn_pack_f16_deconv_goki_w;
+  xnn_pack_conv_goki_w_fn pack_conv_goki_w = (xnn_pack_conv_goki_w_fn) xnn_pack_f16_conv_goki_w;
+  xnn_pack_deconv_goki_w_fn pack_deconv_goki_w = (xnn_pack_deconv_goki_w_fn) xnn_pack_f16_deconv_goki_w;
   if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-    pack_conv_goki_w = (xnn_pack_conv_goki_w_function) xnn_pack_f32_to_f16_conv_goki_w;
-    pack_deconv_goki_w = (xnn_pack_deconv_goki_w_function) xnn_pack_f32_to_f16_deconv_goki_w;
+    pack_conv_goki_w = (xnn_pack_conv_goki_w_fn) xnn_pack_f32_to_f16_conv_goki_w;
+    pack_deconv_goki_w = (xnn_pack_deconv_goki_w_fn) xnn_pack_f32_to_f16_deconv_goki_w;
   }
 
   return create_deconvolution2d_nhwc(
@@ -649,8 +649,8 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     2 /* log2(sizeof(input element)) = log2(sizeof(float)) */,
     2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
     sizeof(float) /* sizeof(bias element) */,
-    (xnn_pack_conv_goki_w_function) xnn_pack_f32_conv_goki_w,
-    (xnn_pack_deconv_goki_w_function) xnn_pack_f32_deconv_goki_w,
+    (xnn_pack_conv_goki_w_fn) xnn_pack_f32_conv_goki_w,
+    (xnn_pack_deconv_goki_w_fn) xnn_pack_f32_deconv_goki_w,
     NULL /* packing params */, 0 /* input padding byte */, 0 /* packed weights padding byte */,
     &params, sizeof(params),
     gemm_parameters, gemm_ukernels,

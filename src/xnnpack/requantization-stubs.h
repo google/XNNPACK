@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 
-typedef void (*xnn_qu8_requantization_function)(
+typedef void (*xnn_qu8_requantization_fn)(
     size_t n,
     const int32_t* input,
     float scale,
@@ -57,7 +57,7 @@ DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_rndna__sse4)
 DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_rndna__ssse3)
 
 
-typedef void (*xnn_qs8_requantization_function)(
+typedef void (*xnn_qs8_requantization_fn)(
     size_t n,
     const int32_t* input,
     float scale,

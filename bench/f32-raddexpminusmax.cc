@@ -22,8 +22,8 @@
 
 static void f32_raddexpminusmax(
   benchmark::State& state,
-  xnn_f32_rmax_ukernel_function rmax,
-  xnn_f32_raddexpminusmax_ukernel_function raddexpminusmax,
+  xnn_f32_rmax_ukernel_fn rmax,
+  xnn_f32_raddexpminusmax_ukernel_fn raddexpminusmax,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {

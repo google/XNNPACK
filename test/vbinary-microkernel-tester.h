@@ -89,7 +89,7 @@ class VBinaryMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f16_vbinary_ukernel_function vbinary, OpType op_type) const {
+  void Test(xnn_f16_vbinary_ukernel_fn vbinary, OpType op_type) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
@@ -150,7 +150,7 @@ class VBinaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_vbinary_minmax_ukernel_function vbinary_minmax, OpType op_type, xnn_init_f16_minmax_params_fn init_params) const {
+  void Test(xnn_f16_vbinary_minmax_ukernel_fn vbinary_minmax, OpType op_type, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
@@ -229,7 +229,7 @@ class VBinaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vbinary_ukernel_function vbinary, OpType op_type, xnn_init_f32_default_params_fn init_params = nullptr) const {
+  void Test(xnn_f32_vbinary_ukernel_fn vbinary, OpType op_type, xnn_init_f32_default_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
@@ -296,7 +296,7 @@ class VBinaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vbinary_relu_ukernel_function vbinary_relu, OpType op_type) const {
+  void Test(xnn_f32_vbinary_relu_ukernel_fn vbinary_relu, OpType op_type) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
@@ -362,7 +362,7 @@ class VBinaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vbinary_minmax_ukernel_function vbinary_minmax, OpType op_type, xnn_init_f32_minmax_params_fn init_params) const {
+  void Test(xnn_f32_vbinary_minmax_ukernel_fn vbinary_minmax, OpType op_type, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);

@@ -40,7 +40,7 @@ class RAddExtExpMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_raddextexp_ukernel_function raddextexp) const {
+  void Test(xnn_f32_raddextexp_ukernel_fn raddextexp) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     // Choose such range that expf(x[i]) overflows, but double-precision exp doesn't overflow.

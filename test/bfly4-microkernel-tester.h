@@ -215,7 +215,7 @@ class BFly4MicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_cs16_bfly4_ukernel_function bfly4) const {
+  void Test(xnn_cs16_bfly4_ukernel_fn bfly4) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));

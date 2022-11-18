@@ -30,7 +30,7 @@ struct xnn_qs8_packing_params {
 };
 
 
-typedef void (*xnn_pack_gemm_goi_w_function)(
+typedef void (*xnn_pack_gemm_goi_w_fn)(
   size_t g,
   size_t nc,
   size_t kc,
@@ -122,7 +122,7 @@ XNN_INTERNAL void xnn_pack_qs8_gemm_xw_goi_w(
   const struct xnn_qs8_packing_params* params);
 
 
-typedef void (*xnn_pack_gemm_io_w_function)(
+typedef void (*xnn_pack_gemm_io_w_fn)(
   size_t nc,
   size_t kc,
   size_t nr,
@@ -189,7 +189,7 @@ XNN_INTERNAL void xnn_pack_qs8_gemm_io_w(
   const struct xnn_qs8_packing_params* params);
 
 
-typedef void (*xnn_pack_conv_goki_w_function)(
+typedef void (*xnn_pack_conv_goki_w_fn)(
   size_t g,
   size_t nc,
   size_t ks,
@@ -274,7 +274,7 @@ XNN_INTERNAL void xnn_pack_qs8_conv_goki_w(
   const struct xnn_qs8_packing_params* params);
 
 
-typedef void (*xnn_pack_conv_kgo_w_function)(
+typedef void (*xnn_pack_conv_kgo_w_fn)(
   size_t g,
   size_t nc,
   size_t ks,
@@ -353,7 +353,7 @@ XNN_INTERNAL void xnn_pack_qs8_conv_kgo_w(
   const struct xnn_qs8_packing_params* params);
 
 
-typedef void (*xnn_pack_deconv_goki_w_function)(
+typedef void (*xnn_pack_deconv_goki_w_fn)(
   size_t g,
   size_t nc,
   size_t kh,
@@ -462,7 +462,7 @@ XNN_INTERNAL void xnn_pack_qu8_deconv_goki_w(
 // 3. Weights are written such that the channel values at the same x-y is are adjacent in memory.
 // 4. The weights are then written column major (WHC layout).
 // "ghw" in the function name is the layout of the weights, (g)roups, (h)eight, (w)idth.
-typedef void (*xnn_pack_dwconv_ghw_w_function)(
+typedef void (*xnn_pack_dwconv_ghw_w_fn)(
   size_t primary_tile,
   size_t h,
   size_t w,
@@ -535,7 +535,7 @@ XNN_INTERNAL void xnn_pack_qs8_dwconv_ghw_w(
   const struct xnn_qs8_packing_params* params);
 
 
-typedef void (*xnn_pack_dwconv_hwg_w_function)(
+typedef void (*xnn_pack_dwconv_hwg_w_fn)(
   size_t primary_tile,
   size_t h,
   size_t w,
@@ -631,7 +631,7 @@ XNN_INTERNAL void xnn_pack_f16_gemminc_goi_w(
   const void* params);
 
 
-typedef void (*xnn_pack_dconv_oki_w_function)(
+typedef void (*xnn_pack_dconv_oki_w_fn)(
   size_t nc,
   size_t kc,
   size_t nr,
@@ -676,7 +676,7 @@ XNN_INTERNAL void xnn_pack_f16_dconv_oki_w(
   const void* params);
 
 
-typedef void (*xnn_pack_chw_dwconv_ghw_w_function)(
+typedef void (*xnn_pack_chw_dwconv_ghw_w_fn)(
   size_t kernel_size,
   size_t groups,
   const void* kernel,
@@ -709,7 +709,7 @@ XNN_INTERNAL void xnn_pack_f16_chw_dwconv_ghw_w(
   const void* params);
 
 
-typedef void (*xnn_pack_chw_dwconv_hwg_w_function)(
+typedef void (*xnn_pack_chw_dwconv_hwg_w_fn)(
   size_t kernel_size,
   size_t groups,
   const void* kernel,
@@ -741,7 +741,7 @@ XNN_INTERNAL void xnn_pack_f32_to_f16_chw_dwconv_hwg_w(
   uint16_t* packed_weights,
   const void* params);
 
-typedef void (*xnn_pack_vmulcaddc_w_function)(
+typedef void (*xnn_pack_vmulcaddc_w_fn)(
   size_t c,
   size_t cr,
   const void* s,
@@ -774,7 +774,7 @@ XNN_INTERNAL void xnn_pack_f32_to_f16_vmulcaddc_w(
   const void* params);
 
 
-typedef void (*xnn_pack_prelu_w_function)(
+typedef void (*xnn_pack_prelu_w_fn)(
   size_t c,
   const void* s,
   void* packed_weights);

@@ -55,7 +55,7 @@ class ZipMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_x8_zipc_ukernel_function zip) const {
+  void Test(xnn_x8_zipc_ukernel_fn zip) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
@@ -80,7 +80,7 @@ class ZipMicrokernelTester {
     }
   }
 
-  void Test(xnn_x8_zipv_ukernel_function zip) const {
+  void Test(xnn_x8_zipv_ukernel_fn zip) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
@@ -105,7 +105,7 @@ class ZipMicrokernelTester {
     }
   }
 
-  void Test(xnn_x32_zipc_ukernel_function zip) const {
+  void Test(xnn_x32_zipc_ukernel_fn zip) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), rng);
@@ -130,7 +130,7 @@ class ZipMicrokernelTester {
     }
   }
 
-  void Test(xnn_x32_zipv_ukernel_function zip) const {
+  void Test(xnn_x32_zipv_ukernel_fn zip) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), rng);

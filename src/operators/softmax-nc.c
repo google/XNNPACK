@@ -300,10 +300,10 @@ static enum xnn_status setup_softmax_nc_floating_point(
     const void* input,
     void* output,
     uint32_t log2_element_size,
-    xnn_rmax_ukernel_function rmax,
+    xnn_rmax_ukernel_fn rmax,
     const struct raddstoreexpminusmax_parameters raddstoreexpminusmax[restrict XNN_MIN_ELEMENTS(1)],
     const struct vbinary_parameters vmul[restrict XNN_MIN_ELEMENTS(1)],
-    xnn_compute_reciprocal_function compute_reciprocal,
+    xnn_compute_reciprocal_fn compute_reciprocal,
     const void* expminus_params,
     size_t expminus_params_size,
     const void* minmax_params,
@@ -383,7 +383,7 @@ enum xnn_status xnn_setup_softmax_nc_f16(
     batch_size, input, output,
     1 /* log2(sizeof(uint16_t)) */,
     xnn_params.f16.rmax, &xnn_params.f16.raddstoreexpminusmax, &xnn_params.f16.vmul,
-    (xnn_compute_reciprocal_function) compute_reciprocal_f16,
+    (xnn_compute_reciprocal_fn) compute_reciprocal_f16,
     &expminus_params, sizeof(expminus_params),
     &minmax_params, sizeof(minmax_params));
 }
@@ -415,7 +415,7 @@ enum xnn_status xnn_setup_softmax_nc_f32(
     batch_size, input, output,
     2 /* log2(sizeof(float)) */,
     xnn_params.f32.rmax, &xnn_params.f32.raddstoreexpminusmax, &xnn_params.f32.vmul,
-    (xnn_compute_reciprocal_function) compute_reciprocal_f32,
+    (xnn_compute_reciprocal_fn) compute_reciprocal_f32,
     &expminus_params, sizeof(expminus_params),
     &minmax_params, sizeof(minmax_params));
 }

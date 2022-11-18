@@ -22,7 +22,7 @@
 
 void cs16_vsquareabs(
     benchmark::State& state,
-    xnn_cs16_vsquareabs_ukernel_function vsquareabs,
+    xnn_cs16_vsquareabs_ukernel_fn vsquareabs,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {

@@ -19,8 +19,8 @@
 
 static void f32_vscaleextexp(
   benchmark::State& state,
-  xnn_f32_raddextexp_ukernel_function raddextexp,
-  xnn_f32_vscaleextexp_ukernel_function vscaleextexp,
+  xnn_f32_raddextexp_ukernel_fn raddextexp,
+  xnn_f32_vscaleextexp_ukernel_fn vscaleextexp,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {

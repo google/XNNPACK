@@ -22,7 +22,7 @@
 
 void transpose(
     benchmark::State& state,
-    xnn_x32_transposec_ukernel_function transpose,
+    xnn_x32_transposec_ukernel_fn transpose,
     xnn_init_x32_transpose_params_fn init_params = nullptr,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

@@ -26,7 +26,7 @@
 
 
 static void f32_igemm(benchmark::State& state,
-  xnn_f32_igemm_minmax_ukernel_function igemm,
+  xnn_f32_igemm_minmax_ukernel_fn igemm,
   uint32_t mr, uint32_t nr, uint32_t kr, uint32_t sr,
   xnn_init_f32_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -156,7 +156,7 @@ static void f32_igemm(benchmark::State& state,
 
 #if XNN_PLATFORM_JIT
   static void f32_igemm(benchmark::State& state,
-    xnn_jit_igemm_code_generator_function generator,
+    xnn_jit_igemm_code_generator_fn generator,
     size_t mr, size_t nr, size_t kr, size_t sr,
     xnn_init_f32_minmax_params_fn init_params,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -266,7 +266,7 @@ static void f32_igemm(benchmark::State& state,
             kernel_size * mr * sizeof(void *),
             &jit_params);
   xnn_finalize_code_memory(&code_buffer);
-  auto igemm = reinterpret_cast<xnn_f32_igemm_minmax_ukernel_function>(code_buffer.start);
+  auto igemm = reinterpret_cast<xnn_f32_igemm_minmax_ukernel_fn>(code_buffer.start);
 
   size_t buffer_index = 0;
   for (auto _ : state) {

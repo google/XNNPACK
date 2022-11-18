@@ -28,10 +28,10 @@
 static void GEMMEnd2EndBenchmark(
   benchmark::State& state,
   models::ExecutionPlanFactory model_factory,
-  xnn_qs8_gemm_minmax_ukernel_function gemm,
-  xnn_qs8_igemm_minmax_ukernel_function igemm,
-  xnn_qs8_gemm_minmax_ukernel_function gemm1,
-  xnn_qs8_igemm_minmax_ukernel_function igemm1,
+  xnn_qs8_gemm_minmax_ukernel_fn gemm,
+  xnn_qs8_igemm_minmax_ukernel_fn igemm,
+  xnn_qs8_gemm_minmax_ukernel_fn gemm1,
+  xnn_qs8_igemm_minmax_ukernel_fn igemm1,
   xnn_init_qs8_conv_minmax_params_fn init_params,
   uint8_t mr, uint8_t nr, uint8_t log2_kr = 0, uint8_t log2_sr = 0,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -47,10 +47,10 @@ static void GEMMEnd2EndBenchmark(
   // Override microkernels chosen in xnn_initialize
   // Note: do not directly assign to xnn_params.qs8.gemm because it breaks older gcc.
   std::memset(&xnn_params.qs8.gemm, 0, sizeof(xnn_params.qs8.gemm));
-  xnn_params.qs8.gemm.minmax.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm));
-  xnn_params.qs8.gemm.minmax.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm));
-  xnn_params.qs8.gemm.minmax.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1));
-  xnn_params.qs8.gemm.minmax.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm1));
+  xnn_params.qs8.gemm.minmax.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm));
+  xnn_params.qs8.gemm.minmax.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm));
+  xnn_params.qs8.gemm.minmax.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1));
+  xnn_params.qs8.gemm.minmax.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm1));
   xnn_params.qs8.gemm.init.qs8 = init_params;
   xnn_params.qs8.gemm.mr = mr;
   xnn_params.qs8.gemm.nr = nr;

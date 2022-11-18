@@ -22,7 +22,7 @@
 
 void cs16_fftr(
     benchmark::State& state,
-    xnn_cs16_fftr_ukernel_function fftr,
+    xnn_cs16_fftr_ukernel_fn fftr,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {

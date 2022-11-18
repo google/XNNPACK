@@ -23,7 +23,7 @@
 
 static void f16_vsqrt(
   benchmark::State& state,
-  xnn_f16_vsqrt_ukernel_function sqrt,
+  xnn_f16_vsqrt_ukernel_fn sqrt,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {

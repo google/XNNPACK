@@ -30,7 +30,7 @@
 
 
 static void GEMMBenchmark(benchmark::State& state,
-  xnn_qs8_gemm_minmax_ukernel_function gemm,
+  xnn_qs8_gemm_minmax_ukernel_fn gemm,
   size_t mr, size_t nr, size_t kr, size_t sr,
   xnn_init_qs8_conv_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr,
@@ -209,7 +209,7 @@ static void ruy_st(benchmark::State& state, const char* net)
 
 #if XNN_ARCH_ARM && XNN_PLATFORM_JIT && XNN_ENABLE_JIT
   static void GEMMBenchmark(benchmark::State& state,
-    xnn_jit_gemm_code_generator_function generator,
+    xnn_jit_gemm_code_generator_fn generator,
     size_t mr, size_t nr, size_t kr, size_t sr,
     xnn_init_qs8_conv_minmax_params_fn  init_params,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -222,7 +222,7 @@ static void ruy_st(benchmark::State& state, const char* net)
     xnn_finalize_code_memory(&code_buffer);
     GEMMBenchmark(
         state,
-        reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_function>(code_buffer.start),
+        reinterpret_cast<xnn_qs8_gemm_minmax_ukernel_fn>(code_buffer.start),
         mr, nr, kr, sr, init_params, isa_check);
     xnn_release_code_memory(&code_buffer);
   }

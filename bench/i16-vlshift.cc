@@ -21,7 +21,7 @@
 
 void i16_vlshift(
     benchmark::State& state,
-    xnn_i16_vlshift_ukernel_function vlshift,
+    xnn_i16_vlshift_ukernel_fn vlshift,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {

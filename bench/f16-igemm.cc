@@ -27,7 +27,7 @@
 
 
 static void f16_igemm(benchmark::State& state,
-  xnn_f16_igemm_minmax_ukernel_function igemm,
+  xnn_f16_igemm_minmax_ukernel_fn igemm,
   uint32_t mr, uint32_t nr, uint32_t kr, uint32_t sr,
   xnn_init_f16_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)

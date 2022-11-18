@@ -22,7 +22,7 @@
 
 static void qs8_vmulc(
   benchmark::State& state,
-  xnn_qs8_vmul_minmax_ukernel_function vmulc,
+  xnn_qs8_vmul_minmax_ukernel_fn vmulc,
   xnn_init_qs8_mul_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

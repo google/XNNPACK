@@ -21,7 +21,7 @@
 
 void s16_rmaxabs(
     benchmark::State& state,
-    xnn_s16_rmaxabs_ukernel_function rmaxabs,
+    xnn_s16_rmaxabs_ukernel_fn rmaxabs,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {

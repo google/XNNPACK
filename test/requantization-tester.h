@@ -82,7 +82,7 @@ class RequantizationTester {
    * - no output clamping
    * produces exactly i, provided that ((i - zero point) * 2**s) does not overflow.
    */
-  void TestExactDivideByPO2(xnn_qu8_requantization_function requantize) const {
+  void TestExactDivideByPO2(xnn_qu8_requantization_fn requantize) const {
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
@@ -122,7 +122,7 @@ class RequantizationTester {
    * - no output clamping
    * produces exactly i, provided that ((i - zero point) * 2**s) does not overflow.
    */
-  void TestExactDivideByPO2(xnn_qs8_requantization_function requantize) const {
+  void TestExactDivideByPO2(xnn_qs8_requantization_fn requantize) const {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
@@ -163,7 +163,7 @@ class RequantizationTester {
    * - no output clamping
    * produces exactly i, provided that ((i - zero point) * 2**s) does not overflow.
    */
-  void TestDivideByPO2WithRoundingUp(xnn_qu8_requantization_function requantize) {
+  void TestDivideByPO2WithRoundingUp(xnn_qu8_requantization_fn requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
@@ -204,7 +204,7 @@ class RequantizationTester {
    * - no output clamping
    * produces exactly i, provided that ((i - zero point) * 2**s) does not overflow.
    */
-  void TestDivideByPO2WithRoundingUp(xnn_qs8_requantization_function requantize) {
+  void TestDivideByPO2WithRoundingUp(xnn_qs8_requantization_fn requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
@@ -245,7 +245,7 @@ class RequantizationTester {
    * - no output clamping
    * produces exactly i, provided that ((i - zero point) * 2**s) does not overflow.
    */
-  void TestDivideByPO2WithRoundingDown(xnn_qu8_requantization_function requantize) {
+  void TestDivideByPO2WithRoundingDown(xnn_qu8_requantization_fn requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
@@ -286,7 +286,7 @@ class RequantizationTester {
    * - no output clamping
    * produces exactly i, provided that ((i - zero point) * 2**s) does not overflow.
    */
-  void TestDivideByPO2WithRoundingDown(xnn_qs8_requantization_function requantize) {
+  void TestDivideByPO2WithRoundingDown(xnn_qs8_requantization_fn requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
@@ -320,7 +320,7 @@ class RequantizationTester {
     }
   }
 
-  void TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantization_function requantize) {
+  void TestDivideByPO2WithRoundingTiesAway(xnn_qu8_requantization_fn requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
@@ -362,7 +362,7 @@ class RequantizationTester {
     }
   }
 
-  void TestDivideByPO2WithRoundingTiesAway(xnn_qs8_requantization_function requantize) {
+  void TestDivideByPO2WithRoundingTiesAway(xnn_qs8_requantization_fn requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
@@ -404,7 +404,7 @@ class RequantizationTester {
     }
   }
 
-  void TestDivideByPO2WithRoundingTiesUp(xnn_qs8_requantization_function requantize) {
+  void TestDivideByPO2WithRoundingTiesUp(xnn_qs8_requantization_fn requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
@@ -438,7 +438,7 @@ class RequantizationTester {
     }
   }
 
-  void TestSpecialCases(xnn_qu8_requantization_function requantize) {
+  void TestSpecialCases(xnn_qu8_requantization_fn requantize) {
     ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(qmin(), std::numeric_limits<uint8_t>::max());
     ASSERT_GE(qmax(), std::numeric_limits<uint8_t>::min());
@@ -477,7 +477,7 @@ class RequantizationTester {
     }
   }
 
-  void TestSpecialCases(xnn_qs8_requantization_function requantize) {
+  void TestSpecialCases(xnn_qs8_requantization_fn requantize) {
     ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(qmin(), std::numeric_limits<int8_t>::max());
     ASSERT_GE(qmax(), std::numeric_limits<int8_t>::min());
@@ -519,7 +519,7 @@ class RequantizationTester {
     }
   }
 
-  void TestRandomCasesRoundToNearestTiesAway(xnn_qu8_requantization_function requantize) {
+  void TestRandomCasesRoundToNearestTiesAway(xnn_qu8_requantization_fn requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
@@ -562,7 +562,7 @@ class RequantizationTester {
     }
   }
 
-  void TestRandomCasesRoundToNearestTiesAway(xnn_qs8_requantization_function requantize) {
+  void TestRandomCasesRoundToNearestTiesAway(xnn_qs8_requantization_fn requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
@@ -605,7 +605,7 @@ class RequantizationTester {
     }
   }
 
-  void TestRandomCasesRoundToNearestTiesUp(xnn_qs8_requantization_function requantize) {
+  void TestRandomCasesRoundToNearestTiesUp(xnn_qs8_requantization_fn requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
@@ -648,7 +648,7 @@ class RequantizationTester {
     }
   }
 
-  void TestRandomCasesApproximate(xnn_qu8_requantization_function requantize) {
+  void TestRandomCasesApproximate(xnn_qu8_requantization_fn requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
@@ -693,7 +693,7 @@ class RequantizationTester {
     }
   }
 
-  void TestRandomCasesApproximate(xnn_qs8_requantization_function requantize) {
+  void TestRandomCasesApproximate(xnn_qs8_requantization_fn requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
     ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());

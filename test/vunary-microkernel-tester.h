@@ -127,7 +127,7 @@ class VUnaryMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_vrelu_ukernel_function vrelu) const {
+  void Test(xnn_f32_vrelu_ukernel_fn vrelu) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
@@ -160,7 +160,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_vabs_ukernel_function vabs, xnn_init_f16_abs_params_fn init_params = nullptr) const {
+  void Test(xnn_f16_vabs_ukernel_fn vabs, xnn_init_f16_abs_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
@@ -199,7 +199,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vabs_ukernel_function vabs, xnn_init_f32_abs_params_fn init_params = nullptr) const {
+  void Test(xnn_f32_vabs_ukernel_fn vabs, xnn_init_f32_abs_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
@@ -238,7 +238,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vclamp_ukernel_function vclamp, xnn_init_f32_minmax_params_fn init_params) const {
+  void Test(xnn_f32_vclamp_ukernel_fn vclamp, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(0.0f, 255.0f);
@@ -275,7 +275,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_velu_ukernel_function velu, xnn_init_f16_elu_params_fn init_params) const {
+  void Test(xnn_f16_velu_ukernel_fn velu, xnn_init_f16_elu_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-9.0f, 9.0f);
@@ -316,7 +316,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_velu_ukernel_function velu, xnn_init_f32_elu_params_fn init_params) const {
+  void Test(xnn_f32_velu_ukernel_fn velu, xnn_init_f32_elu_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-20.0f, 20.0f);
@@ -353,7 +353,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_vhswish_ukernel_function vhswish, xnn_init_f16_hswish_params_fn init_params) const {
+  void Test(xnn_f16_vhswish_ukernel_fn vhswish, xnn_init_f16_hswish_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(-4.0f, 4.0f), std::ref(rng));
@@ -392,7 +392,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vhswish_ukernel_function vhswish, xnn_init_f32_hswish_params_fn init_params) const {
+  void Test(xnn_f32_vhswish_ukernel_fn vhswish, xnn_init_f32_hswish_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-4.0f, 4.0f);
@@ -429,7 +429,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_vlrelu_ukernel_function vlrelu, xnn_init_f16_lrelu_params_fn init_params) const {
+  void Test(xnn_f16_vlrelu_ukernel_fn vlrelu, xnn_init_f16_lrelu_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(-125.0f, 125.0f), std::ref(rng));
@@ -473,7 +473,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vlrelu_ukernel_function vlrelu, xnn_init_f32_lrelu_params_fn init_params) const {
+  void Test(xnn_f32_vlrelu_ukernel_fn vlrelu, xnn_init_f32_lrelu_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-125.0f, 125.0f);
@@ -510,7 +510,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_vneg_ukernel_function vneg, xnn_init_f16_neg_params_fn init_params = nullptr) const {
+  void Test(xnn_f16_vneg_ukernel_fn vneg, xnn_init_f16_neg_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
@@ -549,7 +549,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vneg_ukernel_function vneg, xnn_init_f32_neg_params_fn init_params = nullptr) const {
+  void Test(xnn_f32_vneg_ukernel_fn vneg, xnn_init_f32_neg_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
@@ -588,7 +588,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_vround_ukernel_function vrnd, OpType op_type, xnn_init_f16_rnd_params_fn init_params = nullptr) const {
+  void Test(xnn_f16_vround_ukernel_fn vrnd, OpType op_type, xnn_init_f16_rnd_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-5.0f, 5.0f);
@@ -643,7 +643,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vround_ukernel_function vrnd, OpType op_type, xnn_init_f32_rnd_params_fn init_params = nullptr) const {
+  void Test(xnn_f32_vround_ukernel_fn vrnd, OpType op_type, xnn_init_f32_rnd_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-5.0f, 5.0f);
@@ -698,7 +698,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_vsigmoid_ukernel_function vsigmoid, xnn_init_f16_sigmoid_params_fn init_params) const {
+  void Test(xnn_f16_vsigmoid_ukernel_fn vsigmoid, xnn_init_f16_sigmoid_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto distribution = std::uniform_real_distribution<float>(-25.0f, 25.0f);
@@ -741,7 +741,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vsigmoid_ukernel_function vsigmoid, xnn_init_f32_sigmoid_params_fn init_params) const {
+  void Test(xnn_f32_vsigmoid_ukernel_fn vsigmoid, xnn_init_f32_sigmoid_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-125.0f, 125.0f);
@@ -779,7 +779,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_vsqr_ukernel_function vsqr, xnn_init_f16_default_params_fn init_params = nullptr) const {
+  void Test(xnn_f16_vsqr_ukernel_fn vsqr, xnn_init_f16_default_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
@@ -822,7 +822,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vsqr_ukernel_function vsqr, xnn_init_f32_default_params_fn init_params = nullptr) const {
+  void Test(xnn_f32_vsqr_ukernel_fn vsqr, xnn_init_f32_default_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
@@ -861,7 +861,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_vsqrt_ukernel_function vsqrt, xnn_init_f16_sqrt_params_fn init_params = nullptr) const {
+  void Test(xnn_f16_vsqrt_ukernel_fn vsqrt, xnn_init_f16_sqrt_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(0.001f, 10.0f);
@@ -903,7 +903,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_vsqrt_ukernel_function vsqrt, xnn_init_f32_sqrt_params_fn init_params = nullptr) const {
+  void Test(xnn_f32_vsqrt_ukernel_fn vsqrt, xnn_init_f32_sqrt_params_fn init_params = nullptr) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(0.0f, 10.0f);
@@ -942,7 +942,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_vclamp_ukernel_function vclamp, xnn_init_f16_minmax_params_fn init_params) const {
+  void Test(xnn_f16_vclamp_ukernel_fn vclamp, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 255.0f), std::ref(rng));
@@ -980,7 +980,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_s8_vclamp_ukernel_function vclamp, xnn_init_s8_minmax_params_fn init_params) const {
+  void Test(xnn_s8_vclamp_ukernel_fn vclamp, xnn_init_s8_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto i8rng = std::bind(
@@ -1019,7 +1019,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_u8_vclamp_ukernel_function vclamp, xnn_init_u8_minmax_params_fn init_params) const {
+  void Test(xnn_u8_vclamp_ukernel_fn vclamp, xnn_init_u8_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(
@@ -1057,7 +1057,7 @@ class VUnaryMicrokernelTester {
     }
   }
 
-  void Test(xnn_u64_u32_vsqrtshift_ukernel_function vsqrtshift) const {
+  void Test(xnn_u64_u32_vsqrtshift_ukernel_fn vsqrtshift) const {
     ASSERT_FALSE(inplace());
 
     std::random_device random_device;

@@ -154,7 +154,7 @@ class MaxPoolMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_s8_maxpool_ukernel_function maxpool, xnn_init_s8_minmax_params_fn init_params) const {
+  void Test(xnn_s8_maxpool_ukernel_fn maxpool, xnn_init_s8_minmax_params_fn init_params) const {
     ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
     ASSERT_LT(qmin(), qmax());
@@ -226,7 +226,7 @@ class MaxPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_u8_maxpool_ukernel_function maxpool, xnn_init_u8_minmax_params_fn init_params) const {
+  void Test(xnn_u8_maxpool_ukernel_fn maxpool, xnn_init_u8_minmax_params_fn init_params) const {
     ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
     ASSERT_LT(qmin(), qmax());
@@ -298,7 +298,7 @@ class MaxPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_maxpool_ukernel_function maxpool, xnn_init_f16_minmax_params_fn init_params) const {
+  void Test(xnn_f16_maxpool_ukernel_fn maxpool, xnn_init_f16_minmax_params_fn init_params) const {
     ASSERT_LT(qmin(), qmax());
 
     std::random_device random_device;
@@ -387,7 +387,7 @@ class MaxPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_maxpool_ukernel_function maxpool, xnn_init_f32_minmax_params_fn init_params) const {
+  void Test(xnn_f32_maxpool_ukernel_fn maxpool, xnn_init_f32_minmax_params_fn init_params) const {
     ASSERT_LT(qmin(), qmax());
 
     std::random_device random_device;

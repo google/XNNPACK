@@ -23,7 +23,7 @@
 
 void cs16_bfly4(
     benchmark::State& state,
-    xnn_cs16_bfly4_ukernel_function bfly4,
+    xnn_cs16_bfly4_ukernel_fn bfly4,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {

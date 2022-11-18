@@ -23,8 +23,8 @@
 
 struct xnn_ukernel_conv2d {
   union {
-    xnn_conv_hwc2chw_ukernel_function hwc2chw_function;
-    xnn_conv_hwc_ukernel_function hwc_function;
+    xnn_conv_hwc2chw_ukernel_fn hwc2chw_fn;
+    xnn_conv_hwc_ukernel_fn hwc_fn;
   };
   uint8_t output_height_tile;
   uint8_t output_channel_tile;
@@ -32,8 +32,8 @@ struct xnn_ukernel_conv2d {
 
 struct xnn_ukernel_dwconv {
   union {
-    xnn_dwconv_unipass_ukernel_function unipass_function;
-    xnn_dwconv_multipass_ukernel_function multipass_function;
+    xnn_dwconv_unipass_ukernel_fn unipass_fn;
+    xnn_dwconv_multipass_ukernel_fn multipass_fn;
   };
   uint8_t primary_tile;
   uint8_t incremental_tile;
@@ -42,7 +42,7 @@ struct xnn_ukernel_dwconv {
 // Direct 2D Depthwise Convolution
 struct xnn_ukernel_dwconv2d {
   union {
-    xnn_dwconv2d_chw_ukernel_function chw_function;
+    xnn_dwconv2d_chw_ukernel_fn chw_fn;
   };
   uint8_t output_width_tile;
 };
@@ -65,23 +65,23 @@ struct xnn_ukernel_igemm {
 };
 
 struct xnn_ukernel_spmm {
-  xnn_spmm_ukernel_function function;
+  xnn_spmm_ukernel_fn function;
   uint8_t mr;
 };
 
 struct xnn_ukernel_vmulcaddc {
-  xnn_vmulcaddc_ukernel_function function;
+  xnn_vmulcaddc_ukernel_fn function;
   uint8_t mr;
 };
 
 struct xnn_ukernel_vbinary {
-  xnn_vbinary_ukernel_function op_function;
-  xnn_vbinary_ukernel_function opc_function;
-  xnn_vbinary_ukernel_function ropc_function;
+  xnn_vbinary_ukernel_fn op_fn;
+  xnn_vbinary_ukernel_fn opc_fn;
+  xnn_vbinary_ukernel_fn ropc_fn;
 };
 
 struct xnn_ukernel_vunary {
-  xnn_vunary_ukernel_function function;
+  xnn_vunary_ukernel_fn function;
 };
 
 struct xnn_ukernel {

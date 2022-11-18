@@ -18,13 +18,13 @@
 #include <xnnpack/microparams.h>
 
 struct xnn_hmp_gemm_ukernel {
-  xnn_gemm_ukernel_function function[XNN_MAX_UARCH_TYPES];
+  xnn_gemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
 #if XNN_PLATFORM_JIT
   size_t generated_code_offset[XNN_MAX_UARCH_TYPES];
 #endif  // XNN_PLATFORM_JIT
 };
 
-static inline struct xnn_hmp_gemm_ukernel xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function function) {
+static inline struct xnn_hmp_gemm_ukernel xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn function) {
   struct xnn_hmp_gemm_ukernel ukernel = {{ function }};
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
@@ -39,23 +39,23 @@ static inline bool xnn_is_hmp_gemm_ukernel(struct xnn_hmp_gemm_ukernel ukernel) 
 #if XNN_MAX_UARCH_TYPES == 1
   return false;
 #else
-  uintptr_t default_function = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
+  uintptr_t default_fn = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
   uintptr_t difference = 0;
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    difference |= (default_function ^ (uintptr_t) ukernel.function[i]);
+    difference |= (default_fn ^ (uintptr_t) ukernel.function[i]);
   }
   return difference != 0;
 #endif
 }
 
 struct xnn_hmp_igemm_ukernel {
-  xnn_igemm_ukernel_function function[XNN_MAX_UARCH_TYPES];
+  xnn_igemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
 #if XNN_PLATFORM_JIT
   size_t generated_code_offset[XNN_MAX_UARCH_TYPES];
 #endif  // XNN_PLATFORM_JIT
 };
 
-static inline struct xnn_hmp_igemm_ukernel xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function function) {
+static inline struct xnn_hmp_igemm_ukernel xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn function) {
   struct xnn_hmp_igemm_ukernel ukernel = {{ function }};
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
@@ -70,10 +70,10 @@ static inline bool xnn_is_hmp_igemm_ukernel(struct xnn_hmp_igemm_ukernel ukernel
 #if XNN_MAX_UARCH_TYPES == 1
   return false;
 #else
-  uintptr_t default_function = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
+  uintptr_t default_fn = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
   uintptr_t difference = 0;
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    difference |= (default_function ^ (uintptr_t) ukernel.function[i]);
+    difference |= (default_fn ^ (uintptr_t) ukernel.function[i]);
   }
   return difference != 0;
 #endif
@@ -90,10 +90,10 @@ struct gemm_fused_ukernels {
 
 #if XNN_PLATFORM_JIT
 struct xnn_hmp_gemm_codegen {
-  xnn_jit_gemm_code_generator_function function[XNN_MAX_UARCH_TYPES];
+  xnn_jit_gemm_code_generator_fn function[XNN_MAX_UARCH_TYPES];
 };
 
-static inline struct xnn_hmp_gemm_codegen xnn_init_hmp_gemm_codegen(xnn_jit_gemm_code_generator_function function) {
+static inline struct xnn_hmp_gemm_codegen xnn_init_hmp_gemm_codegen(xnn_jit_gemm_code_generator_fn function) {
   struct xnn_hmp_gemm_codegen ukernel = {{ function }};
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
@@ -105,20 +105,20 @@ static inline bool xnn_is_hmp_gemm_codegen(struct xnn_hmp_gemm_codegen ukernel) 
 #if XNN_MAX_UARCH_TYPES == 1
   return false;
 #else
-  uintptr_t default_function = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
+  uintptr_t default_fn = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
   uintptr_t difference = 0;
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    difference |= (default_function ^ (uintptr_t) ukernel.function[i]);
+    difference |= (default_fn ^ (uintptr_t) ukernel.function[i]);
   }
   return difference != 0;
 #endif
 }
 
 struct xnn_hmp_igemm_codegen {
-  xnn_jit_igemm_code_generator_function function[XNN_MAX_UARCH_TYPES];
+  xnn_jit_igemm_code_generator_fn function[XNN_MAX_UARCH_TYPES];
 };
 
-static inline struct xnn_hmp_igemm_codegen xnn_init_hmp_igemm_codegen(xnn_jit_igemm_code_generator_function function) {
+static inline struct xnn_hmp_igemm_codegen xnn_init_hmp_igemm_codegen(xnn_jit_igemm_code_generator_fn function) {
   struct xnn_hmp_igemm_codegen ukernel = {{ function }};
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
@@ -130,10 +130,10 @@ static inline bool xnn_is_hmp_igemm_codegen(struct xnn_hmp_igemm_codegen ukernel
 #if XNN_MAX_UARCH_TYPES == 1
   return false;
 #else
-  uintptr_t default_function = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
+  uintptr_t default_fn = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
   uintptr_t difference = 0;
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    difference |= (default_function ^ (uintptr_t) ukernel.function[i]);
+    difference |= (default_fn ^ (uintptr_t) ukernel.function[i]);
   }
   return difference != 0;
 #endif
@@ -169,7 +169,7 @@ struct gemm_parameters {
 };
 
 struct vunary_parameters {
-  xnn_vunary_ukernel_function ukernel;
+  xnn_vunary_ukernel_fn ukernel;
   union {
     xnn_init_f16_f32_cvt_params_fn f16_f32_cvt;
     xnn_init_f16_abs_params_fn f16_abs;
@@ -208,9 +208,9 @@ struct vunary_parameters {
 };
 
 struct vbinary_fused_ukernels {
-  xnn_vbinary_ukernel_function op_ukernel;
-  xnn_vbinary_ukernel_function opc_ukernel;
-  xnn_vbinary_ukernel_function ropc_ukernel;
+  xnn_vbinary_ukernel_fn op_ukernel;
+  xnn_vbinary_ukernel_fn opc_ukernel;
+  xnn_vbinary_ukernel_fn ropc_ukernel;
 };
 
 struct vbinary_parameters {
@@ -231,7 +231,7 @@ struct vbinary_parameters {
 };
 
 struct spmm_parameters {
-  xnn_spmm_ukernel_function ukernel;
+  xnn_spmm_ukernel_fn ukernel;
   // Number of M-dimension elements in a tile.
   // Corresponds to a block of pixels in 1x1 Convolution and a block of batch size in Fully Connected operator.
   uint8_t mr;
@@ -241,7 +241,7 @@ struct spmm_parameters {
 };
 
 struct conv_hwc2chw_parameters {
-  xnn_conv_hwc2chw_ukernel_function ukernel_with_symm_padding;
+  xnn_conv_hwc2chw_ukernel_fn ukernel_with_symm_padding;
   // Number of output channels in a tile.
   // This parameter must be passed as is to weight packing function.
   uint8_t output_channel_tile;
@@ -253,7 +253,7 @@ struct conv_hwc2chw_parameters {
 };
 
 struct dwconv2d_chw_parameters {
-  xnn_dwconv2d_chw_ukernel_function ukernel;
+  xnn_dwconv2d_chw_ukernel_fn ukernel;
   // Number of output width pixels in a tile.
   uint8_t output_width_tile;
   // Number of output height pixels in a tile.
@@ -262,7 +262,7 @@ struct dwconv2d_chw_parameters {
 };
 
 struct gavgpool_cw_parameters {
-  xnn_gavgpool_cw_ukernel_function ukernel;
+  xnn_gavgpool_cw_ukernel_fn ukernel;
   union {
     xnn_init_f16_gavgpool_neonfp16arith_params_fn f16;
   } init;
@@ -276,8 +276,8 @@ struct gavgpool_cw_parameters {
 };
 
 union dwconv_fused_ukernels {
-  xnn_dwconv_unipass_ukernel_function unipass;
-  xnn_dwconv_multipass_ukernel_function multipass;
+  xnn_dwconv_unipass_ukernel_fn unipass;
+  xnn_dwconv_multipass_ukernel_fn multipass;
 };
 
 struct dwconv_parameters {
@@ -296,8 +296,8 @@ struct dwconv_parameters {
 };
 
 struct gavgpool_parameters {
-  xnn_gavgpool_unipass_ukernel_function unipass;
-  xnn_gavgpool_multipass_ukernel_function multipass;
+  xnn_gavgpool_unipass_ukernel_fn unipass;
+  xnn_gavgpool_multipass_ukernel_fn multipass;
   union {
     xnn_init_f16_scaleminmax_params_fn f16;
     xnn_init_f32_scaleminmax_params_fn f32;
@@ -319,8 +319,8 @@ struct gavgpool_parameters {
 };
 
 struct avgpool_parameters {
-  xnn_avgpool_unipass_ukernel_function unipass;
-  xnn_avgpool_multipass_ukernel_function multipass;
+  xnn_avgpool_unipass_ukernel_fn unipass;
+  xnn_avgpool_multipass_ukernel_fn multipass;
   union {
     xnn_init_f16_scaleminmax_params_fn f16;
     xnn_init_f32_scaleminmax_params_fn f32;
@@ -340,8 +340,8 @@ struct avgpool_parameters {
 };
 
 struct pavgpool_parameters {
-  xnn_pavgpool_unipass_ukernel_function unipass;
-  xnn_pavgpool_multipass_ukernel_function multipass;
+  xnn_pavgpool_unipass_ukernel_fn unipass;
+  xnn_pavgpool_multipass_ukernel_fn multipass;
   union {
     xnn_init_f16_minmax_params_fn f16;
     xnn_init_f32_minmax_params_fn f32;
@@ -361,15 +361,15 @@ struct pavgpool_parameters {
 
 struct argmaxpool_parameters {
   union {
-    xnn_argmaxpool_unipass_ukernel_function up;
-    xnn_argmaxpool_multipass_ukernel_function mp;
+    xnn_argmaxpool_unipass_ukernel_fn up;
+    xnn_argmaxpool_multipass_ukernel_fn mp;
   };
   uint8_t mr;
   uint8_t qr;
 };
 
 struct maxpool_parameters {
-  xnn_maxpool_ukernel_function ukernel;
+  xnn_maxpool_ukernel_fn ukernel;
   union {
     xnn_init_s8_minmax_params_fn s8;
     xnn_init_u8_minmax_params_fn u8;
@@ -381,7 +381,7 @@ struct maxpool_parameters {
 };
 
 struct ibilinear_parameters {
-  xnn_ibilinear_ukernel_function ukernel;
+  xnn_ibilinear_ukernel_fn ukernel;
   // Number of output pixels in a tile.
   // For best efficiency, micro-kernel must produce a multiple of this number of pixels in each call.
   uint8_t pixel_tile;
@@ -391,7 +391,7 @@ struct ibilinear_parameters {
 };
 
 struct ibilinear_chw_parameters {
-  xnn_ibilinear_chw_ukernel_function ukernel;
+  xnn_ibilinear_chw_ukernel_fn ukernel;
   // Number of output pixels in a tile.
   // For best efficiency, micro-kernel must produce a multiple of this number of pixels in each call.
   uint8_t pixel_tile;
@@ -401,20 +401,20 @@ struct ibilinear_chw_parameters {
 };
 
 struct zip_parameters {
-  xnn_zipc_ukernel_function x2;
-  xnn_zipc_ukernel_function x3;
-  xnn_zipc_ukernel_function x4;
-  xnn_zipv_ukernel_function xm;
+  xnn_zipc_ukernel_fn x2;
+  xnn_zipc_ukernel_fn x3;
+  xnn_zipc_ukernel_fn x4;
+  xnn_zipv_ukernel_fn xm;
 };
 
 struct prelu_parameters {
-  xnn_prelu_ukernel_function ukernel;
+  xnn_prelu_ukernel_fn ukernel;
   uint16_t row_tile;
   uint16_t channel_tile;
 };
 
 struct raddstoreexpminusmax_parameters {
-  xnn_raddstoreexpminusmax_ukernel_function ukernel;
+  xnn_raddstoreexpminusmax_ukernel_fn ukernel;
   union {
     xnn_init_f16_expminus_params_fn f16;
     xnn_init_f32_expminus_params_fn f32;
@@ -425,21 +425,21 @@ struct raddstoreexpminusmax_parameters {
 };
 
 struct fill_parameters {
-  xnn_fill_ukernel_function ukernel;
+  xnn_fill_ukernel_fn ukernel;
   // Number of rows of inputs processed in one tile.
   // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
   uint8_t row_tile;
 };
 
 struct pad_parameters {
-  xnn_pad_ukernel_function ukernel;
+  xnn_pad_ukernel_fn ukernel;
   // Number of rows of inputs processed in one tile.
   // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
   uint8_t row_tile;
 };
 
 struct vmulcaddc_parameters {
-  xnn_vmulcaddc_ukernel_function ukernel;
+  xnn_vmulcaddc_ukernel_fn ukernel;
   union {
     xnn_init_f16_minmax_params_fn f16;
     xnn_init_f32_minmax_params_fn f32;
@@ -525,11 +525,11 @@ struct xnn_parameters {
     // Bilinear interpolation (2D).
     struct ibilinear_parameters ibilinear;
     struct maxpool_parameters maxpool;
-    xnn_u8_lut32norm_ukernel_function lut32norm;
-    xnn_u8_rmax_ukernel_function rmax;
+    xnn_u8_lut32norm_ukernel_fn lut32norm;
+    xnn_u8_rmax_ukernel_fn rmax;
   } u8;
   struct {
-    xnn_x8_lut_ukernel_function lut;
+    xnn_x8_lut_ukernel_fn lut;
     struct zip_parameters zip;
   } x8;
   struct {
@@ -565,7 +565,7 @@ struct xnn_parameters {
     struct vbinary_parameters vsqrdiff;
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
-    xnn_rmax_ukernel_function rmax;
+    xnn_rmax_ukernel_fn rmax;
     // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
     struct spmm_parameters spmm;
     // Direct 3x3 stride-2 Convolution with 3 input channels and HWC->CHW layout conversion.
@@ -618,7 +618,7 @@ struct xnn_parameters {
     struct vbinary_parameters vsqrdiff;
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
-    xnn_rmax_ukernel_function rmax;
+    xnn_rmax_ukernel_fn rmax;
     // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
     struct spmm_parameters spmm;
     // Sparse Matrix-Dense Matrix Multiplication (NR=2 block).
@@ -651,11 +651,11 @@ struct xnn_parameters {
     struct vunary_parameters qu8_to_f32;
   } vcvt;
   struct {
-    xnn_unpool_ukernel_function unpool;
+    xnn_unpool_ukernel_fn unpool;
     struct zip_parameters zip;
   } x32;
   struct {
-    xnn_vunary_ukernel_function copy;
+    xnn_vunary_ukernel_fn copy;
     struct fill_parameters fill;
     struct pad_parameters pad;
   } xx;

@@ -54,7 +54,7 @@ class LUTMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_x8_lut_ukernel_function lut) const {
+  void Test(xnn_x8_lut_ukernel_fn lut) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     auto u8rng = std::bind(

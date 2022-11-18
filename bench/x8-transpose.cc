@@ -21,7 +21,7 @@
 
 void transpose(
     benchmark::State& state,
-    xnn_x8_transposec_ukernel_function transpose,
+    xnn_x8_transposec_ukernel_fn transpose,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {

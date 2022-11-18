@@ -21,7 +21,7 @@
 
 void vlog(
     benchmark::State& state,
-    xnn_u32_vlog_ukernel_function vlog,
+    xnn_u32_vlog_ukernel_fn vlog,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {

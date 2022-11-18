@@ -51,7 +51,7 @@ class VScaleExpMinusMaxMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_vscaleexpminusmax_ukernel_function vscaleexpminusmax) const {
+  void Test(xnn_f32_vscaleexpminusmax_ukernel_fn vscaleexpminusmax) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     // Choose such range that expf(x[i]) overflows, but expf(x[i] - x_max) doesn't.

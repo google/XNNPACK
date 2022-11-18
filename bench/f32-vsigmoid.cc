@@ -22,7 +22,7 @@
 
 static void f32_vsigmoid(
   benchmark::State& state,
-  xnn_f32_vsigmoid_ukernel_function sigmoid,
+  xnn_f32_vsigmoid_ukernel_fn sigmoid,
   xnn_init_f32_sigmoid_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

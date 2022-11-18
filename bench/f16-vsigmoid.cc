@@ -23,7 +23,7 @@
 
 static void f16_vsigmoid(
   benchmark::State& state,
-  xnn_f16_vsigmoid_ukernel_function sigmoid,
+  xnn_f16_vsigmoid_ukernel_fn sigmoid,
   xnn_init_f16_sigmoid_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {

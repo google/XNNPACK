@@ -28,18 +28,18 @@
 static void GEMMEnd2EndBenchmark(
   benchmark::State& state,
   models::ExecutionPlanFactory model_factory,
-  xnn_f32_gemm_minmax_ukernel_function gemm_minmax,
-  xnn_f32_igemm_minmax_ukernel_function igemm_minmax,
-  xnn_f32_gemm_minmax_ukernel_function gemm1_minmax,
-  xnn_f32_igemm_minmax_ukernel_function igemm1_minmax,
-  xnn_f32_gemm_relu_ukernel_function gemm_relu,
-  xnn_f32_igemm_relu_ukernel_function igemm_relu,
-  xnn_f32_gemm_relu_ukernel_function gemm1_relu,
-  xnn_f32_igemm_relu_ukernel_function igemm1_relu,
-  xnn_f32_gemm_ukernel_function gemm,
-  xnn_f32_igemm_ukernel_function igemm,
-  xnn_f32_gemm_ukernel_function gemm1,
-  xnn_f32_igemm_ukernel_function igemm1,
+  xnn_f32_gemm_minmax_ukernel_fn gemm_minmax,
+  xnn_f32_igemm_minmax_ukernel_fn igemm_minmax,
+  xnn_f32_gemm_minmax_ukernel_fn gemm1_minmax,
+  xnn_f32_igemm_minmax_ukernel_fn igemm1_minmax,
+  xnn_f32_gemm_relu_ukernel_fn gemm_relu,
+  xnn_f32_igemm_relu_ukernel_fn igemm_relu,
+  xnn_f32_gemm_relu_ukernel_fn gemm1_relu,
+  xnn_f32_igemm_relu_ukernel_fn igemm1_relu,
+  xnn_f32_gemm_ukernel_fn gemm,
+  xnn_f32_igemm_ukernel_fn igemm,
+  xnn_f32_gemm_ukernel_fn gemm1,
+  xnn_f32_igemm_ukernel_fn igemm1,
   xnn_init_f32_minmax_params_fn init_params,
   uint8_t mr, uint8_t nr, uint8_t log2_kr = 0, uint8_t log2_sr = 0,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -56,18 +56,18 @@ static void GEMMEnd2EndBenchmark(
   // Note: do not directly assign to xnn_params.f32.gemm because it breaks older gcc.
   std::memset(&xnn_params.f32.gemm, 0, sizeof(xnn_params.f32.gemm));
   std::memset(&xnn_params.f32.gemm2, 0, sizeof(xnn_params.f32.gemm2));
-  xnn_params.f32.gemm.minmax.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm_minmax));
-  xnn_params.f32.gemm.minmax.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm_minmax));
-  xnn_params.f32.gemm.minmax.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1_minmax));
-  xnn_params.f32.gemm.minmax.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm1_minmax));
-  xnn_params.f32.gemm.relu.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm_relu));
-  xnn_params.f32.gemm.relu.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm_relu));
-  xnn_params.f32.gemm.relu.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1_relu));
-  xnn_params.f32.gemm.relu.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm1_relu));
-  xnn_params.f32.gemm.linear.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm));
-  xnn_params.f32.gemm.linear.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm));
-  xnn_params.f32.gemm.linear.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_function(gemm1));
-  xnn_params.f32.gemm.linear.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_function(igemm1));
+  xnn_params.f32.gemm.minmax.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm_minmax));
+  xnn_params.f32.gemm.minmax.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm_minmax));
+  xnn_params.f32.gemm.minmax.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1_minmax));
+  xnn_params.f32.gemm.minmax.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm1_minmax));
+  xnn_params.f32.gemm.relu.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm_relu));
+  xnn_params.f32.gemm.relu.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm_relu));
+  xnn_params.f32.gemm.relu.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1_relu));
+  xnn_params.f32.gemm.relu.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm1_relu));
+  xnn_params.f32.gemm.linear.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm));
+  xnn_params.f32.gemm.linear.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm));
+  xnn_params.f32.gemm.linear.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1));
+  xnn_params.f32.gemm.linear.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm1));
   xnn_params.f32.gemm.init.f32 = init_params;
   xnn_params.f32.gemm.mr = mr;
   xnn_params.f32.gemm.nr = nr;
@@ -113,10 +113,10 @@ void dummy() {}
 static void GEMMEnd2EndBenchmark(
   benchmark::State& state,
   models::ExecutionPlanFactory model_factory,
-  xnn_jit_gemm_code_generator_function gemm_generator,
-  xnn_jit_gemm_code_generator_function gemm1_generator,
-  xnn_jit_igemm_code_generator_function igemm_generator,
-  xnn_jit_igemm_code_generator_function igemm1_generator,
+  xnn_jit_gemm_code_generator_fn gemm_generator,
+  xnn_jit_gemm_code_generator_fn gemm1_generator,
+  xnn_jit_igemm_code_generator_fn igemm_generator,
+  xnn_jit_igemm_code_generator_fn igemm1_generator,
   xnn_init_f32_minmax_params_fn init_params,
   uint8_t mr, uint8_t nr, uint8_t log2_kr = 0, uint8_t log2_sr = 0,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
@@ -132,9 +132,9 @@ static void GEMMEnd2EndBenchmark(
   // Set the microkernels to dummies to ensure we run JIT kernels.
   for (size_t i = 0; i < XNN_MAX_MR; i++) {
     xnn_params.f32.gemm.minmax.gemm[i] = xnn_init_hmp_gemm_ukernel(
-        reinterpret_cast<xnn_gemm_ukernel_function>(dummy));
+        reinterpret_cast<xnn_gemm_ukernel_fn>(dummy));
     xnn_params.f32.gemm.minmax.igemm[i] = xnn_init_hmp_igemm_ukernel(
-        reinterpret_cast<xnn_igemm_ukernel_function>(dummy));
+        reinterpret_cast<xnn_igemm_ukernel_fn>(dummy));
   }
   xnn_params.f32.gemm.init.f32 = init_params;
   xnn_params.f32.gemm.mr = mr;

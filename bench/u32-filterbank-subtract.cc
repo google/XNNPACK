@@ -21,7 +21,7 @@
 
 void filterbank_subtract(
     benchmark::State& state,
-    xnn_u32_filterbank_subtract_ukernel_function filterbank_subtract,
+    xnn_u32_filterbank_subtract_ukernel_fn filterbank_subtract,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {
