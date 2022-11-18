@@ -15,7 +15,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_x4(
+void xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_p5_div_x4(
     size_t batch,
     const float* input,
     float* output,
@@ -44,20 +44,20 @@ void xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_x4(
 
     const v128_t vz = wasm_f32x4_abs(vx);
 
-    v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz, vminus_log2e));
+    v128_t vn = __builtin_wasm_fma_f32x4(vmagic_bias, vz, vminus_log2e);
     const v128_t vs = wasm_i32x4_shl(vn, 23);
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
-    v128_t vt = wasm_f32x4_add(vz, wasm_f32x4_mul(vn, vln2_hi));
-    vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vln2_lo));
+    v128_t vt = __builtin_wasm_fma_f32x4(vz, vn, vln2_hi);
+    vt = __builtin_wasm_fma_f32x4(vt, vn, vln2_lo);
 
-    v128_t vp = wasm_f32x4_add(vc4, wasm_f32x4_mul(vt, vc5));
-    vp = wasm_f32x4_add(vc3, wasm_f32x4_mul(vt, vp));
-    vp = wasm_f32x4_add(vc2, wasm_f32x4_mul(vt, vp));
-    vp = wasm_f32x4_add(vc1, wasm_f32x4_mul(vt, vp));
+    v128_t vp = __builtin_wasm_fma_f32x4(vc4, vt, vc5);
+    vp = __builtin_wasm_fma_f32x4(vc3, vt, vp);
+    vp = __builtin_wasm_fma_f32x4(vc2, vt, vp);
+    vp = __builtin_wasm_fma_f32x4(vc1, vt, vp);
 
     vt = wasm_f32x4_mul(vt, vs);
-    const v128_t ve = wasm_f32x4_add(vs, wasm_f32x4_mul(vt, vp));
+    const v128_t ve = __builtin_wasm_fma_f32x4(vs, vt, vp);
     const v128_t vd = wasm_f32x4_add(ve, vone);
 
     v128_t vf = wasm_f32x4_div(ve, vd);
@@ -73,20 +73,20 @@ void xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_x4(
 
     const v128_t vz = wasm_f32x4_abs(vx);
 
-    v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz, vminus_log2e));
+    v128_t vn = __builtin_wasm_fma_f32x4(vmagic_bias, vz, vminus_log2e);
     const v128_t vs = wasm_i32x4_shl(vn, 23);
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
-    v128_t vt = wasm_f32x4_add(vz, wasm_f32x4_mul(vn, vln2_hi));
-    vt = wasm_f32x4_add(vt, wasm_f32x4_mul(vn, vln2_lo));
+    v128_t vt = __builtin_wasm_fma_f32x4(vz, vn, vln2_hi);
+    vt = __builtin_wasm_fma_f32x4(vt, vn, vln2_lo);
 
-    v128_t vp = wasm_f32x4_add(vc4, wasm_f32x4_mul(vt, vc5));
-    vp = wasm_f32x4_add(vc3, wasm_f32x4_mul(vt, vp));
-    vp = wasm_f32x4_add(vc2, wasm_f32x4_mul(vt, vp));
-    vp = wasm_f32x4_add(vc1, wasm_f32x4_mul(vt, vp));
+    v128_t vp = __builtin_wasm_fma_f32x4(vc4, vt, vc5);
+    vp = __builtin_wasm_fma_f32x4(vc3, vt, vp);
+    vp = __builtin_wasm_fma_f32x4(vc2, vt, vp);
+    vp = __builtin_wasm_fma_f32x4(vc1, vt, vp);
 
     vt = wasm_f32x4_mul(vt, vs);
-    const v128_t ve = wasm_f32x4_add(vs, wasm_f32x4_mul(vt, vp));
+    const v128_t ve = __builtin_wasm_fma_f32x4(vs, vt, vp);
     const v128_t vd = wasm_f32x4_add(ve, vone);
 
     v128_t vf = wasm_f32x4_div(ve, vd);
