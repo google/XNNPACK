@@ -19,6 +19,7 @@ $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $WASM_X16X8_LOAD8X8 = {"QS8": "wasm_i16x8_load8x8", "QU8": "wasm_u16x8_load8x8"}[DATATYPE]
 $WASM_X16X8_EXTEND_LOW_X8X16 = {"QS8": "wasm_i16x8_extend_low_i8x16", "QU8": "wasm_u16x8_extend_low_u8x16"}[DATATYPE]
 $WASM_X16X8_EXTEND_HIGH_X8X16 = {"QS8": "wasm_i16x8_extend_high_i8x16", "QU8": "wasm_u16x8_extend_high_u8x16"}[DATATYPE]
+$WASM_V16X8_LANESELECT = "__builtin_wasm_laneselect_i16x8" if RELAXED else "wasm_v128_bitselect"
 $WASM_I16X8_Q15MULR = "__builtin_wasm_relaxed_q15mulr_s_i16x8" if RELAXED else "wasm_i16x8_q15mulr_sat"
 $WASM_X8X16_NARROW_I16X8 = {"QS8": "wasm_i8x16_narrow_i16x8", "QU8": "wasm_u8x16_narrow_i16x8"}[DATATYPE]
 $ISA = "wasmrelaxedsimd" if RELAXED else "wasmsimd"
@@ -51,7 +52,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__${ISA}_arm_x${BATCH_TILE}(
 
     $for N in range(2*SIMD_TILE):
       vacc${ABC[N]} = wasm_i16x8_shl(vacc${ABC[N]}, 7);
-      vmultiplier${ABC[N]} = wasm_v128_bitselect(vpositive_multiplier, vnegative_multiplier, vmultiplier${ABC[N]});
+      vmultiplier${ABC[N]} = ${WASM_V16X8_LANESELECT}(vpositive_multiplier, vnegative_multiplier, vmultiplier${ABC[N]});
 
     $for N in range(2*SIMD_TILE):
       vacc${ABC[N]} = ${WASM_I16X8_Q15MULR}(vacc${ABC[N]}, vmultiplier${ABC[N]});
@@ -72,7 +73,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__${ISA}_arm_x${BATCH_TILE}(
     v128_t vacc = wasm_i16x8_sub(vinput_zero_point, vx);
     v128_t vmultiplier = wasm_i16x8_shr(vacc, 15);
     vacc = wasm_i16x8_shl(vacc, 7);
-    vmultiplier = wasm_v128_bitselect(vpositive_multiplier, vnegative_multiplier, vmultiplier);
+    vmultiplier = ${WASM_V16X8_LANESELECT}(vpositive_multiplier, vnegative_multiplier, vmultiplier);
     vacc = ${WASM_I16X8_Q15MULR}(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
     input += 8;
@@ -89,7 +90,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__${ISA}_arm_x${BATCH_TILE}(
     v128_t vacc = wasm_i16x8_sub(vinput_zero_point, vx);
     v128_t vmultiplier = wasm_i16x8_shr(vacc, 15);
     vacc = wasm_i16x8_shl(vacc, 7);
-    vmultiplier = wasm_v128_bitselect(vpositive_multiplier, vnegative_multiplier, vmultiplier);
+    vmultiplier = ${WASM_V16X8_LANESELECT}(vpositive_multiplier, vnegative_multiplier, vmultiplier);
     vacc = ${WASM_I16X8_Q15MULR}(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
 
