@@ -272,10 +272,10 @@ SET(LOGGING_SRCS
   src/ukernel-strings.c)
 
 SET(XNNPACK_SRCS
-  src/init.c
   src/hardware-config.c
-  src/transpose-config.c
-  src/params.c)
+  src/init.c
+  src/params.c
+  src/transpose-config.c)
 
 SET(TABLE_SRCS
   src/tables/exp2-k-over-64.c
@@ -317,9 +317,9 @@ SET(JIT_AARCH64_SRCS
   src/f32-gemm/f32-gemm-4x8-aarch64-neonfma-cortex-a75.cc
   src/f32-gemm/f32-gemm-6x8-aarch64-neonfma-cortex-a75.cc
   src/f32-gemm/f32-gemm-6x8-aarch64-neonfma-ld128.cc
-  src/f32-igemm/f32-igemm-6x8-aarch64-neonfma-cortex-a75.cc
   src/f32-igemm/f32-igemm-1x8-aarch64-neonfma-cortex-a75.cc
   src/f32-igemm/f32-igemm-4x8-aarch64-neonfma-cortex-a75.cc
+  src/f32-igemm/f32-igemm-6x8-aarch64-neonfma-cortex-a75.cc
   src/f32-igemm/f32-igemm-6x8-aarch64-neonfma-ld128.cc)
 
 SET(PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS
