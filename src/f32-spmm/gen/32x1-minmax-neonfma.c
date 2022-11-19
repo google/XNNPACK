@@ -30,8 +30,16 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neonfma(
   assert(mc % sizeof(float) == 0);
   assert(nc != 0);
 
-  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+  #if XNN_ARCH_ARM64
+    const float32x4x2_t vminmax = vld2q_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vminmax.val[0];
+    const float32x4_t vmax = vminmax.val[1];
+  #else
+    const float32x2x2_t vminmax = vld2_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vcombine_f32(vminmax.val[0],vminmax.val[0]);
+    const float32x4_t vmax = vcombine_f32(vminmax.val[1],vminmax.val[1]);
+  #endif
+
   size_t output_decrement = output_stride * nc - 32 * sizeof(float);
   while XNN_LIKELY(mc >= 32 * sizeof(float)) {
     const float*restrict w = weights;
