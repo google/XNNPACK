@@ -1,11 +1,12 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-f16-vcvt/wasmsimd.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert BATCH_TILE % 8 == 0
-$assert BATCH_TILE >= 8
-$SIMD_TILE = BATCH_TILE // 8
 #include <assert.h>
 
 #include <wasm_simd128.h>
@@ -14,9 +15,7 @@ $SIMD_TILE = BATCH_TILE // 8
 #include <xnnpack/vcvt.h>
 
 
-$WASM_V16X8_LANESELECT = "__builtin_wasm_laneselect_i16x8" if RELAXED else "wasm_v128_bitselect"
-$ISA = "wasmrelaxedsimd" if RELAXED else "wasmsimd"
-void xnn_f32_f16_vcvt_ukernel__${ISA}_x${BATCH_TILE}(
+void xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_x16(
     size_t batch,
     const float* input,
     void* output,
@@ -37,72 +36,97 @@ void xnn_f32_f16_vcvt_ukernel__${ISA}_x${BATCH_TILE}(
   const v128_t vnanh = wasm_v128_load64_splat(params->wasmsimd.nanh);
 
   uint16_t* o = (uint16_t*) output;
-  $if BATCH_TILE > 8:
-    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-      const v128_t vx0 = wasm_v128_load(input);
-      $for N in range(1, 2*SIMD_TILE):
-        const v128_t vx${N} = wasm_v128_load(input + ${N * 4});
-      input += ${BATCH_TILE};
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+    const v128_t vx0 = wasm_v128_load(input);
+    const v128_t vx1 = wasm_v128_load(input + 4);
+    const v128_t vx2 = wasm_v128_load(input + 8);
+    const v128_t vx3 = wasm_v128_load(input + 12);
+    input += 16;
 
-      $for N in range(2*SIMD_TILE):
-        const v128_t vabsx${N} = wasm_f32x4_abs(vx${N});
+    const v128_t vabsx0 = wasm_f32x4_abs(vx0);
+    const v128_t vabsx1 = wasm_f32x4_abs(vx1);
+    const v128_t vabsx2 = wasm_f32x4_abs(vx2);
+    const v128_t vabsx3 = wasm_f32x4_abs(vx3);
 
-      $for N in range(2*SIMD_TILE):
-        const v128_t vsignx${N} = wasm_v128_xor(vx${N}, vabsx${N});
+    const v128_t vsignx0 = wasm_v128_xor(vx0, vabsx0);
+    const v128_t vsignx1 = wasm_v128_xor(vx1, vabsx1);
+    const v128_t vsignx2 = wasm_v128_xor(vx2, vabsx2);
+    const v128_t vsignx3 = wasm_v128_xor(vx3, vabsx3);
 
-      $for N in range(2*SIMD_TILE):
-        v128_t vbias${N} = wasm_i32x4_add(vabsx${N}, vexp_bias);
+    v128_t vbias0 = wasm_i32x4_add(vabsx0, vexp_bias);
+    v128_t vbias1 = wasm_i32x4_add(vabsx1, vexp_bias);
+    v128_t vbias2 = wasm_i32x4_add(vabsx2, vexp_bias);
+    v128_t vbias3 = wasm_i32x4_add(vabsx3, vexp_bias);
 
-      $for N in range(2*SIMD_TILE):
-        v128_t vf${N} = wasm_f32x4_mul(vabsx${N}, vscale_to_inf);
+    v128_t vf0 = wasm_f32x4_mul(vabsx0, vscale_to_inf);
+    v128_t vf1 = wasm_f32x4_mul(vabsx1, vscale_to_inf);
+    v128_t vf2 = wasm_f32x4_mul(vabsx2, vscale_to_inf);
+    v128_t vf3 = wasm_f32x4_mul(vabsx3, vscale_to_inf);
 
-      $for N in range(2*SIMD_TILE):
-        const v128_t vnanmaskw${N} = wasm_i32x4_gt(vabsx${N}, vexpw_max);
+    const v128_t vnanmaskw0 = wasm_i32x4_gt(vabsx0, vexpw_max);
+    const v128_t vnanmaskw1 = wasm_i32x4_gt(vabsx1, vexpw_max);
+    const v128_t vnanmaskw2 = wasm_i32x4_gt(vabsx2, vexpw_max);
+    const v128_t vnanmaskw3 = wasm_i32x4_gt(vabsx3, vexpw_max);
 
-      $for N in range(2*SIMD_TILE):
-        vbias${N} = wasm_v128_and(vbias${N}, vexpw_max);
+    vbias0 = wasm_v128_and(vbias0, vexpw_max);
+    vbias1 = wasm_v128_and(vbias1, vexpw_max);
+    vbias2 = wasm_v128_and(vbias2, vexpw_max);
+    vbias3 = wasm_v128_and(vbias3, vexpw_max);
 
-      $for N in range(2*SIMD_TILE):
-        vf${N} = wasm_f32x4_mul(vf${N}, vscale_to_zero);
+    vf0 = wasm_f32x4_mul(vf0, vscale_to_zero);
+    vf1 = wasm_f32x4_mul(vf1, vscale_to_zero);
+    vf2 = wasm_f32x4_mul(vf2, vscale_to_zero);
+    vf3 = wasm_f32x4_mul(vf3, vscale_to_zero);
 
-      $for N in range(SIMD_TILE):
-        const v128_t vnanmaskh${N} = wasm_i16x8_narrow_i32x4(vnanmaskw${2*N}, vnanmaskw${2*N+1});
+    const v128_t vnanmaskh0 = wasm_i16x8_narrow_i32x4(vnanmaskw0, vnanmaskw1);
+    const v128_t vnanmaskh1 = wasm_i16x8_narrow_i32x4(vnanmaskw2, vnanmaskw3);
 
-      $for N in range(SIMD_TILE):
-        const v128_t vsignh${N} = wasm_i16x8_narrow_i32x4(vsignx${2*N}, vsignx${2*N+1});
+    const v128_t vsignh0 = wasm_i16x8_narrow_i32x4(vsignx0, vsignx1);
+    const v128_t vsignh1 = wasm_i16x8_narrow_i32x4(vsignx2, vsignx3);
 
-      $for N in range(2*SIMD_TILE):
-        vbias${N} = wasm_i16x8_max(vbias${N}, vbias_min);
+    vbias0 = wasm_i16x8_max(vbias0, vbias_min);
+    vbias1 = wasm_i16x8_max(vbias1, vbias_min);
+    vbias2 = wasm_i16x8_max(vbias2, vbias_min);
+    vbias3 = wasm_i16x8_max(vbias3, vbias_min);
 
-      $for N in range(2*SIMD_TILE):
-        vf${N} = wasm_f32x4_add(vf${N}, vbias${N});
+    vf0 = wasm_f32x4_add(vf0, vbias0);
+    vf1 = wasm_f32x4_add(vf1, vbias1);
+    vf2 = wasm_f32x4_add(vf2, vbias2);
+    vf3 = wasm_f32x4_add(vf3, vbias3);
 
-      $for N in range(2*SIMD_TILE):
-        v128_t vexpw${N} = wasm_i32x4_shr(vf${N}, 13);
+    v128_t vexpw0 = wasm_i32x4_shr(vf0, 13);
+    v128_t vexpw1 = wasm_i32x4_shr(vf1, 13);
+    v128_t vexpw2 = wasm_i32x4_shr(vf2, 13);
+    v128_t vexpw3 = wasm_i32x4_shr(vf3, 13);
 
-      $for N in range(2*SIMD_TILE):
-        const v128_t vmantw${N} = wasm_v128_and(vf${N}, vmanth_mask);
+    const v128_t vmantw0 = wasm_v128_and(vf0, vmanth_mask);
+    const v128_t vmantw1 = wasm_v128_and(vf1, vmanth_mask);
+    const v128_t vmantw2 = wasm_v128_and(vf2, vmanth_mask);
+    const v128_t vmantw3 = wasm_v128_and(vf3, vmanth_mask);
 
-      $for N in range(2*SIMD_TILE):
-        vexpw${N} = wasm_v128_and(vexpw${N}, vexph_mask);
+    vexpw0 = wasm_v128_and(vexpw0, vexph_mask);
+    vexpw1 = wasm_v128_and(vexpw1, vexph_mask);
+    vexpw2 = wasm_v128_and(vexpw2, vexph_mask);
+    vexpw3 = wasm_v128_and(vexpw3, vexph_mask);
 
-      $for N in range(2*SIMD_TILE):
-        const v128_t vnonsignw${N} = wasm_i32x4_add(vmantw${N}, vexpw${N});
+    const v128_t vnonsignw0 = wasm_i32x4_add(vmantw0, vexpw0);
+    const v128_t vnonsignw1 = wasm_i32x4_add(vmantw1, vexpw1);
+    const v128_t vnonsignw2 = wasm_i32x4_add(vmantw2, vexpw2);
+    const v128_t vnonsignw3 = wasm_i32x4_add(vmantw3, vexpw3);
 
-      $for N in range(SIMD_TILE):
-        const v128_t vnonsignh${N} = wasm_i16x8_narrow_i32x4(vnonsignw${2*N}, vnonsignw${2*N+1});
+    const v128_t vnonsignh0 = wasm_i16x8_narrow_i32x4(vnonsignw0, vnonsignw1);
+    const v128_t vnonsignh1 = wasm_i16x8_narrow_i32x4(vnonsignw2, vnonsignw3);
 
-      $for N in range(SIMD_TILE):
-        const v128_t vabsh${N} = ${WASM_V16X8_LANESELECT}(vnanh, vnonsignh${N}, vnanmaskh${N});
+    const v128_t vabsh0 = __builtin_wasm_laneselect_i16x8(vnanh, vnonsignh0, vnanmaskh0);
+    const v128_t vabsh1 = __builtin_wasm_laneselect_i16x8(vnanh, vnonsignh1, vnanmaskh1);
 
-      $for N in range(SIMD_TILE):
-        const v128_t vh${N} = wasm_v128_or(vabsh${N}, vsignh${N});
+    const v128_t vh0 = wasm_v128_or(vabsh0, vsignh0);
+    const v128_t vh1 = wasm_v128_or(vabsh1, vsignh1);
 
-      wasm_v128_store(o, vh0);
-      $for N in range(1, SIMD_TILE):
-        wasm_v128_store(o + ${N * 8}, vh${N});
-      o += ${BATCH_TILE};
-    }
+    wasm_v128_store(o, vh0);
+    wasm_v128_store(o + 8, vh1);
+    o += 16;
+  }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const v128_t vx_lo = wasm_v128_load(input);
     const v128_t vx_hi = wasm_v128_load(input + 4);
@@ -146,7 +170,7 @@ void xnn_f32_f16_vcvt_ukernel__${ISA}_x${BATCH_TILE}(
 
     const v128_t vnonsignh = wasm_i16x8_narrow_i32x4(vnonsignw_lo, vnonsignw_hi);
 
-    const v128_t vabsh = ${WASM_V16X8_LANESELECT}(vnanh, vnonsignh, vnanmaskh);
+    const v128_t vabsh = __builtin_wasm_laneselect_i16x8(vnanh, vnonsignh, vnanmaskh);
 
     const v128_t vh = wasm_v128_or(vabsh, vsignh);
 
@@ -196,7 +220,7 @@ void xnn_f32_f16_vcvt_ukernel__${ISA}_x${BATCH_TILE}(
 
     const v128_t vnonsignh = wasm_i16x8_narrow_i32x4(vnonsignw_lo, vnonsignw_hi);
 
-    const v128_t vabsh = ${WASM_V16X8_LANESELECT}(vnanh, vnonsignh, vnanmaskh);
+    const v128_t vabsh = __builtin_wasm_laneselect_i16x8(vnanh, vnonsignh, vnanmaskh);
 
     v128_t vh = wasm_v128_or(vabsh, vsignh);
 

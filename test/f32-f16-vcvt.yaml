@@ -57,6 +57,15 @@
   init: xnn_init_f32_f16_cvt_wasmsimd_params
 - name: xnn_f32_f16_vcvt_ukernel__wasmsimd_x32
   init: xnn_init_f32_f16_cvt_wasmsimd_params
+# WAsm Relaxed SIMD
+- name: xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_x8
+  init: xnn_init_f32_f16_cvt_wasmsimd_params
+- name: xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_x16
+  init: xnn_init_f32_f16_cvt_wasmsimd_params
+- name: xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_x24
+  init: xnn_init_f32_f16_cvt_wasmsimd_params
+- name: xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_x32
+  init: xnn_init_f32_f16_cvt_wasmsimd_params
 # Scalar
 - name: xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x1
   init: xnn_init_f32_f16_cvt_scalar_bitcast_params

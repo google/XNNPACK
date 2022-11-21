@@ -38,10 +38,15 @@ tools/xngen src/f32-f16-vcvt/avx512skx.c.in -D BATCH_TILE=16 -o src/f32-f16-vcvt
 tools/xngen src/f32-f16-vcvt/avx512skx.c.in -D BATCH_TILE=32 -o src/f32-f16-vcvt/gen/f32-f16-vcvt-avx512skx-x32.c &
 
 ################################## WAsm SIMD ##################################
-tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=8  -o src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmsimd-x8.c &
-tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=16 -o src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmsimd-x16.c &
-tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=24 -o src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmsimd-x24.c &
-tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=32 -o src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmsimd-x32.c &
+tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=8  -D RELAXED=0 -o src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmsimd-x8.c &
+tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=16 -D RELAXED=0 -o src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmsimd-x16.c &
+tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=24 -D RELAXED=0 -o src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmsimd-x24.c &
+tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=32 -D RELAXED=0 -o src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmsimd-x32.c &
+
+tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=8  -D RELAXED=1 -o src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmrelaxedsimd-x8.c &
+tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=16 -D RELAXED=1 -o src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmrelaxedsimd-x16.c &
+tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=24 -D RELAXED=1 -o src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmrelaxedsimd-x24.c &
+tools/xngen src/f32-f16-vcvt/wasmsimd.c.in -D BATCH_TILE=32 -D RELAXED=1 -o src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmrelaxedsimd-x32.c &
 
 #################################### Scalar ###################################
 tools/xngen src/f32-f16-vcvt/scalar-bitcast.c.in -D BATCH_TILE=1 -o src/f32-f16-vcvt/gen/f32-f16-vcvt-scalar-bitcast-x1.c &
