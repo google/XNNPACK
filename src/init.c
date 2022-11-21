@@ -6076,13 +6076,13 @@ static void init(void) {
     };
     if (is_wasm_x86) {
       xnn_params.f32.lrelu = (struct vunary_parameters) {
-        .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x8,
+        .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_x8,
         .init.f32_lrelu = xnn_init_f32_lrelu_wasmsimd_params,
         .element_tile = 8,
       };
     } else {
       xnn_params.f32.lrelu = (struct vunary_parameters) {
-        .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x8,
+        .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__wasmsimd_laneselect_x8,
         .init.f32_lrelu = xnn_init_f32_lrelu_wasmsimd_params,
         .element_tile = 8,
       };

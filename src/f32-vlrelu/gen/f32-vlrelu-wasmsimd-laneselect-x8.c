@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vlrelu/wasmsimd-bitselect.c.in
+//   Template: src/f32-vlrelu/wasmsimd-laneselect.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -15,7 +15,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x8(
+void xnn_f32_vlrelu_ukernel__wasmsimd_laneselect_x8(
     size_t batch,
     const float* input,
     float* output,

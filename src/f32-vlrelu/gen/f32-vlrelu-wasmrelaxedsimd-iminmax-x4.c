@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vlrelu/wasmsimd-minmax.c.in
+//   Template: src/f32-vlrelu/wasmsimd-iminmax.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -15,7 +15,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x4(
+void xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_iminmax_x4(
     size_t batch,
     const float* input,
     float* output,
@@ -33,7 +33,7 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x4(
     input += 4;
     v128_t vacc = wasm_i32x4_max(vx, vzero);
     vx = wasm_i32x4_min(vx, vzero);
-    vacc = wasm_f32x4_add(vacc, wasm_f32x4_mul(vx, vslope));
+    vacc = __builtin_wasm_fma_f32x4(vacc, vx, vslope);
     wasm_v128_store(output, vacc);
     output += 4;
   }
@@ -41,7 +41,7 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x4(
     v128_t vx = wasm_v128_load(input);
     v128_t vacc = wasm_i32x4_max(vx, vzero);
     vx = wasm_i32x4_min(vx, vzero);
-    vacc = wasm_f32x4_add(vacc, wasm_f32x4_mul(vx, vslope));
+    vacc = __builtin_wasm_fma_f32x4(vacc, vx, vslope);
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vacc, 0);

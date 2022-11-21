@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vlrelu/wasmsimd-minmax.c.in
+//   Template: src/f32-vlrelu/wasmsimd-iminmax.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -15,7 +15,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x8(
+void xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_x8(
     size_t batch,
     const float* input,
     float* output,

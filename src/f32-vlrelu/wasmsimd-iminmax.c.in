@@ -14,7 +14,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x${BATCH_TILE}(
+$ISA = "wasmrelaxedsimd" if RELAXED else "wasmsimd"
+void xnn_f32_vlrelu_ukernel__${ISA}_iminmax_x${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,
@@ -39,7 +40,10 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x${BATCH_TILE}(
         vx${ABC[N:N+4]} = wasm_i32x4_min(vx${ABC[N:N+4]}, vzero);
 
       $for N in range(0, BATCH_TILE, 4):
-        vacc${ABC[N:N+4]} = wasm_f32x4_add(vacc${ABC[N:N+4]}, wasm_f32x4_mul(vx${ABC[N:N+4]}, vslope));
+        $if RELAXED:
+          vacc${ABC[N:N+4]} = __builtin_wasm_fma_f32x4(vacc${ABC[N:N+4]}, vx${ABC[N:N+4]}, vslope);
+        $else:
+          vacc${ABC[N:N+4]} = wasm_f32x4_add(vacc${ABC[N:N+4]}, wasm_f32x4_mul(vx${ABC[N:N+4]}, vslope));
 
       wasm_v128_store(output, vacc${ABC[0:4]});
       $for N in range(4, BATCH_TILE, 4):
@@ -51,7 +55,10 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x${BATCH_TILE}(
     input += 4;
     v128_t vacc = wasm_i32x4_max(vx, vzero);
     vx = wasm_i32x4_min(vx, vzero);
-    vacc = wasm_f32x4_add(vacc, wasm_f32x4_mul(vx, vslope));
+    $if RELAXED:
+      vacc = __builtin_wasm_fma_f32x4(vacc, vx, vslope);
+    $else:
+      vacc = wasm_f32x4_add(vacc, wasm_f32x4_mul(vx, vslope));
     wasm_v128_store(output, vacc);
     output += 4;
   }
@@ -59,7 +66,10 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x${BATCH_TILE}(
     v128_t vx = wasm_v128_load(input);
     v128_t vacc = wasm_i32x4_max(vx, vzero);
     vx = wasm_i32x4_min(vx, vzero);
-    vacc = wasm_f32x4_add(vacc, wasm_f32x4_mul(vx, vslope));
+    $if RELAXED:
+      vacc = __builtin_wasm_fma_f32x4(vacc, vx, vslope);
+    $else:
+      vacc = wasm_f32x4_add(vacc, wasm_f32x4_mul(vx, vslope));
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vacc, 0);

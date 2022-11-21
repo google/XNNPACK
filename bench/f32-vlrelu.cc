@@ -138,25 +138,49 @@ static void f32_vlrelu(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_vlrelu, wasmsimd_bitselect_x4,
-                    xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x4,
+#if XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_vlrelu, wasmrelaxedsimd_laneselect_x4,
+                    xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_laneselect_x4,
                     xnn_init_f32_lrelu_wasmsimd_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vlrelu, wasmsimd_bitselect_x8,
-                    xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x8,
+  BENCHMARK_CAPTURE(f32_vlrelu, wasmrelaxedsimd_laneselect_x8,
+                    xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_laneselect_x8,
                     xnn_init_f32_lrelu_wasmsimd_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vlrelu, wasmsimd_minmax_x4,
-                    xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x4,
+  BENCHMARK_CAPTURE(f32_vlrelu, wasmrelaxedsimd_iminmax_x4,
+                    xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_iminmax_x4,
                     xnn_init_f32_lrelu_wasmsimd_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vlrelu, wasmsimd_minmax_x8,
-                    xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x8,
+  BENCHMARK_CAPTURE(f32_vlrelu, wasmrelaxedsimd_iminmax_x8,
+                    xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_iminmax_x8,
+                    xnn_init_f32_lrelu_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_vlrelu, wasmsimd_laneselect_x4,
+                    xnn_f32_vlrelu_ukernel__wasmsimd_laneselect_x4,
+                    xnn_init_f32_lrelu_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vlrelu, wasmsimd_laneselect_x8,
+                    xnn_f32_vlrelu_ukernel__wasmsimd_laneselect_x8,
+                    xnn_init_f32_lrelu_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vlrelu, wasmsimd_iminmax_x4,
+                    xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_x4,
+                    xnn_init_f32_lrelu_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vlrelu, wasmsimd_iminmax_x8,
+                    xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_x8,
                     xnn_init_f32_lrelu_wasmsimd_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();

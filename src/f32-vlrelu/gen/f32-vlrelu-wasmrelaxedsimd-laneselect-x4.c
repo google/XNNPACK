@@ -1,11 +1,12 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-vlrelu/wasmsimd-laneselect.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2020 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert BATCH_TILE % 4 == 0
-$assert BATCH_TILE >= 4
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <wasm_simd128.h>
@@ -14,7 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x${BATCH_TILE}(
+void xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_laneselect_x4(
     size_t batch,
     const float* input,
     float* output,
@@ -26,31 +27,12 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x${BATCH_TILE}(
   assert(output != NULL);
 
   const v128_t vslope = wasm_v128_load64_splat(params->wasmsimd.slope);
-  $if BATCH_TILE > 4:
-    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-      const v128_t vx${ABC[0:4]} = wasm_v128_load(input);
-      $for N in range(4, BATCH_TILE, 4):
-        const v128_t vx${ABC[N:N+4]} = wasm_v128_load(input + ${N});
-      input += ${BATCH_TILE};
-
-      $for N in range(0, BATCH_TILE, 4):
-        v128_t vacc${ABC[N:N+4]} = wasm_f32x4_mul(vx${ABC[N:N+4]}, vslope);
-        const v128_t vmask${ABC[N:N+4]} = wasm_i32x4_shr(vx${ABC[N:N+4]}, 31);
-
-      $for N in range(0, BATCH_TILE, 4):
-        vacc${ABC[N:N+4]} = wasm_v128_bitselect(vacc${ABC[N:N+4]}, vx${ABC[N:N+4]}, vmask${ABC[N:N+4]});
-
-      wasm_v128_store(output, vacc${ABC[0:4]});
-      $for N in range(4, BATCH_TILE, 4):
-        wasm_v128_store(output + ${N}, vacc${ABC[N:N+4]});
-      output += ${BATCH_TILE};
-    }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const v128_t vx = wasm_v128_load(input);
     input += 4;
     v128_t vacc = wasm_f32x4_mul(vx, vslope);
     const v128_t vmask = wasm_i32x4_shr(vx, 31);
-    vacc = wasm_v128_bitselect(vacc, vx, vmask);
+    vacc = __builtin_wasm_laneselect_i32x4(vacc, vx, vmask);
     wasm_v128_store(output, vacc);
     output += 4;
   }
@@ -58,7 +40,7 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x${BATCH_TILE}(
     const v128_t vx = wasm_v128_load(input);
     v128_t vacc = wasm_f32x4_mul(vx, vslope);
     const v128_t vmask = wasm_i32x4_shr(vx, 31);
-    vacc = wasm_v128_bitselect(vacc, vx, vmask);
+    vacc = __builtin_wasm_laneselect_i32x4(vacc, vx, vmask);
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vacc, 0);

@@ -32,13 +32,22 @@
 - name: xnn_f32_vlrelu_ukernel__avx512f_x32
   init: xnn_init_f32_lrelu_scalar_params
 # WAsm SIMD
-- name: xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x4
+- name: xnn_f32_vlrelu_ukernel__wasmsimd_laneselect_x4
   init: xnn_init_f32_lrelu_wasmsimd_params
-- name: xnn_f32_vlrelu_ukernel__wasmsimd_bitselect_x8
+- name: xnn_f32_vlrelu_ukernel__wasmsimd_laneselect_x8
   init: xnn_init_f32_lrelu_wasmsimd_params
-- name: xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x4
+- name: xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_x4
   init: xnn_init_f32_lrelu_wasmsimd_params
-- name: xnn_f32_vlrelu_ukernel__wasmsimd_minmax_x8
+- name: xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_x8
+  init: xnn_init_f32_lrelu_wasmsimd_params
+# WAsm Relaxed SIMD
+- name: xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_laneselect_x4
+  init: xnn_init_f32_lrelu_wasmsimd_params
+- name: xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_laneselect_x8
+  init: xnn_init_f32_lrelu_wasmsimd_params
+- name: xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_iminmax_x4
+  init: xnn_init_f32_lrelu_wasmsimd_params
+- name: xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_iminmax_x8
   init: xnn_init_f32_lrelu_wasmsimd_params
 # WAsm
 - name: xnn_f32_vlrelu_ukernel__wasm_x1
