@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-prelu/wasmsimd-bitselect.c.in
+//   Template: src/f32-prelu/wasmsimd-iminmax.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -15,7 +15,7 @@
 #include <xnnpack/prelu.h>
 
 
-void xnn_f32_prelu_ukernel__wasmsimd_bitselect_1x8(
+void xnn_f32_prelu_ukernel__wasmsimd_iminmax_1x8(
     size_t rows,
     size_t channels,
     const float*restrict input,
@@ -34,6 +34,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_1x8(
   const size_t input_increment = input_stride * 1 - channels;
   const size_t output_increment = output_stride * 1 - channels;
 
+  const v128_t vzero = wasm_i32x4_const_splat(0);
   do {
 
     const float* w = weights;
@@ -43,17 +44,17 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_1x8(
       const v128_t vw4567 = wasm_v128_load(w + 4);
       w += 8;
 
-      const v128_t vi0x0123 = wasm_v128_load(i0);
-      const v128_t vi0x4567 = wasm_v128_load(i0 + 4);
+      v128_t vi0x0123 = wasm_v128_load(i0);
+      v128_t vi0x4567 = wasm_v128_load(i0 + 4);
       i0 += 8;
 
-      v128_t vacc0x0123 = wasm_f32x4_mul(vi0x0123, vw0123);
-      const v128_t vmask0x0123 = wasm_i32x4_shr(vi0x0123, 31);
-      v128_t vacc0x4567 = wasm_f32x4_mul(vi0x4567, vw4567);
-      const v128_t vmask0x4567 = wasm_i32x4_shr(vi0x4567, 31);
+      v128_t vacc0x0123 = wasm_i32x4_max(vi0x0123, vzero);
+      vi0x0123 = wasm_i32x4_min(vi0x0123, vzero);
+      v128_t vacc0x4567 = wasm_i32x4_max(vi0x4567, vzero);
+      vi0x4567 = wasm_i32x4_min(vi0x4567, vzero);
 
-      vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vi0x0123, vmask0x0123);
-      vacc0x4567 = wasm_v128_bitselect(vacc0x4567, vi0x4567, vmask0x4567);
+      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(vi0x0123, vw0123));
+      vacc0x4567 = wasm_f32x4_add(vacc0x4567, wasm_f32x4_mul(vi0x4567, vw4567));
 
       wasm_v128_store(o0, vacc0x0123);
       wasm_v128_store(o0 + 4, vacc0x4567);
@@ -63,13 +64,13 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_1x8(
       const v128_t vw0123 = wasm_v128_load(w);
       w += 4;
 
-      const v128_t vi0x0123 = wasm_v128_load(i0);
+      v128_t vi0x0123 = wasm_v128_load(i0);
       i0 += 4;
 
-      v128_t vacc0x0123 = wasm_f32x4_mul(vi0x0123, vw0123);
-      const v128_t vmask0x0123 = wasm_i32x4_shr(vi0x0123, 31);
+      v128_t vacc0x0123 = wasm_i32x4_max(vi0x0123, vzero);
+      vi0x0123 = wasm_i32x4_min(vi0x0123, vzero);
 
-      vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vi0x0123, vmask0x0123);
+      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(vi0x0123, vw0123));
 
       wasm_v128_store(o0, vacc0x0123);
       o0 += 4;
@@ -78,13 +79,13 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_1x8(
       const v128_t vw0123 = wasm_v128_load(w);
       w = (const float*) ((uintptr_t) w + c);
 
-      const v128_t vi0x0123 = wasm_v128_load(i0);
+      v128_t vi0x0123 = wasm_v128_load(i0);
       i0 = (const float*) ((uintptr_t) i0 + c);
 
-      v128_t vacc0x0123 = wasm_f32x4_mul(vi0x0123, vw0123);
-      const v128_t vmask0x0123 = wasm_i32x4_shr(vi0x0123, 31);
+      v128_t vacc0x0123 = wasm_i32x4_max(vi0x0123, vzero);
+      vi0x0123 = wasm_i32x4_min(vi0x0123, vzero);
 
-      vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vi0x0123, vmask0x0123);
+      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(vi0x0123, vw0123));
 
       if (c & (2 * sizeof(float))) {
         wasm_v128_store64_lane(o0, vacc0x0123, 0);

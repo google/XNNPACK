@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-prelu/wasmsimd-bitselect.c.in
+//   Template: src/f32-prelu/wasmsimd-laneselect.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -15,7 +15,7 @@
 #include <xnnpack/prelu.h>
 
 
-void xnn_f32_prelu_ukernel__wasmsimd_bitselect_2x8(
+void xnn_f32_prelu_ukernel__wasmrelaxedsimd_laneselect_2x16(
     size_t rows,
     size_t channels,
     const float*restrict input,
@@ -44,38 +44,60 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_2x8(
 
     const float* w = weights;
     size_t c = channels;
-    for (; c >= 8 * sizeof(float); c -= 8 * sizeof(float)) {
+    for (; c >= 16 * sizeof(float); c -= 16 * sizeof(float)) {
       const v128_t vw0123 = wasm_v128_load(w);
       const v128_t vw4567 = wasm_v128_load(w + 4);
-      w += 8;
+      const v128_t vw89AB = wasm_v128_load(w + 8);
+      const v128_t vwCDEF = wasm_v128_load(w + 12);
+      w += 16;
 
       const v128_t vi0x0123 = wasm_v128_load(i0);
       const v128_t vi0x4567 = wasm_v128_load(i0 + 4);
-      i0 += 8;
+      const v128_t vi0x89AB = wasm_v128_load(i0 + 8);
+      const v128_t vi0xCDEF = wasm_v128_load(i0 + 12);
+      i0 += 16;
       const v128_t vi1x0123 = wasm_v128_load(i1);
       const v128_t vi1x4567 = wasm_v128_load(i1 + 4);
-      i1 += 8;
+      const v128_t vi1x89AB = wasm_v128_load(i1 + 8);
+      const v128_t vi1xCDEF = wasm_v128_load(i1 + 12);
+      i1 += 16;
 
       v128_t vacc0x0123 = wasm_f32x4_mul(vi0x0123, vw0123);
       const v128_t vmask0x0123 = wasm_i32x4_shr(vi0x0123, 31);
       v128_t vacc0x4567 = wasm_f32x4_mul(vi0x4567, vw4567);
       const v128_t vmask0x4567 = wasm_i32x4_shr(vi0x4567, 31);
+      v128_t vacc0x89AB = wasm_f32x4_mul(vi0x89AB, vw89AB);
+      const v128_t vmask0x89AB = wasm_i32x4_shr(vi0x89AB, 31);
+      v128_t vacc0xCDEF = wasm_f32x4_mul(vi0xCDEF, vwCDEF);
+      const v128_t vmask0xCDEF = wasm_i32x4_shr(vi0xCDEF, 31);
       v128_t vacc1x0123 = wasm_f32x4_mul(vi1x0123, vw0123);
       const v128_t vmask1x0123 = wasm_i32x4_shr(vi1x0123, 31);
       v128_t vacc1x4567 = wasm_f32x4_mul(vi1x4567, vw4567);
       const v128_t vmask1x4567 = wasm_i32x4_shr(vi1x4567, 31);
+      v128_t vacc1x89AB = wasm_f32x4_mul(vi1x89AB, vw89AB);
+      const v128_t vmask1x89AB = wasm_i32x4_shr(vi1x89AB, 31);
+      v128_t vacc1xCDEF = wasm_f32x4_mul(vi1xCDEF, vwCDEF);
+      const v128_t vmask1xCDEF = wasm_i32x4_shr(vi1xCDEF, 31);
 
-      vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vi0x0123, vmask0x0123);
-      vacc0x4567 = wasm_v128_bitselect(vacc0x4567, vi0x4567, vmask0x4567);
-      vacc1x0123 = wasm_v128_bitselect(vacc1x0123, vi1x0123, vmask1x0123);
-      vacc1x4567 = wasm_v128_bitselect(vacc1x4567, vi1x4567, vmask1x4567);
+      vacc0x0123 = __builtin_wasm_laneselect_i32x4(vacc0x0123, vi0x0123, vmask0x0123);
+      vacc0x4567 = __builtin_wasm_laneselect_i32x4(vacc0x4567, vi0x4567, vmask0x4567);
+      vacc0x89AB = __builtin_wasm_laneselect_i32x4(vacc0x89AB, vi0x89AB, vmask0x89AB);
+      vacc0xCDEF = __builtin_wasm_laneselect_i32x4(vacc0xCDEF, vi0xCDEF, vmask0xCDEF);
+      vacc1x0123 = __builtin_wasm_laneselect_i32x4(vacc1x0123, vi1x0123, vmask1x0123);
+      vacc1x4567 = __builtin_wasm_laneselect_i32x4(vacc1x4567, vi1x4567, vmask1x4567);
+      vacc1x89AB = __builtin_wasm_laneselect_i32x4(vacc1x89AB, vi1x89AB, vmask1x89AB);
+      vacc1xCDEF = __builtin_wasm_laneselect_i32x4(vacc1xCDEF, vi1xCDEF, vmask1xCDEF);
 
       wasm_v128_store(o0, vacc0x0123);
       wasm_v128_store(o0 + 4, vacc0x4567);
-      o0 += 8;
+      wasm_v128_store(o0 + 8, vacc0x89AB);
+      wasm_v128_store(o0 + 12, vacc0xCDEF);
+      o0 += 16;
       wasm_v128_store(o1, vacc1x0123);
       wasm_v128_store(o1 + 4, vacc1x4567);
-      o1 += 8;
+      wasm_v128_store(o1 + 8, vacc1x89AB);
+      wasm_v128_store(o1 + 12, vacc1xCDEF);
+      o1 += 16;
     }
     for (; c >= 4 * sizeof(float); c -= 4 * sizeof(float)) {
       const v128_t vw0123 = wasm_v128_load(w);
@@ -91,8 +113,8 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_2x8(
       v128_t vacc1x0123 = wasm_f32x4_mul(vi1x0123, vw0123);
       const v128_t vmask1x0123 = wasm_i32x4_shr(vi1x0123, 31);
 
-      vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vi0x0123, vmask0x0123);
-      vacc1x0123 = wasm_v128_bitselect(vacc1x0123, vi1x0123, vmask1x0123);
+      vacc0x0123 = __builtin_wasm_laneselect_i32x4(vacc0x0123, vi0x0123, vmask0x0123);
+      vacc1x0123 = __builtin_wasm_laneselect_i32x4(vacc1x0123, vi1x0123, vmask1x0123);
 
       wasm_v128_store(o0, vacc0x0123);
       o0 += 4;
@@ -113,8 +135,8 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_2x8(
       v128_t vacc1x0123 = wasm_f32x4_mul(vi1x0123, vw0123);
       const v128_t vmask1x0123 = wasm_i32x4_shr(vi1x0123, 31);
 
-      vacc0x0123 = wasm_v128_bitselect(vacc0x0123, vi0x0123, vmask0x0123);
-      vacc1x0123 = wasm_v128_bitselect(vacc1x0123, vi1x0123, vmask1x0123);
+      vacc0x0123 = __builtin_wasm_laneselect_i32x4(vacc0x0123, vi0x0123, vmask0x0123);
+      vacc1x0123 = __builtin_wasm_laneselect_i32x4(vacc1x0123, vi1x0123, vmask1x0123);
 
       if (c & (2 * sizeof(float))) {
         wasm_v128_store64_lane(o0, vacc0x0123, 0);

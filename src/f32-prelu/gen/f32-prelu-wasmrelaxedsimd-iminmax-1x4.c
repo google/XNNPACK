@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-prelu/wasmsimd-minmax.c.in
+//   Template: src/f32-prelu/wasmsimd-iminmax.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -15,7 +15,7 @@
 #include <xnnpack/prelu.h>
 
 
-void xnn_f32_prelu_ukernel__wasmsimd_minmax_1x8(
+void xnn_f32_prelu_ukernel__wasmrelaxedsimd_iminmax_1x4(
     size_t rows,
     size_t channels,
     const float*restrict input,
@@ -39,27 +39,6 @@ void xnn_f32_prelu_ukernel__wasmsimd_minmax_1x8(
 
     const float* w = weights;
     size_t c = channels;
-    for (; c >= 8 * sizeof(float); c -= 8 * sizeof(float)) {
-      const v128_t vw0123 = wasm_v128_load(w);
-      const v128_t vw4567 = wasm_v128_load(w + 4);
-      w += 8;
-
-      v128_t vi0x0123 = wasm_v128_load(i0);
-      v128_t vi0x4567 = wasm_v128_load(i0 + 4);
-      i0 += 8;
-
-      v128_t vacc0x0123 = wasm_i32x4_max(vi0x0123, vzero);
-      vi0x0123 = wasm_i32x4_min(vi0x0123, vzero);
-      v128_t vacc0x4567 = wasm_i32x4_max(vi0x4567, vzero);
-      vi0x4567 = wasm_i32x4_min(vi0x4567, vzero);
-
-      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(vi0x0123, vw0123));
-      vacc0x4567 = wasm_f32x4_add(vacc0x4567, wasm_f32x4_mul(vi0x4567, vw4567));
-
-      wasm_v128_store(o0, vacc0x0123);
-      wasm_v128_store(o0 + 4, vacc0x4567);
-      o0 += 8;
-    }
     for (; c >= 4 * sizeof(float); c -= 4 * sizeof(float)) {
       const v128_t vw0123 = wasm_v128_load(w);
       w += 4;
@@ -70,7 +49,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_minmax_1x8(
       v128_t vacc0x0123 = wasm_i32x4_max(vi0x0123, vzero);
       vi0x0123 = wasm_i32x4_min(vi0x0123, vzero);
 
-      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(vi0x0123, vw0123));
+      vacc0x0123 = __builtin_wasm_fma_f32x4(vacc0x0123, vi0x0123, vw0123);
 
       wasm_v128_store(o0, vacc0x0123);
       o0 += 4;
@@ -85,7 +64,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_minmax_1x8(
       v128_t vacc0x0123 = wasm_i32x4_max(vi0x0123, vzero);
       vi0x0123 = wasm_i32x4_min(vi0x0123, vzero);
 
-      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(vi0x0123, vw0123));
+      vacc0x0123 = __builtin_wasm_fma_f32x4(vacc0x0123, vi0x0123, vw0123);
 
       if (c & (2 * sizeof(float))) {
         wasm_v128_store64_lane(o0, vacc0x0123, 0);

@@ -15,7 +15,9 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/prelu.h>
 
 
-void xnn_f32_prelu_ukernel__wasmsimd_bitselect_${ROW_TILE}x${CHANNEL_TILE}(
+$WASM_V32X4_LANESELECT = "__builtin_wasm_laneselect_i32x4" if RELAXED else "wasm_v128_bitselect"
+$ISA = "wasmrelaxedsimd" if RELAXED else "wasmsimd"
+void xnn_f32_prelu_ukernel__${ISA}_laneselect_${ROW_TILE}x${CHANNEL_TILE}(
     size_t rows,
     size_t channels,
     const float*restrict input,
@@ -71,7 +73,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_${ROW_TILE}x${CHANNEL_TILE}(
 
       $for M in range(ROW_TILE):
         $for C in range(0, CHANNEL_TILE, 4):
-          vacc${M}x${ABC[C:C+4]} = wasm_v128_bitselect(vacc${M}x${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]}, vmask${M}x${ABC[C:C+4]});
+          vacc${M}x${ABC[C:C+4]} = ${WASM_V32X4_LANESELECT}(vacc${M}x${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]}, vmask${M}x${ABC[C:C+4]});
 
       $for M in range(ROW_TILE):
         wasm_v128_store(o${M}, vacc${M}x${ABC[0:4]});
@@ -93,7 +95,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_${ROW_TILE}x${CHANNEL_TILE}(
           const v128_t vmask${M}x0123 = wasm_i32x4_shr(vi${M}x0123, 31);
 
         $for M in range(ROW_TILE):
-          vacc${M}x0123 = wasm_v128_bitselect(vacc${M}x0123, vi${M}x0123, vmask${M}x0123);
+          vacc${M}x0123 = ${WASM_V32X4_LANESELECT}(vacc${M}x0123, vi${M}x0123, vmask${M}x0123);
 
         $for M in range(ROW_TILE):
           wasm_v128_store(o${M}, vacc${M}x0123);
@@ -112,7 +114,7 @@ void xnn_f32_prelu_ukernel__wasmsimd_bitselect_${ROW_TILE}x${CHANNEL_TILE}(
         const v128_t vmask${M}x0123 = wasm_i32x4_shr(vi${M}x0123, 31);
 
       $for M in range(ROW_TILE):
-        vacc${M}x0123 = wasm_v128_bitselect(vacc${M}x0123, vi${M}x0123, vmask${M}x0123);
+        vacc${M}x0123 = ${WASM_V32X4_LANESELECT}(vacc${M}x0123, vi${M}x0123, vmask${M}x0123);
 
       if (c & (2 * sizeof(float))) {
         $for M in range(ROW_TILE):

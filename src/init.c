@@ -6127,13 +6127,13 @@ static void init(void) {
     };
     if (is_wasm_x86) {
       xnn_params.f32.prelu = (struct prelu_parameters) {
-        .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__wasmsimd_minmax_2x8,
+        .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__wasmsimd_iminmax_2x8,
         .row_tile = 2,
         .channel_tile = 8,
       };
     } else {
       xnn_params.f32.prelu = (struct prelu_parameters) {
-        .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__wasmsimd_bitselect_2x8,
+        .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__wasmsimd_laneselect_2x8,
         .row_tile = 2,
         .channel_tile = 8,
       };

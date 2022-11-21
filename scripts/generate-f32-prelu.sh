@@ -24,25 +24,45 @@ tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=8  -D ROW_TILE=4 -o src/f32-
 tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=16 -D ROW_TILE=4 -o src/f32-prelu/gen/f32-prelu-neon-4x16.c &
 
 ################################## WAsm SIMD ##################################
-tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=4  -D ROW_TILE=1 -o src/f32-prelu/gen/f32-prelu-wasmsimd-bitselect-1x4.c &
-tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=8  -D ROW_TILE=1 -o src/f32-prelu/gen/f32-prelu-wasmsimd-bitselect-1x8.c &
-tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=16 -D ROW_TILE=1 -o src/f32-prelu/gen/f32-prelu-wasmsimd-bitselect-1x16.c &
-tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=4  -D ROW_TILE=2 -o src/f32-prelu/gen/f32-prelu-wasmsimd-bitselect-2x4.c &
-tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=8  -D ROW_TILE=2 -o src/f32-prelu/gen/f32-prelu-wasmsimd-bitselect-2x8.c &
-tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=16 -D ROW_TILE=2 -o src/f32-prelu/gen/f32-prelu-wasmsimd-bitselect-2x16.c &
-tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=4  -D ROW_TILE=4 -o src/f32-prelu/gen/f32-prelu-wasmsimd-bitselect-4x4.c &
-tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=8  -D ROW_TILE=4 -o src/f32-prelu/gen/f32-prelu-wasmsimd-bitselect-4x8.c &
-tools/xngen src/f32-prelu/wasmsimd-bitselect.c.in -D CHANNEL_TILE=16 -D ROW_TILE=4 -o src/f32-prelu/gen/f32-prelu-wasmsimd-bitselect-4x16.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=4  -D ROW_TILE=1 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-1x4.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=8  -D ROW_TILE=1 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-1x8.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=16 -D ROW_TILE=1 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-1x16.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=4  -D ROW_TILE=2 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-2x4.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=8  -D ROW_TILE=2 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-2x8.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=16 -D ROW_TILE=2 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-2x16.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=4  -D ROW_TILE=4 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-4x4.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=8  -D ROW_TILE=4 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-4x8.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=16 -D ROW_TILE=4 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-4x16.c &
 
-tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=4  -D ROW_TILE=1 -o src/f32-prelu/gen/f32-prelu-wasmsimd-minmax-1x4.c &
-tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=8  -D ROW_TILE=1 -o src/f32-prelu/gen/f32-prelu-wasmsimd-minmax-1x8.c &
-tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=16 -D ROW_TILE=1 -o src/f32-prelu/gen/f32-prelu-wasmsimd-minmax-1x16.c &
-tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=4  -D ROW_TILE=2 -o src/f32-prelu/gen/f32-prelu-wasmsimd-minmax-2x4.c &
-tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=8  -D ROW_TILE=2 -o src/f32-prelu/gen/f32-prelu-wasmsimd-minmax-2x8.c &
-tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=16 -D ROW_TILE=2 -o src/f32-prelu/gen/f32-prelu-wasmsimd-minmax-2x16.c &
-tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=4  -D ROW_TILE=4 -o src/f32-prelu/gen/f32-prelu-wasmsimd-minmax-4x4.c &
-tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=8  -D ROW_TILE=4 -o src/f32-prelu/gen/f32-prelu-wasmsimd-minmax-4x8.c &
-tools/xngen src/f32-prelu/wasmsimd-minmax.c.in    -D CHANNEL_TILE=16 -D ROW_TILE=4 -o src/f32-prelu/gen/f32-prelu-wasmsimd-minmax-4x16.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=4  -D ROW_TILE=1 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-1x4.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=8  -D ROW_TILE=1 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-1x8.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=16 -D ROW_TILE=1 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-1x16.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=4  -D ROW_TILE=2 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-2x4.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=8  -D ROW_TILE=2 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-2x8.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=16 -D ROW_TILE=2 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-2x16.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=4  -D ROW_TILE=4 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-4x4.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=8  -D ROW_TILE=4 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-4x8.c &
+tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=16 -D ROW_TILE=4 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-4x16.c &
+
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=4  -D ROW_TILE=1 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-1x4.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=8  -D ROW_TILE=1 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-1x8.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=16 -D ROW_TILE=1 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-1x16.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=4  -D ROW_TILE=2 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-2x4.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=8  -D ROW_TILE=2 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-2x8.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=16 -D ROW_TILE=2 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-2x16.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=4  -D ROW_TILE=4 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-4x4.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=8  -D ROW_TILE=4 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-4x8.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=16 -D ROW_TILE=4 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-4x16.c &
+
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=4  -D ROW_TILE=1 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-1x4.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=8  -D ROW_TILE=1 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-1x8.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=16 -D ROW_TILE=1 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-1x16.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=4  -D ROW_TILE=2 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-2x4.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=8  -D ROW_TILE=2 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-2x8.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=16 -D ROW_TILE=2 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-2x16.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=4  -D ROW_TILE=4 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-4x4.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=8  -D ROW_TILE=4 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-4x8.c &
+tools/xngen src/f32-prelu/wasmsimd-iminmax.c.in    -D CHANNEL_TILE=16 -D ROW_TILE=4 -D RELAXED=1 -o src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-4x16.c &
 
 ################################### ARM NEON ##################################
 tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=4 -D ROW_TILE=2 -o src/f32-prelu/gen/f32-prelu-neon-2x4.c &
