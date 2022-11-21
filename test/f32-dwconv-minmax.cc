@@ -144,7 +144,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
@@ -339,7 +339,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
@@ -525,7 +525,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(3)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x3__neon, xnn_init_f32_minmax_scalar_params);
@@ -711,7 +711,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(3)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x3__neon_acc2, xnn_init_f32_minmax_scalar_params);
@@ -897,7 +897,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(3)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x3__neonfma, xnn_init_f32_minmax_scalar_params);
@@ -1083,7 +1083,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(3)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x3__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
@@ -1269,7 +1269,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(4)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__neon, xnn_init_f32_minmax_scalar_params);
@@ -1455,7 +1455,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(4)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
@@ -1641,7 +1641,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(4)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__neonfma, xnn_init_f32_minmax_scalar_params);
@@ -1827,7 +1827,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(4)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
@@ -2013,7 +2013,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__neon, xnn_init_f32_minmax_scalar_params);
@@ -2199,7 +2199,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
@@ -2385,7 +2385,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__neonfma, xnn_init_f32_minmax_scalar_params);
@@ -2571,7 +2571,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
@@ -2757,7 +2757,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(25)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__neon, xnn_init_f32_minmax_scalar_params);
@@ -2943,7 +2943,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(25)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
@@ -3129,7 +3129,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(25)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__neonfma, xnn_init_f32_minmax_scalar_params);
@@ -3315,7 +3315,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(25)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
@@ -3501,7 +3501,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__neon, xnn_init_f32_minmax_scalar_params);
@@ -3687,7 +3687,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__neon_acc2, xnn_init_f32_minmax_scalar_params);
@@ -3873,7 +3873,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__neonfma, xnn_init_f32_minmax_scalar_params);
@@ -4059,7 +4059,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
@@ -4245,7 +4245,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__neon, xnn_init_f32_minmax_scalar_params);
@@ -4431,7 +4431,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
@@ -4617,7 +4617,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__neonfma, xnn_init_f32_minmax_scalar_params);
@@ -4803,7 +4803,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
@@ -4989,7 +4989,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__neon, xnn_init_f32_minmax_scalar_params);
@@ -5175,7 +5175,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
@@ -5361,7 +5361,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__neonfma, xnn_init_f32_minmax_scalar_params);
@@ -5547,7 +5547,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
@@ -5733,7 +5733,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__neon, xnn_init_f32_minmax_scalar_params);
@@ -5919,7 +5919,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
@@ -6105,7 +6105,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__neonfma, xnn_init_f32_minmax_scalar_params);
@@ -6291,7 +6291,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
@@ -6477,7 +6477,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(3)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x3__neon, xnn_init_f32_minmax_scalar_params);
@@ -6663,7 +6663,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(3)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x3__neon_acc2, xnn_init_f32_minmax_scalar_params);
@@ -6849,7 +6849,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(3)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x3__neonfma, xnn_init_f32_minmax_scalar_params);
@@ -7035,7 +7035,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(3)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x3__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
@@ -7221,7 +7221,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(4)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon, xnn_init_f32_minmax_scalar_params);
@@ -7407,7 +7407,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(4)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neon_acc2, xnn_init_f32_minmax_scalar_params);
@@ -7593,7 +7593,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(4)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma, xnn_init_f32_minmax_scalar_params);
@@ -7779,7 +7779,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(4)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
@@ -7965,7 +7965,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon, xnn_init_f32_minmax_scalar_params);
@@ -8151,7 +8151,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neon_acc2, xnn_init_f32_minmax_scalar_params);
@@ -8337,7 +8337,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma, xnn_init_f32_minmax_scalar_params);
@@ -8523,7 +8523,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
@@ -8709,7 +8709,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon, xnn_init_f32_minmax_scalar_params);
@@ -8895,7 +8895,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neon_acc2, xnn_init_f32_minmax_scalar_params);
@@ -9081,7 +9081,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma, xnn_init_f32_minmax_scalar_params);
@@ -9267,7 +9267,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__neonfma_acc2, xnn_init_f32_minmax_scalar_params);
@@ -9453,7 +9453,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(3)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x3__sse, xnn_init_f32_minmax_sse_params);
@@ -9639,7 +9639,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(3)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x3__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -9825,7 +9825,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(4)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__sse, xnn_init_f32_minmax_sse_params);
@@ -10011,7 +10011,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(4)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -10197,7 +10197,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__sse, xnn_init_f32_minmax_sse_params);
@@ -10383,7 +10383,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -10569,7 +10569,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(25)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__sse, xnn_init_f32_minmax_sse_params);
@@ -10755,7 +10755,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(25)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -10941,7 +10941,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__sse, xnn_init_f32_minmax_sse_params);
@@ -11127,7 +11127,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -11313,7 +11313,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__sse, xnn_init_f32_minmax_sse_params);
@@ -11499,7 +11499,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -11685,7 +11685,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__sse, xnn_init_f32_minmax_sse_params);
@@ -11871,7 +11871,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -12057,7 +12057,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__sse, xnn_init_f32_minmax_sse_params);
@@ -12243,7 +12243,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -12429,7 +12429,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__avx, xnn_init_f32_minmax_avx_params);
@@ -12615,7 +12615,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__avx_acc2, xnn_init_f32_minmax_avx_params);
@@ -12801,7 +12801,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__avx, xnn_init_f32_minmax_avx_params);
@@ -12987,7 +12987,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__avx_acc2, xnn_init_f32_minmax_avx_params);
@@ -13173,7 +13173,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__avx, xnn_init_f32_minmax_avx_params);
@@ -13359,7 +13359,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__avx_acc2, xnn_init_f32_minmax_avx_params);
@@ -13545,7 +13545,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__avx, xnn_init_f32_minmax_avx_params);
@@ -13731,7 +13731,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__avx_acc2, xnn_init_f32_minmax_avx_params);
@@ -13917,7 +13917,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(3)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x3__avx, xnn_init_f32_minmax_avx_params);
@@ -14103,7 +14103,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(3)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x3__avx_acc2, xnn_init_f32_minmax_avx_params);
@@ -14289,7 +14289,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(4)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__avx, xnn_init_f32_minmax_avx_params);
@@ -14475,7 +14475,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(4)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__avx_acc2, xnn_init_f32_minmax_avx_params);
@@ -14661,7 +14661,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__avx, xnn_init_f32_minmax_avx_params);
@@ -14847,7 +14847,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__avx_acc2, xnn_init_f32_minmax_avx_params);
@@ -15033,7 +15033,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__avx, xnn_init_f32_minmax_avx_params);
@@ -15219,7 +15219,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__avx_acc2, xnn_init_f32_minmax_avx_params);
@@ -15405,7 +15405,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__fma3, xnn_init_f32_minmax_avx_params);
@@ -15591,7 +15591,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__fma3_acc2, xnn_init_f32_minmax_avx_params);
@@ -15777,7 +15777,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__fma3, xnn_init_f32_minmax_avx_params);
@@ -15963,7 +15963,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__fma3_acc2, xnn_init_f32_minmax_avx_params);
@@ -16149,7 +16149,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__fma3, xnn_init_f32_minmax_avx_params);
@@ -16335,7 +16335,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__fma3_acc2, xnn_init_f32_minmax_avx_params);
@@ -16521,7 +16521,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__fma3, xnn_init_f32_minmax_avx_params);
@@ -16707,7 +16707,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__fma3_acc2, xnn_init_f32_minmax_avx_params);
@@ -16893,7 +16893,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(3)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x3__fma3, xnn_init_f32_minmax_avx_params);
@@ -17079,7 +17079,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(3)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x3__fma3_acc2, xnn_init_f32_minmax_avx_params);
@@ -17265,7 +17265,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(4)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__fma3, xnn_init_f32_minmax_avx_params);
@@ -17451,7 +17451,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(4)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__fma3_acc2, xnn_init_f32_minmax_avx_params);
@@ -17637,7 +17637,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__fma3, xnn_init_f32_minmax_avx_params);
@@ -17823,7 +17823,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__fma3_acc2, xnn_init_f32_minmax_avx_params);
@@ -18009,7 +18009,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__fma3, xnn_init_f32_minmax_avx_params);
@@ -18195,7 +18195,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__fma3_acc2, xnn_init_f32_minmax_avx_params);
@@ -18381,7 +18381,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(3)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x3__avx512f, xnn_init_f32_minmax_scalar_params);
@@ -18567,7 +18567,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(3)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x3__avx512f_acc2, xnn_init_f32_minmax_scalar_params);
@@ -18753,7 +18753,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(4)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__avx512f, xnn_init_f32_minmax_scalar_params);
@@ -18939,7 +18939,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(4)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x4__avx512f_acc2, xnn_init_f32_minmax_scalar_params);
@@ -19125,7 +19125,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__avx512f, xnn_init_f32_minmax_scalar_params);
@@ -19311,7 +19311,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x9__avx512f_acc2, xnn_init_f32_minmax_scalar_params);
@@ -19497,7 +19497,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__avx512f, xnn_init_f32_minmax_scalar_params);
@@ -19683,7 +19683,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_f32_dwconv_minmax_ukernel_up16x25__avx512f_acc2, xnn_init_f32_minmax_scalar_params);
@@ -19869,7 +19869,7 @@
       DWConvMicrokernelTester()
         .cr(32)
         .kr(3)
-        .channels(32)
+        .channels(channels)
         .width(5)
         .output_stride(163)
         .Test(xnn_f32_dwconv_minmax_ukernel_up32x3__avx512f, xnn_init_f32_minmax_scalar_params);
@@ -20055,7 +20055,7 @@
       DWConvMicrokernelTester()
         .cr(32)
         .kr(3)
-        .channels(32)
+        .channels(channels)
         .width(5)
         .output_stride(163)
         .Test(xnn_f32_dwconv_minmax_ukernel_up32x3__avx512f_acc2, xnn_init_f32_minmax_scalar_params);
@@ -20241,7 +20241,7 @@
       DWConvMicrokernelTester()
         .cr(32)
         .kr(4)
-        .channels(32)
+        .channels(channels)
         .width(5)
         .output_stride(163)
         .Test(xnn_f32_dwconv_minmax_ukernel_up32x4__avx512f, xnn_init_f32_minmax_scalar_params);
@@ -20427,7 +20427,7 @@
       DWConvMicrokernelTester()
         .cr(32)
         .kr(4)
-        .channels(32)
+        .channels(channels)
         .width(5)
         .output_stride(163)
         .Test(xnn_f32_dwconv_minmax_ukernel_up32x4__avx512f_acc2, xnn_init_f32_minmax_scalar_params);
@@ -20613,7 +20613,7 @@
       DWConvMicrokernelTester()
         .cr(32)
         .kr(9)
-        .channels(32)
+        .channels(channels)
         .width(5)
         .output_stride(163)
         .Test(xnn_f32_dwconv_minmax_ukernel_up32x9__avx512f, xnn_init_f32_minmax_scalar_params);
@@ -20799,7 +20799,7 @@
       DWConvMicrokernelTester()
         .cr(32)
         .kr(9)
-        .channels(32)
+        .channels(channels)
         .width(5)
         .output_stride(163)
         .Test(xnn_f32_dwconv_minmax_ukernel_up32x9__avx512f_acc2, xnn_init_f32_minmax_scalar_params);
@@ -20985,7 +20985,7 @@
       DWConvMicrokernelTester()
         .cr(32)
         .kr(25)
-        .channels(32)
+        .channels(channels)
         .width(5)
         .output_stride(163)
         .Test(xnn_f32_dwconv_minmax_ukernel_up32x25__avx512f, xnn_init_f32_minmax_scalar_params);
@@ -21171,7 +21171,7 @@
       DWConvMicrokernelTester()
         .cr(32)
         .kr(25)
-        .channels(32)
+        .channels(channels)
         .width(5)
         .output_stride(163)
         .Test(xnn_f32_dwconv_minmax_ukernel_up32x25__avx512f_acc2, xnn_init_f32_minmax_scalar_params);
@@ -21346,7 +21346,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(3)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x3__wasmsimd_arm, xnn_init_f32_minmax_wasmsimd_params);
@@ -21517,7 +21517,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(3)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x3__wasmsimd_arm_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -21688,7 +21688,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(3)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x3__wasmsimd_x86, xnn_init_f32_minmax_wasmsimd_params);
@@ -21859,7 +21859,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(3)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x3__wasmsimd_x86_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -22030,7 +22030,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(4)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__wasmsimd_arm, xnn_init_f32_minmax_wasmsimd_params);
@@ -22201,7 +22201,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(4)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__wasmsimd_arm_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -22372,7 +22372,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(4)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__wasmsimd_x86, xnn_init_f32_minmax_wasmsimd_params);
@@ -22543,7 +22543,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(4)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__wasmsimd_x86_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -22714,7 +22714,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__wasmsimd_arm, xnn_init_f32_minmax_wasmsimd_params);
@@ -22885,7 +22885,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__wasmsimd_arm_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -23056,7 +23056,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__wasmsimd_x86, xnn_init_f32_minmax_wasmsimd_params);
@@ -23227,7 +23227,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__wasmsimd_x86_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -23398,7 +23398,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(25)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__wasmsimd_arm, xnn_init_f32_minmax_wasmsimd_params);
@@ -23569,7 +23569,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(25)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__wasmsimd_arm_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -23740,7 +23740,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(25)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__wasmsimd_x86, xnn_init_f32_minmax_wasmsimd_params);
@@ -23911,7 +23911,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(25)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__wasmsimd_x86_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -24082,7 +24082,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__wasmsimd_arm, xnn_init_f32_minmax_wasmsimd_params);
@@ -24253,7 +24253,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__wasmsimd_arm_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -24424,7 +24424,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__wasmsimd_x86, xnn_init_f32_minmax_wasmsimd_params);
@@ -24595,7 +24595,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__wasmsimd_x86_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -24766,7 +24766,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__wasmsimd_arm, xnn_init_f32_minmax_wasmsimd_params);
@@ -24937,7 +24937,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__wasmsimd_arm_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -25108,7 +25108,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__wasmsimd_x86, xnn_init_f32_minmax_wasmsimd_params);
@@ -25279,7 +25279,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__wasmsimd_x86_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -25450,7 +25450,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__wasmsimd_arm, xnn_init_f32_minmax_wasmsimd_params);
@@ -25621,7 +25621,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__wasmsimd_arm_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -25792,7 +25792,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__wasmsimd_x86, xnn_init_f32_minmax_wasmsimd_params);
@@ -25963,7 +25963,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__wasmsimd_x86_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -26134,7 +26134,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__wasmsimd_arm, xnn_init_f32_minmax_wasmsimd_params);
@@ -26305,7 +26305,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__wasmsimd_arm_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -26476,7 +26476,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__wasmsimd_x86, xnn_init_f32_minmax_wasmsimd_params);
@@ -26647,7 +26647,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__wasmsimd_x86_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -26818,7 +26818,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(3)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x3__wasmrelaxedsimd, xnn_init_f32_minmax_wasmsimd_params);
@@ -26989,7 +26989,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(3)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x3__wasmrelaxedsimd_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -27160,7 +27160,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(3)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x3__wasmrelaxedsimd_fma, xnn_init_f32_minmax_wasmsimd_params);
@@ -27331,7 +27331,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(3)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x3__wasmrelaxedsimd_fma_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -27502,7 +27502,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(4)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__wasmrelaxedsimd, xnn_init_f32_minmax_wasmsimd_params);
@@ -27673,7 +27673,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(4)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__wasmrelaxedsimd_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -27844,7 +27844,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(4)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__wasmrelaxedsimd_fma, xnn_init_f32_minmax_wasmsimd_params);
@@ -28015,7 +28015,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(4)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x4__wasmrelaxedsimd_fma_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -28186,7 +28186,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__wasmrelaxedsimd, xnn_init_f32_minmax_wasmsimd_params);
@@ -28357,7 +28357,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__wasmrelaxedsimd_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -28528,7 +28528,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__wasmrelaxedsimd_fma, xnn_init_f32_minmax_wasmsimd_params);
@@ -28699,7 +28699,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(9)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x9__wasmrelaxedsimd_fma_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -28870,7 +28870,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(25)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__wasmrelaxedsimd, xnn_init_f32_minmax_wasmsimd_params);
@@ -29041,7 +29041,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(25)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__wasmrelaxedsimd_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -29212,7 +29212,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(25)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__wasmrelaxedsimd_fma, xnn_init_f32_minmax_wasmsimd_params);
@@ -29383,7 +29383,7 @@
       DWConvMicrokernelTester()
         .cr(4)
         .kr(25)
-        .channels(4)
+        .channels(channels)
         .width(5)
         .output_stride(23)
         .Test(xnn_f32_dwconv_minmax_ukernel_up4x25__wasmrelaxedsimd_fma_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -29554,7 +29554,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__wasmrelaxedsimd, xnn_init_f32_minmax_wasmsimd_params);
@@ -29725,7 +29725,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__wasmrelaxedsimd_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -29896,7 +29896,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__wasmrelaxedsimd_fma, xnn_init_f32_minmax_wasmsimd_params);
@@ -30067,7 +30067,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(3)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x3__wasmrelaxedsimd_fma_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -30238,7 +30238,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__wasmrelaxedsimd, xnn_init_f32_minmax_wasmsimd_params);
@@ -30409,7 +30409,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__wasmrelaxedsimd_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -30580,7 +30580,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__wasmrelaxedsimd_fma, xnn_init_f32_minmax_wasmsimd_params);
@@ -30751,7 +30751,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(4)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x4__wasmrelaxedsimd_fma_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -30922,7 +30922,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__wasmrelaxedsimd, xnn_init_f32_minmax_wasmsimd_params);
@@ -31093,7 +31093,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__wasmrelaxedsimd_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -31264,7 +31264,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__wasmrelaxedsimd_fma, xnn_init_f32_minmax_wasmsimd_params);
@@ -31435,7 +31435,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x9__wasmrelaxedsimd_fma_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -31606,7 +31606,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__wasmrelaxedsimd, xnn_init_f32_minmax_wasmsimd_params);
@@ -31777,7 +31777,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__wasmrelaxedsimd_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -31948,7 +31948,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__wasmrelaxedsimd_fma, xnn_init_f32_minmax_wasmsimd_params);
@@ -32119,7 +32119,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_f32_dwconv_minmax_ukernel_up8x25__wasmrelaxedsimd_fma_acc2, xnn_init_f32_minmax_wasmsimd_params);
@@ -32248,7 +32248,7 @@
       DWConvMicrokernelTester()
         .cr(1)
         .kr(3)
-        .channels(1)
+        .channels(channels)
         .width(5)
         .output_stride(7)
         .Test(xnn_f32_dwconv_minmax_ukernel_up1x3__wasm, xnn_init_f32_minmax_scalar_params);
@@ -32377,7 +32377,7 @@
       DWConvMicrokernelTester()
         .cr(1)
         .kr(3)
-        .channels(1)
+        .channels(channels)
         .width(5)
         .output_stride(7)
         .Test(xnn_f32_dwconv_minmax_ukernel_up1x3__wasm_acc2, xnn_init_f32_minmax_scalar_params);
@@ -32506,7 +32506,7 @@
       DWConvMicrokernelTester()
         .cr(1)
         .kr(4)
-        .channels(1)
+        .channels(channels)
         .width(5)
         .output_stride(7)
         .Test(xnn_f32_dwconv_minmax_ukernel_up1x4__wasm, xnn_init_f32_minmax_scalar_params);
@@ -32635,7 +32635,7 @@
       DWConvMicrokernelTester()
         .cr(1)
         .kr(4)
-        .channels(1)
+        .channels(channels)
         .width(5)
         .output_stride(7)
         .Test(xnn_f32_dwconv_minmax_ukernel_up1x4__wasm_acc2, xnn_init_f32_minmax_scalar_params);
@@ -32764,7 +32764,7 @@
       DWConvMicrokernelTester()
         .cr(1)
         .kr(9)
-        .channels(1)
+        .channels(channels)
         .width(5)
         .output_stride(7)
         .Test(xnn_f32_dwconv_minmax_ukernel_up1x9__wasm, xnn_init_f32_minmax_scalar_params);
@@ -32893,7 +32893,7 @@
       DWConvMicrokernelTester()
         .cr(1)
         .kr(9)
-        .channels(1)
+        .channels(channels)
         .width(5)
         .output_stride(7)
         .Test(xnn_f32_dwconv_minmax_ukernel_up1x9__wasm_acc2, xnn_init_f32_minmax_scalar_params);
@@ -33022,7 +33022,7 @@
       DWConvMicrokernelTester()
         .cr(1)
         .kr(25)
-        .channels(1)
+        .channels(channels)
         .width(5)
         .output_stride(7)
         .Test(xnn_f32_dwconv_minmax_ukernel_up1x25__wasm, xnn_init_f32_minmax_scalar_params);
@@ -33151,7 +33151,7 @@
       DWConvMicrokernelTester()
         .cr(1)
         .kr(25)
-        .channels(1)
+        .channels(channels)
         .width(5)
         .output_stride(7)
         .Test(xnn_f32_dwconv_minmax_ukernel_up1x25__wasm_acc2, xnn_init_f32_minmax_scalar_params);
@@ -33322,7 +33322,7 @@
       DWConvMicrokernelTester()
         .cr(2)
         .kr(3)
-        .channels(2)
+        .channels(channels)
         .width(5)
         .output_stride(13)
         .Test(xnn_f32_dwconv_minmax_ukernel_up2x3__wasm, xnn_init_f32_minmax_scalar_params);
@@ -33493,7 +33493,7 @@
       DWConvMicrokernelTester()
         .cr(2)
         .kr(3)
-        .channels(2)
+        .channels(channels)
         .width(5)
         .output_stride(13)
         .Test(xnn_f32_dwconv_minmax_ukernel_up2x3__wasm_acc2, xnn_init_f32_minmax_scalar_params);
@@ -33664,7 +33664,7 @@
       DWConvMicrokernelTester()
         .cr(2)
         .kr(4)
-        .channels(2)
+        .channels(channels)
         .width(5)
         .output_stride(13)
         .Test(xnn_f32_dwconv_minmax_ukernel_up2x4__wasm, xnn_init_f32_minmax_scalar_params);
@@ -33835,7 +33835,7 @@
       DWConvMicrokernelTester()
         .cr(2)
         .kr(4)
-        .channels(2)
+        .channels(channels)
         .width(5)
         .output_stride(13)
         .Test(xnn_f32_dwconv_minmax_ukernel_up2x4__wasm_acc2, xnn_init_f32_minmax_scalar_params);
@@ -34006,7 +34006,7 @@
       DWConvMicrokernelTester()
         .cr(2)
         .kr(9)
-        .channels(2)
+        .channels(channels)
         .width(5)
         .output_stride(13)
         .Test(xnn_f32_dwconv_minmax_ukernel_up2x9__wasm, xnn_init_f32_minmax_scalar_params);
@@ -34177,7 +34177,7 @@
       DWConvMicrokernelTester()
         .cr(2)
         .kr(9)
-        .channels(2)
+        .channels(channels)
         .width(5)
         .output_stride(13)
         .Test(xnn_f32_dwconv_minmax_ukernel_up2x9__wasm_acc2, xnn_init_f32_minmax_scalar_params);
@@ -34348,7 +34348,7 @@
       DWConvMicrokernelTester()
         .cr(2)
         .kr(25)
-        .channels(2)
+        .channels(channels)
         .width(5)
         .output_stride(13)
         .Test(xnn_f32_dwconv_minmax_ukernel_up2x25__wasm, xnn_init_f32_minmax_scalar_params);
@@ -34519,7 +34519,7 @@
       DWConvMicrokernelTester()
         .cr(2)
         .kr(25)
-        .channels(2)
+        .channels(channels)
         .width(5)
         .output_stride(13)
         .Test(xnn_f32_dwconv_minmax_ukernel_up2x25__wasm_acc2, xnn_init_f32_minmax_scalar_params);
@@ -34647,7 +34647,7 @@ TEST(F32_DWCONV_MINMAX_UP1X3__SCALAR, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(1)
       .kr(3)
-      .channels(1)
+      .channels(channels)
       .width(5)
       .output_stride(7)
       .Test(xnn_f32_dwconv_minmax_ukernel_up1x3__scalar, xnn_init_f32_minmax_scalar_params);
@@ -34773,7 +34773,7 @@ TEST(F32_DWCONV_MINMAX_UP1X3__SCALAR_ACC2, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(1)
       .kr(3)
-      .channels(1)
+      .channels(channels)
       .width(5)
       .output_stride(7)
       .Test(xnn_f32_dwconv_minmax_ukernel_up1x3__scalar_acc2, xnn_init_f32_minmax_scalar_params);
@@ -34899,7 +34899,7 @@ TEST(F32_DWCONV_MINMAX_UP1X4__SCALAR, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(1)
       .kr(4)
-      .channels(1)
+      .channels(channels)
       .width(5)
       .output_stride(7)
       .Test(xnn_f32_dwconv_minmax_ukernel_up1x4__scalar, xnn_init_f32_minmax_scalar_params);
@@ -35025,7 +35025,7 @@ TEST(F32_DWCONV_MINMAX_UP1X4__SCALAR_ACC2, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(1)
       .kr(4)
-      .channels(1)
+      .channels(channels)
       .width(5)
       .output_stride(7)
       .Test(xnn_f32_dwconv_minmax_ukernel_up1x4__scalar_acc2, xnn_init_f32_minmax_scalar_params);
@@ -35151,7 +35151,7 @@ TEST(F32_DWCONV_MINMAX_UP1X9__SCALAR, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(1)
       .kr(9)
-      .channels(1)
+      .channels(channels)
       .width(5)
       .output_stride(7)
       .Test(xnn_f32_dwconv_minmax_ukernel_up1x9__scalar, xnn_init_f32_minmax_scalar_params);
@@ -35277,7 +35277,7 @@ TEST(F32_DWCONV_MINMAX_UP1X9__SCALAR_ACC2, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(1)
       .kr(9)
-      .channels(1)
+      .channels(channels)
       .width(5)
       .output_stride(7)
       .Test(xnn_f32_dwconv_minmax_ukernel_up1x9__scalar_acc2, xnn_init_f32_minmax_scalar_params);
@@ -35403,7 +35403,7 @@ TEST(F32_DWCONV_MINMAX_UP1X25__SCALAR, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(1)
       .kr(25)
-      .channels(1)
+      .channels(channels)
       .width(5)
       .output_stride(7)
       .Test(xnn_f32_dwconv_minmax_ukernel_up1x25__scalar, xnn_init_f32_minmax_scalar_params);
@@ -35529,7 +35529,7 @@ TEST(F32_DWCONV_MINMAX_UP1X25__SCALAR_ACC2, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(1)
       .kr(25)
-      .channels(1)
+      .channels(channels)
       .width(5)
       .output_stride(7)
       .Test(xnn_f32_dwconv_minmax_ukernel_up1x25__scalar_acc2, xnn_init_f32_minmax_scalar_params);
@@ -35697,7 +35697,7 @@ TEST(F32_DWCONV_MINMAX_UP2X3__SCALAR, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(2)
       .kr(3)
-      .channels(2)
+      .channels(channels)
       .width(5)
       .output_stride(13)
       .Test(xnn_f32_dwconv_minmax_ukernel_up2x3__scalar, xnn_init_f32_minmax_scalar_params);
@@ -35865,7 +35865,7 @@ TEST(F32_DWCONV_MINMAX_UP2X3__SCALAR_ACC2, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(2)
       .kr(3)
-      .channels(2)
+      .channels(channels)
       .width(5)
       .output_stride(13)
       .Test(xnn_f32_dwconv_minmax_ukernel_up2x3__scalar_acc2, xnn_init_f32_minmax_scalar_params);
@@ -36033,7 +36033,7 @@ TEST(F32_DWCONV_MINMAX_UP2X4__SCALAR, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(2)
       .kr(4)
-      .channels(2)
+      .channels(channels)
       .width(5)
       .output_stride(13)
       .Test(xnn_f32_dwconv_minmax_ukernel_up2x4__scalar, xnn_init_f32_minmax_scalar_params);
@@ -36201,7 +36201,7 @@ TEST(F32_DWCONV_MINMAX_UP2X4__SCALAR_ACC2, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(2)
       .kr(4)
-      .channels(2)
+      .channels(channels)
       .width(5)
       .output_stride(13)
       .Test(xnn_f32_dwconv_minmax_ukernel_up2x4__scalar_acc2, xnn_init_f32_minmax_scalar_params);
@@ -36369,7 +36369,7 @@ TEST(F32_DWCONV_MINMAX_UP2X9__SCALAR, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(2)
       .kr(9)
-      .channels(2)
+      .channels(channels)
       .width(5)
       .output_stride(13)
       .Test(xnn_f32_dwconv_minmax_ukernel_up2x9__scalar, xnn_init_f32_minmax_scalar_params);
@@ -36537,7 +36537,7 @@ TEST(F32_DWCONV_MINMAX_UP2X9__SCALAR_ACC2, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(2)
       .kr(9)
-      .channels(2)
+      .channels(channels)
       .width(5)
       .output_stride(13)
       .Test(xnn_f32_dwconv_minmax_ukernel_up2x9__scalar_acc2, xnn_init_f32_minmax_scalar_params);
@@ -36705,7 +36705,7 @@ TEST(F32_DWCONV_MINMAX_UP2X25__SCALAR, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(2)
       .kr(25)
-      .channels(2)
+      .channels(channels)
       .width(5)
       .output_stride(13)
       .Test(xnn_f32_dwconv_minmax_ukernel_up2x25__scalar, xnn_init_f32_minmax_scalar_params);
@@ -36873,7 +36873,7 @@ TEST(F32_DWCONV_MINMAX_UP2X25__SCALAR_ACC2, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(2)
       .kr(25)
-      .channels(2)
+      .channels(channels)
       .width(5)
       .output_stride(13)
       .Test(xnn_f32_dwconv_minmax_ukernel_up2x25__scalar_acc2, xnn_init_f32_minmax_scalar_params);

@@ -144,7 +144,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up8x9__neon_mul8, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -358,7 +358,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(9)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up8x9__neon_mul16, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -572,7 +572,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mul8, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -786,7 +786,7 @@
       DWConvMicrokernelTester()
         .cr(8)
         .kr(25)
-        .channels(8)
+        .channels(channels)
         .width(5)
         .output_stride(43)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mul16, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -1000,7 +1000,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up16x9__neon_mul8, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -1214,7 +1214,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(9)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up16x9__neon_mul16, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -1428,7 +1428,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up16x25__neon_mul8, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -1642,7 +1642,7 @@
       DWConvMicrokernelTester()
         .cr(16)
         .kr(25)
-        .channels(16)
+        .channels(channels)
         .width(5)
         .output_stride(83)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up16x25__neon_mul16, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -1856,7 +1856,7 @@
       DWConvMicrokernelTester()
         .cr(24)
         .kr(9)
-        .channels(24)
+        .channels(channels)
         .width(5)
         .output_stride(127)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up24x9__neon_mul8, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -2070,7 +2070,7 @@
       DWConvMicrokernelTester()
         .cr(24)
         .kr(9)
-        .channels(24)
+        .channels(channels)
         .width(5)
         .output_stride(127)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up24x9__neon_mul16, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -2284,7 +2284,7 @@
       DWConvMicrokernelTester()
         .cr(24)
         .kr(25)
-        .channels(24)
+        .channels(channels)
         .width(5)
         .output_stride(127)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up24x25__neon_mul8, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -2498,7 +2498,7 @@
       DWConvMicrokernelTester()
         .cr(24)
         .kr(25)
-        .channels(24)
+        .channels(channels)
         .width(5)
         .output_stride(127)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up24x25__neon_mul16, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -2712,7 +2712,7 @@
       DWConvMicrokernelTester()
         .cr(32)
         .kr(9)
-        .channels(32)
+        .channels(channels)
         .width(5)
         .output_stride(163)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up32x9__neon_mul8, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -2926,7 +2926,7 @@
       DWConvMicrokernelTester()
         .cr(32)
         .kr(9)
-        .channels(32)
+        .channels(channels)
         .width(5)
         .output_stride(163)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up32x9__neon_mul16, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -3140,7 +3140,7 @@
       DWConvMicrokernelTester()
         .cr(32)
         .kr(25)
-        .channels(32)
+        .channels(channels)
         .width(5)
         .output_stride(163)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up32x25__neon_mul8, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -3354,7 +3354,7 @@
       DWConvMicrokernelTester()
         .cr(32)
         .kr(25)
-        .channels(32)
+        .channels(channels)
         .width(5)
         .output_stride(163)
         .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up32x25__neon_mul16, xnn_init_qu8_conv_minmax_rndnu_neon_params, xnn_qu8_requantize_rndnu);
@@ -3514,7 +3514,7 @@ TEST(QU8_DWCONV_MINMAX_RNDNU_UP1X9__SCALAR, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(1)
       .kr(9)
-      .channels(1)
+      .channels(channels)
       .width(5)
       .output_stride(7)
       .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up1x9__scalar, xnn_init_qu8_conv_minmax_rndnu_scalar_params, xnn_qu8_requantize_rndnu);
@@ -3708,7 +3708,7 @@ TEST(QU8_DWCONV_MINMAX_RNDNU_UP2X9__SCALAR, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(2)
       .kr(9)
-      .channels(2)
+      .channels(channels)
       .width(5)
       .output_stride(13)
       .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up2x9__scalar, xnn_init_qu8_conv_minmax_rndnu_scalar_params, xnn_qu8_requantize_rndnu);
@@ -3902,7 +3902,7 @@ TEST(QU8_DWCONV_MINMAX_RNDNU_UP4X9__SCALAR, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(4)
       .kr(9)
-      .channels(4)
+      .channels(channels)
       .width(5)
       .output_stride(23)
       .Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_up4x9__scalar, xnn_init_qu8_conv_minmax_rndnu_scalar_params, xnn_qu8_requantize_rndnu);

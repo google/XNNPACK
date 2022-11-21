@@ -196,7 +196,7 @@ TEST(${TEST_NAME}, multipixel_with_output_stride) {
     DWConvMicrokernelTester()
       .cr(${CR})
       .kr(${KR})
-      .channels(${CR})
+      .channels(channels)
       .width(5)
       .output_stride(${next_prime(CR * 5 + 1)})
       .Test(${", ".join(TEST_ARGS)});
