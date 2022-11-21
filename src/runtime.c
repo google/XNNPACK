@@ -591,6 +591,8 @@ enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
         if (opdata[i].operator_objects[0] != NULL) {
           const char* op_name = xnn_operator_type_to_string(opdata[i].operator_objects[0]->type);
           size_t op_name_len = strlen(op_name) + 1;
+          // Adding length of prefix "XNNPackDelegate/".
+          op_name_len += 16;
           if (opdata[i].operator_objects[0]->ukernel.type != xnn_ukernel_type_default ) {
             op_name_len += strlen(xnn_ukernel_type_to_string(opdata[i].operator_objects[0]->ukernel.type)) + 1;
           }
@@ -606,12 +608,14 @@ enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
           if (opdata[i].operator_objects[0] != NULL) {
             const char* op_name = xnn_operator_type_to_string(opdata[i].operator_objects[0]->type);
             size_t op_name_len = strlen(op_name) + 1;
+            // Adding length of prefix "XNNPackDelegate/".
+            op_name_len += 16;
             if (opdata[i].operator_objects[0]->ukernel.type != xnn_ukernel_type_default ) {
               const char* ukernel_type = xnn_ukernel_type_to_string(opdata[i].operator_objects[0]->ukernel.type);
               op_name_len += strlen(ukernel_type) + 1;
-              snprintf(name_out, op_name_len, "%s %s", op_name, ukernel_type);
+              snprintf(name_out, op_name_len, "XNNPackDelegate/%s %s", op_name, ukernel_type);
             } else {
-              snprintf(name_out, op_name_len, "%s", op_name);
+              snprintf(name_out, op_name_len, "XNNPackDelegate/%s", op_name);
             }
             name_out += op_name_len;
           }
