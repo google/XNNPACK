@@ -11,6 +11,7 @@
 
 #include <arm_neon.h>
 
+#include <xnnpack/prefetch.h>
 #include <xnnpack/spmm.h>
 
 
@@ -57,7 +58,9 @@ void xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith(
           const intptr_t diff = *dmap++;
           const float16x8_t va01234567 = vreinterpretq_f16_u16(vld1q_u16(i));
           i = (const uint16_t*restrict) ((uintptr_t) i + (uintptr_t) diff);
+          xnn_prefetch_to_l1(i + 32);
           const float16x8_t vb = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
+          xnn_prefetch_to_l1(w + 32);
           vacc01234567 = vfmaq_f16(vacc01234567, va01234567, vb);
         } while (--nnz != 0);
       }

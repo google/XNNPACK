@@ -9,6 +9,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <arm_neon.h>
 
+#include <xnnpack/prefetch.h>
 #include <xnnpack/spmm.h>
 
 
@@ -66,7 +67,10 @@ void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_x%d" % UNROLL if 
             $for M in range(8, MR, 8):
               const float16x8_t va${ABC[M:M+8]}x${K} = vreinterpretq_f16_u16(vld1q_u16(i + ${M}));
             i = (const uint16_t*restrict) ((uintptr_t) i + (uintptr_t) diff${K});
+            $for M in range(0, MR, 32):
+              xnn_prefetch_to_l1(i + ${M+32});
             const float16x8_t vb${K} = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
+            xnn_prefetch_to_l1(w + 64);
             $for M in range(0, MR, 8):
               vacc${ABC[M:M+8]}x${K} = vfmaq_f16(vacc${ABC[M:M+8]}x${K}, va${ABC[M:M+8]}x${K}, vb${K});
         }
@@ -86,7 +90,10 @@ void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_x%d" % UNROLL if 
           $for M in range(8, MR, 8):
             const float16x8_t va${ABC[M:M+8]} = vreinterpretq_f16_u16(vld1q_u16(i + ${M}));
           i = (const uint16_t*restrict) ((uintptr_t) i + (uintptr_t) diff);
+          $for M in range(0, MR, 32):
+            xnn_prefetch_to_l1(i + ${M+32});
           const float16x8_t vb = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
+          xnn_prefetch_to_l1(w + 32);
           $for M in range(0, MR, 8):
             vacc${ABC[M:M+8]} = vfmaq_f16(vacc${ABC[M:M+8]}, va${ABC[M:M+8]}, vb);
         } while (--nnz != 0);

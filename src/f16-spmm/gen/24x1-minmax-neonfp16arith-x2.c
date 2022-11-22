@@ -11,6 +11,7 @@
 
 #include <arm_neon.h>
 
+#include <xnnpack/prefetch.h>
 #include <xnnpack/spmm.h>
 
 
@@ -65,7 +66,9 @@ void xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2(
         const float16x8_t va89ABCDEFx0 = vreinterpretq_f16_u16(vld1q_u16(i + 8));
         const float16x8_t vaGHIJKLMNx0 = vreinterpretq_f16_u16(vld1q_u16(i + 16));
         i = (const uint16_t*restrict) ((uintptr_t) i + (uintptr_t) diff0);
+        xnn_prefetch_to_l1(i + 32);
         const float16x8_t vb0 = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
+        xnn_prefetch_to_l1(w + 64);
         vacc01234567x0 = vfmaq_f16(vacc01234567x0, va01234567x0, vb0);
         vacc89ABCDEFx0 = vfmaq_f16(vacc89ABCDEFx0, va89ABCDEFx0, vb0);
         vaccGHIJKLMNx0 = vfmaq_f16(vaccGHIJKLMNx0, vaGHIJKLMNx0, vb0);
@@ -73,7 +76,9 @@ void xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2(
         const float16x8_t va89ABCDEFx1 = vreinterpretq_f16_u16(vld1q_u16(i + 8));
         const float16x8_t vaGHIJKLMNx1 = vreinterpretq_f16_u16(vld1q_u16(i + 16));
         i = (const uint16_t*restrict) ((uintptr_t) i + (uintptr_t) diff1);
+        xnn_prefetch_to_l1(i + 32);
         const float16x8_t vb1 = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
+        xnn_prefetch_to_l1(w + 64);
         vacc01234567x1 = vfmaq_f16(vacc01234567x1, va01234567x1, vb1);
         vacc89ABCDEFx1 = vfmaq_f16(vacc89ABCDEFx1, va89ABCDEFx1, vb1);
         vaccGHIJKLMNx1 = vfmaq_f16(vaccGHIJKLMNx1, vaGHIJKLMNx1, vb1);
@@ -91,7 +96,9 @@ void xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2(
           const float16x8_t va89ABCDEF = vreinterpretq_f16_u16(vld1q_u16(i + 8));
           const float16x8_t vaGHIJKLMN = vreinterpretq_f16_u16(vld1q_u16(i + 16));
           i = (const uint16_t*restrict) ((uintptr_t) i + (uintptr_t) diff);
+          xnn_prefetch_to_l1(i + 32);
           const float16x8_t vb = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
+          xnn_prefetch_to_l1(w + 32);
           vacc01234567 = vfmaq_f16(vacc01234567, va01234567, vb);
           vacc89ABCDEF = vfmaq_f16(vacc89ABCDEF, va89ABCDEF, vb);
           vaccGHIJKLMN = vfmaq_f16(vaccGHIJKLMN, vaGHIJKLMN, vb);
