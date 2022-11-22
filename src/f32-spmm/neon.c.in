@@ -18,11 +18,11 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}${"_x" + str(UNROLL) if UNROLL > 1 else ""}(
     size_t mc,
     size_t nc,
-    const float*restrict input,
-    const float*restrict weights,
-    const int32_t*restrict widx_dmap,
-    const uint32_t*restrict nidx_nnzmap,
-    float*restrict output,
+    const float* input,
+    const float* weights,
+    const int32_t* widx_dmap,
+    const uint32_t* nidx_nnzmap,
+    float* output,
     size_t output_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
@@ -42,7 +42,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}${"
 
   size_t output_decrement = output_stride * nc - ${MR} * sizeof(float);
   while XNN_LIKELY(mc >= ${MR} * sizeof(float)) {
-    const float*restrict w = weights;
+    const float* w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
     size_t n = nc;
@@ -117,7 +117,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}${"
       $else:
         output_decrement += ${SUBMR} * sizeof(float);
       if (mc & (${SUBMR} * sizeof(float))) {
-        const float*restrict w = weights;
+        const float* w = weights;
         const int32_t* dmap = widx_dmap;
         const uint32_t* nnzmap = nidx_nnzmap;
         size_t n = nc;

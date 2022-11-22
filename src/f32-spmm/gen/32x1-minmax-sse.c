@@ -17,11 +17,11 @@
 void xnn_f32_spmm_minmax_ukernel_32x1__sse(
     size_t mc,
     size_t nc,
-    const float*restrict input,
-    const float*restrict weights,
-    const int32_t*restrict widx_dmap,
-    const uint32_t*restrict nidx_nnzmap,
-    float*restrict output,
+    const float* input,
+    const float* weights,
+    const int32_t* widx_dmap,
+    const uint32_t* nidx_nnzmap,
+    float* output,
     size_t output_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
@@ -33,7 +33,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__sse(
   const __m128 vmax = _mm_load_ps(params->sse.max);
   size_t output_decrement = output_stride * nc - 32 * sizeof(float);
   while XNN_LIKELY(mc >= 32 * sizeof(float)) {
-    const float*restrict w = weights;
+    const float* w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
     size_t n = nc;
@@ -103,7 +103,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__sse(
   if XNN_UNLIKELY(mc != 0) {
     output_decrement += 16 * sizeof(float);
     if (mc & (16 * sizeof(float))) {
-      const float*restrict w = weights;
+      const float* w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       size_t n = nc;
@@ -147,7 +147,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__sse(
     }
     output_decrement += 8 * sizeof(float);
     if (mc & (8 * sizeof(float))) {
-      const float*restrict w = weights;
+      const float* w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       size_t n = nc;
@@ -179,7 +179,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__sse(
     }
     output_decrement += 4 * sizeof(float);
     if (mc & (4 * sizeof(float))) {
-      const float*restrict w = weights;
+      const float* w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       size_t n = nc;
@@ -205,7 +205,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__sse(
     }
     output_decrement += 2 * sizeof(float);
     if (mc & (2 * sizeof(float))) {
-      const float*restrict w = weights;
+      const float* w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       size_t n = nc;
@@ -233,7 +233,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__sse(
     }
     output_decrement += 1 * sizeof(float);
     if (mc & (1 * sizeof(float))) {
-      const float*restrict w = weights;
+      const float* w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       size_t n = nc;

@@ -16,11 +16,11 @@
 void xnn_f32_spmm_minmax_ukernel_2x1__scalar(
     size_t mc,
     size_t nc,
-    const float*restrict input,
-    const float*restrict weights,
-    const int32_t*restrict widx_dmap,
-    const uint32_t*restrict nidx_nnzmap,
-    float*restrict output,
+    const float* input,
+    const float* weights,
+    const int32_t* widx_dmap,
+    const uint32_t* nidx_nnzmap,
+    float* output,
     size_t output_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
@@ -32,7 +32,7 @@ void xnn_f32_spmm_minmax_ukernel_2x1__scalar(
   const float vmax = params->scalar.max;
   size_t output_decrement = output_stride * nc - 2 * sizeof(float);
   while (mc >= 2 * sizeof(float)) {
-    const float*restrict w = weights;
+    const float* w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
     size_t n = nc;
@@ -95,7 +95,7 @@ void xnn_f32_spmm_minmax_ukernel_2x1__scalar(
   if XNN_UNLIKELY(mc != 0) {
     output_decrement += 1 * sizeof(float);
     if (mc & (1 * sizeof(float))) {
-      const float*restrict w = weights;
+      const float* w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       size_t n = nc;
