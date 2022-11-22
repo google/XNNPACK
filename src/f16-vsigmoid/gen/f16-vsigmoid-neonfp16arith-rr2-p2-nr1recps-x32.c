@@ -193,7 +193,7 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x32(
       vf_lo = vget_high_f16(vf);
     }
     if (batch & (2 * sizeof(uint16_t))) {
-      vst1_u16(o, vreinterpret_u16_f16(vf_lo)); o += 2;
+      vst1_lane_u32((void*) o, vreinterpret_u32_f16(vf_lo), 0); o += 2;
       vf_lo = vext_f16(vf_lo, vf_lo, 2);
     }
     if (batch & (1 * sizeof(uint16_t))) {

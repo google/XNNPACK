@@ -133,7 +133,7 @@ void GemmMicrokernelTester::Test(
   std::vector<uint8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
   std::vector<uint8_t> c_ref(m() * n());
-  std::vector<uint8_t> junk(k() + 8);
+  std::vector<uint8_t> junk(k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::vector<const uint8_t*> im2col(mr() * ks());
 
   std::fill(junk.begin(), junk.end(), 0xA5);
@@ -378,7 +378,7 @@ void GemmMicrokernelTester::Test(
   std::vector<int32_t> acc(m() * n());
   std::vector<float> scale(n());
   std::vector<int8_t> c_ref(m() * n());
-  std::vector<int8_t> junk(k() + 8);
+  std::vector<int8_t> junk(k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::vector<const int8_t*> im2col(mr() * ks());
 
   std::fill(junk.begin(), junk.end(), 0xA5);
@@ -607,14 +607,14 @@ void GemmMicrokernelTester::Test(
     std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()),
     std::ref(rng));
 
-  std::vector<int8_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  std::vector<int8_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::vector<int8_t> b(n() * ks() * k());
   std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(ks() * packed_n() * packed_k() + packed_n() * sizeof(int32_t) / sizeof(int8_t));
   std::vector<int32_t> bias(n());
   std::vector<int8_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
   std::vector<int8_t> c_ref(m() * n());
-  std::vector<int8_t> junk(k() + 8);
+  std::vector<int8_t> junk(k() + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::vector<const int8_t*> im2col(mr() * ks());
 
   std::fill(junk.begin(), junk.end(), 0xA5);
