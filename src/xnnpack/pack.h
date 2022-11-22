@@ -455,7 +455,6 @@ XNN_INTERNAL void xnn_pack_qu8_deconv_goki_w(
   struct subconvolution_params* subconv_params,
   const struct xnn_qu8_packing_params* params);
 
-
 // Pack weights and bias such that:
 // 1. Each block contains `cr` bias and `cr * h * w` weights.
 // 2. Within each "cr block", `cr` biases are at the beginning of the block.
@@ -607,6 +606,42 @@ XNN_INTERNAL void xnn_pack_qs8_dwconv_hwg_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params);
 
+// Multipass dwconv packing functions.
+// Pack weights and bias such that:
+// 1. First block has biases and first_pass_tile weights
+// 2. Within this block, we have c/cr biases, then weights, then remainder cr.
+// 3. Second block has middle_pass_tile weights.
+// 4. Last block has last_pass_tile weights.
+
+// Weights layout is channels/(g)roups, (h)eight, (w)idth.
+XNN_INTERNAL void xnn_pack_f32_multipass_dwconv_ghw_w(
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t cr,
+  const float* k,
+  const float* b,
+  float* packed_weights,
+  size_t extra_bytes,
+  const void* params);
+
+// Weights layout is (h)eight, (w)idth, channels/(g)roups.
+XNN_INTERNAL void xnn_pack_f32_multipass_dwconv_hwg_w(
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t cr,
+  const float* k,
+  const float* b,
+  float* packed_weights,
+  size_t extra_bytes,
+  const void* params);
 
 XNN_INTERNAL void xnn_pack_f32_gemminc_goi_w(
   size_t g,
