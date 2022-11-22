@@ -27,7 +27,7 @@ $_MM256_MIN_EPX8 = "_mm256_min_epu8" if DATATYPE == "QU8" else "_mm256_min_epi8"
 $_MM256_MAX_EPX8 = "_mm256_max_epu8" if DATATYPE == "QU8" else "_mm256_max_epi8"
 $_MM_MIN_EPX8 = "_mm_min_epu8" if DATATYPE == "QU8" else "_mm_min_epi8"
 $_MM_MAX_EPX8 = "_mm_max_epu8" if DATATYPE == "QU8" else "_mm_max_epi8"
-void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__avx512skx_mul32(
+void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__avx512skx_mul32(
     size_t channels,
     size_t output_width,
     const ${XINT8_T}** input,

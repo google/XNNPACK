@@ -4,42 +4,42 @@
 # LICENSE file in the root directory of this source tree.
 
 # ARM NEON
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up8x9__neon_mul8
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p8c__neon_mul8
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up8x9__neon_mul16
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p8c__neon_mul16
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mul8
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_25p8c__neon_mul8
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up8x25__neon_mul16
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_25p8c__neon_mul16
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up16x9__neon_mul8
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p16c__neon_mul8
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up16x9__neon_mul16
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p16c__neon_mul16
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up16x25__neon_mul8
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_25p16c__neon_mul8
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up16x25__neon_mul16
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_25p16c__neon_mul16
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up24x9__neon_mul8
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p24c__neon_mul8
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up24x9__neon_mul16
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p24c__neon_mul16
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up24x25__neon_mul8
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_25p24c__neon_mul8
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up24x25__neon_mul16
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_25p24c__neon_mul16
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up32x9__neon_mul8
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p32c__neon_mul8
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up32x9__neon_mul16
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p32c__neon_mul16
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up32x25__neon_mul8
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_25p32c__neon_mul8
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up32x25__neon_mul16
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_25p32c__neon_mul16
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
 # Scalar
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up1x9__scalar
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p1c__scalar
   init: xnn_init_qu8_conv_minmax_rndnu_scalar_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up2x9__scalar
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p2c__scalar
   init: xnn_init_qu8_conv_minmax_rndnu_scalar_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_up4x9__scalar
+- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p4c__scalar
   init: xnn_init_qu8_conv_minmax_rndnu_scalar_params

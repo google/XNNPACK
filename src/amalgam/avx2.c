@@ -2291,7 +2291,7 @@ void xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_div_x40(
   }
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
+void xnn_qc8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -2897,7 +2897,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
   } while (--output_width != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x3__avx2_mul32(
+void xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__avx2_mul32(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -3063,7 +3063,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x3__avx2_mul32(
   } while (--output_width != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__avx2_mul32(
+void xnn_qc8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -4041,7 +4041,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_3x8c8__avx2(
   } while (nc != 0);
 }
 
-void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
+void xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -4644,7 +4644,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
   } while (--output_width != 0);
 }
 
-void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__avx2_mul32(
+void xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -6034,7 +6034,7 @@ void xnn_qs8_vlrelu_ukernel__avx2_x32(
   }
 }
 
-void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
+void xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32(
     size_t channels,
     size_t output_width,
     const uint8_t** input,
@@ -6638,7 +6638,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__avx2_mul32(
   } while (--output_width != 0);
 }
 
-void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__avx2_mul32(
+void xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
     size_t channels,
     size_t output_width,
     const uint8_t** input,

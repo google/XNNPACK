@@ -22,7 +22,7 @@ $PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${"wasm" if WASM else "scalar"}${"_" + VARIANT.lower() if VARIANT else ""}(
+void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__${"wasm" if WASM else "scalar"}${"_" + VARIANT.lower() if VARIANT else ""}(
     size_t channels,
     size_t output_width,
     const ${XINT8_T}** input,

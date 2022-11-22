@@ -19,7 +19,7 @@ $assert KERNEL_TILE >= 2
 
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx2"
 $PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
-void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__avx2_mul16_vpmovsx(
+void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__avx2_mul16_vpmovsx(
     size_t channels,
     size_t output_width,
     const int8_t** input,

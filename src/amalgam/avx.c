@@ -4743,7 +4743,7 @@ void xnn_f32_vsqr_ukernel__avx_x16(
   }
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__avx_mul16_add16(
+void xnn_qc8_dwconv_minmax_fp32_ukernel_25p16c__avx_mul16_add16(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -5701,7 +5701,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x25__avx_mul16_add16(
   } while (--output_width != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x3__avx_mul16_add16(
+void xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__avx_mul16_add16(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -5933,7 +5933,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x3__avx_mul16_add16(
   } while (--output_width != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_up16x9__avx_mul16_add16(
+void xnn_qc8_dwconv_minmax_fp32_ukernel_9p16c__avx_mul16_add16(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -6856,7 +6856,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_2x4c8__avx_ld128(
   } while (nc != 0);
 }
 
-void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x25__avx_mul16_add16(
+void xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx_mul16_add16(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -7809,7 +7809,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x25__avx_mul16_add16(
   } while (--output_width != 0);
 }
 
-void xnn_qs8_dwconv_minmax_fp32_ukernel_up16x9__avx_mul16_add16(
+void xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx_mul16_add16(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -9413,7 +9413,7 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_x16(
   }
 }
 
-void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__avx_mul16(
+void xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__avx_mul16(
     size_t channels,
     size_t output_width,
     const uint8_t** input,
@@ -10512,7 +10512,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x25__avx_mul16(
   } while (--output_width != 0);
 }
 
-void xnn_qu8_dwconv_minmax_fp32_ukernel_up16x9__avx_mul16(
+void xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx_mul16(
     size_t channels,
     size_t output_width,
     const uint8_t** input,

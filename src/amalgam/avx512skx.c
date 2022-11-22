@@ -320,7 +320,7 @@ void xnn_f32_qu8_vcvt_ukernel__avx512skx_x128(
   }
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x25__avx512skx_mul32(
+void xnn_qc8_dwconv_minmax_fp32_ukernel_25p32c__avx512skx_mul32(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -926,7 +926,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x25__avx512skx_mul32(
   } while (--output_width != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x3__avx512skx_mul32(
+void xnn_qc8_dwconv_minmax_fp32_ukernel_3p32c__avx512skx_mul32(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -1092,7 +1092,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x3__avx512skx_mul32(
   } while (--output_width != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_up32x9__avx512skx_mul32(
+void xnn_qc8_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -1971,7 +1971,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_4x16c8__avx512skx(
   } while (nc != 0);
 }
 
-void xnn_qs8_dwconv_minmax_fp32_ukernel_up32x25__avx512skx_mul32(
+void xnn_qs8_dwconv_minmax_fp32_ukernel_25p32c__avx512skx_mul32(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -2574,7 +2574,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_up32x25__avx512skx_mul32(
   } while (--output_width != 0);
 }
 
-void xnn_qs8_dwconv_minmax_fp32_ukernel_up32x9__avx512skx_mul32(
+void xnn_qs8_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -3627,7 +3627,7 @@ void xnn_qs8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x16(
   }
 }
 
-void xnn_qu8_dwconv_minmax_fp32_ukernel_up32x25__avx512skx_mul32(
+void xnn_qu8_dwconv_minmax_fp32_ukernel_25p32c__avx512skx_mul32(
     size_t channels,
     size_t output_width,
     const uint8_t** input,
@@ -4231,7 +4231,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_up32x25__avx512skx_mul32(
   } while (--output_width != 0);
 }
 
-void xnn_qu8_dwconv_minmax_fp32_ukernel_up32x9__avx512skx_mul32(
+void xnn_qu8_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32(
     size_t channels,
     size_t output_width,
     const uint8_t** input,

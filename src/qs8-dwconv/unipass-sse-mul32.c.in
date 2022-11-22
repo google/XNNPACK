@@ -33,7 +33,7 @@ $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("sse2" if DATATYPE == "QU8" els
 $PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $ISA = "xop" if XOP else "avx" if AVX else {4: "sse41"}[SSE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__${ISA}_mul32(
+void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__${ISA}_mul32(
     size_t channels,
     size_t output_width,
     const ${XINT8_T}** input,

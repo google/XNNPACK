@@ -16,7 +16,7 @@ $assert KERNEL_TILE >= 2
 #include <xnnpack/dwconv.h>
 
 
-void xnn_qu8_dwconv_minmax_rndnu_ukernel_up${CHANNEL_TILE}x${KERNEL_TILE}__neon_mul8(
+void xnn_qu8_dwconv_minmax_rndnu_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__neon_mul8(
     size_t channels,
     size_t output_width,
     const uint8_t** input,
