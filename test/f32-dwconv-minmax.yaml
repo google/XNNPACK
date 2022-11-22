@@ -20,30 +20,6 @@
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p4c__neonfma_acc2
   init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p4c__neon
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p4c__neon_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p4c__neonfma
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p4c__neonfma_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__neon
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__neon_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__neonfma
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__neonfma_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p4c__neon
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p4c__neon_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p4c__neonfma
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p4c__neonfma_acc2
-  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__neon
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__neon_acc2
@@ -51,30 +27,6 @@
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__neonfma
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__neonfma_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p8c__neon
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p8c__neon_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p8c__neonfma
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p8c__neonfma_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p8c__neon
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p8c__neon_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p8c__neonfma
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p8c__neonfma_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p8c__neon
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p8c__neon_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p8c__neonfma
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p8c__neonfma_acc2
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p16c__neon
   init: xnn_init_f32_minmax_scalar_params
@@ -84,6 +36,22 @@
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p16c__neonfma_acc2
   init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p4c__neon
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p4c__neon_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p4c__neonfma
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p4c__neonfma_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p8c__neon
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p8c__neon_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p8c__neonfma
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p8c__neonfma_acc2
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p16c__neon
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p16c__neon_acc2
@@ -92,6 +60,22 @@
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p16c__neonfma_acc2
   init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__neon
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__neon_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__neonfma
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__neonfma_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p8c__neon
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p8c__neon_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p8c__neonfma
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p8c__neonfma_acc2
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p16c__neon
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p16c__neon_acc2
@@ -99,6 +83,22 @@
 - name: xnn_f32_dwconv_minmax_ukernel_9p16c__neonfma
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p16c__neonfma_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p4c__neon
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p4c__neon_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p4c__neonfma
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p4c__neonfma_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p8c__neon
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p8c__neon_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p8c__neonfma
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p8c__neonfma_acc2
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_25p16c__neon
   init: xnn_init_f32_minmax_scalar_params
@@ -113,29 +113,29 @@
   init: xnn_init_f32_minmax_sse_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p4c__sse_acc2
   init: xnn_init_f32_minmax_sse_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p4c__sse
-  init: xnn_init_f32_minmax_sse_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p4c__sse_acc2
-  init: xnn_init_f32_minmax_sse_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__sse
-  init: xnn_init_f32_minmax_sse_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__sse_acc2
-  init: xnn_init_f32_minmax_sse_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p4c__sse
-  init: xnn_init_f32_minmax_sse_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p4c__sse_acc2
-  init: xnn_init_f32_minmax_sse_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__sse
   init: xnn_init_f32_minmax_sse_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__sse_acc2
+  init: xnn_init_f32_minmax_sse_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p4c__sse
+  init: xnn_init_f32_minmax_sse_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p4c__sse_acc2
   init: xnn_init_f32_minmax_sse_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p8c__sse
   init: xnn_init_f32_minmax_sse_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p8c__sse_acc2
   init: xnn_init_f32_minmax_sse_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__sse
+  init: xnn_init_f32_minmax_sse_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__sse_acc2
+  init: xnn_init_f32_minmax_sse_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p8c__sse
   init: xnn_init_f32_minmax_sse_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p8c__sse_acc2
+  init: xnn_init_f32_minmax_sse_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p4c__sse
+  init: xnn_init_f32_minmax_sse_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p4c__sse_acc2
   init: xnn_init_f32_minmax_sse_params
 - name: xnn_f32_dwconv_minmax_ukernel_25p8c__sse
   init: xnn_init_f32_minmax_sse_params
@@ -146,29 +146,29 @@
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__avx_acc2
   init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p8c__avx
-  init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p8c__avx_acc2
-  init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p8c__avx
-  init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p8c__avx_acc2
-  init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p8c__avx
-  init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p8c__avx_acc2
-  init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p16c__avx
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p16c__avx_acc2
+  init: xnn_init_f32_minmax_avx_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p8c__avx
+  init: xnn_init_f32_minmax_avx_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p8c__avx_acc2
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p16c__avx
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p16c__avx_acc2
   init: xnn_init_f32_minmax_avx_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p8c__avx
+  init: xnn_init_f32_minmax_avx_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p8c__avx_acc2
+  init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p16c__avx
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p16c__avx_acc2
+  init: xnn_init_f32_minmax_avx_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p8c__avx
+  init: xnn_init_f32_minmax_avx_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p8c__avx_acc2
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_25p16c__avx
   init: xnn_init_f32_minmax_avx_params
@@ -179,29 +179,29 @@
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__fma3_acc2
   init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p8c__fma3
-  init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p8c__fma3_acc2
-  init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p8c__fma3
-  init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p8c__fma3_acc2
-  init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p8c__fma3
-  init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p8c__fma3_acc2
-  init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p16c__fma3
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p16c__fma3_acc2
+  init: xnn_init_f32_minmax_avx_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p8c__fma3
+  init: xnn_init_f32_minmax_avx_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p8c__fma3_acc2
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p16c__fma3
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p16c__fma3_acc2
   init: xnn_init_f32_minmax_avx_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p8c__fma3
+  init: xnn_init_f32_minmax_avx_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p8c__fma3_acc2
+  init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p16c__fma3
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p16c__fma3_acc2
+  init: xnn_init_f32_minmax_avx_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p8c__fma3
+  init: xnn_init_f32_minmax_avx_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p8c__fma3_acc2
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_25p16c__fma3
   init: xnn_init_f32_minmax_avx_params
@@ -212,29 +212,29 @@
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p16c__avx512f_acc2
   init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p16c__avx512f
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p16c__avx512f_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p16c__avx512f
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p16c__avx512f_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p16c__avx512f
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p16c__avx512f_acc2
-  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p32c__avx512f
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p32c__avx512f_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p16c__avx512f
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p16c__avx512f_acc2
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p32c__avx512f
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p32c__avx512f_acc2
   init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p16c__avx512f
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p16c__avx512f_acc2
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p32c__avx512f
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p32c__avx512f_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p16c__avx512f
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p16c__avx512f_acc2
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_25p32c__avx512f
   init: xnn_init_f32_minmax_scalar_params
@@ -249,30 +249,6 @@
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p4c__wasmsimd_x86_acc2
   init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmsimd_arm
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmsimd_arm_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmsimd_x86
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmsimd_x86_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmsimd_arm
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmsimd_arm_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmsimd_x86
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmsimd_x86_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_arm
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_arm_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_x86
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_x86_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__wasmsimd_arm
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__wasmsimd_arm_acc2
@@ -280,6 +256,14 @@
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__wasmsimd_x86
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__wasmsimd_x86_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmsimd_arm
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmsimd_arm_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmsimd_x86
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmsimd_x86_acc2
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p8c__wasmsimd_arm
   init: xnn_init_f32_minmax_wasmsimd_params
@@ -289,6 +273,14 @@
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p8c__wasmsimd_x86_acc2
   init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmsimd_arm
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmsimd_arm_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmsimd_x86
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmsimd_x86_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p8c__wasmsimd_arm
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p8c__wasmsimd_arm_acc2
@@ -296,6 +288,14 @@
 - name: xnn_f32_dwconv_minmax_ukernel_9p8c__wasmsimd_x86
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p8c__wasmsimd_x86_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_arm
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_arm_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_x86
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_x86_acc2
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_arm
   init: xnn_init_f32_minmax_wasmsimd_params
@@ -314,30 +314,6 @@
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p4c__wasmrelaxedsimd_fma_acc2
   init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmrelaxedsimd
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmrelaxedsimd_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmrelaxedsimd_fma
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmrelaxedsimd_fma_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmrelaxedsimd
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmrelaxedsimd_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmrelaxedsimd_fma
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmrelaxedsimd_fma_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_fma
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_fma_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__wasmrelaxedsimd
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__wasmrelaxedsimd_acc2
@@ -345,6 +321,14 @@
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__wasmrelaxedsimd_fma
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p8c__wasmrelaxedsimd_fma_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmrelaxedsimd
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmrelaxedsimd_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p4c__wasmrelaxedsimd_fma_acc2
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p8c__wasmrelaxedsimd
   init: xnn_init_f32_minmax_wasmsimd_params
@@ -354,6 +338,14 @@
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p8c__wasmrelaxedsimd_fma_acc2
   init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmrelaxedsimd
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmrelaxedsimd_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__wasmrelaxedsimd_fma_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p8c__wasmrelaxedsimd
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p8c__wasmrelaxedsimd_acc2
@@ -361,6 +353,14 @@
 - name: xnn_f32_dwconv_minmax_ukernel_9p8c__wasmrelaxedsimd_fma
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p8c__wasmrelaxedsimd_fma_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_acc2
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_fma
+  init: xnn_init_f32_minmax_wasmsimd_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_fma_acc2
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd
   init: xnn_init_f32_minmax_wasmsimd_params
@@ -375,29 +375,29 @@
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p1c__wasm_acc2
   init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p1c__wasm
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p1c__wasm_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p1c__wasm
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p1c__wasm_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p1c__wasm
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p1c__wasm_acc2
-  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p2c__wasm
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p2c__wasm_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p1c__wasm
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p1c__wasm_acc2
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p2c__wasm
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p2c__wasm_acc2
   init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p1c__wasm
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p1c__wasm_acc2
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p2c__wasm
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p2c__wasm_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p1c__wasm
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p1c__wasm_acc2
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_25p2c__wasm
   init: xnn_init_f32_minmax_scalar_params
@@ -408,29 +408,29 @@
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p1c__scalar_acc2
   init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p1c__scalar
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_4p1c__scalar_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p1c__scalar
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_9p1c__scalar_acc2
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p1c__scalar
-  init: xnn_init_f32_minmax_scalar_params
-- name: xnn_f32_dwconv_minmax_ukernel_25p1c__scalar_acc2
-  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p2c__scalar
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_3p2c__scalar_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p1c__scalar
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_4p1c__scalar_acc2
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p2c__scalar
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_4p2c__scalar_acc2
   init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p1c__scalar
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_9p1c__scalar_acc2
+  init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p2c__scalar
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_9p2c__scalar_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p1c__scalar
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_25p1c__scalar_acc2
   init: xnn_init_f32_minmax_scalar_params
 - name: xnn_f32_dwconv_minmax_ukernel_25p2c__scalar
   init: xnn_init_f32_minmax_scalar_params

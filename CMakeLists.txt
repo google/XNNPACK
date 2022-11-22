@@ -655,30 +655,30 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-3p1c-minmax-scalar.c
   src/f32-dwconv/gen/f32-dwconv-3p1c-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p1c-scalar.c
-  src/f32-dwconv/gen/f32-dwconv-4p1c-minmax-scalar-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-4p1c-minmax-scalar.c
-  src/f32-dwconv/gen/f32-dwconv-4p1c-scalar-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-4p1c-scalar.c
-  src/f32-dwconv/gen/f32-dwconv-9p1c-minmax-scalar-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-9p1c-minmax-scalar.c
-  src/f32-dwconv/gen/f32-dwconv-9p1c-scalar-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-9p1c-scalar.c
-  src/f32-dwconv/gen/f32-dwconv-25p1c-minmax-scalar-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-25p1c-minmax-scalar.c
-  src/f32-dwconv/gen/f32-dwconv-25p1c-scalar-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-25p1c-scalar.c
   src/f32-dwconv/gen/f32-dwconv-3p2c-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p2c-minmax-scalar.c
   src/f32-dwconv/gen/f32-dwconv-3p2c-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p2c-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-4p1c-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-4p1c-minmax-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-4p1c-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-4p1c-scalar.c
   src/f32-dwconv/gen/f32-dwconv-4p2c-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p2c-minmax-scalar.c
   src/f32-dwconv/gen/f32-dwconv-4p2c-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p2c-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-9p1c-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-9p1c-minmax-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-9p1c-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-9p1c-scalar.c
   src/f32-dwconv/gen/f32-dwconv-9p2c-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p2c-minmax-scalar.c
   src/f32-dwconv/gen/f32-dwconv-9p2c-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p2c-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-25p1c-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p1c-minmax-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-25p1c-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p1c-scalar.c
   src/f32-dwconv/gen/f32-dwconv-25p2c-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p2c-minmax-scalar.c
   src/f32-dwconv/gen/f32-dwconv-25p2c-scalar-acc2.c
@@ -1796,18 +1796,18 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-neon-2x2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-neon-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-neon.c
-  src/f32-dwconv/gen/f32-dwconv-4p4c-minmax-neon-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-4p4c-minmax-neon.c
-  src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-neon-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-neon.c
-  src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-neon-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-neon.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-neon-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-neon.c
+  src/f32-dwconv/gen/f32-dwconv-4p4c-minmax-neon-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-4p4c-minmax-neon.c
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-neon-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-neon.c
+  src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-neon-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-neon.c
   src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-neon-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-neon.c
+  src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-neon-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-neon.c
   src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-neon-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-neon.c
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-neon-1x4-acc2.c
@@ -2924,32 +2924,32 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/bf16-gemm/gen/bf16-gemm-5x4c8-minmax-neonfma-shland.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-neonfma.c
-  src/f32-dwconv/gen/f32-dwconv-4p4c-minmax-neonfma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-4p4c-minmax-neonfma.c
-  src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-neonfma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-neonfma.c
-  src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-neonfma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-neonfma.c
-  src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-neonfma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-neonfma.c
-  src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-neonfma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-neonfma.c
-  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-neonfma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-neon-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-neon.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-neonfma.c
+  src/f32-dwconv/gen/f32-dwconv-4p4c-minmax-neonfma-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-4p4c-minmax-neonfma.c
+  src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-neonfma-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-neon-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-neon.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-neonfma.c
+  src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-neonfma-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-neonfma.c
+  src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-neonfma-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-neon-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-neon.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-neonfma.c
+  src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-neonfma-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-neonfma.c
+  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-neonfma-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-neon-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-neon.c
   src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-neonfma-acc2.c
@@ -4050,18 +4050,18 @@ SET(ALL_SSE_MICROKERNEL_SRCS
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-sse-2x2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-sse-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-sse.c
-  src/f32-dwconv/gen/f32-dwconv-4p4c-minmax-sse-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-4p4c-minmax-sse.c
-  src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-sse-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-sse.c
-  src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-sse-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-sse.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-sse-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-sse.c
+  src/f32-dwconv/gen/f32-dwconv-4p4c-minmax-sse-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-4p4c-minmax-sse.c
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-sse-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-sse.c
+  src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-sse-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-sse.c
   src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-sse-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-sse.c
+  src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-sse-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-sse.c
   src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-sse-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-sse.c
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-sse-1x4-acc2.c
@@ -5097,10 +5097,10 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
 
 SET(PROD_AVX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx-int16-x16.c
-  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx.c
+  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-avx.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-avx-x24.c
   src/f32-gemm/gen/f32-gemm-1x16-minmax-avx-broadcast.c
   src/f32-gemm/gen/f32-gemm-5x16-minmax-avx-broadcast.c
@@ -5184,18 +5184,18 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx-int32-x32.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-avx-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-avx.c
-  src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-avx-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-avx.c
-  src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-avx-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-avx.c
-  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-avx-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx.c
+  src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-avx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-avx-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-avx.c
+  src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-avx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx.c
+  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-avx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-avx-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-avx.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-avx-x8.c
@@ -5915,10 +5915,10 @@ SET(PROD_FMA3_MICROKERNEL_SRCS
   src/f16-ibilinear/gen/f16-ibilinear-fma3-c8.c
   src/f16-ibilinear/gen/f16-ibilinear-fma3-c16.c
   src/f16-vmulcaddc/gen/f16-vmulcaddc-c8-minmax-fma3-2x.c
-  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-fma3.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-fma3.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-fma3.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-fma3.c
+  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-fma3.c
   src/f32-gemm/gen/f32-gemm-1x16-minmax-fma3-broadcast.c
   src/f32-gemm/gen/f32-gemm-1x16s4-minmax-fma3-broadcast.c
   src/f32-gemm/gen/f32-gemm-4x16s4-minmax-fma3-broadcast.c
@@ -5960,18 +5960,18 @@ SET(ALL_FMA3_MICROKERNEL_SRCS
   src/f16-vmulcaddc/gen/f16-vmulcaddc-c16-minmax-fma3-2x.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-fma3-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-fma3.c
-  src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-fma3-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-fma3.c
-  src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-fma3-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-fma3.c
-  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-fma3-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-fma3.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-fma3-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-fma3.c
+  src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-fma3-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-fma3.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-fma3-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-fma3.c
+  src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-fma3-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-fma3.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-fma3-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-fma3.c
+  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-fma3-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-fma3.c
   src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-fma3-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-fma3.c
   src/f32-gemm/gen/f32-gemm-1x8-minmax-fma3-broadcast.c
@@ -6456,18 +6456,18 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
 SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx512f.c
-  src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-avx512f-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-avx512f.c
-  src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx512f-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx512f.c
-  src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-avx512f-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-avx512f.c
   src/f32-dwconv/gen/f32-dwconv-3p32c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p32c-minmax-avx512f.c
+  src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-avx512f-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-avx512f.c
   src/f32-dwconv/gen/f32-dwconv-4p32c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p32c-minmax-avx512f.c
+  src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx512f-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx512f.c
   src/f32-dwconv/gen/f32-dwconv-9p32c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p32c-minmax-avx512f.c
+  src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-avx512f-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-avx512f.c
   src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-avx512f.c
   src/f32-gemm/gen/f32-gemm-1x16-minmax-avx512f-broadcast.c
