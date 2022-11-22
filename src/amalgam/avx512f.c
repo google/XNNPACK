@@ -18,7 +18,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_dwconv_minmax_ukernel_up16x25__avx512f(
+void xnn_f32_dwconv_minmax_ukernel_25p16c__avx512f(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -448,7 +448,7 @@ void xnn_f32_dwconv_minmax_ukernel_up16x25__avx512f(
   } while (--output_width != 0);
 }
 
-void xnn_f32_dwconv_minmax_ukernel_up16x3__avx512f(
+void xnn_f32_dwconv_minmax_ukernel_3p16c__avx512f(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -548,7 +548,7 @@ void xnn_f32_dwconv_minmax_ukernel_up16x3__avx512f(
   } while (--output_width != 0);
 }
 
-void xnn_f32_dwconv_minmax_ukernel_up16x4__avx512f(
+void xnn_f32_dwconv_minmax_ukernel_4p16c__avx512f(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -663,7 +663,7 @@ void xnn_f32_dwconv_minmax_ukernel_up16x4__avx512f(
   } while (--output_width != 0);
 }
 
-void xnn_f32_dwconv_minmax_ukernel_up16x9__avx512f(
+void xnn_f32_dwconv_minmax_ukernel_9p16c__avx512f(
     size_t channels,
     size_t output_width,
     const float** input,

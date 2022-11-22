@@ -9,6 +9,7 @@ import bisect
 import codecs
 import math
 import os
+import re
 import sys
 import yaml
 
@@ -29,12 +30,14 @@ def split_ukernel_name(name):
   common_name, target_name = name.split("__", 1)
   common_parts = common_name.split("_")
   param_spec = common_parts[-1]
-  assert param_spec.startswith("up")
 
-  if len(param_spec[2:].split("p")) > 1:
-    tile_part, kernel_part = param_spec[2:].split("p", 1)
-    primary_tile = int(tile_part)
-    cr, kr = map(int, kernel_part.split("x"))
+  # New transitional naming convention for unipass microkernels.
+  if 'c' in param_spec:
+    m = re.search(r'(\d+)p(\d+)c', param_spec);
+    assert(m)
+    primary_tile = 0;
+    cr = int(m[2])
+    kr = int(m[1])
   else:
     primary_tile = 0;
     cr, kr = map(int, param_spec[2:].split("x"))

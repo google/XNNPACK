@@ -1161,7 +1161,7 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_2x2(
   }
 }
 
-void xnn_f32_dwconv_minmax_ukernel_up8x25__sse(
+void xnn_f32_dwconv_minmax_ukernel_25p8c__sse(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -1834,7 +1834,7 @@ void xnn_f32_dwconv_minmax_ukernel_up8x25__sse(
   } while (--output_width != 0);
 }
 
-void xnn_f32_dwconv_minmax_ukernel_up8x3__sse(
+void xnn_f32_dwconv_minmax_ukernel_3p8c__sse(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -1979,7 +1979,7 @@ void xnn_f32_dwconv_minmax_ukernel_up8x3__sse(
   } while (--output_width != 0);
 }
 
-void xnn_f32_dwconv_minmax_ukernel_up8x4__sse(
+void xnn_f32_dwconv_minmax_ukernel_4p8c__sse(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -2148,7 +2148,7 @@ void xnn_f32_dwconv_minmax_ukernel_up8x4__sse(
   } while (--output_width != 0);
 }
 
-void xnn_f32_dwconv_minmax_ukernel_up8x9__sse(
+void xnn_f32_dwconv_minmax_ukernel_9p8c__sse(
     size_t channels,
     size_t output_width,
     const float** input,
