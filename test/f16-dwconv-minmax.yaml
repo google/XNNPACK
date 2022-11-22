@@ -4,101 +4,101 @@
 # LICENSE file in the root directory of this source tree.
 
 # ARM NEON+FP16ARITH
-- name: xnn_f16_dwconv_minmax_ukernel_up8x3__neonfp16arith
+- name: xnn_f16_dwconv_minmax_ukernel_3p8c__neonfp16arith
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up8x3__neonfp16arith_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_3p8c__neonfp16arith_acc2
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up8x4__neonfp16arith
+- name: xnn_f16_dwconv_minmax_ukernel_4p8c__neonfp16arith
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up8x4__neonfp16arith_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_4p8c__neonfp16arith_acc2
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up8x9__neonfp16arith
+- name: xnn_f16_dwconv_minmax_ukernel_9p8c__neonfp16arith
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up8x9__neonfp16arith_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_9p8c__neonfp16arith_acc2
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up8x25__neonfp16arith
+- name: xnn_f16_dwconv_minmax_ukernel_25p8c__neonfp16arith
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up8x25__neonfp16arith_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_25p8c__neonfp16arith_acc2
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x3__neonfp16arith
+- name: xnn_f16_dwconv_minmax_ukernel_3p16c__neonfp16arith
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x3__neonfp16arith_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_3p16c__neonfp16arith_acc2
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x4__neonfp16arith
+- name: xnn_f16_dwconv_minmax_ukernel_4p16c__neonfp16arith
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x4__neonfp16arith_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_4p16c__neonfp16arith_acc2
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x9__neonfp16arith
+- name: xnn_f16_dwconv_minmax_ukernel_9p16c__neonfp16arith
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x9__neonfp16arith_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_9p16c__neonfp16arith_acc2
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x25__neonfp16arith
+- name: xnn_f16_dwconv_minmax_ukernel_25p16c__neonfp16arith
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x25__neonfp16arith_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_25p16c__neonfp16arith_acc2
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x3__neonfp16arith
+- name: xnn_f16_dwconv_minmax_ukernel_3p32c__neonfp16arith
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x3__neonfp16arith_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_3p32c__neonfp16arith_acc2
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x4__neonfp16arith
+- name: xnn_f16_dwconv_minmax_ukernel_4p32c__neonfp16arith
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x4__neonfp16arith_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_4p32c__neonfp16arith_acc2
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x9__neonfp16arith
+- name: xnn_f16_dwconv_minmax_ukernel_9p32c__neonfp16arith
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x9__neonfp16arith_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_9p32c__neonfp16arith_acc2
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x25__neonfp16arith
+- name: xnn_f16_dwconv_minmax_ukernel_25p32c__neonfp16arith
   init: xnn_init_f16_minmax_fp16arith_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x25__neonfp16arith_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_25p32c__neonfp16arith_acc2
   init: xnn_init_f16_minmax_fp16arith_params
 
 # x86 FMA3
-- name: xnn_f16_dwconv_minmax_ukernel_up8x3__fma3
+- name: xnn_f16_dwconv_minmax_ukernel_3p8c__fma3
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up8x3__fma3_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_3p8c__fma3_acc2
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up8x4__fma3
+- name: xnn_f16_dwconv_minmax_ukernel_4p8c__fma3
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up8x4__fma3_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_4p8c__fma3_acc2
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up8x9__fma3
+- name: xnn_f16_dwconv_minmax_ukernel_9p8c__fma3
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up8x9__fma3_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_9p8c__fma3_acc2
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up8x25__fma3
+- name: xnn_f16_dwconv_minmax_ukernel_25p8c__fma3
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up8x25__fma3_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_25p8c__fma3_acc2
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x3__fma3
+- name: xnn_f16_dwconv_minmax_ukernel_3p16c__fma3
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x3__fma3_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_3p16c__fma3_acc2
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x4__fma3
+- name: xnn_f16_dwconv_minmax_ukernel_4p16c__fma3
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x4__fma3_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_4p16c__fma3_acc2
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x9__fma3
+- name: xnn_f16_dwconv_minmax_ukernel_9p16c__fma3
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x9__fma3_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_9p16c__fma3_acc2
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x25__fma3
+- name: xnn_f16_dwconv_minmax_ukernel_25p16c__fma3
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up16x25__fma3_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_25p16c__fma3_acc2
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x3__fma3
+- name: xnn_f16_dwconv_minmax_ukernel_3p32c__fma3
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x3__fma3_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_3p32c__fma3_acc2
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x4__fma3
+- name: xnn_f16_dwconv_minmax_ukernel_4p32c__fma3
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x4__fma3_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_4p32c__fma3_acc2
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x9__fma3
+- name: xnn_f16_dwconv_minmax_ukernel_9p32c__fma3
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x9__fma3_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_9p32c__fma3_acc2
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x25__fma3
+- name: xnn_f16_dwconv_minmax_ukernel_25p32c__fma3
   init: xnn_init_f16_minmax_avx_params
-- name: xnn_f16_dwconv_minmax_ukernel_up32x25__fma3_acc2
+- name: xnn_f16_dwconv_minmax_ukernel_25p32c__fma3_acc2
   init: xnn_init_f16_minmax_avx_params

@@ -816,22 +816,22 @@ static void init(void) {
           xnn_params.f16.gemm.mr = 6;
           xnn_params.f16.gemm.nr = 8;
 
-          xnn_params.f16.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_up16x3__neonfp16arith;
+          xnn_params.f16.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_3p16c__neonfp16arith;
           xnn_params.f16.dwconv[0].init.f16 = xnn_init_f16_minmax_fp16arith_params;
           xnn_params.f16.dwconv[0].channel_tile = 16;
           xnn_params.f16.dwconv[0].primary_tile = 3;
 
-          xnn_params.f16.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_up16x4__neonfp16arith;
+          xnn_params.f16.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_4p16c__neonfp16arith;
           xnn_params.f16.dwconv[1].init.f16 = xnn_init_f16_minmax_fp16arith_params;
           xnn_params.f16.dwconv[1].channel_tile = 16;
           xnn_params.f16.dwconv[1].primary_tile = 4;
 
-          xnn_params.f16.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_up8x9__neonfp16arith;
+          xnn_params.f16.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_9p8c__neonfp16arith;
           xnn_params.f16.dwconv[2].init.f16 = xnn_init_f16_minmax_fp16arith_params;
           xnn_params.f16.dwconv[2].channel_tile = 8;
           xnn_params.f16.dwconv[2].primary_tile = 9;
 
-          xnn_params.f16.dwconv[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_up8x25__neonfp16arith_acc2;
+          xnn_params.f16.dwconv[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_25p8c__neonfp16arith_acc2;
           xnn_params.f16.dwconv[3].init.f16 = xnn_init_f16_minmax_fp16arith_params;
           xnn_params.f16.dwconv[3].channel_tile = 8;
           xnn_params.f16.dwconv[3].primary_tile = 25;
@@ -2872,22 +2872,22 @@ static void init(void) {
           xnn_params.f16.gemm.nr = 16;
         #endif  // XNN_ENABLE_ASSEMBLY
 
-        xnn_params.f16.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_up16x3__neonfp16arith;
+        xnn_params.f16.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_3p16c__neonfp16arith;
         xnn_params.f16.dwconv[0].init.f16 = xnn_init_f16_minmax_fp16arith_params;
         xnn_params.f16.dwconv[0].channel_tile = 16;
         xnn_params.f16.dwconv[0].primary_tile = 3;
 
-        xnn_params.f16.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_up16x4__neonfp16arith;
+        xnn_params.f16.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_4p16c__neonfp16arith;
         xnn_params.f16.dwconv[1].init.f16 = xnn_init_f16_minmax_fp16arith_params;
         xnn_params.f16.dwconv[1].channel_tile = 16;
         xnn_params.f16.dwconv[1].primary_tile = 4;
 
-        xnn_params.f16.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_up16x9__neonfp16arith;
+        xnn_params.f16.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_9p16c__neonfp16arith;
         xnn_params.f16.dwconv[2].init.f16 = xnn_init_f16_minmax_fp16arith_params;
         xnn_params.f16.dwconv[2].channel_tile = 16;
         xnn_params.f16.dwconv[2].primary_tile = 9;
 
-        xnn_params.f16.dwconv[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_up8x25__neonfp16arith_acc2;
+        xnn_params.f16.dwconv[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_25p8c__neonfp16arith_acc2;
         xnn_params.f16.dwconv[3].init.f16 = xnn_init_f16_minmax_fp16arith_params;
         xnn_params.f16.dwconv[3].channel_tile = 8;
         xnn_params.f16.dwconv[3].primary_tile = 25;
@@ -4386,22 +4386,22 @@ static void init(void) {
       xnn_params.f16.gemm.mr = 4;
       xnn_params.f16.gemm.nr = 16;
 
-      xnn_params.f16.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_up16x3__fma3;
+      xnn_params.f16.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_3p16c__fma3;
       xnn_params.f16.dwconv[0].init.f16 = xnn_init_f16_minmax_avx_params;
       xnn_params.f16.dwconv[0].channel_tile = 16;
       xnn_params.f16.dwconv[0].primary_tile = 3;
 
-      xnn_params.f16.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_up16x4__fma3;
+      xnn_params.f16.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_4p16c__fma3;
       xnn_params.f16.dwconv[1].init.f16 = xnn_init_f16_minmax_avx_params;
       xnn_params.f16.dwconv[1].channel_tile = 16;
       xnn_params.f16.dwconv[1].primary_tile = 4;
 
-      xnn_params.f16.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_up16x9__fma3;
+      xnn_params.f16.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_9p16c__fma3;
       xnn_params.f16.dwconv[2].init.f16 = xnn_init_f16_minmax_avx_params;
       xnn_params.f16.dwconv[2].channel_tile = 16;
       xnn_params.f16.dwconv[2].primary_tile = 9;
 
-      xnn_params.f16.dwconv[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_up8x25__fma3_acc2;
+      xnn_params.f16.dwconv[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_25p8c__fma3_acc2;
       xnn_params.f16.dwconv[3].init.f16 = xnn_init_f16_minmax_avx_params;
       xnn_params.f16.dwconv[3].channel_tile = 8;
       xnn_params.f16.dwconv[3].primary_tile = 25;
