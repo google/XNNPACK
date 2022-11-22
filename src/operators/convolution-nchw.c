@@ -579,6 +579,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       assert(kernel_width == 1);
       assert(groups == 1);
 
+      // Count number of non-zero values.
       size_t num_nonzeroes = 0;
       size_t num_nonzero_blocks2 = 0;
       size_t num_nonzero_blocks4 = 0;
@@ -608,6 +609,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
           num_nonzeroes += (size_t) (kernel[oc * group_input_channels + ic] != 0.0f);
         }
       }
+
+      // Select block encoding when 2 or 4 channels have non-zero values.
       size_t output_channels_block_size = 1;
       size_t num_output_channel_blocks = group_output_channels;
       size_t num_nonzero_values = num_nonzeroes;
@@ -636,15 +639,18 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       }
 
       // Sparse representation of weights consists of four components:
-      // 1. An array of float values storing non-zero kernel elements, and all (group_output_channels) bias elements.
-      //    All elements within non-zero block are assumed to be non-zero.
+      // 1. An array of int32_t values storing scaled [by sizeof(input element)] difference between input channels
+      //    corresponding to successive non-zero blocks.  Used by setup to compute (array 2).
       // 2. An array of int32_t values storing increment for input pointer after each processed tile. This array is
-      //    derived from scaled difference in array 2 using parameters to setup function.
+      //    derived from scaled difference in array 1 using parameters to setup function.
       // 3. An array of uint32_t values storing the number of non-zero kernel elements per each output channel.
-      // 4. An array of int32_t values storing scaled [by sizeof(input element)] difference between input channels
-      //    corresponding to successive non-zero blocks.
-      const size_t packed_weights_size = num_output_channel_blocks * sizeof(uint32_t) +
-        (num_nonzero_blocks * 2) * sizeof(int32_t) + (num_nonzero_values + group_output_channels) * sizeof(float);
+      // 4. An array of float values storing non-zero kernel elements, and all (group_output_channels) bias elements.
+      //    All elements within non-zero block are assumed to be non-zero.
+
+      const size_t packed_weights_size =
+        (num_nonzero_blocks * 2) * sizeof(int32_t) +
+        (num_output_channel_blocks * sizeof(uint32_t) +
+        num_nonzero_values + group_output_channels) * sizeof(float) + XNN_EXTRA_BYTES;
 
       convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
       if (convolution_op->packed_weights.pointer == NULL) {
@@ -657,10 +663,11 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       convolution_op->num_nonzero_blocks = num_nonzero_blocks;
       convolution_op->num_output_channel_blocks = num_output_channel_blocks;
 
-      float* nonzero_values = convolution_op->packed_weights.pointer;
-      int32_t* input_increments = (int32_t*) (nonzero_values + num_nonzero_values + group_output_channels);
+      int32_t* input_channel_diffs = (int32_t*) convolution_op->packed_weights.pointer;
+      int32_t* input_increments = (int32_t*) (input_channel_diffs + num_nonzero_blocks);
       uint32_t* output_channel_nonzeros = (uint32_t*) (input_increments + num_nonzero_blocks);
-      int32_t* input_channel_diffs = (int32_t*) (output_channel_nonzeros + num_output_channel_blocks);
+      float* nonzero_values = (float*) (output_channel_nonzeros + num_output_channel_blocks);
+
       memset(output_channel_nonzeros, 0, num_output_channel_blocks * sizeof(uint32_t));
 
       status = xnn_status_unsupported_parameter;
@@ -956,11 +963,12 @@ static enum xnn_status setup_convolution2d_nchw(
       convolution_op->num_nonzero_blocks = num_nonzero_blocks;
       convolution_op->num_output_channel_blocks = num_output_channel_blocks;
 
-      void* nonzero_values = packed_weights(convolution_op);
-      int32_t* input_increments = (int32_t*) ((intptr_t) nonzero_values + ((num_nonzero_values + convolution_op->group_output_channels) << log2_input_element_size));
-      uint32_t* output_channel_nonzeros = (uint32_t*) (input_increments + num_nonzero_blocks);
-      int32_t* input_channel_diffs = (int32_t*) (output_channel_nonzeros + num_output_channel_blocks);
+      const int32_t* input_channel_diffs = (const int32_t*) packed_weights(convolution_op);
+      int32_t* input_increments = ((int32_t*) packed_weights(convolution_op)) + num_nonzero_blocks;
+      const uint32_t* output_channel_nonzeros = (uint32_t*) (input_increments + num_nonzero_blocks);
+      const void* nonzero_values = (const void*) (output_channel_nonzeros + num_output_channel_blocks);
 
+      // Scale input_channel_diffs by input_size to compute input_increments;
       const size_t input_size = input_height * input_width;
       for (size_t i = 0; i < num_nonzero_blocks; i++) {
         const int32_t diff = input_channel_diffs[i];
