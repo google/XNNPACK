@@ -69,10 +69,10 @@ void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_x%d" % UNROLL if 
             i = (const uint16_t*restrict) ((uintptr_t) i + (uintptr_t) diff${K});
             $for M in range(0, MR, 32):
               xnn_prefetch_to_l1(i + ${M+32});
-            const float16x8_t vb${K} = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
+            const float16x8_t vw${K} = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
             xnn_prefetch_to_l1(w + 64);
             $for M in range(0, MR, 8):
-              vacc${ABC[M:M+8]}x${K} = vfmaq_f16(vacc${ABC[M:M+8]}x${K}, va${ABC[M:M+8]}x${K}, vb${K});
+              vacc${ABC[M:M+8]}x${K} = vfmaq_f16(vacc${ABC[M:M+8]}x${K}, va${ABC[M:M+8]}x${K}, vw${K});
         }
         $for M in range(0, MR, 8):
           float16x8_t vacc${ABC[M:M+8]} = vacc${ABC[M:M+8]}x0;
@@ -92,10 +92,10 @@ void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_x%d" % UNROLL if 
           i = (const uint16_t*restrict) ((uintptr_t) i + (uintptr_t) diff);
           $for M in range(0, MR, 32):
             xnn_prefetch_to_l1(i + ${M+32});
-          const float16x8_t vb = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
-          xnn_prefetch_to_l1(w + 32);
+          const float16x8_t vw = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
+          xnn_prefetch_to_l1(w + 64);
           $for M in range(0, MR, 8):
-            vacc${ABC[M:M+8]} = vfmaq_f16(vacc${ABC[M:M+8]}, va${ABC[M:M+8]}, vb);
+            vacc${ABC[M:M+8]} = vfmaq_f16(vacc${ABC[M:M+8]}, va${ABC[M:M+8]}, vw);
         } while (--nnz != 0);
       }
       $for M in range(0, MR, 8):
@@ -146,14 +146,14 @@ void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith${"_x%d" % UNROLL if 
                 const float16x8_t va${ABC[M:M+8]} = vreinterpretq_f16_u16(vld1q_u16(i + ${M}));
               i = (const uint16_t*restrict) ((uintptr_t) i + (uintptr_t) diff);
               $if SUBMR <= 4:
-                const float16x4_t vb = vreinterpret_f16_u16(vld1_dup_u16(w)); w += 1;
+                const float16x4_t vw = vreinterpret_f16_u16(vld1_dup_u16(w)); w += 1;
               $else:
-                const float16x8_t vb = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
+                const float16x8_t vw = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
               $if SUBMR <= 4:
-                vacc${ABC[0:SUBMR]} = vfma_f16(vacc${ABC[0:SUBMR]}, va${ABC[0:SUBMR]}, vb);
+                vacc${ABC[0:SUBMR]} = vfma_f16(vacc${ABC[0:SUBMR]}, va${ABC[0:SUBMR]}, vw);
               $else:
                 $for M in range(0, SUBMR, 8):
-                  vacc${ABC[M:M+8]} = vfmaq_f16(vacc${ABC[M:M+8]}, va${ABC[M:M+8]}, vb);
+                  vacc${ABC[M:M+8]} = vfmaq_f16(vacc${ABC[M:M+8]}, va${ABC[M:M+8]}, vw);
             } while (--nnz != 0);
           }
           $if SUBMR <= 4:
