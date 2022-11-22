@@ -17,7 +17,9 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
+#include <xnnpack/log.h>
 #include <xnnpack/microparams-init.h>
+
 
 static struct xnn_hardware_config hardware_config = {0};
 
@@ -45,9 +47,9 @@ static void init_hardware_config(void) {
     hardware_config.use_x86_avx = cpuinfo_has_x86_avx();
     hardware_config.use_x86_avx2 = cpuinfo_has_x86_avx2();
     hardware_config.use_x86_avx512f = cpuinfo_has_x86_avx512f();
-    hardware_config.use_x86_avx512vbmi = cpuinfo_has_x86_avx512vbmi();
     hardware_config.use_x86_avx512skx = cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw()
         && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl();
+    hardware_config.use_x86_avx512vbmi = cpuinfo_has_x86_avx512vbmi();
   #endif  // !XNN_ARCH_X86 && !XNN_ARCH_X86_64
 }
 
@@ -61,28 +63,34 @@ static void init_hardware_config(void) {
 const struct xnn_hardware_config* xnn_init_hardware_config() {
   #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
     if (!cpuinfo_initialize()) {
+      xnn_log_error("failed to initialize cpuinfo");
       return NULL;
     }
   #endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
   #if XNN_ARCH_ARM
     #if XNN_PLATFORM_MOBILE
       if (!cpuinfo_has_arm_neon()) {
+        xnn_log_debug("unsupported hardware: ARM NEON not detected");
         return NULL;
       }
     #else
       if (!cpuinfo_has_arm_v6()) {
+        xnn_log_debug("unsupported hardware: ARMv6 not detected");
         return NULL;
       }
 
       if (!cpuinfo_has_arm_vfpv2() && !cpuinfo_has_arm_vfpv3()) {
+        xnn_log_debug("unsupported hardware: VFP FPU not detected");
         return NULL;
       }
     #endif
-  #elif XNN_ARCH_X86
+  #endif  // XNN_ARCH_ARM
+  #if XNN_ARCH_X86
     if (!cpuinfo_has_x86_sse2()) {
+      xnn_log_debug("unsupported hardware: SSE2 not detected");
       return NULL;
     }
-  #endif
+  #endif  // XNN_ARCH_X86
 
   #if XNN_PLATFORM_WINDOWS
     InitOnceExecuteOnce(&init_guard, &init_hardware_config_windows, NULL, NULL);
