@@ -55,12 +55,15 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x8(
     const v128_t vzero = wasm_i16x8_const_splat(0);
 
     const v128_t vxmask_lo = wasm_i32x4_extend_low_i16x8(vmask);
-    const v128_t vf_lo = wasm_v128_or(wasm_v16x8_shuffle(vzero, vsign, 0,  8, 1,  9, 2, 10, 3, 11),
-      wasm_v128_bitselect(vnorm_lo, vdenorm_lo, vxmask_lo));
-
     const v128_t vxmask_hi = wasm_i32x4_extend_high_i16x8(vmask);
-    const v128_t vf_hi = wasm_v128_or(wasm_v16x8_shuffle(vzero, vsign, 4, 12, 5, 13, 6, 14, 7, 15),
-      wasm_v128_bitselect(vnorm_hi, vdenorm_hi, vxmask_hi));
+
+    const v128_t vabsf_lo = wasm_v128_bitselect(vnorm_lo, vdenorm_lo, vxmask_lo);
+    const v128_t vsignf_lo = wasm_v16x8_shuffle(vzero, vsign, 0,  8, 1,  9, 2, 10, 3, 11);
+    const v128_t vabsf_hi = wasm_v128_bitselect(vnorm_hi, vdenorm_hi, vxmask_hi);
+    const v128_t vsignf_hi = wasm_v16x8_shuffle(vzero, vsign, 4, 12, 5, 13, 6, 14, 7, 15);
+
+    const v128_t vf_lo = wasm_v128_or(vsignf_lo, vabsf_lo);
+    const v128_t vf_hi = wasm_v128_or(vsignf_hi, vabsf_hi);
 
     wasm_v128_store(output, vf_lo);
     wasm_v128_store(output + 4, vf_hi);
@@ -88,16 +91,20 @@ void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x8(
     const v128_t vzero = wasm_i16x8_const_splat(0);
 
     const v128_t vxmask_lo = wasm_i32x4_extend_low_i16x8(vmask);
-    v128_t vf = wasm_v128_or(wasm_v16x8_shuffle(vzero, vsign, 0, 8, 1, 9, 2, 10, 3, 11),
-      wasm_v128_bitselect(vnorm_lo, vdenorm_lo, vxmask_lo));
+    const v128_t vxmask_hi = wasm_i32x4_extend_high_i16x8(vmask);
+
+    const v128_t vabsf_lo = wasm_v128_bitselect(vnorm_lo, vdenorm_lo, vxmask_lo);
+    const v128_t vsignf_lo = wasm_v16x8_shuffle(vzero, vsign, 0,  8, 1,  9, 2, 10, 3, 11);
+    const v128_t vabsf_hi = wasm_v128_bitselect(vnorm_hi, vdenorm_hi, vxmask_hi);
+    const v128_t vsignf_hi = wasm_v16x8_shuffle(vzero, vsign, 4, 12, 5, 13, 6, 14, 7, 15);
+
+    v128_t vf = wasm_v128_or(vsignf_lo, vabsf_lo);
 
     if (batch & (4 * sizeof(uint16_t))) {
       wasm_v128_store(output, vf);
       output += 4;
 
-      const v128_t vxmask_hi = wasm_i32x4_extend_high_i16x8(vmask);
-      vf = wasm_v128_or(wasm_v16x8_shuffle(vzero, vsign, 4, 12, 5, 13, 6, 14, 7, 15),
-        wasm_v128_bitselect(vnorm_hi, vdenorm_hi, vxmask_hi));
+      vf = wasm_v128_or(vsignf_hi, vabsf_hi);
     }
     if (batch & (2 * sizeof(uint16_t))) {
       wasm_v128_store64_lane(output, vf, 0);

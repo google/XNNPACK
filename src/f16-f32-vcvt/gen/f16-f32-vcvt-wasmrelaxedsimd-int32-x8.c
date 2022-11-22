@@ -1,12 +1,12 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f16-f32-vcvt/wasmsimd-int32.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2021 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert BATCH_TILE % 8 == 0
-$assert BATCH_TILE >= 8
-$SIMD_TILE = BATCH_TILE // 8
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <wasm_simd128.h>
@@ -15,9 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/vcvt.h>
 
 
-$WASM_V32X4_LANESELECT = "__builtin_wasm_laneselect_i32x4" if RELAXED else "wasm_v128_bitselect"
-$ISA = "wasmrelaxedsimd" if RELAXED else "wasmsimd"
-void xnn_f16_f32_vcvt_ukernel__${ISA}_int32_x${BATCH_TILE}(
+void xnn_f16_f32_vcvt_ukernel__wasmrelaxedsimd_int32_x8(
     size_t batch,
     const void* input,
     float* output,
@@ -35,41 +33,6 @@ void xnn_f16_f32_vcvt_ukernel__${ISA}_int32_x${BATCH_TILE}(
   const v128_t vdenorm_cutoff = wasm_v128_load64_splat(params->wasmsimd_int32.denorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
-  $if BATCH_TILE > 8:
-    for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
-      const v128_t vh0 = wasm_v128_load(i);
-      $for N in range(1, SIMD_TILE):
-        const v128_t vh${N} = wasm_v128_load(i + ${N * 8});
-      i += ${BATCH_TILE};
-
-      const v128_t vzero = wasm_i16x8_const_splat(0);
-      $for N in range(SIMD_TILE):
-        const v128_t vw${N*2} = wasm_v16x8_shuffle(vzero, vh${N}, 0,  8, 1,  9, 2, 10, 3, 11);
-        const v128_t vw${N*2+1} = wasm_v16x8_shuffle(vzero, vh${N}, 4, 12, 5, 13, 6, 14, 7, 15);
-
-      $for N in range(2*SIMD_TILE):
-        const v128_t vsign${N} = wasm_v128_and(vw${N}, vsign_mask);
-
-      $for N in range(2*SIMD_TILE):
-        const v128_t vnonsign${N} = wasm_v128_xor(vw${N}, vsign${N});
-
-      $for N in range(2*SIMD_TILE):
-        const v128_t vnorm${N} = wasm_f32x4_mul(wasm_i32x4_add(wasm_u32x4_shr(vnonsign${N}, 3), vexp_offset), vexp_scale);
-
-      $for N in range(2*SIMD_TILE):
-        const v128_t vdenorm${N} = wasm_f32x4_sub(wasm_v128_or(wasm_u32x4_shr(vnonsign${N}, 16), vmagic_bias), vmagic_bias);
-
-      $for N in range(2*SIMD_TILE):
-        const v128_t vxmask${N} = wasm_i32x4_gt(vnonsign${N}, vdenorm_cutoff);
-
-      $for N in range(2*SIMD_TILE):
-        const v128_t vf${N} = wasm_v128_or(vsign${N}, wasm_v128_bitselect(vnorm${N}, vdenorm${N}, vxmask${N}));
-
-      wasm_v128_store(output, vf0);
-      $for N in range(1, 2*SIMD_TILE):
-        wasm_v128_store(output + ${N*4}, vf${N});
-      output += ${BATCH_TILE};
-    }
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const v128_t vh = wasm_v128_load(i);
     i += 8;
