@@ -114,6 +114,30 @@ static void FP16MobileNetV3Small(benchmark::State& state) {
   End2EndBenchmark(state, models::FP16MobileNetV3Small);
 }
 
+static void FP16Sparse80MobileNetV1(benchmark::State& state) {
+  End2EndBenchmark(state, [](pthreadpool_t threadpool) {
+    return models::FP16SparseMobileNetV1(0.8f, threadpool);
+  });
+}
+
+static void FP16Sparse80MobileNetV2(benchmark::State& state) {
+  End2EndBenchmark(state, [](pthreadpool_t threadpool) {
+    return models::FP16SparseMobileNetV2(0.8f, threadpool);
+  });
+}
+
+static void FP16Sparse80MobileNetV3Large(benchmark::State& state) {
+  End2EndBenchmark(state, [](pthreadpool_t threadpool) {
+    return models::FP16SparseMobileNetV3Large(0.8f, threadpool);
+  });
+}
+
+static void FP16Sparse80MobileNetV3Small(benchmark::State& state) {
+  End2EndBenchmark(state, [](pthreadpool_t threadpool) {
+    return models::FP16SparseMobileNetV3Small(0.8f, threadpool);
+  });
+}
+
 static void QC8MobileNetV1(benchmark::State& state) {
   End2EndBenchmark(state, models::QC8MobileNetV1);
 }
@@ -155,6 +179,11 @@ BENCHMARK(FP16MobileNetV1)->Apply(benchmark::utils::MultiThreadingParameters)->U
 BENCHMARK(FP16MobileNetV2)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(FP16MobileNetV3Large)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(FP16MobileNetV3Small)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+BENCHMARK(FP16Sparse80MobileNetV1)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(FP16Sparse80MobileNetV2)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(FP16Sparse80MobileNetV3Large)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(FP16Sparse80MobileNetV3Small)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
 BENCHMARK(QC8MobileNetV1)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(QC8MobileNetV2)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
