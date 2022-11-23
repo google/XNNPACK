@@ -6,7 +6,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <math.h>
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -84,10 +84,7 @@ static const struct xnn_allocator* volatile init_allocator = NULL;
 
 static void init(void) {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL) {
-    xnn_log_error("XNNPACK initialization failed: hardware not supported");
-    return;
-  }
+  assert(hardware_config != NULL);
 
   uint32_t init_flags = XNN_INIT_FLAG_XNNPACK;
 
@@ -7706,11 +7703,12 @@ static void init(void) {
 #endif
 
 enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
-  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
-    if (!cpuinfo_initialize()) {
-      return xnn_status_out_of_memory;
-    }
-  #endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    xnn_log_error("XNNPACK initialization failed: hardware not supported");
+    return xnn_status_unsupported_hardware;
+  }
+
   if (allocator == NULL) {
     allocator = &xnn_default_allocator;
   }
@@ -7732,8 +7730,5 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
 }
 
 enum xnn_status xnn_deinitialize(void) {
-  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
-    cpuinfo_deinitialize();
-  #endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
   return xnn_status_success;
 }
