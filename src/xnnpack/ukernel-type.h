@@ -9,6 +9,13 @@
 
 #pragma once
 
+#include <xnnpack/common.h>
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum xnn_ukernel_type {
   xnn_ukernel_type_default = 0,
   xnn_ukernel_type_average_pooling,
@@ -21,3 +28,9 @@ enum xnn_ukernel_type {
   xnn_ukernel_type_subconv2d,
   xnn_ukernel_type_vmulcaddc,
 };
+
+XNN_INTERNAL const char* xnn_ukernel_type_to_string(enum xnn_ukernel_type ukernel_type);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif

@@ -9,6 +9,13 @@
 
 #pragma once
 
+#include <xnnpack/common.h>
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum xnn_operator_type {
   xnn_operator_type_invalid = 0,
   xnn_operator_type_abs_nc_f16,
@@ -138,3 +145,9 @@ enum xnn_operator_type {
   xnn_operator_type_truncation_nc_f32,
   xnn_operator_type_unpooling_nhwc_x32,
 };
+
+XNN_INTERNAL const char* xnn_operator_type_to_string(enum xnn_operator_type operator_type);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif

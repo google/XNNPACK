@@ -65,8 +65,6 @@ extern "C" {
   const char* xnn_datatype_to_string(enum xnn_datatype type);
   const char* xnn_node_type_to_string(enum xnn_node_type type);
 #endif
-const char* xnn_operator_type_to_string(enum xnn_operator_type type);
-const char* xnn_ukernel_type_to_string(enum xnn_ukernel_type type);
 
 #ifdef __cplusplus
 }  // extern "C"
