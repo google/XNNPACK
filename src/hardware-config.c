@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <stdbool.h>
+#include <math.h>  // For INFINITY
 
 #ifdef _WIN32
   #include <windows.h>
@@ -30,27 +31,43 @@ static struct xnn_hardware_config hardware_config = {0};
 #endif
 
 static void init_hardware_config(void) {
-  #if XNN_ARCH_ARM64 || XNN_ARCH_ARM
-    hardware_config.use_arm_neon_dot = cpuinfo_has_arm_neon_dot();
-    hardware_config.use_arm_neon_fp16_arith = cpuinfo_has_arm_neon_fp16_arith();
-  #endif
   #if XNN_ARCH_ARM
-    hardware_config.use_arm_neon = cpuinfo_has_arm_neon();
-    hardware_config.use_arm_neon_fma = cpuinfo_has_arm_neon_fma();
-    hardware_config.use_arm_neon_fp16 = cpuinfo_has_arm_neon_fp16();
     hardware_config.use_arm_v6 = cpuinfo_has_arm_v6();
-    hardware_config.use_arm_v8 = cpuinfo_has_arm_v8();
     hardware_config.use_arm_vfpv2 = cpuinfo_has_arm_vfpv2();
     hardware_config.use_arm_vfpv3 = cpuinfo_has_arm_vfpv3();
+    hardware_config.use_arm_neon = cpuinfo_has_arm_neon();
+    hardware_config.use_arm_neon_fp16 = cpuinfo_has_arm_neon_fp16();
+    hardware_config.use_arm_neon_fma = cpuinfo_has_arm_neon_fma();
+    hardware_config.use_arm_neon_v8 = cpuinfo_has_arm_neon_v8();
   #endif
+
+  #if XNN_ARCH_ARM64 || XNN_ARCH_ARM
+    hardware_config.use_arm_neon_fp16_arith = cpuinfo_has_arm_neon_fp16_arith();
+    hardware_config.use_arm_neon_dot = cpuinfo_has_arm_neon_dot();
+  #endif
+
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    hardware_config.use_x86_ssse3 = cpuinfo_has_x86_ssse3();
+    hardware_config.use_x86_sse4_1 = cpuinfo_has_x86_sse4_1();
     hardware_config.use_x86_avx = cpuinfo_has_x86_avx();
+    hardware_config.use_x86_f16c = cpuinfo_has_x86_f16c();
+    hardware_config.use_x86_fma3 = cpuinfo_has_x86_fma3();
+    hardware_config.use_x86_xop = cpuinfo_has_x86_xop();
     hardware_config.use_x86_avx2 = cpuinfo_has_x86_avx2();
     hardware_config.use_x86_avx512f = cpuinfo_has_x86_avx512f();
-    hardware_config.use_x86_avx512skx = cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw()
-        && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl();
-    hardware_config.use_x86_avx512vbmi = cpuinfo_has_x86_avx512vbmi();
+    hardware_config.use_x86_avx512skx = hardware_config.use_x86_avx512f &&
+      cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl();
+    hardware_config.use_x86_avx512vbmi = hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avx512vbmi();
   #endif  // !XNN_ARCH_X86 && !XNN_ARCH_X86_64
+
+  #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+    // Unlike most other architectures, on x86/x86-64 when floating-point instructions
+    // have no NaN arguments, but produce NaN output, the output NaN has sign bit set.
+    // We use it to distinguish x86/x86-64 from other architectures, by doing subtraction
+    // of two infinities (must produce NaN per IEEE 754 standard).
+    static const volatile float inf = INFINITY;
+    hardware_config.is_x86 = signbit(inf - inf);
+  #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 }
 
 #if XNN_PLATFORM_WINDOWS

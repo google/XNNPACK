@@ -36,25 +36,34 @@ XNN_INTERNAL const struct xnn_transpose_config* xnn_init_transpose_config();
 
 struct xnn_hardware_config {
   char _; // Dummy member variable to comply with the C standard
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  bool use_arm_neon_dot;
-  bool use_arm_neon_fp16_arith;
-#endif
 #if XNN_ARCH_ARM
-  bool use_arm_neon;
-  bool use_arm_neon_fma;
-  bool use_arm_neon_fp16;
   bool use_arm_v6;
-  bool use_arm_v8;
   bool use_arm_vfpv2;
   bool use_arm_vfpv3;
-#elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+  bool use_arm_neon;
+  bool use_arm_neon_fp16;
+  bool use_arm_neon_fma;
+  bool use_arm_neon_v8;
+#endif  // XNN_ARCH_ARM
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  bool use_arm_neon_fp16_arith;
+  bool use_arm_neon_dot;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  bool use_x86_ssse3;
+  bool use_x86_sse4_1;
   bool use_x86_avx;
+  bool use_x86_f16c;
+  bool use_x86_fma3;
+  bool use_x86_xop;
   bool use_x86_avx2;
   bool use_x86_avx512f;
   bool use_x86_avx512vbmi;
   bool use_x86_avx512skx;
 #endif
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  bool is_x86;
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
 XNN_INTERNAL const struct xnn_hardware_config* xnn_init_hardware_config();

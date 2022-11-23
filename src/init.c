@@ -34,6 +34,7 @@
 #include <xnnpack/argmaxpool.h>
 #include <xnnpack/avgpool.h>
 #include <xnnpack/common.h>
+#include <xnnpack/config.h>
 #include <xnnpack/conv.h>
 #include <xnnpack/dwconv.h>
 #include <xnnpack/gavgpool.h>
@@ -62,9 +63,6 @@
 #include <xnnpack/vunary.h>
 #include <xnnpack/zip.h>
 
-#ifndef XNN_ENABLE_ASSEMBLY
-  #define XNN_ENABLE_ASSEMBLY 1
-#endif
 
 #if XNN_PLATFORM_WINDOWS
   static INIT_ONCE init_guard = INIT_ONCE_STATIC_INIT;
@@ -74,48 +72,33 @@
 
 #define XNN_MR_TO_INDEX(MR) (MR-1)
 
+#ifndef XNN_ENABLE_ASSEMBLY
+  #error "XNN_ENABLE_ASSEMBLY is not defined"
+#endif
+
 #ifndef XNN_ENABLE_GEMM_M_SPECIALIZATION
-#error "XNN_ENABLE_GEMM_M_SPECIALIZATION is not defined"
+  #error "XNN_ENABLE_GEMM_M_SPECIALIZATION is not defined"
 #endif
 
 static const struct xnn_allocator* volatile init_allocator = NULL;
 
 static void init(void) {
-#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  // Unlike most other architectures, on x86/x86-64 when floating-point instructions
-  // have no NaN arguments, but produce NaN output, the output NaN has sign bit set.
-  // We use it to distinguish x86/x86-64 from other architectures, by doing subtraction
-  // of two infinities (must produce NaN per IEEE 754 standard).
-  static const volatile float inf = INFINITY;
-  const bool is_wasm_x86 = signbit(inf - inf);
-#endif
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    xnn_log_error("XNNPACK initialization failed: hardware not supported");
+    return;
+  }
+
   uint32_t init_flags = XNN_INIT_FLAG_XNNPACK;
 
 #if XNN_ARCH_ARM
-  #if XNN_PLATFORM_MOBILE
-    if (!cpuinfo_has_arm_neon()) {
-      xnn_log_error("XNNPACK initialization failed: NEON is not supported");
-      return;
-    }
-  #else
-    if (!cpuinfo_has_arm_v6()) {
-      xnn_log_error("XNNPACK initialization failed: ARMv6 instructions not supported");
-      return;
-    }
-
-    if (!cpuinfo_has_arm_vfpv2() && !cpuinfo_has_arm_vfpv3()) {
-      xnn_log_error("XNNPACK initialization failed: VFP is not supported");
-      return;
-    }
-  #endif
-
-  if (cpuinfo_has_arm_neon()) {
+  if (hardware_config->use_arm_neon) {
     /**************************** QC8 AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_QC8_OPERATORS
       init_flags |= XNN_INIT_FLAG_QC8;
 
       #if XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
             switch (cpuinfo_get_uarch(0)->uarch) {
               case cpuinfo_uarch_cortex_a55:
@@ -207,7 +190,7 @@ static void init(void) {
               break;
 
             default:
-              if (cpuinfo_has_arm_neon_v8()) {
+              if (hardware_config->use_arm_neon_v8) {
                 xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64);
                 xnn_params.qc8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qc8_igemm_minmax_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64);
                 xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_1x8__aarch32_neonv8_mlal_lane_cortex_a35);
@@ -243,7 +226,7 @@ static void init(void) {
             switch (uarch_info->uarch) {
               case cpuinfo_uarch_cortex_a55:
                 #if XNN_ENABLE_ARM_DOTPROD
-                  if (mr == 4 && nr == 8 && log2_kr == 2 && cpuinfo_has_arm_neon_dot()) {
+                  if (mr == 4 && nr == 8 && log2_kr == 2 && hardware_config->use_arm_neon_dot) {
                     xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_cortex_a55;
                     xnn_params.qc8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__aarch32_neondot_cortex_a55;
                     xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_1x8c4__neondot;
@@ -275,7 +258,7 @@ static void init(void) {
         }
         #endif  // XNN_MAX_UARCH_TYPES > 1
       #else  // XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
             xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__neondot);
             xnn_params.qc8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__neondot);
@@ -286,7 +269,7 @@ static void init(void) {
             xnn_params.qc8.gemm.nr = 8;
             xnn_params.qc8.gemm.log2_kr = 2;
           #endif  // XNN_ENABLE_ARM_DOTPROD
-        } else if (cpuinfo_has_arm_v8()) {
+        } else if (hardware_config->use_arm_neon_v8) {
           xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_2x8c2s4__neonv8_mlal);
           xnn_params.qc8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qc8_igemm_minmax_fp32_ukernel_2x8c2s4__neonv8_mlal);
           xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_1x8c2s4__neonv8_mlal);
@@ -309,7 +292,7 @@ static void init(void) {
         }
       #endif  // XNN_ENABLE_ASSEMBLY
 
-      if (cpuinfo_has_arm_neon_v8()) {
+      if (hardware_config->use_arm_neon_v8) {
         xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35;
         xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qc8_conv_minmax_fp32_neonv8_params;
         xnn_params.qc8.dwconv[0].channel_tile = 16;
@@ -343,7 +326,7 @@ static void init(void) {
       init_flags |= XNN_INIT_FLAG_QS8;
 
       #if XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
             switch (cpuinfo_get_uarch(0)->uarch) {
               case cpuinfo_uarch_cortex_a55:
@@ -460,7 +443,7 @@ static void init(void) {
             switch (uarch_info->uarch) {
               case cpuinfo_uarch_cortex_a55:
                 #if XNN_ENABLE_ARM_DOTPROD
-                  if (mr == 4 && nr == 8 && log2_kr == 2 && cpuinfo_has_arm_neon_dot()) {
+                  if (mr == 4 && nr == 8 && log2_kr == 2 && hardware_config->use_arm_neon_dot) {
                     xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a55;
                     xnn_params.qs8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__aarch32_neondot_cortex_a55;
                     xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c4__neondot;
@@ -491,7 +474,7 @@ static void init(void) {
         }
         #endif  // XNN_MAX_UARCH_TYPES > 1
       #else  // XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
             xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__neondot);
             xnn_params.qs8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__neondot);
@@ -560,7 +543,7 @@ static void init(void) {
       init_flags |= XNN_INIT_FLAG_QU8;
 
       #if XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
             xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__neondot);
             xnn_params.qu8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__neondot);
@@ -674,7 +657,7 @@ static void init(void) {
         }
         #endif  // XNN_MAX_UARCH_TYPES > 1
       #else  // XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
             xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x8c4__neondot);
             xnn_params.qu8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_rndnu_ukernel_4x8c4__neondot);
@@ -805,7 +788,7 @@ static void init(void) {
     /**************************** F16 AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_F16_OPERATORS
       #if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
-        if (cpuinfo_has_arm_neon_fp16_arith()) {
+        if (hardware_config->use_arm_neon_fp16_arith) {
           init_flags |= XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE;
 
           xnn_params.f16.gemm.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_6x8__neonfp16arith_ld64);
@@ -1259,7 +1242,7 @@ static void init(void) {
         .init.f32_minmax = xnn_init_f32_minmax_scalar_params,
         .element_tile = 8,
       };
-      if (cpuinfo_has_arm_neon_fma()) {
+      if (hardware_config->use_arm_neon_fma) {
         xnn_params.f32.elu = (struct vunary_parameters) {
           .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__neonfma_rr1_p6_x8,
           .init.f32_elu = xnn_init_f32_elu_neonfma_rr1_p6_params,
@@ -1286,7 +1269,7 @@ static void init(void) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__neon_x8,
         .element_tile = 8,
       };
-      if (cpuinfo_has_arm_neon_v8()) {
+      if (hardware_config->use_arm_neon_v8) {
         xnn_params.f32.rndne = (struct vunary_parameters) {
           .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__neonv8_x8,
           .element_tile = 8,
@@ -1448,7 +1431,7 @@ static void init(void) {
     #ifndef XNN_NO_VCVT_OPERATORS
       init_flags |= XNN_INIT_FLAG_VCVT;
 
-      if (cpuinfo_has_arm_neon_fp16()) {
+      if (hardware_config->use_arm_neon_fp16) {
         xnn_params.vcvt.f16_to_f32 = (struct vunary_parameters) {
           .ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__neonfp16_x16,
           .element_tile = 16,
@@ -1469,7 +1452,7 @@ static void init(void) {
           .element_tile = 8,
         };
       }
-      if (cpuinfo_has_arm_neon_v8()) {
+      if (hardware_config->use_arm_neon_v8) {
         xnn_params.vcvt.f32_to_qs8 = (struct vunary_parameters) {
           .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__neonv8_x32,
           .init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_neonv8_params,
@@ -2102,7 +2085,7 @@ static void init(void) {
 
     #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
       #if XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
             xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld128);
             xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_1x16c4__neondot);
@@ -2124,7 +2107,7 @@ static void init(void) {
           xnn_params.qc8.gemm.log2_kr = 3;
         }
       #else  // !XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
             xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__neondot);
             xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_1x16c4__neondot);
@@ -2149,7 +2132,7 @@ static void init(void) {
       #endif  // XNN_ENABLE_ASSEMBLY
     #else  // !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
       #if XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
             switch (cpuinfo_get_core(0)->uarch) {
               case cpuinfo_uarch_cortex_a55:
@@ -2247,7 +2230,7 @@ static void init(void) {
 
               case cpuinfo_uarch_cortex_a55:
                 #if XNN_ENABLE_ARM_DOTPROD
-                  if (mr == 4 && nr == 16 && log2_kr == 2 && cpuinfo_has_arm_neon_dot()) {
+                  if (mr == 4 && nr == 16 && log2_kr == 2 && hardware_config->use_arm_neon_dot) {
                     xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a55;
                     xnn_params.qc8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a55;
                     xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_1x16c4__neondot;
@@ -2262,7 +2245,7 @@ static void init(void) {
         }
         #endif  // XNN_MAX_UARCH_TYPES > 1
       #else  // !XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
             xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__neondot);
             xnn_params.qc8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__neondot);
@@ -2307,7 +2290,7 @@ static void init(void) {
 
     #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
       #if XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
             xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_ld128);
             xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c4__neondot);
@@ -2329,7 +2312,7 @@ static void init(void) {
           xnn_params.qs8.gemm.log2_kr = 3;
         }
       #else  // !XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
             xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__neondot);
             xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c4__neondot);
@@ -2354,7 +2337,7 @@ static void init(void) {
       #endif  // XNN_ENABLE_ASSEMBLY
     #else  // !XNN_PLATFORM_IOS && !XNN_PLATFORM_MAC
       #if XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
             switch (cpuinfo_get_core(0)->uarch) {
               case cpuinfo_uarch_cortex_a55:
@@ -2452,7 +2435,7 @@ static void init(void) {
 
               case cpuinfo_uarch_cortex_a55:
                 #if XNN_ENABLE_ARM_DOTPROD
-                  if (mr == 4 && nr == 16 && log2_kr == 2 && cpuinfo_has_arm_neon_dot()) {
+                  if (mr == 4 && nr == 16 && log2_kr == 2 && hardware_config->use_arm_neon_dot) {
                     xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_cortex_a55;
                     xnn_params.qs8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_qs8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_cortex_a55;
                     xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)].function[i] = (xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c4__neondot;
@@ -2467,7 +2450,7 @@ static void init(void) {
         }
         #endif  // XNN_MAX_UARCH_TYPES > 1
       #else  // !XNN_ENABLE_ASSEMBLY
-        if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+        if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
             xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__neondot);
             xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c4__neondot);
@@ -2537,7 +2520,7 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_QU8;
 
     #if XNN_ENABLE_ASSEMBLY
-      if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+      if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
         #if XNN_ENABLE_ARM_DOTPROD
           switch (cpuinfo_get_core(0)->uarch) {
             case cpuinfo_uarch_cortex_a55:
@@ -2629,7 +2612,7 @@ static void init(void) {
 
             case cpuinfo_uarch_cortex_a55:
               #if XNN_ENABLE_ARM_DOTPROD
-                if (mr == 4 && nr == 16 && log2_kr == 2 && cpuinfo_has_arm_neon_dot()) {
+                if (mr == 4 && nr == 16 && log2_kr == 2 && hardware_config->use_arm_neon_dot) {
                   xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_cortex_a55;
                   xnn_params.qu8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)].function[i] = (xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__aarch64_neondot_cortex_a55;
                 }
@@ -2642,7 +2625,7 @@ static void init(void) {
       }
       #endif  // XNN_MAX_UARCH_TYPES > 1
     #else  // !XNN_ENABLE_ASSEMBLY
-      if (XNN_ENABLE_ARM_DOTPROD && cpuinfo_has_arm_neon_dot()) {
+      if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
         #if XNN_ENABLE_ARM_DOTPROD
           xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_rndnu_ukernel_4x16c4__neondot);
           xnn_params.qu8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_rndnu_ukernel_4x16c4__neondot);
@@ -2773,7 +2756,7 @@ static void init(void) {
   /**************************** F16 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_F16_OPERATORS
     #if XNN_ENABLE_ARM_FP16_VECTOR
-      if (cpuinfo_has_arm_neon_fp16_arith()) {
+      if (hardware_config->use_arm_neon_fp16_arith) {
         init_flags |= XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE;
 
         #if XNN_ENABLE_ASSEMBLY
@@ -3661,16 +3644,11 @@ static void init(void) {
   #endif
 
 #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-  if (!cpuinfo_has_x86_sse2()) {
-    xnn_log_error("XNNPACK initialization failed: SSE2 is not supported");
-    return;
-  }
-
   /**************************** QC8 x86 micro-kernels ****************************/
   #ifndef XNN_NO_QC8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QC8;
 
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
       xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_4x16c8__avx512skx);
       xnn_params.qc8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qc8_igemm_minmax_fp32_ukernel_4x16c8__avx512skx);
       xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx);
@@ -3679,7 +3657,7 @@ static void init(void) {
       xnn_params.qc8.gemm.mr = 4;
       xnn_params.qc8.gemm.nr = 16;
       xnn_params.qc8.gemm.log2_kr = 3;
-    } else if (cpuinfo_has_x86_xop()) {
+    } else if (hardware_config->use_x86_xop) {
       // XOP should be checked before AVX2: AMD Excavator supports both, but performs better with XOP microkernels
       xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_2x4c8__xop_ld64);
       xnn_params.qc8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qc8_igemm_minmax_fp32_ukernel_2x4c8__xop_ld64);
@@ -3689,7 +3667,7 @@ static void init(void) {
       xnn_params.qc8.gemm.mr = 2;
       xnn_params.qc8.gemm.nr = 4;
       xnn_params.qc8.gemm.log2_kr = 3;
-    } else if (cpuinfo_has_x86_avx2()) {
+    } else if (hardware_config->use_x86_avx2) {
       xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_3x8c8__avx2);
       xnn_params.qc8.gemm.minmax.igemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qc8_igemm_minmax_fp32_ukernel_3x8c8__avx2);
       xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_1x8c8__avx2);
@@ -3698,7 +3676,7 @@ static void init(void) {
       xnn_params.qc8.gemm.mr = 3;
       xnn_params.qc8.gemm.nr = 8;
       xnn_params.qc8.gemm.log2_kr = 3;
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_2x4c8__avx_ld128);
       xnn_params.qc8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qc8_igemm_minmax_fp32_ukernel_2x4c8__avx_ld128);
       xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_1x4c8__avx_ld128);
@@ -3707,7 +3685,7 @@ static void init(void) {
       xnn_params.qc8.gemm.mr = 2;
       xnn_params.qc8.gemm.nr = 4;
       xnn_params.qc8.gemm.log2_kr = 3;
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_3x4c8__sse41_ld64);
       xnn_params.qc8.gemm.minmax.igemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qc8_igemm_minmax_fp32_ukernel_3x4c8__sse41_ld64);
       xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_1x4c8__sse41_ld64);
@@ -3727,7 +3705,7 @@ static void init(void) {
       xnn_params.qc8.gemm.log2_kr = 3;
     }
 
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
       xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qc8_dwconv_minmax_fp32_ukernel_3p32c__avx512skx_mul32;
       xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qc8_conv_minmax_fp32_avx512_params;
       xnn_params.qc8.dwconv[0].channel_tile = 32;
@@ -3737,7 +3715,7 @@ static void init(void) {
       xnn_params.qc8.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qc8_dwconv_minmax_fp32_ukernel_25p32c__avx512skx_mul32;
       xnn_params.qc8.dwconv[2].init.qc8 = xnn_init_qc8_conv_minmax_fp32_avx512_params;
       xnn_params.qc8.dwconv[2].channel_tile = 32;
-    } else if (cpuinfo_has_x86_xop()) {
+    } else if (hardware_config->use_x86_xop) {
       // XOP should be checked before AVX2: AMD Excavator supports both, but performs better with XOP microkernels
       xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__xop_mul16_add16;
       xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qc8_conv_minmax_fp32_sse4_params;
@@ -3748,7 +3726,7 @@ static void init(void) {
       xnn_params.qc8.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qc8_dwconv_minmax_fp32_ukernel_25p16c__xop_mul16_add16;
       xnn_params.qc8.dwconv[2].init.qc8 = xnn_init_qc8_conv_minmax_fp32_sse4_params;
       xnn_params.qc8.dwconv[2].channel_tile = 16;
-    } else if (cpuinfo_has_x86_avx2()) {
+    } else if (hardware_config->use_x86_avx2) {
       xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__avx2_mul32;
       xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qc8_conv_minmax_fp32_avx2_params;
       xnn_params.qc8.dwconv[0].channel_tile = 16;
@@ -3758,7 +3736,7 @@ static void init(void) {
       xnn_params.qc8.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qc8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32;
       xnn_params.qc8.dwconv[2].init.qc8 = xnn_init_qc8_conv_minmax_fp32_avx2_params;
       xnn_params.qc8.dwconv[2].channel_tile = 16;
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__avx_mul16_add16;
       xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qc8_conv_minmax_fp32_sse4_params;
       xnn_params.qc8.dwconv[0].channel_tile = 16;
@@ -3768,7 +3746,7 @@ static void init(void) {
       xnn_params.qc8.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qc8_dwconv_minmax_fp32_ukernel_25p16c__avx_mul16_add16;
       xnn_params.qc8.dwconv[2].init.qc8 = xnn_init_qc8_conv_minmax_fp32_sse4_params;
       xnn_params.qc8.dwconv[2].channel_tile = 16;
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__sse41_mul16;
       xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qc8_conv_minmax_fp32_sse4_params;
       xnn_params.qc8.dwconv[0].channel_tile = 8;
@@ -3778,7 +3756,7 @@ static void init(void) {
       xnn_params.qc8.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qc8_dwconv_minmax_fp32_ukernel_25p8c__sse41_mul16;
       xnn_params.qc8.dwconv[2].init.qc8 = xnn_init_qc8_conv_minmax_fp32_sse4_params;
       xnn_params.qc8.dwconv[2].channel_tile = 8;
-    } else if (cpuinfo_has_x86_sse2()) {
+    } else {
       xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__sse2_mul16;
       xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qc8_conv_minmax_fp32_sse2_params;
       xnn_params.qc8.dwconv[0].channel_tile = 8;
@@ -3798,7 +3776,7 @@ static void init(void) {
   #ifndef XNN_NO_QS8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QS8;
 
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
       xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_fp32_ukernel_4x16c8__avx512skx);
       xnn_params.qs8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_igemm_minmax_fp32_ukernel_4x16c8__avx512skx);
       xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx);
@@ -3807,7 +3785,7 @@ static void init(void) {
       xnn_params.qs8.gemm.mr = 4;
       xnn_params.qs8.gemm.nr = 16;
       xnn_params.qs8.gemm.log2_kr = 3;
-    } else if (cpuinfo_has_x86_xop()) {
+    } else if (hardware_config->use_x86_xop) {
       // XOP should be checked before AVX2: AMD Excavator supports both, but performs better with XOP microkernels
       xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_fp32_ukernel_2x4c8__xop_ld64);
       xnn_params.qs8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_igemm_minmax_fp32_ukernel_2x4c8__xop_ld64);
@@ -3817,7 +3795,7 @@ static void init(void) {
       xnn_params.qs8.gemm.mr = 2;
       xnn_params.qs8.gemm.nr = 4;
       xnn_params.qs8.gemm.log2_kr = 3;
-    } else if (cpuinfo_has_x86_avx2()) {
+    } else if (hardware_config->use_x86_avx2) {
       xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_fp32_ukernel_3x8c8__avx2);
       xnn_params.qs8.gemm.minmax.igemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_igemm_minmax_fp32_ukernel_3x8c8__avx2);
       xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_fp32_ukernel_1x8c8__avx2);
@@ -3826,7 +3804,7 @@ static void init(void) {
       xnn_params.qs8.gemm.mr = 3;
       xnn_params.qs8.gemm.nr = 8;
       xnn_params.qs8.gemm.log2_kr = 3;
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_fp32_ukernel_2x4c8__avx_ld128);
       xnn_params.qs8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_igemm_minmax_fp32_ukernel_2x4c8__avx_ld128);
       xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_fp32_ukernel_1x4c8__avx_ld128);
@@ -3835,7 +3813,7 @@ static void init(void) {
       xnn_params.qs8.gemm.mr = 2;
       xnn_params.qs8.gemm.nr = 4;
       xnn_params.qs8.gemm.log2_kr = 3;
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_fp32_ukernel_3x4c8__sse41_ld64);
       xnn_params.qs8.gemm.minmax.igemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_igemm_minmax_fp32_ukernel_3x4c8__sse41_ld64);
       xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_fp32_ukernel_1x4c8__sse41_ld64);
@@ -3855,14 +3833,14 @@ static void init(void) {
       xnn_params.qs8.gemm.log2_kr = 3;
     }
 
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32;
       xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_avx512_params;
       xnn_params.qs8.dwconv[0].channel_tile = 32;
       xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_25p32c__avx512skx_mul32;
       xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_fp32_avx512_params;
       xnn_params.qs8.dwconv[1].channel_tile = 32;
-    } else if (cpuinfo_has_x86_xop()) {
+    } else if (hardware_config->use_x86_xop) {
       // XOP should be checked before AVX2: AMD Excavator supports both, but performs better with XOP microkernels
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__xop_mul16_add16;
       xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_sse4_params;
@@ -3870,28 +3848,28 @@ static void init(void) {
       xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__xop_mul16_add16;
       xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_fp32_sse4_params;
       xnn_params.qs8.dwconv[1].channel_tile = 16;
-    } else if (cpuinfo_has_x86_avx2()) {
+    } else if (hardware_config->use_x86_avx2) {
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32;
       xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_avx2_params;
       xnn_params.qs8.dwconv[0].channel_tile = 16;
       xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32;
       xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_fp32_avx2_params;
       xnn_params.qs8.dwconv[1].channel_tile = 16;
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx_mul16_add16;
       xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_sse4_params;
       xnn_params.qs8.dwconv[0].channel_tile = 16;
       xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx_mul16_add16;
       xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_fp32_sse4_params;
       xnn_params.qs8.dwconv[1].channel_tile = 16;
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__sse41_mul16_add16;
       xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_sse4_params;
       xnn_params.qs8.dwconv[0].channel_tile = 8;
       xnn_params.qs8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__sse41_mul16_add16;
       xnn_params.qs8.dwconv[1].init.qs8 = xnn_init_qs8_conv_minmax_fp32_sse4_params;
       xnn_params.qs8.dwconv[1].channel_tile = 8;
-    } else if (cpuinfo_has_x86_sse2()) {
+    } else {
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__sse2_mul16_add16;
       xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_sse2_params;
       xnn_params.qs8.dwconv[0].channel_tile = 8;
@@ -3902,7 +3880,7 @@ static void init(void) {
     xnn_params.qs8.dwconv[0].primary_tile = 9;
     xnn_params.qs8.dwconv[1].primary_tile = 25;
 
-    if (cpuinfo_has_x86_sse4_1()) {
+    if (hardware_config->use_x86_sse4_1) {
       xnn_params.qs8.gavgpool = (struct gavgpool_parameters) {
         .unipass = (xnn_gavgpool_unipass_ukernel_fn) xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__sse41_c8,
         .multipass = (xnn_gavgpool_multipass_ukernel_fn) xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__sse41_c8,
@@ -3922,7 +3900,7 @@ static void init(void) {
       };
     }
 
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
       xnn_params.qs8.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x16,
@@ -3930,7 +3908,7 @@ static void init(void) {
         .init.qs8_add = xnn_init_qs8_add_minmax_avx512_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_xop()) {
+    } else if (hardware_config->use_x86_xop) {
       xnn_params.qs8.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__xop_mul32_ld32_x8,
@@ -3938,7 +3916,7 @@ static void init(void) {
         .init.qs8_add = xnn_init_qs8_add_minmax_sse4_mul32_params,
         .element_tile = 8,
       };
-    } else if (cpuinfo_has_x86_avx2()) {
+    } else if (hardware_config->use_x86_avx2) {
       xnn_params.qs8.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16,
@@ -3946,7 +3924,7 @@ static void init(void) {
         .init.qs8_add = xnn_init_qs8_add_minmax_avx2_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.qs8.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__avx_mul32_ld32_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_x8,
@@ -3954,7 +3932,7 @@ static void init(void) {
         .init.qs8_add = xnn_init_qs8_add_minmax_sse4_mul32_params,
         .element_tile = 8,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.qs8.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__sse41_mul16_ld64_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_x8,
@@ -3971,7 +3949,7 @@ static void init(void) {
         .element_tile = 8,
       };
     }
-    if (cpuinfo_has_x86_avx()) {
+    if (hardware_config->use_x86_avx) {
       xnn_params.qs8.vmul = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmul_minmax_fp32_ukernel__avx_mul16_ld64_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_x16,
@@ -3979,7 +3957,7 @@ static void init(void) {
         .init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_sse4_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.qs8.vmul = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmul_minmax_fp32_ukernel__sse41_mul16_ld64_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_x16,
@@ -3997,25 +3975,25 @@ static void init(void) {
       };
     }
 
-    if (cpuinfo_has_x86_avx2()) {
+    if (hardware_config->use_x86_avx2) {
       xnn_params.qs8.lrelu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__avx2_x32,
         .init.qs8_lrelu = xnn_init_qs8_lrelu_avx2_params,
         .element_tile = 32,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.qs8.lrelu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__avx_x32,
         .init.qs8_lrelu = xnn_init_qs8_lrelu_avx_params,
         .element_tile = 32,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.qs8.lrelu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__sse41_x32,
         .init.qs8_lrelu = xnn_init_qs8_lrelu_sse2_params,
         .element_tile = 32,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.qs8.lrelu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__ssse3_x32,
         .init.qs8_lrelu = xnn_init_qs8_lrelu_sse2_params,
@@ -4034,7 +4012,7 @@ static void init(void) {
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;
 
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
       xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_fp32_ukernel_4x16c8__avx512skx);
       xnn_params.qu8.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_fp32_ukernel_4x16c8__avx512skx);
       xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx);
@@ -4043,7 +4021,7 @@ static void init(void) {
       xnn_params.qu8.gemm.mr = 4;
       xnn_params.qu8.gemm.nr = 16;
       xnn_params.qu8.gemm.log2_kr = 3;
-    } else if (cpuinfo_has_x86_xop()) {
+    } else if (hardware_config->use_x86_xop) {
       // XOP should be checked before AVX2: AMD Excavator supports both, but performs better with XOP microkernels
       xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_fp32_ukernel_2x4c8__xop_ld64);
       xnn_params.qu8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__xop_ld64);
@@ -4053,7 +4031,7 @@ static void init(void) {
       xnn_params.qu8.gemm.mr = 2;
       xnn_params.qu8.gemm.nr = 4;
       xnn_params.qu8.gemm.log2_kr = 3;
-    } else if (cpuinfo_has_x86_avx2()) {
+    } else if (hardware_config->use_x86_avx2) {
       xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_fp32_ukernel_3x8c8__avx2);
       xnn_params.qu8.gemm.minmax.igemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2);
       xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx2);
@@ -4062,7 +4040,7 @@ static void init(void) {
       xnn_params.qu8.gemm.mr = 3;
       xnn_params.qu8.gemm.nr = 8;
       xnn_params.qu8.gemm.log2_kr = 3;
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_fp32_ukernel_2x4c8__avx_ld128);
       xnn_params.qu8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__avx_ld128);
       xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__avx_ld128);
@@ -4071,7 +4049,7 @@ static void init(void) {
       xnn_params.qu8.gemm.mr = 2;
       xnn_params.qu8.gemm.nr = 4;
       xnn_params.qu8.gemm.log2_kr = 3;
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_fp32_ukernel_3x4c8__sse41_ld64);
       xnn_params.qu8.gemm.minmax.igemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse41_ld64);
       xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__sse41_ld64);
@@ -4091,14 +4069,14 @@ static void init(void) {
       xnn_params.qu8.gemm.log2_kr = 3;
     }
 
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
       xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32;
       xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_avx512_params;
       xnn_params.qu8.dwconv[0].channel_tile = 32;
       xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_25p32c__avx512skx_mul32;
       xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_avx512_params;
       xnn_params.qu8.dwconv[1].channel_tile = 32;
-    } else if (cpuinfo_has_x86_xop()) {
+    } else if (hardware_config->use_x86_xop) {
       // XOP should be checked before AVX2: AMD Excavator supports both, but performs better with XOP microkernels
       xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__xop_mul32;
       xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
@@ -4106,28 +4084,28 @@ static void init(void) {
       xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__xop_mul32;
       xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
       xnn_params.qu8.dwconv[1].channel_tile = 16;
-    } else if (cpuinfo_has_x86_avx2()) {
+    } else if (hardware_config->use_x86_avx2) {
       xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32;
       xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_avx2_params;
       xnn_params.qu8.dwconv[0].channel_tile = 16;
       xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32;
       xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_avx2_params;
       xnn_params.qu8.dwconv[1].channel_tile = 16;
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx_mul16;
       xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
       xnn_params.qu8.dwconv[0].channel_tile = 16;
       xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__avx_mul16;
       xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
       xnn_params.qu8.dwconv[1].channel_tile = 16;
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__sse41_mul16;
       xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
       xnn_params.qu8.dwconv[0].channel_tile = 8;
       xnn_params.qu8.dwconv[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_25p8c__sse41_mul16;
       xnn_params.qu8.dwconv[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
       xnn_params.qu8.dwconv[1].channel_tile = 8;
-    } else if (cpuinfo_has_x86_sse2()) {
+    } else {
       xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__sse2_mul16;
       xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_sse2_params;
       xnn_params.qu8.dwconv[0].channel_tile = 8;
@@ -4146,7 +4124,7 @@ static void init(void) {
       .incremental_tile = 8,
       .channel_tile = 8,
     };
-    if (cpuinfo_has_x86_sse4_1()) {
+    if (hardware_config->use_x86_sse4_1) {
       xnn_params.qu8.gavgpool = (struct gavgpool_parameters) {
         .unipass = (xnn_gavgpool_unipass_ukernel_fn) xnn_qu8_gavgpool_minmax_fp32_ukernel_7x__sse41_c8,
         .multipass = (xnn_gavgpool_multipass_ukernel_fn) xnn_qu8_gavgpool_minmax_fp32_ukernel_7p7x__sse41_c8,
@@ -4166,7 +4144,7 @@ static void init(void) {
       };
     }
 
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
       xnn_params.qu8.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x16,
@@ -4174,7 +4152,7 @@ static void init(void) {
         .init.qu8_add = xnn_init_qu8_add_minmax_avx512_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_xop()) {
+    } else if (hardware_config->use_x86_xop) {
       xnn_params.qu8.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__xop_mul32_ld32_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__xop_mul32_ld32_x8,
@@ -4182,7 +4160,7 @@ static void init(void) {
         .init.qu8_add = xnn_init_qu8_add_minmax_sse4_params,
         .element_tile = 8,
       };
-    } else if (cpuinfo_has_x86_avx2()) {
+    } else if (hardware_config->use_x86_avx2) {
       xnn_params.qu8.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__avx2_mul32_ld64_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16,
@@ -4190,7 +4168,7 @@ static void init(void) {
         .init.qu8_add = xnn_init_qu8_add_minmax_avx2_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.qu8.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__avx_mul32_ld32_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__avx_mul32_ld32_x8,
@@ -4198,7 +4176,7 @@ static void init(void) {
         .init.qu8_add = xnn_init_qu8_add_minmax_sse4_params,
         .element_tile = 8,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.qu8.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__sse41_mul16_ld64_x8,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__sse41_mul16_ld64_x8,
@@ -4215,7 +4193,7 @@ static void init(void) {
         .element_tile = 8,
       };
     }
-    if (cpuinfo_has_x86_avx()) {
+    if (hardware_config->use_x86_avx) {
       xnn_params.qu8.vmul = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmul_minmax_fp32_ukernel__avx_mul16_ld64_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_x16,
@@ -4223,7 +4201,7 @@ static void init(void) {
         .init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_sse2_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.qu8.vmul = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmul_minmax_fp32_ukernel__sse41_mul16_ld64_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_x16,
@@ -4241,25 +4219,25 @@ static void init(void) {
       };
     }
 
-    if (cpuinfo_has_x86_avx2()) {
+    if (hardware_config->use_x86_avx2) {
       xnn_params.qu8.lrelu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__avx2_x32,
         .init.qu8_lrelu = xnn_init_qu8_lrelu_avx2_params,
         .element_tile = 32,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.qu8.lrelu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__avx_x32,
         .init.qu8_lrelu = xnn_init_qu8_lrelu_avx_params,
         .element_tile = 32,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.qu8.lrelu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__sse41_x32,
         .init.qu8_lrelu = xnn_init_qu8_lrelu_sse2_params,
         .element_tile = 32,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.qu8.lrelu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__ssse3_x32,
         .init.qu8_lrelu = xnn_init_qu8_lrelu_sse2_params,
@@ -4278,7 +4256,7 @@ static void init(void) {
   #ifndef XNN_NO_S8_OPERATORS
     init_flags |= XNN_INIT_FLAG_S8;
 
-    if (cpuinfo_has_x86_sse4_1()) {
+    if (hardware_config->use_x86_sse4_1) {
       xnn_params.s8.clamp = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__sse41_x64,
         .init.s8_minmax = xnn_init_s8_minmax_sse4_params,
@@ -4324,7 +4302,7 @@ static void init(void) {
       .init.u8_minmax = xnn_init_u8_minmax_sse2_params,
       .element_tile = 64,
     };
-    if (cpuinfo_has_x86_sse4_1()) {
+    if (hardware_config->use_x86_sse4_1) {
       xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
         .ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__sse41_c16,
         .pixel_tile = 1,
@@ -4351,15 +4329,15 @@ static void init(void) {
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
-      if (cpuinfo_has_x86_avx512vbmi()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+      if (hardware_config->use_x86_avx512vbmi) {
         xnn_params.x8.lut = xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_x128;
       } else {
         xnn_params.x8.lut = xnn_x8_lut_ukernel__avx512skx_vpshufb_x64;
       }
-    } else if (cpuinfo_has_x86_avx2()) {
+    } else if (hardware_config->use_x86_avx2) {
       xnn_params.x8.lut = xnn_x8_lut_ukernel__avx2_x128;
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.x8.lut = xnn_x8_lut_ukernel__avx_x64;
     } else {
       // Note: SSSE3 version is usually slower than scalar
@@ -4375,7 +4353,7 @@ static void init(void) {
 
   /**************************** F16 x86 micro-kernels ****************************/
   #ifndef XNN_NO_F16_OPERATORS
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx2()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx2) {
       init_flags |= XNN_INIT_FLAG_F16;
 
       xnn_params.f16.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_4x16__avx2_broadcast);
@@ -4577,7 +4555,7 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       xnn_params.f32.gemm.minmax.gemm[XNN_MR_TO_INDEX(7)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_7x16__avx512f_broadcast);
       xnn_params.f32.gemm.minmax.igemm[XNN_MR_TO_INDEX(7)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_7x16__avx512f_broadcast);
       xnn_params.f32.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x16__avx512f_broadcast);
@@ -4585,7 +4563,7 @@ static void init(void) {
       xnn_params.f32.gemm.init.f32 = xnn_init_f32_minmax_scalar_params;
       xnn_params.f32.gemm.mr = 7;
       xnn_params.f32.gemm.nr = 16;
-    } else if (cpuinfo_has_x86_fma3()) {
+    } else if (hardware_config->use_x86_fma3) {
       switch (cpuinfo_get_core(0)->uarch) {
         case cpuinfo_uarch_zen:
         case cpuinfo_uarch_dhyana:
@@ -4608,7 +4586,7 @@ static void init(void) {
           xnn_params.f32.gemm.nr = 16;
           break;
       }
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.f32.gemm.minmax.gemm[XNN_MR_TO_INDEX(5)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_5x16__avx_broadcast);
       xnn_params.f32.gemm.minmax.igemm[XNN_MR_TO_INDEX(5)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_5x16__avx_broadcast);
       xnn_params.f32.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x16__avx_broadcast);
@@ -4632,7 +4610,7 @@ static void init(void) {
     xnn_params.f32.gemm2.nr = 2;
     xnn_params.f32.gemm2.log2_kr = 2;
 
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       xnn_params.f32.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p16c__avx512f;
       xnn_params.f32.dwconv[0].init.f32 = xnn_init_f32_minmax_scalar_params;
       xnn_params.f32.dwconv[0].channel_tile = 16;
@@ -4652,7 +4630,7 @@ static void init(void) {
       xnn_params.f32.dwconv[3].init.f32 = xnn_init_f32_minmax_scalar_params;
       xnn_params.f32.dwconv[3].channel_tile = 16;
       xnn_params.f32.dwconv[3].primary_tile = 25;
-    } else if (cpuinfo_has_x86_fma3()) {
+    } else if (hardware_config->use_x86_fma3) {
       xnn_params.f32.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p16c__fma3;
       xnn_params.f32.dwconv[0].init.f32 = xnn_init_f32_minmax_avx_params;
       xnn_params.f32.dwconv[0].channel_tile = 16;
@@ -4672,7 +4650,7 @@ static void init(void) {
       xnn_params.f32.dwconv[3].init.f32 = xnn_init_f32_minmax_avx_params;
       xnn_params.f32.dwconv[3].channel_tile = 8;
       xnn_params.f32.dwconv[3].primary_tile = 25;
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.f32.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p16c__avx;
       xnn_params.f32.dwconv[0].init.f32 = xnn_init_f32_minmax_avx_params;
       xnn_params.f32.dwconv[0].channel_tile = 16;
@@ -4761,13 +4739,13 @@ static void init(void) {
       .pixel_tile = 1,
       .channel_tile = 8,
     };
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       xnn_params.f32.abs = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__avx512f_x16,
         .init.f32_abs = xnn_init_f32_abs_avx512_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.f32.abs = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__avx_x16,
         .init.f32_abs = xnn_init_f32_abs_avx_params,
@@ -4780,13 +4758,13 @@ static void init(void) {
         .element_tile = 8,
       };
     }
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       xnn_params.f32.clamp = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__avx512f_x16,
         .init.f32_minmax = xnn_init_f32_minmax_scalar_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.f32.clamp = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__avx_x16,
         .init.f32_minmax = xnn_init_f32_minmax_avx_params,
@@ -4799,19 +4777,19 @@ static void init(void) {
         .element_tile = 8,
       };
     }
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       xnn_params.f32.elu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64,
         .init.f32_elu = xnn_init_f32_elu_avx512_rr1_lut16_p3_params,
         .element_tile = 64,
       };
-    } else if (cpuinfo_has_x86_avx2()) {
+    } else if (hardware_config->use_x86_avx2) {
       xnn_params.f32.elu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_x56,
         .init.f32_elu = xnn_init_f32_elu_avx2_rr1_lut4_p4_params,
         .element_tile = 56,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.f32.elu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x32,
         .init.f32_elu = xnn_init_f32_elu_avx_rr2_lut4_p4_params,
@@ -4824,19 +4802,19 @@ static void init(void) {
         .element_tile = 12,
       };
     }
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       xnn_params.f32.hswish = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__avx512f_x16,
         .init.f32_hswish = xnn_init_f32_hswish_avx512_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_fma3()) {
+    } else if (hardware_config->use_x86_fma3) {
       xnn_params.f32.hswish = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__fma3_x16,
         .init.f32_hswish = xnn_init_f32_hswish_avx_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.f32.hswish = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__avx_x16,
         .init.f32_hswish = xnn_init_f32_hswish_avx_params,
@@ -4849,19 +4827,19 @@ static void init(void) {
         .element_tile = 8,
       };
     }
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       xnn_params.f32.lrelu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__avx512f_x16,
         .init.f32_lrelu = xnn_init_f32_lrelu_scalar_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.f32.lrelu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__avx_x16,
         .init.f32_lrelu = xnn_init_f32_lrelu_avx_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.f32.lrelu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__sse41_x8,
         .init.f32_lrelu = xnn_init_f32_lrelu_sse_params,
@@ -4874,13 +4852,13 @@ static void init(void) {
         .element_tile = 8,
       };
     }
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       xnn_params.f32.neg = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__avx512f_x16,
         .init.f32_neg = xnn_init_f32_neg_avx512_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.f32.neg = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__avx_x16,
         .init.f32_neg = xnn_init_f32_neg_avx_params,
@@ -4893,7 +4871,7 @@ static void init(void) {
         .element_tile = 8,
       };
     }
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       xnn_params.f32.rndne = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__avx512f_x16,
         .element_tile = 16,
@@ -4910,7 +4888,7 @@ static void init(void) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndd_ukernel__avx512f_x16,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.f32.rndne = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__avx_x16,
         .init.f32_rnd = xnn_init_f32_rnd_avx_params,
@@ -4931,7 +4909,7 @@ static void init(void) {
         .init.f32_rnd = xnn_init_f32_rnd_avx_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.f32.rndne = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__sse41_x8,
         .element_tile = 8,
@@ -4970,25 +4948,25 @@ static void init(void) {
         .element_tile = 8,
       };
     }
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       xnn_params.f32.sigmoid = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x64,
         .init.f32_sigmoid = xnn_init_f32_sigmoid_avx512_rr2_lut32_p2_params,
         .element_tile = 64,
       };
-    } else if (cpuinfo_has_x86_avx2()) {
+    } else if (hardware_config->use_x86_avx2) {
       xnn_params.f32.sigmoid = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_div_x40,
         .init.f32_sigmoid = xnn_init_f32_sigmoid_avx2_rr1_p5_params,
         .element_tile = 40,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.f32.sigmoid = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__avx_rr2_p5_nr2_x40,
         .init.f32_sigmoid = xnn_init_f32_sigmoid_avx_rr2_p5_params,
         .element_tile = 40,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.f32.sigmoid = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__sse41_rr2_lut64_p2_div_x8,
         .init.f32_sigmoid = xnn_init_f32_sigmoid_sse2_rr2_lut64_p2_params,
@@ -5001,12 +4979,12 @@ static void init(void) {
         .element_tile = 8,
       };
     }
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       xnn_params.f32.sqr = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__avx512f_x16,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.f32.sqr = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__avx_x16,
         .init.f32_default = xnn_init_f32_default_avx_params,
@@ -5018,7 +4996,7 @@ static void init(void) {
         .element_tile = 8,
       };
     }
-    if (cpuinfo_has_x86_avx()) {
+    if (hardware_config->use_x86_avx) {
       xnn_params.f32.sqrt = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__avx_sqrt_x8,
         .init.f32_sqrt = xnn_init_f32_sqrt_avx_params,
@@ -5030,19 +5008,19 @@ static void init(void) {
         .element_tile = 4,
       };
     }
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__avx512f_2x16,
         .row_tile = 2,
         .channel_tile = 16,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__avx_2x16,
         .row_tile = 2,
         .channel_tile = 16,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__sse41_2x8,
         .row_tile = 2,
@@ -5061,7 +5039,7 @@ static void init(void) {
       .element_tile = 20,
     };
     xnn_params.f32.rmax = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__sse;
-    if (!XNN_PLATFORM_MOBILE && cpuinfo_has_x86_avx512f()) {
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       xnn_params.f32.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vadd_minmax_ukernel__avx512f_x32,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_minmax_ukernel__avx512f_x32,
@@ -5108,7 +5086,7 @@ static void init(void) {
         .minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiffc_ukernel__avx512f_x32,
         .element_tile = 32,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.f32.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vadd_minmax_ukernel__avx_x16,
         .minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_minmax_ukernel__avx_x16,
@@ -5215,7 +5193,7 @@ static void init(void) {
     #ifndef XNN_NO_NCHW_OPERATORS
       // Sparse microkernels on x86 currently target only SSE, and on processors
       // with AVX ISA dense inference is expected to be faster than sparse.
-      if (!cpuinfo_has_x86_avx()) {
+      if (!hardware_config->use_x86_avx) {
         init_flags |= XNN_INIT_FLAG_CHW_OPT;
       }
 
@@ -5231,7 +5209,7 @@ static void init(void) {
         .output_height_tile = 2,
         .output_width_tile = 2,
       };
-      if (cpuinfo_has_x86_ssse3()) {
+      if (hardware_config->use_x86_ssse3) {
         xnn_params.f32.dwconv2d_chw_3x3 = (struct dwconv2d_chw_parameters) {
           .ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_2x4_acc2,
           .output_height_tile = 2,
@@ -5275,7 +5253,7 @@ static void init(void) {
   #ifndef XNN_NO_VCVT_OPERATORS
     init_flags |= XNN_INIT_FLAG_VCVT;
 
-    if (cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+    if (hardware_config->use_x86_avx512skx) {
       xnn_params.vcvt.f16_to_f32 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__avx512skx_x16,
         .element_tile = 16,
@@ -5284,7 +5262,7 @@ static void init(void) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_f16_vcvt_ukernel__avx512skx_x16,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_f16c()) {
+    } else if (hardware_config->use_x86_f16c) {
       xnn_params.vcvt.f16_to_f32 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__f16c_x16,
         .element_tile = 16,
@@ -5294,7 +5272,7 @@ static void init(void) {
         .init.f32_f16_cvt = xnn_init_f32_f16_cvt_f16c_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.vcvt.f16_to_f32 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__avx_int16_x16,
         .init.f16_f32_cvt = xnn_init_f16_f32_cvt_sse_int16_params,
@@ -5305,7 +5283,7 @@ static void init(void) {
         .init.f32_f16_cvt = xnn_init_f32_f16_cvt_sse2_params,
         .element_tile = 24,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.vcvt.f16_to_f32 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f16_f32_vcvt_ukernel__sse41_int16_x16,
         .init.f16_f32_cvt = xnn_init_f16_f32_cvt_sse_int16_params,
@@ -5328,25 +5306,25 @@ static void init(void) {
         .element_tile = 16,
       };
     }
-    if (cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+    if (hardware_config->use_x86_avx512skx) {
       xnn_params.vcvt.f32_to_qs8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__avx512skx_x128,
         .init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_avx512_params,
         .element_tile = 128,
       };
-    } else if (cpuinfo_has_x86_avx2()) {
+    } else if (hardware_config->use_x86_avx2) {
       xnn_params.vcvt.f32_to_qs8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__avx2_x64,
         .init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_avx2_params,
         .element_tile = 64,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.vcvt.f32_to_qs8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__avx_x32,
         .init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_avx_params,
         .element_tile = 32,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.vcvt.f32_to_qs8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__sse41_x32,
         .init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_sse4_params,
@@ -5359,19 +5337,19 @@ static void init(void) {
         .element_tile = 32,
       };
     }
-    if (cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+    if (hardware_config->use_x86_avx512skx) {
       xnn_params.vcvt.f32_to_qu8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__avx512skx_x128,
         .init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_avx512_params,
         .element_tile = 128,
       };
-    } else if (cpuinfo_has_x86_avx2()) {
+    } else if (hardware_config->use_x86_avx2) {
       xnn_params.vcvt.f32_to_qu8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__avx2_x64,
         .init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_avx2_params,
         .element_tile = 64,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.vcvt.f32_to_qu8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__avx_x32,
         .init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_avx_params,
@@ -5384,7 +5362,7 @@ static void init(void) {
         .element_tile = 32,
       };
     }
-    if (cpuinfo_has_x86_avx2()) {
+    if (hardware_config->use_x86_avx2) {
       xnn_params.vcvt.qs8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__avx2_x32,
         .init.qs8_cvt = xnn_init_qs8_cvt_avx2_params,
@@ -5395,7 +5373,7 @@ static void init(void) {
         .init.qu8_cvt = xnn_init_qu8_cvt_avx2_params,
         .element_tile = 32,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.vcvt.qs8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__avx_x32,
         .init.qs8_cvt = xnn_init_qs8_cvt_ssse3_params,
@@ -5406,7 +5384,7 @@ static void init(void) {
         .init.qu8_cvt = xnn_init_qu8_cvt_ssse3_params,
         .element_tile = 32,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.vcvt.qs8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__sse41_x32,
         .init.qs8_cvt = xnn_init_qs8_cvt_ssse3_params,
@@ -5417,7 +5395,7 @@ static void init(void) {
         .init.qu8_cvt = xnn_init_qu8_cvt_ssse3_params,
         .element_tile = 32,
       };
-    } else if (cpuinfo_has_x86_ssse3()) {
+    } else if (hardware_config->use_x86_ssse3) {
       xnn_params.vcvt.qs8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__ssse3_x32,
         .init.qs8_cvt = xnn_init_qs8_cvt_ssse3_params,
@@ -5440,7 +5418,7 @@ static void init(void) {
         .element_tile = 32,
       };
     }
-    if (cpuinfo_has_x86_avx512f() && cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl()) {
+    if (hardware_config->use_x86_avx512skx) {
       xnn_params.vcvt.qs8_to_f32 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__avx512skx_x32,
         .init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_avx512_params,
@@ -5451,7 +5429,7 @@ static void init(void) {
         .init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_avx512_params,
         .element_tile = 32,
       };
-    } else if (cpuinfo_has_x86_avx2()) {
+    } else if (hardware_config->use_x86_avx2) {
       xnn_params.vcvt.qs8_to_f32 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__avx2_x16,
         .init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_avx_params,
@@ -5462,7 +5440,7 @@ static void init(void) {
         .init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_avx_params,
         .element_tile = 16,
       };
-    } else if (cpuinfo_has_x86_avx()) {
+    } else if (hardware_config->use_x86_avx) {
       xnn_params.vcvt.qs8_to_f32 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__avx_x32,
         .init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_avx_params,
@@ -5473,7 +5451,7 @@ static void init(void) {
         .init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_avx_params,
         .element_tile = 32,
       };
-    } else if (cpuinfo_has_x86_sse4_1()) {
+    } else if (hardware_config->use_x86_sse4_1) {
       xnn_params.vcvt.qs8_to_f32 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__sse41_x16,
         .init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_sse4_params,
@@ -5604,7 +5582,7 @@ static void init(void) {
     };
 
     #if XNN_ARCH_WASMRELAXEDSIMD
-      if (is_wasm_x86) {
+      if (hardware_config->is_x86) {
         xnn_params.qs8.lrelu = (struct vunary_parameters) {
           .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_x86_x32,
           .init.qs8_lrelu = xnn_init_qs8_lrelu_wasmsimd_x86_params,
@@ -5618,7 +5596,7 @@ static void init(void) {
         };
       }
     #else
-      if (is_wasm_x86) {
+      if (hardware_config->is_x86) {
         xnn_params.qs8.lrelu = (struct vunary_parameters) {
           .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__wasmsimd_x86_x16,
           .init.qs8_lrelu = xnn_init_qs8_lrelu_wasmsimd_x86_params,
@@ -5690,7 +5668,7 @@ static void init(void) {
     };
 
     #if XNN_ARCH_WASMRELAXEDSIMD
-      if (is_wasm_x86) {
+      if (hardware_config->is_x86) {
         xnn_params.qu8.lrelu = (struct vunary_parameters) {
           .ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_x86_x32,
           .init.qu8_lrelu = xnn_init_qu8_lrelu_wasmsimd_x86_params,
@@ -5704,7 +5682,7 @@ static void init(void) {
         };
       }
     #else
-      if (is_wasm_x86) {
+      if (hardware_config->is_x86) {
         xnn_params.qu8.lrelu = (struct vunary_parameters) {
           .ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__wasmsimd_x86_x16,
           .init.qu8_lrelu = xnn_init_qu8_lrelu_wasmsimd_x86_params,
@@ -5783,7 +5761,7 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       #if XNN_ARCH_WASMRELAXEDSIMD
         xnn_params.f32.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__wasmrelaxedsimd_fma_splat);
         xnn_params.f32.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8__wasmrelaxedsimd_fma_splat);
@@ -5901,7 +5879,7 @@ static void init(void) {
       xnn_params.f32.dwconv[2].channel_tile = 8;
       xnn_params.f32.dwconv[2].primary_tile = 9;
     #else
-      if (is_wasm_x86) {
+      if (hardware_config->is_x86) {
         xnn_params.f32.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p8c__wasmsimd_x86;
         xnn_params.f32.dwconv[0].linear.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_ukernel_3p8c__wasmsimd;
         xnn_params.f32.dwconv[0].init.f32 = xnn_init_f32_minmax_wasmsimd_params;
@@ -5954,7 +5932,7 @@ static void init(void) {
       xnn_params.f32.dwconv[3].primary_tile = 25;
     #endif
 
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.f32.avgpool = (struct avgpool_parameters) {
         .unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9x__wasmsimd_x86_c4,
         .multipass = (xnn_avgpool_multipass_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9p8x__wasmsimd_x86_c4,
@@ -6005,7 +5983,7 @@ static void init(void) {
         .channel_tile = 4,
       };
     }
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.f32.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__wasmsimd_x86_c4,
         .init.f32 = xnn_init_f32_minmax_wasmsimd_params,
@@ -6043,7 +6021,7 @@ static void init(void) {
       .init.f32_abs = xnn_init_f32_abs_wasmsimd_params,
       .element_tile = 16,
     };
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.f32.clamp = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__wasmsimd_x86_x8,
         .init.f32_minmax = xnn_init_f32_minmax_wasmsimd_params,
@@ -6056,7 +6034,7 @@ static void init(void) {
         .element_tile = 8,
       };
     }
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.f32.elu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x20,
         .init.f32_elu = xnn_init_f32_elu_wasmsimd_rr2_p6_params,
@@ -6074,7 +6052,7 @@ static void init(void) {
       .init.f32_hswish = xnn_init_f32_hswish_wasmsimd_params,
       .element_tile = 16,
     };
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.f32.lrelu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_x8,
         .init.f32_lrelu = xnn_init_f32_lrelu_wasmsimd_params,
@@ -6125,7 +6103,7 @@ static void init(void) {
       .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_x8,
       .element_tile = 8,
     };
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__wasmsimd_iminmax_2x8,
         .row_tile = 2,
@@ -6143,7 +6121,7 @@ static void init(void) {
       .init.f32 = xnn_init_f32_expminus_wasmsimd_rr2_p5_params,
       .element_tile = 16,
     };
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.f32.rmax = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__wasmsimd_x86;
       xnn_params.f32.vadd = (struct vbinary_parameters) {
         .minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vadd_minmax_ukernel__wasmsimd_x86_x16,
@@ -6258,7 +6236,7 @@ static void init(void) {
       .minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsqrdiffc_ukernel__wasmsimd_x16,
       .element_tile = 16,
     };
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
         .ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_x86_2x,
         .init.f32 = xnn_init_f32_minmax_wasmsimd_params,
@@ -6276,7 +6254,7 @@ static void init(void) {
     #ifndef XNN_NO_NCHW_OPERATORS
       init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
-      if (is_wasm_x86) {
+      if (hardware_config->is_x86) {
         xnn_params.f32.spmm = (struct spmm_parameters) {
           .ukernel = (xnn_spmm_ukernel_fn) xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86,
           .mr = 32,
@@ -6296,7 +6274,7 @@ static void init(void) {
         .output_height_tile = 2,
         .output_width_tile = 2,
       };
-      if (is_wasm_x86) {
+      if (hardware_config->is_x86) {
         xnn_params.f32.dwconv2d_chw_3x3 = (struct dwconv2d_chw_parameters) {
           .ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f32_dwconv2d_chw_ukernel_3x3p1__wasmsimd_x86_loadsplat_2x4,
           .output_height_tile = 2,
@@ -6339,7 +6317,7 @@ static void init(void) {
           .output_width_tile = 4,
         };
       }
-      if (is_wasm_x86) {
+      if (hardware_config->is_x86) {
         xnn_params.f32.gavgpool_cw = (struct gavgpool_cw_parameters) {
           .ukernel = (xnn_gavgpool_cw_ukernel_fn) xnn_f32_gavgpool_cw_ukernel__wasmsimd_x86_x4,
           .channel_tile = 4,
@@ -6454,7 +6432,7 @@ static void init(void) {
   #ifndef XNN_NO_QC8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QC8;
 
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_2x2__scalar_imagic);
       xnn_params.qc8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qc8_igemm_minmax_fp32_ukernel_2x2__scalar_imagic);
       xnn_params.qc8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qc8_gemm_minmax_fp32_ukernel_1x2__scalar_imagic);
@@ -6472,7 +6450,7 @@ static void init(void) {
       xnn_params.qc8.gemm.nr = 4;
     }
 
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qc8_dwconv_minmax_fp32_ukernel_3p2c__scalar_imagic;
       xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qc8_conv_minmax_fp32_scalar_imagic_params;
       xnn_params.qc8.dwconv[0].channel_tile = 2;
@@ -6505,7 +6483,7 @@ static void init(void) {
   #ifndef XNN_NO_QS8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QS8;
 
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_fp32_ukernel_2x2__scalar_imagic);
       xnn_params.qs8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_igemm_minmax_fp32_ukernel_2x2__scalar_imagic);
       xnn_params.qs8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_fp32_ukernel_1x2__scalar_imagic);
@@ -6523,7 +6501,7 @@ static void init(void) {
       xnn_params.qs8.gemm.nr = 4;
     }
 
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p2c__scalar_imagic;
       xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params;
       xnn_params.qs8.dwconv[0].channel_tile = 2;
@@ -6567,7 +6545,7 @@ static void init(void) {
       .element_tile = 4,
     };
 
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.qs8.lrelu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__scalar_select_x4,
         .init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_select_params,
@@ -6586,7 +6564,7 @@ static void init(void) {
   #ifndef XNN_NO_QU8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QU8;
 
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_fp32_ukernel_2x2__scalar_imagic);
       xnn_params.qu8.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_fp32_ukernel_2x2__scalar_imagic);
       xnn_params.qu8.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_fp32_ukernel_1x2__scalar_imagic);
@@ -6604,7 +6582,7 @@ static void init(void) {
       xnn_params.qu8.gemm.nr = 4;
     }
 
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.qu8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_9p2c__scalar_imagic;
       xnn_params.qu8.dwconv[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params;
       xnn_params.qu8.dwconv[0].channel_tile = 2;
@@ -6656,7 +6634,7 @@ static void init(void) {
       .element_tile = 4,
     };
 
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.qu8.lrelu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__scalar_select_x4,
         .init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_select_params,
@@ -6734,7 +6712,7 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.f32.gemm.minmax.gemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_2x4__scalar);
       xnn_params.f32.gemm.minmax.igemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_2x4__scalar);
       xnn_params.f32.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x4__wasm);
@@ -6856,7 +6834,7 @@ static void init(void) {
       .init.f32_minmax = xnn_init_f32_minmax_scalar_params,
       .element_tile = 4,
     };
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.f32.hswish = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__scalar_x4,
         .init.f32_hswish = xnn_init_f32_hswish_scalar_params,
@@ -6869,7 +6847,7 @@ static void init(void) {
         .element_tile = 4,
       };
     }
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.f32.elu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x2,
         .init.f32_elu = xnn_init_f32_elu_scalar_rr2_lut16_p3_params,
@@ -6891,7 +6869,7 @@ static void init(void) {
       .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__scalar_x4,
       .element_tile = 4,
     };
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.f32.relu = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__scalar_x8,
         .element_tile = 8,
@@ -6931,7 +6909,7 @@ static void init(void) {
       .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__scalar_sqrt_x1,
       .element_tile = 1,
     };
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__scalar_2x4,
         .row_tile = 2,
@@ -7073,7 +7051,7 @@ static void init(void) {
       .init.f32_f16_cvt = xnn_init_f32_f16_cvt_scalar_bitcast_params,
       .element_tile = 4,
     };
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.vcvt.f32_to_qs8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__scalar_imagic_x1,
         .init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_imagic_params,
@@ -7096,7 +7074,7 @@ static void init(void) {
         .element_tile = 4,
       };
     }
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.vcvt.qs8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__scalar_x1,
         .init.qs8_cvt = xnn_init_qs8_cvt_scalar_params,
@@ -7114,7 +7092,7 @@ static void init(void) {
       .init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params,
       .element_tile = 1,
     };
-    if (is_wasm_x86) {
+    if (hardware_config->is_x86) {
       xnn_params.vcvt.qu8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__scalar_x1,
         .init.qu8_cvt = xnn_init_qu8_cvt_scalar_params,
