@@ -91,6 +91,22 @@ TEST(TRANSPOSE_ND_X8, 6D) {
   } while (std::next_permutation(perm.begin(), perm.end()));
 }
 
+TEST(TRANSPOSE_ND_X8, 6D_X24) {
+  std::vector<size_t> perm{0,1,2,4,3,5};
+  do {
+    // Prevent merging of the final two dimensions.
+    if (perm[4] == 4) {
+      continue;
+    }
+    TransposeOperatorTester()
+        .num_dims(6)
+        .shape({2,4,5,6,7,3})
+        .perm(perm)
+        .TestX8();
+    // Force the element size to always be 24 bits.
+  } while (std::next_permutation(perm.begin(), perm.end() - 1));
+}
+
 TEST(TRANSPOSE_ND_X16, 1D) {
   TransposeOperatorTester()
       .num_dims(1)

@@ -27,6 +27,7 @@ struct xnn_transpose_subconfig {
 struct xnn_transpose_config {
   struct xnn_transpose_subconfig x8;
   struct xnn_transpose_subconfig x16;
+  struct xnn_transpose_subconfig x24;
   struct xnn_transpose_subconfig x32;
   struct xnn_transpose_subconfig xx;
   xnn_vunary_ukernel_fn copy;

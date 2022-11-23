@@ -219,19 +219,24 @@ static enum xnn_status setup_transpose_nd(
   bool variable_size_ukernel = false;
   switch (normalized_element_size) {
     case 1:
-      context->log2_element_size = 0;
       context->const_size_ukernel = xnn_transpose_conf->x8.const_size_ukernel;
       transpose_op->compute.tile[0] = xnn_transpose_conf->x8.tile_size;
       transpose_op->compute.tile[1] = xnn_transpose_conf->x8.tile_size;
       break;
     case 2:
-      context->log2_element_size = 1;
       transpose_op->compute.tile[0] = xnn_transpose_conf->x16.tile_size;
       transpose_op->compute.tile[1] = xnn_transpose_conf->x16.tile_size;
       context->const_size_ukernel = xnn_transpose_conf->x16.const_size_ukernel;
       break;
+    case 3:
+      transpose_op->compute.tile[0] = xnn_transpose_conf->x24.tile_size;
+      transpose_op->compute.tile[1] = xnn_transpose_conf->x24.tile_size;
+      context->const_size_ukernel = xnn_transpose_conf->x24.const_size_ukernel;
+      if (xnn_transpose_conf->x24.init.x24 != NULL) {
+        xnn_transpose_conf->x24.init.x24(&context->params.x24_params);
+      }
+      break;
     case 4:
-      context->log2_element_size = 2;
       transpose_op->compute.tile[0] = xnn_transpose_conf->x32.tile_size;
       transpose_op->compute.tile[1] = xnn_transpose_conf->x32.tile_size;
       context->const_size_ukernel = xnn_transpose_conf->x32.const_size_ukernel;
@@ -240,7 +245,6 @@ static enum xnn_status setup_transpose_nd(
       }
       break;
     default:
-      context->element_size = normalized_element_size;
       transpose_op->compute.tile[0] = xnn_transpose_conf->xx.tile_size;
       transpose_op->compute.tile[1] = xnn_transpose_conf->xx.tile_size;
       context->variable_size_ukernel = xnn_transpose_conf->xx.variable_size_ukernel;

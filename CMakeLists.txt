@@ -326,7 +326,8 @@ SET(PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS
   src/u8-lut32norm/u8-lut32norm-scalar.c
   src/xx-copy/xx-copy-memcpy.c
   src/xx-transpose/xx-transpose-1x1-memcpy.c
-  src/x8-lut/gen/x8-lut-scalar-x4.c)
+  src/x8-lut/gen/x8-lut-scalar-x4.c,
+  src/x24-transposec/gen/x24-transposec-1x2-scalar.c)
 
 SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-x4.c
@@ -1754,6 +1755,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/x8-zip/x8-zip-x3-neon.c
   src/x8-zip/x8-zip-x4-neon.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-dec-zip-neon.c
+  src/x24-transposec/x24-transposec-2x2-neon-tbl64.c
   src/x32-packx/x32-packx-x4-neon-st4.c
   src/x32-transposec/gen/x32-transposec-4x4-reuse-dec-zip-neon.c
   src/x32-unpool/x32-unpool-neon.c
@@ -3165,6 +3167,7 @@ SET(PROD_AARCH64_NEON_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vrdivc-minmax-neon-x8.c
   src/f32-vsqrt/gen/f32-vsqrt-neon-sqrt-x4.c
   src/x8-lut/gen/x8-lut-neon-tbx128x4-x64.c
+  src/x24-transposec/x24-transposec-4x4-neon-tbl128.
   src/x32-transposec/x32-transposec-4x4-neon-tbl128.c)
 
 SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
@@ -4676,7 +4679,8 @@ SET(PROD_SSSE3_MICROKERNEL_SRCS
   src/qs8-vcvt/gen/qs8-vcvt-ssse3-x32.c
   src/qs8-vlrelu/gen/qs8-vlrelu-ssse3-x32.c
   src/qu8-vcvt/gen/qu8-vcvt-ssse3-x32.c
-  src/qu8-vlrelu/gen/qu8-vlrelu-ssse3-x32.c)
+  src/qu8-vlrelu/gen/qu8-vlrelu-ssse3-x32.c
+  src/x24-transposec/x24-transposec-4x4-ssse3.c)
 
 SET(ALL_SSSE3_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/3x3p1-minmax-ssse3-1x4-acc2.c

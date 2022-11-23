@@ -63,8 +63,8 @@ class TransposeOperatorTester {
     size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
     std::vector<uint8_t> input(count + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> output(count);
-    std::vector<size_t> input_stride(input.size(), 1);
-    std::vector<size_t> output_stride(input.size(), 1);
+    std::vector<size_t> input_stride(num_dims(), 1);
+    std::vector<size_t> output_stride(num_dims(), 1);
     for (size_t i = num_dims() - 1; i > 0; --i) {
       input_stride[i - 1] = input_stride[i] * shape_[i];
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
@@ -131,8 +131,8 @@ class TransposeOperatorTester {
     size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
     std::vector<uint16_t> input(count + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> output(count);
-    std::vector<size_t> input_stride(input.size(), 1);
-    std::vector<size_t> output_stride(input.size(), 1);
+    std::vector<size_t> input_stride(num_dims(), 1);
+    std::vector<size_t> output_stride(num_dims(), 1);
     for (size_t i = num_dims() - 1; i > 0; --i) {
       input_stride[i - 1] = input_stride[i] * shape_[i];
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
@@ -199,8 +199,8 @@ class TransposeOperatorTester {
     size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
     std::vector<uint32_t> input(count + XNN_EXTRA_BYTES / sizeof(uint32_t));
     std::vector<uint32_t> output(count);
-    std::vector<size_t> input_stride(input.size(), 1);
-    std::vector<size_t> output_stride(input.size(), 1);
+    std::vector<size_t> input_stride(num_dims(), 1);
+    std::vector<size_t> output_stride(num_dims(), 1);
     for (size_t i = num_dims() - 1; i > 0; --i) {
       input_stride[i - 1] = input_stride[i] * shape_[i];
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
