@@ -1184,10 +1184,10 @@ ExecutionPlan FP16SparseMobileNetV1(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wpessimizing-move"
+  XNN_PRAGMA_CLANG("clang diagnostic push")
+  XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wpessimizing-move\"")
   return operators;
-  #pragma clang diagnostic pop
+  XNN_PRAGMA_CLANG("clang diagnostic pop")
 }
 
 }  // namespace models
