@@ -231,7 +231,7 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_qu8(
     0 /* bias */, requantization_scale, output_zero_point, output_min, output_max);
 
   average_pooling_op->type = xnn_operator_type_average_pooling_nhwc_qu8;
-  average_pooling_op->ukernel.type = xnn_ukernel_type_average_pooling;
+  average_pooling_op->ukernel.type = xnn_microkernel_type_average_pooling;
   average_pooling_op->flags = flags;
 
   *average_pooling_op_out = average_pooling_op;
@@ -417,9 +417,9 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
   const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
   if (any_padding || tf_same_padding) {
     xnn_params.f16.pavgpool.init.f16(&average_pooling_op->params.f16_minmax, fp16_output_min, fp16_output_max);
-    average_pooling_op->ukernel.type = xnn_ukernel_type_pixelwise_average_pooling;
+    average_pooling_op->ukernel.type = xnn_microkernel_type_pixelwise_average_pooling;
   } else {
-    average_pooling_op->ukernel.type = xnn_ukernel_type_average_pooling;
+    average_pooling_op->ukernel.type = xnn_microkernel_type_average_pooling;
   }
   average_pooling_op->flags = flags;
 
@@ -593,9 +593,9 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
   const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
   if (any_padding || tf_same_padding) {
     xnn_params.f32.pavgpool.init.f32(&average_pooling_op->params.f32_minmax, output_min, output_max);
-    average_pooling_op->ukernel.type = xnn_ukernel_type_pixelwise_average_pooling;
+    average_pooling_op->ukernel.type = xnn_microkernel_type_pixelwise_average_pooling;
   } else {
-    average_pooling_op->ukernel.type = xnn_ukernel_type_average_pooling;
+    average_pooling_op->ukernel.type = xnn_microkernel_type_average_pooling;
   }
   average_pooling_op->flags = flags;
 
@@ -857,7 +857,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_qu8(
     return xnn_status_invalid_parameter;
   }
 
-  assert(average_pooling_op->ukernel.type == xnn_ukernel_type_average_pooling);
+  assert(average_pooling_op->ukernel.type == xnn_microkernel_type_average_pooling);
 
   // Number of rows read in the GAVGPOOL micro-kernel.
   const size_t input_size = input_height * input_width;
@@ -902,12 +902,12 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f16(
     return xnn_status_invalid_parameter;
   }
 
-  assert(average_pooling_op->ukernel.type == xnn_ukernel_type_average_pooling ||
-         average_pooling_op->ukernel.type == xnn_ukernel_type_pixelwise_average_pooling);
+  assert(average_pooling_op->ukernel.type == xnn_microkernel_type_average_pooling ||
+         average_pooling_op->ukernel.type == xnn_microkernel_type_pixelwise_average_pooling);
 
   const void* pooling_params = &average_pooling_op->params.f16_scaleminmax;
   size_t pooling_params_size = sizeof(average_pooling_op->params.f16_scaleminmax);
-  const bool is_pixelwise = average_pooling_op->ukernel.type == xnn_ukernel_type_pixelwise_average_pooling;
+  const bool is_pixelwise = average_pooling_op->ukernel.type == xnn_microkernel_type_pixelwise_average_pooling;
   if (is_pixelwise) {
     const size_t input_size = input_height * input_width;
     xnn_params.f16.gavgpool.update.f16(&average_pooling_op->params.f16_scaleminmax, fp16_ieee_from_fp32_value(1.0f / (float) (int32_t) input_size));
@@ -945,12 +945,12 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
     return xnn_status_invalid_parameter;
   }
 
-  assert(average_pooling_op->ukernel.type == xnn_ukernel_type_average_pooling ||
-         average_pooling_op->ukernel.type == xnn_ukernel_type_pixelwise_average_pooling);
+  assert(average_pooling_op->ukernel.type == xnn_microkernel_type_average_pooling ||
+         average_pooling_op->ukernel.type == xnn_microkernel_type_pixelwise_average_pooling);
 
   const void* pooling_params = &average_pooling_op->params.f32_scaleminmax;
   size_t pooling_params_size = sizeof(average_pooling_op->params.f32_scaleminmax);
-  const bool is_pixelwise = average_pooling_op->ukernel.type == xnn_ukernel_type_pixelwise_average_pooling;
+  const bool is_pixelwise = average_pooling_op->ukernel.type == xnn_microkernel_type_pixelwise_average_pooling;
   if (is_pixelwise) {
     const size_t input_size = input_height * input_width;
     xnn_params.f32.gavgpool.update.f32(&average_pooling_op->params.f32_scaleminmax, 1.0f / (float) (int32_t) input_size);

@@ -4,14 +4,14 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: src/ukernel-strings.yaml
+//   Specification: src/enums/microkernel-type.yaml
 //   Generator: tools/generate-enum.py
 
 
 #include <assert.h>
 #include <stdint.h>
 
-#include <xnnpack/ukernel-type.h>
+#include <xnnpack/microkernel-type.h>
 
 
 static const uint8_t offset[10] = {
@@ -30,8 +30,8 @@ static const char data[] =
   "Subconv2D\0"
   "VMulCAddC";
 
-const char* xnn_ukernel_type_to_string(enum xnn_ukernel_type ukernel_type) {
-  assert(ukernel_type >= xnn_ukernel_type_default);
-  assert(ukernel_type <= xnn_ukernel_type_vmulcaddc);
-  return &data[offset[ukernel_type]];
+const char* xnn_microkernel_type_to_string(enum xnn_microkernel_type microkernel_type) {
+  assert(microkernel_type >= xnn_microkernel_type_default);
+  assert(microkernel_type <= xnn_microkernel_type_vmulcaddc);
+  return &data[offset[microkernel_type]];
 }

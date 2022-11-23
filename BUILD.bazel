@@ -9074,8 +9074,8 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "ukernel_type",
-    hdrs = ["src/xnnpack/ukernel-type.h"],
+    name = "microkernel_type",
+    hdrs = ["src/xnnpack/microkernel-type.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
 )
@@ -10943,11 +10943,11 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "logging",
     srcs = [
-        "src/datatype-strings.c",
+        "src/enums/datatype-strings.c",
+        "src/enums/microkernel-type.c",
+        "src/enums/node-type.c",
+        "src/enums/operator-type.c",
         "src/log.c",
-        "src/node-type.c",
-        "src/operator-strings.c",
-        "src/ukernel-strings.c",
     ],
     hdrs = ["src/xnnpack/log.h"],
     copts = select({
@@ -10979,7 +10979,7 @@ xnnpack_cc_library(
         "//conditions:default": [":log_level_default"],
     }) + [
         ":operator_type",
-        ":ukernel_type",
+        ":microkernel_type",
         ":node_type",
         ":xnnpack_h",
         ":common",
@@ -11452,9 +11452,9 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":compute_h",
+        ":microkernel_type",
         ":operator_type",
         ":params",
-        ":ukernel_type",
         "@pthreadpool",
     ],
 )
@@ -11486,13 +11486,13 @@ xnnpack_cc_library(
         ":jit",
         ":logging",
         ":math",
+        ":microkernel_type",
         ":microparams_init",
         ":normalization",
         ":operator_type",
         ":packing",
         ":params",
         ":post_operation",
-        ":ukernel_type",
         ":xnnpack_h",
         "@FP16",
         "@pthreadpool",

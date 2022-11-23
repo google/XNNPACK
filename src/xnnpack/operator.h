@@ -16,9 +16,9 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/cache.h>
 #include <xnnpack/compute.h>
+#include <xnnpack/microkernel-type.h>
 #include <xnnpack/operator-type.h>
 #include <xnnpack/params.h>
-#include <xnnpack/ukernel-type.h>
 
 
 struct xnn_ukernel_conv2d {
@@ -85,7 +85,7 @@ struct xnn_ukernel_vunary {
 };
 
 struct xnn_ukernel {
-  enum xnn_ukernel_type type;
+  enum xnn_microkernel_type type;
   union {
     struct xnn_ukernel_conv2d conv2d;
     struct xnn_ukernel_dwconv dwconv;

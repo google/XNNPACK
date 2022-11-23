@@ -14,8 +14,6 @@
 
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
-#include <xnnpack/operator-type.h>
-#include <xnnpack/ukernel-type.h>
 
 #ifndef XNN_LOG_LEVEL
   #error "Undefined XNN_LOG_LEVEL"

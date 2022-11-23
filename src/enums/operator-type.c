@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: src/operator-strings.yaml
+//   Specification: src/enums/operator-type.yaml
 //   Generator: tools/generate-enum.py
 
 

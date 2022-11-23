@@ -4,7 +4,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-tools/generate-enum.py --enum xnn_operator_type --spec src/operator-strings.yaml --output_src src/operator-strings.c --output_hdr src/xnnpack/operator-type.h &
-tools/generate-enum.py --enum xnn_ukernel_type --spec src/ukernel-strings.yaml --output_src src/ukernel-strings.c --output_hdr src/xnnpack/ukernel-type.h &
+tools/generate-enum.py --enum xnn_operator_type --spec src/enums/operator-type.yaml --output_src src/enums/operator-type.c --output_hdr src/xnnpack/operator-type.h &
+tools/generate-enum.py --enum xnn_microkernel_type --spec src/enums/microkernel-type.yaml --output_src src/enums/microkernel-type.c --output_hdr src/xnnpack/microkernel-type.h &
 
 wait

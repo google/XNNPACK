@@ -371,21 +371,21 @@ static enum xnn_status create_convolution2d_nhwc(
 
   const size_t kernel_size = kernel_height * kernel_width;
 
-  enum xnn_ukernel_type ukernel_type = xnn_ukernel_type_default;
+  enum xnn_microkernel_type ukernel_type = xnn_microkernel_type_default;
   const bool unit_subsampling = (subsampling_width | subsampling_height) == 1;
   if (group_input_channels == 1 && group_output_channels == 1 && kernel_size == 1 && unit_subsampling && !any_padding && vmulcaddc_parameters != NULL) {
-    ukernel_type = xnn_ukernel_type_vmulcaddc;
+    ukernel_type = xnn_microkernel_type_vmulcaddc;
   } else if (group_input_channels == 1 && group_output_channels == 1 && dwconv_ukernel != NULL)
   {
-    ukernel_type = xnn_ukernel_type_dwconv;
+    ukernel_type = xnn_microkernel_type_dwconv;
   } else if (kernel_size == 1 && unit_subsampling && !any_padding) {
-    ukernel_type = xnn_ukernel_type_gemm;
+    ukernel_type = xnn_microkernel_type_gemm;
   } else {
-    ukernel_type = xnn_ukernel_type_igemm;
+    ukernel_type = xnn_microkernel_type_igemm;
   }
-  assert(ukernel_type != xnn_ukernel_type_default);
+  assert(ukernel_type != xnn_microkernel_type_default);
 
-  if (num_post_operations != 0 && (ukernel_type != xnn_ukernel_type_gemm && ukernel_type != xnn_ukernel_type_igemm)) {
+  if (num_post_operations != 0 && (ukernel_type != xnn_microkernel_type_gemm && ukernel_type != xnn_microkernel_type_igemm)) {
     xnn_log_error(
         "convolution with post operations not support for these parameters: "
         "kernel_size: %zu unit_subsampling: %d padding: %d, ukernel_type: %d",
@@ -395,7 +395,7 @@ static enum xnn_status create_convolution2d_nhwc(
 
   size_t zero_size = 0;
   switch (ukernel_type) {
-    case xnn_ukernel_type_vmulcaddc:
+    case xnn_microkernel_type_vmulcaddc:
     {
       assert(vmulcaddc_parameters != NULL);
       assert(vmulcaddc_params != NULL);
@@ -428,7 +428,7 @@ static enum xnn_status create_convolution2d_nhwc(
       };
       break;
     }
-    case xnn_ukernel_type_dwconv:
+    case xnn_microkernel_type_dwconv:
     {
       assert(dwconv_ukernel != NULL);
       const uint8_t primary_tile = dwconv_ukernel->primary_tile;
@@ -492,8 +492,8 @@ static enum xnn_status create_convolution2d_nhwc(
       zero_size = XNN_EXTRA_BYTES + (c_stride << log2_input_element_size);
       break;
     }
-    case xnn_ukernel_type_gemm:
-    case xnn_ukernel_type_igemm:
+    case xnn_microkernel_type_gemm:
+    case xnn_microkernel_type_igemm:
     {
       const uint32_t nr = gemm_parameters->nr;
       const uint32_t kr = UINT32_C(1) << gemm_parameters->log2_kr;
@@ -522,7 +522,7 @@ static enum xnn_status create_convolution2d_nhwc(
         gemm_ukernels = &gemm_parameters->relu;
       }
       switch (ukernel_type) {
-        case xnn_ukernel_type_gemm:
+        case xnn_microkernel_type_gemm:
             pack_gemm_goi_w(
                 groups, group_output_channels, group_input_channels,
                 nr, kr, sr,
@@ -546,7 +546,7 @@ static enum xnn_status create_convolution2d_nhwc(
           #endif  // XNN_PLATFORM_JIT
 
           break;
-        case xnn_ukernel_type_igemm:
+        case xnn_microkernel_type_igemm:
           if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
             pack_conv_kgo_w(
               groups, group_output_channels, kernel_size,
@@ -1419,7 +1419,7 @@ static enum xnn_status setup_convolution2d_nhwc(
   convolution_op->output = output;
 
   switch (convolution_op->ukernel.type) {
-    case xnn_ukernel_type_gemm:
+    case xnn_microkernel_type_gemm:
     {
       // Convolution maps directly to GEMM and doesn't use indirection buffer.
 
@@ -1531,7 +1531,7 @@ static enum xnn_status setup_convolution2d_nhwc(
 
       return xnn_status_success;
     }
-    case xnn_ukernel_type_igemm:
+    case xnn_microkernel_type_igemm:
     {
       const size_t groups = convolution_op->groups;
       const size_t kernel_height = convolution_op->kernel_height;
@@ -1707,7 +1707,7 @@ static enum xnn_status setup_convolution2d_nhwc(
 
       return xnn_status_success;
     }
-    case xnn_ukernel_type_dwconv:
+    case xnn_microkernel_type_dwconv:
     {
       const size_t kernel_height = convolution_op->kernel_height;
       const size_t kernel_width = convolution_op->kernel_width;
@@ -1777,7 +1777,7 @@ static enum xnn_status setup_convolution2d_nhwc(
 
       return xnn_status_success;
     }
-    case xnn_ukernel_type_vmulcaddc:
+    case xnn_microkernel_type_vmulcaddc:
     {
       const size_t batch_output_size = batch_size * convolution_op->output_height * convolution_op->output_width;
 

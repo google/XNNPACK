@@ -260,4 +260,4 @@
 - name: xnn_operator_type_unpooling_nhwc_x32
   string: "Unpooling (NHWC, X32)"
 
-# LINT.ThenChange(operator-strings.c, xnnpack/operator-type.h)
+# LINT.ThenChange(operator-type.c, ../xnnpack/operator-type.h)

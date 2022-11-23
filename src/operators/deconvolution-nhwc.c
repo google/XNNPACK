@@ -158,10 +158,10 @@ static enum xnn_status create_deconvolution2d_nhwc(
   const uint32_t n_stride = round_up(group_output_channels, nr);
   const uint32_t k_stride = round_up_po2(group_input_channels, kr * sr);
   const uint32_t kernel_size = kernel_height * kernel_width;
-  enum xnn_ukernel_type ukernel_type = xnn_ukernel_type_igemm;
+  enum xnn_microkernel_type ukernel_type = xnn_microkernel_type_igemm;
   size_t packed_group_weights_size = (((kernel_size * k_stride) << log2_filter_element_size) + bias_element_size) * n_stride;
   if (max(stride_height, stride_width) > 1 && max(dilation_height, dilation_width) == 1 && stride_width <= kernel_width && stride_height <= kernel_height) {
-    ukernel_type = xnn_ukernel_type_subconv2d;
+    ukernel_type = xnn_microkernel_type_subconv2d;
     const size_t subkernels = stride_height * stride_width;
     packed_group_weights_size = n_stride *
       (((kernel_size * k_stride) << log2_filter_element_size) + bias_element_size * subkernels);
@@ -200,7 +200,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
   }
 
   switch (ukernel_type) {
-    case xnn_ukernel_type_igemm:
+    case xnn_microkernel_type_igemm:
       pack_conv_goki_w(
         groups, group_output_channels, kernel_size, group_input_channels,
         nr, kr, sr,
@@ -208,7 +208,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
         0 /* extra bytes */,
         packing_params);
       break;
-    case xnn_ukernel_type_subconv2d:
+    case xnn_microkernel_type_subconv2d:
       pack_deconv_goki_w(
         groups, group_output_channels, kernel_height, kernel_width, group_input_channels,
         stride_height, stride_width,
@@ -676,7 +676,7 @@ static enum xnn_status setup_conv_path(
   size_t params_size,
   size_t num_threads)
 {
-  assert(deconvolution_op->ukernel.type == xnn_ukernel_type_igemm);
+  assert(deconvolution_op->ukernel.type == xnn_microkernel_type_igemm);
 
   const size_t kernel_height = deconvolution_op->kernel_height;
   const size_t kernel_width = deconvolution_op->kernel_width;
@@ -855,7 +855,7 @@ static enum xnn_status setup_subconv2d_path(
   size_t num_threads,
   bool use_gemm)
 {
-  assert(deconvolution_op->ukernel.type == xnn_ukernel_type_subconv2d);
+  assert(deconvolution_op->ukernel.type == xnn_microkernel_type_subconv2d);
 
   const size_t kernel_height = deconvolution_op->kernel_height;
   const size_t kernel_width = deconvolution_op->kernel_width;
@@ -1104,7 +1104,7 @@ static enum xnn_status setup_deconvolution2d_nhwc(
       adjustment_width, deconvolution_op->kernel_width, deconvolution_op->dilation_width, deconvolution_op->stride_width);
 
   switch (deconvolution_op->ukernel.type) {
-    case xnn_ukernel_type_igemm:
+    case xnn_microkernel_type_igemm:
       return setup_conv_path(
         deconvolution_op,
         batch_size,
@@ -1112,7 +1112,7 @@ static enum xnn_status setup_deconvolution2d_nhwc(
         deconvolution_op->output_height, deconvolution_op->output_width, output,
         log2_input_element_size, log2_filter_element_size, bias_element_size, log2_output_element_size,
         params, params_size, num_threads);
-    case xnn_ukernel_type_subconv2d:
+    case xnn_microkernel_type_subconv2d:
     {
       const size_t mr = deconvolution_op->ukernel.igemm.mr;
       const bool no_padding = (deconvolution_op->padding_top | deconvolution_op->padding_right | deconvolution_op->padding_bottom | deconvolution_op->padding_left) == 0;

@@ -161,7 +161,7 @@ static enum xnn_status create_fully_connected_nc(
   fully_connected_op->flags = flags;
 
   const size_t mr = gemm_parameters->mr;
-  fully_connected_op->ukernel.type = xnn_ukernel_type_gemm;
+  fully_connected_op->ukernel.type = xnn_microkernel_type_gemm;
   fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
     .mr = mr,
     .nr = nr,

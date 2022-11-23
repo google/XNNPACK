@@ -265,11 +265,11 @@ SET(SUBGRAPH_SRCS
   src/tensor.c)
 
 SET(LOGGING_SRCS
-  src/datatype-strings.c
-  src/log.c
-  src/node-type.c
-  src/operator-strings.c
-  src/ukernel-strings.c)
+  src/enums/datatype-strings.c
+  src/enums/microkernel-type.c
+  src/enums/node-type.c
+  src/enums/operator-type.c
+  src/log.c)
 
 SET(XNNPACK_SRCS
   src/hardware-config.c
