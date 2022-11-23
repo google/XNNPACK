@@ -2080,7 +2080,7 @@ static void init(void) {
   #ifndef XNN_NO_QC8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QC8;
 
-    #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
+    #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC || XNN_PLATFORM_WINDOWS
       #if XNN_ENABLE_ASSEMBLY
         if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
@@ -2265,7 +2265,7 @@ static void init(void) {
           xnn_params.qc8.gemm.log2_sr = 2;
         }
       #endif  // XNN_ENABLE_ASSEMBLY
-    #endif  // XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
+    #endif  // XNN_PLATFORM_IOS || XNN_PLATFORM_MAC || XNN_PLATFORM_WINDOWS
 
     xnn_params.qc8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__neonv8_mla8_ld128;
     xnn_params.qc8.dwconv[0].init.qc8 = xnn_init_qc8_conv_minmax_fp32_neonv8_params;
@@ -2285,7 +2285,7 @@ static void init(void) {
   #ifndef XNN_NO_QS8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QS8;
 
-    #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
+    #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC || XNN_PLATFORM_WINDOWS
       #if XNN_ENABLE_ASSEMBLY
         if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
           #if XNN_ENABLE_ARM_DOTPROD
@@ -2470,7 +2470,7 @@ static void init(void) {
           xnn_params.qs8.gemm.log2_sr = 2;
         }
       #endif  // XNN_ENABLE_ASSEMBLY
-    #endif  // XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
+    #endif  // XNN_PLATFORM_IOS || XNN_PLATFORM_MAC || XNN_PLATFORM_WINDOWS
 
     xnn_params.qs8.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_rndnu_ukernel_9p16c__neon_mla8_ld64;
     xnn_params.qs8.dwconv[0].init.qs8 = xnn_init_qs8_conv_minmax_rndnu_neon_params;
@@ -3306,7 +3306,7 @@ static void init(void) {
     xnn_params.f32.dwconv[1].channel_tile = 8;
     xnn_params.f32.dwconv[1].primary_tile = 4;
 
-    #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC
+    #if XNN_PLATFORM_IOS || XNN_PLATFORM_MAC || XNN_PLATFORM_WINDOWS
       xnn_params.f32.dwconv[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_9p8c__neonfma;
       xnn_params.f32.dwconv[2].init.f32 = xnn_init_f32_minmax_scalar_params;
       xnn_params.f32.dwconv[2].channel_tile = 8;

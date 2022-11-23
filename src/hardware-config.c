@@ -8,6 +8,10 @@
 
 #ifdef _WIN32
   #include <windows.h>
+
+  #ifndef PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE
+    #define PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE 43
+  #endif
 #else
   #include <pthread.h>
 #endif
@@ -42,8 +46,13 @@ static void init_hardware_config(void) {
   #endif
 
   #if XNN_ARCH_ARM64 || XNN_ARCH_ARM
-    hardware_config.use_arm_neon_fp16_arith = cpuinfo_has_arm_neon_fp16_arith();
-    hardware_config.use_arm_neon_dot = cpuinfo_has_arm_neon_dot();
+    #if XNN_PLATFORM_WINDOWS
+      hardware_config.use_arm_neon_fp16_arith = !!IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
+      hardware_config.use_arm_neon_dot = !!IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
+    #else
+      hardware_config.use_arm_neon_fp16_arith = cpuinfo_has_arm_neon_fp16_arith();
+      hardware_config.use_arm_neon_dot = cpuinfo_has_arm_neon_dot();
+    #endif
   #endif
 
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -78,12 +87,12 @@ static void init_hardware_config(void) {
 #endif
 
 const struct xnn_hardware_config* xnn_init_hardware_config() {
-  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
+  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !(XNN_ARCH_ARM64 && XNN_PLATFORM_WINDOWS)
     if (!cpuinfo_initialize()) {
       xnn_log_error("failed to initialize cpuinfo");
       return NULL;
     }
-  #endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
+  #endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !(XNN_ARCH_ARM64 && XNN_PLATFORM_WINDOWS)
   #if XNN_ARCH_ARM
     #if XNN_PLATFORM_MOBILE
       if (!cpuinfo_has_arm_neon()) {
