@@ -6930,9 +6930,9 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-cortex-a7.S
   src/qu8-igemm/gen/qu8-igemm-4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-cortex-a53.S
   src/qu8-igemm/gen/qu8-igemm-4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S
-  src/u32-filterbank-accumulate/aarch32-arm-x1.S
-  src/u32-filterbank-accumulate/aarch32-neon-x1.S
-  src/u32-filterbank-accumulate/aarch32-neon-x2.S)
+  src/u32-filterbank-accumulate/u32-filterbank-accumulate-aarch32-arm-x1.S
+  src/u32-filterbank-accumulate/u32-filterbank-accumulate-aarch32-neon-x1.S
+  src/u32-filterbank-accumulate/u32-filterbank-accumulate-aarch32-neon-x2.S)
 
 SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f16-gemm/gen/f16-gemm-1x8-minmax-aarch64-neonfp16arith-ld64.S
