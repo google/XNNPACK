@@ -10,6 +10,18 @@
 
 /**************************** SPMM path ****************************/
 
+TEST(CONVOLUTION_NCHW_F16, 1x1) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  ConvolutionOperatorTester()
+    .input_size(27, 37)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(19)
+    .sparsity(0.5f)
+    .iterations(3)
+    .TestNCHWxF16();
+}
+
 TEST(CONVOLUTION_NCHW_F16, 1x1_with_fp32_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
   ConvolutionOperatorTester()

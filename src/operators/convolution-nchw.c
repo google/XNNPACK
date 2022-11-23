@@ -243,15 +243,21 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
       assert(kernel_height == 1);
       assert(kernel_width == 1);
       assert(groups == 1);
-      assert(flags & XNN_FLAG_FP32_STATIC_WEIGHTS);
-
-      const float* k = (const float*) kernel;
-      const float* b = (const float*) bias;
 
       size_t num_nonzeroes = 0;
-      for (size_t oc = 0; oc < group_output_channels; oc++) {
-        for (size_t ic = 0; ic < group_input_channels; ic++) {
-          num_nonzeroes += (size_t) (k[oc * group_input_channels + ic] != 0.0f);
+      if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+        const float* k = (const float*) kernel;
+        for (size_t oc = 0; oc < group_output_channels; oc++) {
+          for (size_t ic = 0; ic < group_input_channels; ic++) {
+            num_nonzeroes += (size_t) (k[oc * group_input_channels + ic] != 0.0f);
+          }
+        }
+      } else {
+        const uint16_t* k = (const uint16_t*) kernel;
+        for (size_t oc = 0; oc < group_output_channels; oc++) {
+          for (size_t ic = 0; ic < group_input_channels; ic++) {
+            num_nonzeroes += (size_t) (k[oc * group_input_channels + ic] != 0);
+          }
         }
       }
       const size_t num_output_channel_blocks = group_output_channels;
@@ -296,13 +302,26 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
       size_t first_ic = 0, last_ic = 0;
       bool first_nonzero = true;
       for (size_t oc = 0; oc < group_output_channels; oc++) {
-        if XNN_LIKELY(b != NULL) {
-          *nonzero_values++ = fp16_ieee_from_fp32_value(b[oc]);
+        if XNN_LIKELY(bias != NULL) {
+          if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+            const float* b = (const float*) bias;
+            *nonzero_values++ = fp16_ieee_from_fp32_value(b[oc]);
+          } else {
+            const uint16_t* b = (const uint16_t*) bias;
+            *nonzero_values++ = b[oc];
+          }
         } else {
           *nonzero_values++ = 0;
         }
         for (size_t ic = 0; ic < group_input_channels; ic++) {
-          const uint16_t weight = fp16_ieee_from_fp32_value(k[oc * group_input_channels + ic]);
+          uint16_t weight;
+          if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+            const float* k = (const float*) kernel;
+            weight = fp16_ieee_from_fp32_value(k[oc * group_input_channels + ic]);
+          } else {
+            const uint16_t* k = (const uint16_t*) kernel;
+            weight = (k[oc * group_input_channels + ic]);
+          }
           if (weight != 0) {
             *nonzero_values++ = weight;
             if (first_nonzero) {
