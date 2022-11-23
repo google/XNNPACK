@@ -12774,8 +12774,33 @@ xnnpack_benchmark(
 ############################# End-to-end benchmarks ############################
 
 xnnpack_cc_library(
+    name = "fp16_mobilenet_v1",
+    srcs = ["models/fp16-mobilenet-v1.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    deps = [
+        ":XNNPACK",
+        ":cache",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "fp32_mobilenet_v1",
     srcs = ["models/fp32-mobilenet-v1.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    deps = [
+        ":XNNPACK",
+        ":cache",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "fp16_sparse_mobilenet_v1",
+    srcs = ["models/fp16-sparse-mobilenet-v1.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
@@ -12793,19 +12818,6 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        "@pthreadpool",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "fp16_mobilenet_v1",
-    srcs = ["models/fp16-mobilenet-v1.cc"],
-    hdrs = ["models/models.h"],
-    copts = xnnpack_std_cxxopts(),
-    deps = [
-        ":XNNPACK",
-        ":cache",
-        "@FP16",
         "@pthreadpool",
     ],
 )
@@ -12883,8 +12895,33 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "fp16_mobilenet_v2",
+    srcs = ["models/fp16-mobilenet-v2.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    deps = [
+        ":XNNPACK",
+        ":cache",
+        "@FP16",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "fp32_mobilenet_v2",
     srcs = ["models/fp32-mobilenet-v2.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    deps = [
+        ":XNNPACK",
+        ":cache",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "fp16_sparse_mobilenet_v2",
+    srcs = ["models/fp16-sparse-mobilenet-v2.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
@@ -12907,8 +12944,8 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "fp16_mobilenet_v2",
-    srcs = ["models/fp16-mobilenet-v2.cc"],
+    name = "fp16_mobilenet_v3_large",
+    srcs = ["models/fp16-mobilenet-v3-large.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
@@ -12932,6 +12969,18 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "fp16_sparse_mobilenet_v3_large",
+    srcs = ["models/fp16-sparse-mobilenet-v3-large.cc"],
+    hdrs = ["models/models.h"],
+    copts = xnnpack_std_cxxopts(),
+    deps = [
+        ":XNNPACK",
+        ":cache",
+        "@pthreadpool",
+    ],
+)
+
+xnnpack_cc_library(
     name = "fp32_sparse_mobilenet_v3_large",
     srcs = ["models/fp32-sparse-mobilenet-v3-large.cc"],
     hdrs = ["models/models.h"],
@@ -12944,8 +12993,8 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "fp16_mobilenet_v3_large",
-    srcs = ["models/fp16-mobilenet-v3-large.cc"],
+    name = "fp16_mobilenet_v3_small",
+    srcs = ["models/fp16-mobilenet-v3-small.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
@@ -12982,8 +13031,8 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "fp32_sparse_mobilenet_v3_small",
-    srcs = ["models/fp32-sparse-mobilenet-v3-small.cc"],
+    name = "fp16_sparse_mobilenet_v3_small",
+    srcs = ["models/fp16-sparse-mobilenet-v3-small.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
@@ -12994,14 +13043,13 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "fp16_mobilenet_v3_small",
-    srcs = ["models/fp16-mobilenet-v3-small.cc"],
+    name = "fp32_sparse_mobilenet_v3_small",
+    srcs = ["models/fp32-sparse-mobilenet-v3-small.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
         ":cache",
-        "@FP16",
         "@pthreadpool",
     ],
 )
@@ -13113,6 +13161,10 @@ xnnpack_benchmark(
         ":fp16_mobilenet_v2",
         ":fp16_mobilenet_v3_large",
         ":fp16_mobilenet_v3_small",
+        ":fp16_sparse_mobilenet_v1",
+        ":fp16_sparse_mobilenet_v2",
+        ":fp16_sparse_mobilenet_v3_large",
+        ":fp16_sparse_mobilenet_v3_small",
         ":fp32_mobilenet_v1",
         ":fp32_mobilenet_v2",
         ":fp32_mobilenet_v3_large",

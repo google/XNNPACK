@@ -31,6 +31,11 @@ ExecutionPlan FP16MobileNetV2(pthreadpool_t threadpool);
 ExecutionPlan FP16MobileNetV3Large(pthreadpool_t threadpool);
 ExecutionPlan FP16MobileNetV3Small(pthreadpool_t threadpool);
 
+ExecutionPlan FP16SparseMobileNetV1(float sparsity, pthreadpool_t threadpool);
+ExecutionPlan FP16SparseMobileNetV2(float sparsity, pthreadpool_t threadpool);
+ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpool);
+ExecutionPlan FP16SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpool);
+
 ExecutionPlan QC8MobileNetV1(pthreadpool_t threadpool);
 ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool);
 

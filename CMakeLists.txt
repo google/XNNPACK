@@ -9713,23 +9713,27 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     # ---[ Build end-to-end microbenchmarks
     ADD_LIBRARY(bench-models STATIC
       models/fp16-mobilenet-v1.cc
+      models/fp16-mobilenet-v2.cc
+      models/fp16-mobilenet-v3-large.cc
+      models/fp16-mobilenet-v3-small.cc
+      models/fp16-sparse-mobilenet-v1.cc
+      models/fp16-sparse-mobilenet-v2.cc
+      models/fp16-sparse-mobilenet-v3-large.cc
+      models/fp16-sparse-mobilenet-v3-small.cc
       models/fp32-mobilenet-v1.cc
+      models/fp32-mobilenet-v2.cc
+      models/fp32-mobilenet-v3-large.cc
+      models/fp32-mobilenet-v3-small.cc
+      models/fp32-sparse-mobilenet-v1.cc
+      models/fp32-sparse-mobilenet-v2.cc
+      models/fp32-sparse-mobilenet-v3-large.cc
+      models/fp32-sparse-mobilenet-v3-small.cc
       models/qc8-mobilenet-v1.cc
       models/qc8-mobilenet-v2.cc
       models/qs8-mobilenet-v1.cc
       models/qs8-mobilenet-v2.cc
       models/qu8-mobilenet-v1.cc
-      models/qu8-mobilenet-v2.cc
-      models/fp16-mobilenet-v2.cc
-      models/fp32-mobilenet-v2.cc
-      models/fp16-mobilenet-v3-large.cc
-      models/fp32-mobilenet-v3-large.cc
-      models/fp16-mobilenet-v3-small.cc
-      models/fp32-mobilenet-v3-small.cc
-      models/fp32-sparse-mobilenet-v1.cc
-      models/fp32-sparse-mobilenet-v2.cc
-      models/fp32-sparse-mobilenet-v3-large.cc
-      models/fp32-sparse-mobilenet-v3-small.cc)
+      models/qu8-mobilenet-v2.cc)
     SET_TARGET_PROPERTIES(bench-models PROPERTIES CXX_EXTENSIONS YES)
     TARGET_INCLUDE_DIRECTORIES(bench-models PRIVATE .)
     TARGET_LINK_LIBRARIES(bench-models PRIVATE fp16 benchmark)
