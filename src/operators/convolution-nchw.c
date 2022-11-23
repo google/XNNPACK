@@ -175,10 +175,14 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
   // + 3x3 stride-1 depthwise convolution with horizontal padding 1 & no vertical padding
   // + 5x5 stride-2 depthwise convolution with horizontal padding 2 & no vertical padding
   // + 5x5 stride-1 depthwise convolution with horizontal padding 2 & no vertical padding
+  const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
+  const bool is_1x1 = kernel_width == 1 && kernel_height == 1 && subsampling_height == 1 && subsampling_width == 1;
   const bool is_3x3 = kernel_width == 3 && kernel_height == 3 && dilation_height == 1 && dilation_width == 1;
   const bool is_5x5 = kernel_width == 5 && kernel_height == 5 && dilation_height == 1 && dilation_width == 1;
   const bool nhwc_input = (flags & XNN_FLAG_INPUT_NHWC) != 0;
-  if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
+  if (is_1x1 && !any_padding && !nhwc_input && groups == 1) {
+    ukernel_type = xnn_ukernel_type_spmm;
+  } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
     input_padding_top == 1 && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
     nhwc_input && groups == 1)
   {
@@ -234,6 +238,110 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
   }
 
   switch (ukernel_type) {
+    case xnn_ukernel_type_spmm:
+    {
+      assert(kernel_height == 1);
+      assert(kernel_width == 1);
+      assert(groups == 1);
+      assert(flags & XNN_FLAG_FP32_STATIC_WEIGHTS);
+
+      const float* k = (const float*) kernel;
+      const float* b = (const float*) bias;
+
+      size_t num_nonzeroes = 0;
+      for (size_t oc = 0; oc < group_output_channels; oc++) {
+        for (size_t ic = 0; ic < group_input_channels; ic++) {
+          num_nonzeroes += (size_t) (k[oc * group_input_channels + ic] != 0.0f);
+        }
+      }
+      const size_t num_output_channel_blocks = group_output_channels;
+      const size_t num_nonzero_values = num_nonzeroes;
+      const size_t num_nonzero_blocks = num_nonzeroes;
+      const struct spmm_parameters* spmm_parameters = &xnn_params.f16.spmm;
+
+      // Sparse representation of weights consists of four components:
+      // 1. An array of int32_t values storing scaled [by sizeof(input element)] difference between input channels
+      //    corresponding to successive non-zero blocks.  Used by setup to compute (array 2).
+      // 2. An array of int32_t values storing increment for input pointer after each processed tile. This array is
+      //    derived from scaled difference in array 1 using parameters to setup function.
+      // 3. An array of uint32_t values storing the number of non-zero kernel elements per each output channel.
+      // 4. An array of fp16 values storing all bias elements (group_output_channels) and non-zero kernel elements.
+      //    All elements within non-zero block are assumed to be non-zero.
+
+      const size_t packed_weights_size =
+        (num_nonzero_blocks * 2) * sizeof(int32_t) +
+        (num_output_channel_blocks * sizeof(uint32_t) +
+        group_output_channels + num_nonzero_values) * sizeof(uint16_t) + XNN_EXTRA_BYTES;
+
+      convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size * 2 + 1024);
+      if (convolution_op->packed_weights.pointer == NULL) {
+        xnn_log_error(
+          "failed to allocate %zu bytes for %s operator packed weights",
+          packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f16));
+        goto error;
+      }
+      convolution_op->num_nonzero_values = num_nonzero_values;
+      convolution_op->num_nonzero_blocks = num_nonzero_blocks;
+      convolution_op->num_output_channel_blocks = num_output_channel_blocks;
+
+      int32_t* input_channel_diffs = (int32_t*) convolution_op->packed_weights.pointer;
+      int32_t* input_increments = (int32_t*) (input_channel_diffs + num_nonzero_blocks);
+      uint32_t* output_channel_nonzeros = (uint32_t*) (input_increments + num_nonzero_blocks);
+      uint16_t* nonzero_values = (uint16_t*) (output_channel_nonzeros + num_output_channel_blocks);
+
+      memset(output_channel_nonzeros, 0, num_output_channel_blocks * sizeof(uint32_t));
+
+      // Encode fp16 bias and non-zero weights
+      status = xnn_status_unsupported_parameter;
+      size_t first_ic = 0, last_ic = 0;
+      bool first_nonzero = true;
+      for (size_t oc = 0; oc < group_output_channels; oc++) {
+        if XNN_LIKELY(b != NULL) {
+          *nonzero_values++ = fp16_ieee_from_fp32_value(b[oc]);
+        } else {
+          *nonzero_values++ = 0;
+        }
+        for (size_t ic = 0; ic < group_input_channels; ic++) {
+          const uint16_t weight = fp16_ieee_from_fp32_value(k[oc * group_input_channels + ic]);
+          if (weight != 0) {
+            *nonzero_values++ = weight;
+            if (first_nonzero) {
+              first_ic = ic;
+            } else {
+              const int64_t diff = (int64_t) ((uint64_t) ic - (uint64_t) last_ic) * (int64_t) sizeof(uint16_t);
+              if (diff != (int64_t) (int32_t) diff) {
+                xnn_log_error("failed to convert kernel to sparse representation: "
+                  "scaled difference in input channels exceeds int32_t range");
+                goto error;
+              }
+              *input_channel_diffs++ = (int32_t) diff;
+            }
+            first_nonzero = false;
+            last_ic = ic;
+            *output_channel_nonzeros += 1;
+          }
+        }
+        output_channel_nonzeros += 1;
+      }
+      // If there are any non-zero elements, we have to return to the initial input channel.
+      if (!first_nonzero) {
+        const int64_t diff = (int64_t) ((uint64_t) first_ic - (uint64_t) last_ic) * (int64_t) sizeof(uint16_t);
+        if (diff != (int64_t) (int32_t) diff) {
+          xnn_log_error("failed to convert kernel to sparse representation: "
+            "scaled difference in input channels exceeds int32_t range");
+          goto error;
+        }
+        *input_channel_diffs++ = (int32_t) diff;
+      }
+      convolution_op->first_input_channel = first_ic;
+
+      convolution_op->ukernel.spmm = (struct xnn_ukernel_spmm) {
+        .function = spmm_parameters->ukernel,
+        .mr = spmm_parameters->mr,
+      };
+
+      break;
+    }
     case xnn_ukernel_type_conv2d_hwc2chw:
     {
       assert(groups == 1);
@@ -354,7 +462,6 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
   convolution_op->flags = flags;
 
   convolution_op->state = xnn_run_state_invalid;
-
   *convolution_op_out = convolution_op;
   return xnn_status_success;
 
