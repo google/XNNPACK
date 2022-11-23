@@ -138,7 +138,7 @@ class DepthToSpaceOperatorTester {
       std::ref(rng));
 
     std::vector<int8_t> input(
-      (batch_size() * input_height() * input_width() - 1) * input_channels_stride() + input_channels());
+      (batch_size() * input_height() * input_width() - 1) * input_channels_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
     std::vector<int8_t> output(
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -204,7 +204,7 @@ class DepthToSpaceOperatorTester {
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
 
     std::vector<int16_t> input(
-      (batch_size() * input_height() * input_width() - 1) * input_channels_stride() + input_channels());
+      (batch_size() * input_height() * input_width() - 1) * input_channels_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(int16_t));
     std::vector<int16_t> output(
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -270,7 +270,7 @@ class DepthToSpaceOperatorTester {
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(), std::ref(rng));
 
     std::vector<int32_t> input(
-      (batch_size() * input_height() * input_width() - 1) * input_channels_stride() + input_channels());
+      (batch_size() * input_height() * input_width() - 1) * input_channels_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(int32_t));
     std::vector<int32_t> output(
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -335,7 +335,7 @@ class DepthToSpaceOperatorTester {
     auto rng = std::mt19937(random_device());
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
 
-    std::vector<int16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+    std::vector<int16_t> input(XNN_EXTRA_BYTES / sizeof(int16_t) +
       ((batch_size() - 1) * input_channels_stride() + input_channels()) * input_height() * input_width());
     std::vector<int16_t> output(
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
@@ -401,7 +401,7 @@ class DepthToSpaceOperatorTester {
     auto rng = std::mt19937(random_device());
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(), std::ref(rng));
 
-    std::vector<int32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
+    std::vector<int32_t> input(XNN_EXTRA_BYTES / sizeof(int32_t) +
       ((batch_size() - 1) * input_channels_stride() + input_channels()) * input_height() * input_width());
     std::vector<int32_t> output(
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
