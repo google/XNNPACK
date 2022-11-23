@@ -131,7 +131,7 @@ class TransposeMicrokernelTester {
       std::fill(output.begin(), output.end(), UINT64_C(0xBADC0FFEE0DDF00D));
 
       union xnn_x64_transpose_params params;
-      if (init_params) {
+      if (init_params != nullptr) {
         init_params(&params);
       }
 
@@ -163,7 +163,7 @@ class TransposeMicrokernelTester {
       std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
 
       union xnn_x32_transpose_params params;
-      if (init_params) {
+      if (init_params != nullptr) {
         init_params(&params);
       }
 
@@ -193,7 +193,7 @@ class TransposeMicrokernelTester {
     std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
     union xnn_x24_transpose_params params;
-    if (init_params) {
+    if (init_params != nullptr) {
       init_params(&params);
     }
     // Call optimized micro-kernel.
@@ -217,13 +217,17 @@ class TransposeMicrokernelTester {
     }
   }
 
-  void Test(xnn_x16_transposec_ukernel_fn transpose) const {
+  void Test(xnn_x16_transposec_ukernel_fn transpose, const xnn_init_x16_transpose_params_fn init_params = nullptr) const {
     std::vector<uint16_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> output(input_stride() * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), 0);
       std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
 
+      union xnn_x16_transpose_params params;
+      if (init_params != nullptr) {
+        init_params(&params);
+      }
       // Call optimized micro-kernel.
       transpose(input.data(),
                 output.data(),
@@ -231,12 +235,12 @@ class TransposeMicrokernelTester {
                 output_stride() * sizeof(uint16_t),
                 block_width(),
                 block_height(),
-                nullptr);
+                &params);
 
       // Verify results.
       for (size_t c = 0; c < block_width(); c++) {
         for (size_t r = 0; r < block_height(); r++) {
-          EXPECT_EQ(input[c + r * input_stride()], output[r + c * output_stride()])
+          ASSERT_EQ(input[c + r * input_stride()], output[r + c * output_stride()])
               << "at row " << r << " / " << block_height()
               << ", at column " << c << " / " << block_width();
         }
@@ -244,13 +248,17 @@ class TransposeMicrokernelTester {
     }
   }
 
-  void Test(xnn_x8_transposec_ukernel_fn transpose) const {
+  void Test(xnn_x8_transposec_ukernel_fn transpose, const xnn_init_x8_transpose_params_fn init_params = nullptr) const {
     std::vector<uint8_t> input(input_stride() * output_stride() + XNN_EXTRA_BYTES);
     std::vector<uint8_t> output(input_stride() * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), 0);
       std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
+      union xnn_x8_transpose_params params;
+      if (init_params != nullptr) {
+        init_params(&params);
+      }
       // Call optimized micro-kernel.
       transpose(input.data(),
                 output.data(),
@@ -258,12 +266,12 @@ class TransposeMicrokernelTester {
                 output_stride() * sizeof(uint8_t),
                 block_width(),
                 block_height(),
-                nullptr);
+                &params);
 
       // Verify results.
       for (size_t c = 0; c < block_width(); c++) {
         for (size_t r = 0; r < block_height(); r++) {
-          EXPECT_EQ((int)input[c + r * input_stride()], (int)output[r + c * output_stride()])
+          ASSERT_EQ((int)input[c + r * input_stride()], (int)output[r + c * output_stride()])
               << "at row " << r << " / " << block_height()
               << ", at column " << c << " / " << block_width();
         }

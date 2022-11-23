@@ -2509,10 +2509,20 @@ struct jit_gemm_params {
 
 union xnn_x8_transpose_params {
   char _; // Dummy member variable to comply with the C standard
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    uint32_t mask_table[15];
+  } avx2;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_x16_transpose_params {
   char _; // Dummy member variable to comply with the C standard
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    uint32_t mask_table[15];
+  } avx2;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_x24_transpose_params {

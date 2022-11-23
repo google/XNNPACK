@@ -16,12 +16,14 @@
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/transpose.h>
 
 
 void transpose(
     benchmark::State& state,
     xnn_x16_transposec_ukernel_fn transpose,
+    xnn_init_x16_transpose_params_fn init_params = nullptr,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check && !isa_check(state)) {
@@ -39,9 +41,13 @@ void transpose(
   std::iota(x.begin(), x.end(), 0);
   std::fill(y.begin(), y.end(), 0);
 
+  xnn_x16_transpose_params params;
+  if (init_params != nullptr) {
+    init_params(&params);
+  }
   for (auto _ : state) {
     transpose(x.data(), y.data(), tile_wbytes, tile_hbytes, width,
-              height, nullptr);
+              height, &params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -133,6 +139,16 @@ BENCHMARK_CAPTURE(transpose, 4x4_scalar_int, xnn_x16_transposec_ukernel__4x4_sca
       ->Apply(BenchmarkKernelSize)->UseRealTime();
   BENCHMARK_CAPTURE(transpose, 8x8_reuse_switch_sse2, xnn_x16_transposec_ukernel__8x8_reuse_switch_sse2)
       ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose,
+                    16x16_multi_mov_avx2,
+                    xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2,
+                    xnn_init_x16_transpose_avx2_params, benchmark::utils::CheckAVX2)
+       ->Apply(BenchmarkKernelSize)->UseRealTime();
+  BENCHMARK_CAPTURE(transpose,
+                    16x16_multi_switch_avx2,
+                    xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2,
+                    xnn_init_x16_transpose_avx2_params, benchmark::utils::CheckAVX2)
+       ->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 

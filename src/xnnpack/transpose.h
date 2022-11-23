@@ -190,6 +190,8 @@ DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x16_transposec_ukernel__8x8_reuse_mu
 DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x16_transposec_ukernel__8x8_reuse_switch_sse2)
 DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x16_transposec_ukernel__8x8_reuse_switch_wasmsimd)
 DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x16_transposec_ukernel__8x8_reuse_switch_zip_neon)
+DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2)
+DECLARE_X16_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2)
 
 #define DECLARE_X8_TRANSPOSEC_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                            \
@@ -223,6 +225,8 @@ DECLARE_X8_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x8_transposec_ukernel__16x16_reuse_mo
 DECLARE_X8_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x8_transposec_ukernel__16x16_reuse_switch_sse2)
 DECLARE_X8_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x8_transposec_ukernel__16x16_reuse_switch_wasmsimd)
 DECLARE_X8_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x8_transposec_ukernel__16x16_reuse_switch_zip_neon)
+DECLARE_X8_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x8_transposec_ukernel__32x32_reuse_mov_avx2)
+DECLARE_X8_TRANSPOSEC_UKERNEL_FUNCTION(xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2)
 
 #ifdef __cplusplus
 }  // extern "C"
