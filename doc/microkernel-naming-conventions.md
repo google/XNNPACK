@@ -60,6 +60,19 @@ output calculated by the microkernel.
 E.g. `xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_cortex_a7` processes 32
 elements of the output matrix.
 
+## DWCONV microkernels
+
+These microkernels come in 2 varieties, uni-pass and multi-pass.
+
+Uni-pass have `XpYc` in their name, where `X` is the kernel tile, and `Y` is the
+channel tile. `p` stands for primary, `c` for channel.
+
+Multi-pass have `WfXmYlZc` in their name, where `W` is the first pass tile, `X`
+is the middle pass tile, `Y` is the last pass tile, and `Z` is the channel tile.
+`f` stands for first, `m` for middle, `l` for last, `c` for channel.
+The kernel size must be at least `W+1`, the middle pass runs for as many
+iterations as possible, and the last pass handles the remainder (at least 1).
+
 ## Average Pooling and Global Average Pooling
 
 These microkernels come in 2 varieties, uni-pass and multi-pass.
