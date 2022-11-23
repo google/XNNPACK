@@ -1513,6 +1513,13 @@ void xnn_pack_f32_multipass_dwconv_ghw_w(
   assert(k != NULL);
   assert(packed_weights != NULL);
   size_t kernel_size = h * w;
+  if (middle_pass_tile == 0) {
+    // Uni-pass DWCONV.
+    assert(last_pass_tile == 0);
+  } else {
+    // Multi-pass DWCONV.
+    assert(kernel_size > first_pass_tile);
+  }
 
   // Stores the x and y index that should be processed next.
   size_t processed_x = 0;
@@ -1590,7 +1597,6 @@ void xnn_pack_f32_multipass_dwconv_ghw_w(
   }
 
   // Last pass.
-  // Right now we don't pad the packed weights if kernel_size < last_pass_tile.
   assert(kernel_size <= last_pass_tile);
   for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
     x = processed_x;
@@ -1607,6 +1613,8 @@ void xnn_pack_f32_multipass_dwconv_ghw_w(
         x++;
       }
     }
+    // Pad so that we can always read last_pass_tile weights in the last pass.
+    packed_weights += (last_pass_tile - kernel_size) * cr;
   }
 }
 
@@ -1836,6 +1844,14 @@ void xnn_pack_f32_multipass_dwconv_hwg_w(
   assert(k != NULL);
   assert(packed_weights != NULL);
   size_t kernel_size = h * w;
+  if (middle_pass_tile == 0) {
+    // Uni-pass DWCONV.
+    assert(last_pass_tile == 0);
+  } else {
+    // Multi-pass DWCONV.
+    assert(kernel_size > first_pass_tile);
+  }
+
 
   // Stores the x and y index that should be processed next.
   size_t processed_x = 0;
@@ -1913,7 +1929,6 @@ void xnn_pack_f32_multipass_dwconv_hwg_w(
   }
 
   // Last pass.
-  // Right now we don't pad the packed weights if kernel_size < last_pass_tile.
   assert(kernel_size <= last_pass_tile);
   for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
     x = processed_x;
@@ -1930,6 +1945,8 @@ void xnn_pack_f32_multipass_dwconv_hwg_w(
         x++;
       }
     }
+    // Pad so that we can always read last_pass_tile weights in the last pass.
+    packed_weights += (last_pass_tile - kernel_size) * cr;
   }
 }
 
