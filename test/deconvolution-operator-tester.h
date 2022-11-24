@@ -24,15 +24,6 @@
 #include <xnnpack.h>
 #include <xnnpack/cache.h>
 
-namespace {
-
-template<class T>
-inline T doz(T a, T b) {
-  return a > b ? a - b : T(0);
-}
-
-}  // namespace
-
 class DeconvolutionOperatorTester {
  public:
   enum class WeightsType {
