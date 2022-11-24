@@ -8,7 +8,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <xnnpack/params.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams.h>
+
 
 struct xnn_transpose_subconfig {
   union {

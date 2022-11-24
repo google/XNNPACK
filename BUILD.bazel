@@ -8946,23 +8946,18 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "configs",
-    srcs = [
-        "src/hardware-config.c",
-        "src/transpose-config.c",
-    ],
+    name = "hardware_config",
+    srcs = ["src/hardware-config.c"],
     hdrs = [
         "src/xnnpack/config.h",
+        "src/xnnpack/microfnptr.h",
+        "src/xnnpack/microparams.h",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
-        ":amalgam_microkernels",
         ":common",
         ":logging",
-        ":microparams_init",
-        ":microkernels_h",
-        ":params",
     ] + select({
         ":emscripten": [],
         "//conditions:default": ["@cpuinfo"],
@@ -8970,13 +8965,55 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "configs_test_mode",
-    srcs = [
-        "src/hardware-config.c",
-        "src/transpose-config.c",
-    ],
+    name = "hardware_config_test_mode",
+    srcs = ["src/hardware-config.c"],
     hdrs = [
         "src/xnnpack/config.h",
+        "src/xnnpack/microfnptr.h",
+        "src/xnnpack/microparams.h",
+    ],
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":logging",
+    ] + select({
+        ":emscripten": [],
+        "//conditions:default": ["@cpuinfo"],
+    }),
+)
+
+xnnpack_cc_library(
+    name = "microkernel_configs",
+    srcs = ["src/transpose-config.c"],
+    hdrs = [
+        "src/xnnpack/config.h",
+        "src/xnnpack/microfnptr.h",
+        "src/xnnpack/microparams.h",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":amalgam_microkernels",
+        ":common",
+        ":hardware_config",
+        ":logging",
+        ":microkernels_h",
+        ":microparams_init",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "microkernel_configs_test_mode",
+    srcs = ["src/transpose-config.c"],
+    hdrs = [
+        "src/xnnpack/config.h",
+        "src/xnnpack/microfnptr.h",
+        "src/xnnpack/microparams.h",
     ],
     copts = [
         "-UNDEBUG",
@@ -8986,11 +9023,11 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":amalgam_microkernels",
+        ":hardware_config_test_mode",
         ":common",
         ":logging",
         ":microparams_init",
         ":microkernels_h",
-        ":params",
     ] + select({
         ":emscripten": [],
         "//conditions:default": ["@cpuinfo"],
@@ -11479,13 +11516,13 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":common",
-        ":configs",
         ":enable_gemm_m_specialization",
         ":enable_jit",
         ":indirection",
         ":jit",
         ":logging",
         ":math",
+        ":microkernel_configs",
         ":microkernel_type",
         ":microparams_init",
         ":normalization",
@@ -11522,13 +11559,14 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":common",
-        ":configs_test_mode",
         ":enable_gemm_m_specialization",
         ":enable_jit",
         ":indirection_test_mode",
         ":jit_test_mode",
         ":logging",
         ":math",
+        ":microkernel_configs_test_mode",
+        ":microkernel_type",
         ":microparams_init",
         ":normalization_test_mode",
         ":packing_test_mode",
@@ -11740,9 +11778,7 @@ xnnpack_cc_library(
     srcs = [
         "src/init.c",
     ],
-    hdrs = [
-        "include/xnnpack.h",
-    ],
+    hdrs = ["include/xnnpack.h"],
     copts = select({
         ":debug_build": [],
         "//conditions:default": xnnpack_min_size_copts(),
@@ -11756,10 +11792,10 @@ xnnpack_cc_library(
     deps = [
         ":allocator",
         ":common",
-        ":configs",
         ":enable_assembly",
         ":enable_gemm_m_specialization",
         ":enable_jit",
+        ":hardware_config",
         ":logging",
         ":math",
         ":microkernels_h",
@@ -11781,9 +11817,7 @@ xnnpack_cc_library(
     srcs = [
         "src/init.c",
     ],
-    hdrs = [
-        "include/xnnpack.h",
-    ],
+    hdrs = ["include/xnnpack.h"],
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
@@ -11800,10 +11834,10 @@ xnnpack_cc_library(
     deps = [
         ":allocator",
         ":common",
-        ":configs_test_mode",
         ":enable_assembly",
         ":enable_gemm_m_specialization",
         ":enable_jit",
+        ":hardware_config_test_mode",
         ":logging",
         ":math",
         ":microkernels_h",

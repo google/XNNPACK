@@ -23,7 +23,6 @@
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
 #include <xnnpack/log.h>
-#include <xnnpack/microparams-init.h>
 
 
 static struct xnn_hardware_config hardware_config = {0};

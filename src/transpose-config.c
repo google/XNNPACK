@@ -23,7 +23,6 @@
 #endif
 
 #include <xnnpack/config.h>
-#include <xnnpack/log.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/transpose.h>
 #include <xnnpack/vunary.h>
