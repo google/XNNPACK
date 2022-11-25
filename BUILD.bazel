@@ -9023,15 +9023,12 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":amalgam_microkernels",
-        ":hardware_config_test_mode",
         ":common",
+        ":hardware_config_test_mode",
         ":logging",
-        ":microparams_init",
         ":microkernels_h",
-    ] + select({
-        ":emscripten": [],
-        "//conditions:default": ["@cpuinfo"],
-    }),
+        ":microparams_init",
+    ],
 )
 
 xnnpack_cc_library(
@@ -9152,7 +9149,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
-        "@cpuinfo",
+        ":hardware_config",
     ],
 )
 

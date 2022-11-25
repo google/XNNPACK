@@ -46,10 +46,14 @@ static void init_hardware_config(void) {
 
   #if XNN_ARCH_ARM64 || XNN_ARCH_ARM
     #if XNN_PLATFORM_WINDOWS
+      hardware_config.use_arm_fp16_arith = !!IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
       hardware_config.use_arm_neon_fp16_arith = !!IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
+      hardware_config.use_arm_neon_bf16 = false;
       hardware_config.use_arm_neon_dot = !!IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
     #else
+      hardware_config.use_arm_fp16_arith = cpuinfo_has_arm_fp16_arith();
       hardware_config.use_arm_neon_fp16_arith = cpuinfo_has_arm_neon_fp16_arith();
+      hardware_config.use_arm_neon_bf16 = cpuinfo_has_arm_neon_bf16();
       hardware_config.use_arm_neon_dot = cpuinfo_has_arm_neon_dot();
     #endif
   #endif

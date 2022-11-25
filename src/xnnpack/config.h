@@ -12,6 +12,10 @@
 #include <xnnpack/microparams.h>
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct xnn_transpose_subconfig {
   union {
     xnn_transposec_ukernel_fn const_size_ukernel;
@@ -49,7 +53,9 @@ struct xnn_hardware_config {
   bool use_arm_neon_v8;
 #endif  // XNN_ARCH_ARM
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  bool use_arm_fp16_arith;
   bool use_arm_neon_fp16_arith;
+  bool use_arm_neon_bf16;
   bool use_arm_neon_dot;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -70,3 +76,7 @@ struct xnn_hardware_config {
 };
 
 XNN_INTERNAL const struct xnn_hardware_config* xnn_init_hardware_config();
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
