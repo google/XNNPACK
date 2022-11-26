@@ -272,9 +272,6 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
 
 #ifndef XNN_NO_F16_OPERATORS
 void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
-  if (!benchmark::utils::CheckNEONFP16ARITH(state)) {
-    return;
-  }
   const size_t batch_size = state.range(0);
   const size_t input_height = state.range(1);
   const size_t input_width = state.range(2);

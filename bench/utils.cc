@@ -23,6 +23,7 @@
 #include <xnnpack.h>
 #include <xnnpack/common.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/config.h>
 
 #include "bench/utils.h"
 
@@ -145,195 +146,265 @@ void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
   // Disabled thread pool (execution on the caller thread only).
   benchmark->Arg(1);
 
-  if (cpuinfo_initialize()) {
-    // All cores except the little ones.
-    uint32_t max_cores = cpuinfo_get_cores_count();
-    if (cpuinfo_get_clusters_count() > 1) {
-      max_cores -= cpuinfo_get_cluster(cpuinfo_get_clusters_count() - 1)->core_count;
+  #if !XNN_PLATFORM_WINDOWS || !(XNN_ARCH_ARM || XNN_ARCH_ARM64)
+    if (cpuinfo_initialize()) {
+      // All cores except the little ones.
+      uint32_t max_cores = cpuinfo_get_cores_count();
+      if (cpuinfo_get_clusters_count() > 1) {
+        max_cores -= cpuinfo_get_cluster(cpuinfo_get_clusters_count() - 1)->core_count;
+      }
+      for (uint32_t t = 2; t <= max_cores; t++) {
+        benchmark->Arg(t);
+      }
+
+      // All cores (if more than one cluster).
+      if (cpuinfo_get_cores_count() > max_cores) {
+        benchmark->Arg(cpuinfo_get_cores_count());
+      }
+
+      // All cores + hyperthreads (only if hyperthreading supported).
+      if (cpuinfo_get_processors_count() > cpuinfo_get_cores_count()) {
+        benchmark->Arg(cpuinfo_get_processors_count());
+      }
     }
-    for (uint32_t t = 2; t <= max_cores; t++) {
-      benchmark->Arg(t);
+  #endif  // !XNN_PLATFORM_WINDOWS || !(XNN_ARCH_ARM || XNN_ARCH_ARM64)
+}
+
+#if XNN_ARCH_ARM
+  bool CheckVFP(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !(hardware_config->use_arm_vfpv2 || hardware_config->use_arm_vfpv3)) {
+      state.SkipWithError("no VFP extension");
+      return false;
     }
+    return true;
+  }
+#endif  // XNN_ARCH_ARM
 
-    // All cores (if more than one cluster).
-    if (cpuinfo_get_cores_count() > max_cores) {
-      benchmark->Arg(cpuinfo_get_cores_count());
+#if XNN_ARCH_ARM
+  bool CheckARMV6(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_arm_v6) {
+      state.SkipWithError("no ARMv6 extension");
+      return false;
     }
+    return true;
+  }
+#endif  // XNN_ARCH_ARM
 
-    // All cores + hyperthreads (only if hyperthreading supported).
-    if (cpuinfo_get_processors_count() > cpuinfo_get_cores_count()) {
-      benchmark->Arg(cpuinfo_get_processors_count());
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  bool CheckFP16ARITH(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_arm_fp16_arith) {
+      state.SkipWithError("no FP16-ARITH extension");
+      return false;
     }
+    return true;
   }
-}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
-bool CheckVFP(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !(cpuinfo_has_arm_vfpv2() || cpuinfo_has_arm_vfpv3())) {
-    state.SkipWithError("no VFP extension");
-    return false;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  bool CheckNEON(benchmark::State& state) {
+    #if XNN_ARCH_ARM64
+      return true;
+    #else
+      const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      if (hardware_config == nullptr || !hardware_config->use_arm_neon) {
+        state.SkipWithError("no NEON extension");
+        return false;
+      }
+      return true;
+    #endif
   }
-  return true;
-}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-bool CheckARMV6(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_arm_v6()) {
-    state.SkipWithError("no ARMv6 extension");
-    return false;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  bool CheckNEONFP16(benchmark::State& state) {
+    #if XNN_ARCH_ARM64
+      return true;
+    #else
+      const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      if (hardware_config == nullptr || !hardware_config->use_arm_neon_fp16) {
+        state.SkipWithError("no NEON-FP16 extension");
+        return false;
+      }
+      return true;
+    #endif
   }
-  return true;
-}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-bool CheckFP16ARITH(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_arm_fp16_arith()) {
-    state.SkipWithError("no FP16-ARITH extension");
-    return false;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  bool CheckNEONFMA(benchmark::State& state) {
+    #if XNN_ARCH_ARM64
+      return true;
+    #else
+      const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      if (hardware_config == nullptr || !hardware_config->use_arm_neon_fma) {
+        state.SkipWithError("no NEON-FMA extension");
+        return false;
+      }
+      return true;
+    #endif
   }
-  return true;
-}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-bool CheckNEON(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon()) {
-    state.SkipWithError("no NEON extension");
-    return false;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  bool CheckNEONV8(benchmark::State& state) {
+    #if XNN_ARCH_ARM64
+      return true;
+    #else
+      const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      if (hardware_config == nullptr || !hardware_config->use_arm_neon_v8) {
+        state.SkipWithError("no NEON-V8 extension");
+        return false;
+      }
+      return true;
+    #endif
   }
-  return true;
-}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-bool CheckNEONFP16(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_fp16()) {
-    state.SkipWithError("no NEON-FP16 extension");
-    return false;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  bool CheckNEONFP16ARITH(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_arm_neon_fp16_arith) {
+      state.SkipWithError("no NEON-FP16-ARITH extension");
+      return false;
+    }
+    return true;
   }
-  return true;
-}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-bool CheckNEONFMA(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_fma()) {
-    state.SkipWithError("no NEON-FMA extension");
-    return false;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  bool CheckNEONBF16(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_arm_neon_bf16) {
+      state.SkipWithError("no NEON-BF16 extension");
+      return false;
+    }
+    return true;
   }
-  return true;
-}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-bool CheckNEONV8(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_v8()) {
-    state.SkipWithError("no NEON-V8 extension");
-    return false;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  bool CheckNEONDOT(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_arm_neon_dot) {
+      state.SkipWithError("no NEON-DOT extension");
+      return false;
+    }
+    return true;
   }
-  return true;
-}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-bool CheckNEONFP16ARITH(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_fp16_arith()) {
-    state.SkipWithError("no NEON-FP16-ARITH extension");
-    return false;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  bool CheckSSSE3(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_x86_ssse3) {
+      state.SkipWithError("no SSSE3 extension");
+      return false;
+    }
+    return true;
   }
-  return true;
-}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-bool CheckNEONBF16(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_bf16()) {
-    state.SkipWithError("no NEON-BF16 extension");
-    return false;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  bool CheckSSE41(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_x86_sse4_1) {
+      state.SkipWithError("no SSE4.1 extension");
+      return false;
+    }
+    return true;
   }
-  return true;
-}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-bool CheckNEONDOT(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_arm_neon_dot()) {
-    state.SkipWithError("no NEON-DOT extension");
-    return false;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  bool CheckAVX(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_x86_avx) {
+      state.SkipWithError("no AVX extension");
+      return false;
+    }
+    return true;
   }
-  return true;
-}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-bool CheckSSSE3(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_x86_ssse3()) {
-    state.SkipWithError("no SSSE3 extension");
-    return false;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  bool CheckF16C(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_x86_f16c) {
+      state.SkipWithError("no F16C extension");
+      return false;
+    }
+    return true;
   }
-  return true;
-}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-bool CheckSSE41(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_x86_sse4_1()) {
-    state.SkipWithError("no SSE4.1 extension");
-    return false;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  bool CheckXOP(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_x86_xop) {
+      state.SkipWithError("no XOP extension");
+      return false;
+    }
+    return true;
   }
-  return true;
-}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-bool CheckAVX(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx()) {
-    state.SkipWithError("no AVX extension");
-    return false;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  bool CheckFMA3(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_x86_fma3) {
+      state.SkipWithError("no FMA3 extension");
+      return false;
+    }
+    return true;
   }
-  return true;
-}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-bool CheckF16C(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_x86_f16c()) {
-    state.SkipWithError("no F16C extension");
-    return false;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  bool CheckAVX2(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_x86_avx2) {
+      state.SkipWithError("no AVX2 extension");
+      return false;
+    }
+    return true;
   }
-  return true;
-}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-bool CheckXOP(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_x86_xop()) {
-    state.SkipWithError("no XOP extension");
-    return false;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  bool CheckAVX512F(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_x86_avx512f) {
+      state.SkipWithError("no AVX512F extension");
+      return false;
+    }
+    return true;
   }
-  return true;
-}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-bool CheckFMA3(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_x86_fma3()) {
-    state.SkipWithError("no FMA3 extension");
-    return false;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  bool CheckAVX512SKX(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_x86_avx512skx) {
+      state.SkipWithError("no AVX512 SKX extensions");
+      return false;
+    }
+    return true;
   }
-  return true;
-}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-bool CheckAVX2(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx2()) {
-    state.SkipWithError("no AVX2 extension");
-    return false;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  bool CheckAVX512VBMI(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_x86_avx512vbmi) {
+      state.SkipWithError("no AVX512 VBMI extension");
+      return false;
+    }
+    return true;
   }
-  return true;
-}
-
-bool CheckAVX512F(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx512f()) {
-    state.SkipWithError("no AVX512F extension");
-    return false;
-  }
-  return true;
-}
-
-bool CheckAVX512SKX(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx512f() ||
-      !cpuinfo_has_x86_avx512cd() || !cpuinfo_has_x86_avx512bw() ||
-      !cpuinfo_has_x86_avx512dq() || !cpuinfo_has_x86_avx512vl())
-  {
-    state.SkipWithError("no AVX512 SKX extensions");
-    return false;
-  }
-  return true;
-}
-
-bool CheckAVX512VBMI(benchmark::State& state) {
-  if (!cpuinfo_initialize() || !cpuinfo_has_x86_avx512f() ||
-      !cpuinfo_has_x86_avx512cd() || !cpuinfo_has_x86_avx512bw() ||
-      !cpuinfo_has_x86_avx512dq() || !cpuinfo_has_x86_avx512vl() ||
-      !cpuinfo_has_x86_avx512vbmi())
-  {
-    state.SkipWithError("no AVX512 VBMI extension");
-    return false;
-  }
-  return true;
-}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_PLATFORM_JIT
 

@@ -147,9 +147,6 @@ static void global_average_pooling_qs8(benchmark::State& state) {
 
 #ifndef XNN_NO_F16_OPERATORS
 static void global_average_pooling_f16(benchmark::State& state) {
-  if (!benchmark::utils::CheckNEONFP16ARITH(state)) {
-    return;
-  }
   const size_t batch_size = state.range(0);
   const size_t input_height = state.range(1);
   const size_t input_width = state.range(2);
