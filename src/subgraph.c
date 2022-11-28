@@ -222,7 +222,7 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph)
 #define XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER 8
 
 uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* node) {
-  if (node->compute_type != xnn_compute_type_fp32) {
+  if (node->compute_type != xnn_compute_type_fp16 && node->compute_type != xnn_compute_type_fp32) {
     if (node->type != xnn_node_type_invalid) {
       xnn_log_info(
           "Node %s compute type %d is incompatible with sparse inference",
@@ -714,22 +714,6 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not FP32", n, xnn_node_type_to_string(node->type));
       return false;
     }
-    for (uint32_t i = 0; i < node->num_inputs; i++) {
-      if (subgraph->values[node->inputs[i]].layout == xnn_layout_type_nchw) {
-        xnn_log_warning(
-          "FP16 rewrite aborted: input #%" PRIu32 " (Value #%" PRIu32 ") of node #%" PRIu32 " (%s) has NCHW layout",
-          i, node->inputs[i], n, xnn_node_type_to_string(node->type));
-        return false;
-      }
-    }
-    for (uint32_t o = 0; o < node->num_outputs; o++) {
-      if (subgraph->values[node->outputs[o]].layout == xnn_layout_type_nchw) {
-        xnn_log_warning(
-          "FP16 rewrite aborted: output #%" PRIu32 " (Value #%" PRIu32 ") of node #%" PRIu32 " (%s) has NCHW layout",
-          o, node->outputs[o], n, xnn_node_type_to_string(node->type));
-        return false;
-      }
-    }
     switch (node->type) {
       case xnn_node_type_abs:
       case xnn_node_type_add2:
@@ -1178,16 +1162,9 @@ enum xnn_status xnn_subgraph_optimize(
     }
   }
 
-
   if (!(flags & XNN_FLAG_NO_OPERATOR_FUSION)) {
     xnn_subgraph_fusion(subgraph);
   }
-
-  #if XNN_ENABLE_SPARSE
-    if ((flags & XNN_FLAG_HINT_SPARSE_INFERENCE) && (xnn_params.init_flags & XNN_INIT_FLAG_CHW_OPT)) {
-      xnn_subgraph_rewrite_for_nchw(subgraph);
-    }
-  #endif
 
   if ((flags & XNN_FLAG_FORCE_FP16_INFERENCE) && !(xnn_params.init_flags & XNN_INIT_FLAG_F16)) {
     xnn_log_error("failed to force FP16 inference: hardware supports neither native nor emulated FP16 operators");
@@ -1205,6 +1182,12 @@ enum xnn_status xnn_subgraph_optimize(
       }
     }
   #endif  // XNN_NO_F16_OPERATORS
+
+  #if XNN_ENABLE_SPARSE
+    if ((flags & XNN_FLAG_HINT_SPARSE_INFERENCE) && (xnn_params.init_flags & XNN_INIT_FLAG_CHW_OPT)) {
+      xnn_subgraph_rewrite_for_nchw(subgraph);
+    }
+  #endif
 
   return xnn_status_success;
 }
