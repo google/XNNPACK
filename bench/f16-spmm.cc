@@ -130,7 +130,7 @@ static void f16_spmm(benchmark::State& state,
   std::fill(c.begin(), c.end(), nanf(""));
 
   xnn_f16_minmax_params params;
-  init_params(&params, 0x7C00 /* inf */, 0xFC00 /* -inf */);
+  init_params(&params, 0xFC00 /* -inf */, 0x7C00 /* inf */);
 
   size_t buffer_index = 0;
   for (auto _ : state) {
