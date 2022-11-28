@@ -139,21 +139,21 @@ class BinaryElementwiseOperatorTester {
     return this->output_scale_;
   }
 
-  inline BinaryElementwiseOperatorTester& qmin(uint8_t qmin) {
+  inline BinaryElementwiseOperatorTester& qmin(int16_t qmin) {
     this->qmin_ = qmin;
     return *this;
   }
 
-  inline uint8_t qmin() const {
+  inline int16_t qmin() const {
     return this->qmin_;
   }
 
-  inline BinaryElementwiseOperatorTester& qmax(uint8_t qmax) {
+  inline BinaryElementwiseOperatorTester& qmax(int16_t qmax) {
     this->qmax_ = qmax;
     return *this;
   }
 
-  inline uint8_t qmax() const {
+  inline int16_t qmax() const {
     return this->qmax_;
   }
 
@@ -204,6 +204,9 @@ class BinaryElementwiseOperatorTester {
     ASSERT_LE(input2_zero_point(), std::numeric_limits<int8_t>::max());
     ASSERT_GE(output_zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(output_zero_point(), std::numeric_limits<int8_t>::max());
+    ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
+    ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
+    ASSERT_LT(qmin(), qmax());
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -270,7 +273,8 @@ class BinaryElementwiseOperatorTester {
       }
 
       for (float& output_value : output_ref) {
-        output_value = std::min(std::max(output_value, float(int8_t(qmin() - 0x80))), float(int8_t(qmax() - 0x80)));
+        output_value = std::max<float>(output_value, static_cast<float>(qmin()));
+        output_value = std::min<float>(output_value, static_cast<float>(qmax()));
       }
 
       // Create, setup, run, and destroy a binary elementwise operator.
@@ -283,7 +287,7 @@ class BinaryElementwiseOperatorTester {
             input1_zero_point(), input1_scale(),
             input2_zero_point(), input2_scale(),
             output_zero_point(), output_scale(),
-            int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+            static_cast<int8_t>(qmin()), static_cast<int8_t>(qmax()),
             0, &binary_elementwise_op);
           break;
         case OperationType::Multiply:
@@ -291,7 +295,7 @@ class BinaryElementwiseOperatorTester {
             input1_zero_point(), input1_scale(),
             input2_zero_point(), input2_scale(),
             output_zero_point(), output_scale(),
-            int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+            static_cast<int8_t>(qmin()), static_cast<int8_t>(qmax()),
             0, &binary_elementwise_op);
           break;
         case OperationType::Subtract:
@@ -299,7 +303,7 @@ class BinaryElementwiseOperatorTester {
             input1_zero_point(), input1_scale(),
             input2_zero_point(), input2_scale(),
             output_zero_point(), output_scale(),
-            int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+            static_cast<int8_t>(qmin()), static_cast<int8_t>(qmax()),
             0, &binary_elementwise_op);
           break;
         default:
@@ -386,6 +390,9 @@ class BinaryElementwiseOperatorTester {
     ASSERT_LE(input2_zero_point(), std::numeric_limits<uint8_t>::max());
     ASSERT_GE(output_zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(output_zero_point(), std::numeric_limits<uint8_t>::max());
+    ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
+    ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
+    ASSERT_LT(qmin(), qmax());
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -452,7 +459,8 @@ class BinaryElementwiseOperatorTester {
       }
 
       for (float& output_value : output_ref) {
-        output_value = std::min(std::max(output_value, float(int32_t(qmin()))), float(int32_t(qmax())));
+        output_value = std::max<float>(output_value, static_cast<float>(qmin()));
+        output_value = std::min<float>(output_value, static_cast<float>(qmax()));
       }
 
       // Create, setup, run, and destroy a binary elementwise operator.
@@ -465,7 +473,7 @@ class BinaryElementwiseOperatorTester {
             input1_zero_point(), input1_scale(),
             input2_zero_point(), input2_scale(),
             output_zero_point(), output_scale(),
-            qmin(), qmax(),
+            static_cast<uint8_t>(qmin()), static_cast<uint8_t>(qmax()),
             0, &binary_elementwise_op);
           break;
         case OperationType::Multiply:
@@ -473,7 +481,7 @@ class BinaryElementwiseOperatorTester {
             input1_zero_point(), input1_scale(),
             input2_zero_point(), input2_scale(),
             output_zero_point(), output_scale(),
-            qmin(), qmax(),
+            static_cast<uint8_t>(qmin()), static_cast<uint8_t>(qmax()),
             0, &binary_elementwise_op);
           break;
         case OperationType::Subtract:
@@ -481,7 +489,7 @@ class BinaryElementwiseOperatorTester {
             input1_zero_point(), input1_scale(),
             input2_zero_point(), input2_scale(),
             output_zero_point(), output_scale(),
-            qmin(), qmax(),
+            static_cast<uint8_t>(qmin()), static_cast<uint8_t>(qmax()),
             0, &binary_elementwise_op);
           break;
         default:
@@ -562,6 +570,7 @@ class BinaryElementwiseOperatorTester {
 
   void TestF16() const {
     ASSERT_NE(operation_type(), OperationType::Unknown);
+    ASSERT_LT(qmin(), qmax());
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -629,13 +638,24 @@ class BinaryElementwiseOperatorTester {
       const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_range = accumulated_max - accumulated_min;
-      const float scaled_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + accumulated_range / 255.0f * float(qmin())));
-      const float scaled_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
-      const float output_min = scaled_min == scaled_max ? -std::numeric_limits<float>::infinity() : scaled_min;
-      const float output_max = scaled_min == scaled_max ? +std::numeric_limits<float>::infinity() : scaled_max;
+      float output_min = accumulated_min + accumulated_range *
+        (static_cast<float>(qmin() - std::numeric_limits<int16_t>::min()) /
+          static_cast<float>(std::numeric_limits<int16_t>::max() - std::numeric_limits<int16_t>::min()));
+      if (qmin() == std::numeric_limits<int16_t>::min()) {
+        output_min = -std::numeric_limits<float>::infinity();
+      }
+      float output_max = accumulated_max - accumulated_range *
+        (static_cast<float>(std::numeric_limits<int16_t>::max() - qmax()) /
+          static_cast<float>(std::numeric_limits<int16_t>::max() - std::numeric_limits<int16_t>::min()));
+      if (qmax() == std::numeric_limits<int16_t>::max()) {
+        output_max = +std::numeric_limits<float>::infinity();
+      }
+      output_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_min));
+      output_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_max));
 
       for (float& output_value : output_ref) {
-        output_value = std::min(std::max(output_value, output_min), output_max);
+        output_value = std::max(output_value, output_min);
+        output_value = std::min(output_value, output_max);
       }
 
       // Create, setup, run, and destroy a binary elementwise operator.
@@ -783,6 +803,7 @@ class BinaryElementwiseOperatorTester {
 
   void TestF32() const {
     ASSERT_NE(operation_type(), OperationType::Unknown);
+    ASSERT_LT(qmin(), qmax());
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -848,12 +869,21 @@ class BinaryElementwiseOperatorTester {
       const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_range = accumulated_max - accumulated_min;
-      const float output_min = num_output_elements == 1 ?
-        -std::numeric_limits<float>::infinity() : accumulated_min + accumulated_range / 255.0f * float(qmin());
-      const float output_max = num_output_elements == 1 ?
-        +std::numeric_limits<float>::infinity() : accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
+      float output_min = accumulated_min + accumulated_range *
+        (static_cast<float>(qmin() - std::numeric_limits<int16_t>::min()) /
+          static_cast<float>(std::numeric_limits<int16_t>::max() - std::numeric_limits<int16_t>::min()));
+      if (qmin() == std::numeric_limits<int16_t>::min()) {
+        output_min = -std::numeric_limits<float>::infinity();
+      }
+      float output_max = accumulated_max - accumulated_range *
+        (static_cast<float>(std::numeric_limits<int16_t>::max() - qmax()) /
+          static_cast<float>(std::numeric_limits<int16_t>::max() - std::numeric_limits<int16_t>::min()));
+      if (qmax() == std::numeric_limits<int16_t>::max()) {
+        output_max = +std::numeric_limits<float>::infinity();
+      }
       for (float& output_value : output_ref) {
-        output_value = std::min(std::max(output_value, output_min), output_max);
+        output_value = std::max(output_value, output_min);
+        output_value = std::min(output_value, output_max);
       }
 
       // Create, setup, run, and destroy a binary elementwise operator.
@@ -1015,6 +1045,7 @@ class BinaryElementwiseOperatorTester {
 
   void TestRunF32() const {
     ASSERT_NE(operation_type(), OperationType::Unknown);
+    ASSERT_LT(qmin(), qmax());
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -1092,22 +1123,24 @@ class BinaryElementwiseOperatorTester {
           }
         }
       }
-      const float accumulated_min =
-          *std::min_element(output_ref.cbegin(), output_ref.cend());
-      const float accumulated_max =
-          *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_range = accumulated_max - accumulated_min;
-      const float output_min =
-          num_output_elements == 1
-              ? -std::numeric_limits<float>::infinity()
-              : accumulated_min + accumulated_range / 255.0f * float(qmin());
-      const float output_max = num_output_elements == 1
-                                   ? +std::numeric_limits<float>::infinity()
-                                   : accumulated_max - accumulated_range /
-                                                           255.0f *
-                                                           float(255 - qmax());
+      float output_min = accumulated_min + accumulated_range *
+        (static_cast<float>(qmin() - std::numeric_limits<int16_t>::min()) /
+          static_cast<float>(std::numeric_limits<int16_t>::max() - std::numeric_limits<int16_t>::min()));
+      if (qmin() == std::numeric_limits<int16_t>::min()) {
+        output_min = -std::numeric_limits<float>::infinity();
+      }
+      float output_max = accumulated_max - accumulated_range *
+        (static_cast<float>(std::numeric_limits<int16_t>::max() - qmax()) /
+          static_cast<float>(std::numeric_limits<int16_t>::max() - std::numeric_limits<int16_t>::min()));
+      if (qmax() == std::numeric_limits<int16_t>::max()) {
+        output_max = +std::numeric_limits<float>::infinity();
+      }
       for (float& output_value : output_ref) {
-        output_value = std::min(std::max(output_value, output_min), output_max);
+        output_value = std::max(output_value, output_min);
+        output_value = std::min(output_value, output_max);
       }
 
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -1219,6 +1252,9 @@ void TestRunQS8() const {
     ASSERT_LE(input2_zero_point(), std::numeric_limits<int8_t>::max());
     ASSERT_GE(output_zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(output_zero_point(), std::numeric_limits<int8_t>::max());
+    ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
+    ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
+    ASSERT_LT(qmin(), qmax());
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -1285,7 +1321,8 @@ void TestRunQS8() const {
       }
 
       for (float& output_value : output_ref) {
-        output_value = std::min(std::max(output_value, float(int8_t(qmin() - 0x80))), float(int8_t(qmax() - 0x80)));
+        output_value = std::max<float>(output_value, static_cast<float>(qmin()));
+        output_value = std::min<float>(output_value, static_cast<float>(qmax()));
       }
 
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -1297,7 +1334,7 @@ void TestRunQS8() const {
               num_input2_dims(), input2_shape().data(), input2_zero_point(), input2_scale(),
               input1.data(), input2.data(), output.data(),
               output_zero_point(), output_scale(),
-              int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+              static_cast<int8_t>(qmin()), static_cast<int8_t>(qmax()),
               0,
               nullptr /* thread pool */));
           break;
@@ -1308,7 +1345,7 @@ void TestRunQS8() const {
               num_input2_dims(), input2_shape().data(), input2_zero_point(), input2_scale(),
               input1.data(), input2.data(), output.data(),
               output_zero_point(), output_scale(),
-              int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+              static_cast<int8_t>(qmin()), static_cast<int8_t>(qmax()),
               0,
               nullptr /* thread pool */));
           break;
@@ -1319,7 +1356,7 @@ void TestRunQS8() const {
               num_input2_dims(), input2_shape().data(), input2_zero_point(), input2_scale(),
               input1.data(), input2.data(), output.data(),
               output_zero_point(), output_scale(),
-              int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
+              static_cast<int8_t>(qmin()), static_cast<int8_t>(qmax()),
               0,
               nullptr /* thread pool */));
           break;
@@ -1358,6 +1395,9 @@ void TestRunQS8() const {
     ASSERT_LE(input2_zero_point(), std::numeric_limits<uint8_t>::max());
     ASSERT_GE(output_zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(output_zero_point(), std::numeric_limits<uint8_t>::max());
+    ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
+    ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
+    ASSERT_LT(qmin(), qmax());
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -1424,7 +1464,8 @@ void TestRunQS8() const {
       }
 
       for (float& output_value : output_ref) {
-        output_value = std::min(std::max(output_value, float(int32_t(qmin()))), float(int32_t(qmax())));
+        output_value = std::max<float>(output_value, static_cast<float>(qmin()));
+        output_value = std::min<float>(output_value, static_cast<float>(qmax()));
       }
 
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -1436,7 +1477,7 @@ void TestRunQS8() const {
               num_input2_dims(), input2_shape().data(), input2_zero_point(), input2_scale(),
               input1.data(), input2.data(), output.data(),
               output_zero_point(), output_scale(),
-              qmin(), qmax(),
+              static_cast<uint8_t>(qmin()), static_cast<uint8_t>(qmax()),
               0,
               nullptr /* thread pool */));
           break;
@@ -1447,7 +1488,7 @@ void TestRunQS8() const {
               num_input2_dims(), input2_shape().data(), input2_zero_point(), input2_scale(),
               input1.data(), input2.data(), output.data(),
               output_zero_point(), output_scale(),
-              qmin(), qmax(),
+              static_cast<uint8_t>(qmin()), static_cast<uint8_t>(qmax()),
               0,
               nullptr /* thread pool */));
           break;
@@ -1458,7 +1499,7 @@ void TestRunQS8() const {
               num_input2_dims(), input2_shape().data(), input2_zero_point(), input2_scale(),
               input1.data(), input2.data(), output.data(),
               output_zero_point(), output_scale(),
-              qmin(), qmax(),
+              static_cast<uint8_t>(qmin()), static_cast<uint8_t>(qmax()),
               0,
               nullptr /* thread pool */));
           break;
@@ -1499,8 +1540,8 @@ void TestRunQS8() const {
   float input2_scale_{1.0f};
   int16_t output_zero_point_{0};
   float output_scale_{1.0f};
-  uint8_t qmin_{0};
-  uint8_t qmax_{255};
+  int16_t qmin_{std::numeric_limits<int16_t>::min()};
+  int16_t qmax_{std::numeric_limits<int16_t>::max()};
   OperationType operation_type_{OperationType::Unknown};
   size_t iterations_{3};
 };

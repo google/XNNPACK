@@ -3,8 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "binary-elementwise-operator-tester.h"
 #include <gtest/gtest.h>
+
+#include "binary-elementwise-operator-tester.h"
 
 constexpr size_t kDim1 = 2;
 constexpr size_t kDim2 = 3;
@@ -13,9 +14,12 @@ constexpr size_t kDim4 = 5;
 constexpr size_t kDim5 = 6;
 constexpr size_t kDim6 = 7;
 
+
 TEST(MULTIPLY_ND_QS8, 0d_x_0d) {
   BinaryElementwiseOperatorTester()
     .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .qmin(std::numeric_limits<int8_t>::min())
+    .qmax(std::numeric_limits<int8_t>::max())
     .TestRunQS8();
 }
 
@@ -26,6 +30,8 @@ TEST(MULTIPLY_ND_QS8, 1d_x_0d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim1})
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
       .TestRunQS8();
   }
 }
@@ -37,6 +43,8 @@ TEST(MULTIPLY_ND_QS8, 0d_x_1d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim1})
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
       .TestRunQS8();
   }
 }
@@ -52,6 +60,8 @@ TEST(MULTIPLY_ND_QS8, 1d_x_1d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -66,6 +76,8 @@ TEST(MULTIPLY_ND_QS8, 0d_x_2d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim2, input2_dim1})
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
       .TestRunQS8();
   }
 }
@@ -83,6 +95,8 @@ TEST(MULTIPLY_ND_QS8, 1d_x_2d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -97,6 +111,8 @@ TEST(MULTIPLY_ND_QS8, 2d_x_0d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim2, input1_dim1})
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
       .TestRunQS8();
   }
 }
@@ -114,6 +130,8 @@ TEST(MULTIPLY_ND_QS8, 2d_x_1d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -134,6 +152,8 @@ TEST(MULTIPLY_ND_QS8, 2d_x_2d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -150,6 +170,8 @@ TEST(MULTIPLY_ND_QS8, 0d_x_3d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim3, input2_dim2, input2_dim1})
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
       .TestRunQS8();
   }
 }
@@ -169,6 +191,8 @@ TEST(MULTIPLY_ND_QS8, 1d_x_3d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -191,6 +215,8 @@ TEST(MULTIPLY_ND_QS8, 2d_x_3d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -207,6 +233,8 @@ TEST(MULTIPLY_ND_QS8, 3d_x_0d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim3, input1_dim2, input1_dim1})
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
       .TestRunQS8();
   }
 }
@@ -226,6 +254,8 @@ TEST(MULTIPLY_ND_QS8, 3d_x_1d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -248,6 +278,8 @@ TEST(MULTIPLY_ND_QS8, 3d_x_2d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -272,6 +304,8 @@ TEST(MULTIPLY_ND_QS8, 3d_x_3d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -290,6 +324,8 @@ TEST(MULTIPLY_ND_QS8, 0d_x_4d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
       .TestRunQS8();
   }
 }
@@ -311,6 +347,8 @@ TEST(MULTIPLY_ND_QS8, 1d_x_4d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -335,6 +373,8 @@ TEST(MULTIPLY_ND_QS8, 2d_x_4d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -361,6 +401,8 @@ TEST(MULTIPLY_ND_QS8, 3d_x_4d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -379,6 +421,8 @@ TEST(MULTIPLY_ND_QS8, 4d_x_0d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
       .TestRunQS8();
   }
 }
@@ -400,6 +444,8 @@ TEST(MULTIPLY_ND_QS8, 4d_x_1d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -424,6 +470,8 @@ TEST(MULTIPLY_ND_QS8, 4d_x_2d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -450,6 +498,8 @@ TEST(MULTIPLY_ND_QS8, 4d_x_3d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -478,6 +528,8 @@ TEST(MULTIPLY_ND_QS8, 4d_x_4d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -498,6 +550,8 @@ TEST(MULTIPLY_ND_QS8, 0d_x_5d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
       .TestRunQS8();
   }
 }
@@ -521,6 +575,8 @@ TEST(MULTIPLY_ND_QS8, 1d_x_5d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -547,6 +603,8 @@ TEST(MULTIPLY_ND_QS8, 2d_x_5d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -575,6 +633,8 @@ TEST(MULTIPLY_ND_QS8, 3d_x_5d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -605,6 +665,8 @@ TEST(MULTIPLY_ND_QS8, 4d_x_5d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -625,6 +687,8 @@ TEST(MULTIPLY_ND_QS8, 5d_x_0d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
       .TestRunQS8();
   }
 }
@@ -648,6 +712,8 @@ TEST(MULTIPLY_ND_QS8, 5d_x_1d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -674,6 +740,8 @@ TEST(MULTIPLY_ND_QS8, 5d_x_2d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -702,6 +770,8 @@ TEST(MULTIPLY_ND_QS8, 5d_x_3d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -732,6 +802,8 @@ TEST(MULTIPLY_ND_QS8, 5d_x_4d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -765,6 +837,8 @@ TEST(MULTIPLY_ND_QS8, 5d_x_5d) {
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -787,6 +861,8 @@ TEST(MULTIPLY_ND_QS8, 0d_x_6d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
       .TestRunQS8();
   }
 }
@@ -812,6 +888,8 @@ TEST(MULTIPLY_ND_QS8, 1d_x_6d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -840,6 +918,8 @@ TEST(MULTIPLY_ND_QS8, 2d_x_6d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -870,6 +950,8 @@ TEST(MULTIPLY_ND_QS8, 3d_x_6d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -902,6 +984,8 @@ TEST(MULTIPLY_ND_QS8, 4d_x_6d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -937,6 +1021,8 @@ TEST(MULTIPLY_ND_QS8, 5d_x_6d) {
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -959,6 +1045,8 @@ TEST(MULTIPLY_ND_QS8, 6d_x_0d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
       .TestRunQS8();
   }
 }
@@ -984,6 +1072,8 @@ TEST(MULTIPLY_ND_QS8, 6d_x_1d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -1012,6 +1102,8 @@ TEST(MULTIPLY_ND_QS8, 6d_x_2d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -1042,6 +1134,8 @@ TEST(MULTIPLY_ND_QS8, 6d_x_3d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -1074,6 +1168,8 @@ TEST(MULTIPLY_ND_QS8, 6d_x_4d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -1109,6 +1205,8 @@ TEST(MULTIPLY_ND_QS8, 6d_x_5d) {
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -1146,6 +1244,8 @@ TEST(MULTIPLY_ND_QS8, 6d_x_6d) {
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
         .TestRunQS8();
     }
   }
@@ -1176,6 +1276,8 @@ TEST(MULTIPLY_ND_QS8, input1_scale) {
           .input1_scale(input1_scale)
           .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
           .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
           .TestRunQS8();
       }
     }
@@ -1207,6 +1309,8 @@ TEST(MULTIPLY_ND_QS8, input1_zero_point) {
           .input1_zero_point(input1_zero_point)
           .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
           .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
           .TestRunQS8();
       }
     }
@@ -1238,6 +1342,8 @@ TEST(MULTIPLY_ND_QS8, input2_scale) {
           .input1_scale(input2_scale)
           .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
           .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
           .TestRunQS8();
       }
     }
@@ -1269,6 +1375,8 @@ TEST(MULTIPLY_ND_QS8, input2_zero_point) {
           .input2_zero_point(input2_zero_point)
           .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
           .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
           .TestRunQS8();
       }
     }
@@ -1300,6 +1408,8 @@ TEST(MULTIPLY_ND_QS8, output_scale) {
           .input1_scale(output_scale)
           .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
           .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
           .TestRunQS8();
       }
     }
@@ -1331,6 +1441,8 @@ TEST(MULTIPLY_ND_QS8, output_zero_point) {
           .output_zero_point(output_zero_point)
           .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
           .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
           .TestRunQS8();
       }
     }
@@ -1340,6 +1452,8 @@ TEST(MULTIPLY_ND_QS8, output_zero_point) {
 TEST(MULTIPLY_ND_QU8, 0d_x_0d) {
   BinaryElementwiseOperatorTester()
     .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
+    .qmin(std::numeric_limits<uint8_t>::min())
+    .qmax(std::numeric_limits<uint8_t>::max())
     .TestRunQU8();
 }
 
@@ -1350,6 +1464,8 @@ TEST(MULTIPLY_ND_QU8, 1d_x_0d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim1})
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
       .TestRunQU8();
   }
 }
@@ -1361,6 +1477,8 @@ TEST(MULTIPLY_ND_QU8, 0d_x_1d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim1})
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
       .TestRunQU8();
   }
 }
@@ -1376,6 +1494,8 @@ TEST(MULTIPLY_ND_QU8, 1d_x_1d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1390,6 +1510,8 @@ TEST(MULTIPLY_ND_QU8, 0d_x_2d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim2, input2_dim1})
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
       .TestRunQU8();
   }
 }
@@ -1407,6 +1529,8 @@ TEST(MULTIPLY_ND_QU8, 1d_x_2d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1421,6 +1545,8 @@ TEST(MULTIPLY_ND_QU8, 2d_x_0d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim2, input1_dim1})
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
       .TestRunQU8();
   }
 }
@@ -1438,6 +1564,8 @@ TEST(MULTIPLY_ND_QU8, 2d_x_1d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1458,6 +1586,8 @@ TEST(MULTIPLY_ND_QU8, 2d_x_2d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1474,6 +1604,8 @@ TEST(MULTIPLY_ND_QU8, 0d_x_3d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim3, input2_dim2, input2_dim1})
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
       .TestRunQU8();
   }
 }
@@ -1493,6 +1625,8 @@ TEST(MULTIPLY_ND_QU8, 1d_x_3d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1515,6 +1649,8 @@ TEST(MULTIPLY_ND_QU8, 2d_x_3d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1531,6 +1667,8 @@ TEST(MULTIPLY_ND_QU8, 3d_x_0d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim3, input1_dim2, input1_dim1})
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
       .TestRunQU8();
   }
 }
@@ -1550,6 +1688,8 @@ TEST(MULTIPLY_ND_QU8, 3d_x_1d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1572,6 +1712,8 @@ TEST(MULTIPLY_ND_QU8, 3d_x_2d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1596,6 +1738,8 @@ TEST(MULTIPLY_ND_QU8, 3d_x_3d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1614,6 +1758,8 @@ TEST(MULTIPLY_ND_QU8, 0d_x_4d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
       .TestRunQU8();
   }
 }
@@ -1635,6 +1781,8 @@ TEST(MULTIPLY_ND_QU8, 1d_x_4d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1659,6 +1807,8 @@ TEST(MULTIPLY_ND_QU8, 2d_x_4d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1685,6 +1835,8 @@ TEST(MULTIPLY_ND_QU8, 3d_x_4d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1703,6 +1855,8 @@ TEST(MULTIPLY_ND_QU8, 4d_x_0d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
       .TestRunQU8();
   }
 }
@@ -1724,6 +1878,8 @@ TEST(MULTIPLY_ND_QU8, 4d_x_1d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1748,6 +1904,8 @@ TEST(MULTIPLY_ND_QU8, 4d_x_2d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1774,6 +1932,8 @@ TEST(MULTIPLY_ND_QU8, 4d_x_3d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1802,6 +1962,8 @@ TEST(MULTIPLY_ND_QU8, 4d_x_4d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1822,6 +1984,8 @@ TEST(MULTIPLY_ND_QU8, 0d_x_5d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
       .TestRunQU8();
   }
 }
@@ -1845,6 +2009,8 @@ TEST(MULTIPLY_ND_QU8, 1d_x_5d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1871,6 +2037,8 @@ TEST(MULTIPLY_ND_QU8, 2d_x_5d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1899,6 +2067,8 @@ TEST(MULTIPLY_ND_QU8, 3d_x_5d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1929,6 +2099,8 @@ TEST(MULTIPLY_ND_QU8, 4d_x_5d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1949,6 +2121,8 @@ TEST(MULTIPLY_ND_QU8, 5d_x_0d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
       .TestRunQU8();
   }
 }
@@ -1972,6 +2146,8 @@ TEST(MULTIPLY_ND_QU8, 5d_x_1d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -1998,6 +2174,8 @@ TEST(MULTIPLY_ND_QU8, 5d_x_2d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2026,6 +2204,8 @@ TEST(MULTIPLY_ND_QU8, 5d_x_3d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2056,6 +2236,8 @@ TEST(MULTIPLY_ND_QU8, 5d_x_4d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2089,6 +2271,8 @@ TEST(MULTIPLY_ND_QU8, 5d_x_5d) {
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2111,6 +2295,8 @@ TEST(MULTIPLY_ND_QU8, 0d_x_6d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
       .TestRunQU8();
   }
 }
@@ -2136,6 +2322,8 @@ TEST(MULTIPLY_ND_QU8, 1d_x_6d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2164,6 +2352,8 @@ TEST(MULTIPLY_ND_QU8, 2d_x_6d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2194,6 +2384,8 @@ TEST(MULTIPLY_ND_QU8, 3d_x_6d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2226,6 +2418,8 @@ TEST(MULTIPLY_ND_QU8, 4d_x_6d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2261,6 +2455,8 @@ TEST(MULTIPLY_ND_QU8, 5d_x_6d) {
         .input1_shape({input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2283,6 +2479,8 @@ TEST(MULTIPLY_ND_QU8, 6d_x_0d) {
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
       .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
       .TestRunQU8();
   }
 }
@@ -2308,6 +2506,8 @@ TEST(MULTIPLY_ND_QU8, 6d_x_1d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2336,6 +2536,8 @@ TEST(MULTIPLY_ND_QU8, 6d_x_2d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2366,6 +2568,8 @@ TEST(MULTIPLY_ND_QU8, 6d_x_3d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2398,6 +2602,8 @@ TEST(MULTIPLY_ND_QU8, 6d_x_4d) {
         .operation_type(BinaryElementwiseOperatorTester::OperationType::Multiply)
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2433,6 +2639,8 @@ TEST(MULTIPLY_ND_QU8, 6d_x_5d) {
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2470,6 +2678,8 @@ TEST(MULTIPLY_ND_QU8, 6d_x_6d) {
         .input1_shape({input1_dim6, input1_dim5, input1_dim4, input1_dim3, input1_dim2, input1_dim1})
         .input2_shape({input2_dim6, input2_dim5, input2_dim4, input2_dim3, input2_dim2, input2_dim1})
         .iterations(1)
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
         .TestRunQU8();
     }
   }
@@ -2500,6 +2710,8 @@ TEST(MULTIPLY_ND_QU8, input1_scale) {
           .input1_scale(input1_scale)
           .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
           .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
           .TestRunQU8();
       }
     }
@@ -2531,6 +2743,8 @@ TEST(MULTIPLY_ND_QU8, input1_zero_point) {
           .input1_zero_point(input1_zero_point)
           .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
           .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
           .TestRunQU8();
       }
     }
@@ -2562,6 +2776,8 @@ TEST(MULTIPLY_ND_QU8, input2_scale) {
           .input1_scale(input2_scale)
           .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
           .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
           .TestRunQU8();
       }
     }
@@ -2593,6 +2809,8 @@ TEST(MULTIPLY_ND_QU8, input2_zero_point) {
           .input2_zero_point(input2_zero_point)
           .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
           .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
           .TestRunQU8();
       }
     }
@@ -2624,6 +2842,8 @@ TEST(MULTIPLY_ND_QU8, output_scale) {
           .input1_scale(output_scale)
           .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
           .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
           .TestRunQU8();
       }
     }
@@ -2655,6 +2875,8 @@ TEST(MULTIPLY_ND_QU8, output_zero_point) {
           .output_zero_point(output_zero_point)
           .input1_shape({input1_dim4, input1_dim3, input1_dim2, input1_dim1})
           .input2_shape({input2_dim4, input2_dim3, input2_dim2, input2_dim1})
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
           .TestRunQU8();
       }
     }
