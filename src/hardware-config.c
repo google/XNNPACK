@@ -46,8 +46,20 @@ static void init_hardware_config(void) {
 
   #if XNN_ARCH_ARM64 || XNN_ARCH_ARM
     #if XNN_PLATFORM_WINDOWS
-      hardware_config.use_arm_fp16_arith = !!IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
-      hardware_config.use_arm_neon_fp16_arith = !!IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
+      SYSTEM_INFO system_info;
+      GetSystemInfo(&system_info);
+      switch (system_info.wProcessorLevel) {
+        case 0x803:  // Kryo 385 Silver
+          hardware_config.use_arm_neon_fp16_arith = true;
+          break;
+        default:
+          // Assume that Dot Product support implies FP16 support.
+          // ARM manuals don't guarantee that, but it holds in practice.
+          hardware_config.use_arm_neon_fp16_arith = !!IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
+          break;
+      }
+      hardware_config.use_arm_fp16_arith = hardware_config.use_arm_neon_fp16_arith;
+
       hardware_config.use_arm_neon_bf16 = false;
       hardware_config.use_arm_neon_dot = !!IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
     #else
