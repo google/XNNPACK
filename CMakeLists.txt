@@ -5174,7 +5174,8 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/qu8-vlrelu/gen/qu8-vlrelu-avx-x32.c
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-avx-mul16-ld64-x16.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-avx-mul16-ld64-x16.c
-  src/x8-lut/gen/x8-lut-avx-x64.c)
+  src/x8-lut/gen/x8-lut-avx-x64.c
+  src/x32-transposec/gen/x32-transposec-8x8-reuse-multi-avx.c)
 
 SET(ALL_AVX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx-int16-x8.c
@@ -6076,7 +6077,9 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/qu8-vaddc-minmax-avx2-mul32-ld64-x16.c
   src/qu8-vcvt/gen/qu8-vcvt-avx2-x32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-avx2-x32.c
-  src/x8-lut/gen/x8-lut-avx2-x128.c)
+  src/x8-lut/gen/x8-lut-avx2-x128.c
+  src/x8-transposec/gen/x8-transposec-32x32-reuse-switch-avx2.c
+  src/x16-transposec/gen/x16-transposec-16x16-reuse-switch-avx2.c)
 
 SET(ALL_AVX2_MICROKERNEL_SRCS
   src/f16-gemm/gen/f16-gemm-1x8-minmax-avx2-broadcast.c

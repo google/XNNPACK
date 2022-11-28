@@ -222,11 +222,17 @@ static enum xnn_status setup_transpose_nd(
       context->const_size_ukernel = xnn_transpose_conf->x8.const_size_ukernel;
       transpose_op->compute.tile[0] = xnn_transpose_conf->x8.tile_size;
       transpose_op->compute.tile[1] = xnn_transpose_conf->x8.tile_size;
+      if (xnn_transpose_conf->x8.init.x16 != NULL) {
+        xnn_transpose_conf->x8.init.x8(&context->params.x8_params);
+      }
       break;
     case 2:
       transpose_op->compute.tile[0] = xnn_transpose_conf->x16.tile_size;
       transpose_op->compute.tile[1] = xnn_transpose_conf->x16.tile_size;
       context->const_size_ukernel = xnn_transpose_conf->x16.const_size_ukernel;
+      if (xnn_transpose_conf->x16.init.x16 != NULL) {
+        xnn_transpose_conf->x16.init.x16(&context->params.x16_params);
+      }
       break;
     case 3:
       transpose_op->compute.tile[0] = xnn_transpose_conf->x24.tile_size;
