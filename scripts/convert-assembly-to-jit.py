@@ -558,7 +558,11 @@ def emit_instruction(instr: str,
   # emit a guard for instruction if it is using a particular register
   # mapping is a map from register to the mr it is used, e.g. v0 -> 0 to guard v0 behind max_mr > 0.
   # parse the dest register from this instruction
-  pat = re.compile(r'(\w+)\(\{?((?:v|x|q|s|d|r)\d+)')
+  # Match instructions like:
+  # - add(r6, r8, r6)
+  # - vld1_32({d3}, mem[r0]++)
+  # - vldm(mem[r0]++, {s6})
+  pat = re.compile(r'(\w+)\((?:mem\[)?\{?((?:v|x|q|s|d|r)\d+)')
   m = re.search(pat, instr)
   if not m:
     instructions.append(instr)

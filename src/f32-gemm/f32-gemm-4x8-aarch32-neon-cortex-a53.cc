@@ -619,9 +619,15 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   // Remainder- 1 float of A (4 bytes)
   vldm(mem[r3]++, {s0}); // A0
   vldm(mem[r9]++, {d8-d11}); // B0
-  vldm(mem[r12]++, {s2}); // A1
-  vldm(mem[r10]++, {s4}); // A2
-  vldm(mem[r7]++, {s6}); // A3
+  if (max_mr > 1) {
+    vldm(mem[r12]++, {s2}); // A1
+  }
+  if (max_mr > 2) {
+    vldm(mem[r10]++, {s4}); // A2
+  }
+  if (max_mr > 3) {
+    vldm(mem[r7]++, {s6}); // A3
+  }
   vmla_f32(q8, q4, d0[0]);
   vmla_f32(q9, q5, d0[0]);
   if (max_mr > 1) {

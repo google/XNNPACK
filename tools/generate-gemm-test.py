@@ -847,23 +847,25 @@ $if DATATYPE == "qu8":
   }
 
 $if TEST_NAME.startswith('GENERATE') and DATATYPE == 'f32':
-  TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile_m_upto_mr) {
+  TEST(${TEST_NAME}, subtile_m_upto_mr) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (uint32_t max_mr = 1; max_mr <= ${MR}; max_mr++) {
       for (uint32_t m = 1; m <= max_mr; m++) {
-        GemmMicrokernelTester()
-          $if EXTENDED_WEIGHTS:
-            .extended_weights(true)
-          .mr(max_mr)
-          .nr(${NR})
-          .kr(${KR})
-          .sr(${SR})
-          .m(m)
-          .n(${NR})
-          .k(${KBLOCK})
-          .iterations(1)
-          .Test(${", ".join(TEST_ARGS)});
+        for (size_t k = 1; k <= ${KBLOCK * 2}; k += 1) {
+          GemmMicrokernelTester()
+            $if EXTENDED_WEIGHTS:
+              .extended_weights(true)
+            .mr(max_mr)
+            .nr(${NR})
+            .kr(${KR})
+            .sr(${SR})
+            .m(m)
+            .n(${NR})
+            .k(k)
+            .iterations(1)
+            .Test(${", ".join(TEST_ARGS)});
+        }
       }
     }
   }
