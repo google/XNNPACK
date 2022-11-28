@@ -11,7 +11,7 @@
 #     const float** input,               x2
 #     const float* weights,              x3, x19
 #     float* output,                     x4
-#     size_t input_stride,               x5
+#     intptr_t input_stride,             x5
 #     size_t output_increment,           x6
 #     size_t input_offset,               x7
 #     const float* zero,                 [sp + 80] -> x17

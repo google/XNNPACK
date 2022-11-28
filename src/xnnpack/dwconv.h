@@ -26,7 +26,7 @@ extern "C" {
     const float** input,                                     \
     const float* weights,                                    \
     float* output,                                           \
-    size_t input_stride,                                     \
+    intptr_t input_stride,                                   \
     size_t output_increment,                                 \
     size_t input_offset,                                     \
     const float* zero,                                       \
@@ -39,7 +39,7 @@ extern "C" {
     const float** input,                                            \
     const float* weights,                                           \
     float* output,                                                  \
-    size_t input_stride,                                            \
+    intptr_t input_stride,                                          \
     size_t output_increment,                                        \
     size_t input_offset,                                            \
     const float* zero,                                              \
@@ -321,7 +321,7 @@ DECLARE_F32_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel
     const void** input,                                      \
     const void* weights,                                     \
     void* output,                                            \
-    size_t input_stride,                                     \
+    intptr_t input_stride,                                   \
     size_t output_increment,                                 \
     size_t input_offset,                                     \
     const void* zero,                                        \
@@ -334,7 +334,7 @@ DECLARE_F32_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel
     const void** input,                                             \
     const void* weights,                                            \
     void* output,                                                   \
-    size_t input_stride,                                            \
+    intptr_t input_stride,                                          \
     size_t output_increment,                                        \
     size_t input_offset,                                            \
     const void* zero,                                               \
@@ -398,7 +398,7 @@ DECLARE_F16_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel
     const uint8_t** input,                                          \
     const void* weights,                                            \
     uint8_t* output,                                                \
-    size_t input_stride,                                            \
+    intptr_t input_stride,                                          \
     size_t output_increment,                                        \
     size_t input_offset,                                            \
     const uint8_t* zero,                                            \
@@ -546,7 +546,7 @@ DECLARE_QU8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_dwconv_minmax_fp32_uk
     const int8_t** input,                                           \
     const void* weights,                                            \
     int8_t* output,                                                 \
-    size_t input_stride,                                            \
+    intptr_t input_stride,                                          \
     size_t output_increment,                                        \
     size_t input_offset,                                            \
     const int8_t* zero,                                             \
@@ -764,7 +764,7 @@ DECLARE_QS8_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_fp32_uk
     const int8_t** input,                                           \
     const void* weights,                                            \
     int8_t* output,                                                 \
-    size_t input_stride,                                            \
+    intptr_t input_stride,                                          \
     size_t output_increment,                                        \
     size_t input_offset,                                            \
     const int8_t* zero,                                             \

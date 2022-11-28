@@ -13,7 +13,7 @@
 //   const int8_t** input,                     r2
 //   const void* weights,                      r3
 //   int8_t* output,                           r10, [sp, 40]
-//   size_t input_stride,                      r9,  [sp, 44]
+//   intptr_t input_stride,                    r9,  [sp, 44]
 //   size_t output_increment,                  r12, [sp, 48]
 //   size_t input_offset,                      r7,  [sp, 52]
 //   const int8_t* zero,                       r4,  [sp, 56]

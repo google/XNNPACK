@@ -21,7 +21,7 @@ void xnn_f16_dwconv_minmax_ukernel_3p16c__fma3_acc2(
     const void** input,
     const void* weights,
     void* output,
-    size_t input_stride,
+    intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
     const void* zero,

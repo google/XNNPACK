@@ -21,7 +21,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
     const uint8_t** input,
     const void* weights,
     uint8_t* output,
-    size_t input_stride,
+    intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
     const uint8_t* zero,

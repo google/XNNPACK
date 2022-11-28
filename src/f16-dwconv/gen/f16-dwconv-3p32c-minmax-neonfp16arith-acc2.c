@@ -20,7 +20,7 @@ void xnn_f16_dwconv_minmax_ukernel_3p32c__neonfp16arith_acc2(
     const void** input,
     const void* weights,
     void* output_ptr,
-    size_t input_stride,
+    intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
     const void* zero,

@@ -20,7 +20,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_25p2c__scalar_imagic(
     const int8_t** input,
     const void* weights,
     int8_t* output,
-    size_t input_stride,
+    intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
     const int8_t* zero,

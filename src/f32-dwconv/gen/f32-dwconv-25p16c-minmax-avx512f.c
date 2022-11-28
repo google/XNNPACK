@@ -21,7 +21,7 @@ void xnn_f32_dwconv_minmax_ukernel_25p16c__avx512f(
     const float** input,
     const float* weights,
     float* output,
-    size_t input_stride,
+    intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
     const float* zero,

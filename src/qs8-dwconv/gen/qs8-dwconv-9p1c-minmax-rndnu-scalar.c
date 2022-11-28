@@ -20,7 +20,7 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_9p1c__scalar(
     const int8_t** input,
     const void* weights,
     int8_t* output,
-    size_t input_stride,
+    intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
     const int8_t* zero,

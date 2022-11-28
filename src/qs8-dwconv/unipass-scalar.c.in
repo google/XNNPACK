@@ -28,7 +28,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${K
     const ${XINT8_T}** input,
     const void* weights,
     ${XINT8_T}* output,
-    size_t input_stride,
+    intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
     const ${XINT8_T}* zero,
