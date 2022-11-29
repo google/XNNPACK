@@ -589,14 +589,26 @@ enum xnn_status xnn_define_concatenate_n(
 
   #if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
     if (compute_type == xnn_compute_type_qs8 || compute_type == xnn_compute_type_qu8) {
-      check_input_compute_type(subgraph, input_ids[0], output_id, "first", node_type);
-      check_input_compute_type(subgraph, input_ids[1], output_id, "second", node_type);
+      status = check_input_compute_type(subgraph, input_ids[0], output_id, "first", node_type);
+      if (status != xnn_status_success) {
+        return status;
+      }
+      status = check_input_compute_type(subgraph, input_ids[1], output_id, "second", node_type);
+      if (status != xnn_status_success) {
+        return status;
+      }
     }
     if (num_inputs > 2) {
-      check_input_compute_type(subgraph, input_ids[2], output_id, "third", node_type);
+      status = check_input_compute_type(subgraph, input_ids[2], output_id, "third", node_type);
+      if (status != xnn_status_success) {
+        return status;
+      }
     }
     if (num_inputs > 3) {
-      check_input_compute_type(subgraph, input_ids[3], output_id, "fourth", node_type);
+      status = check_input_compute_type(subgraph, input_ids[3], output_id, "fourth", node_type);
+      if (status !=  xnn_status_success) {
+        return status;
+      }
     }
   #endif  // !defined( XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
 
