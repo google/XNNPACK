@@ -5,7 +5,7 @@
 $import math
 $assert IN_PTRS in ["MULTI", "REUSE"]
 $assert OUT_PTRS in ["MULTI", "SWITCH", "MOV", "DEC"]
-$assert SIZE in [8, 16, 32]
+$assert SIZE in [8, 16, 32, 64]
 $assert VECTOR_SIZE in [64, 128]
 $TILE_SIZE = int(VECTOR_SIZE/SIZE)
 $NUM_ITERS = int(math.log2(TILE_SIZE))
@@ -93,8 +93,18 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
         $else:
           const uint${SIZE}x${TILE_SIZE}_t v${NUM_ITERS}_${N} = vld1${SUFFIX}_u${SIZE}(i${N}); i${N} = (uint${SIZE}_t*) ((uintptr_t) i${N} + input_offset);
 
-      $for N in range(TILE_SIZE >> 1):
-        const uint${SIZE}x${TILE_SIZE}x2_t v${NUM_ITERS-1}_${N} = vzip${SUFFIX}_u${SIZE}(v${NUM_ITERS}_${N}, v${NUM_ITERS}_${N+(TILE_SIZE>>1)});
+      $if SIZE == 64:
+        uint64x2x2_t v0_0;
+        #if XNN_ARCH_ARM64
+          v0_0.val[0] = vzip1q_u64(v1_0, v1_1);
+          v0_0.val[1] = vzip2q_u64(v1_0, v1_1);
+        #else
+          v0_0.val[0] = vcombine_u64(vget_low_u64(v1_0), vget_low_u64(v1_1));
+          v0_0.val[1] = vcombine_u64(vget_high_u64(v1_0), vget_high_u64(v1_1));
+        #endif
+      $else:
+        $for N in range(TILE_SIZE >> 1):
+          const uint${SIZE}x${TILE_SIZE}x2_t v${NUM_ITERS-1}_${N} = vzip${SUFFIX}_u${SIZE}(v${NUM_ITERS}_${N}, v${NUM_ITERS}_${N+(TILE_SIZE>>1)});
 
       $for M in range(1, NUM_ITERS):
         $for N in range(TILE_SIZE >> 1):
@@ -179,8 +189,18 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
           const uint${SIZE}x${TILE_SIZE}_t v${NUM_ITERS}_${N+1} = vld1${SUFFIX}_u${SIZE}(i${N+1});
       const uint${SIZE}x${TILE_SIZE}_t v${NUM_ITERS}_${TILE_SIZE-1} = vmov${SUFFIX}_n_u${SIZE}(0);
 
-      $for N in range(TILE_SIZE >> 1):
-          const uint${SIZE}x${TILE_SIZE}x2_t v${NUM_ITERS-1}_${N} = vzip${SUFFIX}_u${SIZE}(v${NUM_ITERS}_${N}, v${NUM_ITERS}_${N+(TILE_SIZE>>1)});
+      $if SIZE == 64:
+        uint64x2x2_t v0_0;
+        #if XNN_ARCH_ARM64
+          v0_0.val[0] = vzip1q_u64(v1_0, v1_1);
+          v0_0.val[1] = vzip2q_u64(v1_0, v1_1);
+        #else
+          v0_0.val[0] = vcombine_u64(vget_low_u64(v1_0), vget_low_u64(v1_1));
+          v0_0.val[1] = vcombine_u64(vget_high_u64(v1_0), vget_high_u64(v1_1));
+        #endif
+      $else:
+        $for N in range(TILE_SIZE >> 1):
+            const uint${SIZE}x${TILE_SIZE}x2_t v${NUM_ITERS-1}_${N} = vzip${SUFFIX}_u${SIZE}(v${NUM_ITERS}_${N}, v${NUM_ITERS}_${N+(TILE_SIZE>>1)});
 
       $for M in range(1, NUM_ITERS):
         $for N in range(TILE_SIZE >> 1):

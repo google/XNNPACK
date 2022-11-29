@@ -14,7 +14,7 @@
 - name: xnn_x64_transposec_ukernel__4x1_scalar_int
 - name: xnn_x64_transposec_ukernel__4x2_scalar_float
 - name: xnn_x64_transposec_ukernel__4x2_scalar_int
-## x86 SSE
+# x86 SSE
 - name: xnn_x64_transposec_ukernel__2x2_multi_mov_sse2
 - name: xnn_x64_transposec_ukernel__2x2_multi_multi_sse2
 - name: xnn_x64_transposec_ukernel__2x2_multi_switch_sse2
@@ -34,3 +34,12 @@
   init: xnn_init_x64_transpose_avx_params
 - name: xnn_x64_transposec_ukernel__4x4_reuse_switch_avx
   init: xnn_init_x64_transpose_avx_params
+# ARM NEON
+- name: xnn_x64_transposec_ukernel__2x2_multi_dec_zip_neon
+- name: xnn_x64_transposec_ukernel__2x2_multi_mov_zip_neon
+- name: xnn_x64_transposec_ukernel__2x2_multi_multi_zip_neon
+- name: xnn_x64_transposec_ukernel__2x2_multi_switch_zip_neon
+- name: xnn_x64_transposec_ukernel__2x2_reuse_dec_zip_neon
+- name: xnn_x64_transposec_ukernel__2x2_reuse_mov_zip_neon
+- name: xnn_x64_transposec_ukernel__2x2_reuse_multi_zip_neon
+- name: xnn_x64_transposec_ukernel__2x2_reuse_switch_zip_neon

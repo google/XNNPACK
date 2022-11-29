@@ -2885,7 +2885,15 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x32-zip/x32-zip-xm-neon.c
   src/x32-zip/x32-zip-x2-neon.c
   src/x32-zip/x32-zip-x3-neon.c
-  src/x32-zip/x32-zip-x4-neon.c)
+  src/x32-zip/x32-zip-x4-neon.c
+  src/x64-transposec/gen/x64-transposec-2x2-multi-dec-zip-neon.c
+  src/x64-transposec/gen/x64-transposec-2x2-multi-mov-zip-neon.c
+  src/x64-transposec/gen/x64-transposec-2x2-multi-multi-zip-neon.c
+  src/x64-transposec/gen/x64-transposec-2x2-multi-switch-zip-neon.c
+  src/x64-transposec/gen/x64-transposec-2x2-reuse-dec-zip-neon.c
+  src/x64-transposec/gen/x64-transposec-2x2-reuse-mov-zip-neon.c
+  src/x64-transposec/gen/x64-transposec-2x2-reuse-multi-zip-neon.c
+  src/x64-transposec/gen/x64-transposec-2x2-reuse-switch-zip-neon.c)
 
 SET(PROD_NEONFP16_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neonfp16-x16.c
