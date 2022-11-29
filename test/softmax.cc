@@ -19,7 +19,8 @@
 #include "subgraph-unary-tester.h"
 #include <gtest/gtest.h>
 
-using SoftmaxTestF32 = UnaryTest<float, /*OutputType=*/float, /*min_dim=*/1>;
+using SoftmaxTestF32 =
+  UnaryTest<float, /*OutputType=*/float, /*min_dim=*/1, /*max_dim=*/XNN_MAX_TENSOR_DIMS, /*pad_output=*/true>;
 
 TEST_F(SoftmaxTestF32, define)
 {
@@ -112,5 +113,7 @@ TEST_F(SoftmaxTestF32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  ASSERT_EQ(subgraph_output, operator_output);
+  for (size_t i = 0; i < num_output_elements; i++) {
+    ASSERT_EQ(subgraph_output[i], operator_output[i]) << "element " << i << " / " << num_output_elements;
+  }
 }

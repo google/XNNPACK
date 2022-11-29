@@ -20,7 +20,13 @@
 
 #include <gtest/gtest.h>
 
-template <typename InputType, typename OutputType = InputType, size_t min_dim = 0, size_t max_dim = XNN_MAX_TENSOR_DIMS> class UnaryTest : public ::testing::Test {
+template <
+  typename InputType,
+  typename OutputType = InputType,
+  size_t min_dim = 0,
+  size_t max_dim = XNN_MAX_TENSOR_DIMS,
+  bool pad_output = false>
+class UnaryTest : public ::testing::Test {
 protected:
   UnaryTest()
   {
@@ -51,8 +57,9 @@ protected:
     unsigned_zero_point = u8dist(rng);
 
     input = std::vector<InputType>(num_output_elements + XNN_EXTRA_BYTES / sizeof(InputType));
-    operator_output = std::vector<OutputType>(num_output_elements);
-    subgraph_output = std::vector<OutputType>(num_output_elements);
+    const size_t output_padding = pad_output ? (XNN_EXTRA_BYTES / sizeof(InputType)) : 0;
+    operator_output = std::vector<OutputType>(num_output_elements + output_padding);
+    subgraph_output = std::vector<OutputType>(num_output_elements + output_padding);
   }
 
   std::vector<size_t> RandomShape() {
