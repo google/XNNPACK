@@ -81,7 +81,6 @@ OPERATOR_TEST_DEPS = [
 OPERATOR_SRCS = [
     "src/operator-delete.c",
     "src/operator-run.c",
-    "src/operator-utils.c",
     "src/operators/argmax-pooling-nhwc.c",
     "src/operators/average-pooling-nhwc.c",
     "src/operators/binary-elementwise-nd.c",
@@ -11505,6 +11504,20 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "operator_utils",
+    srcs = ["src/operator-utils.c"],
+    hdrs = ["src/xnnpack/operator-utils.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":allocator",
+        ":cache",
+        ":operator_h",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
     name = "operators",
     srcs = OPERATOR_SRCS,
     hdrs = [
@@ -11535,6 +11548,7 @@ xnnpack_cc_library(
         ":microparams_init",
         ":normalization",
         ":operator_type",
+        ":operator_utils",
         ":packing",
         ":params",
         ":post_operation",
@@ -11577,6 +11591,7 @@ xnnpack_cc_library(
         ":microkernel_type",
         ":microparams_init",
         ":normalization_test_mode",
+        ":operator_utils",
         ":packing_test_mode",
         ":params",
         ":post_operation",
@@ -16158,6 +16173,7 @@ xnnpack_unit_test(
     deps = [
         ":XNNPACK_test_mode",
         ":node_type",
+        ":operator_utils",
         ":operators_test_mode",
         ":subgraph_test_mode",
     ],
@@ -16266,6 +16282,7 @@ xnnpack_unit_test(
     deps = [
         ":XNNPACK_test_mode",
         ":convolution_test_helpers",
+        ":operator_utils",
         ":operators_test_mode",
         ":requantization",
         ":subgraph_test_mode",
@@ -16295,6 +16312,7 @@ xnnpack_unit_test(
     shard_count = 5,
     deps = [
         ":XNNPACK_test_mode",
+        ":operator_utils",
         ":operators_test_mode",
         ":requantization",
         ":subgraph_test_mode",
@@ -16322,6 +16340,7 @@ xnnpack_unit_test(
     deps = [
         ":XNNPACK_test_mode",
         ":convolution_test_helpers",
+        ":operator_utils",
         ":operators_test_mode",
         ":requantization",
         ":subgraph_test_mode",
@@ -16486,6 +16505,7 @@ xnnpack_unit_test(
     deps = [
         ":XNNPACK_test_mode",
         ":node_type",
+        ":operator_utils",
         ":operators_test_mode",
         ":requantization",
         ":subgraph_test_mode",
@@ -16738,6 +16758,7 @@ xnnpack_unit_test(
     deps = [
         ":XNNPACK_test_mode",
         ":node_type",
+        ":operator_utils",
         ":operators_test_mode",
         ":requantization",
         ":subgraph_test_mode",
@@ -16874,6 +16895,7 @@ xnnpack_unit_test(
     srcs = ["test/operator-utils.cc"],
     deps = [
         ":common",
+        ":operator_utils",
         ":operators_test_mode",
         ":params",
     ],
@@ -16895,6 +16917,7 @@ xnnpack_unit_test(
     deps = [
         ":allocator",
         ":indirection_test_mode",
+        ":operator_utils",
         ":operators_test_mode",
         ":xnnpack_h",
     ],

@@ -5,6 +5,7 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/operator.h>
+#include <xnnpack/operator-utils.h>
 #include <xnnpack/params.h>
 #include <gtest/gtest.h>
 

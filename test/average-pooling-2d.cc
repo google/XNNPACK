@@ -14,6 +14,7 @@
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
+#include <xnnpack/operator-utils.h>
 #include <xnnpack/subgraph.h>
 
 #include <gtest/gtest.h>

@@ -9,6 +9,7 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/indirection.h>
 #include <xnnpack/operator.h>
+#include <xnnpack/operator-utils.h>
 
 #include <gtest/gtest.h>
 

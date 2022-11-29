@@ -15,6 +15,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/operator.h>
+#include <xnnpack/operator-utils.h>
 #include <xnnpack/requantization.h>
 #include <xnnpack/subgraph.h>
 

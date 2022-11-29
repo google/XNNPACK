@@ -23,6 +23,7 @@
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
 #include <xnnpack/operator.h>
+#include <xnnpack/operator-utils.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
 
