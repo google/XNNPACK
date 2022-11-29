@@ -871,7 +871,7 @@ static enum xnn_status setup_subconv2d_path(
   const uint32_t nr = deconvolution_op->ukernel.igemm.nr;
   #if XNN_ENABLE_GEMM_M_SPECIALIZATION
     mr = xnn_get_heuristic_mr_igemm(
-      output_width_positions, mr, nr, deconvolution_op->ukernel.igemm.igemm_cases);
+      output_width_positions, mr, nr, deconvolution_op->ukernel.igemm.igemm_cases, deconvolution_op->code_cache != NULL);
   #endif
 
   const size_t input_pixel_stride = deconvolution_op->input_pixel_stride << log2_input_element_size;

@@ -1439,7 +1439,7 @@ static enum xnn_status setup_convolution2d_nhwc(
       struct xnn_hmp_gemm_ukernel *gemm_cases = convolution_op->ukernel.gemm.gemm_cases;
 
       #if XNN_ENABLE_GEMM_M_SPECIALIZATION
-        mr = xnn_get_heuristic_mr_gemm(batch_output_size, mr, nr, gemm_cases);
+        mr = xnn_get_heuristic_mr_gemm(batch_output_size, mr, nr, gemm_cases, convolution_op->code_cache != NULL);
       #else
         if (batch_output_size == 1 && gemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
           mr = 1;
@@ -1452,6 +1452,13 @@ static enum xnn_status setup_convolution2d_nhwc(
           if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
             gemm_cases[mr - 1].function[XNN_UARCH_DEFAULT] =
                 (xnn_gemm_ukernel_fn) cached_code_at_offset(convolution_op, jit_code_offset);
+            // TODO(zhin): different code generators for different uarch.
+            #if XNN_MAX_UARCH_TYPES > 1
+              for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
+                gemm_cases[mr - 1].function[i] =
+                    (xnn_gemm_ukernel_fn) cached_code_at_offset(convolution_op, jit_code_offset);
+              }
+            #endif
           }
         }
       #endif  // XNN_PLATFORM_JIT
@@ -1546,7 +1553,7 @@ static enum xnn_status setup_convolution2d_nhwc(
       struct xnn_hmp_igemm_ukernel* igemm_cases = convolution_op->ukernel.igemm.igemm_cases;
 
       #if XNN_ENABLE_GEMM_M_SPECIALIZATION
-        mr = xnn_get_heuristic_mr_igemm(output_size, mr, nr, igemm_cases);
+        mr = xnn_get_heuristic_mr_igemm(output_size, mr, nr, igemm_cases, convolution_op->code_cache != NULL);
       #else
         if (output_size == 1 && igemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
           mr = 1;
@@ -1559,6 +1566,13 @@ static enum xnn_status setup_convolution2d_nhwc(
           if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
             igemm_cases[mr - 1].function[XNN_UARCH_DEFAULT] =
                 (xnn_igemm_ukernel_fn) cached_code_at_offset(convolution_op, jit_code_offset);
+            // TODO(zhin): different code generators for different uarch.
+            #if XNN_MAX_UARCH_TYPES > 1
+              for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
+                igemm_cases[mr - 1].function[i] =
+                    (xnn_igemm_ukernel_fn) cached_code_at_offset(convolution_op, jit_code_offset);
+              }
+            #endif
           }
         }
       #endif  // XNN_PLATFORM_JIT
