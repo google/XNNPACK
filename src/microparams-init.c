@@ -2055,30 +2055,6 @@ size_t xnn_init_f32_default_avx_params(
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-size_t xnn_init_f32_minmax_params(
-  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float output_min,
-  float output_max)
-{
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    for (uint32_t i = 0; i < 4; i++) {
-      params->sse.min[i] = output_min;
-      params->sse.max[i] = output_max;
-    }
-    return sizeof(params->sse);
-  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    params->wasmsimd.min[0] = output_min;
-    params->wasmsimd.min[1] = output_min;
-    params->wasmsimd.max[0] = output_max;
-    params->wasmsimd.max[1] = output_max;
-    return sizeof(params->wasmsimd);
-  #else
-    params->scalar.min = output_min;
-    params->scalar.max = output_max;
-    return sizeof(params->scalar);
-  #endif
-}
-
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f32_minmax_sse_params(
   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
