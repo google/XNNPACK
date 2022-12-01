@@ -44,7 +44,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 48387);
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // bias first
     // 48387 + 0 - (2 + 3 + 4) * 127 = 47,244 = 0xB88C
     0x8C, 0xB8, 0, 0,
@@ -93,7 +93,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 48387);
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     // 48387 + 0 - (5 + 6 + 7) * 127 = 46,101 = 0xB415
@@ -153,7 +153,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 64516);
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // bias first (cr == 2 of them)
     // 64516 + 0 - (2 + 3 + 4 + 5) * 127 = 62,738 = 0xF512
     0x12, 0xF5, 0, 0,
@@ -209,7 +209,7 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 64516);
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // bias first (cr == 2 of them)
     // 64516 + 0 - (5 + 6 + 7 + 8) * 127 = 61,214 = 0xEF1E
     0x1E, 0xEF, 0, 0,
@@ -273,7 +273,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 48387);
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // bias first
     // 48387 + 0 - (2 + 4 + 6) * 127 = 46,863 = 0xB70F
     0x0F, 0xB7, 0, 0,
@@ -320,7 +320,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 48387);
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     // 48387 + 0 - (5 + 10 + 15) * 127 = 44577 = 0xAE21
@@ -380,7 +380,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 64516);
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // bias first (cr == 2 of them)
     // 64516 + 0 - (2 + 4 + 6 + 8) * 127 = 61976 = 0xF218
     0x18, 0xF2, 0, 0,
@@ -430,7 +430,7 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
   ASSERT_EQ(bias_offset, 64516);
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // bias first (cr == 2 of them)
     // 64516 + 0 - (5 + 10 + 15 + 20) * 127 = 58166 = 0xE336
     0x36, 0xE3, 0, 0,
@@ -491,7 +491,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
       0,
       &params);
 
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // bias first
     // (2 + 3 + 4) * 127 = -1143 = 0xFFFFFB89
     0x89, 0xFB, 0xFF, 0xFF,
@@ -537,7 +537,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       0,
       &params);
 
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     // 0 - (5 + 6 + 7) * 127 = -2286 = 0xFFFFF712
@@ -594,7 +594,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
       0,
       &params);
 
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // bias first (cr == 2 of them)
     // 0 - (2 + 3 + 4 + 5) * 127 = -1778 = 0xFFFFF90E
     0x0E, 0xF9, 0xFF, 0xFF,
@@ -647,7 +647,7 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       0,
       &params);
 
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // bias first (cr == 2 of them)
     // 0 - (5 + 6 + 7 + 8) * 127 = -3302 = 0xFFFFF31A
     0x1A, 0xF3, 0xFF, 0xFF,
@@ -708,7 +708,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       0,
       &params);
 
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // bias first
     // 0 - (2 + 4 + 6) * 127 = -1524 = 0xFFFFFA0C
     0x0C, 0xFA, 0xFF, 0xFF,
@@ -752,7 +752,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       0,
       &params);
 
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     // 0 - (5 + 10 + 15) * 127 = -3810 = 0xFFFFF11E
@@ -809,7 +809,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
       0,
       &params);
 
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // bias first (cr == 2 of them)
     // 0 - (2 + 4 + 6 + 8) * 127 = -2540 = 0xFFFFF614
     0x14, 0xF6, 0xFF, 0xFF,
@@ -856,7 +856,7 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       0,
       &params);
 
-  std::vector<uint8_t> expected = {
+  const std::vector<uint8_t> expected = {
     // bias first (cr == 2 of them)
     // 0 - (5 + 10 + 15 + 20) * 127 = -6350 = 0xFFFFE732
     0x32, 0xE7, 0xFF, 0xFF,
@@ -914,7 +914,7 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
       0,
       nullptr);
 
-  std::vector<uint16_t> expected = {
+  const std::vector<uint16_t> expected = {
     // bias first
     0, 1,
     // then weights, channels first
@@ -955,7 +955,7 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  std::vector<uint16_t> expected = {
+  const std::vector<uint16_t> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     0, 1,
@@ -1002,7 +1002,7 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
       0,
       nullptr);
 
-  std::vector<uint16_t> expected = {
+  const std::vector<uint16_t> expected = {
     // bias first (cr == 2 of them)
     0, 1,
     // then weights, channels first
@@ -1050,7 +1050,7 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  std::vector<uint16_t> expected = {
+  const std::vector<uint16_t> expected = {
     // bias first (cr == 2 of them)
     0, 1,
     // then weights, channels first
@@ -1100,7 +1100,7 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       0,
       nullptr);
 
-  std::vector<uint16_t> expected = {
+  const std::vector<uint16_t> expected = {
     // bias first
     0, 1,
     // then weights, channels first
@@ -1139,7 +1139,7 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  std::vector<uint16_t> expected = {
+  const std::vector<uint16_t> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     0, 1,
@@ -1186,7 +1186,7 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
       0,
       nullptr);
 
-  std::vector<uint16_t> expected = {
+  const std::vector<uint16_t> expected = {
     // bias first (cr == 2 of them)
     0, 1,
     // then weights, channels first
@@ -1228,7 +1228,7 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  std::vector<uint16_t> expected = {
+  const std::vector<uint16_t> expected = {
     // bias first (cr == 2 of them)
     0, 1,
     // then weights, channels first
@@ -1278,7 +1278,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // bias first
     0.0f, 1.0f,
     // then weights, channels first
@@ -1319,7 +1319,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
@@ -1366,7 +1366,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -1414,7 +1414,7 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -1464,7 +1464,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // bias first
     0.0f, 1.0f,
     // then weights, channels first
@@ -1503,7 +1503,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // cr blocks
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
@@ -1550,7 +1550,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -1592,7 +1592,7 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -1679,7 +1679,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // First pass.
     0.0f, 1.0f,  // bias
     2.0f, 6.0f,  // 2 weights, channels first, then columns
@@ -1728,7 +1728,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channels_gt
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // First pass.
     0.0f, 1.0f, // bias
     5.0f, 9.0f, // 2 weights, 2 channels first, then columns
@@ -1788,7 +1788,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // First pass only has 1 element.
     0.0f, 1.0f, // bias
     2.0f, 6.0f, // weights, 2 channels, 1 element.
@@ -1842,7 +1842,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // First pass only has 1 element.
     0.0f, 1.0f, // bias
     5.0f, 9.0f, // weights, 2 channels, 1 element.
@@ -1903,7 +1903,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // First pass has 2 elements.
     0.0f, 1.0f, // bias
     2.0f, 8.0f, // 1 weight, 2 channels first, then columns
@@ -1962,7 +1962,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_gt_cr) 
       nullptr);
 
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // First pass has 1 element.
     0.0f, 1.0f, // bias
     5.0f, 11.0f, // 1 weight, 2 channels, 2 elements.
@@ -2290,7 +2290,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // First pass.
     0.0f, 1.0f, // bias
     2.0f, 3.0f, // First pass, 2 weights, channels first, then columns
@@ -2338,7 +2338,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channels_gt
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // First pass.
     0.0f, 1.0f, // bias
     5.0f, 6.0f, // 2 weights, 2 channels first, then columns
@@ -2398,7 +2398,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // First pass only has 1 element.
     0.0f, 1.0f, // bias
     2.0f, 3.0f, // weights, 2 channels, 1 element.
@@ -2446,7 +2446,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // First pass only has 1 element.
     0.0f, 1.0f, // bias
     5.0f, 6.0f, // weights, 2 channels, 1 element.
@@ -2509,7 +2509,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
       0,
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // First pass has 2 elements.
     0.0f, 1.0f, // bias
     2.0f, 3.0f, // 1 weight, 2 channels first, then columns
@@ -2563,7 +2563,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_gt_cr) 
       nullptr);
 
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // First pass has 1 element.
     0.0f, 1.0f, // bias
     5.0f, 6.0f, // weights, 2 channels, 2 elements.
@@ -2849,7 +2849,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
       0,
       nullptr);
 
-  std::vector<float> expected_float = {
+  const std::vector<float> expected_float = {
     // bias first
     0.0f, 1.0f,
     // then weights, channels first
@@ -2893,7 +2893,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  std::vector<float> expected_float = {
+  const std::vector<float> expected_float = {
     // cr blocks
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
@@ -2943,7 +2943,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
       0,
       nullptr);
 
-  std::vector<float> expected_float = {
+  const std::vector<float> expected_float = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -2994,7 +2994,7 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  std::vector<float> expected_float = {
+  const std::vector<float> expected_float = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -3047,7 +3047,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       0,
       nullptr);
 
-  std::vector<float> expected_float = {
+  const std::vector<float> expected_float = {
     // bias first
     0.0f, 1.0f,
     // then weights, channels first
@@ -3089,7 +3089,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  std::vector<float> expected_float = {
+  const std::vector<float> expected_float = {
     // cr blocks
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
@@ -3139,7 +3139,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
       0,
       nullptr);
 
-  std::vector<float> expected_float = {
+  const std::vector<float> expected_float = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -3184,7 +3184,7 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       0,
       nullptr);
 
-  std::vector<float> expected_float = {
+  const std::vector<float> expected_float = {
     // bias first (cr == 2 of them)
     0.0f, 1.0f,
     // then weights, channels first
@@ -3231,7 +3231,7 @@ TEST(PACK_F32_TO_F16_CHW_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       packed_weights.data(),
       nullptr);
 
-  std::vector<float> expected_float = {
+  const std::vector<float> expected_float = {
     // bias first
     0.0f,
     // then weights
@@ -3266,7 +3266,7 @@ TEST(PACK_F32_TO_F16_CHW_DWCONV_HWG_W, groups_gt_1) {
       packed_weights.data(),
       nullptr);
 
-  std::vector<float> expected_float = {
+  const std::vector<float> expected_float = {
     // bias first
     0.0f,
     // then weights
@@ -3313,7 +3313,7 @@ TEST(PACK_F16_CHW_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       packed_weights.data(),
       nullptr);
 
-  std::vector<uint16_t> expected = {
+  const std::vector<uint16_t> expected = {
     // bias first
     0,
     // then weights
@@ -3344,7 +3344,7 @@ TEST(PACK_F16_CHW_DWCONV_HWG_W, groups_gt_1) {
       packed_weights.data(),
       nullptr);
 
-  std::vector<uint16_t> expected = {
+  const std::vector<uint16_t> expected = {
     // bias first
     0,
     // then weights
@@ -3389,7 +3389,7 @@ TEST(PACK_F16_CHW_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
       packed_weights.data(),
       nullptr);
 
-  std::vector<uint16_t> expected = {
+  const std::vector<uint16_t> expected = {
     // bias first
     0,
     // then weights
@@ -3420,7 +3420,7 @@ TEST(PACK_F16_CHW_DWCONV_GHW_W, groups_gt_1) {
       packed_weights.data(),
       nullptr);
 
-  std::vector<uint16_t> expected = {
+  const std::vector<uint16_t> expected = {
     // bias first
     0,
     // then weights
@@ -3468,7 +3468,7 @@ TEST(PACK_F32_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
       packed_weights.data(),
       nullptr);
 
-  std::vector<float> expected = {
+  const std::vector<float> expected = {
     // bias first
     0.0f,
     // then weight
@@ -3507,7 +3507,7 @@ TEST(PACK_F32_TO_F16_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
       packed_weights.data(),
       nullptr);
 
-  std::vector<float> expected_float = {
+  const std::vector<float> expected_float = {
     // bias first
     0.0f,
     // then weight
@@ -3547,7 +3547,7 @@ TEST(PACK_F32_TO_F16_DWCONV_OKI_W, null_bias) {
       packed_weights.data(),
       nullptr);
 
-  std::vector<float> expected_float = {
+  const std::vector<float> expected_float = {
     // bias first
     0.0f,
     // then weight
@@ -3589,7 +3589,7 @@ TEST(PACK_F16_DWCONV_OKI_W, primary_tile_eq_kernel_size) {
       packed_weights.data(),
       nullptr);
 
-  std::vector<uint16_t> expected = {
+  const std::vector<uint16_t> expected = {
     // bias first
     0,
     // then weight
