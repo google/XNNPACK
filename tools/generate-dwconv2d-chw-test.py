@@ -269,11 +269,7 @@ def generate_test_cases(ukernel, kernel_height, kernel_width, subsampling, \
   """
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
-  test_args = [ukernel]
-  if init_fn:
-    test_args.append(init_fn)
-  if not isa:
-    test_args.append("DWConv2DMicrokernelTester::Variant::Scalar")
+  test_args = [ukernel, init_fn]
   return xngen.preprocess(TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
@@ -320,7 +316,7 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      init_fn = ukernel_spec.get("init")
+      init_fn = ukernel_spec["init"]
       pipelined = bool(ukernel_spec.get("pipelined", False))
       assembly = bool(ukernel_spec.get("assembly", False))
       kernel_height, kernel_width, subsampling, padding, arch, isa, \

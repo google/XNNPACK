@@ -30,11 +30,6 @@
 
 class DWConv2DMicrokernelTester {
  public:
-  enum class Variant {
-    Native,
-    Scalar,
-  };
-
   inline DWConv2DMicrokernelTester& padding_left(uint32_t padding_left) {
     this->padding_left_ = padding_left;
     return *this;
@@ -170,7 +165,7 @@ class DWConv2DMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_dwconv2d_chw_ukernel_fn dwconv, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_dwconv2d_chw_ukernel_fn dwconv, xnn_init_f32_chw_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
@@ -213,14 +208,7 @@ class DWConv2DMicrokernelTester {
 
       // Prepare parameters.
       xnn_f32_chw_params chw_params;
-      switch (variant) {
-        case Variant::Native:
-          xnn_init_f32_chw_params(&chw_params, input_width(), output_min, output_max);
-          break;
-        case Variant::Scalar:
-          xnn_init_scalar_f32_chw_params(&chw_params, input_width(), output_min, output_max);
-          break;
-      }
+      init_params(&chw_params, input_width(), output_min, output_max);
 
       // Clamp reference results.
       for (float& output_val : output_ref) {

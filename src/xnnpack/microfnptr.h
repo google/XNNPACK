@@ -2070,6 +2070,12 @@ typedef size_t (*xnn_init_f32_gavgpool_params_fn)(
   float output_max,
   uint32_t width);
 
+typedef size_t (*xnn_init_f32_chw_params_fn)(
+  union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
+  uint32_t width,
+  float output_min,
+  float output_max);
+
 typedef size_t (*xnn_init_f16_chw_params_fn)(
   union xnn_f16_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width,
@@ -2078,10 +2084,6 @@ typedef size_t (*xnn_init_f16_chw_params_fn)(
 
 typedef void (*xnn_update_chw_params_fn)(
   void* params,
-  uint32_t width);
-
-typedef void (*xnn_update_f32_chw_params_fn)(
-  union xnn_f32_chw_params* params,
   uint32_t width);
 
 typedef size_t (*xnn_init_x8_transpose_params_fn)(
