@@ -670,31 +670,61 @@ DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_scalar_select_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-XNN_INTERNAL size_t xnn_init_f16_chw_params(
-  union xnn_f16_chw_params params[XNN_MIN_ELEMENTS(1)],
-  uint32_t width,
-  uint16_t output_min,
-  uint16_t output_max);
+#define DECLARE_INIT_F16_CHW_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL size_t fn_name(                            \
+    union xnn_f16_chw_params params[XNN_MIN_ELEMENTS(1)], \
+    uint32_t width,                                       \
+    uint16_t output_min,                                  \
+    uint16_t output_max);
 
-XNN_INTERNAL size_t xnn_init_f32_chw_params(
-  union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
-  uint32_t width,
-  float output_min,
-  float output_max);
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  DECLARE_INIT_F16_CHW_PARAMS_FUNCTION(xnn_init_f16_chw_neonfp16arith_params)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-XNN_INTERNAL void xnn_update_f16_chw_params(
-  union xnn_f16_chw_params* params,
-  uint32_t width);
 
-XNN_INTERNAL void xnn_update_f32_chw_params(
-  union xnn_f32_chw_params* params,
-  uint32_t width);
+#define DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL size_t fn_name(                            \
+    union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)], \
+    uint32_t width,                                       \
+    float output_min,                                     \
+    float output_max);
 
-XNN_INTERNAL size_t xnn_init_scalar_f32_chw_params(
-  union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
-  uint32_t width,
-  float output_min,
-  float output_max);
+DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_scalar_params)
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_neon_params)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_sse_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_wasmsimd_params)
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#define DECLARE_UPDATE_F16_CHW_PARAMS_FUNCTION(fn_name)   \
+  XNN_INTERNAL void fn_name(                              \
+    union xnn_f16_chw_params params[XNN_MIN_ELEMENTS(1)], \
+    uint32_t width);
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  DECLARE_UPDATE_F16_CHW_PARAMS_FUNCTION(xnn_update_f16_chw_neonfp16arith_params)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#define DECLARE_UPDATE_F32_CHW_PARAMS_FUNCTION(fn_name)   \
+  XNN_INTERNAL void fn_name(                              \
+    union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)], \
+    uint32_t width);
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  DECLARE_UPDATE_F32_CHW_PARAMS_FUNCTION(xnn_update_f32_chw_neon_params)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_UPDATE_F32_CHW_PARAMS_FUNCTION(xnn_update_f32_chw_sse_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  DECLARE_UPDATE_F32_CHW_PARAMS_FUNCTION(xnn_update_f32_chw_wasmsimd_params)
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 #define DECLARE_INIT_S8_MINMAX_PARAMS_FUNCTION(fn_name)     \
