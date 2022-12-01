@@ -910,38 +910,6 @@ union xnn_qu8_avgpool_minmax_params {
     XNN_ALIGN(8) uint8_t output_max[8];
   } fp32_wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-  // Legacy parameters used by QU8 AVGPOOL microkernels
-  struct {
-    int32_t bias;
-    int32_t multiplier;
-    int64_t rounding;
-    uint32_t right_shift;
-    int32_t output_min_less_zero_point;
-    int32_t output_max_less_zero_point;
-    int32_t output_zero_point;
-  } scalar;
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    int32_t bias;
-    int32_t multiplier;
-    int64_t left_shift;
-    int16_t output_zero_point;
-    uint8_t output_min;
-    uint8_t output_max;
-  } neon;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) int32_t bias[4];
-    XNN_ALIGN(16) uint32_t multiplier[4];
-    XNN_ALIGN(16) uint64_t rounding[2];
-    XNN_ALIGN(16) uint64_t right_shift[2];
-    XNN_ALIGN(16) int16_t output_zero_point[8];
-    XNN_ALIGN(16) uint8_t output_min[16];
-    XNN_ALIGN(16) uint8_t output_max[16];
-  } sse2;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 

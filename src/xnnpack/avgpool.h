@@ -111,9 +111,9 @@ DECLARE_F32_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_avgpool_minmax_ukern
       size_t output_increment,                                         \
       const union xnn_qu8_avgpool_minmax_params* params);
 
-DECLARE_QU8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_ukernel_9p8x__neon_c8)
-DECLARE_QU8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_ukernel_9p8x__scalar_c1)
-DECLARE_QU8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_ukernel_9p8x__sse2_c8)
+DECLARE_QU8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8)
+DECLARE_QU8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1)
+DECLARE_QU8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8)
 
 
 #define DECLARE_QU8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(fn_name) \
@@ -129,9 +129,9 @@ DECLARE_QU8_AVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_uke
       size_t output_increment,                                       \
       const union xnn_qu8_avgpool_minmax_params* params);
 
-DECLARE_QU8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_ukernel_9x__neon_c8)
-DECLARE_QU8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_ukernel_9x__scalar_c1)
-DECLARE_QU8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_ukernel_9x__sse2_c8)
+DECLARE_QU8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8)
+DECLARE_QU8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1)
+DECLARE_QU8_AVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8)
 
 
 #ifdef __cplusplus

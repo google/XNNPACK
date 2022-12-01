@@ -564,7 +564,11 @@ class AvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_qu8_avgpool_minmax_unipass_ukernel_fn avgpool_minmax, xnn_init_qu8_avgpool_minmax_params_fn init_params) const {
+  void Test(
+      xnn_qu8_avgpool_minmax_unipass_ukernel_fn avgpool_minmax,
+      xnn_init_qu8_avgpool_minmax_params_fn init_params,
+      xnn_qu8_requantize_fn requantize) const
+  {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_int_distribution<int32_t> u8dist(
@@ -615,7 +619,7 @@ class AvgPoolMicrokernelTester {
             acc -= int32_t(input_zero_point());
           }
           accumulator[x * channels() + c] = acc;
-          output_ref[x * channels() + c] = xnn_qu8_requantize_rndna(
+          output_ref[x * channels() + c] = requantize(
             acc, input_scale() / (output_scale() * float(pooling_elements())), output_zero_point(), qmin(), qmax());
           const float scaled_acc =
             float(acc) * input_scale() / (output_scale() * float(pooling_elements())) + float(output_zero_point());
@@ -655,7 +659,11 @@ class AvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_qu8_avgpool_minmax_multipass_ukernel_fn avgpool_minmax, xnn_init_qu8_avgpool_minmax_params_fn init_params) const {
+  void Test(
+      xnn_qu8_avgpool_minmax_multipass_ukernel_fn avgpool_minmax,
+      xnn_init_qu8_avgpool_minmax_params_fn init_params,
+      xnn_qu8_requantize_fn requantize) const
+  {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_int_distribution<int32_t> u8dist(
@@ -707,7 +715,7 @@ class AvgPoolMicrokernelTester {
             acc -= int32_t(input_zero_point());
           }
           accumulator[x * channels() + c] = acc;
-          output_ref[x * channels() + c] = xnn_qu8_requantize_rndna(
+          output_ref[x * channels() + c] = requantize(
             acc, input_scale() / (output_scale() * float(pooling_elements())), output_zero_point(), qmin(), qmax());
           const float scaled_acc =
             float(acc) * input_scale() / (output_scale() * float(pooling_elements())) + float(output_zero_point());

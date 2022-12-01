@@ -435,8 +435,8 @@ SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/qs8-vaddc-minmax-scalar-x1.c
   src/qs8-vmul/gen/qs8-vmul-minmax-fp32-scalar-x4.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-scalar-x4.c
-  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-scalar-c1.c
-  src/qu8-avgpool/qu8-avgpool-9x-minmax-scalar-c1.c
+  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-fp32-scalar-imagic-c1.c
+  src/qu8-avgpool/qu8-avgpool-9x-minmax-fp32-scalar-imagic-c1.c
   src/qu8-dwconv/gen/qu8-dwconv-9p1c-minmax-fp32-scalar-fmagic.c
   src/qu8-dwconv/gen/qu8-dwconv-25p1c-minmax-fp32-scalar-fmagic.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-scalar-x4.c
@@ -583,8 +583,8 @@ SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS
   src/qs8-vlrelu/gen/qs8-vlrelu-scalar-andxor-x4.c
   src/qs8-vmul/gen/qs8-vmul-minmax-fp32-scalar-x4.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-scalar-x4.c
-  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-scalar-c1.c
-  src/qu8-avgpool/qu8-avgpool-9x-minmax-scalar-c1.c
+  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-fp32-scalar-imagic-c1.c
+  src/qu8-avgpool/qu8-avgpool-9x-minmax-fp32-scalar-imagic-c1.c
   src/qu8-dwconv/gen/qu8-dwconv-9p2c-minmax-fp32-scalar-lrintf.c
   src/qu8-dwconv/gen/qu8-dwconv-25p2c-minmax-fp32-scalar-lrintf.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-scalar-x4.c
@@ -1273,8 +1273,8 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-scalar-x1.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-scalar-x2.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-scalar-x4.c
-  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-scalar-c1.c
-  src/qu8-avgpool/qu8-avgpool-9x-minmax-scalar-c1.c
+  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-fp32-scalar-imagic-c1.c
+  src/qu8-avgpool/qu8-avgpool-9x-minmax-fp32-scalar-imagic-c1.c
   src/qu8-dwconv/gen/qu8-dwconv-9p1c-minmax-fp32-scalar-fmagic.c
   src/qu8-dwconv/gen/qu8-dwconv-9p1c-minmax-fp32-scalar-imagic.c
   src/qu8-dwconv/gen/qu8-dwconv-9p1c-minmax-fp32-scalar-lrintf.c
@@ -1713,8 +1713,8 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qs8-vlrelu/gen/qs8-vlrelu-neon-x32.c
   src/qs8-vmul/gen/qs8-vmul-minmax-rndnu-neon-ld64-x16.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-rndnu-neon-ld64-x16.c
-  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-neon-c8.c
-  src/qu8-avgpool/qu8-avgpool-9x-minmax-neon-c8.c
+  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-fp32-neon-c8.c
+  src/qu8-avgpool/qu8-avgpool-9x-minmax-fp32-neon-c8.c
   src/qu8-dwconv/gen/qu8-dwconv-9p16c-minmax-rndnu-neon-mul8.c
   src/qu8-dwconv/gen/qu8-dwconv-25p8c-minmax-rndnu-neon-mul8.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-neon-x32.c
@@ -2699,8 +2699,8 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-vmulc/gen/qs8-vmulc-minmax-rndnu-neon-ld64-x8.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-rndnu-neon-ld64-x16.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-rndnu-neon-ld128-x16.c
-  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-neon-c8.c
-  src/qu8-avgpool/qu8-avgpool-9x-minmax-neon-c8.c
+  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-fp32-neon-c8.c
+  src/qu8-avgpool/qu8-avgpool-9x-minmax-fp32-neon-c8.c
   src/qu8-dwconv/gen/qu8-dwconv-9p8c-minmax-fp32-neon-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-9p8c-minmax-rndnu-neon-mul8.c
   src/qu8-dwconv/gen/qu8-dwconv-9p8c-minmax-rndnu-neon-mul16.c
@@ -4271,8 +4271,8 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/qs8-vlrelu/gen/qs8-vlrelu-sse2-x32.c
   src/qs8-vmul/gen/qs8-vmul-minmax-fp32-sse2-mul16-ld64-x8.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-sse2-mul16-ld64-x8.c
-  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-sse2-c8.c
-  src/qu8-avgpool/qu8-avgpool-9x-minmax-sse2-c8.c
+  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-fp32-sse2-c8.c
+  src/qu8-avgpool/qu8-avgpool-9x-minmax-fp32-sse2-c8.c
   src/qu8-dwconv/gen/qu8-dwconv-9p8c-minmax-fp32-sse2-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-25p8c-minmax-fp32-sse2-mul16.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-sse2-x32.c
@@ -4564,8 +4564,8 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qs8-vmul/gen/qs8-vmul-minmax-fp32-sse2-mul16-ld64-x16.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-sse2-mul16-ld64-x8.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-sse2-mul16-ld64-x16.c
-  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-sse2-c8.c
-  src/qu8-avgpool/qu8-avgpool-9x-minmax-sse2-c8.c
+  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-fp32-sse2-c8.c
+  src/qu8-avgpool/qu8-avgpool-9x-minmax-fp32-sse2-c8.c
   src/qu8-dwconv/gen/qu8-dwconv-9p8c-minmax-fp32-sse2-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-9p16c-minmax-fp32-sse2-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-25p8c-minmax-fp32-sse2-mul16.c
@@ -9253,11 +9253,11 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qs8-vmulc-minmax-fp32-test PRIVATE hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME qs8-vmulc-minmax-fp32-test COMMAND qs8-vmulc-minmax-fp32-test)
 
-  ADD_EXECUTABLE(qu8-avgpool-minmax-test test/qu8-avgpool-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-avgpool-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-avgpool-minmax-test PRIVATE fp16 pthreadpool gtest gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-avgpool-minmax-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-avgpool-minmax-test COMMAND qu8-avgpool-minmax-test)
+  ADD_EXECUTABLE(qu8-avgpool-minmax-fp32-test test/qu8-avgpool-minmax-fp32.cc)
+  TARGET_INCLUDE_DIRECTORIES(qu8-avgpool-minmax-fp32-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qu8-avgpool-minmax-fp32-test PRIVATE fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(qu8-avgpool-minmax-fp32-test PRIVATE hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME qu8-avgpool-minmax-fp32-test COMMAND qu8-avgpool-minmax-fp32-test)
 
   ADD_EXECUTABLE(qu8-dwconv-minmax-fp32-test test/qu8-dwconv-minmax-fp32.cc)
   TARGET_INCLUDE_DIRECTORIES(qu8-dwconv-minmax-fp32-test PRIVATE include src test)
