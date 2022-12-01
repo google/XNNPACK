@@ -63,6 +63,11 @@ XNN_INLINE static size_t round_up_po2(size_t n, size_t q) {
   return round_down_po2(n + q - 1, q);
 }
 
+XNN_INLINE static size_t mod_po2(size_t n, size_t m) {
+  assert(is_po2(m));
+  return n & (m - 1);
+}
+
 XNN_INLINE static size_t subtract_modulo(size_t a, size_t b, size_t m) {
   assert(a < m);
   assert(b < m);

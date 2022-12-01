@@ -6,8 +6,9 @@
 #include <algorithm>
 #include <numeric>
 
-#include <xnnpack/pack.h>
 #include <xnnpack/aligned-allocator.h>
+#include <xnnpack/operator-utils.h>
+#include <xnnpack/pack.h>
 
 #include <gtest/gtest.h>
 #include <fp16.h>
@@ -1617,7 +1618,22 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 }
 
 // Calculates the size (number of elements) of packed weights required for a multi-pass dwconv.
-static size_t multipass_weights_size(
+static size_t multipass_weights_count(
+  size_t kernel_size,
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t channels,
+  size_t channel_tile,
+  size_t channel_subtile)
+{
+  return xnn_multipass_dwconv_weights_count(
+    xnn_multipass_dwconv_tile_size(kernel_size, first_pass_tile, middle_pass_tile, last_pass_tile), channels,
+    channel_tile, channel_subtile);
+}
+
+// Convenient overload when channel_tile == channel_subtile.
+static size_t multipass_weights_count(
   size_t kernel_size,
   size_t first_pass_tile,
   size_t middle_pass_tile,
@@ -1625,13 +1641,8 @@ static size_t multipass_weights_size(
   size_t channels,
   size_t channel_tile)
 {
-  // 1 for bias, we always have a first and last pass. We run as many middle
-  // pass as possible.
-  // E.g. kernel_size == 9, first_pass_tile = 2, middle_pass_tile = 3, last_pass_tile == 3.
-  // 1 first pass (8 left), 2 middle pass (2 left), last pass (with remainder 1).
-  return (1 + first_pass_tile + last_pass_tile +
-          round_up(doz(kernel_size, first_pass_tile + last_pass_tile), middle_pass_tile)) *
-         round_up_po2(channels, channel_tile);
+  return multipass_weights_count(
+    kernel_size, first_pass_tile, middle_pass_tile, last_pass_tile, channels, channel_tile, channel_tile);
 }
 
 TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
@@ -1651,7 +1662,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
                                     //      8, 9]
   std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
   std::vector<float> packed_weights(
-    multipass_weights_size(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
   xnn_pack_f32_multipass_dwconv_ghw_w(
       first_pass_tile,
@@ -1660,6 +1671,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
       h,
       w,
       c,
+      cr,
       cr,
       k.data(),
       b.data(),
@@ -1699,7 +1711,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channels_gt
                                     //      ]
   std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
   std::vector<float> packed_weights(
-    multipass_weights_size(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
   xnn_pack_f32_multipass_dwconv_ghw_w(
       first_pass_tile,
@@ -1708,6 +1720,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channels_gt
       h,
       w,
       c,
+      cr,
       cr,
       k.data(),
       b.data(),
@@ -1758,7 +1771,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
                                     //      8, 9]
   std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
   std::vector<float> packed_weights(
-    multipass_weights_size(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
   xnn_pack_f32_multipass_dwconv_ghw_w(
       first_pass_tile,
@@ -1767,6 +1780,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
       h,
       w,
       c,
+      cr,
       cr,
       k.data(),
       b.data(),
@@ -1811,7 +1825,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr) {
                                     //      ]
   std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
   std::vector<float> packed_weights(
-    multipass_weights_size(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
   xnn_pack_f32_multipass_dwconv_ghw_w(
       first_pass_tile,
@@ -1820,6 +1834,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr) {
       h,
       w,
       c,
+      cr,
       cr,
       k.data(),
       b.data(),
@@ -1871,7 +1886,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
                                     //      11, 12, 13]
   std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
   std::vector<float> packed_weights(
-    multipass_weights_size(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
   xnn_pack_f32_multipass_dwconv_ghw_w(
       first_pass_tile,
@@ -1880,6 +1895,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
       h,
       w,
       c,
+      cr,
       cr,
       k.data(),
       b.data(),
@@ -1928,7 +1944,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_gt_cr) 
                                     //      ]
   std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
   std::vector<float> packed_weights(
-    multipass_weights_size(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
   xnn_pack_f32_multipass_dwconv_ghw_w(
       first_pass_tile,
@@ -1937,6 +1953,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_gt_cr) 
       h,
       w,
       c,
+      cr,
       cr,
       k.data(),
       b.data(),
@@ -1981,6 +1998,264 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_gt_cr) 
   EXPECT_EQ(expected, packed_weights);
 }
 
+TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_subtile) {
+  const size_t first_pass_tile = 2;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 3;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+
+  std::vector<float> b(c);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4]
+  std::vector<float> k(c * h * w);  // k = [5, 6, // first 2x2 kernel
+                                    //      7, 8,
+                                    //      9, 10, // second 2x2 kernel
+                                    //      11, 12,
+                                    //      13, 14, // third 2x2 kernel
+                                    //      15, 16,
+                                    //      17, 18, // fourth 2x2 kernel
+                                    //      19, 20,
+                                    //      21, 22, // fifth 2x2 kernel
+                                    //      23, 24 ]
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  std::vector<float> packed_weights(
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_pack_f32_multipass_dwconv_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      nullptr);
+
+  const std::vector<float> expected = {
+    // First pass.
+    0.0f, 1.0f, 2.0f, 3.0f,  // bias, 4 channels
+    5.0f, 9.0f, 13.0, 17.0f,  // 2 weights, 4 channels first, then columns
+    7.0f, 11.0f, 15.0f, 19.0f,
+    4.0f, 0.0f, // bias, 1 last channel, 1 padding up to channel_subtile
+    21.0f, 0.0f, // 2 weights, 1 last channel, 1 padding up to channel_subtile
+    23.0f, 0.0f,
+    // No middle pass.
+    6.0f, 10.0f, 14.0f, 18.0f,  // last pass, 2 weights, 4 channels first
+    8.0f, 12.0f, 16.0f, 20.0f,
+    0.0f, 0.0f, 0.0f, 0.0f, // padding to last_pass_tile
+    22.0f, 0.0f, // 2 weights, 1 last channel, 1 padding up to channel_subtile
+    24.0f, 0.0f,
+    0.0f, 0.0f, // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 2;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+
+  std::vector<float> b(c);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4]
+  std::vector<float> k(c * h * w);  // k = [5, 6, // first 2x2 kernel
+                                    //      7, 8,
+                                    //      9, 10, // second 2x2 kernel
+                                    //      11, 12,
+                                    //      13, 14, // third 2x2 kernel
+                                    //      15, 16,
+                                    //      17, 18, // fourth 2x2 kernel
+                                    //      19, 20,
+                                    //      21, 22, // fifth 2x2 kernel
+                                    //      23, 24 ]
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  std::vector<float> packed_weights(
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_pack_f32_multipass_dwconv_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      nullptr);
+
+  const std::vector<float> expected = {
+    // First pass.
+    0.0f, 1.0f, 2.0f, 3.0f,  // bias, 4 channels
+    5.0f, 9.0f, 13.0, 17.0f,  // 1 weight, 4 channels first, then columns
+    4.0f, 0.0f, // bias, 1 last channel, 1 padding up to channel_subtile
+    21.0f, 0.0f, // 1 weight, 1 last channel, 1 padding up to channel_subtile
+    // 1 middle pass
+    7.0f, 11.0f, 15.0f, 19.0f, // 2 weights, 4 channels first, then columns
+    6.0f, 10.0f, 14.0f, 18.0f,
+    23.0f, 0.0f, // 2 weights, 1 last channel, 1 padding up to channel_subtile
+    22.0f, 0.0f,
+    // Last pass.
+    8.0f, 12.0f, 16.0f, 20.0f,  // 1 weight, 4 channels first
+    0.0f, 0.0f, 0.0f, 0.0f, // padding to last_pass_tile
+    24.0f, 0.0f, // 1 weight, 1 last channel, 1 padding up to channel_subtile
+    0.0f, 0.0f, // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_subtile_rounded) {
+  const size_t first_pass_tile = 2;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 3;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 7;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+  // c rounded to channel_subtile is 8, so we will have 2 channel_tile loops in the first and middle pass.
+
+  std::vector<float> b(c);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4, 5, 6]
+  std::vector<float> k(c * h * w);  // k = [7, 8, // first 2x2 kernel
+                                    //      9, 10,
+                                    //      11, 12, // second 2x2 kernel
+                                    //      13, 14,
+                                    //      15, 16, // third 2x2 kernel
+                                    //      17, 18,
+                                    //      19, 20, // fourth 2x2 kernel
+                                    //      21, 22,
+                                    //      23, 24, // fifth 2x2 kernel
+                                    //      25, 26,
+                                    //      27, 28, // sixth 2x2 kernel
+                                    //      29, 30,
+                                    //      31, 32, // seventh 2x2 kernel
+                                    //      33, 34]
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  std::vector<float> packed_weights(
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_pack_f32_multipass_dwconv_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      nullptr);
+
+  const std::vector<float> expected = {
+    // First pass.
+    0.0f, 1.0f, 2.0f, 3.0f,  // bias, 4 channels
+    7.0f, 11.0f, 15.0, 19.0f,  // 2 weights, 4 channels first, then columns
+    9.0f, 13.0f, 17.0f, 21.0f,
+    4.0f, 5.0f, 6.0f, 0.0f, // bias, 3 remainder channels, 1 padding up to channel_tile
+    23.0f, 27.0f, 31.0f, 0.0f,  // 2 weights, 3 remainder channels, 1 padding up to channel_tile
+    25.0f, 29.0f, 33.0f, 0.0f,
+    // No middle pass.
+    // Last pass.
+    8.0f, 12.0f, 16.0f, 20.0f,  // last pass, 2 weights, 4 channels first
+    10.0f, 14.0f, 18.0f, 22.0f,
+    0.0f, 0.0f, 0.0f, 0.0f, // padding to last_pass_tile
+    24.0f, 28.0f, // last pass, 2 weights, channel_subtile (2)
+    26.0f, 30.0f,
+    0.0f, 0.0f, // padding to last_pass_tile
+    32.0f, 0.0f, // 1 remainder channel, 1 padding up to channel_subtile
+    34.0f, 0.0f, // 1 remainder channel, 1 padding up to channel_subtile
+    0.0f, 0.0f, // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rounded) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 2;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 7;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+  // c rounded to channel_subtile is 8, so we will have 2 channel_tile loops in first and middle pass.
+
+  std::vector<float> b(c);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4, 5, 6]
+  std::vector<float> k(c * h * w);  // k = [7, 8, // first 2x2 kernel
+                                    //      9, 10,
+                                    //      11, 12, // second 2x2 kernel
+                                    //      13, 14,
+                                    //      15, 16, // third 2x2 kernel
+                                    //      17, 18,
+                                    //      19, 20, // fourth 2x2 kernel
+                                    //      21, 22,
+                                    //      23, 24, // fifth 2x2 kernel
+                                    //      25, 26,
+                                    //      27, 28, // sixth 2x2 kernel
+                                    //      29, 30,
+                                    //      31, 32, // seventh 2x2 kernel
+                                    //      33, 34]
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  std::vector<float> packed_weights(
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_pack_f32_multipass_dwconv_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      nullptr);
+
+  const std::vector<float> expected = {
+    // First pass.
+    0.0f, 1.0f, 2.0f, 3.0f,  // bias, 4 channels
+    7.0f, 11.0f, 15.0, 19.0f,  // 1 weight, 4 channels first, then columns
+    4.0f, 5.0f, 6.0f, 0.0f, // bias, 4 channels, 1 padding up to channel_tile
+    23.0f, 27.0f, 31.0f, 0.0f,  // 1 weight, 3 remainder channels, 1 padding up to channel_tile
+    // 1 middle pass.
+    9.0f, 13.0f, 17.0f, 21.0f, // 2 weights, 4 channels first
+    8.0f, 12.0f, 16.0f, 20.0f,
+    25.0f, 29.0f, 33.0f, 0.0f, // 3 remainder channels, 1 padding up to channel_tile
+    24.0f, 28.0f, 32.0f, 0.0f,
+    // Last pass.
+    10.0f, 14.0f, 18.0f, 22.0f,  // last pass, 1 weight, 4 channels first
+    0.0f, 0.0f, 0.0f, 0.0f, // padding to last_pass_tile
+    26.0f, 30.0f, // 1 weight, channel_subtile,
+    0.0f, 0.0f, // padding to last_pass_tile
+    34.0f, 0.0f, // 1 weight, 1 remainder channel, 1 padding up to channel_subtile
+    0.0f, 0.0f, // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
 TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
   const size_t first_pass_tile = 2;
   const size_t middle_pass_tile = 2;
@@ -1998,7 +2273,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
                                     //      8, 9]
   std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
   std::vector<float> packed_weights(
-    multipass_weights_size(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
   xnn_pack_f32_multipass_dwconv_hwg_w(
       first_pass_tile,
@@ -2007,6 +2282,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
       h,
       w,
       c,
+      cr,
       cr,
       k.data(),
       b.data(),
@@ -2045,7 +2321,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channels_gt
                                     //      ]
   std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
   std::vector<float> packed_weights(
-    multipass_weights_size(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
   xnn_pack_f32_multipass_dwconv_hwg_w(
       first_pass_tile,
@@ -2054,6 +2330,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channels_gt
       h,
       w,
       c,
+      cr,
       cr,
       k.data(),
       b.data(),
@@ -2104,7 +2381,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
                                     //      8, 9]
   std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
   std::vector<float> packed_weights(
-    multipass_weights_size(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
   xnn_pack_f32_multipass_dwconv_hwg_w(
       first_pass_tile,
@@ -2113,6 +2390,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
       h,
       w,
       c,
+      cr,
       cr,
       k.data(),
       b.data(),
@@ -2151,7 +2429,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr) {
                                     //      ]
   std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
   std::vector<float> packed_weights(
-    multipass_weights_size(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
   xnn_pack_f32_multipass_dwconv_hwg_w(
       first_pass_tile,
@@ -2160,6 +2438,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr) {
       h,
       w,
       c,
+      cr,
       cr,
       k.data(),
       b.data(),
@@ -2213,7 +2492,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
                                     //      12, 13]
   std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
   std::vector<float> packed_weights(
-    multipass_weights_size(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
   xnn_pack_f32_multipass_dwconv_hwg_w(
       first_pass_tile,
@@ -2222,6 +2501,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
       h,
       w,
       c,
+      cr,
       cr,
       k.data(),
       b.data(),
@@ -2265,7 +2545,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_gt_cr) 
                                     //      ]
   std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
   std::vector<float> packed_weights(
-    multipass_weights_size(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
   xnn_pack_f32_multipass_dwconv_hwg_w(
       first_pass_tile,
@@ -2274,6 +2554,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_gt_cr) 
       h,
       w,
       c,
+      cr,
       cr,
       k.data(),
       b.data(),
@@ -2314,6 +2595,231 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_gt_cr) 
     // 1 remainder channel.
     34.0f, 0.0f,
     0.0f, 0.0f,  // padding
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_subtile) {
+  const size_t first_pass_tile = 2;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 3;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+
+  std::vector<float> b(c);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4]
+  std::vector<float> k(c * h * w);  // k = [5, 6, 7, 8, 9, // first channel
+                                    //      10, 11, 12, 13, 14, // second channel
+                                    //      15, 16, 17, 18, 19, // third channel
+                                    //      20, 21, 22, 23, 24] // fourth channel
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  std::vector<float> packed_weights(
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_pack_f32_multipass_dwconv_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      nullptr);
+
+  const std::vector<float> expected = {
+    // First pass.
+    0.0f, 1.0f, 2.0f, 3.0f, // bias, 4 channels
+    5.0f, 6.0f, 7.0f, 8.0f, // first pass, 2 weights, 4 channels first, then columns
+    15.0f, 16.0f, 17.0f, 18.0f,
+    4.0f, 0.0f, // bias, 1 last channel, 1 padding up to channel_subtile
+    9.0f, 0.0f, // 2 weights, 1 last channel, 1 padding up to channel_subtile
+    19.0f, 0.0f,
+    // No middle pass.
+    10.0f, 11.0f, 12.0f, 13.0f, // last pass, 2 weights, 4 channels first.
+    20.0f, 21.0f, 22.0f, 23.0f,
+    0.0f, 0.0f, 0.0f, 0.0f, // padding to last_pass_tile
+    14.0f, 0.0f, // 2 weights, 1 last channel, 1 padding up to channel_subtile
+    24.0f, 0.0f, // 2 weights, 1 last channel, 1 padding up to channel_subtile
+    0.0f, 0.0f,  // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 2;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+
+  std::vector<float> b(c);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4]
+  std::vector<float> k(c * h * w);  // k = [5, 6, 7, 8, 9,
+                                    //      10, 11, 12, 13, 14,
+                                    //      15, 16, 17, 18, 19,
+                                    //      20, 21, 22, 23, 24]
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  std::vector<float> packed_weights(
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_pack_f32_multipass_dwconv_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      nullptr);
+
+  const std::vector<float> expected = {
+    // First pass.
+    0.0f, 1.0f, 2.0f, 3.0f, // bias, 4 channels
+    5.0f, 6.0f, 7.0f, 8.0f, // first pass, 1 weight, 4 channels first, then columns
+    4.0f, 0.0f, // bias, 1 last channel, 1 padding up to channel_subtile
+    9.0f, 0.0f, // 1 weight, 1 last channel, 1 padding up to channel_subtile
+    // 1 middle pass.
+    15.0f, 16.0f, 17.0f, 18.0f, // 2 weights, 4 channels first.
+    10.0f, 11.0f, 12.0f, 13.0f,
+    19.0f, 0.0f, // 2 weights, 1 last channel, 1 padding up to channel_subtile
+    14.0f, 0.0f,
+    // Last pass.
+    20.0f, 21.0f, 22.0f, 23.0f, // 1 weight, 4 channels first.
+    0.0f, 0.0f, 0.0f, 0.0f, // padding to last_pass_tile
+    24.0f, 0.0f, // 1 weight, 1 last channel, 1 padding up to channel_subtile
+    0.0f, 0.0f,  // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_subtile_rounded) {
+  const size_t first_pass_tile = 2;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 3;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 7;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+  // c rounded to channel_subtile is 8, so we will have 2 channel_tile loops for first and middle pass.
+
+  std::vector<float> b(c);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4, 5, 6]
+  std::vector<float> k(c * h * w);  // k = [7, 8, 9, 10, 11, 12, 13,
+                                    //      14, 15, 16, 17, 18, 19, 20,
+                                    //      21, 22, 23, 24, 25, 26, 27,
+                                    //      28, 29, 30, 31, 32, 33, 34]
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  std::vector<float> packed_weights(
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_pack_f32_multipass_dwconv_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      nullptr);
+
+  const std::vector<float> expected = {
+    // First pass.
+    0.0f, 1.0f, 2.0f, 3.0f, // bias, 4 channels
+    7.0f, 8.0f, 9.0f, 10.0f, // 2 weights, 4 channels first, then columns
+    21.0f, 22.0f, 23.0f, 24.0f,
+    4.0f, 5.0f, 6.0f, 0.0f, // bias, 3 remainder channels, 1 padding up to channel_subtile
+    11.0f, 12.0f, 13.0f, 0.0f, // 2 weights, 3 remainder channel, 1 padding up to channel_subtile
+    25.0f, 26.0f, 27.0f, 0.0f,
+    // No middle pass.
+    14.0f, 15.0f, 16.0f, 17.0f, // last pass, 2 weights, 4 channels first.
+    28.0f, 29.0f, 30.0f, 31.0f,
+    0.0f, 0.0f, 0.0f, 0.0f, // padding to last_pass_tile
+    18.0f, 19.0f, // 2 weights, channel_subtile (2)
+    32.0f, 33.0f,
+    0.0f, 0.0f,  // padding to last_pass_tile
+    20.0f, 0.0f, // 2 weights, 1 remainder channel, 1 padding up to channel_subtile
+    34.0f, 0.0f,
+    0.0f, 0.0f,  // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile_rounded) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 2;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 7;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+  // c rounded to channel_subtile is 8, so we will have 2 channel_tile loops for first and middle pass.
+
+  std::vector<float> b(c);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4, 5, 6]
+  std::vector<float> k(c * h * w);  // k = [7, 8, 9, 10, 11, 12, 13,
+                                    //      14, 15, 16, 17, 18, 19, 20,
+                                    //      21, 22, 23, 24, 25, 26, 27,
+                                    //      28, 29, 30, 31, 32, 33, 34]
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size()));
+  std::vector<float> packed_weights(
+    multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_pack_f32_multipass_dwconv_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      nullptr);
+
+  const std::vector<float> expected = {
+    // First pass.
+    0.0f, 1.0f, 2.0f, 3.0f, // bias, 4 channels
+    7.0f, 8.0f, 9.0f, 10.0f, // 1 weight, 4 channels first, then columns
+    4.0f, 5.0f, 6.0f, 0.0f, // bias, 3 remainder channels, 1 padding up to channel_subtile
+    11.0f, 12.0f, 13.0f, 0.0f, // 1 weight, 3 remainder channel, 1 padding up to channel_subtile
+    // 1 middle pass.
+    21.0f, 22.0f, 23.0f, 24.0f, // 2 weights, 4 channels first
+    14.0f, 15.0f, 16.0f, 17.0f,
+    25.0f, 26.0f, 27.0f, 0.0f, // 3 remainder channels first, 1 padding up to channel_tile
+    18.0f, 19.0f, 20.0f, 0.0f,
+    // Last pass.
+    28.0f, 29.0f, 30.0f, 31.0f, // last pass, 1 weight, 4 channels first.
+    0.0f, 0.0f, 0.0f, 0.0f, // padding to last_pass_tile
+    32.0f, 33.0f, // last pass, 1 weight, channel_subtile (2)
+    0.0f, 0.0f,  // padding to last_pass_tile
+    34.0f, 0.0f, // last pass, 1 remainder channel, 1 padding up to channel_subtile
+    0.0f, 0.0f,  // padding to last_pass_tile
   };
   EXPECT_EQ(expected, packed_weights);
 }

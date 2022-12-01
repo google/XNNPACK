@@ -609,9 +609,11 @@ XNN_INTERNAL void xnn_pack_qs8_dwconv_hwg_w(
 // Multipass dwconv packing functions.
 // Pack weights and bias such that:
 // 1. First block has biases and first_pass_tile weights
-// 2. Within this block, we have c/cr biases, then weights, then remainder cr.
-// 3. Second block has middle_pass_tile weights.
-// 4. Last block has last_pass_tile weights.
+// 2. Within this block, we have biases, then weights, in channel_tile, then in channel_subtiles.
+// 3. Second block has middle_pass_tile weights, in channel_tile, then in channel_subtiles.
+// 4. Last block has last_pass_tile weights, in channel_tile, then in channel_subtiles.
+// The first and middle pass of the microkernel runs as many channel_tile as possible, so the number of channel_tile
+// tiles is round_up_po2(channels, channel_subtile)/channel_tile.
 
 // Weights layout is channels/(g)roups, (h)eight, (w)idth.
 XNN_INTERNAL void xnn_pack_f32_multipass_dwconv_ghw_w(
@@ -621,7 +623,8 @@ XNN_INTERNAL void xnn_pack_f32_multipass_dwconv_ghw_w(
   size_t h,
   size_t w,
   size_t c,
-  size_t cr,
+  size_t channel_tile,
+  size_t channel_subtile,
   const float* k,
   const float* b,
   float* packed_weights,
@@ -636,7 +639,8 @@ XNN_INTERNAL void xnn_pack_f32_multipass_dwconv_hwg_w(
   size_t h,
   size_t w,
   size_t c,
-  size_t cr,
+  size_t channel_tile,
+  size_t channel_subtile,
   const float* k,
   const float* b,
   float* packed_weights,
@@ -828,7 +832,6 @@ XNN_INTERNAL void xnn_pack_f32_to_f16_prelu_w(
   size_t c,
   const float* s,
   uint16_t* packed_weights);
-
 
 #ifdef __cplusplus
 }  // extern "C"

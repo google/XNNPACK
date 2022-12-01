@@ -11512,6 +11512,7 @@ xnnpack_cc_library(
     deps = [
         ":allocator",
         ":cache",
+        ":math",
         ":operator_h",
         ":xnnpack_h",
     ],
@@ -16906,7 +16907,10 @@ xnnpack_unit_test(
     srcs = [
         "test/packing.cc",
     ],
-    deps = MICROKERNEL_TEST_DEPS + [":packing_test_mode"],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":packing_test_mode",
+        ":operator_utils",
+    ],
 )
 
 xnnpack_unit_test(
