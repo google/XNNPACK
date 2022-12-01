@@ -31,11 +31,6 @@ class VUnaryMicrokernelTester {
     RoundDown,
   };
 
-  enum class Variant {
-    Native,
-    Scalar,
-  };
-
   inline VUnaryMicrokernelTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
