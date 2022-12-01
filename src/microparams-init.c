@@ -4199,25 +4199,31 @@ size_t xnn_init_f32_chw_params(
     params->neon.mask_odd[2] = -(uint32_t) (w8 >= 5);
     params->neon.mask_odd[3] = -(uint32_t) (w8 >= 7);
     return sizeof(params->neon);
+  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+    params->wasmsimd.min[0] = output_min;
+    params->wasmsimd.min[1] = output_min;
+    params->wasmsimd.max[0] = output_max;
+    params->wasmsimd.max[1] = output_max;
+
+    const uint32_t w4 = (width - 1) & 3;
+    params->wasmsimd.mask[0] = UINT32_C(0xFFFFFFFF);
+    params->wasmsimd.mask[1] = -(uint32_t) (w4 >= 1);
+    params->wasmsimd.mask[2] = -(uint32_t) (w4 >= 2);
+    params->wasmsimd.mask[3] = -(uint32_t) (w4 >= 3);
+
+    const uint32_t w8 = (width - 1) & 7;
+    params->wasmsimd.mask_even[0] = UINT32_C(0xFFFFFFFF);
+    params->wasmsimd.mask_even[1] = -(uint32_t) (w8 >= 2);
+    params->wasmsimd.mask_even[2] = -(uint32_t) (w8 >= 4);
+    params->wasmsimd.mask_even[3] = -(uint32_t) (w8 >= 6);
+    params->wasmsimd.mask_odd[0] = -(uint32_t) (w8 >= 1);
+    params->wasmsimd.mask_odd[1] = -(uint32_t) (w8 >= 3);
+    params->wasmsimd.mask_odd[2] = -(uint32_t) (w8 >= 5);
+    params->wasmsimd.mask_odd[3] = -(uint32_t) (w8 >= 7);
+    return sizeof(params->wasmsimd);
   #else
     params->scalar.min = output_min;
     params->scalar.max = output_max;
-
-    const uint32_t w4 = (width - 1) & 3;
-    params->scalar.mask[0] = UINT32_C(0xFFFFFFFF);
-    params->scalar.mask[1] = -(uint32_t) (w4 >= 1);
-    params->scalar.mask[2] = -(uint32_t) (w4 >= 2);
-    params->scalar.mask[3] = -(uint32_t) (w4 >= 3);
-
-    const uint32_t w8 = (width - 1) & 7;
-    params->scalar.mask_even[0] = UINT32_C(0xFFFFFFFF);
-    params->scalar.mask_even[1] = -(uint32_t) (w8 >= 2);
-    params->scalar.mask_even[2] = -(uint32_t) (w8 >= 4);
-    params->scalar.mask_even[3] = -(uint32_t) (w8 >= 6);
-    params->scalar.mask_odd[0] = -(uint32_t) (w8 >= 1);
-    params->scalar.mask_odd[1] = -(uint32_t) (w8 >= 3);
-    params->scalar.mask_odd[2] = -(uint32_t) (w8 >= 5);
-    params->scalar.mask_odd[3] = -(uint32_t) (w8 >= 7);
     return sizeof(params->scalar);
   #endif
 }
@@ -4294,22 +4300,22 @@ void xnn_update_f32_chw_params(
     params->neon.mask_odd[1] = -(uint32_t) (w8 >= 3);
     params->neon.mask_odd[2] = -(uint32_t) (w8 >= 5);
     params->neon.mask_odd[3] = -(uint32_t) (w8 >= 7);
-  #else
+  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const uint32_t w4 = (width - 1) & 3;
-    params->scalar.mask[0] = UINT32_C(0xFFFFFFFF);
-    params->scalar.mask[1] = -(uint32_t) (w4 >= 1);
-    params->scalar.mask[2] = -(uint32_t) (w4 >= 2);
-    params->scalar.mask[3] = -(uint32_t) (w4 >= 3);
+    params->wasmsimd.mask[0] = UINT32_C(0xFFFFFFFF);
+    params->wasmsimd.mask[1] = -(uint32_t) (w4 >= 1);
+    params->wasmsimd.mask[2] = -(uint32_t) (w4 >= 2);
+    params->wasmsimd.mask[3] = -(uint32_t) (w4 >= 3);
 
     const uint32_t w8 = (width - 1) & 7;
-    params->scalar.mask_even[0] = UINT32_C(0xFFFFFFFF);
-    params->scalar.mask_even[1] = -(uint32_t) (w8 >= 2);
-    params->scalar.mask_even[2] = -(uint32_t) (w8 >= 4);
-    params->scalar.mask_even[3] = -(uint32_t) (w8 >= 6);
-    params->scalar.mask_odd[0] = -(uint32_t) (w8 >= 1);
-    params->scalar.mask_odd[1] = -(uint32_t) (w8 >= 3);
-    params->scalar.mask_odd[2] = -(uint32_t) (w8 >= 5);
-    params->scalar.mask_odd[3] = -(uint32_t) (w8 >= 7);
+    params->wasmsimd.mask_even[0] = UINT32_C(0xFFFFFFFF);
+    params->wasmsimd.mask_even[1] = -(uint32_t) (w8 >= 2);
+    params->wasmsimd.mask_even[2] = -(uint32_t) (w8 >= 4);
+    params->wasmsimd.mask_even[3] = -(uint32_t) (w8 >= 6);
+    params->wasmsimd.mask_odd[0] = -(uint32_t) (w8 >= 1);
+    params->wasmsimd.mask_odd[1] = -(uint32_t) (w8 >= 3);
+    params->wasmsimd.mask_odd[2] = -(uint32_t) (w8 >= 5);
+    params->wasmsimd.mask_odd[3] = -(uint32_t) (w8 >= 7);
   #endif
 }
 
@@ -4321,22 +4327,6 @@ size_t xnn_init_scalar_f32_chw_params(
 {
   params->scalar.min = output_min;
   params->scalar.max = output_max;
-
-  const uint32_t w4 = (width - 1) & 3;
-  params->scalar.mask[0] = UINT32_C(0xFFFFFFFF);
-  params->scalar.mask[1] = -(uint32_t) (w4 >= 1);
-  params->scalar.mask[2] = -(uint32_t) (w4 >= 2);
-  params->scalar.mask[3] = -(uint32_t) (w4 >= 3);
-
-  const uint32_t w8 = (width - 1) & 7;
-  params->scalar.mask_even[0] = UINT32_C(0xFFFFFFFF);
-  params->scalar.mask_even[1] = -(uint32_t) (w8 >= 2);
-  params->scalar.mask_even[2] = -(uint32_t) (w8 >= 4);
-  params->scalar.mask_even[3] = -(uint32_t) (w8 >= 6);
-  params->scalar.mask_odd[0] = -(uint32_t) (w8 >= 1);
-  params->scalar.mask_odd[1] = -(uint32_t) (w8 >= 3);
-  params->scalar.mask_odd[2] = -(uint32_t) (w8 >= 5);
-  params->scalar.mask_odd[3] = -(uint32_t) (w8 >= 7);
   return sizeof(params->scalar);
 }
 

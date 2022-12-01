@@ -162,11 +162,11 @@ struct gemm_parameters {
   struct gemm_codegens generator;
 #endif  // XNN_PLATFORM_JIT
   union {
+    xnn_init_f16_minmax_params_fn f16;
+    xnn_init_f32_minmax_params_fn f32;
     xnn_init_qc8_conv_minmax_params_fn qc8;
     xnn_init_qs8_conv_minmax_params_fn qs8;
     xnn_init_qu8_conv_minmax_params_fn qu8;
-    xnn_init_f16_minmax_params_fn f16;
-    xnn_init_f32_minmax_params_fn f32;
   } init;
   uint8_t mr;
   uint8_t nr;
@@ -238,6 +238,10 @@ struct vbinary_parameters {
 
 struct spmm_parameters {
   xnn_spmm_ukernel_fn ukernel;
+  union {
+    xnn_init_f16_minmax_params_fn f16;
+    xnn_init_f32_minmax_params_fn f32;
+  } init;
   // Number of M-dimension elements in a tile.
   // Corresponds to a block of pixels in 1x1 Convolution and a block of batch size in Fully Connected operator.
   uint8_t mr;
@@ -248,6 +252,10 @@ struct spmm_parameters {
 
 struct conv_hwc2chw_parameters {
   xnn_conv_hwc2chw_ukernel_fn ukernel_with_symm_padding;
+  union {
+    xnn_init_f16_minmax_params_fn f16;
+    xnn_init_f32_minmax_params_fn f32;
+  } init;
   // Number of output channels in a tile.
   // This parameter must be passed as is to weight packing function.
   uint8_t output_channel_tile;
@@ -260,6 +268,14 @@ struct conv_hwc2chw_parameters {
 
 struct dwconv2d_chw_parameters {
   xnn_dwconv2d_chw_ukernel_fn ukernel;
+  union {
+    xnn_init_f16_chw_params_fn f16;
+    xnn_init_f32_chw_params_fn f32;
+  } init;
+  union {
+    xnn_update_f16_chw_params_fn f16;
+    xnn_update_f32_chw_params_fn f32;
+  } update;
   // Number of output width pixels in a tile.
   uint8_t output_width_tile;
   // Number of output height pixels in a tile.

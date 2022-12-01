@@ -44,6 +44,7 @@ struct xnn_ukernel_dwconv2d {
   union {
     xnn_dwconv2d_chw_ukernel_fn chw_fn;
   };
+  xnn_update_chw_params_fn update_params;
   uint8_t output_width_tile;
 };
 
