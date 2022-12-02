@@ -13554,6 +13554,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-gemm-minmax.cc",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -14854,6 +14855,7 @@ xnnpack_unit_test(
         "test/qs8-requantization.cc",
         "test/requantization-tester.h",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [":requantization_stubs"],
 )
 
