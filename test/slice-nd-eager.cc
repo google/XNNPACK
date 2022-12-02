@@ -12,40 +12,46 @@
 
 constexpr size_t kDim1 = 4;
 constexpr size_t kDim2 = 5;
-constexpr size_t kDim3 = 7;
-constexpr size_t kDim4 = 11;
-constexpr size_t kDim5 = 13;
-constexpr size_t kDim6 = 17;
+constexpr size_t kDim3 = 6;
+constexpr size_t kDim4 = 7;
+constexpr size_t kDim5 = 8;
+constexpr size_t kDim6 = 9;
 
 // For each dimension test 3 cases:
 // 1. offset = 0, size = full dimension
-// 2. offset = 1, size = full dimension - 1 (skip first and last 2 elements)
+// 2. offset = 1, size = full dimension - 3 (skip first and last 2 elements)
 // 3. offset > 0 && offset < size, size = 1 (copy 1 element from the middle)
+static_assert(kDim1 > 3, "kDim1 must be at least 3");
 constexpr std::array<std::pair<size_t, size_t>, 3> kDim1TestCases = {{
     {0, kDim1},
     {1, kDim1 - 3},
     {kDim1 - 1, 1},
 }};
+static_assert(kDim2 > 3, "kDim2 must be at least 3");
 constexpr std::array<std::pair<size_t, size_t>, 3> kDim2TestCases = {{
     {0, kDim2},
     {1, kDim2 - 3},
     {kDim2 - 2, 1},
 }};
+static_assert(kDim3 > 3, "kDim3 must be at least 3");
 constexpr std::array<std::pair<size_t, size_t>, 3> kDim3TestCases = {{
     {0, kDim3},
     {1, kDim3 - 3},
     {kDim3 - 3, 1},
 }};
+static_assert(kDim4 > 4, "kDim4 must be at least 4");
 constexpr std::array<std::pair<size_t, size_t>, 3> kDim4TestCases = {{
     {0, kDim4},
     {1, kDim4 - 3},
     {kDim4 - 4, 1},
 }};
+static_assert(kDim5 > 5, "kDim5 must be at least 5");
 constexpr std::array<std::pair<size_t, size_t>, 3> kDim5TestCases = {{
     {0, kDim5},
     {1, kDim5 - 3},
     {kDim5 - 5, 1},
 }};
+static_assert(kDim6 > 6, "kDim6 must be at least 6");
 constexpr std::array<std::pair<size_t, size_t>, 3> kDim6TestCases = {{
     {0, kDim6},
     {1, kDim6 - 3},
