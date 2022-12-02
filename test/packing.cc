@@ -7,6 +7,7 @@
 #include <numeric>
 
 #include <xnnpack/aligned-allocator.h>
+#include <xnnpack/microkernel-utils.h>
 #include <xnnpack/operator-utils.h>
 #include <xnnpack/pack.h>
 

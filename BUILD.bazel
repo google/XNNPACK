@@ -11469,6 +11469,18 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "microkernel_utils",
+    srcs = ["src/microkernel-utils.c"],
+    hdrs = ["src/xnnpack/microkernel-utils.h"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+    ],
+)
+
+xnnpack_cc_library(
     name = "post_operation",
     srcs = [
         "src/operators/post-operation.c",
@@ -16892,7 +16904,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "operators_util_test",
+    name = "microkernel_utils_test",
+    srcs = ["test/microkernel-utils.cc"],
+    deps = [
+        ":common",
+        ":microkernel_utils",
+        ":params",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "operator_utils_test",
     srcs = ["test/operator-utils.cc"],
     deps = [
         ":common",
@@ -16910,6 +16932,7 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS + [
         ":packing_test_mode",
         ":operator_utils",
+        ":microkernel_utils",
     ],
 )
 
