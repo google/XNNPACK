@@ -64,6 +64,6 @@ tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=2
 tools/xngen src/f16-dwconv/unipass-fma3.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f16-dwconv/gen/f16-dwconv-25p32c-minmax-fma3-acc2.c &
 
 ################################## Unit tests #################################
-tools/generate-dwconv-unipass-test.py --spec test/f16-dwconv-minmax.yaml --output test/f16-dwconv-minmax.cc &
+tools/generate-dwconv-unipass-test.py --spec test/f16-dwconv-unipass-minmax.yaml --output test/f16-dwconv-unipass-minmax.cc &
 
 wait

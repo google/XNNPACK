@@ -320,8 +320,8 @@ tools/xngen src/f32-dwconv/unipass-avx512.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE
 tools/xngen src/f32-dwconv/unipass-avx512.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-avx512f-acc2.c &
 
 ################################## Unit tests #################################
-tools/generate-dwconv-unipass-test.py --spec test/f32-dwconv.yaml --output test/f32-dwconv.cc &
-tools/generate-dwconv-unipass-test.py --spec test/f32-dwconv-minmax.yaml --output test/f32-dwconv-minmax.cc &
+tools/generate-dwconv-unipass-test.py --spec test/f32-dwconv-unipass.yaml --output test/f32-dwconv-unipass.cc &
+tools/generate-dwconv-unipass-test.py --spec test/f32-dwconv-unipass-minmax.yaml --output test/f32-dwconv-unipass-minmax.cc &
 tools/generate-dwconv-multipass-test.py --spec test/f32-dwconv-multipass-minmax.yaml --output test/f32-dwconv-multipass-minmax.cc &
 
 wait

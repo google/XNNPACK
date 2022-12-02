@@ -583,11 +583,11 @@ tools/xngen src/qs8-dwconv/unipass-avx512skx-mul32.c.in -D CHANNEL_TILE=16 -D KE
 tools/xngen src/qs8-dwconv/unipass-avx512skx-mul32.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D DATATYPE=QU8 -D REQUANTIZATION=FP32     -o src/qu8-dwconv/gen/qu8-dwconv-25p32c-minmax-fp32-avx512skx-mul32.c &
 
 ################################## Unit tests #################################
-tools/generate-dwconv-unipass-test.py --spec test/qc8-dwconv-minmax-fp32.yaml --output test/qc8-dwconv-minmax-fp32.cc &
-tools/generate-dwconv-unipass-test.py --spec test/qs8-dwconv-minmax-fp32.yaml --output test/qs8-dwconv-minmax-fp32.cc &
-tools/generate-dwconv-unipass-test.py --spec test/qu8-dwconv-minmax-fp32.yaml --output test/qu8-dwconv-minmax-fp32.cc &
+tools/generate-dwconv-unipass-test.py --spec test/qc8-dwconv-unipass-minmax-fp32.yaml --output test/qc8-dwconv-unipass-minmax-fp32.cc &
+tools/generate-dwconv-unipass-test.py --spec test/qs8-dwconv-unipass-minmax-fp32.yaml --output test/qs8-dwconv-unipass-minmax-fp32.cc &
+tools/generate-dwconv-unipass-test.py --spec test/qu8-dwconv-unipass-minmax-fp32.yaml --output test/qu8-dwconv-unipass-minmax-fp32.cc &
 
-tools/generate-dwconv-unipass-test.py --spec test/qs8-dwconv-minmax-rndnu.yaml --output test/qs8-dwconv-minmax-rndnu.cc &
-tools/generate-dwconv-unipass-test.py --spec test/qu8-dwconv-minmax-rndnu.yaml --output test/qu8-dwconv-minmax-rndnu.cc &
+tools/generate-dwconv-unipass-test.py --spec test/qs8-dwconv-unipass-minmax-rndnu.yaml --output test/qs8-dwconv-unipass-minmax-rndnu.cc &
+tools/generate-dwconv-unipass-test.py --spec test/qu8-dwconv-unipass-minmax-rndnu.yaml --output test/qu8-dwconv-unipass-minmax-rndnu.cc &
 
 wait
