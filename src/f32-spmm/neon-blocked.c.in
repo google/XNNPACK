@@ -57,7 +57,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
           const float32x4_t vi${ABC[0:4]} = vld1q_f32(input);
           $for M in range(4, MR, 4):
             const float32x4_t vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
-          input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+          input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
           $for M in range(0, MR, 16):
             xnn_prefetch_to_l1(input + ${M+16});
           $if NR == 1:
@@ -87,7 +87,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
       $for N in range(0, NR, 1):
         $for M in range(0, MR, 4):
           vst1q_f32(output + ${M}, vout${ABC[M:M+4]}n${N});
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
       n -= ${NR};
     }
 
@@ -104,7 +104,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
             const float32x4_t vi${ABC[0:4]} = vld1q_f32(input);
             $for M in range(4, MR, 4):
               const float32x4_t vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
-            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
             $for M in range(0, MR, 16):
               xnn_prefetch_to_l1(input + ${M+16});
             const float32x4_t vw = vld1q_dup_f32(w); w += 1;
@@ -121,11 +121,11 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
 
         $for M in range(0, MR, 4):
           vst1q_f32(output + ${M}, vout${ABC[M:M+4]});
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         n -= 1;
       } while (n != 0);
     }
-    output = (float*restrict) ((uintptr_t) output - output_decrement);
+    output = (float*) ((uintptr_t) output - output_decrement);
     input += ${MR};
     mc -= ${MR} * sizeof(float);
   }
@@ -161,7 +161,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
                 const float32x4_t vi${ABC[0:4]} = vld1q_f32(input);
               $for M in range(4, SUBMR, 4):
                 const float32x4_t vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
-              input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+              input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
               $if NR == 1:
                 $if SUBMR < 4:
                   const float32x2_t vw = vld1_dup_f32(w); w += 1;
@@ -209,7 +209,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
             $else:
               $for M in range(0, SUBMR, 4):
                 vst1q_f32(output + ${M}, vout${ABC[M:M+4]}n${N});
-            output = (float*restrict) ((uintptr_t) output + output_stride);
+            output = (float*) ((uintptr_t) output + output_stride);
           n -= ${NR};
         }
 
@@ -234,7 +234,7 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
                   const float32x4_t vi${ABC[0:4]} = vld1q_f32(input);
                 $for M in range(4, SUBMR, 4):
                   const float32x4_t vi${ABC[M:M+4]} = vld1q_f32(input + ${M});
-                input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+                input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
                 $if SUBMR < 4:
                   const float32x2_t vw = vld1_dup_f32(w); w += 1;
                   vacc${ABC[0:SUBMR]} = vfma_f32(vacc${ABC[0:SUBMR]}, vi${ABC[0:SUBMR]}, vw);
@@ -261,11 +261,11 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
             $else:
               $for M in range(0, SUBMR, 4):
                 vst1q_f32(output + ${M}, vout${ABC[M:M+4]});
-            output = (float*restrict) ((uintptr_t) output + output_stride);
+            output = (float*) ((uintptr_t) output + output_stride);
             n -= 1;
           } while (n != 0);
         }
-        output = (float*restrict) ((uintptr_t) output - output_decrement);
+        output = (float*) ((uintptr_t) output - output_decrement);
         input += ${SUBMR};
       }
     }

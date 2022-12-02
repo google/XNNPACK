@@ -66,7 +66,7 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
           const float32x4_t vi0123 = vld1q_f32(input);
           const float32x4_t vi4567 = vld1q_f32(input + 4);
           const float32x4_t vi89AB = vld1q_f32(input + 8);
-          input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+          input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
           xnn_prefetch_to_l1(input + 16);
           const float32x4_t vw = vld1q_f32(w); w += 4;
           xnn_prefetch_to_l1(w + 32);
@@ -113,19 +113,19 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
       vst1q_f32(output + 0, vout0123n0);
       vst1q_f32(output + 4, vout4567n0);
       vst1q_f32(output + 8, vout89ABn0);
-      output = (float*restrict) ((uintptr_t) output + output_stride);
+      output = (float*) ((uintptr_t) output + output_stride);
       vst1q_f32(output + 0, vout0123n1);
       vst1q_f32(output + 4, vout4567n1);
       vst1q_f32(output + 8, vout89ABn1);
-      output = (float*restrict) ((uintptr_t) output + output_stride);
+      output = (float*) ((uintptr_t) output + output_stride);
       vst1q_f32(output + 0, vout0123n2);
       vst1q_f32(output + 4, vout4567n2);
       vst1q_f32(output + 8, vout89ABn2);
-      output = (float*restrict) ((uintptr_t) output + output_stride);
+      output = (float*) ((uintptr_t) output + output_stride);
       vst1q_f32(output + 0, vout0123n3);
       vst1q_f32(output + 4, vout4567n3);
       vst1q_f32(output + 8, vout89ABn3);
-      output = (float*restrict) ((uintptr_t) output + output_stride);
+      output = (float*) ((uintptr_t) output + output_stride);
       n -= 4;
     }
 
@@ -142,7 +142,7 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
             const float32x4_t vi0123 = vld1q_f32(input);
             const float32x4_t vi4567 = vld1q_f32(input + 4);
             const float32x4_t vi89AB = vld1q_f32(input + 8);
-            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
             xnn_prefetch_to_l1(input + 16);
             const float32x4_t vw = vld1q_dup_f32(w); w += 1;
             xnn_prefetch_to_l1(w + 32);
@@ -162,11 +162,11 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
         vst1q_f32(output + 0, vout0123);
         vst1q_f32(output + 4, vout4567);
         vst1q_f32(output + 8, vout89AB);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         n -= 1;
       } while (n != 0);
     }
-    output = (float*restrict) ((uintptr_t) output - output_decrement);
+    output = (float*) ((uintptr_t) output - output_decrement);
     input += 12;
     mc -= 12 * sizeof(float);
   }
@@ -192,7 +192,7 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
             const intptr_t diff = *dmap++;
             const float32x4_t vi0123 = vld1q_f32(input);
             const float32x4_t vi4567 = vld1q_f32(input + 4);
-            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
             const float32x4_t vw = vld1q_f32(w); w += 4;
 
             vacc0123n0 = vfmaq_laneq_f32(vacc0123n0, vi0123, vw, 0);
@@ -225,16 +225,16 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
 
         vst1q_f32(output + 0, vout0123n0);
         vst1q_f32(output + 4, vout4567n0);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         vst1q_f32(output + 0, vout0123n1);
         vst1q_f32(output + 4, vout4567n1);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         vst1q_f32(output + 0, vout0123n2);
         vst1q_f32(output + 4, vout4567n2);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         vst1q_f32(output + 0, vout0123n3);
         vst1q_f32(output + 4, vout4567n3);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         n -= 4;
       }
 
@@ -249,7 +249,7 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
               const intptr_t diff = *dmap++;
               const float32x4_t vi0123 = vld1q_f32(input);
               const float32x4_t vi4567 = vld1q_f32(input + 4);
-              input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+              input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
               const float32x4_t vw = vld1q_dup_f32(w); w += 1;
               vacc0123 = vfmaq_f32(vacc0123, vi0123, vw);
               vacc4567 = vfmaq_f32(vacc4567, vi4567, vw);
@@ -263,11 +263,11 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
 
           vst1q_f32(output + 0, vout0123);
           vst1q_f32(output + 4, vout4567);
-          output = (float*restrict) ((uintptr_t) output + output_stride);
+          output = (float*) ((uintptr_t) output + output_stride);
           n -= 1;
         } while (n != 0);
       }
-      output = (float*restrict) ((uintptr_t) output - output_decrement);
+      output = (float*) ((uintptr_t) output - output_decrement);
       input += 8;
     }
     output_decrement += 4 * sizeof(float);
@@ -286,7 +286,7 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
           do {
             const intptr_t diff = *dmap++;
             const float32x4_t vi0123 = vld1q_f32(input);
-            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
             const float32x4_t vw = vld1q_f32(w); w += 4;
 
             vacc0123n0 = vfmaq_laneq_f32(vacc0123n0, vi0123, vw, 0);
@@ -306,13 +306,13 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
         vout0123n3 = vmaxq_f32(vout0123n3, vmin);
 
         vst1q_f32(output + 0, vout0123n0);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         vst1q_f32(output + 0, vout0123n1);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         vst1q_f32(output + 0, vout0123n2);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         vst1q_f32(output + 0, vout0123n3);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         n -= 4;
       }
 
@@ -325,7 +325,7 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
             do {
               const intptr_t diff = *dmap++;
               const float32x4_t vi0123 = vld1q_f32(input);
-              input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+              input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
               const float32x4_t vw = vld1q_dup_f32(w); w += 1;
               vacc0123 = vfmaq_f32(vacc0123, vi0123, vw);
             } while (--nnz != 0);
@@ -335,11 +335,11 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
           vout0123 = vmaxq_f32(vout0123, vmin);
 
           vst1q_f32(output + 0, vout0123);
-          output = (float*restrict) ((uintptr_t) output + output_stride);
+          output = (float*) ((uintptr_t) output + output_stride);
           n -= 1;
         } while (n != 0);
       }
-      output = (float*restrict) ((uintptr_t) output - output_decrement);
+      output = (float*) ((uintptr_t) output - output_decrement);
       input += 4;
     }
     output_decrement += 2 * sizeof(float);
@@ -358,7 +358,7 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
           do {
             const intptr_t diff = *dmap++;
             const float32x2_t vi01 = vld1_f32(input);
-            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
             const float32x4_t vw = vld1q_f32(w); w += 4;
 
             vacc01n0 = vfma_laneq_f32(vacc01n0, vi01, vw, 0);
@@ -378,13 +378,13 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
         vout01n3 = vmax_f32(vout01n3, vget_low_f32(vmin));
 
         vst1_f32(output + 0, vout01n0);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         vst1_f32(output + 0, vout01n1);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         vst1_f32(output + 0, vout01n2);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         vst1_f32(output + 0, vout01n3);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         n -= 4;
       }
 
@@ -397,7 +397,7 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
             do {
               const intptr_t diff = *dmap++;
               const float32x2_t vi01 = vld1_f32(input);
-              input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+              input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
               const float32x2_t vw = vld1_dup_f32(w); w += 1;
               vacc01 = vfma_f32(vacc01, vi01, vw);
             } while (--nnz != 0);
@@ -406,11 +406,11 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
           vout01 = vmax_f32(vout01, vget_low_f32(vmin));
 
           vst1_f32(output, vout01);
-          output = (float*restrict) ((uintptr_t) output + output_stride);
+          output = (float*) ((uintptr_t) output + output_stride);
           n -= 1;
         } while (n != 0);
       }
-      output = (float*restrict) ((uintptr_t) output - output_decrement);
+      output = (float*) ((uintptr_t) output - output_decrement);
       input += 2;
     }
     output_decrement += 1 * sizeof(float);
@@ -429,7 +429,7 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
           do {
             const intptr_t diff = *dmap++;
             const float32x2_t vi0 = vld1_dup_f32(input);
-            input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+            input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
             const float32x4_t vw = vld1q_f32(w); w += 4;
 
             vacc0n0 = vfma_laneq_f32(vacc0n0, vi0, vw, 0);
@@ -449,13 +449,13 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
         vout0n3 = vmax_f32(vout0n3, vget_low_f32(vmin));
 
         vst1_lane_f32(output + 0, vout0n0, 0);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         vst1_lane_f32(output + 0, vout0n1, 0);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         vst1_lane_f32(output + 0, vout0n2, 0);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         vst1_lane_f32(output + 0, vout0n3, 0);
-        output = (float*restrict) ((uintptr_t) output + output_stride);
+        output = (float*) ((uintptr_t) output + output_stride);
         n -= 4;
       }
 
@@ -468,7 +468,7 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
             do {
               const intptr_t diff = *dmap++;
               const float32x2_t vi0 = vld1_dup_f32(input);
-              input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
+              input = (const float*) ((uintptr_t) input + (uintptr_t) diff);
               const float32x2_t vw = vld1_dup_f32(w); w += 1;
               vacc0 = vfma_f32(vacc0, vi0, vw);
             } while (--nnz != 0);
@@ -477,11 +477,11 @@ void xnn_f32_spmm_minmax_ukernel_12x4__neonfma(
           vout0 = vmax_f32(vout0, vget_low_f32(vmin));
 
           vst1_lane_f32(output, vout0, 1);
-          output = (float*restrict) ((uintptr_t) output + output_stride);
+          output = (float*) ((uintptr_t) output + output_stride);
           n -= 1;
         } while (n != 0);
       }
-      output = (float*restrict) ((uintptr_t) output - output_decrement);
+      output = (float*) ((uintptr_t) output - output_decrement);
       input += 1;
     }
     }
