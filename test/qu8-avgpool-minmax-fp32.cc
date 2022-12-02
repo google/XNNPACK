@@ -7,7 +7,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/qu8-avgpool-minmax.yaml
+//   Specification: test/qu8-avgpool-minmax-fp32.yaml
 //   Generator: tools/generate-avgpool-test.py
 
 
