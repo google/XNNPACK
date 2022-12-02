@@ -52,8 +52,9 @@ TEST(${TEST_NAME}, c_eq_${CBLOCK}) {
     ${ISA_CHECK};
   DWConvMicrokernelTester()
     .cr(${CR})
-    .kr(${KR})
+    .primary_tile(${KR})
     .channels(${CBLOCK})
+    .kr(${KR})
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -63,8 +64,9 @@ $if IS_PIPELINED:
       ${ISA_CHECK};
     DWConvMicrokernelTester()
       .cr(${CR})
-      .kr(${KR})
+      .primary_tile(${KR})
       .channels(${CBLOCK * 2})
+      .kr(${KR})
       .Test(${", ".join(TEST_ARGS)});
   }
 
@@ -75,8 +77,9 @@ $if CBLOCK > 1:
     for (uint32_t channels = ${ADJCBLOCK + CBLOCK}; channels < ${CR * 16}; channels += ${CR * 3}) {
       DWConvMicrokernelTester()
         .cr(${CR})
-        .kr(${KR})
+        .primary_tile(${KR})
         .channels(channels)
+        .kr(${KR})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -88,8 +91,9 @@ $if CBLOCK > 1:
       for (uint32_t channels = ${ADJCBLOCK + CBLOCK}; channels < ${CR * 16}; channels += ${CR * 3}) {
         DWConvMicrokernelTester()
           .cr(${CR})
-          .kr(${KR})
+          .primary_tile(${KR})
           .channels(channels)
+          .kr(${KR})
           .qmin(128)
           .Test(${", ".join(TEST_ARGS)});
       }
@@ -101,8 +105,9 @@ $if CBLOCK > 1:
       for (uint32_t channels = ${ADJCBLOCK + CBLOCK}; channels < ${CR * 16}; channels += ${CR * 3}) {
         DWConvMicrokernelTester()
           .cr(${CR})
-          .kr(${KR})
+          .primary_tile(${KR})
           .channels(channels)
+          .kr(${KR})
           .qmax(128)
           .Test(${", ".join(TEST_ARGS)});
       }
@@ -114,8 +119,9 @@ $if CBLOCK > 1:
     for (uint32_t channels = 1; channels < ${ADJCBLOCK}; channels++) {
       DWConvMicrokernelTester()
         .cr(${CR})
-        .kr(${KR})
+        .primary_tile(${KR})
         .channels(channels)
+        .kr(${KR})
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -126,8 +132,9 @@ TEST(${TEST_NAME}, c_gt_${ADJCBLOCK}) {
   for (uint32_t channels = ${ADJCBLOCK + 1}; channels < ${10 if CBLOCK == 1 else ADJCBLOCK + CBLOCK}; channels++) {
     DWConvMicrokernelTester()
       .cr(${CR})
-      .kr(${KR})
+      .primary_tile(${KR})
       .channels(channels)
+      .kr(${KR})
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -139,8 +146,9 @@ $if ACTIVATION == "MINMAX":
     for (uint32_t channels = ${ADJCBLOCK + 1}; channels < ${10 if CBLOCK == 1 else ADJCBLOCK + CBLOCK}; channels++) {
       DWConvMicrokernelTester()
         .cr(${CR})
-        .kr(${KR})
+        .primary_tile(${KR})
         .channels(channels)
+        .kr(${KR})
         .qmin(128)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -152,8 +160,9 @@ $if ACTIVATION == "MINMAX":
     for (uint32_t channels = ${ADJCBLOCK + 1}; channels < ${10 if CBLOCK == 1 else ADJCBLOCK + CBLOCK}; channels++) {
       DWConvMicrokernelTester()
         .cr(${CR})
-        .kr(${KR})
+        .primary_tile(${KR})
         .channels(channels)
+        .kr(${KR})
         .qmax(128)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -165,8 +174,9 @@ TEST(${TEST_NAME}, multipixel) {
   for (size_t channels = 1; channels <= ${CBLOCK * 5}; channels += ${max(1, CBLOCK - 1)}) {
     DWConvMicrokernelTester()
       .cr(${CR})
-      .kr(${KR})
+      .primary_tile(${KR})
       .channels(channels)
+      .kr(${KR})
       .width(3)
       .Test(${", ".join(TEST_ARGS)});
   }
@@ -179,8 +189,9 @@ TEST(${TEST_NAME}, multipixel_with_step) {
     for (size_t step = 2; step <= ${KR}; step++) {
       DWConvMicrokernelTester()
         .cr(${CR})
-        .kr(${KR})
+        .primary_tile(${KR})
         .channels(channels)
+        .kr(${KR})
         .width(3)
         .step(step)
         .Test(${", ".join(TEST_ARGS)});
@@ -194,8 +205,9 @@ TEST(${TEST_NAME}, multipixel_with_output_stride) {
   for (size_t channels = 1; channels <= ${CBLOCK * 5}; channels += ${max(1, CBLOCK - 1)}) {
     DWConvMicrokernelTester()
       .cr(${CR})
-      .kr(${KR})
+      .primary_tile(${KR})
       .channels(channels)
+      .kr(${KR})
       .width(5)
       .output_stride(${next_prime(CR * 5 + 1)})
       .Test(${", ".join(TEST_ARGS)});
@@ -209,8 +221,9 @@ $if ACTIVATION == "MINMAX":
     for (size_t channels = 1; channels <= ${CBLOCK * 5}; channels += ${max(1, CBLOCK - 1)}) {
       DWConvMicrokernelTester()
         .cr(${CR})
-        .kr(${KR})
+        .primary_tile(${KR})
         .channels(channels)
+        .kr(${KR})
         .width(3)
         .qmin(128)
         .Test(${", ".join(TEST_ARGS)});
@@ -223,8 +236,9 @@ $if ACTIVATION == "MINMAX":
     for (size_t channels = 1; channels <= ${CBLOCK * 5}; channels += ${max(1, CBLOCK - 1)}) {
       DWConvMicrokernelTester()
         .cr(${CR})
-        .kr(${KR})
+        .primary_tile(${KR})
         .channels(channels)
+        .kr(${KR})
         .width(3)
         .qmax(128)
         .Test(${", ".join(TEST_ARGS)});
@@ -238,8 +252,9 @@ $if DATATYPE == "qu8":
     for (size_t channels = 1; channels <= ${CBLOCK * 5}; channels += ${max(1, CBLOCK - 1)}) {
       DWConvMicrokernelTester()
         .cr(${CR})
-        .kr(${KR})
+        .primary_tile(${KR})
         .channels(channels)
+        .kr(${KR})
         .width(3)
         .input_zero_point(255)
         .kernel_zero_point(0)
@@ -253,8 +268,9 @@ $if DATATYPE == "qu8":
     for (size_t channels = 1; channels <= ${CBLOCK * 5}; channels += ${max(1, CBLOCK - 1)}) {
       DWConvMicrokernelTester()
         .cr(${CR})
-        .kr(${KR})
+        .primary_tile(${KR})
         .channels(channels)
+        .kr(${KR})
         .width(3)
         .input_zero_point(0)
         .kernel_zero_point(255)
@@ -268,8 +284,9 @@ TEST(${TEST_NAME}, input_offset) {
   for (uint32_t channels = ${ADJCBLOCK + CBLOCK}; channels < ${CR * 16}; channels += ${CR * 3}) {
     DWConvMicrokernelTester()
       .cr(${CR})
-      .kr(${KR})
+      .primary_tile(${KR})
       .channels(channels)
+      .kr(${KR})
       .input_offset(${next_prime(CR + 1) * 16})
       .Test(${", ".join(TEST_ARGS)});
   }
@@ -282,10 +299,27 @@ TEST(${TEST_NAME}, zero) {
     for (uint32_t channels = ${ADJCBLOCK + CBLOCK}; channels < ${CR * 16}; channels += ${CR * 3}) {
       DWConvMicrokernelTester()
         .cr(${CR})
-        .kr(${KR})
+        .primary_tile(${KR})
         .channels(channels)
+        .kr(${KR})
         .input_offset(${next_prime(CR + 1) * 16})
         .zero_index(mz)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+}
+
+TEST(${TEST_NAME}, c_eq_${CBLOCK}_k_lt_${KR}) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (uint32_t channels = ${ADJCBLOCK + 1}; channels < ${10 if CBLOCK == 1 else ADJCBLOCK + CBLOCK}; channels++) {
+    for (size_t kernel_size = 1; kernel_size < ${KR}; kernel_size++) {
+      DWConvMicrokernelTester()
+        .cr(${CR})
+        .primary_tile(${KR})
+        .channels(channels)
+        .kr(kernel_size)
+        .width(3)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
