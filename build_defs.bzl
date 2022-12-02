@@ -249,6 +249,7 @@ def xnnpack_aggregate_library(
             ":emscripten_wasmsimd": wasmsimd_deps,
             ":emscripten_wasmrelaxedsimd": wasmrelaxedsimd_deps,
             ":riscv": riscv_deps,
+            "//conditions:default": [],
         }),
         defines = defines,
         compatible_with = compatible_with,
