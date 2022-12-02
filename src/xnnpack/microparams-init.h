@@ -656,7 +656,8 @@ DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_scalar_select_params)
     uint16_t output_max);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_F16_CHW_PARAMS_FUNCTION(xnn_init_f16_chw_neonfp16arith_params)
+  DECLARE_INIT_F16_CHW_PARAMS_FUNCTION(xnn_init_f16_chw_neonfp16arith_stride1_params)
+  DECLARE_INIT_F16_CHW_PARAMS_FUNCTION(xnn_init_f16_chw_neonfp16arith_stride2_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
@@ -685,7 +686,8 @@ DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_scalar_params)
     uint32_t width);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_UPDATE_F16_CHW_PARAMS_FUNCTION(xnn_update_f16_chw_neonfp16arith_params)
+  DECLARE_UPDATE_F16_CHW_PARAMS_FUNCTION(xnn_update_f16_chw_neonfp16arith_stride1_params)
+  DECLARE_UPDATE_F16_CHW_PARAMS_FUNCTION(xnn_update_f16_chw_neonfp16arith_stride2_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 

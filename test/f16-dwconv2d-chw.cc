@@ -30,7 +30,7 @@
       .padding_right(1)
       .padding_top(1)
       .padding_bottom(1)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_3X3P1__NEONFP16ARITH_1X8, output_width_div_8) {
@@ -46,7 +46,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -63,7 +63,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -80,7 +80,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -98,7 +98,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -118,7 +118,7 @@
       .padding_right(1)
       .padding_top(1)
       .padding_bottom(1)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_3X3P1__NEONFP16ARITH_1X8_ACC2, output_width_div_8) {
@@ -134,7 +134,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -151,7 +151,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -168,7 +168,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -186,7 +186,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -206,7 +206,7 @@
       .padding_right(1)
       .padding_top(1)
       .padding_bottom(1)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_3X3P1__NEONFP16ARITH_1X8_ACC3, output_width_div_8) {
@@ -222,7 +222,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -239,7 +239,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -256,7 +256,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -274,7 +274,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -294,7 +294,7 @@
       .padding_right(1)
       .padding_top(1)
       .padding_bottom(1)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_3X3P1__NEONFP16ARITH_1X8_ACC4, output_width_div_8) {
@@ -310,7 +310,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -327,7 +327,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -344,7 +344,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -362,7 +362,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -382,7 +382,7 @@
       .padding_right(1)
       .padding_top(1)
       .padding_bottom(1)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_3X3P1__NEONFP16ARITH_2X8, output_width_div_8) {
@@ -398,7 +398,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -415,7 +415,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -432,7 +432,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -450,7 +450,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -469,7 +469,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -488,7 +488,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -508,7 +508,7 @@
       .padding_right(1)
       .padding_top(1)
       .padding_bottom(1)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_3X3P1__NEONFP16ARITH_2X8_ACC2, output_width_div_8) {
@@ -524,7 +524,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -541,7 +541,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -558,7 +558,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -576,7 +576,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -595,7 +595,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -614,7 +614,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -634,7 +634,7 @@
       .padding_right(1)
       .padding_top(1)
       .padding_bottom(1)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_3X3P1__NEONFP16ARITH_3X8, output_width_div_8) {
@@ -650,7 +650,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -667,7 +667,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -684,7 +684,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -702,7 +702,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -721,7 +721,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -740,7 +740,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -760,7 +760,7 @@
       .padding_right(1)
       .padding_top(1)
       .padding_bottom(1)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_3X3P1__NEONFP16ARITH_4X8, output_width_div_8) {
@@ -776,7 +776,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -793,7 +793,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -810,7 +810,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -828,7 +828,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -847,7 +847,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -866,7 +866,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -886,7 +886,7 @@
       .padding_right(1)
       .padding_top(1)
       .padding_bottom(1)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_3X3P1__NEONFP16ARITH_5X8, output_width_div_8) {
@@ -902,7 +902,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -919,7 +919,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -936,7 +936,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -954,7 +954,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -973,7 +973,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -992,7 +992,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -1012,7 +1012,7 @@
       .padding_right(1)
       .padding_top(1)
       .padding_bottom(1)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_3X3P1__NEONFP16ARITH_6X8, output_width_div_8) {
@@ -1028,7 +1028,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -1045,7 +1045,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -1062,7 +1062,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -1080,7 +1080,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -1099,7 +1099,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -1118,7 +1118,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_6x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -1139,7 +1139,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1156,7 +1156,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1173,7 +1173,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1190,7 +1190,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1208,7 +1208,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1227,7 +1227,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1246,7 +1246,7 @@
           .padding_right(1)
           .padding_top(0)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1267,7 +1267,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1284,7 +1284,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1301,7 +1301,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1318,7 +1318,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1336,7 +1336,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1355,7 +1355,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1374,7 +1374,7 @@
           .padding_right(1)
           .padding_top(0)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1395,7 +1395,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1412,7 +1412,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1429,7 +1429,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1446,7 +1446,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1464,7 +1464,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1483,7 +1483,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1502,7 +1502,7 @@
           .padding_right(1)
           .padding_top(0)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1523,7 +1523,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1540,7 +1540,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1557,7 +1557,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1574,7 +1574,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1592,7 +1592,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1611,7 +1611,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1630,7 +1630,7 @@
           .padding_right(1)
           .padding_top(0)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1651,7 +1651,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1668,7 +1668,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1685,7 +1685,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1702,7 +1702,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1720,7 +1720,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1739,7 +1739,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1758,7 +1758,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1777,7 +1777,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1796,7 +1796,7 @@
           .padding_right(1)
           .padding_top(0)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1817,7 +1817,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1834,7 +1834,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1851,7 +1851,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1868,7 +1868,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -1886,7 +1886,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1905,7 +1905,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1924,7 +1924,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1943,7 +1943,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1962,7 +1962,7 @@
           .padding_right(1)
           .padding_top(0)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -1983,7 +1983,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -2000,7 +2000,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -2017,7 +2017,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -2034,7 +2034,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -2052,7 +2052,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -2071,7 +2071,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -2090,7 +2090,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -2109,7 +2109,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -2128,7 +2128,7 @@
           .padding_right(1)
           .padding_top(0)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -2149,7 +2149,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -2166,7 +2166,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -2183,7 +2183,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -2200,7 +2200,7 @@
         .padding_right(1)
         .padding_top(1)
         .padding_bottom(1)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -2218,7 +2218,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -2237,7 +2237,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -2256,7 +2256,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -2275,7 +2275,7 @@
           .padding_right(1)
           .padding_top(1)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -2294,7 +2294,7 @@
           .padding_right(1)
           .padding_top(0)
           .padding_bottom(1)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -2314,7 +2314,7 @@
       .padding_right(2)
       .padding_top(2)
       .padding_bottom(2)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_5X5P2__NEONFP16ARITH_1X8, output_width_div_8) {
@@ -2330,7 +2330,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2347,7 +2347,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2364,7 +2364,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2382,7 +2382,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -2402,7 +2402,7 @@
       .padding_right(2)
       .padding_top(2)
       .padding_bottom(2)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_5X5P2__NEONFP16ARITH_1X8_ACC2, output_width_div_8) {
@@ -2418,7 +2418,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2435,7 +2435,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2452,7 +2452,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2470,7 +2470,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -2490,7 +2490,7 @@
       .padding_right(2)
       .padding_top(2)
       .padding_bottom(2)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_5X5P2__NEONFP16ARITH_1X8_ACC3, output_width_div_8) {
@@ -2506,7 +2506,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2523,7 +2523,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2540,7 +2540,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2558,7 +2558,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -2578,7 +2578,7 @@
       .padding_right(2)
       .padding_top(2)
       .padding_bottom(2)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_5X5P2__NEONFP16ARITH_1X8_ACC4, output_width_div_8) {
@@ -2594,7 +2594,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2611,7 +2611,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2628,7 +2628,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2646,7 +2646,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -2666,7 +2666,7 @@
       .padding_right(2)
       .padding_top(2)
       .padding_bottom(2)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_5X5P2__NEONFP16ARITH_1X8_ACC5, output_width_div_8) {
@@ -2682,7 +2682,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2699,7 +2699,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2716,7 +2716,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2734,7 +2734,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -2754,7 +2754,7 @@
       .padding_right(2)
       .padding_top(2)
       .padding_bottom(2)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_5X5P2__NEONFP16ARITH_2X8, output_width_div_8) {
@@ -2770,7 +2770,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2787,7 +2787,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2804,7 +2804,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2822,7 +2822,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -2841,7 +2841,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -2860,7 +2860,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -2880,7 +2880,7 @@
       .padding_right(2)
       .padding_top(2)
       .padding_bottom(2)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_5X5P2__NEONFP16ARITH_2X8_ACC2, output_width_div_8) {
@@ -2896,7 +2896,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2913,7 +2913,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2930,7 +2930,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -2948,7 +2948,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -2967,7 +2967,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -2986,7 +2986,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3006,7 +3006,7 @@
       .padding_right(2)
       .padding_top(2)
       .padding_bottom(2)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_5X5P2__NEONFP16ARITH_2X8_ACC3, output_width_div_8) {
@@ -3022,7 +3022,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3039,7 +3039,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3056,7 +3056,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3074,7 +3074,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3093,7 +3093,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3112,7 +3112,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3132,7 +3132,7 @@
       .padding_right(2)
       .padding_top(2)
       .padding_bottom(2)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_5X5P2__NEONFP16ARITH_3X8, output_width_div_8) {
@@ -3148,7 +3148,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3165,7 +3165,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3182,7 +3182,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3200,7 +3200,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3219,7 +3219,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3238,7 +3238,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3258,7 +3258,7 @@
       .padding_right(2)
       .padding_top(2)
       .padding_bottom(2)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_5X5P2__NEONFP16ARITH_3X8_ACC2, output_width_div_8) {
@@ -3274,7 +3274,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3291,7 +3291,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3308,7 +3308,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3326,7 +3326,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3345,7 +3345,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3364,7 +3364,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3384,7 +3384,7 @@
       .padding_right(2)
       .padding_top(2)
       .padding_bottom(2)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_5X5P2__NEONFP16ARITH_4X8, output_width_div_8) {
@@ -3400,7 +3400,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3417,7 +3417,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3434,7 +3434,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3452,7 +3452,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3471,7 +3471,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3490,7 +3490,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3510,7 +3510,7 @@
       .padding_right(2)
       .padding_top(2)
       .padding_bottom(2)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_5X5P2__NEONFP16ARITH_4X8_ACC2, output_width_div_8) {
@@ -3526,7 +3526,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3543,7 +3543,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3560,7 +3560,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3578,7 +3578,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3597,7 +3597,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3616,7 +3616,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_4x8_acc2, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3636,7 +3636,7 @@
       .padding_right(2)
       .padding_top(2)
       .padding_bottom(2)
-      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_params);
+      .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
   }
 
   TEST(F16_DWCONV2D_CHW_5X5P2__NEONFP16ARITH_5X8, output_width_div_8) {
@@ -3652,7 +3652,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3669,7 +3669,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3686,7 +3686,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
     }
   }
 
@@ -3704,7 +3704,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3723,7 +3723,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3742,7 +3742,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_5x8, xnn_init_f16_chw_neonfp16arith_stride1_params);
       }
     }
   }
@@ -3763,7 +3763,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -3780,7 +3780,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -3797,7 +3797,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -3814,7 +3814,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -3832,7 +3832,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -3851,7 +3851,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -3870,7 +3870,7 @@
           .padding_right(2)
           .padding_top(1)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -3891,7 +3891,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -3908,7 +3908,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -3925,7 +3925,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -3942,7 +3942,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -3960,7 +3960,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -3979,7 +3979,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -3998,7 +3998,7 @@
           .padding_right(2)
           .padding_top(1)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4019,7 +4019,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4036,7 +4036,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4053,7 +4053,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4070,7 +4070,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4088,7 +4088,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4107,7 +4107,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4126,7 +4126,7 @@
           .padding_right(2)
           .padding_top(1)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4147,7 +4147,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4164,7 +4164,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4181,7 +4181,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4198,7 +4198,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4216,7 +4216,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4235,7 +4235,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4254,7 +4254,7 @@
           .padding_right(2)
           .padding_top(1)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc4, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4275,7 +4275,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4292,7 +4292,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4309,7 +4309,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4326,7 +4326,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4344,7 +4344,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4363,7 +4363,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4382,7 +4382,7 @@
           .padding_right(2)
           .padding_top(1)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8_acc5, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4403,7 +4403,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4420,7 +4420,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4437,7 +4437,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4454,7 +4454,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4472,7 +4472,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4491,7 +4491,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4510,7 +4510,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4529,7 +4529,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4548,7 +4548,7 @@
           .padding_right(2)
           .padding_top(1)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4569,7 +4569,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4586,7 +4586,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4603,7 +4603,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4620,7 +4620,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4638,7 +4638,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4657,7 +4657,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4676,7 +4676,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4695,7 +4695,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4714,7 +4714,7 @@
           .padding_right(2)
           .padding_top(1)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4735,7 +4735,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4752,7 +4752,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4769,7 +4769,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4786,7 +4786,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4804,7 +4804,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4823,7 +4823,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4842,7 +4842,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4861,7 +4861,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4880,7 +4880,7 @@
           .padding_right(2)
           .padding_top(1)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_2x8_acc3, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4901,7 +4901,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4918,7 +4918,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4935,7 +4935,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4952,7 +4952,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -4970,7 +4970,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -4989,7 +4989,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -5008,7 +5008,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -5027,7 +5027,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -5046,7 +5046,7 @@
           .padding_right(2)
           .padding_top(1)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -5067,7 +5067,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -5084,7 +5084,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -5101,7 +5101,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -5118,7 +5118,7 @@
         .padding_right(2)
         .padding_top(2)
         .padding_bottom(2)
-        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+        .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
     }
   }
 
@@ -5136,7 +5136,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -5155,7 +5155,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -5174,7 +5174,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -5193,7 +5193,7 @@
           .padding_right(2)
           .padding_top(2)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
@@ -5212,7 +5212,7 @@
           .padding_right(2)
           .padding_top(1)
           .padding_bottom(2)
-          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_params);
+          .Test(xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_3x8_acc2, xnn_init_f16_chw_neonfp16arith_stride2_params);
       }
     }
   }
