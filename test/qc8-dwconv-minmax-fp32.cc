@@ -8,7 +8,7 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/qc8-dwconv-minmax-fp32.yaml
-//   Generator: tools/generate-dwconv-test.py
+//   Generator: tools/generate-dwconv-unipass-test.py
 
 
 #include <gtest/gtest.h>

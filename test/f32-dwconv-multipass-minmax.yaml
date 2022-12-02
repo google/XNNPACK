@@ -1,0 +1,13 @@
+# x86 SSE multipass
+- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse
+  init: xnn_init_f32_minmax_sse_params
+- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2
+  init: xnn_init_f32_minmax_sse_params
+- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse
+  init: xnn_init_f32_minmax_sse_params
+- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2
+  init: xnn_init_f32_minmax_sse_params
+- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse
+  init: xnn_init_f32_minmax_sse_params
+- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2
+  init: xnn_init_f32_minmax_sse_params

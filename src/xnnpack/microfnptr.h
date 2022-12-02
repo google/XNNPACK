@@ -410,6 +410,20 @@ typedef void (*xnn_f32_dwconv_minmax_unipass_ukernel_fn)(
     const float* zero,
     const union xnn_f32_minmax_params* params);
 
+typedef void (*xnn_f32_dwconv_multipass_minmax_ukernel_fn)(
+    size_t channels,
+    size_t output_width,
+    const float** input,
+    const float* weights,
+    float* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    const float* zero,
+    size_t kernel_size,
+    float* buffer,
+    const union xnn_f32_minmax_params* params);
+
 typedef void (*xnn_qc8_dwconv_minmax_unipass_ukernel_fn)(
     size_t channels,
     size_t output_width,

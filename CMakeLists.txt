@@ -4057,6 +4057,12 @@ SET(ALL_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/f32-avgpool-9x-minmax-sse-c4.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-sse-1x1.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-sse-2x2.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c-minmax-sse.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c-minmax-sse-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c-minmax-sse.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c-minmax-sse-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c-minmax-sse.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c-minmax-sse-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-sse-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-sse.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-sse-acc2.c
@@ -8669,6 +8675,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-dwconv-minmax-test PRIVATE hardware-config logging microkernels-all microparams-init packing)
   ADD_TEST(NAME f32-dwconv-minmax-test COMMAND f32-dwconv-minmax-test)
 
+  ADD_EXECUTABLE(f32-dwconv-multipass-minmax-test test/f32-dwconv-multipass-minmax.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-multipass-minmax-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-dwconv-multipass-minmax-test PRIVATE fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f32-dwconv-multipass-minmax-test PRIVATE hardware-config logging microkernel-utils microkernels-all microparams-init packing)
+  ADD_TEST(NAME f32-dwconv-multipass-minmax-test COMMAND f32-dwconv-multipass-minmax-test)
+
   ADD_EXECUTABLE(f32-f16-vcvt-test test/f32-f16-vcvt.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-f16-vcvt-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f32-f16-vcvt-test PRIVATE fp16 pthreadpool gtest gtest_main)
@@ -9988,7 +10000,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(f32-dwconv-bench bench/f32-dwconv.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-dwconv-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-dwconv-bench PRIVATE benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-dwconv-bench PRIVATE bench-utils indirection hardware-config logging microkernels-all microparams-init packing)
+  TARGET_LINK_LIBRARIES(f32-dwconv-bench PRIVATE bench-utils indirection hardware-config logging microkernel-utils microkernels-all microparams-init packing)
 
   ADD_EXECUTABLE(f32-dwconv2d-chw-bench bench/f32-dwconv2d-chw.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-dwconv2d-chw-bench PRIVATE . include src)

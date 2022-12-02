@@ -32,15 +32,11 @@ def split_ukernel_name(name):
   param_spec = common_parts[-1]
 
   # New transitional naming convention for unipass microkernels.
-  if 'c' in param_spec:
-    m = re.search(r'(\d+)p(\d+)c', param_spec);
-    assert(m)
-    primary_tile = 0;
-    cr = int(m[2])
-    kr = int(m[1])
-  else:
-    primary_tile = 0;
-    cr, kr = map(int, param_spec[2:].split("x"))
+  m = re.search(r'(\d+)p(\d+)c', param_spec);
+  assert(m)
+  primary_tile = 0;
+  cr = int(m[2])
+  kr = int(m[1])
   arch, isa = xnncommon.parse_target_name(target_name)
 
   requantization = common_parts[-3]

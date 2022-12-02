@@ -250,6 +250,13 @@ tools/xngen src/f32-dwconv/unipass-sse.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 
 tools/xngen src/f32-dwconv/unipass-sse.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-sse.c &
 tools/xngen src/f32-dwconv/unipass-sse.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-sse-acc2.c &
 
+tools/xngen src/f32-dwconv/multipass-sse.c.in -D CHANNEL_TILE=4 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c-minmax-sse.c &
+tools/xngen src/f32-dwconv/multipass-sse.c.in -D CHANNEL_TILE=4 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c-minmax-sse-acc2.c &
+tools/xngen src/f32-dwconv/multipass-sse.c.in -D CHANNEL_TILE=8 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/f32-dwconv-2f2m2l8c-minmax-sse.c &
+tools/xngen src/f32-dwconv/multipass-sse.c.in -D CHANNEL_TILE=8 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/f32-dwconv-2f2m2l8c-minmax-sse-acc2.c &
+tools/xngen src/f32-dwconv/multipass-sse.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/f32-dwconv-2f2m2l16c-minmax-sse.c &
+tools/xngen src/f32-dwconv/multipass-sse.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/f32-dwconv-2f2m2l16c-minmax-sse-acc2.c &
+
 ################################### x86 AVX ###################################
 tools/xngen src/f32-dwconv/unipass-avx.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=3 -D FMA=0 -D ACCUMULATORS=1 -o src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-avx.c &
 tools/xngen src/f32-dwconv/unipass-avx.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=3 -D FMA=0 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-avx-acc2.c &
@@ -313,7 +320,8 @@ tools/xngen src/f32-dwconv/unipass-avx512.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE
 tools/xngen src/f32-dwconv/unipass-avx512.c.in -D CHANNEL_TILE=32 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -o src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-avx512f-acc2.c &
 
 ################################## Unit tests #################################
-tools/generate-dwconv-test.py --spec test/f32-dwconv.yaml --output test/f32-dwconv.cc &
-tools/generate-dwconv-test.py --spec test/f32-dwconv-minmax.yaml --output test/f32-dwconv-minmax.cc &
+tools/generate-dwconv-unipass-test.py --spec test/f32-dwconv.yaml --output test/f32-dwconv.cc &
+tools/generate-dwconv-unipass-test.py --spec test/f32-dwconv-minmax.yaml --output test/f32-dwconv-minmax.cc &
+tools/generate-dwconv-multipass-test.py --spec test/f32-dwconv-multipass-minmax.yaml --output test/f32-dwconv-multipass-minmax.cc &
 
 wait
