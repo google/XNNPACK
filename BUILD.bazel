@@ -15072,7 +15072,7 @@ xnnpack_unit_test(
         "test/qu8-igemm-minmax-rndnu.cc",
         "test/qu8-igemm-minmax-rndnu-2.cc",
     ],
-    shard_count = 5,
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -16056,7 +16056,7 @@ xnnpack_unit_test(
         "test/binary-elementwise-operator-tester.h",
         "test/subtract-nd.cc",
     ],
-    shard_count = 5,
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS,
 )
 
