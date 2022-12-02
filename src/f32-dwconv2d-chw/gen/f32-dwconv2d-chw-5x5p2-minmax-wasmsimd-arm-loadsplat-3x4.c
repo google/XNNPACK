@@ -31,9 +31,9 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__wasmsimd_arm_loadsplat_3x4(
   assert(input_width % sizeof(float) == 0);
   assert(padding_top == 2);
 
-  const v128_t vmask = wasm_v128_load(params->wasmsimd.mask);
-  const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
-  const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
+  const v128_t vmask = wasm_v128_load(params->wasmsimd_stride1.mask);
+  const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd_stride1.max);
+  const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd_stride1.min);
 
   const v128_t vw0123 = wasm_v128_load(weights);
   const v128_t vw4567 = wasm_v128_load(weights + 4);

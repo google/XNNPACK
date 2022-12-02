@@ -30,9 +30,9 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__neon_1x4_acc4(
   assert(input_width % sizeof(float) == 0);
   assert(padding_top == 1);
 
-  const uint32x4_t vmask = vld1q_u32(params->neon.mask);
-  const float32x4_t vmax = vld1q_dup_f32(&params->neon.max);
-  const float32x4_t vmin = vld1q_dup_f32(&params->neon.min);
+  const uint32x4_t vmask = vld1q_u32(params->neon_stride1.mask);
+  const float32x4_t vmax = vld1q_dup_f32(&params->neon_stride1.max);
+  const float32x4_t vmin = vld1q_dup_f32(&params->neon_stride1.min);
 
   const float32x4_t vw0123 = vld1q_f32(weights);
   const float32x4_t vw4567 = vld1q_f32(weights + 4);

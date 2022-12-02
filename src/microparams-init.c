@@ -3938,93 +3938,136 @@ size_t xnn_init_f32_chw_scalar_params(
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f32_chw_neon_params(
+size_t xnn_init_f32_chw_neon_stride1_params(
   union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width,
   float output_min,
   float output_max)
 {
-  params->neon.min = output_min;
-  params->neon.max = output_max;
+  params->neon_stride1.min = output_min;
+  params->neon_stride1.max = output_max;
 
   const uint32_t w4 = (width - 1) & 3;
-  params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
-  params->neon.mask[1] = -(uint32_t) (w4 >= 1);
-  params->neon.mask[2] = -(uint32_t) (w4 >= 2);
-  params->neon.mask[3] = -(uint32_t) (w4 >= 3);
+  params->neon_stride1.mask[0] = UINT32_C(0xFFFFFFFF);
+  params->neon_stride1.mask[1] = -(uint32_t) (w4 >= 1);
+  params->neon_stride1.mask[2] = -(uint32_t) (w4 >= 2);
+  params->neon_stride1.mask[3] = -(uint32_t) (w4 >= 3);
+
+  return sizeof(params->neon_stride1);
+}
+
+size_t xnn_init_f32_chw_neon_stride2_params(
+  union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
+  uint32_t width,
+  float output_min,
+  float output_max)
+{
+  params->neon_stride2.min = output_min;
+  params->neon_stride2.max = output_max;
 
   const uint32_t w8 = (width - 1) & 7;
-  params->neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-  params->neon.mask_even[1] = -(uint32_t) (w8 >= 2);
-  params->neon.mask_even[2] = -(uint32_t) (w8 >= 4);
-  params->neon.mask_even[3] = -(uint32_t) (w8 >= 6);
-  params->neon.mask_odd[0] = -(uint32_t) (w8 >= 1);
-  params->neon.mask_odd[1] = -(uint32_t) (w8 >= 3);
-  params->neon.mask_odd[2] = -(uint32_t) (w8 >= 5);
-  params->neon.mask_odd[3] = -(uint32_t) (w8 >= 7);
-  return sizeof(params->neon);
+  params->neon_stride2.mask_even[0] = UINT32_C(0xFFFFFFFF);
+  params->neon_stride2.mask_even[1] = -(uint32_t) (w8 >= 2);
+  params->neon_stride2.mask_even[2] = -(uint32_t) (w8 >= 4);
+  params->neon_stride2.mask_even[3] = -(uint32_t) (w8 >= 6);
+  params->neon_stride2.mask_odd[0] = -(uint32_t) (w8 >= 1);
+  params->neon_stride2.mask_odd[1] = -(uint32_t) (w8 >= 3);
+  params->neon_stride2.mask_odd[2] = -(uint32_t) (w8 >= 5);
+  params->neon_stride2.mask_odd[3] = -(uint32_t) (w8 >= 7);
+
+  return sizeof(params->neon_stride2);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_chw_sse_params(
+size_t xnn_init_f32_chw_sse_stride1_params(
   union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width,
   float output_min,
   float output_max)
 {
   for (uint32_t i = 0; i < 4; i++) {
-    params->sse.min[i] = output_min;
-    params->sse.max[i] = output_max;
+    params->sse_stride1.min[i] = output_min;
+    params->sse_stride1.max[i] = output_max;
   }
 
   const uint32_t w4 = (width - 1) & 3;
-  params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
-  params->sse.mask[1] = -(uint32_t) (w4 >= 1);
-  params->sse.mask[2] = -(uint32_t) (w4 >= 2);
-  params->sse.mask[3] = -(uint32_t) (w4 >= 3);
+  params->sse_stride1.mask[0] = UINT32_C(0xFFFFFFFF);
+  params->sse_stride1.mask[1] = -(uint32_t) (w4 >= 1);
+  params->sse_stride1.mask[2] = -(uint32_t) (w4 >= 2);
+  params->sse_stride1.mask[3] = -(uint32_t) (w4 >= 3);
 
-  const uint32_t w8 = (width - 1) & 7;
-  params->sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-  params->sse.mask_even[1] = -(uint32_t) (w8 >= 2);
-  params->sse.mask_even[2] = -(uint32_t) (w8 >= 4);
-  params->sse.mask_even[3] = -(uint32_t) (w8 >= 6);
-  params->sse.mask_odd[0] = -(uint32_t) (w8 >= 1);
-  params->sse.mask_odd[1] = -(uint32_t) (w8 >= 3);
-  params->sse.mask_odd[2] = -(uint32_t) (w8 >= 5);
-  params->sse.mask_odd[3] = -(uint32_t) (w8 >= 7);
-  return sizeof(params->sse);
+  return sizeof(params->sse_stride1);
 }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_f32_chw_wasmsimd_params(
+size_t xnn_init_f32_chw_sse_stride2_params(
   union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width,
   float output_min,
   float output_max)
 {
-  params->wasmsimd.min[0] = output_min;
-  params->wasmsimd.min[1] = output_min;
-  params->wasmsimd.max[0] = output_max;
-  params->wasmsimd.max[1] = output_max;
-
-  const uint32_t w4 = (width - 1) & 3;
-  params->wasmsimd.mask[0] = UINT32_C(0xFFFFFFFF);
-  params->wasmsimd.mask[1] = -(uint32_t) (w4 >= 1);
-  params->wasmsimd.mask[2] = -(uint32_t) (w4 >= 2);
-  params->wasmsimd.mask[3] = -(uint32_t) (w4 >= 3);
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse_stride2.min[i] = output_min;
+    params->sse_stride2.max[i] = output_max;
+  }
 
   const uint32_t w8 = (width - 1) & 7;
-  params->wasmsimd.mask_even[0] = UINT32_C(0xFFFFFFFF);
-  params->wasmsimd.mask_even[1] = -(uint32_t) (w8 >= 2);
-  params->wasmsimd.mask_even[2] = -(uint32_t) (w8 >= 4);
-  params->wasmsimd.mask_even[3] = -(uint32_t) (w8 >= 6);
-  params->wasmsimd.mask_odd[0] = -(uint32_t) (w8 >= 1);
-  params->wasmsimd.mask_odd[1] = -(uint32_t) (w8 >= 3);
-  params->wasmsimd.mask_odd[2] = -(uint32_t) (w8 >= 5);
-  params->wasmsimd.mask_odd[3] = -(uint32_t) (w8 >= 7);
-  return sizeof(params->wasmsimd);
+  params->sse_stride2.mask_even[0] = UINT32_C(0xFFFFFFFF);
+  params->sse_stride2.mask_even[1] = -(uint32_t) (w8 >= 2);
+  params->sse_stride2.mask_even[2] = -(uint32_t) (w8 >= 4);
+  params->sse_stride2.mask_even[3] = -(uint32_t) (w8 >= 6);
+  params->sse_stride2.mask_odd[0] = -(uint32_t) (w8 >= 1);
+  params->sse_stride2.mask_odd[1] = -(uint32_t) (w8 >= 3);
+  params->sse_stride2.mask_odd[2] = -(uint32_t) (w8 >= 5);
+  params->sse_stride2.mask_odd[3] = -(uint32_t) (w8 >= 7);
+
+  return sizeof(params->sse_stride2);
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+size_t xnn_init_f32_chw_wasmsimd_stride1_params(
+  union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
+  uint32_t width,
+  float output_min,
+  float output_max)
+{
+  params->wasmsimd_stride1.min[0] = output_min;
+  params->wasmsimd_stride1.min[1] = output_min;
+  params->wasmsimd_stride1.max[0] = output_max;
+  params->wasmsimd_stride1.max[1] = output_max;
+
+  const uint32_t w4 = (width - 1) & 3;
+  params->wasmsimd_stride1.mask[0] = UINT32_C(0xFFFFFFFF);
+  params->wasmsimd_stride1.mask[1] = -(uint32_t) (w4 >= 1);
+  params->wasmsimd_stride1.mask[2] = -(uint32_t) (w4 >= 2);
+  params->wasmsimd_stride1.mask[3] = -(uint32_t) (w4 >= 3);
+
+  return sizeof(params->wasmsimd_stride1);
+}
+
+size_t xnn_init_f32_chw_wasmsimd_stride2_params(
+  union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
+  uint32_t width,
+  float output_min,
+  float output_max)
+{
+  params->wasmsimd_stride2.min[0] = output_min;
+  params->wasmsimd_stride2.min[1] = output_min;
+  params->wasmsimd_stride2.max[0] = output_max;
+  params->wasmsimd_stride2.max[1] = output_max;
+
+  const uint32_t w8 = (width - 1) & 7;
+  params->wasmsimd_stride2.mask_even[0] = UINT32_C(0xFFFFFFFF);
+  params->wasmsimd_stride2.mask_even[1] = -(uint32_t) (w8 >= 2);
+  params->wasmsimd_stride2.mask_even[2] = -(uint32_t) (w8 >= 4);
+  params->wasmsimd_stride2.mask_even[3] = -(uint32_t) (w8 >= 6);
+  params->wasmsimd_stride2.mask_odd[0] = -(uint32_t) (w8 >= 1);
+  params->wasmsimd_stride2.mask_odd[1] = -(uint32_t) (w8 >= 3);
+  params->wasmsimd_stride2.mask_odd[2] = -(uint32_t) (w8 >= 5);
+  params->wasmsimd_stride2.mask_odd[3] = -(uint32_t) (w8 >= 7);
+
+  return sizeof(params->wasmsimd_stride2);
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
@@ -4069,71 +4112,86 @@ void xnn_update_f16_chw_neonfp16arith_stride2_params(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-void xnn_update_f32_chw_neon_params(
+void xnn_update_f32_chw_neon_stride1_params(
   union xnn_f32_chw_params* params,
   uint32_t width)
 {
   const uint32_t w4 = (width - 1) & 3;
-  params->neon.mask[0] = UINT32_C(0xFFFFFFFF);
-  params->neon.mask[1] = -(uint32_t) (w4 >= 1);
-  params->neon.mask[2] = -(uint32_t) (w4 >= 2);
-  params->neon.mask[3] = -(uint32_t) (w4 >= 3);
+  params->neon_stride1.mask[0] = UINT32_C(0xFFFFFFFF);
+  params->neon_stride1.mask[1] = -(uint32_t) (w4 >= 1);
+  params->neon_stride1.mask[2] = -(uint32_t) (w4 >= 2);
+  params->neon_stride1.mask[3] = -(uint32_t) (w4 >= 3);
+}
 
+void xnn_update_f32_chw_neon_stride2_params(
+  union xnn_f32_chw_params* params,
+  uint32_t width)
+{
   const uint32_t w8 = (width - 1) & 7;
-  params->neon.mask_even[0] = UINT32_C(0xFFFFFFFF);
-  params->neon.mask_even[1] = -(uint32_t) (w8 >= 2);
-  params->neon.mask_even[2] = -(uint32_t) (w8 >= 4);
-  params->neon.mask_even[3] = -(uint32_t) (w8 >= 6);
-  params->neon.mask_odd[0] = -(uint32_t) (w8 >= 1);
-  params->neon.mask_odd[1] = -(uint32_t) (w8 >= 3);
-  params->neon.mask_odd[2] = -(uint32_t) (w8 >= 5);
-  params->neon.mask_odd[3] = -(uint32_t) (w8 >= 7);
+  params->neon_stride2.mask_even[0] = UINT32_C(0xFFFFFFFF);
+  params->neon_stride2.mask_even[1] = -(uint32_t) (w8 >= 2);
+  params->neon_stride2.mask_even[2] = -(uint32_t) (w8 >= 4);
+  params->neon_stride2.mask_even[3] = -(uint32_t) (w8 >= 6);
+  params->neon_stride2.mask_odd[0] = -(uint32_t) (w8 >= 1);
+  params->neon_stride2.mask_odd[1] = -(uint32_t) (w8 >= 3);
+  params->neon_stride2.mask_odd[2] = -(uint32_t) (w8 >= 5);
+  params->neon_stride2.mask_odd[3] = -(uint32_t) (w8 >= 7);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-void xnn_update_f32_chw_sse_params(
+void xnn_update_f32_chw_sse_stride1_params(
   union xnn_f32_chw_params* params,
   uint32_t width)
 {
   const uint32_t w4 = (width - 1) & 3;
-  params->sse.mask[0] = UINT32_C(0xFFFFFFFF);
-  params->sse.mask[1] = -(uint32_t) (w4 >= 1);
-  params->sse.mask[2] = -(uint32_t) (w4 >= 2);
-  params->sse.mask[3] = -(uint32_t) (w4 >= 3);
+  params->sse_stride1.mask[0] = UINT32_C(0xFFFFFFFF);
+  params->sse_stride1.mask[1] = -(uint32_t) (w4 >= 1);
+  params->sse_stride1.mask[2] = -(uint32_t) (w4 >= 2);
+  params->sse_stride1.mask[3] = -(uint32_t) (w4 >= 3);
+}
 
+void xnn_update_f32_chw_sse_stride2_params(
+  union xnn_f32_chw_params* params,
+  uint32_t width)
+{
   const uint32_t w8 = (width - 1) & 7;
-  params->sse.mask_even[0] = UINT32_C(0xFFFFFFFF);
-  params->sse.mask_even[1] = -(uint32_t) (w8 >= 2);
-  params->sse.mask_even[2] = -(uint32_t) (w8 >= 4);
-  params->sse.mask_even[3] = -(uint32_t) (w8 >= 6);
-  params->sse.mask_odd[0] = -(uint32_t) (w8 >= 1);
-  params->sse.mask_odd[1] = -(uint32_t) (w8 >= 3);
-  params->sse.mask_odd[2] = -(uint32_t) (w8 >= 5);
-  params->sse.mask_odd[3] = -(uint32_t) (w8 >= 7);
+  params->sse_stride2.mask_even[0] = UINT32_C(0xFFFFFFFF);
+  params->sse_stride2.mask_even[1] = -(uint32_t) (w8 >= 2);
+  params->sse_stride2.mask_even[2] = -(uint32_t) (w8 >= 4);
+  params->sse_stride2.mask_even[3] = -(uint32_t) (w8 >= 6);
+  params->sse_stride2.mask_odd[0] = -(uint32_t) (w8 >= 1);
+  params->sse_stride2.mask_odd[1] = -(uint32_t) (w8 >= 3);
+  params->sse_stride2.mask_odd[2] = -(uint32_t) (w8 >= 5);
+  params->sse_stride2.mask_odd[3] = -(uint32_t) (w8 >= 7);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-void xnn_update_f32_chw_wasmsimd_params(
+void xnn_update_f32_chw_wasmsimd_stride1_params(
   union xnn_f32_chw_params* params,
   uint32_t width)
 {
   const uint32_t w4 = (width - 1) & 3;
-  params->wasmsimd.mask[0] = UINT32_C(0xFFFFFFFF);
-  params->wasmsimd.mask[1] = -(uint32_t) (w4 >= 1);
-  params->wasmsimd.mask[2] = -(uint32_t) (w4 >= 2);
-  params->wasmsimd.mask[3] = -(uint32_t) (w4 >= 3);
+  params->wasmsimd_stride1.mask[0] = UINT32_C(0xFFFFFFFF);
+  params->wasmsimd_stride1.mask[1] = -(uint32_t) (w4 >= 1);
+  params->wasmsimd_stride1.mask[2] = -(uint32_t) (w4 >= 2);
+  params->wasmsimd_stride1.mask[3] = -(uint32_t) (w4 >= 3);
+}
 
+void xnn_update_f32_chw_wasmsimd_stride2_params(
+  union xnn_f32_chw_params* params,
+  uint32_t width)
+{
   const uint32_t w8 = (width - 1) & 7;
-  params->wasmsimd.mask_even[0] = UINT32_C(0xFFFFFFFF);
-  params->wasmsimd.mask_even[1] = -(uint32_t) (w8 >= 2);
-  params->wasmsimd.mask_even[2] = -(uint32_t) (w8 >= 4);
-  params->wasmsimd.mask_even[3] = -(uint32_t) (w8 >= 6);
-  params->wasmsimd.mask_odd[0] = -(uint32_t) (w8 >= 1);
-  params->wasmsimd.mask_odd[1] = -(uint32_t) (w8 >= 3);
-  params->wasmsimd.mask_odd[2] = -(uint32_t) (w8 >= 5);
-  params->wasmsimd.mask_odd[3] = -(uint32_t) (w8 >= 7);
+  params->wasmsimd_stride2.mask_even[0] = UINT32_C(0xFFFFFFFF);
+  params->wasmsimd_stride2.mask_even[1] = -(uint32_t) (w8 >= 2);
+  params->wasmsimd_stride2.mask_even[2] = -(uint32_t) (w8 >= 4);
+  params->wasmsimd_stride2.mask_even[3] = -(uint32_t) (w8 >= 6);
+  params->wasmsimd_stride2.mask_odd[0] = -(uint32_t) (w8 >= 1);
+  params->wasmsimd_stride2.mask_odd[1] = -(uint32_t) (w8 >= 3);
+  params->wasmsimd_stride2.mask_odd[2] = -(uint32_t) (w8 >= 5);
+  params->wasmsimd_stride2.mask_odd[3] = -(uint32_t) (w8 >= 7);
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 

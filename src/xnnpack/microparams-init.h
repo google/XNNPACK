@@ -670,13 +670,16 @@ DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_scalar_select_params)
 
 DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_scalar_params)
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_neon_params)
+  DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_neon_stride1_params)
+  DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_neon_stride2_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_sse_params)
+  DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_sse_stride1_params)
+  DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_sse_stride2_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_wasmsimd_params)
+  DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_wasmsimd_stride1_params)
+  DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_wasmsimd_stride2_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
@@ -697,13 +700,16 @@ DECLARE_INIT_F32_CHW_PARAMS_FUNCTION(xnn_init_f32_chw_scalar_params)
     uint32_t width);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_UPDATE_F32_CHW_PARAMS_FUNCTION(xnn_update_f32_chw_neon_params)
+  DECLARE_UPDATE_F32_CHW_PARAMS_FUNCTION(xnn_update_f32_chw_neon_stride1_params)
+  DECLARE_UPDATE_F32_CHW_PARAMS_FUNCTION(xnn_update_f32_chw_neon_stride2_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_UPDATE_F32_CHW_PARAMS_FUNCTION(xnn_update_f32_chw_sse_params)
+  DECLARE_UPDATE_F32_CHW_PARAMS_FUNCTION(xnn_update_f32_chw_sse_stride1_params)
+  DECLARE_UPDATE_F32_CHW_PARAMS_FUNCTION(xnn_update_f32_chw_sse_stride2_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_UPDATE_F32_CHW_PARAMS_FUNCTION(xnn_update_f32_chw_wasmsimd_params)
+  DECLARE_UPDATE_F32_CHW_PARAMS_FUNCTION(xnn_update_f32_chw_wasmsimd_stride1_params)
+  DECLARE_UPDATE_F32_CHW_PARAMS_FUNCTION(xnn_update_f32_chw_wasmsimd_stride2_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 

@@ -2405,28 +2405,40 @@ union xnn_f32_chw_params {
   struct {
     float min;
     float max;
-    XNN_ALIGN(16) uint32_t mask_even[4]; // used by stride 2 kernels
-    XNN_ALIGN(16) uint32_t mask_odd[4];  // used by stride 2 kernels
-    XNN_ALIGN(16) uint32_t mask[4]; // used by stride 1 kernels
-  } neon;
+    XNN_ALIGN(8) uint32_t mask[4];
+  } neon_stride1;
+  struct {
+    float min;
+    float max;
+    XNN_ALIGN(8) uint32_t mask_even[4];
+    XNN_ALIGN(8) uint32_t mask_odd[4];
+  } neon_stride2;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float min[4];
     XNN_ALIGN(16) float max[4];
-    XNN_ALIGN(16) uint32_t mask_even[4]; // used by stride 2 kernels
-    XNN_ALIGN(16) uint32_t mask_odd[4];  // used by stride 2 kernels
-    XNN_ALIGN(16) uint32_t mask[4]; // used by stride 1 kernels
-  } sse;
+    XNN_ALIGN(16) uint32_t mask[4];
+  } sse_stride1;
+  struct {
+    XNN_ALIGN(16) float min[4];
+    XNN_ALIGN(16) float max[4];
+    XNN_ALIGN(16) uint32_t mask_even[4];
+    XNN_ALIGN(16) uint32_t mask_odd[4];
+  } sse_stride2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {
     XNN_ALIGN(8) float min[2];
     XNN_ALIGN(8) float max[2];
-    XNN_ALIGN(16) uint32_t mask_even[4]; // used by stride 2 kernels
-    XNN_ALIGN(16) uint32_t mask_odd[4];  // used by stride 2 kernels
-    XNN_ALIGN(16) uint32_t mask[4]; // used by stride 1 kernels
-  } wasmsimd;
+    XNN_ALIGN(16) uint32_t mask[4];
+  } wasmsimd_stride1;
+  struct {
+    XNN_ALIGN(8) float min[2];
+    XNN_ALIGN(8) float max[2];
+    XNN_ALIGN(16) uint32_t mask_even[4];
+    XNN_ALIGN(16) uint32_t mask_odd[4];
+  } wasmsimd_stride2;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
