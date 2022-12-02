@@ -62,14 +62,14 @@ class DWConvMicrokernelTester {
     return this->channels_;
   }
 
-  inline DWConvMicrokernelTester& cr(uint32_t cr) {
-    assert(cr != 0);
-    this->cr_ = cr;
+  inline DWConvMicrokernelTester& channel_tile(uint32_t channel_tile) {
+    assert(channel_tile != 0);
+    this->channel_tile_ = channel_tile;
     return *this;
   }
 
-  inline uint32_t cr() const {
-    return this->cr_;
+  inline uint32_t channel_tile() const {
+    return this->channel_tile_;
   }
 
   inline DWConvMicrokernelTester& channel_subtile(uint32_t channel_subtile) {
@@ -82,18 +82,28 @@ class DWConvMicrokernelTester {
     return this->channel_subtile_;
   }
 
-  inline DWConvMicrokernelTester& kr(uint32_t kr) {
-    assert(kr != 0);
-    this->kr_ = kr;
+  inline DWConvMicrokernelTester& kernel_tile(uint32_t kernel_tile) {
+    assert(kernel_tile != 0);
+    this->kernel_tile_ = kernel_tile;
     return *this;
   }
 
-  inline uint32_t kr() const {
-    return this->kr_;
+  inline uint32_t kernel_tile() const {
+    return this->kernel_tile_;
+  }
+
+  inline DWConvMicrokernelTester& kernel_size(uint32_t kernel_size) {
+    assert(kernel_size != 0);
+    this->kernel_size_ = kernel_size;
+    return *this;
+  }
+
+  inline uint32_t kernel_size() const {
+    return this->kernel_size_;
   }
 
   inline uint32_t packed_channels() const {
-    return (channels() / cr() + !!(channels() % cr())) * cr();
+    return (channels() / channel_tile() + !!(channels() % channel_tile())) * channel_tile();
   }
 
   inline DWConvMicrokernelTester& output_stride(uint32_t output_stride) {
@@ -212,11 +222,11 @@ class DWConvMicrokernelTester {
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<const uint8_t*> indirection((width() - 1) * step() + kr());
+    std::vector<const uint8_t*> indirection((width() - 1) * step() + kernel_tile());
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + indirection.size() * channels());
-    std::vector<uint8_t> kernel(channels() * kr());
+    std::vector<uint8_t> kernel(channels() * kernel_tile());
     std::vector<int32_t> bias(channels());
-    std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_weights((kr() + sizeof(int32_t) / sizeof(uint8_t)) * packed_channels());
+    std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_weights((kernel_tile() + sizeof(int32_t) / sizeof(uint8_t)) * packed_channels());
     std::vector<uint8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     std::vector<uint8_t> output((width() - 1) * output_stride() + channels());
     std::vector<int32_t> accumulators(width() * channels());
@@ -236,7 +246,7 @@ class DWConvMicrokernelTester {
       std::fill(packed_weights.begin(), packed_weights.end(), kernel_zero_point());
       const xnn_qu8_packing_params packing_params = { input_zero_point(), kernel_zero_point() };
       xnn_pack_qu8_dwconv_ghw_w(
-        kr(), kr(), 1, channels(), cr(),
+        kernel_tile(), kernel_tile(), 1, channels(), channel_tile(),
         kernel.data(), bias.data(), packed_weights.data(),
         0 /* extra bytes */, &packing_params);
       for (size_t i = 0; i < indirection.size(); i++) {
@@ -244,7 +254,7 @@ class DWConvMicrokernelTester {
       }
       std::shuffle(indirection.begin(), indirection.end(), rng);
       if (zero_index() != SIZE_MAX) {
-        for (size_t i = 0; i < indirection.size(); i += kr()) {
+        for (size_t i = 0; i < indirection.size(); i += kernel_tile()) {
           indirection[i + zero_index()] = zero.data();
         }
       }
@@ -253,11 +263,11 @@ class DWConvMicrokernelTester {
       for (size_t x = 0; x < width(); x++) {
         for (size_t c = 0; c < channels(); c++) {
           float acc = bias[c];
-          for (size_t k = 0; k < kr(); k++) {
+          for (size_t k = 0; k < kernel_tile(); k++) {
             if (indirection[x * step() + k] != zero.data()) {
               acc +=
                 (int32_t(indirection[x * step() + k][c + input_offset()]) - int32_t(input_zero_point())) *
-                (int32_t(kernel[c * kr() + k]) - int32_t(kernel_zero_point()));
+                (int32_t(kernel[c * kernel_tile() + k]) - int32_t(kernel_zero_point()));
             }
           }
           accumulators[x * channels() + c] = acc;
@@ -323,11 +333,11 @@ class DWConvMicrokernelTester {
     std::uniform_int_distribution<int32_t> w8dist(
       -std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max());
 
-    std::vector<const int8_t*> indirection((width() - 1) * step() + kr());
+    std::vector<const int8_t*> indirection((width() - 1) * step() + kernel_tile());
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + indirection.size() * channels());
-    std::vector<int8_t> kernel(channels() * kr());
+    std::vector<int8_t> kernel(channels() * kernel_tile());
     std::vector<int32_t> bias(channels());
-    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_weights((kr() + (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t)) * packed_channels());
+    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_weights((kernel_tile() + (sizeof(int32_t) + sizeof(float)) / sizeof(int8_t)) * packed_channels());
     std::vector<int8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
     std::vector<int8_t> output((width() - 1) * output_stride() + channels());
     std::vector<int32_t> accumulators(width() * channels());
@@ -348,15 +358,15 @@ class DWConvMicrokernelTester {
       std::fill(packed_weights.begin(), packed_weights.end(), 0);
       const xnn_qs8_packing_params packing_params = { int8_t(input_zero_point() - 0x80) };
       xnn_pack_qs8_dwconv_ghw_w(
-        kr(), kr(), 1, channels(), cr(),
-        kernel.data(), bias.data(), packed_weights.data(), cr() * sizeof(float),
+        kernel_tile(), kernel_tile(), 1, channels(), channel_tile(),
+        kernel.data(), bias.data(), packed_weights.data(), channel_tile() * sizeof(float),
         &packing_params);
       for (size_t i = 0; i < indirection.size(); i++) {
         indirection[i] = input.data() + i * channels() - input_offset();
       }
       std::shuffle(indirection.begin(), indirection.end(), rng);
       if (zero_index() != SIZE_MAX) {
-        for (size_t i = 0; i < indirection.size(); i += kr()) {
+        for (size_t i = 0; i < indirection.size(); i += kernel_tile()) {
           indirection[i + zero_index()] = zero.data();
         }
       }
@@ -365,11 +375,11 @@ class DWConvMicrokernelTester {
       for (size_t x = 0; x < width(); x++) {
         for (size_t c = 0; c < channels(); c++) {
           float acc = bias[c];
-          for (size_t k = 0; k < kr(); k++) {
+          for (size_t k = 0; k < kernel_tile(); k++) {
             if (indirection[x * step() + k] != zero.data()) {
               acc +=
                 (int32_t(indirection[x * step() + k][c + input_offset()]) - int32_t(input_zero_point() - 0x80)) *
-                int32_t(kernel[c * kr() + k]);
+                int32_t(kernel[c * kernel_tile() + k]);
             }
           }
           accumulators[x * channels() + c] = acc;
@@ -390,9 +400,9 @@ class DWConvMicrokernelTester {
         scale[c] = 1.0f / output_scale;
       }
       xnn_init_qc8_scale_fp32_params(
-        channels(), cr(),
-        cr() * (kr() * sizeof(int8_t) + sizeof(int32_t) + sizeof(float)), scale.data(),
-        (void*) ((uintptr_t) packed_weights.data() + cr() * (kr() * sizeof(int8_t) + sizeof(int32_t))));
+        channels(), channel_tile(),
+        channel_tile() * (kernel_tile() * sizeof(int8_t) + sizeof(int32_t) + sizeof(float)), scale.data(),
+        (void*) ((uintptr_t) packed_weights.data() + channel_tile() * (kernel_tile() * sizeof(int8_t) + sizeof(int32_t))));
 
       // Prepare parameters.
       union xnn_qc8_conv_minmax_params minmax_params;
@@ -443,11 +453,11 @@ class DWConvMicrokernelTester {
     std::uniform_int_distribution<int32_t> w8dist(
       -std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max());
 
-    std::vector<const int8_t*> indirection((width() - 1) * step() + kr());
+    std::vector<const int8_t*> indirection((width() - 1) * step() + kernel_tile());
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + indirection.size() * channels());
-    std::vector<int8_t> kernel(channels() * kr());
+    std::vector<int8_t> kernel(channels() * kernel_tile());
     std::vector<int32_t> bias(channels());
-    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_weights((kr() + sizeof(int32_t) / sizeof(int8_t)) * packed_channels());
+    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_weights((kernel_tile() + sizeof(int32_t) / sizeof(int8_t)) * packed_channels());
     std::vector<int8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
     std::vector<int8_t> output((width() - 1) * output_stride() + channels());
     std::vector<int32_t> accumulators(width() * channels());
@@ -467,7 +477,7 @@ class DWConvMicrokernelTester {
       std::fill(packed_weights.begin(), packed_weights.end(), 0);
       const xnn_qs8_packing_params packing_params = { int8_t(input_zero_point() - 0x80) };
       xnn_pack_qs8_dwconv_ghw_w(
-        kr(), kr(), 1, channels(), cr(),
+        kernel_tile(), kernel_tile(), 1, channels(), channel_tile(),
         kernel.data(), bias.data(), packed_weights.data(),
         0 /* extra bytes */, &packing_params);
       for (size_t i = 0; i < indirection.size(); i++) {
@@ -475,7 +485,7 @@ class DWConvMicrokernelTester {
       }
       std::shuffle(indirection.begin(), indirection.end(), rng);
       if (zero_index() != SIZE_MAX) {
-        for (size_t i = 0; i < indirection.size(); i += kr()) {
+        for (size_t i = 0; i < indirection.size(); i += kernel_tile()) {
           indirection[i + zero_index()] = zero.data();
         }
       }
@@ -484,11 +494,11 @@ class DWConvMicrokernelTester {
       for (size_t x = 0; x < width(); x++) {
         for (size_t c = 0; c < channels(); c++) {
           float acc = bias[c];
-          for (size_t k = 0; k < kr(); k++) {
+          for (size_t k = 0; k < kernel_tile(); k++) {
             if (indirection[x * step() + k] != zero.data()) {
               acc +=
                 (int32_t(indirection[x * step() + k][c + input_offset()]) - int32_t(input_zero_point() - 0x80)) *
-                int32_t(kernel[c * kr() + k]);
+                int32_t(kernel[c * kernel_tile() + k]);
             }
           }
           accumulators[x * channels() + c] = acc;
@@ -546,11 +556,11 @@ class DWConvMicrokernelTester {
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<const uint16_t*> indirection((width() - 1) * step() + kr());
+    std::vector<const uint16_t*> indirection((width() - 1) * step() + kernel_tile());
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + indirection.size() * channels());
-    std::vector<uint16_t> kernel(channels() * kr());
+    std::vector<uint16_t> kernel(channels() * kernel_tile());
     std::vector<uint16_t> bias(channels());
-    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_weights((kr() + 1) * packed_channels());
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_weights((kernel_tile() + 1) * packed_channels());
     std::vector<uint16_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> output((width() - 1) * output_stride() + channels());
     std::vector<float> output_ref(width() * channels());
@@ -565,7 +575,7 @@ class DWConvMicrokernelTester {
 
       std::fill(packed_weights.begin(), packed_weights.end(), 0);
       xnn_pack_f16_dwconv_ghw_w(
-        kr(), kr(), 1, channels(), cr(),
+        kernel_tile(), kernel_tile(), 1, channels(), channel_tile(),
         kernel.data(), bias.data(), packed_weights.data(),
         0 /* extra bytes */, nullptr);
       for (size_t i = 0; i < indirection.size(); i++) {
@@ -573,7 +583,7 @@ class DWConvMicrokernelTester {
       }
       std::shuffle(indirection.begin(), indirection.end(), rng);
       if (zero_index() != SIZE_MAX) {
-        for (size_t i = 0; i < indirection.size(); i += kr()) {
+        for (size_t i = 0; i < indirection.size(); i += kernel_tile()) {
           indirection[i + zero_index()] = zero.data();
         }
       }
@@ -582,9 +592,9 @@ class DWConvMicrokernelTester {
       for (size_t x = 0; x < width(); x++) {
         for (size_t c = 0; c < channels(); c++) {
           float acc = fp16_ieee_to_fp32_value(bias[c]);
-          for (size_t k = 0; k < kr(); k++) {
+          for (size_t k = 0; k < kernel_tile(); k++) {
             if (indirection[x * step() + k] != zero.data()) {
-              acc += fp16_ieee_to_fp32_value(indirection[x * step() + k][c + input_offset()]) * fp16_ieee_to_fp32_value(kernel[c * kr() + k]);
+              acc += fp16_ieee_to_fp32_value(indirection[x * step() + k][c + input_offset()]) * fp16_ieee_to_fp32_value(kernel[c * kernel_tile() + k]);
             }
           }
           output_ref[x * channels() + c] = acc;
@@ -637,11 +647,11 @@ class DWConvMicrokernelTester {
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<const float*> indirection((width() - 1) * step() + kr());
+    std::vector<const float*> indirection((width() - 1) * step() + kernel_tile());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
-    std::vector<float> kernel(channels() * kr());
+    std::vector<float> kernel(channels() * kernel_tile());
     std::vector<float> bias(channels());
-    std::vector<float, AlignedAllocator<float, 64>> packed_weights((kr() + 1) * packed_channels());
+    std::vector<float, AlignedAllocator<float, 64>> packed_weights((kernel_tile() + 1) * packed_channels());
     std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> output((width() - 1) * output_stride() + channels());
     std::vector<float> output_ref(width() * channels());
@@ -656,7 +666,7 @@ class DWConvMicrokernelTester {
 
       std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
       xnn_pack_f32_dwconv_ghw_w(
-        kr(), kr(), 1, channels(), cr(),
+        kernel_tile(), kernel_tile(), 1, channels(), channel_tile(),
         kernel.data(), bias.data(), packed_weights.data(),
         0 /* extra bytes */, nullptr);
       for (size_t i = 0; i < indirection.size(); i++) {
@@ -664,7 +674,7 @@ class DWConvMicrokernelTester {
       }
       std::shuffle(indirection.begin(), indirection.end(), rng);
       if (zero_index() != SIZE_MAX) {
-        for (size_t i = 0; i < indirection.size(); i += kr()) {
+        for (size_t i = 0; i < indirection.size(); i += kernel_tile()) {
           indirection[i + zero_index()] = zero.data();
         }
       }
@@ -673,9 +683,9 @@ class DWConvMicrokernelTester {
       for (size_t x = 0; x < width(); x++) {
         for (size_t c = 0; c < channels(); c++) {
           float acc = bias[c];
-          for (size_t k = 0; k < kr(); k++) {
+          for (size_t k = 0; k < kernel_tile(); k++) {
             if (indirection[x * step() + k] != zero.data()) {
-              acc += indirection[x * step() + k][c + input_offset()] * kernel[c * kr() + k];
+              acc += indirection[x * step() + k][c + input_offset()] * kernel[c * kernel_tile() + k];
             }
           }
           output_ref[x * channels() + c] = acc;
@@ -709,11 +719,11 @@ class DWConvMicrokernelTester {
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<const float*> indirection((width() - 1) * step() + kr());
+    std::vector<const float*> indirection((width() - 1) * step() + kernel_tile());
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
-    std::vector<float> kernel(channels() * kr());
+    std::vector<float> kernel(channels() * kernel_tile());
     std::vector<float> bias(channels());
-    std::vector<float, AlignedAllocator<float, 64>> packed_weights((kr() + 1) * packed_channels());
+    std::vector<float, AlignedAllocator<float, 64>> packed_weights((kernel_tile() + 1) * packed_channels());
     std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> output((width() - 1) * output_stride() + channels());
     std::vector<float> output_ref(width() * channels());
@@ -728,7 +738,7 @@ class DWConvMicrokernelTester {
 
       std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
       xnn_pack_f32_dwconv_ghw_w(
-        kr(), kr(), 1, channels(), cr(),
+        kernel_tile(), kernel_tile(), 1, channels(), channel_tile(),
         kernel.data(), bias.data(), packed_weights.data(),
         0 /* extra bytes */, nullptr);
       for (size_t i = 0; i < indirection.size(); i++) {
@@ -736,7 +746,7 @@ class DWConvMicrokernelTester {
       }
       std::shuffle(indirection.begin(), indirection.end(), rng);
       if (zero_index() != SIZE_MAX) {
-        for (size_t i = 0; i < indirection.size(); i += kr()) {
+        for (size_t i = 0; i < indirection.size(); i += kernel_tile()) {
           indirection[i + zero_index()] = zero.data();
         }
       }
@@ -745,9 +755,9 @@ class DWConvMicrokernelTester {
       for (size_t x = 0; x < width(); x++) {
         for (size_t c = 0; c < channels(); c++) {
           float acc = bias[c];
-          for (size_t k = 0; k < kr(); k++) {
+          for (size_t k = 0; k < kernel_tile(); k++) {
             if (indirection[x * step() + k] != zero.data()) {
-              acc += indirection[x * step() + k][c + input_offset()] * kernel[c * kr() + k];
+              acc += indirection[x * step() + k][c + input_offset()] * kernel[c * kernel_tile() + k];
             }
           }
           output_ref[x * channels() + c] = acc;
@@ -801,14 +811,14 @@ class DWConvMicrokernelTester {
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
 
-    const size_t tile_size = xnn_multipass_dwconv_tile_size(kr(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
+    const size_t tile_size = xnn_multipass_dwconv_tile_size(kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
     std::vector<const float*> indirection((width() - 1) * step() + tile_size);
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
     std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_EXTRA_BYTES / sizeof(float) + channels());
-    std::vector<float> kernel(channels() * kr());
+    std::vector<float> kernel(channels() * kernel_size());
     std::vector<float> bias(channels());
     std::vector<float, AlignedAllocator<float, 64>> packed_weights(
-      xnn_multipass_dwconv_weights_count(tile_size, channels(), cr(), channel_subtile()));
+      xnn_multipass_dwconv_weights_count(tile_size, channels(), channel_tile(), channel_subtile()));
     std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> output((width() - 1) * output_stride() + channels());
     std::vector<float> output_ref(width() * channels());
@@ -824,7 +834,7 @@ class DWConvMicrokernelTester {
       std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
       xnn_pack_f32_multipass_dwconv_ghw_w(
         first_pass_tile(), middle_pass_tile(), last_pass_tile(),
-        kr(), 1, channels(), cr(), channel_subtile(),
+        kernel_size(), 1, channels(), channel_tile(), channel_subtile(),
         kernel.data(), bias.data(), packed_weights.data(),
         0 /* extra bytes */, nullptr);
       for (size_t i = 0; i < indirection.size(); i++) {
@@ -832,7 +842,7 @@ class DWConvMicrokernelTester {
       }
       std::shuffle(indirection.begin(), indirection.end(), rng);
       if (zero_index() != SIZE_MAX) {
-        for (size_t i = 0; i < indirection.size(); i += kr()) {
+        for (size_t i = 0; i < indirection.size(); i += kernel_size()) {
           indirection[i + zero_index()] = zero.data();
         }
       }
@@ -841,9 +851,9 @@ class DWConvMicrokernelTester {
       for (size_t x = 0; x < width(); x++) {
         for (size_t c = 0; c < channels(); c++) {
           float acc = bias[c];
-          for (size_t k = 0; k < kr(); k++) {
+          for (size_t k = 0; k < kernel_size(); k++) {
             if (indirection[x * step() + k] != zero.data()) {
-              acc += indirection[x * step() + k][c + input_offset()] * kernel[c * kr() + k];
+              acc += indirection[x * step() + k][c + input_offset()] * kernel[c * kernel_size() + k];
             }
           }
           output_ref[x * channels() + c] = acc;
@@ -878,7 +888,7 @@ class DWConvMicrokernelTester {
         input_stride_elements * sizeof(void*),
         (output_stride() - channels()) * sizeof(float),
         input_offset() * sizeof(float), zero.data(),
-        kr(),
+        kernel_size(),
         buffer.data(),
         &params);
 
@@ -894,7 +904,10 @@ class DWConvMicrokernelTester {
               output[x * output_stride() + c],
               std::abs(output_ref[x * channels() + c]) * 1.0e-5)
             << "x = " << x << ", channel = " << c << " channels = " << channels()
-            << " kr = " << kr();
+            << " kernel_size = " << kernel_size()
+            << " first_pass_tile = " << first_pass_tile()
+            << " middle_pass_tile = " << middle_pass_tile()
+            << " last_pass_tile = " << last_pass_tile();
         }
       }
     }
@@ -902,9 +915,10 @@ class DWConvMicrokernelTester {
 
  private:
   uint32_t channels_{1};
-  uint32_t cr_{1};
+  uint32_t channel_tile_{1};
   uint32_t channel_subtile_{1};
-  uint32_t kr_{1};
+  uint32_t kernel_tile_{1};
+  uint32_t kernel_size_{1};
   uint32_t width_{1};
   uint32_t step_{1};
   uint32_t output_stride_{0};

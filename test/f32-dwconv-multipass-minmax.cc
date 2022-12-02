@@ -24,9 +24,9 @@
       .first_pass_tile(2)
       .middle_pass_tile(2)
       .last_pass_tile(2)
-      .cr(4)
+      .channel_tile(4)
       .channel_subtile(4)
-      .kr(3)
+      .kernel_size(3)
       .channels(4)
       .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
   }
@@ -37,23 +37,23 @@
       .first_pass_tile(2)
       .middle_pass_tile(2)
       .last_pass_tile(2)
-      .cr(4)
+      .channel_tile(4)
       .channel_subtile(4)
-      .kr(4)
+      .kernel_size(4)
       .channels(4)
       .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
   }
 
   TEST(F32_DWCONV_MINMAX_2F2M2L4C__SSE, c_eq_4_multipass) {
-    for (uint32_t kr = 6; kr < 8; kr++) {
+    for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
       TEST_REQUIRES_X86_SSE;
       DWConvMicrokernelTester()
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(kr)
+        .kernel_size(kernel_size)
         .channels(4)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -66,9 +66,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -81,9 +81,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -92,14 +92,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L4C__SSE, c_div_4_multipass) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 8; channels < 64; channels += 12) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(4)
+          .channel_tile(4)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
       }
@@ -113,9 +113,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .qmin(128)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
@@ -129,9 +129,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .qmax(128)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
@@ -145,9 +145,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -160,9 +160,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -171,14 +171,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L4C__SSE, c_gt_4_multipass) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 5; channels < 8; channels++) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(4)
+          .channel_tile(4)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
       }
@@ -192,9 +192,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .width(3)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
@@ -208,9 +208,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .width(3)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
@@ -219,15 +219,15 @@
 
   TEST(F32_DWCONV_MINMAX_2F2M2L4C__SSE, c_eq_4_multipass_multipixel) {
     for (size_t channels = 1; channels <= 20; channels += 3) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         TEST_REQUIRES_X86_SSE;
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(4)
+          .channel_tile(4)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .width(3)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
@@ -238,15 +238,15 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L4C__SSE, multipixel_with_step) {
     TEST_REQUIRES_X86_SSE;
     for (size_t channels = 1; channels <= 20; channels += 3) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         for (size_t step = 2; step <= 2; step++) {
           DWConvMicrokernelTester()
             .first_pass_tile(2)
             .middle_pass_tile(2)
             .last_pass_tile(2)
-            .cr(4)
+            .channel_tile(4)
             .channel_subtile(4)
-            .kr(kr)
+            .kernel_size(kernel_size)
             .channels(channels)
             .width(3)
             .step(step)
@@ -259,14 +259,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L4C__SSE, multipixel_with_output_stride) {
     TEST_REQUIRES_X86_SSE;
     for (size_t channels = 1; channels <= 20; channels += 3) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(4)
+          .channel_tile(4)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .width(5)
           .output_stride(23)
@@ -278,14 +278,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L4C__SSE, input_offset) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 8; channels < 64; channels += 12) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(4)
+          .channel_tile(4)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .input_offset(112)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse, xnn_init_f32_minmax_sse_params);
@@ -302,9 +302,9 @@
       .first_pass_tile(2)
       .middle_pass_tile(2)
       .last_pass_tile(2)
-      .cr(4)
+      .channel_tile(4)
       .channel_subtile(4)
-      .kr(3)
+      .kernel_size(3)
       .channels(4)
       .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
   }
@@ -315,23 +315,23 @@
       .first_pass_tile(2)
       .middle_pass_tile(2)
       .last_pass_tile(2)
-      .cr(4)
+      .channel_tile(4)
       .channel_subtile(4)
-      .kr(4)
+      .kernel_size(4)
       .channels(4)
       .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
   }
 
   TEST(F32_DWCONV_MINMAX_2F2M2L4C__SSE_ACC2, c_eq_4_multipass) {
-    for (uint32_t kr = 6; kr < 8; kr++) {
+    for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
       TEST_REQUIRES_X86_SSE;
       DWConvMicrokernelTester()
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(kr)
+        .kernel_size(kernel_size)
         .channels(4)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -344,9 +344,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -359,9 +359,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -370,14 +370,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L4C__SSE_ACC2, c_div_4_multipass) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 8; channels < 64; channels += 12) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(4)
+          .channel_tile(4)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
       }
@@ -391,9 +391,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .qmin(128)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -407,9 +407,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .qmax(128)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -423,9 +423,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -438,9 +438,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -449,14 +449,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L4C__SSE_ACC2, c_gt_4_multipass) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 5; channels < 8; channels++) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(4)
+          .channel_tile(4)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
       }
@@ -470,9 +470,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .width(3)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -486,9 +486,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(4)
+        .channel_tile(4)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .width(3)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -497,15 +497,15 @@
 
   TEST(F32_DWCONV_MINMAX_2F2M2L4C__SSE_ACC2, c_eq_4_multipass_multipixel) {
     for (size_t channels = 1; channels <= 20; channels += 3) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         TEST_REQUIRES_X86_SSE;
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(4)
+          .channel_tile(4)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .width(3)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -516,15 +516,15 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L4C__SSE_ACC2, multipixel_with_step) {
     TEST_REQUIRES_X86_SSE;
     for (size_t channels = 1; channels <= 20; channels += 3) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         for (size_t step = 2; step <= 2; step++) {
           DWConvMicrokernelTester()
             .first_pass_tile(2)
             .middle_pass_tile(2)
             .last_pass_tile(2)
-            .cr(4)
+            .channel_tile(4)
             .channel_subtile(4)
-            .kr(kr)
+            .kernel_size(kernel_size)
             .channels(channels)
             .width(3)
             .step(step)
@@ -537,14 +537,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L4C__SSE_ACC2, multipixel_with_output_stride) {
     TEST_REQUIRES_X86_SSE;
     for (size_t channels = 1; channels <= 20; channels += 3) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(4)
+          .channel_tile(4)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .width(5)
           .output_stride(23)
@@ -556,14 +556,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L4C__SSE_ACC2, input_offset) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 8; channels < 64; channels += 12) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(4)
+          .channel_tile(4)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .input_offset(112)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -580,9 +580,9 @@
       .first_pass_tile(2)
       .middle_pass_tile(2)
       .last_pass_tile(2)
-      .cr(8)
+      .channel_tile(8)
       .channel_subtile(4)
-      .kr(3)
+      .kernel_size(3)
       .channels(8)
       .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
   }
@@ -593,23 +593,23 @@
       .first_pass_tile(2)
       .middle_pass_tile(2)
       .last_pass_tile(2)
-      .cr(8)
+      .channel_tile(8)
       .channel_subtile(4)
-      .kr(4)
+      .kernel_size(4)
       .channels(8)
       .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
   }
 
   TEST(F32_DWCONV_MINMAX_2F2M2L8C__SSE, c_eq_8_multipass) {
-    for (uint32_t kr = 6; kr < 8; kr++) {
+    for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
       TEST_REQUIRES_X86_SSE;
       DWConvMicrokernelTester()
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(kr)
+        .kernel_size(kernel_size)
         .channels(8)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -622,9 +622,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -637,9 +637,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -648,14 +648,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L8C__SSE, c_div_8_multipass) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 16; channels < 128; channels += 24) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(8)
+          .channel_tile(8)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
       }
@@ -669,9 +669,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .qmin(128)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
@@ -685,9 +685,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .qmax(128)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
@@ -701,9 +701,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -716,9 +716,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -727,14 +727,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L8C__SSE, c_gt_8_multipass) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 9; channels < 16; channels++) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(8)
+          .channel_tile(8)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
       }
@@ -748,9 +748,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .width(3)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
@@ -764,9 +764,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .width(3)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
@@ -775,15 +775,15 @@
 
   TEST(F32_DWCONV_MINMAX_2F2M2L8C__SSE, c_eq_8_multipass_multipixel) {
     for (size_t channels = 1; channels <= 40; channels += 7) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         TEST_REQUIRES_X86_SSE;
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(8)
+          .channel_tile(8)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .width(3)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
@@ -794,15 +794,15 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L8C__SSE, multipixel_with_step) {
     TEST_REQUIRES_X86_SSE;
     for (size_t channels = 1; channels <= 40; channels += 7) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         for (size_t step = 2; step <= 2; step++) {
           DWConvMicrokernelTester()
             .first_pass_tile(2)
             .middle_pass_tile(2)
             .last_pass_tile(2)
-            .cr(8)
+            .channel_tile(8)
             .channel_subtile(4)
-            .kr(kr)
+            .kernel_size(kernel_size)
             .channels(channels)
             .width(3)
             .step(step)
@@ -815,14 +815,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L8C__SSE, multipixel_with_output_stride) {
     TEST_REQUIRES_X86_SSE;
     for (size_t channels = 1; channels <= 40; channels += 7) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(8)
+          .channel_tile(8)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .width(5)
           .output_stride(43)
@@ -834,14 +834,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L8C__SSE, input_offset) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 16; channels < 128; channels += 24) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(8)
+          .channel_tile(8)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .input_offset(176)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse, xnn_init_f32_minmax_sse_params);
@@ -858,9 +858,9 @@
       .first_pass_tile(2)
       .middle_pass_tile(2)
       .last_pass_tile(2)
-      .cr(8)
+      .channel_tile(8)
       .channel_subtile(4)
-      .kr(3)
+      .kernel_size(3)
       .channels(8)
       .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
   }
@@ -871,23 +871,23 @@
       .first_pass_tile(2)
       .middle_pass_tile(2)
       .last_pass_tile(2)
-      .cr(8)
+      .channel_tile(8)
       .channel_subtile(4)
-      .kr(4)
+      .kernel_size(4)
       .channels(8)
       .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
   }
 
   TEST(F32_DWCONV_MINMAX_2F2M2L8C__SSE_ACC2, c_eq_8_multipass) {
-    for (uint32_t kr = 6; kr < 8; kr++) {
+    for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
       TEST_REQUIRES_X86_SSE;
       DWConvMicrokernelTester()
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(kr)
+        .kernel_size(kernel_size)
         .channels(8)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -900,9 +900,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -915,9 +915,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -926,14 +926,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L8C__SSE_ACC2, c_div_8_multipass) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 16; channels < 128; channels += 24) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(8)
+          .channel_tile(8)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
       }
@@ -947,9 +947,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .qmin(128)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -963,9 +963,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .qmax(128)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -979,9 +979,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -994,9 +994,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -1005,14 +1005,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L8C__SSE_ACC2, c_gt_8_multipass) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 9; channels < 16; channels++) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(8)
+          .channel_tile(8)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
       }
@@ -1026,9 +1026,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .width(3)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -1042,9 +1042,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(8)
+        .channel_tile(8)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .width(3)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -1053,15 +1053,15 @@
 
   TEST(F32_DWCONV_MINMAX_2F2M2L8C__SSE_ACC2, c_eq_8_multipass_multipixel) {
     for (size_t channels = 1; channels <= 40; channels += 7) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         TEST_REQUIRES_X86_SSE;
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(8)
+          .channel_tile(8)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .width(3)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -1072,15 +1072,15 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L8C__SSE_ACC2, multipixel_with_step) {
     TEST_REQUIRES_X86_SSE;
     for (size_t channels = 1; channels <= 40; channels += 7) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         for (size_t step = 2; step <= 2; step++) {
           DWConvMicrokernelTester()
             .first_pass_tile(2)
             .middle_pass_tile(2)
             .last_pass_tile(2)
-            .cr(8)
+            .channel_tile(8)
             .channel_subtile(4)
-            .kr(kr)
+            .kernel_size(kernel_size)
             .channels(channels)
             .width(3)
             .step(step)
@@ -1093,14 +1093,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L8C__SSE_ACC2, multipixel_with_output_stride) {
     TEST_REQUIRES_X86_SSE;
     for (size_t channels = 1; channels <= 40; channels += 7) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(8)
+          .channel_tile(8)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .width(5)
           .output_stride(43)
@@ -1112,14 +1112,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L8C__SSE_ACC2, input_offset) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 16; channels < 128; channels += 24) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(8)
+          .channel_tile(8)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .input_offset(176)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -1136,9 +1136,9 @@
       .first_pass_tile(2)
       .middle_pass_tile(2)
       .last_pass_tile(2)
-      .cr(16)
+      .channel_tile(16)
       .channel_subtile(4)
-      .kr(3)
+      .kernel_size(3)
       .channels(16)
       .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
   }
@@ -1149,23 +1149,23 @@
       .first_pass_tile(2)
       .middle_pass_tile(2)
       .last_pass_tile(2)
-      .cr(16)
+      .channel_tile(16)
       .channel_subtile(4)
-      .kr(4)
+      .kernel_size(4)
       .channels(16)
       .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
   }
 
   TEST(F32_DWCONV_MINMAX_2F2M2L16C__SSE, c_eq_16_multipass) {
-    for (uint32_t kr = 6; kr < 8; kr++) {
+    for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
       TEST_REQUIRES_X86_SSE;
       DWConvMicrokernelTester()
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(kr)
+        .kernel_size(kernel_size)
         .channels(16)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -1178,9 +1178,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -1193,9 +1193,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -1204,14 +1204,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L16C__SSE, c_div_16_multipass) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(16)
+          .channel_tile(16)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
       }
@@ -1225,9 +1225,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .qmin(128)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
@@ -1241,9 +1241,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .qmax(128)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
@@ -1257,9 +1257,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -1272,9 +1272,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
     }
@@ -1283,14 +1283,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L16C__SSE, c_gt_16_multipass) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 17; channels < 32; channels++) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(16)
+          .channel_tile(16)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
       }
@@ -1304,9 +1304,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .width(3)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
@@ -1320,9 +1320,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .width(3)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
@@ -1331,15 +1331,15 @@
 
   TEST(F32_DWCONV_MINMAX_2F2M2L16C__SSE, c_eq_16_multipass_multipixel) {
     for (size_t channels = 1; channels <= 80; channels += 15) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         TEST_REQUIRES_X86_SSE;
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(16)
+          .channel_tile(16)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .width(3)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
@@ -1350,15 +1350,15 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L16C__SSE, multipixel_with_step) {
     TEST_REQUIRES_X86_SSE;
     for (size_t channels = 1; channels <= 80; channels += 15) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         for (size_t step = 2; step <= 2; step++) {
           DWConvMicrokernelTester()
             .first_pass_tile(2)
             .middle_pass_tile(2)
             .last_pass_tile(2)
-            .cr(16)
+            .channel_tile(16)
             .channel_subtile(4)
-            .kr(kr)
+            .kernel_size(kernel_size)
             .channels(channels)
             .width(3)
             .step(step)
@@ -1371,14 +1371,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L16C__SSE, multipixel_with_output_stride) {
     TEST_REQUIRES_X86_SSE;
     for (size_t channels = 1; channels <= 80; channels += 15) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(16)
+          .channel_tile(16)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .width(5)
           .output_stride(83)
@@ -1390,14 +1390,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L16C__SSE, input_offset) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(16)
+          .channel_tile(16)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .input_offset(304)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse, xnn_init_f32_minmax_sse_params);
@@ -1414,9 +1414,9 @@
       .first_pass_tile(2)
       .middle_pass_tile(2)
       .last_pass_tile(2)
-      .cr(16)
+      .channel_tile(16)
       .channel_subtile(4)
-      .kr(3)
+      .kernel_size(3)
       .channels(16)
       .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);
   }
@@ -1427,23 +1427,23 @@
       .first_pass_tile(2)
       .middle_pass_tile(2)
       .last_pass_tile(2)
-      .cr(16)
+      .channel_tile(16)
       .channel_subtile(4)
-      .kr(4)
+      .kernel_size(4)
       .channels(16)
       .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);
   }
 
   TEST(F32_DWCONV_MINMAX_2F2M2L16C__SSE_ACC2, c_eq_16_multipass) {
-    for (uint32_t kr = 6; kr < 8; kr++) {
+    for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
       TEST_REQUIRES_X86_SSE;
       DWConvMicrokernelTester()
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(kr)
+        .kernel_size(kernel_size)
         .channels(16)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -1456,9 +1456,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -1471,9 +1471,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -1482,14 +1482,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L16C__SSE_ACC2, c_div_16_multipass) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(16)
+          .channel_tile(16)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);
       }
@@ -1503,9 +1503,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .qmin(128)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -1519,9 +1519,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .qmax(128)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -1535,9 +1535,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -1550,9 +1550,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);
     }
@@ -1561,14 +1561,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L16C__SSE_ACC2, c_gt_16_multipass) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 17; channels < 32; channels++) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(16)
+          .channel_tile(16)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);
       }
@@ -1582,9 +1582,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(3)
+        .kernel_size(3)
         .channels(channels)
         .width(3)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -1598,9 +1598,9 @@
         .first_pass_tile(2)
         .middle_pass_tile(2)
         .last_pass_tile(2)
-        .cr(16)
+        .channel_tile(16)
         .channel_subtile(4)
-        .kr(4)
+        .kernel_size(4)
         .channels(channels)
         .width(3)
         .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -1609,15 +1609,15 @@
 
   TEST(F32_DWCONV_MINMAX_2F2M2L16C__SSE_ACC2, c_eq_16_multipass_multipixel) {
     for (size_t channels = 1; channels <= 80; channels += 15) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         TEST_REQUIRES_X86_SSE;
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(16)
+          .channel_tile(16)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .width(3)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);
@@ -1628,15 +1628,15 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L16C__SSE_ACC2, multipixel_with_step) {
     TEST_REQUIRES_X86_SSE;
     for (size_t channels = 1; channels <= 80; channels += 15) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         for (size_t step = 2; step <= 2; step++) {
           DWConvMicrokernelTester()
             .first_pass_tile(2)
             .middle_pass_tile(2)
             .last_pass_tile(2)
-            .cr(16)
+            .channel_tile(16)
             .channel_subtile(4)
-            .kr(kr)
+            .kernel_size(kernel_size)
             .channels(channels)
             .width(3)
             .step(step)
@@ -1649,14 +1649,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L16C__SSE_ACC2, multipixel_with_output_stride) {
     TEST_REQUIRES_X86_SSE;
     for (size_t channels = 1; channels <= 80; channels += 15) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(16)
+          .channel_tile(16)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .width(5)
           .output_stride(83)
@@ -1668,14 +1668,14 @@
   TEST(F32_DWCONV_MINMAX_2F2M2L16C__SSE_ACC2, input_offset) {
     TEST_REQUIRES_X86_SSE;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
-      for (uint32_t kr = 6; kr < 8; kr++) {
+      for (uint32_t kernel_size = 6; kernel_size < 8; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(2)
           .middle_pass_tile(2)
           .last_pass_tile(2)
-          .cr(16)
+          .channel_tile(16)
           .channel_subtile(4)
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .input_offset(304)
           .Test(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c__sse_acc2, xnn_init_f32_minmax_sse_params);

@@ -54,9 +54,9 @@ TEST(${TEST_NAME}, c_eq_${CBLOCK}_first_pass_plus_one) {
     .first_pass_tile(${FIRST_PASS_TILE})
     .middle_pass_tile(${MIDDLE_PASS_TILE})
     .last_pass_tile(${LAST_PASS_TILE})
-    .cr(${CR})
+    .channel_tile(${CR})
     .channel_subtile(${CHANNEL_SUBTILE})
-    .kr(${FIRST_PASS_TILE+1})
+    .kernel_size(${FIRST_PASS_TILE+1})
     .channels(${CBLOCK})
     .Test(${", ".join(TEST_ARGS)});
 }
@@ -68,24 +68,24 @@ TEST(${TEST_NAME}, c_eq_${CBLOCK}_first_pass_and_last_pass) {
     .first_pass_tile(${FIRST_PASS_TILE})
     .middle_pass_tile(${MIDDLE_PASS_TILE})
     .last_pass_tile(${LAST_PASS_TILE})
-    .cr(${CR})
+    .channel_tile(${CR})
     .channel_subtile(${CHANNEL_SUBTILE})
-    .kr(${FIRST_PASS_TILE+LAST_PASS_TILE})
+    .kernel_size(${FIRST_PASS_TILE+LAST_PASS_TILE})
     .channels(${CBLOCK})
     .Test(${", ".join(TEST_ARGS)});
 }
 
 TEST(${TEST_NAME}, c_eq_${CBLOCK}_multipass) {
-  for (uint32_t kr = ${FIRST_PASS_TILE+MIDDLE_PASS_TILE+LAST_PASS_TILE}; kr < ${FIRST_PASS_TILE+MIDDLE_PASS_TILE*2+LAST_PASS_TILE}; kr++) {
+  for (uint32_t kernel_size = ${FIRST_PASS_TILE+MIDDLE_PASS_TILE+LAST_PASS_TILE}; kernel_size < ${FIRST_PASS_TILE+MIDDLE_PASS_TILE*2+LAST_PASS_TILE}; kernel_size++) {
     $if ISA_CHECK:
       ${ISA_CHECK};
     DWConvMicrokernelTester()
       .first_pass_tile(${FIRST_PASS_TILE})
       .middle_pass_tile(${MIDDLE_PASS_TILE})
       .last_pass_tile(${LAST_PASS_TILE})
-      .cr(${CR})
+      .channel_tile(${CR})
       .channel_subtile(${CHANNEL_SUBTILE})
-      .kr(kr)
+      .kernel_size(kernel_size)
       .channels(${CBLOCK})
       .Test(${", ".join(TEST_ARGS)});
   }
@@ -100,9 +100,9 @@ $if CBLOCK > 1:
         .first_pass_tile(${FIRST_PASS_TILE})
         .middle_pass_tile(${MIDDLE_PASS_TILE})
         .last_pass_tile(${LAST_PASS_TILE})
-        .cr(${CR})
+        .channel_tile(${CR})
         .channel_subtile(${CHANNEL_SUBTILE})
-        .kr(${FIRST_PASS_TILE+1})
+        .kernel_size(${FIRST_PASS_TILE+1})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -116,9 +116,9 @@ $if CBLOCK > 1:
         .first_pass_tile(${FIRST_PASS_TILE})
         .middle_pass_tile(${MIDDLE_PASS_TILE})
         .last_pass_tile(${LAST_PASS_TILE})
-        .cr(${CR})
+        .channel_tile(${CR})
         .channel_subtile(${CHANNEL_SUBTILE})
-        .kr(${FIRST_PASS_TILE+LAST_PASS_TILE})
+        .kernel_size(${FIRST_PASS_TILE+LAST_PASS_TILE})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -128,14 +128,14 @@ $if CBLOCK > 1:
     $if ISA_CHECK:
       ${ISA_CHECK};
     for (uint32_t channels = ${ADJCBLOCK + CBLOCK}; channels < ${CR * 16}; channels += ${CR * 3}) {
-      for (uint32_t kr = ${FIRST_PASS_TILE+MIDDLE_PASS_TILE+LAST_PASS_TILE}; kr < ${FIRST_PASS_TILE+MIDDLE_PASS_TILE*2+LAST_PASS_TILE}; kr++) {
+      for (uint32_t kernel_size = ${FIRST_PASS_TILE+MIDDLE_PASS_TILE+LAST_PASS_TILE}; kernel_size < ${FIRST_PASS_TILE+MIDDLE_PASS_TILE*2+LAST_PASS_TILE}; kernel_size++) {
         DWConvMicrokernelTester()
           .first_pass_tile(${FIRST_PASS_TILE})
           .middle_pass_tile(${MIDDLE_PASS_TILE})
           .last_pass_tile(${LAST_PASS_TILE})
-          .cr(${CR})
+          .channel_tile(${CR})
           .channel_subtile(${CHANNEL_SUBTILE})
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
       }
@@ -151,9 +151,9 @@ $if CBLOCK > 1:
           .first_pass_tile(${FIRST_PASS_TILE})
           .middle_pass_tile(${MIDDLE_PASS_TILE})
           .last_pass_tile(${LAST_PASS_TILE})
-          .cr(${CR})
+          .channel_tile(${CR})
           .channel_subtile(${CHANNEL_SUBTILE})
-          .kr(${FIRST_PASS_TILE+LAST_PASS_TILE})
+          .kernel_size(${FIRST_PASS_TILE+LAST_PASS_TILE})
           .channels(channels)
           .qmin(128)
           .Test(${", ".join(TEST_ARGS)});
@@ -168,9 +168,9 @@ $if CBLOCK > 1:
           .first_pass_tile(${FIRST_PASS_TILE})
           .middle_pass_tile(${MIDDLE_PASS_TILE})
           .last_pass_tile(${LAST_PASS_TILE})
-          .cr(${CR})
+          .channel_tile(${CR})
           .channel_subtile(${CHANNEL_SUBTILE})
-          .kr(${FIRST_PASS_TILE+LAST_PASS_TILE})
+          .kernel_size(${FIRST_PASS_TILE+LAST_PASS_TILE})
           .channels(channels)
           .qmax(128)
           .Test(${", ".join(TEST_ARGS)});
@@ -185,9 +185,9 @@ TEST(${TEST_NAME}, c_gt_${ADJCBLOCK}_first_pass_plus_one) {
       .first_pass_tile(${FIRST_PASS_TILE})
       .middle_pass_tile(${MIDDLE_PASS_TILE})
       .last_pass_tile(${LAST_PASS_TILE})
-      .cr(${CR})
+      .channel_tile(${CR})
       .channel_subtile(${CHANNEL_SUBTILE})
-      .kr(${FIRST_PASS_TILE+1})
+      .kernel_size(${FIRST_PASS_TILE+1})
       .channels(channels)
       .Test(${", ".join(TEST_ARGS)});
   }
@@ -201,9 +201,9 @@ TEST(${TEST_NAME}, c_gt_${ADJCBLOCK}_first_pass_and_last_pass) {
       .first_pass_tile(${FIRST_PASS_TILE})
       .middle_pass_tile(${MIDDLE_PASS_TILE})
       .last_pass_tile(${LAST_PASS_TILE})
-      .cr(${CR})
+      .channel_tile(${CR})
       .channel_subtile(${CHANNEL_SUBTILE})
-      .kr(${FIRST_PASS_TILE+LAST_PASS_TILE})
+      .kernel_size(${FIRST_PASS_TILE+LAST_PASS_TILE})
       .channels(channels)
       .Test(${", ".join(TEST_ARGS)});
   }
@@ -213,14 +213,14 @@ TEST(${TEST_NAME}, c_gt_${ADJCBLOCK}_multipass) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (uint32_t channels = ${ADJCBLOCK + 1}; channels < ${10 if CBLOCK == 1 else ADJCBLOCK + CBLOCK}; channels++) {
-    for (uint32_t kr = ${FIRST_PASS_TILE+MIDDLE_PASS_TILE+LAST_PASS_TILE}; kr < ${FIRST_PASS_TILE+MIDDLE_PASS_TILE*2+LAST_PASS_TILE}; kr++) {
+    for (uint32_t kernel_size = ${FIRST_PASS_TILE+MIDDLE_PASS_TILE+LAST_PASS_TILE}; kernel_size < ${FIRST_PASS_TILE+MIDDLE_PASS_TILE*2+LAST_PASS_TILE}; kernel_size++) {
       DWConvMicrokernelTester()
         .first_pass_tile(${FIRST_PASS_TILE})
         .middle_pass_tile(${MIDDLE_PASS_TILE})
         .last_pass_tile(${LAST_PASS_TILE})
-        .cr(${CR})
+        .channel_tile(${CR})
         .channel_subtile(${CHANNEL_SUBTILE})
-        .kr(kr)
+        .kernel_size(kernel_size)
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -235,9 +235,9 @@ TEST(${TEST_NAME}, c_eq_${CBLOCK}_first_pass_plus_one_multipixel) {
       .first_pass_tile(${FIRST_PASS_TILE})
       .middle_pass_tile(${MIDDLE_PASS_TILE})
       .last_pass_tile(${LAST_PASS_TILE})
-      .cr(${CR})
+      .channel_tile(${CR})
       .channel_subtile(${CHANNEL_SUBTILE})
-      .kr(${FIRST_PASS_TILE+1})
+      .kernel_size(${FIRST_PASS_TILE+1})
       .channels(channels)
       .width(3)
       .Test(${", ".join(TEST_ARGS)});
@@ -252,9 +252,9 @@ TEST(${TEST_NAME}, c_eq_${CBLOCK}_first_pass_and_last_pass_multipixel) {
       .first_pass_tile(${FIRST_PASS_TILE})
       .middle_pass_tile(${MIDDLE_PASS_TILE})
       .last_pass_tile(${LAST_PASS_TILE})
-      .cr(${CR})
+      .channel_tile(${CR})
       .channel_subtile(${CHANNEL_SUBTILE})
-      .kr(${FIRST_PASS_TILE+LAST_PASS_TILE})
+      .kernel_size(${FIRST_PASS_TILE+LAST_PASS_TILE})
       .channels(channels)
       .width(3)
       .Test(${", ".join(TEST_ARGS)});
@@ -263,16 +263,16 @@ TEST(${TEST_NAME}, c_eq_${CBLOCK}_first_pass_and_last_pass_multipixel) {
 
 TEST(${TEST_NAME}, c_eq_${CBLOCK}_multipass_multipixel) {
   for (size_t channels = 1; channels <= ${CBLOCK * 5}; channels += ${max(1, CBLOCK - 1)}) {
-    for (uint32_t kr = ${FIRST_PASS_TILE+MIDDLE_PASS_TILE+LAST_PASS_TILE}; kr < ${FIRST_PASS_TILE+MIDDLE_PASS_TILE*2+LAST_PASS_TILE}; kr++) {
+    for (uint32_t kernel_size = ${FIRST_PASS_TILE+MIDDLE_PASS_TILE+LAST_PASS_TILE}; kernel_size < ${FIRST_PASS_TILE+MIDDLE_PASS_TILE*2+LAST_PASS_TILE}; kernel_size++) {
       $if ISA_CHECK:
         ${ISA_CHECK};
       DWConvMicrokernelTester()
         .first_pass_tile(${FIRST_PASS_TILE})
         .middle_pass_tile(${MIDDLE_PASS_TILE})
         .last_pass_tile(${LAST_PASS_TILE})
-        .cr(${CR})
+        .channel_tile(${CR})
         .channel_subtile(${CHANNEL_SUBTILE})
-        .kr(kr)
+        .kernel_size(kernel_size)
         .channels(channels)
         .width(3)
         .Test(${", ".join(TEST_ARGS)});
@@ -284,15 +284,15 @@ TEST(${TEST_NAME}, multipixel_with_step) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t channels = 1; channels <= ${CBLOCK * 5}; channels += ${max(1, CBLOCK - 1)}) {
-    for (uint32_t kr = ${FIRST_PASS_TILE+MIDDLE_PASS_TILE+LAST_PASS_TILE}; kr < ${FIRST_PASS_TILE+MIDDLE_PASS_TILE*2+LAST_PASS_TILE}; kr++) {
+    for (uint32_t kernel_size = ${FIRST_PASS_TILE+MIDDLE_PASS_TILE+LAST_PASS_TILE}; kernel_size < ${FIRST_PASS_TILE+MIDDLE_PASS_TILE*2+LAST_PASS_TILE}; kernel_size++) {
       for (size_t step = 2; step <= ${KR}; step++) {
         DWConvMicrokernelTester()
           .first_pass_tile(${FIRST_PASS_TILE})
           .middle_pass_tile(${MIDDLE_PASS_TILE})
           .last_pass_tile(${LAST_PASS_TILE})
-          .cr(${CR})
+          .channel_tile(${CR})
           .channel_subtile(${CHANNEL_SUBTILE})
-          .kr(kr)
+          .kernel_size(kernel_size)
           .channels(channels)
           .width(3)
           .step(step)
@@ -306,14 +306,14 @@ TEST(${TEST_NAME}, multipixel_with_output_stride) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t channels = 1; channels <= ${CBLOCK * 5}; channels += ${max(1, CBLOCK - 1)}) {
-    for (uint32_t kr = ${FIRST_PASS_TILE+MIDDLE_PASS_TILE+LAST_PASS_TILE}; kr < ${FIRST_PASS_TILE+MIDDLE_PASS_TILE*2+LAST_PASS_TILE}; kr++) {
+    for (uint32_t kernel_size = ${FIRST_PASS_TILE+MIDDLE_PASS_TILE+LAST_PASS_TILE}; kernel_size < ${FIRST_PASS_TILE+MIDDLE_PASS_TILE*2+LAST_PASS_TILE}; kernel_size++) {
       DWConvMicrokernelTester()
         .first_pass_tile(${FIRST_PASS_TILE})
         .middle_pass_tile(${MIDDLE_PASS_TILE})
         .last_pass_tile(${LAST_PASS_TILE})
-        .cr(${CR})
+        .channel_tile(${CR})
         .channel_subtile(${CHANNEL_SUBTILE})
-        .kr(kr)
+        .kernel_size(kernel_size)
         .channels(channels)
         .width(5)
         .output_stride(${next_prime(CR * 5 + 1)})
@@ -326,14 +326,14 @@ TEST(${TEST_NAME}, input_offset) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (uint32_t channels = ${ADJCBLOCK + CBLOCK}; channels < ${CR * 16}; channels += ${CR * 3}) {
-    for (uint32_t kr = ${FIRST_PASS_TILE+MIDDLE_PASS_TILE+LAST_PASS_TILE}; kr < ${FIRST_PASS_TILE+MIDDLE_PASS_TILE*2+LAST_PASS_TILE}; kr++) {
+    for (uint32_t kernel_size = ${FIRST_PASS_TILE+MIDDLE_PASS_TILE+LAST_PASS_TILE}; kernel_size < ${FIRST_PASS_TILE+MIDDLE_PASS_TILE*2+LAST_PASS_TILE}; kernel_size++) {
       DWConvMicrokernelTester()
         .first_pass_tile(${FIRST_PASS_TILE})
         .middle_pass_tile(${MIDDLE_PASS_TILE})
         .last_pass_tile(${LAST_PASS_TILE})
-        .cr(${CR})
+        .channel_tile(${CR})
         .channel_subtile(${CHANNEL_SUBTILE})
-        .kr(kr)
+        .kernel_size(kernel_size)
         .channels(channels)
         .input_offset(${next_prime(CR + 1) * 16})
         .Test(${", ".join(TEST_ARGS)});
