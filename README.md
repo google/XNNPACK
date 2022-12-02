@@ -10,6 +10,7 @@ XNNPACK is a highly optimized library of floating-point neural network inference
 - x86 and x86-64 (up to AVX512) on Windows, Linux, macOS, Android, and iOS simulator
 - WebAssembly MVP
 - WebAssembly SIMD
+- [WebAssembly Relaxed SIMD](https://github.com/WebAssembly/relaxed-simd) (experimental)
 - RISC-V (RV32GV and RV64GC)
 
 ## Operator Coverage
