@@ -47,7 +47,7 @@ static void f32_dwconv(benchmark::State& state,
   const size_t channels = state.range(8);
 
   const size_t kernel_size = kernel_height * kernel_width;
-  if (kernel_size != primary_tile) {
+  if (kernel_size > primary_tile) {
     state.SkipWithError("kernel size mismatch");
     return;
   }
@@ -63,7 +63,7 @@ static void f32_dwconv(benchmark::State& state,
   const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
   const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
   const size_t output_size = output_height * output_width;
-  const size_t step_width = dilation == 1 ? subsampling : kernel_width;
+  const size_t step_width = dilation == 1 ? std::min(subsampling, kernel_width) : kernel_width;
   const size_t step_height = kernel_size + (output_width - 1) * step_width * kernel_height;
 
   const size_t c_stride = benchmark::utils::RoundUp<size_t>(channels, channel_tile);
@@ -78,7 +78,8 @@ static void f32_dwconv(benchmark::State& state,
   std::vector<float> z(channels + XNN_EXTRA_BYTES / sizeof(float));
 
   const size_t w_elements = (kernel_size + 1) * c_stride;
-  const size_t i_elements = output_height * step_height;
+  // Can read (primary_tile - kernel_size) elements after end of indirection buffer.
+  const size_t i_elements = (primary_tile - kernel_size) + output_height * step_height;
   const size_t c_elements = output_size * channels;
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
@@ -196,7 +197,7 @@ static void f32_dwconv(
   const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
   const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
   const size_t output_size = output_height * output_width;
-  const size_t step_width = dilation == 1 ? min(subsampling, kernel_width) : kernel_width;
+  const size_t step_width = dilation == 1 ? std::min(subsampling, kernel_width) : kernel_width;
   const size_t step_height = kernel_size + (output_width - 1) * step_width * kernel_height;
 
   const size_t c_stride = benchmark::utils::RoundUp<size_t>(channels, channel_tile);
