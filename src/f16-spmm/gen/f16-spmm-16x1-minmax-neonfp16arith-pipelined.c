@@ -58,7 +58,7 @@ void xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_pipelined(
       uint32_t nnz = *nnzmap++;
       float16x8_t vacc01234567 = vw;
       float16x8_t vacc89ABCDEF = vw;
-      vw = vld1q_dup_f16(w); w += 1;
+      vw = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
       if XNN_LIKELY(nnz != 0) {
         do {
           vacc01234567 = vfmaq_f16(vacc01234567, vi01234567, vw);
@@ -183,7 +183,7 @@ void xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_pipelined(
         }
         float16x4_t vout0 = vmin_f16(vacc0, vget_low_f16(vmax));
         vout0 = vmax_f16(vout0, vget_low_f16(vmin));
-        vst1_lane_u16((void*) o, vreinterpret_u16_f16(vout0), 0);
+        vst1_lane_u16(o, vreinterpret_u16_f16(vout0), 0);
         o = (uint16_t*) ((uintptr_t) o + output_stride);
       } while (--n != 0);
       o = (uint16_t*) ((uintptr_t) o - output_decrement);

@@ -57,7 +57,7 @@ void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith_pipelined(
       uint32_t nnz = *nnzmap++;
       $for M in range(0, MR, 8):
         float16x8_t vacc${ABC[M:M+8]} = vw;
-      vw = vld1q_dup_f16(w); w += 1;
+      vw = vreinterpretq_f16_u16(vld1q_dup_u16(w)); w += 1;
       if XNN_LIKELY(nnz != 0) {
         do {
           $for M in range(0, MR, 8):
@@ -135,7 +135,7 @@ void xnn_f16_spmm_minmax_ukernel_${MR}x${NR}__neonfp16arith_pipelined(
             float16x4_t vout${ABC[0:SUBMR]} = vmin_f16(vacc${ABC[0:SUBMR]}, vget_low_f16(vmax));
             vout${ABC[0:SUBMR]} = vmax_f16(vout${ABC[0:SUBMR]}, vget_low_f16(vmin));
             $if SUBMR == 1:
-              vst1_lane_u16((void*) o, vreinterpret_u16_f16(vout${ABC[0]}), 0);
+              vst1_lane_u16(o, vreinterpret_u16_f16(vout${ABC[0]}), 0);
             $elif SUBMR == 2:
               vst1_lane_u32((void*) o, vreinterpret_u32_f16(vout${ABC[0:SUBMR]}), 0);
             $else:
