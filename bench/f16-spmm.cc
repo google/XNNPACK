@@ -170,12 +170,20 @@ static void f16_spmm(benchmark::State& state,
     f16_spmm(state, xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith, 8, 1, 0.8f,
       xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
   }
+  static void spmm80_8x1__neonfp16arith_pipelined(benchmark::State& state, const char* net) {
+    f16_spmm(state, xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_pipelined, 8, 1, 0.8f,
+      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
+  }
   static void spmm80_8x1__neonfp16arith_x2(benchmark::State& state, const char* net) {
     f16_spmm(state, xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2, 8, 1, 0.8f,
       xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
   }
   static void spmm80_16x1__neonfp16arith(benchmark::State& state, const char* net) {
     f16_spmm(state, xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith, 16, 1, 0.8f,
+      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
+  }
+  static void spmm80_16x1__neonfp16arith_pipelined(benchmark::State& state, const char* net) {
+    f16_spmm(state, xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_pipelined, 16, 1, 0.8f,
       xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
   }
   static void spmm80_16x1__neonfp16arith_x2(benchmark::State& state, const char* net) {
@@ -186,6 +194,10 @@ static void f16_spmm(benchmark::State& state,
     f16_spmm(state, xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith, 24, 1, 0.8f,
       xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
   }
+  static void spmm80_24x1__neonfp16arith_pipelined(benchmark::State& state, const char* net) {
+    f16_spmm(state, xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_pipelined, 24, 1, 0.8f,
+      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
+  }
   static void spmm80_24x1__neonfp16arith_x2(benchmark::State& state, const char* net) {
     f16_spmm(state, xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2, 24, 1, 0.8f,
       xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
@@ -194,18 +206,26 @@ static void f16_spmm(benchmark::State& state,
     f16_spmm(state, xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith, 32, 1, 0.8f,
       xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
   }
+  static void spmm80_32x1__neonfp16arith_pipelined(benchmark::State& state, const char* net) {
+    f16_spmm(state, xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_pipelined, 32, 1, 0.8f,
+      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
+  }
   static void spmm80_32x1__neonfp16arith_x2(benchmark::State& state, const char* net) {
     f16_spmm(state, xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2, 32, 1, 0.8f,
       xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
   }
 
   BENCHMARK_SPMM(spmm80_8x1__neonfp16arith)
+  BENCHMARK_SPMM(spmm80_8x1__neonfp16arith_pipelined)
   BENCHMARK_SPMM(spmm80_8x1__neonfp16arith_x2)
   BENCHMARK_SPMM(spmm80_16x1__neonfp16arith)
+  BENCHMARK_SPMM(spmm80_16x1__neonfp16arith_pipelined)
   BENCHMARK_SPMM(spmm80_16x1__neonfp16arith_x2)
   BENCHMARK_SPMM(spmm80_24x1__neonfp16arith)
+  BENCHMARK_SPMM(spmm80_24x1__neonfp16arith_pipelined)
   BENCHMARK_SPMM(spmm80_24x1__neonfp16arith_x2)
   BENCHMARK_SPMM(spmm80_32x1__neonfp16arith)
+  BENCHMARK_SPMM(spmm80_32x1__neonfp16arith_pipelined)
   BENCHMARK_SPMM(spmm80_32x1__neonfp16arith_x2)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 

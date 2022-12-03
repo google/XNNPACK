@@ -3583,7 +3583,7 @@ SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-x32.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-x40.c
   src/f16-rmax/f16-rmax-neonfp16arith.c
-  src/f16-spmm/gen/f16-spmm-32x1-minmax-neonfp16arith.c
+  src/f16-spmm/gen/f16-spmm-32x1-minmax-neonfp16arith-pipelined.c
   src/f16-vbinary/gen/f16-vadd-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/f16-vaddc-minmax-neonfp16arith-x16.c
   src/f16-vbinary/gen/f16-vmax-neonfp16arith-x16.c

@@ -983,7 +983,7 @@ static void init(void) {
             init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
             xnn_params.f16.spmm = (struct spmm_parameters) {
-              .ukernel = (xnn_spmm_ukernel_fn) xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith,
+              .ukernel = (xnn_spmm_ukernel_fn) xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_pipelined,
               .init.f16 = xnn_init_f16_minmax_fp16arith_params,
               .mr = 32,
               .nr = 1,
@@ -3067,7 +3067,7 @@ static void init(void) {
           init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
           xnn_params.f16.spmm = (struct spmm_parameters) {
-            .ukernel = (xnn_spmm_ukernel_fn) xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith,
+            .ukernel = (xnn_spmm_ukernel_fn) xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_pipelined,
             .init.f16 = xnn_init_f16_minmax_fp16arith_params,
             .mr = 32,
             .nr = 1,
