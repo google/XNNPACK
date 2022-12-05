@@ -67,11 +67,12 @@ These microkernels come in 2 varieties, uni-pass and multi-pass.
 Uni-pass have `XpYc` in their name, where `X` is the kernel tile, and `Y` is the
 channel tile. `p` stands for primary, `c` for channel.
 
-Multi-pass have `WfXmYlZc` in their name, where `W` is the first pass tile, `X`
-is the middle pass tile, `Y` is the last pass tile, and `Z` is the channel tile.
-`f` stands for first, `m` for middle, `l` for last, `c` for channel.
-The kernel size must be at least `W+1`, the middle pass runs for as many
-iterations as possible, and the last pass handles the remainder (at least 1).
+Multi-pass have `VfWmXlYcZs` in their name, where `V` is the first pass tile, `W`
+is the middle pass tile, `X` is the last pass tile, `Y` is the channel tile, and
+`Z` is the channel subtile.  `f` stands for first, `m` for middle, `l` for last,
+`c` for channel, and `s` for subtile.  The kernel size must be at least `W+1`,
+the middle pass runs for as many iterations as possible, and the last pass
+handles the remainder (at least 1).
 
 ## Average Pooling and Global Average Pooling
 

@@ -31,19 +31,20 @@ def split_ukernel_name(name):
   common_parts = common_name.split("_")
   param_spec = common_parts[-1]
 
-  m = re.search(r'(\d+)f(\d+)m(\d+)l(\d+)c', param_spec)
+  m = re.search(r'(\d+)f(\d+)m(\d+)l(\d+)c(\d+)s', param_spec)
   assert m
   first_pass_tile = int(m[1])
   middle_pass_tile = int(m[2])
   last_pass_tile = int(m[3])
   cr = int(m[4])
+  channel_subtile = int(m[5])
   arch, isa = xnncommon.parse_target_name(target_name)
 
   requantization = common_parts[-3]
   if requantization not in ["fp32", "rndnu"]:
     requantization = None
 
-  return first_pass_tile, middle_pass_tile, last_pass_tile, cr, requantization, arch, isa
+  return first_pass_tile, middle_pass_tile, last_pass_tile, cr, channel_subtile, requantization, arch, isa
 
 
 DWCONV_TEST_CODE = """\
@@ -343,14 +344,8 @@ TEST(${TEST_NAME}, input_offset) {
 """
 
 
-def channel_subtile_from_isa(isa):
-  if isa == 'sse':
-    return 4
-  assert False
-
-
 def generate_test_cases(ukernel, first_pass_tile, middle_pass_tile, last_pass_tile, cr, c_block,
-                        init_fn, requantization, is_pipelined, isa):
+                        channel_subtile, init_fn, requantization, is_pipelined, isa):
   """Generates all tests cases for a DWCONV micro-kernel.
 
   Args:
@@ -393,7 +388,7 @@ def generate_test_cases(ukernel, first_pass_tile, middle_pass_tile, last_pass_ti
       "MIDDLE_PASS_TILE": middle_pass_tile,
       "LAST_PASS_TILE": last_pass_tile,
       "CR": cr,
-      "CHANNEL_SUBTILE": channel_subtile_from_isa(isa),
+      "CHANNEL_SUBTILE": channel_subtile,
       "KR": kr,
       "CBLOCK": c_block,
       "ADJCBLOCK": 2 * c_block if is_pipelined else c_block,
@@ -437,13 +432,13 @@ def main(args):
       init_fn = ukernel_spec.get("init")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       assembly = bool(ukernel_spec.get("assembly", False))
-      first_pass_tile, middle_pass_tile, last_pass_tile, cr, requantization, arch, isa = split_ukernel_name(name)
+      first_pass_tile, middle_pass_tile, last_pass_tile, cr, channel_subtile, requantization, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
       test_case = generate_test_cases(
-        name, first_pass_tile, middle_pass_tile, last_pass_tile, cr, cr, init_fn, requantization, pipelined, isa)
+        name, first_pass_tile, middle_pass_tile, last_pass_tile, cr, cr, channel_subtile, init_fn, requantization, pipelined, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa, assembly)
 
     txt_changed = True

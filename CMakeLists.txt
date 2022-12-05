@@ -4061,12 +4061,12 @@ SET(ALL_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/f32-avgpool-9x-minmax-sse-c4.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-sse-1x1.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-sse-2x2.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c-minmax-sse-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c-minmax-sse.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c-minmax-sse-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c-minmax-sse.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c-minmax-sse-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c-minmax-sse.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s-minmax-sse-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s-minmax-sse.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s-minmax-sse-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s-minmax-sse.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s-minmax-sse-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s-minmax-sse.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-sse-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-sse.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-sse-acc2.c
