@@ -58,7 +58,7 @@ def escape(line):
 
 def preprocess(input_text, input_globals, input_path="codegen"):
   input_lines = input_text.splitlines()
-  python_lines = ["from __future__ import print_function"]
+  python_lines = []
 
   blank_lines = 0
 
