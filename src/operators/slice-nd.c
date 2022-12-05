@@ -27,7 +27,7 @@ static void init_slice_nd(
   slice_op->state = xnn_run_state_invalid;
 }
 
-enum xnn_status create_slice_nd(
+static enum xnn_status create_slice_nd(
     uint32_t flags,
     enum xnn_operator_type operator_type,
     xnn_operator_t* slice_op_out)
