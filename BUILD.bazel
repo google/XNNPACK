@@ -8482,9 +8482,9 @@ ALL_AVX512VBMI_MICROKERNEL_SRCS = [
 ]
 
 WASM32_ASM_MICROKERNEL_SRCS = [
-    "src/f32-vrelu/f32-vrelu-wasm-shr-x1.S",
-    "src/f32-vrelu/f32-vrelu-wasm-shr-x2.S",
-    "src/f32-vrelu/f32-vrelu-wasm-shr-x4.S",
+    "src/f32-vrelu/f32-vrelu-wasm32-shr-x1.S",
+    "src/f32-vrelu/f32-vrelu-wasm32-shr-x2.S",
+    "src/f32-vrelu/f32-vrelu-wasm32-shr-x4.S",
 ]
 
 AARCH32_ASM_MICROKERNEL_SRCS = [
