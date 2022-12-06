@@ -82,6 +82,16 @@ class DWConvMicrokernelTester {
     return this->channel_subtile_;
   }
 
+  inline DWConvMicrokernelTester& channel_round(uint32_t channel_round) {
+    assert(channel_round != 0);
+    this->channel_round_ = channel_round;
+    return *this;
+  }
+
+  inline uint32_t channel_round() const {
+    return this->channel_round_;
+  }
+
   inline DWConvMicrokernelTester& kernel_tile(uint32_t kernel_tile) {
     assert(kernel_tile != 0);
     this->kernel_tile_ = kernel_tile;
@@ -811,14 +821,16 @@ class DWConvMicrokernelTester {
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
 
-    const size_t tile_size = xnn_multipass_dwconv_tile_size(kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
+    const size_t tile_size = xnn_multipass_dwconv_tile_size(
+      kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
     std::vector<const float*> indirection((width() - 1) * step() + tile_size);
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
     std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_EXTRA_BYTES / sizeof(float) + channels());
     std::vector<float> kernel(channels() * kernel_size());
     std::vector<float> bias(channels());
     std::vector<float, AlignedAllocator<float, 64>> packed_weights(
-      xnn_multipass_dwconv_weights_count(tile_size, channels(), channel_tile(), channel_subtile()));
+      xnn_multipass_dwconv_weights_count(
+        tile_size, channels(), channel_tile(), channel_subtile(), channel_round()));
     std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> output((width() - 1) * output_stride() + channels());
     std::vector<float> output_ref(width() * channels());
@@ -833,8 +845,8 @@ class DWConvMicrokernelTester {
 
       std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
       xnn_pack_f32_multipass_dwconv_ghw_w(
-        first_pass_tile(), middle_pass_tile(), last_pass_tile(),
-        kernel_size(), 1, channels(), channel_tile(), channel_subtile(),
+        first_pass_tile(), middle_pass_tile(), last_pass_tile(), kernel_size(), 1,
+        channels(), channel_tile(), channel_subtile(), channel_round(),
         kernel.data(), bias.data(), packed_weights.data(),
         0 /* extra bytes */, nullptr);
       for (size_t i = 0; i < indirection.size(); i++) {
@@ -917,6 +929,7 @@ class DWConvMicrokernelTester {
   uint32_t channels_{1};
   uint32_t channel_tile_{1};
   uint32_t channel_subtile_{1};
+  uint32_t channel_round_{1};
   uint32_t kernel_tile_{1};
   uint32_t kernel_size_{1};
   uint32_t width_{1};

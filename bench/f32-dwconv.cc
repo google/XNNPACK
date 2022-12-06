@@ -163,6 +163,7 @@ static void f32_dwconv(
   uint32_t last_pass_tile,
   uint32_t channel_tile,
   uint32_t channel_subtile,
+  uint32_t channel_round,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check != nullptr && !isa_check(state)) {
@@ -224,7 +225,8 @@ static void f32_dwconv(
   std::vector<float, AlignedAllocator<float, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0.0f);
   xnn_pack_f32_multipass_dwconv_ghw_w(first_pass_tile, middle_pass_tile, last_pass_tile,
-                                      kernel_height, kernel_width, channels, channel_tile, channel_subtile,
+                                      kernel_height, kernel_width,
+                                      channels, channel_tile, channel_subtile, channel_round,
                                       k.data(), b.data(), w.data(), 0 /* extra bytes */, nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
@@ -629,34 +631,38 @@ static void f32_dwconv(
       xnn_init_f32_minmax_sse_params,
       4 /* channel tile */, 25 /* primary tile */);
   }
-  static void f32_dwconv_2f2m2l4c4s__sse(benchmark::State& state, const char* net) {
-    f32_dwconv(
-      state, xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s__sse, xnn_init_f32_minmax_sse_params, 2 /* first pass tile */,
-      2 /* middle pass tile */, 2 /* last pass tile */, 4 /* channel tile */, 4 /* channel subtile */);
+  static void f32_dwconv_2f2m2l4c4s4r__sse(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__sse, xnn_init_f32_minmax_sse_params,
+               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
-  static void f32_dwconv_2f2m2l4c4s__sse_acc2(benchmark::State& state, const char* net) {
-    f32_dwconv(
-      state, xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s__sse_acc2, xnn_init_f32_minmax_sse_params, 2 /* first pass tile */,
-      2 /* middle pass tile */, 2 /* last pass tile */, 4 /* channel tile */, 4 /* channel subtile */);
+  static void f32_dwconv_2f2m2l4c4s4r__sse_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__sse, xnn_init_f32_minmax_sse_params,
+               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
-  static void f32_dwconv_2f2m2l8c4s__sse(benchmark::State& state, const char* net) {
-    f32_dwconv(
-      state, xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s__sse, xnn_init_f32_minmax_sse_params, 2 /* first pass tile */,
-      2 /* middle pass tile */, 2 /* last pass tile */, 8 /* channel tile */, 4 /* channel subtile */);
+  static void f32_dwconv_2f2m2l8c4s4r__sse(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__sse, xnn_init_f32_minmax_sse_params,
+               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+               8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
-  static void f32_dwconv_2f2m2l8c4s__sse_acc2(benchmark::State& state, const char* net) {
-    f32_dwconv(
-      state, xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s__sse_acc2, xnn_init_f32_minmax_sse_params, 2 /* first pass tile */,
-      2 /* middle pass tile */, 2 /* last pass tile */, 8 /* channel tile */, 4 /* channel subtile */);
+  static void f32_dwconv_2f2m2l8c4s4r__sse_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__sse, xnn_init_f32_minmax_sse_params,
+               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+               8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
 
   BENCHMARK_DWCONV(f32_dwconv_4p4c__sse)
   BENCHMARK_DWCONV(f32_dwconv_9p4c__sse)
   BENCHMARK_DWCONV(f32_dwconv_25p4c__sse)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l4c4s__sse)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l4c4s__sse_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c4s__sse)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c4s__sse_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l4c4s4r__sse)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l4c4s4r__sse_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c4s4r__sse)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c4s4r__sse_acc2)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 

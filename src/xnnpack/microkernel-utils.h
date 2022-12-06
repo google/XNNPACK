@@ -25,7 +25,8 @@ XNN_INTERNAL size_t xnn_multipass_dwconv_weights_count(
   size_t tile_size,
   size_t channels,
   size_t channel_tile,
-  size_t channel_subtile);
+  size_t channel_subtile,
+  size_t channel_round);
 
 #ifdef __cplusplus
 }

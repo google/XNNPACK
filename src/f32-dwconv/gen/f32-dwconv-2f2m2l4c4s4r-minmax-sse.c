@@ -17,7 +17,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s__sse(
+void xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__sse(
     size_t channels,
     size_t output_width,
     const float** input,

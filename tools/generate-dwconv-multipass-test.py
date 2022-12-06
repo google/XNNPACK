@@ -31,20 +31,21 @@ def split_ukernel_name(name):
   common_parts = common_name.split("_")
   param_spec = common_parts[-1]
 
-  m = re.search(r'(\d+)f(\d+)m(\d+)l(\d+)c(\d+)s', param_spec)
+  m = re.search(r'(\d+)f(\d+)m(\d+)l(\d+)c(\d+)s(\d+)r', param_spec)
   assert m
   first_pass_tile = int(m[1])
   middle_pass_tile = int(m[2])
   last_pass_tile = int(m[3])
-  cr = int(m[4])
+  channel_tile = int(m[4])
   channel_subtile = int(m[5])
+  channel_round = int(m[6])
   arch, isa = xnncommon.parse_target_name(target_name)
 
   requantization = common_parts[-3]
   if requantization not in ["fp32", "rndnu"]:
     requantization = None
 
-  return first_pass_tile, middle_pass_tile, last_pass_tile, cr, channel_subtile, requantization, arch, isa
+  return (first_pass_tile, middle_pass_tile, last_pass_tile, channel_tile, channel_subtile, channel_round, requantization, arch, isa)
 
 
 DWCONV_TEST_CODE = """\
@@ -57,6 +58,7 @@ TEST(${TEST_NAME}, c_eq_${CBLOCK}_first_pass_plus_one) {
     .last_pass_tile(${LAST_PASS_TILE})
     .channel_tile(${CR})
     .channel_subtile(${CHANNEL_SUBTILE})
+    .channel_round(${CHANNEL_ROUND})
     .kernel_size(${FIRST_PASS_TILE+1})
     .channels(${CBLOCK})
     .Test(${", ".join(TEST_ARGS)});
@@ -71,6 +73,7 @@ TEST(${TEST_NAME}, c_eq_${CBLOCK}_first_pass_and_last_pass) {
     .last_pass_tile(${LAST_PASS_TILE})
     .channel_tile(${CR})
     .channel_subtile(${CHANNEL_SUBTILE})
+    .channel_round(${CHANNEL_ROUND})
     .kernel_size(${FIRST_PASS_TILE+LAST_PASS_TILE})
     .channels(${CBLOCK})
     .Test(${", ".join(TEST_ARGS)});
@@ -86,6 +89,7 @@ TEST(${TEST_NAME}, c_eq_${CBLOCK}_multipass) {
       .last_pass_tile(${LAST_PASS_TILE})
       .channel_tile(${CR})
       .channel_subtile(${CHANNEL_SUBTILE})
+      .channel_round(${CHANNEL_ROUND})
       .kernel_size(kernel_size)
       .channels(${CBLOCK})
       .Test(${", ".join(TEST_ARGS)});
@@ -103,6 +107,7 @@ $if CBLOCK > 1:
         .last_pass_tile(${LAST_PASS_TILE})
         .channel_tile(${CR})
         .channel_subtile(${CHANNEL_SUBTILE})
+        .channel_round(${CHANNEL_ROUND})
         .kernel_size(${FIRST_PASS_TILE+1})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
@@ -119,6 +124,7 @@ $if CBLOCK > 1:
         .last_pass_tile(${LAST_PASS_TILE})
         .channel_tile(${CR})
         .channel_subtile(${CHANNEL_SUBTILE})
+        .channel_round(${CHANNEL_ROUND})
         .kernel_size(${FIRST_PASS_TILE+LAST_PASS_TILE})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
@@ -136,6 +142,7 @@ $if CBLOCK > 1:
           .last_pass_tile(${LAST_PASS_TILE})
           .channel_tile(${CR})
           .channel_subtile(${CHANNEL_SUBTILE})
+          .channel_round(${CHANNEL_ROUND})
           .kernel_size(kernel_size)
           .channels(channels)
           .Test(${", ".join(TEST_ARGS)});
@@ -154,6 +161,7 @@ $if CBLOCK > 1:
           .last_pass_tile(${LAST_PASS_TILE})
           .channel_tile(${CR})
           .channel_subtile(${CHANNEL_SUBTILE})
+          .channel_round(${CHANNEL_ROUND})
           .kernel_size(${FIRST_PASS_TILE+LAST_PASS_TILE})
           .channels(channels)
           .qmin(128)
@@ -171,6 +179,7 @@ $if CBLOCK > 1:
           .last_pass_tile(${LAST_PASS_TILE})
           .channel_tile(${CR})
           .channel_subtile(${CHANNEL_SUBTILE})
+          .channel_round(${CHANNEL_ROUND})
           .kernel_size(${FIRST_PASS_TILE+LAST_PASS_TILE})
           .channels(channels)
           .qmax(128)
@@ -188,6 +197,7 @@ TEST(${TEST_NAME}, c_gt_${ADJCBLOCK}_first_pass_plus_one) {
       .last_pass_tile(${LAST_PASS_TILE})
       .channel_tile(${CR})
       .channel_subtile(${CHANNEL_SUBTILE})
+      .channel_round(${CHANNEL_ROUND})
       .kernel_size(${FIRST_PASS_TILE+1})
       .channels(channels)
       .Test(${", ".join(TEST_ARGS)});
@@ -204,6 +214,7 @@ TEST(${TEST_NAME}, c_gt_${ADJCBLOCK}_first_pass_and_last_pass) {
       .last_pass_tile(${LAST_PASS_TILE})
       .channel_tile(${CR})
       .channel_subtile(${CHANNEL_SUBTILE})
+      .channel_round(${CHANNEL_ROUND})
       .kernel_size(${FIRST_PASS_TILE+LAST_PASS_TILE})
       .channels(channels)
       .Test(${", ".join(TEST_ARGS)});
@@ -221,6 +232,7 @@ TEST(${TEST_NAME}, c_gt_${ADJCBLOCK}_multipass) {
         .last_pass_tile(${LAST_PASS_TILE})
         .channel_tile(${CR})
         .channel_subtile(${CHANNEL_SUBTILE})
+        .channel_round(${CHANNEL_ROUND})
         .kernel_size(kernel_size)
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
@@ -238,6 +250,7 @@ TEST(${TEST_NAME}, c_eq_${CBLOCK}_first_pass_plus_one_multipixel) {
       .last_pass_tile(${LAST_PASS_TILE})
       .channel_tile(${CR})
       .channel_subtile(${CHANNEL_SUBTILE})
+      .channel_round(${CHANNEL_ROUND})
       .kernel_size(${FIRST_PASS_TILE+1})
       .channels(channels)
       .width(3)
@@ -255,6 +268,7 @@ TEST(${TEST_NAME}, c_eq_${CBLOCK}_first_pass_and_last_pass_multipixel) {
       .last_pass_tile(${LAST_PASS_TILE})
       .channel_tile(${CR})
       .channel_subtile(${CHANNEL_SUBTILE})
+      .channel_round(${CHANNEL_ROUND})
       .kernel_size(${FIRST_PASS_TILE+LAST_PASS_TILE})
       .channels(channels)
       .width(3)
@@ -273,6 +287,7 @@ TEST(${TEST_NAME}, c_eq_${CBLOCK}_multipass_multipixel) {
         .last_pass_tile(${LAST_PASS_TILE})
         .channel_tile(${CR})
         .channel_subtile(${CHANNEL_SUBTILE})
+        .channel_round(${CHANNEL_ROUND})
         .kernel_size(kernel_size)
         .channels(channels)
         .width(3)
@@ -293,6 +308,7 @@ TEST(${TEST_NAME}, multipixel_with_step) {
           .last_pass_tile(${LAST_PASS_TILE})
           .channel_tile(${CR})
           .channel_subtile(${CHANNEL_SUBTILE})
+          .channel_round(${CHANNEL_ROUND})
           .kernel_size(kernel_size)
           .channels(channels)
           .width(3)
@@ -314,6 +330,7 @@ TEST(${TEST_NAME}, multipixel_with_output_stride) {
         .last_pass_tile(${LAST_PASS_TILE})
         .channel_tile(${CR})
         .channel_subtile(${CHANNEL_SUBTILE})
+        .channel_round(${CHANNEL_ROUND})
         .kernel_size(kernel_size)
         .channels(channels)
         .width(5)
@@ -334,6 +351,7 @@ TEST(${TEST_NAME}, input_offset) {
         .last_pass_tile(${LAST_PASS_TILE})
         .channel_tile(${CR})
         .channel_subtile(${CHANNEL_SUBTILE})
+        .channel_round(${CHANNEL_ROUND})
         .kernel_size(kernel_size)
         .channels(channels)
         .input_offset(${next_prime(CR + 1) * 16})
@@ -345,12 +363,14 @@ TEST(${TEST_NAME}, input_offset) {
 
 
 def generate_test_cases(ukernel, first_pass_tile, middle_pass_tile, last_pass_tile, cr, c_block,
-                        channel_subtile, init_fn, requantization, is_pipelined, isa):
+                        channel_subtile, channel_round, init_fn, requantization, is_pipelined, isa):
   """Generates all tests cases for a DWCONV micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
     cr: CR parameter of the DWCONV micro-kernel.
+    channel_subtile: channel_subtile parameter of the DWCONV micro-kernel.
+    channel_round: channel_round parameter of the DWCONV micro-kernel.
     kr: KR parameter of the DWCONV micro-kernel.
     k_block: Number of C values processed per one iteration of the main loop of
              the micro-kernel.
@@ -389,6 +409,7 @@ def generate_test_cases(ukernel, first_pass_tile, middle_pass_tile, last_pass_ti
       "LAST_PASS_TILE": last_pass_tile,
       "CR": cr,
       "CHANNEL_SUBTILE": channel_subtile,
+      "CHANNEL_ROUND": channel_round,
       "KR": kr,
       "CBLOCK": c_block,
       "ADJCBLOCK": 2 * c_block if is_pipelined else c_block,
@@ -432,13 +453,13 @@ def main(args):
       init_fn = ukernel_spec.get("init")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       assembly = bool(ukernel_spec.get("assembly", False))
-      first_pass_tile, middle_pass_tile, last_pass_tile, cr, channel_subtile, requantization, arch, isa = split_ukernel_name(name)
+      first_pass_tile, middle_pass_tile, last_pass_tile, cr, channel_subtile, channel_round, requantization, arch, isa = split_ukernel_name(name)
 
       # specification can override architecture
       arch = ukernel_spec.get("arch", arch)
 
       test_case = generate_test_cases(
-        name, first_pass_tile, middle_pass_tile, last_pass_tile, cr, cr, channel_subtile, init_fn, requantization, pipelined, isa)
+        name, first_pass_tile, middle_pass_tile, last_pass_tile, cr, cr, channel_subtile, channel_round, init_fn, requantization, pipelined, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa, assembly)
 
     txt_changed = True

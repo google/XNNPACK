@@ -1490,6 +1490,7 @@ void xnn_pack_f32_dwconv_ghw_w(
       c,
       cr,
       cr,
+      cr,
       k,
       b,
       packed_weights,
@@ -1514,6 +1515,7 @@ void xnn_pack_f32_multipass_dwconv_ghw_w(
   size_t c,
   size_t channel_tile,
   size_t channel_subtile,
+  size_t channel_round,
   const float* k,
   const float* b,
   float* packed_weights,
@@ -1537,7 +1539,7 @@ void xnn_pack_f32_multipass_dwconv_ghw_w(
   size_t x = 0;
   size_t y = 0;
   // First and middle pass packs in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
-  const size_t tiled_c = round_down_po2(round_up_po2(c, channel_subtile), channel_tile);
+  const size_t tiled_c = round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
   // Pack in blocks of channel_tile, then in blocks of channel_subtile.
   {
@@ -1893,6 +1895,7 @@ void xnn_pack_f32_dwconv_hwg_w(
       c,
       cr,
       cr,
+      cr,
       k,
       b,
       packed_weights,
@@ -1909,6 +1912,7 @@ void xnn_pack_f32_multipass_dwconv_hwg_w(
   size_t c,
   size_t channel_tile,
   size_t channel_subtile,
+  size_t channel_round,
   const float* k,
   const float* b,
   float* packed_weights,
@@ -1932,7 +1936,7 @@ void xnn_pack_f32_multipass_dwconv_hwg_w(
   size_t x = 0;
   size_t y = 0;
   // First and middle pass packs in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
-  const size_t tiled_c = round_down_po2(round_up_po2(c, channel_subtile), channel_tile);
+  const size_t tiled_c = round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
   // Pack in blocks of channel_tile, then in blocks of channel_subtile.
   {

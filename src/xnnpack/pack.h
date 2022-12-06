@@ -613,7 +613,9 @@ XNN_INTERNAL void xnn_pack_qs8_dwconv_hwg_w(
 // 3. Second block has middle_pass_tile weights, in channel_tile, then in channel_subtiles.
 // 4. Last block has last_pass_tile weights, in channel_tile, then in channel_subtiles.
 // The first and middle pass of the microkernel runs as many channel_tile as possible, so the number of channel_tile
-// tiles is round_up_po2(channels, channel_subtile)/channel_tile.
+// tiles is round_up_po2(channels, channel_round)/channel_tile.
+// We use channel_round because rounding to channel_subtile might exceed the
+// padding that we have.
 
 // Weights layout is channels/(g)roups, (h)eight, (w)idth.
 XNN_INTERNAL void xnn_pack_f32_multipass_dwconv_ghw_w(
@@ -625,6 +627,7 @@ XNN_INTERNAL void xnn_pack_f32_multipass_dwconv_ghw_w(
   size_t c,
   size_t channel_tile,
   size_t channel_subtile,
+  size_t channel_round,
   const float* k,
   const float* b,
   float* packed_weights,
@@ -641,6 +644,7 @@ XNN_INTERNAL void xnn_pack_f32_multipass_dwconv_hwg_w(
   size_t c,
   size_t channel_tile,
   size_t channel_subtile,
+  size_t channel_round,
   const float* k,
   const float* b,
   float* packed_weights,

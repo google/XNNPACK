@@ -26,10 +26,11 @@ size_t xnn_multipass_dwconv_weights_count(
   size_t tile_size,
   size_t channels,
   size_t channel_tile,
-  size_t channel_subtile)
+  size_t channel_subtile,
+  size_t channel_round)
 {
-  // First and middle pass runs as many channel_tile-sized loops as possible, and can over-read up to channel_subtile.
-  const size_t subtiled_channels = round_up_po2(channels, channel_subtile);
+  // First and middle pass runs as many channel_tile-sized loops as possible, and can over-read up to channel_round.
+  const size_t subtiled_channels = round_up_po2(channels, channel_round);
   // 1 for bias, we always have a first and last pass.
   return (1 + tile_size) *
          // as many channel_tile-sized loops as possible.

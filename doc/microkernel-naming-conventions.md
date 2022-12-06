@@ -67,12 +67,17 @@ These microkernels come in 2 varieties, uni-pass and multi-pass.
 Uni-pass have `XpYc` in their name, where `X` is the kernel tile, and `Y` is the
 channel tile. `p` stands for primary, `c` for channel.
 
-Multi-pass have `VfWmXlYcZs` in their name, where `V` is the first pass tile, `W`
-is the middle pass tile, `X` is the last pass tile, `Y` is the channel tile, and
-`Z` is the channel subtile.  `f` stands for first, `m` for middle, `l` for last,
-`c` for channel, and `s` for subtile.  The kernel size must be at least `W+1`,
-the middle pass runs for as many iterations as possible, and the last pass
-handles the remainder (at least 1).
+Multi-pass have `UfVmWlXcYsZr` in their name, where `U` is the first pass tile,
+`V` is the middle pass tile, `W` is the last pass tile, `X` is the channel tile,
+`Y` is the channel subtile, and `Z` is the channel round.  `f` stands for first,
+`m` for middle, `l` for last, `c` for channel, `s` for subtile, `r` for round.
+The kernel size must be at least `W+1`, the middle pass runs for as many
+iterations as possible, and the last pass handles the remainder (at least 1).
+`c`, `s`, `r`, affects the tiling of channels. We run as many tiles of `c` as
+possible, followed by rounds of `s`. We determine how many tiles of `c` to run
+based on rounding the number of channels up to `r`. `r` is determined based on
+the natural tiling size of the microarchitecture (e.g. SSE/AVX) and the number
+of elements we can read OOB (`XNN_EXTRA_BYTES`).
 
 ## Average Pooling and Global Average Pooling
 

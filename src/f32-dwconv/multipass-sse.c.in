@@ -7,6 +7,7 @@ $assert CHANNEL_TILE % 4 == 0
 $assert CHANNEL_SUBTILE % 4 == 0
 $assert CHANNEL_SUBTILE <= CHANNEL_TILE
 $assert CHANNEL_TILE % CHANNEL_SUBTILE == 0
+$assert CHANNEL_ROUND == 4
 $assert MIDDLE_PASS_TILE <= LAST_PASS_TILE
 $assert FIRST_PASS_TILE >= 1
 $assert MIDDLE_PASS_TILE >= 1
@@ -23,7 +24,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_minmax_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST_PASS_TILE}l${CHANNEL_TILE}c${CHANNEL_SUBTILE}s__sse${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_f32_dwconv_minmax_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST_PASS_TILE}l${CHANNEL_TILE}c${CHANNEL_SUBTILE}s${CHANNEL_ROUND}r__sse${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -89,7 +90,7 @@ void xnn_f32_dwconv_minmax_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST
           b += ${CHANNEL_TILE};
         }
       $else:
-        size_t c = round_up_po2(channels, 4);
+        size_t c = round_up_po2(channels, ${CHANNEL_ROUND});
         for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
           $for C in range(0, CHANNEL_TILE, 4):
             $if C == 0:
@@ -239,7 +240,7 @@ void xnn_f32_dwconv_minmax_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST
           b += ${CHANNEL_TILE};
         }
       $else:
-        size_t c = round_up_po2(channels, 4);
+        size_t c = round_up_po2(channels, ${CHANNEL_ROUND});
         for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
           $for C in range(0, CHANNEL_TILE, 4):
             $if C == 0:
