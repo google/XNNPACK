@@ -4,4 +4,4 @@
 # LICENSE file in the root directory of this source tree.
 
 # Scalar
-- name: xnn_xx_transposev_ukernel__1x1_memcpy
+- name: xnn_xx_transposev_ukernel__1x1_scalar_memcpy

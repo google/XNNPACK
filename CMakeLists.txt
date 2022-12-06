@@ -322,8 +322,8 @@ SET(JIT_AARCH64_SRCS
 
 SET(PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS
   src/u8-lut32norm/u8-lut32norm-scalar.c
-  src/xx-copy/xx-copy-memcpy.c
-  src/xx-transpose/xx-transpose-1x1-memcpy.c
+  src/xx-copy/xx-copy-scalar-memcpy.c
+  src/xx-transpose/xx-transpose-1x1-scalar-memcpy.c
   src/x8-lut/gen/x8-lut-scalar-x4.c
   src/x24-transposec/gen/x24-transposec-1x2-scalar.c)
 
@@ -1436,10 +1436,10 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/u32-vlog/gen/u32-vlog-scalar-x3.c
   src/u32-vlog/gen/u32-vlog-scalar-x4.c
   src/u64-u32-vsqrtshift/u64-u32-vsqrtshift-scalar-cvtu32-sqrt-cvtu32f64-x1.c
-  src/xx-copy/xx-copy-memcpy.c
+  src/xx-copy/xx-copy-scalar-memcpy.c
   src/xx-fill/xx-fill-scalar-x16.c
   src/xx-pad/xx-pad-scalar.c
-  src/xx-transpose/xx-transpose-1x1-memcpy.c
+  src/xx-transpose/xx-transpose-1x1-scalar-memcpy.c
   src/x8-lut/gen/x8-lut-scalar-x1.c
   src/x8-lut/gen/x8-lut-scalar-x2.c
   src/x8-lut/gen/x8-lut-scalar-x4.c

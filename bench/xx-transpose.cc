@@ -61,7 +61,7 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
   b->Args({49153, 8, 128});
 }
 
-BENCHMARK_CAPTURE(transpose, 1x1_mmemcpy, xnn_xx_transposev_ukernel__1x1_memcpy)
+BENCHMARK_CAPTURE(transpose, 1x1_scalar_memcpy, xnn_xx_transposev_ukernel__1x1_scalar_memcpy)
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

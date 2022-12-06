@@ -27,7 +27,7 @@ extern "C" {
       size_t block_width,                               \
       size_t block_height);
 
-DECLARE_XX_TRANSPOSEV_UKERNEL_FUNCTION(xnn_xx_transposev_ukernel__1x1_memcpy)
+DECLARE_XX_TRANSPOSEV_UKERNEL_FUNCTION(xnn_xx_transposev_ukernel__1x1_scalar_memcpy)
 
 #define DECLARE_X64_TRANSPOSEC_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                             \

@@ -10,7 +10,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
 
-void xnn_xx_transposev_ukernel__1x1_memcpy(
+void xnn_xx_transposev_ukernel__1x1_scalar_memcpy(
     const void* input,
     void* output,
     size_t input_row_stride,

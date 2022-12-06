@@ -1165,7 +1165,7 @@ DECLARE_U64_U32_VSQRTSHIFT_UKERNEL_FUNCTION(xnn_u64_u32_vsqrtshift_ukernel__scal
       void* output,                                 \
       const void* params);
 
-DECLARE_XX_VUNARY_UKERNEL_FUNCTION(xnn_xx_copy_ukernel__memcpy)
+DECLARE_XX_VUNARY_UKERNEL_FUNCTION(xnn_xx_copy_ukernel__scalar_memcpy)
 
 #ifdef __cplusplus
 }  // extern "C"

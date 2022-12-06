@@ -1531,7 +1531,7 @@ static void init(void) {
     #ifndef XNN_NO_XX_OPERATORS
       init_flags |= XNN_INIT_FLAG_XX;
 
-      xnn_params.xx.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__memcpy;
+      xnn_params.xx.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
       xnn_params.xx.fill = (struct fill_parameters) {
         .ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__neon_x64,
         .row_tile = 1,
@@ -2090,7 +2090,7 @@ static void init(void) {
     #ifndef XNN_NO_XX_OPERATORS
       init_flags |= XNN_INIT_FLAG_XX;
 
-      xnn_params.xx.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__memcpy;
+      xnn_params.xx.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
       xnn_params.xx.fill = (struct fill_parameters) {
         .ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__scalar_x16,
         .row_tile = 1,
@@ -3679,7 +3679,7 @@ static void init(void) {
   #ifndef XNN_NO_XX_OPERATORS
     init_flags |= XNN_INIT_FLAG_XX;
 
-    xnn_params.xx.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__memcpy;
+    xnn_params.xx.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
     xnn_params.xx.fill = (struct fill_parameters) {
       .ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__neon_x64,
       .row_tile = 1,
@@ -5552,7 +5552,7 @@ static void init(void) {
   #ifndef XNN_NO_XX_OPERATORS
     init_flags |= XNN_INIT_FLAG_XX;
 
-    xnn_params.xx.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__memcpy;
+    xnn_params.xx.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
     xnn_params.xx.fill = (struct fill_parameters) {
       .ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__sse2_x64,
       .row_tile = 1,
@@ -6493,7 +6493,7 @@ static void init(void) {
   #ifndef XNN_NO_XX_OPERATORS
     init_flags |= XNN_INIT_FLAG_XX;
 
-    xnn_params.xx.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__memcpy;
+    xnn_params.xx.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
     xnn_params.xx.fill = (struct fill_parameters) {
       .ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__wasmsimd_x64,
       .row_tile = 1,
@@ -7215,7 +7215,7 @@ static void init(void) {
   #ifndef XNN_NO_XX_OPERATORS
     init_flags |= XNN_INIT_FLAG_XX;
 
-    xnn_params.xx.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__memcpy;
+    xnn_params.xx.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
     xnn_params.xx.fill = (struct fill_parameters) {
       .ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__scalar_x16,
       .row_tile = 1,
@@ -7773,7 +7773,7 @@ static void init(void) {
   #ifndef XNN_NO_XX_OPERATORS
     init_flags |= XNN_INIT_FLAG_XX;
 
-    xnn_params.xx.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__memcpy;
+    xnn_params.xx.copy = (xnn_vunary_ukernel_fn) xnn_xx_copy_ukernel__scalar_memcpy;
     xnn_params.xx.fill = (struct fill_parameters) {
       .ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__scalar_x16,
       .row_tile = 1,
