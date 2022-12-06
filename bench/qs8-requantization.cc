@@ -99,8 +99,8 @@ static void qs8_requantization(
                     xnn_qs8_requantize_fp32__sse2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, int8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(qs8_requantization, fp32__sse4,
-                    xnn_qs8_requantize_fp32__sse4,
+  BENCHMARK_CAPTURE(qs8_requantization, fp32__sse41,
+                    xnn_qs8_requantize_fp32__sse41,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, int8_t>)
     ->UseRealTime();
@@ -114,8 +114,8 @@ static void qs8_requantization(
                     benchmark::utils::CheckSSSE3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, int8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(qs8_requantization, gemmlowp__sse4,
-                    xnn_qs8_requantize_gemmlowp__sse4,
+  BENCHMARK_CAPTURE(qs8_requantization, gemmlowp__sse41,
+                    xnn_qs8_requantize_gemmlowp__sse41,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, int8_t>)
     ->UseRealTime();
@@ -129,19 +129,19 @@ static void qs8_requantization(
                     benchmark::utils::CheckSSSE3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, int8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(qs8_requantization, rndna__sse4,
-                    xnn_qs8_requantize_rndna__sse4,
+  BENCHMARK_CAPTURE(qs8_requantization, rndna__sse41,
+                    xnn_qs8_requantize_rndna__sse41,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, int8_t>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(qs8_requantization, rndnu__sse4_sra,
-                    xnn_qs8_requantize_rndnu__sse4_sra,
+  BENCHMARK_CAPTURE(qs8_requantization, rndnu__sse41_sra,
+                    xnn_qs8_requantize_rndnu__sse41_sra,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, int8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(qs8_requantization, rndnu__sse4_srl,
-                    xnn_qs8_requantize_rndnu__sse4_srl,
+  BENCHMARK_CAPTURE(qs8_requantization, rndnu__sse41_srl,
+                    xnn_qs8_requantize_rndnu__sse41_srl,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, int8_t>)
     ->UseRealTime();
