@@ -21,11 +21,13 @@
 #include <xnnpack/indirection.h>
 
 
-enum xnn_status xnn_create_resize_bilinear2d_nchw_f16(
+enum xnn_status create_resize_bilinear2d_nchw(
     size_t channels,
     size_t input_pixel_stride,
     size_t output_pixel_stride,
     uint32_t flags,
+    uint32_t datatype_init_flags,
+    enum xnn_operator_type operator_type,
     xnn_operator_t* resize_op_out)
 {
   xnn_operator_t resize_op = NULL;
@@ -33,16 +35,15 @@ enum xnn_status xnn_create_resize_bilinear2d_nchw_f16(
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f16));
+      xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
   status = xnn_status_unsupported_hardware;
 
-  const uint32_t datatype_init_flags = XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE;
   if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
     xnn_log_error("failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f16));
+      xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
@@ -51,7 +52,7 @@ enum xnn_status xnn_create_resize_bilinear2d_nchw_f16(
   if (channels == 0) {
     xnn_log_error(
       "failed to create %s operator with %zu channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f16), channels);
+      xnn_operator_type_to_string(operator_type), channels);
     goto error;
   }
 
@@ -59,7 +60,7 @@ enum xnn_status xnn_create_resize_bilinear2d_nchw_f16(
     xnn_log_error(
       "failed to create %s operator with input pixel stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f16), input_pixel_stride, channels);
+      xnn_operator_type_to_string(operator_type), input_pixel_stride, channels);
     goto error;
   }
 
@@ -67,7 +68,7 @@ enum xnn_status xnn_create_resize_bilinear2d_nchw_f16(
     xnn_log_error(
       "failed to create %s operator with output pixel stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f16), output_pixel_stride, channels);
+      xnn_operator_type_to_string(operator_type), output_pixel_stride, channels);
     goto error;
   }
 
@@ -77,7 +78,7 @@ enum xnn_status xnn_create_resize_bilinear2d_nchw_f16(
   if (resize_op == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f16));
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
@@ -85,7 +86,7 @@ enum xnn_status xnn_create_resize_bilinear2d_nchw_f16(
   resize_op->input_pixel_stride = input_pixel_stride;
   resize_op->output_pixel_stride = output_pixel_stride;
 
-  resize_op->type = xnn_operator_type_resize_bilinear_nchw_f16;
+  resize_op->type = operator_type;
   resize_op->flags = flags;
 
   resize_op->state = xnn_run_state_invalid;
@@ -96,6 +97,23 @@ enum xnn_status xnn_create_resize_bilinear2d_nchw_f16(
 error:
   xnn_delete_operator(resize_op);
   return status;
+}
+
+enum xnn_status xnn_create_resize_bilinear2d_nchw_f16(
+    size_t channels,
+    size_t input_pixel_stride,
+    size_t output_pixel_stride,
+    uint32_t flags,
+    xnn_operator_t* resize_op_out)
+{
+  return create_resize_bilinear2d_nchw(
+    channels,
+    input_pixel_stride,
+    output_pixel_stride,
+    flags,
+    XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE,
+    xnn_operator_type_resize_bilinear_nchw_f16,
+    resize_op_out);
 }
 
 enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
@@ -105,66 +123,16 @@ enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
     uint32_t flags,
     xnn_operator_t* resize_op_out)
 {
-  xnn_operator_t resize_op = NULL;
-  enum xnn_status status = xnn_status_uninitialized;
-
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f32));
-    goto error;
-  }
-
-  status = xnn_status_invalid_parameter;
-
-  if (channels == 0) {
-    xnn_log_error(
-      "failed to create %s operator with %zu channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f32), channels);
-    goto error;
-  }
-
-  if (input_pixel_stride < channels) {
-    xnn_log_error(
-      "failed to create %s operator with input pixel stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f32), input_pixel_stride, channels);
-    goto error;
-  }
-
-  if (output_pixel_stride < channels) {
-    xnn_log_error(
-      "failed to create %s operator with output pixel stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f32), output_pixel_stride, channels);
-    goto error;
-  }
-
-  status = xnn_status_out_of_memory;
-
-  resize_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
-  if (resize_op == NULL) {
-    xnn_log_error(
-      "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f32));
-    goto error;
-  }
-
-  resize_op->channels = channels;
-  resize_op->input_pixel_stride = input_pixel_stride;
-  resize_op->output_pixel_stride = output_pixel_stride;
-
-  resize_op->type = xnn_operator_type_resize_bilinear_nchw_f32;
-  resize_op->flags = flags;
-
-  resize_op->state = xnn_run_state_invalid;
-
-  *resize_op_out = resize_op;
-  return xnn_status_success;
-
-error:
-  xnn_delete_operator(resize_op);
-  return status;
+  return create_resize_bilinear2d_nchw(
+    channels,
+    input_pixel_stride,
+    output_pixel_stride,
+    flags,
+    XNN_INIT_FLAG_F32,
+    xnn_operator_type_resize_bilinear_nchw_f32,
+    resize_op_out);
 }
+
 
 static enum xnn_status setup_resize_bilinear2d_nchw(
     xnn_operator_t resize_op,
