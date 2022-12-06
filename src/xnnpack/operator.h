@@ -36,7 +36,8 @@ struct xnn_ukernel_dwconv {
     xnn_dwconv_multipass_ukernel_fn multipass_fn;
   };
   uint8_t primary_tile;
-  uint8_t incremental_tile;
+  uint8_t middle_tile;
+  uint8_t last_tile;
 };
 
 // Direct 2D Depthwise Convolution

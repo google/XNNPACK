@@ -313,8 +313,10 @@ struct dwconv_parameters {
     xnn_init_f32_minmax_params_fn f32;
   } init;
   uint8_t channel_tile;
-  uint8_t primary_tile;
-  uint8_t incremental_tile;
+  uint8_t channel_subtile;
+  uint8_t primary_tile;  // First tile in multipass.
+  uint8_t middle_tile;
+  uint8_t last_tile;  // Will be zero for unipass, non-zero for multipass.
 };
 
 struct gavgpool_parameters {

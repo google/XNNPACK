@@ -47,7 +47,7 @@ static void DWConvEnd2EndBenchmark(
       xnn_params.qu8.dwconv[i].minmax.unipass = xnn_dwconv_unipass_ukernel_fn(dwconv);
       xnn_params.qu8.dwconv[i].channel_tile = channel_tile;
       xnn_params.qu8.dwconv[i].primary_tile = primary_tile;
-      xnn_params.qu8.dwconv[i].incremental_tile = 0;
+      xnn_params.qu8.dwconv[i].last_tile = 0;
       xnn_params.qu8.dwconv[i].init.qu8 = init_params;
       break;
     }

@@ -487,7 +487,8 @@ static enum xnn_status create_convolution2d_nhwc(
       convolution_op->ukernel.dwconv = (struct xnn_ukernel_dwconv) {
         .unipass_fn = ukernels->unipass,
         .primary_tile = dwconv_ukernel->primary_tile,
-        .incremental_tile = dwconv_ukernel->incremental_tile,
+        .middle_tile = dwconv_ukernel->middle_tile,
+        .last_tile = dwconv_ukernel->last_tile,
       };
 
       zero_size = XNN_EXTRA_BYTES + (c_stride << log2_input_element_size);
