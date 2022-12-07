@@ -201,8 +201,6 @@ static void f32_dwconv(
   const size_t step_width = dilation == 1 ? std::min(subsampling, kernel_width) : kernel_width;
   const size_t step_height = kernel_size + (output_width - 1) * step_width * kernel_height;
 
-  const size_t c_stride = benchmark::utils::RoundUp<size_t>(channels, channel_tile);
-
   std::vector<float> a(channels * input_height * input_width + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   std::vector<float> k(channels * kernel_size);
@@ -213,8 +211,10 @@ static void f32_dwconv(
   std::vector<float> z(channels + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float, AlignedAllocator<float, 64>> buffer(channels + XNN_ALLOCATION_ALIGNMENT / sizeof(float));
 
-  const size_t w_elements = (kernel_size + 1) * c_stride;
-  const size_t tile_size = xnn_multipass_dwconv_tile_size(kernel_size, first_pass_tile, middle_pass_tile, last_pass_tile);
+  const size_t tile_size = xnn_multipass_dwconv_tile_size(
+    kernel_size, first_pass_tile, middle_pass_tile, last_pass_tile);
+  const size_t w_elements = xnn_multipass_dwconv_weights_count(
+    tile_size, channels, channel_tile, channel_subtile, channel_round);
   // Can read (tile_size - kernel_size) elements after end of indirection buffer.
   const size_t i_elements = tile_size - kernel_size + output_height * step_height;
   const size_t c_elements = output_size * channels;
