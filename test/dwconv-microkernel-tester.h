@@ -23,6 +23,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/microkernel-utils.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/microfnptr.h>
@@ -825,7 +826,7 @@ class DWConvMicrokernelTester {
       kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
     std::vector<const float*> indirection((width() - 1) * step() + tile_size);
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
-    std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_EXTRA_BYTES / sizeof(float) + channels());
+    std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_ALLOCATION_ALIGNMENT / sizeof(float) + channels());
     std::vector<float> kernel(channels() * kernel_size());
     std::vector<float> bias(channels());
     std::vector<float, AlignedAllocator<float, 64>> packed_weights(

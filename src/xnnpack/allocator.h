@@ -20,18 +20,6 @@
 #include <xnnpack/params.h>
 
 
-#if XNN_ARCH_WASM
-  #define XNN_ALLOCATION_ALIGNMENT 4
-#elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-  #if XNN_PLATFORM_MOBILE
-    #define XNN_ALLOCATION_ALIGNMENT 32
-  #else
-    #define XNN_ALLOCATION_ALIGNMENT 64
-  #endif
-#else
-  #define XNN_ALLOCATION_ALIGNMENT 16
-#endif
-
 XNN_INTERNAL extern const struct xnn_allocator xnn_default_allocator;
 
 inline static void* xnn_allocate_memory(size_t memory_size) {

@@ -17,6 +17,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/indirection.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>

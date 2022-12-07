@@ -5203,6 +5203,12 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx-int32-x16.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx-int32-x24.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx-int32-x32.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c8s4r-minmax-avx.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c8s4r-minmax-avx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c8s4r-minmax-avx.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c8s4r-minmax-avx-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l32c8s4r-minmax-avx.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l32c8s4r-minmax-avx-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-avx-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx-acc2.c
@@ -5979,6 +5985,12 @@ SET(ALL_FMA3_MICROKERNEL_SRCS
   src/f16-ibilinear/gen/f16-ibilinear-fma3-c16.c
   src/f16-vmulcaddc/gen/f16-vmulcaddc-c8-minmax-fma3-2x.c
   src/f16-vmulcaddc/gen/f16-vmulcaddc-c16-minmax-fma3-2x.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c8s4r-minmax-fma3.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c8s4r-minmax-fma3-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c8s4r-minmax-fma3.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c8s4r-minmax-fma3-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l32c8s4r-minmax-fma3.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l32c8s4r-minmax-fma3-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-fma3-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-fma3.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-fma3-acc2.c
