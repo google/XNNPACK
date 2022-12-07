@@ -39,7 +39,7 @@ static void f32_vrelu(
   std::generate(x.begin(), x.end(), std::ref(f32rng));
 
   for (auto _ : state) {
-    f32_vrelu(num_elements * sizeof(float), x.data(), y.data(), NULL);
+    f32_vrelu(num_elements * sizeof(float), x.data(), y.data(), nullptr);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();

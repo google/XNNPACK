@@ -89,7 +89,7 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
         kernel.data(), bias.data(),
         127, 0.5f, 0, 255,
         0 /* flags */,
-        NULL,
+        nullptr,
         &deconvolution_op);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to create QINT8 Deconvolution operator");
@@ -207,7 +207,7 @@ void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
         kernel.data(), bias.data(),
         -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity(),
         0 /* flags */,
-        NULL,
+        nullptr,
         &deconvolution_op);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to create FP32 Deconvolution operator");
