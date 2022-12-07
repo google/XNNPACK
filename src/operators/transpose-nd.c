@@ -141,6 +141,7 @@ static enum xnn_status setup_transpose_nd(
       xnn_log_error(
           "failed to create %s operator with %zu input_stride[num_dims - 1]: input_stride[num_dims - 1] == 1",
           xnn_operator_type_to_string(transpose_op->type), input_stride[num_dims - 1]);
+      goto error;
     }
     size_t current_stride = 1;
     for (size_t i = num_dims - 1; i > 0; --i) {
@@ -148,6 +149,7 @@ static enum xnn_status setup_transpose_nd(
         xnn_log_error(
             "failed to create %s operator with %zu input_shape and %zu input_stride: input_stride >= input_shape",
             xnn_operator_type_to_string(transpose_op->type), input_shape[i], input_stride[i]);
+        goto error;
       }
       current_stride *= input_shape[i];
     }
@@ -158,6 +160,7 @@ static enum xnn_status setup_transpose_nd(
       xnn_log_error(
           "failed to create %s operator with %zu output_stride[num_dims - 1]: output_stride[num_dims - 1] == 1",
           xnn_operator_type_to_string(transpose_op->type), output_stride[num_dims - 1]);
+      goto error;
     }
     size_t current_stride = 1;
     for (size_t i = num_dims - 1; i > 0; --i) {
@@ -165,6 +168,7 @@ static enum xnn_status setup_transpose_nd(
         xnn_log_error(
             "failed to create %s operator with %zu output_shape and %zu output_stride: output_stride >= output_shape",
             xnn_operator_type_to_string(transpose_op->type), input_shape[perm[i]], output_stride[i]);
+        goto error;
       }
       current_stride *= input_shape[perm[i]];
     }
