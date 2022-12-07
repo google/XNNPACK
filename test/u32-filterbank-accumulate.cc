@@ -18,55 +18,55 @@
 
 
 #if XNN_ARCH_ARM
-  TEST(U32_FILTERBANK_ACCUMULATE__AARCH32_ARM_X1, rows_eq_1) {
+  TEST(U32_FILTERBANK_ACCUMULATE__ASM_AARCH32_ARM_X1, rows_eq_1) {
     FilterbankAccumulateMicrokernelTester()
       .rows(1)
-      .Test(xnn_u32_filterbank_accumulate_ukernel__aarch32_arm_x1);
+      .Test(xnn_u32_filterbank_accumulate_ukernel__asm_aarch32_arm_x1);
   }
 
-  TEST(U32_FILTERBANK_ACCUMULATE__AARCH32_ARM_X1, rows_gt_1) {
+  TEST(U32_FILTERBANK_ACCUMULATE__ASM_AARCH32_ARM_X1, rows_gt_1) {
     for (size_t rows = 2; rows < 10; rows++) {
       FilterbankAccumulateMicrokernelTester()
         .rows(rows)
-        .Test(xnn_u32_filterbank_accumulate_ukernel__aarch32_arm_x1);
+        .Test(xnn_u32_filterbank_accumulate_ukernel__asm_aarch32_arm_x1);
     }
   }
 #endif  // XNN_ARCH_ARM
 
 
 #if XNN_ARCH_ARM
-  TEST(U32_FILTERBANK_ACCUMULATE__AARCH32_NEON_X1, rows_eq_1) {
+  TEST(U32_FILTERBANK_ACCUMULATE__ASM_AARCH32_NEON_X1, rows_eq_1) {
     TEST_REQUIRES_ARM_NEON;
     FilterbankAccumulateMicrokernelTester()
       .rows(1)
-      .Test(xnn_u32_filterbank_accumulate_ukernel__aarch32_neon_x1);
+      .Test(xnn_u32_filterbank_accumulate_ukernel__asm_aarch32_neon_x1);
   }
 
-  TEST(U32_FILTERBANK_ACCUMULATE__AARCH32_NEON_X1, rows_gt_1) {
+  TEST(U32_FILTERBANK_ACCUMULATE__ASM_AARCH32_NEON_X1, rows_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 2; rows < 10; rows++) {
       FilterbankAccumulateMicrokernelTester()
         .rows(rows)
-        .Test(xnn_u32_filterbank_accumulate_ukernel__aarch32_neon_x1);
+        .Test(xnn_u32_filterbank_accumulate_ukernel__asm_aarch32_neon_x1);
     }
   }
 #endif  // XNN_ARCH_ARM
 
 
 #if XNN_ARCH_ARM
-  TEST(U32_FILTERBANK_ACCUMULATE__AARCH32_NEON_X2, rows_eq_1) {
+  TEST(U32_FILTERBANK_ACCUMULATE__ASM_AARCH32_NEON_X2, rows_eq_1) {
     TEST_REQUIRES_ARM_NEON;
     FilterbankAccumulateMicrokernelTester()
       .rows(1)
-      .Test(xnn_u32_filterbank_accumulate_ukernel__aarch32_neon_x2);
+      .Test(xnn_u32_filterbank_accumulate_ukernel__asm_aarch32_neon_x2);
   }
 
-  TEST(U32_FILTERBANK_ACCUMULATE__AARCH32_NEON_X2, rows_gt_1) {
+  TEST(U32_FILTERBANK_ACCUMULATE__ASM_AARCH32_NEON_X2, rows_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t rows = 2; rows < 10; rows++) {
       FilterbankAccumulateMicrokernelTester()
         .rows(rows)
-        .Test(xnn_u32_filterbank_accumulate_ukernel__aarch32_neon_x2);
+        .Test(xnn_u32_filterbank_accumulate_ukernel__asm_aarch32_neon_x2);
     }
   }
 #endif  // XNN_ARCH_ARM

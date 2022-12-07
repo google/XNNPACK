@@ -26,7 +26,7 @@ class Generator : public MacroAssembler {
 };
 
 
-// void xnn_f32_gemm_minmax_ukernel_4x8__aarch32_neon_ld64(
+// void xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_ld64(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5
@@ -53,7 +53,7 @@ class Generator : public MacroAssembler {
 // C3   r6 d28-d29 q14  d30-d31 q15
 // clamp  (r5) d4 d5 d6 d7
 
-// Converted from: src/f32-gemm/gen/f32-gemm-4x8-minmax-aarch32-neon-ld64.S
+// Converted from: src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-ld64.S
 void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
 {
   assert(max_mr <= 4);

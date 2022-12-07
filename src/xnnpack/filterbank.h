@@ -23,9 +23,9 @@ extern "C" {
     const uint16_t* weights,                                        \
     uint64_t* output);
 
-DECLARE_U32_FILTERBANK_ACCUMULATE_UKERNEL_FUNCTION(xnn_u32_filterbank_accumulate_ukernel__aarch32_arm_x1)
-DECLARE_U32_FILTERBANK_ACCUMULATE_UKERNEL_FUNCTION(xnn_u32_filterbank_accumulate_ukernel__aarch32_neon_x1)
-DECLARE_U32_FILTERBANK_ACCUMULATE_UKERNEL_FUNCTION(xnn_u32_filterbank_accumulate_ukernel__aarch32_neon_x2)
+DECLARE_U32_FILTERBANK_ACCUMULATE_UKERNEL_FUNCTION(xnn_u32_filterbank_accumulate_ukernel__asm_aarch32_arm_x1)
+DECLARE_U32_FILTERBANK_ACCUMULATE_UKERNEL_FUNCTION(xnn_u32_filterbank_accumulate_ukernel__asm_aarch32_neon_x1)
+DECLARE_U32_FILTERBANK_ACCUMULATE_UKERNEL_FUNCTION(xnn_u32_filterbank_accumulate_ukernel__asm_aarch32_neon_x2)
 DECLARE_U32_FILTERBANK_ACCUMULATE_UKERNEL_FUNCTION(xnn_u32_filterbank_accumulate_ukernel__neon_x1)
 DECLARE_U32_FILTERBANK_ACCUMULATE_UKERNEL_FUNCTION(xnn_u32_filterbank_accumulate_ukernel__neon_x2)
 DECLARE_U32_FILTERBANK_ACCUMULATE_UKERNEL_FUNCTION(xnn_u32_filterbank_accumulate_ukernel__scalar_x1)

@@ -5,7 +5,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64(
+# void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64(
 #     size_t mr,                x0
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -35,7 +35,7 @@ $else:
 // C3  x7 v30 v31
 // clamp  v4, v5
 
-BEGIN_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
+BEGIN_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64
 
         $if INC:
           # Load cn_stride, acc
@@ -317,7 +317,7 @@ BEGIN_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_4x16__aarch64_
 9:
         RET
 
-END_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_4x16__aarch64_neonfp16arith_ld64
+END_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

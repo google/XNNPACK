@@ -25,7 +25,7 @@ class Generator : public MacroAssembler {
   void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);
 };
 
-// void xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75(
+// void xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex_a75(
 //     size_t mr,                         (x0) - unused.  mr = 1
 //     size_t nc,                         x1
 //     size_t kc,                         x2 / x0
@@ -53,7 +53,7 @@ class Generator : public MacroAssembler {
 // B v24 v25 v26 v27
 // C v16 v17
 
-// Converted from: src/f32-igemm/gen/f32-igemm-1x8-minmax-aarch64-neonfma-prfm-cortex-a75.S
+// Converted from: src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S
 void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const jit_gemm_params* jit_gemm_params)
 {
   assert(max_mr <= 1);

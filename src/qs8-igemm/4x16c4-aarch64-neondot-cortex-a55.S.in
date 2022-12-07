@@ -12,7 +12,7 @@ $DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
 $REWIND_DECREMENT = 3 if CHANNELWISE else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
 $if DATATYPE == "qu8": REWIND_DECREMENT += 4
-# void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_cortex_a55(
+# void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -42,7 +42,7 @@ $if DATATYPE == "qu8": REWIND_DECREMENT += 4
 
 // x11 temp for Cortex-A55 loads
 
-BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_cortex_a55
+BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
 
         # Clamp C pointers
         CMP     x0, 2                   // if mr < 2
@@ -750,7 +750,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x
         LDP     d8,  d9, [sp], 32
         RET
 
-END_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__aarch64_neondot_cortex_a55
+END_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

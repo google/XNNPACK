@@ -6,7 +6,7 @@
 #include <xnnpack/assembly.h>
 
 # LINT.IfChange
-# void xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ld128(
+# void xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128(
 #     size_t mr,                         x0
 #     size_t nc,                         x1
 #     size_t kc,                         x2 / x0
@@ -56,7 +56,7 @@
 # unused A   v8 v9 v10 v11
 # unused B   v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ld128
+BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
 
         # Load zero, params pointer
         LDP     x12, x8, [sp, 16]
@@ -381,7 +381,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ld128
         LDP     x20, x21, [sp], 32
         RET
 
-END_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_ld128
+END_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
 # LINT.ThenChange(f32-igemm-6x8-aarch64-neonfma-ld128.cc)
 
 #ifdef __ELF__

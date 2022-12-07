@@ -10,7 +10,7 @@ $assert not CHANNELWISE or REQUANTIZATION == "FP32"
 
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-# void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c8__aarch64_neon_mlal(
+# void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c8__asm_aarch64_neon_mlal(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -34,7 +34,7 @@ $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax
 // temp1   v3 v11 v13 v15
 
 
-BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c8__aarch64_neon_mlal${"_prfm" if PREFETCH else ""}
+BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c8__asm_aarch64_neon_mlal${"_prfm" if PREFETCH else ""}
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -387,7 +387,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8
         LDP     d8, d9, [sp], 64
         RET
 
-END_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c8__aarch64_neon_mlal${"_prfm" if PREFETCH else ""}
+END_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c8__asm_aarch64_neon_mlal${"_prfm" if PREFETCH else ""}
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

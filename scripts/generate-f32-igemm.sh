@@ -192,43 +192,43 @@ tools/xngen src/f32-igemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=1 -D ACTIV
 
 ############################### AArch64 assembly ##############################
 ### LD64 micro-kernels
-tools/xngen src/f32-igemm/4x8-aarch64-neonfma-ld64.S.in -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch64-neonfma-ld64.S &
-tools/xngen src/f32-igemm/6x8-aarch64-neonfma-ld64.S.in -o src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-ld64.S &
+tools/xngen src/f32-igemm/4x8-aarch64-neonfma-ld64.S.in -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch64-neonfma-ld64.S &
+tools/xngen src/f32-igemm/6x8-aarch64-neonfma-ld64.S.in -o src/f32-igemm/gen/f32-igemm-6x8-minmax-asm-aarch64-neonfma-ld64.S &
 
 ### LD128 micro-kernels
-tools/xngen src/f32-igemm/4x8-aarch64-neonfma-ld128.S.in -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch64-neonfma-ld128.S &
-tools/xngen src/f32-igemm/6x8-aarch64-neonfma-ld128.S.in -o src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-ld128.S &
+tools/xngen src/f32-igemm/4x8-aarch64-neonfma-ld128.S.in -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch64-neonfma-ld128.S &
+tools/xngen src/f32-igemm/6x8-aarch64-neonfma-ld128.S.in -o src/f32-igemm/gen/f32-igemm-6x8-minmax-asm-aarch64-neonfma-ld128.S &
 
 ### MRx2 micro-kernels
-tools/xngen src/f32-igemm/4x2-aarch64-neonfma-ld64.S.in  -o src/f32-igemm/gen/f32-igemm-4x2-minmax-aarch64-neonfma-ld64.S &
-tools/xngen src/f32-igemm/4x2-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x2-minmax-aarch64-neonfma-cortex-a75.S &
-tools/xngen src/f32-igemm/4x2-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x2-minmax-aarch64-neonfma-prfm-cortex-a75.S &
+tools/xngen src/f32-igemm/4x2-aarch64-neonfma-ld64.S.in  -o src/f32-igemm/gen/f32-igemm-4x2-minmax-asm-aarch64-neonfma-ld64.S &
+tools/xngen src/f32-igemm/4x2-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x2-minmax-asm-aarch64-neonfma-cortex-a75.S &
+tools/xngen src/f32-igemm/4x2-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x2-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S &
 
 ### Cortex A53 micro-kernels
-tools/xngen src/f32-igemm/1x8-aarch64-neonfma-cortex-a53.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-aarch64-neonfma-cortex-a53.S &
-tools/xngen src/f32-igemm/1x8-aarch64-neonfma-cortex-a53.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-aarch64-neonfma-prfm-cortex-a53.S &
-tools/xngen src/f32-igemm/4x8-aarch64-neonfma-cortex-a53.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch64-neonfma-cortex-a53.S &
-tools/xngen src/f32-igemm/4x8-aarch64-neonfma-cortex-a53.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch64-neonfma-prfm-cortex-a53.S &
-tools/xngen src/f32-igemm/6x8-aarch64-neonfma-cortex-a53.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-cortex-a53.S &
-tools/xngen src/f32-igemm/6x8-aarch64-neonfma-cortex-a53.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-prfm-cortex-a53.S &
+tools/xngen src/f32-igemm/1x8-aarch64-neonfma-cortex-a53.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch64-neonfma-cortex-a53.S &
+tools/xngen src/f32-igemm/1x8-aarch64-neonfma-cortex-a53.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch64-neonfma-prfm-cortex-a53.S &
+tools/xngen src/f32-igemm/4x8-aarch64-neonfma-cortex-a53.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch64-neonfma-cortex-a53.S &
+tools/xngen src/f32-igemm/4x8-aarch64-neonfma-cortex-a53.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch64-neonfma-prfm-cortex-a53.S &
+tools/xngen src/f32-igemm/6x8-aarch64-neonfma-cortex-a53.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-asm-aarch64-neonfma-cortex-a53.S &
+tools/xngen src/f32-igemm/6x8-aarch64-neonfma-cortex-a53.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-asm-aarch64-neonfma-prfm-cortex-a53.S &
 
 ### Cortex A75 micro-kernels
-tools/xngen src/f32-igemm/1x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-aarch64-neonfma-cortex-a75.S &
-tools/xngen src/f32-igemm/1x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-aarch64-neonfma-prfm-cortex-a75.S &
-tools/xngen src/f32-igemm/4x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch64-neonfma-cortex-a75.S &
-tools/xngen src/f32-igemm/4x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch64-neonfma-prfm-cortex-a75.S &
-tools/xngen src/f32-igemm/5x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-5x8-minmax-aarch64-neonfma-cortex-a75.S &
-tools/xngen src/f32-igemm/5x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-5x8-minmax-aarch64-neonfma-prfm-cortex-a75.S &
-tools/xngen src/f32-igemm/6x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-cortex-a75.S &
-tools/xngen src/f32-igemm/6x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S &
+tools/xngen src/f32-igemm/1x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch64-neonfma-cortex-a75.S &
+tools/xngen src/f32-igemm/1x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S &
+tools/xngen src/f32-igemm/4x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch64-neonfma-cortex-a75.S &
+tools/xngen src/f32-igemm/4x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S &
+tools/xngen src/f32-igemm/5x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-5x8-minmax-asm-aarch64-neonfma-cortex-a75.S &
+tools/xngen src/f32-igemm/5x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-5x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S &
+tools/xngen src/f32-igemm/6x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-asm-aarch64-neonfma-cortex-a75.S &
+tools/xngen src/f32-igemm/6x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S &
 
 ############################### AArch32 assembly ##############################
-tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a53.S.in       -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-cortex-a53.S &
-tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a53.S.in       -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-prfm-cortex-a53.S &
-tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a75.S.in       -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-cortex-a75.S &
-tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a75.S.in       -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-prfm-cortex-a75.S &
-tools/xngen src/f32-igemm/4x8-minmax-aarch32-neon-cortex-a7.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-cortex-a7.S &
-tools/xngen src/f32-igemm/4x8-minmax-aarch32-neon-ld64.S.in      -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-ld64.S &
+tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a53.S.in       -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a53.S &
+tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a53.S.in       -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S &
+tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a75.S.in       -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a75.S &
+tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a75.S.in       -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a75.S &
+tools/xngen src/f32-igemm/4x8-minmax-aarch32-neon-cortex-a7.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S &
+tools/xngen src/f32-igemm/4x8-minmax-aarch32-neon-ld64.S.in      -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-ld64.S &
 
 ################################### ARM NEON ##################################
 ### LD64 micro-kernels
@@ -344,15 +344,15 @@ tools/generate-gemm-test.py --spec test/f32-igemm-jit.yaml --output test/f32-ige
 
 ###################################### JIT ####################################
 # AArch32
-scripts/convert-assembly-to-jit.py --reload-params -i src/f32-igemm/f32-igemm-4x8-minmax-aarch32-neon-cortex-a55.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a55.cc &
-scripts/convert-assembly-to-jit.py --reload-params -i src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-cortex-a7.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a7.cc &
-scripts/convert-assembly-to-jit.py --reload-params -i src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-ld64.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-ld64.cc &
-scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-prfm-cortex-a75.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a75.cc &
-scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-prfm-cortex-a53.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a53.cc &
+scripts/convert-assembly-to-jit.py --reload-params -i src/f32-igemm/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a55.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a55.cc &
+scripts/convert-assembly-to-jit.py --reload-params -i src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a7.cc &
+scripts/convert-assembly-to-jit.py --reload-params -i src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-ld64.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-ld64.cc &
+scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a75.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a75.cc &
+scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S -o src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a53.cc &
 # AArch64
-scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-1x8-minmax-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-igemm/f32-igemm-1x8-aarch64-neonfma-cortex-a75.cc &
-scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-igemm/f32-igemm-4x8-aarch64-neonfma-cortex-a75.cc &
-scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-igemm/f32-igemm-6x8-aarch64-neonfma-cortex-a75.cc &
-scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-ld128.S -o src/f32-igemm/f32-igemm-6x8-aarch64-neonfma-ld128.cc &
+scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-igemm/f32-igemm-1x8-aarch64-neonfma-cortex-a75.cc &
+scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-igemm/f32-igemm-4x8-aarch64-neonfma-cortex-a75.cc &
+scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-6x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-igemm/f32-igemm-6x8-aarch64-neonfma-cortex-a75.cc &
+scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-6x8-minmax-asm-aarch64-neonfma-ld128.S -o src/f32-igemm/f32-igemm-6x8-aarch64-neonfma-ld128.cc &
 
 wait

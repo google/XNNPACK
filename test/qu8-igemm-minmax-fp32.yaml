@@ -4,11 +4,11 @@
 # LICENSE file in the root directory of this source tree.
 
 # AArch64 assembly
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_cortex_a55
+- name: xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
   init: xnn_init_qu8_conv_minmax_fp32_neonv8_params
   k-block: 16
   assembly: true
-- name: xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__aarch64_neondot_ld128
+- name: xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128
   init: xnn_init_qu8_conv_minmax_fp32_neonv8_params
   k-block: 16
   assembly: true

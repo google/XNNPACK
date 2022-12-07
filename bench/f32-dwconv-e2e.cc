@@ -81,24 +81,24 @@ static void DWConvEnd2EndBenchmark(
 }
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
-  static void f32_dwconv_9p4c__aarch64_neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
+  static void f32_dwconv_9p4c__asm_aarch64_neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
-      xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma,
+      xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma,
       nullptr /* dwconv */,
       xnn_init_f32_minmax_scalar_params,
       4 /* channel tile */, 9 /* primary tile */);
   }
 
-  static void f32_dwconv_9p4c__aarch64_neonfma_cortex_a55(benchmark::State& state, models::ExecutionPlanFactory model) {
+  static void f32_dwconv_9p4c__asm_aarch64_neonfma_cortex_a55(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
-      xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55,
+      xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55,
       nullptr /* dwconv */,
       xnn_init_f32_minmax_scalar_params,
       4 /* channel tile */, 9 /* primary tile */);
   }
 
-  BENCHMARK_FP32_END2END(f32_dwconv_9p4c__aarch64_neonfma);
-  BENCHMARK_FP32_END2END(f32_dwconv_9p4c__aarch64_neonfma_cortex_a55);
+  BENCHMARK_FP32_END2END(f32_dwconv_9p4c__asm_aarch64_neonfma);
+  BENCHMARK_FP32_END2END(f32_dwconv_9p4c__asm_aarch64_neonfma_cortex_a55);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

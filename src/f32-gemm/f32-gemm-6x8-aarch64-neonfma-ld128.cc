@@ -25,7 +25,7 @@ class Generator : public MacroAssembler {
   void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);
 };
 
-// void xnn_f32_gemm_minmax_ukernel_6x8__aarch64_neonfma_ld128(
+// void xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128(
 //     size_t mr,                x0
 //     size_t nc,                x1
 //     size_t kc,                x2 / x0
@@ -73,7 +73,7 @@ class Generator : public MacroAssembler {
 // unused A   v8 v9 v10 v11
 // unused B   v12 v13 v14 v15
 
-// Converted from: src/f32-gemm/gen/f32-gemm-6x8-minmax-aarch64-neonfma-ld128.S
+// Converted from: src/f32-gemm/gen/f32-gemm-6x8-minmax-asm-aarch64-neonfma-ld128.S
 void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
 {
   assert(max_mr <= 6);

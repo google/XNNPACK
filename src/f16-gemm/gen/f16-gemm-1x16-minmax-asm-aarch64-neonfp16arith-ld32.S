@@ -1,0 +1,129 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f16-gemm/1x16-aarch64-neonfp16arith-ld32.S.in
+//   Generator: tools/xngen
+//
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <xnnpack/assembly.h>
+
+# void xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32(
+#     size_t mr,                (x0) - unused.  mr = 1
+#     size_t nc,                x1
+#     size_t kc,                x2 / x0
+#     const void*restrict a,    x3
+#     size_t a_stride,          (x4) - unused
+#     const void*restrict w,    x5
+#     void*restrict c,          x6
+#     size_t cm_stride,         (x7) - unused
+#     size_t cn_stride,         [sp] -> x14
+#     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
+
+# d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
+
+# A pointer
+# x3  a0
+
+# C pointer
+# x6  c0
+
+# Clamp v4, v5
+
+BEGIN_FUNCTION xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32
+
+        # Load cn_stride, params pointer
+        LDP     x14, x8, [sp]
+
+        # Load params values
+        LD2R    {v4.8h, v5.8h}, [x8]
+0:
+        # Load initial bias from w into accumulators
+        LDP     q16, q17, [x5], 32
+
+        MOVI    v18.8h, 0               // second set of C for pipelining FMLA
+        MOVI    v19.8h, 0
+
+        # Is there at least 2 halffloats (4 bytes)
+        SUBS    x0, x2, 4               // k = kc - 4
+
+        B.LO    3f
+
+        # Main loop - 2 halffloats of A (4 bytes)
+1:
+        LDR     s0, [x3], 4
+        LDR     q20, [x5, 0]
+        LDR     q21, [x5, 16]
+        LDR     q22, [x5, 32]
+        LDR     q23, [x5, 48]
+        SUBS    x0, x0, 4
+        FMLA    v16.8h, v20.8h, v0.h[0]
+        FMLA    v17.8h, v21.8h, v0.h[0]
+        FMLA    v18.8h, v22.8h, v0.h[1]
+        FMLA    v19.8h, v23.8h, v0.h[1]
+        ADD     x5, x5, 64
+        B.HS    1b
+
+        # Is there a remainder?- 1 halffloat of A (2 bytes)
+        TBNZ    x0, 1, 3f
+
+2:
+        FADD    v16.8h, v16.8h, v18.8h
+        FADD    v17.8h, v17.8h, v19.8h
+        SUBS    x1, x1, 16
+
+        # Clamp
+        FMAX    v16.8h, v16.8h, v4.8h
+        FMAX    v17.8h, v17.8h, v4.8h
+        FMIN    v16.8h, v16.8h, v5.8h
+        FMIN    v17.8h, v17.8h, v5.8h
+
+        # Store full 1 x 16
+        B.LO    4f
+
+        STP     q16, q17, [x6]
+        ADD     x6, x6, x14
+
+        SUB     x3,  x3, x2             // a0 -= kc
+
+        B.HI    0b
+
+        RET
+
+3:
+        # Remainder- 1 halffloat of A (2 bytes)
+        LDR     q20, [x5], 16
+        LDR     q21, [x5], 16
+        LDR     h0, [x3], 2
+        FMLA    v16.8h, v20.8h, v0.h[0]
+        FMLA    v17.8h, v21.8h, v0.h[0]
+        B       2b
+
+        # Store odd channels
+4:
+        TBZ     x1, 3, 5f
+        STR     q16, [x6], 16
+        MOV     v16.16b, v17.16b
+
+5:
+        TBZ     x1, 2, 6f
+        STR     d16, [x6], 8
+        DUP     d16, v16.d[1]
+
+6:
+        TBZ     x1, 1, 7f
+        STR     s16, [x6], 4
+        DUP     s16, v16.s[1]
+
+7:
+        TBZ     x1, 0, 8f
+        STR     h16, [x6]
+8:
+        RET
+
+END_FUNCTION xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32
+
+#ifdef __ELF__
+.section ".note.GNU-stack","",%progbits
+#endif

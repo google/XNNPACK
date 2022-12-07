@@ -21,27 +21,27 @@
 
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, c_eq_4) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, c_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     DWConvMicrokernelTester()
       .channel_tile(4)
       .kernel_tile(9)
       .channels(4)
-      .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+      .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, c_div_4) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, c_div_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 8; channels < 64; channels += 12) {
       DWConvMicrokernelTester()
         .channel_tile(4)
         .kernel_tile(9)
         .channels(channels)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, c_div_4_with_qmin) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, c_div_4_with_qmin) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 8; channels < 64; channels += 12) {
       DWConvMicrokernelTester()
@@ -49,11 +49,11 @@
         .kernel_tile(9)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, c_div_4_with_qmax) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, c_div_4_with_qmax) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 8; channels < 64; channels += 12) {
       DWConvMicrokernelTester()
@@ -61,33 +61,33 @@
         .kernel_tile(9)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, c_lt_4) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, c_lt_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 1; channels < 4; channels++) {
       DWConvMicrokernelTester()
         .channel_tile(4)
         .kernel_tile(9)
         .channels(channels)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, c_gt_4) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, c_gt_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 5; channels < 8; channels++) {
       DWConvMicrokernelTester()
         .channel_tile(4)
         .kernel_tile(9)
         .channels(channels)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, c_gt_4_with_qmin) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, c_gt_4_with_qmin) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 5; channels < 8; channels++) {
       DWConvMicrokernelTester()
@@ -95,11 +95,11 @@
         .kernel_tile(9)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, c_gt_4_with_qmax) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, c_gt_4_with_qmax) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 5; channels < 8; channels++) {
       DWConvMicrokernelTester()
@@ -107,11 +107,11 @@
         .kernel_tile(9)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, multipixel) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, multipixel) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t channels = 1; channels <= 20; channels += 3) {
       DWConvMicrokernelTester()
@@ -119,11 +119,11 @@
         .kernel_tile(9)
         .channels(channels)
         .width(3)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, multipixel_with_step) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, multipixel_with_step) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t channels = 1; channels <= 20; channels += 3) {
       for (size_t step = 2; step <= 9; step++) {
@@ -133,12 +133,12 @@
           .channels(channels)
           .width(3)
           .step(step)
-          .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+          .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, multipixel_with_output_stride) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, multipixel_with_output_stride) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t channels = 1; channels <= 20; channels += 3) {
       DWConvMicrokernelTester()
@@ -147,11 +147,11 @@
         .channels(channels)
         .width(5)
         .output_stride(23)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, multipixel_with_qmin) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, multipixel_with_qmin) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t channels = 1; channels <= 20; channels += 3) {
       DWConvMicrokernelTester()
@@ -160,11 +160,11 @@
         .channels(channels)
         .width(3)
         .qmin(128)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, multipixel_with_qmax) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, multipixel_with_qmax) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t channels = 1; channels <= 20; channels += 3) {
       DWConvMicrokernelTester()
@@ -173,11 +173,11 @@
         .channels(channels)
         .width(3)
         .qmax(128)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, input_offset) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, input_offset) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 8; channels < 64; channels += 12) {
       DWConvMicrokernelTester()
@@ -185,11 +185,11 @@
         .kernel_tile(9)
         .channels(channels)
         .input_offset(112)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA, zero) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA, zero) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t mz = 0; mz < 9; mz++) {
       for (uint32_t channels = 8; channels < 64; channels += 12) {
@@ -199,7 +199,7 @@
           .channels(channels)
           .input_offset(112)
           .zero_index(mz)
-          .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
+          .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
@@ -207,36 +207,36 @@
 
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, c_eq_4) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, c_eq_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     DWConvMicrokernelTester()
       .channel_tile(4)
       .kernel_tile(9)
       .channels(4)
-      .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+      .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, c_eq_8) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, c_eq_8) {
     TEST_REQUIRES_ARM_NEON_FMA;
     DWConvMicrokernelTester()
       .channel_tile(4)
       .kernel_tile(9)
       .channels(8)
-      .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+      .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, c_div_4) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, c_div_4) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 12; channels < 64; channels += 12) {
       DWConvMicrokernelTester()
         .channel_tile(4)
         .kernel_tile(9)
         .channels(channels)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, c_div_4_with_qmin) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, c_div_4_with_qmin) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 12; channels < 64; channels += 12) {
       DWConvMicrokernelTester()
@@ -244,11 +244,11 @@
         .kernel_tile(9)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, c_div_4_with_qmax) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, c_div_4_with_qmax) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 12; channels < 64; channels += 12) {
       DWConvMicrokernelTester()
@@ -256,33 +256,33 @@
         .kernel_tile(9)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, c_lt_8) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, c_lt_8) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 1; channels < 8; channels++) {
       DWConvMicrokernelTester()
         .channel_tile(4)
         .kernel_tile(9)
         .channels(channels)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, c_gt_8) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, c_gt_8) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 9; channels < 12; channels++) {
       DWConvMicrokernelTester()
         .channel_tile(4)
         .kernel_tile(9)
         .channels(channels)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, c_gt_8_with_qmin) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, c_gt_8_with_qmin) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 9; channels < 12; channels++) {
       DWConvMicrokernelTester()
@@ -290,11 +290,11 @@
         .kernel_tile(9)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, c_gt_8_with_qmax) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, c_gt_8_with_qmax) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 9; channels < 12; channels++) {
       DWConvMicrokernelTester()
@@ -302,11 +302,11 @@
         .kernel_tile(9)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, multipixel) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, multipixel) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t channels = 1; channels <= 20; channels += 3) {
       DWConvMicrokernelTester()
@@ -314,11 +314,11 @@
         .kernel_tile(9)
         .channels(channels)
         .width(3)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, multipixel_with_step) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, multipixel_with_step) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t channels = 1; channels <= 20; channels += 3) {
       for (size_t step = 2; step <= 9; step++) {
@@ -328,12 +328,12 @@
           .channels(channels)
           .width(3)
           .step(step)
-          .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+          .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, multipixel_with_output_stride) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, multipixel_with_output_stride) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t channels = 1; channels <= 20; channels += 3) {
       DWConvMicrokernelTester()
@@ -342,11 +342,11 @@
         .channels(channels)
         .width(5)
         .output_stride(23)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, multipixel_with_qmin) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, multipixel_with_qmin) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t channels = 1; channels <= 20; channels += 3) {
       DWConvMicrokernelTester()
@@ -355,11 +355,11 @@
         .channels(channels)
         .width(3)
         .qmin(128)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, multipixel_with_qmax) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, multipixel_with_qmax) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (size_t channels = 1; channels <= 20; channels += 3) {
       DWConvMicrokernelTester()
@@ -368,11 +368,11 @@
         .channels(channels)
         .width(3)
         .qmax(128)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, input_offset) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, input_offset) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t channels = 12; channels < 64; channels += 12) {
       DWConvMicrokernelTester()
@@ -380,11 +380,11 @@
         .kernel_tile(9)
         .channels(channels)
         .input_offset(112)
-        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+        .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_DWCONV_MINMAX_9P4C__AARCH64_NEONFMA_CORTEX_A55, zero) {
+  TEST(F32_DWCONV_MINMAX_9P4C__ASM_AARCH64_NEONFMA_CORTEX_A55, zero) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t mz = 0; mz < 9; mz++) {
       for (uint32_t channels = 12; channels < 64; channels += 12) {
@@ -394,7 +394,7 @@
           .channels(channels)
           .input_offset(112)
           .zero_index(mz)
-          .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+          .Test(xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
       }
     }
   }

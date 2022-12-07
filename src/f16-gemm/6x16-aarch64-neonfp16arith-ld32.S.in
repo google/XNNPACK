@@ -5,7 +5,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_6x16__aarch64_neonfp16arith_ld32(
+# void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32(
 #     size_t mr,                x0
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -44,7 +44,7 @@ $else:
 // unused A   v8 v9 v10 v11
 // unused B   v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_6x16__aarch64_neonfp16arith_ld32
+BEGIN_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32
 
         $if INC:
           # Load acc, params pointer
@@ -355,7 +355,7 @@ BEGIN_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_6x16__aarch64_
 8:
         RET
 
-END_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_6x16__aarch64_neonfp16arith_ld32
+END_FUNCTION xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

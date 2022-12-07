@@ -297,21 +297,21 @@ static void f32_dwconv(
 
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
-  static void f32_dwconv_9p4c__aarch64_neonfma(benchmark::State& state, const char* net) {
+  static void f32_dwconv_9p4c__asm_aarch64_neonfma(benchmark::State& state, const char* net) {
     f32_dwconv(state,
       xnn_f32_dwconv_minmax_ukernel_9p4c__neon,
       xnn_init_f32_minmax_scalar_params,
       4 /* channel tile */, 9 /* primary tile */);
   }
-  static void f32_dwconv_9p4c__aarch64_neonfma_cortex_a55(benchmark::State& state, const char* net) {
+  static void f32_dwconv_9p4c__asm_aarch64_neonfma_cortex_a55(benchmark::State& state, const char* net) {
     f32_dwconv(state,
       xnn_f32_dwconv_minmax_ukernel_9p4c__neonfma,
       xnn_init_f32_minmax_scalar_params,
       4 /* channel tile */, 9 /* primary tile */);
   }
 
-  BENCHMARK_DWCONV(f32_dwconv_9p4c__aarch64_neonfma)
-  BENCHMARK_DWCONV(f32_dwconv_9p4c__aarch64_neonfma_cortex_a55)
+  BENCHMARK_DWCONV(f32_dwconv_9p4c__asm_aarch64_neonfma)
+  BENCHMARK_DWCONV(f32_dwconv_9p4c__asm_aarch64_neonfma_cortex_a55)
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 

@@ -5,7 +5,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x12__aarch64_neonfma_cortex_a53(
+# void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x12__asm_aarch64_neonfma_cortex_a53(
 #     size_t mr,                (x0) - unused.  mr = 1
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -33,7 +33,7 @@ $else:
 
 # A53 based on A57/A75 but with LD64
 
-BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x12__aarch64_neonfma_cortex_a53
+BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x12__asm_aarch64_neonfma_cortex_a53
 
         $if INC:
           # Load cn_stride, acc
@@ -299,7 +299,7 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x12__aarch64_
 13:
         RET
 
-END_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x12__aarch64_neonfma_cortex_a53
+END_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x12__asm_aarch64_neonfma_cortex_a53
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

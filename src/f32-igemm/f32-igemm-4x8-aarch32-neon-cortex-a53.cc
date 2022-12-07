@@ -26,7 +26,7 @@ class Generator : public MacroAssembler {
 };
 
 
-// void xnn_f32_igemm_minmax_ukernel_4x8__aarch32_neon_prfm_cortex_a53(
+// void xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_prfm_cortex_a53(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5 -> sp + 68
@@ -56,7 +56,7 @@ class Generator : public MacroAssembler {
 // clamp  (r2) d4 d5 d6 d7
 // temp r0, r2 for Cortex-A53 loads
 
-// Converted from: src/f32-igemm/gen/f32-igemm-4x8-minmax-aarch32-neon-prfm-cortex-a53.S
+// Converted from: src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S
 void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const jit_gemm_params* jit_gemm_params)
 {
   assert(max_mr <= 4);

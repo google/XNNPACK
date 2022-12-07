@@ -10,7 +10,7 @@ $assert not CHANNELWISE or REQUANTIZATION == "FP32"
 
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-# void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x16c4__aarch64_neondot_ld64(
+# void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x16c4__asm_aarch64_neondot_ld64(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -30,7 +30,7 @@ $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax
 // C0  x6 v28 v29 v30 v31
 // unused v8 v9 v10 v11 v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x16c4__aarch64_neondot_ld64
+BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x16c4__asm_aarch64_neondot_ld64
         ADD     x2, x2, 3               // kc = (kc + 3) & ~3
         BIC     x2, x2, 3
 
@@ -181,7 +181,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x1
 8:
         RET
 
-END_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x16c4__aarch64_neondot_ld64
+END_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x16c4__asm_aarch64_neondot_ld64
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

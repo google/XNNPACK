@@ -21,27 +21,27 @@
 
 
 #if XNN_ARCH_ARM
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_eq_8) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_eq_8) {
     TEST_REQUIRES_ARM_NEON_V8;
     DWConvMicrokernelTester()
       .channel_tile(8)
       .kernel_tile(3)
       .channels(8)
-      .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+      .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_div_8) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_div_8) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 16; channels < 128; channels += 24) {
       DWConvMicrokernelTester()
         .channel_tile(8)
         .kernel_tile(3)
         .channels(channels)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_div_8_with_qmin) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_div_8_with_qmin) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 16; channels < 128; channels += 24) {
       DWConvMicrokernelTester()
@@ -49,11 +49,11 @@
         .kernel_tile(3)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_div_8_with_qmax) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_div_8_with_qmax) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 16; channels < 128; channels += 24) {
       DWConvMicrokernelTester()
@@ -61,33 +61,33 @@
         .kernel_tile(3)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_lt_8) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_lt_8) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 1; channels < 8; channels++) {
       DWConvMicrokernelTester()
         .channel_tile(8)
         .kernel_tile(3)
         .channels(channels)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_gt_8) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_gt_8) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 9; channels < 16; channels++) {
       DWConvMicrokernelTester()
         .channel_tile(8)
         .kernel_tile(3)
         .channels(channels)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_gt_8_with_qmin) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_gt_8_with_qmin) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 9; channels < 16; channels++) {
       DWConvMicrokernelTester()
@@ -95,11 +95,11 @@
         .kernel_tile(3)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_gt_8_with_qmax) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_gt_8_with_qmax) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 9; channels < 16; channels++) {
       DWConvMicrokernelTester()
@@ -107,11 +107,11 @@
         .kernel_tile(3)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t channels = 1; channels <= 40; channels += 7) {
       DWConvMicrokernelTester()
@@ -119,11 +119,11 @@
         .kernel_tile(3)
         .channels(channels)
         .width(3)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_step) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_step) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t channels = 1; channels <= 40; channels += 7) {
       for (size_t step = 2; step <= 3; step++) {
@@ -133,12 +133,12 @@
           .channels(channels)
           .width(3)
           .step(step)
-          .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+          .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
       }
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_output_stride) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_output_stride) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t channels = 1; channels <= 40; channels += 7) {
       DWConvMicrokernelTester()
@@ -147,11 +147,11 @@
         .channels(channels)
         .width(5)
         .output_stride(43)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_qmin) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_qmin) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t channels = 1; channels <= 40; channels += 7) {
       DWConvMicrokernelTester()
@@ -160,11 +160,11 @@
         .channels(channels)
         .width(3)
         .qmin(128)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_qmax) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_qmax) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t channels = 1; channels <= 40; channels += 7) {
       DWConvMicrokernelTester()
@@ -173,11 +173,11 @@
         .channels(channels)
         .width(3)
         .qmax(128)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, input_offset) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, input_offset) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 16; channels < 128; channels += 24) {
       DWConvMicrokernelTester()
@@ -185,11 +185,11 @@
         .kernel_tile(3)
         .channels(channels)
         .input_offset(176)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__AARCH32_NEONV8_MLA8_CORTEX_A35, zero) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, zero) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t mz = 0; mz < 3; mz++) {
       for (uint32_t channels = 16; channels < 128; channels += 24) {
@@ -199,7 +199,7 @@
           .channels(channels)
           .input_offset(176)
           .zero_index(mz)
-          .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+          .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
       }
     }
   }
@@ -579,27 +579,27 @@
 
 
 #if XNN_ARCH_ARM
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_eq_16) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_eq_16) {
     TEST_REQUIRES_ARM_NEON_V8;
     DWConvMicrokernelTester()
       .channel_tile(16)
       .kernel_tile(3)
       .channels(16)
-      .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+      .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_div_16) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_div_16) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
       DWConvMicrokernelTester()
         .channel_tile(16)
         .kernel_tile(3)
         .channels(channels)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_div_16_with_qmin) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_div_16_with_qmin) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
       DWConvMicrokernelTester()
@@ -607,11 +607,11 @@
         .kernel_tile(3)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_div_16_with_qmax) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_div_16_with_qmax) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
       DWConvMicrokernelTester()
@@ -619,33 +619,33 @@
         .kernel_tile(3)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_lt_16) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_lt_16) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 1; channels < 16; channels++) {
       DWConvMicrokernelTester()
         .channel_tile(16)
         .kernel_tile(3)
         .channels(channels)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_gt_16) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_gt_16) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 17; channels < 32; channels++) {
       DWConvMicrokernelTester()
         .channel_tile(16)
         .kernel_tile(3)
         .channels(channels)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_gt_16_with_qmin) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_gt_16_with_qmin) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 17; channels < 32; channels++) {
       DWConvMicrokernelTester()
@@ -653,11 +653,11 @@
         .kernel_tile(3)
         .channels(channels)
         .qmin(128)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, c_gt_16_with_qmax) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_gt_16_with_qmax) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 17; channels < 32; channels++) {
       DWConvMicrokernelTester()
@@ -665,11 +665,11 @@
         .kernel_tile(3)
         .channels(channels)
         .qmax(128)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       DWConvMicrokernelTester()
@@ -677,11 +677,11 @@
         .kernel_tile(3)
         .channels(channels)
         .width(3)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_step) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_step) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       for (size_t step = 2; step <= 3; step++) {
@@ -691,12 +691,12 @@
           .channels(channels)
           .width(3)
           .step(step)
-          .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+          .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
       }
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_output_stride) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_output_stride) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       DWConvMicrokernelTester()
@@ -705,11 +705,11 @@
         .channels(channels)
         .width(5)
         .output_stride(83)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_qmin) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_qmin) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       DWConvMicrokernelTester()
@@ -718,11 +718,11 @@
         .channels(channels)
         .width(3)
         .qmin(128)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_qmax) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, multipixel_with_qmax) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (size_t channels = 1; channels <= 80; channels += 15) {
       DWConvMicrokernelTester()
@@ -731,11 +731,11 @@
         .channels(channels)
         .width(3)
         .qmax(128)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, input_offset) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, input_offset) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t channels = 32; channels < 256; channels += 48) {
       DWConvMicrokernelTester()
@@ -743,11 +743,11 @@
         .kernel_tile(3)
         .channels(channels)
         .input_offset(304)
-        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+        .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
     }
   }
 
-  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__AARCH32_NEONV8_MLA8_CORTEX_A35, zero) {
+  TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, zero) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t mz = 0; mz < 3; mz++) {
       for (uint32_t channels = 32; channels < 256; channels += 48) {
@@ -757,7 +757,7 @@
           .channels(channels)
           .input_offset(304)
           .zero_index(mz)
-          .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+          .Test(xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
       }
     }
   }

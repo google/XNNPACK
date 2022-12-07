@@ -6,7 +6,7 @@
 #include <xnnpack/assembly.h>
 
 # LINT.IfChange
-# void xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a75(
+# void xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a75(
 #     size_t mr,                         (x0) - unused.  mr = 1
 #     size_t nc,                         x1
 #     size_t kc,                         x2 / x0
@@ -34,7 +34,7 @@
 # B v24 v25 v26 v27
 # C v16 v17
 
-BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a75
+BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a75
 
         # Load cn_stride, a_offset
         LDP     x10, x11, [sp]
@@ -246,7 +246,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma${"_prfm" if PRE
 13:
         RET
 
-END_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a75
+END_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a75
 # LINT.ThenChange(f32-igemm-1x8-aarch64-neonfma-cortex-a75.cc)
 
 #ifdef __ELF__

@@ -4,10 +4,10 @@
 # LICENSE file in the root directory of this source tree.
 
 # AArch64 assembly
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
   assembly: true
-- name: xnn_f32_dwconv_minmax_ukernel_9p4c__aarch64_neonfma_cortex_a55
+- name: xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55
   init: xnn_init_f32_minmax_scalar_params
   pipelined: true
   assembly: true

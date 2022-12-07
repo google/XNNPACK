@@ -11,7 +11,7 @@ $assert not CHANNELWISE or REQUANTIZATION == "FP32"
 $DATATYPE = "qc8" if CHANNELWISE else "qs8"
 $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
 $REWIND_DECREMENT = 3 if CHANNELWISE else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
-# void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__aarch64_neon_mlal(
+# void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__asm_aarch64_neon_mlal(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -37,7 +37,7 @@ $REWIND_DECREMENT = 3 if CHANNELWISE else {"RNDNU": 15, "FP32": 7}[REQUANTIZATIO
 // temp1   v3 v11 v13 v15
 // unused  v8 v9
 
-BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__aarch64_neon_mlal
+BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__asm_aarch64_neon_mlal
 
         # Clamp C pointers
         LDP     x10, x8, [sp]           // Load cn_stride, a_offset
@@ -266,7 +266,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x
         LDP     d10, d11, [sp], 48
         RET
 
-END_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__aarch64_neon_mlal
+END_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__asm_aarch64_neon_mlal
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

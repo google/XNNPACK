@@ -56,8 +56,8 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
   b->Args({1024});
 }
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
-BENCHMARK_CAPTURE(cs16_fftr, cs16_aarch32_neon_x1, xnn_cs16_fftr_ukernel__aarch32_neon_x1)->Apply(BenchmarkKernelSize)->UseRealTime();
-BENCHMARK_CAPTURE(cs16_fftr, cs16_aarch32_neon_x4, xnn_cs16_fftr_ukernel__aarch32_neon_x4)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_fftr, cs16_aarch32_neon_x1, xnn_cs16_fftr_ukernel__asm_aarch32_neon_x1)->Apply(BenchmarkKernelSize)->UseRealTime();
+BENCHMARK_CAPTURE(cs16_fftr, cs16_aarch32_neon_x4, xnn_cs16_fftr_ukernel__asm_aarch32_neon_x4)->Apply(BenchmarkKernelSize)->UseRealTime();
 #endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

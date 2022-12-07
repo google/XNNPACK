@@ -166,6 +166,8 @@ def maybe_wb(wb: bool) -> str:
 def fix_fn_name(name: str) -> str:
   if name.startswith('xnn_'):
     name = name[len('xnn_'):]
+  # replace "__asm_<arch>" with "__<arch>"
+  name = name.replace("__asm_", "__")
   # remove any type of activations from name
   if 'minmax' in name:
     name = name.replace('minmax_', '')

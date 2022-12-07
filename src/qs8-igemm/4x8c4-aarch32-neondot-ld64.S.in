@@ -14,7 +14,7 @@ $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 
 $PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
 # LINT.IfChange
-// void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch32_neondot_ld64(
+// void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__asm_aarch32_neondot_ld64(
 //     size_t mr,                                      r0
 //     size_t nc,                                      r1
 //     size_t kc,                                      r2 -> r5 -> sp + 52
@@ -63,7 +63,7 @@ $else:
 // iOS does not support 32 bit ARM with Neon DotProduct.
 #ifndef __APPLE__
 
-BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch32_neondot_ld64
+BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__asm_aarch32_neondot_ld64
         ADD     r2, r2, 3               // kc = (kc + 3) & ~3
         BIC     r2, r2, 3
         # Push 96 bytes
@@ -340,7 +340,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         ADD     sp, sp, 12              // skip pad, r2, r3
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
-END_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__aarch32_neondot_ld64
+END_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__asm_aarch32_neondot_ld64
 # LINT.ThenChange(4x8c4-rndnu-aarch32-neondot-ld64.cc)
 #endif  // __APPLE__
 

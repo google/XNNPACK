@@ -23,9 +23,9 @@ extern "C" {
     const int16_t* twiddle,                          \
     size_t stride);
 
-DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x1)
-DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x2)
-DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_samples1_ukernel__aarch32_neon_x4)
+DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_samples1_ukernel__asm_aarch32_neon_x1)
+DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_samples1_ukernel__asm_aarch32_neon_x2)
+DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_samples1_ukernel__asm_aarch32_neon_x4)
 DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_samples1_ukernel__neon)
 DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_samples1_ukernel__scalar)
 DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_samples4_ukernel__neon)
@@ -42,8 +42,8 @@ DECLARE_CS16_BFLY4_UKERNEL_FUNCTION(xnn_cs16_bfly4_ukernel__scalar_x4)
     int16_t* data,                                  \
     const int16_t* twiddle);
 
-DECLARE_CS16_FFTR_UKERNEL_FUNCTION(xnn_cs16_fftr_ukernel__aarch32_neon_x1)
-DECLARE_CS16_FFTR_UKERNEL_FUNCTION(xnn_cs16_fftr_ukernel__aarch32_neon_x4)
+DECLARE_CS16_FFTR_UKERNEL_FUNCTION(xnn_cs16_fftr_ukernel__asm_aarch32_neon_x1)
+DECLARE_CS16_FFTR_UKERNEL_FUNCTION(xnn_cs16_fftr_ukernel__asm_aarch32_neon_x4)
 DECLARE_CS16_FFTR_UKERNEL_FUNCTION(xnn_cs16_fftr_ukernel__neon_x4)
 DECLARE_CS16_FFTR_UKERNEL_FUNCTION(xnn_cs16_fftr_ukernel__scalar_x1)
 DECLARE_CS16_FFTR_UKERNEL_FUNCTION(xnn_cs16_fftr_ukernel__scalar_x2)
