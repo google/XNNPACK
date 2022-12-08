@@ -33,7 +33,7 @@ def split_ukernel_name(name):
   channel_tile = int(match.group(4))
   row_tile = int(match.group(6))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(5))
+  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(5))
   return channel_tile, row_tile, arch, isa
 
 
@@ -269,9 +269,6 @@ def main(args):
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
       channel_tile, row_tile, arch, isa = split_ukernel_name(name)
-
-      # specification can override architecture
-      arch = ukernel_spec.get("arch", arch)
 
       test_case = generate_test_cases(
         name, channel_tile, row_tile, init_fn, isa)

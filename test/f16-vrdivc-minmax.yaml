@@ -6,12 +6,8 @@
 # ARM NEON+FP16ARITH
 - name: xnn_f16_vrdivc_minmax_ukernel__aarch64_neonfp16arith_x8
   init: xnn_init_f16_minmax_fp16arith_params
-  arch:
-  - aarch64
 - name: xnn_f16_vrdivc_minmax_ukernel__aarch64_neonfp16arith_x16
   init: xnn_init_f16_minmax_fp16arith_params
-  arch:
-  - aarch64
 
 # ARM NEON+FP16ARITH
 - name: xnn_f16_vrdivc_minmax_ukernel__fp16arith_x1

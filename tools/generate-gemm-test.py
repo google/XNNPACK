@@ -47,13 +47,13 @@ def split_ukernel_name(name):
   else:
     kr = 1
   mr, nr = map(int, param_spec.split("x"))
-  arch, isa = xnncommon.parse_target_name(target_name)
+  arch, isa, assembly = xnncommon.parse_target_name(target_name)
 
   requantization = common_parts[-3]
   if requantization not in ["fp32", "rndnu"]:
     requantization = None
 
-  return mr, nr, kr, sr, xw, requantization, arch, isa
+  return mr, nr, kr, sr, xw, requantization, arch, isa, assembly
 
 
 GEMM_TEST_CODE = """\
@@ -1004,12 +1004,9 @@ def main(args):
       k_block = int(ukernel_spec["k-block"])
       init_fn = ukernel_spec.get("init")
       pipelined = bool(ukernel_spec.get("pipelined", False))
-      assembly = bool(ukernel_spec.get("assembly", False))
       jit = name.startswith("xnn_generate")
-      mr, nr, kr, sr, xw, requantization, arch, isa = split_ukernel_name(name)
-
-      # specification can override architecture
-      arch = ukernel_spec.get("arch", arch)
+      mr, nr, kr, sr, xw, requantization, arch, isa, assembly = \
+        split_ukernel_name(name)
 
       test_case = generate_test_cases(name, mr, nr, kr, sr, xw, k_block,
                                       init_fn, requantization, pipelined, isa,

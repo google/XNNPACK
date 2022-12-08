@@ -20,7 +20,7 @@
 #include "dwconv-microkernel-tester.h"
 
 
-#if XNN_ARCH_ARM
+#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   TEST(QC8_DWCONV_MINMAX_FP32_3P8C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_eq_8) {
     TEST_REQUIRES_ARM_NEON_V8;
     DWConvMicrokernelTester()
@@ -203,7 +203,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM
+#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -578,7 +578,7 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_ARM
+#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   TEST(QC8_DWCONV_MINMAX_FP32_3P16C__ASM_AARCH32_NEONV8_MLA8_CORTEX_A35, c_eq_16) {
     TEST_REQUIRES_ARM_NEON_V8;
     DWConvMicrokernelTester()
@@ -761,7 +761,7 @@
       }
     }
   }
-#endif  // XNN_ARCH_ARM
+#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

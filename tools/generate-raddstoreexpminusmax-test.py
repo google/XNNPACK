@@ -32,7 +32,7 @@ def split_ukernel_name(name):
     raise ValueError("Unexpected microkernel name: " + name)
   elements_tile = int(match.group(3))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(2))
+  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(2))
   return elements_tile, arch, isa
 
 
@@ -136,9 +136,6 @@ def main(args):
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
       elements_tile, arch, isa = split_ukernel_name(name)
-
-      # specification can override architecture
-      arch = ukernel_spec.get("arch", arch)
 
       test_case = generate_test_cases(name, init_fn, elements_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)

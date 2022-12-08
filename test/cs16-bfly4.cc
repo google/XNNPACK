@@ -17,7 +17,7 @@
 #include "bfly4-microkernel-tester.h"
 
 
-#if XNN_ARCH_ARM
+#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
   TEST(CS16_BFLY4_SAMPLES1__ASM_AARCH32_NEON_X1, samples_eq_1) {
     TEST_REQUIRES_ARM_NEON;
@@ -47,10 +47,10 @@
         .Test(xnn_cs16_bfly4_samples1_ukernel__asm_aarch32_neon_x1);
     }
   }
-#endif  // XNN_ARCH_ARM
+#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_ARM
+#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
   TEST(CS16_BFLY4_SAMPLES1__ASM_AARCH32_NEON_X2, samples_eq_1) {
     TEST_REQUIRES_ARM_NEON;
@@ -80,10 +80,10 @@
         .Test(xnn_cs16_bfly4_samples1_ukernel__asm_aarch32_neon_x2);
     }
   }
-#endif  // XNN_ARCH_ARM
+#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_ARM
+#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
   TEST(CS16_BFLY4_SAMPLES1__ASM_AARCH32_NEON_X4, samples_eq_1) {
     TEST_REQUIRES_ARM_NEON;
@@ -113,7 +113,7 @@
         .Test(xnn_cs16_bfly4_samples1_ukernel__asm_aarch32_neon_x4);
     }
   }
-#endif  // XNN_ARCH_ARM
+#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

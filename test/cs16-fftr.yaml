@@ -6,9 +6,7 @@
 
 # NEON
 - name: xnn_cs16_fftr_ukernel__asm_aarch32_neon_x1
-  assembly: true
 - name: xnn_cs16_fftr_ukernel__asm_aarch32_neon_x4
-  assembly: true
 - name: xnn_cs16_fftr_ukernel__neon_x4
 
 # Scalar

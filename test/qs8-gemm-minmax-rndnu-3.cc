@@ -480,7 +480,7 @@
 #endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM
+#if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   TEST(QS8_GEMM_MINMAX_RNDNU_4X8C4__ASM_AARCH32_NEONDOT_CORTEX_A55, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_DOT;
     GemmMicrokernelTester()
@@ -933,7 +933,7 @@
       .cm_stride(11)
       .Test(xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
   }
-#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM
+#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
 
 #if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY

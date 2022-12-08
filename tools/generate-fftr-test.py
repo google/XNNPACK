@@ -31,8 +31,8 @@ def split_ukernel_name(name):
   assert match is not None
   sample_tile = int(match.group(2))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(1))
-  return sample_tile, arch, isa
+  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(1))
+  return sample_tile, arch, isa, assembly
 
 
 FFTR_TEST_TEMPLATE = """\
@@ -102,13 +102,10 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      sample_tile, arch, isa = split_ukernel_name(name)
-
-      # specification can override architecture
-      arch = ukernel_spec.get("arch", arch)
+      sample_tile, arch, isa, assembly = split_ukernel_name(name)
 
       test_case = generate_test_cases(name, sample_tile, isa)
-      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
+      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa, assembly)
 
     txt_changed = True
     if os.path.exists(options.output):

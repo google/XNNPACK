@@ -96,6 +96,7 @@ _ISA_TO_CHECK_MAP = {
 def parse_target_name(target_name):
   arch = list()
   isa = None
+  assembly = False
   for target_part in target_name.split("_"):
     if target_part in _ARCH_TO_MACRO_MAP:
       if target_part in _ISA_TO_ARCH_MAP:
@@ -105,10 +106,12 @@ def parse_target_name(target_name):
         arch = [target_part]
     elif target_part in _ISA_TO_ARCH_MAP:
       isa = target_part
+    elif target_part == "asm":
+      assembly = True
   if isa and not arch:
     arch = _ISA_TO_ARCH_MAP[isa]
 
-  return arch, isa
+  return arch, isa, assembly
 
 
 def generate_isa_check_macro(isa):

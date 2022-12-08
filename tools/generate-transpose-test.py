@@ -44,7 +44,7 @@ def split_ukernel_name(name):
   tile_height = int(match.group(3))
   tile_width = int(match.group(4))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(5))
+  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(5))
   return tile_height, tile_width, element_size, arch, isa
 
 
@@ -353,9 +353,6 @@ def main(args):
       init_fn = ukernel_spec.get("init")
 
       tile_height, tile_width, element_size, arch, isa = split_ukernel_name(name)
-
-      # specification can override architecture
-      arch = ukernel_spec.get("arch", arch)
 
       if element_size is not None:
         test_case = generate_test_cases(name, tile_height, tile_width, element_size, isa, init_fn)

@@ -6,11 +6,9 @@
 # AArch64 assembly
 - name: xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
-  assembly: true
 - name: xnn_f32_dwconv_minmax_ukernel_9p4c__asm_aarch64_neonfma_cortex_a55
   init: xnn_init_f32_minmax_scalar_params
   pipelined: true
-  assembly: true
 # ARM NEON
 - name: xnn_f32_dwconv_minmax_ukernel_3p4c__neon
   init: xnn_init_f32_minmax_scalar_params

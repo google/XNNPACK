@@ -67,7 +67,7 @@ def split_ukernel_name(name):
   else:
     requantization_type = requantization_type.upper()
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(7))
+  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(7))
   return op_type, activation_type, requantization_type, batch_tile, arch, isa
 
 
@@ -354,9 +354,6 @@ def main(args):
       init_fn = ukernel_spec.get("init")
       op_type, activation_type, requantization_type, batch_tile, arch, isa = \
         split_ukernel_name(name)
-
-      # specification can override architecture
-      arch = ukernel_spec.get("arch", arch)
 
       test_case = generate_test_cases(name, op_type, init_fn, activation_type,
                                       requantization_type, options.tester,

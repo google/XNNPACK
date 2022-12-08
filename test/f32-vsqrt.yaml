@@ -5,11 +5,7 @@
 
 # ARM NEON
 - name: xnn_f32_vsqrt_ukernel__aarch64_neon_sqrt_x4
-  arch:
-    - aarch64
 - name: xnn_f32_vsqrt_ukernel__aarch64_neon_sqrt_x8
-  arch:
-    - aarch64
 - name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_x4
 - name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_x8
 - name: xnn_f32_vsqrt_ukernel__neonfma_nr1rsqrts1fma1adj_x12

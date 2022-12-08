@@ -7,11 +7,9 @@
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
   init: xnn_init_qu8_conv_minmax_fp32_neonv8_params
   k-block: 16
-  assembly: true
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128
   init: xnn_init_qu8_conv_minmax_fp32_neonv8_params
   k-block: 16
-  assembly: true
 
 # ARMv6 SIMD
 - name: xnn_qu8_igemm_minmax_fp32_ukernel_1x1c4__armsimd32

@@ -5,11 +5,7 @@
 
 # ARM NEON+FP16ARITH: hardware square root
 - name: xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x8
-  arch:
-  - aarch64
 - name: xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x16
-  arch:
-  - aarch64
 
 # ARM NEON+FP16ARITH: Newton-Raphson algorithm
 - name: xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x8

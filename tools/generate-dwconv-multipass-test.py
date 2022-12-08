@@ -39,13 +39,13 @@ def split_ukernel_name(name):
   channel_tile = int(m[4])
   channel_subtile = int(m[5])
   channel_round = int(m[6])
-  arch, isa = xnncommon.parse_target_name(target_name)
+  arch, isa, assembly = xnncommon.parse_target_name(target_name)
 
   requantization = common_parts[-3]
   if requantization not in ["fp32", "rndnu"]:
     requantization = None
 
-  return (first_pass_tile, middle_pass_tile, last_pass_tile, channel_tile, channel_subtile, channel_round, requantization, arch, isa)
+  return (first_pass_tile, middle_pass_tile, last_pass_tile, channel_tile, channel_subtile, channel_round, requantization, arch, isa, assembly)
 
 
 DWCONV_TEST_CODE = """\
@@ -452,11 +452,7 @@ def main(args):
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
       pipelined = bool(ukernel_spec.get("pipelined", False))
-      assembly = bool(ukernel_spec.get("assembly", False))
-      first_pass_tile, middle_pass_tile, last_pass_tile, cr, channel_subtile, channel_round, requantization, arch, isa = split_ukernel_name(name)
-
-      # specification can override architecture
-      arch = ukernel_spec.get("arch", arch)
+      first_pass_tile, middle_pass_tile, last_pass_tile, cr, channel_subtile, channel_round, requantization, arch, isa, assembly = split_ukernel_name(name)
 
       test_case = generate_test_cases(
         name, first_pass_tile, middle_pass_tile, last_pass_tile, cr, cr, channel_subtile, channel_round, init_fn, requantization, pipelined, isa)

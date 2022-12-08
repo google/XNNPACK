@@ -235,7 +235,7 @@ def split_ukernel_name(name):
   height_tile = int(match.group(7))
   width_tile = int(match.group(8))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(6))
+  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(6))
   return kernel_height, kernel_width, stride, padding, arch, isa, \
          height_tile, width_tile
 
@@ -318,17 +318,13 @@ def main(args):
       name = ukernel_spec["name"]
       init_fn = ukernel_spec["init"]
       pipelined = bool(ukernel_spec.get("pipelined", False))
-      assembly = bool(ukernel_spec.get("assembly", False))
       kernel_height, kernel_width, subsampling, padding, arch, isa, \
         height_tile, width_tile = split_ukernel_name(name)
-
-      # specification can override architecture
-      arch = ukernel_spec.get("arch", arch)
 
       test_case = generate_test_cases(name, kernel_height, kernel_width, \
                                       subsampling, init_fn, padding, isa, \
                                       height_tile, width_tile)
-      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa, assembly)
+      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     txt_changed = True
     if os.path.exists(options.output):

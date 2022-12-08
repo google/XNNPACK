@@ -20,8 +20,6 @@
 # AArch64
 - name: xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128
   init: xnn_init_x24_transpose_neon_tbl128_params
-  arch:
-    - aarch64
 
 # SSSE3
 - name: xnn_x24_transposec_ukernel__4x4_ssse3

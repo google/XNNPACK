@@ -34,7 +34,7 @@ def split_ukernel_name(name):
   datatype = match.group(1)
   batch_tile = int(match.group(3))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(2))
+  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(2))
   return datatype, batch_tile, arch, isa
 
 
@@ -214,9 +214,6 @@ def main(args):
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
       datatype, batch_tile, arch, isa = split_ukernel_name(name)
-
-      # specification can override architecture
-      arch = ukernel_spec.get("arch", arch)
 
       test_case = generate_test_cases(
         name, init_fn, datatype, batch_tile, isa)

@@ -34,8 +34,8 @@ def split_ukernel_name(name):
   if match.group(3):
     batch_tile = int(match.group(3))
 
-  arch, isa = xnncommon.parse_target_name(target_name=match.group(1))
-  return row_tile, batch_tile, arch, isa
+  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(1))
+  return row_tile, batch_tile, arch, isa, assembly
 
 
 FILTERBANK_ACCUMULATE_TEST_TEMPLATE = """\
@@ -117,13 +117,10 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      row_tile, batch_tile, arch, isa = split_ukernel_name(name)
-
-      # specification can override architecture
-      arch = ukernel_spec.get("arch", arch)
+      row_tile, batch_tile, arch, isa, assembly = split_ukernel_name(name)
 
       test_case = generate_test_cases(name, row_tile, batch_tile, isa)
-      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
+      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa, assembly)
 
     txt_changed = True
     if os.path.exists(options.output):
