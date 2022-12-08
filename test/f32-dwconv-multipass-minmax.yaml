@@ -62,3 +62,16 @@
   init: xnn_init_f32_minmax_avx_params
 - name: xnn_f32_dwconv_minmax_ukernel_2f2m2l32c8s4r__fma3_acc2
   init: xnn_init_f32_minmax_avx_params
+# x86 AVX512
+- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l16c16s4r__avx512f
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l16c16s4r__avx512f_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l64c16s4r__avx512f
+  init: xnn_init_f32_minmax_scalar_params
+- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l64c16s4r__avx512f_acc2
+  init: xnn_init_f32_minmax_scalar_params

@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert CHANNEL_TILE % 8 == 0
 $CHANNEL_SUBTILE = 8
+$assert CHANNEL_TILE % CHANNEL_SUBTILE == 0
 $CHANNEL_ROUND = 4
 $assert MIDDLE_PASS_TILE <= LAST_PASS_TILE
 $assert FIRST_PASS_TILE >= 1
@@ -418,7 +418,7 @@ void xnn_f32_dwconv_minmax_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST
 
       if XNN_UNLIKELY(c != 0) {
         assert(c >= 1);
-        assert(c <= 7);
+        assert(c <= ${CHANNEL_SUBTILE-1});
         __m256 vacc01234567p0 = _mm256_load_ps(b);
         const __m256i vmask = _mm256_loadu_si256((const __m256i*) &params->avx.mask_table[7 - c]);
         $for K in range(LAST_PASS_TILE):
