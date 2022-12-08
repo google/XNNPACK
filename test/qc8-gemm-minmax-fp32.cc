@@ -49152,7 +49152,7 @@ TEST(QC8_GEMM_MINMAX_FP32_4X2__SCALAR_LRINTF, strided_cm) {
 }
 
 
-#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY && XNN_PLATFORM_JIT
+#if XNN_ARCH_ARM && XNN_PLATFORM_JIT
   TEST(GENERATE_QC8_GEMM_FP32_4X8__AARCH32_NEONV8_MLAL_LANE_PRFM_LD64, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_V8;
     GemmMicrokernelTester()
@@ -49605,10 +49605,10 @@ TEST(QC8_GEMM_MINMAX_FP32_4X2__SCALAR_LRINTF, strided_cm) {
       .cm_stride(11)
       .Test(xnn_generate_qc8_gemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prfm_ld64, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
   }
-#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY && XNN_PLATFORM_JIT
+#endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 
 
-#if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && !XNN_PLATFORM_IOS && XNN_ENABLE_ASSEMBLY && XNN_PLATFORM_JIT
+#if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && !XNN_PLATFORM_IOS && XNN_PLATFORM_JIT
   TEST(GENERATE_QC8_GEMM_FP32_4X8C4__AARCH32_NEONDOT_LD64, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_DOT;
     GemmMicrokernelTester()
@@ -50061,4 +50061,4 @@ TEST(QC8_GEMM_MINMAX_FP32_4X2__SCALAR_LRINTF, strided_cm) {
       .cm_stride(11)
       .Test(xnn_generate_qc8_gemm_fp32_ukernel_4x8c4__aarch32_neondot_ld64, xnn_init_qc8_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
   }
-#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && !XNN_PLATFORM_IOS && XNN_ENABLE_ASSEMBLY && XNN_PLATFORM_JIT
+#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && !XNN_PLATFORM_IOS && XNN_PLATFORM_JIT

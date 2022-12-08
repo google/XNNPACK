@@ -22368,7 +22368,7 @@
 #endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM && !XNN_PLATFORM_IOS || XNN_ARCH_ARM64)
 
 
-#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY && XNN_PLATFORM_JIT
+#if XNN_ARCH_ARM && XNN_PLATFORM_JIT
   TEST(GENERATE_QS8_GEMM_RNDNU_4X8__AARCH32_NEON_MLAL_LANE_LD64, k_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
@@ -22821,7 +22821,7 @@
       .cm_stride(11)
       .Test(xnn_generate_qs8_gemm_rndnu_ukernel_4x8__aarch32_neon_mlal_lane_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
   }
-#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY && XNN_PLATFORM_JIT
+#endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 
 
 TEST(QS8_GEMM_MINMAX_RNDNU_1X2__SCALAR, k_eq_1) {
