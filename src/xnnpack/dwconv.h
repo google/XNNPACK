@@ -45,6 +45,21 @@ extern "C" {
     const float* zero,                                              \
     const union xnn_f32_minmax_params* params);
 
+#define DECLARE_F32_DWCONV_MULTIPASS_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                                   \
+    size_t channels,                                           \
+    size_t output_width,                                       \
+    const float** input,                                       \
+    const float* weights,                                      \
+    float* output,                                             \
+    intptr_t input_stride,                                     \
+    size_t output_increment,                                   \
+    size_t input_offset,                                       \
+    const float* zero,                                         \
+    size_t kernel_size,                                        \
+    float* buffer,                                             \
+    const union xnn_f32_default_params* params);
+
 #define DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                          \
     size_t channels,                                                  \
@@ -98,6 +113,47 @@ DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukern
 DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__neon_acc2)
 DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__neonfma)
 DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__neonfma_acc2)
+
+DECLARE_F32_DWCONV_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_2f2m2l4c4s4r__wasmsimd)
+DECLARE_F32_DWCONV_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_2f2m2l4c4s4r__wasmsimd_acc2)
+DECLARE_F32_DWCONV_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmsimd)
+DECLARE_F32_DWCONV_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmsimd_acc2)
+DECLARE_F32_DWCONV_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_2f2m2l16c4s4r__wasmsimd)
+DECLARE_F32_DWCONV_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_2f2m2l16c4s4r__wasmsimd_acc2)
+
+DECLARE_F32_DWCONV_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_2f2m2l4c4s4r__wasmrelaxedsimd_fma)
+DECLARE_F32_DWCONV_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_2f2m2l4c4s4r__wasmrelaxedsimd_fma_acc2)
+DECLARE_F32_DWCONV_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmrelaxedsimd_fma)
+DECLARE_F32_DWCONV_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmrelaxedsimd_fma_acc2)
+DECLARE_F32_DWCONV_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_2f2m2l16c4s4r__wasmrelaxedsimd_fma)
+DECLARE_F32_DWCONV_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_ukernel_2f2m2l16c4s4r__wasmrelaxedsimd_fma_acc2)
+
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__wasmsimd_arm)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__wasmsimd_arm_acc2)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__wasmsimd_arm)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__wasmsimd_arm_acc2)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__wasmsimd_arm)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__wasmsimd_arm_acc2)
+
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__wasmsimd_x86)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__wasmsimd_x86_acc2)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__wasmsimd_x86)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__wasmsimd_x86_acc2)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__wasmsimd_x86)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__wasmsimd_x86_acc2)
+
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__wasmrelaxedsimd)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__wasmrelaxedsimd_acc2)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__wasmrelaxedsimd_fma)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__wasmrelaxedsimd_fma_acc2)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__wasmrelaxedsimd)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__wasmrelaxedsimd_acc2)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__wasmrelaxedsimd_fma)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__wasmrelaxedsimd_fma_acc2)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__wasmrelaxedsimd)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__wasmrelaxedsimd_acc2)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__wasmrelaxedsimd_fma)
+DECLARE_F32_DWCONV_MULTIPASS_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__wasmrelaxedsimd_fma_acc2)
 
 DECLARE_F32_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_3p4c__neon)
 DECLARE_F32_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel_3p4c__neon_acc2)

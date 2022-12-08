@@ -172,6 +172,48 @@ tools/xngen src/f32-dwconv/unipass-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TIL
 tools/xngen src/f32-dwconv/unipass-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-25p4c-wasmrelaxedsimd-fma.c &
 tools/xngen src/f32-dwconv/unipass-wasmsimd.c.in -D CHANNEL_TILE=8 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-25p8c-wasmrelaxedsimd-fma.c &
 
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=4  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-wasmsimd.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=4  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-wasmsimd-acc2.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-wasmsimd.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-wasmsimd-acc2.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-wasmsimd.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=0 -D ACTIVATION=LINEAR                 -o src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-wasmsimd-acc2.c &
+
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=4  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=4  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-wasmrelaxedsimd-fma-acc2.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-wasmrelaxedsimd-fma-acc2.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-wasmrelaxedsimd-fma-acc2.c &
+
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=4  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-minmax-wasmsimd-arm.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=4  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-minmax-wasmsimd-arm-acc2.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -o src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-minmax-wasmsimd-arm.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -o src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-minmax-wasmsimd-arm-acc2.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -o src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-minmax-wasmsimd-arm.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -o src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-minmax-wasmsimd-arm-acc2.c &
+
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=4  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-minmax-wasmsimd-x86.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=4  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-minmax-wasmsimd-x86-acc2.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -o src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-minmax-wasmsimd-x86.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -o src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-minmax-wasmsimd-x86-acc2.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -o src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-minmax-wasmsimd-x86.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -o src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-minmax-wasmsimd-x86-acc2.c &
+
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=4  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=4  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-minmax-wasmrelaxedsimd-acc2.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-minmax-wasmrelaxedsimd-acc2.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-minmax-wasmrelaxedsimd-acc2.c &
+
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=4  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-minmax-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=4  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-minmax-wasmrelaxedsimd-fma-acc2.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-minmax-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-minmax-wasmrelaxedsimd-fma-acc2.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-minmax-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-dwconv/multipass-wasmsimd.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -o src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-minmax-wasmrelaxedsimd-fma-acc2.c &
+
 ################################### ARM NEON ##################################
 tools/xngen src/f32-dwconv/unipass-neon.c.in -D CHANNEL_TILE=4  -D KERNEL_TILE=3 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-neon.c &
 tools/xngen src/f32-dwconv/unipass-neon.c.in -D CHANNEL_TILE=4  -D KERNEL_TILE=3 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-neon-acc2.c &
@@ -357,6 +399,7 @@ tools/xngen src/f32-dwconv/multipass-avx512.c.in -D CHANNEL_TILE=64 -D FIRST_PAS
 ################################## Unit tests #################################
 tools/generate-dwconv-unipass-test.py --spec test/f32-dwconv-unipass.yaml --output test/f32-dwconv-unipass.cc &
 tools/generate-dwconv-unipass-test.py --spec test/f32-dwconv-unipass-minmax.yaml --output test/f32-dwconv-unipass-minmax.cc &
+tools/generate-dwconv-multipass-test.py --spec test/f32-dwconv-multipass.yaml --output test/f32-dwconv-multipass.cc &
 tools/generate-dwconv-multipass-test.py --spec test/f32-dwconv-multipass-minmax.yaml --output test/f32-dwconv-multipass-minmax.cc &
 
 wait

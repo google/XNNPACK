@@ -7015,10 +7015,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f32_dwconv_unipass_minmax_test",
+    name = "f32_dwconv_multipass_test",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/f32-dwconv-unipass-minmax.cc",
+        "test/f32-dwconv-multipass.cc",
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -7032,6 +7032,19 @@ xnnpack_unit_test(
     srcs = [
         "test/dwconv-microkernel-tester.h",
         "test/f32-dwconv-multipass-minmax.cc",
+    ],
+    shard_count = 5,
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":packing",
+        ":microkernel_utils",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "f32_dwconv_unipass_minmax_test",
+    srcs = [
+        "test/dwconv-microkernel-tester.h",
+        "test/f32-dwconv-unipass-minmax.cc",
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [

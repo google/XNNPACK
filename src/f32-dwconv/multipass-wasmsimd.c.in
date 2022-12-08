@@ -1,0 +1,559 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$CHANNEL_SUBTILE = 4
+$assert CHANNEL_TILE % CHANNEL_SUBTILE == 0
+$CHANNEL_ROUND = 4
+$assert MIDDLE_PASS_TILE <= LAST_PASS_TILE
+$assert FIRST_PASS_TILE >= 1
+$assert MIDDLE_PASS_TILE >= 1
+$assert LAST_PASS_TILE >= 1
+$assert ACCUMULATORS >= 1
+$assert ACTIVATION != "MINMAX" or ARCH in ["ARM", "X86", "RELAXED"]
+$assert not FMA or ARCH == "RELAXED"
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <wasm_simd128.h>
+
+#include <xnnpack/dwconv.h>
+#include <xnnpack/math.h>
+
+
+$assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
+$if ACTIVATION == "MINMAX":
+$  WASM_F32X4_MIN={"ARM": "wasm_f32x4_min", "X86": "wasm_f32x4_pmin", "RELAXED": "__builtin_wasm_relaxed_min_f32x4"}[ARCH]
+$  WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "__builtin_wasm_relaxed_max_f32x4"}[ARCH]
+$ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
+$ISA = "wasmsimd" if not FMA and (ACTIVATION in ["LINEAR", "RELU"] or ARCH != "RELAXED") else "wasmrelaxedsimd"
+$ARCH_SUFFIX = "" if not FMA and (ACTIVATION in ["LINEAR", "RELU"] or ARCH == "RELAXED") else "_" + ("fma" if FMA else ARCH.lower())
+$PARAMS = {"LINEAR": "xnn_f32_default_params", "RELU": "xnn_f32_relu_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
+void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST_PASS_TILE}l${CHANNEL_TILE}c${CHANNEL_SUBTILE}s${CHANNEL_ROUND}r__${ISA}${ARCH_SUFFIX}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t channels,
+    size_t output_width,
+    const float** input,
+    const float* weights,
+    float* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    const float* zero,
+    size_t kernel_size,
+    float* buffer,
+    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(channels != 0);
+  assert(output_width != 0);
+  assert(kernel_size > ${FIRST_PASS_TILE});
+
+  $if ACTIVATION == "MINMAX":
+    const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
+    const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
+  $elif ACTIVATION == "RELU":
+    const v128_t vzero = wasm_i32x4_const_splat(0);
+  do {
+    const float* w = weights;
+
+    // First pass to process ${FIRST_PASS_TILE} inputs.
+    {
+      float* b = buffer;
+      $for K in range(FIRST_PASS_TILE):
+        const float* i${K} = input[${K}];
+        assert(i${K} != NULL);
+        if XNN_UNPREDICTABLE(i${K} != zero) {
+          i${K} = (const float*) ((uintptr_t) i${K} + input_offset);
+        }
+      input += ${FIRST_PASS_TILE};
+
+      // Process c channels and write to buffer.
+      $if CHANNEL_TILE == 4:
+        size_t c = 0;
+        for (; c < channels; c += 4) {
+          v128_t vacc0p0 = wasm_v128_load(w);
+
+          $for K in range(FIRST_PASS_TILE):
+
+            const v128_t vi${K}x0123 = wasm_v128_load(i${K});
+            i${K} += ${CHANNEL_TILE};
+
+            const v128_t vk${K}x0123 = wasm_v128_load(w + ${(K + 1) * CHANNEL_TILE});
+            $if 1 <= K < ACCUMULATORS:
+              v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
+            $elif FMA:
+              vacc0p${K % ACCUMULATORS} = __builtin_wasm_fma_f32x4(vacc0p${K % ACCUMULATORS}, vi${K}x0123, vk${K}x0123);
+            $else:
+              vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(vacc0p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${K}x0123, vk${K}x0123));
+
+          w += ${(FIRST_PASS_TILE + 1) * CHANNEL_TILE};
+
+          $if ACCUMULATORS > 1:
+            // Add up all accumulators to vacc0p0
+            $ACC_SLICE = 1
+            $while ACC_SLICE < ACCUMULATORS:
+              $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                $if A + ACC_SLICE < ACCUMULATORS:
+                  vacc0p${A} = wasm_f32x4_add(vacc0p${A}, vacc0p${A + ACC_SLICE});
+              $ACC_SLICE *= 2
+
+          wasm_v128_store(b, vacc0p0);
+          b += ${CHANNEL_TILE};
+        }
+      $else:
+        size_t c = round_up_po2(channels, ${CHANNEL_ROUND});
+        for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+          $for C in range(0, CHANNEL_TILE, 4):
+            $if C == 0:
+              v128_t vacc${ABC[C:C+4]}p0 = wasm_v128_load(w);
+            $else:
+              v128_t vacc${ABC[C:C+4]}p0 = wasm_v128_load(w + ${C});
+
+          $for K in range(FIRST_PASS_TILE):
+
+            $for C in range(0, CHANNEL_TILE, 4):
+              $if C == 0:
+                const v128_t vi${K}x${ABC[C:C+4]} = wasm_v128_load(i${K});
+              $else:
+                const v128_t vi${K}x${ABC[C:C+4]} = wasm_v128_load(i${K} + ${C});
+            i${K} += ${CHANNEL_TILE};
+
+            $for C in range(0, CHANNEL_TILE, 4):
+              const v128_t vk${K}x${ABC[C:C+4]} = wasm_v128_load(w + ${(K + 1) * CHANNEL_TILE + C});
+            $for C in range(0, CHANNEL_TILE, 4):
+              $if 1 <= K < ACCUMULATORS:
+                v128_t vacc${ABC[C:C+4]}p${K} = wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]});
+              $elif FMA:
+                vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = __builtin_wasm_fma_f32x4(vacc${ABC[C:C+4]}p${K % ACCUMULATORS}, vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]});
+              $else:
+                vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = wasm_f32x4_add(vacc${ABC[C:C+4]}p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}));
+
+          w += ${(FIRST_PASS_TILE + 1) * CHANNEL_TILE};
+
+          $if ACCUMULATORS > 1:
+            // Add up all accumulators to vacc${ABC[0:4]}p0
+            $ACC_SLICE = 1
+            $while ACC_SLICE < ACCUMULATORS:
+              $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                $if A + ACC_SLICE < ACCUMULATORS:
+                  $for C in range(0, CHANNEL_TILE, 4):
+                    vacc${ABC[C:C+4]}p${A} = wasm_f32x4_add(vacc${ABC[C:C+4]}p${A}, vacc${ABC[C:C+4]}p${A + ACC_SLICE});
+              $ACC_SLICE *= 2
+
+          $for C in range(0, CHANNEL_TILE, 4):
+            $if C == 0:
+              wasm_v128_store(b, vacc${ABC[C:C+4]}p0);
+            $else:
+              wasm_v128_store(b + ${C}, vacc${ABC[C:C+4]}p0);
+          b += ${CHANNEL_TILE};
+        }
+
+        $if CHANNEL_TILE == 8:
+          if (c != 0) {
+            v128_t vacc0p0 = wasm_v128_load(w);
+
+            $for K in range(FIRST_PASS_TILE):
+
+              const v128_t vi${K}x0123 = wasm_v128_load(i${K});
+              i${K} += 4;
+
+              const v128_t vk${K}x0123 = wasm_v128_load(w + ${(K + 1) * 4});
+              $if 1 <= K < ACCUMULATORS:
+                v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
+              $elif FMA:
+                vacc0p${K % ACCUMULATORS} = __builtin_wasm_fma_f32x4(vacc0p${K % ACCUMULATORS}, vi${K}x0123, vk${K}x0123);
+              $else:
+                vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(vacc0p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${K}x0123, vk${K}x0123));
+
+            w += ${(FIRST_PASS_TILE + 1) * 4};
+
+            $if ACCUMULATORS > 1:
+              // Add up all accumulators to vacc0p0
+              $ACC_SLICE = 1
+              $while ACC_SLICE < ACCUMULATORS:
+                $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                  $if A + ACC_SLICE < ACCUMULATORS:
+                    vacc0p${A} = wasm_f32x4_add(vacc0p${A}, vacc0p${A + ACC_SLICE});
+                $ACC_SLICE *= 2
+
+            wasm_v128_store(b, vacc0p0);
+            b += 4;
+          }
+        $else:
+          for (; c != 0; c -= 4) {
+            v128_t vacc0p0 = wasm_v128_load(w);
+
+            $for K in range(FIRST_PASS_TILE):
+
+              const v128_t vi${K}x0123 = wasm_v128_load(i${K});
+              i${K} += 4;
+
+              const v128_t vk${K}x0123 = wasm_v128_load(w + ${(K + 1) * 4});
+              $if 1 <= K < ACCUMULATORS:
+                v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
+              $elif FMA:
+                vacc0p${K % ACCUMULATORS} = __builtin_wasm_fma_f32x4(vacc0p${K % ACCUMULATORS}, vi${K}x0123, vk${K}x0123);
+              $else:
+                vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(vacc0p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${K}x0123, vk${K}x0123));
+
+            w += ${(FIRST_PASS_TILE + 1) * 4};
+
+            $if ACCUMULATORS > 1:
+              // Add up all accumulators to vacc0p0
+              $ACC_SLICE = 1
+              $while ACC_SLICE < ACCUMULATORS:
+                $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                  $if A + ACC_SLICE < ACCUMULATORS:
+                    vacc0p${A} = wasm_f32x4_add(vacc0p${A}, vacc0p${A + ACC_SLICE});
+                $ACC_SLICE *= 2
+
+            wasm_v128_store(b, vacc0p0);
+            b += 4;
+          }
+    }
+
+    // Middle pass to process ${MIDDLE_PASS_TILE} inputs in each iteration.
+    for (size_t ks = kernel_size - ${FIRST_PASS_TILE}; ks > ${LAST_PASS_TILE}; ks -= ${MIDDLE_PASS_TILE}) {
+      float* b = buffer;
+      $for K in range(MIDDLE_PASS_TILE):
+        const float* i${K} = input[${K}];
+        assert(i${K} != NULL);
+        if XNN_UNPREDICTABLE(i${K} != zero) {
+          i${K} = (const float*) ((uintptr_t) i${K} + input_offset);
+        }
+      input += ${MIDDLE_PASS_TILE};
+
+      $if CHANNEL_TILE == 4:
+        size_t c = 0;
+        for (; c < channels; c += 4) {
+          v128_t vacc0p0 = wasm_v128_load(b);
+
+          $for K in range(MIDDLE_PASS_TILE):
+
+            const v128_t vi${K}x0123 = wasm_v128_load(i${K});
+            i${K} += ${CHANNEL_TILE};
+
+            $if K == 0:
+              const v128_t vk${K}x0123 = wasm_v128_load(w);
+            $else:
+              const v128_t vk${K}x0123 = wasm_v128_load(w + ${K * CHANNEL_TILE});
+            $if 1 <= K < ACCUMULATORS:
+              v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
+            $elif FMA:
+              vacc0p${K % ACCUMULATORS} = __builtin_wasm_fma_f32x4(vacc0p${K % ACCUMULATORS}, vi${K}x0123, vk${K}x0123);
+            $else:
+              vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(vacc0p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${K}x0123, vk${K}x0123));
+
+          w += ${MIDDLE_PASS_TILE * CHANNEL_TILE};
+
+          $if ACCUMULATORS > 1:
+            // Add up all accumulators to vacc0p0
+            $ACC_SLICE = 1
+            $while ACC_SLICE < ACCUMULATORS:
+              $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                $if A + ACC_SLICE < ACCUMULATORS:
+                  vacc0p${A} = wasm_f32x4_add(vacc0p${A}, vacc0p${A + ACC_SLICE});
+              $ACC_SLICE *= 2
+
+          wasm_v128_store(b, vacc0p0);
+          b += ${CHANNEL_TILE};
+        }
+      $else:
+        size_t c = round_up_po2(channels, ${CHANNEL_ROUND});
+        for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+          $for C in range(0, CHANNEL_TILE, 4):
+            $if C == 0:
+              v128_t vacc${ABC[C:C+4]}p0 = wasm_v128_load(b);
+            $else:
+              v128_t vacc${ABC[C:C+4]}p0 = wasm_v128_load(b + ${C});
+
+          $for K in range(MIDDLE_PASS_TILE):
+
+            $for C in range(0, CHANNEL_TILE, 4):
+              $if C == 0:
+                const v128_t vi${K}x${ABC[C:C+4]} = wasm_v128_load(i${K});
+              $else:
+                const v128_t vi${K}x${ABC[C:C+4]} = wasm_v128_load(i${K} + ${C});
+            i${K} += ${CHANNEL_TILE};
+
+            $for C in range(0, CHANNEL_TILE, 4):
+              $if K == 0 and C == 0:
+                const v128_t vk${K}x${ABC[C:C+4]} = wasm_v128_load(w);
+              $else:
+                const v128_t vk${K}x${ABC[C:C+4]} = wasm_v128_load(w + ${K * CHANNEL_TILE + C});
+            $for C in range(0, CHANNEL_TILE, 4):
+              $if 1 <= K < ACCUMULATORS:
+                v128_t vacc${ABC[C:C+4]}p${K} = wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]});
+              $elif FMA:
+                vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = __builtin_wasm_fma_f32x4(vacc${ABC[C:C+4]}p${K % ACCUMULATORS}, vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]});
+              $else:
+                vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = wasm_f32x4_add(vacc${ABC[C:C+4]}p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}));
+
+          w += ${MIDDLE_PASS_TILE * CHANNEL_TILE};
+
+          $if ACCUMULATORS > 1:
+            // Add up all accumulators to vacc${ABC[0:4]}p0
+            $ACC_SLICE = 1
+            $while ACC_SLICE < ACCUMULATORS:
+              $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                $if A + ACC_SLICE < ACCUMULATORS:
+                  $for C in range(0, CHANNEL_TILE, 4):
+                    vacc${ABC[C:C+4]}p${A} = wasm_f32x4_add(vacc${ABC[C:C+4]}p${A}, vacc${ABC[C:C+4]}p${A + ACC_SLICE});
+              $ACC_SLICE *= 2
+
+          $for C in range(0, CHANNEL_TILE, 4):
+            $if C == 0:
+              wasm_v128_store(b, vacc${ABC[C:C+4]}p0);
+            $else:
+              wasm_v128_store(b + ${C}, vacc${ABC[C:C+4]}p0);
+          b += ${CHANNEL_TILE};
+        }
+
+        $if CHANNEL_TILE == 8:
+          if (c != 0) {
+            v128_t vacc0p0 = wasm_v128_load(b);
+
+            $for K in range(MIDDLE_PASS_TILE):
+
+              const v128_t vi${K}x0123 = wasm_v128_load(i${K});
+              i${K} += 4;
+
+              $if K == 0:
+                const v128_t vk${K}x0123 = wasm_v128_load(w);
+              $else:
+                const v128_t vk${K}x0123 = wasm_v128_load(w + ${K * 4});
+              $if 1 <= K < ACCUMULATORS:
+                v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
+              $elif FMA:
+                vacc0p${K % ACCUMULATORS} = __builtin_wasm_fma_f32x4(vacc0p${K % ACCUMULATORS}, vi${K}x0123, vk${K}x0123);
+              $else:
+                vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(vacc0p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${K}x0123, vk${K}x0123));
+
+            w += ${MIDDLE_PASS_TILE * 4};
+
+            $if ACCUMULATORS > 1:
+              // Add up all accumulators to vacc0p0
+              $ACC_SLICE = 1
+              $while ACC_SLICE < ACCUMULATORS:
+                $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                  $if A + ACC_SLICE < ACCUMULATORS:
+                    vacc0p${A} = wasm_f32x4_add(vacc0p${A}, vacc0p${A + ACC_SLICE});
+                $ACC_SLICE *= 2
+
+            wasm_v128_store(b, vacc0p0);
+            b += 4;
+          }
+        $else:
+          for (; c != 0; c -= 4) {
+            v128_t vacc0p0 = wasm_v128_load(b);
+
+            $for K in range(MIDDLE_PASS_TILE):
+
+              const v128_t vi${K}x0123 = wasm_v128_load(i${K});
+              i${K} += 4;
+
+              $if K == 0:
+                const v128_t vk${K}x0123 = wasm_v128_load(w);
+              $else:
+                const v128_t vk${K}x0123 = wasm_v128_load(w + ${K * 4});
+              $if 1 <= K < ACCUMULATORS:
+                v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
+              $elif FMA:
+                vacc0p${K % ACCUMULATORS} = __builtin_wasm_fma_f32x4(vacc0p${K % ACCUMULATORS}, vi${K}x0123, vk${K}x0123);
+              $else:
+                vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(vacc0p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${K}x0123, vk${K}x0123));
+
+            w += ${MIDDLE_PASS_TILE * 4};
+
+            $if ACCUMULATORS > 1:
+              // Add up all accumulators to vacc0p0
+              $ACC_SLICE = 1
+              $while ACC_SLICE < ACCUMULATORS:
+                $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                  $if A + ACC_SLICE < ACCUMULATORS:
+                    vacc0p${A} = wasm_f32x4_add(vacc0p${A}, vacc0p${A + ACC_SLICE});
+                $ACC_SLICE *= 2
+
+            wasm_v128_store(b, vacc0p0);
+            b += 4;
+          }
+    }
+
+    // Last pass to process up to ${LAST_PASS_TILE} inputs.
+    {
+      float* b = buffer;
+      $for K in range(0, LAST_PASS_TILE):
+        const float* i${K} = input[${K}];
+        assert(i${K} != NULL);
+        if XNN_UNPREDICTABLE(i${K} != zero) {
+          i${K} = (const float*) ((uintptr_t) i${K} + input_offset);
+        }
+
+      size_t c = channels;
+      $if CHANNEL_TILE > 4:
+        for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+          $for C in range(0, CHANNEL_TILE, 4):
+            $if C == 0:
+              v128_t vacc${ABC[C:C+4]}p0 = wasm_v128_load(b);
+            $else:
+              v128_t vacc${ABC[C:C+4]}p0 = wasm_v128_load(b + ${C});
+          b += ${CHANNEL_TILE};
+
+          $for K in range(LAST_PASS_TILE):
+
+            $for C in range(0, CHANNEL_TILE, 4):
+              $if C == 0:
+                const v128_t vi${K}x${ABC[C:C+4]} = wasm_v128_load(i${K});
+              $else:
+                const v128_t vi${K}x${ABC[C:C+4]} = wasm_v128_load(i${K} + ${C});
+            i${K} += ${CHANNEL_TILE};
+
+            $for C in range(0, CHANNEL_TILE, 4):
+              $if K == 0 and C == 0:
+                v128_t vk${K}x${ABC[C:C+4]} = wasm_v128_load(w);
+              $else:
+                v128_t vk${K}x${ABC[C:C+4]} = wasm_v128_load(w + ${K * CHANNEL_TILE + C});
+
+            $for C in range(0, CHANNEL_TILE, 4):
+              $if 1 <= K < ACCUMULATORS:
+                v128_t vacc${ABC[C:C+4]}p${K} = wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]});
+              $elif FMA:
+                vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = __builtin_wasm_fma_f32x4(vacc${ABC[C:C+4]}p${K % ACCUMULATORS}, vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]});
+              $else:
+                vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = wasm_f32x4_add(vacc${ABC[C:C+4]}p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}));
+
+          w += ${LAST_PASS_TILE * CHANNEL_TILE};
+
+          $if ACCUMULATORS > 1:
+            // Add up all accumulators to vacc${ABC[0:4]}p0
+            $ACC_SLICE = 1
+            $while ACC_SLICE < ACCUMULATORS:
+              $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                $if A + ACC_SLICE < ACCUMULATORS:
+                  $for C in range(0, CHANNEL_TILE, 4):
+                    vacc${ABC[C:C+4]}p${A} = wasm_f32x4_add(vacc${ABC[C:C+4]}p${A}, vacc${ABC[C:C+4]}p${A + ACC_SLICE});
+              $ACC_SLICE *= 2
+
+          $if ACTIVATION == "MINMAX":
+            $for C in range(0, CHANNEL_TILE, 4):
+              v128_t vacc${ABC[C:C+4]} = ${WASM_F32X4_MAX}(vacc${ABC[C:C+4]}p0, vmin);
+
+            $for C in range(0, CHANNEL_TILE, 4):
+              vacc${ABC[C:C+4]} = ${WASM_F32X4_MIN}(vacc${ABC[C:C+4]}, vmax);
+          $elif ACTIVATION == "RELU":
+            $for C in range(0, CHANNEL_TILE, 4):
+              const v128_t vacc${ABC[C:C+4]} = ${WASM_F32X4_MAX}(vacc${ABC[C:C+4]}p0, vzero);
+          $elif ACTIVATION == "LINEAR":
+            $for C in range(0, CHANNEL_TILE, 4):
+              const v128_t vacc${ABC[C:C+4]} = vacc${ABC[C:C+4]}p0;
+
+          $for C in range(0, CHANNEL_TILE, 4):
+            $if C == 0:
+              wasm_v128_store(output, vacc${ABC[C:C+4]});
+            $else:
+              wasm_v128_store(output + ${C}, vacc${ABC[C:C+4]});
+          output += ${CHANNEL_TILE};
+        }
+
+
+      for (; c >= 4; c -= 4) {
+        v128_t vacc0p0 = wasm_v128_load(b);
+        b += 4;
+
+        $for K in range(LAST_PASS_TILE):
+
+          const v128_t vi${K}x0123 = wasm_v128_load(i${K});
+          i${K} += 4;
+
+          $if K == 0:
+            v128_t vk${K}x0123 = wasm_v128_load(w);
+          $else:
+            v128_t vk${K}x0123 = wasm_v128_load(w + ${K * 4});
+
+          $if 1 <= K < ACCUMULATORS:
+            v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
+          $elif FMA:
+            vacc0p${K % ACCUMULATORS} = __builtin_wasm_fma_f32x4(vacc0p${K % ACCUMULATORS}, vi${K}x0123, vk${K}x0123);
+          $else:
+            vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(vacc0p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${K}x0123, vk${K}x0123));
+
+        $if CHANNEL_TILE > 4:
+          w += ${LAST_PASS_TILE * 4};
+        $else:
+          w += ${LAST_PASS_TILE * CHANNEL_TILE};
+
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc0p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc0p${A} = wasm_f32x4_add(vacc0p${A}, vacc0p${A + ACC_SLICE});
+            $ACC_SLICE *= 2
+
+        $if ACTIVATION == "MINMAX":
+          v128_t vacc0 = ${WASM_F32X4_MAX}(vacc0p0, vmin);
+
+          vacc0 = ${WASM_F32X4_MIN}(vacc0, vmax);
+        $elif ACTIVATION == "RELU":
+          const v128_t vacc0 = ${WASM_F32X4_MAX}(vacc0p0, vzero);
+        $elif ACTIVATION == "LINEAR":
+          const v128_t vacc0 = vacc0p0;
+
+        wasm_v128_store(output, vacc0);
+        output += 4;
+      }
+
+      if XNN_UNLIKELY(c != 0) {
+        v128_t vacc0p0 = wasm_v128_load(b);
+        $for K in range(LAST_PASS_TILE):
+
+          const v128_t vi${K}x0123 = wasm_v128_load(i${K});
+          $if K == 0:
+            v128_t vk${K}x0123 = wasm_v128_load(w);
+          $else:
+            v128_t vk${K}x0123 = wasm_v128_load(w + ${K * 4});
+          $if 1 <= K < ACCUMULATORS:
+            v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
+          $elif FMA:
+            vacc0p${K % ACCUMULATORS} = __builtin_wasm_fma_f32x4(vacc0p${K % ACCUMULATORS}, vi${K}x0123, vk${K}x0123);
+          $else:
+            vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(vacc0p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${K}x0123, vk${K}x0123));
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc${ABC[0:4]}p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc0p${A} = wasm_f32x4_add(vacc0p${A}, vacc0p${A + ACC_SLICE});
+            $ACC_SLICE *= 2
+
+        $if ACTIVATION == "MINMAX":
+          v128_t vacc0 = ${WASM_F32X4_MAX}(vacc0p0, vmin);
+
+          vacc0 = ${WASM_F32X4_MIN}(vacc0, vmax);
+        $elif ACTIVATION == "RELU":
+          v128_t vacc0 = ${WASM_F32X4_MAX}(vacc0p0, vzero);
+        $elif ACTIVATION == "LINEAR":
+          v128_t vacc0 = vacc0p0;
+
+        if (c & 2) {
+          wasm_v128_store64_lane(output, vacc0, 0);
+          vacc0 = wasm_v64x2_shuffle(vacc0, vacc0, 1, 1);
+          output += 2;
+        }
+        if (c & 1) {
+          wasm_v128_store32_lane(output, vacc0, 0);
+          output += 1;
+        }
+      }
+
+    }
+    input = (const float**) ((uintptr_t) input + input_stride);
+    output = (float*) ((uintptr_t) output + output_increment);
+  } while (--output_width != 0);
+}

@@ -817,6 +817,95 @@ class DWConvMicrokernelTester {
     }
   }
 
+  void Test(xnn_f32_dwconv_multipass_ukernel_fn dwconv) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist;
+
+    const size_t tile_size = xnn_multipass_dwconv_tile_size(
+      kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
+    std::vector<const float*> indirection((width() - 1) * step() + tile_size);
+    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
+    std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_ALLOCATION_ALIGNMENT / sizeof(float) + channels());
+    std::vector<float> kernel(channels() * kernel_size());
+    std::vector<float> bias(channels());
+    std::vector<float, AlignedAllocator<float, 64>> packed_weights(
+      xnn_multipass_dwconv_weights_count(
+        tile_size, channels(), channel_tile(), channel_subtile(), channel_round()));
+    std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> output((width() - 1) * output_stride() + channels());
+    std::vector<float> output_ref(width() * channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
+      std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+      std::fill(zero.begin(), zero.end(), 0.0f);
+      std::fill(output_ref.begin(), output_ref.end(), nanf(""));
+      std::fill(output.begin(), output.end(), nanf(""));
+
+      std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
+      xnn_pack_f32_multipass_dwconv_ghw_w(
+        first_pass_tile(), middle_pass_tile(), last_pass_tile(), kernel_size(), 1,
+        channels(), channel_tile(), channel_subtile(), channel_round(),
+        kernel.data(), bias.data(), packed_weights.data(),
+        0 /* extra bytes */, nullptr);
+      for (size_t i = 0; i < indirection.size(); i++) {
+        indirection[i] = input.data() + i * channels() - input_offset();
+      }
+      std::shuffle(indirection.begin(), indirection.end(), rng);
+      if (zero_index() != SIZE_MAX) {
+        for (size_t i = 0; i < indirection.size(); i += kernel_size()) {
+          indirection[i + zero_index()] = zero.data();
+        }
+      }
+
+      // Compute reference results, without clamping.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          float acc = bias[c];
+          for (size_t k = 0; k < kernel_size(); k++) {
+            if (indirection[x * step() + k] != zero.data()) {
+              acc += indirection[x * step() + k][c + input_offset()] * kernel[c * kernel_size() + k];
+            }
+          }
+          output_ref[x * channels() + c] = acc;
+        }
+      }
+
+      // input_stride is step() - first and middle pass
+      size_t num_middle_pass =
+        divide_round_up(doz(tile_size, first_pass_tile() + last_pass_tile()), middle_pass_tile());
+      const int input_advanced = first_pass_tile() + num_middle_pass * middle_pass_tile();
+      int input_stride_elements = step() - input_advanced;
+      // Call optimized micro-kernel.
+      dwconv(
+        channels(), width(),
+        indirection.data(), packed_weights.data(), output.data(),
+        input_stride_elements * sizeof(void*),
+        (output_stride() - channels()) * sizeof(float),
+        input_offset() * sizeof(float), zero.data(),
+        kernel_size(),
+        buffer.data(),
+        nullptr);
+
+      // Verify results.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          EXPECT_NEAR(
+              output_ref[x * channels() + c],
+              output[x * output_stride() + c],
+              std::abs(output_ref[x * channels() + c]) * 1.0e-5)
+            << "x = " << x << ", channel = " << c << " channels = " << channels()
+            << " kernel_size = " << kernel_size()
+            << " first_pass_tile = " << first_pass_tile()
+            << " middle_pass_tile = " << middle_pass_tile()
+            << " last_pass_tile = " << last_pass_tile();
+        }
+      }
+    }
+  }
+
   void Test(xnn_f32_dwconv_multipass_minmax_ukernel_fn dwconv_minmax, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
