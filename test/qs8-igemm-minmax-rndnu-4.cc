@@ -22956,7 +22956,7 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM && !XNN_PLATFORM_IOS || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(QS8_IGEMM_MINMAX_RNDNU_6X16C4__NEONDOT, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_DOT;
     GemmMicrokernelTester()
@@ -23421,10 +23421,10 @@
       .cm_stride(19)
       .Test(xnn_qs8_igemm_minmax_rndnu_ukernel_6x16c4__neondot, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
   }
-#endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM && !XNN_PLATFORM_IOS || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && !XNN_PLATFORM_IOS && XNN_PLATFORM_JIT
+#if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && XNN_PLATFORM_JIT
   TEST(GENERATE_QS8_IGEMM_RNDNU_4X8C4__AARCH32_NEONDOT_LD64, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_DOT;
     GemmMicrokernelTester()
@@ -23889,4 +23889,4 @@
       .cm_stride(11)
       .Test(xnn_generate_qs8_igemm_rndnu_ukernel_4x8c4__aarch32_neondot_ld64, xnn_init_qs8_conv_minmax_rndnu_neon_params, xnn_qs8_requantize_rndnu);
   }
-#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && !XNN_PLATFORM_IOS && XNN_PLATFORM_JIT
+#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && XNN_PLATFORM_JIT

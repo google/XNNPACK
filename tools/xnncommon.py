@@ -116,10 +116,7 @@ def generate_isa_check_macro(isa):
 
 
 def arch_to_macro(arch, isa):
-  if arch == "aarch32" and isa == "neondot":
-    return _ARCH_TO_MACRO_MAP[arch] + " && !XNN_PLATFORM_IOS"
-  else:
-    return _ARCH_TO_MACRO_MAP[arch]
+  return _ARCH_TO_MACRO_MAP[arch]
 
 
 def postprocess_test_case(test_case, arch, isa, assembly=False, jit=False):
