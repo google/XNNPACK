@@ -1701,7 +1701,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
 
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_4_bw_4) {
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_4_bw_4) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1710,10 +1710,10 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_1_8_bw_1_8) {
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_1_8_bw_1_8) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 1; i <= 8; ++i){
       for(size_t j = 1; j <= 8; ++j){
@@ -1724,12 +1724,12 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
           .block_height(i)
           .element_size(3)
           .iterations(1)
-          .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+          .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
       }
     }
   }
 
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_4_bw_8) {
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_4_bw_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1738,10 +1738,10 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_4_bw_5_8) {
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_4_bw_5_8) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 5; i < 8; ++i){
       TransposeMicrokernelTester()
@@ -1751,11 +1751,11 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(4)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+        .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
     }
   }
 
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_8_bw_5_8) {
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_8_bw_5_8) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 5; i < 8; ++i){
       TransposeMicrokernelTester()
@@ -1765,11 +1765,11 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(8)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+        .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
     }
   }
 
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_8_bw_4) {
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_8_bw_4) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(4)
@@ -1778,10 +1778,10 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(8)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_5_8_bw_4){
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_5_8_bw_4){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 5; i < 8; ++i){
       TransposeMicrokernelTester()
@@ -1791,11 +1791,11 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(i)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+        .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
     }
   }
 
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_5_8_bw_8){
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_5_8_bw_8){
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 5; i < 8; ++i){
       TransposeMicrokernelTester()
@@ -1805,11 +1805,11 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
         .block_height(i)
         .element_size(3)
         .iterations(1)
-        .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+        .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
     }
   }
 
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_5_8_bw_5_8) {
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_5_8_bw_5_8) {
     TEST_REQUIRES_ARM_NEON;
     for(size_t i = 5; i < 8; ++i){
       for(size_t j = 5; j < 8; ++j){
@@ -1820,12 +1820,12 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
           .block_height(i)
           .element_size(3)
           .iterations(1)
-          .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+          .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
       }
     }
   }
 
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_4_bw_4_is_8) {
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_4_bw_4_is_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1834,10 +1834,10 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_4_bw_4_os_8) {
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_4_bw_4_os_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(4)
@@ -1846,10 +1846,10 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_4_bw_4_is_8_os_8) {
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_4_bw_4_is_8_os_8) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(8)
@@ -1858,10 +1858,10 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .block_height(4)
       .element_size(3)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_68_bw_76_ies_14) {
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_68_bw_76_ies_14) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(76)
@@ -1871,10 +1871,10 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .element_size(3)
       .input_element_stride(14)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_12_bw_20_oes_14) {
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_12_bw_20_oes_14) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(20)
@@ -1884,10 +1884,10 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .element_size(3)
       .output_element_stride(14)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
   }
 
-  TEST(X24_TRANSPOSEC__4X4_NEON_TBL128_3, bh_28_bw_92_ies_20_oes_16) {
+  TEST(X24_TRANSPOSEC__4X4_AARCH64_NEON_TBL128_3, bh_28_bw_92_ies_20_oes_16) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
       .input_stride(97)
@@ -1898,7 +1898,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .input_element_stride(20)
       .output_element_stride(16)
       .iterations(1)
-      .Test(xnn_x24_transposec_ukernel__4x4_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
+      .Test(xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128, xnn_init_x24_transpose_neon_tbl128_params);
   }
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 

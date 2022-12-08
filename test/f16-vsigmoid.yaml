@@ -4,35 +4,35 @@
 # LICENSE file in the root directory of this source tree.
 
 # ARM NEON+FP16ARITH
-- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x8
+- name: xnn_f16_vsigmoid_ukernel__aarch64_neonfp16arith_rr2_p2_div_x8
   init: xnn_init_f16_sigmoid_fp16arith_rr2_p2_params
   arch:
   - aarch64
-- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x16
+- name: xnn_f16_vsigmoid_ukernel__aarch64_neonfp16arith_rr2_p2_div_x16
   init: xnn_init_f16_sigmoid_fp16arith_rr2_p2_params
   arch:
   - aarch64
-- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x24
+- name: xnn_f16_vsigmoid_ukernel__aarch64_neonfp16arith_rr2_p2_div_x24
   init: xnn_init_f16_sigmoid_fp16arith_rr2_p2_params
   arch:
   - aarch64
-- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x32
+- name: xnn_f16_vsigmoid_ukernel__aarch64_neonfp16arith_rr2_p2_div_x32
   init: xnn_init_f16_sigmoid_fp16arith_rr2_p2_params
   arch:
   - aarch64
-- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x40
+- name: xnn_f16_vsigmoid_ukernel__aarch64_neonfp16arith_rr2_p2_div_x40
   init: xnn_init_f16_sigmoid_fp16arith_rr2_p2_params
   arch:
   - aarch64
-- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x48
+- name: xnn_f16_vsigmoid_ukernel__aarch64_neonfp16arith_rr2_p2_div_x48
   init: xnn_init_f16_sigmoid_fp16arith_rr2_p2_params
   arch:
   - aarch64
-- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x56
+- name: xnn_f16_vsigmoid_ukernel__aarch64_neonfp16arith_rr2_p2_div_x56
   init: xnn_init_f16_sigmoid_fp16arith_rr2_p2_params
   arch:
   - aarch64
-- name: xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_div_x64
+- name: xnn_f16_vsigmoid_ukernel__aarch64_neonfp16arith_rr2_p2_div_x64
   init: xnn_init_f16_sigmoid_fp16arith_rr2_p2_params
   arch:
   - aarch64

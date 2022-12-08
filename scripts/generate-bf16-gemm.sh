@@ -17,11 +17,11 @@ tools/xngen src/bf16-gemm/c8-neon.c.in -D MR=3 -D NR=4 -D EXTOPT=SHLAND -o src/b
 tools/xngen src/bf16-gemm/c8-neon.c.in -D MR=4 -D NR=4 -D EXTOPT=SHLAND -o src/bf16-gemm/gen/bf16-gemm-4x4c8-minmax-neonfma-shland.c &
 tools/xngen src/bf16-gemm/c8-neon.c.in -D MR=5 -D NR=4 -D EXTOPT=SHLAND -o src/bf16-gemm/gen/bf16-gemm-5x4c8-minmax-neonfma-shland.c &
 
-tools/xngen src/bf16-gemm/c8-neon.c.in -D MR=1 -D NR=4 -D EXTOPT=ZIP -o src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-neonfma-zip.c &
-tools/xngen src/bf16-gemm/c8-neon.c.in -D MR=2 -D NR=4 -D EXTOPT=ZIP -o src/bf16-gemm/gen/bf16-gemm-2x4c8-minmax-neonfma-zip.c &
-tools/xngen src/bf16-gemm/c8-neon.c.in -D MR=3 -D NR=4 -D EXTOPT=ZIP -o src/bf16-gemm/gen/bf16-gemm-3x4c8-minmax-neonfma-zip.c &
-tools/xngen src/bf16-gemm/c8-neon.c.in -D MR=4 -D NR=4 -D EXTOPT=ZIP -o src/bf16-gemm/gen/bf16-gemm-4x4c8-minmax-neonfma-zip.c &
-tools/xngen src/bf16-gemm/c8-neon.c.in -D MR=5 -D NR=4 -D EXTOPT=ZIP -o src/bf16-gemm/gen/bf16-gemm-5x4c8-minmax-neonfma-zip.c &
+tools/xngen src/bf16-gemm/c8-neon.c.in -D MR=1 -D NR=4 -D EXTOPT=ZIP -o src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-aarch64-neonfma-zip.c &
+tools/xngen src/bf16-gemm/c8-neon.c.in -D MR=2 -D NR=4 -D EXTOPT=ZIP -o src/bf16-gemm/gen/bf16-gemm-2x4c8-minmax-aarch64-neonfma-zip.c &
+tools/xngen src/bf16-gemm/c8-neon.c.in -D MR=3 -D NR=4 -D EXTOPT=ZIP -o src/bf16-gemm/gen/bf16-gemm-3x4c8-minmax-aarch64-neonfma-zip.c &
+tools/xngen src/bf16-gemm/c8-neon.c.in -D MR=4 -D NR=4 -D EXTOPT=ZIP -o src/bf16-gemm/gen/bf16-gemm-4x4c8-minmax-aarch64-neonfma-zip.c &
+tools/xngen src/bf16-gemm/c8-neon.c.in -D MR=5 -D NR=4 -D EXTOPT=ZIP -o src/bf16-gemm/gen/bf16-gemm-5x4c8-minmax-aarch64-neonfma-zip.c &
 
 tools/xngen src/bf16-gemm/c8-neonbf16.c.in -D MR=1 -D NR=4 -D BFOPT=BFDOT -o src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-neonbf16-bfdot.c &
 tools/xngen src/bf16-gemm/c8-neonbf16.c.in -D MR=2 -D NR=4 -D BFOPT=BFDOT -o src/bf16-gemm/gen/bf16-gemm-2x4c8-minmax-neonbf16-bfdot.c &

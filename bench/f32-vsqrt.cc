@@ -63,12 +63,12 @@ static void f32_vsqrt(
 }
 
 #if XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f32_vsqrt, neon_sqrt_x4,
-                    xnn_f32_vsqrt_ukernel__neon_sqrt_x4)
+  BENCHMARK_CAPTURE(f32_vsqrt, aarch64_neon_sqrt_x4,
+                    xnn_f32_vsqrt_ukernel__aarch64_neon_sqrt_x4)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vsqrt, neon_sqrt_x8,
-                    xnn_f32_vsqrt_ukernel__neon_sqrt_x8)
+  BENCHMARK_CAPTURE(f32_vsqrt, aarch64_neon_sqrt_x8,
+                    xnn_f32_vsqrt_ukernel__aarch64_neon_sqrt_x8)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM64

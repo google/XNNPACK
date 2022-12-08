@@ -40,27 +40,27 @@
   init: xnn_init_f32_sigmoid_neon_rr2_p5_params
 - name: xnn_f32_vsigmoid_ukernel__neon_rr2_p5_nr2recps_x24
   init: xnn_init_f32_sigmoid_neon_rr2_p5_params
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_div_x4
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_lut64_p2_div_x4
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut64_p2_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_div_x8
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_lut64_p2_div_x8
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut64_p2_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_div_x12
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_lut64_p2_div_x12
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut64_p2_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_div_x16
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_lut64_p2_div_x16
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut64_p2_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_div_x20
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_lut64_p2_div_x20
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut64_p2_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_div_x24
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_lut64_p2_div_x24
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut64_p2_params
   arch:
     - aarch64
@@ -100,27 +100,27 @@
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut64_p2_params
 - name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_nr2recps_x24
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut64_p2_params
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut2048_p1_div_x4
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_lut2048_p1_div_x4
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut2048_p1_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut2048_p1_div_x8
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_lut2048_p1_div_x8
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut2048_p1_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut2048_p1_div_x12
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_lut2048_p1_div_x12
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut2048_p1_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut2048_p1_div_x16
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_lut2048_p1_div_x16
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut2048_p1_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut2048_p1_div_x20
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_lut2048_p1_div_x20
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut2048_p1_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut2048_p1_div_x24
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_lut2048_p1_div_x24
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut2048_p1_params
   arch:
     - aarch64
@@ -160,27 +160,27 @@
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut2048_p1_params
 - name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut2048_p1_nr2recps_x24
   init: xnn_init_f32_sigmoid_neonfma_rr1_lut2048_p1_params
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_p5_div_x4
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_p5_div_x4
   init: xnn_init_f32_sigmoid_neonfma_rr1_p5_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_p5_div_x8
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_p5_div_x8
   init: xnn_init_f32_sigmoid_neonfma_rr1_p5_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_p5_div_x12
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_p5_div_x12
   init: xnn_init_f32_sigmoid_neonfma_rr1_p5_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_p5_div_x16
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_p5_div_x16
   init: xnn_init_f32_sigmoid_neonfma_rr1_p5_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_p5_div_x20
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_p5_div_x20
   init: xnn_init_f32_sigmoid_neonfma_rr1_p5_params
   arch:
     - aarch64
-- name: xnn_f32_vsigmoid_ukernel__neonfma_rr1_p5_div_x24
+- name: xnn_f32_vsigmoid_ukernel__aarch64_neonfma_rr1_p5_div_x24
   init: xnn_init_f32_sigmoid_neonfma_rr1_p5_params
   arch:
     - aarch64

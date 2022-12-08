@@ -22,12 +22,12 @@
 - name: xnn_f32_spmm_minmax_ukernel_4x1__neonfma_x2
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_4x2__neonfma
+- name: xnn_f32_spmm_minmax_ukernel_4x2__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
   arch:
   - aarch64
-- name: xnn_f32_spmm_minmax_ukernel_4x4__neonfma
+- name: xnn_f32_spmm_minmax_ukernel_4x4__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
   arch:
@@ -50,12 +50,12 @@
 - name: xnn_f32_spmm_minmax_ukernel_8x1__neonfma_x2
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_8x2__neonfma
+- name: xnn_f32_spmm_minmax_ukernel_8x2__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
   arch:
   - aarch64
-- name: xnn_f32_spmm_minmax_ukernel_8x4__neonfma
+- name: xnn_f32_spmm_minmax_ukernel_8x4__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
   arch:
@@ -66,12 +66,12 @@
 - name: xnn_f32_spmm_minmax_ukernel_12x1__neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
-- name: xnn_f32_spmm_minmax_ukernel_12x2__neonfma
+- name: xnn_f32_spmm_minmax_ukernel_12x2__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
   arch:
   - aarch64
-- name: xnn_f32_spmm_minmax_ukernel_12x4__neonfma
+- name: xnn_f32_spmm_minmax_ukernel_12x4__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
   arch:
@@ -94,12 +94,12 @@
 - name: xnn_f32_spmm_minmax_ukernel_16x1__neonfma_x2
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_16x2__neonfma
+- name: xnn_f32_spmm_minmax_ukernel_16x2__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
   arch:
   - aarch64
-- name: xnn_f32_spmm_minmax_ukernel_16x4__neonfma
+- name: xnn_f32_spmm_minmax_ukernel_16x4__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
   arch:
@@ -122,12 +122,12 @@
 - name: xnn_f32_spmm_minmax_ukernel_32x1__neonfma_x2
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
-- name: xnn_f32_spmm_minmax_ukernel_32x2__neonfma
+- name: xnn_f32_spmm_minmax_ukernel_32x2__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
   arch:
   - aarch64
-- name: xnn_f32_spmm_minmax_ukernel_32x4__neonfma
+- name: xnn_f32_spmm_minmax_ukernel_32x4__aarch64_neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
   arch:

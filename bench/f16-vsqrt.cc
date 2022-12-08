@@ -62,13 +62,13 @@ static void f16_vsqrt(
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f16_vsqrt, neonfp16arith_sqrt_x8,
-                    xnn_f16_vsqrt_ukernel__neonfp16arith_sqrt_x8,
+  BENCHMARK_CAPTURE(f16_vsqrt, aarch64_neonfp16arith_sqrt_x8,
+                    xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x8,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_vsqrt, neonfp16arith_sqrt_x16,
-                    xnn_f16_vsqrt_ukernel__neonfp16arith_sqrt_x16,
+  BENCHMARK_CAPTURE(f16_vsqrt, aarch64_neonfp16arith_sqrt_x16,
+                    xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x16,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();

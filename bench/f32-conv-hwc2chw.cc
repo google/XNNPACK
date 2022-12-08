@@ -118,15 +118,15 @@ static void f32_conv_hwc2chw(benchmark::State& state,
 
 
 #if XNN_ARCH_ARM64
-  static void f32_conv_hwc2chw_3x3s2p1c3x4__neonfma_2x2(benchmark::State& state, const char* net) {
+  static void f32_conv_hwc2chw_3x3s2p1c3x4__aarch64_neonfma_2x2(benchmark::State& state, const char* net) {
     f32_conv_hwc2chw(state,
-      xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfma_2x2,
+      xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2,
       xnn_init_f32_minmax_scalar_params,
       4 /* output channel tile */,
       benchmark::utils::CheckNEONFMA);
   }
 
-  BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x4__neonfma_2x2);
+  BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x4__aarch64_neonfma_2x2);
 #endif
 
 

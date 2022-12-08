@@ -15,7 +15,8 @@ $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
 #include <xnnpack/gemm.h>
 
 
-void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}_${"dup" if DUP else "lane"}_ld64(
+$ISA = ("neonfma" if DUP else "aarch64_neonfma") if FMA else "neon"
+void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_${"dup" if DUP else "lane"}_ld64(
     size_t mr,
     size_t nc,
     size_t kc,

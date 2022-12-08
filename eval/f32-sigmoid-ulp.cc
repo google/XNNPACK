@@ -247,28 +247,28 @@ static void SigmoidError(benchmark::State& state,
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(SigmoidError, neonfma_rr1_lut2048_p1_div,
-                    xnn_math_f32_sigmoid__neonfma_rr1_lut2048_p1_div)
+  BENCHMARK_CAPTURE(SigmoidError, aarch64_neonfma_rr1_lut2048_p1_div,
+                    xnn_math_f32_sigmoid__aarch64_neonfma_rr1_lut2048_p1_div)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(SigmoidError, neonfma_rr2_lut2048_p1_div,
-                    xnn_math_f32_sigmoid__neonfma_rr2_lut2048_p1_div)
+  BENCHMARK_CAPTURE(SigmoidError, aarch64_neonfma_rr2_lut2048_p1_div,
+                    xnn_math_f32_sigmoid__aarch64_neonfma_rr2_lut2048_p1_div)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(SigmoidError, neonfma_rr1_lut64_p2_div,
-                    xnn_math_f32_sigmoid__neonfma_rr1_lut64_p2_div)
+  BENCHMARK_CAPTURE(SigmoidError, aarch64_neonfma_rr1_lut64_p2_div,
+                    xnn_math_f32_sigmoid__aarch64_neonfma_rr1_lut64_p2_div)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(SigmoidError, neonfma_rr2_lut64_p2_div,
-                    xnn_math_f32_sigmoid__neonfma_rr2_lut64_p2_div)
+  BENCHMARK_CAPTURE(SigmoidError, aarch64_neonfma_rr2_lut64_p2_div,
+                    xnn_math_f32_sigmoid__aarch64_neonfma_rr2_lut64_p2_div)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(SigmoidError, neonfma_rr1_p5_div,
-                    xnn_math_f32_sigmoid__neonfma_rr1_p5_div)
+  BENCHMARK_CAPTURE(SigmoidError, aarch64_neonfma_rr1_p5_div,
+                    xnn_math_f32_sigmoid__aarch64_neonfma_rr1_p5_div)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(SigmoidError, neonfma_rr2_p5_div,
-                    xnn_math_f32_sigmoid__neonfma_rr2_p5_div)
+  BENCHMARK_CAPTURE(SigmoidError, aarch64_neonfma_rr2_p5_div,
+                    xnn_math_f32_sigmoid__aarch64_neonfma_rr2_p5_div)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
 #endif  // XNN_ARCH_ARM64

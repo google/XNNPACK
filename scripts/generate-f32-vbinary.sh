@@ -417,8 +417,8 @@ tools/xngen src/f32-vbinary/vopc-wasmsimd.c.in -D OP=SUB     -D BATCH_TILE=16 -D
 ################################### ARM NEON ##################################
 tools/xngen src/f32-vbinary/vop-neon.c.in -D OP=ADD     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vadd-minmax-neon-x4.c &
 tools/xngen src/f32-vbinary/vop-neon.c.in -D OP=ADD     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vadd-minmax-neon-x8.c &
-tools/xngen src/f32-vbinary/vop-neon.c.in -D OP=DIV     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vdiv-minmax-neon-x4.c &
-tools/xngen src/f32-vbinary/vop-neon.c.in -D OP=DIV     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vdiv-minmax-neon-x8.c &
+tools/xngen src/f32-vbinary/vop-neon.c.in -D OP=DIV     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vdiv-minmax-aarch64-neon-x4.c &
+tools/xngen src/f32-vbinary/vop-neon.c.in -D OP=DIV     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vdiv-minmax-aarch64-neon-x8.c &
 tools/xngen src/f32-vbinary/vop-neon.c.in -D OP=MAX     -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmax-neon-x4.c &
 tools/xngen src/f32-vbinary/vop-neon.c.in -D OP=MAX     -D BATCH_TILE=8 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmax-neon-x8.c &
 tools/xngen src/f32-vbinary/vop-neon.c.in -D OP=MIN     -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmin-neon-x4.c &
@@ -432,16 +432,16 @@ tools/xngen src/f32-vbinary/vop-neon.c.in -D OP=SUB     -D BATCH_TILE=8 -D ACTIV
 
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=ADD      -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vaddc-minmax-neon-x4.c &
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=ADD      -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vaddc-minmax-neon-x8.c &
-tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=DIV      -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vdivc-minmax-neon-x4.c &
-tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=DIV      -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vdivc-minmax-neon-x8.c &
+tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=DIV      -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vdivc-minmax-aarch64-neon-x4.c &
+tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=DIV      -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vdivc-minmax-aarch64-neon-x8.c &
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=MAX      -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmaxc-neon-x4.c &
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=MAX      -D BATCH_TILE=8 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vmaxc-neon-x8.c &
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=MIN      -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vminc-neon-x4.c &
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=MIN      -D BATCH_TILE=8 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vminc-neon-x8.c &
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=MUL      -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vmulc-minmax-neon-x4.c &
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=MUL      -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vmulc-minmax-neon-x8.c &
-tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=RDIV     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vrdivc-minmax-neon-x4.c &
-tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=RDIV     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vrdivc-minmax-neon-x8.c &
+tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=RDIV     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vrdivc-minmax-aarch64-neon-x4.c &
+tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=RDIV     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vrdivc-minmax-aarch64-neon-x8.c &
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=RSUB     -D BATCH_TILE=4 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vrsubc-minmax-neon-x4.c &
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=RSUB     -D BATCH_TILE=8 -D ACTIVATION=MINMAX -o src/f32-vbinary/gen/f32-vrsubc-minmax-neon-x8.c &
 tools/xngen src/f32-vbinary/vopc-neon.c.in -D OP=SQRDIFF  -D BATCH_TILE=4 -D ACTIVATION=LINEAR -o src/f32-vbinary/gen/f32-vsqrdiffc-neon-x4.c &

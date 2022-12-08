@@ -61,20 +61,20 @@ static void x8_lut(
 }
 
 #if XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(x8_lut, neon_tbx128x4_x16,
-                    xnn_x8_lut_ukernel__neon_tbx128x4_x16)
+  BENCHMARK_CAPTURE(x8_lut, aarch64_neon_tbx128x4_x16,
+                    xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_x16)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, neon_tbx128x4_x32,
-                    xnn_x8_lut_ukernel__neon_tbx128x4_x32)
+  BENCHMARK_CAPTURE(x8_lut, aarch64_neon_tbx128x4_x32,
+                    xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_x32)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, neon_tbx128x4_x48,
-                    xnn_x8_lut_ukernel__neon_tbx128x4_x48)
+  BENCHMARK_CAPTURE(x8_lut, aarch64_neon_tbx128x4_x48,
+                    xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_x48)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, neon_tbx128x4_x64,
-                    xnn_x8_lut_ukernel__neon_tbx128x4_x64)
+  BENCHMARK_CAPTURE(x8_lut, aarch64_neon_tbx128x4_x64,
+                    xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_x64)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM64

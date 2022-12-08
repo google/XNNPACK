@@ -24,43 +24,43 @@
   init: xnn_init_f32_chw_neon_stride1_params
 - name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__neon_6x4
   init: xnn_init_f32_chw_neon_stride1_params
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__neonfma_1x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__aarch64_neonfma_1x4
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__neonfma_1x4_acc2
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__aarch64_neonfma_1x4_acc2
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__neonfma_1x4_acc3
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__aarch64_neonfma_1x4_acc3
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__neonfma_1x4_acc4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__aarch64_neonfma_1x4_acc4
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__neonfma_2x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__aarch64_neonfma_2x4
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__neonfma_2x4_acc2
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__aarch64_neonfma_2x4_acc2
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__neonfma_3x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__aarch64_neonfma_3x4
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__neonfma_4x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__aarch64_neonfma_4x4
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__neonfma_5x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__aarch64_neonfma_5x4
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__neonfma_6x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3p1__aarch64_neonfma_6x4
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
@@ -80,35 +80,35 @@
   init: xnn_init_f32_chw_neon_stride2_params
 - name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neon_4x4
   init: xnn_init_f32_chw_neon_stride2_params
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_1x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__aarch64_neonfma_1x4
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_1x4_acc2
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__aarch64_neonfma_1x4_acc2
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_1x4_acc3
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__aarch64_neonfma_1x4_acc3
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_1x4_acc4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__aarch64_neonfma_1x4_acc4
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_2x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__aarch64_neonfma_2x4
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_2x4_acc2
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__aarch64_neonfma_2x4_acc2
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_3x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__aarch64_neonfma_3x4
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__neonfma_4x4
+- name: xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__aarch64_neonfma_4x4
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
@@ -138,55 +138,55 @@
   init: xnn_init_f32_chw_neon_stride1_params
 - name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_5x4
   init: xnn_init_f32_chw_neon_stride1_params
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_1x4
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__aarch64_neonfma_1x4
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_1x4_acc2
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__aarch64_neonfma_1x4_acc2
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_1x4_acc3
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__aarch64_neonfma_1x4_acc3
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_1x4_acc4
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__aarch64_neonfma_1x4_acc4
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_1x4_acc5
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__aarch64_neonfma_1x4_acc5
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_2x4
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__aarch64_neonfma_2x4
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_2x4_acc2
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__aarch64_neonfma_2x4_acc2
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_2x4_acc3
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__aarch64_neonfma_2x4_acc3
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_3x4
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__aarch64_neonfma_3x4
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_3x4_acc2
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__aarch64_neonfma_3x4_acc2
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_4x4
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__aarch64_neonfma_4x4
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_4x4_acc2
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__aarch64_neonfma_4x4_acc2
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__neonfma_5x4
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5p2__aarch64_neonfma_5x4
   init: xnn_init_f32_chw_neon_stride1_params
   arch:
     - aarch64
@@ -210,43 +210,43 @@
   init: xnn_init_f32_chw_neon_stride2_params
 - name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_3x4_acc2
   init: xnn_init_f32_chw_neon_stride2_params
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neonfma_1x4
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__aarch64_neonfma_1x4
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neonfma_1x4_acc2
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__aarch64_neonfma_1x4_acc2
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neonfma_1x4_acc3
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__aarch64_neonfma_1x4_acc3
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neonfma_1x4_acc4
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__aarch64_neonfma_1x4_acc4
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neonfma_1x4_acc5
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__aarch64_neonfma_1x4_acc5
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neonfma_2x4
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__aarch64_neonfma_2x4
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neonfma_2x4_acc2
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__aarch64_neonfma_2x4_acc2
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neonfma_2x4_acc3
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__aarch64_neonfma_2x4_acc3
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neonfma_3x4
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__aarch64_neonfma_3x4
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64
-- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neonfma_3x4_acc2
+- name: xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__aarch64_neonfma_3x4_acc2
   init: xnn_init_f32_chw_neon_stride2_params
   arch:
     - aarch64

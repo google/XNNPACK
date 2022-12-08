@@ -5,8 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 
 ################################### ARM NEON ##################################
-tools/xngen src/f16-vsqrt/neonfp16arith-sqrt.c.in -D BATCH_TILE=8  -o src/f16-vsqrt/gen/f16-vsqrt-neonfp16arith-sqrt-x8.c &
-tools/xngen src/f16-vsqrt/neonfp16arith-sqrt.c.in -D BATCH_TILE=16 -o src/f16-vsqrt/gen/f16-vsqrt-neonfp16arith-sqrt-x16.c &
+tools/xngen src/f16-vsqrt/neonfp16arith-sqrt.c.in -D BATCH_TILE=8  -o src/f16-vsqrt/gen/f16-vsqrt-aarch64-neonfp16arith-sqrt-x8.c &
+tools/xngen src/f16-vsqrt/neonfp16arith-sqrt.c.in -D BATCH_TILE=16 -o src/f16-vsqrt/gen/f16-vsqrt-aarch64-neonfp16arith-sqrt-x16.c &
 
 tools/xngen src/f16-vsqrt/neonfp16arith-nr1fma1adj.c.in -D BATCH_TILE=8  -o src/f16-vsqrt/gen/f16-vsqrt-neonfp16arith-nr1fma1adj-x8.c &
 tools/xngen src/f16-vsqrt/neonfp16arith-nr1fma1adj.c.in -D BATCH_TILE=16 -o src/f16-vsqrt/gen/f16-vsqrt-neonfp16arith-nr1fma1adj-x16.c &

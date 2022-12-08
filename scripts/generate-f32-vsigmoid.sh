@@ -5,12 +5,12 @@
 # LICENSE file in the root directory of this source tree.
 
 ################################### ARM NEON ##################################
-tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=4  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-p5-div-x4.c &
-tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=8  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-p5-div-x8.c &
-tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=12 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-p5-div-x12.c &
-tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=16 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-p5-div-x16.c &
-tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=20 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-p5-div-x20.c &
-tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=24 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-p5-div-x24.c &
+tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=4  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-x4.c &
+tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=8  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-x8.c &
+tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=12 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-x12.c &
+tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=16 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-x16.c &
+tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=20 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-x20.c &
+tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=24 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-x24.c &
 
 tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=4  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=nr2fma -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-p5-nr2fma-x4.c &
 tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=8  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=nr2fma -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-p5-nr2fma-x8.c &
@@ -40,12 +40,12 @@ tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=16 -D RR_STEPS=2 -D FMA=
 tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=20 -D RR_STEPS=2 -D FMA=0 -D DIV_ALGO=nr2recps -o src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-p5-nr2recps-x20.c &
 tools/xngen src/f32-vsigmoid/neon-p5.c.in -D BATCH_TILE=24 -D RR_STEPS=2 -D FMA=0 -D DIV_ALGO=nr2recps -o src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-p5-nr2recps-x24.c &
 
-tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=4  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-div-x4.c &
-tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=8  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-div-x8.c &
-tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=12 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-div-x12.c &
-tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=16 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-div-x16.c &
-tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=20 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-div-x20.c &
-tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=24 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-div-x24.c &
+tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=4  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut64-p2-div-x4.c &
+tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=8  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut64-p2-div-x8.c &
+tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=12 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut64-p2-div-x12.c &
+tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=16 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut64-p2-div-x16.c &
+tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=20 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut64-p2-div-x20.c &
+tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=24 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut64-p2-div-x24.c &
 
 tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=4  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=nr2fma -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-nr2fma-x4.c &
 tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=8  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=nr2fma -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-nr2fma-x8.c &
@@ -75,12 +75,12 @@ tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=16 -D RR_STEPS=2 -
 tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=20 -D RR_STEPS=2 -D FMA=0 -D DIV_ALGO=nr2recps -o src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut64-p2-nr2recps-x20.c &
 tools/xngen src/f32-vsigmoid/neon-lut64-p2.c.in -D BATCH_TILE=24 -D RR_STEPS=2 -D FMA=0 -D DIV_ALGO=nr2recps -o src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut64-p2-nr2recps-x24.c &
 
-tools/xngen src/f32-vsigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=4  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut2048-p1-div-x4.c &
-tools/xngen src/f32-vsigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=8  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut2048-p1-div-x8.c &
-tools/xngen src/f32-vsigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=12 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut2048-p1-div-x12.c &
-tools/xngen src/f32-vsigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=16 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut2048-p1-div-x16.c &
-tools/xngen src/f32-vsigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=20 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut2048-p1-div-x20.c &
-tools/xngen src/f32-vsigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=24 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut2048-p1-div-x24.c &
+tools/xngen src/f32-vsigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=4  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut2048-p1-div-x4.c &
+tools/xngen src/f32-vsigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=8  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut2048-p1-div-x8.c &
+tools/xngen src/f32-vsigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=12 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut2048-p1-div-x12.c &
+tools/xngen src/f32-vsigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=16 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut2048-p1-div-x16.c &
+tools/xngen src/f32-vsigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=20 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut2048-p1-div-x20.c &
+tools/xngen src/f32-vsigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=24 -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=div -o src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut2048-p1-div-x24.c &
 
 tools/xngen src/f32-vsigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=4  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=nr2fma -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut2048-p1-nr2fma-x4.c &
 tools/xngen src/f32-vsigmoid/neon-lut2048-p1.c.in -D BATCH_TILE=8  -D RR_STEPS=1 -D FMA=1 -D DIV_ALGO=nr2fma -o src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut2048-p1-nr2fma-x8.c &

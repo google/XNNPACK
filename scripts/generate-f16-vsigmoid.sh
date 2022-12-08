@@ -5,14 +5,14 @@
 # LICENSE file in the root directory of this source tree.
 
 ################################### ARM NEON ##################################
-tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=8  -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-div-x8.c &
-tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=16 -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-div-x16.c &
-tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=24 -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-div-x24.c &
-tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=32 -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-div-x32.c &
-tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=40 -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-div-x40.c &
-tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=48 -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-div-x48.c &
-tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=56 -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-div-x56.c &
-tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=64 -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-div-x64.c &
+tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=8  -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-aarch64-neonfp16arith-rr2-p2-div-x8.c &
+tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=16 -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-aarch64-neonfp16arith-rr2-p2-div-x16.c &
+tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=24 -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-aarch64-neonfp16arith-rr2-p2-div-x24.c &
+tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=32 -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-aarch64-neonfp16arith-rr2-p2-div-x32.c &
+tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=40 -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-aarch64-neonfp16arith-rr2-p2-div-x40.c &
+tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=48 -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-aarch64-neonfp16arith-rr2-p2-div-x48.c &
+tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=56 -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-aarch64-neonfp16arith-rr2-p2-div-x56.c &
+tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=64 -D DIV_ALGO=DIV -o src/f16-vsigmoid/gen/f16-vsigmoid-aarch64-neonfp16arith-rr2-p2-div-x64.c &
 
 tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=8  -D DIV_ALGO=NR1FMA -o src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-nr1fma-x8.c &
 tools/xngen src/f16-vsigmoid/neonfp16arith.c.in -D BATCH_TILE=16 -D DIV_ALGO=NR1FMA -o src/f16-vsigmoid/gen/f16-vsigmoid-neonfp16arith-rr2-p2-nr1fma-x16.c &

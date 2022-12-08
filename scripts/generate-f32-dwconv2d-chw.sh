@@ -17,17 +17,17 @@ tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=3
 tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -D FMA=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-neon-1x4-acc4.c &
 tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-neon-2x4-acc2.c &
 
-tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-neonfma-1x4.c &
-tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-neonfma-2x4.c &
-tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=3 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-neonfma-3x4.c &
-tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=4 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-neonfma-4x4.c &
-tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=5 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-neonfma-5x4.c &
-tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=6 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-neonfma-6x4.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-1x4.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-2x4.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=3 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-3x4.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=4 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-4x4.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=5 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-5x4.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=6 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-6x4.c &
 
-tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-neonfma-1x4-acc2.c &
-tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=3 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-neonfma-1x4-acc3.c &
-tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-neonfma-1x4-acc4.c &
-tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-neonfma-2x4-acc2.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-1x4-acc2.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=3 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-1x4-acc3.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-1x4-acc4.c &
+tools/xngen src/f32-dwconv2d-chw/3x3p1-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-aarch64-neonfma-2x4-acc2.c &
 
 tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-neon-1x4.c &
 tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-neon-2x4.c &
@@ -39,15 +39,15 @@ tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS
 tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -D FMA=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-neon-1x4-acc4.c &
 tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-neon-2x4-acc2.c &
 
-tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-neonfma-1x4.c &
-tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-neonfma-2x4.c &
-tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=3 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-neonfma-3x4.c &
-tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=4 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-neonfma-4x4.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-aarch64-neonfma-1x4.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-aarch64-neonfma-2x4.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=3 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-aarch64-neonfma-3x4.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=4 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-aarch64-neonfma-4x4.c &
 
-tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-neonfma-1x4-acc2.c &
-tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=3 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-neonfma-1x4-acc3.c &
-tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-neonfma-1x4-acc4.c &
-tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-neonfma-2x4-acc2.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-aarch64-neonfma-1x4-acc2.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=3 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-aarch64-neonfma-1x4-acc3.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-aarch64-neonfma-1x4-acc4.c &
+tools/xngen src/f32-dwconv2d-chw/3x3s2p1-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-aarch64-neonfma-2x4-acc2.c &
 
 tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neon-1x4.c &
 tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neon-2x4.c &
@@ -64,20 +64,20 @@ tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=3
 tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=3 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neon-3x4-acc2.c &
 tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=4 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neon-4x4-acc2.c &
 
-tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neonfma-1x4.c &
-tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neonfma-2x4.c &
-tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=3 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neonfma-3x4.c &
-tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=4 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neonfma-4x4.c &
-tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=5 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neonfma-5x4.c &
+tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-aarch64-neonfma-1x4.c &
+tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-aarch64-neonfma-2x4.c &
+tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=3 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-aarch64-neonfma-3x4.c &
+tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=4 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-aarch64-neonfma-4x4.c &
+tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=5 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-aarch64-neonfma-5x4.c &
 
-tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neonfma-1x4-acc2.c &
-tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=3 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neonfma-1x4-acc3.c &
-tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neonfma-1x4-acc4.c &
-tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=5 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neonfma-1x4-acc5.c &
-tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neonfma-2x4-acc2.c &
-tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=3 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neonfma-2x4-acc3.c &
-tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=3 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neonfma-3x4-acc2.c &
-tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=4 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neonfma-4x4-acc2.c &
+tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-aarch64-neonfma-1x4-acc2.c &
+tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=3 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-aarch64-neonfma-1x4-acc3.c &
+tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-aarch64-neonfma-1x4-acc4.c &
+tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=5 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-aarch64-neonfma-1x4-acc5.c &
+tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-aarch64-neonfma-2x4-acc2.c &
+tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=3 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-aarch64-neonfma-2x4-acc3.c &
+tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=3 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-aarch64-neonfma-3x4-acc2.c &
+tools/xngen src/f32-dwconv2d-chw/5x5p2-neon.c.in -D ROW_TILE=4 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-aarch64-neonfma-4x4-acc2.c &
 
 tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neon-1x4.c &
 tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D FMA=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neon-2x4.c &
@@ -91,17 +91,17 @@ tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS
 tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=3 -D FMA=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neon-2x4-acc3.c &
 tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=3 -D ACCUMULATORS=2 -D FMA=0 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neon-3x4-acc2.c &
 
-tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neonfma-1x4.c &
-tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neonfma-2x4.c &
-tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=3 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neonfma-3x4.c &
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-aarch64-neonfma-1x4.c &
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-aarch64-neonfma-2x4.c &
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=3 -D ACCUMULATORS=1 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-aarch64-neonfma-3x4.c &
 
-tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neonfma-1x4-acc2.c &
-tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=3 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neonfma-1x4-acc3.c &
-tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neonfma-1x4-acc4.c &
-tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=5 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neonfma-1x4-acc5.c &
-tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neonfma-2x4-acc2.c &
-tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=3 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neonfma-2x4-acc3.c &
-tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=3 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neonfma-3x4-acc2.c &
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-aarch64-neonfma-1x4-acc2.c &
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=3 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-aarch64-neonfma-1x4-acc3.c &
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=4 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-aarch64-neonfma-1x4-acc4.c &
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=1 -D ACCUMULATORS=5 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-aarch64-neonfma-1x4-acc5.c &
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-aarch64-neonfma-2x4-acc2.c &
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=2 -D ACCUMULATORS=3 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-aarch64-neonfma-2x4-acc3.c &
+tools/xngen src/f32-dwconv2d-chw/5x5s2p2-neon.c.in -D ROW_TILE=3 -D ACCUMULATORS=2 -D FMA=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-aarch64-neonfma-3x4-acc2.c &
 
 ################################### x86 SSE ###################################
 tools/xngen src/f32-dwconv2d-chw/3x3p1-sse.c.in -D ROW_TILE=1 -D ACCUMULATORS=1 -o src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-sse-1x4.c &

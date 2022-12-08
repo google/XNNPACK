@@ -14,8 +14,8 @@ tools/xngen src/f32-vsqrt/wasmsimd-sqrt.c.in -D BATCH_TILE=4 -o src/f32-vsqrt/ge
 tools/xngen src/f32-vsqrt/wasmsimd-sqrt.c.in -D BATCH_TILE=8 -o src/f32-vsqrt/gen/f32-vsqrt-wasmsimd-sqrt-x8.c &
 
 ################################### ARM NEON ##################################
-tools/xngen src/f32-vsqrt/neon-sqrt.c.in -D BATCH_TILE=4 -o src/f32-vsqrt/gen/f32-vsqrt-neon-sqrt-x4.c &
-tools/xngen src/f32-vsqrt/neon-sqrt.c.in -D BATCH_TILE=8 -o src/f32-vsqrt/gen/f32-vsqrt-neon-sqrt-x8.c &
+tools/xngen src/f32-vsqrt/neon-sqrt.c.in -D BATCH_TILE=4 -o src/f32-vsqrt/gen/f32-vsqrt-aarch64-neon-sqrt-x4.c &
+tools/xngen src/f32-vsqrt/neon-sqrt.c.in -D BATCH_TILE=8 -o src/f32-vsqrt/gen/f32-vsqrt-aarch64-neon-sqrt-x8.c &
 
 tools/xngen src/f32-vsqrt/neonfma-nr2fma1adj.c.in -D BATCH_TILE=4  -o src/f32-vsqrt/gen/f32-vsqrt-neonfma-nr2fma1adj-x4.c &
 tools/xngen src/f32-vsqrt/neonfma-nr2fma1adj.c.in -D BATCH_TILE=8  -o src/f32-vsqrt/gen/f32-vsqrt-neonfma-nr2fma1adj-x8.c &

@@ -173,7 +173,7 @@
 - name: xnn_f32_igemm_minmax_ukernel_1x8__neonfma_dup_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
-- name: xnn_f32_igemm_minmax_ukernel_1x8__neonfma_lane_ld64
+- name: xnn_f32_igemm_minmax_ukernel_1x8__aarch64_neonfma_lane_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
   arch:
@@ -187,7 +187,7 @@
 - name: xnn_f32_igemm_minmax_ukernel_4x2__neon_lane_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
-- name: xnn_f32_igemm_minmax_ukernel_4x2__neonfma_lane_ld64
+- name: xnn_f32_igemm_minmax_ukernel_4x2__aarch64_neonfma_lane_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
   arch:
@@ -195,7 +195,7 @@
 - name: xnn_f32_igemm_minmax_ukernel_4x4__neon_lane_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
-- name: xnn_f32_igemm_minmax_ukernel_4x4__neonfma_lane_ld64
+- name: xnn_f32_igemm_minmax_ukernel_4x4__aarch64_neonfma_lane_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
   arch:
@@ -218,12 +218,12 @@
 - name: xnn_f32_igemm_minmax_ukernel_4x8__neonfma_dup_ld128
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-- name: xnn_f32_igemm_minmax_ukernel_4x8__neonfma_lane_ld64
+- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_lane_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
   arch:
     - aarch64
-- name: xnn_f32_igemm_minmax_ukernel_4x8__neonfma_lane_ld128
+- name: xnn_f32_igemm_minmax_ukernel_4x8__aarch64_neonfma_lane_ld128
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   arch:
@@ -237,7 +237,7 @@
 - name: xnn_f32_igemm_minmax_ukernel_6x2__neon_lane_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
-- name: xnn_f32_igemm_minmax_ukernel_6x2__neonfma_lane_ld64
+- name: xnn_f32_igemm_minmax_ukernel_6x2__aarch64_neonfma_lane_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
   arch:
@@ -260,12 +260,12 @@
 - name: xnn_f32_igemm_minmax_ukernel_6x8__neonfma_dup_ld128
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-- name: xnn_f32_igemm_minmax_ukernel_6x8__neonfma_lane_ld64
+- name: xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_lane_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
   arch:
     - aarch64
-- name: xnn_f32_igemm_minmax_ukernel_6x8__neonfma_lane_ld128
+- name: xnn_f32_igemm_minmax_ukernel_6x8__aarch64_neonfma_lane_ld128
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   arch:

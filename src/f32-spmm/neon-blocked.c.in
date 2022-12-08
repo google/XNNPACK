@@ -14,7 +14,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/spmm.h>
 
 
-void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
+void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__${"aarch64_neonfma" if FMA else "neon"}(
     size_t mc,
     size_t nc,
     const float* input,

@@ -27,7 +27,8 @@ $  "SQRDIFF": lambda x, y: "vsubq_f16(%s, %s)" % (x, y),
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "xnn_f16_default_params", "MINMAX": "xnn_f16_minmax_params"}[ACTIVATION]
-void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__neonfp16arith_x${BATCH_TILE}(
+$ISA = "aarch64_neonfp16arith" if OP == "DIV" else "neonfp16arith"
+void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__${ISA}_x${BATCH_TILE}(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,

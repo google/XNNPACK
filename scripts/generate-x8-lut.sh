@@ -18,10 +18,10 @@ tools/xngen src/x8-lut/wasmsimd.c.in -D BATCH_TILE=48 -o src/x8-lut/gen/x8-lut-w
 tools/xngen src/x8-lut/wasmsimd.c.in -D BATCH_TILE=64 -o src/x8-lut/gen/x8-lut-wasmsimd-x64.c &
 
 ################################## ARM64 NEON #################################
-tools/xngen src/x8-lut/neon-tbx128x4.c.in -D BATCH_TILE=16 -o src/x8-lut/gen/x8-lut-neon-tbx128x4-x16.c &
-tools/xngen src/x8-lut/neon-tbx128x4.c.in -D BATCH_TILE=32 -o src/x8-lut/gen/x8-lut-neon-tbx128x4-x32.c &
-tools/xngen src/x8-lut/neon-tbx128x4.c.in -D BATCH_TILE=48 -o src/x8-lut/gen/x8-lut-neon-tbx128x4-x48.c &
-tools/xngen src/x8-lut/neon-tbx128x4.c.in -D BATCH_TILE=64 -o src/x8-lut/gen/x8-lut-neon-tbx128x4-x64.c &
+tools/xngen src/x8-lut/neon-tbx128x4.c.in -D BATCH_TILE=16 -o src/x8-lut/gen/x8-lut-aarch64-neon-tbx128x4-x16.c &
+tools/xngen src/x8-lut/neon-tbx128x4.c.in -D BATCH_TILE=32 -o src/x8-lut/gen/x8-lut-aarch64-neon-tbx128x4-x32.c &
+tools/xngen src/x8-lut/neon-tbx128x4.c.in -D BATCH_TILE=48 -o src/x8-lut/gen/x8-lut-aarch64-neon-tbx128x4-x48.c &
+tools/xngen src/x8-lut/neon-tbx128x4.c.in -D BATCH_TILE=64 -o src/x8-lut/gen/x8-lut-aarch64-neon-tbx128x4-x64.c &
 
 ################################### x86 SSE ###################################
 tools/xngen src/x8-lut/ssse3.c.in -D AVX=0 -D BATCH_TILE=16 -o src/x8-lut/gen/x8-lut-ssse3-x16.c &

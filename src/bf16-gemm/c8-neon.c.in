@@ -14,7 +14,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/gemm.h>
 
 
-void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c8__neonfma_${EXTOPT.lower()}(
+void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c8__${"aarch64_neonfma" if EXTOPT == "ZIP" else "neonfma"}_${EXTOPT.lower()}(
     size_t mr,
     size_t nc,
     size_t kc,
