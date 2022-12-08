@@ -33,15 +33,13 @@ static void reorder_array(
   }
 }
 
-static enum xnn_status init_transpose_nd(
+static void init_transpose_nd(
     uint32_t flags,
     enum xnn_operator_type operator_type,
     xnn_operator_t transpose_op)
 {
   transpose_op->flags = flags;
   transpose_op->type = operator_type;
-
-  return xnn_status_success;
 }
 
 static enum xnn_status create_transpose_nd(
@@ -49,8 +47,17 @@ static enum xnn_status create_transpose_nd(
     enum xnn_operator_type operator_type,
     xnn_operator_t* transpose_op_out)
 {
-  enum xnn_status status = xnn_status_out_of_memory;
-  xnn_operator_t transpose_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
+  xnn_operator_t transpose_op = NULL;
+
+  enum xnn_status status = xnn_status_uninitialized;
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
+  status = xnn_status_out_of_memory;
+  transpose_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (transpose_op == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
@@ -58,10 +65,7 @@ static enum xnn_status create_transpose_nd(
     goto error;
   }
 
-  status = init_transpose_nd(flags, operator_type, transpose_op);
-  if (status != xnn_status_success) {
-    goto error;
-  }
+  init_transpose_nd(flags, operator_type, transpose_op);
   *transpose_op_out = transpose_op;
 
   return xnn_status_success;
@@ -91,17 +95,8 @@ static enum xnn_status setup_transpose_nd(
   const size_t* output_stride,
   size_t element_size)
 {
-  enum xnn_status status = xnn_status_unsupported_hardware;
-  const struct xnn_transpose_config* xnn_transpose_conf = xnn_init_transpose_config();
-  if (xnn_transpose_conf == NULL) {
-     xnn_log_error(
-      "failed to create %s operator: hardware is not supported",
-      xnn_operator_type_to_string(transpose_op->type));
-    goto error;
-  }
-
   transpose_op->state = xnn_run_state_invalid;
-  status = xnn_status_invalid_parameter;
+  enum xnn_status status = xnn_status_invalid_parameter;
   if (num_dims == 0) {
     xnn_log_error(
       "failed to create %s operator with %zu num_dims: num_dims must be non-zero",
@@ -220,44 +215,47 @@ static enum xnn_status setup_transpose_nd(
   reorder_array(normalized_dims, loop_order, context->input_stride);
   reorder_array(normalized_dims, loop_order, transpose_op->compute.range);
 
+  const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
+  assert(transpose_config != NULL);
+
   bool variable_size_ukernel = false;
   switch (normalized_element_size) {
     case 1:
-      context->const_size_ukernel = xnn_transpose_conf->x8.const_size_ukernel;
-      transpose_op->compute.tile[0] = xnn_transpose_conf->x8.tile_size;
-      transpose_op->compute.tile[1] = xnn_transpose_conf->x8.tile_size;
-      if (xnn_transpose_conf->x8.init.x16 != NULL) {
-        xnn_transpose_conf->x8.init.x8(&context->params.x8_params);
+      context->const_size_ukernel = transpose_config->x8.const_size_ukernel;
+      transpose_op->compute.tile[0] = transpose_config->x8.tile_size;
+      transpose_op->compute.tile[1] = transpose_config->x8.tile_size;
+      if (transpose_config->x8.init.x16 != NULL) {
+        transpose_config->x8.init.x8(&context->params.x8_params);
       }
       break;
     case 2:
-      transpose_op->compute.tile[0] = xnn_transpose_conf->x16.tile_size;
-      transpose_op->compute.tile[1] = xnn_transpose_conf->x16.tile_size;
-      context->const_size_ukernel = xnn_transpose_conf->x16.const_size_ukernel;
-      if (xnn_transpose_conf->x16.init.x16 != NULL) {
-        xnn_transpose_conf->x16.init.x16(&context->params.x16_params);
+      transpose_op->compute.tile[0] = transpose_config->x16.tile_size;
+      transpose_op->compute.tile[1] = transpose_config->x16.tile_size;
+      context->const_size_ukernel = transpose_config->x16.const_size_ukernel;
+      if (transpose_config->x16.init.x16 != NULL) {
+        transpose_config->x16.init.x16(&context->params.x16_params);
       }
       break;
     case 3:
-      transpose_op->compute.tile[0] = xnn_transpose_conf->x24.tile_size;
-      transpose_op->compute.tile[1] = xnn_transpose_conf->x24.tile_size;
-      context->const_size_ukernel = xnn_transpose_conf->x24.const_size_ukernel;
-      if (xnn_transpose_conf->x24.init.x24 != NULL) {
-        xnn_transpose_conf->x24.init.x24(&context->params.x24_params);
+      transpose_op->compute.tile[0] = transpose_config->x24.tile_size;
+      transpose_op->compute.tile[1] = transpose_config->x24.tile_size;
+      context->const_size_ukernel = transpose_config->x24.const_size_ukernel;
+      if (transpose_config->x24.init.x24 != NULL) {
+        transpose_config->x24.init.x24(&context->params.x24_params);
       }
       break;
     case 4:
-      transpose_op->compute.tile[0] = xnn_transpose_conf->x32.tile_size;
-      transpose_op->compute.tile[1] = xnn_transpose_conf->x32.tile_size;
-      context->const_size_ukernel = xnn_transpose_conf->x32.const_size_ukernel;
-      if (xnn_transpose_conf->x32.init.x32 != NULL) {
-        xnn_transpose_conf->x32.init.x32(&context->params.x32_params);
+      transpose_op->compute.tile[0] = transpose_config->x32.tile_size;
+      transpose_op->compute.tile[1] = transpose_config->x32.tile_size;
+      context->const_size_ukernel = transpose_config->x32.const_size_ukernel;
+      if (transpose_config->x32.init.x32 != NULL) {
+        transpose_config->x32.init.x32(&context->params.x32_params);
       }
       break;
     default:
-      transpose_op->compute.tile[0] = xnn_transpose_conf->xx.tile_size;
-      transpose_op->compute.tile[1] = xnn_transpose_conf->xx.tile_size;
-      context->variable_size_ukernel = xnn_transpose_conf->xx.variable_size_ukernel;
+      transpose_op->compute.tile[0] = transpose_config->xx.tile_size;
+      transpose_op->compute.tile[1] = transpose_config->xx.tile_size;
+      context->variable_size_ukernel = transpose_config->xx.variable_size_ukernel;
       variable_size_ukernel = true;
   }
 
@@ -268,7 +266,7 @@ static enum xnn_status setup_transpose_nd(
       transpose_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
       transpose_op->compute.range[0] = normalized_element_size;
       transpose_op->compute.tile[0] = normalized_element_size;
-      univector_context->ukernel = xnn_transpose_conf->copy;
+      univector_context->ukernel = transpose_config->copy;
       univector_context->log2_xsize = 0;
       univector_context->log2_ysize = 0;
       break;
@@ -444,24 +442,13 @@ enum xnn_status run_transpose_nd(
 
   struct xnn_operator transpose_op;
   memset(&transpose_op, 0, sizeof(transpose_op));
+  init_transpose_nd(flags, operator_type, &transpose_op);
 
-  enum xnn_status status = init_transpose_nd(
-      flags,
-      operator_type,
-      &transpose_op);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
-  status = setup_transpose_nd(&transpose_op,
-                              input,
-                              output,
-                              num_dims,
-                              input_shape,
-                              output_perm,
-                              NULL,
-                              NULL,
-                              element_size);
+  const enum xnn_status status = setup_transpose_nd(
+    &transpose_op,
+    input, output,
+    num_dims, input_shape, output_perm, NULL, NULL,
+    element_size);
   if (status != xnn_status_success) {
     return status;
   }
@@ -469,7 +456,7 @@ enum xnn_status run_transpose_nd(
   return xnn_run_operator(&transpose_op, threadpool);
 }
 
-enum xnn_status xnn_run_transpose_nd_x32(
+enum xnn_status xnn_run_transpose_nd_x8(
     const void* input,
     void* output,
     const size_t num_dims,
@@ -480,13 +467,9 @@ enum xnn_status xnn_run_transpose_nd_x32(
 {
   return run_transpose_nd(
     flags,
-    input,
-    output,
-    num_dims,
-    input_shape,
-    output_perm,
-    sizeof(uint32_t),
-    xnn_operator_type_transpose_nd_x32,
+    input, output,
+    num_dims, input_shape, output_perm,
+    sizeof(uint8_t), xnn_operator_type_transpose_nd_x8,
     threadpool);
 }
 
@@ -501,17 +484,13 @@ enum xnn_status xnn_run_transpose_nd_x16(
 {
   return run_transpose_nd(
     flags,
-    input,
-    output,
-    num_dims,
-    input_shape,
-    output_perm,
-    sizeof(uint16_t),
-    xnn_operator_type_transpose_nd_x16,
+    input, output,
+    num_dims, input_shape, output_perm,
+    sizeof(uint16_t), xnn_operator_type_transpose_nd_x16,
     threadpool);
 }
 
-enum xnn_status xnn_run_transpose_nd_x8(
+enum xnn_status xnn_run_transpose_nd_x32(
     const void* input,
     void* output,
     const size_t num_dims,
@@ -522,13 +501,9 @@ enum xnn_status xnn_run_transpose_nd_x8(
 {
   return run_transpose_nd(
     flags,
-    input,
-    output,
-    num_dims,
-    input_shape,
-    output_perm,
-    sizeof(uint8_t),
-    xnn_operator_type_transpose_nd_x8,
+    input, output,
+    num_dims, input_shape, output_perm,
+    sizeof(uint32_t), xnn_operator_type_transpose_nd_x32,
     threadpool);
 }
 
@@ -542,8 +517,8 @@ enum xnn_status create_depth_to_space_nchw2nhwc(
     xnn_operator_t* depth_to_space_op_out)
 {
   xnn_operator_t depth_to_space_op = NULL;
-  enum xnn_status status = xnn_status_uninitialized;
 
+  enum xnn_status status = xnn_status_uninitialized;
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(operator_type));
@@ -551,7 +526,6 @@ enum xnn_status create_depth_to_space_nchw2nhwc(
   }
 
   status = xnn_status_invalid_parameter;
-
   if (output_channels == 0) {
     xnn_log_error("failed to create %s operator with %zu output channels: number of channels must be non-zero",
       xnn_operator_type_to_string(operator_type), output_channels);
@@ -684,24 +658,21 @@ enum xnn_status setup_depth_to_space_nchw2nhwc(
     elements_per_batch,
     area,
     input_width,
-    1};
+    1
+  };
   const size_t output_stride[6] = {
     input_height * block_size * input_width * block_size * depth_to_space_op->output_pixel_stride,
     block_size * input_width * block_size * depth_to_space_op->output_pixel_stride,
     input_width * block_size * depth_to_space_op->output_pixel_stride,
     block_size * depth_to_space_op->output_pixel_stride,
     depth_to_space_op->output_pixel_stride,
-    1};
+    1
+  };
 
   return setup_transpose_nd(
     depth_to_space_op,
-    input,
-    output,
-    6,
-    input_shape,
-    perm,
-    input_stride,
-    output_stride,
+    input, output,
+    6, input_shape, perm, input_stride, output_stride,
     element_size);
 }
 
@@ -933,24 +904,21 @@ static enum xnn_status setup_depth_to_space_nhwc(
     input_pixel_stride,
     block_size * channels,
     channels,
-    1};
+    1
+  };
   const size_t output_stride[5] = {
     block_size * input_width * block_output_pixel_stride,
     input_width * block_output_pixel_stride,
     block_output_pixel_stride,
     output_pixel_stride,
-    1};
+    1
+  };
 
   return setup_transpose_nd(
-      depth_to_space_op,
-      input,
-      output,
-      5,
-      input_shape,
-      perm,
-      input_stride,
-      output_stride,
-      element_size);
+    depth_to_space_op,
+    input, output,
+    5, input_shape, perm, input_stride, output_stride,
+    element_size);
 }
 
 enum xnn_status xnn_setup_depth_to_space_nhwc_x8(
@@ -1193,7 +1161,8 @@ static enum xnn_status setup_space_to_depth_nhwc(
     block_size,
     input_width / block_size,
     block_size,
-    channels};
+    channels
+  };
   const size_t perm[5] = {0, 2, 1, 3, 4};
 
   const size_t input_stride[5] = {
@@ -1201,24 +1170,21 @@ static enum xnn_status setup_space_to_depth_nhwc(
     input_width * space_to_depth_op->input_pixel_stride,
     block_size * space_to_depth_op->input_pixel_stride,
     space_to_depth_op->input_pixel_stride,
-    1};
+    1
+  };
   const size_t output_stride[5] = {
     (input_width/block_size) * space_to_depth_op->output_pixel_stride,
     space_to_depth_op->output_pixel_stride,
     block_size * channels,
     channels,
-    1};
+    1
+  };
 
   return setup_transpose_nd(
-      space_to_depth_op,
-      input,
-      output,
-      5,
-      input_shape,
-      perm,
-      input_stride,
-      output_stride,
-      element_size);
+    space_to_depth_op,
+    input, output,
+    5, input_shape, perm, input_stride, output_stride,
+    element_size);
 }
 
 enum xnn_status xnn_setup_space_to_depth_nhwc_x8(
