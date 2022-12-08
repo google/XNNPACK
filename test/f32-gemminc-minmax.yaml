@@ -79,6 +79,9 @@
   k-block: 8
   pipelined: true
 # ARM NEON
+- name: xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_lane_ld64
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__neon_dup_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
@@ -88,13 +91,16 @@
 - name: xnn_f32_gemminc_minmax_ukernel_1x8__neonfma_dup_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
-- name: xnn_f32_gemminc_minmax_ukernel_1x8__aarch64_neonfma_lane_ld64
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_1x8s4__neon
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_1x8s4__neonfma
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_lane_ld64
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
+- name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_lane_ld128
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__neon_dup_ld64
@@ -115,24 +121,24 @@
 - name: xnn_f32_gemminc_minmax_ukernel_4x8__neonfma_dup_ld128
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-- name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_lane_ld64
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 2
-- name: xnn_f32_gemminc_minmax_ukernel_4x8__aarch64_neonfma_lane_ld128
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_4x8s4__neon
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_4x8s4__neonfma
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-- name: xnn_f32_gemminc_minmax_ukernel_5x8__neon_lane_ld64
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_5x8__aarch64_neonfma_lane_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
+- name: xnn_f32_gemminc_minmax_ukernel_5x8__neon_lane_ld64
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_lane_ld64
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
+- name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_lane_ld128
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__neon_dup_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
@@ -149,12 +155,6 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_f32_gemminc_minmax_ukernel_6x8__neonfma_dup_ld128
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 4
-- name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_lane_ld64
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 2
-- name: xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_lane_ld128
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemminc_minmax_ukernel_6x8s4__neon

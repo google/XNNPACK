@@ -14,4 +14,3 @@
   init: xnn_init_f16_scaleminmax_avx_params
 - name: xnn_f16_avgpool_minmax_ukernel_9x__f16c_c8
   init: xnn_init_f16_scaleminmax_avx_params
-

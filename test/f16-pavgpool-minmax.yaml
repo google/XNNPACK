@@ -14,4 +14,3 @@
   init: xnn_init_f16_minmax_avx_params
 - name: xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8
   init: xnn_init_f16_minmax_avx_params
-
