@@ -553,7 +553,6 @@ struct xnn_parameters {
     xnn_u8_rmax_ukernel_fn rmax;
   } u8;
   struct {
-    xnn_x8_lut_ukernel_fn lut;
     struct zip_parameters zip;
   } x8;
   struct {

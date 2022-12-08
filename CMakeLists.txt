@@ -275,7 +275,8 @@ SET(LOGGING_SRCS
 SET(XNNPACK_SRCS
   src/init.c
   src/params.c
-  src/transpose-config.c)
+  src/transpose-config.c
+  src/x8-lut-config.c)
 
 SET(TABLE_SRCS
   src/tables/exp2-k-over-64.c

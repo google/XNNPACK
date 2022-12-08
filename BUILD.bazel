@@ -1993,7 +1993,10 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "microkernel_configs",
-    srcs = ["src/transpose-config.c"],
+    srcs = [
+        "src/transpose-config.c",
+        "src/x8-lut-config.c",
+    ],
     hdrs = [
         "src/xnnpack/config.h",
         "src/xnnpack/microfnptr.h",
@@ -2013,7 +2016,10 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "microkernel_configs_test_mode",
-    srcs = ["src/transpose-config.c"],
+    srcs = [
+        "src/transpose-config.c",
+        "src/x8-lut-config.c",
+    ],
     hdrs = [
         "src/xnnpack/config.h",
         "src/xnnpack/microfnptr.h",
