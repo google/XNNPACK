@@ -18,7 +18,7 @@
 #include "vbinaryc-microkernel-tester.h"
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VMINC__NEONFP16ARITH_X8, batch_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VBinaryCMicrokernelTester()
@@ -62,10 +62,10 @@
         .Test(xnn_f16_vminc_ukernel__neonfp16arith_x8, VBinaryCMicrokernelTester::OpType::MinC);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VMINC__NEONFP16ARITH_X16, batch_eq_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VBinaryCMicrokernelTester()
@@ -109,7 +109,130 @@
         .Test(xnn_f16_vminc_ukernel__neonfp16arith_x16, VBinaryCMicrokernelTester::OpType::MinC);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_FP16_SCALAR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  TEST(F16_VMINC__FP16ARITH_X1, batch_eq_1) {
+    TEST_REQUIRES_ARM_FP16_ARITH;
+    VBinaryCMicrokernelTester()
+      .batch_size(1)
+      .Test(xnn_f16_vminc_ukernel__fp16arith_x1, VBinaryCMicrokernelTester::OpType::MinC);
+  }
+
+  TEST(F16_VMINC__FP16ARITH_X1, batch_gt_1) {
+    TEST_REQUIRES_ARM_FP16_ARITH;
+    for (size_t batch_size = 2; batch_size < 10; batch_size++) {
+      VBinaryCMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_vminc_ukernel__fp16arith_x1, VBinaryCMicrokernelTester::OpType::MinC);
+    }
+  }
+
+  TEST(F16_VMINC__FP16ARITH_X1, inplace) {
+    TEST_REQUIRES_ARM_FP16_ARITH;
+    for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
+      VBinaryCMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f16_vminc_ukernel__fp16arith_x1, VBinaryCMicrokernelTester::OpType::MinC);
+    }
+  }
+#endif  // XNN_ENABLE_ARM_FP16_SCALAR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_FP16_SCALAR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  TEST(F16_VMINC__FP16ARITH_X2, batch_eq_2) {
+    TEST_REQUIRES_ARM_FP16_ARITH;
+    VBinaryCMicrokernelTester()
+      .batch_size(2)
+      .Test(xnn_f16_vminc_ukernel__fp16arith_x2, VBinaryCMicrokernelTester::OpType::MinC);
+  }
+
+  TEST(F16_VMINC__FP16ARITH_X2, batch_div_2) {
+    TEST_REQUIRES_ARM_FP16_ARITH;
+    for (size_t batch_size = 4; batch_size < 20; batch_size += 2) {
+      VBinaryCMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_vminc_ukernel__fp16arith_x2, VBinaryCMicrokernelTester::OpType::MinC);
+    }
+  }
+
+  TEST(F16_VMINC__FP16ARITH_X2, batch_lt_2) {
+    TEST_REQUIRES_ARM_FP16_ARITH;
+    for (size_t batch_size = 1; batch_size < 2; batch_size++) {
+      VBinaryCMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_vminc_ukernel__fp16arith_x2, VBinaryCMicrokernelTester::OpType::MinC);
+    }
+  }
+
+  TEST(F16_VMINC__FP16ARITH_X2, batch_gt_2) {
+    TEST_REQUIRES_ARM_FP16_ARITH;
+    for (size_t batch_size = 3; batch_size < 4; batch_size++) {
+      VBinaryCMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_vminc_ukernel__fp16arith_x2, VBinaryCMicrokernelTester::OpType::MinC);
+    }
+  }
+
+  TEST(F16_VMINC__FP16ARITH_X2, inplace) {
+    TEST_REQUIRES_ARM_FP16_ARITH;
+    for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
+      VBinaryCMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f16_vminc_ukernel__fp16arith_x2, VBinaryCMicrokernelTester::OpType::MinC);
+    }
+  }
+#endif  // XNN_ENABLE_ARM_FP16_SCALAR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_FP16_SCALAR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  TEST(F16_VMINC__FP16ARITH_X4, batch_eq_4) {
+    TEST_REQUIRES_ARM_FP16_ARITH;
+    VBinaryCMicrokernelTester()
+      .batch_size(4)
+      .Test(xnn_f16_vminc_ukernel__fp16arith_x4, VBinaryCMicrokernelTester::OpType::MinC);
+  }
+
+  TEST(F16_VMINC__FP16ARITH_X4, batch_div_4) {
+    TEST_REQUIRES_ARM_FP16_ARITH;
+    for (size_t batch_size = 8; batch_size < 40; batch_size += 4) {
+      VBinaryCMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_vminc_ukernel__fp16arith_x4, VBinaryCMicrokernelTester::OpType::MinC);
+    }
+  }
+
+  TEST(F16_VMINC__FP16ARITH_X4, batch_lt_4) {
+    TEST_REQUIRES_ARM_FP16_ARITH;
+    for (size_t batch_size = 1; batch_size < 4; batch_size++) {
+      VBinaryCMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_vminc_ukernel__fp16arith_x4, VBinaryCMicrokernelTester::OpType::MinC);
+    }
+  }
+
+  TEST(F16_VMINC__FP16ARITH_X4, batch_gt_4) {
+    TEST_REQUIRES_ARM_FP16_ARITH;
+    for (size_t batch_size = 5; batch_size < 8; batch_size++) {
+      VBinaryCMicrokernelTester()
+        .batch_size(batch_size)
+        .Test(xnn_f16_vminc_ukernel__fp16arith_x4, VBinaryCMicrokernelTester::OpType::MinC);
+    }
+  }
+
+  TEST(F16_VMINC__FP16ARITH_X4, inplace) {
+    TEST_REQUIRES_ARM_FP16_ARITH;
+    for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
+      VBinaryCMicrokernelTester()
+        .batch_size(batch_size)
+        .inplace(true)
+        .Test(xnn_f16_vminc_ukernel__fp16arith_x4, VBinaryCMicrokernelTester::OpType::MinC);
+    }
+  }
+#endif  // XNN_ENABLE_ARM_FP16_SCALAR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

@@ -5,11 +5,7 @@
 
 # ARM NEON+FP16ARITH
 - name: xnn_f16_vsqrdiff_ukernel__neonfp16arith_x8
-  arch:
-    - aarch64
 - name: xnn_f16_vsqrdiff_ukernel__neonfp16arith_x16
-  arch:
-    - aarch64
 
 # ARM FP16ARITH
 - name: xnn_f16_vsqrdiff_ukernel__fp16arith_x1

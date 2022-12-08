@@ -18,7 +18,7 @@
 #include "vbinary-microkernel-tester.h"
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSQRDIFF__NEONFP16ARITH_X8, batch_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VBinaryMicrokernelTester()
@@ -83,10 +83,10 @@
         .Test(xnn_f16_vsqrdiff_ukernel__neonfp16arith_x8, VBinaryMicrokernelTester::OpType::SqrDiff);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSQRDIFF__NEONFP16ARITH_X16, batch_eq_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VBinaryMicrokernelTester()
@@ -151,7 +151,7 @@
         .Test(xnn_f16_vsqrdiff_ukernel__neonfp16arith_x16, VBinaryMicrokernelTester::OpType::SqrDiff);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
 #if XNN_ENABLE_ARM_FP16_SCALAR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
