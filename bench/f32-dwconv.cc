@@ -568,6 +568,103 @@ static void f32_dwconv(
       16 /* channel tile */, 25 /* primary tile */,
       benchmark::utils::CheckNEONFMA);
   }
+  static void f32_dwconv_2f2m2l4c4s4r__neon(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__neon,
+      xnn_init_f32_minmax_scalar_params,
+      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_2f2m2l4c4s4r__neon_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__neon_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_2f2m2l4c4s4r__neonfma(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__neonfma,
+      xnn_init_f32_minmax_scalar_params,
+      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_2f2m2l4c4s4r__neonfma_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__neonfma_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_2f2m2l8c4s4r__neon(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__neon,
+      xnn_init_f32_minmax_scalar_params,
+      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_2f2m2l8c4s4r__neon_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__neon_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_2f2m2l8c4s4r__neonfma(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__neonfma,
+      xnn_init_f32_minmax_scalar_params,
+      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_2f2m2l8c4s4r__neonfma_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__neonfma_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_2f2m2l16c4s4r__neon(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__neon,
+      xnn_init_f32_minmax_scalar_params,
+      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      16 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_2f2m2l16c4s4r__neon_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__neon_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      16 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_2f2m2l16c4s4r__neonfma(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__neonfma,
+      xnn_init_f32_minmax_scalar_params,
+      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      16 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_2f2m2l16c4s4r__neonfma_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__neonfma_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      16 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+
   BENCHMARK_DWCONV(f32_dwconv_4p4c__neonfma)
   BENCHMARK_DWCONV(f32_dwconv_4p4c__neonfma_acc2)
   BENCHMARK_DWCONV(f32_dwconv_4p8c__neonfma)
@@ -609,6 +706,19 @@ static void f32_dwconv(
   BENCHMARK_DWCONV(f32_dwconv_25p8c__neon_acc2)
   BENCHMARK_DWCONV(f32_dwconv_25p16c__neon)
   BENCHMARK_DWCONV(f32_dwconv_25p16c__neon_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l4c4s4r__neon)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l4c4s4r__neon_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l4c4s4r__neonfma)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l4c4s4r__neonfma_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c4s4r__neon)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c4s4r__neon_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c4s4r__neonfma)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c4s4r__neonfma_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l16c4s4r__neon)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l16c4s4r__neon_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l16c4s4r__neonfma)
+  BENCHMARK_DWCONV(f32_dwconv_2f2m2l16c4s4r__neonfma_acc2)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
