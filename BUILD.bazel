@@ -454,6 +454,7 @@ PROD_SCALAR_WASM_MICROKERNEL_SRCS = [
     "src/u8-vclamp/u8-vclamp-scalar-x4.c",
     "src/xx-fill/xx-fill-scalar-x16.c",
     "src/xx-pad/xx-pad-scalar.c",
+    "src/x8-lut/gen/x8-lut-scalar-x1.c",
     "src/x8-transposec/gen/x8-transposec-2x4-scalar-int.c",
     "src/x8-zip/x8-zip-xm-scalar.c",
     "src/x8-zip/x8-zip-x2-scalar.c",
