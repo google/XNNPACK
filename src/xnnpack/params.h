@@ -314,6 +314,7 @@ struct dwconv_parameters {
   } init;
   uint8_t channel_tile;
   uint8_t channel_subtile;
+  uint8_t channel_round;
   uint8_t primary_tile;  // First tile in multipass.
   uint8_t middle_tile;
   uint8_t last_tile;  // Will be zero for unipass, non-zero for multipass.

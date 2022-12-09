@@ -384,20 +384,6 @@ typedef void (*xnn_f32_dwconv_unipass_ukernel_fn)(
     const float* zero,
     const union xnn_f32_default_params* params);
 
-typedef void (*xnn_f32_dwconv_multipass_ukernel_fn)(
-    size_t channels,
-    size_t output_width,
-    const float** input,
-    const float* weights,
-    float* output,
-    intptr_t input_stride,
-    size_t output_increment,
-    size_t input_offset,
-    const float* zero,
-    size_t kernel_size,
-    float* buffer,
-    const union xnn_f32_default_params* params);
-
 // DWCONV: DepthWise CONVolution single-pass with Min+Max activation
 
 typedef void (*xnn_f16_dwconv_minmax_unipass_ukernel_fn)(
@@ -422,20 +408,6 @@ typedef void (*xnn_f32_dwconv_minmax_unipass_ukernel_fn)(
     size_t output_increment,
     size_t input_offset,
     const float* zero,
-    const union xnn_f32_minmax_params* params);
-
-typedef void (*xnn_f32_dwconv_multipass_minmax_ukernel_fn)(
-    size_t channels,
-    size_t output_width,
-    const float** input,
-    const float* weights,
-    float* output,
-    intptr_t input_stride,
-    size_t output_increment,
-    size_t input_offset,
-    const float* zero,
-    size_t kernel_size,
-    float* buffer,
     const union xnn_f32_minmax_params* params);
 
 typedef void (*xnn_qc8_dwconv_minmax_unipass_ukernel_fn)(
@@ -481,13 +453,44 @@ typedef void (*xnn_dwconv_multipass_ukernel_fn)(
     size_t output_width,
     const void** input,
     const void* weights,
-    void* buffer,
     void* output,
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
     const void* zero,
+    size_t kernel_size,
+    void* buffer,
     const void* params);
+
+typedef void (*xnn_f32_dwconv_multipass_ukernel_fn)(
+    size_t channels,
+    size_t output_width,
+    const float** input,
+    const float* weights,
+    float* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    const float* zero,
+    size_t kernel_size,
+    float* buffer,
+    const union xnn_f32_default_params* params);
+
+// DWCONV: DepthWise CONVolution multi-pass with Min+Max activation
+
+typedef void (*xnn_f32_dwconv_multipass_minmax_ukernel_fn)(
+    size_t channels,
+    size_t output_width,
+    const float** input,
+    const float* weights,
+    float* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    const float* zero,
+    size_t kernel_size,
+    float* buffer,
+    const union xnn_f32_minmax_params* params);
 
 // VMULCADDC: Vector MULtiply-by-Constant, ADD-Constant
 

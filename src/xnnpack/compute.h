@@ -489,7 +489,7 @@ struct conv2d_context {
 
 struct dwconv_context {
   const void** indirect_input;
-  size_t indirect_input_width_stride;
+  intptr_t indirect_input_width_stride;
   size_t indirect_input_height_stride;
   size_t input_offset;
   size_t input_batch_stride;
