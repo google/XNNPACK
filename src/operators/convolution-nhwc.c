@@ -24,6 +24,7 @@
 #include <xnnpack/indirection.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
+#include <xnnpack/microkernel-utils.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/operator-utils.h>
 #include <xnnpack/pack.h>
@@ -54,8 +55,21 @@ static inline const struct dwconv_parameters* find_dwconv_ukernel(
       if (best_ukernel == NULL || ukernel->primary_tile < best_ukernel->primary_tile) {
         best_ukernel = ukernel;
       }
+    } else if (ukernel->last_tile != 0 && kernel_size >= 25) {
+      // TODO(zhin): better heuristic to select multipass.
+      best_ukernel = ukernel;
     }
     ukernel++;
+  }
+  if (best_ukernel == NULL) {
+    xnn_log_debug("no dwconv ukernel found");
+  } else if (best_ukernel->last_tile == 0) {
+    xnn_log_debug("dwconv unipass ukernel of primary_tile %d found", best_ukernel->primary_tile);
+  } else {
+    xnn_log_debug("dwconv multipass ukernel of tiles %d, %d, %d found",
+                  best_ukernel->primary_tile,
+                  best_ukernel->middle_tile,
+                  best_ukernel->last_tile);
   }
   return best_ukernel;
 }
@@ -224,6 +238,8 @@ static enum xnn_status create_convolution2d_nhwc(
     xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w,
     xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w,
     xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w,
+    xnn_pack_dwconv_multipass_hwg_w_fn pack_dwconv_multipass_hwg_w,
+    xnn_pack_dwconv_multipass_ghw_w_fn pack_dwconv_multipass_ghw_w,
     xnn_pack_gemm_goi_w_fn pack_gemm_goi_w,
     xnn_pack_conv_kgo_w_fn pack_conv_kgo_w,
     xnn_pack_conv_goki_w_fn pack_conv_goki_w,
@@ -433,10 +449,26 @@ static enum xnn_status create_convolution2d_nhwc(
     {
       assert(dwconv_ukernel != NULL);
       const uint8_t primary_tile = dwconv_ukernel->primary_tile;
-      assert(primary_tile >= kernel_size);
+      const bool is_unipass = dwconv_ukernel->last_tile == 0;
+      if (is_unipass) {
+        assert(primary_tile >= kernel_size);
+      } else {
+        assert(kernel_size > primary_tile);
+      }
 
       const size_t c_stride = round_up_po2(groups, dwconv_ukernel->channel_tile);
-      const size_t packed_weights_size = ((primary_tile << log2_filter_element_size) + bias_element_size + extra_weights_bytes) * c_stride;
+      size_t tile_size = 0;
+      size_t packed_weights_size = 0;
+      if (is_unipass) {
+        tile_size = primary_tile;
+        packed_weights_size = ((primary_tile << log2_filter_element_size) + bias_element_size + extra_weights_bytes) * c_stride;
+      } else {
+        tile_size = xnn_dwconv_multipass_tile_size(
+          kernel_size, primary_tile, dwconv_ukernel->middle_tile, dwconv_ukernel->last_tile);
+        packed_weights_size = xnn_dwconv_multipass_weights_size(
+          tile_size, groups, dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile,
+          dwconv_ukernel->channel_round, bias_element_size, log2_filter_element_size, extra_weights_bytes);
+      }
       size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
       void* weights_ptr = xnn_get_pointer_to_write_weights(
           convolution_op, aligned_total_weights_size, packed_weights_padding_byte);
@@ -448,25 +480,53 @@ static enum xnn_status create_convolution2d_nhwc(
       memcpy(&convolution_op->params, dwconv_params, dwconv_params_size);
 
       if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
-        pack_dwconv_hwg_w(
-          dwconv_ukernel->primary_tile,
-          kernel_height, kernel_width,
-          groups, dwconv_ukernel->channel_tile,
-          kernel, bias, weights_ptr,
-          dwconv_ukernel->channel_tile * extra_weights_bytes,
-          packing_params);
+        if (is_unipass) {
+          pack_dwconv_hwg_w(
+              primary_tile,
+              kernel_height, kernel_width,
+              groups, dwconv_ukernel->channel_tile,
+              kernel, bias, weights_ptr,
+              dwconv_ukernel->channel_tile * extra_weights_bytes,
+              packing_params);
+        } else {
+          pack_dwconv_multipass_hwg_w(
+              primary_tile,
+              dwconv_ukernel->middle_tile,
+              dwconv_ukernel->last_tile,
+              kernel_height, kernel_width,
+              groups, dwconv_ukernel->channel_tile,
+              dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
+              kernel, bias, weights_ptr,
+              dwconv_ukernel->channel_tile * extra_weights_bytes,
+              packing_params);
+        }
       } else {
-        pack_dwconv_ghw_w(
-          dwconv_ukernel->primary_tile,
-          kernel_height, kernel_width,
-          groups, dwconv_ukernel->channel_tile,
-          kernel, bias, weights_ptr,
-          dwconv_ukernel->channel_tile * extra_weights_bytes,
-          packing_params);
+        if (is_unipass) {
+          pack_dwconv_ghw_w(
+              primary_tile,
+              kernel_height, kernel_width,
+              groups, dwconv_ukernel->channel_tile,
+              kernel, bias, weights_ptr,
+              dwconv_ukernel->channel_tile * extra_weights_bytes,
+              packing_params);
+        } else {
+          pack_dwconv_multipass_ghw_w(
+              primary_tile,
+              dwconv_ukernel->middle_tile,
+              dwconv_ukernel->last_tile,
+              kernel_height, kernel_width,
+              groups, dwconv_ukernel->channel_tile,
+              dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
+              kernel, bias, weights_ptr,
+              dwconv_ukernel->channel_tile * extra_weights_bytes,
+              packing_params);
+        }
       }
 
       if (scale_params != NULL) {
         assert(init_scale_params != NULL);
+        // TODO(zhin): QC8 DWCONV multipass is not implemented for now, fix this when it is supported.
+        assert(is_unipass);
 
         init_scale_params(
           groups, dwconv_ukernel->channel_tile,
@@ -485,11 +545,16 @@ static enum xnn_status create_convolution2d_nhwc(
         ukernels = &dwconv_ukernel->linear;
       }
       convolution_op->ukernel.dwconv = (struct xnn_ukernel_dwconv) {
-        .unipass_fn = ukernels->unipass,
-        .primary_tile = dwconv_ukernel->primary_tile,
+        .primary_tile = primary_tile,
         .middle_tile = dwconv_ukernel->middle_tile,
         .last_tile = dwconv_ukernel->last_tile,
+        .tile_size = tile_size,
       };
+      if (is_unipass) {
+        convolution_op->ukernel.dwconv.unipass_fn = ukernels->unipass;
+      } else {
+        convolution_op->ukernel.dwconv.multipass_fn = ukernels->multipass;
+      }
 
       zero_size = XNN_EXTRA_BYTES + (c_stride << log2_input_element_size);
       break;
@@ -759,6 +824,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qu8_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qu8_dwconv_ghw_w,
+    (xnn_pack_dwconv_multipass_hwg_w_fn) NULL,
+    (xnn_pack_dwconv_multipass_ghw_w_fn) NULL,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_qu8_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_qu8_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_qu8_conv_goki_w,
@@ -873,6 +940,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qs8_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qs8_dwconv_ghw_w,
+    (xnn_pack_dwconv_multipass_hwg_w_fn) NULL,
+    (xnn_pack_dwconv_multipass_ghw_w_fn) NULL,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_qs8_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_qs8_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_conv_goki_w,
@@ -995,6 +1064,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qs8_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qs8_dwconv_ghw_w,
+    (xnn_pack_dwconv_multipass_hwg_w_fn) NULL,
+    (xnn_pack_dwconv_multipass_ghw_w_fn) NULL,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_qs8_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_qs8_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_conv_goki_w,
@@ -1108,6 +1179,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     pack_vmulcaddc_w,
     pack_dwconv_hwg_w,
     pack_dwconv_ghw_w,
+    NULL,
+    NULL,
     pack_gemm_goi_w,
     pack_conv_kgo_w,
     pack_conv_goki_w,
@@ -1220,6 +1293,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_vmulcaddc_w,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_dwconv_ghw_w,
+    (xnn_pack_dwconv_multipass_hwg_w_fn) xnn_pack_f32_dwconv_multipass_hwg_w,
+    (xnn_pack_dwconv_multipass_ghw_w_fn) xnn_pack_f32_dwconv_multipass_ghw_w,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_f32_conv_goki_w,
@@ -1314,6 +1389,8 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_vmulcaddc_w,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_dwconv_ghw_w,
+    (xnn_pack_dwconv_multipass_hwg_w_fn) NULL,
+    (xnn_pack_dwconv_multipass_ghw_w_fn) NULL,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_f32_conv_goki_w,
@@ -1733,11 +1810,13 @@ static enum xnn_status setup_convolution2d_nhwc(
       const size_t step_width = convolution_op->dilation_width == 1 ?
           min(convolution_op->stride_width, kernel_width) : kernel_width;
       const size_t step_height = kernel_size + (output_width - 1) * step_width * kernel_height;
-      const size_t primary_tile = convolution_op->ukernel.dwconv.primary_tile;
+      const struct xnn_ukernel_dwconv dwconv_ukernel = convolution_op->ukernel.dwconv;
+      const bool is_unipass = dwconv_ukernel.last_tile == 0;
+      const size_t tile_size = dwconv_ukernel.tile_size;
       if (input_height != convolution_op->last_input_height || input_width != convolution_op->last_input_width) {
-        // Micro-kernel will read (primary_tile - kernel_size) elements after the end of indirection buffer.
+        // Micro-kernel will read (tile_size - kernel_size) elements after the end of indirection buffer.
         const size_t indirection_buffer_size =
-          sizeof(void*) * (primary_tile - kernel_size + output_height * step_height);
+          sizeof(void*) * (tile_size - kernel_size + output_height * step_height);
 
         const void** indirection_buffer =
           (const void**) xnn_reallocate_memory(convolution_op->indirection_buffer, indirection_buffer_size);
@@ -1752,7 +1831,7 @@ static enum xnn_status setup_convolution2d_nhwc(
           memset(convolution_op->indirection_buffer, 0, indirection_buffer_size);
         #endif
 
-        xnn_indirection_init_dwconv2d(convolution_op, step_height, step_width, primary_tile, log2_input_element_size);
+        xnn_indirection_init_dwconv2d(convolution_op, step_height, step_width, tile_size, log2_input_element_size);
 
         #if XNN_TEST_MODE
           for (size_t i = 0; i < indirection_buffer_size / sizeof(void*); i++) {
@@ -1766,10 +1845,13 @@ static enum xnn_status setup_convolution2d_nhwc(
         convolution_op->last_input_width = input_width;
       }
 
+      int32_t extra_input_advanced = is_unipass ? 0 : tile_size - convolution_op->ukernel.dwconv.last_tile;
+
       const size_t groups = convolution_op->groups;
       convolution_op->context.dwconv = (struct dwconv_context) {
+          .kernel_size = kernel_size,
           .indirect_input = convolution_op->indirection_buffer,
-          .indirect_input_width_stride = kernel_height * step_width * sizeof(void*),
+          .indirect_input_width_stride = (kernel_height * step_width - extra_input_advanced) * sizeof(void*),
           .indirect_input_height_stride = step_height * sizeof(void*),
           .input_offset = (size_t) ((uintptr_t) input - (uintptr_t) convolution_op->last_input),
           .input_batch_stride = (input_height * input_width * convolution_op->input_pixel_stride) << log2_input_element_size,
@@ -1781,14 +1863,21 @@ static enum xnn_status setup_convolution2d_nhwc(
           .groups = groups,
           .zero = convolution_op->zero_buffer,
           .output_increment = (convolution_op->output_pixel_stride - groups) << log2_output_element_size,
-          .unipass_ukernel = convolution_op->ukernel.dwconv.unipass_fn,
       };
       memcpy(&convolution_op->context.dwconv.params, &convolution_op->params, sizeof(convolution_op->context.dwconv.params));
 
       convolution_op->compute.type = xnn_parallelization_type_2d;
-      convolution_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_unipass;
       convolution_op->compute.range[0] = batch_size;
       convolution_op->compute.range[1] = output_height;
+
+      if (is_unipass) {
+        convolution_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_unipass;
+        convolution_op->context.dwconv.unipass_ukernel = convolution_op->ukernel.dwconv.unipass_fn;
+      } else {
+        convolution_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_multipass;
+        convolution_op->context.dwconv.multipass_ukernel = convolution_op->ukernel.dwconv.multipass_fn;
+      }
+
       convolution_op->state = xnn_run_state_ready;
 
       return xnn_status_success;

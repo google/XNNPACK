@@ -968,6 +968,7 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/f32-avgpool-9p8x-minmax-sse-c4.c
   src/f32-avgpool/f32-avgpool-9x-minmax-sse-c4.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-sse-2x2.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l8c4s4r-minmax-sse-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-sse.c
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-sse.c
   src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-sse.c
@@ -1590,7 +1591,7 @@ IF(XNNPACK_BUILD_LIBRARY)
 
   TARGET_LINK_LIBRARIES(memory PRIVATE logging)
   TARGET_LINK_LIBRARIES(mutex PRIVATE logging)
-  TARGET_LINK_LIBRARIES(operators PRIVATE allocator indirection logging normalization operator-utils packing post-operation)
+  TARGET_LINK_LIBRARIES(operators PRIVATE allocator indirection logging microkernel-utils normalization operator-utils packing post-operation)
   TARGET_LINK_LIBRARIES(operator-run PRIVATE logging)
   TARGET_LINK_LIBRARIES(subgraph PRIVATE allocator logging memory mutex operators operator-run)
   TARGET_LINK_LIBRARIES(XNNPACK PRIVATE allocator cache hardware-config indirection jit logging memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing post-operation microkernels-prod subgraph)

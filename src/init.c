@@ -4680,6 +4680,15 @@ static void init(void) {
       xnn_params.f32.dwconv[3].init.f32 = xnn_init_f32_minmax_avx_params;
       xnn_params.f32.dwconv[3].channel_tile = 8;
       xnn_params.f32.dwconv[3].primary_tile = 25;
+
+      xnn_params.f32.dwconv[4].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_5f5m5l8c4s4r__sse_acc2;
+      xnn_params.f32.dwconv[4].init.f32 = xnn_init_f32_minmax_sse_params;
+      xnn_params.f32.dwconv[4].channel_tile = 8;
+      xnn_params.f32.dwconv[4].channel_subtile = 4;
+      xnn_params.f32.dwconv[4].channel_round = 4;
+      xnn_params.f32.dwconv[4].primary_tile = 5;
+      xnn_params.f32.dwconv[4].middle_tile = 5;
+      xnn_params.f32.dwconv[4].last_tile = 5;
     } else if (hardware_config->use_x86_avx) {
       xnn_params.f32.dwconv[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p16c__avx;
       xnn_params.f32.dwconv[0].init.f32 = xnn_init_f32_minmax_avx_params;
@@ -4720,6 +4729,15 @@ static void init(void) {
       xnn_params.f32.dwconv[3].init.f32 = xnn_init_f32_minmax_sse_params;
       xnn_params.f32.dwconv[3].channel_tile = 8;
       xnn_params.f32.dwconv[3].primary_tile = 25;
+
+      xnn_params.f32.dwconv[4].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_5f5m5l8c4s4r__sse_acc2;
+      xnn_params.f32.dwconv[4].init.f32 = xnn_init_f32_minmax_sse_params;
+      xnn_params.f32.dwconv[4].channel_tile = 8;
+      xnn_params.f32.dwconv[4].channel_subtile = 4;
+      xnn_params.f32.dwconv[4].channel_round = 4;
+      xnn_params.f32.dwconv[4].primary_tile = 5;
+      xnn_params.f32.dwconv[4].middle_tile = 5;
+      xnn_params.f32.dwconv[4].last_tile = 5;
     }
     xnn_params.f32.avgpool = (struct avgpool_parameters) {
       .unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9x__sse_c4,
