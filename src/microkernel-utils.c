@@ -8,7 +8,7 @@
 #include <xnnpack/math.h>
 #include <xnnpack/microkernel-utils.h>
 
-size_t xnn_multipass_dwconv_tile_size(
+size_t xnn_dwconv_multipass_tile_size(
   size_t kernel_size,
   size_t first_pass_tile,
   size_t middle_pass_tile,
@@ -22,7 +22,7 @@ size_t xnn_multipass_dwconv_tile_size(
           round_up(doz(kernel_size, first_pass_tile + last_pass_tile), middle_pass_tile));
 }
 
-size_t xnn_multipass_dwconv_weights_count(
+size_t xnn_dwconv_multipass_weights_count(
   size_t tile_size,
   size_t channels,
   size_t channel_tile,

@@ -822,7 +822,7 @@ class DWConvMicrokernelTester {
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
 
-    const size_t tile_size = xnn_multipass_dwconv_tile_size(
+    const size_t tile_size = xnn_dwconv_multipass_tile_size(
       kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
     std::vector<const float*> indirection((width() - 1) * step() + tile_size);
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
@@ -830,7 +830,7 @@ class DWConvMicrokernelTester {
     std::vector<float> kernel(channels() * kernel_size());
     std::vector<float> bias(channels());
     std::vector<float, AlignedAllocator<float, 64>> packed_weights(
-      xnn_multipass_dwconv_weights_count(
+      xnn_dwconv_multipass_weights_count(
         tile_size, channels(), channel_tile(), channel_subtile(), channel_round()));
     std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> output((width() - 1) * output_stride() + channels());
@@ -911,7 +911,7 @@ class DWConvMicrokernelTester {
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
 
-    const size_t tile_size = xnn_multipass_dwconv_tile_size(
+    const size_t tile_size = xnn_dwconv_multipass_tile_size(
       kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
     std::vector<const float*> indirection((width() - 1) * step() + tile_size);
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
@@ -919,7 +919,7 @@ class DWConvMicrokernelTester {
     std::vector<float> kernel(channels() * kernel_size());
     std::vector<float> bias(channels());
     std::vector<float, AlignedAllocator<float, 64>> packed_weights(
-      xnn_multipass_dwconv_weights_count(
+      xnn_dwconv_multipass_weights_count(
         tile_size, channels(), channel_tile(), channel_subtile(), channel_round()));
     std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> output((width() - 1) * output_stride() + channels());

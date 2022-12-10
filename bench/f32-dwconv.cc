@@ -211,9 +211,9 @@ static void f32_dwconv(
   std::vector<float> z(channels + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float, AlignedAllocator<float, 64>> buffer(channels + XNN_ALLOCATION_ALIGNMENT / sizeof(float));
 
-  const size_t tile_size = xnn_multipass_dwconv_tile_size(
+  const size_t tile_size = xnn_dwconv_multipass_tile_size(
     kernel_size, first_pass_tile, middle_pass_tile, last_pass_tile);
-  const size_t w_elements = xnn_multipass_dwconv_weights_count(
+  const size_t w_elements = xnn_dwconv_multipass_weights_count(
     tile_size, channels, channel_tile, channel_subtile, channel_round);
   // Can read (tile_size - kernel_size) elements after end of indirection buffer.
   const size_t i_elements = tile_size - kernel_size + output_height * step_height;

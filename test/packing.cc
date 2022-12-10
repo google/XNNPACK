@@ -1629,8 +1629,8 @@ static size_t multipass_weights_count(
   size_t channel_subtile,
   size_t channel_round)
 {
-  return xnn_multipass_dwconv_weights_count(
-    xnn_multipass_dwconv_tile_size(kernel_size, first_pass_tile, middle_pass_tile, last_pass_tile), channels,
+  return xnn_dwconv_multipass_weights_count(
+    xnn_dwconv_multipass_tile_size(kernel_size, first_pass_tile, middle_pass_tile, last_pass_tile), channels,
     channel_tile, channel_subtile, channel_round);
 }
 
