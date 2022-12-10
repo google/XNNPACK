@@ -1481,7 +1481,7 @@ void xnn_pack_f32_dwconv_ghw_w(
   const void* params)
 {
   assert(primary_tile >= h * w);
-  xnn_pack_f32_multipass_dwconv_ghw_w(
+  xnn_pack_f32_dwconv_multipass_ghw_w(
       primary_tile,
       /*middle_pass_tile=*/0,
       /*last_pass_tile=*/0,
@@ -1506,7 +1506,7 @@ inline static void advance_x_y(size_t h, size_t* x, size_t* y) {
   }
 }
 
-void xnn_pack_f32_multipass_dwconv_ghw_w(
+void xnn_pack_f32_dwconv_multipass_ghw_w(
   size_t first_pass_tile,
   size_t middle_pass_tile,
   size_t last_pass_tile,
@@ -1886,7 +1886,7 @@ void xnn_pack_f32_dwconv_hwg_w(
   const void* params)
 {
   assert(primary_tile >= h * w);
-  xnn_pack_f32_multipass_dwconv_hwg_w(
+  xnn_pack_f32_dwconv_multipass_hwg_w(
       primary_tile,
       /*middle_pass_tile=*/0,
       /*last_pass_tile=*/0,
@@ -1903,7 +1903,7 @@ void xnn_pack_f32_dwconv_hwg_w(
       params);
 }
 
-void xnn_pack_f32_multipass_dwconv_hwg_w(
+void xnn_pack_f32_dwconv_multipass_hwg_w(
   size_t first_pass_tile,
   size_t middle_pass_tile,
   size_t last_pass_tile,

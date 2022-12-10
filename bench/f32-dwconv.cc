@@ -224,7 +224,7 @@ static void f32_dwconv(
 
   std::vector<float, AlignedAllocator<float, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0.0f);
-  xnn_pack_f32_multipass_dwconv_ghw_w(first_pass_tile, middle_pass_tile, last_pass_tile,
+  xnn_pack_f32_dwconv_multipass_ghw_w(first_pass_tile, middle_pass_tile, last_pass_tile,
                                       kernel_height, kernel_width,
                                       channels, channel_tile, channel_subtile, channel_round,
                                       k.data(), b.data(), w.data(), 0 /* extra bytes */, nullptr);

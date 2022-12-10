@@ -617,7 +617,7 @@ XNN_INTERNAL void xnn_pack_qs8_dwconv_hwg_w(
 // might exceed the padding that we have.
 
 // Weights layout is channels/(g)roups, (h)eight, (w)idth.
-XNN_INTERNAL void xnn_pack_f32_multipass_dwconv_ghw_w(
+XNN_INTERNAL void xnn_pack_f32_dwconv_multipass_ghw_w(
   size_t first_pass_tile,
   size_t middle_pass_tile,
   size_t last_pass_tile,
@@ -634,7 +634,7 @@ XNN_INTERNAL void xnn_pack_f32_multipass_dwconv_ghw_w(
   const void* params);
 
 // Weights layout is (h)eight, (w)idth, channels/(g)roups.
-XNN_INTERNAL void xnn_pack_f32_multipass_dwconv_hwg_w(
+XNN_INTERNAL void xnn_pack_f32_dwconv_multipass_hwg_w(
   size_t first_pass_tile,
   size_t middle_pass_tile,
   size_t last_pass_tile,

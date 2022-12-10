@@ -845,7 +845,7 @@ class DWConvMicrokernelTester {
       std::fill(output.begin(), output.end(), nanf(""));
 
       std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
-      xnn_pack_f32_multipass_dwconv_ghw_w(
+      xnn_pack_f32_dwconv_multipass_ghw_w(
         first_pass_tile(), middle_pass_tile(), last_pass_tile(), kernel_size(), 1,
         channels(), channel_tile(), channel_subtile(), channel_round(),
         kernel.data(), bias.data(), packed_weights.data(),
@@ -934,7 +934,7 @@ class DWConvMicrokernelTester {
       std::fill(output.begin(), output.end(), nanf(""));
 
       std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
-      xnn_pack_f32_multipass_dwconv_ghw_w(
+      xnn_pack_f32_dwconv_multipass_ghw_w(
         first_pass_tile(), middle_pass_tile(), last_pass_tile(), kernel_size(), 1,
         channels(), channel_tile(), channel_subtile(), channel_round(),
         kernel.data(), bias.data(), packed_weights.data(),

@@ -1680,7 +1680,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_multipass_dwconv_ghw_w(
+  xnn_pack_f32_dwconv_multipass_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1730,7 +1730,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channels_gt
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_multipass_dwconv_ghw_w(
+  xnn_pack_f32_dwconv_multipass_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1791,7 +1791,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_multipass_dwconv_ghw_w(
+  xnn_pack_f32_dwconv_multipass_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1846,7 +1846,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_multipass_dwconv_ghw_w(
+  xnn_pack_f32_dwconv_multipass_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1908,7 +1908,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_multipass_dwconv_ghw_w(
+  xnn_pack_f32_dwconv_multipass_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1967,7 +1967,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_gt_cr) 
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_multipass_dwconv_ghw_w(
+  xnn_pack_f32_dwconv_multipass_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2046,7 +2046,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_multipass_dwconv_ghw_w(
+  xnn_pack_f32_dwconv_multipass_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2107,7 +2107,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_multipass_dwconv_ghw_w(
+  xnn_pack_f32_dwconv_multipass_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2174,7 +2174,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_multipass_dwconv_ghw_w(
+  xnn_pack_f32_dwconv_multipass_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2239,7 +2239,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
     multipass_weights_count(
       h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile, channel_round));
 
-  xnn_pack_f32_multipass_dwconv_ghw_w(
+  xnn_pack_f32_dwconv_multipass_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2305,7 +2305,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rounded) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_multipass_dwconv_ghw_w(
+  xnn_pack_f32_dwconv_multipass_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2362,7 +2362,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_multipass_dwconv_hwg_w(
+  xnn_pack_f32_dwconv_multipass_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2411,7 +2411,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channels_gt
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_multipass_dwconv_hwg_w(
+  xnn_pack_f32_dwconv_multipass_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2472,7 +2472,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_multipass_dwconv_hwg_w(
+  xnn_pack_f32_dwconv_multipass_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2521,7 +2521,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_multipass_dwconv_hwg_w(
+  xnn_pack_f32_dwconv_multipass_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2585,7 +2585,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_multipass_dwconv_hwg_w(
+  xnn_pack_f32_dwconv_multipass_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2639,7 +2639,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_gt_cr) 
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_multipass_dwconv_hwg_w(
+  xnn_pack_f32_dwconv_multipass_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2712,7 +2712,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_multipass_dwconv_hwg_w(
+  xnn_pack_f32_dwconv_multipass_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2767,7 +2767,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_multipass_dwconv_hwg_w(
+  xnn_pack_f32_dwconv_multipass_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2824,7 +2824,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_multipass_dwconv_hwg_w(
+  xnn_pack_f32_dwconv_multipass_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2883,7 +2883,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile_rounded) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_multipass_dwconv_hwg_w(
+  xnn_pack_f32_dwconv_multipass_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2945,7 +2945,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
     multipass_weights_count(
       h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile, channel_round));
 
-  xnn_pack_f32_multipass_dwconv_hwg_w(
+  xnn_pack_f32_dwconv_multipass_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
