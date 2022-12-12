@@ -17,6 +17,7 @@
 #include <xnnpack/log.h>
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
+#include <xnnpack/microkernel-type.h>
 #include <xnnpack/params.h>
 #include <xnnpack/compute.h>
 
@@ -1428,14 +1429,16 @@ enum xnn_status xnn_run_operator_with_index(
       xnn_log_error("failed to run operator: operator was not successfully setup");
       return xnn_status_invalid_state;
     case xnn_run_state_ready:
-      xnn_log_debug("running operator %zu:%zu (%s)", opdata_index,
+      xnn_log_debug("running operator %zu:%zu (%s %s)", opdata_index,
                     operator_object_index,
-                    xnn_operator_type_to_string(op->type));
+                    xnn_operator_type_to_string(op->type),
+                    xnn_microkernel_type_to_string(op->ukernel.type));
       break;
     case xnn_run_state_skip:
-      xnn_log_debug("skip running operator %zu:%zu (%s)", opdata_index,
+      xnn_log_debug("skip running operator %zu:%zu (%s %s)", opdata_index,
                     operator_object_index,
-                    xnn_operator_type_to_string(op->type));
+                    xnn_operator_type_to_string(op->type),
+                    xnn_microkernel_type_to_string(op->ukernel.type));
       return xnn_status_success;
   }
 
