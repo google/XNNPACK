@@ -16,6 +16,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams.h>
+#include <xnnpack/config.h>
 
 struct xnn_hmp_gemm_ukernel {
   xnn_gemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
@@ -213,28 +214,6 @@ struct vunary_parameters {
   uint8_t element_tile;
 };
 
-struct vbinary_fused_ukernels {
-  xnn_vbinary_ukernel_fn op_ukernel;
-  xnn_vbinary_ukernel_fn opc_ukernel;
-  xnn_vbinary_ukernel_fn ropc_ukernel;
-};
-
-struct vbinary_parameters {
-  struct vbinary_fused_ukernels minmax;
-  struct vbinary_fused_ukernels linear;
-  union {
-    xnn_init_f16_minmax_params_fn f16_minmax;
-    xnn_init_f32_default_params_fn f32_default;
-    xnn_init_f32_minmax_params_fn f32_minmax;
-    xnn_init_qs8_add_minmax_params_fn qs8_add;
-    xnn_init_qs8_mul_minmax_params_fn qs8_mul;
-    xnn_init_qu8_add_minmax_params_fn qu8_add;
-    xnn_init_qu8_mul_minmax_params_fn qu8_mul;
-  } init;
-  // Number of elements in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
-  uint8_t element_tile;
-};
 
 struct spmm_parameters {
   xnn_spmm_ukernel_fn ukernel;
@@ -526,8 +505,8 @@ struct xnn_parameters {
     struct gemm_parameters gemm;
     struct dwconv_parameters dwconv[XNN_MAX_QS8_DWCONV_UKERNELS];
     struct gavgpool_parameters gavgpool;
-    struct vbinary_parameters vadd;
-    struct vbinary_parameters vmul;
+    struct xnn_binary_elementwise_config vadd;
+    struct xnn_binary_elementwise_config vmul;
     struct vunary_parameters lrelu;
   } qs8;
   struct {
@@ -535,8 +514,8 @@ struct xnn_parameters {
     struct dwconv_parameters dwconv[XNN_MAX_QU8_DWCONV_UKERNELS];
     struct avgpool_parameters avgpool;
     struct gavgpool_parameters gavgpool;
-    struct vbinary_parameters vadd;
-    struct vbinary_parameters vmul;
+    struct xnn_binary_elementwise_config vadd;
+    struct xnn_binary_elementwise_config vmul;
     struct vunary_parameters lrelu;
   } qu8;
   struct {
@@ -580,13 +559,13 @@ struct xnn_parameters {
     struct vunary_parameters sqr;
     struct vunary_parameters sqrt;
     struct prelu_parameters prelu;
-    struct vbinary_parameters vadd;
-    struct vbinary_parameters vdiv;
-    struct vbinary_parameters vmax;
-    struct vbinary_parameters vmin;
-    struct vbinary_parameters vmul;
-    struct vbinary_parameters vsub;
-    struct vbinary_parameters vsqrdiff;
+    struct xnn_binary_elementwise_config vadd;
+    struct xnn_binary_elementwise_config vdiv;
+    struct xnn_binary_elementwise_config vmax;
+    struct xnn_binary_elementwise_config vmin;
+    struct xnn_binary_elementwise_config vmul;
+    struct xnn_binary_elementwise_config vsub;
+    struct xnn_binary_elementwise_config vsqrdiff;
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
     xnn_rmax_ukernel_fn rmax;
@@ -633,13 +612,13 @@ struct xnn_parameters {
     struct vunary_parameters sqr;
     struct vunary_parameters sqrt;
     struct prelu_parameters prelu;
-    struct vbinary_parameters vadd;
-    struct vbinary_parameters vdiv;
-    struct vbinary_parameters vmax;
-    struct vbinary_parameters vmin;
-    struct vbinary_parameters vmul;
-    struct vbinary_parameters vsub;
-    struct vbinary_parameters vsqrdiff;
+    struct xnn_binary_elementwise_config vadd;
+    struct xnn_binary_elementwise_config vdiv;
+    struct xnn_binary_elementwise_config vmax;
+    struct xnn_binary_elementwise_config vmin;
+    struct xnn_binary_elementwise_config vmul;
+    struct xnn_binary_elementwise_config vsub;
+    struct xnn_binary_elementwise_config vsqrdiff;
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
     xnn_rmax_ukernel_fn rmax;

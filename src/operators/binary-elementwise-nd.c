@@ -23,16 +23,16 @@ static void init_binary_elementwise_nd(
   size_t params_size,
   uint32_t flags,
   enum xnn_operator_type operator_type,
-  const struct vbinary_fused_ukernels* vbinary_fused_ukernels,
+  const struct xnn_binary_elementwise_subconfig* xnn_binary_elementwise_subconfig,
   xnn_operator_t binary_elementwise_op)
 {
   if (params_size != 0) {
     memcpy(&binary_elementwise_op->params, params, params_size);
   }
 
-  binary_elementwise_op->ukernel.vbinary.op_fn   = vbinary_fused_ukernels->op_ukernel;
-  binary_elementwise_op->ukernel.vbinary.opc_fn  = vbinary_fused_ukernels->opc_ukernel;
-  binary_elementwise_op->ukernel.vbinary.ropc_fn = vbinary_fused_ukernels->ropc_ukernel;
+  binary_elementwise_op->ukernel.vbinary.op_fn   = xnn_binary_elementwise_subconfig->op_ukernel;
+  binary_elementwise_op->ukernel.vbinary.opc_fn  = xnn_binary_elementwise_subconfig->opc_ukernel;
+  binary_elementwise_op->ukernel.vbinary.ropc_fn = xnn_binary_elementwise_subconfig->ropc_ukernel;
 
   binary_elementwise_op->type = operator_type;
   binary_elementwise_op->flags = flags;
@@ -46,7 +46,7 @@ static enum xnn_status create_binary_elementwise_nd(
     size_t params_size,
     uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
-    const struct vbinary_fused_ukernels* vbinary_fused_ukernels,
+    const struct xnn_binary_elementwise_subconfig* xnn_binary_elementwise_subconfig,
     xnn_operator_t* binary_elementwise_op_out)
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -74,7 +74,7 @@ static enum xnn_status create_binary_elementwise_nd(
     params_size,
     flags,
     operator_type,
-    vbinary_fused_ukernels,
+    xnn_binary_elementwise_subconfig,
     binary_elementwise_op);
 
   *binary_elementwise_op_out = binary_elementwise_op;
@@ -86,7 +86,7 @@ static enum xnn_status create_binary_elementwise_nd_f16(
     float output_max,
     uint32_t flags,
     enum xnn_operator_type operator_type,
-    const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_binary_elementwise_config vbinary[restrict XNN_MIN_ELEMENTS(1)],
     xnn_operator_t* binary_elementwise_op_out)
 {
   if (isnan(output_min)) {
@@ -132,7 +132,7 @@ static enum xnn_status create_binary_elementwise_nd_f32(
     float output_max,
     uint32_t flags,
     enum xnn_operator_type operator_type,
-    const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_binary_elementwise_config vbinary[restrict XNN_MIN_ELEMENTS(1)],
     xnn_operator_t* binary_elementwise_op_out)
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -163,9 +163,9 @@ static enum xnn_status create_binary_elementwise_nd_f32(
   }
 
   const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
-  const struct vbinary_fused_ukernels* vbinary_fused_ukernels = &vbinary->minmax;
+  const struct xnn_binary_elementwise_subconfig* xnn_binary_elementwise_subconfig = &vbinary->minmax;
   if (linear_activation && vbinary->linear.op_ukernel != NULL) {
-    vbinary_fused_ukernels = &vbinary->linear;
+    xnn_binary_elementwise_subconfig = &vbinary->linear;
   }
 
   union xnn_f32_minmax_params params;
@@ -178,7 +178,7 @@ static enum xnn_status create_binary_elementwise_nd_f32(
     sizeof(params),
     XNN_INIT_FLAG_F32,
     operator_type,
-    vbinary_fused_ukernels,
+    xnn_binary_elementwise_subconfig,
     binary_elementwise_op_out);
 }
 
@@ -867,7 +867,7 @@ static enum xnn_status setup_binary_elementwise_nd(
     size_t params_size,
     const void* reversed_params,
     size_t reversed_params_size,
-    const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_binary_elementwise_config vbinary[restrict XNN_MIN_ELEMENTS(1)],
     size_t num_threads)
 {
   if (binary_elementwise_op->type != expected_operator_type) {
@@ -1072,7 +1072,7 @@ static enum xnn_status setup_binary_elementwise_nd_f16(
     const void* input1,
     const void* input2,
     void* output,
-    const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_binary_elementwise_config vbinary[restrict XNN_MIN_ELEMENTS(1)],
     size_t num_threads)
 {
   return setup_binary_elementwise_nd(
@@ -1102,7 +1102,7 @@ static enum xnn_status setup_binary_elementwise_nd_f32(
     const float* input1,
     const float* input2,
     float* output,
-    const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_binary_elementwise_config vbinary[restrict XNN_MIN_ELEMENTS(1)],
     size_t num_threads)
 {
   return setup_binary_elementwise_nd(
@@ -1171,8 +1171,8 @@ static enum xnn_status run_binary_elementwise_nd(
   size_t setup_params_size,
   size_t rparams_offset,
   size_t setup_reversed_params_size,
-  const struct vbinary_fused_ukernels* vbinary_fused_ukernels,
-  const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
+  const struct xnn_binary_elementwise_subconfig* xnn_binary_elementwise_subconfig,
+  const struct xnn_binary_elementwise_config vbinary[restrict XNN_MIN_ELEMENTS(1)],
   const void* create_params,
   size_t create_params_size,
   uint32_t create_init_flag,
@@ -1199,7 +1199,7 @@ static enum xnn_status run_binary_elementwise_nd(
     create_params_size,
     flags,
     operator_type,
-    vbinary_fused_ukernels,
+    xnn_binary_elementwise_subconfig,
     &binary_elementwise_op);
 
   const void* setup_params = (void*) ((uintptr_t) &binary_elementwise_op + params_offset);
@@ -1234,7 +1234,7 @@ static enum xnn_status run_binary_elementwise_nd_f32(
   float* output,
   float output_min,
   float output_max,
-  const struct vbinary_parameters vbinary[restrict XNN_MIN_ELEMENTS(1)],
+  const struct xnn_binary_elementwise_config vbinary[restrict XNN_MIN_ELEMENTS(1)],
   uint32_t flags,
   pthreadpool_t threadpool)
 {
@@ -1265,9 +1265,9 @@ static enum xnn_status run_binary_elementwise_nd_f32(
   }
 
   const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
-  const struct vbinary_fused_ukernels* vbinary_fused_ukernels = &vbinary->minmax;
+  const struct xnn_binary_elementwise_subconfig* xnn_binary_elementwise_subconfig = &vbinary->minmax;
   if (linear_activation && vbinary->linear.op_ukernel != NULL) {
-    vbinary_fused_ukernels = &vbinary->linear;
+    xnn_binary_elementwise_subconfig = &vbinary->linear;
   }
 
   return run_binary_elementwise_nd(
@@ -1278,7 +1278,7 @@ static enum xnn_status run_binary_elementwise_nd_f32(
     2 /* log2(sizeof(float)) */,
     offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
     offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
-    vbinary_fused_ukernels, vbinary,
+    xnn_binary_elementwise_subconfig, vbinary,
     &params,
     sizeof(params),
     XNN_INIT_FLAG_F32,
@@ -1353,9 +1353,9 @@ enum xnn_status xnn_run_maximum_nd_f32(
   }
 
   const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
-  const struct vbinary_fused_ukernels* vbinary_fused_ukernels = &xnn_params.f32.vmax.minmax;
+  const struct xnn_binary_elementwise_subconfig* xnn_binary_elementwise_subconfig = &xnn_params.f32.vmax.minmax;
   if (linear_activation && xnn_params.f32.vmax.linear.op_ukernel != NULL) {
-    vbinary_fused_ukernels = &xnn_params.f32.vmax.linear;
+    xnn_binary_elementwise_subconfig = &xnn_params.f32.vmax.linear;
   }
 
   return run_binary_elementwise_nd(
@@ -1366,7 +1366,7 @@ enum xnn_status xnn_run_maximum_nd_f32(
     2 /* log2(sizeof(float)) */,
     offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
     offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
-    vbinary_fused_ukernels, &xnn_params.f32.vmax,
+    xnn_binary_elementwise_subconfig, &xnn_params.f32.vmax,
     &params,
     sizeof(params),
     XNN_INIT_FLAG_F32,
@@ -1393,9 +1393,9 @@ enum xnn_status xnn_run_minimum_nd_f32(
   }
 
   const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
-  const struct vbinary_fused_ukernels* vbinary_fused_ukernels = &xnn_params.f32.vmin.minmax;
+  const struct xnn_binary_elementwise_subconfig* xnn_binary_elementwise_subconfig = &xnn_params.f32.vmin.minmax;
   if (linear_activation && xnn_params.f32.vmin.linear.op_ukernel != NULL) {
-    vbinary_fused_ukernels = &xnn_params.f32.vmin.linear;
+    xnn_binary_elementwise_subconfig = &xnn_params.f32.vmin.linear;
   }
 
   return run_binary_elementwise_nd(
@@ -1406,7 +1406,7 @@ enum xnn_status xnn_run_minimum_nd_f32(
     2 /* log2(sizeof(float)) */,
     offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
     offsetof(struct xnn_operator, params.f32_minmax), sizeof(params),
-    vbinary_fused_ukernels, &xnn_params.f32.vmin,
+    xnn_binary_elementwise_subconfig, &xnn_params.f32.vmin,
     &params,
     sizeof(params),
     XNN_INIT_FLAG_F32,

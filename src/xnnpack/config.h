@@ -93,6 +93,29 @@ struct xnn_transpose_config {
 
 XNN_INTERNAL const struct xnn_transpose_config* xnn_init_transpose_config();
 
+struct xnn_binary_elementwise_subconfig {
+  xnn_vbinary_ukernel_fn op_ukernel;
+  xnn_vbinary_ukernel_fn opc_ukernel;
+  xnn_vbinary_ukernel_fn ropc_ukernel;
+};
+
+struct xnn_binary_elementwise_config {
+  struct xnn_binary_elementwise_subconfig minmax;
+  struct xnn_binary_elementwise_subconfig linear;
+  union {
+    xnn_init_f16_minmax_params_fn f16_minmax;
+    xnn_init_f32_default_params_fn f32_default;
+    xnn_init_f32_minmax_params_fn f32_minmax;
+    xnn_init_qs8_add_minmax_params_fn qs8_add;
+    xnn_init_qs8_mul_minmax_params_fn qs8_mul;
+    xnn_init_qu8_add_minmax_params_fn qu8_add;
+    xnn_init_qu8_mul_minmax_params_fn qu8_mul;
+  } init;
+  // Number of elements in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
+  size_t element_tile;
+};
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

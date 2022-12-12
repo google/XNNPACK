@@ -2046,6 +2046,7 @@ xnnpack_cc_library(
     name = "params",
     srcs = ["src/params.c"],
     hdrs = [
+        "src/xnnpack/config.h",
         "src/xnnpack/microfnptr.h",
         "src/xnnpack/params.h",
     ],
