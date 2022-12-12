@@ -60,8 +60,18 @@ static void init_x8_lut_config(void) {
     assert(hardware_config != NULL);
 
     if (hardware_config->is_x86) {
-      x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_x1;
-      x8_lut_config.tile_size = 1;
+      #if XNN_ARCH_WASMRELAXEDSIMD
+        if (hardware_config->use_wasm_pshufb) {
+          x8_lut_config.microkernel = xnn_x8_lut_ukernel__wasmpshufb_x32;
+          x8_lut_config.tile_size = 32;
+        } else {
+          x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_x1;
+          x8_lut_config.tile_size = 1;
+        }
+      #else
+        x8_lut_config.microkernel = xnn_x8_lut_ukernel__scalar_x1;
+        x8_lut_config.tile_size = 1;
+      #endif
     } else {
       x8_lut_config.microkernel = xnn_x8_lut_ukernel__wasmsimd_x32;
       x8_lut_config.tile_size = 32;

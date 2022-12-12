@@ -37,9 +37,14 @@ ISA_LIST = frozenset({
   'ssse3',
   'wasm',
   'wasmrelaxedsimd',
+  'wasmpshufb',
   'wasmsimd',
   'xop',
 })
+
+ISA_MAP = {
+  'wasmpshufb': 'wasmrelaxedsimd',
+}
 
 ARCH_LIST = frozenset({
   'aarch32',
@@ -73,7 +78,7 @@ def main(args):
     os.path.join(src_dir, 'tables'),
     os.path.join(src_dir, 'xnnpack'),
   }
-  c_microkernels_per_isa = {isa: [] for isa in ISA_LIST}
+  c_microkernels_per_isa = {isa: [] for isa in ISA_LIST if isa not in ISA_MAP}
   c_microkernels_per_isa['aarch64_neon'] = list()
   c_microkernels_per_isa['aarch64_neonfma'] = list()
   c_microkernels_per_isa['aarch64_neonfp16arith'] = list()
@@ -95,7 +100,8 @@ def main(args):
           if component in ARCH_LIST:
             arch = component
           elif component in ISA_LIST:
-            key = component if arch is None else f'{arch}_{component}'
+            isa = ISA_MAP.get(component, component)
+            key = isa if arch is None else f'{arch}_{isa}'
             c_microkernels_per_isa[key].append(filepath)
             break
         else:

@@ -72,7 +72,11 @@ class LUTMicrokernelTester {
       } else {
         std::fill(y.begin(), y.end(), 0xA5);
       }
-      const uint8_t* x_data = inplace() ? y.data() : x.data();
+      const uint8_t* x_data = x.data();
+      if (inplace()) {
+        std::copy(y.cbegin(), y.cend(), x.begin());
+        x_data = y.data();
+      }
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -85,7 +89,8 @@ class LUTMicrokernelTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         EXPECT_EQ(uint32_t(y_ref[i]), uint32_t(y[i]))
-          << "at position " << i << " / " << batch_size();
+          << "at position " << i << " / " << batch_size()
+          << ", input " << uint32_t(x[i]);
       }
     }
   }

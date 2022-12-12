@@ -1,0 +1,301 @@
+// Auto-generated file. Do not edit!
+//   Template: src/x8-lut/wasmpshufb.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/lut.h>
+
+
+void xnn_x8_lut_ukernel__wasmpshufb_x64(
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
+    const uint8_t table[restrict XNN_MIN_ELEMENTS(256)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const v128_t vt0 = wasm_v128_load(table);
+  const v128_t vt1 = wasm_v128_load(table + 16);
+  const v128_t vt2 = wasm_v128_load(table + 32);
+  const v128_t vt3 = wasm_v128_load(table + 48);
+  const v128_t vt4 = wasm_v128_load(table + 64);
+  const v128_t vt5 = wasm_v128_load(table + 80);
+  const v128_t vt6 = wasm_v128_load(table + 96);
+  const v128_t vt7 = wasm_v128_load(table + 112);
+  const v128_t vt8 = wasm_v128_load(table + 128);
+  const v128_t vt9 = wasm_v128_load(table + 144);
+  const v128_t vtA = wasm_v128_load(table + 160);
+  const v128_t vtB = wasm_v128_load(table + 176);
+  const v128_t vtC = wasm_v128_load(table + 192);
+  const v128_t vtD = wasm_v128_load(table + 208);
+  const v128_t vtE = wasm_v128_load(table + 224);
+  const v128_t vtF = wasm_v128_load(table + 240);
+
+  const v128_t vtable0 = vt0;
+  const v128_t vtable1 = wasm_v128_xor(vt0, vt1);
+  const v128_t vtable2 = wasm_v128_xor(vt1, vt2);
+  const v128_t vtable3 = wasm_v128_xor(vt2, vt3);
+  const v128_t vtable4 = wasm_v128_xor(vt3, vt4);
+  const v128_t vtable5 = wasm_v128_xor(vt4, vt5);
+  const v128_t vtable6 = wasm_v128_xor(vt5, vt6);
+  const v128_t vtable7 = wasm_v128_xor(vt6, vt7);
+  const v128_t vtable8 = wasm_v128_xor(wasm_v128_xor(vt7, vt8), vtable0);
+  const v128_t vtable9 = wasm_v128_xor(wasm_v128_xor(vt8, vt9), vtable1);
+  const v128_t vtableA = wasm_v128_xor(wasm_v128_xor(vt9, vtA), vtable2);
+  const v128_t vtableB = wasm_v128_xor(wasm_v128_xor(vtA, vtB), vtable3);
+  const v128_t vtableC = wasm_v128_xor(wasm_v128_xor(vtB, vtC), vtable4);
+  const v128_t vtableD = wasm_v128_xor(wasm_v128_xor(vtC, vtD), vtable5);
+  const v128_t vtableE = wasm_v128_xor(wasm_v128_xor(vtD, vtE), vtable6);
+  const v128_t vtableF = wasm_v128_xor(wasm_v128_xor(vtE, vtF), vtable7);
+
+  const v128_t voffset = wasm_i8x16_const_splat(16);
+  for (; batch >= 64 * sizeof(uint8_t); batch -= 64 * sizeof(uint8_t)) {
+    v128_t vx0 = wasm_v128_load((const v128_t*) input);
+    v128_t vx1 = wasm_v128_load((const v128_t*) (input + 16));
+    v128_t vx2 = wasm_v128_load((const v128_t*) (input + 32));
+    v128_t vx3 = wasm_v128_load((const v128_t*) (input + 48));
+    input += 64;
+
+    v128_t vy0 = __builtin_wasm_relaxed_swizzle_i8x16(vtable0, vx0);
+    v128_t vy1 = __builtin_wasm_relaxed_swizzle_i8x16(vtable0, vx1);
+    v128_t vy2 = __builtin_wasm_relaxed_swizzle_i8x16(vtable0, vx2);
+    v128_t vy3 = __builtin_wasm_relaxed_swizzle_i8x16(vtable0, vx3);
+
+    vx0 = wasm_i8x16_sub(vx0, voffset);
+    vx1 = wasm_i8x16_sub(vx1, voffset);
+    vx2 = wasm_i8x16_sub(vx2, voffset);
+    vx3 = wasm_i8x16_sub(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtable1, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtable1, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtable1, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtable1, vx3));
+    vx0 = wasm_i8x16_sub(vx0, voffset);
+    vx1 = wasm_i8x16_sub(vx1, voffset);
+    vx2 = wasm_i8x16_sub(vx2, voffset);
+    vx3 = wasm_i8x16_sub(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtable2, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtable2, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtable2, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtable2, vx3));
+    vx0 = wasm_i8x16_sub(vx0, voffset);
+    vx1 = wasm_i8x16_sub(vx1, voffset);
+    vx2 = wasm_i8x16_sub(vx2, voffset);
+    vx3 = wasm_i8x16_sub(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtable3, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtable3, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtable3, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtable3, vx3));
+    vx0 = wasm_i8x16_sub(vx0, voffset);
+    vx1 = wasm_i8x16_sub(vx1, voffset);
+    vx2 = wasm_i8x16_sub(vx2, voffset);
+    vx3 = wasm_i8x16_sub(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtable4, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtable4, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtable4, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtable4, vx3));
+    vx0 = wasm_i8x16_sub(vx0, voffset);
+    vx1 = wasm_i8x16_sub(vx1, voffset);
+    vx2 = wasm_i8x16_sub(vx2, voffset);
+    vx3 = wasm_i8x16_sub(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtable5, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtable5, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtable5, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtable5, vx3));
+    vx0 = wasm_i8x16_sub(vx0, voffset);
+    vx1 = wasm_i8x16_sub(vx1, voffset);
+    vx2 = wasm_i8x16_sub(vx2, voffset);
+    vx3 = wasm_i8x16_sub(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtable6, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtable6, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtable6, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtable6, vx3));
+    vx0 = wasm_i8x16_sub(vx0, voffset);
+    vx1 = wasm_i8x16_sub(vx1, voffset);
+    vx2 = wasm_i8x16_sub(vx2, voffset);
+    vx3 = wasm_i8x16_sub(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtable7, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtable7, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtable7, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtable7, vx3));
+    vx0 = wasm_i8x16_sub(vx0, voffset);
+    vx1 = wasm_i8x16_sub(vx1, voffset);
+    vx2 = wasm_i8x16_sub(vx2, voffset);
+    vx3 = wasm_i8x16_sub(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtable8, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtable8, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtable8, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtable8, vx3));
+
+    vx0 = wasm_i8x16_sub_sat(vx0, voffset);
+    vx1 = wasm_i8x16_sub_sat(vx1, voffset);
+    vx2 = wasm_i8x16_sub_sat(vx2, voffset);
+    vx3 = wasm_i8x16_sub_sat(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtable9, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtable9, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtable9, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtable9, vx3));
+    vx0 = wasm_i8x16_sub_sat(vx0, voffset);
+    vx1 = wasm_i8x16_sub_sat(vx1, voffset);
+    vx2 = wasm_i8x16_sub_sat(vx2, voffset);
+    vx3 = wasm_i8x16_sub_sat(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtableA, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtableA, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtableA, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtableA, vx3));
+    vx0 = wasm_i8x16_sub_sat(vx0, voffset);
+    vx1 = wasm_i8x16_sub_sat(vx1, voffset);
+    vx2 = wasm_i8x16_sub_sat(vx2, voffset);
+    vx3 = wasm_i8x16_sub_sat(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtableB, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtableB, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtableB, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtableB, vx3));
+    vx0 = wasm_i8x16_sub_sat(vx0, voffset);
+    vx1 = wasm_i8x16_sub_sat(vx1, voffset);
+    vx2 = wasm_i8x16_sub_sat(vx2, voffset);
+    vx3 = wasm_i8x16_sub_sat(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtableC, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtableC, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtableC, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtableC, vx3));
+    vx0 = wasm_i8x16_sub_sat(vx0, voffset);
+    vx1 = wasm_i8x16_sub_sat(vx1, voffset);
+    vx2 = wasm_i8x16_sub_sat(vx2, voffset);
+    vx3 = wasm_i8x16_sub_sat(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtableD, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtableD, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtableD, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtableD, vx3));
+    vx0 = wasm_i8x16_sub_sat(vx0, voffset);
+    vx1 = wasm_i8x16_sub_sat(vx1, voffset);
+    vx2 = wasm_i8x16_sub_sat(vx2, voffset);
+    vx3 = wasm_i8x16_sub_sat(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtableE, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtableE, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtableE, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtableE, vx3));
+    vx0 = wasm_i8x16_sub_sat(vx0, voffset);
+    vx1 = wasm_i8x16_sub_sat(vx1, voffset);
+    vx2 = wasm_i8x16_sub_sat(vx2, voffset);
+    vx3 = wasm_i8x16_sub_sat(vx3, voffset);
+    vy0 = wasm_v128_xor(vy0, __builtin_wasm_relaxed_swizzle_i8x16(vtableF, vx0));
+    vy1 = wasm_v128_xor(vy1, __builtin_wasm_relaxed_swizzle_i8x16(vtableF, vx1));
+    vy2 = wasm_v128_xor(vy2, __builtin_wasm_relaxed_swizzle_i8x16(vtableF, vx2));
+    vy3 = wasm_v128_xor(vy3, __builtin_wasm_relaxed_swizzle_i8x16(vtableF, vx3));
+
+    wasm_v128_store(output, vy0);
+    wasm_v128_store(output + 16, vy1);
+    wasm_v128_store(output + 32, vy2);
+    wasm_v128_store(output + 48, vy3);
+    output += 64;
+  }
+  for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
+    v128_t vx = wasm_v128_load(input);
+    input += 16;
+
+    v128_t vy = __builtin_wasm_relaxed_swizzle_i8x16(vtable0, vx);
+
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable1, vx));
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable2, vx));
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable3, vx));
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable4, vx));
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable5, vx));
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable6, vx));
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable7, vx));
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable8, vx));
+
+    vx = wasm_i8x16_sub_sat(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable9, vx));
+    vx = wasm_i8x16_sub_sat(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableA, vx));
+    vx = wasm_i8x16_sub_sat(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableB, vx));
+    vx = wasm_i8x16_sub_sat(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableC, vx));
+    vx = wasm_i8x16_sub_sat(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableD, vx));
+    vx = wasm_i8x16_sub_sat(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableE, vx));
+    vx = wasm_i8x16_sub_sat(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableF, vx));
+
+    wasm_v128_store(output, vy);
+    output += 16;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    v128_t vx = wasm_v128_load((const v128_t*) input);
+
+    v128_t vy = __builtin_wasm_relaxed_swizzle_i8x16(vtable0, vx);
+
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable1, vx));
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable2, vx));
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable3, vx));
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable4, vx));
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable5, vx));
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable6, vx));
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable7, vx));
+    vx = wasm_i8x16_sub(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable8, vx));
+
+    vx = wasm_i8x16_sub_sat(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable9, vx));
+    vx = wasm_i8x16_sub_sat(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableA, vx));
+    vx = wasm_i8x16_sub_sat(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableB, vx));
+    vx = wasm_i8x16_sub_sat(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableC, vx));
+    vx = wasm_i8x16_sub_sat(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableD, vx));
+    vx = wasm_i8x16_sub_sat(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableE, vx));
+    vx = wasm_i8x16_sub_sat(vx, voffset);
+    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableF, vx));
+
+    if (batch & (8 * sizeof(uint8_t))) {
+      wasm_v128_store64_lane(output, vy, 0);
+      vy = wasm_v64x2_shuffle(vy, vy, 1, 1);
+      output += 8;
+    }
+    if (batch & (4 * sizeof(uint8_t))) {
+      wasm_v128_store32_lane(output, vy, 0);
+      vy = wasm_u64x2_shr(vy, 32);
+      output += 4;
+    }
+    if (batch & (2 * sizeof(uint8_t))) {
+      wasm_v128_store16_lane(output, vy, 0);
+      vy = wasm_u32x4_shr(vy, 16);
+      output += 2;
+    }
+    if (batch & (1 * sizeof(uint8_t))) {
+      wasm_v128_store8_lane(output, vy, 0);
+    }
+  }
+}

@@ -5850,7 +5850,11 @@ SET(ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/qu8-vlrelu/gen/qu8-vlrelu-wasmrelaxedsimd-arm-x32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-wasmrelaxedsimd-x86-x8.c
   src/qu8-vlrelu/gen/qu8-vlrelu-wasmrelaxedsimd-x86-x16.c
-  src/qu8-vlrelu/gen/qu8-vlrelu-wasmrelaxedsimd-x86-x32.c)
+  src/qu8-vlrelu/gen/qu8-vlrelu-wasmrelaxedsimd-x86-x32.c
+  src/x8-lut/gen/x8-lut-wasmpshufb-x16.c
+  src/x8-lut/gen/x8-lut-wasmpshufb-x32.c
+  src/x8-lut/gen/x8-lut-wasmpshufb-x48.c
+  src/x8-lut/gen/x8-lut-wasmpshufb-x64.c)
 
 SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmsimd-int16-x8.c

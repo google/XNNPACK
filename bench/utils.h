@@ -157,6 +157,10 @@ bool CheckAVX512SKX(benchmark::State& state);
 // If VBMI or SKX-level AVX512 extensions are unsupported, report error in benchmark state, and return false.
 bool CheckAVX512VBMI(benchmark::State& state);
 
+// Check if PSHUFB instruction is available in WAsm Relaxed SIMD as Relaxed Swizzle.
+// If WAsm PSHUFB is unsupported, report error in benchmark state, and return false.
+bool CheckWAsmPSHUFB(benchmark::State& state);
+
 template <class T>
 inline T DivideRoundUp(T x, T q) {
   return x / q + T(x % q != 0);

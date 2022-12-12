@@ -48,6 +48,9 @@ struct xnn_hardware_config {
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   bool is_x86;
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_WASMRELAXEDSIMD
+  bool use_wasm_pshufb;
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
 };
 
 XNN_INTERNAL const struct xnn_hardware_config* xnn_init_hardware_config();

@@ -20,6 +20,10 @@
   #include <cpuinfo.h>
 #endif
 
+#ifdef __wasm_relaxed_simd__
+  #include <wasm_simd128.h>
+#endif
+
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
 #include <xnnpack/log.h>
@@ -92,6 +96,22 @@ static void init_hardware_config(void) {
     static const volatile float inf = INFINITY;
     hardware_config.is_x86 = signbit(inf - inf);
   #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+  #if XNN_ARCH_WASMRELAXEDSIMD
+    // Check if out-of-bounds behavior of Relaxed Swizzle is consistent with PSHUFB.
+    const v128_t table = wasm_i8x16_const(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+    const v128_t index_mask = wasm_i8x16_const_splat(INT8_C(0x8F));
+    const volatile v128_t index_increment = wasm_i8x16_const_splat(16);  // volatile to confuse Clang which otherwise mis-compiles
+    v128_t index = wasm_i8x16_const(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+    v128_t diff = wasm_i8x16_const_splat(0);
+    for (uint32_t i = 16; i != 0; i--) {
+      const v128_t pshufb_result = wasm_i8x16_swizzle(table, wasm_v128_and(index, index_mask));
+      const v128_t relaxed_result = __builtin_wasm_relaxed_swizzle_i8x16(table, index);
+      diff = wasm_v128_or(diff, wasm_v128_xor(pshufb_result, relaxed_result));
+      index = wasm_i8x16_add(index, index_increment);
+    }
+    hardware_config.use_wasm_pshufb = !wasm_v128_any_true(diff);
+  #endif  // XNN_ARCH_WASMRELAXEDSIMD
 }
 
 #if XNN_PLATFORM_WINDOWS

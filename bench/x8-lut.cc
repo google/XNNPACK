@@ -176,6 +176,25 @@ static void x8_lut(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(x8_lut, wasmpshufb_x16,
+                    xnn_x8_lut_ukernel__wasmpshufb_x16)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(x8_lut, wasmpshufb_x32,
+                    xnn_x8_lut_ukernel__wasmpshufb_x32)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(x8_lut, wasmpshufb_x48,
+                    xnn_x8_lut_ukernel__wasmpshufb_x48)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(x8_lut, wasmpshufb_x64,
+                    xnn_x8_lut_ukernel__wasmpshufb_x64)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(x8_lut, wasmsimd_x16,
                     xnn_x8_lut_ukernel__wasmsimd_x16)

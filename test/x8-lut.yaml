@@ -40,3 +40,8 @@
 - name: xnn_x8_lut_ukernel__wasmsimd_x32
 - name: xnn_x8_lut_ukernel__wasmsimd_x48
 - name: xnn_x8_lut_ukernel__wasmsimd_x64
+# WAsm Relaxed SIMD
+- name: xnn_x8_lut_ukernel__wasmpshufb_x16
+- name: xnn_x8_lut_ukernel__wasmpshufb_x32
+- name: xnn_x8_lut_ukernel__wasmpshufb_x48
+- name: xnn_x8_lut_ukernel__wasmpshufb_x64
