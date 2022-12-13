@@ -245,22 +245,14 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
       assert(kernel_width == 1);
       assert(groups == 1);
 
-      size_t num_nonzeroes = 0;
+      // Count number of non-zero values.
+      size_t num_nonzeros[5];
       if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-        const float* k = (const float*) kernel;
-        for (size_t oc = 0; oc < group_output_channels; oc++) {
-          for (size_t ic = 0; ic < group_input_channels; ic++) {
-            num_nonzeroes += (size_t) (k[oc * group_input_channels + ic] != 0.0f);
-          }
-        }
+        xnn_analyze_f32_spmm(group_output_channels, group_input_channels, kernel, num_nonzeros);
       } else {
-        const uint16_t* k = (const uint16_t*) kernel;
-        for (size_t oc = 0; oc < group_output_channels; oc++) {
-          for (size_t ic = 0; ic < group_input_channels; ic++) {
-            num_nonzeroes += (size_t) (k[oc * group_input_channels + ic] != 0);
-          }
-        }
+        xnn_analyze_f16_spmm(group_output_channels, group_input_channels, kernel, num_nonzeros);
       }
+      size_t num_nonzeroes = num_nonzeros[0];
       const size_t num_output_channel_blocks = group_output_channels;
       const size_t num_nonzero_values = num_nonzeroes;
       const size_t num_nonzero_blocks = num_nonzeroes;
@@ -705,35 +697,13 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       assert(groups == 1);
 
       // Count number of non-zero values.
-      size_t num_nonzeroes = 0;
-      size_t num_nonzero_blocks2 = 0;
-      size_t num_nonzero_blocks4 = 0;
-      for (size_t oc = 0; oc < round_down_po2(group_output_channels, 4); oc += 4) {
-        for (size_t ic = 0; ic < group_input_channels; ic++) {
-          const size_t row0_nonzero = (size_t) (kernel[oc * group_input_channels + ic] != 0.0f);
-          const size_t row1_nonzero = (size_t) (kernel[(oc + 1) * group_input_channels + ic] != 0.0f);
-          const size_t row2_nonzero = (size_t) (kernel[(oc + 2) * group_input_channels + ic] != 0.0f);
-          const size_t row3_nonzero = (size_t) (kernel[(oc + 3) * group_input_channels + ic] != 0.0f);
-          num_nonzeroes += row0_nonzero + row1_nonzero + row2_nonzero + row3_nonzero;
-          num_nonzero_blocks2 += (row0_nonzero | row1_nonzero) + (row2_nonzero | row3_nonzero);
-          num_nonzero_blocks4 += (row0_nonzero | row1_nonzero | row2_nonzero | row3_nonzero);
-        }
-      }
-      const size_t num_block4_nonzeroes = num_nonzeroes;
-      for (size_t oc = round_down_po2(group_output_channels, 4); oc < round_down_po2(group_output_channels, 2); oc += 2) {
-        for (size_t ic = 0; ic < group_input_channels; ic++) {
-          const size_t row0_nonzero = (size_t) (kernel[oc * group_input_channels + ic] != 0.0f);
-          const size_t row1_nonzero = (size_t) (kernel[(oc + 1) * group_input_channels + ic] != 0.0f);
-          num_nonzeroes += row0_nonzero + row1_nonzero;
-          num_nonzero_blocks2 += (row0_nonzero | row1_nonzero);
-        }
-      }
-      const size_t num_block2_nonzeroes = num_nonzeroes;
-      for (size_t oc = round_down_po2(group_output_channels, 2); oc < group_output_channels; oc++) {
-        for (size_t ic = 0; ic < group_input_channels; ic++) {
-          num_nonzeroes += (size_t) (kernel[oc * group_input_channels + ic] != 0.0f);
-        }
-      }
+      size_t num_nonzeros[5];
+      xnn_analyze_f32_spmm(group_output_channels, group_input_channels, kernel, num_nonzeros);
+      size_t num_nonzeroes = num_nonzeros[0];
+      size_t num_nonzero_blocks2 = num_nonzeros[1];
+      size_t num_nonzero_blocks4 = num_nonzeros[2];
+      size_t num_block2_nonzeroes = num_nonzeros[3];
+      size_t num_block4_nonzeroes = num_nonzeros[4];
 
       // Select block encoding when 2 or 4 channels have non-zero values.
       size_t output_channels_block_size = 1;

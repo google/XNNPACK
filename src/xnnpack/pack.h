@@ -836,6 +836,19 @@ XNN_INTERNAL void xnn_pack_f32_to_f16_prelu_w(
   const float* s,
   uint16_t* packed_weights);
 
+// Sparse packing functions.
+XNN_INTERNAL void xnn_analyze_f32_spmm(
+  size_t group_output_channels,
+  size_t group_input_channels,
+  const float* kernel,
+  size_t num_nonzeros[XNN_MIN_ELEMENTS(1)]);
+
+XNN_INTERNAL void xnn_analyze_f16_spmm(
+  size_t group_output_channels,
+  size_t group_input_channels,
+  const uint16_t* kernel,
+  size_t num_nonzeros[XNN_MIN_ELEMENTS(1)]);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
