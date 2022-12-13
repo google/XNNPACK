@@ -2760,3 +2760,94 @@ void xnn_pack_f32_to_f16_prelu_w(
     *packed_weights++ = fp16_ieee_from_fp32_value(*s++);
   } while (--c != 0);
 }
+
+void xnn_analyze_f32_spmm(
+  size_t group_output_channels,
+  size_t group_input_channels,
+  const float* kernel,
+  size_t num_nonzeros[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(kernel != NULL);
+
+  // Count number of non-zero values.
+  size_t num_nonzeroes = 0;
+  size_t num_nonzero_blocks2 = 0;
+  size_t num_nonzero_blocks4 = 0;
+  for (size_t oc = 0; oc < round_down_po2(group_output_channels, 4); oc += 4) {
+    for (size_t ic = 0; ic < group_input_channels; ic++) {
+      const size_t row0_nonzero = (size_t) (kernel[oc * group_input_channels + ic] != 0.0f);
+      const size_t row1_nonzero = (size_t) (kernel[(oc + 1) * group_input_channels + ic] != 0.0f);
+      const size_t row2_nonzero = (size_t) (kernel[(oc + 2) * group_input_channels + ic] != 0.0f);
+      const size_t row3_nonzero = (size_t) (kernel[(oc + 3) * group_input_channels + ic] != 0.0f);
+      num_nonzeroes += row0_nonzero + row1_nonzero + row2_nonzero + row3_nonzero;
+      num_nonzero_blocks2 += (row0_nonzero | row1_nonzero) + (row2_nonzero | row3_nonzero);
+      num_nonzero_blocks4 += (row0_nonzero | row1_nonzero | row2_nonzero | row3_nonzero);
+    }
+  }
+  const size_t num_block4_nonzeroes = num_nonzeroes;
+  for (size_t oc = round_down_po2(group_output_channels, 4); oc < round_down_po2(group_output_channels, 2); oc += 2) {
+    for (size_t ic = 0; ic < group_input_channels; ic++) {
+      const size_t row0_nonzero = (size_t) (kernel[oc * group_input_channels + ic] != 0.0f);
+      const size_t row1_nonzero = (size_t) (kernel[(oc + 1) * group_input_channels + ic] != 0.0f);
+      num_nonzeroes += row0_nonzero + row1_nonzero;
+      num_nonzero_blocks2 += (row0_nonzero | row1_nonzero);
+    }
+  }
+  const size_t num_block2_nonzeroes = num_nonzeroes;
+  for (size_t oc = round_down_po2(group_output_channels, 2); oc < group_output_channels; oc++) {
+    for (size_t ic = 0; ic < group_input_channels; ic++) {
+      num_nonzeroes += (size_t) (kernel[oc * group_input_channels + ic] != 0.0f);
+    }
+  }
+  num_nonzeros[0] = num_nonzeroes;
+  num_nonzeros[1] = num_nonzero_blocks2;
+  num_nonzeros[2] = num_nonzero_blocks4;
+  num_nonzeros[3] = num_block2_nonzeroes;
+  num_nonzeros[4] = num_block4_nonzeroes;
+}
+
+void xnn_analyze_f16_spmm(
+  size_t group_output_channels,
+  size_t group_input_channels,
+  const uint16_t* kernel,
+  size_t num_nonzeros[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(kernel != NULL);
+
+  // Count number of non-zero values.
+  size_t num_nonzeroes = 0;
+  size_t num_nonzero_blocks2 = 0;
+  size_t num_nonzero_blocks4 = 0;
+  for (size_t oc = 0; oc < round_down_po2(group_output_channels, 4); oc += 4) {
+    for (size_t ic = 0; ic < group_input_channels; ic++) {
+      const size_t row0_nonzero = (size_t) (kernel[oc * group_input_channels + ic] != 0);
+      const size_t row1_nonzero = (size_t) (kernel[(oc + 1) * group_input_channels + ic] != 0);
+      const size_t row2_nonzero = (size_t) (kernel[(oc + 2) * group_input_channels + ic] != 0);
+      const size_t row3_nonzero = (size_t) (kernel[(oc + 3) * group_input_channels + ic] != 0);
+      num_nonzeroes += row0_nonzero + row1_nonzero + row2_nonzero + row3_nonzero;
+      num_nonzero_blocks2 += (row0_nonzero | row1_nonzero) + (row2_nonzero | row3_nonzero);
+      num_nonzero_blocks4 += (row0_nonzero | row1_nonzero | row2_nonzero | row3_nonzero);
+    }
+  }
+  const size_t num_block4_nonzeroes = num_nonzeroes;
+  for (size_t oc = round_down_po2(group_output_channels, 4); oc < round_down_po2(group_output_channels, 2); oc += 2) {
+    for (size_t ic = 0; ic < group_input_channels; ic++) {
+      const size_t row0_nonzero = (size_t) (kernel[oc * group_input_channels + ic] != 0);
+      const size_t row1_nonzero = (size_t) (kernel[(oc + 1) * group_input_channels + ic] != 0);
+      num_nonzeroes += row0_nonzero + row1_nonzero;
+      num_nonzero_blocks2 += (row0_nonzero | row1_nonzero);
+    }
+  }
+  const size_t num_block2_nonzeroes = num_nonzeroes;
+  for (size_t oc = round_down_po2(group_output_channels, 2); oc < group_output_channels; oc++) {
+    for (size_t ic = 0; ic < group_input_channels; ic++) {
+      num_nonzeroes += (size_t) (kernel[oc * group_input_channels + ic] != 0);
+    }
+  }
+  num_nonzeros[0] = num_nonzeroes;
+  num_nonzeros[1] = num_nonzero_blocks2;
+  num_nonzeros[2] = num_nonzero_blocks4;
+  num_nonzeros[3] = num_block2_nonzeroes;
+  num_nonzeros[4] = num_block4_nonzeroes;
+}
+
