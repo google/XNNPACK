@@ -294,34 +294,34 @@ SET(JIT_SRCS
   src/jit/assembler.cc)
 
 SET(JIT_AARCH32_SRCS
-  src/f32-gemm/f32-gemm-4x8-aarch32-neon-cortex-a7.cc
-  src/f32-gemm/f32-gemm-4x8-aarch32-neon-cortex-a53.cc
-  src/f32-gemm/f32-gemm-4x8-aarch32-neon-cortex-a55.cc
-  src/f32-gemm/f32-gemm-4x8-aarch32-neon-cortex-a75.cc
-  src/f32-gemm/f32-gemm-4x8-aarch32-neon-ld64.cc
-  src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a7.cc
-  src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a53.cc
-  src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a55.cc
-  src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a75.cc
-  src/f32-igemm/f32-igemm-4x8-aarch32-neon-ld64.cc
-  src/qc8-gemm/qc8-gemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc
-  src/qc8-gemm/qc8-gemm-4x8c4-fp32-aarch32-neondot-ld64.cc
-  src/qc8-igemm/qc8-igemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc
-  src/qc8-igemm/qc8-igemm-4x8c4-fp32-aarch32-neondot-ld64.cc
-  src/qs8-gemm/qs8-gemm-4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc
-  src/qs8-gemm/qs8-gemm-4x8c4-rndnu-aarch32-neondot-ld64.cc
-  src/qs8-igemm/qs8-igemm-4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc
-  src/qs8-igemm/qs8-igemm-4x8c4-rndnu-aarch32-neondot-ld64.cc)
+  src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a7.cc
+  src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a53.cc
+  src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a55.cc
+  src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a75.cc
+  src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-ld64.cc
+  src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a7.cc
+  src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a53.cc
+  src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a55.cc
+  src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a75.cc
+  src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-ld64.cc
+  src/qc8-gemm/gen/qc8-gemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc
+  src/qc8-gemm/gen/qc8-gemm-4x8c4-fp32-aarch32-neondot-ld64.cc
+  src/qc8-igemm/gen/qc8-igemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc
+  src/qc8-igemm/gen/qc8-igemm-4x8c4-fp32-aarch32-neondot-ld64.cc
+  src/qs8-gemm/gen/qs8-gemm-4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc
+  src/qs8-gemm/gen/qs8-gemm-4x8c4-rndnu-aarch32-neondot-ld64.cc
+  src/qs8-igemm/gen/qs8-igemm-4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc
+  src/qs8-igemm/gen/qs8-igemm-4x8c4-rndnu-aarch32-neondot-ld64.cc)
 
 SET(JIT_AARCH64_SRCS
-  src/f32-gemm/f32-gemm-1x8-aarch64-neonfma-cortex-a75.cc
-  src/f32-gemm/f32-gemm-4x8-aarch64-neonfma-cortex-a75.cc
-  src/f32-gemm/f32-gemm-6x8-aarch64-neonfma-cortex-a75.cc
-  src/f32-gemm/f32-gemm-6x8-aarch64-neonfma-ld128.cc
-  src/f32-igemm/f32-igemm-1x8-aarch64-neonfma-cortex-a75.cc
-  src/f32-igemm/f32-igemm-4x8-aarch64-neonfma-cortex-a75.cc
-  src/f32-igemm/f32-igemm-6x8-aarch64-neonfma-cortex-a75.cc
-  src/f32-igemm/f32-igemm-6x8-aarch64-neonfma-ld128.cc)
+  src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-cortex-a75.cc
+  src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a75.cc
+  src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-cortex-a75.cc
+  src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-ld128.cc
+  src/f32-igemm/gen/f32-igemm-1x8-aarch64-neonfma-cortex-a75.cc
+  src/f32-igemm/gen/f32-igemm-4x8-aarch64-neonfma-cortex-a75.cc
+  src/f32-igemm/gen/f32-igemm-6x8-aarch64-neonfma-cortex-a75.cc
+  src/f32-igemm/gen/f32-igemm-6x8-aarch64-neonfma-ld128.cc)
 
 SET(PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS
   src/u8-lut32norm/u8-lut32norm-scalar.c
