@@ -860,6 +860,17 @@ XNN_INTERNAL enum xnn_status xnn_pack_f32_spmm(
   float* nonzero_values,
   size_t* first_input_channel);
 
+XNN_INTERNAL enum xnn_status xnn_pack_f32_to_f16_spmm(
+  size_t group_output_channels,
+  size_t output_channels_block_size,
+  size_t group_input_channels,
+  const float* kernel,
+  const float* bias,
+  int32_t* input_channel_diffs,
+  uint32_t* output_channel_nonzeros,
+  uint16_t* nonzero_values,
+  size_t* first_input_channel);
+
 
 #ifdef __cplusplus
 }  // extern "C"
