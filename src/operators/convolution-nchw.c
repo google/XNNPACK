@@ -708,32 +708,12 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       size_t num_nonzeroes = 0;
       size_t num_nonzero_blocks2 = 0;
       size_t num_nonzero_blocks4 = 0;
-      for (size_t oc = 0; oc < round_down_po2(group_output_channels, 4); oc += 4) {
-        for (size_t ic = 0; ic < group_input_channels; ic++) {
-          const size_t row0_nonzero = (size_t) (kernel[oc * group_input_channels + ic] != 0.0f);
-          const size_t row1_nonzero = (size_t) (kernel[(oc + 1) * group_input_channels + ic] != 0.0f);
-          const size_t row2_nonzero = (size_t) (kernel[(oc + 2) * group_input_channels + ic] != 0.0f);
-          const size_t row3_nonzero = (size_t) (kernel[(oc + 3) * group_input_channels + ic] != 0.0f);
-          num_nonzeroes += row0_nonzero + row1_nonzero + row2_nonzero + row3_nonzero;
-          num_nonzero_blocks2 += (row0_nonzero | row1_nonzero) + (row2_nonzero | row3_nonzero);
-          num_nonzero_blocks4 += (row0_nonzero | row1_nonzero | row2_nonzero | row3_nonzero);
-        }
-      }
-      const size_t num_block4_nonzeroes = num_nonzeroes;
-      for (size_t oc = round_down_po2(group_output_channels, 4); oc < round_down_po2(group_output_channels, 2); oc += 2) {
-        for (size_t ic = 0; ic < group_input_channels; ic++) {
-          const size_t row0_nonzero = (size_t) (kernel[oc * group_input_channels + ic] != 0.0f);
-          const size_t row1_nonzero = (size_t) (kernel[(oc + 1) * group_input_channels + ic] != 0.0f);
-          num_nonzeroes += row0_nonzero + row1_nonzero;
-          num_nonzero_blocks2 += (row0_nonzero | row1_nonzero);
-        }
-      }
-      const size_t num_block2_nonzeroes = num_nonzeroes;
-      for (size_t oc = round_down_po2(group_output_channels, 2); oc < group_output_channels; oc++) {
-        for (size_t ic = 0; ic < group_input_channels; ic++) {
-          num_nonzeroes += (size_t) (kernel[oc * group_input_channels + ic] != 0.0f);
-        }
-      }
+      size_t num_block2_nonzeroes = 0;
+      size_t num_block4_nonzeroes= 0;
+
+      xnn_packsize_f32_spmm(group_output_channels, group_input_channels, kernel,
+        &num_nonzeroes, &num_nonzero_blocks2, &num_nonzero_blocks4,
+        &num_block2_nonzeroes, &num_block4_nonzeroes);
 
       // Select block encoding when 2 or 4 channels have non-zero values.
       size_t output_channels_block_size = 1;
