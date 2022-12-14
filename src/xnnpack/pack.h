@@ -849,6 +849,18 @@ XNN_INTERNAL void xnn_analyze_f16_spmm(
   const uint16_t* kernel,
   size_t num_nonzeros[XNN_MIN_ELEMENTS(1)]);
 
+XNN_INTERNAL enum xnn_status xnn_pack_f32_spmm(
+  size_t group_output_channels,
+  size_t output_channels_block_size,
+  size_t group_input_channels,
+  const float* kernel,
+  const float* bias,
+  int32_t* input_channel_diffs,
+  uint32_t* output_channel_nonzeros,
+  float* nonzero_values,
+  size_t* first_input_channel);
+
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

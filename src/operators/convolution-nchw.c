@@ -765,85 +765,21 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
 
       memset(output_channel_nonzeros, 0, num_output_channel_blocks * sizeof(uint32_t));
 
-      status = xnn_status_unsupported_parameter;
+      size_t first_ic = 0;
+      status = xnn_pack_f32_spmm(
+          group_output_channels,
+          output_channels_block_size,
+          group_input_channels,
+          kernel,
+          bias,
+          input_channel_diffs,
+          output_channel_nonzeros,
+          nonzero_values,
+          &first_ic);
+      if (status != xnn_status_success) {
+        goto error;
+      }
 
-      size_t first_ic = 0, last_ic = 0;
-      bool first_nonzero = true;
-      for (size_t ocb = 0; ocb < round_down_po2(group_output_channels, output_channels_block_size); ocb += output_channels_block_size) {
-        if XNN_LIKELY(bias != NULL) {
-          for (size_t oco = 0; oco < output_channels_block_size; oco++) {
-            *nonzero_values++ = bias[ocb + oco];
-          }
-        } else {
-          for (size_t oco = 0; oco < output_channels_block_size; oco++) {
-            *nonzero_values++ = 0.0f;
-          }
-        }
-        for (size_t ic = 0; ic < group_input_channels; ic++) {
-          bool is_nonzero_block = false;
-          for (size_t oco = 0; oco < output_channels_block_size; oco++) {
-            is_nonzero_block |= (kernel[(ocb + oco) * group_input_channels + ic] != 0.0f);
-          }
-          if (is_nonzero_block) {
-            for (size_t oco = 0; oco < output_channels_block_size; oco++) {
-              *nonzero_values++ = kernel[(ocb + oco) * group_input_channels + ic];
-            }
-            if (first_nonzero) {
-              first_ic = ic;
-            } else {
-              const int64_t diff = (int64_t) ((uint64_t) ic - (uint64_t) last_ic) * (int64_t) sizeof(float);
-              if (diff != (int64_t) (int32_t) diff) {
-                xnn_log_error("failed to convert kernel to sparse representation: "
-                  "scaled difference in input channels exceeds int32_t range");
-                goto error;
-              }
-              *input_channel_diffs++ = (int32_t) diff;
-            }
-            first_nonzero = false;
-            last_ic = ic;
-            *output_channel_nonzeros += 1;
-          }
-        }
-        output_channel_nonzeros += 1;
-      }
-      for (size_t oc = round_down_po2(group_output_channels, output_channels_block_size); oc < group_output_channels; oc++) {
-        if XNN_LIKELY(bias != NULL) {
-          *nonzero_values++ = bias[oc];
-        } else {
-          *nonzero_values++ = 0.0f;
-        }
-        for (size_t ic = 0; ic < group_input_channels; ic++) {
-          const float weight = kernel[oc * group_input_channels + ic];
-          if (weight != 0.0f) {
-            *nonzero_values++ = weight;
-            if (first_nonzero) {
-              first_ic = ic;
-            } else {
-              const int64_t diff = (int64_t) ((uint64_t) ic - (uint64_t) last_ic) * (int64_t) sizeof(float);
-              if (diff != (int64_t) (int32_t) diff) {
-                xnn_log_error("failed to convert kernel to sparse representation: "
-                  "scaled difference in input channels exceeds int32_t range");
-                goto error;
-              }
-              *input_channel_diffs++ = (int32_t) diff;
-            }
-            first_nonzero = false;
-            last_ic = ic;
-            *output_channel_nonzeros += 1;
-          }
-        }
-        output_channel_nonzeros += 1;
-      }
-      // If there are any non-zero elements, we have to return to the initial input channel.
-      if (!first_nonzero) {
-        const int64_t diff = (int64_t) ((uint64_t) first_ic - (uint64_t) last_ic) * (int64_t) sizeof(float);
-        if (diff != (int64_t) (int32_t) diff) {
-          xnn_log_error("failed to convert kernel to sparse representation: "
-            "scaled difference in input channels exceeds int32_t range");
-          goto error;
-        }
-        *input_channel_diffs++ = (int32_t) diff;
-      }
       convolution_op->first_input_channel = first_ic;
 
       convolution_op->ukernel.spmm = (struct xnn_ukernel_spmm) {
