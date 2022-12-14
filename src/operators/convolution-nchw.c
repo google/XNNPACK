@@ -290,60 +290,35 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
 
       memset(output_channel_nonzeros, 0, num_output_channel_blocks * sizeof(uint32_t));
 
-      // Encode fp16 bias and non-zero weights
-      status = xnn_status_unsupported_parameter;
-      size_t first_ic = 0, last_ic = 0;
-      bool first_nonzero = true;
-      for (size_t oc = 0; oc < group_output_channels; oc++) {
-        if XNN_LIKELY(bias != NULL) {
-          if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-            const float* b = (const float*) bias;
-            *nonzero_values++ = fp16_ieee_from_fp32_value(b[oc]);
-          } else {
-            const uint16_t* b = (const uint16_t*) bias;
-            *nonzero_values++ = b[oc];
-          }
-        } else {
-          *nonzero_values++ = 0;
-        }
-        for (size_t ic = 0; ic < group_input_channels; ic++) {
-          uint16_t weight;
-          if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-            const float* k = (const float*) kernel;
-            weight = fp16_ieee_from_fp32_value(k[oc * group_input_channels + ic]);
-          } else {
-            const uint16_t* k = (const uint16_t*) kernel;
-            weight = (k[oc * group_input_channels + ic]);
-          }
-          if (weight != 0) {
-            *nonzero_values++ = weight;
-            if (first_nonzero) {
-              first_ic = ic;
-            } else {
-              const int64_t diff = (int64_t) ((uint64_t) ic - (uint64_t) last_ic) * (int64_t) sizeof(uint16_t);
-              if (diff != (int64_t) (int32_t) diff) {
-                xnn_log_error("failed to convert kernel to sparse representation: "
-                  "scaled difference in input channels exceeds int32_t range");
-                goto error;
-              }
-              *input_channel_diffs++ = (int32_t) diff;
-            }
-            first_nonzero = false;
-            last_ic = ic;
-            *output_channel_nonzeros += 1;
-          }
-        }
-        output_channel_nonzeros += 1;
+      // TODO(fbarchard): Support block encoding
+      const size_t output_channels_block_size = 1;
+
+      size_t first_ic = 0;
+      if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
+        status = xnn_pack_f32_to_f16_spmm(
+            group_output_channels,
+            output_channels_block_size,
+            group_input_channels,
+            kernel,
+            bias,
+            input_channel_diffs,
+            output_channel_nonzeros,
+            nonzero_values,
+            &first_ic);
+      } else {
+        status = xnn_pack_f16_spmm(
+            group_output_channels,
+            output_channels_block_size,
+            group_input_channels,
+            (const uint16_t*) kernel,
+            (const uint16_t*) bias,
+            input_channel_diffs,
+            output_channel_nonzeros,
+            nonzero_values,
+            &first_ic);
       }
-      // If there are any non-zero elements, we have to return to the initial input channel.
-      if (!first_nonzero) {
-        const int64_t diff = (int64_t) ((uint64_t) first_ic - (uint64_t) last_ic) * (int64_t) sizeof(uint16_t);
-        if (diff != (int64_t) (int32_t) diff) {
-          xnn_log_error("failed to convert kernel to sparse representation: "
-            "scaled difference in input channels exceeds int32_t range");
-          goto error;
-        }
-        *input_channel_diffs++ = (int32_t) diff;
+      if (status != xnn_status_success) {
+        goto error;
       }
       convolution_op->first_input_channel = first_ic;
 

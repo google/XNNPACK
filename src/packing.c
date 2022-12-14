@@ -2944,3 +2944,187 @@ enum xnn_status xnn_pack_f32_spmm(
   return xnn_status_success;
 }
 
+
+enum xnn_status xnn_pack_f32_to_f16_spmm(
+  size_t group_output_channels,
+  size_t output_channels_block_size,
+  size_t group_input_channels,
+  const float* kernel,
+  const float* bias,
+  int32_t* input_channel_diffs,
+  uint32_t* output_channel_nonzeros,
+  uint16_t* nonzero_values,  // fp16 values
+  size_t* first_input_channel)
+{
+  size_t first_ic = 0, last_ic = 0;
+  bool first_nonzero = true;
+  for (size_t ocb = 0; ocb < round_down_po2(group_output_channels, output_channels_block_size); ocb += output_channels_block_size) {
+    if XNN_LIKELY(bias != NULL) {
+      for (size_t oco = 0; oco < output_channels_block_size; oco++) {
+        *nonzero_values++ = fp16_ieee_from_fp32_value(bias[ocb + oco]);
+      }
+    } else {
+      for (size_t oco = 0; oco < output_channels_block_size; oco++) {
+        *nonzero_values++ = 0;
+      }
+    }
+    for (size_t ic = 0; ic < group_input_channels; ic++) {
+      bool is_nonzero_block = false;
+      for (size_t oco = 0; oco < output_channels_block_size; oco++) {
+        is_nonzero_block |= (kernel[(ocb + oco) * group_input_channels + ic] != 0.0f);
+      }
+      if (is_nonzero_block) {
+        for (size_t oco = 0; oco < output_channels_block_size; oco++) {
+          *nonzero_values++ = fp16_ieee_from_fp32_value(kernel[(ocb + oco) * group_input_channels + ic]);
+        }
+        if (first_nonzero) {
+          first_ic = ic;
+        } else {
+          const int64_t diff = (int64_t) ((uint64_t) ic - (uint64_t) last_ic) * (int64_t) sizeof(uint16_t);
+          if (diff != (int64_t) (int32_t) diff) {
+            xnn_log_error("failed to convert kernel to sparse representation: "
+              "scaled difference in input channels exceeds int32_t range");
+            return xnn_status_unsupported_parameter;
+          }
+          *input_channel_diffs++ = (int32_t) diff;
+        }
+        first_nonzero = false;
+        last_ic = ic;
+        *output_channel_nonzeros += 1;
+      }
+    }
+    output_channel_nonzeros += 1;
+  }
+  for (size_t oc = round_down_po2(group_output_channels, output_channels_block_size); oc < group_output_channels; oc++) {
+    if XNN_LIKELY(bias != NULL) {
+      *nonzero_values++ = fp16_ieee_from_fp32_value(bias[oc]);
+    } else {
+      *nonzero_values++ = 0;
+    }
+    for (size_t ic = 0; ic < group_input_channels; ic++) {
+      const float weight = kernel[oc * group_input_channels + ic];
+      if (weight != 0.0f) {
+        *nonzero_values++ = fp16_ieee_from_fp32_value(weight);
+        if (first_nonzero) {
+          first_ic = ic;
+        } else {
+          const int64_t diff = (int64_t) ((uint64_t) ic - (uint64_t) last_ic) * (int64_t) sizeof(uint16_t);
+          if (diff != (int64_t) (int32_t) diff) {
+            xnn_log_error("failed to convert kernel to sparse representation: "
+              "scaled difference in input channels exceeds int32_t range");
+            return xnn_status_unsupported_parameter;
+          }
+          *input_channel_diffs++ = (int32_t) diff;
+        }
+        first_nonzero = false;
+        last_ic = ic;
+        *output_channel_nonzeros += 1;
+      }
+    }
+    output_channel_nonzeros += 1;
+  }
+  // If there are any non-zero elements, we have to return to the initial input channel.
+  if (!first_nonzero) {
+    const int64_t diff = (int64_t) ((uint64_t) first_ic - (uint64_t) last_ic) * (int64_t) sizeof(uint16_t);
+    if (diff != (int64_t) (int32_t) diff) {
+      xnn_log_error("failed to convert kernel to sparse representation: "
+        "scaled difference in input channels exceeds int32_t range");
+            return xnn_status_unsupported_parameter;
+    }
+    *input_channel_diffs++ = (int32_t) diff;
+  }
+  *first_input_channel = first_ic;
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_pack_f16_spmm(
+  size_t group_output_channels,
+  size_t output_channels_block_size,
+  size_t group_input_channels,
+  const uint16_t* kernel,  // fp16 values
+  const uint16_t* bias,  // fp16 values
+  int32_t* input_channel_diffs,
+  uint32_t* output_channel_nonzeros,
+  uint16_t* nonzero_values,  // fp16 values
+  size_t* first_input_channel)
+{
+  size_t first_ic = 0, last_ic = 0;
+  bool first_nonzero = true;
+  for (size_t ocb = 0; ocb < round_down_po2(group_output_channels, output_channels_block_size); ocb += output_channels_block_size) {
+    if XNN_LIKELY(bias != NULL) {
+      for (size_t oco = 0; oco < output_channels_block_size; oco++) {
+        *nonzero_values++ = bias[ocb + oco];
+      }
+    } else {
+      for (size_t oco = 0; oco < output_channels_block_size; oco++) {
+        *nonzero_values++ = 0;
+      }
+    }
+    for (size_t ic = 0; ic < group_input_channels; ic++) {
+      bool is_nonzero_block = false;
+      for (size_t oco = 0; oco < output_channels_block_size; oco++) {
+        is_nonzero_block |= (kernel[(ocb + oco) * group_input_channels + ic] != 0);
+      }
+      if (is_nonzero_block) {
+        for (size_t oco = 0; oco < output_channels_block_size; oco++) {
+          *nonzero_values++ = kernel[(ocb + oco) * group_input_channels + ic];
+        }
+        if (first_nonzero) {
+          first_ic = ic;
+        } else {
+          const int64_t diff = (int64_t) ((uint64_t) ic - (uint64_t) last_ic) * (int64_t) sizeof(uint16_t);
+          if (diff != (int64_t) (int32_t) diff) {
+            xnn_log_error("failed to convert kernel to sparse representation: "
+              "scaled difference in input channels exceeds int32_t range");
+            return xnn_status_unsupported_parameter;
+          }
+          *input_channel_diffs++ = (int32_t) diff;
+        }
+        first_nonzero = false;
+        last_ic = ic;
+        *output_channel_nonzeros += 1;
+      }
+    }
+    output_channel_nonzeros += 1;
+  }
+  for (size_t oc = round_down_po2(group_output_channels, output_channels_block_size); oc < group_output_channels; oc++) {
+    if XNN_LIKELY(bias != NULL) {
+      *nonzero_values++ = bias[oc];
+    } else {
+      *nonzero_values++ = 0;
+    }
+    for (size_t ic = 0; ic < group_input_channels; ic++) {
+      const float weight = kernel[oc * group_input_channels + ic];
+      if (weight != 0) {
+        *nonzero_values++ = weight;
+        if (first_nonzero) {
+          first_ic = ic;
+        } else {
+          const int64_t diff = (int64_t) ((uint64_t) ic - (uint64_t) last_ic) * (int64_t) sizeof(uint16_t);
+          if (diff != (int64_t) (int32_t) diff) {
+            xnn_log_error("failed to convert kernel to sparse representation: "
+              "scaled difference in input channels exceeds int32_t range");
+            return xnn_status_unsupported_parameter;
+          }
+          *input_channel_diffs++ = (int32_t) diff;
+        }
+        first_nonzero = false;
+        last_ic = ic;
+        *output_channel_nonzeros += 1;
+      }
+    }
+    output_channel_nonzeros += 1;
+  }
+  // If there are any non-zero elements, we have to return to the initial input channel.
+  if (!first_nonzero) {
+    const int64_t diff = (int64_t) ((uint64_t) first_ic - (uint64_t) last_ic) * (int64_t) sizeof(uint16_t);
+    if (diff != (int64_t) (int32_t) diff) {
+      xnn_log_error("failed to convert kernel to sparse representation: "
+        "scaled difference in input channels exceeds int32_t range");
+            return xnn_status_unsupported_parameter;
+    }
+    *input_channel_diffs++ = (int32_t) diff;
+  }
+  *first_input_channel = first_ic;
+  return xnn_status_success;
+}
