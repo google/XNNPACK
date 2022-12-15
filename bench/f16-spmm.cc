@@ -123,11 +123,11 @@ static void f16_spmm(benchmark::State& state,
   w.resize(w.size() + 1);
   dmap.resize(dmap.size() + 1);
 
-  std::vector<float, AlignedAllocator<float, 64>> a(kc * mc);
-  std::vector<float, AlignedAllocator<float, 64>> c(num_buffers * c_elements);
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> a(kc * mc + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> c(num_buffers * c_elements);
 
-  std::generate(a.begin(), a.end(), std::ref(f32rng));
-  std::fill(c.begin(), c.end(), nanf(""));
+  std::generate(a.begin(), a.end(), std::ref(f16rng));
+  std::fill(c.begin(), c.end(), UINT16_C(0x7E00) /* NaN */);
 
   xnn_f16_minmax_params params;
   init_params(&params, 0xFC00 /* -inf */, 0x7C00 /* inf */);

@@ -122,7 +122,7 @@ static void f32_spmm(benchmark::State& state,
   w.resize(w.size() + 1);
   dmap.resize(dmap.size() + 1);
 
-  std::vector<float, AlignedAllocator<float, 64>> a(kc * mc);
+  std::vector<float, AlignedAllocator<float, 64>> a(kc * mc + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float, AlignedAllocator<float, 64>> c(num_buffers * c_elements);
 
   std::generate(a.begin(), a.end(), std::ref(f32rng));
