@@ -272,7 +272,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
         (num_output_channel_blocks * sizeof(uint32_t) +
         group_output_channels + num_nonzero_values) * sizeof(uint16_t) + XNN_EXTRA_BYTES;
 
-      convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size * 2 + 1024);
+      convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
       if (convolution_op->packed_weights.pointer == NULL) {
         xnn_log_error(
           "failed to allocate %zu bytes for %s operator packed weights",
