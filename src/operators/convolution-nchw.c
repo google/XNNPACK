@@ -279,6 +279,9 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
           packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f16));
         goto error;
       }
+      xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+        packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f16));
+
       convolution_op->num_nonzero_values = num_nonzero_values;
       convolution_op->num_nonzero_blocks = num_nonzero_blocks;
       convolution_op->num_output_channel_blocks = num_output_channel_blocks;
@@ -347,6 +350,9 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
                       xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f16));
         goto error;
       }
+      xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+        aligned_total_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f16));
+
       xnn_pack_dconv_oki_w_fn xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_fn) xnn_pack_f16_dconv_oki_w;
       if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
         xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_fn) xnn_pack_f32_to_f16_dconv_oki_w;
@@ -389,6 +395,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
                       xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f16));
         goto error;
       }
+      xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+        aligned_total_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f16));
 
       xnn_pack_chw_dwconv_hwg_w_fn pack_chw_dwconv_hwg_w = (xnn_pack_chw_dwconv_hwg_w_fn) xnn_pack_f16_chw_dwconv_hwg_w;
       xnn_pack_chw_dwconv_ghw_w_fn pack_chw_dwconv_ghw_w = (xnn_pack_chw_dwconv_ghw_w_fn) xnn_pack_f16_chw_dwconv_ghw_w;
@@ -729,6 +737,9 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
           packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
         goto error;
       }
+      xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+        packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
+
       convolution_op->num_nonzero_values = num_nonzero_values;
       convolution_op->num_nonzero_blocks = num_nonzero_blocks;
       convolution_op->num_output_channel_blocks = num_output_channel_blocks;
@@ -782,6 +793,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
                       xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
         goto error;
       }
+      xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+        aligned_total_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
 
       xnn_pack_f32_dconv_oki_w(
         group_output_channels,
@@ -820,6 +833,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
                       xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
         goto error;
       }
+      xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+        aligned_total_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
 
       if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
         xnn_pack_f32_chw_dwconv_hwg_w(

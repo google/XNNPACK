@@ -200,6 +200,8 @@ static enum xnn_status create_deconvolution2d_nhwc(
       aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+    aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
 
   switch (ukernel_type) {
     case xnn_microkernel_type_igemm:

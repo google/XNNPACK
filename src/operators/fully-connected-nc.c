@@ -130,6 +130,8 @@ static enum xnn_status create_fully_connected_nc(
       packed_weights_size, xnn_operator_type_to_string(operator_type));
     goto error;
   }
+  xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+    aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
 
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     pack_gemm_io_w(

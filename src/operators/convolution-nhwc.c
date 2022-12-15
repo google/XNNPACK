@@ -411,6 +411,8 @@ static enum xnn_status create_convolution2d_nhwc(
                       aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
         goto error;
       }
+      xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+        aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
 
       pack_vmulcaddc_w(
         groups, vmulcaddc_parameters->channel_tile,
@@ -445,6 +447,9 @@ static enum xnn_status create_convolution2d_nhwc(
                       aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
         goto error;
       }
+      xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+        aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
+
       memcpy(&convolution_op->params, dwconv_params, dwconv_params_size);
 
       if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
@@ -512,6 +517,9 @@ static enum xnn_status create_convolution2d_nhwc(
                       aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
         goto error;
       }
+      xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+        aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
+
       memcpy(&convolution_op->params, gemm_params, gemm_params_size);
       convolution_op->num_post_operation_params = num_post_operations;
       convolution_op->post_operation_params = post_operation_params;
