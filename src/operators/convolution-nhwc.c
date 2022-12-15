@@ -1605,6 +1605,8 @@ static enum xnn_status setup_convolution2d_nhwc(
         convolution_op->last_input = input;
         convolution_op->last_input_height = input_height;
         convolution_op->last_input_width = input_width;
+        xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
+          indirection_buffer_size, xnn_operator_type_to_string(convolution_op->type));
 
         xnn_indirection_init_conv2d(convolution_op, mr, log2_input_element_size);
       }
@@ -1755,6 +1757,8 @@ static enum xnn_status setup_convolution2d_nhwc(
           return xnn_status_out_of_memory;
         }
         convolution_op->indirection_buffer = indirection_buffer;
+        xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
+          indirection_buffer_size, xnn_operator_type_to_string(convolution_op->type));
 
         #if XNN_TEST_MODE
           memset(convolution_op->indirection_buffer, 0, indirection_buffer_size);

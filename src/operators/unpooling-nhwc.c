@@ -194,6 +194,8 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
     return xnn_status_out_of_memory;
   }
   unpooling_op->indirection_buffer = indirection_buffer;
+  xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
+    indirection_buffer_size, xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
 
   xnn_indirection_init_unpool2d(unpooling_op, valid_batch_size, 2 /* log2(sizeof(type32)) */);
 

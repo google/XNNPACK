@@ -242,6 +242,8 @@ static enum xnn_status setup_resize_bilinear2d_nhwc(
       return xnn_status_out_of_memory;
     }
     resize_op->indirection_buffer = indirection_buffer;
+    xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
+      indirection_buffer_size, xnn_operator_type_to_string(resize_op->type));
 
     // Note: packed weights must be SIMD-aligned, so we can't use xnn_reallocate_memory
     xnn_release_simd_memory(resize_op->packed_weights.pointer);

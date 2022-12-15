@@ -740,6 +740,8 @@ static enum xnn_status setup_average_pooling2d(
         return xnn_status_out_of_memory;
       }
       average_pooling_op->indirection_buffer = indirection_buffer;
+      xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
+        indirection_buffer_size, xnn_operator_type_to_string(average_pooling_op->type));
 
       xnn_indirection_init_dwconv2d(average_pooling_op, step_height, step_width, primary_tile, log2_data_element_size);
 
@@ -766,6 +768,8 @@ static enum xnn_status setup_average_pooling2d(
           return xnn_status_out_of_memory;
         }
         average_pooling_op->pixelwise_buffer = pixelwise_buffer;
+        xnn_log_debug("allocated %zu bytes for pixelwise buffer in %s operator",
+          pixelwise_buffer_size, xnn_operator_type_to_string(average_pooling_op->type));
 
         indirection_init_pavgpool2d(
           input_height, input_width,

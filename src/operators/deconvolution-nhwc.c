@@ -713,6 +713,8 @@ static enum xnn_status setup_conv_path(
     deconvolution_op->last_input = input;
     deconvolution_op->last_input_height = input_height;
     deconvolution_op->last_input_width = input_width;
+    xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
+      indirection_buffer_size, xnn_operator_type_to_string(deconvolution_op->type));
 
     xnn_indirection_init_deconv2d(deconvolution_op, mr, log2_input_element_size);
   }
@@ -937,6 +939,8 @@ static enum xnn_status setup_subconv2d_path(
       }
       deconvolution_op->indirection_buffer = indirection_buffer;
       deconvolution_op->last_input = input;
+      xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
+        indirection_buffer_size, xnn_operator_type_to_string(deconvolution_op->type));
 
       xnn_indirection_init_subconv2d(deconvolution_op, mr, log2_input_element_size);
     }

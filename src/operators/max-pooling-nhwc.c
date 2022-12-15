@@ -289,10 +289,13 @@ static enum xnn_status setup_max_pooling2d_nhwc(
     const void** indirection_buffer =
       (const void**) xnn_reallocate_memory(max_pooling_op->indirection_buffer, indirection_buffer_size);
     if (indirection_buffer == NULL) {
-      xnn_log_error("failed to allocate %zu bytes for indirection buffer", indirection_buffer_size);
+      xnn_log_error("failed to allocate %zu bytes for %s operator indirection buffer",
+        indirection_buffer_size, xnn_operator_type_to_string(max_pooling_op->type));
       return xnn_status_out_of_memory;
     }
     max_pooling_op->indirection_buffer = indirection_buffer;
+    xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
+      indirection_buffer_size, xnn_operator_type_to_string(max_pooling_op->type));
 
     xnn_indirection_init_maxpool2d(max_pooling_op, step_height, step_width, log2_input_element_size);
 
