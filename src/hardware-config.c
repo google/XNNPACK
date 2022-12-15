@@ -6,7 +6,9 @@
 #include <stdbool.h>
 #include <math.h>  // For INFINITY
 
-#ifdef _WIN32
+#include <xnnpack/common.h>
+
+#if XNN_PLATFORM_WINDOWS
   #include <windows.h>
 
   #ifndef PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE
@@ -16,15 +18,20 @@
   #include <pthread.h>
 #endif
 
-#ifndef __EMSCRIPTEN__
+#if !XNN_PLATFORM_WEB
   #include <cpuinfo.h>
 #endif
 
-#ifdef __wasm_relaxed_simd__
+#if XNN_ARCH_RISCV
+  #include <sys/auxv.h>
+
+  #define COMPAT_HWCAP_ISA_V (1 << ('V' - 'A'))
+#endif
+
+#if XNN_ARCH_WASMRELAXEDSIMD
   #include <wasm_simd128.h>
 #endif
 
-#include <xnnpack/common.h>
 #include <xnnpack/config.h>
 #include <xnnpack/log.h>
 
@@ -87,6 +94,10 @@ static void init_hardware_config(void) {
       cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl();
     hardware_config.use_x86_avx512vbmi = hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avx512vbmi();
   #endif  // !XNN_ARCH_X86 && !XNN_ARCH_X86_64
+
+  #if XNN_ARCH_RISCV
+    hardware_config.use_rvv = (getauxval(AT_HWCAP) & COMPAT_HWCAP_ISA_V) != 0;
+  #endif
 
   #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     // Unlike most other architectures, on x86/x86-64 when floating-point instructions

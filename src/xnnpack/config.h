@@ -45,6 +45,9 @@ struct xnn_hardware_config {
   bool use_x86_avx512vbmi;
   bool use_x86_avx512skx;
 #endif
+#if XNN_ARCH_RISCV
+  bool use_rvv;
+#endif
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   bool is_x86;
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
