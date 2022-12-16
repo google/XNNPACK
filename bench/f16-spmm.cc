@@ -79,7 +79,7 @@ static void f16_spmm(benchmark::State& state,
       for (uint32_t n = 0; n < nr; n++)
         w.push_back(bias[nr * i + n]);
       for (uint32_t j = 0; j < kc; j++) {
-        if ((b[i * kc + j] & 0x7FFF) != 0) {
+        if (b[i * kc + j] != 0) {
           for (size_t l = 0; l < nr; l++)
             w.push_back(fp16_ieee_from_fp32_value(fp16_ieee_to_fp32_value(b[i * kc + j]) + static_cast<float>(i)));
           if (is_first_nonzero) {
@@ -97,7 +97,7 @@ static void f16_spmm(benchmark::State& state,
     for (uint32_t i = nc / nr; i < ncols; i++) {
       w.push_back(bias[i]);
       for (uint32_t j = 0; j < kc; j++) {
-        if ((b[i * kc + j] & 0x7FFF) != 0) {
+        if (b[i * kc + j] != 0) {
           w.push_back(b[i * kc + j]);
           if (is_first_nonzero) {
             first_j = j;
@@ -123,7 +123,7 @@ static void f16_spmm(benchmark::State& state,
   w.resize(w.size() + 1);
   dmap.resize(dmap.size() + 1);
 
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> a(kc * mc + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> a(kc * mc);
   std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> c(num_buffers * c_elements);
 
   std::generate(a.begin(), a.end(), std::ref(f16rng));
@@ -215,17 +215,17 @@ static void f16_spmm(benchmark::State& state,
       xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
   }
 
-  BENCHMARK_SPMM(spmm80_8x1__neonfp16arith)
   BENCHMARK_SPMM(spmm80_8x1__neonfp16arith_pipelined)
-  BENCHMARK_SPMM(spmm80_8x1__neonfp16arith_x2)
-  BENCHMARK_SPMM(spmm80_16x1__neonfp16arith)
   BENCHMARK_SPMM(spmm80_16x1__neonfp16arith_pipelined)
-  BENCHMARK_SPMM(spmm80_16x1__neonfp16arith_x2)
-  BENCHMARK_SPMM(spmm80_24x1__neonfp16arith)
   BENCHMARK_SPMM(spmm80_24x1__neonfp16arith_pipelined)
-  BENCHMARK_SPMM(spmm80_24x1__neonfp16arith_x2)
-  BENCHMARK_SPMM(spmm80_32x1__neonfp16arith)
   BENCHMARK_SPMM(spmm80_32x1__neonfp16arith_pipelined)
+  BENCHMARK_SPMM(spmm80_8x1__neonfp16arith)
+  BENCHMARK_SPMM(spmm80_16x1__neonfp16arith)
+  BENCHMARK_SPMM(spmm80_24x1__neonfp16arith)
+  BENCHMARK_SPMM(spmm80_32x1__neonfp16arith)
+  BENCHMARK_SPMM(spmm80_8x1__neonfp16arith_x2)
+  BENCHMARK_SPMM(spmm80_16x1__neonfp16arith_x2)
+  BENCHMARK_SPMM(spmm80_24x1__neonfp16arith_x2)
   BENCHMARK_SPMM(spmm80_32x1__neonfp16arith_x2)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
