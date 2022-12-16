@@ -2359,6 +2359,31 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "armsimd32_amalgam_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv6",
+        "-mfpu=vfp",
+        "-munaligned-access",
+    ],
+    aarch32_srcs = ["src/amalgam/armsimd32.c"],
+    gcc_copts = xnnpack_gcc_std_copts() + [
+        "-fno-fast-math",
+        "-fno-math-errno",
+    ],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":prefetch",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
     name = "armsimd32_bench_microkernels",
     aarch32_copts = [
         "-marm",
@@ -2397,10 +2422,6 @@ xnnpack_cc_library(
         "-fno-math-errno",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
-    riscv_srcs = PROD_SCALAR_RISCV_MICROKERNEL_SRCS,
-    wasm_srcs = PROD_SCALAR_WASM_MICROKERNEL_SRCS,
-    wasmrelaxedsimd_srcs = PROD_SCALAR_WASM_MICROKERNEL_SRCS,
-    wasmsimd_srcs = PROD_SCALAR_WASM_MICROKERNEL_SRCS,
     deps = [
         ":common",
         ":math",
@@ -2429,6 +2450,32 @@ xnnpack_cc_library(
         "-fno-fast-math",
         "-fno-math-errno",
     ],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":prefetch",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "fp16arith_amalgam_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+fp16",
+        # GCC emits wrong directives for assembler with -mfpu=fp-armv8
+        "-mfpu=neon-fp-armv8",
+        # For vsqrth_f16 polyfill using sqrtf
+        "-fno-math-errno",
+        # For vminh_f16/vmaxh_f16 polyfills using compare + select
+        "-ffinite-math-only",
+    ],
+    aarch32_srcs = ["src/amalgam/fp16arith.c"],
+    gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
@@ -2482,8 +2529,6 @@ xnnpack_cc_library(
         "-ffinite-math-only",
     ],
     aarch32_srcs = PROD_FP16ARITH_MICROKERNEL_SRCS,
-    aarch64_copts = ["-march=armv8.2-a+fp16"],
-    aarch64_srcs = PROD_FP16ARITH_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -2515,6 +2560,31 @@ xnnpack_cc_library(
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":prefetch",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "neon_amalgam_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv7-a",
+        "-mfpu=neon",
+    ],
+    aarch32_srcs = ["src/amalgam/neon.c"],
+    aarch64_srcs = [
+        "src/amalgam/neon.c",
+        "src/amalgam/neon-aarch64.c",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -2600,6 +2670,28 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "neonfp16_amalgam_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv7-a",
+        "-mfpu=neon-fp16",
+    ],
+    aarch32_srcs = ["src/amalgam/neonfp16.c"],
+    aarch64_srcs = ["src/amalgam/neonfp16.c"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":prefetch",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
     name = "neonfp16_bench_microkernels",
     aarch32_copts = [
         "-marm",
@@ -2656,6 +2748,28 @@ xnnpack_cc_library(
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
     ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":prefetch",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "neonfma_amalgam_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv7-a",
+        "-mfpu=neon-vfpv4",
+    ],
+    aarch32_srcs = ["src/amalgam/neonfma.c"],
+    aarch64_srcs = ["src/amalgam/neonfma.c"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -2740,6 +2854,28 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "neonv8_amalgam_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8-a",
+        "-mfpu=neon-fp-armv8",
+    ],
+    aarch32_srcs = ["src/amalgam/neonv8.c"],
+    aarch64_srcs = ["src/amalgam/neonv8.c"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":prefetch",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
     name = "neonv8_bench_microkernels",
     aarch32_copts = [
         "-marm",
@@ -2795,6 +2931,32 @@ xnnpack_cc_library(
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":prefetch",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "neonfp16arith_amalgam_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+fp16",
+        "-mfpu=neon-fp-armv8",
+    ],
+    aarch32_srcs = ["src/amalgam/neonfp16arith.c"],
+    aarch64_copts = ["-march=armv8.2-a+fp16"],
+    aarch64_srcs = [
+        "src/amalgam/neonfp16arith.c",
+        "src/amalgam/neonfp16arith-aarch64.c",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -2931,6 +3093,29 @@ xnnpack_cc_library(
         ":math",
         ":microkernels_h",
         ":params",
+        ":prefetch",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "neondot_amalgam_microkernels",
+    aarch32_copts = [
+        "-marm",
+        "-march=armv8.2-a+dotprod",
+        "-mfpu=neon-fp-armv8",
+    ],
+    aarch32_srcs = ["src/amalgam/neondot.c"],
+    aarch64_copts = ["-march=armv8.2-a+dotprod"],
+    aarch64_srcs = ["src/amalgam/neondot.c"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
         ":prefetch",
         ":tables",
         ":unaligned",
@@ -4035,18 +4220,18 @@ xnnpack_cc_library(
 xnnpack_aggregate_library(
     name = "amalgam_microkernels",
     aarch32_deps = [
-        ":armsimd32_prod_microkernels",
-        ":neon_prod_microkernels",
-        ":neonfp16_prod_microkernels",
-        ":neonfma_prod_microkernels",
-        ":neonv8_prod_microkernels",
+        ":armsimd32_amalgam_microkernels",
+        ":neon_amalgam_microkernels",
+        ":neonfp16_amalgam_microkernels",
+        ":neonfma_amalgam_microkernels",
+        ":neonv8_amalgam_microkernels",
         ":asm_microkernels",
     ],
     aarch64_deps = [
-        ":neon_prod_microkernels",
-        ":neonfp16_prod_microkernels",
-        ":neonfma_prod_microkernels",
-        ":neonv8_prod_microkernels",
+        ":neon_amalgam_microkernels",
+        ":neonfp16_amalgam_microkernels",
+        ":neonfma_amalgam_microkernels",
+        ":neonv8_amalgam_microkernels",
         ":asm_microkernels",
     ],
     defines = select({
@@ -4065,16 +4250,16 @@ xnnpack_aggregate_library(
     generic_deps = [
         ":scalar_prod_microkernels",
     ] + select({
-        ":arm_fp16_scalar_enabled": [":fp16arith_prod_microkernels"],
+        ":arm_fp16_scalar_enabled": [":fp16arith_amalgam_microkernels"],
         "//conditions:default": [],
     }) + select({
-        ":arm_fp16_vector_enabled": [":neonfp16arith_prod_microkernels"],
+        ":arm_fp16_vector_enabled": [":neonfp16arith_amalgam_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":arm_bf16_enabled": [":neonbf16_prod_microkernels"],
         "//conditions:default": [],
     }) + select({
-        ":arm_dotprod_enabled": [":neondot_prod_microkernels"],
+        ":arm_dotprod_enabled": [":neondot_amalgam_microkernels"],
         "//conditions:default": [],
     }),
     wasm_deps = [
