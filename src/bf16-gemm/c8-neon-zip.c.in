@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert NR % 4 == 0
-$assert EXTOPT in ["SHLAND", "ZIP", "MOVL"]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <assert.h>
@@ -14,7 +13,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/gemm.h>
 
 
-void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c8__${"aarch64_neonfma" if EXTOPT == "ZIP" else "neonfma"}_${EXTOPT.lower()}(
+void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c8__neonfma_zip(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -57,10 +56,7 @@ void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c8__${"aarch64_neonfma" if EXTOPT =
       }
 
   const uint16_t* w = (const uint16_t*) w_ptr;
-  $if EXTOPT == "SHLAND":
-    const uint16x8_t vmask = vreinterpretq_u16_u32(vmovq_n_u32(UINT32_C(0xFFFF0000)));
-  $elif EXTOPT == "ZIP":
-    const uint16x8_t vzero = vmovq_n_u16(0);
+  const uint16x8_t vzero = vmovq_n_u16(0);
   do {
     $for N in range(NR):
       float32x4_t vacc0x${ABC[N]} = vreinterpretq_f32_u32(vshll_n_u16(vld1_lane_u16(w, vdup_n_u16(0), 0), 16)); w += 1;
@@ -71,90 +67,53 @@ void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c8__${"aarch64_neonfma" if EXTOPT =
     size_t k = kc;
     for (; k >= 8 * sizeof(uint16_t); k -= 8 * sizeof(uint16_t)) {
       $for M in range(MR):
-        const uint16x8_t va${M} = vld1q_u16(a${M}); a${M} += 8;
+        const uint16x8_t va${M}h = vld1q_u16(a${M}); a${M} += 8;
 
       $for N in range(NR):
-        const uint16x8_t vb${ABC[N]} = vld1q_u16(w); w += 8;
+        const uint16x8_t vb${ABC[N]}h = vld1q_u16(w); w += 8;
 
       $for M in range(MR):
-        $if EXTOPT == "SHLAND":
-          const float32x4_t va${M}e = vreinterpretq_f32_u32(vshlq_n_u32(vreinterpretq_u32_u16(va${M}), 16));
-        $elif EXTOPT == "ZIP":
-          const float32x4_t va${M}e = vreinterpretq_f32_u16(vzip1q_u16(vzero, va${M}));
+        const uint16x8x2_t va${M}f = vzipq_u16(vzero, va${M}h);
 
       $for N in range(NR):
-        $if EXTOPT == "SHLAND":
-          const float32x4_t vb${ABC[N]}e = vreinterpretq_f32_u32(vshlq_n_u32(vreinterpretq_u32_u16(vb${ABC[N]}), 16));
-        $elif EXTOPT == "ZIP":
-          const float32x4_t vb${ABC[N]}e = vreinterpretq_f32_u16(vzip1q_u16(vzero, vb${ABC[N]}));
+        const uint16x8x2_t vb${ABC[N]}f = vzipq_u16(vzero, vb${ABC[N]}h);
 
       $for N in range(NR):
         $for M in range(MR):
-          vacc${M}x${ABC[N]} = vfmaq_f32(vacc${M}x${ABC[N]}, va${M}e, vb${ABC[N]}e);
-
-      $for M in range(MR):
-        $if EXTOPT == "SHLAND":
-          const float32x4_t va${M}o = vreinterpretq_f32_u16(vandq_u16(va${M}, vmask));
-        $elif EXTOPT == "ZIP":
-          const float32x4_t va${M}o = vreinterpretq_f32_u16(vzip2q_u16(vzero, va${M}));
-
-      $for N in range(NR):
-        $if EXTOPT == "SHLAND":
-          const float32x4_t vb${ABC[N]}o = vreinterpretq_f32_u16(vandq_u16(vb${ABC[N]}, vmask));
-        $elif EXTOPT == "ZIP":
-          const float32x4_t vb${ABC[N]}o = vreinterpretq_f32_u16(vzip2q_u16(vzero, vb${ABC[N]}));
+          vacc${M}x${ABC[N]} = vfmaq_f32(vacc${M}x${ABC[N]}, vreinterpretq_f32_u16(va${M}f.val[0]), vreinterpretq_f32_u16(vb${ABC[N]}f.val[0]));
 
       $for N in range(NR):
         $for M in range(MR):
-          vacc${M}x${ABC[N]} = vfmaq_f32(vacc${M}x${ABC[N]}, va${M}o, vb${ABC[N]}o);
+          vacc${M}x${ABC[N]} = vfmaq_f32(vacc${M}x${ABC[N]}, vreinterpretq_f32_u16(va${M}f.val[1]), vreinterpretq_f32_u16(vb${ABC[N]}f.val[1]));
     }
     if XNN_UNLIKELY(k != 0) {
       $for M in range(MR):
-        const uint16x8_t va${M} = vld1q_u16(a${M}); a${M} = (const uint16_t*) ((uintptr_t) a${M} + k);
+        const uint16x8_t va${M}h = vld1q_u16(a${M}); a${M} = (const uint16_t*) ((uintptr_t) a${M} + k);
 
       $for N in range(NR):
-        const uint16x8_t vb${ABC[N]} = vld1q_u16(w); w += 8;
+        const uint16x8_t vb${ABC[N]}h = vld1q_u16(w); w += 8;
 
       $for N in range(NR):
-        const uint16x8_t vm${ABC[N]} = vceqq_u16(vb${ABC[N]}, vmovq_n_u16(0));
+        const uint16x8_t vm${ABC[N]}h = vceqq_u16(vb${ABC[N]}h, vmovq_n_u16(0));
 
       $for N in range(NR):
-        $if EXTOPT == "SHLAND":
-          const float32x4_t vb${ABC[N]}e = vreinterpretq_f32_u32(vshlq_n_u32(vreinterpretq_u32_u16(vb${ABC[N]}), 16));
-        $elif EXTOPT == "ZIP":
-          const float32x4_t vb${ABC[N]}e = vreinterpretq_f32_u16(vzip1q_u16(vzero, vb${ABC[N]}));
+        const uint16x8x2_t vb${ABC[N]}f = vzipq_u16(vzero, vb${ABC[N]}h);
 
       $for N in range(NR):
         $for M in range(MR):
-          const uint16x8_t va${M}x${ABC[N]} = vbicq_u16(va${M}, vm${ABC[N]});
+          const uint16x8_t va${M}x${ABC[N]}h = vbicq_u16(va${M}h, vm${ABC[N]}h);
 
       $for N in range(NR):
         $for M in range(MR):
-          $if EXTOPT == "SHLAND":
-            const float32x4_t va${M}x${ABC[N]}e = vreinterpretq_f32_u32(vshlq_n_u32(vreinterpretq_u32_u16(va${M}x${ABC[N]}), 16));
-          $elif EXTOPT == "ZIP":
-            const float32x4_t va${M}x${ABC[N]}e = vreinterpretq_f32_u16(vzip1q_u16(vzero, va${M}x${ABC[N]}));
+          const uint16x8x2_t va${M}x${ABC[N]}f = vzipq_u16(vzero, va${M}x${ABC[N]}h);
 
       $for N in range(NR):
         $for M in range(MR):
-          vacc${M}x${ABC[N]} = vfmaq_f32(vacc${M}x${ABC[N]}, va${M}x${ABC[N]}e, vb${ABC[N]}e);
-
-      $for N in range(NR):
-        $if EXTOPT == "SHLAND":
-          const float32x4_t vb${ABC[N]}o = vreinterpretq_f32_u16(vandq_u16(vb${ABC[N]}, vmask));
-        $elif EXTOPT == "ZIP":
-          const float32x4_t vb${ABC[N]}o = vreinterpretq_f32_u16(vzip2q_u16(vzero, vb${ABC[N]}));
+          vacc${M}x${ABC[N]} = vfmaq_f32(vacc${M}x${ABC[N]}, vreinterpretq_f32_u16(va${M}x${ABC[N]}f.val[0]), vreinterpretq_f32_u16(vb${ABC[N]}f.val[0]));
 
       $for N in range(NR):
         $for M in range(MR):
-          $if EXTOPT == "SHLAND":
-            const float32x4_t va${M}x${ABC[N]}o = vreinterpretq_f32_u16(vandq_u16(va${M}x${ABC[N]}, vmask));
-          $elif EXTOPT == "ZIP":
-            const float32x4_t va${M}x${ABC[N]}o = vreinterpretq_f32_u16(vzip2q_u16(vzero, va${M}x${ABC[N]}));
-
-      $for N in range(NR):
-        $for M in range(MR):
-          vacc${M}x${ABC[N]} = vfmaq_f32(vacc${M}x${ABC[N]}, va${M}x${ABC[N]}o, vb${ABC[N]}o);
+          vacc${M}x${ABC[N]} = vfmaq_f32(vacc${M}x${ABC[N]}, vreinterpretq_f32_u16(va${M}x${ABC[N]}f.val[1]), vreinterpretq_f32_u16(vb${ABC[N]}f.val[1]));
     }
 
 #if XNN_ARCH_ARM64

@@ -28,11 +28,6 @@ SET(ALL_AARCH64_NEON_MICROKERNEL_SRCS
 SET(ALL_AARCH64_NEONBF16_MICROKERNEL_SRCS)
 
 SET(ALL_AARCH64_NEONFMA_MICROKERNEL_SRCS
-  src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-aarch64-neonfma-zip.c
-  src/bf16-gemm/gen/bf16-gemm-2x4c8-minmax-aarch64-neonfma-zip.c
-  src/bf16-gemm/gen/bf16-gemm-3x4c8-minmax-aarch64-neonfma-zip.c
-  src/bf16-gemm/gen/bf16-gemm-4x4c8-minmax-aarch64-neonfma-zip.c
-  src/bf16-gemm/gen/bf16-gemm-5x4c8-minmax-aarch64-neonfma-zip.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-aarch64-neonfma-2x2.c
   src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x4-aarch64-neonfma-2x1.c
   src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x4-aarch64-neonfma-2x2.c
@@ -2789,10 +2784,15 @@ SET(ALL_NEONDOT_MICROKERNEL_SRCS
 
 SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-neonfma-shland.c
+  src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-neonfma-zip.c
   src/bf16-gemm/gen/bf16-gemm-2x4c8-minmax-neonfma-shland.c
+  src/bf16-gemm/gen/bf16-gemm-2x4c8-minmax-neonfma-zip.c
   src/bf16-gemm/gen/bf16-gemm-3x4c8-minmax-neonfma-shland.c
+  src/bf16-gemm/gen/bf16-gemm-3x4c8-minmax-neonfma-zip.c
   src/bf16-gemm/gen/bf16-gemm-4x4c8-minmax-neonfma-shland.c
+  src/bf16-gemm/gen/bf16-gemm-4x4c8-minmax-neonfma-zip.c
   src/bf16-gemm/gen/bf16-gemm-5x4c8-minmax-neonfma-shland.c
+  src/bf16-gemm/gen/bf16-gemm-5x4c8-minmax-neonfma-zip.c
   src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-minmax-neonfma-acc2.c

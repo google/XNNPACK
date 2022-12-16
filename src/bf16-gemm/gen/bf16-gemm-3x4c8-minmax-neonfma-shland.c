@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/bf16-gemm/c8-neon.c.in
+//   Template: src/bf16-gemm/c8-neon-shland.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2022 Google LLC
