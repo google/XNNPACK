@@ -165,7 +165,7 @@ TABLE_SRCS = [
     "src/tables/vlog.c",
 ]
 
-PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS = [
+PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/u8-lut32norm/u8-lut32norm-scalar.c",
     "src/xx-copy/xx-copy-scalar-memcpy.c",
     "src/xx-transpose/xx-transpose-1x1-scalar-memcpy.c",
@@ -2220,6 +2220,32 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "scalar_amalgam_microkernels",
+    srcs = ["src/amalgam/scalar.c"],
+    aarch32_copts = ["-marm"],
+    aarch32_srcs = ["src/amalgam/scalar-aarch32.c"],
+    gcc_copts = xnnpack_gcc_std_copts() + [
+        "-fno-fast-math",
+        "-fno-math-errno",
+    ],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    riscv_srcs = ["src/amalgam/scalar-riscv.c"],
+    wasm_srcs = ["src/amalgam/scalar-wasm.c"],
+    wasmrelaxedsimd_srcs = ["src/amalgam/scalar-wasm.c"],
+    wasmsimd_srcs = ["src/amalgam/scalar-wasm.c"],
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":prefetch",
+        ":tables",
+        ":unaligned",
+        "@FXdiv",
+    ],
+)
+
+xnnpack_cc_library(
     name = "scalar_bench_microkernels",
     srcs = ALL_SCALAR_MICROKERNEL_SRCS,
     aarch32_copts = ["-marm"],
@@ -2242,7 +2268,7 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "scalar_prod_microkernels",
-    srcs = PROD_SCALAR_PORTABLE_MICROKERNEL_SRCS,
+    srcs = PROD_SCALAR_MICROKERNEL_SRCS,
     aarch32_copts = ["-marm"],
     aarch32_srcs = PROD_SCALAR_AARCH32_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts() + [
@@ -4248,7 +4274,7 @@ xnnpack_aggregate_library(
         "//conditions:default": ["XNN_ENABLE_ARM_DOTPROD=0"],
     }),
     generic_deps = [
-        ":scalar_prod_microkernels",
+        ":scalar_amalgam_microkernels",
     ] + select({
         ":arm_fp16_scalar_enabled": [":fp16arith_amalgam_microkernels"],
         "//conditions:default": [],

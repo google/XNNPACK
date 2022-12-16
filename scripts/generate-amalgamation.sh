@@ -4,6 +4,12 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# Scalar microkernels
+tools/amalgamate-microkernels.py -s PROD_SCALAR_MICROKERNEL_SRCS -o src/amalgam/scalar.c &
+tools/amalgamate-microkernels.py -s PROD_SCALAR_AARCH32_MICROKERNEL_SRCS -o src/amalgam/scalar-aarch32.c &
+tools/amalgamate-microkernels.py -s PROD_SCALAR_WASM_MICROKERNEL_SRCS -o src/amalgam/scalar-wasm.c &
+tools/amalgamate-microkernels.py -s PROD_SCALAR_RISCV_MICROKERNEL_SRCS -o src/amalgam/scalar-riscv.c &
+
 # x86/x86-64 microkernels
 tools/amalgamate-microkernels.py -i immintrin.h -s PROD_SSE_MICROKERNEL_SRCS -o src/amalgam/sse.c &
 tools/amalgamate-microkernels.py -i immintrin.h -s PROD_SSE2_MICROKERNEL_SRCS -o src/amalgam/sse2.c &

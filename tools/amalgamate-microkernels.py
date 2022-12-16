@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser(
   description='Amalgamation utility for microkernels')
 parser.add_argument("-s", "--set", metavar="SET", required=True,
                     help="List of microkernel filenames in the BUILD file")
-parser.add_argument("-i", "--include", metavar="INCLUDE", required=True,
+parser.add_argument("-i", "--include", metavar="INCLUDE",
                     help="Header file to include (e.g. immintrin.h, arm_neon.h)")
 parser.add_argument("-o", "--output", metavar="FILE", required=True,
                     help='Output (C source) file')
@@ -101,7 +101,10 @@ def main(args):
 
   amalgam_text += "\n".join(sorted(inc for inc in amalgam_includes if
                                    not inc.startswith("#include <xnnpack/")))
-  amalgam_text += "\n\n#include <%s>\n\n" % options.include
+  if options.include:
+    amalgam_text += "\n\n#include <%s>\n\n" % options.include
+  else:
+    amalgam_text += "\n\n"
   amalgam_text += "\n".join(sorted(inc for inc in amalgam_includes if
                                    inc.startswith("#include <xnnpack/")))
   amalgam_text += "\n\n\n"
