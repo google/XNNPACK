@@ -79,10 +79,10 @@ def main(args):
     os.path.join(src_dir, 'xnnpack'),
   }
   c_microkernels_per_isa = {isa: [] for isa in ISA_LIST if isa not in ISA_MAP}
-  c_microkernels_per_isa['aarch64_neon'] = list()
-  c_microkernels_per_isa['aarch64_neonfma'] = list()
-  c_microkernels_per_isa['aarch64_neonfp16arith'] = list()
-  c_microkernels_per_isa['aarch64_neonbf16'] = list()
+  c_microkernels_per_isa['neon_aarch64'] = list()
+  c_microkernels_per_isa['neonfma_aarch64'] = list()
+  c_microkernels_per_isa['neonfp16arith_aarch64'] = list()
+  c_microkernels_per_isa['neonbf16_aarch64'] = list()
   asm_microkernels_per_arch = {arch: [] for arch in ARCH_LIST}
   for root, dirs, files in os.walk(src_dir, topdown=False):
     if root in ignore_roots:
@@ -101,7 +101,7 @@ def main(args):
             arch = component
           elif component in ISA_LIST:
             isa = ISA_MAP.get(component, component)
-            key = isa if arch is None else f'{arch}_{isa}'
+            key = isa if arch is None else f'{isa}_{arch}'
             c_microkernels_per_isa[key].append(filepath)
             break
         else:
