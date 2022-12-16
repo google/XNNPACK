@@ -13,11 +13,10 @@ $assert MR <= 4
 #include <assert.h>
 
 $if XOP:
-  #if defined(__GNUC__) || defined(__clang__)
-    #include <x86intrin.h>
+  #ifdef _MSC_VER
+    #include <intrin.h>
   #else
-    #include <immintrin.h>
-    #include <ammintrin.h>
+    #include <x86intrin.h>
   #endif
 $else:
   $SSE_HEADER = {2: "emmintrin.h", 3: "tmmintrin.h", 4: "smmintrin.h"}[SSE]
