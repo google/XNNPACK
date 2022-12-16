@@ -36,7 +36,7 @@ static void GEMMBenchmark(benchmark::State& state,
   benchmark::utils::IsaCheckFunction isa_check = nullptr,
   bool extended_weights = false)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

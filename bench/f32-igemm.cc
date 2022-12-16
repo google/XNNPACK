@@ -31,7 +31,7 @@ static void f32_igemm(benchmark::State& state,
   xnn_init_f32_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 
@@ -161,7 +161,7 @@ static void f32_igemm(benchmark::State& state,
     xnn_init_f32_minmax_params_fn init_params,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

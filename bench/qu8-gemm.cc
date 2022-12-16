@@ -42,7 +42,7 @@ static void GEMMBenchmark(benchmark::State& state,
   size_t mr, size_t nr, size_t kr, size_t sr,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

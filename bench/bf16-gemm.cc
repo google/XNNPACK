@@ -31,7 +31,7 @@ static void bf16_gemm(benchmark::State& state,
   xnn_init_bf16_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

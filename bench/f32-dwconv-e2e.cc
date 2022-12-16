@@ -33,7 +33,7 @@ static void DWConvEnd2EndBenchmark(
   uint8_t channel_tile, uint8_t primary_tile,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
   if (xnn_initialize(nullptr /* allocator */) != xnn_status_success) {

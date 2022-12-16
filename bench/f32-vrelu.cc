@@ -23,7 +23,7 @@ static void f32_vrelu(
   xnn_f32_vrelu_ukernel_fn f32_vrelu,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

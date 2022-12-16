@@ -26,7 +26,7 @@ static void f32_vlrelu(
   xnn_init_f32_lrelu_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

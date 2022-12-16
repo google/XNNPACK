@@ -25,7 +25,7 @@ static void f32_vscaleexpminusmax(
   xnn_f32_vscaleexpminusmax_ukernel_fn vscaleexpminusmax,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

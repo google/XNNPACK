@@ -40,7 +40,7 @@ static void GEMMBenchmark(benchmark::State& state,
   xnn_init_f32_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 
@@ -116,7 +116,7 @@ static void PPMM1PBenchmark(benchmark::State& state,
   xnn_init_f32_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 
@@ -194,7 +194,7 @@ static void PPMM2PBenchmark(benchmark::State& state,
   xnn_init_f32_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 
@@ -364,7 +364,7 @@ static void GEMMBenchmark(benchmark::State& state,
   xnn_init_f32_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

@@ -23,7 +23,7 @@ static void f32_vscaleextexp(
   xnn_f32_vscaleextexp_ukernel_fn vscaleextexp,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

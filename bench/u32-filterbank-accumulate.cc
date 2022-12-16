@@ -24,7 +24,7 @@ void filterbank_accumulate(
     xnn_u32_filterbank_accumulate_ukernel_fn filterbank_accumulate,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
   const size_t rows = state.range(0);

@@ -26,7 +26,7 @@ static void qs8_requantization(
   xnn_qs8_requantization_fn requantize,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

@@ -31,7 +31,7 @@ static void DWConvBenchmark(benchmark::State& state,
   uint32_t channel_tile, uint32_t primary_tile,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

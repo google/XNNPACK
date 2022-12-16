@@ -26,7 +26,7 @@ static void qs8_vaddc(
   xnn_init_qs8_add_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

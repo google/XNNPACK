@@ -24,7 +24,7 @@ static void f32_raddextexp(
   xnn_f32_raddextexp_ukernel_fn raddextexp,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

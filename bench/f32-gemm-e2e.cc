@@ -44,7 +44,7 @@ static void GEMMEnd2EndBenchmark(
   uint8_t mr, uint8_t nr, uint8_t log2_kr = 0, uint8_t log2_sr = 0,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
   if (xnn_initialize(nullptr /* allocator */) != xnn_status_success) {
@@ -117,7 +117,7 @@ static void GEMMEnd2EndBenchmark(
   uint8_t mr, uint8_t nr, uint8_t log2_kr = 0, uint8_t log2_sr = 0,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
   if (xnn_initialize(nullptr /* allocator */) != xnn_status_success) {

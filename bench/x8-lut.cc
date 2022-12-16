@@ -25,7 +25,7 @@ static void x8_lut(
   xnn_x8_lut_ukernel_fn lut,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

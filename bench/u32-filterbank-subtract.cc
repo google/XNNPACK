@@ -24,7 +24,7 @@ void filterbank_subtract(
     xnn_u32_filterbank_subtract_ukernel_fn filterbank_subtract,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
   const size_t batch = state.range(0);

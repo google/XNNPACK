@@ -186,7 +186,7 @@ static void ThreePassSoftMaxWithRecomputing(
   xnn_f32_vscaleexpminusmax_ukernel_fn vscaleexpminusmax,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 
@@ -250,7 +250,7 @@ static void ThreePassSoftMaxWithReloading(
   xnn_init_f32_minmax_params_fn init_minmax_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 
@@ -317,7 +317,7 @@ static void TwoPassSoftMax(
   xnn_f32_vscaleextexp_ukernel_fn vscaleextexp,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 

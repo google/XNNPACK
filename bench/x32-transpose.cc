@@ -26,7 +26,7 @@ void transpose(
     xnn_init_x32_transpose_params_fn init_params = nullptr,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
   const size_t height = state.range(0);
