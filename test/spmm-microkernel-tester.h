@@ -318,7 +318,7 @@ class SpMMMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::generate(b.begin(), b.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       std::generate(bias.begin(), bias.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      std::fill(output.begin(), output.end(), 0xC000);
+      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
       std::fill(output_ref.begin(), output_ref.end(), 0.0f);
       std::fill(nmap.begin(), nmap.end(), 0);
       std::fill(dmap.begin(), dmap.end(), 0);
