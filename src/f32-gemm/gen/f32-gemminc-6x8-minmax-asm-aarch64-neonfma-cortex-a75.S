@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-gemm/6x8-aarch64-neonfma-cortex-a75.S.in
+//   Template: src/f32-gemm/f32-gemm-6x8-aarch64-neonfma-cortex-a75.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC

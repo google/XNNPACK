@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-igemm/2x8c16-aarch64-neon-mlal.S.in
+//   Template: src/qs8-igemm/qs8-igemm-2x8c16-aarch64-neon-mlal.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2021 Google LLC

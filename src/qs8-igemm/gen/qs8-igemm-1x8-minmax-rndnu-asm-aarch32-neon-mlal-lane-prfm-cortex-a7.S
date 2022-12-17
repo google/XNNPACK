@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-igemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in
+//   Template: src/qs8-igemm/qs8-igemm-1x8-aarch32-neon-mlal-lane-cortex-a7.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2021 Google LLC

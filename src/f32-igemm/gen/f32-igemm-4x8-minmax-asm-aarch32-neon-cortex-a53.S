@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-igemm/4x8-aarch32-neon-cortex-a53.S.in
+//   Template: src/f32-igemm/f32-igemm-4x8-aarch32-neon-cortex-a53.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC

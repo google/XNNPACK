@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gemm/4x8c4-aarch32-neondot-cortex-a55.S.in
+//   Template: src/qs8-gemm/qs8-gemm-4x8c4-aarch32-neondot-cortex-a55.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2022 Google LLC

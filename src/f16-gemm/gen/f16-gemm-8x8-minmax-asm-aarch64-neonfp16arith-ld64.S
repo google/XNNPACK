@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f16-gemm/8x8-aarch64-neonfp16arith-ld64.S.in
+//   Template: src/f16-gemm/f16-gemm-8x8-aarch64-neonfp16arith-ld64.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC

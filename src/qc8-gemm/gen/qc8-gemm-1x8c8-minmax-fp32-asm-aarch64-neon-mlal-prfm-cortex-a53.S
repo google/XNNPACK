@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in
+//   Template: src/qs8-gemm/qs8-gemm-1x8c8-aarch64-neon-mlal-cortex-a53.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2021 Google LLC
