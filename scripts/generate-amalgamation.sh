@@ -10,6 +10,11 @@ tools/amalgamate-microkernels.py -s PROD_SCALAR_AARCH32_MICROKERNEL_SRCS -o src/
 tools/amalgamate-microkernels.py -s PROD_SCALAR_WASM_MICROKERNEL_SRCS -o src/amalgam/scalar-wasm.c &
 tools/amalgamate-microkernels.py -s PROD_SCALAR_RISCV_MICROKERNEL_SRCS -o src/amalgam/scalar-riscv.c &
 
+# Wasm microkernels
+tools/amalgamate-microkernels.py -s PROD_WASM_MICROKERNEL_SRCS -o src/amalgam/wasm.c &
+tools/amalgamate-microkernels.py -s PROD_WASMSIMD_MICROKERNEL_SRCS -o src/amalgam/wasmsimd.c &
+tools/amalgamate-microkernels.py -s PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS -o src/amalgam/wasmrelaxedsimd.c &
+
 # x86/x86-64 microkernels
 tools/amalgamate-microkernels.py -i immintrin.h -s PROD_SSE_MICROKERNEL_SRCS -o src/amalgam/sse.c &
 tools/amalgamate-microkernels.py -i immintrin.h -s PROD_SSE2_MICROKERNEL_SRCS -o src/amalgam/sse2.c &
