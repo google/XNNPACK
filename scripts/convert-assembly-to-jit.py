@@ -468,7 +468,10 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
       if not line.strip():
         in_a_pointers = False
         continue
-      m = re.search(r'(?:#|//)\W+(\w\d+)', line)
+      # Handle both:
+      # - A0 x1
+      # - x1 a0
+      m = re.search(r'(?:#|//)\W+(?:A\d+\W+)?(\w\d+)', line)
       if not m:
         print(f'ERROR expected to find A pointers: {line}', file=sys.stderr)
         sys.exit(1)
@@ -483,7 +486,10 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
       if not line.strip():
         in_c_pointers = False
         continue
-      m = re.search(r'(?:#|//)\W+(\w\d+)', line)
+      # Handle both:
+      # - C0 x1
+      # - x1 c0
+      m = re.search(r'(?:#|//)\W+(?:C\d+\W+)?(\w\d+)', line)
       if not m:
         print(f'ERROR expected to find C pointers: {line}', file=sys.stderr)
         sys.exit(1)
@@ -648,13 +654,11 @@ def emit_instruction(instr: str,
                r'\1(\2, \3, max_mr * sizeof(void*));', instr))
     return
 
-  # this workaround is specifically for 4x8 A53 kernel where it loads from A low
-  # and A high into GPR then moves into vector registers.
-  if instr_name == 'ldr' and is_a53:
-    # A53 microkernels use ldr in 2 ways, load A, and load A high. If the
-    # destination register is in the vector register map, we will emit a guard.
-    # Otherwise we try to look at the source register, because it could be a
-    # load A high.
+  if instr_name == 'ldr':
+    # Some microkernels use ldr to load into a temporary register. In that case,
+    # the temporary register doesn't show up in the register usage map, so using
+    # the dest reg for max_mr guard doesn't work, we need to use the source
+    # register instead.
     if reg not in vector_register_map:
       # extract register from the load
       ldr_m = re.search(r'mem\[([rx]\d+)', instr)
