@@ -1733,6 +1733,7 @@ PROD_WASMSIMD_MICROKERNEL_SRCS = [
 ]
 
 PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS = [
+    "src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmrelaxedsimd-int16-x16.c",
     "src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-wasmrelaxedsimd-fma.c",
     "src/f32-dwconv/gen/f32-dwconv-3p8c-wasmrelaxedsimd-fma.c",
     "src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-wasmrelaxedsimd-fma.c",
@@ -1741,6 +1742,7 @@ PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/f32-dwconv-9p8c-wasmrelaxedsimd-fma.c",
     "src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-wasmrelaxedsimd-fma.c",
     "src/f32-dwconv/gen/f32-dwconv-25p8c-wasmrelaxedsimd-fma.c",
+    "src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmrelaxedsimd-x24.c",
     "src/f32-gemm/gen/f32-gemm-1x8-minmax-wasmrelaxedsimd-fma-splat.c",
     "src/f32-gemm/gen/f32-gemm-1x8-relu-wasmrelaxedsimd-fma-splat.c",
     "src/f32-gemm/gen/f32-gemm-1x8-wasmrelaxedsimd-fma-splat.c",
@@ -1752,6 +1754,7 @@ PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS = [
     "src/f32-gemm/gen/f32-gemm-6x8-minmax-wasmrelaxedsimd-fma-splat.c",
     "src/f32-gemm/gen/f32-gemm-6x8-relu-wasmrelaxedsimd-fma-splat.c",
     "src/f32-gemm/gen/f32-gemm-6x8-wasmrelaxedsimd-fma-splat.c",
+    "src/f32-ibilinear/gen/f32-ibilinear-wasmrelaxedsimd-c8.c",
     "src/f32-igemm/gen/f32-igemm-1x8-minmax-wasmrelaxedsimd-fma-splat.c",
     "src/f32-igemm/gen/f32-igemm-1x8-relu-wasmrelaxedsimd-fma-splat.c",
     "src/f32-igemm/gen/f32-igemm-1x8-wasmrelaxedsimd-fma-splat.c",
@@ -1763,6 +1766,14 @@ PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS = [
     "src/f32-igemm/gen/f32-igemm-6x8-minmax-wasmrelaxedsimd-fma-splat.c",
     "src/f32-igemm/gen/f32-igemm-6x8-relu-wasmrelaxedsimd-fma-splat.c",
     "src/f32-igemm/gen/f32-igemm-6x8-wasmrelaxedsimd-fma-splat.c",
+    "src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-2x4.c",
+    "src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-2x4.c",
+    "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-wasmrelaxedsimd-rr2-p5-x16-acc2.c",
+    "src/f32-velu/gen/f32-velu-wasmrelaxedsimd-fma-rr2-p6-x24.c",
+    "src/f32-vlrelu/gen/f32-vlrelu-wasmrelaxedsimd-iminmax-x4.c",
+    "src/f32-vlrelu/gen/f32-vlrelu-wasmrelaxedsimd-laneselect-x4.c",
+    "src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-wasmrelaxedsimd-fma-2x.c",
+    "src/f32-vsigmoid/gen/f32-vsigmoid-wasmrelaxedsimd-fma-rr2-p5-div-x24.c",
     "src/qs8-vcvt/gen/qs8-vcvt-wasmrelaxedsimd-x32.c",
     "src/qs8-vlrelu/gen/qs8-vlrelu-wasmrelaxedsimd-arm-x32.c",
     "src/qs8-vlrelu/gen/qs8-vlrelu-wasmrelaxedsimd-x86-x32.c",
