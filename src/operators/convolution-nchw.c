@@ -326,7 +326,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel, %"PRIu32 "x%" PRIu32 " subsampling, %"PRIu32 "x%" PRIu32 " dilation"
       ", %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding, %" PRIu32 "x%zu input channels, and %" PRIu32 "x%zu output channels: "
       "only selected convolution parameters are supported",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f16),
+      xnn_operator_type_to_string(operator_type),
       kernel_width, kernel_height, subsampling_width, subsampling_height, dilation_width, dilation_height,
       input_padding_top, input_padding_left, input_padding_bottom, input_padding_right,
       groups, group_input_channels, groups, group_output_channels);
@@ -557,7 +557,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
+      xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
@@ -566,7 +566,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
   const uint32_t datatype_init_flags = XNN_INIT_FLAG_F32;
   if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
     xnn_log_error("failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
+      xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
@@ -575,42 +575,42 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
   if (kernel_width == 0 || kernel_height == 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel: kernel dimensions must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32), kernel_width, kernel_height);
+      xnn_operator_type_to_string(operator_type), kernel_width, kernel_height);
     goto error;
   }
 
   if (subsampling_width == 0 || subsampling_height == 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " subsampling: subsampling dimensions must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32), subsampling_width, subsampling_height);
+      xnn_operator_type_to_string(operator_type), subsampling_width, subsampling_height);
     goto error;
   }
 
   if (dilation_width == 0 || dilation_height == 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " dilation: dilation dimensions must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32), dilation_width, dilation_height);
+      xnn_operator_type_to_string(operator_type), dilation_width, dilation_height);
     goto error;
   }
 
   if (groups == 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu32 " groups: number of groups must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32), groups);
+      xnn_operator_type_to_string(operator_type), groups);
     goto error;
   }
 
   if (group_input_channels == 0) {
     xnn_log_error(
       "failed to create %s operator with %zu input channels per group: number of channels must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32), group_input_channels);
+      xnn_operator_type_to_string(operator_type), group_input_channels);
     goto error;
   }
 
   if (group_output_channels == 0) {
     xnn_log_error(
       "failed to create %s operator with %zu output channels per group: number of channels must be non-zero",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32), group_output_channels);
+      xnn_operator_type_to_string(operator_type), group_output_channels);
     goto error;
   }
 
@@ -619,7 +619,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     xnn_log_error(
       "failed to create %s operator with input channel stride of %zu: "
       "stride must be at least as large as the number of input channels (%" PRIu32 "x%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32),
+      xnn_operator_type_to_string(operator_type),
       input_channel_stride, groups, group_input_channels);
     goto error;
   }
@@ -629,7 +629,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     xnn_log_error(
       "failed to create %s operator with output channel stride of %zu: "
       "stride must be at least as large as the number of output channels (%" PRIu32 "x%zu)",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32),
+      xnn_operator_type_to_string(operator_type),
       output_channel_stride, groups, group_output_channels);
     goto error;
   }
@@ -637,21 +637,21 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
   if (isnan(output_min)) {
     xnn_log_error(
       "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
+      xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
   if (isnan(output_max)) {
     xnn_log_error(
       "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
+      xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
   if (output_min >= output_max) {
     xnn_log_error(
       "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32), output_min, output_max);
+      xnn_operator_type_to_string(operator_type), output_min, output_max);
     goto error;
   }
 
@@ -659,7 +659,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     xnn_log_error(
       "failed to create depthwise %s operator with %zu input channels per group: "
       "depthwise convolution must have exactly 1 input channel per group",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32), group_input_channels);
+      xnn_operator_type_to_string(operator_type), group_input_channels);
     goto error;
   }
 
@@ -715,7 +715,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel, %"PRIu32 "x%" PRIu32 " subsampling, %"PRIu32 "x%" PRIu32 " dilation"
       ", %" PRIu32 "+%" PRIu32 "x%" PRIu32 "+%" PRIu32" padding, %" PRIu32 "x%zu input channels, and %" PRIu32 "x%zu output channels: "
       "only selected convolution parameters are supported",
-      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32),
+      xnn_operator_type_to_string(operator_type),
       kernel_width, kernel_height, subsampling_width, subsampling_height, dilation_width, dilation_height,
       input_padding_top, input_padding_left, input_padding_bottom, input_padding_right,
       groups, group_input_channels, groups, group_output_channels);
@@ -728,7 +728,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
   if (convolution_op == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
@@ -798,11 +798,11 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       if (convolution_op->packed_weights.pointer == NULL) {
         xnn_log_error(
           "failed to allocate %zu bytes for %s operator packed weights",
-          packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
+          packed_weights_size, xnn_operator_type_to_string(operator_type));
         goto error;
       }
       xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
-        packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
+        packed_weights_size, xnn_operator_type_to_string(operator_type));
 
       convolution_op->num_nonzero_values = num_nonzero_values;
       convolution_op->num_nonzero_blocks = num_nonzero_blocks;
@@ -844,41 +844,21 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     {
       assert(groups == 1);
 
-      const size_t packed_group_output_channels =
-        round_up(group_output_channels, xnn_params.f32.conv_hwc2chw_3x3c3s2.output_channel_tile);
-      const size_t packed_weights_size = groups * packed_group_output_channels *
-        (group_input_channels * kernel_height * kernel_width + 1 /* bias */) * sizeof(float);
-      size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
-      void* weights_ptr = xnn_get_pointer_to_write_weights(
-          convolution_op, aligned_total_weights_size, 0);
-      if (weights_ptr == NULL) {
-        xnn_log_error("failed to reserve or allocate %zu bytes for %s operator conv2d_hwc2chw packed weights",
-                      aligned_total_weights_size,
-                      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
-        goto error;
-      }
-      xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
-        aligned_total_weights_size, xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
-
-      xnn_pack_f32_dconv_oki_w(
-        group_output_channels,
-        group_input_channels,
-        xnn_params.f32.conv_hwc2chw_3x3c3s2.output_channel_tile,
-        kernel_height, kernel_width,
-        kernel, bias, weights_ptr, NULL);
-
-      if (use_weights_cache(convolution_op)) {
-        convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-            convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
-      }
-
-      convolution_op->ukernel.conv2d = (struct xnn_ukernel_conv2d) {
-        .hwc2chw_fn = xnn_params.f32.conv_hwc2chw_3x3c3s2.ukernel_with_symm_padding,
-        .output_height_tile = xnn_params.f32.conv_hwc2chw_3x3c3s2.output_height_tile,
-        .output_channel_tile = xnn_params.f32.conv_hwc2chw_3x3c3s2.output_channel_tile,
-      };
       xnn_params.f32.conv_hwc2chw_3x3c3s2.init.f32(&convolution_op->params.f32_minmax, output_min, output_max);
 
+      status = create_conv2d_hwc2chw_path(
+          kernel_height, kernel_width, groups,
+          group_input_channels,
+          group_output_channels,
+          xnn_params.f32.conv_hwc2chw_3x3c3s2.output_height_tile,
+          xnn_params.f32.conv_hwc2chw_3x3c3s2.output_channel_tile,
+          kernel, bias, log2_filter_element_size,
+          (xnn_pack_dconv_oki_w_fn) xnn_pack_f32_dconv_oki_w,
+          xnn_params.f32.conv_hwc2chw_3x3c3s2.ukernel_with_symm_padding,
+          operator_type, convolution_op);
+      if (status != xnn_status_success) {
+        goto error;
+      }
       break;
     }
     case xnn_microkernel_type_dwconv:
@@ -920,7 +900,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
   convolution_op->input_pixel_stride = input_channel_stride;
   convolution_op->output_pixel_stride = output_channel_stride;
 
-  convolution_op->type = xnn_operator_type_convolution_nchw_f32;
+  convolution_op->type = operator_type;
   convolution_op->ukernel.type = ukernel_type;
   convolution_op->flags = flags;
 
