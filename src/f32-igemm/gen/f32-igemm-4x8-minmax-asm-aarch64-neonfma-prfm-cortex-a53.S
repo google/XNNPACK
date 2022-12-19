@@ -29,7 +29,7 @@
 # x13 a0
 # x14 a1
 # x15 a2
-#  x8 a3
+# x20 a3
 
 # C pointers
 #  x6 c0
@@ -44,7 +44,6 @@
 # A1  v0[1]  v3[1]
 # A2  v1     v4
 # A3  v1[1]  v4[1]
-
 # B   v12 v13 v14 v15 second set of B
 # B   v16 v17 v18 v19 first set
 # C   v20 v21
@@ -90,7 +89,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex
         # Save x19, d12-d15 on stack
         STP     d12, d13, [sp, -48]!
         STP     d14, d15, [sp, 16]
-        STR     x19,      [sp, 32]
+        STP     x19, x20,  [sp, 32]
 
 0:
         # Load initial bias from w into accumulators
@@ -105,8 +104,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex
         PRFM    PLDL1KEEP, [x15,  0]
         PRFM    PLDL1KEEP, [x15, 64]
         MOV     v25.16b, v21.16b
-        PRFM    PLDL1KEEP, [x8,  0]
-        PRFM    PLDL1KEEP, [x8, 64]
+        PRFM    PLDL1KEEP, [x20,  0]
+        PRFM    PLDL1KEEP, [x20, 64]
         MOV     v26.16b, v20.16b
         PRFM    PLDL1KEEP, [x5,   0]    // Prefetch B
         PRFM    PLDL1KEEP, [x5,  64]
@@ -119,7 +118,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex
 1:
         # Load next 4 A pointers
         LDP     x13, x14, [x4], 16
-        LDP     x15, x8, [x4], 16
+        LDP     x15, x20, [x4], 16
 
         CMP     x13, x12                // if a0 == zero
         ADD     x13, x13, x11           // a0 += a_offset
@@ -130,9 +129,9 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex
         CMP     x15, x12                // if a2 == zero
         ADD     x15, x15, x11           // a2 += a_offset
         CSEL    x15, x12, x15, EQ       //   a2 = zero, else += a2 + a_offset
-        CMP     x8, x12                 // if a3 == zero
-        ADD     x8, x8, x11             // a3 += a_offset
-        CSEL    x8, x12, x8, EQ         //   a3 = zero, else += a3 + a_offset
+        CMP     x20, x12                 // if a3 == zero
+        ADD     x20, x20, x11             // a3 += a_offset
+        CSEL    x20, x12, x20, EQ         //   a3 = zero, else += a3 + a_offset
 
         # Is there at least 4 floats (16 bytes) for prologue + epilogue?
         SUBS    x0, x2, 16              // k = kc - 16
@@ -143,7 +142,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex
         LDP     q16, q17, [x5], 32        // b
         LDR     d1, [x15], 8            // a2
         LD1     {v0.d}[1],  [x14], 8     // a1
-        LD1     {v1.d}[1], [x8], 8       // a3
+        LD1     {v1.d}[1], [x20], 8       // a3
         SUBS    x0, x0, 16
         LDR     q18, [x5], 16
         LDR     d19, [x5], 8
@@ -176,7 +175,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex
         LDR     d4, [x15], 8              // a2
         INS     v12.d[1], x19           // b  ins
         FMLA    v25.4s, v17.4s,  v1.s[0]
-        LDR     x19, [x8], 8               // a3
+        LDR     x19, [x20], 8               // a3
         FMLA    v27.4s, v17.4s,  v1.s[2]
         FMLA    v20.4s, v18.4s,  v0.s[1]
 
@@ -230,7 +229,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex
         LDR     d1, [x15], 8             // a2
         INS     v16.d[1], x19           // b
         FMLA    v25.4s, v13.4s,  v4.s[0]
-        LDR     x19, [x8], 8             // a3
+        LDR     x19, [x20], 8             // a3
         FMLA    v27.4s, v13.4s,  v4.s[2]
         FMLA    v20.4s, v14.4s,  v3.s[1]
         PRFM    PLDL1KEEP, [x15, 128]     // Prefetch A2
@@ -242,7 +241,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex
         LDR     x19, [x5, 88]
         FMLA    v24.4s, v14.4s,  v4.s[1]
         FMLA    v26.4s, v14.4s,  v4.s[3]
-        PRFM    PLDL1KEEP, [x8, 128]     // Prefetch A3
+        PRFM    PLDL1KEEP, [x20, 128]     // Prefetch A3
 
         # BLOCK 4
         LDR     d18, [x5, 96]
@@ -288,7 +287,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex
         LDR     d4, [x15], 8             // a2
         INS     v12.d[1], x19           // b  ins
         FMLA    v25.4s, v17.4s,  v1.s[0]
-        LDR     x19, [x8], 8             // a3
+        LDR     x19, [x20], 8             // a3
         FMLA    v27.4s, v17.4s,  v1.s[2]
         FMLA    v20.4s, v18.4s,  v0.s[1]
 
@@ -397,7 +396,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex
         B.HI    0b
 
         # Restore x19, d12-d15 from stack
-        LDR     x19,      [sp, 32]
+        LDP     x19, x20, [sp, 32]
         LDP     d14, d15, [sp, 16]
         LDP     d12, d13, [sp], 48
         RET
@@ -409,7 +408,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex
         LDP     q16,  q17, [x5], 32
         LD1     {v0.d}[1], [x14], 8
         LDR     d1, [x15], 8
-        LD1     {v1.d}[1], [x8], 8
+        LD1     {v1.d}[1], [x20], 8
         LDP     q18,  q19, [x5], 32
         FMLA    v20.4s, v16.4s,  v0.s[0]
         FMLA    v22.4s, v16.4s,  v0.s[2]
@@ -438,7 +437,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex
         LDP     q16,  q17, [x5], 32
         LD1     {v0.s}[2], [x14], 4
         LDR     s1, [x15], 4
-        LD1     {v1.s}[2], [x8], 4
+        LD1     {v1.s}[2], [x20], 4
 
         FMLA    v20.4s, v16.4s,  v0.s[0]
         FMLA    v22.4s, v16.4s,  v0.s[2]
@@ -480,7 +479,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex
         STR     s20,  [x6]
 11:
         # Restore x19, d12-d15 from stack
-        LDR     x19,      [sp, 32]
+        LDP     x19, x20, [sp, 32]
         LDP     d14, d15, [sp, 16]
         LDP     d12, d13, [sp], 48
         RET

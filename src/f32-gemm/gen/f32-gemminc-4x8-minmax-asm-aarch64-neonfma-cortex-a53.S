@@ -43,7 +43,6 @@
 # A1  v0[1]  v3[1]
 # A2  v1     v4
 # A3  v1[1]  v4[1]
-
 # B   v12 v13 v14 v15 second set of B
 # B   v16 v17 v18 v19 first set
 # C   v20 v21
