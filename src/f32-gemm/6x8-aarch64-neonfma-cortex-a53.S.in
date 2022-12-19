@@ -23,22 +23,37 @@ $else:
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-// Register usage
-// A0  x3 v0     v3
-// A1  x9 v0[1]  v3[1]
-// A2 x10 v1     v4
-// A3 x11 v1[1]  v4[1]
-// A4 x12 v2     v5
-// A5  x4 v2[1]  v5[1]
-// B   x5 v12 v13 v14 v15 second set of B
-// B      v16 v17 v18 v19 first set
+# A pointers
+#  x3 a0
+#  x9 a1
+# x10 a2
+# x11 a3
+# x12 a4
+#  x4 a5
 
-// C   x6 v20 v21
-// C  x16 v22 v23
-// C  x17 v24 v25
-// C  x14 v26 v27
-// C  x13 v28 v29
-// C   x7 v30 v31
+# C pointers
+#  x6 c0
+# x16 c1
+# x17 c2
+# x14 c3
+# x13 c4
+#  x7 c5
+
+// Register usage
+// A0   v0     v3
+// A1   v0[1]  v3[1]
+// A2   v1     v4
+// A3   v1[1]  v4[1]
+// A4   v2     v5
+// A5   v2[1]  v5[1]
+// B   v12 v13 v14 v15 second set of B
+// B   v16 v17 v18 v19 first set
+// C   v20 v21
+// C   v22 v23
+// C   v24 v25
+// C   v26 v27
+// C   v28 v29
+// C   v30 v31
 // clamp  v6 v7
 // unused A   v8 v9 v10 v11
 // x8 temporary vector shadow register
