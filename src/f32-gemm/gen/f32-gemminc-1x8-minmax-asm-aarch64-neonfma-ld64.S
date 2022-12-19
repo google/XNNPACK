@@ -24,13 +24,11 @@
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# A pointer
-# x3  a0
-
-# C pointer
-# x6  c0
-
-# Clamp v4 v5
+# Register usage
+# A0  x3 v0
+# B   x5 v20 v21 v22 v23
+# C0  x6 v16 v17 v18 v19
+# Clamp  v4, v5
 
 BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
 
@@ -58,9 +56,9 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
         LDR     d0, [x3], 8
         LDP     q20, q21, [x5], 32
         LDP     q22, q23, [x5], 32
+        SUBS    x0, x0, 8
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v21.4s, v0.s[0]
-        SUBS    x0, x0, 8
         FMLA    v18.4s, v22.4s, v0.s[1]
         FMLA    v19.4s, v23.4s, v0.s[1]
         B.HS    1b

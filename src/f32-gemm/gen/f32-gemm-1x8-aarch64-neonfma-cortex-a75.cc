@@ -39,18 +39,12 @@ class Generator : public MacroAssembler {
 
 // d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-// A pointer
-// x3  a0
-
-// C pointer
-// x6  c0
-
-// Vector register usage
-// A0 v0 v1
-// B  v20 v21 v22 v23
-// B  v24 v25 v26 v27
-// C0 v16 v17
-// Clamp v4 v5
+// Register usage
+// A0  x3 v0 v1
+// B   x5 v20 v21 v22 v23
+// B      v24 v25 v26 v27
+// C0  x6 v16 v17 v18 v19
+// Clamp  v4, v5
 
 // Converted from: src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S
 void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
