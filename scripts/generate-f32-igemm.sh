@@ -352,6 +352,7 @@ scripts/convert-assembly-to-jit.py --reload-params -i src/f32-igemm/gen/f32-igem
 scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a75.S -o src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a75.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S -o src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a53.cc &
 # AArch64
+scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch64-neonfma-prfm-cortex-a53.S -o src/f32-igemm/gen/f32-igemm-1x8-aarch64-neonfma-cortex-a53.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-igemm/gen/f32-igemm-1x8-aarch64-neonfma-cortex-a75.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-igemm/gen/f32-igemm-4x8-aarch64-neonfma-cortex-a75.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-igemm/gen/f32-igemm-6x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-igemm/gen/f32-igemm-6x8-aarch64-neonfma-cortex-a75.cc &

@@ -29,6 +29,11 @@
 # C pointer
 # x6  c0
 
+# Vector register usage
+# A0  v0     v1
+# B   v20 v21 v22 v23
+# B   v24 v25 v26 v27
+# C   v16   v17
 # Clamp v4 v5
 
 # A53 based on A57/A75 but with LD64

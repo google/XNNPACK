@@ -17,7 +17,7 @@
 #     size_t cn_stride,                  [sp] -> x10
 #     size_t a_offset,                   [sp + 8] -> x11
 #     const float* zero,                 [sp + 16] -> x12
-#     const xnn_f32_minmax_params params [sp + 24] -> (x8)
+#     const xnn_f32_minmax_params params [sp + 24] -> (x13)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -27,6 +27,12 @@
 # C pointer
 # x6  c0
 
+# Vector register usage
+# A0  v0     v1
+# B   v20 v21 v22 v23
+# B   v24 v25 v26 v27
+# C   v16   v17
+
 # A53 based on a53/75 but with LD64
 
 BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a53
@@ -35,10 +41,10 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma${"_prfm" if
         LDP     x10, x11, [sp]
 
         # Load zero, params pointer
-        LDP     x12, x8, [sp, 16]
+        LDP     x12, x13, [sp, 16]
 
         # Load min/max values
-        LD2R    {v30.4s, v31.4s}, [x8]
+        LD2R    {v30.4s, v31.4s}, [x13]
 
 0:
         # Load initial bias from w into accumulators
