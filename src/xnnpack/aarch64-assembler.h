@@ -140,6 +140,14 @@ struct VRegisterList {
   uint8_t length;
 };
 
+struct ScalarVRegisterList {
+  explicit ScalarVRegisterList(ScalarVRegister vt1)
+      : vt1(vt1), length(1) {}
+
+  ScalarVRegister vt1;
+  uint8_t length;
+};
+
 struct SRegister {
   uint8_t code;
 };
@@ -371,13 +379,20 @@ class Assembler : public AssemblerBase {
   void fmla(VRegister vd, VRegister vn, VRegisterLane vm);
   void fmul(VRegister vd, VRegister vn, VRegister vm);
   void fneg(VRegister vd, VRegister vn);
+  void ins(VRegisterLane vd, XRegister vn);
   void ld1(VRegisterList vs, MemOperand xn, int32_t imm);
+  // LD1 (single structure).
+  // ld1({v1.d()}[0], mem[x0], 0) is invalid syntax, so the lane is a separate arg.
+  void ld1(ScalarVRegisterList vs, size_t lane, MemOperand xn, int32_t imm);
+  // Convenience overload for callers with single V register in list.
+  void ld1(ScalarVRegister v, size_t lane, MemOperand xn, int32_t imm);
   void ld1r(VRegisterList xs, MemOperand xn);
   void ld2r(VRegisterList xs, MemOperand xn);
   void ld3r(VRegisterList xs, MemOperand xn);
   void ldp(DRegister dt1, DRegister dt2, MemOperand xn);
   void ldp(DRegister dt1, DRegister dt2, MemOperand xn, int32_t imm);
   void ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
+  void ldr(DRegister dt, MemOperand xn);
   void ldr(DRegister dt, MemOperand xn, int32_t imm);
   void ldr(QRegister qt, MemOperand xn, int32_t imm);
   void ldr(SRegister st, MemOperand xn, int32_t imm);

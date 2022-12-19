@@ -460,6 +460,21 @@ void Assembler::fneg(VRegister vd, VRegister vn) {
   emit32(0x2EA0F800 | q(vd) | fp_sz(vn) | rn(vn) | rd(vd));
 }
 
+void Assembler::ins(VRegisterLane vd, XRegister vn) {
+  size_t shift = vd.size;
+  size_t imm5 = (vd.lane << (shift + 1)) | (1 << shift);
+
+  emit32(0x4E001C00 | imm5 << 16 | rn(vn) | rd(vd));
+}
+
+void Assembler::ld1(ScalarVRegisterList vs, size_t lane, MemOperand xn, int32_t imm) {
+  emit32(0x4DC08000 | 0b11111 << 16 | (vs.vt1.size & 1) << 10 | rn(xn.base) | rt(vs.vt1));
+}
+
+void Assembler::ld1(ScalarVRegister vs, size_t lane, MemOperand xn, int32_t imm) {
+  ld1(ScalarVRegisterList{vs}, lane, xn, imm);
+}
+
 void Assembler::ld1(VRegisterList vs, MemOperand xn, int32_t imm) {
   ld1_st1_multiple_structures(vs, xn, imm, true);
 }
@@ -513,6 +528,16 @@ void Assembler::ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm) {
   const uint32_t offset = (imm >> 4) & kImm7Mask;
 
   emit32(0xACC00000 | offset << 15 | rt2(qt2) | rn(xn.base) | qt1.code);
+}
+
+void Assembler::ldr(DRegister dt, MemOperand xn) {
+  if (xn.offset != 0 && (xn.offset < 0 || xn.offset > 32760)) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+  size_t size = 3;
+
+  emit32(0x3D400000 | size << 30 | 1 << 22 | (xn.offset >> size) << 10 | rn(xn.base) | rt(dt));
 }
 
 void Assembler::ldr(DRegister dt, MemOperand xn, int32_t imm) {
