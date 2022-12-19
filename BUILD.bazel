@@ -3939,6 +3939,25 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "xop_amalgam_microkernels",
+    gcc_copts = xnnpack_gcc_std_copts(),
+    gcc_x86_copts = ["-mxop"],
+    msvc_copts = xnnpack_msvc_std_copts(),
+    msvc_x86_32_copts = ["/arch:AVX"],
+    msvc_x86_64_copts = ["/arch:AVX"],
+    x86_srcs = ["src/amalgam/xop.c"],
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":prefetch",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
     name = "xop_bench_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-mxop"],
@@ -4640,7 +4659,7 @@ xnnpack_aggregate_library(
         ":sse41_amalgam_microkernels",
         ":avx_amalgam_microkernels",
         ":f16c_amalgam_microkernels",
-        ":xop_prod_microkernels",
+        ":xop_amalgam_microkernels",
         ":fma3_amalgam_microkernels",
         ":avx2_amalgam_microkernels",
         ":avx512f_amalgam_microkernels",

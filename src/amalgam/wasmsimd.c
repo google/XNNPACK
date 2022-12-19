@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <math.h>
+
 #include <wasm_simd128.h>
 
 #include <xnnpack/argmaxpool.h>

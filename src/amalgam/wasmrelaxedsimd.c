@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+
 #include <wasm_simd128.h>
 
 #include <xnnpack/common.h>

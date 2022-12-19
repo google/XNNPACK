@@ -12,8 +12,8 @@ tools/amalgamate-microkernels.py -s PROD_SCALAR_RISCV_MICROKERNEL_SRCS -o src/am
 
 # Wasm microkernels
 tools/amalgamate-microkernels.py -s PROD_WASM_MICROKERNEL_SRCS -o src/amalgam/wasm.c &
-tools/amalgamate-microkernels.py -s PROD_WASMSIMD_MICROKERNEL_SRCS -o src/amalgam/wasmsimd.c &
-tools/amalgamate-microkernels.py -s PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS -o src/amalgam/wasmrelaxedsimd.c &
+tools/amalgamate-microkernels.py -i wasm_simd128.h -s PROD_WASMSIMD_MICROKERNEL_SRCS -o src/amalgam/wasmsimd.c &
+tools/amalgamate-microkernels.py -i wasm_simd128.h -s PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS -o src/amalgam/wasmrelaxedsimd.c &
 
 # x86/x86-64 microkernels
 tools/amalgamate-microkernels.py -i immintrin.h -s PROD_SSE_MICROKERNEL_SRCS -o src/amalgam/sse.c &
@@ -21,6 +21,7 @@ tools/amalgamate-microkernels.py -i immintrin.h -s PROD_SSE2_MICROKERNEL_SRCS -o
 tools/amalgamate-microkernels.py -i immintrin.h -s PROD_SSSE3_MICROKERNEL_SRCS -o src/amalgam/ssse3.c &
 tools/amalgamate-microkernels.py -i immintrin.h -s PROD_SSE41_MICROKERNEL_SRCS -o src/amalgam/sse41.c &
 tools/amalgamate-microkernels.py -i immintrin.h -s PROD_AVX_MICROKERNEL_SRCS -o src/amalgam/avx.c &
+tools/amalgamate-microkernels.py -i xopintrin.h -s PROD_XOP_MICROKERNEL_SRCS -o src/amalgam/xop.c &
 tools/amalgamate-microkernels.py -i immintrin.h -s PROD_FMA3_MICROKERNEL_SRCS -o src/amalgam/fma3.c &
 tools/amalgamate-microkernels.py -i immintrin.h -s PROD_AVX2_MICROKERNEL_SRCS -o src/amalgam/avx2.c &
 tools/amalgamate-microkernels.py -i immintrin.h -s PROD_F16C_MICROKERNEL_SRCS -o src/amalgam/f16c.c &

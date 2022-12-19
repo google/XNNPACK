@@ -81,6 +81,14 @@ def main(args):
 
     amalgam_lines.append("")
 
+  # Multi-line sequence for XOP intrinsics, which don't have a standardized header
+  amalgam_includes.discard("#ifdef _MSC_VER")
+  amalgam_includes.discard("  #include <intrin.h>")
+  amalgam_includes.discard("#else")
+  amalgam_includes.discard("  #include <x86intrin.h>")
+  amalgam_includes.discard("#endif")
+
+  # Single-line sequences for intrinsics with a standardized header
   amalgam_includes.discard("#include <arm_acle.h>")
   amalgam_includes.discard("#include <arm_fp16.h>")
   amalgam_includes.discard("#include <arm_neon.h>")
@@ -90,6 +98,7 @@ def main(args):
   amalgam_includes.discard("#include <smmintrin.h>")
   amalgam_includes.discard("#include <tmmintrin.h>")
   amalgam_includes.discard("#include <xmmintrin.h>")
+  amalgam_includes.discard("#include <wasm_simd128.h>")
 
   amalgam_text = """\
 // Copyright 2021 Google LLC
@@ -102,7 +111,15 @@ def main(args):
   amalgam_text += "\n".join(sorted(inc for inc in amalgam_includes if
                                    not inc.startswith("#include <xnnpack/")))
   if options.include:
-    amalgam_text += "\n\n#include <%s>\n\n" % options.include
+    if options.include == "xopintrin.h":
+      amalgam_text += "\n\n"
+      amalgam_text += "#ifdef _MSC_VER\n"
+      amalgam_text += "  #include <intrin.h>\n"
+      amalgam_text += "#else\n"
+      amalgam_text += "  #include <x86intrin.h>\n"
+      amalgam_text += "#endif\n\n"
+    else:
+      amalgam_text += "\n\n#include <%s>\n\n" % options.include
   else:
     amalgam_text += "\n\n"
   amalgam_text += "\n".join(sorted(inc for inc in amalgam_includes if
