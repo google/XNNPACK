@@ -26,6 +26,58 @@
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
 
+static enum xnn_status create_conv2d_hwc2chw_path(
+    const uint32_t kernel_height,
+    const uint32_t kernel_width,
+    const uint32_t groups,
+    const size_t group_input_channels,
+    const size_t group_output_channels,
+    const size_t output_height_tile,
+    const size_t output_channel_tile,
+    const void* kernel,
+    const void* bias,
+    const uint32_t log2_filter_element_size,
+    const xnn_pack_dconv_oki_w_fn xnn_pack_dconv_oki_w,
+    const xnn_conv_hwc2chw_ukernel_fn conv_hwc2chw_ukernel,
+    const enum xnn_operator_type operator_type,
+    const xnn_operator_t convolution_op)
+{
+  assert(conv_hwc2chw_ukernel != NULL);
+
+  const size_t packed_group_output_channels = round_up(group_output_channels, output_channel_tile);
+  const size_t packed_weights_size = (groups * packed_group_output_channels *
+    (group_input_channels * kernel_height * kernel_width + 1 /* bias */)) << log2_filter_element_size;
+  const size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
+  void* weights_ptr = xnn_get_pointer_to_write_weights(convolution_op, aligned_total_weights_size, 0);
+  if (weights_ptr == NULL) {
+    xnn_log_error("failed to reserve or allocate %zu bytes for %s operator conv2d_hwc2chw packed weights",
+                  aligned_total_weights_size,
+                  xnn_operator_type_to_string(operator_type));
+    return xnn_status_out_of_memory;
+  }
+  xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+    aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
+
+  xnn_pack_dconv_oki_w(
+    group_output_channels,
+    group_input_channels,
+    output_channel_tile,
+    kernel_height, kernel_width,
+    kernel, bias, weights_ptr, NULL);
+
+  if (use_weights_cache(convolution_op)) {
+    convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
+        convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
+  }
+
+  convolution_op->ukernel.conv2d = (struct xnn_ukernel_conv2d) {
+    .hwc2chw_fn = conv_hwc2chw_ukernel,
+    .output_height_tile = output_height_tile,
+    .output_channel_tile = output_channel_tile,
+  };
+  return xnn_status_success;
+}
+
 static enum xnn_status create_dwconv_path(
     const uint32_t kernel_height,
     const uint32_t kernel_width,
@@ -107,6 +159,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
   xnn_operator_t convolution_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
+  const size_t log2_filter_element_size = 1;  /* log2(sizeof(uint16_t)) */
   const enum xnn_operator_type operator_type = xnn_operator_type_convolution_nchw_f16;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -392,49 +445,27 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
     case xnn_microkernel_type_conv2d_hwc2chw:
     {
       assert(groups == 1);
-
-      const size_t packed_group_output_channels =
-        round_up(group_output_channels, xnn_params.f16.conv_hwc2chw_3x3c3s2.output_channel_tile);
-      const size_t packed_weights_size = groups * packed_group_output_channels *
-        (group_input_channels * kernel_height * kernel_width + 1 /* bias */) * sizeof(uint16_t);
-      size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
-      void* weights_ptr = xnn_get_pointer_to_write_weights(
-          convolution_op, aligned_total_weights_size, 0);
-      if (weights_ptr == NULL) {
-        xnn_log_error("failed to reserve or allocate %zu bytes for %s operator conv2d_hwc2chw packed weights",
-                      aligned_total_weights_size,
-                      xnn_operator_type_to_string(operator_type));
-        goto error;
-      }
-      xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
-        aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
-
       xnn_pack_dconv_oki_w_fn xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_fn) xnn_pack_f16_dconv_oki_w;
       if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
         xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_fn) xnn_pack_f32_to_f16_dconv_oki_w;
       }
-      xnn_pack_dconv_oki_w(
-        group_output_channels,
-        group_input_channels,
-        xnn_params.f16.conv_hwc2chw_3x3c3s2.output_channel_tile,
-        kernel_height, kernel_width,
-        kernel, bias, weights_ptr, NULL);
-
-      if (use_weights_cache(convolution_op)) {
-        convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
-            convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
-      }
-
-      convolution_op->ukernel.conv2d = (struct xnn_ukernel_conv2d) {
-        .hwc2chw_fn = xnn_params.f16.conv_hwc2chw_3x3c3s2.ukernel_with_symm_padding,
-        .output_height_tile = xnn_params.f16.conv_hwc2chw_3x3c3s2.output_height_tile,
-        .output_channel_tile = xnn_params.f16.conv_hwc2chw_3x3c3s2.output_channel_tile,
-      };
       xnn_params.f16.conv_hwc2chw_3x3c3s2.init.f16(&convolution_op->params.f16_minmax, fp16_output_min, fp16_output_max);
 
+      status = create_conv2d_hwc2chw_path(
+          kernel_height, kernel_width, groups,
+          group_input_channels,
+          group_output_channels,
+          xnn_params.f16.conv_hwc2chw_3x3c3s2.output_height_tile,
+          xnn_params.f16.conv_hwc2chw_3x3c3s2.output_channel_tile,
+          kernel, bias, log2_filter_element_size,
+          xnn_pack_dconv_oki_w,
+          xnn_params.f16.conv_hwc2chw_3x3c3s2.ukernel_with_symm_padding,
+          operator_type, convolution_op);
+      if (status != xnn_status_success) {
+        goto error;
+      }
       break;
     }
-
     case xnn_microkernel_type_dwconv:
     {
       xnn_pack_chw_dwconv_hwg_w_fn pack_chw_dwconv_hwg_w = (xnn_pack_chw_dwconv_hwg_w_fn) xnn_pack_f16_chw_dwconv_hwg_w;
@@ -446,7 +477,6 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
 
       dwconv2d_parameters->init.f16(&convolution_op->params.f16_chw, 0, fp16_output_min, fp16_output_max);
 
-      const size_t log2_filter_element_size = 1;  /* log2(sizeof(uint16_t)) */
       status = create_dwconv_path(
           kernel_height, kernel_width, groups,
           kernel, bias, flags, log2_filter_element_size,
@@ -522,6 +552,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
 {
   xnn_operator_t convolution_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
+  const size_t log2_filter_element_size = 2;  /* log2(sizeof(float)) */
   const enum xnn_operator_type operator_type = xnn_operator_type_convolution_nchw_f32;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -854,7 +885,6 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     {
       dwconv2d_parameters->init.f32(&convolution_op->params.f32_chw, 0, output_min, output_max);
 
-      const size_t log2_filter_element_size = 2;  /* log2(sizeof(float)) */
       status = create_dwconv_path(
           kernel_height, kernel_width, groups,
           kernel, bias, flags, log2_filter_element_size,
