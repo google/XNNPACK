@@ -33,14 +33,11 @@
 # x17 c2
 #  x7 c3
 
-# x19 temporary vector shadow register
-
 # Vector register usage
 # A0  v0     v3
 # A1  v0[1]  v3[1]
 # A2  v1     v4
 # A3  v1[1]  v4[1]
-
 # B   v12 v13 v14 v15 second set of B
 # B   v16 v17 v18 v19 first set
 # C   v20 v21
@@ -48,6 +45,7 @@
 # C   v24 v25
 # C   v26 v27
 # Clamp v6 v7
+# temporary vector shadow register x19
 
 # unused A   v8 v9 v10 v11
 # x12 a4

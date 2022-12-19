@@ -51,6 +51,10 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   pipelined: true
+- name: xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a55
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
+  pipelined: true
 - name: xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
