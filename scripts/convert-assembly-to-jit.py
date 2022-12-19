@@ -482,7 +482,7 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
       # Skip b vector registers.
       if re.search(r'(?:#|//)\W+B', line):
         continue
-      m = re.search(r'(?:#|//)\W+(A|C)\d?\W+(((?:v|d|q|r)\d+(?:\W*|-))+)', line)
+      m = re.search(r'(?:#|//)\W+(A|C)\d?\W+(((?:v|d|q|r|x)\d+(?:\W*|-))+)', line)
       if not m:
         print(
             f'ERROR failed to parse vector register usage: {line}',
