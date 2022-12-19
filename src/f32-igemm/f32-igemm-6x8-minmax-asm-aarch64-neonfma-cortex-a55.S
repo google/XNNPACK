@@ -21,22 +21,37 @@
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-// Register usage
-// A0 x14  v0     v3
-// A1 x15  v0[1]  v3[1]
-// A2 x20  v1     v4
-// A3 x21  v1[1]  v4[1]
-// A4 x22  v2     v5
-// A5 x23  v2[1]  v5[1]
-// B   x5  v12 v13 v14 v15 second set of B
-// B       v16 v17 v18 v19 first set
+# A pointers
+# x14 a0
+# x15 a1
+# x20 a2
+# x21 a3
+# x22 a4
+# x23 a5
 
-// C0  x6 v20 v21
-// C1 x16 v22 v23
-// C2 x17 v24 v25
-// C3 x10 v26 v27
-// C4 x13 v28 v29
-// C5  x7 v30 v31
+# C pointers
+#  x6 c0
+# x16 c1
+# x17 c2
+# x10 c3
+# x13 c4
+#  x7 c5
+
+// Register usage
+// A0   v0     v3
+// A1   v0[1]  v3[1]
+// A2   v1     v4
+// A3   v1[1]  v4[1]
+// A4   v2     v5
+// A5   v2[1]  v5[1]
+// B    v12 v13 v14 v15 second set of B
+// B    v16 v17 v18 v19 first set
+// C0  v20 v21
+// C1  v22 v23
+// C2  v24 v25
+// C3  v26 v27
+// C4  v28 v29
+// C5  v30 v31
 // clamp  v6 v7
 // unused A   v8 v9 v10 v11
 // x19 temporary vector shadow register
