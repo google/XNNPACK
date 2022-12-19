@@ -247,7 +247,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma${"_prfm" if
         RET
 
 END_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a75
-# LINT.ThenChange(f32-igemm-1x8-aarch64-neonfma-cortex-a75.cc)
+# LINT.ThenChange(gen/f32-igemm-1x8-aarch64-neonfma-cortex-a75.cc)
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

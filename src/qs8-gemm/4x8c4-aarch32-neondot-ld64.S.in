@@ -317,7 +317,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         BX      lr
 
 END_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__asm_aarch32_neondot_ld64
-# LINT.ThenChange(4x8c4-rndnu-aarch32-neondot-ld64.cc)
+# LINT.ThenChange(gen/qs8-gemm-4x8c4-rndnu-aarch32-neondot-ld64.cc)
 #endif  // __APPLE__
 
 #ifdef __ELF__

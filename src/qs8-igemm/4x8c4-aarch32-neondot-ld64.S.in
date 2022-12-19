@@ -341,7 +341,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
 END_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8c4__asm_aarch32_neondot_ld64
-# LINT.ThenChange(4x8c4-rndnu-aarch32-neondot-ld64.cc)
+# LINT.ThenChange(gen/qs8-igemm-4x8c4-rndnu-aarch32-neondot-ld64.cc)
 #endif  // __APPLE__
 
 #ifdef __ELF__
