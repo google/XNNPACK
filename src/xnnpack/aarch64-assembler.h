@@ -299,7 +299,8 @@ struct MemOperandHelper {
 constexpr MemOperandHelper mem;
 
 enum PrefetchOp {
-  kPLDL1KEEP = 0
+  kPLDL1KEEP = 0,
+  kPSTL1KEEP = 0x10,
 };
 
 enum Condition : uint32_t {

@@ -61,6 +61,11 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
+- name: xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
+  pipelined: true
+  post-op: false
 - name: xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
@@ -68,6 +73,11 @@
 - name: xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_ld128
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
+- name: xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a53
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
+  pipelined: true
+  post-op: false
 - name: xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8

@@ -142,7 +142,7 @@ INSTR_REG_FPSCR = re.compile(INSTR + f'({APSR}|{REG_NO_GROUP})' + COMMA +
                              FPSCR + COMMENTS)
 
 # e.g. PRFM PLDL1KEEP, [x5]
-INSTR_PLD_MEMOP = re.compile(INSTR + f'(PLDL1KEEP)' + COMMA + MEMOP + COMMENTS)
+INSTR_PLD_MEMOP = re.compile(INSTR + f'(PLDL1KEEP|PSTL1KEEP)' + COMMA + MEMOP + COMMENTS)
 # e.g. PRFM PLDL1KEEP, [x5, 64]
 INSTR_PLD_MEMOP_OFFSET = re.compile(INSTR + f'(PLDL1KEEP)' + COMMA +
                                     MEMOP_OFFSET + COMMENTS)

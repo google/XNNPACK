@@ -41,7 +41,7 @@
 # x13 c4
 #  x7 c5
 
-// Vector register usage
+// Register usage
 // A0  v0     v3
 // A1  v0[1]  v3[1]
 // A2  v1     v4

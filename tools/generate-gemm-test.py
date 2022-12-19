@@ -870,7 +870,7 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE == 'f32':
     }
   }
 
-$if TEST_NAME.startswith('GENERATE') and DATATYPE == 'f32':
+$if TEST_NAME.startswith('GENERATE') and DATATYPE == 'f32' and POST_OP:
   TEST(${TEST_NAME}, hardswish) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -893,7 +893,7 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE == 'f32':
 
 
 def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
-                        requantization, is_pipelined, isa, jit):
+                        requantization, is_pipelined, isa, jit, post_op):
   """Generates all tests cases for a GEMM micro-kernel.
 
   Args:
@@ -914,6 +914,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
     isa: instruction set required to run the micro-kernel. Generated unit test
       will skip execution if the host processor doesn't support this ISA.
     jit: if we are generating test code for JIT codegen.
+    post_op: if post operation is supported (only for JIT).
 
   Returns:
     Code for the test case.
@@ -957,6 +958,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
           "IS_PIPELINED": is_pipelined,
           "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
           "next_prime": next_prime,
+          "POST_OP": post_op,
       })
 
 
@@ -1005,12 +1007,13 @@ def main(args):
       init_fn = ukernel_spec.get("init")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       jit = name.startswith("xnn_generate")
+      post_op = ukernel_spec.get("post-op", True)
       mr, nr, kr, sr, xw, requantization, arch, isa, assembly = \
         split_ukernel_name(name)
 
       test_case = generate_test_cases(name, mr, nr, kr, sr, xw, k_block,
                                       init_fn, requantization, pipelined, isa,
-                                      jit)
+                                      jit, post_op)
 
       # Hash the name of each microkernel and figure out which output file to
       # write it to.
