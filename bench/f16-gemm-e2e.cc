@@ -61,10 +61,10 @@ static void GEMMEnd2EndBenchmark(
   #if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
     // If JIT is enabled, we want to make sure that we are still benchmarking
     // non-JIT microkernels, so nullify the pointers to generators.
-    xnn_params.f16.gemm.generator.gemm = xnn_init_hmp_gemm_codegen(nullptr);
-    xnn_params.f16.gemm.generator.gemm1 = xnn_init_hmp_gemm_codegen(nullptr);
-    xnn_params.f16.gemm.generator.igemm = xnn_init_hmp_igemm_codegen(nullptr);
-    xnn_params.f16.gemm.generator.igemm1 = xnn_init_hmp_igemm_codegen(nullptr);
+    for (size_t i = 0; i < XNN_MAX_MR; i++) {
+      xnn_params.f16.gemm.generator.gemm[i] = xnn_init_hmp_gemm_codegen(nullptr);
+      xnn_params.f16.gemm.generator.igemm[i]  = xnn_init_hmp_igemm_codegen(nullptr);
+    }
   #endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
 
   auto execution_plan = model_factory(nullptr);

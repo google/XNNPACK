@@ -122,13 +122,17 @@ static void generate_gemms_up_to_max_mr(
   if (convolution_op->code_cache == NULL) {
     return;
   }
-  convolution_op->ukernel.gemm.gemm_cases[0].generated_code_offset[XNN_UARCH_DEFAULT] =
-      get_generated_gemm(generators.gemm1, jit_gemm_params, 1, group_output_channels, nr, group_input_channels,
-                         log2_input_element_size, convolution_op->code_cache);
-  for (size_t mr = 2; mr <= max_mr; mr++) {
+  for (size_t mr = 1; mr <= max_mr; mr++) {
+    // Get smallest generator that is >= mr.
+    size_t smallest_mr = mr;
+    while (generators.gemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] == NULL && smallest_mr <= max_mr) {
+      smallest_mr++;
+    }
+    xnn_log_debug("using generator for mr %zu to generate gemm of mr %zu", smallest_mr, mr);
+    assert(generators.gemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] != NULL);
     convolution_op->ukernel.gemm.gemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT] =
-        get_generated_gemm(generators.gemm, jit_gemm_params, mr, group_output_channels, nr, group_input_channels,
-                           log2_input_element_size, convolution_op->code_cache);
+      get_generated_gemm(generators.gemm[smallest_mr - 1], jit_gemm_params, mr, group_output_channels, nr,
+                         group_input_channels, log2_input_element_size, convolution_op->code_cache);
   }
 }
 
@@ -188,13 +192,18 @@ static void generate_igemms_up_to_max_mr(
   if (convolution_op->code_cache == NULL) {
     return;
   }
-  convolution_op->ukernel.igemm.igemm_cases[0].generated_code_offset[XNN_UARCH_DEFAULT] =
-      get_generated_igemm(generators.igemm1, jit_gemm_params, group_output_channels, nr, group_input_channels,
-                          log2_input_element_size, kernel_size, 1, convolution_op->code_cache);
-  for (size_t mr = 2; mr <= max_mr; mr++) {
+  for (size_t mr = 1; mr <= max_mr; mr++) {
+    // Get smallest generator that is >= mr.
+    size_t smallest_mr = mr;
+    while (generators.igemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] == NULL && smallest_mr <= max_mr) {
+      smallest_mr++;
+    }
+    xnn_log_debug("using generator for mr %zu to generate igemm of mr %zu", smallest_mr, mr);
+    assert(generators.igemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] != NULL);
     convolution_op->ukernel.igemm.igemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT] =
-      get_generated_igemm(generators.igemm, jit_gemm_params, group_output_channels, nr, group_input_channels,
-                          log2_input_element_size, kernel_size, mr, convolution_op->code_cache);
+      get_generated_igemm(generators.igemm[smallest_mr - 1], jit_gemm_params, group_output_channels, nr,
+                          group_input_channels, log2_input_element_size, kernel_size, mr,
+                          convolution_op->code_cache);
   }
 }
 #endif  // XNN_PLATFORM_JIT
