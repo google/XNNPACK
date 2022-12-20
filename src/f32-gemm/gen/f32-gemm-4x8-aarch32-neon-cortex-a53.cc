@@ -21,12 +21,12 @@ class Generator : public MacroAssembler {
   using MacroAssembler::MacroAssembler;
 
  public:
-  void generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params);
+  void generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params);
   void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);
 };
 
 
-// void xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a53(
+// void xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_prfm_cortex_a53(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5 -> sp + 0
@@ -55,8 +55,8 @@ class Generator : public MacroAssembler {
 // temp r0, r2 for Cortex-A53 loads
 // unused r14 (lr)
 
-// Converted from: src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a53.S
-void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
+// Converted from: src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S
+void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
 {
   assert(max_mr <= 4);
   assert(nc_mod_nr < 8);
@@ -111,17 +111,51 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   vldm(mem[r9]++, {d16-d19}); // Bias
 
   subs(r5, r2, 16); // kc - 16
+  if (prefetch) {
+    pld(mem[r3, 0]); // Prefetch A
+    pld(mem[r3, 64]);
+  }
   if (max_mr > 1) {
     vmov(q10, q8);
+  }
+  if (prefetch) {
+    pld(mem[r12, 0]);
+    pld(mem[r12, 64]);
+  }
+  if (max_mr > 1) {
     vmov(q11, q9);
+  }
+  if (prefetch) {
+    pld(mem[r10, 0]);
+    pld(mem[r10, 64]);
   }
   if (max_mr > 2) {
     vmov(q12, q8);
+  }
+  if (prefetch) {
+    pld(mem[r7, 0]);
+    pld(mem[r7, 64]);
+  }
+  if (max_mr > 2) {
     vmov(q13, q9);
+  }
+  if (prefetch) {
+    pld(mem[r9, 0]); // Prefetch B
+    pld(mem[r9, 64]);
   }
   if (max_mr > 3) {
     vmov(q14, q8);
+  }
+  if (prefetch) {
+    pld(mem[r9, 128]);
+    pld(mem[r9, 192]);
+  }
+  if (max_mr > 3) {
     vmov(q15, q9);
+  }
+  if (prefetch) {
+    pld(mem[r9, 256]);
+    pld(mem[r9, 320]);
   }
   blo(l4); // less than 4 channels?
 
@@ -161,6 +195,9 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 2) {
     vmla_f32(q12, q4, d2[0]);
   }
+  if (prefetch) {
+    pld(mem[r3, 128]); // Prefetch A0
+  }
 
   // BLOCK 1
   vldr(d12, mem[r9, 32]); // B1
@@ -175,6 +212,9 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   ldr(r2, mem[r9, 76]); // B0 high
   if (max_mr > 1) {
     vmla_f32(q11, q5, d1[0]);
+  }
+  if (prefetch) {
+    pld(mem[r12, 128]); // Prefetch A1
   }
 
   // BLOCK 2
@@ -191,6 +231,9 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     ldr(r2, mem[r7, 4]); // A3 high
   }
   vmla_f32(q8, q6, d0[1]);
+  if (prefetch) {
+    pld(mem[r10, 128]); // Prefetch A2
+  }
 
   // BLOCK 3
   vldr(d14, mem[r9, 48]); // B1
@@ -208,6 +251,9 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 3) {
     vmla_f32(q14, q6, d3[1]);
   }
+  if (prefetch) {
+    pld(mem[r7, 128]); // Prefetch A3
+  }
 
   // BLOCK 4
   vldr(d8, mem[r9, 64]); // B0
@@ -221,6 +267,9 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 2) {
     vmla_f32(q13, q7, d2[1]);
   }
+  if (prefetch) {
+    pld(mem[r9, 384]); // Prefetch B
+  }
 
   // BLOCK 5
   vldr(d10, mem[r9, 80]); // B0
@@ -232,6 +281,9 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   nop();
   ldr(r2, mem[r9, 124]); // B1 high
   nop();
+  if (prefetch) {
+    pld(mem[r9, 448]); // Prefetch B
+  }
 
   // Second group of 16 FMA, First group of loads
   // BLOCK 0
@@ -751,7 +803,19 @@ xnn_status_t xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53(xnn_code
   using namespace xnnpack::aarch32;
   Generator g(code);
   assert(params != nullptr);
-  g.generate(max_mr, nc_mod_nr, kc, static_cast<const jit_gemm_params*>(params));
+  g.generate(false, max_mr, nc_mod_nr, kc, static_cast<const jit_gemm_params*>(params));
+  g.finalize();
+  if (g.error() != xnnpack::Error::kNoError) {
+    return xnn_status_invalid_state;
+  }
+  return xnn_status_success;
+}
+
+xnn_status_t xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_prfm_cortex_a53(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params) {
+  using namespace xnnpack::aarch32;
+  Generator g(code);
+  assert(params != nullptr);
+  g.generate(true, max_mr, nc_mod_nr, kc, static_cast<const jit_gemm_params*>(params));
   g.finalize();
   if (g.error() != xnnpack::Error::kNoError) {
     return xnn_status_invalid_state;
