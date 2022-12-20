@@ -9129,6 +9129,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "batch_to_space_nhwc_test",
+    srcs = [
+        "test/batch-to-space-nhwc.cc",
+        "test/batch-to-space-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "ceiling_nc_test",
     srcs = [
         "test/ceiling-nc.cc",

@@ -76,6 +76,7 @@ struct transpose_context {
   } params;
   size_t input_stride[XNN_MAX_TENSOR_DIMS];
   size_t output_stride[XNN_MAX_TENSOR_DIMS];
+  bool variable_ukernel;
 };
 
 XNN_PRIVATE void xnn_compute_transposec_2d(
@@ -1006,6 +1007,117 @@ struct univector_contiguous_context {
       size_t offset,
       size_t size);
 #endif
+
+struct batch_to_space_context_identity {
+  size_t input_batch_stride;
+  size_t input_row_stride;
+  size_t output_row_stride;
+  size_t output_batch;
+  size_t initial_input_offset;
+};
+
+struct batch_to_space_context_tile_2d {
+  size_t left_crop_col;
+  size_t right_crop_col;
+  size_t top_crop_row;
+  size_t bottom_crop_row;
+  size_t crop_top_bytes;
+  size_t crop_left_bytes;
+  size_t vertical_crop;
+  size_t vertical_crop_bytes;
+  size_t horizontal_crop;
+  size_t horizontal_crop_bytes;
+  size_t base_input_offset;
+  ptrdiff_t output_batch_stride_compensation;
+  // Subtile transpose microkernel parameters.
+  size_t ld_input;
+  size_t ld_output;
+  size_t input_element_stride;
+  size_t output_element_stride;
+  size_t element_size;
+};
+
+struct batch_to_space_context_tile_4d {
+  size_t top_crop_row;
+  size_t bottom_crop_row;
+  size_t k_output_stride;
+  size_t crop_top_bytes;
+  size_t crop_left_bytes;
+  size_t vertical_crop_bytes;
+  size_t horizontal_crop_bytes;
+  size_t ld_input;
+  size_t ld_output;
+};
+
+struct batch_to_space_context {
+  union {
+    struct transpose_context transpose;
+    struct univector_contiguous_context univector_contiguous;
+  };
+  size_t type_size;
+  size_t element_size;
+  size_t input_batch;
+  size_t input_height;
+  size_t input_width;
+  size_t input_channels;
+  size_t block_height;
+  size_t block_width;
+  size_t crop_top;
+  size_t crop_bottom;
+  size_t crop_left;
+  size_t crop_right;
+  size_t output_height_nocrop;
+  size_t output_width_nocrop;
+  size_t output_height;
+  size_t output_width;
+  union {
+    struct batch_to_space_context_identity identity;
+    struct batch_to_space_context_tile_2d tile_2d;
+    struct batch_to_space_context_tile_4d tile_4d;
+  };
+};
+
+XNN_PRIVATE void xnn_compute_batch_to_space_v1d(
+    const struct batch_to_space_context* context, size_t offset, size_t size);
+
+void xnn_compute_batch_to_space_2dv(
+    const struct batch_to_space_context* context,
+    size_t i,
+    size_t j,
+    size_t tile_i,
+    size_t tile_j);
+
+void xnn_compute_batch_to_space_c2dh(
+    const struct batch_to_space_context* context,
+    size_t i,
+    size_t j,
+    size_t tile_i,
+    size_t tile_j);
+
+void xnn_compute_batch_to_space_v2dh(
+    const struct batch_to_space_context* context,
+    size_t i,
+    size_t j,
+    size_t tile_i,
+    size_t tile_j);
+
+XNN_PRIVATE void xnn_compute_batch_to_space_c4d(
+    const struct batch_to_space_context* context,
+    size_t i,
+    size_t j,
+    size_t k,
+    size_t l,
+    size_t tile_k,
+    size_t tile_l);
+
+XNN_PRIVATE void xnn_compute_batch_to_space_v4d(
+    const struct batch_to_space_context* context,
+    size_t i,
+    size_t j,
+    size_t k,
+    size_t l,
+    size_t tile_k,
+    size_t tile_l);
 
 struct prelu_context {
   size_t n;
