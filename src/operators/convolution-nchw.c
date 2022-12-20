@@ -378,8 +378,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
 
       const size_t packed_weights_size =
         (num_nonzero_blocks * 2) * sizeof(int32_t) +
-        (num_output_channel_blocks * sizeof(uint32_t) +
-        group_output_channels + num_nonzero_values) * sizeof(uint16_t) + XNN_EXTRA_BYTES;
+        num_output_channel_blocks * sizeof(uint32_t) +
+        (group_output_channels + num_nonzero_values) * sizeof(uint16_t) + XNN_EXTRA_BYTES;
 
       convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
       if (convolution_op->packed_weights.pointer == NULL) {
@@ -791,8 +791,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
 
       const size_t packed_weights_size =
         (num_nonzero_blocks * 2) * sizeof(int32_t) +
-        (num_output_channel_blocks * sizeof(uint32_t) +
-        num_nonzero_values + group_output_channels) * sizeof(float) + XNN_EXTRA_BYTES;
+        num_output_channel_blocks * sizeof(uint32_t) +
+        (num_nonzero_values + group_output_channels) * sizeof(float) + XNN_EXTRA_BYTES;
 
       convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
       if (convolution_op->packed_weights.pointer == NULL) {
