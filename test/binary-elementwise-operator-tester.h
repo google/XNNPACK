@@ -1143,7 +1143,6 @@ class BinaryElementwiseOperatorTester {
         output_value = std::min(output_value, output_max);
       }
 
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
       switch (operation_type()) {
         case OperationType::Add:
@@ -1325,7 +1324,6 @@ void TestRunQS8() const {
         output_value = std::min<float>(output_value, static_cast<float>(qmax()));
       }
 
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       switch (operation_type()) {
         case OperationType::Add:
           ASSERT_EQ(xnn_status_success,
@@ -1468,7 +1466,6 @@ void TestRunQS8() const {
         output_value = std::min<float>(output_value, static_cast<float>(qmax()));
       }
 
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       switch (operation_type()) {
         case OperationType::Add:
           ASSERT_EQ(xnn_status_success,

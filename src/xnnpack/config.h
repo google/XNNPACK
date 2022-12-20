@@ -119,6 +119,25 @@ struct xnn_binary_elementwise_config {
   size_t element_tile;
 };
 
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vadd_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vdiv_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vmax_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vmin_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vmul_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vsub_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vsqrdiff_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vadd_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vdiv_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vmax_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vmin_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vmul_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vsub_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vsqrdiff_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qs8_vadd_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qs8_vmul_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qu8_vadd_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qu8_vmul_config();
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
