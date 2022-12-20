@@ -273,7 +273,6 @@ SET(LOGGING_SRCS
   src/log.c)
 
 SET(XNNPACK_SRCS
-  src/binary-elementwise-config.c
   src/init.c
   src/params.c
   src/transpose-config.c

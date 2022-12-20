@@ -2322,7 +2322,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "microkernel_configs",
     srcs = [
-        "src/binary-elementwise-config.c",
         "src/transpose-config.c",
         "src/x8-lut-config.c",
     ],
@@ -2346,7 +2345,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "microkernel_configs_test_mode",
     srcs = [
-        "src/binary-elementwise-config.c",
         "src/transpose-config.c",
         "src/x8-lut-config.c",
     ],
