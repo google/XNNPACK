@@ -147,11 +147,8 @@ static inline bool xnn_is_hmp_igemm_codegen(struct xnn_hmp_igemm_codegen ukernel
 }
 
 struct gemm_codegens {
-  struct xnn_hmp_gemm_codegen gemm;
-  struct xnn_hmp_igemm_codegen igemm;
-  // Optional JIT GEMM and IGEMM micro-kernels with MR=1 and the same NR and KR parameters.
-  struct xnn_hmp_gemm_codegen gemm1;
-  struct xnn_hmp_igemm_codegen igemm1;
+  struct xnn_hmp_gemm_codegen gemm[XNN_MAX_MR];
+  struct xnn_hmp_igemm_codegen igemm[XNN_MAX_MR];
 };
 #endif  // XNN_PLATFORM_JIT
 
