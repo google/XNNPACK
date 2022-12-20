@@ -26,6 +26,100 @@
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
 
+static enum xnn_status create_spmm_path(
+    const uint32_t kernel_height,
+    const uint32_t kernel_width,
+    const uint32_t groups,
+    const size_t group_input_channels,
+    const size_t group_output_channels,
+    const size_t output_channels_block_size,
+    const void* kernel,
+    const void* bias,
+    const uint32_t log2_filter_element_size,
+    const xnn_analyze_spmm_fn xnn_analyze_spmm,
+    const xnn_pack_spmm_fn xnn_pack_spmm,
+    const xnn_spmm_ukernel_fn spmm_ukernel,
+    const size_t mr,  // For block encoding microkernels
+    const enum xnn_operator_type operator_type,
+    const xnn_operator_t convolution_op)
+{
+  assert(spmm_ukernel != NULL);
+  assert(kernel_height == 1);
+  assert(kernel_width == 1);
+  assert(groups == 1);
+
+  // Count number of non-zero values.
+  size_t num_nonzeros[5];
+  xnn_analyze_spmm(group_output_channels, group_input_channels, kernel, num_nonzeros);
+
+  size_t num_nonzeroes = num_nonzeros[0];
+  const size_t num_output_channel_blocks = group_output_channels;
+  const size_t num_nonzero_values = num_nonzeroes;
+  const size_t num_nonzero_blocks = num_nonzeroes;
+
+  // Sparse representation of weights consists of four components:
+  // 1. An array of int32_t values storing scaled [by sizeof(input element)] difference between input channels
+  //    corresponding to successive non-zero blocks.  Used by setup to compute (array 2).
+  // 2. An array of int32_t values storing increment for input pointer after each processed tile. This array is
+  //    derived from scaled difference in array 1 using parameters to setup function.
+  // 3. An array of uint32_t values storing the number of non-zero kernel elements per each output channel.
+  // 4. An array of float or fp16 values storing all bias elements (group_output_channels) and non-zero kernel elements.
+  //    All elements within non-zero block are assumed to be non-zero.
+
+  const size_t packed_weights_size =
+    num_nonzero_blocks * 2 * sizeof(int32_t) +
+    num_output_channel_blocks * sizeof(uint32_t) +
+    ((group_output_channels + num_nonzero_values) << log2_filter_element_size) + XNN_EXTRA_BYTES;
+
+  convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
+  if (convolution_op->packed_weights.pointer == NULL) {
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator packed weights",
+      packed_weights_size, xnn_operator_type_to_string(operator_type));
+    return xnn_status_out_of_memory;
+  }
+  xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
+    packed_weights_size, xnn_operator_type_to_string(operator_type));
+
+  convolution_op->num_nonzero_values = num_nonzero_values;
+  convolution_op->num_nonzero_blocks = num_nonzero_blocks;
+  convolution_op->num_output_channel_blocks = num_output_channel_blocks;
+
+  int32_t* input_channel_diffs = (int32_t*) convolution_op->packed_weights.pointer;
+  int32_t* input_increments = (int32_t*) (input_channel_diffs + num_nonzero_blocks);
+  uint32_t* output_channel_nonzeros = (uint32_t*) (input_increments + num_nonzero_blocks);
+  void* nonzero_values = (void*) (output_channel_nonzeros + num_output_channel_blocks);
+
+  memset(output_channel_nonzeros, 0, num_output_channel_blocks * sizeof(uint32_t));
+
+  size_t first_ic = 0;
+  enum xnn_status status = xnn_pack_spmm(
+        group_output_channels,
+        output_channels_block_size,
+        group_input_channels,
+        kernel,
+        bias,
+        input_channel_diffs,
+        output_channel_nonzeros,
+        nonzero_values,
+        &first_ic);
+
+  if (status != xnn_status_success) {
+    goto error;
+  }
+  convolution_op->first_input_channel = first_ic;
+
+  convolution_op->ukernel.spmm = (struct xnn_ukernel_spmm) {
+    .function = spmm_ukernel,
+    .mr = mr,
+  };
+  return xnn_status_success;
+
+error:
+  xnn_release_simd_memory(convolution_op->packed_weights.pointer);
+  return status;
+}
+
 static enum xnn_status create_conv2d_hwc2chw_path(
     const uint32_t kernel_height,
     const uint32_t kernel_width,
@@ -350,96 +444,33 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
   switch (ukernel_type) {
     case xnn_microkernel_type_spmm:
     {
-      assert(kernel_height == 1);
       assert(kernel_width == 1);
+      assert(kernel_height == 1);
       assert(groups == 1);
 
-      // Count number of non-zero values.
-      size_t num_nonzeros[5];
+      xnn_analyze_spmm_fn xnn_analyze_spmm;
+      xnn_pack_spmm_fn xnn_pack_spmm;
       if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-        xnn_analyze_f32_spmm(group_output_channels, group_input_channels, kernel, num_nonzeros);
+        xnn_analyze_spmm = (xnn_analyze_spmm_fn) xnn_analyze_f32_spmm;
+        xnn_pack_spmm = (xnn_pack_spmm_fn) xnn_pack_f32_to_f16_spmm;
       } else {
-        xnn_analyze_f16_spmm(group_output_channels, group_input_channels, kernel, num_nonzeros);
+        xnn_analyze_spmm = (xnn_analyze_spmm_fn) xnn_analyze_f16_spmm;
+        xnn_pack_spmm = (xnn_pack_spmm_fn) xnn_pack_f16_spmm;
       }
-      size_t num_nonzeroes = num_nonzeros[0];
-      const size_t num_output_channel_blocks = group_output_channels;
-      const size_t num_nonzero_values = num_nonzeroes;
-      const size_t num_nonzero_blocks = num_nonzeroes;
       const struct spmm_parameters* spmm_parameters = &xnn_params.f16.spmm;
 
-      // Sparse representation of weights consists of four components:
-      // 1. An array of int32_t values storing scaled [by sizeof(input element)] difference between input channels
-      //    corresponding to successive non-zero blocks.  Used by setup to compute (array 2).
-      // 2. An array of int32_t values storing increment for input pointer after each processed tile. This array is
-      //    derived from scaled difference in array 1 using parameters to setup function.
-      // 3. An array of uint32_t values storing the number of non-zero kernel elements per each output channel.
-      // 4. An array of fp16 values storing all bias elements (group_output_channels) and non-zero kernel elements.
-      //    All elements within non-zero block are assumed to be non-zero.
+      spmm_parameters->init.f16(&convolution_op->params.f16_minmax, fp16_output_min, fp16_output_max);
 
-      const size_t packed_weights_size =
-        (num_nonzero_blocks * 2) * sizeof(int32_t) +
-        num_output_channel_blocks * sizeof(uint32_t) +
-        (group_output_channels + num_nonzero_values) * sizeof(uint16_t) + XNN_EXTRA_BYTES;
-
-      convolution_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
-      if (convolution_op->packed_weights.pointer == NULL) {
-        xnn_log_error(
-          "failed to allocate %zu bytes for %s operator packed weights",
-          packed_weights_size, xnn_operator_type_to_string(operator_type));
-        goto error;
-      }
-      xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
-        packed_weights_size, xnn_operator_type_to_string(operator_type));
-
-      convolution_op->num_nonzero_values = num_nonzero_values;
-      convolution_op->num_nonzero_blocks = num_nonzero_blocks;
-      convolution_op->num_output_channel_blocks = num_output_channel_blocks;
-
-      int32_t* input_channel_diffs = (int32_t*) convolution_op->packed_weights.pointer;
-      int32_t* input_increments = (int32_t*) (input_channel_diffs + num_nonzero_blocks);
-      uint32_t* output_channel_nonzeros = (uint32_t*) (input_increments + num_nonzero_blocks);
-      uint16_t* nonzero_values = (uint16_t*) (output_channel_nonzeros + num_output_channel_blocks);
-
-      memset(output_channel_nonzeros, 0, num_output_channel_blocks * sizeof(uint32_t));
-
-      // TODO(fbarchard): Support block encoding
-      const size_t output_channels_block_size = 1;
-
-      size_t first_ic = 0;
-      if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-        status = xnn_pack_f32_to_f16_spmm(
-            group_output_channels,
-            output_channels_block_size,
-            group_input_channels,
-            kernel,
-            bias,
-            input_channel_diffs,
-            output_channel_nonzeros,
-            nonzero_values,
-            &first_ic);
-      } else {
-        status = xnn_pack_f16_spmm(
-            group_output_channels,
-            output_channels_block_size,
-            group_input_channels,
-            (const uint16_t*) kernel,
-            (const uint16_t*) bias,
-            input_channel_diffs,
-            output_channel_nonzeros,
-            nonzero_values,
-            &first_ic);
-      }
+      status = create_spmm_path(
+          kernel_height, kernel_width, groups,
+          group_input_channels, group_output_channels, 1,  /* output_channels_block_size */
+          kernel, bias, log2_filter_element_size,
+          xnn_analyze_spmm, xnn_pack_spmm,
+          spmm_parameters->ukernel, spmm_parameters->mr,
+          operator_type, convolution_op);
       if (status != xnn_status_success) {
         goto error;
       }
-      convolution_op->first_input_channel = first_ic;
-
-      convolution_op->ukernel.spmm = (struct xnn_ukernel_spmm) {
-        .function = spmm_parameters->ukernel,
-        .mr = spmm_parameters->mr,
-      };
-      spmm_parameters->init.f16(&convolution_op->params.f16_minmax, fp16_output_min, fp16_output_max);
-
       break;
     }
     case xnn_microkernel_type_conv2d_hwc2chw:
@@ -790,7 +821,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       //    All elements within non-zero block are assumed to be non-zero.
 
       const size_t packed_weights_size =
-        (num_nonzero_blocks * 2) * sizeof(int32_t) +
+        num_nonzero_blocks * 2 * sizeof(int32_t) +
         num_output_channel_blocks * sizeof(uint32_t) +
         (num_nonzero_values + group_output_channels) * sizeof(float) + XNN_EXTRA_BYTES;
 
