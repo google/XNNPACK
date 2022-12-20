@@ -3917,6 +3917,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/math/sqrt-u64-scalar-cvtu32-sqrt-cvtsatu32f64.c
   src/math/sqrt-u64-scalar-cvtu32-sqrt-llrint.c
   src/math/sqrt-u64-scalar-cvtu64-sqrt-llrint.c
+  src/math/tanh-f32-scalar-rr2-p6-div.c
   src/qc8-dwconv/gen/qc8-dwconv-3p1c-minmax-fp32-scalar-fmagic.c
   src/qc8-dwconv/gen/qc8-dwconv-3p2c-minmax-fp32-scalar-imagic.c
   src/qc8-dwconv/gen/qc8-dwconv-3p2c-minmax-fp32-scalar-lrintf.c

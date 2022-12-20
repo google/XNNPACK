@@ -375,6 +375,8 @@ DECLARE_U64_UNARY_MATH_FUNCTION(xnn_math_u64_sqrt__scalar_cvtu32_sqrt_cvtsatu32f
 DECLARE_U64_UNARY_MATH_FUNCTION(xnn_math_u64_sqrt__scalar_cvtu32_sqrt_llrint)
 DECLARE_U64_UNARY_MATH_FUNCTION(xnn_math_u64_sqrt__scalar_cvtu64_sqrt_llrint)
 
+DECLARE_F32_UNARY_MATH_FUNCTION(xnn_math_f32_tanh__scalar_rr2_p6_div)
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

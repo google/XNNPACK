@@ -6942,6 +6942,14 @@ xnnpack_benchmark(
     deps = ACCURACY_EVAL_DEPS,
 )
 
+xnnpack_benchmark(
+    name = "f32_tanh_ulp_eval",
+    srcs = [
+        "eval/f32-tanh-ulp.cc",
+    ],
+    deps = ACCURACY_EVAL_DEPS,
+)
+
 ################### Accuracy verification for math functions ##################
 
 xnnpack_unit_test(

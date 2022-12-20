@@ -2927,6 +2927,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-sqrt-ulp-eval PRIVATE benchmark cpuinfo fp16 pthreadpool)
   TARGET_LINK_LIBRARIES(f32-sqrt-ulp-eval PRIVATE bench-utils microkernels-all)
 
+  ADD_EXECUTABLE(f32-tanh-ulp-eval eval/f32-tanh-ulp.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-tanh-ulp-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f32-tanh-ulp-eval PRIVATE benchmark cpuinfo fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-tanh-ulp-eval PRIVATE bench-utils microkernels-all)
+
   # ---[ Build accuracy tests
   ADD_EXECUTABLE(f16-sqrt-eval eval/f16-sqrt.cc)
   TARGET_INCLUDE_DIRECTORIES(f16-sqrt-eval PRIVATE include src)
