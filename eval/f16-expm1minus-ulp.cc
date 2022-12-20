@@ -56,7 +56,7 @@ static void ExpM1Error(
     state.SkipWithError("failed cpuinfo init");
     return;
   }
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 
