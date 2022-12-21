@@ -517,7 +517,23 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
             file=sys.stderr)
         sys.exit(1)
       param_reg = m.group(1)
-      vec_regs = m.group(2).split()
+      all_regs = m.group(2).split()
+      pointer_regs = [reg for reg in all_regs if reg.startswith('r') or reg.startswith('x')]
+
+      vec_regs = [reg for reg in all_regs if reg not in pointer_regs]
+      # Support old comments where the pointers are specified separately (len ==
+      # 0), and also new comments where we should only have 1 pointer register.
+      if len(pointer_regs) > 1:
+        print(f'ERROR unexpected pointer registers: {pointer_regs}', file=sys.stderr)
+        sys.exit(1)
+      if len(pointer_regs) == 1:
+        if param_reg.startswith('A'):
+          a_pointers.append(pointer_regs[0])
+        elif param_reg.startswith('C'):
+          c_pointers.append(pointer_regs[0])
+        else:
+          print(f'ERROR unrecognized param register {param_reg}', file=sys.stderr)
+          sys.exit(1)
       vector_register_usage[param_reg].append(vec_regs)
       continue
     elif 'register usage' in line.lower():
