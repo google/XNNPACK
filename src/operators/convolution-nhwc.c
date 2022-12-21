@@ -129,7 +129,6 @@ static void generate_gemms_up_to_max_mr(
       smallest_mr++;
     }
     xnn_log_debug("using generator for mr %zu to generate gemm of mr %zu", smallest_mr, mr);
-    assert(generators.gemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] != NULL);
     convolution_op->ukernel.gemm.gemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT] =
       get_generated_gemm(generators.gemm[smallest_mr - 1], jit_gemm_params, mr, group_output_channels, nr,
                          group_input_channels, log2_input_element_size, convolution_op->code_cache);
@@ -199,7 +198,6 @@ static void generate_igemms_up_to_max_mr(
       smallest_mr++;
     }
     xnn_log_debug("using generator for mr %zu to generate igemm of mr %zu", smallest_mr, mr);
-    assert(generators.igemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] != NULL);
     convolution_op->ukernel.igemm.igemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT] =
       get_generated_igemm(generators.igemm[smallest_mr - 1], jit_gemm_params, group_output_channels, nr,
                           group_input_channels, log2_input_element_size, kernel_size, mr,
