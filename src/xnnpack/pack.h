@@ -837,23 +837,32 @@ XNN_INTERNAL void xnn_pack_f32_to_f16_prelu_w(
   uint16_t* packed_weights);
 
 // Sparse packing functions.
+
+struct xnn_spmm_packing_params {
+  size_t num_nonzeroes;
+  size_t num_nonzero_blocks2;
+  size_t num_nonzero_blocks4;
+  size_t num_block2_nonzeroes;
+  size_t num_block4_nonzeroes;
+};
+
 typedef void (*xnn_analyze_spmm_fn)(
   size_t group_output_channels,
   size_t group_input_channels,
   const void* kernel,
-  size_t num_nonzeros[XNN_MIN_ELEMENTS(1)]);
+  struct xnn_spmm_packing_params* params);
 
 XNN_INTERNAL void xnn_analyze_f32_spmm(
   size_t group_output_channels,
   size_t group_input_channels,
   const float* kernel,
-  size_t num_nonzeros[XNN_MIN_ELEMENTS(1)]);
+  struct xnn_spmm_packing_params* params);
 
 XNN_INTERNAL void xnn_analyze_f16_spmm(
   size_t group_output_channels,
   size_t group_input_channels,
   const uint16_t* kernel,
-  size_t num_nonzeros[XNN_MIN_ELEMENTS(1)]);
+  struct xnn_spmm_packing_params* params);
 
 
 typedef enum xnn_status (*xnn_pack_spmm_fn)(

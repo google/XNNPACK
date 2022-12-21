@@ -2766,9 +2766,10 @@ void xnn_analyze_f32_spmm(
   size_t group_output_channels,
   size_t group_input_channels,
   const float* kernel,
-  size_t num_nonzeros[restrict XNN_MIN_ELEMENTS(1)])
+  struct xnn_spmm_packing_params* params)
 {
   assert(kernel != NULL);
+  assert(params != NULL);
 
   // Count number of non-zero values.
   size_t num_nonzeroes = 0;
@@ -2800,20 +2801,21 @@ void xnn_analyze_f32_spmm(
       num_nonzeroes += (size_t) (kernel[oc * group_input_channels + ic] != 0.0f);
     }
   }
-  num_nonzeros[0] = num_nonzeroes;
-  num_nonzeros[1] = num_nonzero_blocks2;
-  num_nonzeros[2] = num_nonzero_blocks4;
-  num_nonzeros[3] = num_block2_nonzeroes;
-  num_nonzeros[4] = num_block4_nonzeroes;
+  params->num_nonzeroes = num_nonzeroes;
+  params->num_nonzero_blocks2 = num_nonzero_blocks2;
+  params->num_nonzero_blocks4 = num_nonzero_blocks4;
+  params->num_block2_nonzeroes = num_block2_nonzeroes;
+  params->num_block4_nonzeroes = num_block4_nonzeroes;
 }
 
 void xnn_analyze_f16_spmm(
   size_t group_output_channels,
   size_t group_input_channels,
   const uint16_t* kernel,
-  size_t num_nonzeros[restrict XNN_MIN_ELEMENTS(1)])
+  struct xnn_spmm_packing_params* params)
 {
   assert(kernel != NULL);
+  assert(params != NULL);
 
   // Count number of non-zero values.
   size_t num_nonzeroes = 0;
@@ -2845,11 +2847,11 @@ void xnn_analyze_f16_spmm(
       num_nonzeroes += (size_t) (kernel[oc * group_input_channels + ic] != 0);
     }
   }
-  num_nonzeros[0] = num_nonzeroes;
-  num_nonzeros[1] = num_nonzero_blocks2;
-  num_nonzeros[2] = num_nonzero_blocks4;
-  num_nonzeros[3] = num_block2_nonzeroes;
-  num_nonzeros[4] = num_block4_nonzeroes;
+  params->num_nonzeroes = num_nonzeroes;
+  params->num_nonzero_blocks2 = num_nonzero_blocks2;
+  params->num_nonzero_blocks4 = num_nonzero_blocks4;
+  params->num_block2_nonzeroes = num_block2_nonzeroes;
+  params->num_block4_nonzeroes = num_block4_nonzeroes;
 }
 
 enum xnn_status xnn_pack_f32_spmm(

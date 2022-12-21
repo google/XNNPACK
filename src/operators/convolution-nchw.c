@@ -32,30 +32,62 @@ static enum xnn_status create_spmm_path(
     const uint32_t groups,
     const size_t group_input_channels,
     const size_t group_output_channels,
-    const size_t output_channels_block_size,
     const void* kernel,
     const void* bias,
     const uint32_t log2_filter_element_size,
     const xnn_analyze_spmm_fn xnn_analyze_spmm,
     const xnn_pack_spmm_fn xnn_pack_spmm,
-    const xnn_spmm_ukernel_fn spmm_ukernel,
-    const size_t mr,  // For block encoding microkernels
+    const struct spmm_parameters* spmm_parameters,
+    const struct spmm_parameters* spmm_parameters2,
+    const struct spmm_parameters* spmm_parameters4,
     const enum xnn_operator_type operator_type,
     const xnn_operator_t convolution_op)
 {
-  assert(spmm_ukernel != NULL);
+  assert(spmm_parameters != NULL);
   assert(kernel_height == 1);
   assert(kernel_width == 1);
   assert(groups == 1);
 
-  // Count number of non-zero values.
-  size_t num_nonzeros[5];
-  xnn_analyze_spmm(group_output_channels, group_input_channels, kernel, num_nonzeros);
+  const xnn_spmm_ukernel_fn spmm_ukernel = spmm_parameters->ukernel;
+  const size_t mr = spmm_parameters->mr;  // For block encoding microkernels
 
-  size_t num_nonzeroes = num_nonzeros[0];
-  const size_t num_output_channel_blocks = group_output_channels;
-  const size_t num_nonzero_values = num_nonzeroes;
-  const size_t num_nonzero_blocks = num_nonzeroes;
+  // Count number of non-zero values.
+  struct xnn_spmm_packing_params spmm_packing_params;
+
+  xnn_analyze_spmm(group_output_channels, group_input_channels, kernel, &spmm_packing_params);
+
+  size_t num_nonzeroes = spmm_packing_params.num_nonzeroes;
+  size_t num_nonzero_blocks2 = spmm_packing_params.num_nonzero_blocks2;
+  size_t num_nonzero_blocks4 = spmm_packing_params.num_nonzero_blocks4;
+  size_t num_block2_nonzeroes = spmm_packing_params.num_block2_nonzeroes;
+  size_t num_block4_nonzeroes = spmm_packing_params.num_block4_nonzeroes;
+
+  // Select block encoding when 2 or 4 channels have non-zero values.
+  size_t output_channels_block_size = 1;
+  size_t num_output_channel_blocks = group_output_channels;
+  size_t num_nonzero_values = num_nonzeroes;
+  size_t num_nonzero_blocks = num_nonzeroes;
+  if (num_block4_nonzeroes * 5 >= num_nonzero_blocks4 * 18 && spmm_parameters4 != NULL && spmm_parameters4->ukernel != NULL) {
+    // 4-channel blocks have 90%+ non-zeroes
+
+    output_channels_block_size = 4;
+    num_output_channel_blocks = num_output_channel_blocks / 4 + num_output_channel_blocks % 4;
+    spmm_parameters = &xnn_params.f32.spmm4;
+    // Non-zeroes which don't fit into whole 4-channel blocks, processed one-by-one
+    const size_t num_remaining_nonzeroes = num_nonzeroes - num_block4_nonzeroes;
+    num_nonzero_values = num_nonzero_blocks4 * 4 + num_remaining_nonzeroes;
+    num_nonzero_blocks = num_nonzero_blocks4 + num_remaining_nonzeroes;
+  } else if (num_block2_nonzeroes * 5 >= num_nonzero_blocks2 * 9 && spmm_parameters2 != NULL && spmm_parameters2->ukernel != NULL) {
+    // 2-channel blocks have 90%+ non-zeroes
+
+    output_channels_block_size = 2;
+    num_output_channel_blocks = num_output_channel_blocks / 2 + num_output_channel_blocks % 2;
+    spmm_parameters = &xnn_params.f32.spmm2;
+    // Non-zeroes which don't fit into whole 2-channel blocks, processed one-by-one
+    const size_t num_remaining_nonzeroes = num_nonzeroes - num_block2_nonzeroes;
+    num_nonzero_values = num_nonzero_blocks2 * 2 + num_remaining_nonzeroes;
+    num_nonzero_blocks = num_nonzero_blocks2 + num_remaining_nonzeroes;
+  }
 
   // Sparse representation of weights consists of four components:
   // 1. An array of int32_t values storing scaled [by sizeof(input element)] difference between input channels
@@ -444,10 +476,6 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
   switch (ukernel_type) {
     case xnn_microkernel_type_spmm:
     {
-      assert(kernel_width == 1);
-      assert(kernel_height == 1);
-      assert(groups == 1);
-
       xnn_analyze_spmm_fn xnn_analyze_spmm;
       xnn_pack_spmm_fn xnn_pack_spmm;
       if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
@@ -463,10 +491,10 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
 
       status = create_spmm_path(
           kernel_height, kernel_width, groups,
-          group_input_channels, group_output_channels, 1,  /* output_channels_block_size */
+          group_input_channels, group_output_channels,
           kernel, bias, log2_filter_element_size,
           xnn_analyze_spmm, xnn_pack_spmm,
-          spmm_parameters->ukernel, spmm_parameters->mr,
+          &xnn_params.f16.spmm, NULL, NULL,
           operator_type, convolution_op);
       if (status != xnn_status_success) {
         goto error;
@@ -775,13 +803,15 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
       assert(groups == 1);
 
       // Count number of non-zero values.
-      size_t num_nonzeros[5];
-      xnn_analyze_f32_spmm(group_output_channels, group_input_channels, kernel, num_nonzeros);
-      size_t num_nonzeroes = num_nonzeros[0];
-      size_t num_nonzero_blocks2 = num_nonzeros[1];
-      size_t num_nonzero_blocks4 = num_nonzeros[2];
-      size_t num_block2_nonzeroes = num_nonzeros[3];
-      size_t num_block4_nonzeroes = num_nonzeros[4];
+      struct xnn_spmm_packing_params spmm_packing_params;
+
+      xnn_analyze_f32_spmm(group_output_channels, group_input_channels, kernel, &spmm_packing_params);
+
+      size_t num_nonzeroes = spmm_packing_params.num_nonzeroes;
+      size_t num_nonzero_blocks2 = spmm_packing_params.num_nonzero_blocks2;
+      size_t num_nonzero_blocks4 = spmm_packing_params.num_nonzero_blocks4;
+      size_t num_block2_nonzeroes = spmm_packing_params.num_block2_nonzeroes;
+      size_t num_block4_nonzeroes = spmm_packing_params.num_block4_nonzeroes;
 
       // Select block encoding when 2 or 4 channels have non-zero values.
       size_t output_channels_block_size = 1;
