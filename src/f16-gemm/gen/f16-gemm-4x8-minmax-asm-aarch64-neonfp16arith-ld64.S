@@ -23,28 +23,16 @@
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# A pointers
-# x3  a0
-# x11 a1
-# x12 a2
-# x4  a3 / a_stride
-
-# C pointers
-# x6  c0
-# x9  c1
-# x10 c2
-# x7  c3 / cm_stride
-
-# Vector register usage
-# A0   v0
-# A1   v1
-# A2   v2
-# A3   v3
-# B   v20 v21 v22 v23
-# C   v24
-# C   v26
-# C   v28
-# C   v30
+# Register usage
+# A0  x3   v0
+# A1  x11  v1
+# A2  x12  v2
+# A3  x4   v3
+# B    x5 v20 v21 v22 v23
+# C0  x6  v24
+# C1  x9  v26
+# C2  x10 v28
+# C3  x7  v30
 
 # Clamp v4, v5
 # unused A   v6, v7 v8 v9 v10 v11
