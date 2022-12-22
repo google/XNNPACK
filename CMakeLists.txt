@@ -2993,6 +2993,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-roundz-eval PRIVATE fp16 pthreadpool gtest gtest_main)
   TARGET_LINK_LIBRARIES(f32-roundz-eval PRIVATE hardware-config logging microkernels-all)
 
+  ADD_EXECUTABLE(f32-tanh-eval eval/f32-tanh.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-tanh-eval PRIVATE include src)
+  TARGET_LINK_LIBRARIES(f32-tanh-eval PRIVATE fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f32-tanh-eval PRIVATE hardware-config logging microkernels-all)
+
   ADD_EXECUTABLE(u32-sqrt-eval eval/u32-sqrt.cc)
   TARGET_INCLUDE_DIRECTORIES(u32-sqrt-eval PRIVATE include src)
   TARGET_LINK_LIBRARIES(u32-sqrt-eval PRIVATE pthreadpool gtest gtest_main)

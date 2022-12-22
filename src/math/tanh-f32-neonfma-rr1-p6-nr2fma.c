@@ -21,6 +21,8 @@ void xnn_math_f32_tanh__neonfma_rr1_p6_nr2fma(
 {
   assert(n % sizeof(float32x4_t) == 0);
 
+  // The smallest z for which tanhf(-z) is saturated at -1.0f.
+  const float32x4_t vsat_cutoff = vmovq_n_f32(0x1.205968p+3f);
   // Large number such that ulp(magic bias) == 0.5 and magic bias === 63.5 mod 2**21.
   const float32x4_t vmagic_bias = vmovq_n_f32(0x1.8000FEp+22f);
   const float32x4_t vminus_log2e = vmovq_n_f32(-0x1.715476p+0f);
@@ -35,8 +37,6 @@ void xnn_math_f32_tanh__neonfma_rr1_p6_nr2fma(
   const float32x4_t vc2 = vmovq_n_f32(-0x1.FFFFFEp-1f);
   const float32x4_t vone = vmovq_n_f32(1.0f);
   const float32x4_t vtwo = vmovq_n_f32(2.0f);
-  // The largest z for which tanhf(-z) is not saturated at -1.0f.
-  const float32x4_t vsat_cutoff = vmovq_n_f32(0x1.205966p+3f);
   // Mask for the sign bit.
   const uint32x4_t vsign_mask = vmovq_n_u32(UINT32_C(0x80000000));
 
@@ -51,7 +51,12 @@ void xnn_math_f32_tanh__neonfma_rr1_p6_nr2fma(
     //
     // First we compute f[-z] := expm1(-2z) / (2 + expm1(-2z)) where z = abs(x),
     // then replace result with -f[-z] if x >= 0.
-    const float32x4_t vz = vabsq_f32(vx);
+    float32x4_t vz = vabsq_f32(vx);
+
+    // The function f[-z] saturates at -1 for large inputs: tanhf(x) == -1.0f for x <= sat_cutoff ~= -9.010913.
+    // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
+    // tanhf(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
+    vz = vminq_f32(vz, vsat_cutoff);
 
     // Compute reduced argument n := round(-z / log(2), 1).
     // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
@@ -103,11 +108,6 @@ void xnn_math_f32_tanh__neonfma_rr1_p6_nr2fma(
 
     // Reconstruct tanh(-z) := expm1(-2z) / (2.0 + expm1(-2z))
     float32x4_t vabsy = vmulq_f32(vem1, vrep1);
-
-    // The function saturates at +-1 for large inputs: tanhf(z) == +-1.0f for z > sat_cutoff ~= 9.010913.
-    // Note that we use 1.0f, because sign will be copied from the input right after.
-    const uint32x4_t vsat_mask = vcgtq_f32(vz, vsat_cutoff);
-    vabsy = vbslq_f32(vsat_mask, vone, vabsy);
 
     // Reconstruct tanh[x] = sign(x) * tanh[-abs(x)]
     const float32x4_t vy = vbslq_f32(vsign_mask, vx, vabsy);

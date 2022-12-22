@@ -7061,6 +7061,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_tanh_eval",
+    srcs = [
+        "eval/f32-tanh.cc",
+    ],
+    automatic = False,
+    deps = ACCURACY_EVAL_DEPS,
+)
+
+xnnpack_unit_test(
     name = "u32_sqrt_eval",
     srcs = [
         "eval/u32-sqrt.cc",
