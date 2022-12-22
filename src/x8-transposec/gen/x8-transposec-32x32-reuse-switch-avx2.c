@@ -13,6 +13,7 @@
 #include <assert.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
 #include <xnnpack/unaligned.h>
