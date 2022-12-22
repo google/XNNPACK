@@ -2762,7 +2762,7 @@ void xnn_pack_f32_to_f16_prelu_w(
   } while (--c != 0);
 }
 
-void xnn_analyze_f32_spmm(
+void xnn_analyze_f32_spmm_w(
   size_t group_output_channels,
   size_t group_input_channels,
   const float* kernel,
@@ -2808,7 +2808,7 @@ void xnn_analyze_f32_spmm(
   params->num_block4_nonzeroes = num_block4_nonzeroes;
 }
 
-void xnn_analyze_f16_spmm(
+void xnn_analyze_f16_spmm_w(
   size_t group_output_channels,
   size_t group_input_channels,
   const uint16_t* kernel,
@@ -2854,7 +2854,7 @@ void xnn_analyze_f16_spmm(
   params->num_block4_nonzeroes = num_block4_nonzeroes;
 }
 
-enum xnn_status xnn_pack_f32_spmm(
+enum xnn_status xnn_pack_f32_spmm_w(
   size_t group_output_channels,
   size_t output_channels_block_size,
   size_t group_input_channels,
@@ -2947,7 +2947,7 @@ enum xnn_status xnn_pack_f32_spmm(
 }
 
 
-enum xnn_status xnn_pack_f32_to_f16_spmm(
+enum xnn_status xnn_pack_f32_to_f16_spmm_w(
   size_t group_output_channels,
   size_t output_channels_block_size,
   size_t group_input_channels,
@@ -3039,7 +3039,7 @@ enum xnn_status xnn_pack_f32_to_f16_spmm(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_pack_f16_spmm(
+enum xnn_status xnn_pack_f16_spmm_w(
   size_t group_output_channels,
   size_t output_channels_block_size,
   size_t group_input_channels,

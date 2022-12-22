@@ -35,8 +35,8 @@ static enum xnn_status create_spmm_path(
     const void* kernel,
     const void* bias,
     const uint32_t log2_filter_element_size,
-    const xnn_analyze_spmm_fn xnn_analyze_spmm,
-    const xnn_pack_spmm_fn xnn_pack_spmm,
+    const xnn_analyze_spmm_w_fn xnn_analyze_spmm,
+    const xnn_pack_spmm_w_fn xnn_pack_spmm,
     const struct spmm_parameters* spmm_parameters,
     const struct spmm_parameters* spmm_parameters2,
     const struct spmm_parameters* spmm_parameters4,
@@ -473,14 +473,14 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
   switch (ukernel_type) {
     case xnn_microkernel_type_spmm:
     {
-      xnn_analyze_spmm_fn xnn_analyze_spmm;
-      xnn_pack_spmm_fn xnn_pack_spmm;
+      xnn_analyze_spmm_w_fn xnn_analyze_spmm;
+      xnn_pack_spmm_w_fn xnn_pack_spmm;
       if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
-        xnn_analyze_spmm = (xnn_analyze_spmm_fn) xnn_analyze_f32_spmm;
-        xnn_pack_spmm = (xnn_pack_spmm_fn) xnn_pack_f32_to_f16_spmm;
+        xnn_analyze_spmm = (xnn_analyze_spmm_w_fn) xnn_analyze_f32_spmm_w;
+        xnn_pack_spmm = (xnn_pack_spmm_w_fn) xnn_pack_f32_to_f16_spmm_w;
       } else {
-        xnn_analyze_spmm = (xnn_analyze_spmm_fn) xnn_analyze_f16_spmm;
-        xnn_pack_spmm = (xnn_pack_spmm_fn) xnn_pack_f16_spmm;
+        xnn_analyze_spmm = (xnn_analyze_spmm_w_fn) xnn_analyze_f16_spmm_w;
+        xnn_pack_spmm = (xnn_pack_spmm_w_fn) xnn_pack_f16_spmm_w;
       }
       const struct spmm_parameters* spmm_parameters = &xnn_params.f16.spmm;
 
@@ -795,8 +795,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
   switch (ukernel_type) {
     case xnn_microkernel_type_spmm:
     {
-      const xnn_analyze_spmm_fn xnn_analyze_spmm = (xnn_analyze_spmm_fn) xnn_analyze_f32_spmm;
-      const xnn_pack_spmm_fn xnn_pack_spmm = (xnn_pack_spmm_fn) xnn_pack_f32_spmm;
+      const xnn_analyze_spmm_w_fn xnn_analyze_spmm = (xnn_analyze_spmm_w_fn) xnn_analyze_f32_spmm_w;
+      const xnn_pack_spmm_w_fn xnn_pack_spmm = (xnn_pack_spmm_w_fn) xnn_pack_f32_spmm_w;
 
       const struct spmm_parameters* spmm_parameters = &xnn_params.f32.spmm;
 
