@@ -198,6 +198,25 @@ static void TanhError(benchmark::State& state,
     ->Iterations(1);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(TanhError, wasmsimd_rr1_p6_div_abs_min,
+                    xnn_math_f32_tanh__wasmsimd_rr1_p6_div_abs_min)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, wasmsimd_rr1_p6_div_abs_pmin,
+                    xnn_math_f32_tanh__wasmsimd_rr1_p6_div_abs_pmin)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, wasmsimd_rr1_p6_div_nabs_max,
+                    xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_max)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, wasmsimd_rr1_p6_div_nabs_pmax,
+                    xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_pmax)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
 BENCHMARK_CAPTURE(TanhError, scalar_rr1_p6_div,
                   xnn_math_f32_tanh__scalar_rr1_p6_div)
   ->Unit(benchmark::kMillisecond)

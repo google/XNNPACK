@@ -868,6 +868,286 @@ constexpr int kBlockSize = 1024;
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_ABS_MIN, positive_saturation) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0x41102CB4); n <= UINT32_C(0x7F800000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0x7F800000)));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_abs_min(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = UINT32_C(0x3F800000);
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_ABS_MIN, negative_saturation) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0xC1102CB4); n <= UINT32_C(0xFF800000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_abs_min(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = UINT32_C(0xBF800000);
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_ABS_MIN, positive_nan) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_abs_min(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        ASSERT_TRUE(std::isnan(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_ABS_MIN, negative_nan) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_abs_min(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        ASSERT_TRUE(std::isnan(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_ABS_PMIN, positive_saturation) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0x41102CB4); n <= UINT32_C(0x7F800000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0x7F800000)));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_abs_pmin(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = UINT32_C(0x3F800000);
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_ABS_PMIN, negative_saturation) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0xC1102CB4); n <= UINT32_C(0xFF800000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_abs_pmin(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = UINT32_C(0xBF800000);
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_ABS_PMIN, positive_nan) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_abs_pmin(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        ASSERT_TRUE(std::isnan(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_ABS_PMIN, negative_nan) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_abs_pmin(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        ASSERT_TRUE(std::isnan(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_NABS_MAX, positive_saturation) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0x41102CB4); n <= UINT32_C(0x7F800000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0x7F800000)));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_max(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = UINT32_C(0x3F800000);
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_NABS_MAX, negative_saturation) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0xC1102CB4); n <= UINT32_C(0xFF800000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_max(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = UINT32_C(0xBF800000);
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_NABS_MAX, positive_nan) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_max(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        ASSERT_TRUE(std::isnan(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_NABS_MAX, negative_nan) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_max(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        ASSERT_TRUE(std::isnan(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_NABS_PMAX, positive_saturation) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0x41102CB4); n <= UINT32_C(0x7F800000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0x7F800000)));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_pmax(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = UINT32_C(0x3F800000);
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_NABS_PMAX, negative_saturation) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0xC1102CB4); n <= UINT32_C(0xFF800000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_pmax(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        const uint32_t reference_output = UINT32_C(0xBF800000);
+        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_NABS_PMAX, positive_nan) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_pmax(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        ASSERT_TRUE(std::isnan(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+
+  TEST(TANH__WASMSIMD_RR1_P6_DIV_NABS_PMAX, negative_nan) {
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+      }
+      xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_pmax(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        ASSERT_TRUE(std::isnan(outputs[i]))
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
 TEST(TANH__SCALAR_RR1_P6_DIV, positive_saturation) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
