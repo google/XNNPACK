@@ -167,6 +167,37 @@ static void TanhError(benchmark::State& state,
     ->Iterations(1);
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(TanhError, avx512f_rr1_p6_div,
+                    xnn_math_f32_tanh__avx512f_rr1_p6_div,
+                    benchmark::utils::CheckAVX512F)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+
+  BENCHMARK_CAPTURE(TanhError, avx2_rr1_p6_div,
+                    xnn_math_f32_tanh__avx2_rr1_p6_div,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+
+  BENCHMARK_CAPTURE(TanhError, fma3_rr1_p6_div,
+                    xnn_math_f32_tanh__fma3_rr1_p6_div,
+                    benchmark::utils::CheckFMA3)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+
+  BENCHMARK_CAPTURE(TanhError, avx_rr1_p6_div,
+                    xnn_math_f32_tanh__avx_rr1_p6_div,
+                    benchmark::utils::CheckAVX)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+
+  BENCHMARK_CAPTURE(TanhError, sse2_rr1_p6_div,
+                    xnn_math_f32_tanh__sse2_rr1_p6_div)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 BENCHMARK_CAPTURE(TanhError, scalar_rr1_p6_div,
                   xnn_math_f32_tanh__scalar_rr1_p6_div)
   ->Unit(benchmark::kMillisecond)
