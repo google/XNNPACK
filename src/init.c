@@ -1855,7 +1855,7 @@ static void init(void) {
       };
       xnn_params.vcvt.qs8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__armsimd32_x8,
-        .init.qs8_cvt = xnn_init_qs8_cvt_scalar_params,
+        .init.qs8_cvt = xnn_init_qs8_cvt_armsimd32_params,
         .element_tile = 8,
       };
       xnn_params.vcvt.qs8_to_f32 = (struct vunary_parameters) {
@@ -1865,7 +1865,7 @@ static void init(void) {
       };
       xnn_params.vcvt.qu8 = (struct vunary_parameters) {
         .ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__armsimd32_x8,
-        .init.qu8_cvt = xnn_init_qu8_cvt_scalar_params,
+        .init.qu8_cvt = xnn_init_qu8_cvt_armsimd32_params,
         .element_tile = 8,
       };
       xnn_params.vcvt.qu8_to_f32 = (struct vunary_parameters) {
