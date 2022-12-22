@@ -131,6 +131,13 @@ static void TanhError(benchmark::State& state,
   state.counters["ULPERROR"] = benchmark::Counter(max_ulp_error);
 }
 
+#if XNN_ARCH_ARM64
+  BENCHMARK_CAPTURE(TanhError, aarch64_neonfma_rr1_p6_div,
+                    xnn_math_f32_tanh__aarch64_neonfma_rr1_p6_div)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+#endif  // XNN_ARCH_ARM64
+
 BENCHMARK_CAPTURE(TanhError, scalar_rr2_p6_div,
                   xnn_math_f32_tanh__scalar_rr2_p6_div)
   ->Unit(benchmark::kMillisecond)

@@ -3001,6 +3001,7 @@ ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
     "src/math/sigmoid-f32-aarch64-neonfma-rr2-lut64-p2-div.c",
     "src/math/sigmoid-f32-aarch64-neonfma-rr2-lut2048-p1-div.c",
     "src/math/sigmoid-f32-aarch64-neonfma-rr2-p5-div.c",
+    "src/math/tanh-f32-aarch64-neonfma-rr1-p6-div.c",
 ]
 
 ALL_NEONFP16_MICROKERNEL_SRCS = [
