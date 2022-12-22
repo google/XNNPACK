@@ -1730,6 +1730,8 @@ ALL_NEON_MICROKERNEL_SRCS = [
     "src/math/sqrt-f32-neon-nr1rsqrts.c",
     "src/math/sqrt-f32-neon-nr2rsqrts.c",
     "src/math/sqrt-f32-neon-nr3rsqrts.c",
+    "src/math/tanh-f32-neon-rr1-p6-nr2recps.c",
+    "src/math/tanh-f32-neon-rr2-p6-nr2recps.c",
     "src/qc8-dwconv/gen/qc8-dwconv-3p8c-minmax-fp32-neon-mla8-ld64.c",
     "src/qc8-dwconv/gen/qc8-dwconv-3p16c-minmax-fp32-neon-mla8-ld64.c",
     "src/qc8-dwconv/gen/qc8-dwconv-3p16c-minmax-fp32-neon-mla8-ld128.c",
@@ -2892,6 +2894,9 @@ ALL_NEONFMA_MICROKERNEL_SRCS = [
     "src/math/sqrt-f32-neonfma-nr2fma1adj.c",
     "src/math/sqrt-f32-neonfma-nr2fma.c",
     "src/math/sqrt-f32-neonfma-nr3fma.c",
+    "src/math/tanh-f32-neonfma-rr1-p6-nr1recps1fma.c",
+    "src/math/tanh-f32-neonfma-rr1-p6-nr2fma.c",
+    "src/math/tanh-f32-neonfma-rr1-p6-nr2recps.c",
 ]
 
 ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
