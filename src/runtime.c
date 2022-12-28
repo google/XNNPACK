@@ -416,6 +416,11 @@ enum xnn_status xnn_create_runtime_v4(
           xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, round_up_po2(blob->size, XNN_EXTRA_BYTES));
           blob->allocation_type = xnn_allocation_type_workspace;
         }
+      } else if (value->fp16_compatible) {
+        // Value is static and has been converted to FP16 in a new buffer.
+        blob->allocation_type = xnn_allocation_type_dynamic;
+        // Runtime takes ownership of the data from subgraph.
+        value->data = NULL;
       } else {
         blob->allocation_type = xnn_allocation_type_static;
       }
@@ -691,7 +696,17 @@ enum xnn_status xnn_delete_runtime(
       }
       xnn_release_memory(runtime->opdata);
 
-      xnn_release_memory(runtime->blobs);
+      if (runtime->blobs != NULL) {
+        // Release the buffers created during FP16 rewrite.
+        for (size_t i = 0; i < runtime->num_blobs; i++) {
+          struct xnn_blob* blob = &runtime->blobs[i];
+          if (blob->allocation_type == xnn_allocation_type_dynamic) {
+            xnn_release_memory(blob->data);
+          }
+        }
+        xnn_release_memory(runtime->blobs);
+      }
+
       if (runtime->workspace != NULL) {
         // Remove this runtime from the list of users of the workspace.
         assert(runtime->workspace->first_user != NULL);
