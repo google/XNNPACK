@@ -10488,7 +10488,6 @@ xnnpack_unit_test(
         ":XNNPACK",
         ":node_type",
         ":subgraph_test_mode",
-        "@FP16",
     ],
 )
 
