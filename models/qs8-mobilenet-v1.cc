@@ -1187,10 +1187,10 @@ ExecutionPlan QS8MobileNetV1(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  XNN_PRAGMA_CLANG("clang diagnostic push")
-  XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wpessimizing-move\"")
+  XNN_PRAGMA("clang diagnostic push")
+  XNN_PRAGMA("clang diagnostic ignored \"-Wpessimizing-move\"")
   return operators;
-  XNN_PRAGMA_CLANG("clang diagnostic pop")
+  XNN_PRAGMA("clang diagnostic pop")
 }
 
 }  // namespace models

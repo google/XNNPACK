@@ -167,7 +167,10 @@ static void xnnpack_elu_qs8(benchmark::State& state) {
     std::ref(rng));
 
   std::vector<int8_t> input(batch_size + XNN_EXTRA_BYTES / sizeof(int8_t));
+  XNN_PRAGMA("GCC diagnostic push")
+  XNN_PRAGMA("GCC diagnostic ignored \"-Walloc-size-larger-than=\"")
   std::vector<int8_t> output(batch_size);
+  XNN_PRAGMA("GCC diagnostic pop")
   std::generate(input.begin(), input.end(), std::ref(i8rng));
   std::fill(output.begin(), output.end(), INT8_C(0xA5));
 

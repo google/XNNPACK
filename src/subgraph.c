@@ -1254,10 +1254,10 @@ enum xnn_status xnn_delete_subgraph(
         for (uint32_t i = 0; i < subgraph->num_values; i++) {
           struct xnn_value* value = &subgraph->values[i];
           if (value->fp16_compatible && value->data != NULL) {
-            XNN_PRAGMA_CLANG("clang diagnostic push")
-            XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wcast-qual\"")
+            XNN_PRAGMA("clang diagnostic push")
+            XNN_PRAGMA("clang diagnostic ignored \"-Wcast-qual\"")
             xnn_release_memory((void*)value->data);
-            XNN_PRAGMA_CLANG("clang diagnostic pop")
+            XNN_PRAGMA("clang diagnostic pop")
           }
         }
       #endif  // XNN_NO_F16_OPERATORS

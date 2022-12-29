@@ -310,10 +310,10 @@
   #endif
 #endif
 
-#if defined(__clang__)
-  #define XNN_PRAGMA_CLANG(pragma) _Pragma(pragma)
+#if XNN_COMPILER_CLANG || XNN_COMPILER_GCC
+  #define XNN_PRAGMA(pragma) _Pragma(pragma)
 #else
-  #define XNN_PRAGMA_CLANG(pragma)
+  #define XNN_PRAGMA(pragma)
 #endif
 
 #if XNN_ARCH_WASM
