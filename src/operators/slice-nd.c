@@ -15,7 +15,7 @@
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/normalization.h>
 #include <xnnpack/operator.h>
-#include <xnnpack/params.h>
+#include <xnnpack/config.h>
 
 static void init_slice_nd(
     uint32_t flags,
@@ -152,6 +152,13 @@ static enum xnn_status setup_slice_nd(
       return xnn_status_unsupported_parameter;
     }
   }
+  const struct xnn_unary_elementwise_config* xx_copy_config = xnn_init_xx_copy_config();
+  if (xx_copy_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(slice_op->type));
+    return xnn_status_unsupported_hardware;
+  }
 
   size_t normalized_offsets[XNN_MAX_TENSOR_DIMS];
   size_t normalized_input_shape[XNN_MAX_TENSOR_DIMS];
@@ -172,7 +179,7 @@ static enum xnn_status setup_slice_nd(
   slice_op->context.slice = (struct slice_context) {
     .input = input,
     .output = output,
-    .ukernel = xnn_params.xx.copy,
+    .ukernel = xx_copy_config->ukernel,
   };
 
   // TODO(b/246969669): move strides calculation into normalization to simplify code here.
