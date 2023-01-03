@@ -2324,7 +2324,6 @@ xnnpack_cc_library(
     srcs = [
         "src/binary-elementwise-config.c",
         "src/transpose-config.c",
-        "src/unary-elementwise-config.c",
         "src/x8-lut-config.c",
     ],
     hdrs = [
@@ -2349,7 +2348,6 @@ xnnpack_cc_library(
     srcs = [
         "src/binary-elementwise-config.c",
         "src/transpose-config.c",
-        "src/unary-elementwise-config.c",
         "src/x8-lut-config.c",
     ],
     hdrs = [

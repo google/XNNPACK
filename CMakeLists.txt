@@ -277,7 +277,6 @@ SET(XNNPACK_SRCS
   src/init.c
   src/params.c
   src/transpose-config.c
-  src/unary-elementwise-config.c
   src/x8-lut-config.c)
 
 SET(TABLE_SRCS
