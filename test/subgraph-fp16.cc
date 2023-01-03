@@ -91,7 +91,9 @@ TEST(SUBGRAPH_FP16, value_both_external_output_and_input) {
 
 TEST(SUBGRAPH_FP16, with_static_value) {
   auto tester = SubgraphTester(3);
-  float static_tensor_data[] = {1.0f, 2.0f, 3.0f};
+  float static_tensor_data[3 + XNN_EXTRA_BYTES / sizeof(float)] = {
+    1.0f, 2.0f, 3.0f
+  };
   // external input[0]   static[1]
   //               \     /
   //                \   /
