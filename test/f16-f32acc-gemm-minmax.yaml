@@ -1,0 +1,33 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# x86 AVX2
+- name: xnn_f16_f32acc_gemm_minmax_ukernel_1x8__avx2_broadcast
+  init: xnn_init_f16_minmax_avx_params
+  k-block: 1
+- name: xnn_f16_f32acc_gemm_minmax_ukernel_1x16__avx2_broadcast
+  init: xnn_init_f16_minmax_avx_params
+  k-block: 1
+- name: xnn_f16_f32acc_gemm_minmax_ukernel_3x16__avx2_broadcast
+  init: xnn_init_f16_minmax_avx_params
+  k-block: 1
+- name: xnn_f16_f32acc_gemm_minmax_ukernel_4x8__avx2_broadcast
+  init: xnn_init_f16_minmax_avx_params
+  k-block: 1
+- name: xnn_f16_f32acc_gemm_minmax_ukernel_4x16__avx2_broadcast
+  init: xnn_init_f16_minmax_avx_params
+  k-block: 1
+- name: xnn_f16_f32acc_gemm_minmax_ukernel_5x8__avx2_broadcast
+  init: xnn_init_f16_minmax_avx_params
+  k-block: 1
+- name: xnn_f16_f32acc_gemm_minmax_ukernel_5x16__avx2_broadcast
+  init: xnn_init_f16_minmax_avx_params
+  k-block: 1
+- name: xnn_f16_f32acc_gemm_minmax_ukernel_6x8__avx2_broadcast
+  init: xnn_init_f16_minmax_avx_params
+  k-block: 1
+- name: xnn_f16_f32acc_gemm_minmax_ukernel_7x8__avx2_broadcast
+  init: xnn_init_f16_minmax_avx_params
+  k-block: 1

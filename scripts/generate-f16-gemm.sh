@@ -56,18 +56,30 @@ tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=6 -D NR=16 -D INC=1 -o sr
 tools/xngen src/f16-gemm/neonfp16arith-ld64.c.in -D MR=8 -D NR=16 -D INC=1 -o src/f16-gemm/gen/f16-gemminc-8x16-minmax-neonfp16arith-ld64.c &
 
 ################################### x86 AVX2 ###################################
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=8  -o src/f16-gemm/gen/f16-gemm-1x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=8  -o src/f16-gemm/gen/f16-gemm-4x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=8  -o src/f16-gemm/gen/f16-gemm-5x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=6 -D NR=8  -o src/f16-gemm/gen/f16-gemm-6x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=7 -D NR=8  -o src/f16-gemm/gen/f16-gemm-7x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=8  -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-1x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=8  -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-4x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=8  -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-5x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=6 -D NR=8  -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-6x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=7 -D NR=8  -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-7x8-minmax-avx2-broadcast.c &
 
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=16 -o src/f16-gemm/gen/f16-gemm-1x16-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -o src/f16-gemm/gen/f16-gemm-3x16-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -o src/f16-gemm/gen/f16-gemm-4x16-minmax-avx2-broadcast.c &
-tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -o src/f16-gemm/gen/f16-gemm-5x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=16 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-1x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-3x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-4x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D ACCTYPE=F16 -o src/f16-gemm/gen/f16-gemm-5x16-minmax-avx2-broadcast.c &
+
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-5x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=6 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-6x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=7 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-7x8-minmax-avx2-broadcast.c &
+
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=1 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-3x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-gemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-gemm/gen/f16-f32acc-gemm-5x16-minmax-avx2-broadcast.c &
 
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/f16-gemm-minmax.yaml --output test/f16-gemm-minmax.cc &
+tools/generate-gemm-test.py --spec test/f16-f32acc-gemm-minmax.yaml --output test/f16-f32acc-gemm-minmax.cc &
 
 wait

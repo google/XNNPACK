@@ -472,6 +472,15 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/x64-transposec/gen/x64-transposec-4x4-reuse-switch-avx.c)
 
 SET(ALL_AVX2_MICROKERNEL_SRCS
+  src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x8-minmax-avx2-broadcast.c
+  src/f16-f32acc-gemm/gen/f16-f32acc-gemm-1x16-minmax-avx2-broadcast.c
+  src/f16-f32acc-gemm/gen/f16-f32acc-gemm-3x16-minmax-avx2-broadcast.c
+  src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x8-minmax-avx2-broadcast.c
+  src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x16-minmax-avx2-broadcast.c
+  src/f16-f32acc-gemm/gen/f16-f32acc-gemm-5x8-minmax-avx2-broadcast.c
+  src/f16-f32acc-gemm/gen/f16-f32acc-gemm-5x16-minmax-avx2-broadcast.c
+  src/f16-f32acc-gemm/gen/f16-f32acc-gemm-6x8-minmax-avx2-broadcast.c
+  src/f16-f32acc-gemm/gen/f16-f32acc-gemm-7x8-minmax-avx2-broadcast.c
   src/f16-gemm/gen/f16-gemm-1x8-minmax-avx2-broadcast.c
   src/f16-gemm/gen/f16-gemm-1x16-minmax-avx2-broadcast.c
   src/f16-gemm/gen/f16-gemm-3x16-minmax-avx2-broadcast.c

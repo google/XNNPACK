@@ -5791,6 +5791,18 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_f32acc_gemm_bench",
+    srcs = [
+        "bench/f16-f32acc-gemm.cc",
+        "bench/gemm.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":math",
+        ":packing",
+    ],
+)
+
+xnnpack_benchmark(
     name = "f16_gemm_bench",
     srcs = [
         "bench/f16-gemm.cc",
@@ -7157,6 +7169,16 @@ xnnpack_unit_test(
         "test/gavgpool-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_f32acc_gemm_minmax_test",
+    srcs = [
+        "test/f16-f32acc-gemm-minmax.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
 )
 
 xnnpack_unit_test(
