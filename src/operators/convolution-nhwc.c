@@ -66,75 +66,6 @@ static inline uintptr_t cached_code_at_offset(xnn_operator_t op, size_t offset)
   return (uintptr_t)op->code_cache->cache.code.start + offset;
 }
 
-static size_t get_generated_gemm(
-    struct xnn_hmp_gemm_codegen generators,
-    const struct jit_gemm_params *jit_gemm_params,
-    size_t mr,
-    size_t group_output_channels,
-    size_t nr,
-    size_t group_input_channels,
-    size_t log2_input_element_size,
-    struct xnn_code_cache* code_cache)
-{
-  size_t offset = XNN_CACHE_NOT_FOUND;
-  xnn_jit_gemm_code_generator_fn generator = generators.function[XNN_UARCH_DEFAULT];
-  if (generator == NULL) {
-    goto error;
-  }
-
-  enum xnn_status status = xnn_status_success;
-
-  status = xnn_reserve_code_memory(&code_cache->cache.code, XNN_DEFAULT_MICROKERNEL_SIZE);
-  if (xnn_status_success != status) {
-    xnn_log_error("failed to ensure sufficient space in the code buffer for a microkernel");
-    goto error;
-  }
-
-  const size_t old_size = code_cache->cache.code.size;
-  void* old_code = (uint8_t*) code_cache->cache.code.start + old_size;
-  status = generator(&code_cache->cache.code, mr, group_output_channels % nr,
-                     group_input_channels << log2_input_element_size,
-                     jit_gemm_params);
-
-  if (xnn_status_success != status) {
-    xnn_log_error("failed to generate GEMM microkernel");
-    goto error;
-  }
-
-  const size_t new_size = code_cache->cache.code.size;
-  return xnn_get_or_insert_code_cache(code_cache, old_code, new_size - old_size);
-
-error:
-  return offset;
-}
-
-static void generate_gemms_up_to_max_mr(
-    size_t max_mr,
-    struct gemm_codegens generators,
-    const struct jit_gemm_params *jit_gemm_params,
-    size_t group_output_channels,
-    size_t nr,
-    size_t group_input_channels,
-    size_t log2_input_element_size,
-    xnn_operator_t convolution_op)
-{
-  assert(XNN_MAX_MR >= max_mr);
-  if (convolution_op->code_cache == NULL) {
-    return;
-  }
-  for (size_t mr = 1; mr <= max_mr; mr++) {
-    // Get smallest generator that is >= mr.
-    size_t smallest_mr = mr;
-    while (generators.gemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] == NULL && smallest_mr <= max_mr) {
-      smallest_mr++;
-    }
-    xnn_log_debug("using generator for mr %zu to generate gemm of mr %zu", smallest_mr, mr);
-    convolution_op->ukernel.gemm.gemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT] =
-      get_generated_gemm(generators.gemm[smallest_mr - 1], jit_gemm_params, mr, group_output_channels, nr,
-                         group_input_channels, log2_input_element_size, convolution_op->code_cache);
-  }
-}
-
 static size_t get_generated_igemm(
     struct xnn_hmp_igemm_codegen generators,
     const struct jit_gemm_params *jit_gemm_params,
@@ -440,9 +371,9 @@ static enum xnn_status create_gemm_or_igemm(
       }
 
 #if XNN_PLATFORM_JIT
-      generate_gemms_up_to_max_mr(
-          mr, gemm_parameters->generator, jit_gemm_params, group_output_channels, nr,
-          group_input_channels, log2_input_element_size, convolution_op);
+      xnn_generate_gemms_up_to_max_mr(
+        mr, gemm_parameters->generator, jit_gemm_params, group_output_channels, nr,
+        group_input_channels, log2_input_element_size, convolution_op);
 #endif  // XNN_PLATFORM_JIT
 
       break;
@@ -1588,20 +1519,7 @@ static enum xnn_status setup_gemm(
   #endif
 
   #if XNN_PLATFORM_JIT
-    if (convolution_op->code_cache != NULL) {
-      const size_t jit_code_offset = gemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT];
-      if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
-        gemm_cases[mr - 1].function[XNN_UARCH_DEFAULT] =
-            (xnn_gemm_ukernel_fn) cached_code_at_offset(convolution_op, jit_code_offset);
-        // TODO(zhin): different code generators for different uarch.
-        #if XNN_MAX_UARCH_TYPES > 1
-          for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            gemm_cases[mr - 1].function[i] =
-                (xnn_gemm_ukernel_fn) cached_code_at_offset(convolution_op, jit_code_offset);
-          }
-        #endif
-      }
-    }
+    xnn_overwrite_gemm_cases_with_generated_code(convolution_op, gemm_cases, mr);
   #endif  // XNN_PLATFORM_JIT
   struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr - 1];
 
