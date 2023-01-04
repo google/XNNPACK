@@ -40,29 +40,17 @@ class Generator : public MacroAssembler {
 
 // d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-// A pointers
-// x13 a0
-// x14 a1
-// x15 a2
-//  x8 a3
-
-// C pointers
-//  x6 c0
-// x16 c1
-// x17 c2
-//  x7 c3
-
-// Vector register usage
-// A0  v0     v3
-// A1  v0[1]  v3[1]
-// A2  v1     v4
-// A3  v1[1]  v4[1]
+// Register usage
+// A0  x13 v0     v3
+// A1  x14 v0[1]  v3[1]
+// A2  x15 v1     v4
+// A3   x8 v1[1]  v4[1]
 // B   v12 v13 v14 v15 second set of B
 // B   v16 v17 v18 v19 first set
-// C   v20 v21
-// C   v22 v23
-// C   v24 v25
-// C   v26 v27
+// C0   x6 v20 v21
+// C1  x16 v22 v23
+// C2  x17 v24 v25
+// C3   x7 v26 v27
 // Clamp v6 v7
 // temporary vector shadow register x19
 

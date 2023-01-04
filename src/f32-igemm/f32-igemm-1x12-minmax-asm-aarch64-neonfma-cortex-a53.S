@@ -21,20 +21,14 @@
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# A pointer
-# x8  a0
-
-# C pointer
-# x6  c0
-
-# Vector register usage and GPR shadows
-# a0  v0           first set of A
-# a0  v1           second set of A
-# B   v2  v3  v4   x14 x15 x16  first set of B
-# B   v5  v6  v7   x17 x13 x7
-# B  v23 v24 v25   x14 x15 x16  second set of B (same x as first set)
-# B  v17 v18 v19   x17 x13 x7
-# C  v20 v21 v22
+# Register usage
+# A0   x8 v0           first set of A
+# A0   x8 v1           second set of A
+# B   x14 x15 x16  v2  v3  v4   first set of B
+# B   x17 x13  x7  v5  v6  v7
+# B   x14 x15 x16 v23 v24 v25   second set of B (same x as first set)
+# B   x17 x13  x7 v17 v18 v19
+# C0   x6 v20 v21 v22
 
 BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x12__asm_aarch64_neonfma_cortex_a53
 

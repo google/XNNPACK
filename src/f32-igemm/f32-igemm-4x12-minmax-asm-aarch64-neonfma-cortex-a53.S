@@ -21,39 +21,26 @@
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# A pointers
-# x13 a0
-# x14 a1
-# x15 a2
-# x16 a3
-
-# C pointers
-# x6  c0
-# x17 c1
-# x10 c2
-# x7  c3 / cm_stride
-
-# x8 temporary vector shadow register
-
-# Vector register usage and GPR shadows
-# A0  v0
-# A1  v0[1]
-# A2  v1
-# A3  v1[1]
-# A0  v2
-# A1  v2[1]
-# A2  v3
-# A3  v3[1]
-# B   v6  v7  v8
-# B   v9 v10 v11
-# B  v14 v15 v16
-# B  v17 v18 v19
-# C  v20 v21 v22
-# C  v23 v24 v25
-# C  v26 v27 v28
-# C  v29 v30 v31
+# Register usage
+# A0  x13  v0
+# A1  x14  v0[1]
+# A2  x15  v1
+# A3  x16  v1[1]
+# A0  x13  v2
+# A1  x14  v2[1]
+# A2  x15  v3
+# A3  x16  v3[1]
+# B    v6  v7  v8
+# B    v9 v10 v11
+# B   v14 v15 v16
+# B   v17 v18 v19
+# C0   x6 v20 v21 v22
+# C1  x17 v23 v24 v25
+# C2  x10 v26 v27 v28
+# C3   x7 v29 v30 v31
+# temporary vector shadow register x8
 # Clamp v4 v5
-# v12 to v13 unused.
+# unused v12 v13
 
 BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_4x12__asm_aarch64_neonfma_cortex_a53
 
