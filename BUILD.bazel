@@ -9218,6 +9218,7 @@ xnnpack_unit_test(
         "test/constant-pad-nd.cc",
         "test/constant-pad-operator-tester.h",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -9227,6 +9228,7 @@ xnnpack_unit_test(
         "test/constant-pad-nd-eager.cc",
         "test/constant-pad-operator-tester.h",
     ],
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS,
 )
 
