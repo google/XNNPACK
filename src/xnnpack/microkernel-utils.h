@@ -28,6 +28,32 @@ XNN_INTERNAL size_t xnn_dwconv_multipass_weights_count(
   size_t channel_subtile,
   size_t channel_round);
 
+// Calculate the number of bytes read.
+size_t xnn_dwconv_multipass_bytes_read(
+  size_t kernel_size,
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t channels,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
+  size_t log2_input_size,
+  size_t log2_filter_size,
+  size_t bias_element_size,
+  size_t log2_accumulator_size);
+
+// Calculate the number of bytes written.
+size_t xnn_dwconv_multipass_bytes_written(
+  size_t kernel_size,
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t channels,
+  size_t channel_round,
+  size_t log2_accumulator_size,
+  size_t log2_output_size);
+
 #ifdef __cplusplus
 }
 #endif
