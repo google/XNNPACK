@@ -10,6 +10,15 @@
   init: xnn_init_f32_hswish_scalar_params
 - name: xnn_f32_vhswish_ukernel__neon_x16
   init: xnn_init_f32_hswish_scalar_params
+# RISC-V Vector
+- name: xnn_f32_vhswish_ukernel__rvv_x1v
+  init: xnn_init_f32_hswish_scalar_params
+- name: xnn_f32_vhswish_ukernel__rvv_x2v
+  init: xnn_init_f32_hswish_scalar_params
+- name: xnn_f32_vhswish_ukernel__rvv_x4v
+  init: xnn_init_f32_hswish_scalar_params
+- name: xnn_f32_vhswish_ukernel__rvv_x8v
+  init: xnn_init_f32_hswish_scalar_params
 # x86 SSE
 - name: xnn_f32_vhswish_ukernel__sse_x4
   init: xnn_init_f32_hswish_sse_params

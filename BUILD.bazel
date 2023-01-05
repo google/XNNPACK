@@ -4765,7 +4765,7 @@ xnnpack_aggregate_library(
         ":arm_dotprod_enabled": ["XNN_ENABLE_ARM_DOTPROD=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_DOTPROD=0"],
     }) + select({
-        ":arm_dotprod_enabled": ["XNN_ENABLE_RISCV_VECTOR=1"],
+        ":riscv_vector_enabled": ["XNN_ENABLE_RISCV_VECTOR=1"],
         "//conditions:default": ["XNN_ENABLE_RISCV_VECTOR=0"],
     }),
     generic_deps = [
@@ -4915,7 +4915,7 @@ xnnpack_aggregate_library(
         ":arm_dotprod_enabled": ["XNN_ENABLE_ARM_DOTPROD=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_DOTPROD=0"],
     }) + select({
-        ":arm_dotprod_enabled": ["XNN_ENABLE_RISCV_VECTOR=1"],
+        ":riscv_vector_enabled": ["XNN_ENABLE_RISCV_VECTOR=1"],
         "//conditions:default": ["XNN_ENABLE_RISCV_VECTOR=0"],
     }),
     generic_deps = [

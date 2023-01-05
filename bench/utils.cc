@@ -296,6 +296,17 @@ void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ARCH_RISCV
+  bool CheckRVV(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_riscv_vector) {
+      state.SkipWithError("no V extension");
+      return false;
+    }
+    return true;
+  }
+#endif  // XNN_ARCH_RISCV
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   bool CheckSSSE3(benchmark::State& state) {
     const xnn_hardware_config* hardware_config = xnn_init_hardware_config();

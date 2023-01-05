@@ -3493,6 +3493,10 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-neonv8-ld128-x16.c)
 
 SET(ALL_RVV_MICROKERNEL_SRCS
+  src/f32-vhswish/gen/f32-vhswish-rvv-x1v.c
+  src/f32-vhswish/gen/f32-vhswish-rvv-x2v.c
+  src/f32-vhswish/gen/f32-vhswish-rvv-x4v.c
+  src/f32-vhswish/gen/f32-vhswish-rvv-x8v.c
   src/f32-vunary/gen/f32-vabs-rvv-x1v.c
   src/f32-vunary/gen/f32-vabs-rvv-x2v.c
   src/f32-vunary/gen/f32-vabs-rvv-x4v.c
