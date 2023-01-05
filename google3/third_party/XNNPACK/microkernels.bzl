@@ -3509,6 +3509,21 @@ ALL_NEONV8_MICROKERNEL_SRCS = [
     "src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-neonv8-ld128-x16.c",
 ]
 
+ALL_RVV_MICROKERNEL_SRCS = [
+    "src/f32-vunary/gen/f32-vabs-rvv-x1v.c",
+    "src/f32-vunary/gen/f32-vabs-rvv-x2v.c",
+    "src/f32-vunary/gen/f32-vabs-rvv-x4v.c",
+    "src/f32-vunary/gen/f32-vabs-rvv-x8v.c",
+    "src/f32-vunary/gen/f32-vneg-rvv-x1v.c",
+    "src/f32-vunary/gen/f32-vneg-rvv-x2v.c",
+    "src/f32-vunary/gen/f32-vneg-rvv-x4v.c",
+    "src/f32-vunary/gen/f32-vneg-rvv-x8v.c",
+    "src/f32-vunary/gen/f32-vsqr-rvv-x1v.c",
+    "src/f32-vunary/gen/f32-vsqr-rvv-x2v.c",
+    "src/f32-vunary/gen/f32-vsqr-rvv-x4v.c",
+    "src/f32-vunary/gen/f32-vsqr-rvv-x8v.c",
+]
+
 ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/cs16-bfly4/cs16-bfly4-samples1-scalar.c",
     "src/cs16-bfly4/cs16-bfly4-samples4-scalar.c",

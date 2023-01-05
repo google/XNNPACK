@@ -26,6 +26,7 @@ _ARCH_TO_MACRO_MAP = {
   "x86-32": "XNN_ARCH_X86",
   "x86-64": "XNN_ARCH_X86_64",
   "hexagon": "XNN_ARCH_HEXAGON",
+  "riscv": "XNN_ARCH_RISCV",
   "wasm": "XNN_ARCH_WASM",
   "wasmsimd": "XNN_ARCH_WASMSIMD",
   "wasmrelaxedsimd": "XNN_ARCH_WASMRELAXEDSIMD",
@@ -38,6 +39,7 @@ _ISA_TO_MACRO_MAP = {
   "neonfp16arith": "XNN_ENABLE_ARM_FP16_VECTOR",
   "neonbf16": "XNN_ENABLE_ARM_BF16",
   "neondot": "XNN_ENABLE_ARM_DOTPROD",
+  "rvv": "XNN_ENABLE_RISCV_VECTOR",
 }
 
 _ISA_TO_ARCH_MAP = {
@@ -62,6 +64,7 @@ _ISA_TO_ARCH_MAP = {
   "avx512f": ["x86-32", "x86-64"],
   "avx512skx": ["x86-32", "x86-64"],
   "avx512vbmi": ["x86-32", "x86-64"],
+  "rvv": ["riscv"],
   "wasm32": ["wasm", "wasmsimd"],
   "wasm": ["wasm", "wasmsimd", "wasmrelaxedsimd"],
   "wasmsimd": ["wasmsimd", "wasmrelaxedsimd"],
@@ -91,6 +94,7 @@ _ISA_TO_CHECK_MAP = {
   "avx512f": "TEST_REQUIRES_X86_AVX512F",
   "avx512skx": "TEST_REQUIRES_X86_AVX512SKX",
   "avx512vbmi": "TEST_REQUIRES_X86_AVX512VBMI",
+  "rvv": "TEST_REQUIRES_RISCV_VECTOR",
   "wasmpshufb": "TEST_REQUIRES_WASM_PSHUFB",
 }
 

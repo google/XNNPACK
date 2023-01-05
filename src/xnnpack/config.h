@@ -46,7 +46,9 @@ struct xnn_hardware_config {
   bool use_x86_avx512skx;
 #endif
 #if XNN_ARCH_RISCV
-  bool use_rvv;
+  bool use_riscv_vector;
+  // vlenb CSR (VLEN/8). 0 if vector extension is unsupported.
+  uint32_t vlenb;
 #endif
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   bool is_x86;
