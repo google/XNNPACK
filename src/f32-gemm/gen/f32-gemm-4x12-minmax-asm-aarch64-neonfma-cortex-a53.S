@@ -41,8 +41,8 @@
 # C2 x10 v26 v27 v28
 # C3  x7 v29 v30 v31
 # Clamp v4 v5
-# v12 to v13 unused.
-# x8 temporary vector shadow register
+# unused v12 v13
+# temporary vector shadow register x8
 
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x12__asm_aarch64_neonfma_cortex_a53
 

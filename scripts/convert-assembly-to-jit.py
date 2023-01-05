@@ -419,8 +419,7 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
     elif 'Copyright ' in line:
       in_autogen = False
       # replace year
-      prologue.append(
-          re.sub(r'\d{4}', str(datetime.date.today().year), line, 1).rstrip())
+      prologue.append(line)
       continue
     elif '#include <xnnpack/assembly.h>' in line:
       prologue.append(f'#include <cassert>')
