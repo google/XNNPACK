@@ -45,7 +45,7 @@
 
   TEST(F16_VCLAMP__NEONFP16ARITH_X8, batch_gt_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t batch_size = 9; batch_size < 16; batch_size++) {
+    for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vclamp_ukernel__neonfp16arith_x8, xnn_init_f16_minmax_fp16arith_params);
@@ -116,7 +116,7 @@
 
   TEST(F16_VCLAMP__NEONFP16ARITH_X16, batch_gt_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
+    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vclamp_ukernel__neonfp16arith_x16, xnn_init_f16_minmax_fp16arith_params);
@@ -187,7 +187,7 @@
 
   TEST(F16_VCLAMP__F16C_X8, batch_gt_8) {
     TEST_REQUIRES_X86_F16C;
-    for (size_t batch_size = 9; batch_size < 16; batch_size++) {
+    for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vclamp_ukernel__f16c_x8, xnn_init_f16_minmax_avx_params);
@@ -258,7 +258,7 @@
 
   TEST(F16_VCLAMP__F16C_X16, batch_gt_16) {
     TEST_REQUIRES_X86_F16C;
-    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
+    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vclamp_ukernel__f16c_x16, xnn_init_f16_minmax_avx_params);
