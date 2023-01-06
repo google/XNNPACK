@@ -846,7 +846,7 @@ $if DATATYPE == "qu8":
     }
   }
 
-$if TEST_NAME.startswith('GENERATE') and DATATYPE == 'f32':
+$if TEST_NAME.startswith('GENERATE') and (DATATYPE == 'f32' or DATATYPE == 'f16'):
   TEST(${TEST_NAME}, subtile_m_upto_mr) {
     $if ISA_CHECK:
       ${ISA_CHECK};
