@@ -3500,10 +3500,10 @@ SET(ALL_RVV_MICROKERNEL_SRCS
   src/f32-vhswish/gen/f32-vhswish-rvv-x2v.c
   src/f32-vhswish/gen/f32-vhswish-rvv-x4v.c
   src/f32-vhswish/gen/f32-vhswish-rvv-x8v.c
-  src/f32-vsqrt/gen/f32-vsqrt-rvv-x1v.c
-  src/f32-vsqrt/gen/f32-vsqrt-rvv-x2v.c
-  src/f32-vsqrt/gen/f32-vsqrt-rvv-x4v.c
-  src/f32-vsqrt/gen/f32-vsqrt-rvv-x8v.c
+  src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-x1v.c
+  src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-x2v.c
+  src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-x4v.c
+  src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-x8v.c
   src/f32-vunary/gen/f32-vabs-rvv-x1v.c
   src/f32-vunary/gen/f32-vabs-rvv-x2v.c
   src/f32-vunary/gen/f32-vabs-rvv-x4v.c
