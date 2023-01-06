@@ -159,6 +159,11 @@ enum xnn_status xnn_define_softmax(
     return status;
   }
 
+  status = xnn_subgraph_check_all_dims_match(xnn_node_type_softmax, input_id, input_value, output_id, output_value);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
       break;
