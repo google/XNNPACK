@@ -39,6 +39,12 @@ tools/xngen src/f32-vsqrt/neonfma-nr1rsqrts1fma1adj.c.in -D BATCH_TILE=32 -o src
 tools/xngen src/f32-vsqrt/neonfma-nr1rsqrts1fma1adj.c.in -D BATCH_TILE=36 -o src/f32-vsqrt/gen/f32-vsqrt-neonfma-nr1rsqrts1fma1adj-x36.c &
 tools/xngen src/f32-vsqrt/neonfma-nr1rsqrts1fma1adj.c.in -D BATCH_TILE=40 -o src/f32-vsqrt/gen/f32-vsqrt-neonfma-nr1rsqrts1fma1adj-x40.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/f32-vsqrt/rvv-sqrt.c.in -D LMUL=1 -o src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-x1v.c &
+tools/xngen src/f32-vsqrt/rvv-sqrt.c.in -D LMUL=2 -o src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-x2v.c &
+tools/xngen src/f32-vsqrt/rvv-sqrt.c.in -D LMUL=4 -o src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-x4v.c &
+tools/xngen src/f32-vsqrt/rvv-sqrt.c.in -D LMUL=8 -o src/f32-vsqrt/gen/f32-vsqrt-rvv-sqrt-x8v.c &
+
 ################################# x86 128-bit #################################
 tools/xngen src/f32-vsqrt/sse-sqrt.c.in -D BATCH_TILE=4 -o src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-x4.c &
 tools/xngen src/f32-vsqrt/sse-sqrt.c.in -D BATCH_TILE=8 -o src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-x8.c &
