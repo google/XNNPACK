@@ -26,6 +26,12 @@ tools/xngen src/f32-vclamp/wasmsimd.c.in -D BATCH_TILE=8 -D X86=1 -o src/f32-vcl
 tools/xngen src/f32-vclamp/neon.c.in -D BATCH_TILE=4 -o src/f32-vclamp/gen/f32-vclamp-neon-x4.c &
 tools/xngen src/f32-vclamp/neon.c.in -D BATCH_TILE=8 -o src/f32-vclamp/gen/f32-vclamp-neon-x8.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/f32-vclamp/rvv.c.in -D LMUL=1 -o src/f32-vclamp/gen/f32-vclamp-rvv-x1v.c &
+tools/xngen src/f32-vclamp/rvv.c.in -D LMUL=2 -o src/f32-vclamp/gen/f32-vclamp-rvv-x2v.c &
+tools/xngen src/f32-vclamp/rvv.c.in -D LMUL=4 -o src/f32-vclamp/gen/f32-vclamp-rvv-x4v.c &
+tools/xngen src/f32-vclamp/rvv.c.in -D LMUL=8 -o src/f32-vclamp/gen/f32-vclamp-rvv-x8v.c &
+
 ################################# x86 128-bit #################################
 tools/xngen src/f32-vclamp/sse.c.in -D BATCH_TILE=4 -o src/f32-vclamp/gen/f32-vclamp-sse-x4.c &
 tools/xngen src/f32-vclamp/sse.c.in -D BATCH_TILE=8 -o src/f32-vclamp/gen/f32-vclamp-sse-x8.c &

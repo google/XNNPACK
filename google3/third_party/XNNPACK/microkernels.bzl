@@ -3513,6 +3513,10 @@ ALL_NEONV8_MICROKERNEL_SRCS = [
 ]
 
 ALL_RVV_MICROKERNEL_SRCS = [
+    "src/f32-vclamp/gen/f32-vclamp-rvv-x1v.c",
+    "src/f32-vclamp/gen/f32-vclamp-rvv-x2v.c",
+    "src/f32-vclamp/gen/f32-vclamp-rvv-x4v.c",
+    "src/f32-vclamp/gen/f32-vclamp-rvv-x8v.c",
     "src/f32-vhswish/gen/f32-vhswish-rvv-x1v.c",
     "src/f32-vhswish/gen/f32-vhswish-rvv-x2v.c",
     "src/f32-vhswish/gen/f32-vhswish-rvv-x4v.c",
