@@ -273,6 +273,62 @@ static void DWConvEnd2EndBenchmark(
       16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckAVX);
   }
 
+  static void f32_dwconv_3p8c__fma3(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_3p8c__fma3,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_avx_params,
+      8 /* channel tile */, 3 /* primary tile */, benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_3p8c__fma3_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_3p8c__fma3_acc2,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_avx_params,
+      8 /* channel tile */, 3 /* primary tile */, benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_3p16c__fma3(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_3p16c__fma3,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_avx_params,
+      16 /* channel tile */, 3 /* primary tile */, benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_3p16c__fma3_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_3p16c__fma3_acc2,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_avx_params,
+      16 /* channel tile */, 3 /* primary tile */, benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_4p8c__fma3(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_4p8c__fma3,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_avx_params,
+      8 /* channel tile */, 4 /* primary tile */, benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_4p8c__fma3_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_4p8c__fma3_acc2,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_avx_params,
+      8 /* channel tile */, 4 /* primary tile */, benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_4p16c__fma3(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_4p16c__fma3,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_avx_params,
+      16 /* channel tile */, 4 /* primary tile */, benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_4p16c__fma3_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_4p16c__fma3_acc2,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_avx_params,
+      16 /* channel tile */, 4 /* primary tile */, benchmark::utils::CheckFMA3);
+  }
   static void f32_dwconv_9p8c__fma3(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_minmax_ukernel_9p8c__fma3,
@@ -300,6 +356,34 @@ static void DWConvEnd2EndBenchmark(
       nullptr /* dwconv */,
       xnn_init_f32_minmax_avx_params,
       16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_25p8c__fma3(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__fma3,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_avx_params,
+      8 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_25p8c__fma3_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__fma3_acc2,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_avx_params,
+      8 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_25p16c__fma3(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_25p16c__fma3,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_avx_params,
+      16 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_25p16c__fma3_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_25p16c__fma3_acc2,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_avx_params,
+      16 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckFMA3);
   }
 
   static void f32_dwconv_9p16c__avx512f(benchmark::State& state, models::ExecutionPlanFactory model) {
@@ -336,10 +420,22 @@ static void DWConvEnd2EndBenchmark(
   BENCHMARK_FP32_END2END(f32_dwconv_9p32c__avx512f);
   BENCHMARK_FP32_END2END(f32_dwconv_9p32c__avx512f_acc2);
 
+  BENCHMARK_FP32_END2END(f32_dwconv_3p8c__fma3);
+  BENCHMARK_FP32_END2END(f32_dwconv_3p8c__fma3_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_3p16c__fma3);
+  BENCHMARK_FP32_END2END(f32_dwconv_3p16c__fma3_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_4p8c__fma3);
+  BENCHMARK_FP32_END2END(f32_dwconv_4p8c__fma3_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_4p16c__fma3);
+  BENCHMARK_FP32_END2END(f32_dwconv_4p16c__fma3_acc2);
   BENCHMARK_FP32_END2END(f32_dwconv_9p8c__fma3);
   BENCHMARK_FP32_END2END(f32_dwconv_9p8c__fma3_acc2);
   BENCHMARK_FP32_END2END(f32_dwconv_9p16c__fma3);
   BENCHMARK_FP32_END2END(f32_dwconv_9p16c__fma3_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_25p8c__fma3);
+  BENCHMARK_FP32_END2END(f32_dwconv_25p8c__fma3_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_25p16c__fma3);
+  BENCHMARK_FP32_END2END(f32_dwconv_25p16c__fma3_acc2);
 
   BENCHMARK_FP32_END2END(f32_dwconv_9p8c__avx);
   BENCHMARK_FP32_END2END(f32_dwconv_9p8c__avx_acc2);
