@@ -509,10 +509,13 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
       # Skip b vector registers.
       if re.search(r'(?:#|//)\W+B', line):
         continue
-      m = re.search(r'(?:#|//)\W+clamp\W+(v\d+)', line)
+
+      # Look for clamps
+      m = re.search(r'(?:#|//)\W+[Cc]lamp\W+\(?([vr]\d+)\)?', line)
       if m:
         vector_register_usage['clamp'].append(m.group(1))
         continue
+
       m = re.search(r'(?:#|//)\W+(A|C)\d?\W+(((?:v|d|q|r|x)\d+(?:\[\d+\])?(?:\W*|-))+)', line)
       if not m:
         print(
@@ -1098,10 +1101,9 @@ def convert(input_file: str, post_op: bool, reload_params: bool, debug: bool) ->
   minmax = False
   prfm = False
   base_filename = os.path.basename(input_file)
-  ctype = 'float'
   if base_filename.startswith('f16-'):
     ctype = 'uint16_t'
-  elif base_filename.startswith('f16-'):
+  elif base_filename.startswith('f32-'):
     ctype = 'float'
   elif base_filename.startswith('qs8-') or base_filename.startswith('qc8-'):
     ctype = 'int8_t'
