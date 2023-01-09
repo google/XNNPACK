@@ -37,6 +37,12 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
 
   CHECK_ENCODING(0x8B040069, a.add(x9, x3, x4));
 
+  CHECK_ENCODING(0xB1002069, a.adds(x9, x3, 8));
+
+  CHECK_ENCODING(0xF2400869, a.ands(x9, x3, 7));
+  // Any immediate other than 7 is not supported.
+  EXPECT_ERROR(Error::kInvalidOperand, a.ands(x9, x3, 8));
+
   CHECK_ENCODING(0xF100081F, a.cmp(x0, 2));
   EXPECT_ERROR(Error::kInvalidOperand, a.cmp(x0, 4096));
 

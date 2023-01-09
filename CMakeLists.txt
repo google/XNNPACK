@@ -318,8 +318,11 @@ SET(JIT_AARCH32_SRCS
   src/qs8-igemm/gen/qs8-igemm-4x8c4-rndnu-aarch32-neondot-ld64.cc)
 
 SET(JIT_AARCH64_SRCS
+  src/f16-gemm/gen/f16-gemm-4x16-aarch64-neonfp16arith-ld64.cc
   src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a55.cc
   src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a55r0.cc
+  src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a75.cc
+  src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-ld64.cc
   src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-cortex-a53.cc
   src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-cortex-a75.cc
   src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a53.cc

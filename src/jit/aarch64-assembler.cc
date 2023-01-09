@@ -240,6 +240,26 @@ void Assembler::add(XRegister xd, XRegister xn, XRegister xm) {
   emit32(0x8B000000 | rd(xd) | rn(xn) | rm(xm));
 }
 
+void Assembler::adds(XRegister xd, XRegister xn, uint16_t imm12) {
+  // The instruction supports larger numbers using the shift by (left shift by 12), but that's unused in kernels.
+  if (imm12 > kUint12Max) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+
+  emit32(0xB1000000 | imm12 << 10 | rn(xn) | rd(xd));
+}
+
+void Assembler::ands(XRegister xd, XRegister xn, uint16_t imm12) {
+  // Encoding this bitmask is complicated, and we only use 7 in our microkernel, hard code this.
+  if (imm12 != 7) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+
+  emit32(0xF2400800 | rn(xn) | rd(xd));
+}
+
 void Assembler::b(Label& l) {
   return branch_to_label(0x14000000, BranchType::kUnconditional, l);
 }

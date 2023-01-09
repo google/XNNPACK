@@ -163,7 +163,10 @@ def fix_replicate_instruction(s: str) -> str:
 
 
 def fix_instr_name(s: str) -> str:
-  return s.lower().replace('.', '_', 2).replace('and', 'and_', 1)
+  fixed = s.lower().replace('.', '_', 2)
+  if fixed == 'and':
+    return 'and_'
+  return fixed
 
 
 def fix_comments(s: str) -> str:

@@ -89,5 +89,8 @@ wait # JIT requires assembly files to be generated first.
 
 scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-gemm/gen/f16-gemm-6x16-minmax-asm-aarch64-neonfp16arith-cortex-a55.S -o src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a55.cc &
 scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-gemm/gen/f16-gemm-6x16-minmax-asm-aarch64-neonfp16arith-cortex-a55r0.S -o src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a55r0.cc &
+scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-gemm/gen/f16-gemm-6x16-minmax-asm-aarch64-neonfp16arith-cortex-a75.S -o src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a75.cc &
+scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-gemm/gen/f16-gemm-4x16-minmax-asm-aarch64-neonfp16arith-ld64.S -o src/f16-gemm/gen/f16-gemm-4x16-aarch64-neonfp16arith-ld64.cc &
+scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-gemm/gen/f16-gemm-6x16-minmax-asm-aarch64-neonfp16arith-ld64.S -o src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-ld64.cc &
 
 wait

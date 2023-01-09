@@ -420,6 +420,8 @@ class Assembler : public AssemblerBase {
   // Base instructions.
   void add(XRegister xd, XRegister xn, uint16_t imm12);
   void add(XRegister xd, XRegister xn, XRegister xm);
+  void adds(XRegister xd, XRegister xn, uint16_t imm12);
+  void ands(XRegister xd, XRegister xn, uint16_t imm12);
   void b(Label& l);
   void b_eq(Label& l) { return b(kEQ, l); }
   void b_hi(Label& l) { return b(kHI, l); }
