@@ -476,6 +476,7 @@ class Assembler : public AssemblerBase {
   void ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
   void ldr(DRegister dt, MemOperand xn);
   void ldr(SRegister dt, MemOperand xn);
+  void ldr(QRegister dt, MemOperand xn);
   void ldr(DRegister dt, MemOperand xn, int32_t imm);
   void ldr(HRegister dt, MemOperand xn, int32_t imm);
   void ldr(QRegister qt, MemOperand xn, int32_t imm);

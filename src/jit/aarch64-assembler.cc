@@ -454,7 +454,11 @@ void Assembler::fadd(VRegister vd, VRegister vn, VRegister vm) {
     return;
   }
 
-  emit32(0x0E20D400 | q(vd) | fp_sz(vn) | rm(vm) | rn(vn) | rd(vd));
+  if (vd.is_h()) {
+    emit32(0x0E401400 | q(vd) | rm(vm) | rn(vn) | rd(vd));
+  } else {
+    emit32(0x0E20D400 | q(vd) | fp_sz(vn) | rm(vm) | rn(vn) | rd(vd));
+  }
 }
 
 void Assembler::fmax(VRegister vd, VRegister vn, VRegister vm) {
@@ -614,6 +618,17 @@ void Assembler::ldr(SRegister dt, MemOperand xn) {
 
   emit32(0x3D400000 | size << 30 | 1 << 22 | (xn.offset >> size) << 10 | rn(xn.base) | rt(dt));
 }
+
+void Assembler::ldr(QRegister dt, MemOperand xn) {
+  if (xn.offset != 0 && (xn.offset < 0 || xn.offset > 65520 || xn.offset % 16 != 0)) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+  size_t size = 0;
+
+  emit32(0x3D400000 | size << 30 | 0b11 << 22 | (xn.offset >> 4) << 10 | rn(xn.base) | rt(dt));
+}
+
 
 void Assembler::ldr(DRegister dt, MemOperand xn, int32_t imm) {
   return ldr(/*size=*/3, /*opc=*/1, xn, imm, dt.code);

@@ -149,6 +149,8 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   CHECK_ENCODING(0x4EA0F8B0, a.fabs(v16.v4s(), v5.v4s()));
   EXPECT_ERROR(Error::kInvalidOperand, a.fabs(v16.v4s(), v5.v2s()));
 
+  CHECK_ENCODING(0x4E521610, a.fadd(v16.v8h(), v16.v8h(), v18.v8h()));
+
   CHECK_ENCODING(0x4E25D690, a.fadd(v16.v4s(), v20.v4s(), v5.v4s()));
   EXPECT_ERROR(Error::kInvalidOperand, a.fadd(v16.v4s(), v20.v4s(), v5.v2s()));
 
@@ -225,6 +227,11 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(s6, mem[x6, 16384]));
 
   CHECK_ENCODING(0xBC404460, a.ldr(s0, mem[x3], 4));
+
+  CHECK_ENCODING(0x3DC004B9, a.ldr(q25, mem[x5, 16]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q25, mem[x5, -16]));  // Negative offset.
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q25, mem[x5, 17]));  // Not multiple of 16.
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q25, mem[x5, 65536]));  // Out of range.
 
   CHECK_ENCODING(0x3CC10460, a.ldr(q0, mem[x3], 16));
   CHECK_ENCODING(0x3CCFF460, a.ldr(q0, mem[x3], 255));
