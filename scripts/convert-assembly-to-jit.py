@@ -24,7 +24,7 @@ COMMA = r',' + SPACES
 COMMENTS = SPACES + '((//\s+.+)|)$'
 WB = r'!'
 
-REG_NO_GROUP = r'r\d+|h\d+|s\d+|d\d+|q\d+|sp|lr|pc|x\d+|(?:v\d+\.(?:\d+)?(?:d|s|h|b))'
+REG_NO_GROUP = r'r\d+|h\d+|s\d+|d\d+|q\d+|sp|lr|pc|w\d+|x\d+|(?:v\d+\.(?:\d+)?(?:d|s|h|b))'
 REG = r'(' + REG_NO_GROUP + ')'
 IMM_NO_GROUP = r'\d+'
 IMM = r'(' + IMM_NO_GROUP + ')'
@@ -613,6 +613,15 @@ def emit_instruction(instr: str,
                      vector_register_map: Mapping[str, int],
                      vector_register_usage = None,
                      is_a53: bool = False) -> None:
+  # If we have a trailing comment indicating the mr, we use it.
+  m = re.search(r'// (?:A|C)(\d+)(?:\W+\w+)?$', instr)
+  if m:
+    if m[1] == '0':
+      instructions.append(instr)
+    else:
+      instructions.append(f'if (max_mr > {m[1]}) {{ {instr} }}')
+    return
+
   # emit a guard for instruction if it is using a particular register
   # mapping is a map from register to the mr it is used, e.g. v0 -> 0 to guard v0 behind max_mr > 0.
   # parse the dest register from this instruction
