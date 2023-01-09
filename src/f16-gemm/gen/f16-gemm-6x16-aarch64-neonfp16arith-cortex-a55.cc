@@ -69,10 +69,10 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9;
   const size_t num_post_operations = jit_gemm_params->num_post_operations;
   (void) num_post_operations;  // Silence unused warning.
-  const float min = jit_gemm_params->f32_minmax.min;
-  const float max = jit_gemm_params->f32_minmax.max;
-  const bool clamp_min = min != -std::numeric_limits<float>::infinity();
-  const bool clamp_max = max != +std::numeric_limits<float>::infinity();
+  const uint16_t min = jit_gemm_params->f16_minmax.min;
+  const uint16_t max = jit_gemm_params->f16_minmax.max;
+  const bool clamp_min = min != UINT16_C(0xFC00);  // -Inf.
+  const bool clamp_max = max != UINT16_C(0x7C00);  // Inf.
   assert(num_post_operations == 0 || (!clamp_min && !clamp_max));
 
   // Load params pointer

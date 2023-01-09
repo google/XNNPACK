@@ -18,6 +18,7 @@ import re
 import sys
 from typing import List, Tuple, Mapping
 
+
 SPACES = r'\s*'
 COMMA = r',' + SPACES
 COMMENTS = SPACES + '((//\s+.+)|)$'
@@ -1204,15 +1205,22 @@ def convert(input_file: str, post_op: bool, reload_params: bool, debug: bool) ->
     output.append(
         '  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;'
     )
-  output.append('  const float min = jit_gemm_params->f32_minmax.min;')
-  output.append('  const float max = jit_gemm_params->f32_minmax.max;')
+
   if minmax:
-    output.append(
-        '  const bool clamp_min = min != -std::numeric_limits<float>::infinity();'
-    )
-    output.append(
-        '  const bool clamp_max = max != +std::numeric_limits<float>::infinity();'
-    )
+    if ctype == 'float':
+      output.append('  const float min = jit_gemm_params->f32_minmax.min;')
+      output.append('  const float max = jit_gemm_params->f32_minmax.max;')
+      output.append('  const bool clamp_min = min != -std::numeric_limits<float>::infinity();')
+      output.append('  const bool clamp_max = max != +std::numeric_limits<float>::infinity();')
+    elif ctype == 'uint16_t':
+      output.append('  const uint16_t min = jit_gemm_params->f16_minmax.min;')
+      output.append('  const uint16_t max = jit_gemm_params->f16_minmax.max;')
+      output.append('  const bool clamp_min = min != UINT16_C(0xFC00);  // -Inf.')
+      output.append('  const bool clamp_max = max != UINT16_C(0x7C00);  // Inf.')
+    else:
+      print('ERROR: unknown ctype for min/max params')
+      sys.exit(1)
+
     output.append(
         '  assert(num_post_operations == 0 || (!clamp_min && !clamp_max));')
 

@@ -1725,8 +1725,8 @@ void GemmMicrokernelTester::Test(
     struct xnn_code_buffer code_buffer;
     ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
     jit_gemm_params p = {};
-    p.f32_minmax.min = c_min;
-    p.f32_minmax.max = c_max;
+    p.f16_minmax.min = fp16_ieee_to_fp32_value(c_min);
+    p.f16_minmax.max = fp16_ieee_to_fp32_value(c_max);
     ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(uint16_t), &p));
     ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
     xnn_f16_gemm_minmax_ukernel_fn gemm_minmax =
