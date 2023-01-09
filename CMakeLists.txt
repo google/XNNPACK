@@ -324,6 +324,7 @@ SET(JIT_AARCH64_SRCS
   src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a75.cc
   src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-ld64.cc
   src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-cortex-a53.cc
+  src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a55.cc
   src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-cortex-a75.cc
   src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a53.cc
   src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a55.cc
@@ -1677,6 +1678,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f16-ibilinear-test PRIVATE fp16 pthreadpool gtest gtest_main)
   TARGET_LINK_LIBRARIES(f16-ibilinear-test PRIVATE hardware-config logging microkernels-all)
   ADD_TEST(NAME f16-ibilinear-test COMMAND f16-ibilinear-test)
+
+  ADD_EXECUTABLE(f16-igemm-jit-test test/f16-igemm-jit.cc)
+  TARGET_INCLUDE_DIRECTORIES(f16-igemm-jit-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f16-igemm-jit-test PRIVATE fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f16-igemm-jit-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME f16-igemm-jit-test COMMAND f16-igemm-jit-test)
 
   ADD_EXECUTABLE(f16-igemm-minmax-test test/f16-igemm-minmax.cc)
   TARGET_INCLUDE_DIRECTORIES(f16-igemm-minmax-test PRIVATE include src test)

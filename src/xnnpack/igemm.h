@@ -1650,6 +1650,8 @@ DECLARE_QC8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_igemm_minmax_fp32_ukernel_4x4_
       size_t ks,                                         \
       const void* params);
 
+DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55)
+
 DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7)
 DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a53)
 DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55)

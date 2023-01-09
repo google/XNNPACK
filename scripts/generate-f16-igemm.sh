@@ -29,5 +29,12 @@ tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -o src/f16-igemm/
 
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/f16-igemm-minmax.yaml --output test/f16-igemm-minmax.cc &
+tools/generate-gemm-test.py --spec test/f16-igemm-jit.yaml --output test/f16-igemm-jit.cc &
+
+wait # JIT requires assembly files to be generated first.
+
+##################################### JIT #####################################
+
+scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-igemm/f16-igemm-6x16-minmax-asm-aarch64-neonfp16arith-cortex-a55.S -o src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a55.cc &
 
 wait
