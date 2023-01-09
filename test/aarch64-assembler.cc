@@ -63,6 +63,12 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, mem[sp, 32768]));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, MemOperand(sp, 16, AddressingMode::kPostIndex)));
 
+  CHECK_ENCODING(0xB8408488, a.ldr(w8, mem[x4], 8));
+  CHECK_ENCODING(0xB84FF488, a.ldr(w8, mem[x4], 255));
+  CHECK_ENCODING(0xB8500488, a.ldr(w8, mem[x4], -256));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(w8, mem[x4], 256));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(w8, mem[x4], -257));
+
   CHECK_ENCODING(0xF8408488, a.ldr(x8, mem[x4], 8));
   CHECK_ENCODING(0xF84FF488, a.ldr(x8, mem[x4], 255));
   CHECK_ENCODING(0xF8500488, a.ldr(x8, mem[x4], -256));
@@ -152,6 +158,7 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
 
   CHECK_ENCODING(0x4F001290, a.fmla(v16.v8h(), v20.v8h(), v0.h()[0]));
   CHECK_ENCODING(0x4F101290, a.fmla(v16.v8h(), v20.v8h(), v0.h()[1]));
+  CHECK_ENCODING(0x4F001A90, a.fmla(v16.v8h(), v20.v8h(), v0.h()[4]));
   // Only lane indices 0 to 7 are valid.
   EXPECT_ERROR(Error::kInvalidLaneIndex, a.fmla(v16.v8h(), v20.v8h(), v0.h()[8]));
   // Only the first 15 vector registers can be used for half-precision.
@@ -187,6 +194,7 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.ld1({v16.v8b(), v17.v8b(), v18.v8b()}, mem[x15], 48));
 
   CHECK_ENCODING(0x4DDF8520, a.ld1({v0.d()}, 1, mem[x9], 8));
+  CHECK_ENCODING(0x4DDF4120, a.ld1({v0.h()}, 4, mem[x9], 2));
 
   CHECK_ENCODING(0x6D433FEE, a.ldp(d14, d15, mem[sp, 48]));
   CHECK_ENCODING(0x6DC33FEE, a.ldp(d14, d15, mem[sp, 48]++));

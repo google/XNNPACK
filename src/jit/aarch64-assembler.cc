@@ -172,10 +172,10 @@ inline uint32_t branch_imm(ptrdiff_t offset, BranchType bt) {
 
 inline uint32_t hl(VRegisterLane vl) {
   if (vl.is_s()) {
-    return (vl.lane & 1) << 21 | ((vl.lane & 2) << 10);
+    return (vl.lane & 1) << 21 | (vl.lane & 2) << 10;
   } else if (vl.is_h()) {
     // set L, M, H bits.
-    return (vl.lane & 0b010) << 21 | (vl.lane & 0b001) << 20 | (vl.lane & 0b100) >> 3;
+    return (vl.lane & 0b011) << 20 | (vl.lane & 0b100) << 9;
   } else {
     return (vl.lane & 1) << 11;
   }
@@ -291,6 +291,15 @@ void Assembler::ldr(XRegister xt, MemOperand xn) {
   }
 
   emit32(0xF9400000 | imm >> 3 << 10 | rn(xn.base) | xt.code);
+}
+
+void Assembler::ldr(WRegister xt, MemOperand xn, int32_t imm) {
+  if (imm < kInt9Min || imm > kInt9Max) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+
+  emit32(0xB8400400 | imm9(imm) | rn(xn.base) | rt(xt));
 }
 
 void Assembler::ldr(XRegister xt, MemOperand xn, int32_t imm) {
@@ -501,7 +510,10 @@ void Assembler::ins(VRegisterLane vd, XRegister vn) {
 }
 
 void Assembler::ld1(ScalarVRegisterList vs, size_t lane, MemOperand xn, int32_t imm) {
-  emit32(0x4DC08000 | 0b11111 << 16 | (vs.vt1.size & 1) << 10 | rn(xn.base) | rt(vs.vt1));
+  assert(vs.vt1.size > 0);
+  const uint32_t opcode = vs.vt1.size > 1 ? 0b100 : 0b010;
+  const uint32_t size = vs.vt1.size == 3 ? 0b01 : 0;
+  emit32(0x4DC00000 | 0b11111 << 16 | opcode << 13 | size << 10 | rn(xn.base) | rt(vs.vt1));
 }
 
 void Assembler::ld1(ScalarVRegister vs, size_t lane, MemOperand xn, int32_t imm) {
