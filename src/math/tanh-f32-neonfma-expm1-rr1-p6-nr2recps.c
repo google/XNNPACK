@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__neonfma_rr1_p6_nr2fma(
+void xnn_math_f32_tanh__neonfma_expm1_rr1_p6_nr2recps(
     size_t n,
     const float* input,
     float* output)
@@ -103,8 +103,8 @@ void xnn_math_f32_tanh__neonfma_rr1_p6_nr2fma(
     // Note: 2 < exp(-2z) + 1 <= 3, because z >= 0.0 and 0 < exp(-2z) <= 1.0.
     // Thus the reciprocal of the denominator never overflows.
     float32x4_t vrep1 = vrecpeq_f32(vep1);
-    vrep1 = vfmaq_f32(vrep1, vrep1, vfmsq_f32(vone, vrep1, vep1));
-    vrep1 = vfmaq_f32(vrep1, vrep1, vfmsq_f32(vone, vrep1, vep1));
+    vrep1 = vmulq_f32(vrep1, vrecpsq_f32(vrep1, vep1));
+    vrep1 = vmulq_f32(vrep1, vrecpsq_f32(vrep1, vep1));
 
     // Reconstruct tanh(-z) := expm1(-2z) / (2.0 + expm1(-2z))
     float32x4_t vabsy = vmulq_f32(vem1, vrep1);

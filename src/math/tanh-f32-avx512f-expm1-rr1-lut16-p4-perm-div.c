@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__avx512f_rr1_lut16_p4_perm_div(
+void xnn_math_f32_tanh__avx512f_expm1_rr1_lut16_p4_perm_div(
     size_t n,
     const float* input,
     float* output)

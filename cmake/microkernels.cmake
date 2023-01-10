@@ -218,8 +218,8 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/math/sigmoid-f32-avx-rr2-p5-div.c
   src/math/sigmoid-f32-avx-rr2-p5-nr1.c
   src/math/sigmoid-f32-avx-rr2-p5-nr2.c
-  src/math/tanh-f32-avx-rr1-lut4-p4-perm-div.c
-  src/math/tanh-f32-avx-rr1-p6-div.c
+  src/math/tanh-f32-avx-expm1-rr1-lut4-p4-perm-div.c
+  src/math/tanh-f32-avx-expm1-rr1-p6-div.c
   src/qc8-dwconv/gen/qc8-dwconv-3p16c-minmax-fp32-avx-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p8c-minmax-fp32-avx-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p8c-minmax-fp32-avx-mul16.c
@@ -710,9 +710,9 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/math/sigmoid-f32-avx2-rr2-p5-div.c
   src/math/sigmoid-f32-avx2-rr2-p5-nr1fma.c
   src/math/sigmoid-f32-avx2-rr2-p5-nr2fma.c
-  src/math/tanh-f32-avx2-rr1-lut4-p4-perm-div.c
-  src/math/tanh-f32-avx2-rr1-lut8-p4-perm-div.c
-  src/math/tanh-f32-avx2-rr1-p6-div.c
+  src/math/tanh-f32-avx2-expm1-rr1-lut4-p4-perm-div.c
+  src/math/tanh-f32-avx2-expm1-rr1-lut8-p4-perm-div.c
+  src/math/tanh-f32-avx2-expm1-rr1-p6-div.c
   src/qc8-dwconv/gen/qc8-dwconv-3p16c-minmax-fp32-avx2-mul32.c
   src/qc8-dwconv/gen/qc8-dwconv-9p8c-minmax-fp32-avx2-mul32.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-avx2-mul16-add16-vpunpck.c
@@ -1091,9 +1091,9 @@ SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/math/sqrt-f32-avx512f-nr1fma1adj.c
   src/math/sqrt-f32-avx512f-nr1fma.c
   src/math/sqrt-f32-avx512f-nr2fma.c
-  src/math/tanh-f32-avx512f-rr1-lut4-p4-perm-div.c
-  src/math/tanh-f32-avx512f-rr1-lut16-p4-perm-div.c
-  src/math/tanh-f32-avx512f-rr1-p6-div.c)
+  src/math/tanh-f32-avx512f-expm1-rr1-lut4-p4-perm-div.c
+  src/math/tanh-f32-avx512f-expm1-rr1-lut16-p4-perm-div.c
+  src/math/tanh-f32-avx512f-expm1-rr1-p6-div.c)
 
 SET(ALL_AVX512SKX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-x16.c
@@ -1350,8 +1350,8 @@ SET(ALL_FMA3_MICROKERNEL_SRCS
   src/math/sqrt-f32-fma3-nr1fma1adj.c
   src/math/sqrt-f32-fma3-nr1fma.c
   src/math/sqrt-f32-fma3-nr2fma.c
-  src/math/tanh-f32-fma3-rr1-lut4-p4-perm-div.c
-  src/math/tanh-f32-fma3-rr1-p6-div.c)
+  src/math/tanh-f32-fma3-expm1-rr1-lut4-p4-perm-div.c
+  src/math/tanh-f32-fma3-expm1-rr1-p6-div.c)
 
 SET(ALL_FP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vadd-minmax-fp16arith-x1.c
@@ -1743,8 +1743,8 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/math/sqrt-f32-neon-nr1rsqrts.c
   src/math/sqrt-f32-neon-nr2rsqrts.c
   src/math/sqrt-f32-neon-nr3rsqrts.c
-  src/math/tanh-f32-neon-rr1-p6-nr2recps.c
-  src/math/tanh-f32-neon-rr2-p6-nr2recps.c
+  src/math/tanh-f32-neon-expm1-rr1-p6-nr2recps.c
+  src/math/tanh-f32-neon-expm1-rr2-p6-nr2recps.c
   src/qc8-dwconv/gen/qc8-dwconv-3p8c-minmax-fp32-neon-mla8-ld64.c
   src/qc8-dwconv/gen/qc8-dwconv-3p16c-minmax-fp32-neon-mla8-ld64.c
   src/qc8-dwconv/gen/qc8-dwconv-3p16c-minmax-fp32-neon-mla8-ld128.c
@@ -2902,9 +2902,9 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/math/sqrt-f32-neonfma-nr2fma1adj.c
   src/math/sqrt-f32-neonfma-nr2fma.c
   src/math/sqrt-f32-neonfma-nr3fma.c
-  src/math/tanh-f32-neonfma-rr1-p6-nr1recps1fma.c
-  src/math/tanh-f32-neonfma-rr1-p6-nr2fma.c
-  src/math/tanh-f32-neonfma-rr1-p6-nr2recps.c)
+  src/math/tanh-f32-neonfma-expm1-rr1-p6-nr1recps1fma.c
+  src/math/tanh-f32-neonfma-expm1-rr1-p6-nr2fma.c
+  src/math/tanh-f32-neonfma-expm1-rr1-p6-nr2recps.c)
 
 SET(ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-aarch64-neonfma-2x2.c
@@ -3013,7 +3013,7 @@ SET(ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS
   src/math/sigmoid-f32-aarch64-neonfma-rr2-lut64-p2-div.c
   src/math/sigmoid-f32-aarch64-neonfma-rr2-lut2048-p1-div.c
   src/math/sigmoid-f32-aarch64-neonfma-rr2-p5-div.c
-  src/math/tanh-f32-aarch64-neonfma-rr1-p6-div.c)
+  src/math/tanh-f32-aarch64-neonfma-expm1-rr1-p6-div.c)
 
 SET(ALL_NEONFP16_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-neonfp16-x8.c
@@ -3968,14 +3968,14 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/math/sqrt-u64-scalar-cvtu32-sqrt-cvtsatu32f64.c
   src/math/sqrt-u64-scalar-cvtu32-sqrt-llrint.c
   src/math/sqrt-u64-scalar-cvtu64-sqrt-llrint.c
-  src/math/tanh-f32-scalar-rr1-lut4-p4-div.c
-  src/math/tanh-f32-scalar-rr1-lut8-p3-div.c
-  src/math/tanh-f32-scalar-rr1-lut8-p4-div.c
-  src/math/tanh-f32-scalar-rr1-lut16-p3-div.c
-  src/math/tanh-f32-scalar-rr1-lut16-p4-div.c
-  src/math/tanh-f32-scalar-rr1-p6-div.c
-  src/math/tanh-f32-scalar-rr2-lut8-p3-div.c
-  src/math/tanh-f32-scalar-rr2-p6-div.c
+  src/math/tanh-f32-scalar-expm1-rr1-lut4-p4-div.c
+  src/math/tanh-f32-scalar-expm1-rr1-lut8-p3-div.c
+  src/math/tanh-f32-scalar-expm1-rr1-lut8-p4-div.c
+  src/math/tanh-f32-scalar-expm1-rr1-lut16-p3-div.c
+  src/math/tanh-f32-scalar-expm1-rr1-lut16-p4-div.c
+  src/math/tanh-f32-scalar-expm1-rr1-p6-div.c
+  src/math/tanh-f32-scalar-expm1-rr2-lut8-p3-div.c
+  src/math/tanh-f32-scalar-expm1-rr2-p6-div.c
   src/qc8-dwconv/gen/qc8-dwconv-3p1c-minmax-fp32-scalar-fmagic.c
   src/qc8-dwconv/gen/qc8-dwconv-3p2c-minmax-fp32-scalar-imagic.c
   src/qc8-dwconv/gen/qc8-dwconv-3p2c-minmax-fp32-scalar-lrintf.c
@@ -4703,7 +4703,7 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/math/sigmoid-f32-sse2-rr2-p5-div.c
   src/math/sigmoid-f32-sse2-rr2-p5-nr1.c
   src/math/sigmoid-f32-sse2-rr2-p5-nr2.c
-  src/math/tanh-f32-sse2-rr1-p6-div.c
+  src/math/tanh-f32-sse2-expm1-rr1-p6-div.c
   src/qc8-dwconv/gen/qc8-dwconv-3p8c-minmax-fp32-sse2-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p8c-minmax-fp32-sse2-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p8c-minmax-fp32-sse2-mul16.c
@@ -6667,10 +6667,10 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/math/roundz-wasmsimd-native.c
   src/math/sigmoid-f32-wasmsimd-rr2-lut64-p2-div.c
   src/math/sigmoid-f32-wasmsimd-rr2-p5-div.c
-  src/math/tanh-f32-wasmsimd-rr1-p6-div-abs-min.c
-  src/math/tanh-f32-wasmsimd-rr1-p6-div-abs-pmin.c
-  src/math/tanh-f32-wasmsimd-rr1-p6-div-nabs-max.c
-  src/math/tanh-f32-wasmsimd-rr1-p6-div-nabs-pmax.c
+  src/math/tanh-f32-wasmsimd-expm1-rr1-p6-div-abs-min.c
+  src/math/tanh-f32-wasmsimd-expm1-rr1-p6-div-abs-pmin.c
+  src/math/tanh-f32-wasmsimd-expm1-rr1-p6-div-nabs-max.c
+  src/math/tanh-f32-wasmsimd-expm1-rr1-p6-div-nabs-pmax.c
   src/qc8-dwconv/gen/qc8-dwconv-3p16c-minmax-fp32-wasmsimd-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p8c-minmax-fp32-wasmsimd-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p8c-minmax-fp32-wasmsimd-mul16.c

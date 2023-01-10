@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__neon_rr1_p6_nr2recps(
+void xnn_math_f32_tanh__neon_expm1_rr1_p6_nr2recps(
     size_t n,
     const float* input,
     float* output)

@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__avx512f_rr1_p6_div(
+void xnn_math_f32_tanh__avx512f_expm1_rr1_p6_div(
     size_t n,
     const float* input,
     float* output)

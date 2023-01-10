@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -12,27 +12,29 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__scalar_rr2_p6_div(
+// Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
+extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
+
+void xnn_math_f32_tanh__scalar_expm1_rr2_lut8_p3_div(
     size_t n,
     const float* input,
     float* output)
 {
   assert(n % sizeof(float) == 0);
 
-  // Large number such that ulp(magic bias) == 0.5 and magic bias === 63.5 mod 2**21.
-  const float vmagic_bias = 0x1.8000FEp+22f;
+  // Large number such that ulp(magic bias) == exp2(-4)
+  const float vmagic_bias = 0x1.800000p19f;
   const float vminus_log2e = -0x1.715476p+0f;
-  // Last 4 bits are zeroes
-  const float vln2_hi = 0x1.62E420p-1f;
-  const float vln2_lo = 0x1.FDF474p-22f;
+  // Mask for the lowest 3 bits
+  const uint32_t vindex_mask = UINT32_C(0x7);
+  // Last 8 bits are zeroes
+  const float vln2_hi = 0x1.62E400p-1f;
+  const float vln2_lo = 0x1.7F7D1Cp-20f;
   // Coefficient of polynomial approximation
-  //   exp(-2t) - 1 ~ -2 * (t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6))))))
-  // on [-log(2)/2, log(2)/2]
-  const float vc6 = -0x1.6b7338p-5f;
-  const float vc5 = 0x1.12278Ep-3f;
-  const float vc4 = -0x1.555716p-2f;
-  const float vc3 = 0x1.5554B0p-1f;
-  const float vc2 = -0x1.FFFFFEp-1f;
+  //   exp(-2t) - 1 ~ -2 * (t * (1 + t * (c2 + t * c3)))
+  // on [-log(2)/32, log(2)/32]
+  const float vc3 = 0x1.555862p-1f;
+  const float vc2 = -0x1.0007ACp+0f;
   const float vone = 1.0f;
   const float vtwo = 2.0f;
   // The largest z for which tanhf(-z) is not saturated at -1.0f.
@@ -51,39 +53,47 @@ void xnn_math_f32_tanh__scalar_rr2_p6_div(
     // then replace result with -f[-z] if x >= 0.
     const float vz = fabsf(vx);
 
-    // Compute reduced argument n := round(-z / log(2), 1).
+    // Compute reduced argument n := round(-z / log(2), 4).
     // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
     // the large number back. The trick with adding large number is valid only within certain bounds
-    // (|-z / log(2)| <= 2**21, i.e. |z| <= 0x1.62E43p+20 = 1453635.0), but that is acceptable, because inputs x
+    // (|-z / log(2)| <= 2**18, i.e. |z| <= 0x1.62E43p+17 = 181704.375), but that is acceptable, because inputs x
     // outside of [-9.010913, 9.010913] (i.e. z outsize [0, 9.010913]) saturate tanhf(x). We fixup the result for such
     // inputs at the very end of the algorithm.
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
     float vn = vz * vminus_log2e + vmagic_bias;
 
-    // Create a floating-point number s (scale) such that s == 2**(2n) for inputs which don't cause underflow, i.e.
-    // 0 <= z <= 9.010913, and -13 <= n <= 0 accordingly.
-    const float vs = uint32_as_float(float_as_uint32(vn) << 23);
+    // Create a floating-point number s (scale) such that s := 2**(2n) for valid inputs, i.e. -17.328680 <= x <= 0.0. As
+    // n has 4 fractional bits, we split s == 2**(2n) = 2**int(2n) * 2**frac(2n). We create s in two steps:
+    // 1. Fetch 2**frac(2n) from the table using the 3 low bits of n, as integer. Note that the fetched values are in
+    //    the [1.0, 2.0) range, i.e. their unbiased floating-point exponent is 0.
+    // 2. Adjust fetched value by addition of int(2n) to its floating-point exponent. The result is always a normalized
+    //    number, because for 0 <= z <= 9.010913 we have -13 <= int(n) <= 0, and thus the adjusted exponent is not
+    //    lower than -13.
+    //
+    // Shift bits 3:11 into 23:31 (position of floating-point exponent).
+    const uint32_t ven = float_as_uint32(vn) << 20;
 
-    // Subtract the large number back to get final n := round(-z / log(2), 1) as a floating-point number.
+    // Use bits 0:3 bits of n, as integer, as an index for table lookup of l := 2**frac(n).
+    const uint32_t vidx = float_as_uint32(vn) & vindex_mask;
+    // Adjust exponent of the value l fetched from the table to get the final s value.
+    float vs = uint32_as_float(xnn_table_exp2minus_k_over_8[vidx] + ven);
+
+    // Subtract the large number back to get final n := round(-z / log(2), 4) as a floating-point number.
     vn -= vmagic_bias;
 
     // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
-    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
     float vt = vn * vln2_hi + vz;
     vt = vn * vln2_lo + vt;
 
-    // Compute degree-6 polynomial approximation for exp(-2t) - 1 on [-log(2)/4, log(2)/4].
-    //   P(-2t) = t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
-    //          = t + t * (t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
+    // Compute degree-3 polynomial approximation for exp(-2t) - 1 on [-log(2)/32, log(2)/32].
+    //   P(-2t) = t * (1 + t * (c2 + t * c3))
+    //          = t + t * (t * (c2 + t * c3))
     //          = -2 * (t + t * p)
-    float vp = vc6 * vt + vc5;
-    vp = vp * vt + vc4;
-    vp = vp * vt + vc3;
-    vp = vp * vt + vc2;
+    float vp = vc3 * vt + vc2;
     vp *= vt;
 
     // Reconstruct the exp(x) - 1 value:
-    //   exp(x) - 1 = s * (1 - 2t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))) - 1
+    //   exp(x) - 1 = s * (1 - 2t * (1 + t * (c2 + t * c3))) - 1
     //              = (s - 1) + s * (-2t) * (t + t * p)
     //              = (s - 1) - 2 * ((t * s) + (t * s) * p)
     vt *= vs;

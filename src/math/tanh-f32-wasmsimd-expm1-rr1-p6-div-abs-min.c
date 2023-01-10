@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__wasmsimd_rr1_p6_div_abs_min(
+void xnn_math_f32_tanh__wasmsimd_expm1_rr1_p6_div_abs_min(
     size_t n,
     const float* input,
     float* output)

@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__neon_rr2_p6_nr2recps(
+void xnn_math_f32_tanh__neonfma_expm1_rr1_p6_nr1recps1fma(
     size_t n,
     const float* input,
     float* output)
@@ -26,9 +26,7 @@ void xnn_math_f32_tanh__neon_rr2_p6_nr2recps(
   // Large number such that ulp(magic bias) == 0.5 and magic bias === 63.5 mod 2**21.
   const float32x4_t vmagic_bias = vmovq_n_f32(0x1.8000FEp+22f);
   const float32x4_t vminus_log2e = vmovq_n_f32(-0x1.715476p+0f);
-  // Last 4 bits are zeroes
-  const float32x4_t vln2_hi = vmovq_n_f32(0x1.62E420p-1f);
-  const float32x4_t vln2_lo = vmovq_n_f32(0x1.FDF474p-22f);
+  const float32x4_t vln2 = vmovq_n_f32(0x1.62E430p-1f);
   // Coefficient of polynomial approximation
   //   exp(-2t) - 1 ~ -2 * (t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6))))))
   // on [-log(2)/2, log(2)/2]
@@ -67,7 +65,7 @@ void xnn_math_f32_tanh__neon_rr2_p6_nr2recps(
     // outside of [-9.010913, 9.010913] (i.e. z outsize [0, 9.010913]) saturate tanhf(x). We fixup the result for such
     // inputs at the very end of the algorithm.
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
-    float32x4_t vn = vmlaq_f32(vmagic_bias, vz, vminus_log2e);
+    float32x4_t vn = vfmaq_f32(vmagic_bias, vz, vminus_log2e);
 
     // Create a floating-point number s (scale) such that s == 2**(2n) for inputs which don't cause underflow, i.e.
     // 0 <= z <= 9.010913, and -13 <= n <= 0 accordingly.
@@ -77,18 +75,16 @@ void xnn_math_f32_tanh__neon_rr2_p6_nr2recps(
     vn = vsubq_f32(vn, vmagic_bias);
 
     // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
-    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    float32x4_t vt = vmlaq_f32(vz, vn, vln2_hi);
-    vt = vmlaq_f32(vt, vn, vln2_lo);
+    float32x4_t vt = vfmaq_f32(vz, vn, vln2);
 
     // Compute degree-6 polynomial approximation for exp(-2t) - 1 on [-log(2)/4, log(2)/4].
     //   P(-2t) = t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
     //          = t + t * (t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
     //          = -2 * (t + t * p)
-    float32x4_t vp = vmlaq_f32(vc5, vc6, vt);
-    vp = vmlaq_f32(vc4, vp, vt);
-    vp = vmlaq_f32(vc3, vp, vt);
-    vp = vmlaq_f32(vc2, vp, vt);
+    float32x4_t vp = vfmaq_f32(vc5, vc6, vt);
+    vp = vfmaq_f32(vc4, vp, vt);
+    vp = vfmaq_f32(vc3, vp, vt);
+    vp = vfmaq_f32(vc2, vp, vt);
     vp = vmulq_f32(vp, vt);
 
     // Reconstruct the exp(x) - 1 value:
@@ -97,8 +93,8 @@ void xnn_math_f32_tanh__neon_rr2_p6_nr2recps(
     //              = (s - 1) - 2 * ((t * s) + (t * s) * p)
     vt = vmulq_f32(vt, vs);
     const float32x4_t vsm1 = vsubq_f32(vs, vone);
-    vp = vmlaq_f32(vt, vp, vt);
-    const float32x4_t vem1 = vmlsq_f32(vsm1, vtwo, vp);
+    vp = vfmaq_f32(vt, vp, vt);
+    const float32x4_t vem1 = vfmsq_f32(vsm1, vtwo, vp);
 
     // Denominator of the tanh fraction: 1.0 + exp(-2z) = 2.0 + expm1(-2z)
     const float32x4_t vep1 = vaddq_f32(vem1, vtwo);
@@ -108,7 +104,7 @@ void xnn_math_f32_tanh__neon_rr2_p6_nr2recps(
     // Thus the reciprocal of the denominator never overflows.
     float32x4_t vrep1 = vrecpeq_f32(vep1);
     vrep1 = vmulq_f32(vrep1, vrecpsq_f32(vrep1, vep1));
-    vrep1 = vmulq_f32(vrep1, vrecpsq_f32(vrep1, vep1));
+    vrep1 = vfmaq_f32(vrep1, vrep1, vfmsq_f32(vone, vrep1, vep1));
 
     // Reconstruct tanh(-z) := expm1(-2z) / (2.0 + expm1(-2z))
     float32x4_t vabsy = vmulq_f32(vem1, vrep1);

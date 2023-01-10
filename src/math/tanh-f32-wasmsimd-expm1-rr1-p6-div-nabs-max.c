@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_pmax(
+void xnn_math_f32_tanh__wasmsimd_expm1_rr1_p6_div_nabs_max(
     size_t n,
     const float* input,
     float* output)
@@ -59,9 +59,8 @@ void xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_pmax(
 
     // The function f[z] saturates at -1 for large inputs: tanhf(x) == -1.0f for x <= sat_cutoff ~= -9.010913.
     // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
-    // tanhf(sat_cutoff) == -1.0f. The order of operands in the f32x4.pmax instruction matters: it ensures that NaN
-    // inputs are passed unchanged.
-    vz = wasm_f32x4_pmax(vz, vsat_cutoff);
+    // tanhf(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
+    vz = wasm_f32x4_max(vz, vsat_cutoff);
 
     // Compute reduced argument n := round(z / log(2), 1).
     // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing

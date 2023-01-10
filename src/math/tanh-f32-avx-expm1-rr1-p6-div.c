@@ -7,42 +7,42 @@
 #include <stddef.h>
 #include <math.h>
 
-#include <wasm_simd128.h>
+#include <immintrin.h>
 
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_max(
+void xnn_math_f32_tanh__avx_expm1_rr1_p6_div(
     size_t n,
     const float* input,
     float* output)
 {
-  assert(n % sizeof(v128_t) == 0);
+  assert(n % sizeof(__m256) == 0);
 
   // Mask for the sign bit.
-  const v128_t vsign_mask = wasm_f32x4_const_splat(-0.0f);
+  const __m256 vsign_mask = _mm256_set1_ps(-0.0f);
   // The largest z for which tanhf(z) is saturated at -1.0f.
-  const v128_t vsat_cutoff = wasm_f32x4_const_splat(-0x1.205968p+3f);
+  const __m256 vsat_cutoff = _mm256_set1_ps(-0x1.205968p+3f);
   // Large number such that ulp(magic bias) == 0.5 and magic bias === 63.5 mod 2**21.
-  const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.8000FEp+22f);
-  const v128_t vlog2e = wasm_f32x4_const_splat(0x1.715476p+0f);
-  const v128_t vminus_ln2 = wasm_f32x4_const_splat(-0x1.62E430p-1f);
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp+22f);
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
   // Coefficient of polynomial approximation
   //   exp(-2t) - 1 ~ -2 * (t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6))))))
   // on [-log(2)/2, log(2)/2]
-  const v128_t vc6 = wasm_f32x4_const_splat(0x1.6b7338p-5f);
-  const v128_t vc5 = wasm_f32x4_const_splat(0x1.12278Ep-3f);
-  const v128_t vc4 = wasm_f32x4_const_splat(0x1.555716p-2f);
-  const v128_t vc3 = wasm_f32x4_const_splat(0x1.5554B0p-1f);
-  const v128_t vc2 = wasm_f32x4_const_splat(0x1.FFFFFEp-1f);
-  const v128_t vone = wasm_f32x4_const_splat(1.0f);
-  const v128_t vtwo = wasm_f32x4_const_splat(2.0f);
+  const __m256 vc6 = _mm256_set1_ps(0x1.6b7338p-5f);
+  const __m256 vc5 = _mm256_set1_ps(0x1.12278Ep-3f);
+  const __m256 vc4 = _mm256_set1_ps(0x1.555716p-2f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.5554B0p-1f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.FFFFFEp-1f);
+  const __m256 vone = _mm256_set1_ps(1.0f);
+  const __m256 vtwo = _mm256_set1_ps(2.0f);
 
-  for (; n != 0; n -= 4 * sizeof(float)) {
-    const v128_t vx = wasm_v128_load(input);
-    input += 4;
+  for (; n != 0; n -= 8 * sizeof(float)) {
+    const __m256 vx = _mm256_load_ps(input);
+    input += 8;
 
     // General structure of the algorithm:
     //
@@ -52,15 +52,16 @@ void xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_max(
     //
     // First we compute f[z] := expm1(2z) / (2 + expm1(2z)) where z = -abs(x),
     // then replace result with -f[z] if x >= 0.
-    v128_t vz = wasm_v128_or(vx, vsign_mask);
+    __m256 vz = _mm256_or_ps(vx, vsign_mask);
 
     // Inverted mask for the sign of input: 0x00000000 for negative x, 0x80000000 for positive x.
-    const v128_t vinvsignx = wasm_v128_xor(vx, vz);
+    const __m256 vinvsignx = _mm256_xor_ps(vx, vz);
 
     // The function f[z] saturates at -1 for large inputs: tanhf(x) == -1.0f for x <= sat_cutoff ~= -9.010913.
     // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
-    // tanhf(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
-    vz = wasm_f32x4_max(vz, vsat_cutoff);
+    // tanhf(sat_cutoff) == -1.0f. The order of operands in the [V]MAXPS instruction matters: it ensures that NaN
+    // inputs are passed unchanged.
+    vz = _mm256_max_ps(vsat_cutoff, vz);
 
     // Compute reduced argument n := round(z / log(2), 1).
     // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
@@ -69,46 +70,49 @@ void xnn_math_f32_tanh__wasmsimd_rr1_p6_div_nabs_max(
     // outside of [-9.010913, 9.010913] (i.e. z outsize [-9.010913, 0]) saturate tanhf(x). We fixup the result for such
     // inputs at the very end of the algorithm.
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
-    v128_t vn = wasm_f32x4_add(wasm_f32x4_mul(vz, vlog2e), vmagic_bias);
+    __m256 vn = _mm256_add_ps(_mm256_mul_ps(vz, vlog2e), vmagic_bias);
 
     // Create a floating-point number s (scale) such that s == 2**(2n) for inputs which don't cause underflow, i.e.
     // -9.010913 <= z <= 0, and -13 <= n <= 0 accordingly.
-    const v128_t vs = wasm_i32x4_shl(vn, 23);
+    const __m128 vn_hi = _mm256_extractf128_ps(vn, 1);
+    __m256 vs = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn)), 23)));
+    const __m128 vs_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn_hi), 23));
+    vs = _mm256_insertf128_ps(vs, vs_hi, 1);
 
     // Subtract the large number back to get final n := round(z / log(2), 1) as a floating-point number.
-    vn = wasm_f32x4_sub(vn, vmagic_bias);
+    vn = _mm256_sub_ps(vn, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2).
-    const v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2), vz);
+    const __m256 vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2), vz);
 
     // Compute degree-6 polynomial approximation for exp(2t) - 1 on [-log(2)/4, log(2)/4].
     //   P(2t) = 2t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
     //          = 2t + 2t * (t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
     //          = 2 * (t + t * p)
-    v128_t vp = wasm_f32x4_add(wasm_f32x4_mul(vc6, vt), vc5);
-    vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc4);
-    vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc3);
-    vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc2);
-    vp = wasm_f32x4_mul(vp, vt);
+    __m256 vp = _mm256_add_ps(_mm256_mul_ps(vc6, vt), vc5);
+    vp = _mm256_add_ps(_mm256_mul_ps(vp, vt), vc4);
+    vp = _mm256_add_ps(_mm256_mul_ps(vp, vt), vc3);
+    vp = _mm256_add_ps(_mm256_mul_ps(vp, vt), vc2);
+    vp = _mm256_mul_ps(vp, vt);
 
     // Reconstruct the exp(x) - 1 value:
     //   exp(x) - 1 = s * (1 + 2t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))) - 1
     //              = (s - 1) + s * (2t) * (t + t * p)
     //              = (s - 1) + 2 * ((t * s) + (t * s) * p)
-    const v128_t vts = wasm_f32x4_mul(vt, vs);
-    const v128_t vsm1 = wasm_f32x4_sub(vs, vone);
-    vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vts), vts);
-    const v128_t vem1 = wasm_f32x4_add(wasm_f32x4_mul(vp, vtwo), vsm1);
+    const __m256 vts = _mm256_mul_ps(vt, vs);
+    const __m256 vsm1 = _mm256_sub_ps(vs, vone);
+    vp = _mm256_add_ps(_mm256_mul_ps(vp, vts), vts);
+    const __m256 vem1 = _mm256_add_ps(_mm256_mul_ps(vp, vtwo), vsm1);
 
     // Reconstruct tanh(-z) := expm1(-2z) / (2 + expm1(-2z))
-    const v128_t vep1 = wasm_f32x4_add(vem1, vtwo);
-    const v128_t vabsy = wasm_f32x4_div(vem1, vep1);
+    const __m256 vep1 = _mm256_add_ps(vem1, vtwo);
+    const __m256 vabsy = _mm256_div_ps(vem1, vep1);
 
     // Reconstruct tanh[x] = sign(x) * tanh[-abs(x)].
     // As tanh[-abs(x)] is negative, flips the sign bit if x is positive.
-    const v128_t vy = wasm_v128_xor(vabsy, vinvsignx);
+    const __m256 vy = _mm256_xor_ps(vabsy, vinvsignx);
 
-    wasm_v128_store(output, vy);
-    output += 4;
+    _mm256_store_ps(output, vy);
+    output += 8;
   }
 }
