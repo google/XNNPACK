@@ -454,7 +454,7 @@
 
 
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_eq_4) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_eq_2) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
       .mr(1)
@@ -463,7 +463,7 @@
       .sr(1)
       .m(1)
       .n(8)
-      .k(4)
+      .k(2)
       .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
 
@@ -476,12 +476,12 @@
       .sr(1)
       .m(1)
       .n(8)
-      .k(4)
+      .k(2)
       .cn_stride(11)
       .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_eq_4_strided_a) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_eq_2_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
       .mr(1)
@@ -490,12 +490,12 @@
       .sr(1)
       .m(1)
       .n(8)
-      .k(4)
-      .a_stride(7)
+      .k(2)
+      .a_stride(5)
       .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_eq_4_subtile) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_eq_2_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 1; n <= 8; n++) {
       for (uint32_t m = 1; m <= 1; m++) {
@@ -506,14 +506,14 @@
           .sr(1)
           .m(m)
           .n(n)
-          .k(4)
+          .k(2)
           .iterations(1)
           .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_eq_4_subtile_m) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_eq_2_subtile_m) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t m = 1; m <= 1; m++) {
       GemmMicrokernelTester()
@@ -523,13 +523,13 @@
         .sr(1)
         .m(m)
         .n(8)
-        .k(4)
+        .k(2)
         .iterations(1)
         .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_eq_4_subtile_n) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_eq_2_subtile_n) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 1; n <= 8; n++) {
       GemmMicrokernelTester()
@@ -539,60 +539,15 @@
         .sr(1)
         .m(1)
         .n(n)
-        .k(4)
+        .k(2)
         .iterations(1)
         .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_eq_8) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_lt_2) {
     TEST_REQUIRES_ARM_NEON;
-    GemmMicrokernelTester()
-      .mr(1)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(1)
-      .n(8)
-      .k(8)
-      .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_eq_8_strided_a) {
-    TEST_REQUIRES_ARM_NEON;
-    GemmMicrokernelTester()
-      .mr(1)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(1)
-      .n(8)
-      .k(8)
-      .a_stride(11)
-      .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_eq_8_subtile) {
-    TEST_REQUIRES_ARM_NEON;
-    for (uint32_t n = 1; n <= 8; n++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        GemmMicrokernelTester()
-          .mr(1)
-          .nr(8)
-          .kr(1)
-          .sr(1)
-          .m(m)
-          .n(n)
-          .k(8)
-          .iterations(1)
-          .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_lt_8) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 1; k < 8; k++) {
+    for (size_t k = 1; k < 2; k++) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(8)
@@ -605,9 +560,9 @@
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_lt_8_strided_a) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_lt_2_strided_a) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 1; k < 8; k++) {
+    for (size_t k = 1; k < 2; k++) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(8)
@@ -616,14 +571,14 @@
         .m(1)
         .n(8)
         .k(k)
-        .a_stride(11)
+        .a_stride(5)
         .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_lt_8_subtile) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_lt_2_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 1; k < 8; k++) {
+    for (size_t k = 1; k < 2; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
@@ -641,9 +596,9 @@
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_gt_8) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_gt_2) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 9; k < 16; k++) {
+    for (size_t k = 3; k < 4; k++) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(8)
@@ -656,9 +611,9 @@
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_gt_8_strided_a) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_gt_2_strided_a) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 9; k < 16; k++) {
+    for (size_t k = 3; k < 4; k++) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(8)
@@ -667,14 +622,14 @@
         .m(1)
         .n(8)
         .k(k)
-        .a_stride(19)
+        .a_stride(7)
         .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_gt_8_subtile) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_gt_2_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 9; k < 16; k++) {
+    for (size_t k = 3; k < 4; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
@@ -692,9 +647,9 @@
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_div_4) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_div_2) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 12; k <= 40; k += 4) {
+    for (size_t k = 4; k <= 20; k += 2) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(8)
@@ -707,9 +662,9 @@
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_div_4_strided_a) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_div_2_strided_a) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 12; k <= 40; k += 4) {
+    for (size_t k = 4; k <= 20; k += 2) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(8)
@@ -718,14 +673,14 @@
         .m(1)
         .n(8)
         .k(k)
-        .a_stride(43)
+        .a_stride(23)
         .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_div_4_subtile) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, k_div_2_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 12; k <= 40; k += 4) {
+    for (size_t k = 4; k <= 20; k += 2) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
@@ -746,7 +701,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, n_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -763,7 +718,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -781,7 +736,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, n_gt_8_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -790,7 +745,7 @@
           .m(1)
           .n(n)
           .k(k)
-          .a_stride(23)
+          .a_stride(13)
           .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -799,7 +754,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, n_gt_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
@@ -819,7 +774,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, n_div_8) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -836,7 +791,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, n_div_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -854,7 +809,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, n_div_8_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -863,7 +818,7 @@
           .m(1)
           .n(n)
           .k(k)
-          .a_stride(23)
+          .a_stride(13)
           .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -872,7 +827,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, n_div_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
@@ -891,7 +846,7 @@
 
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_CORTEX_A53, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 1; k <= 20; k += 5) {
+    for (size_t k = 1; k <= 10; k += 3) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
@@ -919,7 +874,7 @@
       .sr(1)
       .m(1)
       .n(8)
-      .k(4)
+      .k(2)
       .qmin(128)
       .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
@@ -933,7 +888,7 @@
       .sr(1)
       .m(1)
       .n(8)
-      .k(4)
+      .k(2)
       .qmax(128)
       .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
@@ -947,7 +902,7 @@
       .sr(1)
       .m(1)
       .n(8)
-      .k(4)
+      .k(2)
       .cm_stride(11)
       .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
@@ -1912,7 +1867,7 @@
 
 
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_eq_4) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_eq_2) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
       .mr(1)
@@ -1921,7 +1876,7 @@
       .sr(1)
       .m(1)
       .n(8)
-      .k(4)
+      .k(2)
       .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
 
@@ -1934,12 +1889,12 @@
       .sr(1)
       .m(1)
       .n(8)
-      .k(4)
+      .k(2)
       .cn_stride(11)
       .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_eq_4_strided_a) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_eq_2_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     GemmMicrokernelTester()
       .mr(1)
@@ -1948,12 +1903,12 @@
       .sr(1)
       .m(1)
       .n(8)
-      .k(4)
-      .a_stride(7)
+      .k(2)
+      .a_stride(5)
       .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_eq_4_subtile) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_eq_2_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 1; n <= 8; n++) {
       for (uint32_t m = 1; m <= 1; m++) {
@@ -1964,14 +1919,14 @@
           .sr(1)
           .m(m)
           .n(n)
-          .k(4)
+          .k(2)
           .iterations(1)
           .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_eq_4_subtile_m) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_eq_2_subtile_m) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t m = 1; m <= 1; m++) {
       GemmMicrokernelTester()
@@ -1981,13 +1936,13 @@
         .sr(1)
         .m(m)
         .n(8)
-        .k(4)
+        .k(2)
         .iterations(1)
         .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_eq_4_subtile_n) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_eq_2_subtile_n) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 1; n <= 8; n++) {
       GemmMicrokernelTester()
@@ -1997,60 +1952,15 @@
         .sr(1)
         .m(1)
         .n(n)
-        .k(4)
+        .k(2)
         .iterations(1)
         .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_eq_8) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_lt_2) {
     TEST_REQUIRES_ARM_NEON;
-    GemmMicrokernelTester()
-      .mr(1)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(1)
-      .n(8)
-      .k(8)
-      .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_eq_8_strided_a) {
-    TEST_REQUIRES_ARM_NEON;
-    GemmMicrokernelTester()
-      .mr(1)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(1)
-      .n(8)
-      .k(8)
-      .a_stride(11)
-      .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_eq_8_subtile) {
-    TEST_REQUIRES_ARM_NEON;
-    for (uint32_t n = 1; n <= 8; n++) {
-      for (uint32_t m = 1; m <= 1; m++) {
-        GemmMicrokernelTester()
-          .mr(1)
-          .nr(8)
-          .kr(1)
-          .sr(1)
-          .m(m)
-          .n(n)
-          .k(8)
-          .iterations(1)
-          .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_lt_8) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 1; k < 8; k++) {
+    for (size_t k = 1; k < 2; k++) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(8)
@@ -2063,9 +1973,9 @@
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_lt_8_strided_a) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_lt_2_strided_a) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 1; k < 8; k++) {
+    for (size_t k = 1; k < 2; k++) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(8)
@@ -2074,14 +1984,14 @@
         .m(1)
         .n(8)
         .k(k)
-        .a_stride(11)
+        .a_stride(5)
         .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_lt_8_subtile) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_lt_2_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 1; k < 8; k++) {
+    for (size_t k = 1; k < 2; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
@@ -2099,9 +2009,9 @@
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_gt_8) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_gt_2) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 9; k < 16; k++) {
+    for (size_t k = 3; k < 4; k++) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(8)
@@ -2114,9 +2024,9 @@
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_gt_8_strided_a) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_gt_2_strided_a) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 9; k < 16; k++) {
+    for (size_t k = 3; k < 4; k++) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(8)
@@ -2125,14 +2035,14 @@
         .m(1)
         .n(8)
         .k(k)
-        .a_stride(19)
+        .a_stride(7)
         .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_gt_8_subtile) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_gt_2_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 9; k < 16; k++) {
+    for (size_t k = 3; k < 4; k++) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
@@ -2150,9 +2060,9 @@
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_div_4) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_div_2) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 12; k <= 40; k += 4) {
+    for (size_t k = 4; k <= 20; k += 2) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(8)
@@ -2165,9 +2075,9 @@
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_div_4_strided_a) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_div_2_strided_a) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 12; k <= 40; k += 4) {
+    for (size_t k = 4; k <= 20; k += 2) {
       GemmMicrokernelTester()
         .mr(1)
         .nr(8)
@@ -2176,14 +2086,14 @@
         .m(1)
         .n(8)
         .k(k)
-        .a_stride(43)
+        .a_stride(23)
         .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
     }
   }
 
-  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_div_4_subtile) {
+  TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, k_div_2_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 12; k <= 40; k += 4) {
+    for (size_t k = 4; k <= 20; k += 2) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
@@ -2204,7 +2114,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, n_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -2221,7 +2131,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -2239,7 +2149,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, n_gt_8_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -2248,7 +2158,7 @@
           .m(1)
           .n(n)
           .k(k)
-          .a_stride(23)
+          .a_stride(13)
           .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -2257,7 +2167,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, n_gt_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
@@ -2277,7 +2187,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, n_div_8) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -2294,7 +2204,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, n_div_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -2312,7 +2222,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, n_div_8_strided_a) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         GemmMicrokernelTester()
           .mr(1)
           .nr(8)
@@ -2321,7 +2231,7 @@
           .m(1)
           .n(n)
           .k(k)
-          .a_stride(23)
+          .a_stride(13)
           .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -2330,7 +2240,7 @@
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, n_div_8_subtile) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 16; n <= 24; n += 8) {
-      for (size_t k = 1; k <= 20; k += 5) {
+      for (size_t k = 1; k <= 10; k += 3) {
         for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
             .mr(1)
@@ -2349,7 +2259,7 @@
 
   TEST(F32_GEMM_MINMAX_1X8__ASM_AARCH32_NEON_PRFM_CORTEX_A53, strided_cm_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t k = 1; k <= 20; k += 5) {
+    for (size_t k = 1; k <= 10; k += 3) {
       for (uint32_t n = 1; n <= 8; n++) {
         for (uint32_t m = 1; m <= 1; m++) {
           GemmMicrokernelTester()
@@ -2377,7 +2287,7 @@
       .sr(1)
       .m(1)
       .n(8)
-      .k(4)
+      .k(2)
       .qmin(128)
       .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
@@ -2391,7 +2301,7 @@
       .sr(1)
       .m(1)
       .n(8)
-      .k(4)
+      .k(2)
       .qmax(128)
       .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }
@@ -2405,7 +2315,7 @@
       .sr(1)
       .m(1)
       .n(8)
-      .k(4)
+      .k(2)
       .cm_stride(11)
       .Test(xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params);
   }

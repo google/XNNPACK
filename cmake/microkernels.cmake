@@ -7158,6 +7158,8 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S
   src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a75.S
   src/f32-igemm/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a55.S
+  src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch32-neon-cortex-a53.S
+  src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S
   src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S
   src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a53.S
   src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a75.S

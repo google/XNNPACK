@@ -7,6 +7,9 @@
 - name: xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a7
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
+- name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
 - name: xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
@@ -26,6 +29,9 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   pipelined: true
+- name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
 - name: xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_prfm_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
