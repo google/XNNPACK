@@ -83,7 +83,7 @@ void xnn_math_f32_tanh__scalar_rr1_lut16_p4_div(
     // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
     float vt = vn * vln2 + vz;
 
-    // Compute degree-3 polynomial approximation for exp(-2t) - 1 on [-log(2)/64, log(2)/64].
+    // Compute degree-4 polynomial approximation for exp(-2t) - 1 on [-log(2)/64, log(2)/64].
     //   P(-2t) = t * (1 + t * (c2 + t * (c3 + t * c4)))
     //          = t + t * (t * (c2 + t * (c3 + t * c4)))
     //          = -2 * (t + t * p)
