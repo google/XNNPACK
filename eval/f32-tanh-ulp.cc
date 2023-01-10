@@ -61,9 +61,9 @@ static void TanhError(benchmark::State& state,
     return;
   }
 
-  // The smallest x for which sigmoidf(x) is not -1.0f (-0x1.205966p+3f).
+  // The smallest x for which tanh(x) is not -1.0f (-0x1.205966p+3f).
   const uint32_t min_input = 0xC1102CB3;
-  // The largest x for which sigmoidf(x) is not 1.0f (0x1.205966p+3f).
+  // The largest x for which tanh(x) is not 1.0f (0x1.205966p+3f).
   const uint32_t max_input = 0x41102CB3;
   // Number of elements in one block of inputs/outputs.
   // Combining multiple elements in a block reduce function call overhead.
