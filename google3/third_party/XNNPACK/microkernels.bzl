@@ -7176,6 +7176,8 @@ AARCH32_ASM_MICROKERNEL_SRCS = [
     "src/f32-gemm/f32-gemm-4x4-asm-aarch32-vfp-ld64.S",
     "src/f32-gemm/f32-gemm-4x4-minmax-asm-aarch32-vfp-ld64.S",
     "src/f32-gemm/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a55.S",
+    "src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch32-neon-cortex-a53.S",
+    "src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S",
     "src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S",
     "src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a53.S",
     "src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a75.S",
