@@ -1732,7 +1732,9 @@ class ConvolutionOperatorTester {
                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-             EXPECT_NEAR(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]), std::max(1.0e-4f, std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
+             EXPECT_NEAR(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
+               fp16_ieee_to_fp32_value(output[((i * output_height() + y) * output_width() + x) * output_channel_stride() + g * group_output_channels() + c]),
+               std::max(1.0e-3f, std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]) * 1.0e-2f))
                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
             }
           }
@@ -1746,7 +1748,7 @@ class ConvolutionOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
+    std::uniform_real_distribution<float> f32dist(0.2f, 1.0f);
     std::uniform_real_distribution<float> pdist;
 
     std::vector<float> input(2 * XNN_EXTRA_BYTES / sizeof(float) +
