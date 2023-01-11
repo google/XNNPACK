@@ -36,7 +36,7 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_p6_div_abs_min(
   const v128_t vc3 = wasm_f32x4_const_splat(0x1.5554B0p-1f);
   const v128_t vc2 = wasm_f32x4_const_splat(-0x1.FFFFFEp-1f);
   const v128_t vone = wasm_f32x4_const_splat(1.0f);
-  const v128_t vtwo = wasm_f32x4_const_splat(2.0f);
+  const v128_t vminus_two = wasm_f32x4_const_splat(-2.0f);
   // Mask for the sign bit.
   const v128_t vsign_mask = wasm_f32x4_const_splat(-0.0f);
 
@@ -95,10 +95,10 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_p6_div_abs_min(
     vt = wasm_f32x4_mul(vt, vs);
     const v128_t vsm1 = wasm_f32x4_sub(vs, vone);
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vt);
-    const v128_t vem1 = wasm_f32x4_sub(vsm1, wasm_f32x4_mul(vp, vtwo));
+    const v128_t vem1 = wasm_f32x4_add(wasm_f32x4_mul(vp, vminus_two), vsm1);
 
     // Reconstruct tanh(-z) := expm1(-2z) / (2 + expm1(-2z))
-    const v128_t vep1 = wasm_f32x4_add(vem1, vtwo);
+    const v128_t vep1 = wasm_f32x4_sub(vem1, vminus_two);
     v128_t vabsy = wasm_f32x4_div(vem1, vep1);
 
     // Reconstruct tanh[x] = sign(x) * tanh[-abs(x)]

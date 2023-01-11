@@ -1244,6 +1244,14 @@ SET(ALL_F16C_MICROKERNEL_SRCS
   src/math/cvt-f16-f32-f16c.c
   src/math/cvt-f32-f16-f16c.c)
 
+SET(ALL_FMA_MICROKERNEL_SRCS
+  src/math/tanh-f32-fma-expm1-rr1-lut4-p4-div.c
+  src/math/tanh-f32-fma-expm1-rr1-lut8-p3-div.c
+  src/math/tanh-f32-fma-expm1-rr1-lut8-p4-div.c
+  src/math/tanh-f32-fma-expm1-rr1-lut16-p3-div.c
+  src/math/tanh-f32-fma-expm1-rr1-lut16-p4-div.c
+  src/math/tanh-f32-fma-expm1-rr1-p6-div.c)
+
 SET(ALL_FMA3_MICROKERNEL_SRCS
   src/f16-dwconv/gen/f16-dwconv-3p8c-minmax-fma3-acc2.c
   src/f16-dwconv/gen/f16-dwconv-3p8c-minmax-fma3.c

@@ -15,7 +15,7 @@
 // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_math_f32_tanh__scalar_expm1_rr1_lut8_p3_div(
+void xnn_math_f32_tanh__fma_expm1_rr1_lut8_p4_div(
     size_t n,
     const float* input,
     float* output)
@@ -29,10 +29,11 @@ void xnn_math_f32_tanh__scalar_expm1_rr1_lut8_p3_div(
   const uint32_t vindex_mask = UINT32_C(0x7);
   const float vln2 = 0x1.62E430p-1f;
   // Coefficient of polynomial approximation
-  //   exp(-2t) - 1 ~ -2 * (t * (1 + t * (c2 + t * c3)))
+  //   exp(-2t) - 1 ~ -2 * (t * (1 + t * (c2 + t * (c3 + t * c4))))
   // on [-log(2)/32, log(2)/32]
-  const float vc3 = 0x1.555862p-1f;
-  const float vc2 = -0x1.0007ACp+0f;
+  const float vc4 = -0x1.5558ECp-2f;
+  const float vc3 = 0x1.555C20p-1f;
+  const float vc2 = -0x1.000000p+0f;
   const float vone = 1.0f;
   const float vminus_two = -2.0f;
   // The largest z for which tanhf(-z) is not saturated at -1.0f.
@@ -58,7 +59,7 @@ void xnn_math_f32_tanh__scalar_expm1_rr1_lut8_p3_div(
     // outside of [-9.010913, 9.010913] (i.e. z outsize [0, 9.010913]) saturate tanhf(x). We fixup the result for such
     // inputs at the very end of the algorithm.
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
-    float vn = vz * vminus_log2e + vmagic_bias;
+    float vn = fmaf(vz, vminus_log2e, vmagic_bias);
 
     // Create a floating-point number s (scale) such that s := 2**(2n) for valid inputs, i.e. -17.328680 <= x <= 0.0. As
     // n has 4 fractional bits, we split s == 2**(2n) = 2**int(2n) * 2**frac(2n). We create s in two steps:
@@ -80,23 +81,24 @@ void xnn_math_f32_tanh__scalar_expm1_rr1_lut8_p3_div(
     vn -= vmagic_bias;
 
     // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
-    float vt = vn * vln2 + vz;
+    float vt = fmaf(vn, vln2, vz);
 
-    // Compute degree-3 polynomial approximation for exp(-2t) - 1 on [-log(2)/32, log(2)/32].
-    //   P(-2t) = t * (1 + t * (c2 + t * c3))
-    //          = t + t * (t * (c2 + t * c3))
+    // Compute degree-4 polynomial approximation for exp(-2t) - 1 on [-log(2)/32, log(2)/32].
+    //   P(-2t) = t * (1 + t * (c2 + t * (c3 + t * c4)))
+    //          = t + t * (t * (c2 + t * (c3 + t * c4)))
     //          = -2 * (t + t * p)
-    float vp = vc3 * vt + vc2;
+    float vp = fmaf(vc4, vt, vc3);
+    vp = fmaf(vp, vt, vc2);
     vp *= vt;
 
     // Reconstruct the exp(x) - 1 value:
-    //   exp(x) - 1 = s * (1 - 2t * (1 + t * (c2 + t * c3))) - 1
+    //   exp(x) - 1 = s * (1 - 2t * (1 + t * (c2 + t * (c3 + t * c4)))) - 1
     //              = (s - 1) + s * (-2t) * (t + t * p)
     //              = (s - 1) - 2 * ((t * s) + (t * s) * p)
     vt *= vs;
     const float vsm1 = vs - vone;
-    vp = vp * vt + vt;
-    const float vem1 = vp * vminus_two + vsm1;
+    vp = fmaf(vp, vt, vt);
+    const float vem1 = fmaf(vminus_two, vp, vsm1);
 
     // Reconstruct tanh(-z) := expm1(-2z) / (2 + expm1(-2z))
     const float vep1 = vem1 - vminus_two;

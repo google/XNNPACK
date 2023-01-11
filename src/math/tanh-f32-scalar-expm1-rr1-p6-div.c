@@ -32,7 +32,7 @@ void xnn_math_f32_tanh__scalar_expm1_rr1_p6_div(
   const float vc3 = 0x1.5554B0p-1f;
   const float vc2 = -0x1.FFFFFEp-1f;
   const float vone = 1.0f;
-  const float vtwo = 2.0f;
+  const float vminus_two = -2.0f;
   // The largest z for which tanhf(-z) is not saturated at -1.0f.
   const float vsat_cutoff = 0x1.205966p+3f;
 
@@ -85,10 +85,10 @@ void xnn_math_f32_tanh__scalar_expm1_rr1_p6_div(
     vt *= vs;
     const float vsm1 = vs - vone;
     vp = vp * vt + vt;
-    const float vem1 = vsm1 - vtwo * vp;
+    const float vem1 = vp * vminus_two + vsm1;
 
     // Reconstruct tanh(-z) := expm1(-2z) / (2 + expm1(-2z))
-    const float vep1 = vtwo + vem1;
+    const float vep1 = vem1 - vminus_two;
     float vabsy = vem1 / vep1;
 
     // The function saturates at +-1 for large inputs: tanhf(z) == +-1.0f for z > sat_cutoff ~= 9.010913.

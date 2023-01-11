@@ -38,7 +38,7 @@ void xnn_math_f32_tanh__neon_expm1_rr2_p6_nr2recps(
   const float32x4_t vc3 = vmovq_n_f32(0x1.5554B0p-1f);
   const float32x4_t vc2 = vmovq_n_f32(-0x1.FFFFFEp-1f);
   const float32x4_t vone = vmovq_n_f32(1.0f);
-  const float32x4_t vtwo = vmovq_n_f32(2.0f);
+  const float32x4_t vminus_two = vmovq_n_f32(-2.0f);
   // Mask for the sign bit.
   const uint32x4_t vsign_mask = vmovq_n_u32(UINT32_C(0x80000000));
 
@@ -98,10 +98,10 @@ void xnn_math_f32_tanh__neon_expm1_rr2_p6_nr2recps(
     vt = vmulq_f32(vt, vs);
     const float32x4_t vsm1 = vsubq_f32(vs, vone);
     vp = vmlaq_f32(vt, vp, vt);
-    const float32x4_t vem1 = vmlsq_f32(vsm1, vtwo, vp);
+    const float32x4_t vem1 = vmlaq_f32(vsm1, vp, vminus_two);
 
     // Denominator of the tanh fraction: 1.0 + exp(-2z) = 2.0 + expm1(-2z)
-    const float32x4_t vep1 = vaddq_f32(vem1, vtwo);
+    const float32x4_t vep1 = vsubq_f32(vem1, vminus_two);
 
     // Use Newton-Raphson method (2 iterations) to compute reciprocal of denominator.
     // Note: 2 < exp(-2z) + 1 <= 3, because z >= 0.0 and 0 < exp(-2z) <= 1.0.
@@ -111,7 +111,7 @@ void xnn_math_f32_tanh__neon_expm1_rr2_p6_nr2recps(
     vrep1 = vmulq_f32(vrep1, vrecpsq_f32(vrep1, vep1));
 
     // Reconstruct tanh(-z) := expm1(-2z) / (2.0 + expm1(-2z))
-    float32x4_t vabsy = vmulq_f32(vem1, vrep1);
+    const float32x4_t vabsy = vmulq_f32(vem1, vrep1);
 
     // Reconstruct tanh[x] = sign(x) * tanh[-abs(x)]
     const float32x4_t vy = vbslq_f32(vsign_mask, vx, vabsy);

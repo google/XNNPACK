@@ -38,7 +38,7 @@ void xnn_math_f32_tanh__avx512f_expm1_rr1_p6_div(
   const __m512 vc3 = _mm512_set1_ps(0x1.5554B0p-1f);
   const __m512 vc2 = _mm512_set1_ps(-0x1.FFFFFEp-1f);
   const __m512 vone = _mm512_set1_ps(1.0f);
-  const __m512 vtwo = _mm512_set1_ps(2.0f);
+  const __m512 vminus_two = _mm512_set1_ps(-2.0f);
 
   for (; n != 0; n -= 16 * sizeof(float)) {
     const __m512 vx = _mm512_load_ps(input);
@@ -96,10 +96,10 @@ void xnn_math_f32_tanh__avx512f_expm1_rr1_p6_div(
     const __m512 vts = _mm512_mul_ps(vt, vs);
     const __m512 vsm1 = _mm512_sub_ps(vs, vone);
     vp = _mm512_fmadd_ps(vp, vts, vts);
-    const __m512 vem1 = _mm512_fnmadd_ps(vp, vtwo, vsm1);
+    const __m512 vem1 = _mm512_fmadd_ps(vp, vminus_two, vsm1);
 
     // Reconstruct tanh(-z) := expm1(-2z) / (2 + expm1(-2z))
-    const __m512 vep1 = _mm512_add_ps(vem1, vtwo);
+    const __m512 vep1 = _mm512_sub_ps(vem1, vminus_two);
     const __m512 vabsy = _mm512_div_ps(vem1, vep1);
 
     // Reconstruct tanh[x] = copysign(tanh(abs(x)), x).
