@@ -229,8 +229,8 @@ tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a53.S.in       -D PREFETCH=0 -
 tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a53.S.in       -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S &
 tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a75.S.in       -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a75.S &
 tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a75.S.in       -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a75.S &
-tools/xngen src/f32-igemm/4x8-minmax-aarch32-neon-cortex-a7.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S &
-tools/xngen src/f32-igemm/4x8-minmax-aarch32-neon-ld64.S.in      -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-ld64.S &
+tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a7.S.in        -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S &
+tools/xngen src/f32-igemm/4x8-aarch32-neon-ld64.S.in             -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-ld64.S &
 
 ################################### ARM NEON ##################################
 ### LD64 micro-kernels

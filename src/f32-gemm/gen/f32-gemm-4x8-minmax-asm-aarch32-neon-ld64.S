@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-gemm/4x8-minmax-aarch32-neon-ld64.S.in
+//   Template: src/f32-gemm/4x8-aarch32-neon-ld64.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC
