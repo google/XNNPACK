@@ -39,5 +39,6 @@ scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-igemm/f16-igemm-1x16-
 scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-igemm/f16-igemm-4x16-minmax-asm-aarch64-neonfp16arith-ld64.S -o src/f16-igemm/gen/f16-igemm-4x16-aarch64-neonfp16arith-ld64.cc &
 scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-igemm/f16-igemm-6x16-minmax-asm-aarch64-neonfp16arith-cortex-a55.S -o src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a55.cc &
 scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-igemm/f16-igemm-6x16-minmax-asm-aarch64-neonfp16arith-cortex-a55r0.S -o src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a55r0.cc &
+scripts/convert-assembly-to-jit.py --no-post-op -i src/f16-igemm/f16-igemm-6x16-minmax-asm-aarch64-neonfp16arith-cortex-a75.S -o src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a75.cc &
 
 wait
