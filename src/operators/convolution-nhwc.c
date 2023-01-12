@@ -67,7 +67,7 @@ static inline uintptr_t cached_code_at_offset(xnn_operator_t op, size_t offset)
 }
 
 static size_t get_generated_igemm(
-    struct xnn_hmp_igemm_codegen generators,
+    xnn_jit_igemm_code_generator_fn generator,
     const struct jit_gemm_params *jit_gemm_params,
     size_t group_output_channels,
     size_t nr,
@@ -78,7 +78,6 @@ static size_t get_generated_igemm(
     struct xnn_code_cache* code_cache)
 {
   size_t offset = XNN_CACHE_NOT_FOUND;
-  xnn_jit_igemm_code_generator_fn generator = generators.function[XNN_UARCH_DEFAULT];
   if (generator == NULL) {
     goto error;
   }
@@ -128,11 +127,14 @@ static void generate_igemms_up_to_max_mr(
     while (generators.igemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] == NULL && smallest_mr <= max_mr) {
       smallest_mr++;
     }
-    xnn_log_debug("using generator for mr %zu to generate igemm of mr %zu", smallest_mr, mr);
-    convolution_op->ukernel.igemm.igemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT] =
-      get_generated_igemm(generators.igemm[smallest_mr - 1], jit_gemm_params, group_output_channels, nr,
-                          group_input_channels, log2_input_element_size, kernel_size, mr,
-                          convolution_op->code_cache);
+
+    for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
+      xnn_log_debug("using generator for mr %zu to generate igemm of mr %zu and uarch %zu", smallest_mr, mr, i);
+      convolution_op->ukernel.igemm.igemm_cases[mr - 1].generated_code_offset[i] =
+        get_generated_igemm(generators.igemm[smallest_mr - 1].function[i], jit_gemm_params,
+                            group_output_channels, nr, group_input_channels, log2_input_element_size, kernel_size, mr,
+                            convolution_op->code_cache);
+    }
   }
 }
 #endif  // XNN_PLATFORM_JIT
@@ -1631,17 +1633,10 @@ static enum xnn_status setup_igemm(
 
   #if XNN_PLATFORM_JIT
     if (convolution_op->code_cache != NULL) {
-      const size_t jit_code_offset = igemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT];
-      if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
-        igemm_cases[mr - 1].function[XNN_UARCH_DEFAULT] =
+      for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
+        const size_t jit_code_offset = igemm_cases[mr - 1].generated_code_offset[i];
+        igemm_cases[mr - 1].function[i] =
             (xnn_igemm_ukernel_fn) cached_code_at_offset(convolution_op, jit_code_offset);
-        // TODO(zhin): different code generators for different uarch.
-        #if XNN_MAX_UARCH_TYPES > 1
-          for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            igemm_cases[mr - 1].function[i] =
-                (xnn_igemm_ukernel_fn) cached_code_at_offset(convolution_op, jit_code_offset);
-          }
-        #endif
       }
     }
   #endif  // XNN_PLATFORM_JIT
