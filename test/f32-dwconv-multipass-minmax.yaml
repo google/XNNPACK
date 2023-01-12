@@ -51,17 +51,17 @@
 - name: xnn_f32_dwconv_minmax_ukernel_2f2m2l32c8s4r__avx_acc2
   init: xnn_init_f32_minmax_avx_params
 # x86 FMA3
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__fma3
+- name: xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__fma3
   init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__fma3_acc2
+- name: xnn_f32_dwconv_minmax_ukernel_5f5m5l16c8s4r__fma3
   init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l16c8s4r__fma3
+- name: xnn_f32_dwconv_minmax_ukernel_5f5m5l32c8s4r__fma3
   init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l16c8s4r__fma3_acc2
+- name: xnn_f32_dwconv_minmax_ukernel_7f6m6l8c8s4r__fma3
   init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l32c8s4r__fma3
+- name: xnn_f32_dwconv_minmax_ukernel_7f6m6l16c8s4r__fma3
   init: xnn_init_f32_minmax_avx_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l32c8s4r__fma3_acc2
+- name: xnn_f32_dwconv_minmax_ukernel_7f6m6l32c8s4r__fma3
   init: xnn_init_f32_minmax_avx_params
 # x86 AVX512
 - name: xnn_f32_dwconv_minmax_ukernel_2f2m2l16c16s4r__avx512f
