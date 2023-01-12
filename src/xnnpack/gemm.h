@@ -1996,6 +1996,7 @@ DECLARE_QC8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qc8_gemm_minmax_fp32_ukernel_4x4__s
       size_t kc,                                        \
       const void* params);
 
+DECLARE_GENERATE_GEMM_UKERNEL_FUNCTION(xnn_generate_f16_gemm_ukernel_1x16__aarch64_neonfp16arith_ld64)
 DECLARE_GENERATE_GEMM_UKERNEL_FUNCTION(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55)
 DECLARE_GENERATE_GEMM_UKERNEL_FUNCTION(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0)
 DECLARE_GENERATE_GEMM_UKERNEL_FUNCTION(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75)

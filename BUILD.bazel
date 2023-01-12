@@ -2164,6 +2164,7 @@ JIT_AARCH32_SRCS = [
 ]
 
 JIT_AARCH64_SRCS = [
+    "src/f16-gemm/gen/f16-gemm-1x16-aarch64-neonfp16arith-ld64.cc",
     "src/f16-gemm/gen/f16-gemm-4x16-aarch64-neonfp16arith-ld64.cc",
     "src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a55.cc",
     "src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a55r0.cc",
