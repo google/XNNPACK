@@ -29,7 +29,7 @@
 // A0   r3  d0
 // B    r9  d24, d25, d26, d27
 // B        d28, d29, d30, d31
-// C0  r12 d16-d17  q8  d18-d19  q9, q10, q11
+// C0  r12 d16-d17  q8  d18-d19  q9 q10 q11
 // clamp  (r0) d4 d5 d6 d7
 
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53

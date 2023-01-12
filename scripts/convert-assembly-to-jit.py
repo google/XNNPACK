@@ -264,8 +264,8 @@ AARCH32_POST_OP_RELOAD = """void Generator::perform_post_operations(
         vmov(zero, 0);
         vmov(three.high(), three.low());
         vmov(six.high(), six.low());
-        const QRegister accs[] = {q8, q9, q10, q11, q12, q13, q14, q15};
-        const QRegister tmps[] = {q4, q5, q6, q7};
+        const QRegister accs[] = {ACCS_PLACEHOLDER};
+        const QRegister tmps[] = {TMPS_PLACEHOLDER};
         f32_hardswish(sixth, three, six, zero, &accs[0], XNN_COUNT_OF(accs), &tmps[0], XNN_COUNT_OF(tmps));
         break;
       }
@@ -303,6 +303,10 @@ AARCH64_POST_OP = """void Generator::perform_post_operations(
   }
 }"""
 
+AARCH32_MR1_POST_OP_ACCS = "q8, q9"
+AARCH32_MR4_POST_OP_ACCS = "q8, q9, q10, q11, q12, q13, q14, q15"
+AARCH32_MR1_POST_OP_TMPS = "q12, q13"
+AARCH32_MR4_POST_OP_TMPS = "q4, q5, q6, q7"
 AARCH64_MR1_POST_OP_ACCS = """
           v16.v4s(), v17.v4s(),"""
 AARCH64_MR4_POST_OP_ACCS = """
@@ -342,11 +346,22 @@ def get_post_operation_implementation(arch, mr: int, params_register: str,
                                       vector_register_usage):
   if arch == AARCH32:
     if reload_params:
-      return replace_template(
-          AARCH32_POST_OP_RELOAD, {
-              'PARAMS_REG_PLACEHOLDER': params_register,
-              'PARAMS_OFFSET_PLACEHOLDER': params_offset,
-          })
+      if mr == 1:
+        return replace_template(
+            AARCH32_POST_OP_RELOAD, {
+                'ACCS_PLACEHOLDER': AARCH32_MR1_POST_OP_ACCS,
+                'TMPS_PLACEHOLDER': AARCH32_MR1_POST_OP_TMPS,
+                'PARAMS_REG_PLACEHOLDER': params_register,
+                'PARAMS_OFFSET_PLACEHOLDER': params_offset,
+            })
+      else:
+        return replace_template(
+            AARCH32_POST_OP_RELOAD, {
+                'ACCS_PLACEHOLDER': AARCH32_MR4_POST_OP_ACCS,
+                'TMPS_PLACEHOLDER': AARCH32_MR4_POST_OP_TMPS,
+                'PARAMS_REG_PLACEHOLDER': params_register,
+                'PARAMS_OFFSET_PLACEHOLDER': params_offset,
+            })
     else:
       return replace_template(AARCH32_POST_OP, {
           'PARAMS_REG_PLACEHOLDER': params_register,

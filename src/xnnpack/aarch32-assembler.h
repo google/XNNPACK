@@ -509,6 +509,8 @@ class Assembler : public AssemblerBase {
   void vmla_f32(QRegister qd, QRegister qn, DRegisterLane dm);
   // VMLAL.S16 <Qd>, <Dn>, <Dm[x]>
   void vmlal_s16(QRegister qd, DRegister dn, DRegisterLane dm);
+  // VMOV.I32 <Qd>, #<imm>; encoding A1
+  void vmov_i32(QRegister qd, uint8_t imm);
   // VMOV.F32 <Qd>, #<imm>; encoding A1
   void vmov(QRegister qd, uint8_t imm);
   // VMOV.F32 <Sd>, <Sm>; encoding A2.
