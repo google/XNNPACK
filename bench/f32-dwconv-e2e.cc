@@ -41,6 +41,11 @@ static void DWConvEnd2EndBenchmark(
     return;
   }
 
+  // Save xnn_params.f32.dwconv so that we can modify it for the benchmark and later restore it.
+  struct dwconv_parameters saved_dwconv_params[XNN_MAX_F32_DWCONV_UKERNELS];
+  static_assert(sizeof(saved_dwconv_params) == sizeof(xnn_params.f32.dwconv), "size of dwconv params must match");
+  memcpy(saved_dwconv_params, xnn_params.f32.dwconv, sizeof(saved_dwconv_params));
+
   // Override microkernels chosen in xnn_initialize
   for (size_t i = 0; i < XNN_MAX_F32_DWCONV_UKERNELS; i++) {
     // Replace only the microkernel with the matching kernel size.
@@ -78,6 +83,9 @@ static void DWConvEnd2EndBenchmark(
   if (cpu_frequency != 0) {
     state.counters["cpufreq"] = cpu_frequency;
   }
+
+  // Restore xnn_params.f32.dwconv to original state as defined in init.c.
+  memcpy(xnn_params.f32.dwconv, saved_dwconv_params, sizeof(saved_dwconv_params));
 }
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY

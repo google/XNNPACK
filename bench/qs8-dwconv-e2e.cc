@@ -37,6 +37,11 @@ static void DWConvEnd2EndBenchmark(
     return;
   }
 
+  // Save xnn_params.qs8.dwconv so that we can modify it for the benchmark and later restore it.
+  struct dwconv_parameters saved_dwconv_params[XNN_MAX_QS8_DWCONV_UKERNELS];
+  static_assert(sizeof(saved_dwconv_params) == sizeof(xnn_params.qs8.dwconv), "size of dwconv params must match");
+  memcpy(saved_dwconv_params, xnn_params.qs8.dwconv, sizeof(saved_dwconv_params));
+
   // Override microkernels chosen in xnn_initialize
   for (size_t i = 0; i < XNN_MAX_QS8_DWCONV_UKERNELS; i++) {
     // Replace only the microkernel the matching kernel size.
@@ -71,6 +76,9 @@ static void DWConvEnd2EndBenchmark(
   if (cpu_frequency != 0) {
     state.counters["cpufreq"] = cpu_frequency;
   }
+
+  // Restore xnn_params.qs8.dwconv to original state as defined in init.c.
+  memcpy(xnn_params.qs8.dwconv, saved_dwconv_params, sizeof(saved_dwconv_params));
 }
 
 
