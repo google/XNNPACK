@@ -288,6 +288,10 @@ BENCHMARK_CAPTURE(TanhError, scalar_expm1_rr1_lut8_p4_div,
                   xnn_math_f32_tanh__scalar_expm1_rr1_lut8_p4_div)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1_rr2_lut8_p4_div,
+                  xnn_math_f32_tanh__scalar_expm1_rr2_lut8_p4_div)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, scalar_expm1_rr1_lut16_p3_div,
                   xnn_math_f32_tanh__scalar_expm1_rr1_lut16_p3_div)
   ->Unit(benchmark::kMillisecond)

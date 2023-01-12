@@ -3983,6 +3983,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/math/tanh-f32-scalar-expm1-rr1-lut16-p4-div.c
   src/math/tanh-f32-scalar-expm1-rr1-p6-div.c
   src/math/tanh-f32-scalar-expm1-rr2-lut8-p3-div.c
+  src/math/tanh-f32-scalar-expm1-rr2-lut8-p4-div.c
   src/math/tanh-f32-scalar-expm1-rr2-p6-div.c
   src/qc8-dwconv/gen/qc8-dwconv-3p1c-minmax-fp32-scalar-fmagic.c
   src/qc8-dwconv/gen/qc8-dwconv-3p2c-minmax-fp32-scalar-imagic.c
