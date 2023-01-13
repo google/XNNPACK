@@ -330,6 +330,7 @@ SET(JIT_AARCH64_SRCS
   src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-cortex-a53.cc
   src/f16-igemm/gen/f16-igemm-1x16-aarch64-neonfp16arith-ld64.cc
   src/f16-igemm/gen/f16-igemm-4x16-aarch64-neonfp16arith-ld64.cc
+  src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-ld64.cc
   src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a55.cc
   src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a55r0.cc
   src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a75.cc
