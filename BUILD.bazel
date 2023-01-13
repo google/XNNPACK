@@ -160,6 +160,7 @@ TABLE_SRCS = [
     "src/tables/exp2minus-k-over-4.c",
     "src/tables/exp2minus-k-over-8.c",
     "src/tables/exp2minus-k-over-16.c",
+    "src/tables/exp2minus-k-over-32.c",
     "src/tables/exp2minus-k-over-64.c",
     "src/tables/exp2minus-k-over-2048.c",
     "src/tables/vlog.c",

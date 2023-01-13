@@ -178,11 +178,6 @@ static void TanhError(benchmark::State& state,
                     benchmark::utils::CheckAVX512F)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, avx512f_expm1_rr1_lut16_p4_perm_div,
-                    xnn_math_f32_tanh__avx512f_expm1_rr1_lut16_p4_perm_div,
-                    benchmark::utils::CheckAVX512F)
-    ->Unit(benchmark::kMillisecond)
-    ->Iterations(1);
 
   BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_lut4_p4_perm_div,
                     xnn_math_f32_tanh__avx2_expm1_rr1_lut4_p4_perm_div,
@@ -267,6 +262,14 @@ BENCHMARK_CAPTURE(TanhError, fma_expm1_rr1_lut16_p4_div,
                   xnn_math_f32_tanh__fma_expm1_rr1_lut16_p4_div)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1_rr1_lut32_p3_div,
+                  xnn_math_f32_tanh__fma_expm1_rr1_lut32_p3_div)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1_rr1_lut64_p3_div,
+                  xnn_math_f32_tanh__fma_expm1_rr1_lut64_p3_div)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, fma_expm1_rr1_p6_div,
                   xnn_math_f32_tanh__fma_expm1_rr1_p6_div)
   ->Unit(benchmark::kMillisecond)
@@ -298,6 +301,14 @@ BENCHMARK_CAPTURE(TanhError, scalar_expm1_rr1_lut16_p3_div,
   ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, scalar_expm1_rr1_lut16_p4_div,
                   xnn_math_f32_tanh__scalar_expm1_rr1_lut16_p4_div)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1_rr1_lut32_p3_div,
+                  xnn_math_f32_tanh__scalar_expm1_rr1_lut32_p3_div)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1_rr1_lut64_p3_div,
+                  xnn_math_f32_tanh__scalar_expm1_rr1_lut64_p3_div)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, scalar_expm1_rr1_p6_div,

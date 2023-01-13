@@ -487,84 +487,6 @@ constexpr int kBlockSize = 1024;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(TANH__AVX512F_EXPM1_RR1_P6_DIV, positive_saturation) {
-    TEST_REQUIRES_X86_AVX512F;
-
-    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
-    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
-    for (uint32_t n = UINT32_C(0x41102CB4); n <= UINT32_C(0x7F800000); n += kBlockSize) {
-      for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0x7F800000)));
-      }
-      xnn_math_f32_tanh__avx512f_expm1_rr1_p6_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-      for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = UINT32_C(0x3F800000);
-        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
-          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
-      }
-    }
-  }
-
-  TEST(TANH__AVX512F_EXPM1_RR1_P6_DIV, negative_saturation) {
-    TEST_REQUIRES_X86_AVX512F;
-
-    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
-    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
-    for (uint32_t n = UINT32_C(0xC1102CB4); n <= UINT32_C(0xFF800000); n += kBlockSize) {
-      for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
-      }
-      xnn_math_f32_tanh__avx512f_expm1_rr1_p6_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-      for (uint32_t i = 0; i < kBlockSize; i++) {
-        const uint32_t reference_output = UINT32_C(0xBF800000);
-        ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
-          << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
-      }
-    }
-  }
-
-  TEST(TANH__AVX512F_EXPM1_RR1_P6_DIV, positive_nan) {
-    TEST_REQUIRES_X86_AVX512F;
-
-    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
-    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
-    for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
-      for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = uint32_as_float(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
-      }
-      xnn_math_f32_tanh__avx512f_expm1_rr1_p6_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-      for (uint32_t i = 0; i < kBlockSize; i++) {
-        ASSERT_TRUE(std::isnan(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
-      }
-    }
-  }
-
-  TEST(TANH__AVX512F_EXPM1_RR1_P6_DIV, negative_nan) {
-    TEST_REQUIRES_X86_AVX512F;
-
-    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
-    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
-    for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
-      for (uint32_t i = 0; i < kBlockSize; i++) {
-        inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
-      }
-      xnn_math_f32_tanh__avx512f_expm1_rr1_p6_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
-      for (uint32_t i = 0; i < kBlockSize; i++) {
-        ASSERT_TRUE(std::isnan(outputs[i]))
-          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
-          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
-      }
-    }
-  }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(TANH__AVX512F_EXPM1_RR1_LUT4_P4_PERM_DIV, positive_saturation) {
     TEST_REQUIRES_X86_AVX512F;
 
@@ -643,7 +565,7 @@ constexpr int kBlockSize = 1024;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(TANH__AVX512F_EXPM1_RR1_LUT16_P4_PERM_DIV, positive_saturation) {
+  TEST(TANH__AVX512F_EXPM1_RR1_P6_DIV, positive_saturation) {
     TEST_REQUIRES_X86_AVX512F;
 
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
@@ -652,7 +574,7 @@ constexpr int kBlockSize = 1024;
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0x7F800000)));
       }
-      xnn_math_f32_tanh__avx512f_expm1_rr1_lut16_p4_perm_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_tanh__avx512f_expm1_rr1_p6_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = UINT32_C(0x3F800000);
         ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
@@ -663,7 +585,7 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(TANH__AVX512F_EXPM1_RR1_LUT16_P4_PERM_DIV, negative_saturation) {
+  TEST(TANH__AVX512F_EXPM1_RR1_P6_DIV, negative_saturation) {
     TEST_REQUIRES_X86_AVX512F;
 
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
@@ -672,7 +594,7 @@ constexpr int kBlockSize = 1024;
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
       }
-      xnn_math_f32_tanh__avx512f_expm1_rr1_lut16_p4_perm_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_tanh__avx512f_expm1_rr1_p6_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         const uint32_t reference_output = UINT32_C(0xBF800000);
         ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
@@ -683,7 +605,7 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(TANH__AVX512F_EXPM1_RR1_LUT16_P4_PERM_DIV, positive_nan) {
+  TEST(TANH__AVX512F_EXPM1_RR1_P6_DIV, positive_nan) {
     TEST_REQUIRES_X86_AVX512F;
 
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
@@ -692,7 +614,7 @@ constexpr int kBlockSize = 1024;
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = uint32_as_float(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
       }
-      xnn_math_f32_tanh__avx512f_expm1_rr1_lut16_p4_perm_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_tanh__avx512f_expm1_rr1_p6_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         ASSERT_TRUE(std::isnan(outputs[i]))
           << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
@@ -701,7 +623,7 @@ constexpr int kBlockSize = 1024;
     }
   }
 
-  TEST(TANH__AVX512F_EXPM1_RR1_LUT16_P4_PERM_DIV, negative_nan) {
+  TEST(TANH__AVX512F_EXPM1_RR1_P6_DIV, negative_nan) {
     TEST_REQUIRES_X86_AVX512F;
 
     std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
@@ -710,7 +632,7 @@ constexpr int kBlockSize = 1024;
       for (uint32_t i = 0; i < kBlockSize; i++) {
         inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
       }
-      xnn_math_f32_tanh__avx512f_expm1_rr1_lut16_p4_perm_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      xnn_math_f32_tanh__avx512f_expm1_rr1_p6_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
       for (uint32_t i = 0; i < kBlockSize; i++) {
         ASSERT_TRUE(std::isnan(outputs[i]))
           << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
@@ -1961,6 +1883,144 @@ TEST(TANH__FMA_EXPM1_RR1_LUT16_P4_DIV, negative_nan) {
 }
 
 
+TEST(TANH__FMA_EXPM1_RR1_LUT32_P3_DIV, positive_saturation) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0x41102CB4); n <= UINT32_C(0x7F800000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0x7F800000)));
+    }
+    xnn_math_f32_tanh__fma_expm1_rr1_lut32_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      const uint32_t reference_output = UINT32_C(0x3F800000);
+      ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+TEST(TANH__FMA_EXPM1_RR1_LUT32_P3_DIV, negative_saturation) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0xC1102CB4); n <= UINT32_C(0xFF800000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
+    }
+    xnn_math_f32_tanh__fma_expm1_rr1_lut32_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      const uint32_t reference_output = UINT32_C(0xBF800000);
+      ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+TEST(TANH__FMA_EXPM1_RR1_LUT32_P3_DIV, positive_nan) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+    }
+    xnn_math_f32_tanh__fma_expm1_rr1_lut32_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      ASSERT_TRUE(std::isnan(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+TEST(TANH__FMA_EXPM1_RR1_LUT32_P3_DIV, negative_nan) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+    }
+    xnn_math_f32_tanh__fma_expm1_rr1_lut32_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      ASSERT_TRUE(std::isnan(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+
+TEST(TANH__FMA_EXPM1_RR1_LUT64_P3_DIV, positive_saturation) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0x41102CB4); n <= UINT32_C(0x7F800000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0x7F800000)));
+    }
+    xnn_math_f32_tanh__fma_expm1_rr1_lut64_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      const uint32_t reference_output = UINT32_C(0x3F800000);
+      ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+TEST(TANH__FMA_EXPM1_RR1_LUT64_P3_DIV, negative_saturation) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0xC1102CB4); n <= UINT32_C(0xFF800000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
+    }
+    xnn_math_f32_tanh__fma_expm1_rr1_lut64_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      const uint32_t reference_output = UINT32_C(0xBF800000);
+      ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+TEST(TANH__FMA_EXPM1_RR1_LUT64_P3_DIV, positive_nan) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+    }
+    xnn_math_f32_tanh__fma_expm1_rr1_lut64_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      ASSERT_TRUE(std::isnan(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+TEST(TANH__FMA_EXPM1_RR1_LUT64_P3_DIV, negative_nan) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+    }
+    xnn_math_f32_tanh__fma_expm1_rr1_lut64_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      ASSERT_TRUE(std::isnan(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+
 TEST(TANH__FMA_EXPM1_RR1_P6_DIV, positive_saturation) {
   std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
   std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
@@ -2504,6 +2564,144 @@ TEST(TANH__SCALAR_EXPM1_RR1_LUT16_P4_DIV, negative_nan) {
       inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
     }
     xnn_math_f32_tanh__scalar_expm1_rr1_lut16_p4_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      ASSERT_TRUE(std::isnan(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+
+TEST(TANH__SCALAR_EXPM1_RR1_LUT32_P3_DIV, positive_saturation) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0x41102CB4); n <= UINT32_C(0x7F800000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0x7F800000)));
+    }
+    xnn_math_f32_tanh__scalar_expm1_rr1_lut32_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      const uint32_t reference_output = UINT32_C(0x3F800000);
+      ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+TEST(TANH__SCALAR_EXPM1_RR1_LUT32_P3_DIV, negative_saturation) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0xC1102CB4); n <= UINT32_C(0xFF800000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
+    }
+    xnn_math_f32_tanh__scalar_expm1_rr1_lut32_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      const uint32_t reference_output = UINT32_C(0xBF800000);
+      ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+TEST(TANH__SCALAR_EXPM1_RR1_LUT32_P3_DIV, positive_nan) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+    }
+    xnn_math_f32_tanh__scalar_expm1_rr1_lut32_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      ASSERT_TRUE(std::isnan(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+TEST(TANH__SCALAR_EXPM1_RR1_LUT32_P3_DIV, negative_nan) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+    }
+    xnn_math_f32_tanh__scalar_expm1_rr1_lut32_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      ASSERT_TRUE(std::isnan(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+
+TEST(TANH__SCALAR_EXPM1_RR1_LUT64_P3_DIV, positive_saturation) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0x41102CB4); n <= UINT32_C(0x7F800000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0x7F800000)));
+    }
+    xnn_math_f32_tanh__scalar_expm1_rr1_lut64_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      const uint32_t reference_output = UINT32_C(0x3F800000);
+      ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+TEST(TANH__SCALAR_EXPM1_RR1_LUT64_P3_DIV, negative_saturation) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0xC1102CB4); n <= UINT32_C(0xFF800000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(std::min<uint32_t>(n + i, UINT32_C(0xFF800000)));
+    }
+    xnn_math_f32_tanh__scalar_expm1_rr1_lut64_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      const uint32_t reference_output = UINT32_C(0xBF800000);
+      ASSERT_EQ(reference_output, float_as_uint32(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", reference = 0x" << std::hex << std::setw(8) << std::setfill('0') << reference_output
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+TEST(TANH__SCALAR_EXPM1_RR1_LUT64_P3_DIV, positive_nan) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+    }
+    xnn_math_f32_tanh__scalar_expm1_rr1_lut64_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      ASSERT_TRUE(std::isnan(outputs[i]))
+        << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+        << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+    }
+  }
+}
+
+TEST(TANH__SCALAR_EXPM1_RR1_LUT64_P3_DIV, negative_nan) {
+  std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+  std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+  for (uint32_t n = UINT32_C(0x7F800001); n < UINT32_C(0x80000000); n += kBlockSize) {
+    for (uint32_t i = 0; i < kBlockSize; i++) {
+      inputs[i] = uint32_as_float(UINT32_C(0x80000000) | std::min<uint32_t>(UINT32_C(0x7FFFFFFF), n + i));
+    }
+    xnn_math_f32_tanh__scalar_expm1_rr1_lut64_p3_div(kBlockSize * sizeof(float), inputs.data(), outputs.data());
     for (uint32_t i = 0; i < kBlockSize; i++) {
       ASSERT_TRUE(std::isnan(outputs[i]))
         << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])

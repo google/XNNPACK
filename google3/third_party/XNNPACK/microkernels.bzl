@@ -1091,7 +1091,6 @@ ALL_AVX512F_MICROKERNEL_SRCS = [
     "src/math/sqrt-f32-avx512f-nr1fma.c",
     "src/math/sqrt-f32-avx512f-nr2fma.c",
     "src/math/tanh-f32-avx512f-expm1-rr1-lut4-p4-perm-div.c",
-    "src/math/tanh-f32-avx512f-expm1-rr1-lut16-p4-perm-div.c",
     "src/math/tanh-f32-avx512f-expm1-rr1-p6-div.c",
 ]
 
@@ -1253,6 +1252,8 @@ ALL_FMA_MICROKERNEL_SRCS = [
     "src/math/tanh-f32-fma-expm1-rr1-lut8-p4-div.c",
     "src/math/tanh-f32-fma-expm1-rr1-lut16-p3-div.c",
     "src/math/tanh-f32-fma-expm1-rr1-lut16-p4-div.c",
+    "src/math/tanh-f32-fma-expm1-rr1-lut32-p3-div.c",
+    "src/math/tanh-f32-fma-expm1-rr1-lut64-p3-div.c",
     "src/math/tanh-f32-fma-expm1-rr1-p6-div.c",
 ]
 
@@ -4006,6 +4007,8 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/math/tanh-f32-scalar-expm1-rr1-lut8-p4-div.c",
     "src/math/tanh-f32-scalar-expm1-rr1-lut16-p3-div.c",
     "src/math/tanh-f32-scalar-expm1-rr1-lut16-p4-div.c",
+    "src/math/tanh-f32-scalar-expm1-rr1-lut32-p3-div.c",
+    "src/math/tanh-f32-scalar-expm1-rr1-lut64-p3-div.c",
     "src/math/tanh-f32-scalar-expm1-rr1-p6-div.c",
     "src/math/tanh-f32-scalar-expm1-rr2-lut8-p3-div.c",
     "src/math/tanh-f32-scalar-expm1-rr2-lut8-p4-div.c",
