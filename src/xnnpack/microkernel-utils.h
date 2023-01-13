@@ -28,6 +28,17 @@ XNN_INTERNAL size_t xnn_dwconv_multipass_weights_count(
   size_t channel_subtile,
   size_t channel_round);
 
+// The total count of weights (in bytes) needed for multipass dwconv.
+size_t xnn_dwconv_multipass_weights_size(
+  size_t tile_size,
+  size_t channels,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
+  size_t bias_element_size,
+  size_t log2_filter_element_size,
+  size_t extra_weights_byte);
+
 // Calculate the number of bytes read.
 size_t xnn_dwconv_multipass_bytes_read(
   size_t kernel_size,

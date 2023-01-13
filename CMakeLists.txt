@@ -529,7 +529,7 @@ IF(XNNPACK_BUILD_LIBRARY)
 
   TARGET_LINK_LIBRARIES(memory PRIVATE logging)
   TARGET_LINK_LIBRARIES(mutex PRIVATE logging)
-  TARGET_LINK_LIBRARIES(operators PRIVATE allocator indirection logging normalization operator-utils packing post-operation)
+  TARGET_LINK_LIBRARIES(operators PRIVATE allocator indirection logging microkernel-utils normalization operator-utils packing post-operation)
   TARGET_LINK_LIBRARIES(operator-run PRIVATE logging)
   TARGET_LINK_LIBRARIES(operator-utils PRIVATE logging)
   TARGET_LINK_LIBRARIES(subgraph PRIVATE allocator logging memory mutex operators operator-run)

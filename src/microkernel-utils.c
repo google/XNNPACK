@@ -48,6 +48,25 @@ size_t xnn_dwconv_multipass_weights_count(
           round_up_po2(mod_po2(subtiled_channels, channel_tile), channel_subtile));
 }
 
+size_t xnn_dwconv_multipass_weights_size(
+  size_t tile_size,
+  size_t channels,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
+  size_t bias_element_size,
+  size_t log2_filter_element_size,
+  size_t extra_weights_byte)
+{
+  // First and middle pass runs as many channel_tile-sized loops as possible, and can over-read up to channel_round.
+  const size_t subtiled_channels = round_up_po2(channels, channel_round);
+  // Always have a first and last pass.
+  size_t c_stride = (round_down_po2(subtiled_channels, channel_tile) +
+                     // handle the remainder in channel_subtile loops.
+                     round_up_po2(mod_po2(subtiled_channels, channel_tile), channel_subtile));
+  return ((tile_size << log2_filter_element_size) + bias_element_size + extra_weights_byte) * c_stride;
+}
+
 size_t xnn_dwconv_multipass_bytes_read(
   size_t kernel_size,
   size_t first_pass_tile,
