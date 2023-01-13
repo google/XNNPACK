@@ -1198,6 +1198,13 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     xnn_params.f16.vmulcaddc.init.f16(&vmulcaddc_params, fp16_output_min, fp16_output_max);
   }
 
+  struct jit_gemm_params jit_gemm_params = {
+    .f16_minmax = {
+      .min = fp16_output_min,
+      .max = fp16_output_max
+    }
+  };
+
   xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_fn) xnn_pack_f16_vmulcaddc_w;
   xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f16_dwconv_hwg_w;
   xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f16_dwconv_ghw_w;
@@ -1245,7 +1252,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     /*gemm_parameters=*/&xnn_params.f16.gemm,
     /*dwconv_ukernel=*/dwconv_ukernel,
     /*vmulcaddc_parameters=*/&xnn_params.f16.vmulcaddc,
-    /*jit_gemm_params=*/NULL,
+    /*jit_gemm_params=*/&jit_gemm_params,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
     /*datatype_init_flags=*/XNN_INIT_FLAG_F16,

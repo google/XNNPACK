@@ -1619,6 +1619,13 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
       xnn_caches caches = {};
+      #if XNN_PLATFORM_JIT
+        xnn_code_cache code_cache;
+        if (use_jit()) {
+          xnn_init_code_cache(&code_cache);
+          caches.code_cache = &code_cache;
+        }
+      #endif
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
@@ -1670,6 +1677,14 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
+      #if XNN_PLATFORM_JIT
+        if (use_jit()) {
+          // Check that we actually generated code.
+          ASSERT_GT(code_cache.cache.code.size, 0);
+          xnn_finalize_code_memory(&code_cache.cache.code);
+        }
+      #endif
+
       ASSERT_EQ(xnn_status_success,
         xnn_setup_convolution2d_nhwc_f16(
           convolution_op,
@@ -1683,6 +1698,14 @@ class ConvolutionOperatorTester {
       VerifyNHWCxF16(output, output_ref, output_min, output_max);
 
       if (use_weights_cache()) {
+        // We already finalized the code cache, so create a new code cache if we are testing JIT.
+        #if XNN_PLATFORM_JIT
+          xnn_code_cache inner_code_cache;
+          if (use_jit()) {
+            xnn_init_code_cache(&inner_code_cache);
+            caches.code_cache = &inner_code_cache;
+          }
+        #endif
         xnn_operator_t convolution_op2 = nullptr;
         size_t old_weights_cache_size = weights_cache.cache.weights.size;
         ASSERT_EQ(xnn_status_success, xnn_create_convolution2d_nhwc_f16(
@@ -1703,6 +1726,14 @@ class ConvolutionOperatorTester {
         // Smart pointer to automatically delete convolution_op.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op2, xnn_delete_operator);
 
+        #if XNN_PLATFORM_JIT
+          if (use_jit()) {
+            // Check that we actually generated code.
+            ASSERT_GT(inner_code_cache.cache.code.size, 0);
+            xnn_finalize_code_memory(&inner_code_cache.cache.code);
+          }
+        #endif
+
         std::vector<uint16_t> output2(output.size(), UINT16_C(0x7E00) /* NaN */);
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_convolution2d_nhwc_f16(
@@ -1715,8 +1746,18 @@ class ConvolutionOperatorTester {
                   xnn_run_operator(convolution_op2, nullptr /* thread pool */));
 
         VerifyNHWCxF16(output2, output_ref, output_min, output_max);
+        #if XNN_PLATFORM_JIT
+          if (use_jit()) {
+            xnn_release_code_cache(&inner_code_cache);
+          }
+        #endif
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
       }
+      #if XNN_PLATFORM_JIT
+        if (use_jit()) {
+          xnn_release_code_cache(&code_cache);
+        }
+      #endif
     }
   }
 

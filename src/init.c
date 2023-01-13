@@ -2211,6 +2211,12 @@ static void init(void) {
               xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_fp16arith_params;
               xnn_params.f16.gemm.mr = 6;
               xnn_params.f16.gemm.nr = 16;
+              #if XNN_ENABLE_JIT
+                xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_1x16__aarch64_neonfp16arith_ld64);
+                xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64);
+                xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55);
+                xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55);
+              #endif
               break;
             case cpuinfo_uarch_cortex_a55r0:
             case cpuinfo_uarch_cortex_a75:
@@ -2221,6 +2227,12 @@ static void init(void) {
               xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_fp16arith_params;
               xnn_params.f16.gemm.mr = 6;
               xnn_params.f16.gemm.nr = 16;
+              #if XNN_ENABLE_JIT
+                xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_1x16__aarch64_neonfp16arith_ld64);
+                xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64);
+                xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0);
+                xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0);
+              #endif
               break;
             case cpuinfo_uarch_exynos_m5:
               xnn_params.f16.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64);
@@ -2230,6 +2242,12 @@ static void init(void) {
               xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_fp16arith_params;
               xnn_params.f16.gemm.mr = 4;
               xnn_params.f16.gemm.nr = 16;
+              #if XNN_ENABLE_JIT
+                xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_1x16__aarch64_neonfp16arith_ld64);
+                xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64);
+                xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_4x16__aarch64_neonfp16arith_ld64);
+                xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64);
+              #endif
               break;
             case cpuinfo_uarch_exynos_m4:
               xnn_params.f16.gemm.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld64);
@@ -2239,6 +2257,12 @@ static void init(void) {
               xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_fp16arith_params;
               xnn_params.f16.gemm.mr = 6;
               xnn_params.f16.gemm.nr = 16;
+              #if XNN_ENABLE_JIT
+                xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_1x16__aarch64_neonfp16arith_ld64);
+                xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64);
+                xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_ld64);
+                xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64);
+              #endif
               break;
             default:
             case cpuinfo_uarch_cortex_a76:
@@ -2252,6 +2276,12 @@ static void init(void) {
               xnn_params.f16.gemm.init.f16 = xnn_init_f16_minmax_fp16arith_params;
               xnn_params.f16.gemm.mr = 6;
               xnn_params.f16.gemm.nr = 16;
+              #if XNN_ENABLE_JIT
+                xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_1x16__aarch64_neonfp16arith_ld64);
+                xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64);
+                xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75);
+                xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75);
+              #endif
               break;
           }
 
@@ -2272,6 +2302,10 @@ static void init(void) {
                   if (mr == 6 && nr == 16) {
                     xnn_params.f16.gemm.minmax.gemm[XNN_MR_TO_INDEX(6)].function[i] = (xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55;
                     xnn_params.f16.gemm.minmax.igemm[XNN_MR_TO_INDEX(6)].function[i] = (xnn_igemm_ukernel_fn) xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55;
+                    #if XNN_ENABLE_JIT
+                      xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55);
+                      xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55);
+                    #endif
                   }
                   break;
                 case cpuinfo_uarch_cortex_a55r0:
@@ -2279,6 +2313,10 @@ static void init(void) {
                   if (mr == 6 && nr == 16) {
                     xnn_params.f16.gemm.minmax.gemm[XNN_MR_TO_INDEX(6)].function[i] = (xnn_gemm_ukernel_fn) xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55r0;
                     xnn_params.f16.gemm.minmax.igemm[XNN_MR_TO_INDEX(6)].function[i] = (xnn_igemm_ukernel_fn) xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55r0;
+                    #if XNN_ENABLE_JIT
+                      xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0);
+                      xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55r0);
+                    #endif
                   }
                   break;
                 default:
