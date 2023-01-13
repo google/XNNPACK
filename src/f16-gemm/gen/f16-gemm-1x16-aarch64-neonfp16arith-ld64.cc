@@ -22,7 +22,6 @@ class Generator : public MacroAssembler {
 
  public:
   void generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params);
-  void perform_post_operations(size_t max_mr, size_t num_post_operations, const xnn_post_operation* post_operations);
 };
 
 // void xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64(
@@ -55,7 +54,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
 
   Label l0, l1, l2, l3, l4, l5, l6, l7, l8, l9;
   const size_t num_post_operations = jit_gemm_params->num_post_operations;
-  const xnn_post_operation* post_operations = jit_gemm_params->post_operations;
+  (void) num_post_operations;  // Silence unused warning.
   const uint16_t min = jit_gemm_params->f16_minmax.min;
   const uint16_t max = jit_gemm_params->f16_minmax.max;
   const bool clamp_min = min != UINT16_C(0xFC00);  // -Inf.
@@ -128,7 +127,6 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     fmin(v16.v8h(), v16.v8h(), v5.v8h());
     fmin(v17.v8h(), v17.v8h(), v5.v8h());
   }
-  perform_post_operations(max_mr, num_post_operations, post_operations);
 
   // Store full 1 x 16
   b_lo(l5);
@@ -187,36 +185,6 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
 
   align(16, AlignInstruction::kHlt);
 }
-
-void Generator::perform_post_operations(
-  size_t max_mr,
-  size_t num_post_operations,
-  const xnn_post_operation* post_operations)
-{
-  for (size_t i = 0; i < num_post_operations; i++) {
-    switch (post_operations[i].op_type) {
-      case xnn_post_operation_type_hardswish: {
-        // Reuse A pointers (don't use v8-v15 as they are callee saved).
-        const auto sixth = v0.v4s();
-        const auto three = v1.v4s();
-        const auto six = v2.v4s();
-        const auto zero = v3.v4s();
-        // v4, v5, v6, v7 available for temporaries.
-        ld3r({sixth, three, six}, mem[x8]++);
-        movi(zero, 0);
-        const VRegister accs[] = {
-          v16.v4s(), v17.v4s(),
-        };
-        const VRegister tmps[] = {v4.v4s(), v5.v4s()};
-        f32_hardswish(sixth, three, six, zero, &accs[0], XNN_COUNT_OF(accs), &tmps[0], XNN_COUNT_OF(tmps));
-        break;
-      }
-      default:
-        XNN_UNREACHABLE;
-    }
-  }
-}
-
 }  // namespace
 }  // namespace aarch64
 }  // namespace xnnpack
