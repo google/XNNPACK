@@ -75,10 +75,10 @@ http_archive(
 http_archive(
     name = "cpuinfo",
     build_file = "@//third_party:cpuinfo.BUILD",
-    sha256 = "25843b5f21c32cba89f9b921c0500ab5cd0c2cb8fb0f345e5b5e4678329386c7",
-    strip_prefix = "cpuinfo-49610f89b8b1eb52d75d1eda7a2c40c1e86a78e7",
+    sha256 = "6e69caadfef72932c0838b7458a704202329512039ec6f789e2ef1e97e7b5050",
+    strip_prefix = "cpuinfo-5fd22cacd12f9e74e6a7b014505bbbdc173ede79",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/49610f89b8b1eb52d75d1eda7a2c40c1e86a78e7.zip",
+        "https://github.com/pytorch/cpuinfo/archive/5fd22cacd12f9e74e6a7b014505bbbdc173ede79.zip",
     ],
 )
 
