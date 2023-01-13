@@ -386,20 +386,6 @@ struct raddstoreexpminusmax_parameters {
   uint8_t element_tile;
 };
 
-struct fill_parameters {
-  xnn_fill_ukernel_fn ukernel;
-  // Number of rows of inputs processed in one tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
-  uint8_t row_tile;
-};
-
-struct pad_parameters {
-  xnn_pad_ukernel_fn ukernel;
-  // Number of rows of inputs processed in one tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
-  uint8_t row_tile;
-};
-
 struct vmulcaddc_parameters {
   xnn_vmulcaddc_ukernel_fn ukernel;
   union {
@@ -442,8 +428,6 @@ struct vmulcaddc_parameters {
 #define XNN_INIT_FLAG_U8         0x00000400
 // Indicates that X8 XNNPACK microkernels are available for use.
 #define XNN_INIT_FLAG_X8         0x00000800
-// Indicates that XX XNNPACK microkernels are available for use.
-#define XNN_INIT_FLAG_XX         0x00001000
 // Indicates that VCVT XNNPACK microkernels are available for use.
 #define XNN_INIT_FLAG_VCVT       0x00002000
 // Indicates that CHW XNNPACK microkernels are optimized for the host platform.
@@ -556,10 +540,6 @@ struct xnn_parameters {
     xnn_unpool_ukernel_fn unpool;
     struct zip_parameters zip;
   } x32;
-  struct {
-    struct fill_parameters fill;
-    struct pad_parameters pad;
-  } xx;
 };
 
 #ifdef __cplusplus

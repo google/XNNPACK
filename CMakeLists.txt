@@ -280,7 +280,9 @@ SET(XNNPACK_SRCS
   src/params.c
   src/transpose-config.c
   src/unary-elementwise-config.c
-  src/x8-lut-config.c)
+  src/x8-lut-config.c
+  src/xx-fill-config.c
+  src/xx-pad-config.c)
 
 SET(TABLE_SRCS
   src/tables/exp2-k-over-64.c

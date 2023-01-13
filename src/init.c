@@ -1194,20 +1194,6 @@ static void init(void) {
       };
     #endif  // XNN_NO_X32_OPERATORS
 
-    /**************************** XX AArch32 micro-kernels ****************************/
-    #ifndef XNN_NO_XX_OPERATORS
-      init_flags |= XNN_INIT_FLAG_XX;
-
-      xnn_params.xx.fill = (struct fill_parameters) {
-        .ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__neon_x64,
-        .row_tile = 1,
-      };
-      xnn_params.xx.pad = (struct pad_parameters) {
-        .ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel__neon,
-        .row_tile = 1,
-      };
-    #endif  // XNN_NO_XX_OPERATORS
-
   } else if (!XNN_PLATFORM_MOBILE) {
 
     /*************************** QC8 AArch32 Pre-NEON micro-kernels ***************************/
@@ -1557,19 +1543,6 @@ static void init(void) {
       };
     #endif  // XNN_NO_X32_OPERATORS
 
-    /**************************** XX AArch32 Pre-NEON micro-kernels ****************************/
-    #ifndef XNN_NO_XX_OPERATORS
-      init_flags |= XNN_INIT_FLAG_XX;
-
-      xnn_params.xx.fill = (struct fill_parameters) {
-        .ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__scalar_x16,
-        .row_tile = 1,
-      };
-      xnn_params.xx.pad = (struct pad_parameters) {
-        .ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel__scalar,
-        .row_tile = 1,
-      };
-    #endif  // XNN_NO_XX_OPERATORS
   }
 
 #elif XNN_ARCH_ARM64
@@ -2919,20 +2892,6 @@ static void init(void) {
     };
   #endif  // XNN_NO_X32_OPERATORS
 
-  /**************************** XX AArch64 micro-kernels ****************************/
-  #ifndef XNN_NO_XX_OPERATORS
-    init_flags |= XNN_INIT_FLAG_XX;
-
-    xnn_params.xx.fill = (struct fill_parameters) {
-      .ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__neon_x64,
-      .row_tile = 1,
-    };
-    xnn_params.xx.pad = (struct pad_parameters) {
-      .ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel__neon,
-      .row_tile = 1,
-    };
-  #endif
-
 #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
   /**************************** QC8 x86 micro-kernels ****************************/
   #ifndef XNN_NO_QC8_OPERATORS
@@ -3805,20 +3764,6 @@ static void init(void) {
     };
   #endif  // XNN_NO_X32_OPERATORS
 
-  /**************************** XX x86 micro-kernels ****************************/
-  #ifndef XNN_NO_XX_OPERATORS
-    init_flags |= XNN_INIT_FLAG_XX;
-
-    xnn_params.xx.fill = (struct fill_parameters) {
-      .ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__sse2_x64,
-      .row_tile = 1,
-    };
-    xnn_params.xx.pad = (struct pad_parameters) {
-      .ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel__sse2,
-      .row_tile = 1,
-    };
-  #endif
-
 #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
   /**************************** QC8 WAsm SIMD micro-kernels****************************/
@@ -4428,20 +4373,6 @@ static void init(void) {
     };
   #endif  // XNN_NO_X32_OPERATORS
 
-  /**************************** XX WAsm SIMD micro-kernels****************************/
-  #ifndef XNN_NO_XX_OPERATORS
-    init_flags |= XNN_INIT_FLAG_XX;
-
-    xnn_params.xx.fill = (struct fill_parameters) {
-      .ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__wasmsimd_x64,
-      .row_tile = 1,
-    };
-    xnn_params.xx.pad = (struct pad_parameters) {
-      .ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel__wasmsimd,
-      .row_tile = 1,
-    };
-  #endif
-
 #elif XNN_ARCH_WASM
 
   /**************************** QC8 WAsm micro-kernels****************************/
@@ -4881,20 +4812,6 @@ static void init(void) {
     };
   #endif  // XNN_NO_X32_OPERATORS
 
-  /**************************** XX WAsm micro-kernels****************************/
-  #ifndef XNN_NO_XX_OPERATORS
-    init_flags |= XNN_INIT_FLAG_XX;
-
-    xnn_params.xx.fill = (struct fill_parameters) {
-      .ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__scalar_x16,
-      .row_tile = 1,
-    };
-    xnn_params.xx.pad = (struct pad_parameters) {
-      .ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel__scalar,
-      .row_tile = 1,
-    };
-  #endif
-
 #elif XNN_ARCH_RISCV
 
   /************************** QC8 RISC-V micro-kernels **************************/
@@ -5241,20 +5158,6 @@ static void init(void) {
       .xm = (xnn_zipv_ukernel_fn) xnn_x32_zip_xm_ukernel__scalar,
     };
   #endif  // XNN_NO_X32_OPERATORS
-
-  /************************** XX RISC-V micro-kernels ***************************/
-  #ifndef XNN_NO_XX_OPERATORS
-    init_flags |= XNN_INIT_FLAG_XX;
-
-    xnn_params.xx.fill = (struct fill_parameters) {
-      .ukernel = (xnn_fill_ukernel_fn) xnn_xx_fill_ukernel__scalar_x16,
-      .row_tile = 1,
-    };
-    xnn_params.xx.pad = (struct pad_parameters) {
-      .ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel__scalar,
-      .row_tile = 1,
-    };
-  #endif  // XNN_NO_XX_OPERATORS
 
 #else
   #error "Unsupported architecture"

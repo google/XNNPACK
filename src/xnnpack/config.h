@@ -222,6 +222,22 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_s8_clamp_config
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_u8_clamp_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_xx_copy_config();
 
+struct xnn_xx_fill_config {
+  xnn_fill_ukernel_fn ukernel;
+  // Number of rows of inputs processed in one tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  uint8_t row_tile;
+};
+XNN_INTERNAL const struct xnn_xx_fill_config* xnn_init_xx_fill_config();
+
+struct xnn_xx_pad_config {
+  xnn_pad_ukernel_fn ukernel;
+  // Number of rows of inputs processed in one tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  uint8_t row_tile;
+};
+XNN_INTERNAL const struct xnn_xx_pad_config* xnn_init_xx_pad_config();
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
