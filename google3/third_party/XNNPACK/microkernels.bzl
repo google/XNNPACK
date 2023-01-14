@@ -3285,6 +3285,9 @@ ALL_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/math/sqrt-f16-neonfp16arith-nr1fma1adj.c",
     "src/math/sqrt-f16-neonfp16arith-nr1fma.c",
     "src/math/sqrt-f16-neonfp16arith-nr1rsqrts.c",
+    "src/math/tanh-f16-neonfp16arith-expm1-rr1-p3-nr1fma.c",
+    "src/math/tanh-f16-neonfp16arith-expm1-rr1-p3-nr1recps.c",
+    "src/math/tanh-f16-neonfp16arith-expm1-rr1-p3-recpe.c",
 ]
 
 ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS = [

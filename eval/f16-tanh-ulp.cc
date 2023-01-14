@@ -139,6 +139,24 @@ static void TanhError(
     ->Iterations(1);
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1_rr1_p3_nr1fma,
+                    xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3_nr1fma,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1_rr1_p3_nr1recps,
+                    xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3_nr1recps,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1_rr1_p3_recpe,
+                    xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3_recpe,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
