@@ -3292,7 +3292,8 @@ SET(ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
   src/math/sigmoid-f16-aarch64-neonfp16arith-rr1-p3-div.c
   src/math/sigmoid-f16-aarch64-neonfp16arith-rr2-p2-div.c
   src/math/sigmoid-f16-aarch64-neonfp16arith-rr2-p3-div.c
-  src/math/sqrt-f16-aarch64-neonfp16arith-sqrt.c)
+  src/math/sqrt-f16-aarch64-neonfp16arith-sqrt.c
+  src/math/tanh-f16-aarch64-neonfp16arith-expm1-rr1-p3-div.c)
 
 SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-x8.c

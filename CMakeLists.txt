@@ -2943,6 +2943,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f16-sqrt-ulp-eval PRIVATE benchmark cpuinfo fp16 pthreadpool)
   TARGET_LINK_LIBRARIES(f16-sqrt-ulp-eval PRIVATE bench-utils microkernels-all)
 
+  ADD_EXECUTABLE(f16-tanh-ulp-eval eval/f16-tanh-ulp.cc)
+  TARGET_INCLUDE_DIRECTORIES(f16-tanh-ulp-eval PRIVATE . src)
+  TARGET_LINK_LIBRARIES(f16-tanh-ulp-eval PRIVATE benchmark cpuinfo fp16 pthreadpool)
+  TARGET_LINK_LIBRARIES(f16-tanh-ulp-eval PRIVATE bench-utils microkernels-all)
+
   ADD_EXECUTABLE(f32-exp-ulp-eval eval/f32-exp-ulp.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-exp-ulp-eval PRIVATE . src)
   TARGET_LINK_LIBRARIES(f32-exp-ulp-eval PRIVATE benchmark cpuinfo fp16 pthreadpool)
@@ -2984,6 +2989,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(f16-sqrt-eval PRIVATE include src)
   TARGET_LINK_LIBRARIES(f16-sqrt-eval PRIVATE fp16 pthreadpool gtest gtest_main)
   TARGET_LINK_LIBRARIES(f16-sqrt-eval PRIVATE hardware-config logging microkernels-all)
+
+  ADD_EXECUTABLE(f16-tanh-eval eval/f16-tanh.cc)
+  TARGET_INCLUDE_DIRECTORIES(f16-tanh-eval PRIVATE include src)
+  TARGET_LINK_LIBRARIES(f16-tanh-eval PRIVATE fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f16-tanh-eval PRIVATE hardware-config logging microkernels-all)
 
   ADD_EXECUTABLE(f16-f32-cvt-eval eval/f16-f32-cvt.cc)
   TARGET_INCLUDE_DIRECTORIES(f16-f32-cvt-eval PRIVATE include src)

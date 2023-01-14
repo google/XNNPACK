@@ -6994,6 +6994,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_tanh_ulp_eval",
+    srcs = [
+        "eval/f16-tanh-ulp.cc",
+    ],
+    deps = ACCURACY_EVAL_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_exp_ulp_eval",
     srcs = [
         "eval/f32-exp-ulp.cc",
@@ -7055,6 +7063,15 @@ xnnpack_unit_test(
     name = "f16_sqrt_eval",
     srcs = [
         "eval/f16-sqrt.cc",
+    ],
+    automatic = False,
+    deps = ACCURACY_EVAL_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_tanh_eval",
+    srcs = [
+        "eval/f16-tanh.cc",
     ],
     automatic = False,
     deps = ACCURACY_EVAL_DEPS,
