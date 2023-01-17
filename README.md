@@ -1,6 +1,6 @@
 # XNNPACK
 
-XNNPACK is a highly optimized library of floating-point neural network inference operators for ARM, x86, WebAssembly, and RISC-V platforms. XNNPACK is not intended for direct use by deep learning practitioners and researchers; instead it provides low-level performance primitives for accelerating high-level machine learning frameworks, such as [TensorFlow Lite](https://www.tensorflow.org/lite), [TensorFlow.js](https://www.tensorflow.org/js), [PyTorch](https://pytorch.org/), [ONNX Runtime](https://onnxruntime.ai), and [MediaPipe](https://mediapipe.dev).
+XNNPACK is a highly optimized solution for neural network inference on ARM, x86, WebAssembly, and RISC-V platforms. XNNPACK is not intended for direct use by deep learning practitioners and researchers; instead it provides low-level performance primitives for accelerating high-level machine learning frameworks, such as [TensorFlow Lite](https://www.tensorflow.org/lite), [TensorFlow.js](https://www.tensorflow.org/js), [PyTorch](https://pytorch.org/), [ONNX Runtime](https://onnxruntime.ai), and [MediaPipe](https://mediapipe.dev).
 
 ## Supported Architectures
 
@@ -11,7 +11,7 @@ XNNPACK is a highly optimized library of floating-point neural network inference
 - WebAssembly MVP
 - WebAssembly SIMD
 - [WebAssembly Relaxed SIMD](https://github.com/WebAssembly/relaxed-simd) (experimental)
-- RISC-V (RV32GV and RV64GC)
+- RISC-V (RV32GC and RV64GC)
 
 ## Operator Coverage
 

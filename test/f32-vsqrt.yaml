@@ -26,6 +26,11 @@
 - name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x32
 - name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x36
 - name: xnn_f32_vsqrt_ukernel__neonfma_nr2fma1adj_x40
+# RISC-V Vector
+- name: xnn_f32_vsqrt_ukernel__rvv_sqrt_x1v
+- name: xnn_f32_vsqrt_ukernel__rvv_sqrt_x2v
+- name: xnn_f32_vsqrt_ukernel__rvv_sqrt_x4v
+- name: xnn_f32_vsqrt_ukernel__rvv_sqrt_x8v
 # x86 SSE
 - name: xnn_f32_vsqrt_ukernel__sse_sqrt_x4
 - name: xnn_f32_vsqrt_ukernel__sse_sqrt_x8

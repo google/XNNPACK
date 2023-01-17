@@ -658,6 +658,25 @@ void xnn_compute_dwconv_unipass(
     &context->params);
 }
 
+void xnn_compute_dwconv_multipass(
+    const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index,
+    size_t output_y)
+{
+  const void** indirect_input =
+    (const void**) ((uintptr_t) context->indirect_input + output_y * context->indirect_input_height_stride);
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
+  void* output = (void*) ((uintptr_t) context->output +
+    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
+
+  void* multipass_buffer = XNN_SIMD_ALLOCA(context->groups * sizeof(int32_t) + XNN_ALLOCATION_ALIGNMENT);
+
+  context->multipass_ukernel(
+    context->groups, context->output_width, indirect_input, context->packed_weights, output,
+    context->indirect_input_width_stride, context->output_increment, input_offset, context->zero, context->kernel_size,
+    multipass_buffer, &context->params);
+}
+
 void xnn_compute_dwconv2d_chw(
     const struct dwconv2d_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,

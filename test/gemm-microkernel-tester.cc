@@ -1661,6 +1661,229 @@ void GemmMicrokernelTester::Test(xnn_f32_igemm_minmax_ukernel_fn igemm_minmax, x
 }
 
 #if XNN_PLATFORM_JIT
+
+void GemmMicrokernelTester::Test(
+    xnn_jit_gemm_code_generator_fn gemm_generator,
+    xnn_init_f16_minmax_params_fn init_params) const
+{
+  ASSERT_LE(m(), mr());
+  ASSERT_GE(a_stride(), k());
+  ASSERT_GE(cm_stride(), n());
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
+  auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+  std::vector<uint16_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<uint16_t> b(n() * k());
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(packed_n() * packed_k() + packed_n());
+  std::vector<uint16_t> bias(n());
+  std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+  std::vector<float> c_ref(m() * n());
+
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(a.begin(), a.end(), std::ref(f16rng));
+    std::generate(b.begin(), b.end(), std::ref(f16rng));
+    std::generate(bias.begin(), bias.end(), std::ref(f16rng));
+    std::fill(c.begin(), c.end(), UINT16_C(0x7E00) /* NaN */);
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+
+    std::fill(packed_w.begin(), packed_w.end(), 0);
+    xnn_pack_f16_gemm_goi_w(1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(), packed_w.data(), 0, nullptr);
+
+    for (size_t m_index = 0; m_index < m(); m_index++) {
+      for (size_t n_index = 0; n_index < n(); n_index++) {
+        for (size_t k_index = 0; k_index < k(); k_index++) {
+          EXPECT_LE(n(), packed_n());
+          EXPECT_LT(m_index * n() + n_index, c_ref.size());
+          EXPECT_LT(m_index * k() + k_index, a.size());
+          c_ref[m_index * n() + n_index] +=
+            fp16_ieee_to_fp32_value(a[m_index * a_stride() + k_index]) *
+            fp16_ieee_to_fp32_value(b[n_index * k() + k_index]);
+        }
+        c_ref[m_index * n() + n_index] += fp16_ieee_to_fp32_value(bias[n_index]);
+      }
+    }
+
+    const float accumulated_min = *std::min_element(c_ref.cbegin(), c_ref.cend());
+    const float accumulated_max = *std::max_element(c_ref.cbegin(), c_ref.cend());
+    const float c_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin())));
+    const float c_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax())));
+
+    // Prepare parameters.
+    xnn_f16_minmax_params params;
+    init_params(&params,
+      fp16_ieee_from_fp32_value(c_min),
+      fp16_ieee_from_fp32_value(c_max));
+
+    for (float& c_value : c_ref) {
+      c_value = std::max(std::min(c_value, c_max), c_min);
+    }
+
+    ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+    struct xnn_code_buffer code_buffer;
+    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
+    jit_gemm_params p = {};
+    p.f16_minmax.min = fp16_ieee_to_fp32_value(c_min);
+    p.f16_minmax.max = fp16_ieee_to_fp32_value(c_max);
+    ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(uint16_t), &p));
+    ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
+    xnn_f16_gemm_minmax_ukernel_fn gemm_minmax =
+        reinterpret_cast<xnn_f16_gemm_minmax_ukernel_fn>(code_buffer.start);
+
+    gemm_minmax(m(), n(), k() * sizeof(uint16_t),
+      a.data(), a_stride() * sizeof(uint16_t),
+      packed_w.data(),
+      c.data(), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t),
+      &params);
+
+    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+
+    // Validate micro-kernel outputs.
+    for (size_t i = 0; i < m(); i++) {
+      for (size_t j = 0; j < n(); j++) {
+        EXPECT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
+            << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+            << ", optimized = " << fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
+      }
+    }
+  }
+}
+
+void GemmMicrokernelTester::Test(
+    xnn_jit_igemm_code_generator_fn igemm_generator, xnn_init_f16_minmax_params_fn init_params) const {
+  ASSERT_LE(m(), mr());
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
+  auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+
+  std::vector<uint16_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<uint16_t> b(n() * ks() * k());
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(ks() * packed_k() * packed_n() + packed_n());
+  std::vector<uint16_t> bias(n());
+  std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+  std::vector<float> c_ref(m() * n());
+  std::vector<uint16_t> junk(k() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<const uint16_t*> im2col(mr() * ks());
+  std::fill(junk.begin(), junk.end(), UINT16_C(0x7E00) /* NaN */);
+
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(a.begin(), a.end(), std::ref(f16rng));
+    std::generate(b.begin(), b.end(), std::ref(f16rng));
+    std::generate(bias.begin(), bias.end(), std::ref(f16rng));
+    std::fill(c.begin(), c.end(), UINT16_C(0x7E00) /* NaN */);
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+
+    std::fill(packed_w.begin(), packed_w.end(), 0);
+    xnn_pack_f16_conv_goki_w(
+      1, n(), ks(), k(), nr(), kr(), sr(),
+      b.data(), bias.data(), packed_w.data(), 0 /* extra bytes */, nullptr);
+
+    for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+      for (size_t m_index = 0; m_index < mr(); m_index++) {
+        im2col[ks_index * mr() + m_index] = a.data() + a_stride() * m_index - a_offset();
+      }
+    }
+    std::shuffle(im2col.begin(), im2col.end(), rng);
+    if (zero_index() != SIZE_MAX) {
+      for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+        im2col[ks_index * mr() + zero_index()] = a.data();
+      }
+    }
+    for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+      for (size_t m_index = m(); m_index < mr(); m_index++) {
+        im2col[ks_index * mr() + m_index] = junk.data();
+      }
+    }
+
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+    for (size_t m_index = 0; m_index < m(); m_index++) {
+      for (size_t n_index = 0; n_index < n(); n_index++) {
+        for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
+          for (size_t k_index = 0; k_index < k(); k_index++) {
+            EXPECT_LT(ks_index * mr() + m_index, im2col.size());
+            EXPECT_LT(k_index, k());
+            EXPECT_LT(k_index, a_stride());
+            if (im2col[ks_index * mr() + m_index] == a.data()) {
+              c_ref[m_index * n() + n_index] +=
+                fp16_ieee_to_fp32_value(im2col[ks_index * mr() + m_index][k_index]) *
+                fp16_ieee_to_fp32_value(b[(n_index * ks() + ks_index) * k() + k_index]);
+            } else {
+              c_ref[m_index * n() + n_index] +=
+                fp16_ieee_to_fp32_value(im2col[ks_index * mr() + m_index][k_index + a_offset()]) *
+                fp16_ieee_to_fp32_value(b[(n_index * ks() + ks_index) * k() + k_index]);
+            }
+          }
+        }
+        c_ref[m_index * n() + n_index] += fp16_ieee_to_fp32_value(bias[n_index]);
+      }
+    }
+
+    const float accumulated_min = *std::min_element(c_ref.cbegin(), c_ref.cend());
+    const float accumulated_max = *std::max_element(c_ref.cbegin(), c_ref.cend());
+    const float c_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + (accumulated_max - accumulated_min) / 255.0f * uint16_t(qmin())));
+    const float c_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - (accumulated_max - accumulated_min) / 255.0f * uint16_t(255 - qmax())));
+    for (size_t m_index = 0; m_index < m(); m_index++) {
+      for (size_t n_index = 0; n_index < n(); n_index++) {
+        c_ref[m_index * n() + n_index] = std::min(c_ref[m_index * n() + n_index], c_max);
+        c_ref[m_index * n() + n_index] = std::max(c_ref[m_index * n() + n_index], c_min);
+      }
+    }
+
+    // Prepare parameters.
+    xnn_f16_minmax_params params;
+    init_params(&params,
+      fp16_ieee_from_fp32_value(c_min),
+      fp16_ieee_from_fp32_value(c_max));
+
+    for (float& c_value : c_ref) {
+      c_value = std::max(std::min(c_value, c_max), c_min);
+    }
+
+    const uint16_t* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : NULL;
+
+    ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+    struct xnn_code_buffer code_buffer;
+    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
+    jit_gemm_params p = {};
+    p.f16_minmax.min = fp16_ieee_to_fp32_value(c_min);
+    p.f16_minmax.max = fp16_ieee_to_fp32_value(c_max);
+    ASSERT_EQ(xnn_status_success,
+              igemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(uint16_t), ks() * mr() * sizeof(void *), &p));
+    ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
+    xnn_f16_igemm_minmax_ukernel_fn igemm_minmax =
+        reinterpret_cast<xnn_f16_igemm_minmax_ukernel_fn>(code_buffer.start);
+
+    igemm_minmax(
+      m(), n(), k() * sizeof(uint16_t), ks() * mr() * sizeof(void*),
+      reinterpret_cast<const void**>(im2col.data()), packed_w.data(),
+      c.data(), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t),
+      a_offset() * sizeof(uint16_t), zero_pointer,
+      &params);
+
+    for (size_t i = 0; i < m(); i++) {
+      for (size_t j = 0; j < n(); j++) {
+        EXPECT_LE(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_max)
+            << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
+            << ", optimized = " << fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
+        EXPECT_GE(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_min)
+            << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
+            << ", optimized = " << fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
+        EXPECT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
+            << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
+            << ", optimized = " << fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
+      }
+    }
+  }
+}
+
 void GemmMicrokernelTester::Test(
     xnn_jit_gemm_code_generator_fn gemm_generator,
     xnn_init_f32_minmax_params_fn init_params) const

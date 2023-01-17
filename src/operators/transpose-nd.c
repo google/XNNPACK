@@ -180,8 +180,6 @@ static enum xnn_status setup_transpose_nd(
     return xnn_status_success;
   }
 
-  transpose_op->channels = num_dims;
-
   struct transpose_context* context = &transpose_op->context.transpose;
   size_t normalized_dims;
   size_t normalized_shape[XNN_MAX_TENSOR_DIMS];
@@ -314,7 +312,7 @@ static enum xnn_status setup_transpose_nd(
       XNN_UNREACHABLE;
   }
 
-  if (transpose_op->channels == 1) {
+  if (num_dims == 1) {
     transpose_op->context.univector_contiguous.x = input;
     transpose_op->context.univector_contiguous.y = output;
   } else {

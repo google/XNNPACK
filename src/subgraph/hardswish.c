@@ -23,8 +23,6 @@ static enum xnn_status create_hardswish_operator(
   struct xnn_operator_data* opdata,
   const struct xnn_caches* caches)
 {
-  assert(node->compute_type == xnn_compute_type_fp32);
-
   assert(node->num_inputs == 1);
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
@@ -149,6 +147,11 @@ enum xnn_status xnn_define_hardswish(
 
   const struct xnn_value* output_value = &subgraph->values[output_id];
   status = xnn_subgraph_check_output_type_dense(xnn_node_type_hardswish, output_id, output_value);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  status = xnn_subgraph_check_all_dims_match(xnn_node_type_hardswish, input_id, input_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }

@@ -5,6 +5,8 @@
 
 #include <array>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 
@@ -85,6 +87,60 @@ TEST(SUBGRAPH_FP16, value_both_external_output_and_input) {
   ASSERT_EQ(tester.Node(1)->type, xnn_node_type_static_constant_pad);
   ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
   ASSERT_EQ(tester.Node(0)->compute_type, xnn_compute_type_fp32_to_fp16);
+}
+
+TEST(SUBGRAPH_FP16, with_static_value) {
+  auto tester = SubgraphTester(3);
+  float static_tensor_data[3 + XNN_EXTRA_BYTES / sizeof(float)] = {
+    1.0f, 2.0f, 3.0f
+  };
+  // external input[0]   static[1]
+  //               \     /
+  //                \   /
+  //                [add]
+  //                  |
+  //               external
+  //               output[2]
+  tester
+      .AddInputTensorF32({1, 2, 2, 3}, 0)
+      // Tensor #1 is both static and external
+      .AddStaticTensorF32({1, 1, 1, 3}, TensorType::kDense, 1,
+                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                          static_tensor_data)
+      .AddOutputTensorF32({1, 4, 2, 3}, 2)
+      .AddAddition(0, 1, 2)
+      .Optimize()
+      .RewriteForFp16();
+
+  // After rewriting for FP16, the graph should look like this, with * indicating new operators and values created:
+  // The static tensor data has been converted into a new buffer.
+  //
+  // external input[0]
+  //        |
+  //    [convert]*
+  //        |
+  //     input[3]*   static[1]* (converted into new buffer)
+  //        \       /
+  //         \     /
+  //          [add]
+  //            |
+  //       fp16 value[4]*
+  //            |
+  //        [convert]*
+  //            |
+  //         external
+  //         output[2]
+
+  // We should have 3 nodes, the original add node, plus one convert node for
+  // each of the external input and output.
+  ASSERT_EQ(tester.NumNodes(), 3);
+
+  // The static value should be converted to FP16
+  const xnn_value* static_value = tester.Value(1);
+  ASSERT_EQ(static_value->datatype, xnn_datatype_fp16);
+  ASSERT_EQ(static_cast<const uint16_t*>(static_value->data)[0], fp16_ieee_from_fp32_value(1.0f));
+  ASSERT_EQ(static_cast<const uint16_t*>(static_value->data)[1], fp16_ieee_from_fp32_value(2.0f));
+  ASSERT_EQ(static_cast<const uint16_t*>(static_value->data)[2], fp16_ieee_from_fp32_value(3.0f));
 }
 
 }  // namespace xnnpack

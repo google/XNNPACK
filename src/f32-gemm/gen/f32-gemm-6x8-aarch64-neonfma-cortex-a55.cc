@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -38,40 +38,24 @@ class Generator : public MacroAssembler {
 
 // d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-// A pointers
-// A0  x3
-// A1  x9
-// A2 x10
-// A3 x11
-// A4 x12
-// A5  x4
-
-// C pointers
-// C0  x6
-// C1 x16
-// C2 x17
-// C3 x14
-// C4 x13
-// C5  x7
-
 // Register usage
-// A0  v0     v3
-// A1  v0[1]  v3[1]
-// A2  v1     v4
-// A3  v1[1]  v4[1]
-// A4  v2     v5
-// A5  v2[1]  v5[1]
-// B   x5 v12 v13 v14 v15 second set of B
-// B   v16 v17 v18 v19 first set
-// C0  v20 v21
-// C1  v22 v23
-// C2  v24 v25
-// C3  v26 v27
-// C4  v28 v29
-// C5  v30 v31
+// A0   x3 v0     v3
+// A1   x9 v0[1]  v3[1]
+// A2  x10 v1     v4
+// A3  x11 v1[1]  v4[1]
+// A4  x12 v2     v5
+// A5   x4 v2[1]  v5[1]
+// B    x5 v12 v13 v14 v15 second set of B
+// B       v16 v17 v18 v19 first set
+// C0   x6 v20 v21
+// C1  x16 v22 v23
+// C2  x17 v24 v25
+// C3  x14 v26 v27
+// C4  x13 v28 v29
+// C5   x7 v30 v31
 // clamp  v6 v7
 // unused A   v8 v9 v10 v11
-// x8 temporary vector shadow register
+// temporary vector shadow register x8
 
 // Converted from: src/f32-gemm/gen/f32-gemm-6x8-minmax-asm-aarch64-neonfma-cortex-a55.S
 void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)

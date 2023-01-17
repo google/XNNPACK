@@ -116,6 +116,7 @@ void xnn_value_copy(
   dst_value->data = src_value->data;
   dst_value->producer = src_value->producer;
   dst_value->first_consumer = src_value->first_consumer;
+  dst_value->num_consumers = src_value->num_consumers;
 }
 
 struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
@@ -144,7 +145,7 @@ struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
   return new_node;
 }
 
-void xnn_subgraph_add_nodes(xnn_subgraph_t subgraph, size_t num_nodes)
+enum xnn_status xnn_subgraph_add_nodes(xnn_subgraph_t subgraph, size_t num_nodes)
 {
   struct xnn_node* nodes = subgraph->nodes;
   const size_t size = subgraph->num_nodes;
@@ -157,7 +158,7 @@ void xnn_subgraph_add_nodes(xnn_subgraph_t subgraph, size_t num_nodes)
     if (nodes == NULL) {
       xnn_log_error("failed to allocate %zu bytes for subgraph nodes",
         capacity * sizeof(struct xnn_node));
-      return;
+      return xnn_status_out_of_memory;
     }
 
     memset(nodes + size, 0, (new_capacity - size) * sizeof(struct xnn_node));
@@ -169,6 +170,8 @@ void xnn_subgraph_add_nodes(xnn_subgraph_t subgraph, size_t num_nodes)
   for (size_t i = 0; i < num_nodes; i++) {
     new_nodes[i].id = size + i;
   }
+
+  return xnn_status_success;
 }
 
 void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph)
@@ -702,6 +705,8 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
   // 3. Replace FP32 Values with FP16 Values as Nodes' inputs/outputs.
   // 4. Insert FP32->FP16 Convert Nodes for external FP32 inputs and FP16->FP32 Convert Nodes for external outputs.
 
+  const uint32_t num_original_values = subgraph->num_values;
+
   // Check that all operators in the subgraph are supported in FP16, bail out on any unsupported one.
   for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
     struct xnn_node* node = &subgraph->nodes[n];
@@ -726,14 +731,6 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_concatenate4:
       case xnn_node_type_squared_difference:
       case xnn_node_type_subtract:
-        for (uint32_t i = 0; i < node->num_inputs; i++) {
-          if (subgraph->values[node->inputs[i]].data != NULL) {
-            xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) has static input %" PRIu32,
-              n, xnn_node_type_to_string(node->type), i);
-            return false;
-          }
-        }
-        break;
       case xnn_node_type_average_pooling_2d:
       case xnn_node_type_bankers_rounding:
       case xnn_node_type_ceiling:
@@ -796,39 +793,104 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
     }
   }
 
-  // Replace FP32 Values in Nodes' inputs/outputs with FP16 Values.
-  // FP32 Values that are not external inputs or outputs are converted to FP16 in-place,
-  // for external inputs and outputs we create same-shaped FP16 Values and use those instead.
-  const uint32_t num_original_values = subgraph->num_values;
-  xnn_subgraph_analyze_consumers_and_producers(subgraph);
+  // Attempt to allocate memory for static values and external input/outputs.
+  // The FP16 rewrite is cleanly aborted on failure.
   for (uint32_t n = 0; n < num_original_values; n++) {
     struct xnn_value* value = &subgraph->values[n];
     value->fp16_id = XNN_INVALID_VALUE_ID;
     value->fp32_id = XNN_INVALID_VALUE_ID;
     if (value->fp16_compatible) {
-      assert(value->data == NULL);
       assert(value->datatype == xnn_datatype_fp32);
-      if (xnn_value_is_external(value)) {
+      if (xnn_value_is_static(value)) {
+        assert(value->producer == XNN_INVALID_NODE_ID);
+        const size_t fp16_size = xnn_tensor_get_size(subgraph, n) / 2 + XNN_EXTRA_BYTES;
+        value->fp16_temp_data = xnn_allocate_zero_memory(fp16_size);
+        if (value->fp16_temp_data == NULL) {
+          xnn_log_error("failed to allocate %zu bytes for fp16 tensor data", (size_t)fp16_size);
+          goto error;
+        }
+      } else if (xnn_value_is_external(value)) {
         struct xnn_value* fp16_value = xnn_subgraph_new_internal_value(subgraph);
+        if (fp16_value == NULL) {
+          xnn_log_error("FP16 rewrite aborted: failed to allocate value for external input/output");
+          goto error;
+        } else {
+          // Recompute value due to potential reallocation in xnn_subgraph_new_internal_value
+          value = &subgraph->values[n];
+          xnn_value_copy(fp16_value, value);
+          fp16_value->datatype = xnn_datatype_fp16;
+          // Clear external input/output flags
+          fp16_value->flags = 0;
+          fp16_value->fp16_id = XNN_INVALID_VALUE_ID;
+          fp16_value->fp32_id = value->id;
+          value->fp16_id = fp16_value->id;
+        }
+      }
+    }
+  }
 
-        // Recompute value due to potential reallocation in xnn_subgraph_new_internal_value
-        value = &subgraph->values[n];
-        xnn_value_copy(fp16_value, value);
-        fp16_value->datatype = xnn_datatype_fp16;
+  // Count the number of external inputs and outputs which require Convert nodes
+  uint32_t num_external_inputs = 0;
+  uint32_t num_external_outputs = 0;
+  for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
+    const struct xnn_node* node = &subgraph->nodes[n];
+    for (uint32_t i = 0; i < node->num_inputs; i++) {
+      const struct xnn_value* value = &subgraph->values[node->inputs[i]];
+      if (value->fp16_id != XNN_INVALID_VALUE_ID && value->first_consumer == n) {
+        assert(value->data == NULL);
+        assert(value->datatype == xnn_datatype_fp32);
+        assert(subgraph->values[value->fp16_id].datatype == xnn_datatype_fp16);
+        // This value isn't always an external input, it could be an external output of the current subgraph (due to
+        // partition), and be simultaneously consumed by the current node.
+        if (xnn_value_is_external_input(value)) {
+          num_external_inputs += 1;
+        }
+      }
+    }
+    for (uint32_t o = 0; o < node->num_outputs; o++) {
+      const struct xnn_value* value = &subgraph->values[node->outputs[o]];
+      if (value->fp16_id != XNN_INVALID_VALUE_ID) {
+        assert(value->datatype == xnn_datatype_fp32);
+        assert(subgraph->values[value->fp16_id].datatype == xnn_datatype_fp16);
+        assert(xnn_value_is_external_output(value));
+        num_external_outputs += 1;
+      }
+    }
+  }
+  xnn_log_debug("Discovered %"PRIu32" external inputs and %"PRIu32" external outputs",
+    num_external_inputs, num_external_outputs);
 
-        fp16_value->producer = value->producer;
-        fp16_value->num_consumers = value->num_consumers;
-        fp16_value->first_consumer = value->first_consumer;
+  // Attempt to allocate memory for the Convert nodes.
+  const uint32_t num_original_nodes = subgraph->num_nodes;
+  if (xnn_subgraph_add_nodes(subgraph, num_external_inputs + num_external_outputs) != xnn_status_success) {
+    xnn_log_error("FP16 rewrite aborted: failed to allocate node for external input/output");
+    goto error;
+  }
+
+  // From this point the subgraph and tensor data get mutated, clean failure is no longer an option.
+
+  // Replace FP32 Values in Nodes' inputs/outputs with FP16 Values.
+  // - FP32 values of static tensors get converted in a new data buffer.
+  // - For external inputs and outputs we create same-shaped FP16 Values and use those instead.
+  // - Values that are neither static nor external are converted to FP16 in-place
+  for (uint32_t n = 0; n < num_original_values; n++) {
+    struct xnn_value* value = &subgraph->values[n];
+    if (value->fp16_compatible) {
+      assert(value->datatype == xnn_datatype_fp32);
+      if (xnn_value_is_static(value)) {
+        const size_t num_elements = xnn_shape_multiply_all_dims(&value->shape);
+        xnn_run_convert_nc_f32_f16(1, 1, 1, num_elements, value->data, value->fp16_temp_data, 0, NULL);
+        value->data = value->fp16_temp_data;
+        value->fp16_temp_data = NULL;
+        value->datatype = xnn_datatype_fp16;
+        xnn_log_debug("FP16 rewrite: converted static FP32 tensor #%" PRIu32 " to FP16 in new buffer", n);
+      } else if (xnn_value_is_external(value)) {
+        assert(value->fp16_id != XNN_INVALID_VALUE_ID);
+        struct xnn_value* fp16_value = &subgraph->values[value->fp16_id];
         value->producer = XNN_INVALID_NODE_ID;
         value->num_consumers = 0;
         value->first_consumer = XNN_INVALID_NODE_ID;
-
-        // Clear external input/output flags
-        fp16_value->flags = 0;
         xnn_log_debug("FP16 rewrite: created FP16 tensor #%" PRIu32 " for FP32 tensor #%" PRIu32, fp16_value->id, n);
-
-        value->fp16_id = fp16_value->id;
-        fp16_value->fp32_id = n;
       } else {
         xnn_log_debug("FP16 rewrite: converted FP32 tensor #%" PRIu32 " to FP16", n);
         value->datatype = xnn_datatype_fp16;
@@ -864,39 +926,6 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
     }
   }
 
-  // Count the number of external inputs and outputs which require Convert nodes
-  uint32_t num_external_inputs = 0;
-  uint32_t num_external_outputs = 0;
-  for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
-    const struct xnn_node* node = &subgraph->nodes[n];
-    for (uint32_t i = 0; i < node->num_inputs; i++) {
-      const struct xnn_value* value = &subgraph->values[node->inputs[i]];
-      if (value->fp32_id != XNN_INVALID_VALUE_ID && value->first_consumer == n) {
-        assert(value->data == NULL);
-        assert(value->datatype == xnn_datatype_fp16);
-        assert(subgraph->values[value->fp32_id].datatype == xnn_datatype_fp32);
-        // This value isn't always an external input, it could be an external output of the current subgraph (due to
-        // partition), and be simultaneously consumed by the current node.
-        if (xnn_value_is_external_input(&subgraph->values[value->fp32_id])) {
-          num_external_inputs += 1;
-        }
-      }
-    }
-    for (uint32_t o = 0; o < node->num_outputs; o++) {
-      const struct xnn_value* value = &subgraph->values[node->outputs[o]];
-      if (value->fp32_id != XNN_INVALID_VALUE_ID) {
-        assert(value->datatype == xnn_datatype_fp16);
-        assert(subgraph->values[value->fp32_id].datatype == xnn_datatype_fp32);
-        assert(xnn_value_is_external_output(&subgraph->values[value->fp32_id]));
-        num_external_outputs += 1;
-      }
-    }
-  }
-  xnn_log_debug("Discovered %"PRIu32" external inputs and %"PRIu32" external outputs",
-    num_external_inputs, num_external_outputs);
-
-  const uint32_t num_original_nodes = subgraph->num_nodes;
-  xnn_subgraph_add_nodes(subgraph, num_external_inputs + num_external_outputs);
   struct xnn_node* output_node = subgraph->nodes + subgraph->num_nodes - 1;
   for (uint32_t n = num_original_nodes; n != 0; n--) {
     const struct xnn_node* node = &subgraph->nodes[n - 1];
@@ -943,6 +972,24 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
   }
 
   return true;
+
+error:
+  for (uint32_t n = 0; n < subgraph->num_values; n++) {
+    struct xnn_value* value = &subgraph->values[n];
+    // Deallocate extra memory used during static tensor rewrite.
+    if (value->fp16_temp_data != NULL) {
+      xnn_release_memory(value->fp16_temp_data);
+    }
+    // Revert marking values as FP16-compatible, as xnn_delete_subgraph() may assume ownership of those that are.
+    value->fp16_compatible = false;
+  }
+
+  // Clear the fp16 values created for external inputs and outputs.
+  for (uint32_t n = num_original_values; n < subgraph->num_values; n++) {
+    xnn_value_clear(&subgraph->values[n]);
+  }
+
+  return false;
 }
 
 static void xnn_node_replace_output(struct xnn_node* node, uint32_t old_output_id, uint32_t new_output_id)
@@ -1202,6 +1249,19 @@ enum xnn_status xnn_delete_subgraph(
     }
 
     if (subgraph->values != NULL) {
+      #ifndef XNN_NO_F16_OPERATORS
+        // Release the dynamic allocations created during FP16 rewrite, if the subgraph still has ownership of them.
+        for (uint32_t i = 0; i < subgraph->num_values; i++) {
+          struct xnn_value* value = &subgraph->values[i];
+          if (value->fp16_compatible && value->data != NULL) {
+            XNN_PRAGMA_CLANG("clang diagnostic push")
+            XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wcast-qual\"")
+            xnn_release_memory((void*)value->data);
+            XNN_PRAGMA_CLANG("clang diagnostic pop")
+          }
+        }
+      #endif  // XNN_NO_F16_OPERATORS
+
       memset(subgraph->values, 0, sizeof(struct xnn_value) * subgraph->num_values);
       xnn_release_memory(subgraph->values);
     }

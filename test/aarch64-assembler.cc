@@ -37,6 +37,12 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
 
   CHECK_ENCODING(0x8B040069, a.add(x9, x3, x4));
 
+  CHECK_ENCODING(0xB1002069, a.adds(x9, x3, 8));
+
+  CHECK_ENCODING(0xF2400869, a.ands(x9, x3, 7));
+  // Any immediate other than 7 is not supported.
+  EXPECT_ERROR(Error::kInvalidOperand, a.ands(x9, x3, 8));
+
   CHECK_ENCODING(0xF100081F, a.cmp(x0, 2));
   EXPECT_ERROR(Error::kInvalidOperand, a.cmp(x0, 4096));
 
@@ -62,6 +68,12 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, mem[sp, 7]));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, mem[sp, 32768]));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, MemOperand(sp, 16, AddressingMode::kPostIndex)));
+
+  CHECK_ENCODING(0xB8408488, a.ldr(w8, mem[x4], 8));
+  CHECK_ENCODING(0xB84FF488, a.ldr(w8, mem[x4], 255));
+  CHECK_ENCODING(0xB8500488, a.ldr(w8, mem[x4], -256));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(w8, mem[x4], 256));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(w8, mem[x4], -257));
 
   CHECK_ENCODING(0xF8408488, a.ldr(x8, mem[x4], 8));
   CHECK_ENCODING(0xF84FF488, a.ldr(x8, mem[x4], 255));
@@ -123,21 +135,42 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   Assembler a(&b);
 
+  CHECK_ENCODING(0x5E0C07DE, a.dup(s30, v30.s()[1]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.dup(s30, v30.s()[4]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.dup(s30, v30.d()[1]));
+
   CHECK_ENCODING(0x5E180610, a.dup(d16, v16.d()[1]));
   EXPECT_ERROR(Error::kInvalidOperand, a.dup(d16, v16.d()[2]));
   EXPECT_ERROR(Error::kInvalidOperand, a.dup(d16, v16.s()[1]));
 
+  CHECK_ENCODING(0x4E0204C4, a.dup(v4.v8h(), v6.h()[0]));
+  CHECK_ENCODING(0x4E0604C5, a.dup(v5.v8h(), v6.h()[1]));
+
   CHECK_ENCODING(0x4EA0F8B0, a.fabs(v16.v4s(), v5.v4s()));
   EXPECT_ERROR(Error::kInvalidOperand, a.fabs(v16.v4s(), v5.v2s()));
+
+  CHECK_ENCODING(0x4E521610, a.fadd(v16.v8h(), v16.v8h(), v18.v8h()));
 
   CHECK_ENCODING(0x4E25D690, a.fadd(v16.v4s(), v20.v4s(), v5.v4s()));
   EXPECT_ERROR(Error::kInvalidOperand, a.fadd(v16.v4s(), v20.v4s(), v5.v2s()));
 
+  CHECK_ENCODING(0x4E5037E3, a.fmax(v3.v8h(), v31.v8h(), v16.v8h()));
+
   CHECK_ENCODING(0x4E30F7E3, a.fmax(v3.v4s(), v31.v4s(), v16.v4s()));
   EXPECT_ERROR(Error::kInvalidOperand, a.fmax(v3.v8h(), v31.v4s(), v16.v4s()));
 
+  CHECK_ENCODING(0x4ED137C2, a.fmin(v2.v8h(), v30.v8h(), v17.v8h()));
+
   CHECK_ENCODING(0x4EB1F7C2, a.fmin(v2.v4s(), v30.v4s(), v17.v4s()));
   EXPECT_ERROR(Error::kInvalidOperand, a.fmin(v2.v4s(), v30.v16b(), v17.v4s()));
+
+  CHECK_ENCODING(0x4F001290, a.fmla(v16.v8h(), v20.v8h(), v0.h()[0]));
+  CHECK_ENCODING(0x4F101290, a.fmla(v16.v8h(), v20.v8h(), v0.h()[1]));
+  CHECK_ENCODING(0x4F001A90, a.fmla(v16.v8h(), v20.v8h(), v0.h()[4]));
+  // Only lane indices 0 to 7 are valid.
+  EXPECT_ERROR(Error::kInvalidLaneIndex, a.fmla(v16.v8h(), v20.v8h(), v0.h()[8]));
+  // Only the first 15 vector registers can be used for half-precision.
+  EXPECT_ERROR(Error::kInvalidOperand, a.fmla(v16.v8h(), v20.v8h(), v16.h()[0]));
 
   CHECK_ENCODING(0x4F801290, a.fmla(v16.v4s(), v20.v4s(), v0.s()[0]));
   EXPECT_ERROR(Error::kInvalidOperand, a.fmla(v16.v4s(), v20.v2s(), v0.s()[0]));
@@ -169,6 +202,7 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.ld1({v16.v8b(), v17.v8b(), v18.v8b()}, mem[x15], 48));
 
   CHECK_ENCODING(0x4DDF8520, a.ld1({v0.d()}, 1, mem[x9], 8));
+  CHECK_ENCODING(0x4DDF4120, a.ld1({v0.h()}, 4, mem[x9], 2));
 
   CHECK_ENCODING(0x6D433FEE, a.ldp(d14, d15, mem[sp, 48]));
   CHECK_ENCODING(0x6DC33FEE, a.ldp(d14, d15, mem[sp, 48]++));
@@ -182,11 +216,22 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.ldp(q20, q21, mem[x5], -1040));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldp(q20, q21, mem[x5], 1024));
 
+  CHECK_ENCODING(0x7C402460, a.ldr(h0, mem[x3], 2));
+
   CHECK_ENCODING(0xFD4020B0, a.ldr(d16, mem[x5, 64]));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(d16, mem[x5, 32768]));
 
   CHECK_ENCODING(0xFC408460, a.ldr(d0, mem[x3], 8));
+
+  CHECK_ENCODING(0xBD400106, a.ldr(s6, mem[x8]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(s6, mem[x6, 16384]));
+
   CHECK_ENCODING(0xBC404460, a.ldr(s0, mem[x3], 4));
+
+  CHECK_ENCODING(0x3DC004B9, a.ldr(q25, mem[x5, 16]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q25, mem[x5, -16]));  // Negative offset.
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q25, mem[x5, 17]));  // Not multiple of 16.
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q25, mem[x5, 65536]));  // Out of range.
 
   CHECK_ENCODING(0x3CC10460, a.ldr(q0, mem[x3], 16));
   CHECK_ENCODING(0x3CCFF460, a.ldr(q0, mem[x3], 255));
@@ -291,6 +336,12 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   CHECK_ENCODING(0xBC1004D0, a.str(s16, mem[x6], -256));
   EXPECT_ERROR(Error::kInvalidOperand, a.str(s16, mem[x6], 256));
   EXPECT_ERROR(Error::kInvalidOperand, a.str(s16, mem[x6], -257));
+
+  CHECK_ENCODING(0x7D0000D4, a.str(h20, mem[x6]));
+  CHECK_ENCODING(0x7D3FFCD4, a.str(h20, mem[x6, 8190]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(h20, mem[x6, 1]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(h20, mem[x6, -2]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(h20, mem[x6, 8192]));
 
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }

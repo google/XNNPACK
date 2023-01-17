@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -37,21 +37,15 @@ class Generator : public MacroAssembler {
 //     size_t cn_stride,                  [sp] -> x10
 //     size_t a_offset,                   [sp + 8] -> x11
 //     const float* zero,                 [sp + 16] -> x12
-//     const xnn_f32_minmax_params params [sp + 24] -> (x13)
+//     const xnn_f32_minmax_params params [sp + 24] -> (x8)
 
 // d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-// A pointer
-// x8  a0
-
-// C pointer
-// x6  c0
-
-// Vector register usage
-// A0  v0     v1
-// B   v20 v21 v22 v23
-// B   v24 v25 v26 v27
-// C   v16   v17
+// Register usage
+// A0 x13 v0     v1
+// B   x5 v20 v21 v22 v23
+// B      v24 v25 v26 v27
+// C   x6 v16   v17
 
 // A53 based on a53/75 but with LD64
 
@@ -77,11 +71,11 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   ldp(x10, x11, mem[sp]);
 
   // Load zero, params pointer
-  ldp(x12, x13, mem[sp, 16]);
+  ldp(x12, x8, mem[sp, 16]);
 
   // Load min/max values
   if (clamp_min || clamp_max) {
-    ld2r({v30.v4s(), v31.v4s()}, mem[x13]);
+    ld2r({v30.v4s(), v31.v4s()}, mem[x8]);
   }
 
   bind(l0);
@@ -107,11 +101,11 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   bind(l1);
   // Load next A pointer
-  ldr(x8, mem[x4], 8);
+  ldr(x13, mem[x4], 8);
 
-  cmp(x8, x12); // if a0 == zero
-  add(x8, x8, x11); // a0 += a_offset
-  csel(x8, x12, x8, kEQ); //   a0 = zero, else += a0 + a_offset
+  cmp(x13, x12); // if a0 == zero
+  add(x13, x13, x11); // a0 += a_offset
+  csel(x13, x12, x13, kEQ); //   a0 = zero, else += a0 + a_offset
 
   // Is there at least 8 floats (32 bytes) for prologue + epilogue?
   subs(x0, x2, 32); // k = kc - 32
@@ -123,7 +117,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   ldp(q22, q23, mem[x5], 32);
   ldp(q24, q25, mem[x5], 32);
   ldp(q26, q27, mem[x5], 32);
-  ldr(q0, mem[x8], 16);
+  ldr(q0, mem[x13], 16);
 
   // Is there at least 8.  yes do main loop
   subs(x0, x0, 32);
@@ -133,7 +127,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   bind(l2);
   // First block of 4.  FMA for first 4, loads for 2nd block of 4.
   fmla(v16.v4s(), v20.v4s(), v0.s()[0]);
-  ldr(q1, mem[x8], 16);
+  ldr(q1, mem[x13], 16);
   fmla(v17.v4s(), v21.v4s(), v0.s()[0]);
   ldr(q20, mem[x5], 16);
   fmla(v18.v4s(), v22.v4s(), v0.s()[1]);
@@ -159,7 +153,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   // Second block of 4.  FMA for second 4, loads for 1st block of 4.
   fmla(v16.v4s(), v20.v4s(), v1.s()[0]);
-  ldr(q0, mem[x8], 16);
+  ldr(q0, mem[x13], 16);
   fmla(v17.v4s(), v21.v4s(), v1.s()[0]);
   ldr(q20, mem[x5], 16);
   fmla(v18.v4s(), v22.v4s(), v1.s()[1]);
@@ -183,7 +177,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   // First block of 4.  FMA for first 4, loads for 2nd block of 4.
   fmla(v16.v4s(), v20.v4s(), v0.s()[0]);
-  ldr(q1, mem[x8], 16);
+  ldr(q1, mem[x13], 16);
   fmla(v17.v4s(), v21.v4s(), v0.s()[0]);
   ldr(q20, mem[x5], 16);
   fmla(v18.v4s(), v22.v4s(), v0.s()[1]);
@@ -251,7 +245,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Remainder- 4 floats of A (16 bytes)
   ldr(q20, mem[x5], 16);
   ldr(q21, mem[x5], 16);
-  ldr(q0, mem[x8], 16);
+  ldr(q0, mem[x13], 16);
   fmla(v16.v4s(), v20.v4s(), v0.s()[0]);
   fmla(v17.v4s(), v21.v4s(), v0.s()[0]);
   ldr(q22, mem[x5], 16);
@@ -272,7 +266,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Remainder- 2 floats of A (8 bytes)
   ldr(q20, mem[x5], 16);
   ldr(q21, mem[x5], 16);
-  ldr(d0, mem[x8], 8);
+  ldr(d0, mem[x13], 8);
   fmla(v16.v4s(), v20.v4s(), v0.s()[0]);
   fmla(v17.v4s(), v21.v4s(), v0.s()[0]);
   ldr(q22, mem[x5], 16);
@@ -284,7 +278,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Remainder- 1 float of A (4 bytes)
   ldr(q20, mem[x5], 16);
   ldr(q21, mem[x5], 16);
-  ldr(s0, mem[x8], 4);
+  ldr(s0, mem[x13], 4);
   fmla(v16.v4s(), v20.v4s(), v0.s()[0]);
   fmla(v17.v4s(), v21.v4s(), v0.s()[0]);
   b(l4);
@@ -323,7 +317,7 @@ void Generator::perform_post_operations(
         const auto six = v2.v4s();
         const auto zero = v3.v4s();
         // v4, v5, v6, v7 available for temporaries.
-        ld3r({sixth, three, six}, mem[x13]++);
+        ld3r({sixth, three, six}, mem[x8]++);
         movi(zero, 0);
         const VRegister accs[] = {
           v16.v4s(), v17.v4s(),

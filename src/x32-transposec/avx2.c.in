@@ -15,6 +15,7 @@ $_MM256_UNPACKHI_PX = {8: "_mm256_unpackhi_epi8", 16: "_mm256_unpackhi_epi16"}[S
 #include <assert.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/transpose.h>
 #include <xnnpack/unaligned.h>

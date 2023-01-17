@@ -658,6 +658,14 @@ static void GEMMBenchmark(benchmark::State& state,
     GEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_prfm_cortex_a75, 4, 8, 1, 1,
       xnn_init_f32_minmax_scalar_params, benchmark::utils::CheckNEON);
   }
+  static void f32_gemm_1x8__asm_aarch32_neon_cortex_a53(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53, 1, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params, benchmark::utils::CheckNEON);
+  }
+  static void f32_gemm_1x8__asm_aarch32_neon_prfm_cortex_a53(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state, xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53, 1, 8, 1, 1,
+      xnn_init_f32_minmax_scalar_params, benchmark::utils::CheckNEON);
+  }
 
   BENCHMARK_GEMM(f32_gemm_4x4__asm_aarch32_vfp_ld64)
   BENCHMARK_GEMM(f32_gemm_4x8__asm_aarch32_neon_ld64)
@@ -667,6 +675,8 @@ static void GEMMBenchmark(benchmark::State& state,
   BENCHMARK_GEMM(f32_gemm_4x8__asm_aarch32_neon_cortex_a55)
   BENCHMARK_GEMM(f32_gemm_4x8__asm_aarch32_neon_cortex_a75)
   BENCHMARK_GEMM(f32_gemm_4x8__asm_aarch32_neon_prfm_cortex_a75)
+  BENCHMARK_GEMM(f32_gemm_1x8__asm_aarch32_neon_cortex_a53)
+  BENCHMARK_GEMM(f32_gemm_1x8__asm_aarch32_neon_prfm_cortex_a53)
 #endif  // XNN_ARCH_ARM
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

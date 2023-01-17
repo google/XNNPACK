@@ -46,7 +46,9 @@ struct xnn_hardware_config {
   bool use_x86_avx512skx;
 #endif
 #if XNN_ARCH_RISCV
-  bool use_rvv;
+  bool use_riscv_vector;
+  // vlenb CSR (VLEN/8). 0 if vector extension is unsupported.
+  uint32_t vlenb;
 #endif
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   bool is_x86;
@@ -137,6 +139,104 @@ XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qs8_vadd_confi
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qs8_vmul_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qu8_vadd_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qu8_vmul_config();
+
+struct xnn_unary_elementwise_config {
+  xnn_vunary_ukernel_fn ukernel;
+  union {
+    xnn_init_f16_f32_cvt_params_fn f16_f32_cvt;
+    xnn_init_f16_abs_params_fn f16_abs;
+    xnn_init_f16_elu_params_fn f16_elu;
+    xnn_init_f16_hswish_params_fn f16_hswish;
+    xnn_init_f16_lrelu_params_fn f16_lrelu;
+    xnn_init_f16_neg_params_fn f16_neg;
+    xnn_init_f16_minmax_params_fn f16_minmax;
+    xnn_init_f16_sigmoid_params_fn f16_sigmoid;
+    xnn_init_f16_sqrt_params_fn f16_sqrt;
+    xnn_init_f32_abs_params_fn f32_abs;
+    xnn_init_f32_default_params_fn f32_default;
+    xnn_init_f32_elu_params_fn f32_elu;
+    xnn_init_f32_f16_cvt_params_fn f32_f16_cvt;
+    xnn_init_f32_hswish_params_fn f32_hswish;
+    xnn_init_f32_lrelu_params_fn f32_lrelu;
+    xnn_init_f32_minmax_params_fn f32_minmax;
+    xnn_init_f32_neg_params_fn f32_neg;
+    xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
+    xnn_init_f32_qu8_cvt_params_fn f32_qu8_cvt;
+    xnn_init_f32_rnd_params_fn f32_rnd;
+    xnn_init_f32_sigmoid_params_fn f32_sigmoid;
+    xnn_init_f32_sqrt_params_fn f32_sqrt;
+    xnn_init_qs8_cvt_params_fn qs8_cvt;
+    xnn_init_qs8_f32_cvt_params_fn qs8_f32_cvt;
+    xnn_init_qs8_lrelu_params_fn qs8_lrelu;
+    xnn_init_qu8_cvt_params_fn qu8_cvt;
+    xnn_init_qu8_f32_cvt_params_fn qu8_f32_cvt;
+    xnn_init_qu8_lrelu_params_fn qu8_lrelu;
+    xnn_init_s8_minmax_params_fn s8_minmax;
+    xnn_init_u8_minmax_params_fn u8_minmax;
+  } init;
+  // Number of elements in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of
+  // elements in each call.
+  uint8_t element_tile;
+};
+
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_abs_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_clamp_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_elu_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_hswish_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_lrelu_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_neg_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_relu_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_rndd_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_rndne_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_rndu_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_rndz_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_sigmoid_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_sqr_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_sqrt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_to_f32_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_abs_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_clamp_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_elu_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_hswish_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_lrelu_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_neg_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_relu_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_rndd_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_rndne_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_rndu_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_rndz_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_sigmoid_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_sqr_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_sqrt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_to_f16_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_to_qs8_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_to_qu8_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qs8_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qs8_lrelu_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qs8_to_f32_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qu8_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qu8_lrelu_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qu8_to_f32_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_s8_clamp_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_u8_clamp_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_xx_copy_config();
+
+struct xnn_xx_fill_config {
+  xnn_fill_ukernel_fn ukernel;
+  // Number of rows of inputs processed in one tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  uint8_t row_tile;
+};
+XNN_INTERNAL const struct xnn_xx_fill_config* xnn_init_xx_fill_config();
+
+struct xnn_xx_pad_config {
+  xnn_pad_ukernel_fn ukernel;
+  // Number of rows of inputs processed in one tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  uint8_t row_tile;
+};
+XNN_INTERNAL const struct xnn_xx_pad_config* xnn_init_xx_pad_config();
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -96,7 +96,16 @@ static void init_hardware_config(void) {
   #endif  // !XNN_ARCH_X86 && !XNN_ARCH_X86_64
 
   #if XNN_ARCH_RISCV
-    hardware_config.use_rvv = (getauxval(AT_HWCAP) & COMPAT_HWCAP_ISA_V) != 0;
+    const long hwcap = getauxval(AT_HWCAP);
+    xnn_log_debug("getauxval(AT_HWCAP) = %08lX", hwcap);
+    hardware_config.use_riscv_vector = (hwcap & COMPAT_HWCAP_ISA_V) != 0;
+
+    if (hardware_config.use_riscv_vector) {
+      register uint32_t vlenb __asm__ ("t0");
+      __asm__(".word 0xC22022F3"  /* CSRR t0, vlenb */ : "=r" (vlenb));
+      hardware_config.vlenb = vlenb;
+      xnn_log_info("RISC-V VLENB: %" PRIu32, vlenb);
+    }
   #endif
 
   #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

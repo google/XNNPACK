@@ -4,14 +4,16 @@
 # LICENSE file in the root directory of this source tree.
 
 # AArch32 JIT assembly
+- name: xnn_generate_f32_gemm_ukernel_1x8__aarch32_neon_cortex_a53
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
+- name: xnn_generate_f32_gemm_ukernel_1x8__aarch32_neon_prfm_cortex_a53
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
 - name: xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a7
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 4
-  pipelined: true
-- name: xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_prfm_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   pipelined: true
@@ -26,6 +28,10 @@
 - name: xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
+- name: xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_prfm_cortex_a53
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
+  pipelined: true
 - name: xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_prfm_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4

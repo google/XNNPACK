@@ -116,12 +116,6 @@ static enum xnn_status setup_constant_pad_nd(
   }
   constant_pad_op->state = xnn_run_state_invalid;
 
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(constant_pad_op->type));
-    return xnn_status_uninitialized;
-  }
-
   if (num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
       "failed to setup %s operator with %zu dimensions in input shape: "
@@ -174,12 +168,26 @@ static enum xnn_status setup_constant_pad_nd(
     }
   }
 
+  const struct xnn_xx_fill_config* xx_fill_config = xnn_init_xx_fill_config();
+  if (xx_fill_config == NULL) {
+    xnn_log_error(
+      "failed to create fill operator: unsupported hardware configuration");
+    return xnn_status_unsupported_hardware;
+  }
+
+  const struct xnn_xx_pad_config* xx_pad_config = xnn_init_xx_pad_config();
+  if (xx_pad_config == NULL) {
+    xnn_log_error(
+      "failed to create pad operator: unsupported hardware configuration");
+    return xnn_status_unsupported_hardware;
+  }
+
   constant_pad_op->context.pad = (struct pad_context) {
     .input = input,
     .output = output,
     .padding_value = constant_pad_op->pad_value,
-    .fill_ukernel = xnn_params.xx.fill.ukernel,
-    .pad_ukernel = xnn_params.xx.pad.ukernel,
+    .fill_ukernel = xx_fill_config->ukernel,
+    .pad_ukernel = xx_pad_config->ukernel,
   };
 
   for (size_t i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {
@@ -278,11 +286,6 @@ enum xnn_status run_constant_pad_nd(
     enum xnn_operator_type operator_type,
     pthreadpool_t threadpool)
 {
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(operator_type));
-    return xnn_status_uninitialized;
-  }
   struct xnn_operator constant_pad_op;
   memset(&constant_pad_op, 0, sizeof(constant_pad_op));
 

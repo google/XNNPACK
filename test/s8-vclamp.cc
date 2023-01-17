@@ -45,7 +45,7 @@
 
   TEST(S8_VCLAMP__NEON_X64, batch_gt_64) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t batch_size = 65; batch_size < 128; batch_size++) {
+    for (size_t batch_size = 64 + 1; batch_size < 128; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_s8_vclamp_ukernel__neon_x64, xnn_init_s8_minmax_neon_params);
@@ -116,7 +116,7 @@
 
   TEST(S8_VCLAMP__SSE2_X64, batch_gt_64) {
     TEST_REQUIRES_X86_SSE2;
-    for (size_t batch_size = 65; batch_size < 128; batch_size++) {
+    for (size_t batch_size = 64 + 1; batch_size < 128; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_s8_vclamp_ukernel__sse2_x64, xnn_init_s8_minmax_sse2_params);
@@ -187,7 +187,7 @@
 
   TEST(S8_VCLAMP__SSE41_X64, batch_gt_64) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t batch_size = 65; batch_size < 128; batch_size++) {
+    for (size_t batch_size = 64 + 1; batch_size < 128; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_s8_vclamp_ukernel__sse41_x64, xnn_init_s8_minmax_sse4_params);
@@ -254,7 +254,7 @@
   }
 
   TEST(S8_VCLAMP__WASMSIMD_X64, batch_gt_64) {
-    for (size_t batch_size = 65; batch_size < 128; batch_size++) {
+    for (size_t batch_size = 64 + 1; batch_size < 128; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_s8_vclamp_ukernel__wasmsimd_x64, xnn_init_s8_minmax_wasmsimd_params);
@@ -317,7 +317,7 @@ TEST(S8_VCLAMP__SCALAR_X4, batch_lt_4) {
 }
 
 TEST(S8_VCLAMP__SCALAR_X4, batch_gt_4) {
-  for (size_t batch_size = 5; batch_size < 8; batch_size++) {
+  for (size_t batch_size = 4 + 1; batch_size < 8; batch_size++) {
     VUnaryMicrokernelTester()
       .batch_size(batch_size)
       .Test(xnn_s8_vclamp_ukernel__scalar_x4, xnn_init_s8_minmax_scalar_params);

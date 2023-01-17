@@ -8,9 +8,112 @@
 #include <xnnpack.h>           // For xnn_caches_t, xnn_operator_t.
 #include <xnnpack/common.h>    // For XNN_ALLOCATION_ALIGNMENT.
 #include <xnnpack/cache.h>     // For xnn_caches.
+#include <xnnpack/log.h>
 #include <xnnpack/math.h>
 #include <xnnpack/operator.h>  // For xnn_operator definition.
 #include <xnnpack/operator-utils.h>
+
+#if XNN_PLATFORM_JIT
+// Generate code for a single set of parameters.
+// Code is generated into the code cache, and the offset of the generated code is returned.
+// If code already exists in code cache, the offset of the existing code is returned.
+// Return value of XNN_CACHE_NOT_FOUND indicates that no code is generated.
+static size_t get_generated_gemm(
+    struct xnn_hmp_gemm_codegen generators,
+    const struct jit_gemm_params *jit_gemm_params,
+    size_t mr,
+    size_t group_output_channels,
+    size_t nr,
+    size_t group_input_channels,
+    size_t log2_input_element_size,
+    struct xnn_code_cache* code_cache)
+{
+  assert(code_cache != NULL);
+  size_t offset = XNN_CACHE_NOT_FOUND;
+  xnn_jit_gemm_code_generator_fn generator = generators.function[XNN_UARCH_DEFAULT];
+  if (generator == NULL) {
+    goto error;
+  }
+
+  enum xnn_status status = xnn_status_success;
+
+  status = xnn_reserve_code_memory(&code_cache->cache.code, XNN_DEFAULT_MICROKERNEL_SIZE);
+  if (xnn_status_success != status) {
+    xnn_log_error("failed to ensure sufficient space in the code buffer for a microkernel");
+    goto error;
+  }
+
+  const size_t old_size = code_cache->cache.code.size;
+  void* old_code = (uint8_t*) code_cache->cache.code.start + old_size;
+  status = generator(&code_cache->cache.code, mr, group_output_channels % nr,
+                     group_input_channels << log2_input_element_size,
+                     jit_gemm_params);
+
+  if (xnn_status_success != status) {
+    xnn_log_error("failed to generate GEMM microkernel");
+    goto error;
+  }
+
+  const size_t new_size = code_cache->cache.code.size;
+  return xnn_get_or_insert_code_cache(code_cache, old_code, new_size - old_size);
+
+error:
+  return offset;
+}
+
+void xnn_generate_gemms_up_to_max_mr(
+  size_t max_mr,
+  struct gemm_codegens generators,
+  const struct jit_gemm_params *jit_gemm_params,
+  size_t group_output_channels,
+  size_t nr,
+  size_t group_input_channels,
+  size_t log2_input_element_size,
+  xnn_operator_t op)
+{
+  assert(XNN_MAX_MR >= max_mr);
+  if (op->code_cache == NULL) {
+    return;
+  }
+  for (size_t mr = 1; mr <= max_mr; mr++) {
+    // Get smallest generator that is >= mr.
+    size_t smallest_mr = mr;
+    while (generators.gemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] == NULL && smallest_mr <= max_mr) {
+      smallest_mr++;
+    }
+    xnn_log_debug("using generator for mr %zu to generate gemm of mr %zu", smallest_mr, mr);
+    op->ukernel.gemm.gemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT] =
+      get_generated_gemm(generators.gemm[smallest_mr - 1], jit_gemm_params, mr, group_output_channels, nr,
+                         group_input_channels, log2_input_element_size, op->code_cache);
+  }
+}
+
+static inline uintptr_t cached_code_at_offset(xnn_operator_t op, size_t offset)
+{
+  return (uintptr_t)op->code_cache->cache.code.start + offset;
+}
+
+void xnn_overwrite_gemm_cases_with_generated_code(
+  xnn_operator_t op,
+  struct xnn_hmp_gemm_ukernel *gemm_cases,
+  size_t mr)
+{
+  if (op->code_cache == NULL) {
+    return;
+  }
+
+  const size_t jit_code_offset = gemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT];
+  if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
+    gemm_cases[mr - 1].function[XNN_UARCH_DEFAULT] = (xnn_gemm_ukernel_fn) cached_code_at_offset(op, jit_code_offset);
+    // TODO(zhin): different code generators for different uarch.
+    #if XNN_MAX_UARCH_TYPES > 1
+      for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
+        gemm_cases[mr - 1].function[i] = (xnn_gemm_ukernel_fn) cached_code_at_offset(op, jit_code_offset);
+      }
+    #endif
+  }
+}
+#endif  // XNN_PLATFORM_JIT
 
 void* xnn_get_pointer_to_write_weights(
   xnn_operator_t op,

@@ -25,17 +25,12 @@
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
-# A pointer
-# x8  a0
-
-# C pointer
-# x6  c0
-
-# Vector register usage
-# A0 v0 v1
-# B v20 v21 v22 v23
-# B v24 v25 v26 v27
-# C v16 v17
+# Register usage
+# A0 x8 v0 v1
+# B  x5 v20 v21 v22 v23
+# B     v24 v25 v26 v27
+# C0 x6 v16 v17
+# Clamp v30 v31
 
 BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_cortex_a75
 

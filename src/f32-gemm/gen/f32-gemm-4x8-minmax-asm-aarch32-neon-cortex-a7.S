@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a7.S.in
+//   Template: src/f32-gemm/4x8-aarch32-neon-cortex-a7.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC

@@ -1,0 +1,50 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert OP in ["ABS", "NEG", "SQR"]
+#include <assert.h>
+
+#include <riscv_vector.h>
+
+#include <xnnpack/common.h>
+#include <xnnpack/vunary.h>
+
+
+$VFOP_V_F32MX = {
+$  "ABS": "vfabs_v_f32m%d",
+$  "NEG": "vfneg_v_f32m%d",
+$  "SQR": "vfmul_vv_f32m%d",
+$}[OP] % LMUL
+$PARAMS = {
+$  "ABS": "xnn_f32_abs_params",
+$  "NEG": "xnn_f32_neg_params",
+$  "SQR": "xnn_f32_default_params",
+$}[OP]
+void xnn_f32_v${OP.lower()}_ukernel__rvv_x${LMUL}v(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union ${PARAMS}* params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  batch >>= 2;  // log2(sizeof(float))
+  do {
+    const size_t n = vsetvl_e32m${LMUL}(batch);
+    const vfloat32m${LMUL}_t vi = vle32_v_f32m${LMUL}(input, n);
+    input += n;
+    $if OP == "SQR":
+      const vfloat32m${LMUL}_t vo = vfmul_vv_f32m${LMUL}(vi, vi, n);
+    $else:
+      const vfloat32m${LMUL}_t vo = ${VFOP_V_F32MX}(vi, n);
+    vse32_v_f32m${LMUL}(output, vo, n);
+    output += n;
+
+    batch -= n;
+  } while (batch != 0);
+}

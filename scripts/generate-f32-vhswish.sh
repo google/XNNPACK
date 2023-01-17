@@ -25,6 +25,12 @@ tools/xngen src/f32-vhswish/neon.c.in -D BATCH_TILE=4  -o src/f32-vhswish/gen/f3
 tools/xngen src/f32-vhswish/neon.c.in -D BATCH_TILE=8  -o src/f32-vhswish/gen/f32-vhswish-neon-x8.c &
 tools/xngen src/f32-vhswish/neon.c.in -D BATCH_TILE=16 -o src/f32-vhswish/gen/f32-vhswish-neon-x16.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/f32-vhswish/rvv.c.in -D LMUL=1 -o src/f32-vhswish/gen/f32-vhswish-rvv-x1v.c &
+tools/xngen src/f32-vhswish/rvv.c.in -D LMUL=2 -o src/f32-vhswish/gen/f32-vhswish-rvv-x2v.c &
+tools/xngen src/f32-vhswish/rvv.c.in -D LMUL=4 -o src/f32-vhswish/gen/f32-vhswish-rvv-x4v.c &
+tools/xngen src/f32-vhswish/rvv.c.in -D LMUL=8 -o src/f32-vhswish/gen/f32-vhswish-rvv-x8v.c &
+
 ################################# x86 128-bit #################################
 tools/xngen src/f32-vhswish/sse.c.in -D BATCH_TILE=4 -o src/f32-vhswish/gen/f32-vhswish-sse-x4.c &
 tools/xngen src/f32-vhswish/sse.c.in -D BATCH_TILE=8 -o src/f32-vhswish/gen/f32-vhswish-sse-x8.c &

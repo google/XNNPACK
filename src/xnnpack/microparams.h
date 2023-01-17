@@ -2494,6 +2494,10 @@ struct jit_gemm_params {
     float min;
     float max;
   } f32_minmax;
+  struct {
+    uint16_t min;
+    uint16_t max;
+  } f16_minmax;
   size_t num_post_operations;
   const struct xnn_post_operation* post_operations;
 };

@@ -68,7 +68,7 @@ jobs:
       - name: Install qemu-riscv64
         run: sudo apt install qemu-user
       - name: Configure and build
-        run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release
+        run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNNPACK_ENABLE_RISCV_VECTOR=OFF
         working-directory: ${{ github.workspace }}
       - name: Run tests
         run: ctest --output-on-failure --parallel $(nproc)

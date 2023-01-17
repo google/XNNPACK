@@ -223,12 +223,14 @@ tools/xngen src/f32-igemm/6x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=0 -o s
 tools/xngen src/f32-igemm/6x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S &
 
 ############################### AArch32 assembly ##############################
+tools/xngen src/f32-igemm/1x8-aarch32-neon-cortex-a53.S.in       -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch32-neon-cortex-a53.S &
+tools/xngen src/f32-igemm/1x8-aarch32-neon-cortex-a53.S.in       -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S &
 tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a53.S.in       -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a53.S &
 tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a53.S.in       -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S &
 tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a75.S.in       -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a75.S &
 tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a75.S.in       -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a75.S &
-tools/xngen src/f32-igemm/4x8-minmax-aarch32-neon-cortex-a7.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S &
-tools/xngen src/f32-igemm/4x8-minmax-aarch32-neon-ld64.S.in      -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-ld64.S &
+tools/xngen src/f32-igemm/4x8-aarch32-neon-cortex-a7.S.in        -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S &
+tools/xngen src/f32-igemm/4x8-aarch32-neon-ld64.S.in             -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-ld64.S &
 
 ################################### ARM NEON ##################################
 ### LD64 micro-kernels
@@ -346,6 +348,7 @@ wait # JIT requires the assembly files to be generated first.
 
 ###################################### JIT ####################################
 # AArch32
+scripts/convert-assembly-to-jit.py --reload-params -i src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S -o src/f32-igemm/gen/f32-igemm-1x8-aarch32-neon-cortex-a53.cc &
 scripts/convert-assembly-to-jit.py --reload-params -i src/f32-igemm/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a55.S -o src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a55.cc &
 scripts/convert-assembly-to-jit.py --reload-params -i src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S -o src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a7.cc &
 scripts/convert-assembly-to-jit.py --reload-params -i src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch32-neon-ld64.S -o src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-ld64.cc &
