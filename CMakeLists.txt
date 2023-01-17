@@ -340,6 +340,7 @@ SET(JIT_AARCH64_SRCS
   src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a53.cc
   src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a55.cc
   src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a75.cc
+  src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-ld128.cc
   src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-cortex-a53.cc
   src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-cortex-a55.cc
   src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-cortex-a75.cc
@@ -349,6 +350,7 @@ SET(JIT_AARCH64_SRCS
   src/f32-igemm/gen/f32-igemm-4x8-aarch64-neonfma-cortex-a53.cc
   src/f32-igemm/gen/f32-igemm-4x8-aarch64-neonfma-cortex-a55.cc
   src/f32-igemm/gen/f32-igemm-4x8-aarch64-neonfma-cortex-a75.cc
+  src/f32-igemm/gen/f32-igemm-4x8-aarch64-neonfma-ld128.cc
   src/f32-igemm/gen/f32-igemm-6x8-aarch64-neonfma-cortex-a53.cc
   src/f32-igemm/gen/f32-igemm-6x8-aarch64-neonfma-cortex-a55.cc
   src/f32-igemm/gen/f32-igemm-6x8-aarch64-neonfma-cortex-a75.cc
