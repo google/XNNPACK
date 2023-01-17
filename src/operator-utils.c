@@ -19,7 +19,7 @@
 // If code already exists in code cache, the offset of the existing code is returned.
 // Return value of XNN_CACHE_NOT_FOUND indicates that no code is generated.
 static size_t get_generated_gemm(
-    struct xnn_hmp_gemm_codegen generators,
+    xnn_jit_gemm_code_generator_fn generator,
     const struct jit_gemm_params *jit_gemm_params,
     size_t mr,
     size_t group_output_channels,
@@ -30,7 +30,6 @@ static size_t get_generated_gemm(
 {
   assert(code_cache != NULL);
   size_t offset = XNN_CACHE_NOT_FOUND;
-  xnn_jit_gemm_code_generator_fn generator = generators.function[XNN_UARCH_DEFAULT];
   if (generator == NULL) {
     goto error;
   }
@@ -81,10 +80,13 @@ void xnn_generate_gemms_up_to_max_mr(
     while (generators.gemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] == NULL && smallest_mr <= max_mr) {
       smallest_mr++;
     }
-    xnn_log_debug("using generator for mr %zu to generate gemm of mr %zu", smallest_mr, mr);
-    op->ukernel.gemm.gemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT] =
-      get_generated_gemm(generators.gemm[smallest_mr - 1], jit_gemm_params, mr, group_output_channels, nr,
-                         group_input_channels, log2_input_element_size, op->code_cache);
+
+    for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
+      xnn_log_debug("using generator for mr %zu to generate gemm of mr %zu and uarch %zu", smallest_mr, mr, i);
+      op->ukernel.gemm.gemm_cases[mr - 1].generated_code_offset[i] =
+          get_generated_gemm(generators.gemm[smallest_mr - 1].function[i], jit_gemm_params, mr,
+                             group_output_channels, nr, group_input_channels, log2_input_element_size, op->code_cache);
+    }
   }
 }
 
@@ -102,15 +104,11 @@ void xnn_overwrite_gemm_cases_with_generated_code(
     return;
   }
 
-  const size_t jit_code_offset = gemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT];
-  if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
-    gemm_cases[mr - 1].function[XNN_UARCH_DEFAULT] = (xnn_gemm_ukernel_fn) cached_code_at_offset(op, jit_code_offset);
-    // TODO(zhin): different code generators for different uarch.
-    #if XNN_MAX_UARCH_TYPES > 1
-      for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-        gemm_cases[mr - 1].function[i] = (xnn_gemm_ukernel_fn) cached_code_at_offset(op, jit_code_offset);
-      }
-    #endif
+  for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
+    const size_t jit_code_offset = gemm_cases[mr - 1].generated_code_offset[i];
+    if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
+      gemm_cases[mr - 1].function[i] = (xnn_gemm_ukernel_fn) cached_code_at_offset(op, jit_code_offset);
+    }
   }
 }
 #endif  // XNN_PLATFORM_JIT
