@@ -379,7 +379,7 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
             library is always added as a dependency and does not need to be
             explicitly specified.
     """
-    native.cc_binary(
+    native.cc_test(
         name = name,
         srcs = srcs,
         copts = xnnpack_std_cxxopts() + [
@@ -405,5 +405,5 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
             ":emscripten": xnnpack_emscripten_deps(),
             "//conditions:default": [],
         }),
-	tags = tags,
+        tags = tags,
     )
