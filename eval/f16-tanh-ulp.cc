@@ -157,6 +157,36 @@ static void TanhError(
     ->Iterations(1);
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_p3_div,
+                    xnn_math_f16_tanh__avx2_expm1_rr1_p3_div,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_p3_rcp,
+                    xnn_math_f16_tanh__avx2_expm1_rr1_p3_rcp,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+
+  BENCHMARK_CAPTURE(TanhError, fma3_p17,
+                    xnn_math_f16_tanh__fma3_p17,
+                    benchmark::utils::CheckFMA3)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, fma3_p19,
+                    xnn_math_f16_tanh__fma3_p19,
+                    benchmark::utils::CheckFMA3)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+
+  BENCHMARK_CAPTURE(TanhError, f16c_p19,
+                    xnn_math_f16_tanh__f16c_p19,
+                    benchmark::utils::CheckF16C)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

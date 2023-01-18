@@ -680,6 +680,7 @@ ALL_AVX2_MICROKERNEL_SRCS = [
     "src/math/exp-f32-avx2-rr2-lut8-p3-perm.c",
     "src/math/exp-f32-avx2-rr2-lut8-p4-perm.c",
     "src/math/exp-f32-avx2-rr2-p5.c",
+    "src/math/expm1minus-f16-avx2-rr1-p2.c",
     "src/math/expm1minus-f16-avx2-rr1-p3.c",
     "src/math/expm1minus-f32-avx2-rr1-lut4-p4-perm.c",
     "src/math/expm1minus-f32-avx2-rr1-lut8-p4-perm.c",
@@ -708,6 +709,8 @@ ALL_AVX2_MICROKERNEL_SRCS = [
     "src/math/sigmoid-f32-avx2-rr2-p5-div.c",
     "src/math/sigmoid-f32-avx2-rr2-p5-nr1fma.c",
     "src/math/sigmoid-f32-avx2-rr2-p5-nr2fma.c",
+    "src/math/tanh-f16-avx2-expm1-rr1-p3-div.c",
+    "src/math/tanh-f16-avx2-expm1-rr1-p3-rcp.c",
     "src/math/tanh-f32-avx2-expm1-rr1-lut4-p4-perm-div.c",
     "src/math/tanh-f32-avx2-expm1-rr1-lut8-p4-perm-div.c",
     "src/math/tanh-f32-avx2-expm1-rr1-p6-div.c",
@@ -1244,6 +1247,7 @@ ALL_F16C_MICROKERNEL_SRCS = [
     "src/f32-f16-vcvt/gen/f32-f16-vcvt-f16c-x16.c",
     "src/math/cvt-f16-f32-f16c.c",
     "src/math/cvt-f32-f16-f16c.c",
+    "src/math/tanh-f16-f16c-p19.c",
 ]
 
 ALL_FMA_MICROKERNEL_SRCS = [
@@ -1369,6 +1373,8 @@ ALL_FMA3_MICROKERNEL_SRCS = [
     "src/math/sqrt-f32-fma3-nr1fma1adj.c",
     "src/math/sqrt-f32-fma3-nr1fma.c",
     "src/math/sqrt-f32-fma3-nr2fma.c",
+    "src/math/tanh-f16-fma3-p17.c",
+    "src/math/tanh-f16-fma3-p19.c",
     "src/math/tanh-f32-fma3-expm1-rr1-lut4-p4-perm-div.c",
     "src/math/tanh-f32-fma3-expm1-rr1-p6-div.c",
 ]

@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -11,7 +11,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f16_expm1minus__avx2_rr1_p3(
+void xnn_math_f16_expm1minus__avx2_rr1_p2(
     size_t n,
     const void* input,
     void* output)
@@ -25,11 +25,10 @@ void xnn_math_f16_expm1minus__avx2_rr1_p3(
   const __m256 vlog2e = _mm256_set1_ps(0x1.715476p0f);
   const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E43p-1f);
   // Coefficient of polynomial approximation
-  //   exp(t) - 1 ~ t * (c1 + t * (c2 + t * c3))
+  //   exp(t) - 1 ~ t * (1 + t * c2)
   // on [-log(2)/2, log(2)/2]
-  const __m256 vc3 = _mm256_set1_ps(0x1.5554DCp-3f);
-  const __m256 vc2 = _mm256_set1_ps(0x1.01EBB2p-1f);
-  const __m256 vc1 = _mm256_set1_ps(0x1.0002F2p0f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.FFFAEEp-2f);
+  const __m256 vc1 = _mm256_set1_ps(0x1.028C1Cp0f);
   const __m256 vone = _mm256_set1_ps(1.0f);
 
   const uint16_t* i = (const uint16_t*) input;
@@ -64,11 +63,10 @@ void xnn_math_f16_expm1minus__avx2_rr1_p3(
     // Compute reduced argument t := x - n * log(2).
     __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vx);
 
-    // Compute degree-3 polynomial approximation for exp(t) - 1 on [-log(2)/2, log(2)/2].
+    // Compute degree-2 polynomial approximation for exp(t) - 1 on [-log(2)/2, log(2)/2].
     //   P(t) = t * (c1 + t * (c2 + t * c3))
     //        = t * p
-    __m256 vp = _mm256_fmadd_ps(vc3, vt, vc2);
-    vp = _mm256_fmadd_ps(vp, vt, vc1);
+    const __m256 vp = _mm256_fmadd_ps(vc2, vt, vc1);
 
     // Reconstruct the exp(x) - 1 value:
     //   exp(x) - 1 = s * (1 + t * p) - 1
