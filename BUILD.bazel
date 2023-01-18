@@ -1898,6 +1898,8 @@ AARCH32_ASM_MICROKERNEL_SRCS = [
 ]
 
 AARCH64_ASM_MICROKERNEL_SRCS = [
+    "src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch64-neonfma-ld64.S",
+    "src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch64-neonfma-prfm-ld64.S",
     "src/f16-gemm/gen/f16-gemm-1x8-minmax-asm-aarch64-neonfp16arith-ld64.S",
     "src/f16-gemm/gen/f16-gemm-1x16-minmax-asm-aarch64-neonfp16arith-ld32.S",
     "src/f16-gemm/gen/f16-gemm-1x16-minmax-asm-aarch64-neonfp16arith-ld64.S",

@@ -37,6 +37,12 @@
   k-block: 4
   pipelined: true
 # AArch64 assembly
+- name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
+- name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_ld64
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
 - name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8

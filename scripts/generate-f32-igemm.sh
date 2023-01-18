@@ -192,6 +192,8 @@ tools/xngen src/f32-igemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=1 -D ACTIV
 
 ############################### AArch64 assembly ##############################
 ### LD64 micro-kernels
+tools/xngen src/f32-igemm/1x8-aarch64-neonfma-ld64.S.in -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch64-neonfma-ld64.S &
+tools/xngen src/f32-igemm/1x8-aarch64-neonfma-ld64.S.in -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-asm-aarch64-neonfma-prfm-ld64.S &
 tools/xngen src/f32-igemm/4x8-aarch64-neonfma-ld64.S.in -o src/f32-igemm/gen/f32-igemm-4x8-minmax-asm-aarch64-neonfma-ld64.S &
 tools/xngen src/f32-igemm/6x8-aarch64-neonfma-ld64.S.in -o src/f32-igemm/gen/f32-igemm-6x8-minmax-asm-aarch64-neonfma-ld64.S &
 
