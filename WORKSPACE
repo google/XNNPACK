@@ -22,15 +22,17 @@ http_archive(
 # Google Test framework, used by most unit-tests.
 http_archive(
     name = "com_google_googletest",
-    strip_prefix = "googletest-main",
-    urls = ["https://github.com/google/googletest/archive/main.zip"],
+    sha256 = "5cb522f1427558c6df572d6d0e1bf0fd076428633d080e88ad5312be0b6a8859",
+    strip_prefix = "googletest-e23cdb78e9fef1f69a9ef917f447add5638daf2a",
+    urls = ["https://github.com/google/googletest/archive/e23cdb78e9fef1f69a9ef917f447add5638daf2a.zip"],
 )
 
 # Google Benchmark library, used in micro-benchmarks.
 http_archive(
     name = "com_google_benchmark",
-    strip_prefix = "benchmark-main",
-    urls = ["https://github.com/google/benchmark/archive/main.zip"],
+    sha256 = "1ba14374fddcd9623f126b1a60945e4deac4cdc4fb25a5f25e7f779e36f2db52",
+    strip_prefix = "benchmark-d2a8a4ee41b923876c034afb939c4fc03598e622",
+    urls = ["https://github.com/google/benchmark/archive/d2a8a4ee41b923876c034afb939c4fc03598e622.zip"],
 )
 
 # FP16 library, used for half-precision conversions
@@ -60,25 +62,13 @@ http_archive(
     urls = ["https://github.com/Maratyszcza/pthreadpool/archive/43edadc654d6283b4b6e45ba09a853181ae8e850.zip"],
 )
 
-# clog library, used for logging
-http_archive(
-    name = "clog",
-    build_file = "@//third_party:clog.BUILD",
-    sha256 = "25843b5f21c32cba89f9b921c0500ab5cd0c2cb8fb0f345e5b5e4678329386c7",
-    strip_prefix = "cpuinfo-49610f89b8b1eb52d75d1eda7a2c40c1e86a78e7",
-    urls = [
-        "https://github.com/pytorch/cpuinfo/archive/49610f89b8b1eb52d75d1eda7a2c40c1e86a78e7.zip",
-    ],
-)
-
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    build_file = "@//third_party:cpuinfo.BUILD",
-    sha256 = "6e69caadfef72932c0838b7458a704202329512039ec6f789e2ef1e97e7b5050",
-    strip_prefix = "cpuinfo-5fd22cacd12f9e74e6a7b014505bbbdc173ede79",
+    sha256 = "ba668f9f8ea5b4890309b7db1ed2e152aaaf98af6f9a8a63dbe1b75c04e52cb9",
+    strip_prefix = "cpuinfo-3dc310302210c1891ffcfb12ae67b11a3ad3a150",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/5fd22cacd12f9e74e6a7b014505bbbdc173ede79.zip",
+        "https://github.com/pytorch/cpuinfo/archive/3dc310302210c1891ffcfb12ae67b11a3ad3a150.zip",
     ],
 )
 

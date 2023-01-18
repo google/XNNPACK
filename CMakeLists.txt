@@ -121,16 +121,6 @@ ENDIF()
 
 # ---[ Download deps
 IF(NOT XNNPACK_USE_SYSTEM_LIBS)
-  IF(NOT DEFINED CLOG_SOURCE_DIR)
-    MESSAGE(STATUS "Downloading clog to ${CMAKE_BINARY_DIR}/clog-source (define CLOG_SOURCE_DIR to avoid it)")
-    CONFIGURE_FILE(cmake/DownloadCLog.cmake "${CMAKE_BINARY_DIR}/clog-download/CMakeLists.txt")
-    EXECUTE_PROCESS(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
-      WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/clog-download")
-    EXECUTE_PROCESS(COMMAND "${CMAKE_COMMAND}" --build .
-      WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/clog-download")
-    SET(CLOG_SOURCE_DIR "${CMAKE_BINARY_DIR}/clog-source" CACHE STRING "clog source directory")
-  ENDIF()
-
   IF(NOT DEFINED CPUINFO_SOURCE_DIR)
     MESSAGE(STATUS "Downloading cpuinfo to ${CMAKE_BINARY_DIR}/cpuinfo-source (define CPUINFO_SOURCE_DIR to avoid it)")
     CONFIGURE_FILE(cmake/DownloadCpuinfo.cmake "${CMAKE_BINARY_DIR}/cpuinfo-download/CMakeLists.txt")
@@ -815,26 +805,6 @@ IF(LIBM)
   TARGET_LINK_LIBRARIES(indirection PRIVATE ${LIBM})
   IF(XNNPACK_BUILD_LIBRARY)
     TARGET_LINK_LIBRARIES(XNNPACK PRIVATE ${LIBM})
-  ENDIF()
-ENDIF()
-
-# ---[ Configure clog
-IF(NOT TARGET clog)
-  IF(NOT XNNPACK_USE_SYSTEM_LIBS)
-    SET(CLOG_BUILD_TESTS OFF CACHE BOOL "")
-    SET(CLOG_RUNTIME_TYPE "${CPUINFO_RUNTIME_TYPE}" CACHE STRING "")
-    ADD_SUBDIRECTORY(
-      "${CLOG_SOURCE_DIR}/deps/clog"
-      "${CMAKE_BINARY_DIR}/clog")
-    # We build static version of clog but a dynamic library may indirectly depend on it
-    SET_PROPERTY(TARGET clog PROPERTY POSITION_INDEPENDENT_CODE ON)
-  ELSE()
-    ADD_LIBRARY(clog STATIC IMPORTED)
-    FIND_LIBRARY(CLOG_LIBRARY clog)
-    IF(NOT CLOG_LIBRARY)
-      MESSAGE(FATAL_ERROR "Cannot find clog")
-    ENDIF()
-    SET_PROPERTY(TARGET clog PROPERTY IMPORTED_LOCATION "${CLOG_LIBRARY}")
   ENDIF()
 ENDIF()
 
