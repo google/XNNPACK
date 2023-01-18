@@ -59,9 +59,9 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a5
         # Load initial bias from w into accumulators
         VLDM    r9!, {d16-d19}          // Bias
         VMOV.I32 q10, 0                 // second set of C for pipelining VMLA
+        PLD     [r9]                    // Prefetch B
         VMOV.I32 q11, 0
 
-        PLD     [r9,   0]               // Prefetch B
         PLD     [r9,  64]
         PLD     [r9, 128]
         PLD     [r9, 192]
@@ -69,6 +69,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a5
         PLD     [r9, 320]
         PLD     [r9, 384]
         PLD     [r9, 448]
+        PLD     [r9, 512]
+        PLD     [r9, 576]
 1:
         # Load next A pointer
         LDR     r3, [r4], 4
@@ -95,10 +97,10 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a5
 
         VMLA.F32 q8, q12, d0[0]
         VMLA.F32 q9, q13, d0[0]
+        PLD     [r9, 576]               // Prefetch B
         VMLA.F32 q10, q14, d0[1]
         VMLA.F32 q11, q15, d0[1]
         SUBS    r0, r0, 8
-        PLD     [r9, 448]               // Prefetch B
         PLD     [r3, 128]               // Prefetch A0
         BHS     2b
 

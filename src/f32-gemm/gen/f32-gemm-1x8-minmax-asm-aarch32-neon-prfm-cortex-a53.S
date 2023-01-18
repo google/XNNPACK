@@ -67,6 +67,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53
         PLD     [r9, 320]
         PLD     [r9, 384]
         PLD     [r9, 448]
+        PLD     [r9, 512]
+        PLD     [r9, 576]
         BLO     3f                      // less than 2 channels?
 
         # Main loop - 2 floats of A (8 bytes)
@@ -76,10 +78,10 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53
         VLDM    r9!, {d28-d31}          // B1
         VMLA.F32 q8, q12, d0[0]
         VMLA.F32 q9, q13, d0[0]
+        PLD     [r9, 576]               // Prefetch B
         VMLA.F32 q10, q14, d0[1]
         VMLA.F32 q11, q15, d0[1]
         SUBS    r0, r0, 8
-        PLD     [r9, 448]               // Prefetch B
         PLD     [r3, 128]               // Prefetch A0
         BHS     1b
 

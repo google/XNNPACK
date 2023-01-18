@@ -60,6 +60,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
 
         # Is there at least 2 floats (8 bytes)
         SUBS    x0, x2, 8               // k = kc - 8
+
         B.LO    6f
 
         # Main loop - 2 floats of A (8 bytes)

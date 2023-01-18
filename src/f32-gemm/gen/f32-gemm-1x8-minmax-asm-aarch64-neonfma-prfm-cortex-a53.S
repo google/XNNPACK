@@ -44,8 +44,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_cortex_
         LDP     q16, q17, [x5], 32
 
         MOVI    v18.4s, 0               // second set of C for pipelining FMLA
-        PRFM    PLDL1KEEP, [x5, 64]
+        PRFM    PLDL1KEEP, [x5]
         MOVI    v19.4s, 0
+        PRFM    PLDL1KEEP, [x5, 64]
         PRFM    PLDL1KEEP, [x5, 128]
         PRFM    PLDL1KEEP, [x5, 192]
         PRFM    PLDL1KEEP, [x5, 256]
@@ -93,10 +94,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_cortex_
         LDR     q26, [x5], 16
         LDR     q27, [x5], 16
 
-        PRFM    PLDL1KEEP, [x5, 384]
+        PRFM    PLDL1KEEP, [x5, 384]     // Prefetch B
         PRFM    PLDL1KEEP, [x5, 448]
         PRFM    PLDL1KEEP, [x5, 512]
         PRFM    PLDL1KEEP, [x5, 576]
+        PRFM    PLDL1KEEP, [x3, 128]     // Prefetch A0
 
         # Second block of 4.  FMA for second 4, loads for 1st block of 4.
         FMLA    v16.4s, v20.4s, v1.s[0]

@@ -97,6 +97,8 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     pld(mem[r9, 320]);
     pld(mem[r9, 384]);
     pld(mem[r9, 448]);
+    pld(mem[r9, 512]);
+    pld(mem[r9, 576]);
   }
   blo(l3); // less than 2 channels?
 
@@ -107,11 +109,13 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   vldm(mem[r9]++, {d28-d31}); // B1
   vmla_f32(q8, q12, d0[0]);
   vmla_f32(q9, q13, d0[0]);
+  if (prefetch) {
+    pld(mem[r9, 576]); // Prefetch B
+  }
   vmla_f32(q10, q14, d0[1]);
   vmla_f32(q11, q15, d0[1]);
   subs(r0, r0, 8);
   if (prefetch) {
-    pld(mem[r9, 448]); // Prefetch B
     pld(mem[r3, 128]); // Prefetch A0
   }
   bhs(l1);

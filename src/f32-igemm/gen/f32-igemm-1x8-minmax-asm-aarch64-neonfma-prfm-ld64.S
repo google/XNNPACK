@@ -55,6 +55,8 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_ld64
         PRFM    PLDL1KEEP, [x5, 320]
         PRFM    PLDL1KEEP, [x5, 384]
         PRFM    PLDL1KEEP, [x5, 448]
+        PRFM    PLDL1KEEP, [x5, 512]
+        PRFM    PLDL1KEEP, [x5, 576]
 
         MOV     x9, x3                  // p = ks
 
@@ -68,6 +70,9 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_ld64
 
         # Is there at least 2 floats (8 bytes)
         SUBS    x0, x2, 8               // k = kc - 8
+        PRFM    PLDL1KEEP, [x8,  0]     // Prefetch A
+        PRFM    PLDL1KEEP, [x8, 64]
+
         B.LO    6f
 
         # Main loop - 2 floats of A (8 bytes)
@@ -78,9 +83,10 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_ld64
         SUBS    x0, x0, 8
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v21.4s, v0.s[0]
+        PRFM    PLDL1KEEP, [x5, 576]     // Prefetch B
         FMLA    v18.4s, v22.4s, v0.s[1]
         FMLA    v19.4s, v23.4s, v0.s[1]
-        PRFM    PLDL1KEEP, [x5, 448]
+        PRFM    PLDL1KEEP, [x8, 128]     // Prefetch A0
         B.HS    2b
 
 4:

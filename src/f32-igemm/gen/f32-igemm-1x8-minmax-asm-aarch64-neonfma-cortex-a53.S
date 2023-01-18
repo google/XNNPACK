@@ -49,7 +49,6 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53
         LDP     q16, q17, [x5], 32
         MOVI    v18.4s, 0               // second set of C for pipelining FMLA
         MOVI    v19.4s, 0
-
         MOV     x9, x3                  // p = ks
 
 1:
