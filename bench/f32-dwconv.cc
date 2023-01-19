@@ -984,6 +984,83 @@ static void f32_dwconv(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#if XNN_ARCH_WASMSIMD
+  static void f32_dwconv_25p4c__wasmsimd_arm(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_arm,
+      xnn_init_f32_minmax_wasmsimd_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p4c__wasmsimd_arm_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_arm_acc2,
+      xnn_init_f32_minmax_wasmsimd_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p4c__wasmsimd_x86(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_x86,
+      xnn_init_f32_minmax_wasmsimd_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p4c__wasmsimd_x86_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_x86_acc2,
+      xnn_init_f32_minmax_wasmsimd_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmsimd_arm(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_arm,
+      xnn_init_f32_minmax_wasmsimd_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmsimd_arm_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_arm_acc2,
+      xnn_init_f32_minmax_wasmsimd_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmsimd_x86(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86,
+      xnn_init_f32_minmax_wasmsimd_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmsimd_x86_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2,
+      xnn_init_f32_minmax_wasmsimd_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+
+  static void f32_dwconv_5f5m5l4c4s4r__wasmsimd_x86(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_x86, xnn_init_f32_minmax_wasmsimd_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+  static void f32_dwconv_5f5m5l4c4s4r__wasmsimd_x86_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_x86_acc2, xnn_init_f32_minmax_wasmsimd_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+
+  BENCHMARK_DWCONV(f32_dwconv_25p4c__wasmsimd_arm)
+  BENCHMARK_DWCONV(f32_dwconv_25p4c__wasmsimd_arm_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_25p4c__wasmsimd_x86)
+  BENCHMARK_DWCONV(f32_dwconv_25p4c__wasmsimd_x86_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__wasmsimd_arm)
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__wasmsimd_arm_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__wasmsimd_x86)
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__wasmsimd_x86_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__wasmsimd_x86)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__wasmsimd_x86_acc2)
+#endif
+
+
 static void f32_dwconv_4p1c__scalar(benchmark::State& state, const char* net) {
   f32_dwconv(state,
     xnn_f32_dwconv_minmax_ukernel_4p1c__scalar,
