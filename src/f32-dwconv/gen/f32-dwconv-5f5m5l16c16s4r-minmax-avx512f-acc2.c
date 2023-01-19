@@ -17,7 +17,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2(
+void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f_acc2(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -33,14 +33,14 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2(
 {
   assert(channels != 0);
   assert(output_width != 0);
-  assert(kernel_size > 2);
+  assert(kernel_size > 5);
 
   const __m512 vmax = _mm512_set1_ps(params->scalar.max);
   const __m512 vmin = _mm512_set1_ps(params->scalar.min);
   do {
     const float* w = weights;
 
-    // First pass to process 2 inputs.
+    // First pass to process 5 inputs.
     {
       float* b = buffer;
       const float* i0 = input[0];
@@ -53,43 +53,25 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2(
       if XNN_UNPREDICTABLE(i1 != zero) {
         i1 = (const float*) ((uintptr_t) i1 + input_offset);
       }
-      input += 2;
+      const float* i2 = input[2];
+      assert(i2 != NULL);
+      if XNN_UNPREDICTABLE(i2 != zero) {
+        i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      }
+      const float* i3 = input[3];
+      assert(i3 != NULL);
+      if XNN_UNPREDICTABLE(i3 != zero) {
+        i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      }
+      const float* i4 = input[4];
+      assert(i4 != NULL);
+      if XNN_UNPREDICTABLE(i4 != zero) {
+        i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      }
+      input += 5;
 
       // Process c channels and write to buffer.
       size_t c = round_up_po2(channels, 4);
-      for (; c >= 32; c -= 32) {
-        __m512 vacc0p0 = _mm512_load_ps(w);
-        __m512 vacc1p0 = _mm512_load_ps(w + 16);
-
-
-        const __m512 vi0x0 = _mm512_loadu_ps(i0);
-        const __m512 vi0x1 = _mm512_loadu_ps(i0 + 16);
-        i0 += 32;
-
-        const __m512 vk0x0 = _mm512_load_ps(w + 32);
-        const __m512 vk0x1 = _mm512_load_ps(w + 48);
-        vacc0p0 = _mm512_fmadd_ps(vi0x0, vk0x0, vacc0p0);
-        vacc1p0 = _mm512_fmadd_ps(vi0x1, vk0x1, vacc1p0);
-
-        const __m512 vi1x0 = _mm512_loadu_ps(i1);
-        const __m512 vi1x1 = _mm512_loadu_ps(i1 + 16);
-        i1 += 32;
-
-        const __m512 vk1x0 = _mm512_load_ps(w + 64);
-        const __m512 vk1x1 = _mm512_load_ps(w + 80);
-        __m512 vacc0p1 = _mm512_mul_ps(vi1x0, vk1x0);
-        __m512 vacc1p1 = _mm512_mul_ps(vi1x1, vk1x1);
-
-        w += 96;
-
-        // Add up all accumulators to vacc0p0
-        vacc0p0 = _mm512_add_ps(vacc0p0, vacc0p1);
-        vacc1p0 = _mm512_add_ps(vacc1p0, vacc1p1);
-
-        _mm512_store_ps(b, vacc0p0);
-        _mm512_store_ps(b + 16, vacc1p0);
-        b += 32;
-      }
 
       for (; c >= 16; c -= 16) {
         __m512 vaccp0 = _mm512_load_ps(w);
@@ -107,7 +89,25 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2(
         const __m512 vk1x0 = _mm512_load_ps(w + 32);
         __m512 vaccp1 = _mm512_mul_ps(vi1x0, vk1x0);
 
-        w += 48;
+        const __m512 vi2x0 = _mm512_loadu_ps(i2);
+        i2 += 16;
+
+        const __m512 vk2x0 = _mm512_load_ps(w + 48);
+        vaccp0 = _mm512_fmadd_ps(vi2x0, vk2x0, vaccp0);
+
+        const __m512 vi3x0 = _mm512_loadu_ps(i3);
+        i3 += 16;
+
+        const __m512 vk3x0 = _mm512_load_ps(w + 64);
+        vaccp1 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp1);
+
+        const __m512 vi4x0 = _mm512_loadu_ps(i4);
+        i4 += 16;
+
+        const __m512 vk4x0 = _mm512_load_ps(w + 80);
+        vaccp0 = _mm512_fmadd_ps(vi4x0, vk4x0, vaccp0);
+
+        w += 96;
 
         // Add up all accumulators to vaccp0
         vaccp0 = _mm512_add_ps(vaccp0, vaccp1);
@@ -133,7 +133,22 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2(
         const __m512 vk1x0 = _mm512_load_ps(w + 32);
         __m512 vaccp1 = _mm512_mul_ps(vi1x0, vk1x0);
 
-        w += 48;
+        const __m512 vi2x0 = _mm512_maskz_loadu_ps(vmask, i2);
+
+        const __m512 vk2x0 = _mm512_load_ps(w + 48);
+        vaccp0 = _mm512_fmadd_ps(vi2x0, vk2x0, vaccp0);
+
+        const __m512 vi3x0 = _mm512_maskz_loadu_ps(vmask, i3);
+
+        const __m512 vk3x0 = _mm512_load_ps(w + 64);
+        vaccp1 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp1);
+
+        const __m512 vi4x0 = _mm512_maskz_loadu_ps(vmask, i4);
+
+        const __m512 vk4x0 = _mm512_load_ps(w + 80);
+        vaccp0 = _mm512_fmadd_ps(vi4x0, vk4x0, vaccp0);
+
+        w += 96;
 
         // Add up all accumulators to vaccp0
         vaccp0 = _mm512_add_ps(vaccp0, vaccp1);
@@ -142,8 +157,8 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2(
       }
     }
 
-    // Middle pass to process 2 inputs in each iteration.
-    for (size_t ks = kernel_size - 2; ks > 2; ks -= 2) {
+    // Middle pass to process 5 inputs in each iteration.
+    for (size_t ks = kernel_size - 5; ks > 5; ks -= 5) {
       float* b = buffer;
       const float* i0 = input[0];
       assert(i0 != NULL);
@@ -155,42 +170,24 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2(
       if XNN_UNPREDICTABLE(i1 != zero) {
         i1 = (const float*) ((uintptr_t) i1 + input_offset);
       }
-      input += 2;
+      const float* i2 = input[2];
+      assert(i2 != NULL);
+      if XNN_UNPREDICTABLE(i2 != zero) {
+        i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      }
+      const float* i3 = input[3];
+      assert(i3 != NULL);
+      if XNN_UNPREDICTABLE(i3 != zero) {
+        i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      }
+      const float* i4 = input[4];
+      assert(i4 != NULL);
+      if XNN_UNPREDICTABLE(i4 != zero) {
+        i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      }
+      input += 5;
 
       size_t c = round_up_po2(channels, 4);
-      for (; c >= 32; c -= 32) {
-        __m512 vacc0p0 = _mm512_load_ps(b);
-        __m512 vacc1p0 = _mm512_load_ps(b + 16);
-
-
-        const __m512 vi0x0 = _mm512_loadu_ps(i0);
-        const __m512 vi0x1 = _mm512_loadu_ps(i0 + 16);
-        i0 += 32;
-
-        const __m512 vk0x0 = _mm512_load_ps(w);
-        const __m512 vk0x1 = _mm512_load_ps(w + 16);
-        vacc0p0 = _mm512_fmadd_ps(vi0x0, vk0x0, vacc0p0);
-        vacc1p0 = _mm512_fmadd_ps(vi0x1, vk0x1, vacc1p0);
-
-        const __m512 vi1x0 = _mm512_loadu_ps(i1);
-        const __m512 vi1x1 = _mm512_loadu_ps(i1 + 16);
-        i1 += 32;
-
-        const __m512 vk1x0 = _mm512_load_ps(w + 32);
-        const __m512 vk1x1 = _mm512_load_ps(w + 48);
-        __m512 vacc0p1 = _mm512_mul_ps(vi1x0, vk1x0);
-        __m512 vacc1p1 = _mm512_mul_ps(vi1x1, vk1x1);
-
-        w += 64;
-
-        // Add up all accumulators to vacc0p0
-        vacc0p0 = _mm512_add_ps(vacc0p0, vacc0p1);
-        vacc1p0 = _mm512_add_ps(vacc1p0, vacc1p1);
-
-        _mm512_store_ps(b, vacc0p0);
-        _mm512_store_ps(b + 16, vacc1p0);
-        b += 32;
-      }
 
       for (; c >= 16; c -= 16) {
         __m512 vaccp0 = _mm512_load_ps(b);
@@ -208,7 +205,25 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2(
         const __m512 vk1x0 = _mm512_load_ps(w + 16);
         __m512 vaccp1 = _mm512_mul_ps(vi1x0, vk1x0);
 
-        w += 32;
+        const __m512 vi2x0 = _mm512_loadu_ps(i2);
+        i2 += 16;
+
+        const __m512 vk2x0 = _mm512_load_ps(w + 32);
+        vaccp0 = _mm512_fmadd_ps(vi2x0, vk2x0, vaccp0);
+
+        const __m512 vi3x0 = _mm512_loadu_ps(i3);
+        i3 += 16;
+
+        const __m512 vk3x0 = _mm512_load_ps(w + 48);
+        vaccp1 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp1);
+
+        const __m512 vi4x0 = _mm512_loadu_ps(i4);
+        i4 += 16;
+
+        const __m512 vk4x0 = _mm512_load_ps(w + 64);
+        vaccp0 = _mm512_fmadd_ps(vi4x0, vk4x0, vaccp0);
+
+        w += 80;
 
         // Add up all accumulators to vaccp0
         vaccp0 = _mm512_add_ps(vaccp0, vaccp1);
@@ -234,7 +249,22 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2(
         const __m512 vk1x0 = _mm512_load_ps(w + 16);
         __m512 vaccp1 = _mm512_mul_ps(vi1x0, vk1x0);
 
-        w += 32;
+        const __m512 vi2x0 = _mm512_maskz_loadu_ps(vmask, i2);
+
+        const __m512 vk2x0 = _mm512_load_ps(w + 32);
+        vaccp0 = _mm512_fmadd_ps(vi2x0, vk2x0, vaccp0);
+
+        const __m512 vi3x0 = _mm512_maskz_loadu_ps(vmask, i3);
+
+        const __m512 vk3x0 = _mm512_load_ps(w + 48);
+        vaccp1 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp1);
+
+        const __m512 vi4x0 = _mm512_maskz_loadu_ps(vmask, i4);
+
+        const __m512 vk4x0 = _mm512_load_ps(w + 64);
+        vaccp0 = _mm512_fmadd_ps(vi4x0, vk4x0, vaccp0);
+
+        w += 80;
 
         // Add up all accumulators to vaccp0
         vaccp0 = _mm512_add_ps(vaccp0, vaccp1);
@@ -243,7 +273,7 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2(
       }
     }
 
-    // Last pass to process up to 2 inputs.
+    // Last pass to process up to 5 inputs.
     {
       float* b = buffer;
       const float* i0 = input[0];
@@ -256,50 +286,23 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2(
       if XNN_UNPREDICTABLE(i1 != zero) {
         i1 = (const float*) ((uintptr_t) i1 + input_offset);
       }
+      const float* i2 = input[2];
+      assert(i2 != NULL);
+      if XNN_UNPREDICTABLE(i2 != zero) {
+        i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      }
+      const float* i3 = input[3];
+      assert(i3 != NULL);
+      if XNN_UNPREDICTABLE(i3 != zero) {
+        i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      }
+      const float* i4 = input[4];
+      assert(i4 != NULL);
+      if XNN_UNPREDICTABLE(i4 != zero) {
+        i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      }
 
       size_t c = channels;
-      for (; c >= 32; c -= 32) {
-        __m512 vacc0p0 = _mm512_load_ps(b);
-        __m512 vacc1p0 = _mm512_load_ps(b + 16);
-        b += 32;
-
-
-        const __m512 vi0x0 = _mm512_loadu_ps(i0);
-        const __m512 vi0x1 = _mm512_loadu_ps(i0 + 16);
-        i0 += 32;
-
-        __m512 vk0x0 = _mm512_load_ps(w);
-        __m512 vk0x1 = _mm512_load_ps(w + 16);
-
-        vacc0p0 = _mm512_fmadd_ps(vi0x0, vk0x0, vacc0p0);
-        vacc1p0 = _mm512_fmadd_ps(vi0x1, vk0x1, vacc1p0);
-
-        const __m512 vi1x0 = _mm512_loadu_ps(i1);
-        const __m512 vi1x1 = _mm512_loadu_ps(i1 + 16);
-        i1 += 32;
-
-        __m512 vk1x0 = _mm512_load_ps(w + 32);
-        __m512 vk1x1 = _mm512_load_ps(w + 48);
-
-        __m512 vacc0p1 = _mm512_mul_ps(vi1x0, vk1x0);
-        __m512 vacc1p1 = _mm512_mul_ps(vi1x1, vk1x1);
-
-        w += 64;
-
-        // Add up all accumulators to vacc0p0
-        vacc0p0 = _mm512_add_ps(vacc0p0, vacc0p1);
-        vacc1p0 = _mm512_add_ps(vacc1p0, vacc1p1);
-
-        __m512 vacc0 = _mm512_max_ps(vacc0p0, vmin);
-        __m512 vacc1 = _mm512_max_ps(vacc1p0, vmin);
-
-        vacc0 = _mm512_min_ps(vacc0, vmax);
-        vacc1 = _mm512_min_ps(vacc1, vmax);
-
-        _mm512_storeu_ps(output, vacc0);
-        _mm512_storeu_ps(output + 16, vacc1);
-        output += 32;
-      }
 
 
       for (; c >= 16; c -= 16) {
@@ -321,7 +324,28 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2(
 
         __m512 vaccp1 = _mm512_mul_ps(vi1x0, vk1x0);
 
-        w += 32;
+        const __m512 vi2x0 = _mm512_loadu_ps(i2);
+        i2 += 16;
+
+        __m512 vk2x0 = _mm512_load_ps(w + 32);
+
+        vaccp0 = _mm512_fmadd_ps(vi2x0, vk2x0, vaccp0);
+
+        const __m512 vi3x0 = _mm512_loadu_ps(i3);
+        i3 += 16;
+
+        __m512 vk3x0 = _mm512_load_ps(w + 48);
+
+        vaccp1 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp1);
+
+        const __m512 vi4x0 = _mm512_loadu_ps(i4);
+        i4 += 16;
+
+        __m512 vk4x0 = _mm512_load_ps(w + 64);
+
+        vaccp0 = _mm512_fmadd_ps(vi4x0, vk4x0, vaccp0);
+
+        w += 80;
 
 
         // Add up all accumulators to vaccp0
@@ -348,6 +372,18 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2(
         const __m512 vi1x0 = _mm512_maskz_loadu_ps(vmask, i1);
         __m512 vk1x0 = _mm512_load_ps(w + 16);
         __m512 vaccp1 = _mm512_mul_ps(vi1x0, vk1x0);
+
+        const __m512 vi2x0 = _mm512_maskz_loadu_ps(vmask, i2);
+        __m512 vk2x0 = _mm512_load_ps(w + 32);
+        vaccp0 = _mm512_fmadd_ps(vi2x0, vk2x0, vaccp0);
+
+        const __m512 vi3x0 = _mm512_maskz_loadu_ps(vmask, i3);
+        __m512 vk3x0 = _mm512_load_ps(w + 48);
+        vaccp1 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp1);
+
+        const __m512 vi4x0 = _mm512_maskz_loadu_ps(vmask, i4);
+        __m512 vk4x0 = _mm512_load_ps(w + 64);
+        vaccp0 = _mm512_fmadd_ps(vi4x0, vk4x0, vaccp0);
 
         // Add up all accumulators to vaccp0
         vaccp0 = _mm512_add_ps(vaccp0, vaccp1);
