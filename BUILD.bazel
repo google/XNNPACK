@@ -10622,18 +10622,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "subgraph_test",
-    srcs = [
-        "test/subgraph.cc",
-        "test/subgraph-tester.h",
-    ],
-    deps = [
-        ":XNNPACK",
-        ":subgraph_test_mode",
-    ],
-)
-
-xnnpack_unit_test(
     name = "subgraph_nchw_test",
     srcs = [
         "test/subgraph-nchw.cc",

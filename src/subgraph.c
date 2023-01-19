@@ -1205,9 +1205,6 @@ enum xnn_status xnn_subgraph_optimize(
     }
 
     if (!xnn_value_is_external_input(value) && value->num_consumers == 0 && !xnn_value_is_persistent(value)) {
-      if (value->producer != XNN_INVALID_NODE_ID) {
-        xnn_node_clear(&subgraph->nodes[value->producer]);
-      }
       xnn_value_clear(value);
     }
   }
