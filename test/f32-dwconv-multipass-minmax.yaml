@@ -77,17 +77,9 @@
 - name: xnn_f32_dwconv_minmax_ukernel_2f2m2l64c16s4r__avx512f_acc2
   init: xnn_init_f32_minmax_scalar_params
 # Wasm SIMD
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__wasmsimd_arm
+- name: xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_arm
   init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__wasmsimd_arm_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__wasmsimd_arm
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__wasmsimd_arm_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__wasmsimd_arm
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__wasmsimd_arm_acc2
+- name: xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_arm_acc2
   init: xnn_init_f32_minmax_wasmsimd_params
 - name: xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_x86
   init: xnn_init_f32_minmax_wasmsimd_params
