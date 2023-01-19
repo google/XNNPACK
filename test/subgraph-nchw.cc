@@ -41,7 +41,7 @@ TEST(SUBGRAPH_NCHW, single_conv_and_global_average_pooling) {
     .AddStaticTensorF32({32, 3, 3, 3}, TensorType::kDense, 1)
     .AddStaticTensorF32({32}, TensorType::kDense, 2)
     .AddDynamicTensorF32({1, 128, 128, 32}, 3)
-    .AddDynamicTensorF32({32}, 4)
+    .AddOutputTensorF32({32}, 4)
     .AddConvolution2D(
         ConvolutionParams{
           Padding{1, 1, 1, 1},
@@ -71,7 +71,7 @@ TEST(SUBGRAPH_NCHW, pixelwise_conv_sandwich) {
     .AddStaticTensorF32({4, 1, 1, 8}, TensorType::kSparse, 4)
     .AddStaticTensorF32({4}, TensorType::kDense, 5)
     .AddDynamicTensorF32({1, 128, 128, 4}, 6)
-    .AddDynamicTensorF32({1, 4}, 7)
+    .AddOutputTensorF32({1, 4}, 7)
     .AddConvolution2D(
         ConvolutionParams{
           Padding{1, 1, 1, 1},
@@ -120,7 +120,7 @@ TEST(SUBGRAPH_NCHW, bottleneck) {
     .AddDynamicTensorF32({1, 128, 128, 8}, 12)
     .AddDynamicTensorF32({1, 128, 128, 8}, 13)
     .AddDynamicTensorF32({1, 128, 128, 8}, 13)
-    .AddDynamicTensorF32({1, 8}, 14)
+    .AddOutputTensorF32({1, 8}, 14)
     .AddConvolution2D(
         ConvolutionParams{
           Padding{1, 1, 1, 1},
