@@ -78,27 +78,11 @@
 - name: xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_x86_acc2
   init: xnn_init_f32_minmax_wasmsimd_params
 # Wasm Relaxed SIMD
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__wasmrelaxedsimd
+- name: xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd
   init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__wasmrelaxedsimd_acc2
+- name: xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd_acc2
   init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__wasmrelaxedsimd_fma
+- name: xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd_fma
   init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__wasmrelaxedsimd_fma_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__wasmrelaxedsimd
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__wasmrelaxedsimd_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__wasmrelaxedsimd_fma
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__wasmrelaxedsimd_fma_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__wasmrelaxedsimd
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__wasmrelaxedsimd_acc2
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__wasmrelaxedsimd_fma
-  init: xnn_init_f32_minmax_wasmsimd_params
-- name: xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__wasmrelaxedsimd_fma_acc2
+- name: xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd_fma_acc2
   init: xnn_init_f32_minmax_wasmsimd_params

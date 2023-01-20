@@ -5611,24 +5611,6 @@ SET(ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmrelaxedsimd-int32-x16.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmrelaxedsimd-int32-x24.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmrelaxedsimd-int32-x32.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-minmax-wasmrelaxedsimd-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-minmax-wasmrelaxedsimd-fma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-minmax-wasmrelaxedsimd-fma.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-minmax-wasmrelaxedsimd.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-wasmrelaxedsimd-fma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-wasmrelaxedsimd-fma.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-minmax-wasmrelaxedsimd-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-minmax-wasmrelaxedsimd-fma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-minmax-wasmrelaxedsimd-fma.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-minmax-wasmrelaxedsimd.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-wasmrelaxedsimd-fma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l8c4s4r-wasmrelaxedsimd-fma.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-minmax-wasmrelaxedsimd-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-minmax-wasmrelaxedsimd-fma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-minmax-wasmrelaxedsimd-fma.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-minmax-wasmrelaxedsimd.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-wasmrelaxedsimd-fma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l16c4s4r-wasmrelaxedsimd-fma.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmrelaxedsimd-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmrelaxedsimd-fma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmrelaxedsimd-fma.c
@@ -5649,6 +5631,12 @@ SET(ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-wasmrelaxedsimd-fma.c
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-wasmrelaxedsimd.c
   src/f32-dwconv/gen/f32-dwconv-4p8c-wasmrelaxedsimd-fma.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-minmax-wasmrelaxedsimd-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-minmax-wasmrelaxedsimd-fma-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-minmax-wasmrelaxedsimd-fma.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-minmax-wasmrelaxedsimd.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-wasmrelaxedsimd-fma-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-wasmrelaxedsimd-fma.c
   src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-wasmrelaxedsimd-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-wasmrelaxedsimd-fma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-wasmrelaxedsimd-fma.c

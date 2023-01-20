@@ -923,6 +923,118 @@ static void DWConvEnd2EndBenchmark(
   BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l4c4s4r__wasmsimd_x86_acc2);
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_dwconv_25p4c__wasmrelaxedsimd(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd,
+      xnn_f32_dwconv_ukernel_25p4c__wasmrelaxedsimd_fma,
+      xnn_init_f32_minmax_scalar_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p4c__wasmrelaxedsimd_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_acc2,
+      xnn_f32_dwconv_ukernel_25p4c__wasmrelaxedsimd_fma,
+      xnn_init_f32_minmax_scalar_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p4c__wasmrelaxedsimd_fma(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_fma,
+      xnn_f32_dwconv_ukernel_25p4c__wasmrelaxedsimd_fma,
+      xnn_init_f32_minmax_scalar_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p4c__wasmrelaxedsimd_fma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_fma_acc2,
+      xnn_f32_dwconv_ukernel_25p4c__wasmrelaxedsimd_fma,
+      xnn_init_f32_minmax_scalar_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+
+  static void f32_dwconv_25p8c__wasmrelaxedsimd(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd,
+      xnn_f32_dwconv_ukernel_25p8c__wasmrelaxedsimd_fma,
+      xnn_init_f32_minmax_scalar_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmrelaxedsimd_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd_acc2,
+      xnn_f32_dwconv_ukernel_25p8c__wasmrelaxedsimd_fma,
+      xnn_init_f32_minmax_scalar_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmrelaxedsimd_fma(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd_fma,
+      xnn_f32_dwconv_ukernel_25p8c__wasmrelaxedsimd_fma,
+      xnn_init_f32_minmax_scalar_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmrelaxedsimd_fma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd_fma_acc2,
+      xnn_f32_dwconv_ukernel_25p8c__wasmrelaxedsimd_fma,
+      xnn_init_f32_minmax_scalar_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+
+  static void f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd,
+      /*dwconv=*/xnn_f32_dwconv_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd_fma,
+      xnn_init_f32_minmax_wasmsimd_params,
+      /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25);
+  }
+  static void f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd_acc2,
+      /*dwconv=*/xnn_f32_dwconv_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd_fma_acc2,
+      xnn_init_f32_minmax_wasmsimd_params,
+      /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25);
+  }
+  static void f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd_fma(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd_fma,
+      /*dwconv=*/xnn_f32_dwconv_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd_fma,
+      xnn_init_f32_minmax_wasmsimd_params,
+      /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25);
+  }
+  static void f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd_fma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd_fma_acc2,
+      /*dwconv=*/xnn_f32_dwconv_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd_fma_acc2,
+      xnn_init_f32_minmax_wasmsimd_params,
+      /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25);
+  }
+
+  BENCHMARK_FP32_END2END(f32_dwconv_25p4c__wasmrelaxedsimd);
+  BENCHMARK_FP32_END2END(f32_dwconv_25p4c__wasmrelaxedsimd_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_25p8c__wasmrelaxedsimd);
+  BENCHMARK_FP32_END2END(f32_dwconv_25p8c__wasmrelaxedsimd_acc2);
+
+  BENCHMARK_FP32_END2END(f32_dwconv_25p4c__wasmrelaxedsimd_fma);
+  BENCHMARK_FP32_END2END(f32_dwconv_25p4c__wasmrelaxedsimd_fma_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_25p8c__wasmrelaxedsimd_fma);
+  BENCHMARK_FP32_END2END(f32_dwconv_25p8c__wasmrelaxedsimd_fma_acc2);
+
+  BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd);
+  BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd_fma);
+  BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd_fma_acc2);
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
 static void f32_dwconv_9p1c__scalar(benchmark::State& state, models::ExecutionPlanFactory model) {
   DWConvEnd2EndBenchmark(state, model,
     xnn_f32_dwconv_minmax_ukernel_9p1c__scalar,
