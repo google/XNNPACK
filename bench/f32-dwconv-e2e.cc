@@ -859,7 +859,7 @@ static void DWConvEnd2EndBenchmark(
   static void f32_dwconv_5f5m5l4c4s4r__wasmsimd_arm(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_arm,
-      nullptr /* dwconv */,
+      xnn_f32_dwconv_ukernel_5f5m5l4c4s4r__wasmsimd,
       xnn_init_f32_minmax_wasmsimd_params,
       /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
       /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
@@ -869,7 +869,7 @@ static void DWConvEnd2EndBenchmark(
   static void f32_dwconv_5f5m5l4c4s4r__wasmsimd_arm_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_arm_acc2,
-      nullptr /* dwconv */,
+      xnn_f32_dwconv_ukernel_5f5m5l4c4s4r__wasmsimd_acc2,
       xnn_init_f32_minmax_wasmsimd_params,
       /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
       /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
@@ -879,7 +879,7 @@ static void DWConvEnd2EndBenchmark(
   static void f32_dwconv_5f5m5l4c4s4r__wasmsimd_x86(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_x86,
-      nullptr /* dwconv */,
+      xnn_f32_dwconv_ukernel_5f5m5l4c4s4r__wasmsimd,
       xnn_init_f32_minmax_wasmsimd_params,
       /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
       /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
@@ -889,7 +889,7 @@ static void DWConvEnd2EndBenchmark(
   static void f32_dwconv_5f5m5l4c4s4r__wasmsimd_x86_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_x86_acc2,
-      nullptr /* dwconv */,
+      xnn_f32_dwconv_ukernel_5f5m5l4c4s4r__wasmsimd_acc2,
       xnn_init_f32_minmax_wasmsimd_params,
       /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
       /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,

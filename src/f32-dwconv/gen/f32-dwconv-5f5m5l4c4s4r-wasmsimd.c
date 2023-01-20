@@ -17,7 +17,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmsimd(
+void xnn_f32_dwconv_ukernel_5f5m5l4c4s4r__wasmsimd(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -33,12 +33,12 @@ void xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmsimd(
 {
   assert(channels != 0);
   assert(output_width != 0);
-  assert(kernel_size > 2);
+  assert(kernel_size > 5);
 
   do {
     const float* w = weights;
 
-    // First pass to process 2 inputs.
+    // First pass to process 5 inputs.
     {
       float* b = buffer;
       const float* i0 = input[0];
@@ -51,42 +51,26 @@ void xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmsimd(
       if XNN_UNPREDICTABLE(i1 != zero) {
         i1 = (const float*) ((uintptr_t) i1 + input_offset);
       }
-      input += 2;
+      const float* i2 = input[2];
+      assert(i2 != NULL);
+      if XNN_UNPREDICTABLE(i2 != zero) {
+        i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      }
+      const float* i3 = input[3];
+      assert(i3 != NULL);
+      if XNN_UNPREDICTABLE(i3 != zero) {
+        i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      }
+      const float* i4 = input[4];
+      assert(i4 != NULL);
+      if XNN_UNPREDICTABLE(i4 != zero) {
+        i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      }
+      input += 5;
 
       // Process c channels and write to buffer.
-      size_t c = round_up_po2(channels, 4);
-      for (; c >= 8; c -= 8) {
-        v128_t vacc0123p0 = wasm_v128_load(w);
-        v128_t vacc4567p0 = wasm_v128_load(w + 4);
-
-
-        const v128_t vi0x0123 = wasm_v128_load(i0);
-        const v128_t vi0x4567 = wasm_v128_load(i0 + 4);
-        i0 += 8;
-
-        const v128_t vk0x0123 = wasm_v128_load(w + 8);
-        const v128_t vk0x4567 = wasm_v128_load(w + 12);
-        vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi0x0123, vk0x0123));
-        vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi0x4567, vk0x4567));
-
-        const v128_t vi1x0123 = wasm_v128_load(i1);
-        const v128_t vi1x4567 = wasm_v128_load(i1 + 4);
-        i1 += 8;
-
-        const v128_t vk1x0123 = wasm_v128_load(w + 16);
-        const v128_t vk1x4567 = wasm_v128_load(w + 20);
-        vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi1x0123, vk1x0123));
-        vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi1x4567, vk1x4567));
-
-        w += 24;
-
-
-        wasm_v128_store(b, vacc0123p0);
-        wasm_v128_store(b + 4, vacc4567p0);
-        b += 8;
-      }
-
-      if (c != 0) {
+      size_t c = 0;
+      for (; c < channels; c += 4) {
         v128_t vacc0p0 = wasm_v128_load(w);
 
 
@@ -102,7 +86,25 @@ void xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmsimd(
         const v128_t vk1x0123 = wasm_v128_load(w + 8);
         vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi1x0123, vk1x0123));
 
-        w += 12;
+        const v128_t vi2x0123 = wasm_v128_load(i2);
+        i2 += 4;
+
+        const v128_t vk2x0123 = wasm_v128_load(w + 12);
+        vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi2x0123, vk2x0123));
+
+        const v128_t vi3x0123 = wasm_v128_load(i3);
+        i3 += 4;
+
+        const v128_t vk3x0123 = wasm_v128_load(w + 16);
+        vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi3x0123, vk3x0123));
+
+        const v128_t vi4x0123 = wasm_v128_load(i4);
+        i4 += 4;
+
+        const v128_t vk4x0123 = wasm_v128_load(w + 20);
+        vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi4x0123, vk4x0123));
+
+        w += 24;
 
 
         wasm_v128_store(b, vacc0p0);
@@ -110,8 +112,8 @@ void xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmsimd(
       }
     }
 
-    // Middle pass to process 2 inputs in each iteration.
-    for (size_t ks = kernel_size - 2; ks > 2; ks -= 2) {
+    // Middle pass to process 5 inputs in each iteration.
+    for (size_t ks = kernel_size - 5; ks > 5; ks -= 5) {
       float* b = buffer;
       const float* i0 = input[0];
       assert(i0 != NULL);
@@ -123,41 +125,25 @@ void xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmsimd(
       if XNN_UNPREDICTABLE(i1 != zero) {
         i1 = (const float*) ((uintptr_t) i1 + input_offset);
       }
-      input += 2;
-
-      size_t c = round_up_po2(channels, 4);
-      for (; c >= 8; c -= 8) {
-        v128_t vacc0123p0 = wasm_v128_load(b);
-        v128_t vacc4567p0 = wasm_v128_load(b + 4);
-
-
-        const v128_t vi0x0123 = wasm_v128_load(i0);
-        const v128_t vi0x4567 = wasm_v128_load(i0 + 4);
-        i0 += 8;
-
-        const v128_t vk0x0123 = wasm_v128_load(w);
-        const v128_t vk0x4567 = wasm_v128_load(w + 4);
-        vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi0x0123, vk0x0123));
-        vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi0x4567, vk0x4567));
-
-        const v128_t vi1x0123 = wasm_v128_load(i1);
-        const v128_t vi1x4567 = wasm_v128_load(i1 + 4);
-        i1 += 8;
-
-        const v128_t vk1x0123 = wasm_v128_load(w + 8);
-        const v128_t vk1x4567 = wasm_v128_load(w + 12);
-        vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi1x0123, vk1x0123));
-        vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi1x4567, vk1x4567));
-
-        w += 16;
-
-
-        wasm_v128_store(b, vacc0123p0);
-        wasm_v128_store(b + 4, vacc4567p0);
-        b += 8;
+      const float* i2 = input[2];
+      assert(i2 != NULL);
+      if XNN_UNPREDICTABLE(i2 != zero) {
+        i2 = (const float*) ((uintptr_t) i2 + input_offset);
       }
+      const float* i3 = input[3];
+      assert(i3 != NULL);
+      if XNN_UNPREDICTABLE(i3 != zero) {
+        i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      }
+      const float* i4 = input[4];
+      assert(i4 != NULL);
+      if XNN_UNPREDICTABLE(i4 != zero) {
+        i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      }
+      input += 5;
 
-      if (c != 0) {
+      size_t c = 0;
+      for (; c < channels; c += 4) {
         v128_t vacc0p0 = wasm_v128_load(b);
 
 
@@ -173,7 +159,25 @@ void xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmsimd(
         const v128_t vk1x0123 = wasm_v128_load(w + 4);
         vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi1x0123, vk1x0123));
 
-        w += 8;
+        const v128_t vi2x0123 = wasm_v128_load(i2);
+        i2 += 4;
+
+        const v128_t vk2x0123 = wasm_v128_load(w + 8);
+        vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi2x0123, vk2x0123));
+
+        const v128_t vi3x0123 = wasm_v128_load(i3);
+        i3 += 4;
+
+        const v128_t vk3x0123 = wasm_v128_load(w + 12);
+        vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi3x0123, vk3x0123));
+
+        const v128_t vi4x0123 = wasm_v128_load(i4);
+        i4 += 4;
+
+        const v128_t vk4x0123 = wasm_v128_load(w + 16);
+        vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi4x0123, vk4x0123));
+
+        w += 20;
 
 
         wasm_v128_store(b, vacc0p0);
@@ -181,7 +185,7 @@ void xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmsimd(
       }
     }
 
-    // Last pass to process up to 2 inputs.
+    // Last pass to process up to 5 inputs.
     {
       float* b = buffer;
       const float* i0 = input[0];
@@ -194,44 +198,23 @@ void xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmsimd(
       if XNN_UNPREDICTABLE(i1 != zero) {
         i1 = (const float*) ((uintptr_t) i1 + input_offset);
       }
+      const float* i2 = input[2];
+      assert(i2 != NULL);
+      if XNN_UNPREDICTABLE(i2 != zero) {
+        i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      }
+      const float* i3 = input[3];
+      assert(i3 != NULL);
+      if XNN_UNPREDICTABLE(i3 != zero) {
+        i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      }
+      const float* i4 = input[4];
+      assert(i4 != NULL);
+      if XNN_UNPREDICTABLE(i4 != zero) {
+        i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      }
 
       size_t c = channels;
-      for (; c >= 8; c -= 8) {
-        v128_t vacc0123p0 = wasm_v128_load(b);
-        v128_t vacc4567p0 = wasm_v128_load(b + 4);
-        b += 8;
-
-
-        const v128_t vi0x0123 = wasm_v128_load(i0);
-        const v128_t vi0x4567 = wasm_v128_load(i0 + 4);
-        i0 += 8;
-
-        v128_t vk0x0123 = wasm_v128_load(w);
-        v128_t vk0x4567 = wasm_v128_load(w + 4);
-
-        vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi0x0123, vk0x0123));
-        vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi0x4567, vk0x4567));
-
-        const v128_t vi1x0123 = wasm_v128_load(i1);
-        const v128_t vi1x4567 = wasm_v128_load(i1 + 4);
-        i1 += 8;
-
-        v128_t vk1x0123 = wasm_v128_load(w + 8);
-        v128_t vk1x4567 = wasm_v128_load(w + 12);
-
-        vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi1x0123, vk1x0123));
-        vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi1x4567, vk1x4567));
-
-        w += 16;
-
-
-        const v128_t vacc0123 = vacc0123p0;
-        const v128_t vacc4567 = vacc4567p0;
-
-        wasm_v128_store(output, vacc0123);
-        wasm_v128_store(output + 4, vacc4567);
-        output += 8;
-      }
 
 
       for (; c >= 4; c -= 4) {
@@ -253,7 +236,28 @@ void xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmsimd(
 
         vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi1x0123, vk1x0123));
 
-        w += 8;
+        const v128_t vi2x0123 = wasm_v128_load(i2);
+        i2 += 4;
+
+        v128_t vk2x0123 = wasm_v128_load(w + 8);
+
+        vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi2x0123, vk2x0123));
+
+        const v128_t vi3x0123 = wasm_v128_load(i3);
+        i3 += 4;
+
+        v128_t vk3x0123 = wasm_v128_load(w + 12);
+
+        vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi3x0123, vk3x0123));
+
+        const v128_t vi4x0123 = wasm_v128_load(i4);
+        i4 += 4;
+
+        v128_t vk4x0123 = wasm_v128_load(w + 16);
+
+        vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi4x0123, vk4x0123));
+
+        w += 20;
 
 
 
@@ -273,6 +277,18 @@ void xnn_f32_dwconv_ukernel_2f2m2l8c4s4r__wasmsimd(
         const v128_t vi1x0123 = wasm_v128_load(i1);
         v128_t vk1x0123 = wasm_v128_load(w + 4);
         vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi1x0123, vk1x0123));
+
+        const v128_t vi2x0123 = wasm_v128_load(i2);
+        v128_t vk2x0123 = wasm_v128_load(w + 8);
+        vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi2x0123, vk2x0123));
+
+        const v128_t vi3x0123 = wasm_v128_load(i3);
+        v128_t vk3x0123 = wasm_v128_load(w + 12);
+        vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi3x0123, vk3x0123));
+
+        const v128_t vi4x0123 = wasm_v128_load(i4);
+        v128_t vk4x0123 = wasm_v128_load(w + 16);
+        vacc0p0 = wasm_f32x4_add(vacc0p0, wasm_f32x4_mul(vi4x0123, vk4x0123));
 
 
         v128_t vacc0 = vacc0p0;
