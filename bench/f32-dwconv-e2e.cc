@@ -116,18 +116,25 @@ static void DWConvEnd2EndBenchmark(
   for (size_t i = 0; i < XNN_MAX_F32_DWCONV_UKERNELS; i++) {
     if (xnn_params.f32.dwconv[i].primary_tile == primary_tile_to_replace) {
       found = true;
+    } else if (xnn_params.f32.dwconv[i].last_tile != 0) {
+      // Found a multipass microkernel, replace it.
+      found = true;
     }
   }
 
   if (!found) {
-    state.SkipWithError("unable to find a unipass microkernel tile to replace with multipass");
+    state.SkipWithError("can't replace with multipass");
     return;
   }
 
   // Override microkernels chosen in xnn_initialize
   for (size_t i = 0; i < XNN_MAX_F32_DWCONV_UKERNELS; i++) {
     // Replace only the microkernel with the matching kernel size.
-    if (xnn_params.f32.dwconv[i].primary_tile == primary_tile_to_replace) {
+    if (xnn_params.f32.dwconv[i].primary_tile == primary_tile_to_replace ||
+        xnn_params.f32.dwconv[i].last_tile != 0) {
+      // Replace either when the primary_tile_to_replace matches, or replace the
+      // first multipass dwconv microkernel we find.
+      // TODO(zhin): support specifying target multipass dwconv to replace.
       std::memset(&xnn_params.f32.dwconv[i], 0, sizeof(xnn_params.f32.dwconv[i]));
 
       // Note: do not directly assign to xnn_params.f32.dwconv[i] because it breaks older gcc.

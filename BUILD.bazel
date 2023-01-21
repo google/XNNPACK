@@ -1333,6 +1333,7 @@ PROD_FMA3_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-fma3.c",
     "src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-fma3.c",
     "src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-fma3.c",
+    "src/f32-dwconv/gen/f32-dwconv-5f5m5l8c8s4r-minmax-fma3.c",
     "src/f32-gemm/gen/f32-gemm-1x16-minmax-fma3-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-1x16s4-minmax-fma3-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-4x16s4-minmax-fma3-broadcast.c",
@@ -1397,6 +1398,7 @@ PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-avx512f.c",
     "src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx512f.c",
     "src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-avx512f.c",
+    "src/f32-dwconv/gen/f32-dwconv-5f5m5l16c16s4r-minmax-avx512f-acc2.c",
     "src/f32-gemm/gen/f32-gemm-1x16-minmax-avx512f-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-7x16-minmax-avx512f-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-1x16-minmax-avx512f-broadcast.c",
@@ -1560,6 +1562,8 @@ PROD_WASMSIMD_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/f32-dwconv-9p8c-wasmsimd.c",
     "src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-wasmsimd-arm.c",
     "src/f32-dwconv/gen/f32-dwconv-25p4c-wasmsimd.c",
+    "src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-minmax-wasmsimd-arm.c",
+    "src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-wasmsimd.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-wasmsimd-arm-loadsplat-2x4.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-wasmsimd-x86-loadsplat-2x4.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-wasmsimd-arm-splat-1x4-acc4.c",
@@ -5113,6 +5117,15 @@ cc_library(
     }),
 )
 
+cc_library(
+    name = "enable_dwconv_multipass",
+    defines = select({
+        ":xnn_enable_dwconv_multipass_explicit_true": ["XNN_ENABLE_DWCONV_MULTIPASS=1"],
+        ":xnn_enable_dwconv_multipass_explicit_false": ["XNN_ENABLE_DWCONV_MULTIPASS=0"],
+        "//conditions:default": ["XNN_ENABLE_DWCONV_MULTIPASS=0"],
+    }),
+)
+
 xnnpack_cc_library(
     name = "cache",
     srcs = ["src/cache.c"],
@@ -5512,6 +5525,7 @@ xnnpack_cc_library(
         ":enable_assembly",
         ":enable_gemm_m_specialization",
         ":enable_jit",
+        ":enable_dwconv_multipass",
         ":hardware_config",
         ":logging",
         ":math",
@@ -5553,6 +5567,7 @@ xnnpack_cc_library(
         ":common",
         ":enable_assembly",
         ":enable_gemm_m_specialization",
+        ":enable_dwconv_multipass",
         ":enable_jit",
         ":hardware_config_test_mode",
         ":logging",
@@ -5611,6 +5626,7 @@ xnnpack_cc_library(
         ":enable_jit",
         ":logging",
         ":math",
+        ":enable_dwconv_multipass",
         ":microkernels_h",
         ":operators",
         ":amalgam_microkernels",
@@ -5658,6 +5674,7 @@ xnnpack_cc_library(
         ":common",
         ":enable_assembly",
         ":enable_gemm_m_specialization",
+        ":enable_dwconv_multipass",
         ":enable_jit",
         ":logging",
         ":math",
@@ -10915,6 +10932,18 @@ config_setting(
 config_setting(
     name = "xnn_enable_gemm_m_specialization_explicit_false",
     define_values = {"xnn_enable_gemm_m_specialization": "false"},
+)
+
+# Enables usage of DWCONV multipass kernels.
+config_setting(
+    name = "xnn_enable_dwconv_multipass_explicit_true",
+    define_values = {"xnn_enable_dwconv_multipass": "true"},
+)
+
+# Disables usage of DWCONV multipass kernels.
+config_setting(
+    name = "xnn_enable_dwconv_multipass_explicit_false",
+    define_values = {"xnn_enable_dwconv_multipass": "false"},
 )
 
 # Force logging to stderr/stdout
