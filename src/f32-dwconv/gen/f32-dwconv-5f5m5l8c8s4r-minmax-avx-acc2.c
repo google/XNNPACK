@@ -17,7 +17,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx_acc2(
+void xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__avx_acc2(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -33,14 +33,14 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx_acc2(
 {
   assert(channels != 0);
   assert(output_width != 0);
-  assert(kernel_size > 2);
+  assert(kernel_size > 5);
 
   const __m256 vmax = _mm256_load_ps(params->avx.max);
   const __m256 vmin = _mm256_load_ps(params->avx.min);
   do {
     const float* w = weights;
 
-    // First pass to process 2 inputs.
+    // First pass to process 5 inputs.
     {
       float* b = buffer;
       const float* i0 = input[0];
@@ -53,7 +53,22 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx_acc2(
       if XNN_UNPREDICTABLE(i1 != zero) {
         i1 = (const float*) ((uintptr_t) i1 + input_offset);
       }
-      input += 2;
+      const float* i2 = input[2];
+      assert(i2 != NULL);
+      if XNN_UNPREDICTABLE(i2 != zero) {
+        i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      }
+      const float* i3 = input[3];
+      assert(i3 != NULL);
+      if XNN_UNPREDICTABLE(i3 != zero) {
+        i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      }
+      const float* i4 = input[4];
+      assert(i4 != NULL);
+      if XNN_UNPREDICTABLE(i4 != zero) {
+        i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      }
+      input += 5;
 
       // Process c channels and write to buffer.
       size_t c = round_up_po2(channels, 4);
@@ -74,7 +89,25 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx_acc2(
         const __m256 vk1x01234567 = _mm256_load_ps(w + 16);
         __m256 vacc01234567p1 = _mm256_mul_ps(vi1x01234567, vk1x01234567);
 
-        w += 24;
+        const __m256 vi2x01234567 = _mm256_loadu_ps(i2);
+        i2 += 8;
+
+        const __m256 vk2x01234567 = _mm256_load_ps(w + 24);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi2x01234567, vk2x01234567));
+
+        const __m256 vi3x01234567 = _mm256_loadu_ps(i3);
+        i3 += 8;
+
+        const __m256 vk3x01234567 = _mm256_load_ps(w + 32);
+        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi3x01234567, vk3x01234567));
+
+        const __m256 vi4x01234567 = _mm256_loadu_ps(i4);
+        i4 += 8;
+
+        const __m256 vk4x01234567 = _mm256_load_ps(w + 40);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi4x01234567, vk4x01234567));
+
+        w += 48;
 
         // Add up all accumulators to vacc01234567p0
         vacc01234567p0 = _mm256_add_ps(vacc01234567p0, vacc01234567p1);
@@ -100,7 +133,22 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx_acc2(
         const __m256 vk1x01234567 = _mm256_load_ps(w + 16);
         __m256 vacc01234567p1 = _mm256_mul_ps(vi1x01234567, vk1x01234567);
 
-        w += 24;
+        const __m256 vi2x01234567 = _mm256_maskload_ps(i2, vmask);
+
+        const __m256 vk2x01234567 = _mm256_load_ps(w + 24);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi2x01234567, vk2x01234567));
+
+        const __m256 vi3x01234567 = _mm256_maskload_ps(i3, vmask);
+
+        const __m256 vk3x01234567 = _mm256_load_ps(w + 32);
+        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi3x01234567, vk3x01234567));
+
+        const __m256 vi4x01234567 = _mm256_maskload_ps(i4, vmask);
+
+        const __m256 vk4x01234567 = _mm256_load_ps(w + 40);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi4x01234567, vk4x01234567));
+
+        w += 48;
 
         // Add up all accumulators to vacc01234567p0
         vacc01234567p0 = _mm256_add_ps(vacc01234567p0, vacc01234567p1);
@@ -109,8 +157,8 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx_acc2(
       }
     }
 
-    // Middle pass to process 2 inputs in each iteration.
-    for (size_t ks = kernel_size - 2; ks > 2; ks -= 2) {
+    // Middle pass to process 5 inputs in each iteration.
+    for (size_t ks = kernel_size - 5; ks > 5; ks -= 5) {
       float* b = buffer;
       const float* i0 = input[0];
       assert(i0 != NULL);
@@ -122,7 +170,22 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx_acc2(
       if XNN_UNPREDICTABLE(i1 != zero) {
         i1 = (const float*) ((uintptr_t) i1 + input_offset);
       }
-      input += 2;
+      const float* i2 = input[2];
+      assert(i2 != NULL);
+      if XNN_UNPREDICTABLE(i2 != zero) {
+        i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      }
+      const float* i3 = input[3];
+      assert(i3 != NULL);
+      if XNN_UNPREDICTABLE(i3 != zero) {
+        i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      }
+      const float* i4 = input[4];
+      assert(i4 != NULL);
+      if XNN_UNPREDICTABLE(i4 != zero) {
+        i4 = (const float*) ((uintptr_t) i4 + input_offset);
+      }
+      input += 5;
 
       size_t c = round_up_po2(channels, 4);
 
@@ -142,7 +205,25 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx_acc2(
         const __m256 vk1x01234567 = _mm256_load_ps(w + 8);
         __m256 vacc01234567p1 = _mm256_mul_ps(vi1x01234567, vk1x01234567);
 
-        w += 16;
+        const __m256 vi2x01234567 = _mm256_loadu_ps(i2);
+        i2 += 8;
+
+        const __m256 vk2x01234567 = _mm256_load_ps(w + 16);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi2x01234567, vk2x01234567));
+
+        const __m256 vi3x01234567 = _mm256_loadu_ps(i3);
+        i3 += 8;
+
+        const __m256 vk3x01234567 = _mm256_load_ps(w + 24);
+        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi3x01234567, vk3x01234567));
+
+        const __m256 vi4x01234567 = _mm256_loadu_ps(i4);
+        i4 += 8;
+
+        const __m256 vk4x01234567 = _mm256_load_ps(w + 32);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi4x01234567, vk4x01234567));
+
+        w += 40;
 
         // Add up all accumulators to vacc01234567p0
         vacc01234567p0 = _mm256_add_ps(vacc01234567p0, vacc01234567p1);
@@ -168,7 +249,22 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx_acc2(
         const __m256 vk1x01234567 = _mm256_load_ps(w + 8);
         __m256 vacc01234567p1 = _mm256_mul_ps(vi1x01234567, vk1x01234567);
 
-        w += 16;
+        const __m256 vi2x01234567 = _mm256_maskload_ps(i2, vmask);
+
+        const __m256 vk2x01234567 = _mm256_load_ps(w + 16);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi2x01234567, vk2x01234567));
+
+        const __m256 vi3x01234567 = _mm256_maskload_ps(i3, vmask);
+
+        const __m256 vk3x01234567 = _mm256_load_ps(w + 24);
+        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi3x01234567, vk3x01234567));
+
+        const __m256 vi4x01234567 = _mm256_maskload_ps(i4, vmask);
+
+        const __m256 vk4x01234567 = _mm256_load_ps(w + 32);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi4x01234567, vk4x01234567));
+
+        w += 40;
 
         // Add up all accumulators to vacc01234567p0
         vacc01234567p0 = _mm256_add_ps(vacc01234567p0, vacc01234567p1);
@@ -177,7 +273,7 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx_acc2(
       }
     }
 
-    // Last pass to process up to 2 inputs.
+    // Last pass to process up to 5 inputs.
     {
       float* b = buffer;
       const float* i0 = input[0];
@@ -189,6 +285,21 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx_acc2(
       assert(i1 != NULL);
       if XNN_UNPREDICTABLE(i1 != zero) {
         i1 = (const float*) ((uintptr_t) i1 + input_offset);
+      }
+      const float* i2 = input[2];
+      assert(i2 != NULL);
+      if XNN_UNPREDICTABLE(i2 != zero) {
+        i2 = (const float*) ((uintptr_t) i2 + input_offset);
+      }
+      const float* i3 = input[3];
+      assert(i3 != NULL);
+      if XNN_UNPREDICTABLE(i3 != zero) {
+        i3 = (const float*) ((uintptr_t) i3 + input_offset);
+      }
+      const float* i4 = input[4];
+      assert(i4 != NULL);
+      if XNN_UNPREDICTABLE(i4 != zero) {
+        i4 = (const float*) ((uintptr_t) i4 + input_offset);
       }
 
       size_t c = channels;
@@ -213,7 +324,28 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx_acc2(
 
         __m256 vacc01234567p1 = _mm256_mul_ps(vi1x01234567, vk1x01234567);
 
-        w += 16;
+        const __m256 vi2x01234567 = _mm256_loadu_ps(i2);
+        i2 += 8;
+
+        __m256 vk2x01234567 = _mm256_load_ps(w + 16);
+
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi2x01234567, vk2x01234567));
+
+        const __m256 vi3x01234567 = _mm256_loadu_ps(i3);
+        i3 += 8;
+
+        __m256 vk3x01234567 = _mm256_load_ps(w + 24);
+
+        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi3x01234567, vk3x01234567));
+
+        const __m256 vi4x01234567 = _mm256_loadu_ps(i4);
+        i4 += 8;
+
+        __m256 vk4x01234567 = _mm256_load_ps(w + 32);
+
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi4x01234567, vk4x01234567));
+
+        w += 40;
 
 
         // Add up all accumulators to vacc01234567p0
@@ -240,6 +372,18 @@ void xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx_acc2(
         const __m256 vi1x01234567 = _mm256_maskload_ps(i1, vmask);
         __m256 vk1x01234567 = _mm256_load_ps(w + 8);
         __m256 vacc01234567p1 = _mm256_mul_ps(vi1x01234567, vk1x01234567);
+
+        const __m256 vi2x01234567 = _mm256_maskload_ps(i2, vmask);
+        __m256 vk2x01234567 = _mm256_load_ps(w + 16);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi2x01234567, vk2x01234567));
+
+        const __m256 vi3x01234567 = _mm256_maskload_ps(i3, vmask);
+        __m256 vk3x01234567 = _mm256_load_ps(w + 24);
+        vacc01234567p1 = _mm256_add_ps(vacc01234567p1, _mm256_mul_ps(vi3x01234567, vk3x01234567));
+
+        const __m256 vi4x01234567 = _mm256_maskload_ps(i4, vmask);
+        __m256 vk4x01234567 = _mm256_load_ps(w + 32);
+        vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi4x01234567, vk4x01234567));
 
         // Add up all accumulators to vacc01234567p0
         vacc01234567p0 = _mm256_add_ps(vacc01234567p0, vacc01234567p1);
