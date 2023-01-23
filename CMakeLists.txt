@@ -1326,6 +1326,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(subgraph-fp16-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME subgraph-fp16-test COMMAND subgraph-fp16-test)
 
+    ADD_EXECUTABLE(subgraph-test test/subgraph.cc)
+    TARGET_INCLUDE_DIRECTORIES(subgraph-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(subgraph-test PRIVATE XNNPACK gtest gtest_main)
+    ADD_TEST(NAME subgraph-test COMMAND subgraph-test)
+
     ADD_EXECUTABLE(subgraph-nchw-test test/subgraph-nchw.cc)
     TARGET_INCLUDE_DIRECTORIES(subgraph-nchw-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(subgraph-nchw-test PRIVATE XNNPACK gtest gtest_main)

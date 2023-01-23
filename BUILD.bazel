@@ -10625,6 +10625,18 @@ xnnpack_unit_test(
 ############################### Misc unit tests ###############################
 
 xnnpack_unit_test(
+    name = "subgraph_test",
+    srcs = [
+        "test/subgraph.cc",
+        "test/subgraph-tester.h",
+    ],
+    deps = [
+        ":XNNPACK",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "memory_planner_test",
     srcs = [
         "test/memory-planner-test.cc",
