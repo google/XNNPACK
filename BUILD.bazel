@@ -1749,6 +1749,8 @@ PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/f32-dwconv-9p8c-wasmrelaxedsimd-fma.c",
     "src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-wasmrelaxedsimd-fma.c",
     "src/f32-dwconv/gen/f32-dwconv-25p8c-wasmrelaxedsimd-fma.c",
+    "src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-wasmrelaxedsimd-fma.c",
+    "src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-minmax-wasmrelaxedsimd-fma.c",
     "src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmrelaxedsimd-x24.c",
     "src/f32-gemm/gen/f32-gemm-1x8-minmax-wasmrelaxedsimd-fma-splat.c",
     "src/f32-gemm/gen/f32-gemm-1x8-relu-wasmrelaxedsimd-fma-splat.c",
