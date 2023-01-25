@@ -46,6 +46,28 @@ tools/xngen src/f32-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=
 tools/xngen src/f32-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-25p2c-minmax-scalar.c &
 tools/xngen src/f32-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-25p2c-minmax-scalar-acc2.c &
 
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-2f2m2l1c1s1r-scalar.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-2f2m2l1c1s1r-scalar-acc2.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=4 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c1s1r-scalar.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=4 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c1s1r-scalar-acc2.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=5 -D MIDDLE_PASS_TILE=5 -D LAST_PASS_TILE=5 -D ACCUMULATORS=1 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-scalar.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=5 -D MIDDLE_PASS_TILE=5 -D LAST_PASS_TILE=5 -D ACCUMULATORS=2 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-scalar-acc2.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=6 -D MIDDLE_PASS_TILE=6 -D LAST_PASS_TILE=7 -D ACCUMULATORS=1 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-6f6m7l1c1s1r-scalar.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=6 -D MIDDLE_PASS_TILE=6 -D LAST_PASS_TILE=7 -D ACCUMULATORS=2 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-6f6m7l1c1s1r-scalar-acc2.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=8 -D MIDDLE_PASS_TILE=8 -D LAST_PASS_TILE=9 -D ACCUMULATORS=1 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-8f8m9l1c1s1r-scalar.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=8 -D MIDDLE_PASS_TILE=8 -D LAST_PASS_TILE=9 -D ACCUMULATORS=2 -D WASM=0 -D ACTIVATION=LINEAR -o src/f32-dwconv/gen/f32-dwconv-8f8m9l1c1s1r-scalar-acc2.c &
+
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-2f2m2l1c1s1r-minmax-scalar.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-2f2m2l1c1s1r-minmax-scalar-acc2.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=4 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=1 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c1s1r-minmax-scalar.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=4 -D FIRST_PASS_TILE=2 -D MIDDLE_PASS_TILE=2 -D LAST_PASS_TILE=2 -D ACCUMULATORS=2 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-2f2m2l4c1s1r-minmax-scalar-acc2.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=5 -D MIDDLE_PASS_TILE=5 -D LAST_PASS_TILE=5 -D ACCUMULATORS=1 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-minmax-scalar.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=5 -D MIDDLE_PASS_TILE=5 -D LAST_PASS_TILE=5 -D ACCUMULATORS=2 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-minmax-scalar-acc2.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=6 -D MIDDLE_PASS_TILE=6 -D LAST_PASS_TILE=7 -D ACCUMULATORS=1 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-6f6m7l1c1s1r-minmax-scalar.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=6 -D MIDDLE_PASS_TILE=6 -D LAST_PASS_TILE=7 -D ACCUMULATORS=2 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-6f6m7l1c1s1r-minmax-scalar-acc2.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=8 -D MIDDLE_PASS_TILE=8 -D LAST_PASS_TILE=9 -D ACCUMULATORS=1 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-8f8m9l1c1s1r-minmax-scalar.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=8 -D MIDDLE_PASS_TILE=8 -D LAST_PASS_TILE=9 -D ACCUMULATORS=2 -D WASM=0 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-8f8m9l1c1s1r-minmax-scalar-acc2.c &
+
 ### WAsm-specific micro-kernels
 tools/xngen src/f32-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=3  -D ACCUMULATORS=1 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-3p1c-minmax-wasm.c &
 tools/xngen src/f32-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=3  -D ACCUMULATORS=2 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-3p1c-minmax-wasm-acc2.c &
@@ -66,6 +88,13 @@ tools/xngen src/f32-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=
 tools/xngen src/f32-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-25p1c-minmax-wasm-acc2.c &
 tools/xngen src/f32-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -D ACCUMULATORS=1 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-25p2c-minmax-wasm.c &
 tools/xngen src/f32-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=25 -D ACCUMULATORS=2 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-25p2c-minmax-wasm-acc2.c &
+
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=5 -D MIDDLE_PASS_TILE=5 -D LAST_PASS_TILE=5 -D ACCUMULATORS=1 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-minmax-wasm.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=5 -D MIDDLE_PASS_TILE=5 -D LAST_PASS_TILE=5 -D ACCUMULATORS=2 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-minmax-wasm-acc2.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=6 -D MIDDLE_PASS_TILE=6 -D LAST_PASS_TILE=7 -D ACCUMULATORS=1 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-6f6m7l1c1s1r-minmax-wasm.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=6 -D MIDDLE_PASS_TILE=6 -D LAST_PASS_TILE=7 -D ACCUMULATORS=2 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-6f6m7l1c1s1r-minmax-wasm-acc2.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=8 -D MIDDLE_PASS_TILE=8 -D LAST_PASS_TILE=9 -D ACCUMULATORS=1 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-8f8m9l1c1s1r-minmax-wasm.c &
+tools/xngen src/f32-dwconv/multipass-scalar.c.in -D CHANNEL_TILE=1 -D FIRST_PASS_TILE=8 -D MIDDLE_PASS_TILE=8 -D LAST_PASS_TILE=9 -D ACCUMULATORS=2 -D WASM=1 -D ACTIVATION=MINMAX -o src/f32-dwconv/gen/f32-dwconv-8f8m9l1c1s1r-minmax-wasm-acc2.c &
 
 ################################## WAsm SIMD ##################################
 tools/xngen src/f32-dwconv/unipass-wasmsimd.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=3 -D ACCUMULATORS=1 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -o src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmsimd-arm.c &

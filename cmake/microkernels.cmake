@@ -3616,6 +3616,14 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-scalar-2x1.c
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-scalar-3x1-acc2.c
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-scalar-3x1.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l1c1s1r-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l1c1s1r-minmax-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l1c1s1r-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l1c1s1r-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c1s1r-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c1s1r-minmax-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c1s1r-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c1s1r-scalar.c
   src/f32-dwconv/gen/f32-dwconv-3p1c-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p1c-minmax-scalar.c
   src/f32-dwconv/gen/f32-dwconv-3p1c-scalar-acc2.c
@@ -3632,6 +3640,18 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-4p2c-minmax-scalar.c
   src/f32-dwconv/gen/f32-dwconv-4p2c-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p2c-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-minmax-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-6f6m7l1c1s1r-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-6f6m7l1c1s1r-minmax-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-6f6m7l1c1s1r-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-6f6m7l1c1s1r-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-8f8m9l1c1s1r-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-8f8m9l1c1s1r-minmax-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-8f8m9l1c1s1r-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-8f8m9l1c1s1r-scalar.c
   src/f32-dwconv/gen/f32-dwconv-9p1c-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p1c-minmax-scalar.c
   src/f32-dwconv/gen/f32-dwconv-9p1c-scalar-acc2.c
@@ -5376,6 +5396,12 @@ SET(ALL_WASM_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-4p1c-minmax-wasm.c
   src/f32-dwconv/gen/f32-dwconv-4p2c-minmax-wasm-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p2c-minmax-wasm.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-minmax-wasm-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-minmax-wasm.c
+  src/f32-dwconv/gen/f32-dwconv-6f6m7l1c1s1r-minmax-wasm-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-6f6m7l1c1s1r-minmax-wasm.c
+  src/f32-dwconv/gen/f32-dwconv-8f8m9l1c1s1r-minmax-wasm-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-8f8m9l1c1s1r-minmax-wasm.c
   src/f32-dwconv/gen/f32-dwconv-9p1c-minmax-wasm-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p1c-minmax-wasm.c
   src/f32-dwconv/gen/f32-dwconv-9p2c-minmax-wasm-acc2.c
