@@ -30,15 +30,15 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_p6_div_nabs_pmax(
   const v128_t vlog2e = wasm_f32x4_const_splat(0x1.715476p+0f);
   const v128_t vminus_ln2 = wasm_f32x4_const_splat(-0x1.62E430p-1f);
   // Coefficient of polynomial approximation
-  //   exp(-2t) - 1 ~ -2 * (t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6))))))
-  // on [-log(2)/2, log(2)/2]
-  const v128_t vc6 = wasm_f32x4_const_splat(0x1.6b7338p-5f);
-  const v128_t vc5 = wasm_f32x4_const_splat(0x1.12278Ep-3f);
-  const v128_t vc4 = wasm_f32x4_const_splat(0x1.555716p-2f);
-  const v128_t vc3 = wasm_f32x4_const_splat(0x1.5554B0p-1f);
-  const v128_t vc2 = wasm_f32x4_const_splat(0x1.FFFFFEp-1f);
-  const v128_t vone = wasm_f32x4_const_splat(1.0f);
+  //   exp(2t) - 1 ~ t * (2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
+  // on [-log(2)/4, log(2)/4]
+  const v128_t vc6 = wasm_f32x4_const_splat(0x1.6b7338p-4f);
+  const v128_t vc5 = wasm_f32x4_const_splat(0x1.12278Ep-2f);
+  const v128_t vc4 = wasm_f32x4_const_splat(0x1.555716p-1f);
+  const v128_t vc3 = wasm_f32x4_const_splat(0x1.5554B0p+0f);
+  const v128_t vc2 = wasm_f32x4_const_splat(0x1.FFFFFEp+0f);
   const v128_t vtwo = wasm_f32x4_const_splat(2.0f);
+  const v128_t vone = wasm_f32x4_const_splat(1.0f);
 
   for (; n != 0; n -= 4 * sizeof(float)) {
     const v128_t vx = wasm_v128_load(input);
@@ -83,23 +83,21 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_p6_div_nabs_pmax(
     const v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2), vz);
 
     // Compute degree-6 polynomial approximation for exp(2t) - 1 on [-log(2)/4, log(2)/4].
-    //   P(2t) = 2t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
-    //          = 2t + 2t * (t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
-    //          = 2 * (t + t * p)
+    //   P(2t) = t * (2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
+    //         = t * p
     v128_t vp = wasm_f32x4_add(wasm_f32x4_mul(vc6, vt), vc5);
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc4);
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc3);
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc2);
-    vp = wasm_f32x4_mul(vp, vt);
+    vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vtwo);
 
     // Reconstruct the exp(x) - 1 value:
-    //   exp(x) - 1 = s * (1 + 2t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))) - 1
-    //              = (s - 1) + s * (2t) * (t + t * p)
-    //              = (s - 1) + 2 * ((t * s) + (t * s) * p)
+    //   exp(x) - 1 = s * (2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6))))) - 1
+    //              = (s - 1) + s * t * p
+    //              = (s - 1) + (t * s) * p
     const v128_t vts = wasm_f32x4_mul(vt, vs);
     const v128_t vsm1 = wasm_f32x4_sub(vs, vone);
-    vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vts), vts);
-    const v128_t vem1 = wasm_f32x4_add(wasm_f32x4_mul(vp, vtwo), vsm1);
+    const v128_t vem1 = wasm_f32x4_add(wasm_f32x4_mul(vp, vts), vsm1);
 
     // Reconstruct tanh(-z) := expm1(-2z) / (2 + expm1(-2z))
     const v128_t vep1 = wasm_f32x4_add(vem1, vtwo);

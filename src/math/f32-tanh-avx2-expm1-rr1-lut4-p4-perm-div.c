@@ -34,13 +34,13 @@ void xnn_math_f32_tanh__avx2_expm1_rr1_lut4_p4_perm_div(
     0x1.EE89FAp-1f, 0x1.EA09E6p-1f, 0x1.F06FE0p-1f, 0x1.000000p+0f);
   const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
   // Coefficient of polynomial approximation
-  //   exp(2t) - 1 ~ -2 * (t * (1 + t * (c2 + t * (c3 + t * c4))))
-  // on [-log(2)/8, log(2)/8]
-  const __m256 vc4 = _mm256_set1_ps(0x1.554F9Ap-2f);
-  const __m256 vc3 = _mm256_set1_ps(0x1.557082p-1f);
-  const __m256 vc2 = _mm256_set1_ps(0x1.000002p+0f);
-  const __m256 vone = _mm256_set1_ps(1.0f);
+  //   exp(2t) - 1 ~ t * (2 + t * (c2 + t * (c3 + t * c4)))
+  // on [-log(2)/16, log(2)/16]
+  const __m256 vc4 = _mm256_set1_ps(0x1.554F9Ap-1f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.557082p+0f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.000002p+1f);
   const __m256 vtwo = _mm256_set1_ps(2.0f);
+  const __m256 vone = _mm256_set1_ps(1.0f);
 
   for (; n != 0; n -= 8 * sizeof(float)) {
     const __m256 vx = _mm256_load_ps(input);
@@ -98,21 +98,19 @@ void xnn_math_f32_tanh__avx2_expm1_rr1_lut4_p4_perm_div(
     const __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vz);
 
     // Compute degree-4 polynomial approximation for exp(2t) - 1 on [-log(2)/16, log(2)/16].
-    //   P(2t) = t * (1 + t * (c2 + t * (c3 + t * c4)))
-    //          = t + t * (t * (c2 + t * (c3 + t * c4)))
-    //          = 2 * (t + t * p)
+    //   P(2t) = t * (2 + t * (c2 + t * (c3 + t * c4)))
+    //         = t * p
     __m256 vp = _mm256_fmadd_ps(vc4, vt, vc3);
     vp = _mm256_fmadd_ps(vp, vt, vc2);
-    vp = _mm256_mul_ps(vp, vt);
+    vp = _mm256_fmadd_ps(vp, vt, vtwo);
 
     // Reconstruct the exp(x) - 1 value:
-    //   exp(x) - 1 = s * (1 + 2t * (1 + t * (c2 + t * (c3 + t * c4)))) - 1
-    //              = (s - 1) + s * (2t) * (t + t * p)
-    //              = (s - 1) + 2 * ((t * s) + (t * s) * p)
+    //   exp(x) - 1 = s * (2 + t * (c2 + t * (c3 + t * c4))) - 1
+    //              = (s - 1) + s * t * p
+    //              = (s - 1) + (t * s) * p
     const __m256 vts = _mm256_mul_ps(vt, vs);
     const __m256 vsm1 = _mm256_sub_ps(vs, vone);
-    vp = _mm256_fmadd_ps(vp, vts, vts);
-    const __m256 vem1 = _mm256_fmadd_ps(vp, vtwo, vsm1);
+    const __m256 vem1 = _mm256_fmadd_ps(vp, vts, vsm1);
 
     // Reconstruct tanh(-z) := expm1(-2z) / (2 + expm1(-2z))
     const __m256 vep1 = _mm256_add_ps(vem1, vtwo);

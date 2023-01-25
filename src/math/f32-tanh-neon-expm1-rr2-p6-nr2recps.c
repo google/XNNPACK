@@ -30,15 +30,15 @@ void xnn_math_f32_tanh__neon_expm1_rr2_p6_nr2recps(
   const float32x4_t vln2_hi = vmovq_n_f32(0x1.62E420p-1f);
   const float32x4_t vln2_lo = vmovq_n_f32(0x1.FDF474p-22f);
   // Coefficient of polynomial approximation
-  //   exp(-2t) - 1 ~ -2 * (t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6))))))
-  // on [-log(2)/2, log(2)/2]
-  const float32x4_t vc6 = vmovq_n_f32(-0x1.6b7338p-5f);
-  const float32x4_t vc5 = vmovq_n_f32(0x1.12278Ep-3f);
-  const float32x4_t vc4 = vmovq_n_f32(-0x1.555716p-2f);
-  const float32x4_t vc3 = vmovq_n_f32(0x1.5554B0p-1f);
-  const float32x4_t vc2 = vmovq_n_f32(-0x1.FFFFFEp-1f);
-  const float32x4_t vone = vmovq_n_f32(1.0f);
+  //   exp(-2t) - 1 ~ t * (-2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
+  // on [-log(2)/4, log(2)/4]
+  const float32x4_t vc6 = vmovq_n_f32(0x1.6b7338p-4f);
+  const float32x4_t vc5 = vmovq_n_f32(-0x1.12278Ep-2f);
+  const float32x4_t vc4 = vmovq_n_f32(0x1.555716p-1f);
+  const float32x4_t vc3 = vmovq_n_f32(-0x1.5554B0p+0f);
+  const float32x4_t vc2 = vmovq_n_f32(0x1.FFFFFEp+0f);
   const float32x4_t vminus_two = vmovq_n_f32(-2.0f);
+  const float32x4_t vone = vmovq_n_f32(1.0f);
   // Mask for the sign bit.
   const uint32x4_t vsign_mask = vmovq_n_u32(UINT32_C(0x80000000));
 
@@ -81,24 +81,22 @@ void xnn_math_f32_tanh__neon_expm1_rr2_p6_nr2recps(
     float32x4_t vt = vmlaq_f32(vz, vn, vln2_hi);
     vt = vmlaq_f32(vt, vn, vln2_lo);
 
-    // Compute degree-6 polynomial approximation for exp(-2t) - 1 on [-log(2)/4, log(2)/4].
-    //   P(-2t) = t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
-    //          = t + t * (t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
-    //          = -2 * (t + t * p)
+    // Compute degree-6 polynomial approximation for exp(2t) - 1 on [-log(2)/4, log(2)/4].
+    //   P(-2t) = t * (-2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
+    //          = t * p
     float32x4_t vp = vmlaq_f32(vc5, vc6, vt);
     vp = vmlaq_f32(vc4, vp, vt);
     vp = vmlaq_f32(vc3, vp, vt);
     vp = vmlaq_f32(vc2, vp, vt);
-    vp = vmulq_f32(vp, vt);
+    vp = vmlaq_f32(vminus_two, vp, vt);
 
     // Reconstruct the exp(x) - 1 value:
-    //   exp(x) - 1 = s * (1 - 2t * (1 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))) - 1
-    //              = (s - 1) + s * (-2t) * (t + t * p)
-    //              = (s - 1) - 2 * ((t * s) + (t * s) * p)
-    vt = vmulq_f32(vt, vs);
+    //   exp(x) - 1 = s * (-2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6))))) - 1
+    //              = (s - 1) + s * t * p
+    //              = (s - 1) + (t * s) * p
+    const float32x4_t vts = vmulq_f32(vt, vs);
     const float32x4_t vsm1 = vsubq_f32(vs, vone);
-    vp = vmlaq_f32(vt, vp, vt);
-    const float32x4_t vem1 = vmlaq_f32(vsm1, vp, vminus_two);
+    const float32x4_t vem1 = vmlaq_f32(vsm1, vp, vts);
 
     // Denominator of the tanh fraction: 1.0 + exp(-2z) = 2.0 + expm1(-2z)
     const float32x4_t vep1 = vsubq_f32(vem1, vminus_two);

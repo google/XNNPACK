@@ -29,13 +29,13 @@ void xnn_math_f32_tanh__fma_expm1_rr1_lut8_p4_div(
   const uint32_t vindex_mask = UINT32_C(0x7);
   const float vln2 = 0x1.62E430p-1f;
   // Coefficient of polynomial approximation
-  //   exp(-2t) - 1 ~ -2 * (t * (1 + t * (c2 + t * (c3 + t * c4))))
+  //   exp(-2t) - 1 ~ t * (-2 + t * (c2 + t * (c3 + t * c4)))
   // on [-log(2)/32, log(2)/32]
-  const float vc4 = -0x1.5558ECp-2f;
-  const float vc3 = 0x1.555C20p-1f;
-  const float vc2 = -0x1.000000p+0f;
-  const float vone = 1.0f;
+  const float vc4 = 0x1.5558ECp-1f;
+  const float vc3 = -0x1.555C20p+0f;
+  const float vc2 = 0x1.000000p+1f;
   const float vminus_two = -2.0f;
+  const float vone = 1.0f;
   // The largest z for which tanhf(-z) is not saturated at -1.0f.
   const float vsat_cutoff = 0x1.205966p+3f;
 
@@ -84,21 +84,19 @@ void xnn_math_f32_tanh__fma_expm1_rr1_lut8_p4_div(
     float vt = fmaf(vn, vln2, vz);
 
     // Compute degree-4 polynomial approximation for exp(-2t) - 1 on [-log(2)/32, log(2)/32].
-    //   P(-2t) = t * (1 + t * (c2 + t * (c3 + t * c4)))
-    //          = t + t * (t * (c2 + t * (c3 + t * c4)))
-    //          = -2 * (t + t * p)
+    //   P(-2t) = t * (-2 + t * (c2 + t * (c3 + t * c4)))
+    //          = t * p
     float vp = fmaf(vc4, vt, vc3);
     vp = fmaf(vp, vt, vc2);
-    vp *= vt;
+    vp = fmaf(vp, vt, vminus_two);
 
     // Reconstruct the exp(x) - 1 value:
-    //   exp(x) - 1 = s * (1 - 2t * (1 + t * (c2 + t * (c3 + t * c4)))) - 1
-    //              = (s - 1) + s * (-2t) * (t + t * p)
-    //              = (s - 1) - 2 * ((t * s) + (t * s) * p)
-    vt *= vs;
+    //   exp(x) - 1 = s * (-2 + t * (c2 + t * (c3 + t * c4))) - 1
+    //              = (s - 1) + s * t * p
+    //              = (s - 1) + (t * s) * p
+    const float vts = vt * vs;
     const float vsm1 = vs - vone;
-    vp = fmaf(vp, vt, vt);
-    const float vem1 = fmaf(vminus_two, vp, vsm1);
+    const float vem1 = fmaf(vp, vts, vsm1);
 
     // Reconstruct tanh(-z) := expm1(-2z) / (2 + expm1(-2z))
     const float vep1 = vem1 - vminus_two;

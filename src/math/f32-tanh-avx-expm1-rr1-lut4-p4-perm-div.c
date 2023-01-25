@@ -36,8 +36,8 @@ void xnn_math_f32_tanh__avx_expm1_rr1_lut4_p4_perm_div(
     0x1.AE89FAp+0f, 0x1.6A09E6p+0f, 0x1.306FE0p+0f, 0x1.000000p+0f);
   const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
   // Coefficient of polynomial approximation
-  //   exp(2t) - 1 ~ -2 * (t * (1 + t * (c2 + t * (c3 + t * c4))))
-  // on [-log(2)/8, log(2)/8]
+  //   exp(2t) - 1 ~ 2 * (t * (1 + t * (c2 + t * (c3 + t * c4))))
+  // on [-log(2)/16, log(2)/16]
   const __m256 vc4 = _mm256_set1_ps(0x1.554F9Ap-2f);
   const __m256 vc3 = _mm256_set1_ps(0x1.557082p-1f);
   const __m256 vc2 = _mm256_set1_ps(0x1.000002p+0f);
@@ -103,7 +103,7 @@ void xnn_math_f32_tanh__avx_expm1_rr1_lut4_p4_perm_div(
     // Compute reduced argument t := z - n * log(2).
     const __m256 vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2), vz);
 
-    // Compute degree-6 polynomial approximation for exp(2t) - 1 on [-log(2)/4, log(2)/4].
+    // Compute degree-4 polynomial approximation for exp(2t) - 1 on [-log(2)/16, log(2)/16].
     //   P(2t) = 2t * (1 + t * (c2 + t * (c3 + t * c4)))
     //          = 2t + 2t * (t * (c2 + t * (c3 + t * c4)))
     //          = 2 * (t + t * p)
