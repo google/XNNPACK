@@ -6143,8 +6143,6 @@ ALL_WASMSIMD_MICROKERNEL_SRCS = [
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-wasmsimd-x86-splat-2x4.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-wasmsimd-x86-splat-3x4-acc2.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-wasmsimd-x86-splat-3x4.c",
-    "src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-wasmsimd-acc2.c",
-    "src/f32-dwconv/gen/f32-dwconv-2f2m2l4c4s4r-wasmsimd.c",
     "src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmsimd-arm-acc2.c",
     "src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmsimd-arm.c",
     "src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmsimd-x86-acc2.c",
