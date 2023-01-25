@@ -294,6 +294,145 @@ static void DWConvEnd2EndBenchmark(
       16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEONFMA);
   }
 
+  static void f32_dwconv_25p8c__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__neonfma,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      8 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckNEONFMA);
+  }
+
+  static void f32_dwconv_25p8c__neonfma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__neonfma_acc2,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      8 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckNEONFMA);
+  }
+
+  static void f32_dwconv_5f5m5l4c4s4r__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__neonfma,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25,
+      benchmark::utils::CheckNEONFMA);
+  }
+  static void f32_dwconv_5f5m5l4c4s4r__neonfma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__neonfma_acc2,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25,
+      benchmark::utils::CheckNEONFMA);
+  }
+  static void f32_dwconv_5f5m5l8c4s4r__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l8c4s4r__neonfma,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      /*channel_tile=*/8, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25,
+      benchmark::utils::CheckNEONFMA);
+  }
+  static void f32_dwconv_5f5m5l8c4s4r__neonfma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l8c4s4r__neonfma_acc2,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      /*channel_tile=*/8, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25,
+      benchmark::utils::CheckNEONFMA);
+  }
+
+  static void f32_dwconv_6f6m7l4c4s4r__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_6f6m7l4c4s4r__neonfma,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
+      /*primary_tile_to_replace=*/25,
+      benchmark::utils::CheckNEONFMA);
+  }
+  static void f32_dwconv_6f6m7l4c4s4r__neonfma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_6f6m7l4c4s4r__neonfma_acc2,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
+      /*primary_tile_to_replace=*/25,
+      benchmark::utils::CheckNEONFMA);
+  }
+  static void f32_dwconv_6f6m7l8c4s4r__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_6f6m7l8c4s4r__neonfma,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      /*channel_tile=*/8, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
+      /*primary_tile_to_replace=*/25,
+      benchmark::utils::CheckNEONFMA);
+  }
+  static void f32_dwconv_6f6m7l8c4s4r__neonfma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_6f6m7l8c4s4r__neonfma_acc2,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      /*channel_tile=*/8, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
+      /*primary_tile_to_replace=*/25,
+      benchmark::utils::CheckNEONFMA);
+  }
+
+  static void f32_dwconv_8f8m9l4c4s4r__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_8f8m9l4c4s4r__neonfma,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
+      /*primary_tile_to_replace=*/25,
+      benchmark::utils::CheckNEONFMA);
+  }
+  static void f32_dwconv_8f8m9l4c4s4r__neonfma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_8f8m9l4c4s4r__neonfma_acc2,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
+      /*primary_tile_to_replace=*/25,
+      benchmark::utils::CheckNEONFMA);
+  }
+  static void f32_dwconv_8f8m9l8c4s4r__neonfma(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_8f8m9l8c4s4r__neonfma,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      /*channel_tile=*/8, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
+      /*primary_tile_to_replace=*/25,
+      benchmark::utils::CheckNEONFMA);
+  }
+  static void f32_dwconv_8f8m9l8c4s4r__neonfma_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_8f8m9l8c4s4r__neonfma_acc2,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      /*channel_tile=*/8, /*channel_subtile=*/4, /*channel_round=*/4,
+      /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
+      /*primary_tile_to_replace=*/25,
+      benchmark::utils::CheckNEONFMA);
+  }
+
   static void f32_dwconv_25p8c__neon(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_f32_dwconv_minmax_ukernel_25p8c__neon,
@@ -439,6 +578,24 @@ static void DWConvEnd2EndBenchmark(
   BENCHMARK_FP32_END2END(f32_dwconv_9p8c__neonfma_acc2);
   BENCHMARK_FP32_END2END(f32_dwconv_9p16c__neonfma);
   BENCHMARK_FP32_END2END(f32_dwconv_9p16c__neonfma_acc2);
+
+  BENCHMARK_FP32_END2END(f32_dwconv_25p8c__neonfma);
+  BENCHMARK_FP32_END2END(f32_dwconv_25p8c__neonfma_acc2);
+
+  BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l4c4s4r__neonfma);
+  BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l4c4s4r__neonfma_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l8c4s4r__neonfma);
+  BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l8c4s4r__neonfma_acc2);
+
+  BENCHMARK_FP32_END2END(f32_dwconv_6f6m7l4c4s4r__neonfma);
+  BENCHMARK_FP32_END2END(f32_dwconv_6f6m7l4c4s4r__neonfma_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_6f6m7l8c4s4r__neonfma);
+  BENCHMARK_FP32_END2END(f32_dwconv_6f6m7l8c4s4r__neonfma_acc2);
+
+  BENCHMARK_FP32_END2END(f32_dwconv_8f8m9l4c4s4r__neonfma);
+  BENCHMARK_FP32_END2END(f32_dwconv_8f8m9l4c4s4r__neonfma_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_8f8m9l8c4s4r__neonfma);
+  BENCHMARK_FP32_END2END(f32_dwconv_8f8m9l8c4s4r__neonfma_acc2);
 
   BENCHMARK_FP32_END2END(f32_dwconv_9p4c__neon);
   BENCHMARK_FP32_END2END(f32_dwconv_9p4c__neon_acc2);
