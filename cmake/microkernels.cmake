@@ -1087,7 +1087,11 @@ SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/math/f32-sqrt-avx512f-nr1fma.c
   src/math/f32-sqrt-avx512f-nr2fma.c
   src/math/f32-tanh-avx512f-expm1-rr1-lut4-p4-perm-div.c
-  src/math/f32-tanh-avx512f-expm1-rr1-p6-div.c)
+  src/math/f32-tanh-avx512f-expm1-rr1-lut4-p4-perm-nr1fma1adj.c
+  src/math/f32-tanh-avx512f-expm1-rr1-lut4-p4-perm-nr1fma.c
+  src/math/f32-tanh-avx512f-expm1-rr1-p6-div.c
+  src/math/f32-tanh-avx512f-expm1-rr1-p6-nr1fma1adj.c
+  src/math/f32-tanh-avx512f-expm1-rr1-p6-nr1fma.c)
 
 SET(ALL_AVX512SKX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-x16.c
