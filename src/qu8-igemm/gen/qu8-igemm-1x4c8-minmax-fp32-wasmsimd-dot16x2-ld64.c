@@ -59,8 +59,8 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld64(
       }
       a += 1;
 
-      size_t k = 0;
-      while (k < kc) {
+      size_t k = kc;
+      do {
         const v128_t vxa0 = wasm_u16x8_load8x8(a0);
         a0 += 8;
 
@@ -78,8 +78,8 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld64(
         vacc0x3 = wasm_i32x4_add(vacc0x3, wasm_i32x4_dot_i16x8(vxa0, vxb3));
 
         w = (const void*) ((const uint8_t*) w + 32);
-        k += 8 * sizeof(uint8_t);
-      }
+        k -= 8 * sizeof(uint8_t);
+      } while (k != 0);
       p -= 1 * sizeof(void*);
     } while (p != 0);
 
