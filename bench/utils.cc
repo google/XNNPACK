@@ -417,13 +417,22 @@ void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
-// Check if PSHUFB instruction is available in WAsm Relaxed SIMD as Relaxed Swizzle.
-// If WAsm PSHUFB is unsupported, report error in benchmark state, and return false.
 #if XNN_ARCH_WASMRELAXEDSIMD
   bool CheckWAsmPSHUFB(benchmark::State& state) {
     const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     if (hardware_config == nullptr || !hardware_config->use_wasm_pshufb) {
       state.SkipWithError("no WAsm PSHUFB support");
+      return false;
+    }
+    return true;
+  }
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  bool CheckWAsmSDOT(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_wasm_sdot) {
+      state.SkipWithError("no WAsm SDOT support");
       return false;
     }
     return true;

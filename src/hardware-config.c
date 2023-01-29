@@ -118,19 +118,34 @@ static void init_hardware_config(void) {
   #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
   #if XNN_ARCH_WASMRELAXEDSIMD
-    // Check if out-of-bounds behavior of Relaxed Swizzle is consistent with PSHUFB.
-    const v128_t table = wasm_i8x16_const(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
-    const v128_t index_mask = wasm_i8x16_const_splat(INT8_C(0x8F));
-    const volatile v128_t index_increment = wasm_i8x16_const_splat(16);  // volatile to confuse Clang which otherwise mis-compiles
-    v128_t index = wasm_i8x16_const(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
-    v128_t diff = wasm_i8x16_const_splat(0);
-    for (uint32_t i = 16; i != 0; i--) {
-      const v128_t pshufb_result = wasm_i8x16_swizzle(table, wasm_v128_and(index, index_mask));
-      const v128_t relaxed_result = __builtin_wasm_relaxed_swizzle_i8x16(table, index);
-      diff = wasm_v128_or(diff, wasm_v128_xor(pshufb_result, relaxed_result));
-      index = wasm_i8x16_add(index, index_increment);
+    {
+      // Check if out-of-bounds behavior of Relaxed Swizzle is consistent with PSHUFB.
+      const v128_t table = wasm_i8x16_const(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+      const v128_t index_mask = wasm_i8x16_const_splat(INT8_C(0x8F));
+      const volatile v128_t index_increment = wasm_i8x16_const_splat(16);  // volatile to confuse Clang which otherwise mis-compiles
+      v128_t index = wasm_i8x16_const(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+      v128_t diff = wasm_i8x16_const_splat(0);
+      for (uint32_t i = 16; i != 0; i--) {
+        const v128_t pshufb_result = wasm_i8x16_swizzle(table, wasm_v128_and(index, index_mask));
+        const v128_t relaxed_result = __builtin_wasm_relaxed_swizzle_i8x16(table, index);
+        diff = wasm_v128_or(diff, wasm_v128_xor(pshufb_result, relaxed_result));
+        index = wasm_i8x16_add(index, index_increment);
+      }
+      hardware_config.use_wasm_pshufb = !wasm_v128_any_true(diff);
     }
-    hardware_config.use_wasm_pshufb = !wasm_v128_any_true(diff);
+
+    {
+      // Check out-of-bounds behaviour of Relaxed Integer Dot Product with Accumulation.
+      const v128_t int8_input = wasm_i8x16_const(0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0);
+      const volatile v128_t xint8_input = wasm_i8x16_const(0, 0, 0, -128, 0, 0, -128, 0, 0, -128, 0, 0, -128, 0, 0, 0);  // volatile to confuse Clang which otherwise ICE's
+      const v128_t xint8_output = __builtin_wasm_dot_i8x16_i7x16_add_s_i32x4(int8_input, xint8_input, wasm_i8x16_const_splat(0));
+
+      const volatile v128_t overflow_input = wasm_i8x16_const(-128, -128, -128, -128, -128, -128, -1, -1, -1, -1, -128, -128, -1, -1, -1, -1);  // volatile to confuse Clang which otherwise ICE's
+      const v128_t overflow_output = __builtin_wasm_dot_i8x16_i7x16_add_s_i32x4(wasm_i8x16_const_splat(-128), overflow_input, wasm_i8x16_const_splat(0));
+      hardware_config.use_wasm_sdot = !wasm_v128_any_true(wasm_v128_or(
+        wasm_v128_xor(xint8_output, wasm_i32x4_const_splat(-128)),
+        wasm_v128_xor(overflow_output, wasm_i32x4_const(65536, 33024, 33024, 512))));
+    }
   #endif  // XNN_ARCH_WASMRELAXEDSIMD
 }
 

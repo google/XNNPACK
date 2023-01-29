@@ -68,8 +68,9 @@ _ISA_TO_ARCH_MAP = {
   "wasm32": ["wasm", "wasmsimd"],
   "wasm": ["wasm", "wasmsimd", "wasmrelaxedsimd"],
   "wasmsimd": ["wasmsimd", "wasmrelaxedsimd"],
-  "wasmpshufb": ["wasmrelaxedsimd"],
   "wasmrelaxedsimd": ["wasmrelaxedsimd"],
+  "wasmpshufb": ["wasmrelaxedsimd"],
+  "wasmsdot": ["wasmrelaxedsimd"],
 }
 
 _ISA_TO_CHECK_MAP = {
@@ -96,6 +97,7 @@ _ISA_TO_CHECK_MAP = {
   "avx512vbmi": "TEST_REQUIRES_X86_AVX512VBMI",
   "rvv": "TEST_REQUIRES_RISCV_VECTOR",
   "wasmpshufb": "TEST_REQUIRES_WASM_PSHUFB",
+  "wasmsdot": "TEST_REQUIRES_WASM_SDOT",
 }
 
 

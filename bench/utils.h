@@ -165,6 +165,10 @@ bool CheckAVX512VBMI(benchmark::State& state);
 // If WAsm PSHUFB is unsupported, report error in benchmark state, and return false.
 bool CheckWAsmPSHUFB(benchmark::State& state);
 
+// Check if SDOT instruction is available in WAsm Relaxed SIMD as Relaxed Integer Dot Product with Accumulation.
+// If WAsm SDOT is unsupported, report error in benchmark state, and return false.
+bool CheckWAsmSDOT(benchmark::State& state);
+
 template <class T>
 inline T DivideRoundUp(T x, T q) {
   return x / q + T(x % q != 0);

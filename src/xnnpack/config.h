@@ -55,6 +55,7 @@ struct xnn_hardware_config {
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 #if XNN_ARCH_WASMRELAXEDSIMD
   bool use_wasm_pshufb;
+  bool use_wasm_sdot;
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 };
 
