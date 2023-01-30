@@ -301,6 +301,47 @@ static void f16_dwconv(benchmark::State& state,
   BENCHMARK_DWCONV(f16_dwconv_25p32c__neonfp16arith)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  static void f16_dwconv_25p8c__fma3(benchmark::State& state, const char* net) {
+    f16_dwconv(
+      state, xnn_f16_dwconv_minmax_ukernel_25p8c__fma3, xnn_init_f16_minmax_avx_params,
+      /*channel_tile=*/8, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckFMA3);
+  }
+  static void f16_dwconv_25p8c__fma3_acc2(benchmark::State& state, const char* net) {
+    f16_dwconv(
+      state, xnn_f16_dwconv_minmax_ukernel_25p8c__fma3_acc2, xnn_init_f16_minmax_avx_params,
+      /*channel_tile=*/8, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckFMA3);
+  }
+  static void f16_dwconv_25p16c__fma3(benchmark::State& state, const char* net) {
+    f16_dwconv(
+      state, xnn_f16_dwconv_minmax_ukernel_25p16c__fma3, xnn_init_f16_minmax_avx_params,
+      /*channel_tile=*/16, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckFMA3);
+  }
+  static void f16_dwconv_25p16c__fma3_acc2(benchmark::State& state, const char* net) {
+    f16_dwconv(
+      state, xnn_f16_dwconv_minmax_ukernel_25p16c__fma3_acc2, xnn_init_f16_minmax_avx_params,
+      /*channel_tile=*/16, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckFMA3);
+  }
+  static void f16_dwconv_25p32c__fma3(benchmark::State& state, const char* net) {
+    f16_dwconv(
+      state, xnn_f16_dwconv_minmax_ukernel_25p32c__fma3, xnn_init_f16_minmax_avx_params,
+      /*channel_tile=*/32, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckFMA3);
+  }
+  static void f16_dwconv_25p32c__fma3_acc2(benchmark::State& state, const char* net) {
+    f16_dwconv(
+      state, xnn_f16_dwconv_minmax_ukernel_25p32c__fma3_acc2, xnn_init_f16_minmax_avx_params,
+      /*channel_tile=*/32, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckFMA3);
+  }
+
+  BENCHMARK_DWCONV(f16_dwconv_25p8c__fma3)
+  BENCHMARK_DWCONV(f16_dwconv_25p8c__fma3_acc2)
+  BENCHMARK_DWCONV(f16_dwconv_25p16c__fma3)
+  BENCHMARK_DWCONV(f16_dwconv_25p16c__fma3_acc2)
+  BENCHMARK_DWCONV(f16_dwconv_25p32c__fma3)
+  BENCHMARK_DWCONV(f16_dwconv_25p32c__fma3_acc2)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
