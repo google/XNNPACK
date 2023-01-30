@@ -1399,7 +1399,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
   int8_t* c0 = c;
 
@@ -1498,7 +1498,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_4x16c8__avx512skx(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
   int8_t* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
@@ -1685,7 +1685,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x16c8__avx512skx(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
   int8_t* c0 = c;
 
   const __mmask16 vbias_mask = _cvtu32_mask16(0x1111);
@@ -1795,7 +1795,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_4x16c8__avx512skx(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
   int8_t* c0 = c;
   int8_t* c1 = (int8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {
@@ -2937,7 +2937,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
   int8_t* c0 = c;
 
@@ -3034,7 +3034,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_4x16c8__avx512skx(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
   int8_t* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
@@ -3219,7 +3219,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x16c8__avx512skx(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
   int8_t* c0 = c;
 
   const __mmask16 vbias_mask = _cvtu32_mask16(0x1111);
@@ -3327,7 +3327,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_4x16c8__avx512skx(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
   int8_t* c0 = c;
   int8_t* c1 = (int8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {
@@ -4595,7 +4595,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(uint8_t));
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
 
@@ -4693,7 +4693,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x16c8__avx512skx(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(uint8_t));
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
   const uint8_t* a1 = (const uint8_t*) ((uintptr_t) a0 + a_stride);
@@ -4879,7 +4879,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x16c8__avx512skx(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(uint8_t));
   uint8_t* c0 = c;
 
   const __mmask16 vbias_mask = _cvtu32_mask16(0x1111);
@@ -4988,7 +4988,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_4x16c8__avx512skx(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(uint8_t));
   uint8_t* c0 = c;
   uint8_t* c1 = (uint8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {

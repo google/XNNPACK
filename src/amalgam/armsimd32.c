@@ -1217,7 +1217,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x2c4__armsimd32(
   assert(nc != 0);
   assert(kc != 0);
 
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
+  kc = round_up_po2(kc, 4 * sizeof(uint8_t));
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
 
@@ -1318,7 +1318,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x2c4__armsimd32(
   assert(nc != 0);
   assert(kc != 0);
 
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
+  kc = round_up_po2(kc, 4 * sizeof(uint8_t));
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
   const uint8_t* a1 = (const uint8_t*) ((uintptr_t) a0 + a_stride);
@@ -1460,7 +1460,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x2c4__armsimd32(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
+  kc = round_up_po2(kc, 4 * sizeof(uint8_t));
   uint8_t* c0 = c;
 
   const int16x2_t vb_minus_zero_point = (int16x2_t) params->fp32_armsimd32.minus_kernel_zero_point;
@@ -1577,7 +1577,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x2c4__armsimd32(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
+  kc = round_up_po2(kc, 4 * sizeof(uint8_t));
   uint8_t* c0 = c;
   uint8_t* c1 = (uint8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr != 2) {
