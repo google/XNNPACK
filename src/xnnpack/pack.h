@@ -649,6 +649,22 @@ XNN_INTERNAL void xnn_pack_f32_dwconv_multipass_ghw_w(
   size_t extra_bytes,
   const void* params);
 
+XNN_INTERNAL void xnn_pack_f16_dwconv_multipass_ghw_w(
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
+  const uint16_t* k,
+  const uint16_t* b,
+  uint16_t* packed_weights,
+  size_t extra_bytes,
+  const void* params);
+
 typedef void (*xnn_pack_dwconv_multipass_hwg_w_fn)(
   size_t first_pass_tile,
   size_t middle_pass_tile,
@@ -679,6 +695,22 @@ XNN_INTERNAL void xnn_pack_f32_dwconv_multipass_hwg_w(
   const float* k,
   const float* b,
   float* packed_weights,
+  size_t extra_bytes,
+  const void* params);
+
+XNN_INTERNAL void xnn_pack_f16_dwconv_multipass_hwg_w(
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
+  const uint16_t* k,
+  const uint16_t* b,
+  uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params);
 
