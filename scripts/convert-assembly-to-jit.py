@@ -93,6 +93,8 @@ INSTR_REG_REG_MEMOP_OFFSET_RE = re.compile(INSTR + REG + COMMA + REG + COMMA +
 # e.g. LDP q20, q21, [x5], 32
 INSTR_REG_REG_MEMOP_IMM_RE = re.compile(INSTR + REG + COMMA + REG + COMMA +
                                         MEMOP + COMMA + IMM + COMMENTS)
+# e.g. PLD [r9]
+INSTR_MEMOP_RE = re.compile(INSTR + MEMOP + COMMENTS)
 # e.g. PLD [r4, 64]
 INSTR_MEMOP_OFFSET_RE = re.compile(INSTR + MEMOP_OFFSET + COMMENTS)
 # e.g. movlo r12, r3, vdup.32 q0, d14[0]
@@ -805,6 +807,17 @@ def parse_microkernel(
       else:
         emit_instruction(
             f'{fix_instr_name(m[1])}(mem[{m[2]}, {m[3]}]){sc} {m[4]}',
+            instructions, vector_register_map, vector_register_usage)
+      continue
+    m = re.fullmatch(INSTR_MEMOP_RE, line)
+    if m:
+      if m[1].lower() == 'pld':
+        emit_prefetch_instruction(
+            f'{fix_instr_name(m[1])}(mem[{m[2]}]){sc} {m[4]}', prfm,
+            instructions)
+      else:
+        emit_instruction(
+            f'{fix_instr_name(m[1])}(mem[{m[2]}]){sc} {m[4]}',
             instructions, vector_register_map, vector_register_usage)
       continue
     m = re.fullmatch(INSTR_REG_MEMOP_RE, line)
