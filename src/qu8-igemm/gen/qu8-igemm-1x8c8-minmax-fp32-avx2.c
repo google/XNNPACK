@@ -42,7 +42,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x8c8__avx2(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(uint8_t));
   uint8_t* c0 = c;
 
   do {

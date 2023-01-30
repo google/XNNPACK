@@ -45,7 +45,7 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c2__w
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 2);
+  kc = round_up_po2(kc, 2 * sizeof(${XINT8_T}));
   const ${XINT8_T}* a0 = a;
   ${XINT8_T}* c0 = c;
   $for M in range(1, MR):

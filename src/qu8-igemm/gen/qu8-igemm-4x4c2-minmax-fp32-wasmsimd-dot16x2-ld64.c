@@ -40,7 +40,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_4x4c2__wasmsimd_dot16x2_ld64(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 2);
+  kc = round_up_po2(kc, 2 * sizeof(uint8_t));
   uint8_t* c0 = c;
   uint8_t* c1 = (uint8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {

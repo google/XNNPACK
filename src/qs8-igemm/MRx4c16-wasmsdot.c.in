@@ -40,7 +40,7 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_fp32_ukernel_${MR}x4c16__wasmsdot(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 16);
+  kc = round_up_po2(kc, 16 * sizeof(int8_t));
   int8_t* c0 = c;
   $for M in range(1, MR):
     int8_t* c${M} = (int8_t*) ((uintptr_t) c${M-1} + cm_stride);

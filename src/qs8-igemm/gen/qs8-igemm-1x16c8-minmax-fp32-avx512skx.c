@@ -39,7 +39,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x16c8__avx512skx(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(int8_t));
   int8_t* c0 = c;
 
   const __mmask16 vbias_mask = _cvtu32_mask16(0x1111);

@@ -34,7 +34,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x1c4__armsimd32(
   assert(nc != 0);
   assert(kc != 0);
 
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
+  kc = round_up_po2(kc, 4 * sizeof(uint8_t));
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
   const uint8_t* a1 = (const uint8_t*) ((uintptr_t) a0 + a_stride);

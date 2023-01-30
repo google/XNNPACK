@@ -41,7 +41,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x1c4__armsimd32(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
+  kc = round_up_po2(kc, 4 * sizeof(uint8_t));
   uint8_t* c0 = c;
   uint8_t* c1 = (uint8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr != 2) {
