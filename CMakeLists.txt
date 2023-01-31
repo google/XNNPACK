@@ -2869,7 +2869,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_EXECUTABLE(packing-test test/packing.cc)
   TARGET_INCLUDE_DIRECTORIES(packing-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(packing-test PRIVATE fp16 gtest gtest_main pthreadpool)
+  TARGET_LINK_LIBRARIES(packing-test PRIVATE fp16 gmock gtest gtest_main pthreadpool)
   TARGET_LINK_LIBRARIES(packing-test PRIVATE XNNPACK microkernel-utils operator-utils packing)
 
   ADD_EXECUTABLE(indirection-test test/indirection.cc)
