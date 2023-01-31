@@ -5790,6 +5790,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qs16_qs8_vcvt_bench",
+    srcs = [
+        "bench/qs16-qs8-vcvt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "qs8_vlrelu_bench",
     srcs = [
         "bench/qs8-vlrelu.cc",
@@ -8733,6 +8741,15 @@ xnnpack_unit_test(
     name = "qs8_vcvt_test",
     srcs = [
         "test/qs8-vcvt.cc",
+        "test/vcvt-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "qs16_qs8_vcvt_test",
+    srcs = [
+        "test/qs16-qs8-vcvt.cc",
         "test/vcvt-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,

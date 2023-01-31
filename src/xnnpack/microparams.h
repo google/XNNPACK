@@ -1274,6 +1274,19 @@ union xnn_qs8_cvt_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
+union xnn_qs16_qs8_cvt_params {
+  struct {
+    int32_t multiplier;
+    int32_t bias;
+  } scalar;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    int32_t multiplier;
+    int16_t output_zero_point;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+};
+
 union xnn_qs8_f32_cvt_params {
   struct {
     int32_t zero_point;

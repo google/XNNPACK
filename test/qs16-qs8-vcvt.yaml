@@ -1,0 +1,20 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# ARM NEON
+- name: xnn_qs16_qs8_vcvt_ukernel__neon_x8
+  init: xnn_init_qs16_qs8_cvt_neon_params
+- name: xnn_qs16_qs8_vcvt_ukernel__neon_x16
+  init: xnn_init_qs16_qs8_cvt_neon_params
+- name: xnn_qs16_qs8_vcvt_ukernel__neon_x32
+  init: xnn_init_qs16_qs8_cvt_neon_params
+
+# Scalar
+- name: xnn_qs16_qs8_vcvt_ukernel__scalar_x1
+  init: xnn_init_qs16_qs8_cvt_scalar_params
+- name: xnn_qs16_qs8_vcvt_ukernel__scalar_x2
+  init: xnn_init_qs16_qs8_cvt_scalar_params
+- name: xnn_qs16_qs8_vcvt_ukernel__scalar_x4
+  init: xnn_init_qs16_qs8_cvt_scalar_params

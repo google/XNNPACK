@@ -166,6 +166,7 @@ struct xnn_unary_elementwise_config {
     xnn_init_f32_rnd_params_fn f32_rnd;
     xnn_init_f32_sigmoid_params_fn f32_sigmoid;
     xnn_init_f32_sqrt_params_fn f32_sqrt;
+    xnn_init_qs16_qs8_cvt_params_fn qs16_qs8_cvt;
     xnn_init_qs8_cvt_params_fn qs8_cvt;
     xnn_init_qs8_f32_cvt_params_fn qs8_f32_cvt;
     xnn_init_qs8_lrelu_params_fn qs8_lrelu;

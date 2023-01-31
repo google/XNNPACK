@@ -2396,6 +2396,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-vmulc/gen/qs8-vmulc-minmax-rndnu-neon-ld64-x8.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-rndnu-neon-ld64-x16.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-rndnu-neon-ld128-x16.c
+  src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-neon-x8.c
+  src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-neon-x16.c
+  src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-neon-x32.c
   src/qu8-avgpool/qu8-avgpool-9p8x-minmax-fp32-neon-c8.c
   src/qu8-avgpool/qu8-avgpool-9x-minmax-fp32-neon-c8.c
   src/qu8-dwconv/gen/qu8-dwconv-9p8c-minmax-fp32-neon-mul16.c
@@ -4248,6 +4251,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-scalar-x1.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-scalar-x2.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-scalar-x4.c
+  src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-scalar-x1.c
+  src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-scalar-x2.c
+  src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-scalar-x4.c
   src/qu8-avgpool/qu8-avgpool-9p8x-minmax-fp32-scalar-imagic-c1.c
   src/qu8-avgpool/qu8-avgpool-9x-minmax-fp32-scalar-imagic-c1.c
   src/qu8-dwconv/gen/qu8-dwconv-9p1c-minmax-fp32-scalar-fmagic.c
