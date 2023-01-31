@@ -162,7 +162,7 @@ static enum xnn_status create_convolution_operator(
           node->activation.output_min,
           node->activation.output_max,
           node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS,
-          NULL,
+          caches,
           &opdata->operator_objects[0]);
         break;
 #endif  // XNN_NO_F16_OPERATORS
@@ -197,7 +197,7 @@ static enum xnn_status create_convolution_operator(
           (int8_t) output_zero_point,
           output_scale, output_min, output_max,
           node->flags,
-          NULL,
+          caches,
           &opdata->operator_objects[0]);
         break;
       }
@@ -231,7 +231,7 @@ static enum xnn_status create_convolution_operator(
           (int8_t) output_zero_point,
           output_scale, output_min, output_max,
           node->flags,
-          NULL,
+          caches,
           &opdata->operator_objects[0]);
         break;
       }
@@ -268,7 +268,7 @@ static enum xnn_status create_convolution_operator(
           (uint8_t) output_zero_point,
           output_scale, output_min, output_max,
           node->flags,
-          NULL,
+          caches,
           &opdata->operator_objects[0]);
         break;
       }
