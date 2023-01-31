@@ -684,10 +684,25 @@ def emit_instruction(instr: str,
     return
 
   if ((instr_name == 'stp' or instr_name == 'ldp') and
-      reg in get_callee_saved()
-     ):  # pushing and popping from stack, no max_mr guard.
+      reg in get_callee_saved()) and 'mem[sp' in instr:
+    # pushing and popping from stack, no max_mr guard.
     instructions.append(instr)
     return
+
+  # In some AArch64 GEMM microkernels, we use ldp to load 2 A pointers, we need
+  # to split this up based on max_mr.
+  if (instr_name == 'ldp'):
+    m = re.search(r'ldp\((x\d+), (x\d+), (mem\[x\d+\]), (\d+)', instr)
+    if m:
+      reg1 = m[1]
+      reg2 = m[2]
+      mem = m[3]
+      offset = m[4]
+      if all(reg in vector_register_map for reg in [reg1, reg2]):
+        max_mr = vector_register_map[reg2]
+        instructions.append(f'if (max_mr == {max_mr}) {{ ldr({reg1}, {mem}, {int(offset)//2}); }}');
+        instructions.append(f'if (max_mr > {max_mr}) {{ ldp({reg1}, {reg2}, {mem}, {offset}); }}');
+        return
 
   cmp_m = re.search(r'cmp\((?:x|r)0, (\d+)\);', instr)
   if cmp_m:

@@ -169,9 +169,24 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   bind(l1);
   // Load next 6 A pointers
-  ldp(x14, x15, mem[x4], 16);
-  ldp(x20, x21, mem[x4], 16);
-  ldp(x22, x23, mem[x4], 16);
+  if (max_mr == 1) {
+    ldr(x14, mem[x4], 8);
+  }
+  if (max_mr > 1) {
+    ldp(x14, x15, mem[x4], 16);
+  }
+  if (max_mr == 3) {
+    ldr(x20, mem[x4], 8);
+  }
+  if (max_mr > 3) {
+    ldp(x20, x21, mem[x4], 16);
+  }
+  if (max_mr == 5) {
+    ldr(x22, mem[x4], 8);
+  }
+  if (max_mr > 5) {
+    ldp(x22, x23, mem[x4], 16);
+  }
 
   cmp(x14, x12); // if a0 == zero
   add(x14, x14, x11); // A0 += a_offset

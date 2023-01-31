@@ -125,8 +125,16 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
 
   bind(l1);
   // Load next 4 A pointers
-  ldp(x8, x13, mem[x4], 16);
-  if (max_mr > 2) {
+  if (max_mr == 1) {
+    ldr(x8, mem[x4], 8);
+  }
+  if (max_mr > 1) {
+    ldp(x8, x13, mem[x4], 16);
+  }
+  if (max_mr == 3) {
+    ldr(x14, mem[x4], 8);
+  }
+  if (max_mr > 3) {
     ldp(x14, x15, mem[x4], 16);
   }
 
