@@ -2218,8 +2218,8 @@ static void init(void) {
               #if XNN_ENABLE_JIT
                 xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_1x16__aarch64_neonfp16arith_ld64);
                 xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_1x16__aarch64_neonfp16arith_ld64);
-                xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_4x16__aarch64_neonfp16arith_ld64);
-                xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64);
+                xnn_params.f16.gemm.generator.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_codegen(xnn_generate_f16_gemm_ukernel_4x16__aarch64_neonfp16arith_ld64);
+                xnn_params.f16.gemm.generator.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_codegen(xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64);
               #endif
               break;
             case cpuinfo_uarch_exynos_m4:
