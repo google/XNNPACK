@@ -469,6 +469,42 @@ DECLARE_F32_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel
     const void* zero,                                               \
     const union xnn_f16_minmax_params* params);
 
+#define DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                                        \
+    size_t channels,                                                \
+    size_t output_width,                                            \
+    const void** input,                                             \
+    const void* weights,                                            \
+    void* output,                                                   \
+    intptr_t input_stride,                                          \
+    size_t output_increment,                                        \
+    size_t input_offset,                                            \
+    const void* zero,                                               \
+    size_t kernel_size,                                             \
+    void* buffer,                                                  \
+    const union xnn_f16_minmax_params* params);
+
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_5f5m5l8c8s4r__fma3)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_5f5m5l8c8s4r__fma3_acc2)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_5f5m5l16c8s4r__fma3)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_5f5m5l16c8s4r__fma3_acc2)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_5f5m5l32c8s4r__fma3)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_5f5m5l32c8s4r__fma3_acc2)
+
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_6f6m7l8c8s4r__fma3)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_6f6m7l8c8s4r__fma3_acc2)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_6f6m7l16c8s4r__fma3)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_6f6m7l16c8s4r__fma3_acc2)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_6f6m7l32c8s4r__fma3)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_6f6m7l32c8s4r__fma3_acc2)
+
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_8f8m9l8c8s4r__fma3)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_8f8m9l8c8s4r__fma3_acc2)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_8f8m9l16c8s4r__fma3)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_8f8m9l16c8s4r__fma3_acc2)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_8f8m9l32c8s4r__fma3)
+DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_8f8m9l32c8s4r__fma3_acc2)
+
 DECLARE_F16_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_3p8c__neonfp16arith)
 DECLARE_F16_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_3p8c__neonfp16arith_acc2)
 DECLARE_F16_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_3p16c__neonfp16arith)

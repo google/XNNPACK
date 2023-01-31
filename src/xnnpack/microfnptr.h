@@ -478,6 +478,20 @@ typedef void (*xnn_f32_dwconv_multipass_ukernel_fn)(
 
 // DWCONV: DepthWise CONVolution multi-pass with Min+Max activation
 
+typedef void (*xnn_f16_dwconv_multipass_minmax_ukernel_fn)(
+    size_t channels,
+    size_t output_width,
+    const void** input,
+    const void* weights,
+    void* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    const void* zero,
+    size_t kernel_size,
+    void* buffer,
+    const union xnn_f16_minmax_params* params);
+
 typedef void (*xnn_f32_dwconv_multipass_minmax_ukernel_fn)(
     size_t channels,
     size_t output_width,

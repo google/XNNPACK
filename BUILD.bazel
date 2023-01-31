@@ -6052,6 +6052,7 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":operators",
         ":indirection",
+        ":microkernel_utils",
         ":packing",
     ],
 )
@@ -7305,6 +7306,18 @@ xnnpack_unit_test(
         "test/f16-avgpool-minmax.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_dwconv_multipass_minmax_test",
+    srcs = [
+        "test/dwconv-microkernel-tester.h",
+        "test/f16-dwconv-multipass-minmax.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":packing",
+        ":microkernel_utils",
+    ],
 )
 
 xnnpack_unit_test(

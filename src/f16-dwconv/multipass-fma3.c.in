@@ -1,0 +1,449 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$CHANNEL_SUBTILE = 8
+$assert CHANNEL_TILE % CHANNEL_SUBTILE == 0
+$CHANNEL_ROUND = 4
+$assert MIDDLE_PASS_TILE <= LAST_PASS_TILE
+$assert FIRST_PASS_TILE >= 1
+$assert MIDDLE_PASS_TILE >= 1
+$assert LAST_PASS_TILE >= 1
+$assert ACCUMULATORS >= 1
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <immintrin.h>
+
+#include <xnnpack/dwconv.h>
+#include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/math.h>
+
+
+void xnn_f16_dwconv_minmax_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST_PASS_TILE}l${CHANNEL_TILE}c${CHANNEL_SUBTILE}s${CHANNEL_ROUND}r__fma3${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t channels,
+    size_t output_width,
+    const void** input,
+    const void* weights,
+    void* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    const void* zero,
+    size_t kernel_size,
+    void* buffer,
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(channels != 0);
+  assert(output_width != 0);
+  assert(kernel_size > ${FIRST_PASS_TILE});
+
+  const __m256 vmax = _mm256_load_ps(params->avx.max);
+  const __m256 vmin = _mm256_load_ps(params->avx.min);
+  do {
+    const uint16_t* w = weights;
+
+    // First pass to process ${FIRST_PASS_TILE} inputs.
+    {
+      uint16_t* b = buffer;
+      $for K in range(FIRST_PASS_TILE):
+        const uint16_t* i${K} = input[${K}];
+        assert(i${K} != NULL);
+        if XNN_UNPREDICTABLE(i${K} != zero) {
+          i${K} = (const uint16_t*) ((uintptr_t) i${K} + input_offset);
+        }
+      input += ${FIRST_PASS_TILE};
+
+      // Process c channels and write to buffer.
+      size_t c = round_up_po2(channels, ${CHANNEL_ROUND});
+      $if CHANNEL_TILE > 8:
+        for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+          $for C in range(0, CHANNEL_TILE, 8):
+            $if C == 0:
+              __m256 vacc${ABC[C:C+8]}p0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
+            $else:
+              __m256 vacc${ABC[C:C+8]}p0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w + ${C})));
+
+          $for K in range(FIRST_PASS_TILE):
+            $for C in range(0, CHANNEL_TILE, 8):
+              $if C == 0:
+                const __m256 vi${K}x${ABC[C:C+8]} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i${K})));
+              $else:
+                const __m256 vi${K}x${ABC[C:C+8]} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i${K} + ${C})));
+            i${K} += ${CHANNEL_TILE};
+
+            $for C in range(0, CHANNEL_TILE, 8):
+              const __m256 vk${K}x${ABC[C:C+8]} = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w + ${(K + 1) * CHANNEL_TILE + C})));
+            $for C in range(0, CHANNEL_TILE, 8):
+              $if 1 <= K < ACCUMULATORS:
+                __m256 vacc${ABC[C:C+8]}p${K} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]}), _MM_FROUND_TO_NEAREST_INT));
+              $else:
+                vacc${ABC[C:C+8]}p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]}, vacc${ABC[C:C+8]}p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
+
+          w += ${(FIRST_PASS_TILE + 1) * CHANNEL_TILE};
+
+          $if ACCUMULATORS > 1:
+            // Add up all accumulators to vacc${ABC[0:8]}p0
+            $ACC_SLICE = 1
+            $while ACC_SLICE < ACCUMULATORS:
+              $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                $if A + ACC_SLICE < ACCUMULATORS:
+                  $for C in range(0, CHANNEL_TILE, 8):
+                    vacc${ABC[C:C+8]}p${A} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_add_ps(vacc${ABC[C:C+8]}p${A}, vacc${ABC[C:C+8]}p${A + ACC_SLICE}), _MM_FROUND_TO_NEAREST_INT));
+              $ACC_SLICE *= 2
+
+          $for C in range(0, CHANNEL_TILE, 8):
+            $if C == 0:
+              _mm_store_si128((__m128i*) b, _mm256_cvtps_ph(vacc${ABC[C:C+8]}p0, _MM_FROUND_TO_NEAREST_INT));
+            $else:
+              _mm_store_si128((__m128i*) (b + ${C}), _mm256_cvtps_ph(vacc${ABC[C:C+8]}p0, _MM_FROUND_TO_NEAREST_INT));
+          b += ${CHANNEL_TILE};
+        }
+
+      for (; c >= ${CHANNEL_SUBTILE}; c -= ${CHANNEL_SUBTILE}) {
+        __m256 vacc01234567p0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
+
+        $for K in range(FIRST_PASS_TILE):
+
+          const __m256 vi${K}x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i${K})));
+          i${K} += ${CHANNEL_SUBTILE};
+
+          const __m256 vk${K}x01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w + ${(K + 1) * CHANNEL_SUBTILE})));
+          $if 1 <= K < ACCUMULATORS:
+            __m256 vacc01234567p${K} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vi${K}x01234567, vk${K}x01234567), _MM_FROUND_TO_NEAREST_INT));
+          $else:
+            vacc01234567p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vi${K}x01234567, vk${K}x01234567, vacc01234567p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
+
+        w += ${(FIRST_PASS_TILE + 1) * CHANNEL_SUBTILE};
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc01234567p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc01234567p${A} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_add_ps(vacc01234567p${A}, vacc01234567p${A + ACC_SLICE}), _MM_FROUND_TO_NEAREST_INT));
+            $ACC_SLICE *= 2
+
+        _mm_store_si128((__m128i*) b, _mm256_cvtps_ph(vacc01234567p0, _MM_FROUND_TO_NEAREST_INT));
+        b += ${CHANNEL_SUBTILE};
+      }
+
+      if (c != 0) {
+        assert(c >= 1);
+        assert(c <= ${CHANNEL_SUBTILE-1});
+        __m256 vacc01234567p0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
+
+        $for K in range(FIRST_PASS_TILE):
+
+          const __m256 vi${K}x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i${K}));
+
+          const __m256 vk${K}x01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w + ${(K + 1) * CHANNEL_SUBTILE})));
+          $if 1 <= K < ACCUMULATORS:
+            __m256 vacc01234567p${K} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vi${K}x01234567, vk${K}x01234567), _MM_FROUND_TO_NEAREST_INT));
+          $else:
+            vacc01234567p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vi${K}x01234567, vk${K}x01234567, vacc01234567p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
+
+        w += ${(FIRST_PASS_TILE + 1) * CHANNEL_SUBTILE};
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc01234567p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc01234567p${A} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_add_ps(vacc01234567p${A}, vacc01234567p${A + ACC_SLICE}), _MM_FROUND_TO_NEAREST_INT));
+            $ACC_SLICE *= 2
+
+        _mm_store_si128((__m128i*) b, _mm256_cvtps_ph(vacc01234567p0, _MM_FROUND_TO_NEAREST_INT));
+      }
+    }
+
+    // Middle pass to process ${MIDDLE_PASS_TILE} inputs in each iteration.
+    for (size_t ks = kernel_size - ${FIRST_PASS_TILE}; ks > ${LAST_PASS_TILE}; ks -= ${MIDDLE_PASS_TILE}) {
+      uint16_t* b = buffer;
+      $for K in range(MIDDLE_PASS_TILE):
+        const uint16_t* i${K} = input[${K}];
+        assert(i${K} != NULL);
+        if XNN_UNPREDICTABLE(i${K} != zero) {
+          i${K} = (const uint16_t*) ((uintptr_t) i${K} + input_offset);
+        }
+      input += ${MIDDLE_PASS_TILE};
+
+      size_t c = round_up_po2(channels, ${CHANNEL_ROUND});
+      $if CHANNEL_TILE > 8:
+        for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+          $for C in range(0, CHANNEL_TILE, 8):
+            $if C == 0:
+              __m256 vacc${ABC[C:C+8]}p0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (b)));
+            $else:
+              __m256 vacc${ABC[C:C+8]}p0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (b + ${C})));
+
+          $for K in range(MIDDLE_PASS_TILE):
+
+            $for C in range(0, CHANNEL_TILE, 8):
+              $if C == 0:
+                const __m256 vi${K}x${ABC[C:C+8]} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i${K})));
+              $else:
+                const __m256 vi${K}x${ABC[C:C+8]} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i${K} + ${C})));
+            i${K} += ${CHANNEL_TILE};
+
+            $for C in range(0, CHANNEL_TILE, 8):
+              $if K == 0 and C == 0:
+                const __m256 vk${K}x${ABC[C:C+8]} = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w)));
+              $else:
+                const __m256 vk${K}x${ABC[C:C+8]} = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w + ${K * CHANNEL_TILE + C})));
+            $for C in range(0, CHANNEL_TILE, 8):
+              $if 1 <= K < ACCUMULATORS:
+                __m256 vacc${ABC[C:C+8]}p${K} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]}), _MM_FROUND_TO_NEAREST_INT));
+              $else:
+                vacc${ABC[C:C+8]}p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]}, vacc${ABC[C:C+8]}p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
+
+          w += ${MIDDLE_PASS_TILE * CHANNEL_TILE};
+
+          $if ACCUMULATORS > 1:
+            // Add up all accumulators to vacc${ABC[0:8]}p0
+            $ACC_SLICE = 1
+            $while ACC_SLICE < ACCUMULATORS:
+              $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                $if A + ACC_SLICE < ACCUMULATORS:
+                  $for C in range(0, CHANNEL_TILE, 8):
+                    vacc${ABC[C:C+8]}p${A} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_add_ps(vacc${ABC[C:C+8]}p${A}, vacc${ABC[C:C+8]}p${A + ACC_SLICE}), _MM_FROUND_TO_NEAREST_INT));
+              $ACC_SLICE *= 2
+
+          $for C in range(0, CHANNEL_TILE, 8):
+            $if C == 0:
+              _mm_store_si128((__m128i*) b, _mm256_cvtps_ph(vacc${ABC[C:C+8]}p0, _MM_FROUND_TO_NEAREST_INT));
+            $else:
+              _mm_store_si128((__m128i*) (b + ${C}), _mm256_cvtps_ph(vacc${ABC[C:C+8]}p0, _MM_FROUND_TO_NEAREST_INT));
+          b += ${CHANNEL_TILE};
+        }
+
+      for (; c >= 8; c -= 8) {
+        __m256 vacc01234567p0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (b)));
+
+        $for K in range(MIDDLE_PASS_TILE):
+
+          const __m256 vi${K}x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i${K})));
+          i${K} += ${CHANNEL_SUBTILE};
+
+          $if K == 0:
+            const __m256 vk${K}x01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w)));
+          $else:
+            const __m256 vk${K}x01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w + ${K * CHANNEL_SUBTILE})));
+          $if 1 <= K < ACCUMULATORS:
+            __m256 vacc01234567p${K} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vi${K}x01234567, vk${K}x01234567), _MM_FROUND_TO_NEAREST_INT));
+          $else:
+            vacc01234567p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vi${K}x01234567, vk${K}x01234567, vacc01234567p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
+
+        w += ${MIDDLE_PASS_TILE * CHANNEL_SUBTILE};
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc01234567p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc01234567p${A} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_add_ps(vacc01234567p${A}, vacc01234567p${A + ACC_SLICE}), _MM_FROUND_TO_NEAREST_INT));
+            $ACC_SLICE *= 2
+
+        _mm_store_si128((__m128i*) b, _mm256_cvtps_ph(vacc01234567p0, _MM_FROUND_TO_NEAREST_INT));
+        b += ${CHANNEL_SUBTILE};
+      }
+
+      if (c != 0) {
+        assert(c >= 1);
+        assert(c <= ${CHANNEL_SUBTILE-1});
+        __m256 vacc01234567p0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (b)));
+
+        $for K in range(MIDDLE_PASS_TILE):
+
+          const __m256 vi${K}x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i${K}));
+
+          $if K == 0:
+            const __m256 vk${K}x01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w)));
+          $else:
+            const __m256 vk${K}x01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w + ${(K) * CHANNEL_SUBTILE})));
+          $if 1 <= K < ACCUMULATORS:
+            __m256 vacc01234567p${K} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vi${K}x01234567, vk${K}x01234567), _MM_FROUND_TO_NEAREST_INT));
+          $else:
+            vacc01234567p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vi${K}x01234567, vk${K}x01234567, vacc01234567p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
+
+        w += ${(MIDDLE_PASS_TILE) * CHANNEL_SUBTILE};
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc01234567p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc01234567p${A} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_add_ps(vacc01234567p${A}, vacc01234567p${A + ACC_SLICE}), _MM_FROUND_TO_NEAREST_INT));
+            $ACC_SLICE *= 2
+
+        _mm_store_si128((__m128i*) b, _mm256_cvtps_ph(vacc01234567p0, _MM_FROUND_TO_NEAREST_INT));
+      }
+    }
+
+    // Last pass to process up to ${LAST_PASS_TILE} inputs.
+    {
+      uint16_t* b = buffer;
+      $for K in range(0, LAST_PASS_TILE):
+        const uint16_t* i${K} = input[${K}];
+        assert(i${K} != NULL);
+        if XNN_UNPREDICTABLE(i${K} != zero) {
+          i${K} = (const uint16_t*) ((uintptr_t) i${K} + input_offset);
+        }
+
+      size_t c = channels;
+      $if CHANNEL_TILE > 8:
+        for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+          $for C in range(0, CHANNEL_TILE, 8):
+            $if C == 0:
+              __m256 vacc${ABC[C:C+8]}p0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (b)));
+            $else:
+              __m256 vacc${ABC[C:C+8]}p0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (b + ${C})));
+          b += ${CHANNEL_TILE};
+
+          $for K in range(LAST_PASS_TILE):
+
+            $for C in range(0, CHANNEL_TILE, 8):
+              $if C == 0:
+                const __m256 vi${K}x${ABC[C:C+8]} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i${K})));
+              $else:
+                const __m256 vi${K}x${ABC[C:C+8]} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i${K} + ${C})));
+            i${K} += ${CHANNEL_TILE};
+
+            $for C in range(0, CHANNEL_TILE, 8):
+              $if K == 0 and C == 0:
+                __m256 vk${K}x${ABC[C:C+8]} = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w)));
+              $else:
+                __m256 vk${K}x${ABC[C:C+8]} = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w + ${K * CHANNEL_TILE + C})));
+
+            $for C in range(0, CHANNEL_TILE, 8):
+              $if 1 <= K < ACCUMULATORS:
+                __m256 vacc${ABC[C:C+8]}p${K} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]}), _MM_FROUND_TO_NEAREST_INT));
+              $else:
+                vacc${ABC[C:C+8]}p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]}, vacc${ABC[C:C+8]}p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
+
+          w += ${LAST_PASS_TILE * CHANNEL_TILE};
+
+          $if ACCUMULATORS > 1:
+            // Add up all accumulators to vacc${ABC[0:8]}p0
+            $ACC_SLICE = 1
+            $while ACC_SLICE < ACCUMULATORS:
+              $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                $if A + ACC_SLICE < ACCUMULATORS:
+                  $for C in range(0, CHANNEL_TILE, 8):
+                    vacc${ABC[C:C+8]}p${A} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_add_ps(vacc${ABC[C:C+8]}p${A}, vacc${ABC[C:C+8]}p${A + ACC_SLICE}), _MM_FROUND_TO_NEAREST_INT));
+              $ACC_SLICE *= 2
+
+          $for C in range(0, CHANNEL_TILE, 8):
+            __m256 vacc${ABC[C:C+8]} = _mm256_max_ps(vacc${ABC[C:C+8]}p0, vmin);
+
+          $for C in range(0, CHANNEL_TILE, 8):
+            vacc${ABC[C:C+8]} = _mm256_min_ps(vacc${ABC[C:C+8]}, vmax);
+
+          $for C in range(0, CHANNEL_TILE, 8):
+            $if C == 0:
+              _mm_storeu_si128((__m128i*) output, _mm256_cvtps_ph(vacc${ABC[C:C+8]}, _MM_FROUND_TO_NEAREST_INT));
+            $else:
+              _mm_storeu_si128((__m128i*) ((uint16_t*) output + ${C}), _mm256_cvtps_ph(vacc${ABC[C:C+8]}, _MM_FROUND_TO_NEAREST_INT));
+          output = (uint16_t*) output + ${CHANNEL_TILE};
+        }
+
+
+      for (; c >= 8; c -= 8) {
+        __m256 vacc01234567p0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (b)));
+        b += 8;
+
+        $for K in range(LAST_PASS_TILE):
+
+          const __m256 vi${K}x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i${K})));
+          i${K} += 8;
+
+          $if K == 0:
+            __m256 vk${K}x01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w)));
+          $else:
+            __m256 vk${K}x01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w + ${K * 8})));
+
+          $if 1 <= K < ACCUMULATORS:
+            __m256 vacc01234567p${K} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vi${K}x01234567, vk${K}x01234567), _MM_FROUND_TO_NEAREST_INT));
+          $else:
+            vacc01234567p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vi${K}x01234567, vk${K}x01234567, vacc01234567p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
+
+        $if CHANNEL_TILE > 8:
+          w += ${LAST_PASS_TILE * 8};
+        $else:
+          w += ${LAST_PASS_TILE * CHANNEL_TILE};
+
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc01234567p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc01234567p${A} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_add_ps(vacc01234567p${A}, vacc01234567p${A + ACC_SLICE}), _MM_FROUND_TO_NEAREST_INT));
+            $ACC_SLICE *= 2
+
+        __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
+
+        vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+
+        _mm_storeu_si128((__m128i*) output, _mm256_cvtps_ph(vacc01234567, _MM_FROUND_TO_NEAREST_INT));
+        output = (uint16_t*) output + 8;
+      }
+
+      if XNN_UNLIKELY(c != 0) {
+        assert(c >= 1);
+        assert(c <= ${CHANNEL_SUBTILE-1});
+        __m256 vacc01234567p0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (b)));
+        $for K in range(LAST_PASS_TILE):
+
+          const __m256 vi${K}x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i${K}));
+          $if K == 0:
+            __m256 vk${K}x01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w)));
+          $else:
+            __m256 vk${K}x01234567 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) (w + ${K * 8})));
+          $if 1 <= K < ACCUMULATORS:
+            __m256 vacc01234567p${K} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vi${K}x01234567, vk${K}x01234567), _MM_FROUND_TO_NEAREST_INT));
+          $else:
+            vacc01234567p${K % ACCUMULATORS} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(vi${K}x01234567, vk${K}x01234567, vacc01234567p${K % ACCUMULATORS}), _MM_FROUND_TO_NEAREST_INT));
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc${ABC[0:8]}p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc01234567p${A} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_add_ps(vacc01234567p${A}, vacc01234567p${A + ACC_SLICE}), _MM_FROUND_TO_NEAREST_INT));
+            $ACC_SLICE *= 2
+
+        __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
+        vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+
+        __m128i vh01234567 = _mm256_cvtps_ph(vacc01234567, _MM_FROUND_TO_NEAREST_INT);
+        if (c & 4) {
+          _mm_storel_epi64((__m128i*) output, vh01234567);
+          vh01234567 = _mm_unpackhi_epi64(vh01234567, vh01234567);
+          output = (uint16_t*) output + 4;
+        }
+        if (c & 2) {
+          _mm_storeu_si32(output, vh01234567);
+          vh01234567 = _mm_srli_epi64(vh01234567, 32);
+          output = (uint16_t*) output + 2;
+        }
+        if (c & 1) {
+          *((uint16_t*) output) = (uint16_t) _mm_extract_epi16(vh01234567, 0);
+          output = (uint16_t*) output + 1;
+        }
+      }
+
+    }
+    input = (const void**) (const uint16_t**) ((uintptr_t) input + input_stride);
+    output = (uint16_t*) ((uintptr_t) output + output_increment);
+  } while (--output_width != 0);
+}

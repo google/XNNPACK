@@ -1288,6 +1288,10 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
   xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_fn) xnn_pack_f16_vmulcaddc_w;
   xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f16_dwconv_hwg_w;
   xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f16_dwconv_ghw_w;
+  xnn_pack_dwconv_multipass_hwg_w_fn pack_dwconv_multipass_hwg_w = (xnn_pack_dwconv_multipass_hwg_w_fn)
+      xnn_pack_f16_dwconv_multipass_hwg_w;
+  xnn_pack_dwconv_multipass_ghw_w_fn pack_dwconv_multipass_ghw_w = (xnn_pack_dwconv_multipass_ghw_w_fn)
+      xnn_pack_f16_dwconv_multipass_ghw_w;
   xnn_pack_gemm_goi_w_fn pack_gemm_goi_w = (xnn_pack_gemm_goi_w_fn) xnn_pack_f16_gemm_goi_w;
   xnn_pack_conv_kgo_w_fn pack_conv_kgo_w = (xnn_pack_conv_kgo_w_fn) xnn_pack_f16_conv_kgo_w;
   xnn_pack_conv_goki_w_fn pack_conv_goki_w = (xnn_pack_conv_goki_w_fn) xnn_pack_f16_conv_goki_w;
@@ -1295,6 +1299,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_to_f16_vmulcaddc_w;
     pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_to_f16_dwconv_hwg_w;
     pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_to_f16_dwconv_ghw_w;
+    pack_dwconv_multipass_hwg_w  = (xnn_pack_dwconv_multipass_hwg_w_fn) xnn_pack_f32_to_f16_dwconv_multipass_hwg_w;
+    pack_dwconv_multipass_ghw_w  = (xnn_pack_dwconv_multipass_ghw_w_fn) xnn_pack_f32_to_f16_dwconv_multipass_ghw_w;
     pack_gemm_goi_w = (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_to_f16_gemm_goi_w;
     pack_conv_kgo_w = (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_to_f16_conv_kgo_w;
     pack_conv_goki_w = (xnn_pack_conv_goki_w_fn) xnn_pack_f32_to_f16_conv_goki_w;
@@ -1314,8 +1320,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     pack_vmulcaddc_w,
     pack_dwconv_hwg_w,
     pack_dwconv_ghw_w,
-    (xnn_pack_dwconv_multipass_hwg_w_fn) NULL,
-    (xnn_pack_dwconv_multipass_ghw_w_fn) NULL,
+    pack_dwconv_multipass_hwg_w,
+    pack_dwconv_multipass_ghw_w,
     pack_gemm_goi_w,
     pack_conv_kgo_w,
     pack_conv_goki_w,
