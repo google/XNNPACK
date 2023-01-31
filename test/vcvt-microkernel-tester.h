@@ -304,9 +304,9 @@ class VCvtMicrokernelTester {
       vcvt(batch_size() * sizeof(int16_t), input.data(), output.data(), &params);
 
       // Compute reference results
-      const int64_t multiplier = static_cast<int64_t>(std::lrintf(32768.0f * scale()));
+      const int64_t multiplier = std::llrintf(32768.0f * scale());
       for (size_t i = 0; i < batch_size(); i++) {
-        const int64_t input_value = (input[i]);
+        const int64_t input_value = input[i];
         int32_t output_value = static_cast<int32_t>(math_asr_s64(input_value * multiplier + INT64_C(0x4000), 15)) + output_zero_point();
         output_value = std::min<int32_t>(output_value, std::numeric_limits<int8_t>::max());
         output_value = std::max<int32_t>(output_value, std::numeric_limits<int8_t>::min());
