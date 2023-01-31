@@ -6860,6 +6860,21 @@ xnnpack_cc_library(
 )
 
 xnnpack_benchmark(
+    name = "f16_dwconv_e2e_bench",
+    srcs = [
+        "bench/end2end.h",
+        "bench/f16-dwconv-e2e.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":XNNPACK",
+        ":fp16_mobilenet_v1",
+        ":fp16_mobilenet_v2",
+        ":fp16_mobilenet_v3_large",
+        ":fp16_mobilenet_v3_small",
+    ],
+)
+
+xnnpack_benchmark(
     name = "f16_gemm_e2e_bench",
     srcs = [
         "bench/end2end.h",

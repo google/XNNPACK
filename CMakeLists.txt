@@ -3084,6 +3084,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     TARGET_LINK_LIBRARIES(f16-gemm-e2e-bench PRIVATE fp16 benchmark)
     TARGET_LINK_LIBRARIES(f16-gemm-e2e-bench PRIVATE XNNPACK bench-models bench-utils hardware-config logging microkernels-all microparams-init)
 
+    ADD_EXECUTABLE(f16-dwconv-e2e-bench bench/f16-dwconv-e2e.cc)
+    TARGET_INCLUDE_DIRECTORIES(f16-dwconv-e2e-bench PRIVATE . src)
+    TARGET_LINK_LIBRARIES(f16-dwconv-e2e-bench PRIVATE fp16 benchmark)
+    TARGET_LINK_LIBRARIES(f16-dwconv-e2e-bench PRIVATE XNNPACK bench-models bench-utils hardware-config logging microkernels-all microparams-init)
+
     ADD_EXECUTABLE(f32-dwconv-e2e-bench bench/f32-dwconv-e2e.cc)
     TARGET_INCLUDE_DIRECTORIES(f32-dwconv-e2e-bench PRIVATE . src)
     TARGET_LINK_LIBRARIES(f32-dwconv-e2e-bench PRIVATE benchmark)
