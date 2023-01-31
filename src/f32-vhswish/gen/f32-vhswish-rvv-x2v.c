@@ -36,15 +36,15 @@ void xnn_f32_vhswish_ukernel__rvv_x2v(
 
   batch >>= 2;  // log2(sizeof(float))
   do {
-    const size_t n = vsetvl_e32m2(batch);
-    vfloat32m2_t vx = vle32_v_f32m2(input, n);
+    const size_t n = __riscv_vsetvl_e32m2(batch);
+    vfloat32m2_t vx = __riscv_vle32_v_f32m2(input, n);
     input += n;
-    vfloat32m2_t vacc = vfadd_vf_f32m2(vx, vthree, n);
-    vx = vfmul_vf_f32m2(vx, vsixth, n);
-    vacc = vfmax_vf_f32m2(vacc, vzero, n);
-    vacc = vfmin_vf_f32m2(vacc, vsix, n);
-    vacc = vfmul_vv_f32m2(vacc, vx, n);
-    vse32_v_f32m2(output, vacc, n);
+    vfloat32m2_t vacc = __riscv_vfadd_vf_f32m2(vx, vthree, n);
+    vx = __riscv_vfmul_vf_f32m2(vx, vsixth, n);
+    vacc = __riscv_vfmax_vf_f32m2(vacc, vzero, n);
+    vacc = __riscv_vfmin_vf_f32m2(vacc, vsix, n);
+    vacc = __riscv_vfmul_vv_f32m2(vacc, vx, n);
+    __riscv_vse32_v_f32m2(output, vacc, n);
     output += n;
 
     batch -= n;

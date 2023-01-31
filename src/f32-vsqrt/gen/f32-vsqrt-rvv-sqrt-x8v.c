@@ -30,11 +30,11 @@ void xnn_f32_vsqrt_ukernel__rvv_sqrt_x8v(
 
   batch >>= 2;  // log2(sizeof(float))
   do {
-    const size_t n = vsetvl_e32m8(batch);
-    vfloat32m8_t vx = vle32_v_f32m8(input, n);
+    const size_t n = __riscv_vsetvl_e32m8(batch);
+    vfloat32m8_t vx = __riscv_vle32_v_f32m8(input, n);
     input += n;
-    vfloat32m8_t vacc = vfsqrt_v_f32m8(vx, n);
-    vse32_v_f32m8(output, vacc, n);
+    vfloat32m8_t vacc = __riscv_vfsqrt_v_f32m8(vx, n);
+    __riscv_vse32_v_f32m8(output, vacc, n);
     output += n;
 
     batch -= n;

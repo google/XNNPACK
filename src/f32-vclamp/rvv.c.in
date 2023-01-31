@@ -28,12 +28,12 @@ void xnn_f32_vclamp_ukernel__rvv_x${LMUL}v(
 
   batch >>= 2;  // log2(sizeof(float))
   do {
-    const size_t n = vsetvl_e32m${LMUL}(batch);
-    vfloat32m${LMUL}_t vacc = vle32_v_f32m${LMUL}(input, n);
+    const size_t n = __riscv_vsetvl_e32m${LMUL}(batch);
+    vfloat32m${LMUL}_t vacc = __riscv_vle32_v_f32m${LMUL}(input, n);
     input += n;
-    vacc = vfmax_vf_f32m${LMUL}(vacc, vmin, n);
-    vacc = vfmin_vf_f32m${LMUL}(vacc, vmax, n);
-    vse32_v_f32m${LMUL}(output, vacc, n);
+    vacc = __riscv_vfmax_vf_f32m${LMUL}(vacc, vmin, n);
+    vacc = __riscv_vfmin_vf_f32m${LMUL}(vacc, vmax, n);
+    __riscv_vse32_v_f32m${LMUL}(output, vacc, n);
     output += n;
 
     batch -= n;

@@ -28,11 +28,11 @@ void xnn_f32_vsqr_ukernel__rvv_x1v(
 
   batch >>= 2;  // log2(sizeof(float))
   do {
-    const size_t n = vsetvl_e32m1(batch);
-    const vfloat32m1_t vi = vle32_v_f32m1(input, n);
+    const size_t n = __riscv_vsetvl_e32m1(batch);
+    const vfloat32m1_t vi = __riscv_vle32_v_f32m1(input, n);
     input += n;
-    const vfloat32m1_t vo = vfmul_vv_f32m1(vi, vi, n);
-    vse32_v_f32m1(output, vo, n);
+    const vfloat32m1_t vo = __riscv_vfmul_vv_f32m1(vi, vi, n);
+    __riscv_vse32_v_f32m1(output, vo, n);
     output += n;
 
     batch -= n;

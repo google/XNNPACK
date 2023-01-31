@@ -32,15 +32,15 @@ void xnn_f32_vhswish_ukernel__rvv_x${LMUL}v(
 
   batch >>= 2;  // log2(sizeof(float))
   do {
-    const size_t n = vsetvl_e32m${LMUL}(batch);
-    vfloat32m${LMUL}_t vx = vle32_v_f32m${LMUL}(input, n);
+    const size_t n = __riscv_vsetvl_e32m${LMUL}(batch);
+    vfloat32m${LMUL}_t vx = __riscv_vle32_v_f32m${LMUL}(input, n);
     input += n;
-    vfloat32m${LMUL}_t vacc = vfadd_vf_f32m${LMUL}(vx, vthree, n);
-    vx = vfmul_vf_f32m${LMUL}(vx, vsixth, n);
-    vacc = vfmax_vf_f32m${LMUL}(vacc, vzero, n);
-    vacc = vfmin_vf_f32m${LMUL}(vacc, vsix, n);
-    vacc = vfmul_vv_f32m${LMUL}(vacc, vx, n);
-    vse32_v_f32m${LMUL}(output, vacc, n);
+    vfloat32m${LMUL}_t vacc = __riscv_vfadd_vf_f32m${LMUL}(vx, vthree, n);
+    vx = __riscv_vfmul_vf_f32m${LMUL}(vx, vsixth, n);
+    vacc = __riscv_vfmax_vf_f32m${LMUL}(vacc, vzero, n);
+    vacc = __riscv_vfmin_vf_f32m${LMUL}(vacc, vsix, n);
+    vacc = __riscv_vfmul_vv_f32m${LMUL}(vacc, vx, n);
+    __riscv_vse32_v_f32m${LMUL}(output, vacc, n);
     output += n;
 
     batch -= n;
