@@ -7296,6 +7296,7 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/qs8-igemm/gen/qs8-igemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-ld64.S
   src/qs8-igemm/gen/qs8-igemm-4x8c4-minmax-rndnu-asm-aarch32-neondot-cortex-a55.S
   src/qs8-igemm/gen/qs8-igemm-4x8c4-minmax-rndnu-asm-aarch32-neondot-ld64.S
+  src/qs16-qs8-vcvt/qs16-qs8-vcvt-asm-aarch32-neon-x16.S
   src/qu8-gemm/gen/qu8-gemm-1x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-cortex-a7.S
   src/qu8-gemm/gen/qu8-gemm-1x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-cortex-a7.S
   src/qu8-gemm/gen/qu8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-cortex-a7.S

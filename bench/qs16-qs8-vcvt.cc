@@ -64,6 +64,15 @@ static void qs16_qs8_vcvt(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
+#if XNN_ARCH_ARM
+  BENCHMARK_CAPTURE(qs16_qs8_vcvt, asm_aarch32_neon_x16,
+                    xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16,
+                    xnn_init_qs16_qs8_cvt_neon_params,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int16_t, int8_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_ARM
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(qs16_qs8_vcvt, neon_x8,
                     xnn_qs16_qs8_vcvt_ukernel__neon_x8,

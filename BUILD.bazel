@@ -1813,6 +1813,7 @@ WASM32_ASM_MICROKERNEL_SRCS = [
 ]
 
 AARCH32_ASM_MICROKERNEL_SRCS = [
+    "src/qs16-qs8-vcvt/qs16-qs8-vcvt-asm-aarch32-neon-x16.S",
     "src/cs16-bfly4/cs16-bfly4-samples1-asm-aarch32-neon-x1.S",
     "src/cs16-bfly4/cs16-bfly4-samples1-asm-aarch32-neon-x2.S",
     "src/cs16-bfly4/cs16-bfly4-samples1-asm-aarch32-neon-x4.S",

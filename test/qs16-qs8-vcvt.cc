@@ -17,6 +17,83 @@
 #include "vcvt-microkernel-tester.h"
 
 
+#if XNN_ARCH_ARM
+  TEST(QS16_QS8_VCVT__ASM_AARCH32_NEON_X16, batch_eq_16) {
+    TEST_REQUIRES_ARM_NEON;
+    VCvtMicrokernelTester()
+      .batch_size(16)
+      .input_zero_point(0)
+      .qmin(std::numeric_limits<int8_t>::min())
+      .qmax(std::numeric_limits<int8_t>::max())
+      .Test(xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16, xnn_init_qs16_qs8_cvt_neon_params);
+  }
+
+  TEST(QS16_QS8_VCVT__ASM_AARCH32_NEON_X16, batch_div_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(0)
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
+        .Test(xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16, xnn_init_qs16_qs8_cvt_neon_params);
+    }
+  }
+
+  TEST(QS16_QS8_VCVT__ASM_AARCH32_NEON_X16, batch_lt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size < 16; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(0)
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
+        .Test(xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16, xnn_init_qs16_qs8_cvt_neon_params);
+    }
+  }
+
+  TEST(QS16_QS8_VCVT__ASM_AARCH32_NEON_X16, batch_gt_16) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .input_zero_point(0)
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
+        .Test(xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16, xnn_init_qs16_qs8_cvt_neon_params);
+    }
+  }
+
+  TEST(QS16_QS8_VCVT__ASM_AARCH32_NEON_X16, scale) {
+    TEST_REQUIRES_ARM_NEON;
+    for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+      VCvtMicrokernelTester()
+        .batch_size(batch_size)
+        .scale(50)
+        .input_zero_point(0)
+        .qmin(std::numeric_limits<int8_t>::min())
+        .qmax(std::numeric_limits<int8_t>::max())
+        .Test(xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16, xnn_init_qs16_qs8_cvt_neon_params);
+    }
+  }
+
+  TEST(QS16_QS8_VCVT__ASM_AARCH32_NEON_X16, output_zero_point) {
+    TEST_REQUIRES_ARM_NEON;
+    for (int16_t output_zero_point = 0; output_zero_point < 5; output_zero_point += 2) {
+      for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
+        VCvtMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(0)
+          .output_zero_point(output_zero_point)
+          .qmin(std::numeric_limits<int8_t>::min())
+          .qmax(std::numeric_limits<int8_t>::max())
+          .Test(xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16, xnn_init_qs16_qs8_cvt_neon_params);
+      }
+    }
+  }
+#endif  // XNN_ARCH_ARM
+
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(QS16_QS8_VCVT__NEON_X8, batch_eq_8) {
     TEST_REQUIRES_ARM_NEON;

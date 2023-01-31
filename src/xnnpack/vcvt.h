@@ -348,6 +348,7 @@ DECLARE_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs8_vcvt_ukernel__scalar_x4)
       int8_t* output,                                   \
       const union xnn_qs16_qs8_cvt_params* params);
 
+DECLARE_QS16_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16)
 DECLARE_QS16_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs16_qs8_vcvt_ukernel__neon_x8)
 DECLARE_QS16_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs16_qs8_vcvt_ukernel__neon_x16)
 DECLARE_QS16_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs16_qs8_vcvt_ukernel__neon_x32)
