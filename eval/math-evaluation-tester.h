@@ -43,7 +43,7 @@ class MathEvaluationTester {
     return this->input_max_;
   }
 
-  void TestSaturation(xnn_f32_unary_math_fn math_fn, float output_value) const {
+  void TestOutputMatchReference(xnn_f32_unary_math_fn math_fn, float output_value) const {
     ASSERT_FALSE(std::isnan(output_value));
     ASSERT_FALSE(std::isnan(input_min()));
     ASSERT_FALSE(std::isnan(input_max()));

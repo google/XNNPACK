@@ -7180,6 +7180,7 @@ xnnpack_unit_test(
     name = "f32_exp_eval",
     srcs = [
         "eval/f32-exp.cc",
+        "eval/math-evaluation-tester.h",
     ],
     automatic = False,
     deps = ACCURACY_EVAL_DEPS,
@@ -7189,6 +7190,7 @@ xnnpack_unit_test(
     name = "f32_expm1minus_eval",
     srcs = [
         "eval/f32-expm1minus.cc",
+        "eval/math-evaluation-tester.h",
     ],
     automatic = False,
     deps = ACCURACY_EVAL_DEPS,
@@ -7198,6 +7200,7 @@ xnnpack_unit_test(
     name = "f32_expminus_eval",
     srcs = [
         "eval/f32-expminus.cc",
+        "eval/math-evaluation-tester.h",
     ],
     automatic = False,
     deps = ACCURACY_EVAL_DEPS,
