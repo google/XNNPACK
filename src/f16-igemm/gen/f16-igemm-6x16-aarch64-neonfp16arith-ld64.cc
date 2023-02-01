@@ -123,16 +123,28 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   mov(x9, x3); // p = ks
   if (max_mr > 1) {
     mov(v22.v16b(), v20.v16b());
+  }
+  prfm(kPLDL1KEEP, mem[x5, 0]); // Prefetch B
+  if (max_mr > 1) {
     mov(v23.v16b(), v21.v16b());
   }
+  prfm(kPLDL1KEEP, mem[x5, 64]);
   if (max_mr > 2) {
     mov(v24.v16b(), v20.v16b());
+  }
+  prfm(kPLDL1KEEP, mem[x5, 128]);
+  if (max_mr > 2) {
     mov(v25.v16b(), v21.v16b());
   }
+  prfm(kPLDL1KEEP, mem[x5, 192]);
   if (max_mr > 3) {
     mov(v26.v16b(), v20.v16b());
+  }
+  prfm(kPLDL1KEEP, mem[x5, 256]);
+  if (max_mr > 3) {
     mov(v27.v16b(), v21.v16b());
   }
+  prfm(kPLDL1KEEP, mem[x5, 320]);
   if (max_mr > 4) {
     mov(v28.v16b(), v20.v16b());
     mov(v29.v16b(), v21.v16b());
