@@ -18,7 +18,7 @@
 
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__neon_rr2_lut16_p3, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__neon_rr2_lut16_p3);
   }
 
   TEST(EXPM1MINUS__NEON_RR2_LUT16_P3, negative_saturation) {
@@ -44,7 +44,7 @@
 
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__neon_rr2_p6, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__neon_rr2_p6);
   }
 
   TEST(EXPM1MINUS__NEON_RR2_P6, negative_saturation) {
@@ -70,7 +70,7 @@
 
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__neonfma_rr1_lut16_p3, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__neonfma_rr1_lut16_p3);
   }
 
   TEST(EXPM1MINUS__NEONFMA_RR1_LUT16_P3, negative_saturation) {
@@ -96,7 +96,7 @@
 
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__neonfma_rr1_p6, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__neonfma_rr1_p6);
   }
 
   TEST(EXPM1MINUS__NEONFMA_RR1_P6, negative_saturation) {
@@ -122,7 +122,7 @@
 
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__avx512f_rr1_lut16_p3_perm, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__avx512f_rr1_lut16_p3_perm);
   }
 
   TEST(EXPM1MINUS__AVX512F_RR1_LUT16_P3_PERM, negative_saturation) {
@@ -148,7 +148,7 @@
 
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__avx512f_rr1_p6, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__avx512f_rr1_p6);
   }
 
   TEST(EXPM1MINUS__AVX512F_RR1_P6, negative_saturation) {
@@ -174,7 +174,7 @@
 
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__avx2_rr1_lut4_p4_perm, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__avx2_rr1_lut4_p4_perm);
   }
 
   TEST(EXPM1MINUS__AVX2_RR1_LUT4_P4_PERM, negative_saturation) {
@@ -200,7 +200,7 @@
 
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__avx2_rr1_lut8_p4_perm, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__avx2_rr1_lut8_p4_perm);
   }
 
   TEST(EXPM1MINUS__AVX2_RR1_LUT8_P4_PERM, negative_saturation) {
@@ -226,7 +226,7 @@
 
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__avx2_rr1_lut16_p3_gather, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__avx2_rr1_lut16_p3_gather);
   }
 
   TEST(EXPM1MINUS__AVX2_RR1_LUT16_P3_GATHER, negative_saturation) {
@@ -252,7 +252,7 @@
 
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__avx2_rr1_p6, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__avx2_rr1_p6);
   }
 
   TEST(EXPM1MINUS__AVX2_RR1_P6, negative_saturation) {
@@ -278,7 +278,7 @@
 
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__avx_rr2_lut4_p4_perm, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__avx_rr2_lut4_p4_perm);
   }
 
   TEST(EXPM1MINUS__AVX_RR2_LUT4_P4_PERM, negative_saturation) {
@@ -304,7 +304,7 @@
 
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__avx_rr2_lut16_p3, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__avx_rr2_lut16_p3);
   }
 
   TEST(EXPM1MINUS__AVX_RR2_LUT16_P3, negative_saturation) {
@@ -330,7 +330,7 @@
 
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__avx_rr2_p6, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__avx_rr2_p6);
   }
 
   TEST(EXPM1MINUS__AVX_RR2_P6, negative_saturation) {
@@ -354,7 +354,7 @@
   TEST(EXPM1MINUS__SSE2_RR2_LUT16_P3, negative_zero) {
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__sse2_rr2_lut16_p3, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__sse2_rr2_lut16_p3);
   }
 
   TEST(EXPM1MINUS__SSE2_RR2_LUT16_P3, negative_saturation) {
@@ -374,7 +374,7 @@
   TEST(EXPM1MINUS__SSE2_RR2_P6, negative_zero) {
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__sse2_rr2_p6, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__sse2_rr2_p6);
   }
 
   TEST(EXPM1MINUS__SSE2_RR2_P6, negative_saturation) {
@@ -394,7 +394,7 @@
   TEST(EXPM1MINUS__WASMSIMD_RR2_LUT16_P3_ANDNOT, negative_zero) {
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__wasmsimd_rr2_lut16_p3_andnot, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__wasmsimd_rr2_lut16_p3_andnot);
   }
 
   TEST(EXPM1MINUS__WASMSIMD_RR2_LUT16_P3_ANDNOT, negative_saturation) {
@@ -414,7 +414,7 @@
   TEST(EXPM1MINUS__WASMSIMD_RR2_LUT16_P3_MAX, negative_zero) {
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__wasmsimd_rr2_lut16_p3_max, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__wasmsimd_rr2_lut16_p3_max);
   }
 
   TEST(EXPM1MINUS__WASMSIMD_RR2_LUT16_P3_MAX, negative_saturation) {
@@ -434,7 +434,7 @@
   TEST(EXPM1MINUS__WASMSIMD_RR2_P6_ANDNOT, negative_zero) {
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__wasmsimd_rr2_p6_andnot, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__wasmsimd_rr2_p6_andnot);
   }
 
   TEST(EXPM1MINUS__WASMSIMD_RR2_P6_ANDNOT, negative_saturation) {
@@ -454,7 +454,7 @@
   TEST(EXPM1MINUS__WASMSIMD_RR2_P6_MAX, negative_zero) {
     MathEvaluationTester()
       .input_value(-0.0f)
-      .TestOutputMatchReference(xnn_math_f32_expm1minus__wasmsimd_rr2_p6_max, 0.0f);
+      .TestOutputMatchZero(xnn_math_f32_expm1minus__wasmsimd_rr2_p6_max);
   }
 
   TEST(EXPM1MINUS__WASMSIMD_RR2_P6_MAX, negative_saturation) {
@@ -473,7 +473,7 @@
 TEST(EXPM1MINUS__SCALAR_RR2_LUT4_P4, negative_zero) {
   MathEvaluationTester()
     .input_value(-0.0f)
-    .TestOutputMatchReference(xnn_math_f32_expm1minus__scalar_rr2_lut4_p4, 0.0f);
+    .TestOutputMatchZero(xnn_math_f32_expm1minus__scalar_rr2_lut4_p4);
 }
 
 TEST(EXPM1MINUS__SCALAR_RR2_LUT4_P4, negative_saturation) {
@@ -491,7 +491,7 @@ TEST(EXPM1MINUS__SCALAR_RR2_LUT4_P4, nan) {
 TEST(EXPM1MINUS__SCALAR_RR2_LUT8_P3, negative_zero) {
   MathEvaluationTester()
     .input_value(-0.0f)
-    .TestOutputMatchReference(xnn_math_f32_expm1minus__scalar_rr2_lut8_p3, 0.0f);
+    .TestOutputMatchZero(xnn_math_f32_expm1minus__scalar_rr2_lut8_p3);
 }
 
 TEST(EXPM1MINUS__SCALAR_RR2_LUT8_P3, negative_saturation) {
@@ -509,7 +509,7 @@ TEST(EXPM1MINUS__SCALAR_RR2_LUT8_P3, nan) {
 TEST(EXPM1MINUS__SCALAR_RR2_LUT8_P4, negative_zero) {
   MathEvaluationTester()
     .input_value(-0.0f)
-    .TestOutputMatchReference(xnn_math_f32_expm1minus__scalar_rr2_lut8_p4, 0.0f);
+    .TestOutputMatchZero(xnn_math_f32_expm1minus__scalar_rr2_lut8_p4);
 }
 
 TEST(EXPM1MINUS__SCALAR_RR2_LUT8_P4, negative_saturation) {
@@ -527,7 +527,7 @@ TEST(EXPM1MINUS__SCALAR_RR2_LUT8_P4, nan) {
 TEST(EXPM1MINUS__SCALAR_RR2_LUT16_P3, negative_zero) {
   MathEvaluationTester()
     .input_value(-0.0f)
-    .TestOutputMatchReference(xnn_math_f32_expm1minus__scalar_rr2_lut16_p3, 0.0f);
+    .TestOutputMatchZero(xnn_math_f32_expm1minus__scalar_rr2_lut16_p3);
 }
 
 TEST(EXPM1MINUS__SCALAR_RR2_LUT16_P3, negative_saturation) {
@@ -545,7 +545,7 @@ TEST(EXPM1MINUS__SCALAR_RR2_LUT16_P3, nan) {
 TEST(EXPM1MINUS__SCALAR_RR2_LUT16_P4, negative_zero) {
   MathEvaluationTester()
     .input_value(-0.0f)
-    .TestOutputMatchReference(xnn_math_f32_expm1minus__scalar_rr2_lut16_p4, 0.0f);
+    .TestOutputMatchZero(xnn_math_f32_expm1minus__scalar_rr2_lut16_p4);
 }
 
 TEST(EXPM1MINUS__SCALAR_RR2_LUT16_P4, negative_saturation) {
@@ -563,7 +563,7 @@ TEST(EXPM1MINUS__SCALAR_RR2_LUT16_P4, nan) {
 TEST(EXPM1MINUS__SCALAR_RR2_P5, negative_zero) {
   MathEvaluationTester()
     .input_value(-0.0f)
-    .TestOutputMatchReference(xnn_math_f32_expm1minus__scalar_rr2_p5, 0.0f);
+    .TestOutputMatchZero(xnn_math_f32_expm1minus__scalar_rr2_p5);
 }
 
 TEST(EXPM1MINUS__SCALAR_RR2_P5, negative_saturation) {
@@ -581,7 +581,7 @@ TEST(EXPM1MINUS__SCALAR_RR2_P5, nan) {
 TEST(EXPM1MINUS__SCALAR_RR2_P6, negative_zero) {
   MathEvaluationTester()
     .input_value(-0.0f)
-    .TestOutputMatchReference(xnn_math_f32_expm1minus__scalar_rr2_p6, 0.0f);
+    .TestOutputMatchZero(xnn_math_f32_expm1minus__scalar_rr2_p6);
 }
 
 TEST(EXPM1MINUS__SCALAR_RR2_P6, negative_saturation) {

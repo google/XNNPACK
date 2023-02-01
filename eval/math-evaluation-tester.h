@@ -76,6 +76,35 @@ class MathEvaluationTester {
     }
   }
 
+  void TestOutputMatchZero(xnn_f32_unary_math_fn math_fn) const {
+    ASSERT_FALSE(std::isnan(input_min()));
+    ASSERT_FALSE(std::isnan(input_max()));
+    ASSERT_LE(input_min(), input_max());
+    ASSERT_EQ(std::signbit(input_min()), std::signbit(input_max()));
+
+    uint32_t range_min = float_as_uint32(std::fabs(input_min()));
+    uint32_t range_max = float_as_uint32(std::fabs(input_max()));
+    uint32_t range_sign = std::signbit(input_min()) ? UINT32_C(0x80000000) : 0;
+    if (range_min > range_max) {
+      std::swap(range_min, range_max);
+    }
+
+    std::vector<float, AlignedAllocator<float, 64>> inputs(kBlockSize);
+    std::vector<float, AlignedAllocator<float, 64>> outputs(kBlockSize);
+    for (uint32_t block_start = range_min; block_start <= range_max; block_start += kBlockSize) {
+      for (uint32_t block_offset = 0; block_offset < kBlockSize; block_offset++) {
+        inputs[block_offset] = uint32_as_float(range_sign | std::min<uint32_t>(block_start + block_offset, range_max));
+      }
+      math_fn(kBlockSize * sizeof(float), inputs.data(), outputs.data());
+      for (uint32_t i = 0; i < kBlockSize; i++) {
+        ASSERT_EQ(0.0f, outputs[i])
+          << "input = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(inputs[i])
+          << " (" << inputs[i] << ")"
+          << ", optimized = 0x" << std::hex << std::setw(8) << std::setfill('0') << float_as_uint32(outputs[i]);
+      }
+    }
+  }
+
   void TestNaN(xnn_f32_unary_math_fn math_fn) const {
     ASSERT_TRUE(std::isnan(input_min()));
     ASSERT_TRUE(std::isnan(input_max()));
