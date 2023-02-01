@@ -31,12 +31,12 @@ BEGIN_FUNCTION xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16
 
         VLD1.32       {d0[]}, [r3]!           // vmultiplier
         SUBS          r0, r0, 32              // batch of 32 bytes
-        VLD1.16       {d2[]-d3[]}, [r3]       // zero point
+        VLD1.16       {d2[],d3[]}, [r3]       // zero point
         BLO           1f
 
         // Main loop 16 bytes output
 0:
-        VLD1.16       {d24-d27}, [r1]!        // load 16 int16_t
+        VLD1.16       {d24,d25,d26,d27}, [r1]!  // load 16 int16_t
         SUBS          r0, r0, 32
         VSHLL.S16     q8, d24, 16
         VSHLL.S16     q9, d25, 16
@@ -54,15 +54,15 @@ BEGIN_FUNCTION xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16
         VQADD.S16     q13, q13, q1
         VQMOVN.S16    d4, q12
         VQMOVN.S16    d5, q13
-        VST1.8        {d4-d5}, [r2]!          // store 16 int8_t
+        VST1.8        {d4,d5}, [r2]!          // store 16 int8_t
         BHS           0b
 
-        ANDS          r0, r0, 31  // Is there a remainder?
+        TST           r0, 31                  // Is there a remainder?
         BXEQ          lr
 
         // Remainder 1 to 15 bytes of output
 1:
-        VLD1.16       {d24-d27}, [r1]!        // load 16 int16_t
+        VLD1.16       {d24,d25,d26,d27}, [r1]!  // load 16 int16_t
         VSHLL.S16     q8, d24, 16
         VSHLL.S16     q9, d25, 16
         VQRDMULH.S32  q8, q8, d0[0]
