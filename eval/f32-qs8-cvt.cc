@@ -14,8 +14,6 @@
 
 #include <gtest/gtest.h>
 
-#include <fp16.h>
-
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
