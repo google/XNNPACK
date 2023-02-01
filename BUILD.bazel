@@ -7243,6 +7243,7 @@ xnnpack_unit_test(
     name = "f32_tanh_eval",
     srcs = [
         "eval/f32-tanh.cc",
+        "eval/math-evaluation-tester.h",
     ],
     automatic = False,
     deps = ACCURACY_EVAL_DEPS,

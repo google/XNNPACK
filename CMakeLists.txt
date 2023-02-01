@@ -3043,6 +3043,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-roundz-eval PRIVATE hardware-config logging microkernels-all)
 
   ADD_EXECUTABLE(f32-tanh-eval eval/f32-tanh.cc)
+  SET_TARGET_PROPERTIES(f32-tanh-eval PROPERTIES CXX_EXTENSIONS YES)
   TARGET_INCLUDE_DIRECTORIES(f32-tanh-eval PRIVATE include src)
   TARGET_LINK_LIBRARIES(f32-tanh-eval PRIVATE fp16 pthreadpool gtest gtest_main)
   TARGET_LINK_LIBRARIES(f32-tanh-eval PRIVATE hardware-config logging microkernels-all)
