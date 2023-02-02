@@ -6476,14 +6476,14 @@ size_t xnn_init_qs16_qs8_cvt_scalar_params(
   float input_output_scale,
   int8_t output_zero_point)
 {
-  assert(input_output_scale >= 0x1.0p-15);
+  assert(input_output_scale >= 0x1.0p-16);
   assert(input_output_scale <= 0x1.0p+8);
 
-  const long multiplier = lrintf(32768.0f * input_output_scale);
+  const long multiplier = lrintf(65536.0f * input_output_scale);
   assert(multiplier >= 1L);
   assert(multiplier <= 0x01000000L);
   params->scalar.multiplier = (int32_t) multiplier;
-  params->scalar.bias = ((int32_t) output_zero_point << 15) + INT32_C(0x4000);
+  params->scalar.bias = ((int32_t) output_zero_point << 16) + INT32_C(0x8000);
   return sizeof(params->scalar);
 }
 
@@ -6493,10 +6493,10 @@ size_t xnn_init_qs16_qs8_cvt_neon_params(
   float input_output_scale,
   int8_t output_zero_point)
 {
-  assert(input_output_scale >= 0x1.0p-15);
+  assert(input_output_scale >= 0x1.0p-16);
   assert(input_output_scale <= 0x1.0p+8);
 
-  const long multiplier = lrintf(32768.0f * input_output_scale);
+  const long multiplier = lrintf(65536.0f * input_output_scale);
   assert(multiplier >= 1L);
   assert(multiplier <= 0x01000000L);
   params->neon.multiplier = (int32_t) multiplier;

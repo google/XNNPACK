@@ -19,7 +19,7 @@
 // vin        r1 d24 d25 d26 d27
 // vacc          q8 q9 q10 q11
 // vout       r2 d4 d5
-// multiplier r3 d0
+// multiplier r3 d0 d1
 // zero point    q1
 
 BEGIN_FUNCTION xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16
@@ -29,7 +29,7 @@ BEGIN_FUNCTION xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16
         .fpu    neon
 #endif
 
-        VLD1.32       {d0[]}, [r3]!           // vmultiplier
+        VLD1.32       {d0[],d1[]}, [r3]!      // vmultiplier
         SUBS          r0, r0, 32              // batch of 32 bytes
         VLD1.16       {d2[],d3[]}, [r3]       // zero point
         BLO           1f
@@ -38,14 +38,14 @@ BEGIN_FUNCTION xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16
 0:
         VLD1.16       {d24,d25,d26,d27}, [r1]!  // load 16 int16_t
         SUBS          r0, r0, 32
-        VSHLL.S16     q8, d24, 16
-        VSHLL.S16     q9, d25, 16
-        VSHLL.S16     q10, d26, 16
-        VSHLL.S16     q11, d27, 16
-        VQRDMULH.S32  q8, q8, d0[0]
-        VQRDMULH.S32  q9, q9, d0[0]
-        VQRDMULH.S32  q10, q10, d0[0]
-        VQRDMULH.S32  q11, q11, d0[0]
+        VSHLL.S16     q8, d24, 15
+        VSHLL.S16     q9, d25, 15
+        VSHLL.S16     q10, d26, 15
+        VSHLL.S16     q11, d27, 15
+        VQRDMULH.S32  q8, q8, q0
+        VQRDMULH.S32  q9, q9, q0
+        VQRDMULH.S32  q10, q10, q0
+        VQRDMULH.S32  q11, q11, q0
         VQMOVN.S32    d24, q8
         VQMOVN.S32    d25, q9
         VQMOVN.S32    d26, q10
@@ -63,10 +63,10 @@ BEGIN_FUNCTION xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16
         // Remainder 1 to 15 bytes of output
 1:
         VLD1.16       {d24,d25,d26,d27}, [r1]!  // load 16 int16_t
-        VSHLL.S16     q8, d24, 16
-        VSHLL.S16     q9, d25, 16
-        VQRDMULH.S32  q8, q8, d0[0]
-        VQRDMULH.S32  q9, q9, d0[0]
+        VSHLL.S16     q8, d24, 15
+        VSHLL.S16     q9, d25, 15
+        VQRDMULH.S32  q8, q8, q0
+        VQRDMULH.S32  q9, q9, q0
         VQMOVN.S32    d24, q8
         VQMOVN.S32    d25, q9
         VQADD.S16     q12, q12, q1
@@ -75,10 +75,10 @@ BEGIN_FUNCTION xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16
         BEQ           2f
 
         VST1.8        {d4}, [r2]!             // store 8 int8_t
-        VSHLL.S16     q10, d26, 16
-        VSHLL.S16     q11, d27, 16
-        VQRDMULH.S32  q10, q10, d0[0]
-        VQRDMULH.S32  q11, q11, d0[0]
+        VSHLL.S16     q10, d26, 15
+        VSHLL.S16     q11, d27, 15
+        VQRDMULH.S32  q10, q10, q0
+        VQRDMULH.S32  q11, q11, q0
         VQMOVN.S32    d26, q10
         VQMOVN.S32    d27, q11
         VQADD.S16     q13, q13, q1

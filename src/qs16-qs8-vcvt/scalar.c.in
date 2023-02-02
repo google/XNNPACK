@@ -28,7 +28,7 @@ void xnn_qs16_qs8_vcvt_ukernel__scalar_x${BATCH_TILE}(
     do {
       const int32_t vx = (int32_t) *input++;
 
-      int32_t vout = (int32_t) math_asr_s64(math_mulext_s32(vx, vmultiplier) + vbias, 15);
+      int32_t vout = (int32_t) math_asr_s64(math_mulext_s32(vx, vmultiplier) + vbias, 16);
 
       vout = math_max_s32(vout, -128);
       vout = math_min_s32(vout, 127);
@@ -44,7 +44,7 @@ void xnn_qs16_qs8_vcvt_ukernel__scalar_x${BATCH_TILE}(
       input += ${BATCH_TILE};
 
       $for N in range(BATCH_TILE):
-        int32_t vout${ABC[N]} = (int32_t) math_asr_s64(math_mulext_s32(vx${ABC[N]}, vmultiplier) + vbias, 15);
+        int32_t vout${ABC[N]} = (int32_t) math_asr_s64(math_mulext_s32(vx${ABC[N]}, vmultiplier) + vbias, 16);
 
       $for N in range(BATCH_TILE):
         vout${ABC[N]} = math_max_s32(vout${ABC[N]}, -128);
@@ -60,7 +60,7 @@ void xnn_qs16_qs8_vcvt_ukernel__scalar_x${BATCH_TILE}(
       do {
         const int32_t vx = (int32_t) *input++;
 
-        int32_t vout = (int32_t) math_asr_s64(math_mulext_s32(vx, vmultiplier) + vbias, 15);
+        int32_t vout = (int32_t) math_asr_s64(math_mulext_s32(vx, vmultiplier) + vbias, 16);
 
         vout = math_max_s32(vout, -128);
         vout = math_min_s32(vout, 127);

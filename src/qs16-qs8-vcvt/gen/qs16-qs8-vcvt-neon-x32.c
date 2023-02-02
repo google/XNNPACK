@@ -33,14 +33,14 @@ void xnn_qs16_qs8_vcvt_ukernel__neon_x32(
     const int16x8_t vx2 = vld1q_s16(input); input += 8;
     const int16x8_t vx3 = vld1q_s16(input); input += 8;
 
-    int32x4_t vacc_lo0 = vshll_n_s16(vget_low_s16(vx0), 16);
-    int32x4_t vacc_hi0 = vshll_n_s16(vget_high_s16(vx0), 16);
-    int32x4_t vacc_lo1 = vshll_n_s16(vget_low_s16(vx1), 16);
-    int32x4_t vacc_hi1 = vshll_n_s16(vget_high_s16(vx1), 16);
-    int32x4_t vacc_lo2 = vshll_n_s16(vget_low_s16(vx2), 16);
-    int32x4_t vacc_hi2 = vshll_n_s16(vget_high_s16(vx2), 16);
-    int32x4_t vacc_lo3 = vshll_n_s16(vget_low_s16(vx3), 16);
-    int32x4_t vacc_hi3 = vshll_n_s16(vget_high_s16(vx3), 16);
+    int32x4_t vacc_lo0 = vshll_n_s16(vget_low_s16(vx0), 15);
+    int32x4_t vacc_hi0 = vshll_n_s16(vget_high_s16(vx0), 15);
+    int32x4_t vacc_lo1 = vshll_n_s16(vget_low_s16(vx1), 15);
+    int32x4_t vacc_hi1 = vshll_n_s16(vget_high_s16(vx1), 15);
+    int32x4_t vacc_lo2 = vshll_n_s16(vget_low_s16(vx2), 15);
+    int32x4_t vacc_hi2 = vshll_n_s16(vget_high_s16(vx2), 15);
+    int32x4_t vacc_lo3 = vshll_n_s16(vget_low_s16(vx3), 15);
+    int32x4_t vacc_hi3 = vshll_n_s16(vget_high_s16(vx3), 15);
 
     vacc_lo0 = vqrdmulhq_s32(vacc_lo0, vmultiplier);
     vacc_hi0 = vqrdmulhq_s32(vacc_hi0, vmultiplier);
@@ -73,8 +73,8 @@ void xnn_qs16_qs8_vcvt_ukernel__neon_x32(
   }
   for (; batch >= 8 * sizeof(int16_t); batch -= 8 * sizeof(int16_t)) {
     const int16x8_t vx = vld1q_s16(input); input += 8;
-    int32x4_t vacc_lo = vshll_n_s16(vget_low_s16(vx), 16);
-    int32x4_t vacc_hi = vshll_n_s16(vget_high_s16(vx), 16);
+    int32x4_t vacc_lo = vshll_n_s16(vget_low_s16(vx), 15);
+    int32x4_t vacc_hi = vshll_n_s16(vget_high_s16(vx), 15);
     vacc_lo = vqrdmulhq_s32(vacc_lo, vmultiplier);
     vacc_hi = vqrdmulhq_s32(vacc_hi, vmultiplier);
     int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
@@ -87,8 +87,8 @@ void xnn_qs16_qs8_vcvt_ukernel__neon_x32(
     assert(batch <= 7 * sizeof(int16_t));
 
     const int16x8_t vx = vld1q_s16(input);
-    int32x4_t vacc_lo = vshll_n_s16(vget_low_s16(vx), 16);
-    int32x4_t vacc_hi = vshll_n_s16(vget_high_s16(vx), 16);
+    int32x4_t vacc_lo = vshll_n_s16(vget_low_s16(vx), 15);
+    int32x4_t vacc_hi = vshll_n_s16(vget_high_s16(vx), 15);
     vacc_lo = vqrdmulhq_s32(vacc_lo, vmultiplier);
     vacc_hi = vqrdmulhq_s32(vacc_hi, vmultiplier);
     int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));

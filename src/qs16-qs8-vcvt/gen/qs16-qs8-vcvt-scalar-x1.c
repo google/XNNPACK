@@ -29,7 +29,7 @@ void xnn_qs16_qs8_vcvt_ukernel__scalar_x1(
   do {
     const int32_t vx = (int32_t) *input++;
 
-    int32_t vout = (int32_t) math_asr_s64(math_mulext_s32(vx, vmultiplier) + vbias, 15);
+    int32_t vout = (int32_t) math_asr_s64(math_mulext_s32(vx, vmultiplier) + vbias, 16);
 
     vout = math_max_s32(vout, -128);
     vout = math_min_s32(vout, 127);
