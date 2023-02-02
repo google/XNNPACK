@@ -34,7 +34,7 @@ static void f16_gemm(benchmark::State& state,
   xnn_init_f16_minmax_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
 
@@ -107,120 +107,6 @@ static void f16_gemm(benchmark::State& state,
   state.counters["FLOPS"] = benchmark::Counter(
     uint64_t(state.iterations()) * 2 * mc * nc * kc, benchmark::Counter::kIsRate);
 }
-
-
-#if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
-  static void f16_gemm_1x16__asm_aarch64_neonfp16arith_ld32(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32, 1, 16, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_1x16__asm_aarch64_neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64, 1, 16, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_4x16__asm_aarch64_neonfp16arith_ld32(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld32, 4, 16, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_4x16__asm_aarch64_neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64, 4, 16, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_6x16__asm_aarch64_neonfp16arith_cortex_a55(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55, 6, 16, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_6x16__asm_aarch64_neonfp16arith_cortex_a55r0(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55r0, 6, 16, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_6x16__asm_aarch64_neonfp16arith_cortex_a75(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a75, 6, 16, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_6x16__asm_aarch64_neonfp16arith_ld32(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32, 6, 16, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_6x16__asm_aarch64_neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld64, 6, 16, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_1x8__asm_aarch64_neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_1x8__asm_aarch64_neonfp16arith_ld64, 1, 8, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_4x8__asm_aarch64_neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_4x8__asm_aarch64_neonfp16arith_ld64, 4, 8, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_6x8__asm_aarch64_neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_6x8__asm_aarch64_neonfp16arith_ld64, 6, 8, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_8x8__asm_aarch64_neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_8x8__asm_aarch64_neonfp16arith_ld64, 8, 8, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  BENCHMARK_GEMM(f16_gemm_1x16__asm_aarch64_neonfp16arith_ld32)
-  BENCHMARK_GEMM(f16_gemm_1x16__asm_aarch64_neonfp16arith_ld64)
-  BENCHMARK_GEMM(f16_gemm_4x16__asm_aarch64_neonfp16arith_ld32)
-  BENCHMARK_GEMM(f16_gemm_4x16__asm_aarch64_neonfp16arith_ld64)
-  BENCHMARK_GEMM(f16_gemm_6x16__asm_aarch64_neonfp16arith_cortex_a55)
-  BENCHMARK_GEMM(f16_gemm_6x16__asm_aarch64_neonfp16arith_cortex_a55r0)
-  BENCHMARK_GEMM(f16_gemm_6x16__asm_aarch64_neonfp16arith_cortex_a75)
-  BENCHMARK_GEMM(f16_gemm_6x16__asm_aarch64_neonfp16arith_ld32)
-  BENCHMARK_GEMM(f16_gemm_6x16__asm_aarch64_neonfp16arith_ld64)
-  BENCHMARK_GEMM(f16_gemm_1x8__asm_aarch64_neonfp16arith_ld64)
-  BENCHMARK_GEMM(f16_gemm_4x8__asm_aarch64_neonfp16arith_ld64)
-  BENCHMARK_GEMM(f16_gemm_6x8__asm_aarch64_neonfp16arith_ld64)
-  BENCHMARK_GEMM(f16_gemm_8x8__asm_aarch64_neonfp16arith_ld64)
-#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
-
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  static void f16_gemm_1x8__neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64, 1, 8, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_4x8__neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_4x8__neonfp16arith_ld64, 4, 8, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_6x8__neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_6x8__neonfp16arith_ld64, 6, 8, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_8x8__neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_8x8__neonfp16arith_ld64, 8, 8, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_1x16__neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_1x16__neonfp16arith_ld64, 1, 16, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_4x16__neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_4x16__neonfp16arith_ld64, 4, 16, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_6x16__neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_6x16__neonfp16arith_ld64, 6, 16, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_gemm_8x16__neonfp16arith_ld64(benchmark::State& state, const char* net) {
-    f16_gemm(state, xnn_f16_gemm_minmax_ukernel_8x16__neonfp16arith_ld64, 8, 16, 1, 1,
-      xnn_init_f16_minmax_fp16arith_params, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  BENCHMARK_GEMM(f16_gemm_1x8__neonfp16arith_ld64)
-  BENCHMARK_GEMM(f16_gemm_4x8__neonfp16arith_ld64)
-  BENCHMARK_GEMM(f16_gemm_6x8__neonfp16arith_ld64)
-  BENCHMARK_GEMM(f16_gemm_8x8__neonfp16arith_ld64)
-  BENCHMARK_GEMM(f16_gemm_1x16__neonfp16arith_ld64)
-  BENCHMARK_GEMM(f16_gemm_4x16__neonfp16arith_ld64)
-  BENCHMARK_GEMM(f16_gemm_6x16__neonfp16arith_ld64)
-  BENCHMARK_GEMM(f16_gemm_8x16__neonfp16arith_ld64)
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void f16_f32acc_gemm_1x8__avx2_broadcast(benchmark::State& state, const char* net) {
