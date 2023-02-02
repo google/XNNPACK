@@ -16,20 +16,32 @@ tools/xngen src/f16-igemm/neonfp16arith-ld64.c.in -D MR=6 -D NR=16 -o src/f16-ig
 tools/xngen src/f16-igemm/neonfp16arith-ld64.c.in -D MR=8 -D NR=16 -o src/f16-igemm/gen/f16-igemm-8x16-minmax-neonfp16arith-ld64.c &
 
 ################################### x86 AVX2 ###################################
-tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=1 -D NR=8  -o src/f16-igemm/gen/f16-igemm-1x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=4 -D NR=8  -o src/f16-igemm/gen/f16-igemm-4x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=5 -D NR=8  -o src/f16-igemm/gen/f16-igemm-5x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=6 -D NR=8  -o src/f16-igemm/gen/f16-igemm-6x8-minmax-avx2-broadcast.c &
-tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=7 -D NR=8  -o src/f16-igemm/gen/f16-igemm-7x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=1 -D NR=8  -D ACCTYPE=F16 -o src/f16-igemm/gen/f16-igemm-1x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=4 -D NR=8  -D ACCTYPE=F16 -o src/f16-igemm/gen/f16-igemm-4x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=5 -D NR=8  -D ACCTYPE=F16 -o src/f16-igemm/gen/f16-igemm-5x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=6 -D NR=8  -D ACCTYPE=F16 -o src/f16-igemm/gen/f16-igemm-6x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=7 -D NR=8  -D ACCTYPE=F16 -o src/f16-igemm/gen/f16-igemm-7x8-minmax-avx2-broadcast.c &
 
-tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=1 -D NR=16 -o src/f16-igemm/gen/f16-igemm-1x16-minmax-avx2-broadcast.c &
-tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -o src/f16-igemm/gen/f16-igemm-3x16-minmax-avx2-broadcast.c &
-tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -o src/f16-igemm/gen/f16-igemm-4x16-minmax-avx2-broadcast.c &
-tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -o src/f16-igemm/gen/f16-igemm-5x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=1 -D NR=16 -D ACCTYPE=F16 -o src/f16-igemm/gen/f16-igemm-1x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D ACCTYPE=F16 -o src/f16-igemm/gen/f16-igemm-3x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D ACCTYPE=F16 -o src/f16-igemm/gen/f16-igemm-4x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D ACCTYPE=F16 -o src/f16-igemm/gen/f16-igemm-5x16-minmax-avx2-broadcast.c &
+
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=1 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-1x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=4 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-4x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=5 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-5x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=6 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-6x8-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=7 -D NR=8  -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-7x8-minmax-avx2-broadcast.c &
+
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=1 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-1x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-3x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-4x16-minmax-avx2-broadcast.c &
+tools/xngen src/f16-igemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D ACCTYPE=F32 -o src/f16-f32acc-igemm/gen/f16-f32acc-igemm-5x16-minmax-avx2-broadcast.c &
 
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/f16-igemm-minmax.yaml --output test/f16-igemm-minmax.cc &
 tools/generate-gemm-test.py --spec test/f16-igemm-jit.yaml --output test/f16-igemm-jit.cc &
+tools/generate-gemm-test.py --spec test/f16-f32acc-igemm-minmax.yaml --output test/f16-f32acc-igemm-minmax.cc &
 
 wait # JIT requires assembly files to be generated first.
 

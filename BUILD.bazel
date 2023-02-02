@@ -5912,6 +5912,19 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_f32acc_igemm_bench",
+    srcs = [
+        "bench/conv.h",
+        "bench/f16-f32acc-igemm.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":operators",
+        ":indirection",
+        ":packing",
+    ],
+)
+
+xnnpack_benchmark(
     name = "f16_igemm_bench",
     srcs = [
         "bench/conv.h",
@@ -7431,6 +7444,17 @@ xnnpack_unit_test(
     name = "f16_igemm_jit_test",
     srcs = [
         "test/f16-igemm-jit.cc",
+    ],
+    shard_count = 5,
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "f16_f32acc_igemm_minmax_test",
+    srcs = [
+        "test/f16-f32acc-igemm-minmax.cc",
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
