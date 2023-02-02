@@ -93,7 +93,7 @@ void xnn_f16_vsigmoid_ukernel__aarch64_neonfp16arith_rr2_p2_div_x8(
       vf_lo = vext_f16(vf_lo, vf_lo, 2);
     }
     if (batch & (1 * sizeof(uint16_t))) {
-      vst1_lane_f16(o, vf_lo, 0);
+      vst1_lane_u16(o, vreinterpret_u16_f16(vf_lo), 0);
     }
   }
 }
