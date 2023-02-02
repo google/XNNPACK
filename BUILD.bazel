@@ -7122,6 +7122,22 @@ xnnpack_benchmark(
 
 ################### Accuracy verification for math functions ##################
 
+xnnpack_cc_library(
+    name = "math_evaluation_tester",
+    testonly = True,
+    srcs = ["eval/math-evaluation-tester.cc"],
+    hdrs = ["eval/math-evaluation-tester.h"],
+    deps = [
+        ":aligned_allocator",
+        ":common",
+        ":math",
+        ":math_stubs",
+        "@FP16",
+        "@pthreadpool",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 xnnpack_unit_test(
     name = "f16_sqrt_eval",
     srcs = [
@@ -7137,7 +7153,9 @@ xnnpack_unit_test(
         "eval/f16-tanh.cc",
     ],
     automatic = False,
-    deps = ACCURACY_EVAL_DEPS,
+    deps = ACCURACY_EVAL_DEPS + [
+        ":math_evaluation_tester",
+    ],
 )
 
 xnnpack_unit_test(
@@ -7180,30 +7198,33 @@ xnnpack_unit_test(
     name = "f32_exp_eval",
     srcs = [
         "eval/f32-exp.cc",
-        "eval/math-evaluation-tester.h",
     ],
     automatic = False,
-    deps = ACCURACY_EVAL_DEPS,
+    deps = ACCURACY_EVAL_DEPS + [
+        ":math_evaluation_tester",
+    ],
 )
 
 xnnpack_unit_test(
     name = "f32_expm1minus_eval",
     srcs = [
         "eval/f32-expm1minus.cc",
-        "eval/math-evaluation-tester.h",
     ],
     automatic = False,
-    deps = ACCURACY_EVAL_DEPS,
+    deps = ACCURACY_EVAL_DEPS + [
+        ":math_evaluation_tester",
+    ],
 )
 
 xnnpack_unit_test(
     name = "f32_expminus_eval",
     srcs = [
         "eval/f32-expminus.cc",
-        "eval/math-evaluation-tester.h",
     ],
     automatic = False,
-    deps = ACCURACY_EVAL_DEPS,
+    deps = ACCURACY_EVAL_DEPS + [
+        ":math_evaluation_tester",
+    ],
 )
 
 xnnpack_unit_test(
@@ -7246,10 +7267,11 @@ xnnpack_unit_test(
     name = "f32_tanh_eval",
     srcs = [
         "eval/f32-tanh.cc",
-        "eval/math-evaluation-tester.h",
     ],
     automatic = False,
-    deps = ACCURACY_EVAL_DEPS,
+    deps = ACCURACY_EVAL_DEPS + [
+        ":math_evaluation_tester",
+    ],
 )
 
 xnnpack_unit_test(
