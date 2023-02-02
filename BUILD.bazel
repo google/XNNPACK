@@ -7318,6 +7318,7 @@ xnnpack_unit_test(
         "test/dwconv-microkernel-tester.h",
         "test/f16-dwconv-multipass-minmax.cc",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":packing",
         ":microkernel_utils",
