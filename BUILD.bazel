@@ -2310,6 +2310,9 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/common.h"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":platform_jit",
+    ],
 )
 
 xnnpack_cc_library(
@@ -5140,6 +5143,16 @@ cc_library(
         ":xnn_enable_dwconv_multipass_explicit_true": ["XNN_ENABLE_DWCONV_MULTIPASS=1"],
         ":xnn_enable_dwconv_multipass_explicit_false": ["XNN_ENABLE_DWCONV_MULTIPASS=0"],
         "//conditions:default": ["XNN_ENABLE_DWCONV_MULTIPASS=0"],
+    }),
+)
+
+cc_library(
+    name = "platform_jit",
+    defines = select({
+        ":xnn_platform_jit_explicit_true": ["XNN_PLATFORM_JIT=1"],
+        ":xnn_platform_jit_explicit_false": ["XNN_PLATFORM_JIT=0"],
+        # A constant that is ignored and not used anywhere so that by default we set XNN_PLATFORM_JIT based on actual platform values.
+        "//conditions:default": ["XNN_IGNORED_PLATFORM_JIT=0"],
     }),
 )
 
@@ -11111,6 +11124,16 @@ config_setting(
 config_setting(
     name = "xnn_log_level_explicit_debug",
     define_values = {"xnn_log_level": "debug"},
+)
+
+config_setting(
+    name = "xnn_platform_jit_explicit_true",
+    define_values = {"xnn_platform_jit": "true"},
+)
+
+config_setting(
+    name = "xnn_platform_jit_explicit_false",
+    define_values = {"xnn_platform_jit": "false"},
 )
 
 # Builds with -c dbg
