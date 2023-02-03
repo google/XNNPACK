@@ -24,11 +24,26 @@ XNN_INTERNAL void xnn_generate_gemms_up_to_max_mr(
     size_t group_input_channels,
     size_t log2_input_element_size,
     xnn_operator_t convolution_op);
+XNN_INTERNAL void xnn_generate_igemms_up_to_max_mr(
+  size_t max_mr,
+  struct gemm_codegens generators,
+  const struct jit_gemm_params *jit_gemm_params,
+  size_t group_output_channels,
+  size_t nr,
+  size_t group_input_channels,
+  size_t log2_input_element_size,
+  size_t kernel_size,
+  xnn_operator_t convolution_op);
 
 // Overwrite function pointer to GEMM microkernels with generated code if available.
 XNN_INTERNAL void xnn_overwrite_gemm_cases_with_generated_code(
   xnn_operator_t convolution_op,
   struct xnn_hmp_gemm_ukernel *gemm_cases,
+  size_t mr);
+// Overwrite function pointer to IGEMM microkernels with generated code if available.
+XNN_INTERNAL void xnn_overwrite_igemm_cases_with_generated_code(
+  xnn_operator_t convolution_op,
+  struct xnn_hmp_igemm_ukernel *igemm_cases,
   size_t mr);
 #endif  // XNN_PLATFORM_JIT
 

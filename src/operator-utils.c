@@ -77,7 +77,7 @@ void xnn_generate_gemms_up_to_max_mr(
   for (size_t mr = 1; mr <= max_mr; mr++) {
     // Get smallest generator that is >= mr.
     size_t smallest_mr = mr;
-    while (generators.gemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] == NULL && smallest_mr <= max_mr) {
+    while (generators.gemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] == NULL && smallest_mr < max_mr) {
       smallest_mr++;
     }
 
@@ -86,6 +86,78 @@ void xnn_generate_gemms_up_to_max_mr(
       op->ukernel.gemm.gemm_cases[mr - 1].generated_code_offset[i] =
           get_generated_gemm(generators.gemm[smallest_mr - 1].function[i], jit_gemm_params, mr,
                              group_output_channels, nr, group_input_channels, log2_input_element_size, op->code_cache);
+    }
+  }
+}
+
+static size_t get_generated_igemm(
+  xnn_jit_igemm_code_generator_fn generator,
+  const struct jit_gemm_params *jit_gemm_params,
+  size_t group_output_channels,
+  size_t nr,
+  size_t group_input_channels,
+  size_t log2_input_element_size,
+  size_t kernel_size,
+  size_t mr,
+  struct xnn_code_cache* code_cache)
+{
+  size_t offset = XNN_CACHE_NOT_FOUND;
+  if (generator == NULL) {
+    goto error;
+  }
+  enum xnn_status status = xnn_status_success;
+
+  status = xnn_reserve_code_memory(&code_cache->cache.code, XNN_DEFAULT_MICROKERNEL_SIZE);
+  if (xnn_status_success != status) {
+    xnn_log_error("failed to ensure sufficient space in code buffer for microkernel");
+    goto error;
+  }
+
+  const size_t old_size = code_cache->cache.code.size;
+  void* old_code = (uint8_t*) code_cache->cache.code.start + old_size;
+  status = generator(&code_cache->cache.code, mr, group_output_channels % nr,
+                     group_input_channels << log2_input_element_size,
+                     kernel_size * mr * sizeof(void*), jit_gemm_params);
+  if (status != xnn_status_success) {
+    xnn_log_error("failed to generate IGEMM microkernel");
+    goto error;
+  }
+
+  const size_t new_size = code_cache->cache.code.size;
+  return xnn_get_or_insert_code_cache(code_cache, old_code, new_size - old_size);
+
+error:
+  return offset;
+}
+
+void xnn_generate_igemms_up_to_max_mr(
+  size_t max_mr,
+  struct gemm_codegens generators,
+  const struct jit_gemm_params *jit_gemm_params,
+  size_t group_output_channels,
+  size_t nr,
+  size_t group_input_channels,
+  size_t log2_input_element_size,
+  size_t kernel_size,
+  xnn_operator_t op)
+{
+  assert(XNN_MAX_MR >= max_mr);
+  if (op->code_cache == NULL) {
+    return;
+  }
+  for (size_t mr = 1; mr <= max_mr; mr++) {
+    // Get smallest generator that is >= mr.
+    size_t smallest_mr = mr;
+    while (generators.igemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] == NULL && smallest_mr < max_mr) {
+      smallest_mr++;
+    }
+
+    for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
+      xnn_log_debug("using generator for mr %zu to generate igemm of mr %zu and uarch %zu", smallest_mr, mr, i);
+      op->ukernel.igemm.igemm_cases[mr - 1].generated_code_offset[i] =
+        get_generated_igemm(generators.igemm[smallest_mr - 1].function[i], jit_gemm_params,
+                            group_output_channels, nr, group_input_channels, log2_input_element_size, kernel_size, mr,
+                            op->code_cache);
     }
   }
 }
@@ -108,6 +180,23 @@ void xnn_overwrite_gemm_cases_with_generated_code(
     const size_t jit_code_offset = gemm_cases[mr - 1].generated_code_offset[i];
     if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
       gemm_cases[mr - 1].function[i] = (xnn_gemm_ukernel_fn) cached_code_at_offset(op, jit_code_offset);
+    }
+  }
+}
+
+void xnn_overwrite_igemm_cases_with_generated_code(
+  xnn_operator_t op,
+  struct xnn_hmp_igemm_ukernel *igemm_cases,
+  size_t mr)
+{
+  if (op->code_cache == NULL) {
+    return;
+  }
+
+  for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
+    const size_t jit_code_offset = igemm_cases[mr - 1].generated_code_offset[i];
+    if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
+      igemm_cases[mr - 1].function[i] = (xnn_igemm_ukernel_fn) cached_code_at_offset(op, jit_code_offset);
     }
   }
 }
