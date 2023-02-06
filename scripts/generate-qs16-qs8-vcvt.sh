@@ -9,6 +9,16 @@ tools/xngen src/qs16-qs8-vcvt/neon.c.in -D BATCH_TILE=8  -o src/qs16-qs8-vcvt/ge
 tools/xngen src/qs16-qs8-vcvt/neon.c.in -D BATCH_TILE=16 -o src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-neon-x16.c &
 tools/xngen src/qs16-qs8-vcvt/neon.c.in -D BATCH_TILE=32 -o src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-neon-x32.c &
 
+################################## x86 SSE4.1 #################################
+tools/xngen src/qs16-qs8-vcvt/sse4.c.in -D BATCH_TILE=4  -D AVX=0 -o src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-sse41-x4.c &
+tools/xngen src/qs16-qs8-vcvt/sse4.c.in -D BATCH_TILE=8  -D AVX=0 -o src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-sse41-x8.c &
+tools/xngen src/qs16-qs8-vcvt/sse4.c.in -D BATCH_TILE=16 -D AVX=0 -o src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-sse41-x16.c &
+
+tools/xngen src/qs16-qs8-vcvt/sse4.c.in -D BATCH_TILE=4  -D AVX=1 -o src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-avx-x4.c &
+tools/xngen src/qs16-qs8-vcvt/sse4.c.in -D BATCH_TILE=8  -D AVX=1 -o src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-avx-x8.c &
+tools/xngen src/qs16-qs8-vcvt/sse4.c.in -D BATCH_TILE=16 -D AVX=1 -o src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-avx-x16.c &
+
+
 #################################### Scalar ###################################
 tools/xngen src/qs16-qs8-vcvt/scalar.c.in -D BATCH_TILE=1 -o src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-scalar-x1.c &
 tools/xngen src/qs16-qs8-vcvt/scalar.c.in -D BATCH_TILE=2 -o src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-scalar-x2.c &

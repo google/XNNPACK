@@ -94,6 +94,45 @@ static void qs16_qs8_vcvt(
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qs16_qs8_vcvt, avx_x4,
+                    xnn_qs16_qs8_vcvt_ukernel__avx_x4,
+                    xnn_init_qs16_qs8_cvt_sse4_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int16_t, int8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qs16_qs8_vcvt, avx_x8,
+                    xnn_qs16_qs8_vcvt_ukernel__avx_x8,
+                    xnn_init_qs16_qs8_cvt_sse4_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int16_t, int8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qs16_qs8_vcvt, avx_x16,
+                    xnn_qs16_qs8_vcvt_ukernel__avx_x16,
+                    xnn_init_qs16_qs8_cvt_sse4_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int16_t, int8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qs16_qs8_vcvt, sse41_x4,
+                    xnn_qs16_qs8_vcvt_ukernel__sse41_x4,
+                    xnn_init_qs16_qs8_cvt_sse4_params,
+                    benchmark::utils::CheckSSE41)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int16_t, int8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qs16_qs8_vcvt, sse41_x8,
+                    xnn_qs16_qs8_vcvt_ukernel__sse41_x8,
+                    xnn_init_qs16_qs8_cvt_sse4_params,
+                    benchmark::utils::CheckSSE41)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int16_t, int8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qs16_qs8_vcvt, sse41_x16,
+                    xnn_qs16_qs8_vcvt_ukernel__sse41_x16,
+                    xnn_init_qs16_qs8_cvt_sse4_params,
+                    benchmark::utils::CheckSSE41)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int16_t, int8_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 BENCHMARK_CAPTURE(qs16_qs8_vcvt, scalar_x1,
                   xnn_qs16_qs8_vcvt_ukernel__scalar_x1,
                   xnn_init_qs16_qs8_cvt_scalar_params)

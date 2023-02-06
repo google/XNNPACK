@@ -6505,6 +6505,30 @@ size_t xnn_init_qs16_qs8_cvt_neon_params(
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+size_t xnn_init_qs16_qs8_cvt_sse4_params(
+  union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  int8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-16);
+  assert(input_output_scale <= 0x1.0p+8);
+
+  const long multiplier = lrintf(65536.0f * input_output_scale);
+  assert(multiplier >= 1L);
+  assert(multiplier <= 0x01000000L);
+  const int64_t bias = ((int64_t) output_zero_point << 16) + INT64_C(0x8000);
+
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse4.multiplier[i] = (int32_t) multiplier;
+  }
+  for (uint32_t i = 0; i < 2; i++) {
+    params->sse4.bias[i] = (int64_t) bias;
+  }
+  return sizeof(params->sse4);
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 size_t xnn_init_qs8_f32_cvt_scalar_params(
   union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
