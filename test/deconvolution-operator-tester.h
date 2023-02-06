@@ -1063,7 +1063,7 @@ class DeconvolutionOperatorTester {
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
-    std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
+    std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels());
@@ -1074,8 +1074,25 @@ class DeconvolutionOperatorTester {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
-      std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+      // Weights in the same output channel will be all positive or all negative. This ensures that no catastrophic
+      // cancellation occur, but test covers both positive and negative values.
+      for (size_t g = 0; g < groups(); g++) {
+        for (size_t oc = 0; oc < group_output_channels(); oc++) {
+          float range = f32dist(rng);
+          auto weights_dist = std::uniform_real_distribution<float>(std::min(range, 0.0f), std::max(range, 0.0f));
+          bias[g * group_output_channels() + oc] = weights_dist(rng);
+          for (size_t y = 0; y < kernel_height(); y++) {
+            for (size_t x = 0; x < kernel_width(); x++) {
+              for (size_t ic = 0; ic < group_input_channels(); ic++) {
+                size_t index = ((((g * group_output_channels() + oc) * kernel_height()) + y) * kernel_width() + x) *
+                                 group_input_channels() + ic;
+                kernel[index] = weights_dist(rng);
+              }
+            }
+          }
+        }
+      }
+
       std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
@@ -1391,7 +1408,7 @@ class DeconvolutionOperatorTester {
               EXPECT_NEAR(
                   output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
                   output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c],
-                  1.0e-4 * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]))
+                  std::max(1.0e-4, 1.0e-4 * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c])))
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
             }
           }
