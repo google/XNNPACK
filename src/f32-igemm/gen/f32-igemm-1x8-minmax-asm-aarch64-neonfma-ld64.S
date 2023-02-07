@@ -61,7 +61,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
         # Is there at least 2 floats (8 bytes)
         SUBS    x0, x2, 8               // k = kc - 8
 
-        B.LO    6f
+        B.LO    4f
 
         # Main loop - 2 floats of A (8 bytes)
 2:
@@ -75,11 +75,10 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
         FMLA    v19.4s, v23.4s, v0.s[1]
         B.HS    2b
 
-4:
         # Is there a remainder?- 1 float of A (4 bytes)
-        TBNZ    x0, 2, 6f
+        TBNZ    x0, 2, 4f
 
-5:
+3:
         # ks loop
         SUBS    x9, x9, 8               // ks -= MR * sizeof(void*)
         B.HI    1b
@@ -95,7 +94,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
 
         # Store full 1 x 8
         SUBS    x1, x1, 8
-        B.LO    10f
+        B.LO    5f
 
         STP     q16, q17, [x6]
         ADD     x6, x6, x10
@@ -107,29 +106,29 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
 
         RET
 
-6:
+4:
         # Remainder- 1 float of A (4 bytes)
         LDP     q20, q21, [x5], 32
         LDR     s0, [x8], 4
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v21.4s, v0.s[0]
-        B       5b
+        B       3b
 
-10:
+5:
         # Store odd channels
-        TBZ     x1, 2, 11f
+        TBZ     x1, 2, 6f
         STR     q16, [x6], 16
         MOV     v16.16b, v17.16b
 
-11:
-        TBZ     x1, 1, 12f
+6:
+        TBZ     x1, 1, 7f
         STR     d16, [x6], 8
         DUP     d16, v16.d[1]
 
-12:
-        TBZ     x1, 0, 13f
+7:
+        TBZ     x1, 0, 8f
         STR     s16, [x6], 4
-13:
+8:
         RET
 
 END_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
