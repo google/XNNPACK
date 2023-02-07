@@ -131,6 +131,21 @@ static void qs16_qs8_vcvt(
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int16_t, int8_t>)
     ->UseRealTime();
+  BENCHMARK_CAPTURE(qs16_qs8_vcvt, sse2_x4,
+                    xnn_qs16_qs8_vcvt_ukernel__sse2_x4,
+                    xnn_init_qs16_qs8_cvt_sse2_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int16_t, int8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qs16_qs8_vcvt, sse2_x8,
+                    xnn_qs16_qs8_vcvt_ukernel__sse2_x8,
+                    xnn_init_qs16_qs8_cvt_sse2_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int16_t, int8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qs16_qs8_vcvt, sse2_x16,
+                    xnn_qs16_qs8_vcvt_ukernel__sse2_x16,
+                    xnn_init_qs16_qs8_cvt_sse2_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int16_t, int8_t>)
+    ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 BENCHMARK_CAPTURE(qs16_qs8_vcvt, scalar_x1,

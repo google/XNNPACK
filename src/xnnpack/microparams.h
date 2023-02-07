@@ -1287,8 +1287,13 @@ union xnn_qs16_qs8_cvt_params {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
+    XNN_ALIGN(16) uint16_t input_bias[8];  // Convert to unsigned.
     XNN_ALIGN(16) int32_t multiplier[4];
-    XNN_ALIGN(16) int64_t bias[2];
+    XNN_ALIGN(16) int64_t bias[2];  // Adjust for input bias multiplied.
+  } sse2;
+  struct {
+    XNN_ALIGN(16) int32_t multiplier[4];
+    XNN_ALIGN(16) int64_t bias[2];  // Rounding + output_zero_point.
   } sse4;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
