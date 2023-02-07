@@ -166,7 +166,7 @@ void xnn_f16_avgpool_minmax_ukernel_9x__neonfp16arith_c8(
         vout_lo = vext_f16(vout_lo, vout_lo, 2);
       }
       if (c & 1) {
-        vst1_lane_f16(output, vout_lo, 0); output = (uint16_t*) output + 1;
+        vst1_lane_u16(output, vreinterpret_u16_f16(vout_lo), 0); output = (uint16_t*) output + 1;
       }
     }
     output = (uint16_t*) ((uintptr_t) output + output_increment);

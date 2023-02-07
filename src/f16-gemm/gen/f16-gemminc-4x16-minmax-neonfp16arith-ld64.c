@@ -273,10 +273,10 @@ void xnn_f16_gemminc_minmax_ukernel_4x16__neonfp16arith_ld64(
         vacc3x0123 = vext_f16(vacc3x0123, vacc3x0123, 2);
       }
       if (nc & 1) {
-        vst1_lane_f16(c0, vacc0x0123, 0);
-        vst1_lane_f16(c1, vacc1x0123, 0);
-        vst1_lane_f16(c2, vacc2x0123, 0);
-        vst1_lane_f16(c3, vacc3x0123, 0);
+        vst1_lane_u16(c0, vreinterpret_u16_f16(vacc0x0123), 0);
+        vst1_lane_u16(c1, vreinterpret_u16_f16(vacc1x0123), 0);
+        vst1_lane_u16(c2, vreinterpret_u16_f16(vacc2x0123), 0);
+        vst1_lane_u16(c3, vreinterpret_u16_f16(vacc3x0123), 0);
       }
 
       nc = 0;

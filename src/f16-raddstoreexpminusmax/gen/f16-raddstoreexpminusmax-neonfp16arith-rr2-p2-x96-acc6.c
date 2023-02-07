@@ -293,7 +293,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x96_acc6(
       vf_lo = vext_f16(vf_lo, vf_lo, 2);
     }
     if (batch & (1 * sizeof(uint16_t))) {
-      vst1_lane_f16(o, vf_lo, 0);
+      vst1_lane_u16(o, vreinterpret_u16_f16(vf_lo), 0);
       vacc_lo = vadd_f16(vacc_lo, vreinterpret_f16_u64(vshl_n_u64(vreinterpret_u64_f16(vf_lo), 48)));
     }
   }

@@ -64,7 +64,7 @@ void xnn_f16_vdiv_minmax_ukernel__aarch64_neonfp16arith_x8(
     }
 
     if (batch & (1 * sizeof(uint16_t))) {
-      vst1_lane_f16(o, vy0123, 0);
+      vst1_lane_u16(o, vreinterpret_u16_f16(vy0123), 0);
     }
   }
 }

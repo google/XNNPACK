@@ -138,7 +138,7 @@ void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x16(
       vy_lo = vext_f16(vy_lo, vy_lo, 2);
     }
     if (batch & (1 * sizeof(uint16_t))) {
-      vst1_lane_f16(o, vy_lo, 0);
+      vst1_lane_u16(o, vreinterpret_u16_f16(vy_lo), 0);
     }
   }
 }

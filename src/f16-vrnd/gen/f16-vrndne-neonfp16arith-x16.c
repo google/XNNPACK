@@ -57,7 +57,7 @@ void xnn_f16_vrndne_ukernel__neonfp16arith_x16(
       vacc_lo = vext_f16(vacc_lo, vacc_lo, 2);
     }
     if (batch & (1 * sizeof(uint16_t))) {
-      vst1_lane_f16(o, vacc_lo, 0);
+      vst1_lane_u16(o, vreinterpret_u16_f16(vacc_lo), 0);
     }
   }
 }

@@ -933,12 +933,12 @@ void xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2(
         } else {
           // Exactly 1 output width element remaining
 
-          vst1_lane_f16(o1c0, vo1x0, 0); o1c0 += 1;
+          vst1_lane_u16(o1c0, vreinterpret_u16_f16(vo1x0), 0); o1c0 += 1;
           vst1_lane_f16(o1c1, vo1x0, 1); o1c1 += 1;
           vst1_lane_f16(o1c2, vo1x0, 2); o1c2 += 1;
           vst1_lane_f16(o1c3, vo1x0, 3); o1c3 += 1;
 
-          vst1_lane_f16(o0c0, vo0x0, 0); o0c0 += 1;
+          vst1_lane_u16(o0c0, vreinterpret_u16_f16(vo0x0), 0); o0c0 += 1;
           vst1_lane_f16(o0c1, vo0x0, 1); o0c1 += 1;
           vst1_lane_f16(o0c2, vo0x0, 2); o0c2 += 1;
           vst1_lane_f16(o0c3, vo0x0, 3); o0c3 += 1;

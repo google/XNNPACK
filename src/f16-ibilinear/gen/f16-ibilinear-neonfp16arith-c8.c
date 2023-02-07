@@ -84,7 +84,7 @@ void xnn_f16_ibilinear_ukernel__neonfp16arith_c8(
         vo_lo = vext_f16(vo_lo, vo_lo, 2);
       }
       if (c & (1 * sizeof(uint16_t))) {
-        vst1_lane_f16(o, vo_lo, 0); o += 1;
+        vst1_lane_u16(o, vreinterpret_u16_f16(vo_lo), 0); o += 1;
       }
     }
 

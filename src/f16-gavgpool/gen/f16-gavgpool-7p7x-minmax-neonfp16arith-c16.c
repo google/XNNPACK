@@ -281,7 +281,7 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c16(
           vacc0123 = vext_f16(vacc0123, vacc0123, 2);
         }
         if (channels & 1) {
-          vst1_lane_f16(output, vacc0123, 0); output = (uint16_t*) output + 1;
+          vst1_lane_u16(output, vreinterpret_u16_f16(vacc0123), 0); output = (uint16_t*) output + 1;
         }
         channels = 0;
       }

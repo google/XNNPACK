@@ -267,7 +267,7 @@ void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p16(
         const float16x4_t vd = vsub_f16(vr, vl);
         const float16x4_t vo = vfma_f16(vl, vd, valphah);
 
-        vst1_lane_f16(o, vo, 0); o += 1;
+        vst1_lane_u16(o, vreinterpret_u16_f16(vo), 0); o += 1;
       }
     }
 
