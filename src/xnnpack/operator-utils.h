@@ -93,14 +93,14 @@ XNN_INTERNAL uint32_t xnn_get_heuristic_mr_gemm(
   uint32_t max_mr,
   uint32_t nr,
   struct xnn_hmp_gemm_ukernel *gemm_cases,
-  bool code_cace_available);
+  bool code_cache_available);
 
 XNN_INTERNAL uint32_t xnn_get_heuristic_mr_igemm(
   size_t batch_size,
   uint32_t max_mr,
   uint32_t nr,
   struct xnn_hmp_igemm_ukernel *igemm_cases,
-  bool code_cace_available);
+  bool code_cache_available);
 
 #ifdef __cplusplus
 }
