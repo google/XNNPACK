@@ -9,6 +9,7 @@
 #pragma once
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include <algorithm>
 #include <cassert>
@@ -29,6 +30,12 @@ class DeconvolutionOperatorTester {
   enum class WeightsType {
     Default,
     FP32,
+  };
+
+  enum class Activation {
+    MinMax,  // Default activation used in tests. If tests do not specify
+             // qmin/qmax, it is equivalent to linear activation.
+    Relu,
   };
 
   inline DeconvolutionOperatorTester& padding(uint32_t padding) {
@@ -400,6 +407,15 @@ class DeconvolutionOperatorTester {
     return this->qmax_;
   }
 
+  inline DeconvolutionOperatorTester& activation(Activation activation) {
+    this->activation_ = activation;
+    return *this;
+  }
+
+  inline Activation activation() const {
+    return this->activation_;
+  }
+
   inline DeconvolutionOperatorTester& has_bias(bool has_bias) {
     this->has_bias_ = has_bias;
     return *this;
@@ -426,6 +442,17 @@ class DeconvolutionOperatorTester {
   inline bool use_weights_cache() const {
     return this->use_weights_cache_;
   }
+
+#if XNN_PLATFORM_JIT
+  inline DeconvolutionOperatorTester& use_jit(bool use_jit) {
+    this->use_jit_ = use_jit;
+    return *this;
+  }
+
+  inline bool use_jit() const {
+    return this->use_jit_;
+  }
+#endif
 
   inline DeconvolutionOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
@@ -1144,10 +1171,27 @@ class DeconvolutionOperatorTester {
       const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
 
-      const float output_min = qmin() == 0 ? -std::numeric_limits<float>::infinity() :
+      float output_min = qmin() == 0 ? -std::numeric_limits<float>::infinity() :
         accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin());
-      const float output_max = qmax() == 255 ? std::numeric_limits<float>::infinity() :
+      float output_max = qmax() == 255 ? std::numeric_limits<float>::infinity() :
         accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
+
+      switch (activation()) {
+        case Activation::MinMax:
+          if (qmin() != 0) {
+            ASSERT_THAT(output_ref, testing::Contains(testing::Lt(output_min)));
+          }
+          if (qmax() != 255) {
+            ASSERT_THAT(output_ref, testing::Contains(testing::Gt(output_max)));
+          }
+          break;
+        case Activation::Relu:
+          output_min = 0.0f;
+          output_max = std::numeric_limits<float>::infinity();
+          ASSERT_THAT(output_ref, testing::Contains(testing::Lt(output_min)));
+          ASSERT_THAT(output_ref, testing::Contains(testing::Gt(output_min)));
+          break;
+      }
 
       // Clamp reference results.
       for (float& value : output_ref) {
@@ -1159,6 +1203,13 @@ class DeconvolutionOperatorTester {
       xnn_operator_t deconvolution_op = nullptr;
 
       xnn_caches caches = {};
+      #if XNN_PLATFORM_JIT
+        xnn_code_cache code_cache;
+        if (use_jit()) {
+          xnn_init_code_cache(&code_cache);
+          caches.code_cache = &code_cache;
+        }
+      #endif
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
@@ -1186,6 +1237,14 @@ class DeconvolutionOperatorTester {
       // Smart pointer to automatically delete deconvolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
+      #if XNN_PLATFORM_JIT
+        if (use_jit()) {
+          // Check that we actually generated code.
+          ASSERT_GT(code_cache.cache.code.size, 0);
+          xnn_finalize_code_memory(&code_cache.cache.code);
+        }
+      #endif
+
       ASSERT_EQ(xnn_status_success,
         xnn_setup_deconvolution2d_nhwc_f32(
           deconvolution_op,
@@ -1200,6 +1259,15 @@ class DeconvolutionOperatorTester {
       VerifyF32(output, output_ref, output_max, output_min);
 
       if (use_weights_cache()) {
+        // We already finalized the code cache, so create a new code cache if we are testing JIT.
+        #if XNN_PLATFORM_JIT
+          xnn_code_cache inner_code_cache;
+          if (use_jit()) {
+            xnn_init_code_cache(&inner_code_cache);
+            caches.code_cache = &inner_code_cache;
+          }
+        #endif
+
         xnn_operator_t deconvolution_op2 = nullptr;
         size_t old_weights_cache_size = weights_cache.cache.weights.size;
 
@@ -1218,6 +1286,14 @@ class DeconvolutionOperatorTester {
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op2, xnn_delete_operator);
         std::vector<float> output2(output.size(), nanf(""));
 
+        #if XNN_PLATFORM_JIT
+          if (use_jit()) {
+            // Check that we actually generated code.
+            ASSERT_GT(inner_code_cache.cache.code.size, 0);
+            xnn_finalize_code_memory(&inner_code_cache.cache.code);
+          }
+        #endif
+
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_deconvolution2d_nhwc_f32(
                       deconvolution_op2,
@@ -1231,7 +1307,19 @@ class DeconvolutionOperatorTester {
 
         VerifyWeightsCache(&weights_cache, old_weights_cache_size);
         VerifyF32(output2, output_ref, output_max, output_min);
+
+        #if XNN_PLATFORM_JIT
+          if (use_jit()) {
+            xnn_release_code_cache(&inner_code_cache);
+          }
+        #endif
       }
+
+      #if XNN_PLATFORM_JIT
+        if (use_jit()) {
+          xnn_release_code_cache(&code_cache);
+        }
+      #endif
     }
   }
 
@@ -2362,9 +2450,12 @@ class DeconvolutionOperatorTester {
   size_t next_batch_size_{0};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
+  Activation activation_{Activation::MinMax};
   bool has_bias_{true};
   WeightsType weights_type_{WeightsType::Default};
   bool use_weights_cache_{false};
-  bool stress_weights_cache_{false};
+#if XNN_PLATFORM_JIT
+  bool use_jit_{false};
+#endif
   size_t iterations_{1};
 };
