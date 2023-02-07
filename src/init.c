@@ -4791,11 +4791,22 @@ static void init(void) {
     xnn_params.f32.dwconv[2].channel_tile = 1;
     xnn_params.f32.dwconv[2].primary_tile = 9;
 
-    xnn_params.f32.dwconv[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_25p1c__wasm_acc2;
-    xnn_params.f32.dwconv[3].linear.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_ukernel_25p1c__scalar_acc2;
-    xnn_params.f32.dwconv[3].init.f32 = xnn_init_f32_minmax_scalar_params;
-    xnn_params.f32.dwconv[3].channel_tile = 1;
-    xnn_params.f32.dwconv[3].primary_tile = 25;
+    #if XNN_ENABLE_DWCONV_MULTIPASS
+      xnn_params.f32.dwconv[3].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_5f5m5l1c1s1r__wasm;
+      xnn_params.f32.dwconv[3].init.f32 = xnn_init_f32_minmax_scalar_params;
+      xnn_params.f32.dwconv[3].channel_tile = 1;
+      xnn_params.f32.dwconv[3].channel_subtile = 1;
+      xnn_params.f32.dwconv[3].channel_round = 1;
+      xnn_params.f32.dwconv[3].primary_tile = 5;
+      xnn_params.f32.dwconv[3].middle_tile = 5;
+      xnn_params.f32.dwconv[3].last_tile = 5;
+    #else
+      xnn_params.f32.dwconv[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_25p1c__wasm_acc2;
+      xnn_params.f32.dwconv[3].linear.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_ukernel_25p1c__scalar_acc2;
+      xnn_params.f32.dwconv[3].init.f32 = xnn_init_f32_minmax_scalar_params;
+      xnn_params.f32.dwconv[3].channel_tile = 1;
+      xnn_params.f32.dwconv[3].primary_tile = 25;
+    #endif  // XNN_ENABLE_DWCONV_MULTIPASS
 
     xnn_params.f32.avgpool = (struct avgpool_parameters) {
       .unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_f32_avgpool_minmax_ukernel_9x__wasm_c1,
