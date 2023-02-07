@@ -10,9 +10,6 @@
 - name: xnn_generate_f16_igemm_ukernel_4x16__aarch64_neonfp16arith_ld64
   init: xnn_init_f16_minmax_fp16arith_params
   k-block: 4
-- name: xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64
-  init: xnn_init_f16_minmax_fp16arith_params
-  k-block: 4
 - name: xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a55
   init: xnn_init_f16_minmax_fp16arith_params
   k-block: 2
@@ -22,3 +19,6 @@
 - name: xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_cortex_a75
   init: xnn_init_f16_minmax_fp16arith_params
   k-block: 2
+- name: xnn_generate_f16_igemm_ukernel_6x16__aarch64_neonfp16arith_ld64
+  init: xnn_init_f16_minmax_fp16arith_params
+  k-block: 4

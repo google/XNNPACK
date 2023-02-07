@@ -4,10 +4,13 @@
 # LICENSE file in the root directory of this source tree.
 
 # AArch32 assembly
-- name: xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a7
+- name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
-- name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53
+- name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
+- name: xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a7
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
 - name: xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a53
@@ -29,20 +32,11 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   pipelined: true
-- name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 2
 - name: xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_prfm_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   pipelined: true
 # AArch64 assembly
-- name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 2
-- name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_ld64
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 2
 - name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
@@ -51,6 +45,9 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
+- name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
 - name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
@@ -59,6 +56,9 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8
   pipelined: true
+- name: xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_ld64
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 2
 - name: xnn_f32_igemm_minmax_ukernel_1x12__asm_aarch64_neonfma_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
