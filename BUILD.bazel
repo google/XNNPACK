@@ -2609,19 +2609,19 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "scalar_amalgam_microkernels",
-    srcs = ["src/amalgam/scalar.c"],
+    srcs = ["src/amalgam/gen/scalar.c"],
     aarch32_copts = ["-marm"],
-    aarch32_srcs = ["src/amalgam/scalar-aarch32.c"],
+    aarch32_srcs = ["src/amalgam/gen/scalar-aarch32.c"],
     gcc_copts = xnnpack_gcc_std_copts() + [
         "-fno-fast-math",
         "-fno-math-errno",
         "-ffp-contract=off",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
-    riscv_srcs = ["src/amalgam/scalar-riscv.c"],
-    wasm_srcs = ["src/amalgam/scalar-wasm.c"],
-    wasmrelaxedsimd_srcs = ["src/amalgam/scalar-wasm.c"],
-    wasmsimd_srcs = ["src/amalgam/scalar-wasm.c"],
+    riscv_srcs = ["src/amalgam/gen/scalar-riscv.c"],
+    wasm_srcs = ["src/amalgam/gen/scalar-wasm.c"],
+    wasmrelaxedsimd_srcs = ["src/amalgam/gen/scalar-wasm.c"],
+    wasmsimd_srcs = ["src/amalgam/gen/scalar-wasm.c"],
     deps = [
         ":common",
         ":math",
@@ -2716,15 +2716,15 @@ xnnpack_cc_library(
         "-fno-math-errno",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
-    wasm_srcs = ["src/amalgam/wasm.c"],
+    wasm_srcs = ["src/amalgam/gen/wasm.c"],
     wasmrelaxedsimd_srcs = [
-        "src/amalgam/wasm.c",
-        "src/amalgam/wasmrelaxedsimd.c",
-        "src/amalgam/wasmsimd.c",
+        "src/amalgam/gen/wasm.c",
+        "src/amalgam/gen/wasmrelaxedsimd.c",
+        "src/amalgam/gen/wasmsimd.c",
     ],
     wasmsimd_srcs = [
-        "src/amalgam/wasm.c",
-        "src/amalgam/wasmsimd.c",
+        "src/amalgam/gen/wasm.c",
+        "src/amalgam/gen/wasmsimd.c",
     ],
     deps = [
         ":common",
@@ -2812,7 +2812,7 @@ xnnpack_cc_library(
         "-mfpu=vfp",
         "-munaligned-access",
     ],
-    aarch32_srcs = ["src/amalgam/armsimd32.c"],
+    aarch32_srcs = ["src/amalgam/gen/armsimd32.c"],
     gcc_copts = xnnpack_gcc_std_copts() + [
         "-fno-fast-math",
         "-fno-math-errno",
@@ -2920,7 +2920,7 @@ xnnpack_cc_library(
         # For vminh_f16/vmaxh_f16 polyfills using compare + select
         "-ffinite-math-only",
     ],
-    aarch32_srcs = ["src/amalgam/fp16arith.c"],
+    aarch32_srcs = ["src/amalgam/gen/fp16arith.c"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -3027,10 +3027,10 @@ xnnpack_cc_library(
         "-march=armv7-a",
         "-mfpu=neon",
     ],
-    aarch32_srcs = ["src/amalgam/neon.c"],
+    aarch32_srcs = ["src/amalgam/gen/neon.c"],
     aarch64_srcs = [
-        "src/amalgam/neon-aarch64.c",
-        "src/amalgam/neon.c",
+        "src/amalgam/gen/neon-aarch64.c",
+        "src/amalgam/gen/neon.c",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -3122,8 +3122,8 @@ xnnpack_cc_library(
         "-march=armv7-a",
         "-mfpu=neon-fp16",
     ],
-    aarch32_srcs = ["src/amalgam/neonfp16.c"],
-    aarch64_srcs = ["src/amalgam/neonfp16.c"],
+    aarch32_srcs = ["src/amalgam/gen/neonfp16.c"],
+    aarch64_srcs = ["src/amalgam/gen/neonfp16.c"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -3214,8 +3214,8 @@ xnnpack_cc_library(
         "-march=armv7-a",
         "-mfpu=neon-vfpv4",
     ],
-    aarch32_srcs = ["src/amalgam/neonfma.c"],
-    aarch64_srcs = ["src/amalgam/neonfma.c"],
+    aarch32_srcs = ["src/amalgam/gen/neonfma.c"],
+    aarch64_srcs = ["src/amalgam/gen/neonfma.c"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -3306,8 +3306,8 @@ xnnpack_cc_library(
         "-march=armv8-a",
         "-mfpu=neon-fp-armv8",
     ],
-    aarch32_srcs = ["src/amalgam/neonv8.c"],
-    aarch64_srcs = ["src/amalgam/neonv8.c"],
+    aarch32_srcs = ["src/amalgam/gen/neonv8.c"],
+    aarch64_srcs = ["src/amalgam/gen/neonv8.c"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -3398,11 +3398,11 @@ xnnpack_cc_library(
         "-march=armv8.2-a+fp16",
         "-mfpu=neon-fp-armv8",
     ],
-    aarch32_srcs = ["src/amalgam/neonfp16arith.c"],
+    aarch32_srcs = ["src/amalgam/gen/neonfp16arith.c"],
     aarch64_copts = ["-march=armv8.2-a+fp16"],
     aarch64_srcs = [
-        "src/amalgam/neonfp16arith-aarch64.c",
-        "src/amalgam/neonfp16arith.c",
+        "src/amalgam/gen/neonfp16arith-aarch64.c",
+        "src/amalgam/gen/neonfp16arith.c",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
@@ -3552,9 +3552,9 @@ xnnpack_cc_library(
         "-march=armv8.2-a+dotprod",
         "-mfpu=neon-fp-armv8",
     ],
-    aarch32_srcs = ["src/amalgam/neondot.c"],
+    aarch32_srcs = ["src/amalgam/gen/neondot.c"],
     aarch64_copts = ["-march=armv8.2-a+dotprod"],
-    aarch64_srcs = ["src/amalgam/neondot.c"],
+    aarch64_srcs = ["src/amalgam/gen/neondot.c"],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -3648,8 +3648,8 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = [
-        "src/amalgam/sse.c",
-        "src/amalgam/sse2.c",
+        "src/amalgam/gen/sse.c",
+        "src/amalgam/gen/sse2.c",
     ],
     deps = [
         ":common",
@@ -3726,7 +3726,7 @@ xnnpack_cc_library(
     gcc_x86_copts = ["-mssse3"],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
-    x86_srcs = ["src/amalgam/ssse3.c"],
+    x86_srcs = ["src/amalgam/gen/ssse3.c"],
     deps = [
         ":common",
         ":math",
@@ -3802,7 +3802,7 @@ xnnpack_cc_library(
     gcc_x86_copts = ["-msse4.1"],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
-    x86_srcs = ["src/amalgam/sse41.c"],
+    x86_srcs = ["src/amalgam/gen/sse41.c"],
     deps = [
         ":common",
         ":math",
@@ -3879,7 +3879,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
-    x86_srcs = ["src/amalgam/avx.c"],
+    x86_srcs = ["src/amalgam/gen/avx.c"],
     deps = [
         ":common",
         ":math",
@@ -3959,7 +3959,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
-    x86_srcs = ["src/amalgam/f16c.c"],
+    x86_srcs = ["src/amalgam/gen/f16c.c"],
     deps = [
         ":common",
         ":math",
@@ -4031,7 +4031,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
-    x86_srcs = ["src/amalgam/xop.c"],
+    x86_srcs = ["src/amalgam/gen/xop.c"],
     deps = [
         ":common",
         ":math",
@@ -4114,7 +4114,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
-    x86_srcs = ["src/amalgam/fma3.c"],
+    x86_srcs = ["src/amalgam/gen/fma3.c"],
     deps = [
         ":common",
         ":math",
@@ -4207,7 +4207,7 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX2"],
     msvc_x86_64_copts = ["/arch:AVX2"],
-    x86_srcs = ["src/amalgam/avx2.c"],
+    x86_srcs = ["src/amalgam/gen/avx2.c"],
     deps = [
         ":common",
         ":math",
@@ -4301,7 +4301,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX512"],
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs = ["src/amalgam/avx512f.c"],
+    x86_srcs = ["src/amalgam/gen/avx512f.c"],
     deps = [
         ":common",
         ":math",
@@ -4395,7 +4395,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX512"],
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs = ["src/amalgam/avx512skx.c"],
+    x86_srcs = ["src/amalgam/gen/avx512skx.c"],
     deps = [
         ":common",
         ":math",
@@ -4508,7 +4508,7 @@ xnnpack_cc_library(
     msvc_x86_32_copts = ["/arch:AVX512"],
     msvc_x86_64_copts = ["/arch:AVX512"],
     msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs = ["src/amalgam/avx512vbmi.c"],
+    x86_srcs = ["src/amalgam/gen/avx512vbmi.c"],
     deps = [
         ":common",
         ":math",
