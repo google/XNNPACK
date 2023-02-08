@@ -17,7 +17,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2(
+void xnn_f32_dwconv_minmax_ukernel_8f8m9l8c4s4r__sse_acc2(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -33,14 +33,14 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2(
 {
   assert(channels != 0);
   assert(output_width != 0);
-  assert(kernel_size > 7);
+  assert(kernel_size > 8);
 
   const __m128 vmax = _mm_load_ps(params->sse.max);
   const __m128 vmin = _mm_load_ps(params->sse.min);
   do {
     const float* w = weights;
 
-    // First pass to process 7 inputs.
+    // First pass to process 8 inputs.
     {
       float* b = buffer;
       const float* i0 = input[0];
@@ -78,7 +78,12 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2(
       if XNN_UNPREDICTABLE(i6 != zero) {
         i6 = (const float*) ((uintptr_t) i6 + input_offset);
       }
-      input += 7;
+      const float* i7 = input[7];
+      assert(i7 != NULL);
+      if XNN_UNPREDICTABLE(i7 != zero) {
+        i7 = (const float*) ((uintptr_t) i7 + input_offset);
+      }
+      input += 8;
 
       // Process c channels and write to buffer.
       size_t c = round_up_po2(channels, 4);
@@ -150,7 +155,16 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2(
         vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi6x0123, vk6x0123));
         vacc4567p0 = _mm_add_ps(vacc4567p0, _mm_mul_ps(vi6x4567, vk6x4567));
 
-        w += 64;
+        const __m128 vi7x0123 = _mm_loadu_ps(i7);
+        const __m128 vi7x4567 = _mm_loadu_ps(i7 + 4);
+        i7 += 8;
+
+        const __m128 vk7x0123 = _mm_load_ps(w + 64);
+        const __m128 vk7x4567 = _mm_load_ps(w + 68);
+        vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi7x0123, vk7x0123));
+        vacc4567p1 = _mm_add_ps(vacc4567p1, _mm_mul_ps(vi7x4567, vk7x4567));
+
+        w += 72;
 
         // Add up all accumulators to vacc01234567p0
         vacc0123p0 = _mm_add_ps(vacc0123p0, vacc0123p1);
@@ -207,7 +221,13 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2(
         const __m128 vk6x0123 = _mm_load_ps(w + 28);
         vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi6x0123, vk6x0123));
 
-        w += 32;
+        const __m128 vi7x0123 = _mm_loadu_ps(i7);
+        i7 += 4;
+
+        const __m128 vk7x0123 = _mm_load_ps(w + 32);
+        vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi7x0123, vk7x0123));
+
+        w += 36;
 
         // Add up all accumulators to vacc0123p0
         vacc0123p0 = _mm_add_ps(vacc0123p0, vacc0123p1);
@@ -217,8 +237,8 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2(
       }
     }
 
-    // Middle pass to process 6 inputs in each iteration.
-    for (size_t ks = kernel_size - 7; ks > 6; ks -= 6) {
+    // Middle pass to process 8 inputs in each iteration.
+    for (size_t ks = kernel_size - 8; ks > 9; ks -= 8) {
       float* b = buffer;
       const float* i0 = input[0];
       assert(i0 != NULL);
@@ -250,7 +270,17 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2(
       if XNN_UNPREDICTABLE(i5 != zero) {
         i5 = (const float*) ((uintptr_t) i5 + input_offset);
       }
-      input += 6;
+      const float* i6 = input[6];
+      assert(i6 != NULL);
+      if XNN_UNPREDICTABLE(i6 != zero) {
+        i6 = (const float*) ((uintptr_t) i6 + input_offset);
+      }
+      const float* i7 = input[7];
+      assert(i7 != NULL);
+      if XNN_UNPREDICTABLE(i7 != zero) {
+        i7 = (const float*) ((uintptr_t) i7 + input_offset);
+      }
+      input += 8;
 
       size_t c = round_up_po2(channels, 4);
       for (; c >= 8; c -= 8) {
@@ -312,7 +342,25 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2(
         vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi5x0123, vk5x0123));
         vacc4567p1 = _mm_add_ps(vacc4567p1, _mm_mul_ps(vi5x4567, vk5x4567));
 
-        w += 48;
+        const __m128 vi6x0123 = _mm_loadu_ps(i6);
+        const __m128 vi6x4567 = _mm_loadu_ps(i6 + 4);
+        i6 += 8;
+
+        const __m128 vk6x0123 = _mm_load_ps(w + 48);
+        const __m128 vk6x4567 = _mm_load_ps(w + 52);
+        vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi6x0123, vk6x0123));
+        vacc4567p0 = _mm_add_ps(vacc4567p0, _mm_mul_ps(vi6x4567, vk6x4567));
+
+        const __m128 vi7x0123 = _mm_loadu_ps(i7);
+        const __m128 vi7x4567 = _mm_loadu_ps(i7 + 4);
+        i7 += 8;
+
+        const __m128 vk7x0123 = _mm_load_ps(w + 56);
+        const __m128 vk7x4567 = _mm_load_ps(w + 60);
+        vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi7x0123, vk7x0123));
+        vacc4567p1 = _mm_add_ps(vacc4567p1, _mm_mul_ps(vi7x4567, vk7x4567));
+
+        w += 64;
 
         // Add up all accumulators to vacc01234567p0
         vacc0123p0 = _mm_add_ps(vacc0123p0, vacc0123p1);
@@ -363,7 +411,19 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2(
         const __m128 vk5x0123 = _mm_load_ps(w + 20);
         vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi5x0123, vk5x0123));
 
-        w += 24;
+        const __m128 vi6x0123 = _mm_loadu_ps(i6);
+        i6 += 4;
+
+        const __m128 vk6x0123 = _mm_load_ps(w + 24);
+        vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi6x0123, vk6x0123));
+
+        const __m128 vi7x0123 = _mm_loadu_ps(i7);
+        i7 += 4;
+
+        const __m128 vk7x0123 = _mm_load_ps(w + 28);
+        vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi7x0123, vk7x0123));
+
+        w += 32;
 
         // Add up all accumulators to vacc0123p0
         vacc0123p0 = _mm_add_ps(vacc0123p0, vacc0123p1);
@@ -373,7 +433,7 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2(
       }
     }
 
-    // Last pass to process up to 6 inputs.
+    // Last pass to process up to 9 inputs.
     {
       float* b = buffer;
       const float* i0 = input[0];
@@ -405,6 +465,21 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2(
       assert(i5 != NULL);
       if XNN_UNPREDICTABLE(i5 != zero) {
         i5 = (const float*) ((uintptr_t) i5 + input_offset);
+      }
+      const float* i6 = input[6];
+      assert(i6 != NULL);
+      if XNN_UNPREDICTABLE(i6 != zero) {
+        i6 = (const float*) ((uintptr_t) i6 + input_offset);
+      }
+      const float* i7 = input[7];
+      assert(i7 != NULL);
+      if XNN_UNPREDICTABLE(i7 != zero) {
+        i7 = (const float*) ((uintptr_t) i7 + input_offset);
+      }
+      const float* i8 = input[8];
+      assert(i8 != NULL);
+      if XNN_UNPREDICTABLE(i8 != zero) {
+        i8 = (const float*) ((uintptr_t) i8 + input_offset);
       }
 
       size_t c = channels;
@@ -474,7 +549,37 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2(
         vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi5x0123, vk5x0123));
         vacc4567p1 = _mm_add_ps(vacc4567p1, _mm_mul_ps(vi5x4567, vk5x4567));
 
-        w += 48;
+        const __m128 vi6x0123 = _mm_loadu_ps(i6);
+        const __m128 vi6x4567 = _mm_loadu_ps(i6 + 4);
+        i6 += 8;
+
+        __m128 vk6x0123 = _mm_load_ps(w + 48);
+        __m128 vk6x4567 = _mm_load_ps(w + 52);
+
+        vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi6x0123, vk6x0123));
+        vacc4567p0 = _mm_add_ps(vacc4567p0, _mm_mul_ps(vi6x4567, vk6x4567));
+
+        const __m128 vi7x0123 = _mm_loadu_ps(i7);
+        const __m128 vi7x4567 = _mm_loadu_ps(i7 + 4);
+        i7 += 8;
+
+        __m128 vk7x0123 = _mm_load_ps(w + 56);
+        __m128 vk7x4567 = _mm_load_ps(w + 60);
+
+        vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi7x0123, vk7x0123));
+        vacc4567p1 = _mm_add_ps(vacc4567p1, _mm_mul_ps(vi7x4567, vk7x4567));
+
+        const __m128 vi8x0123 = _mm_loadu_ps(i8);
+        const __m128 vi8x4567 = _mm_loadu_ps(i8 + 4);
+        i8 += 8;
+
+        __m128 vk8x0123 = _mm_load_ps(w + 64);
+        __m128 vk8x4567 = _mm_load_ps(w + 68);
+
+        vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi8x0123, vk8x0123));
+        vacc4567p0 = _mm_add_ps(vacc4567p0, _mm_mul_ps(vi8x4567, vk8x4567));
+
+        w += 72;
 
         // Add up all accumulators to vacc01234567p0
         vacc0123p0 = _mm_add_ps(vacc0123p0, vacc0123p1);
@@ -539,7 +644,28 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2(
 
         vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi5x0123, vk5x0123));
 
-        w += 24;
+        const __m128 vi6x0123 = _mm_loadu_ps(i6);
+        i6 += 4;
+
+        __m128 vk6x0123 = _mm_load_ps(w + 24);
+
+        vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi6x0123, vk6x0123));
+
+        const __m128 vi7x0123 = _mm_loadu_ps(i7);
+        i7 += 4;
+
+        __m128 vk7x0123 = _mm_load_ps(w + 28);
+
+        vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi7x0123, vk7x0123));
+
+        const __m128 vi8x0123 = _mm_loadu_ps(i8);
+        i8 += 4;
+
+        __m128 vk8x0123 = _mm_load_ps(w + 32);
+
+        vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi8x0123, vk8x0123));
+
+        w += 36;
 
 
         // Add up all accumulators to vacc0123p0
@@ -579,6 +705,18 @@ void xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2(
         const __m128 vi5x0123 = _mm_loadu_ps(i5);
         __m128 vk5x0123 = _mm_load_ps(w + 20);
         vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi5x0123, vk5x0123));
+
+        const __m128 vi6x0123 = _mm_loadu_ps(i6);
+        __m128 vk6x0123 = _mm_load_ps(w + 24);
+        vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi6x0123, vk6x0123));
+
+        const __m128 vi7x0123 = _mm_loadu_ps(i7);
+        __m128 vk7x0123 = _mm_load_ps(w + 28);
+        vacc0123p1 = _mm_add_ps(vacc0123p1, _mm_mul_ps(vi7x0123, vk7x0123));
+
+        const __m128 vi8x0123 = _mm_loadu_ps(i8);
+        __m128 vk8x0123 = _mm_load_ps(w + 32);
+        vacc0123p0 = _mm_add_ps(vacc0123p0, _mm_mul_ps(vi8x0123, vk8x0123));
 
         // Add up all accumulators to vacc01234567p0
         vacc0123p0 = _mm_add_ps(vacc0123p0, vacc0123p1);

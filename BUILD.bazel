@@ -990,6 +990,7 @@ PROD_SSE_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-sse.c",
     "src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-sse.c",
     "src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-sse.c",
+    "src/f32-dwconv/gen/f32-dwconv-8f8m9l16c4s4r-minmax-sse-acc2.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-sse-2x4-acc2.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-sse-1x4-acc3.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-sse-4x4.c",
