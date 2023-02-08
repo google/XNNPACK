@@ -273,12 +273,8 @@ static enum xnn_status create_deconvolution2d_nhwc(
 
   assert(XNN_MAX_MR >= mr);
   for (size_t i = 0; i < mr; i++) {
-    if (gemm_ukernels->gemm[i].function[XNN_UARCH_DEFAULT] != NULL) {
-      deconvolution_op->ukernel.igemm.gemm_cases[i] = gemm_ukernels->gemm[i];
-    }
-    if (gemm_ukernels->igemm[i].function[XNN_UARCH_DEFAULT] != NULL) {
-      deconvolution_op->ukernel.igemm.igemm_cases[i] = gemm_ukernels->igemm[i];
-    }
+    deconvolution_op->ukernel.igemm.gemm_cases[i] = gemm_ukernels->gemm[i];
+    deconvolution_op->ukernel.igemm.igemm_cases[i] = gemm_ukernels->igemm[i];
   }
 
   #if XNN_PLATFORM_JIT
@@ -719,11 +715,16 @@ static enum xnn_status setup_conv_path(
   const size_t groups = deconvolution_op->groups;
   const size_t output_size = output_height * output_width;
   size_t mr = deconvolution_op->ukernel.igemm.mr;
+  const uint32_t nr = deconvolution_op->ukernel.igemm.nr;
 
   struct xnn_hmp_igemm_ukernel* igemm_cases = deconvolution_op->ukernel.igemm.igemm_cases;
-  if (output_size == 1 && deconvolution_op->ukernel.igemm.igemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
-    mr = 1;
-  }
+  #if XNN_ENABLE_GEMM_M_SPECIALIZATION
+    mr = xnn_get_heuristic_mr_igemm(output_size, mr, nr, igemm_cases, deconvolution_op->code_cache != NULL);
+  #else
+    if (output_size == 1 && igemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
+      mr = 1;
+    }
+  #endif
 
   #if XNN_PLATFORM_JIT
     xnn_overwrite_igemm_cases_with_generated_code(deconvolution_op, igemm_cases, mr);
@@ -755,7 +756,6 @@ static enum xnn_status setup_conv_path(
 
   const size_t group_input_channels = deconvolution_op->group_input_channels;
   const size_t group_output_channels = deconvolution_op->group_output_channels;
-  const uint32_t nr = deconvolution_op->ukernel.igemm.nr;
 
   const size_t w_stride = bias_element_size +
     (round_up_po2(group_input_channels, deconvolution_op->ukernel.igemm.kr * deconvolution_op->ukernel.igemm.sr) * kernel_size << log2_filter_element_size);
@@ -909,6 +909,15 @@ static enum xnn_status setup_subconv2d_path(
   const size_t output_size = output_height * output_width;
   uint32_t mr = deconvolution_op->ukernel.igemm.mr;
   const uint32_t nr = deconvolution_op->ukernel.igemm.nr;
+  #if XNN_ENABLE_GEMM_M_SPECIALIZATION
+    if (use_gemm) {
+      mr = xnn_get_heuristic_mr_gemm(
+          batch_size, mr, nr, deconvolution_op->ukernel.igemm.gemm_cases, deconvolution_op->code_cache != NULL);
+    } else {
+      mr = xnn_get_heuristic_mr_igemm(
+          batch_size, mr, nr, deconvolution_op->ukernel.igemm.igemm_cases, deconvolution_op->code_cache != NULL);
+    }
+  #endif
 
   const size_t input_pixel_stride = deconvolution_op->input_pixel_stride << log2_input_element_size;
   const size_t output_pixel_stride = deconvolution_op->output_pixel_stride << log2_output_element_size;
@@ -917,7 +926,8 @@ static enum xnn_status setup_subconv2d_path(
     input_height != deconvolution_op->last_input_height ||
     input_width != deconvolution_op->last_input_width ||
     output_height != deconvolution_op->last_output_height ||
-    output_width != deconvolution_op->last_output_width;
+    output_width != deconvolution_op->last_output_width ||
+    mr != deconvolution_op->last_mr;
 
   if (deconvolution_op->weights_cache != NULL) {
     void* packed_weights_ptr = packed_weights(deconvolution_op);
@@ -978,6 +988,7 @@ static enum xnn_status setup_subconv2d_path(
     deconvolution_op->last_input_width = input_width;
     deconvolution_op->last_output_height = output_height;
     deconvolution_op->last_output_width = output_width;
+    deconvolution_op->last_mr = mr;
   }
 
   const size_t group_input_channels = deconvolution_op->group_input_channels;

@@ -181,6 +181,7 @@ struct xnn_operator {
   size_t last_output_height;
   size_t last_output_width;
   void* last_output;
+  uint32_t last_mr;
 
   uint32_t block_size;
 
