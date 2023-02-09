@@ -12,6 +12,8 @@
   init: xnn_init_qs16_qs8_cvt_neon_params
 - name: xnn_qs16_qs8_vcvt_ukernel__neon_x32
   init: xnn_init_qs16_qs8_cvt_neon_params
+- name: xnn_qs16_qs8_vcvt_ukernel__neon_x64
+  init: xnn_init_qs16_qs8_cvt_neon_params
 
 # x86 SSE2
 - name: xnn_qs16_qs8_vcvt_ukernel__sse2_x4
@@ -19,6 +21,8 @@
 - name: xnn_qs16_qs8_vcvt_ukernel__sse2_x8
   init: xnn_init_qs16_qs8_cvt_sse2_params
 - name: xnn_qs16_qs8_vcvt_ukernel__sse2_x16
+  init: xnn_init_qs16_qs8_cvt_sse2_params
+- name: xnn_qs16_qs8_vcvt_ukernel__sse2_x32
   init: xnn_init_qs16_qs8_cvt_sse2_params
 
 # x86 SSE4.1
@@ -28,6 +32,8 @@
   init: xnn_init_qs16_qs8_cvt_sse4_params
 - name: xnn_qs16_qs8_vcvt_ukernel__sse41_x16
   init: xnn_init_qs16_qs8_cvt_sse4_params
+- name: xnn_qs16_qs8_vcvt_ukernel__sse41_x32
+  init: xnn_init_qs16_qs8_cvt_sse4_params
 
 # x86 AVX (VEX128)
 - name: xnn_qs16_qs8_vcvt_ukernel__avx_x4
@@ -36,6 +42,8 @@
   init: xnn_init_qs16_qs8_cvt_sse4_params
 - name: xnn_qs16_qs8_vcvt_ukernel__avx_x16
   init: xnn_init_qs16_qs8_cvt_sse4_params
+- name: xnn_qs16_qs8_vcvt_ukernel__avx_x32
+  init: xnn_init_qs16_qs8_cvt_sse4_params
 
 # Scalar
 - name: xnn_qs16_qs8_vcvt_ukernel__scalar_x1
@@ -43,4 +51,6 @@
 - name: xnn_qs16_qs8_vcvt_ukernel__scalar_x2
   init: xnn_init_qs16_qs8_cvt_scalar_params
 - name: xnn_qs16_qs8_vcvt_ukernel__scalar_x4
+  init: xnn_init_qs16_qs8_cvt_scalar_params
+- name: xnn_qs16_qs8_vcvt_ukernel__scalar_x8
   init: xnn_init_qs16_qs8_cvt_scalar_params
