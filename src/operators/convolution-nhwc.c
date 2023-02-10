@@ -74,13 +74,6 @@ static inline const struct dwconv_parameters* find_dwconv_ukernel(
   return best_ukernel;
 }
 
-#if XNN_PLATFORM_JIT
-static inline uintptr_t cached_code_at_offset(xnn_operator_t op, size_t offset)
-{
-  return (uintptr_t)op->code_cache->cache.code.start + offset;
-}
-#endif  // XNN_PLATFORM_JIT
-
 static enum xnn_status create_vmulcaddc_path(
     uint32_t groups,
     const void* kernel,
