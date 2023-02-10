@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cassert>
 #include <cmath>
 
 #include <xnnpack/aarch64-assembler.h>
@@ -264,6 +265,18 @@ void Assembler::b(Label& l) {
   return branch_to_label(0x14000000, BranchType::kUnconditional, l);
 }
 
+void Assembler::bl(int32_t offset) {
+  if (!branch_offset_valid(offset, BranchType::kUnconditional)) {
+    error_ = Error::kLabelOffsetOutOfBounds;
+    return;
+  }
+  if ((offset & 0x3) != 0) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+  emit32(0x94000000 | ((offset >> kInstructionSizeInBytesLog2) & 0x03FFFFFF));
+}
+
 void Assembler::cmp(XRegister xn, uint16_t imm12) {
   if (imm12 > kUint12Max) {
     error_ = Error::kInvalidOperand;
@@ -329,6 +342,10 @@ void Assembler::ldr(XRegister xt, MemOperand xn, int32_t imm) {
   }
 
   emit32(0xF8400400 | imm9(imm) | rn(xn.base) | rt(xt));
+}
+
+void Assembler::mov(XRegister xd, uint16_t imm) {
+  emit32(0xD2800000 | imm << 5 | rd(xd));
 }
 
 void Assembler::mov(XRegister xd, XRegister xn) {
@@ -677,6 +694,16 @@ void Assembler::movi(VRegister vd, uint8_t imm) {
   }
 
   emit32(0x0F000400 | q(vd) | cmode << 12 | vd.code);
+}
+
+void Assembler::mov(XRegister xd, VRegisterLane vn) {
+  if (vn.lane > 1) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+  uint8_t imm5 = vn.lane << 4;
+
+  emit32(0x4E083C00 | imm5 << 16 | rn(vn) | rd(xd));
 }
 
 void Assembler::st1(VRegisterList vs, MemOperand xn, int32_t imm) {

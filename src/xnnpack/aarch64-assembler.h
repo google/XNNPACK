@@ -428,6 +428,7 @@ class Assembler : public AssemblerBase {
   void b_hs(Label& l) { return b(kHS, l); }
   void b_lo(Label& l) { return b(kLO, l); }
   void b_ne(Label& l) { return b(kNE, l); }
+  void bl(int32_t offset);
   void cmp(XRegister xn, uint16_t imm12);
   void cmp(XRegister xn, XRegister xm);
   void csel(XRegister xd, XRegister xn, XRegister xm, Condition c);
@@ -437,6 +438,7 @@ class Assembler : public AssemblerBase {
   void ldr(XRegister xt, MemOperand xn);
   void ldr(WRegister xt, MemOperand xn, int32_t imm);
   void ldr(XRegister xt, MemOperand xn, int32_t imm);
+  void mov(XRegister xd, uint16_t imm);
   void mov(XRegister xd, XRegister xn);
   void nop();
   void prfm(PrefetchOp prfop, MemOperand xn);
@@ -483,6 +485,8 @@ class Assembler : public AssemblerBase {
   void ldr(SRegister st, MemOperand xn, int32_t imm);
   void mov(VRegister vd, VRegister vn);
   void movi(VRegister vd, uint8_t imm);
+  // MOV (to general).
+  void mov(XRegister xd, VRegisterLane vn);
   void st1(VRegisterList vs, MemOperand xn, int32_t imm);
   void st1(VRegisterList vs, MemOperand xn, XRegister xm);
   void stp(DRegister dt1, DRegister dt2, MemOperand xn);

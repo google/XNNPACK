@@ -43,6 +43,12 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
   // Any immediate other than 7 is not supported.
   EXPECT_ERROR(Error::kInvalidOperand, a.ands(x9, x3, 8));
 
+  CHECK_ENCODING(0x94000001, a.bl(4));
+  CHECK_ENCODING(0x97FFFF80, a.bl(-512));
+  EXPECT_ERROR(Error::kInvalidOperand, a.bl(3));
+  EXPECT_ERROR(Error::kLabelOffsetOutOfBounds, a.bl(128 * 1024 * 1204 + 4));  // > 128MB
+  EXPECT_ERROR(Error::kLabelOffsetOutOfBounds, a.bl(-128 * 1024 * 1204 - 4));  // < -128MB
+
   CHECK_ENCODING(0xF100081F, a.cmp(x0, 2));
   EXPECT_ERROR(Error::kInvalidOperand, a.cmp(x0, 4096));
 
@@ -80,6 +86,8 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
   CHECK_ENCODING(0xF8500488, a.ldr(x8, mem[x4], -256));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, mem[x4], 256));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, mem[x4], -257));
+
+  CHECK_ENCODING(0xD29BD5A9, a.mov(x9, 0xDEAD));
 
   CHECK_ENCODING(0xAA0303E9, a.mov(x9, x3));
 
@@ -257,6 +265,10 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   CHECK_ENCODING(0x4EB21E50, a.mov(v16.v16b(), v18.v16b()));
   CHECK_ENCODING(0x0EB21E50, a.mov(v16.v8b(), v18.v8b()));
   EXPECT_ERROR(Error::kInvalidOperand, a.mov(v16.v16b(), v18.v8b()));
+
+  CHECK_ENCODING(0x4E183DC3, a.mov(x3, v14.d()[1]));
+  CHECK_ENCODING(0x4E083D02, a.mov(x2, v8.d()[0]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.mov(x3, v14.d()[2]));
 
   CHECK_ENCODING(0x4F000405, a.movi(v5.v4s(), 0));
   CHECK_ENCODING(0x4F008405, a.movi(v5.v8h(), 0));
