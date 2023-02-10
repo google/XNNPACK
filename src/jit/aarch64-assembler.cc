@@ -352,6 +352,15 @@ void Assembler::mov(XRegister xd, XRegister xn) {
   emit32(0xAA0003E0 | rm(xn) | rd(xd));
 }
 
+void Assembler::movk(XRegister xd, uint16_t imm, uint8_t shift) {
+  if ((shift & 0xF) != 0 || shift > 48) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+  const uint32_t hw = shift >> 4;
+  emit32(0xF2800000 | hw << 21 | imm << 5 | rd(xd));
+}
+
 void Assembler::nop() {
   emit32(0xD503201F);
 }
@@ -960,5 +969,11 @@ void MacroAssembler::f32_hardswish(VRegister sixth, VRegister three,
   }
 }
 
+void MacroAssembler::Mov(XRegister xd, uint64_t imm) {
+  mov(xd, imm & 0xFFFF);
+  movk(xd, (imm >> 16) & 0xFFFF, 16);
+  movk(xd, (imm >> 32) & 0xFFFF, 32);
+  movk(xd, (imm >> 48) & 0xFFFF, 48);
+}
 }  // namespace aarch64
 }  // namespace xnnpack

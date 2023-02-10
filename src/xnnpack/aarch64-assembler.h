@@ -440,6 +440,7 @@ class Assembler : public AssemblerBase {
   void ldr(XRegister xt, MemOperand xn, int32_t imm);
   void mov(XRegister xd, uint16_t imm);
   void mov(XRegister xd, XRegister xn);
+  void movk(XRegister xd, uint16_t imm, uint8_t shift);
   void nop();
   void prfm(PrefetchOp prfop, MemOperand xn);
   void ret();
@@ -520,6 +521,7 @@ class MacroAssembler : public Assembler {
    void f32_hardswish(VRegister sixth, VRegister three, VRegister six,
                       VRegister zero, const VRegister *accs, size_t num_accs,
                       const VRegister *tmps, size_t num_tmps);
+   void Mov(XRegister xd, uint64_t imm);
 };
 
 }  // namespace aarch64

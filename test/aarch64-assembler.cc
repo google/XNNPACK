@@ -91,6 +91,15 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
 
   CHECK_ENCODING(0xAA0303E9, a.mov(x9, x3));
 
+  CHECK_ENCODING(0xF29BD5A9, a.movk(x9, 0xDEAD, 0));
+  CHECK_ENCODING(0xF2BBD5A9, a.movk(x9, 0xDEAD, 16));
+  CHECK_ENCODING(0xF2DBD5A9, a.movk(x9, 0xDEAD, 32));
+  CHECK_ENCODING(0xF2FBD5A9, a.movk(x9, 0xDEAD, 48));
+  // Not divisible by 16.
+  EXPECT_ERROR(Error::kInvalidOperand, a.movk(x9, 0xDEAD, 1));
+  // Out of range, max shift is 48.
+  EXPECT_ERROR(Error::kInvalidOperand, a.movk(x9, 0xDEAD, 64));
+
   CHECK_ENCODING(0xD503201F, a.nop());
 
   CHECK_ENCODING(0xF98000A0, a.prfm(kPLDL1KEEP, mem[x5]));
@@ -685,6 +694,28 @@ INSTANTIATE_TEST_SUITE_P(
     std::vector<VRegister>({v4.v4s()}),
     std::vector<VRegister>({v4.v4s(), v5.v4s(), v6.v4s(), v7.v4s()}),
     std::vector<VRegister>({v4.v4s(), v5.v4s(), v6.v4s(), v7.v4s(), v20.v4s(), v21.v4s(), v22.v4s(), v23.v4s()})));
+
+typedef void (*MovFn)(uint64_t*);
+
+TEST(MovTest, Mov) {
+  xnn_code_buffer buffer;
+  xnn_allocate_code_memory(&buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  MacroAssembler assm(&buffer);
+
+  uint64_t expected = 0x0123456789ABCDEF;
+  assm.Mov(x1, expected);
+  assm.str(x1, mem[x0]);
+  assm.ret();
+
+  MovFn mov_fn = reinterpret_cast<MovFn>(assm.finalize());
+  uint64_t out = 0;
+  mov_fn(&out);
+
+  xnn_finalize_code_memory(&buffer);
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&buffer));
+
+  EXPECT_EQ(expected, out);
+}
 
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
