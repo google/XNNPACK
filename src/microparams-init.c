@@ -6517,8 +6517,8 @@ size_t xnn_init_qs16_qs8_cvt_sse2_params(
   const long multiplier = lrintf(65536.0f * input_output_scale);
   assert(multiplier >= 1L);
   assert(multiplier <= 0x01000000L);
-  const int64_t bias = ((int64_t) output_zero_point << 16) + INT64_C(0x8000) -
-      (INT64_C(0x8000) * (int64_t) multiplier);
+  const int64_t bias = (int64_t) ((uint64_t) output_zero_point << 32) + INT64_C(0x80000000) -
+      (INT64_C(0x80000000) * (int64_t) multiplier);
 
   for (uint32_t i = 0; i < 8; i++) {
     params->sse2.input_bias[i] = UINT16_C(0x8000);
@@ -6543,7 +6543,7 @@ size_t xnn_init_qs16_qs8_cvt_sse4_params(
   const long multiplier = lrintf(65536.0f * input_output_scale);
   assert(multiplier >= 1L);
   assert(multiplier <= 0x01000000L);
-  const int64_t bias = ((int64_t) output_zero_point << 16) + INT64_C(0x8000);
+  const int64_t bias = (int64_t) ((uint64_t) output_zero_point << 16) + INT64_C(0x8000);
 
   for (uint32_t i = 0; i < 4; i++) {
     params->sse4.multiplier[i] = (int32_t) multiplier;
