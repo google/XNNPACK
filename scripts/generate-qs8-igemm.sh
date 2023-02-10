@@ -1252,8 +1252,10 @@ tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D DAT
 tools/generate-gemm-test.py --spec test/qc8-igemm-minmax-fp32.yaml --output test/qc8-igemm-minmax-fp32.cc --output test/qc8-igemm-minmax-fp32-2.cc --output test/qc8-igemm-minmax-fp32-3.cc &
 tools/generate-gemm-test.py --spec test/qs8-igemm-minmax-fp32.yaml --output test/qs8-igemm-minmax-fp32.cc --output test/qs8-igemm-minmax-fp32-2.cc &
 tools/generate-gemm-test.py --spec test/qu8-igemm-minmax-fp32.yaml --output test/qu8-igemm-minmax-fp32.cc --output test/qu8-igemm-minmax-fp32-2.cc &
+tools/generate-gemm-test.py --spec test/qc8-igemm-jit-fp32.yaml --output test/qc8-igemm-jit-fp32.cc &
 
 tools/generate-gemm-test.py --spec test/qs8-igemm-minmax-rndnu.yaml --output test/qs8-igemm-minmax-rndnu.cc --output test/qs8-igemm-minmax-rndnu-2.cc --output test/qs8-igemm-minmax-rndnu-3.cc --output test/qs8-igemm-minmax-rndnu-4.cc &
 tools/generate-gemm-test.py --spec test/qu8-igemm-minmax-rndnu.yaml --output test/qu8-igemm-minmax-rndnu.cc --output test/qu8-igemm-minmax-rndnu-2.cc &
+tools/generate-gemm-test.py --spec test/qs8-igemm-jit-rndnu.yaml --output test/qs8-igemm-jit-rndnu.cc &
 
 wait

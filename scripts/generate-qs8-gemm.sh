@@ -1340,8 +1340,10 @@ tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D DATA
 tools/generate-gemm-test.py --spec test/qc8-gemm-minmax-fp32.yaml --output test/qc8-gemm-minmax-fp32.cc --output test/qc8-gemm-minmax-fp32-2.cc --output test/qc8-gemm-minmax-fp32-3.cc &
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-fp32.yaml --output test/qs8-gemm-minmax-fp32.cc --output test/qs8-gemm-minmax-fp32-2.cc &
 tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-fp32.yaml --output test/qu8-gemm-minmax-fp32.cc --output test/qu8-gemm-minmax-fp32-2.cc &
+tools/generate-gemm-test.py --spec test/qc8-gemm-jit-fp32.yaml --output test/qc8-gemm-jit-fp32.cc &
 
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-rndnu.yaml --output test/qs8-gemm-minmax-rndnu.cc --output test/qs8-gemm-minmax-rndnu-2.cc --output test/qs8-gemm-minmax-rndnu-3.cc --output test/qs8-gemm-minmax-rndnu-4.cc --output test/qs8-gemm-minmax-rndnu-5.cc &
 tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-rndnu.yaml --output test/qu8-gemm-minmax-rndnu.cc --output test/qu8-gemm-minmax-rndnu-2.cc &
+tools/generate-gemm-test.py --spec test/qs8-gemm-jit-rndnu.yaml --output test/qs8-gemm-jit-rndnu.cc &
 
 wait

@@ -8652,6 +8652,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qc8_gemm_jit_fp32_test",
+    srcs = [
+        "test/qc8-gemm-jit-fp32.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+        ":jit_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "qc8_gemm_minmax_fp32_test",
     timeout = "moderate",
     srcs = [
@@ -8662,7 +8673,17 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "qc8_igemm_jit_fp32_test",
+    srcs = [
+        "test/qc8-igemm-jit-fp32.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
         ":jit_test_mode",
+        ":gemm_microkernel_tester",
     ],
 )
 
@@ -8676,7 +8697,6 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit_test_mode",
         ":gemm_microkernel_tester",
     ],
 )
@@ -8747,6 +8767,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qs8_gemm_jit_rndnu_test",
+    srcs = [
+        "test/qs8-gemm-jit-rndnu.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+        ":jit_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "qs8_gemm_minmax_rndnu_test",
     timeout = "moderate",
     srcs = [
@@ -8759,7 +8790,6 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
-        ":jit_test_mode",
     ],
 )
 
@@ -8777,6 +8807,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qs8_igemm_jit_rndnu_test",
+    srcs = [
+        "test/qs8-igemm-jit-rndnu.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+        ":jit_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "qs8_igemm_minmax_rndnu_test",
     timeout = "moderate",
     srcs = [
@@ -8787,7 +8828,6 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
-        ":jit_test_mode",
     ],
 )
 
