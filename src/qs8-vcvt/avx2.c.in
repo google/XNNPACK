@@ -12,7 +12,6 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vcvt.h>
 
 
@@ -105,7 +104,7 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__avx2_x${BATCH_TILE}(
       output += 2;
     }
     if (batch & (1 * sizeof(${XINT8_T}))) {
-      *output = (${XINT8_T}) _mm_extract_epi8(vy, 0);
+      *output = (${XINT8_T}) _mm_cvtsi128_si32(vy);
     }
   }
 }

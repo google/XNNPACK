@@ -12,7 +12,6 @@
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vcvt.h>
 
 
@@ -95,7 +94,7 @@ void xnn_qu8_vcvt_ukernel__avx2_x32(
       output += 2;
     }
     if (batch & (1 * sizeof(uint8_t))) {
-      *output = (uint8_t) _mm_extract_epi8(vy, 0);
+      *output = (uint8_t) _mm_cvtsi128_si32(vy);
     }
   }
 }

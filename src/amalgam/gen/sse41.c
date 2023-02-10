@@ -282,12 +282,12 @@ void xnn_f32_f16_vcvt_ukernel__sse41_x8(
       o += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vh));
+      _mm_storeu_si32(o, vh);
       vh = _mm_srli_epi64(vh, 32);
       o += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      *o = (uint16_t) _mm_extract_epi16(vh, 0);
+      _mm_storeu_si16(o, vh);
     }
   }
 }
@@ -528,17 +528,17 @@ void xnn_f32_qs8_vcvt_ukernel__sse41_x32(
     vy = _mm_max_epi8(vy, voutput_min);
 
     if (batch & (4 * sizeof(float))) {
-      unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));
-      output += 4;
+      _mm_storeu_si32(output, vy);
       vy = _mm_srli_epi64(vy, 32);
+      output += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vy, 0));
-      output += 2;
+      _mm_storeu_si16(output, vy);
       vy = _mm_srli_epi32(vy, 16);
+      output += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      *output = (int8_t) _mm_extract_epi8(vy, 0);
+      *output = (int8_t) _mm_cvtsi128_si32(vy);
     }
   }
 }
@@ -5345,8 +5345,8 @@ void xnn_qs8_vcvt_ukernel__sse41_x32(
     vacc = _mm_slli_epi16(vacc, 7);
     vacc = _mm_mulhrs_epi16(vacc, vmultiplier);
     vacc = _mm_adds_epi16(vacc, voutput_zero_point);
-
     __m128i vy = _mm_packs_epi16(vacc, vacc);
+
     if (batch & (4 * sizeof(int8_t))) {
       _mm_storeu_si32(output, vy);
       vy = _mm_srli_epi64(vy, 32);
@@ -5358,7 +5358,7 @@ void xnn_qs8_vcvt_ukernel__sse41_x32(
       output += 2;
     }
     if (batch & (1 * sizeof(int8_t))) {
-      *output = (int8_t) _mm_extract_epi8(vy, 0);
+      *output = (int8_t) _mm_cvtsi128_si32(vy);
     }
   }
 }
@@ -8279,8 +8279,8 @@ void xnn_qu8_vcvt_ukernel__sse41_x32(
     vacc = _mm_slli_epi16(vacc, 7);
     vacc = _mm_mulhrs_epi16(vacc, vmultiplier);
     vacc = _mm_adds_epi16(vacc, voutput_zero_point);
-
     __m128i vy = _mm_packus_epi16(vacc, vacc);
+
     if (batch & (4 * sizeof(uint8_t))) {
       _mm_storeu_si32(output, vy);
       vy = _mm_srli_epi64(vy, 32);
@@ -8292,7 +8292,7 @@ void xnn_qu8_vcvt_ukernel__sse41_x32(
       output += 2;
     }
     if (batch & (1 * sizeof(uint8_t))) {
-      *output = (uint8_t) _mm_extract_epi8(vy, 0);
+      *output = (uint8_t) _mm_cvtsi128_si32(vy);
     }
   }
 }

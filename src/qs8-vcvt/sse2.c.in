@@ -13,7 +13,6 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <xnnpack/common.h>
 #include <xnnpack/vcvt.h>
-#include <xnnpack/unaligned.h>
 
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
@@ -51,12 +50,12 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__sse2_x${BATCH_TILE}(
           const __m128i vextx${ABC[2*N+1]} = _mm_unpackhi_epi8(vx${ABC[N]}, vm${ABC[N]});
 
       $for N in range(2*SIMD_TILE):
-        const __m128i vprodlo${ABC[N]} = _mm_mullo_epi16(vextx${ABC[N]}, vmultiplier);
-        const __m128i vprodhi${ABC[N]} = ${_MM_MULHI_EPX16}(vextx${ABC[N]}, vmultiplier);
+        const __m128i vprod${ABC[N]}lo = _mm_mullo_epi16(vextx${ABC[N]}, vmultiplier);
+        const __m128i vprod${ABC[N]}hi = ${_MM_MULHI_EPX16}(vextx${ABC[N]}, vmultiplier);
 
       $for N in range(2*SIMD_TILE):
-        __m128i vacc${ABC[2*N]} = _mm_unpacklo_epi16(vprodlo${ABC[N]}, vprodhi${ABC[N]});
-        __m128i vacc${ABC[2*N+1]} = _mm_unpackhi_epi16(vprodlo${ABC[N]}, vprodhi${ABC[N]});
+        __m128i vacc${ABC[2*N]} = _mm_unpacklo_epi16(vprod${ABC[N]}lo, vprod${ABC[N]}hi);
+        __m128i vacc${ABC[2*N+1]} = _mm_unpackhi_epi16(vprod${ABC[N]}lo, vprod${ABC[N]}hi);
 
       $for N in range(4*SIMD_TILE):
         $if DATATYPE == "QU8":
@@ -173,18 +172,17 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__sse2_x${BATCH_TILE}(
       output += 8;
     }
     if (batch & (4 * sizeof(${XINT8_T}))) {
-      unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));
+      _mm_storeu_si32(output, vy);
       vy = _mm_srli_epi64(vy, 32);
       output += 4;
     }
-    uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
     if (batch & (2 * sizeof(${XINT8_T}))) {
-      unaligned_store_u16(output, (uint16_t) vy_lo);
-      vy_lo >>= 16;
+      _mm_storeu_si16(output, vy);
+      vy = _mm_srli_epi32(vy, 16);
       output += 2;
     }
     if (batch & (1 * sizeof(${XINT8_T}))) {
-      *output = (${XINT8_T}) vy_lo;
+      *output = (${XINT8_T}) _mm_cvtsi128_si32(vy);
     }
   }
 }

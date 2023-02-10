@@ -1211,12 +1211,12 @@ void xnn_f32_f16_vcvt_ukernel__sse2_x16(
       o += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vh));
+      _mm_storeu_si32(o, vh);
       vh = _mm_srli_epi64(vh, 32);
       o += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      *o = (uint16_t) _mm_cvtsi128_si32(vh);
+      _mm_storeu_si16(o, vh);
     }
   }
 }
@@ -1467,20 +1467,17 @@ void xnn_f32_qs8_vcvt_ukernel__sse2_x32(
     vy = _mm_packs_epi16(vy, vy);
 
     if (batch & (4 * sizeof(float))) {
-      unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));
-      output += 4;
+      _mm_storeu_si32(output, vy);
       vy = _mm_srli_epi64(vy, 32);
+      output += 4;
     }
-    {
-      uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
-      if (batch & (2 * sizeof(float))) {
-        unaligned_store_u16(output, (uint16_t) vy_lo);
-        output += 2;
-        vy_lo >>= 16;
-      }
-      if (batch & (1 * sizeof(float))) {
-        *output = (int8_t) vy_lo;
-      }
+    if (batch & (2 * sizeof(float))) {
+      _mm_storeu_si16(output, vy);
+      vy = _mm_srli_epi32(vy, 16);
+      output += 2;
+    }
+    if (batch & (1 * sizeof(float))) {
+      *output = (int8_t) _mm_cvtsi128_si32(vy);
     }
   }
 }
@@ -1602,20 +1599,17 @@ void xnn_f32_qu8_vcvt_ukernel__sse2_x32(
     vy = _mm_max_epu8(vy, voutput_min);
 
     if (batch & (4 * sizeof(float))) {
-      unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));
-      output += 4;
+      _mm_storeu_si32(output, vy);
       vy = _mm_srli_epi64(vy, 32);
+      output += 4;
     }
-    {
-      uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
-      if (batch & (2 * sizeof(float))) {
-        unaligned_store_u16(output, (uint16_t) vy_lo);
-        output += 2;
-        vy_lo >>= 16;
-      }
-      if (batch & (1 * sizeof(float))) {
-        *output = (uint8_t) vy_lo;
-      }
+    if (batch & (2 * sizeof(float))) {
+      _mm_storeu_si16(output, vy);
+      vy = _mm_srli_epi32(vy, 16);
+      output += 2;
+    }
+    if (batch & (1 * sizeof(float))) {
+      *output = (uint8_t) _mm_cvtsi128_si32(vy);
     }
   }
 }
@@ -7288,23 +7282,23 @@ void xnn_qs8_vcvt_ukernel__sse2_x32(
     const __m128i vextx2 = _mm_unpacklo_epi8(vx1, vm1);
     const __m128i vextx3 = _mm_unpackhi_epi8(vx1, vm1);
 
-    const __m128i vprodlo0 = _mm_mullo_epi16(vextx0, vmultiplier);
-    const __m128i vprodhi0 = _mm_mulhi_epi16(vextx0, vmultiplier);
-    const __m128i vprodlo1 = _mm_mullo_epi16(vextx1, vmultiplier);
-    const __m128i vprodhi1 = _mm_mulhi_epi16(vextx1, vmultiplier);
-    const __m128i vprodlo2 = _mm_mullo_epi16(vextx2, vmultiplier);
-    const __m128i vprodhi2 = _mm_mulhi_epi16(vextx2, vmultiplier);
-    const __m128i vprodlo3 = _mm_mullo_epi16(vextx3, vmultiplier);
-    const __m128i vprodhi3 = _mm_mulhi_epi16(vextx3, vmultiplier);
+    const __m128i vprod0lo = _mm_mullo_epi16(vextx0, vmultiplier);
+    const __m128i vprod0hi = _mm_mulhi_epi16(vextx0, vmultiplier);
+    const __m128i vprod1lo = _mm_mullo_epi16(vextx1, vmultiplier);
+    const __m128i vprod1hi = _mm_mulhi_epi16(vextx1, vmultiplier);
+    const __m128i vprod2lo = _mm_mullo_epi16(vextx2, vmultiplier);
+    const __m128i vprod2hi = _mm_mulhi_epi16(vextx2, vmultiplier);
+    const __m128i vprod3lo = _mm_mullo_epi16(vextx3, vmultiplier);
+    const __m128i vprod3hi = _mm_mulhi_epi16(vextx3, vmultiplier);
 
-    __m128i vacc0 = _mm_unpacklo_epi16(vprodlo0, vprodhi0);
-    __m128i vacc1 = _mm_unpackhi_epi16(vprodlo0, vprodhi0);
-    __m128i vacc2 = _mm_unpacklo_epi16(vprodlo1, vprodhi1);
-    __m128i vacc3 = _mm_unpackhi_epi16(vprodlo1, vprodhi1);
-    __m128i vacc4 = _mm_unpacklo_epi16(vprodlo2, vprodhi2);
-    __m128i vacc5 = _mm_unpackhi_epi16(vprodlo2, vprodhi2);
-    __m128i vacc6 = _mm_unpacklo_epi16(vprodlo3, vprodhi3);
-    __m128i vacc7 = _mm_unpackhi_epi16(vprodlo3, vprodhi3);
+    __m128i vacc0 = _mm_unpacklo_epi16(vprod0lo, vprod0hi);
+    __m128i vacc1 = _mm_unpackhi_epi16(vprod0lo, vprod0hi);
+    __m128i vacc2 = _mm_unpacklo_epi16(vprod1lo, vprod1hi);
+    __m128i vacc3 = _mm_unpackhi_epi16(vprod1lo, vprod1hi);
+    __m128i vacc4 = _mm_unpacklo_epi16(vprod2lo, vprod2hi);
+    __m128i vacc5 = _mm_unpackhi_epi16(vprod2lo, vprod2hi);
+    __m128i vacc6 = _mm_unpacklo_epi16(vprod3lo, vprod3hi);
+    __m128i vacc7 = _mm_unpackhi_epi16(vprod3lo, vprod3hi);
 
     vacc0 = _mm_sub_epi32(vbias, vacc0);
     vacc1 = _mm_sub_epi32(vbias, vacc1);
@@ -7411,18 +7405,17 @@ void xnn_qs8_vcvt_ukernel__sse2_x32(
       output += 8;
     }
     if (batch & (4 * sizeof(int8_t))) {
-      unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));
+      _mm_storeu_si32(output, vy);
       vy = _mm_srli_epi64(vy, 32);
       output += 4;
     }
-    uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
     if (batch & (2 * sizeof(int8_t))) {
-      unaligned_store_u16(output, (uint16_t) vy_lo);
-      vy_lo >>= 16;
+      _mm_storeu_si16(output, vy);
+      vy = _mm_srli_epi32(vy, 16);
       output += 2;
     }
     if (batch & (1 * sizeof(int8_t))) {
-      *output = (int8_t) vy_lo;
+      *output = (int8_t) _mm_cvtsi128_si32(vy);
     }
   }
 }
@@ -11089,23 +11082,23 @@ void xnn_qu8_vcvt_ukernel__sse2_x32(
     const __m128i vextx2 = _mm_unpacklo_epi8(vx1, vzero);
     const __m128i vextx3 = _mm_unpackhi_epi8(vx1, vzero);
 
-    const __m128i vprodlo0 = _mm_mullo_epi16(vextx0, vmultiplier);
-    const __m128i vprodhi0 = _mm_mulhi_epu16(vextx0, vmultiplier);
-    const __m128i vprodlo1 = _mm_mullo_epi16(vextx1, vmultiplier);
-    const __m128i vprodhi1 = _mm_mulhi_epu16(vextx1, vmultiplier);
-    const __m128i vprodlo2 = _mm_mullo_epi16(vextx2, vmultiplier);
-    const __m128i vprodhi2 = _mm_mulhi_epu16(vextx2, vmultiplier);
-    const __m128i vprodlo3 = _mm_mullo_epi16(vextx3, vmultiplier);
-    const __m128i vprodhi3 = _mm_mulhi_epu16(vextx3, vmultiplier);
+    const __m128i vprod0lo = _mm_mullo_epi16(vextx0, vmultiplier);
+    const __m128i vprod0hi = _mm_mulhi_epu16(vextx0, vmultiplier);
+    const __m128i vprod1lo = _mm_mullo_epi16(vextx1, vmultiplier);
+    const __m128i vprod1hi = _mm_mulhi_epu16(vextx1, vmultiplier);
+    const __m128i vprod2lo = _mm_mullo_epi16(vextx2, vmultiplier);
+    const __m128i vprod2hi = _mm_mulhi_epu16(vextx2, vmultiplier);
+    const __m128i vprod3lo = _mm_mullo_epi16(vextx3, vmultiplier);
+    const __m128i vprod3hi = _mm_mulhi_epu16(vextx3, vmultiplier);
 
-    __m128i vacc0 = _mm_unpacklo_epi16(vprodlo0, vprodhi0);
-    __m128i vacc1 = _mm_unpackhi_epi16(vprodlo0, vprodhi0);
-    __m128i vacc2 = _mm_unpacklo_epi16(vprodlo1, vprodhi1);
-    __m128i vacc3 = _mm_unpackhi_epi16(vprodlo1, vprodhi1);
-    __m128i vacc4 = _mm_unpacklo_epi16(vprodlo2, vprodhi2);
-    __m128i vacc5 = _mm_unpackhi_epi16(vprodlo2, vprodhi2);
-    __m128i vacc6 = _mm_unpacklo_epi16(vprodlo3, vprodhi3);
-    __m128i vacc7 = _mm_unpackhi_epi16(vprodlo3, vprodhi3);
+    __m128i vacc0 = _mm_unpacklo_epi16(vprod0lo, vprod0hi);
+    __m128i vacc1 = _mm_unpackhi_epi16(vprod0lo, vprod0hi);
+    __m128i vacc2 = _mm_unpacklo_epi16(vprod1lo, vprod1hi);
+    __m128i vacc3 = _mm_unpackhi_epi16(vprod1lo, vprod1hi);
+    __m128i vacc4 = _mm_unpacklo_epi16(vprod2lo, vprod2hi);
+    __m128i vacc5 = _mm_unpackhi_epi16(vprod2lo, vprod2hi);
+    __m128i vacc6 = _mm_unpacklo_epi16(vprod3lo, vprod3hi);
+    __m128i vacc7 = _mm_unpackhi_epi16(vprod3lo, vprod3hi);
 
     vacc0 = _mm_add_epi32(vacc0, vbias);
     vacc1 = _mm_add_epi32(vacc1, vbias);
@@ -11210,18 +11203,17 @@ void xnn_qu8_vcvt_ukernel__sse2_x32(
       output += 8;
     }
     if (batch & (4 * sizeof(uint8_t))) {
-      unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));
+      _mm_storeu_si32(output, vy);
       vy = _mm_srli_epi64(vy, 32);
       output += 4;
     }
-    uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
     if (batch & (2 * sizeof(uint8_t))) {
-      unaligned_store_u16(output, (uint16_t) vy_lo);
-      vy_lo >>= 16;
+      _mm_storeu_si16(output, vy);
+      vy = _mm_srli_epi32(vy, 16);
       output += 2;
     }
     if (batch & (1 * sizeof(uint8_t))) {
-      *output = (uint8_t) vy_lo;
+      *output = (uint8_t) _mm_cvtsi128_si32(vy);
     }
   }
 }

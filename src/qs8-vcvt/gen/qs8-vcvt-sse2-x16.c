@@ -13,7 +13,6 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/vcvt.h>
-#include <xnnpack/unaligned.h>
 
 
 void xnn_qs8_vcvt_ukernel__sse2_x16(
@@ -37,15 +36,15 @@ void xnn_qs8_vcvt_ukernel__sse2_x16(
     const __m128i vextx0 = _mm_unpacklo_epi8(vx0, vm0);
     const __m128i vextx1 = _mm_unpackhi_epi8(vx0, vm0);
 
-    const __m128i vprodlo0 = _mm_mullo_epi16(vextx0, vmultiplier);
-    const __m128i vprodhi0 = _mm_mulhi_epi16(vextx0, vmultiplier);
-    const __m128i vprodlo1 = _mm_mullo_epi16(vextx1, vmultiplier);
-    const __m128i vprodhi1 = _mm_mulhi_epi16(vextx1, vmultiplier);
+    const __m128i vprod0lo = _mm_mullo_epi16(vextx0, vmultiplier);
+    const __m128i vprod0hi = _mm_mulhi_epi16(vextx0, vmultiplier);
+    const __m128i vprod1lo = _mm_mullo_epi16(vextx1, vmultiplier);
+    const __m128i vprod1hi = _mm_mulhi_epi16(vextx1, vmultiplier);
 
-    __m128i vacc0 = _mm_unpacklo_epi16(vprodlo0, vprodhi0);
-    __m128i vacc1 = _mm_unpackhi_epi16(vprodlo0, vprodhi0);
-    __m128i vacc2 = _mm_unpacklo_epi16(vprodlo1, vprodhi1);
-    __m128i vacc3 = _mm_unpackhi_epi16(vprodlo1, vprodhi1);
+    __m128i vacc0 = _mm_unpacklo_epi16(vprod0lo, vprod0hi);
+    __m128i vacc1 = _mm_unpackhi_epi16(vprod0lo, vprod0hi);
+    __m128i vacc2 = _mm_unpacklo_epi16(vprod1lo, vprod1hi);
+    __m128i vacc3 = _mm_unpackhi_epi16(vprod1lo, vprod1hi);
 
     vacc0 = _mm_sub_epi32(vbias, vacc0);
     vacc1 = _mm_sub_epi32(vbias, vacc1);
@@ -140,18 +139,17 @@ void xnn_qs8_vcvt_ukernel__sse2_x16(
       output += 8;
     }
     if (batch & (4 * sizeof(int8_t))) {
-      unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));
+      _mm_storeu_si32(output, vy);
       vy = _mm_srli_epi64(vy, 32);
       output += 4;
     }
-    uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
     if (batch & (2 * sizeof(int8_t))) {
-      unaligned_store_u16(output, (uint16_t) vy_lo);
-      vy_lo >>= 16;
+      _mm_storeu_si16(output, vy);
+      vy = _mm_srli_epi32(vy, 16);
       output += 2;
     }
     if (batch & (1 * sizeof(int8_t))) {
-      *output = (int8_t) vy_lo;
+      *output = (int8_t) _mm_cvtsi128_si32(vy);
     }
   }
 }

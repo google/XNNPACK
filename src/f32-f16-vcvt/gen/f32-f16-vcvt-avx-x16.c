@@ -12,7 +12,6 @@
 #include <smmintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/unaligned.h>
 #include <xnnpack/vcvt.h>
 
 
@@ -234,12 +233,12 @@ void xnn_f32_f16_vcvt_ukernel__avx_x16(
       o += 4;
     }
     if (batch & (2 * sizeof(float))) {
-      unaligned_store_u32(o, (uint32_t) _mm_cvtsi128_si32(vh));
+      _mm_storeu_si32(o, vh);
       vh = _mm_srli_epi64(vh, 32);
       o += 2;
     }
     if (batch & (1 * sizeof(float))) {
-      *o = (uint16_t) _mm_extract_epi16(vh, 0);
+      _mm_storeu_si16(o, vh);
     }
   }
 }

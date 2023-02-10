@@ -12,7 +12,6 @@
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
-#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/vcvt.h>
 
 
@@ -85,8 +84,8 @@ void xnn_qu8_vcvt_ukernel__avx_x32(
     vacc = _mm_slli_epi16(vacc, 7);
     vacc = _mm_mulhrs_epi16(vacc, vmultiplier);
     vacc = _mm_adds_epi16(vacc, voutput_zero_point);
-
     __m128i vy = _mm_packus_epi16(vacc, vacc);
+
     if (batch & (4 * sizeof(uint8_t))) {
       _mm_storeu_si32(output, vy);
       vy = _mm_srli_epi64(vy, 32);
@@ -98,7 +97,7 @@ void xnn_qu8_vcvt_ukernel__avx_x32(
       output += 2;
     }
     if (batch & (1 * sizeof(uint8_t))) {
-      *output = (uint8_t) _mm_extract_epi8(vy, 0);
+      *output = (uint8_t) _mm_cvtsi128_si32(vy);
     }
   }
 }
