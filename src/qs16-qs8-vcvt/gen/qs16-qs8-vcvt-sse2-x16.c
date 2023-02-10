@@ -81,13 +81,17 @@ void xnn_qs16_qs8_vcvt_ukernel__sse2_x16(
     vacco3 = _mm_slli_epi64(vacco3, 16);
 
     __m128i vacc0 = _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(vacce0),
-                                                            _mm_castsi128_ps(vacco0), 0xd8));
+                                                            _mm_castsi128_ps(vacco0),
+                                                            _MM_SHUFFLE(3, 1, 2, 0)));
     __m128i vacc1 = _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(vacce1),
-                                                            _mm_castsi128_ps(vacco1), 0xd8));
+                                                            _mm_castsi128_ps(vacco1),
+                                                            _MM_SHUFFLE(3, 1, 2, 0)));
     __m128i vacc2 = _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(vacce2),
-                                                            _mm_castsi128_ps(vacco2), 0xd8));
+                                                            _mm_castsi128_ps(vacco2),
+                                                            _MM_SHUFFLE(3, 1, 2, 0)));
     __m128i vacc3 = _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(vacce3),
-                                                            _mm_castsi128_ps(vacco3), 0xd8));
+                                                            _mm_castsi128_ps(vacco3),
+                                                            _MM_SHUFFLE(3, 1, 2, 0)));
 
     // Pack 8 ints into 8 shorts
     vacc0 = _mm_packs_epi32(vacc0, vacc1);
@@ -112,7 +116,7 @@ void xnn_qs16_qs8_vcvt_ukernel__sse2_x16(
     vacce = _mm_srli_epi64(vacce, 16);
     vacco = _mm_slli_epi64(vacco, 16);
     __m128i vacc = _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(vacce),
-                                                   _mm_castsi128_ps(vacco), 0xd8));
+                                                   _mm_castsi128_ps(vacco), _MM_SHUFFLE(3, 1, 2, 0)));
     vacc = _mm_packs_epi32(vacc, vacc);
     const __m128i vy = _mm_packs_epi16(vacc, vacc);
     unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));
@@ -134,7 +138,7 @@ void xnn_qs16_qs8_vcvt_ukernel__sse2_x16(
     vacce = _mm_srli_epi64(vacce, 16);
     vacco = _mm_slli_epi64(vacco, 16);
     __m128i vacc = _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(vacce),
-                                                   _mm_castsi128_ps(vacco), 0xd8));
+                                                   _mm_castsi128_ps(vacco), _MM_SHUFFLE(3, 1, 2, 0)));
     vacc = _mm_packs_epi32(vacc, vacc);
     const __m128i vy = _mm_packs_epi16(vacc, vacc);
 

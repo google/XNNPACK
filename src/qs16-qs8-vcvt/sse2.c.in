@@ -62,7 +62,8 @@ void xnn_qs16_qs8_vcvt_ukernel__sse2_x${BATCH_TILE}(
 
       $for N in range(SIMD_TILE):
         __m128i vacc${ABC[N]} = _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(vacce${ABC[N]}),
-                                                                _mm_castsi128_ps(vacco${ABC[N]}), 0xd8));
+                                                                _mm_castsi128_ps(vacco${ABC[N]}),
+                                                                _MM_SHUFFLE(3, 1, 2, 0)));
 
       // Pack 8 ints into 8 shorts
       $for N in range(0, SIMD_TILE, 2):
@@ -97,7 +98,7 @@ void xnn_qs16_qs8_vcvt_ukernel__sse2_x${BATCH_TILE}(
     vacce = _mm_srli_epi64(vacce, 16);
     vacco = _mm_slli_epi64(vacco, 16);
     __m128i vacc = _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(vacce),
-                                                   _mm_castsi128_ps(vacco), 0xd8));
+                                                   _mm_castsi128_ps(vacco), _MM_SHUFFLE(3, 1, 2, 0)));
     vacc = _mm_packs_epi32(vacc, vacc);
     const __m128i vy = _mm_packs_epi16(vacc, vacc);
     unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));
@@ -119,7 +120,7 @@ void xnn_qs16_qs8_vcvt_ukernel__sse2_x${BATCH_TILE}(
     vacce = _mm_srli_epi64(vacce, 16);
     vacco = _mm_slli_epi64(vacco, 16);
     __m128i vacc = _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(vacce),
-                                                   _mm_castsi128_ps(vacco), 0xd8));
+                                                   _mm_castsi128_ps(vacco), _MM_SHUFFLE(3, 1, 2, 0)));
     vacc = _mm_packs_epi32(vacc, vacc);
     const __m128i vy = _mm_packs_epi16(vacc, vacc);
 

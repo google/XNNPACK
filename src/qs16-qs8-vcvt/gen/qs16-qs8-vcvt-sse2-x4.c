@@ -45,7 +45,7 @@ void xnn_qs16_qs8_vcvt_ukernel__sse2_x4(
     vacce = _mm_srli_epi64(vacce, 16);
     vacco = _mm_slli_epi64(vacco, 16);
     __m128i vacc = _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(vacce),
-                                                   _mm_castsi128_ps(vacco), 0xd8));
+                                                   _mm_castsi128_ps(vacco), _MM_SHUFFLE(3, 1, 2, 0)));
     vacc = _mm_packs_epi32(vacc, vacc);
     const __m128i vy = _mm_packs_epi16(vacc, vacc);
     unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));
@@ -67,7 +67,7 @@ void xnn_qs16_qs8_vcvt_ukernel__sse2_x4(
     vacce = _mm_srli_epi64(vacce, 16);
     vacco = _mm_slli_epi64(vacco, 16);
     __m128i vacc = _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(vacce),
-                                                   _mm_castsi128_ps(vacco), 0xd8));
+                                                   _mm_castsi128_ps(vacco), _MM_SHUFFLE(3, 1, 2, 0)));
     vacc = _mm_packs_epi32(vacc, vacc);
     const __m128i vy = _mm_packs_epi16(vacc, vacc);
 
