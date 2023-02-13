@@ -28,47 +28,47 @@ void xnn_qs16_qs8_vcvt_ukernel__avx_x4(
 
   const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse4.multiplier);
   const __m128i vbias = _mm_load_si128((const __m128i*) params->sse4.bias);
+  const __m128i vshuffle01 = _mm_load_si128((const __m128i*) params->sse4.shuffle01);
+  const __m128i vshuffle23 = _mm_load_si128((const __m128i*) params->sse4.shuffle23);
 
 
   for (; batch >= 4 * sizeof(int16_t); batch -= 4 * sizeof(int16_t)) {
-    __m128i vacce = _mm_cvtepi16_epi32(_mm_loadl_epi64((const __m128i*) input)); input += 4;
-    __m128i vacco = _mm_shuffle_epi32(vacce, _MM_SHUFFLE(3, 3, 1, 1));
-    vacce = _mm_mul_epi32(vacce, vmultiplier);
-    vacco = _mm_mul_epi32(vacco, vmultiplier);
-    vacce = _mm_add_epi64(vacce, vbias);
-    vacco = _mm_add_epi64(vacco, vbias);
-    vacce = _mm_srli_epi64(vacce, 16);
-    vacco = _mm_slli_epi64(vacco, 16);
-    __m128i vacc = _mm_blend_epi16(vacce, vacco, 0xcc);
+    const __m128i vx = _mm_loadu_si128((const __m128i*) input); input += 4;
+    __m128i vacclo = _mm_shuffle_epi8(vx, vshuffle01);
+    __m128i vacchi = _mm_shuffle_epi8(vx, vshuffle23);
+    vacclo = _mm_mul_epi32(vacclo, vmultiplier);
+    vacchi = _mm_mul_epi32(vacchi, vmultiplier);
+    vacclo = _mm_add_epi64(vacclo, vbias);
+    vacchi = _mm_add_epi64(vacchi, vbias);
+    __m128i vacc = _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(vacclo), _mm_castsi128_ps(vacchi), _MM_SHUFFLE(3, 1, 3, 1)));
     vacc = _mm_packs_epi32(vacc, vacc);
     const __m128i vy = _mm_packs_epi16(vacc, vacc);
-    unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));
+
+    _mm_storeu_si32(output, vy);
     output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(int16_t));
     assert(batch <= 3 * sizeof(int16_t));
 
-    __m128i vacce = _mm_cvtepi16_epi32(_mm_loadl_epi64((const __m128i*) input));
-    __m128i vacco = _mm_shuffle_epi32(vacce, _MM_SHUFFLE(3, 3, 1, 1));
-    vacce = _mm_mul_epi32(vacce, vmultiplier);
-    vacco = _mm_mul_epi32(vacco, vmultiplier);
-    vacce = _mm_add_epi64(vacce, vbias);
-    vacco = _mm_add_epi64(vacco, vbias);
-    vacce = _mm_srli_epi64(vacce, 16);
-    vacco = _mm_slli_epi64(vacco, 16);
-    __m128i vacc = _mm_blend_epi16(vacce, vacco, 0xcc);
+    const __m128i vx = _mm_loadu_si128((const __m128i*) input);
+    __m128i vacclo = _mm_shuffle_epi8(vx, vshuffle01);
+    __m128i vacchi = _mm_shuffle_epi8(vx, vshuffle23);
+    vacclo = _mm_mul_epi32(vacclo, vmultiplier);
+    vacchi = _mm_mul_epi32(vacchi, vmultiplier);
+    vacclo = _mm_add_epi64(vacclo, vbias);
+    vacchi = _mm_add_epi64(vacchi, vbias);
+    __m128i vacc = _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(vacclo), _mm_castsi128_ps(vacchi), _MM_SHUFFLE(3, 1, 3, 1)));
     vacc = _mm_packs_epi32(vacc, vacc);
-    const __m128i vy = _mm_packs_epi16(vacc, vacc);
+    __m128i vy = _mm_packs_epi16(vacc, vacc);
 
-    uint32_t vy_lo = (uint32_t) _mm_cvtsi128_si32(vy);
     if (batch & (2 * sizeof(int16_t))) {
-      unaligned_store_u16(output, (uint16_t) vy_lo);
-      vy_lo >>= 16;
+      _mm_storeu_si16(output, vy);
+      vy = _mm_srli_epi32(vy, 16);
       output += 2;
     }
     if (batch & (1 * sizeof(int16_t))) {
-      *output = (int8_t) vy_lo;
+      *output = (int8_t) _mm_extract_epi8(vy, 0);
     }
   }
 }
