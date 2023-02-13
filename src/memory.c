@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 // Include first for the platform detection macros.
-#include "xnnpack/common.h"
+#include <xnnpack/common.h>
 
 #if XNN_PLATFORM_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN
