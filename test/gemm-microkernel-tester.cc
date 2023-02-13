@@ -1694,9 +1694,27 @@ typedef uint64_t (*xnn_f32_gemm_minmax_ukernel_trampoline_fn)(
   const float* w,
   float* c,
   size_t cm_stride,
-  size_t cn_stride,  // sp
-  const union xnn_f32_minmax_params* params,  // sp + 8
-  void* ukernel_address);  // sp + 16
+  size_t cn_stride,
+  const union xnn_f32_minmax_params* params,
+  void* ukernel_address);
+
+// Type for a TrampolineGenerator that calls a IGEMM minmax microkernel.
+// Return value is 0 if there are no errors, otherwise it is a corrupted value which encodes the register that was not
+// saved correctly.
+typedef uint64_t (*xnn_f32_igemm_minmax_ukernel_trampoline_fn)(
+  size_t mr,
+  size_t nr,
+  size_t kc,
+  size_t ks,
+  const float** a,
+  const float* w,
+  float* c,
+  size_t cm_stride,
+  size_t cn_stride,
+  size_t a_offset,
+  const float* zero,
+  const union xnn_f32_minmax_params* params,
+  void* ukernel_address);
 
 // TODO(zhin): Currently only supported on ARM64, ARM32 support to come.
 #if XNN_ARCH_ARM64
@@ -2163,16 +2181,28 @@ void GemmMicrokernelTester::Test(
     p.f32_minmax.max = c_max;
     ASSERT_EQ(xnn_status_success,
               igemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(float), ks() * mr() * sizeof(void *), &p));
-    ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
-    xnn_f32_igemm_minmax_ukernel_fn igemm_minmax =
-        reinterpret_cast<xnn_f32_igemm_minmax_ukernel_fn>(code_buffer.start);
 
-    igemm_minmax(
+    void* ukernel_address = code_buffer.start;
+    void* trampoline_start = GenerateTrampoline(&code_buffer, TrampolineType::kIGEMM);
+    ASSERT_NE(trampoline_start, nullptr);
+
+    ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
+    xnn_f32_igemm_minmax_ukernel_trampoline_fn igemm_minmax =
+        reinterpret_cast<xnn_f32_igemm_minmax_ukernel_trampoline_fn>(trampoline_start);
+
+    uint64_t error = igemm_minmax(
       m(), n(), k() * sizeof(float), ks() * mr() * sizeof(void*),
       im2col.data(), packed_w.data(),
       c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
       a_offset() * sizeof(float), zero_pointer,
-      &params);
+      &params, ukernel_address);
+
+    // TODO(zhin); Trampoline only implemented on ARM64.
+    #if XNN_ARCH_ARM64
+      ASSERT_EQ(error, 0) << "Callee-saved register not saved correctly: " << RegisterFromCorruptedValue(error);
+    #else
+      (void) error;  // silence unused warning.
+    #endif  // XNN_ARCH_ARM64
 
     ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
 
