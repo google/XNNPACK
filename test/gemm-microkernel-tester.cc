@@ -17,11 +17,15 @@
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/requantization.h>
 
+#if XNN_ARCH_ARM64
+#include <xnnpack/aarch64-assembler.h>
+#endif  // XNN_ARCH_ARM64
 
 void GemmMicrokernelTester::Test(
   xnn_qu8_gemm_minmax_ukernel_fn gemm,
@@ -1662,6 +1666,69 @@ void GemmMicrokernelTester::Test(xnn_f32_igemm_minmax_ukernel_fn igemm_minmax, x
 
 #if XNN_PLATFORM_JIT
 
+enum class TrampolineType {
+  kGEMM,
+  kIGEMM
+};
+
+size_t NumArgsOnStack(TrampolineType type) {
+  switch (type) {
+    case TrampolineType::kGEMM:
+      return 2;
+    case TrampolineType::kIGEMM:
+      return 4;
+    default:
+      assert(false);
+  }
+}
+
+// Type for a TrampolineGenerator that calls a GEMM minmax microkernel.
+// Return value is 0 if there are no errors, otherwise it is a corrupted value which encodes the register that was not
+// saved correctly.
+typedef uint64_t (*xnn_f32_gemm_minmax_ukernel_trampoline_fn)(
+  size_t mr,
+  size_t nr,
+  size_t k,
+  const float* a,
+  size_t a_stride,
+  const float* w,
+  float* c,
+  size_t cm_stride,
+  size_t cn_stride,  // sp
+  const union xnn_f32_minmax_params* params,  // sp + 8
+  void* ukernel_address);  // sp + 16
+
+// TODO(zhin): Currently only supported on ARM64, ARM32 support to come.
+#if XNN_ARCH_ARM64
+void* GenerateTrampoline(xnn_code_buffer* code_buffer, TrampolineType type) {
+  void* trampoline_start = (void*) ((uintptr_t) code_buffer->start + code_buffer->size);
+
+  xnnpack::aarch64::TrampolineGenerator trampoline(code_buffer);
+  trampoline.generate(NumArgsOnStack(type));
+  trampoline.finalize();
+
+  if (trampoline.error() != xnnpack::Error::kNoError) {
+    return nullptr;
+  }
+
+  return trampoline_start;
+}
+
+std::string RegisterFromCorruptedValue(uint64_t corrupted_value) {
+  uint8_t reg_code = corrupted_value & xnnpack::aarch64::kRegisterCorruptMask;
+  std::string reg_type = (corrupted_value & (~reg_code)) == xnnpack::aarch64::kXRegisterCorruptValue ? "x" : "d";
+  return reg_type + std::to_string(reg_code);
+}
+
+#else
+void* GenerateTrampoline(xnn_code_buffer* code_buffer, TrampolineType type) {
+  return code_buffer->start;
+}
+std::string RegisterFromCorruptedValue(uint64_t corrupted_value) {
+  return "";
+}
+#endif  // XNN_ARCH_ARM64
+
 void GemmMicrokernelTester::Test(
     xnn_jit_gemm_code_generator_fn gemm_generator,
     xnn_init_f16_minmax_params_fn init_params) const
@@ -1952,15 +2019,27 @@ void GemmMicrokernelTester::Test(
     p.f32_minmax.min = c_min;
     p.f32_minmax.max = c_max;
     ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(float), &p));
-    ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
-    xnn_f32_gemm_minmax_ukernel_fn gemm_minmax =
-        reinterpret_cast<xnn_f32_gemm_minmax_ukernel_fn>(code_buffer.start);
 
-    gemm_minmax(m(), n(), k() * sizeof(float),
+    void* ukernel_address = code_buffer.start;
+    void* trampoline_start = GenerateTrampoline(&code_buffer, TrampolineType::kGEMM);
+    ASSERT_NE(trampoline_start, nullptr);
+
+    ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
+    xnn_f32_gemm_minmax_ukernel_trampoline_fn gemm_minmax =
+        reinterpret_cast<xnn_f32_gemm_minmax_ukernel_trampoline_fn>(trampoline_start);
+
+    uint64_t error = gemm_minmax(m(), n(), k() * sizeof(float),
       a.data(), a_stride() * sizeof(float),
       packed_w.data(),
       c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
-      &params);
+      &params, ukernel_address);
+
+    // TODO(zhin); Trampoline only implemented on ARM64.
+    #if XNN_ARCH_ARM64
+      ASSERT_EQ(error, 0) << "Callee-saved register not saved correctly: " << RegisterFromCorruptedValue(error);
+    #else
+      (void) error;  // silence unused warning.
+    #endif  // XNN_ARCH_ARM64
 
     ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
 

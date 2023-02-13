@@ -49,6 +49,8 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
   EXPECT_ERROR(Error::kLabelOffsetOutOfBounds, a.bl(128 * 1024 * 1204 + 4));  // > 128MB
   EXPECT_ERROR(Error::kLabelOffsetOutOfBounds, a.bl(-128 * 1024 * 1204 - 4));  // < -128MB
 
+  CHECK_ENCODING(0xD63F0100, a.blr(x8));
+
   CHECK_ENCODING(0xF100081F, a.cmp(x0, 2));
   EXPECT_ERROR(Error::kInvalidOperand, a.cmp(x0, 4096));
 
@@ -114,6 +116,10 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
   CHECK_ENCODING(0xD65F03C0, a.ret());
 
   CHECK_ENCODING(0xCB020083, a.sub(x3, x4, x2));
+
+  CHECK_ENCODING(0xD1003083, a.sub(x3, x4, 12));
+  CHECK_ENCODING(0xD13FFC83, a.sub(x3, x4, 4095));
+  EXPECT_ERROR(Error::kInvalidOperand, a.sub(x0, x2, 4096));  // Out of bounds.
 
   CHECK_ENCODING(0xA90457F4, a.stp(x20, x21, mem[sp, 64]));
   CHECK_ENCODING(0xA98457F4, a.stp(x20, x21, mem[sp, 64]++));

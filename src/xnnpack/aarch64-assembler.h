@@ -9,12 +9,18 @@
 #include <cstdint>
 
 #include <xnnpack/assembler.h>
+#include <xnnpack/microparams.h>
 
 
 namespace xnnpack {
 namespace aarch64 {
 
 constexpr size_t kInstructionSizeInBytesLog2 = 2;
+// Special values used to check that callee-saved registers are properly saved.
+// Low 8 bits should be 0 to encode register code.
+constexpr uint64_t kXRegisterCorruptValue = UINT64_C(0xDEADBEEF12345600);
+constexpr uint64_t kVRegisterCorruptValue = UINT64_C(0x7FF000007F801000);
+constexpr uint8_t kRegisterCorruptMask = UINT8_C(0xFF);
 
 struct WRegister {
   uint8_t code;
@@ -429,6 +435,7 @@ class Assembler : public AssemblerBase {
   void b_lo(Label& l) { return b(kLO, l); }
   void b_ne(Label& l) { return b(kNE, l); }
   void bl(int32_t offset);
+  void blr(XRegister xn);
   void cmp(XRegister xn, uint16_t imm12);
   void cmp(XRegister xn, XRegister xm);
   void csel(XRegister xd, XRegister xn, XRegister xm, Condition c);
@@ -447,6 +454,7 @@ class Assembler : public AssemblerBase {
   void stp(XRegister xt1, XRegister xt2, MemOperand xn);
   void str(XRegister xt1, MemOperand xn);
   void sub(XRegister xd, XRegister xn, XRegister xm);
+  void sub(XRegister xd, XRegister xn, uint16_t imm12);
   void subs(XRegister xd, XRegister xn, uint16_t imm12);
   void tbnz(XRegister xd, uint8_t bit, Label& l);
   void tbz(XRegister xd, uint8_t bit, Label& l);
@@ -522,6 +530,18 @@ class MacroAssembler : public Assembler {
                       VRegister zero, const VRegister *accs, size_t num_accs,
                       const VRegister *tmps, size_t num_tmps);
    void Mov(XRegister xd, uint64_t imm);
+};
+
+class TrampolineGenerator : public MacroAssembler {
+  using MacroAssembler::MacroAssembler;
+
+ public:
+  void generate(size_t args_on_stack);
+ private:
+  // Helper functions to check that registers match. We keep the expected value inside of x0 and return early once we
+  // have a mismatch. x0 then becomes the error code, if it is 0, there are no errors.
+  void CheckRegisterMatch(VRegisterLane actual, Label& exit);
+  void CheckRegisterMatch(XRegister actual, Label& exit);
 };
 
 }  // namespace aarch64
