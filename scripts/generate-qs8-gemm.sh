@@ -265,6 +265,18 @@ tools/xngen src/qs8-gemm/MRx4c8-wasmsimd-dot16x2.c.in -D MR=2 -D VARIANT=EXTENDE
 tools/xngen src/qs8-gemm/MRx4c8-wasmsimd-dot16x2.c.in -D MR=3 -D VARIANT=EXTENDED -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-3x4c8-xw-minmax-fp32-wasmsimd-dot16x2.c &
 tools/xngen src/qs8-gemm/MRx4c8-wasmsimd-dot16x2.c.in -D MR=4 -D VARIANT=EXTENDED -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x4c8-xw-minmax-fp32-wasmsimd-dot16x2.c &
 
+############################## WAsm Relaxed SIMD ##############################
+### C16 micro-kernels
+tools/xngen src/qs8-gemm/MRx4c16-wasmsdot.c.in -D MR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-gemm/gen/qc8-gemm-1x4c16-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-gemm/MRx4c16-wasmsdot.c.in -D MR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-gemm/gen/qc8-gemm-2x4c16-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-gemm/MRx4c16-wasmsdot.c.in -D MR=3 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-gemm/gen/qc8-gemm-3x4c16-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-gemm/MRx4c16-wasmsdot.c.in -D MR=4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-gemm/gen/qc8-gemm-4x4c16-minmax-fp32-wasmsdot.c &
+
+tools/xngen src/qs8-gemm/MRx4c16-wasmsdot.c.in -D MR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x4c16-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-gemm/MRx4c16-wasmsdot.c.in -D MR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x4c16-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-gemm/MRx4c16-wasmsdot.c.in -D MR=3 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-3x4c16-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-gemm/MRx4c16-wasmsdot.c.in -D MR=4 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x4c16-minmax-fp32-wasmsdot.c &
+
 ################################### ARM NEON ##################################
 tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=1 -D NR=8  -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8-minmax-rndnu-neon-mlal-lane.c &
 tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=2 -D NR=8  -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8-minmax-rndnu-neon-mlal-lane.c &
@@ -1328,8 +1340,10 @@ tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D DATA
 tools/generate-gemm-test.py --spec test/qc8-gemm-minmax-fp32.yaml --output test/qc8-gemm-minmax-fp32.cc --output test/qc8-gemm-minmax-fp32-2.cc --output test/qc8-gemm-minmax-fp32-3.cc &
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-fp32.yaml --output test/qs8-gemm-minmax-fp32.cc --output test/qs8-gemm-minmax-fp32-2.cc &
 tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-fp32.yaml --output test/qu8-gemm-minmax-fp32.cc --output test/qu8-gemm-minmax-fp32-2.cc &
+tools/generate-gemm-test.py --spec test/qc8-gemm-jit-fp32.yaml --output test/qc8-gemm-jit-fp32.cc &
 
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-rndnu.yaml --output test/qs8-gemm-minmax-rndnu.cc --output test/qs8-gemm-minmax-rndnu-2.cc --output test/qs8-gemm-minmax-rndnu-3.cc --output test/qs8-gemm-minmax-rndnu-4.cc --output test/qs8-gemm-minmax-rndnu-5.cc &
 tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-rndnu.yaml --output test/qu8-gemm-minmax-rndnu.cc --output test/qu8-gemm-minmax-rndnu-2.cc &
+tools/generate-gemm-test.py --spec test/qs8-gemm-jit-rndnu.yaml --output test/qs8-gemm-jit-rndnu.cc &
 
 wait

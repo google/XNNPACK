@@ -1274,6 +1274,30 @@ union xnn_qs8_cvt_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
+union xnn_qs16_qs8_cvt_params {
+  struct {
+    int32_t multiplier;
+    int32_t bias;
+  } scalar;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    int32_t multiplier;
+    int16_t output_zero_point;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) uint16_t input_bias[8];  // Convert to unsigned.
+    XNN_ALIGN(16) int32_t multiplier[4];
+    XNN_ALIGN(16) int64_t bias[2];  // Adjust for input bias multiplied.
+  } sse2;
+  struct {
+    XNN_ALIGN(16) int32_t multiplier[4];
+    XNN_ALIGN(16) int64_t bias[2];  // Rounding + output_zero_point.
+  } sse4;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
 union xnn_qs8_f32_cvt_params {
   struct {
     int32_t zero_point;
@@ -2494,6 +2518,10 @@ struct jit_gemm_params {
     float min;
     float max;
   } f32_minmax;
+  struct {
+    uint16_t min;
+    uint16_t max;
+  } f16_minmax;
   size_t num_post_operations;
   const struct xnn_post_operation* post_operations;
 };

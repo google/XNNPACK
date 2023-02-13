@@ -172,45 +172,6 @@ struct gemm_parameters {
   uint8_t log2_sr;
 };
 
-struct vunary_parameters {
-  xnn_vunary_ukernel_fn ukernel;
-  union {
-    xnn_init_f16_f32_cvt_params_fn f16_f32_cvt;
-    xnn_init_f16_abs_params_fn f16_abs;
-    xnn_init_f16_elu_params_fn f16_elu;
-    xnn_init_f16_hswish_params_fn f16_hswish;
-    xnn_init_f16_lrelu_params_fn f16_lrelu;
-    xnn_init_f16_neg_params_fn f16_neg;
-    xnn_init_f16_minmax_params_fn f16_minmax;
-    xnn_init_f16_sigmoid_params_fn f16_sigmoid;
-    xnn_init_f16_sqrt_params_fn f16_sqrt;
-    xnn_init_f32_abs_params_fn f32_abs;
-    xnn_init_f32_default_params_fn f32_default;
-    xnn_init_f32_elu_params_fn f32_elu;
-    xnn_init_f32_f16_cvt_params_fn f32_f16_cvt;
-    xnn_init_f32_hswish_params_fn f32_hswish;
-    xnn_init_f32_lrelu_params_fn f32_lrelu;
-    xnn_init_f32_minmax_params_fn f32_minmax;
-    xnn_init_f32_neg_params_fn f32_neg;
-    xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
-    xnn_init_f32_qu8_cvt_params_fn f32_qu8_cvt;
-    xnn_init_f32_rnd_params_fn f32_rnd;
-    xnn_init_f32_sigmoid_params_fn f32_sigmoid;
-    xnn_init_f32_sqrt_params_fn f32_sqrt;
-    xnn_init_qs8_cvt_params_fn qs8_cvt;
-    xnn_init_qs8_f32_cvt_params_fn qs8_f32_cvt;
-    xnn_init_qs8_lrelu_params_fn qs8_lrelu;
-    xnn_init_qu8_cvt_params_fn qu8_cvt;
-    xnn_init_qu8_f32_cvt_params_fn qu8_f32_cvt;
-    xnn_init_qu8_lrelu_params_fn qu8_lrelu;
-    xnn_init_s8_minmax_params_fn s8_minmax;
-    xnn_init_u8_minmax_params_fn u8_minmax;
-  } init;
-  // Number of elements in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
-  uint8_t element_tile;
-};
-
 
 struct spmm_parameters {
   xnn_spmm_ukernel_fn ukernel;
@@ -425,20 +386,6 @@ struct raddstoreexpminusmax_parameters {
   uint8_t element_tile;
 };
 
-struct fill_parameters {
-  xnn_fill_ukernel_fn ukernel;
-  // Number of rows of inputs processed in one tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
-  uint8_t row_tile;
-};
-
-struct pad_parameters {
-  xnn_pad_ukernel_fn ukernel;
-  // Number of rows of inputs processed in one tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
-  uint8_t row_tile;
-};
-
 struct vmulcaddc_parameters {
   xnn_vmulcaddc_ukernel_fn ukernel;
   union {
@@ -481,8 +428,6 @@ struct vmulcaddc_parameters {
 #define XNN_INIT_FLAG_U8         0x00000400
 // Indicates that X8 XNNPACK microkernels are available for use.
 #define XNN_INIT_FLAG_X8         0x00000800
-// Indicates that XX XNNPACK microkernels are available for use.
-#define XNN_INIT_FLAG_XX         0x00001000
 // Indicates that VCVT XNNPACK microkernels are available for use.
 #define XNN_INIT_FLAG_VCVT       0x00002000
 // Indicates that CHW XNNPACK microkernels are optimized for the host platform.
@@ -502,27 +447,19 @@ struct xnn_parameters {
     struct gemm_parameters gemm;
     struct dwconv_parameters dwconv[XNN_MAX_QS8_DWCONV_UKERNELS];
     struct gavgpool_parameters gavgpool;
-    struct xnn_binary_elementwise_config vadd;
-    struct xnn_binary_elementwise_config vmul;
-    struct vunary_parameters lrelu;
   } qs8;
   struct {
     struct gemm_parameters gemm;
     struct dwconv_parameters dwconv[XNN_MAX_QU8_DWCONV_UKERNELS];
     struct avgpool_parameters avgpool;
     struct gavgpool_parameters gavgpool;
-    struct xnn_binary_elementwise_config vadd;
-    struct xnn_binary_elementwise_config vmul;
-    struct vunary_parameters lrelu;
   } qu8;
   struct {
-    struct vunary_parameters clamp;
     // Bilinear interpolation (2D).
     struct ibilinear_parameters ibilinear;
     struct maxpool_parameters maxpool;
   } s8;
   struct {
-    struct vunary_parameters clamp;
     // Bilinear interpolation (2D).
     struct ibilinear_parameters ibilinear;
     struct maxpool_parameters maxpool;
@@ -542,27 +479,7 @@ struct xnn_parameters {
     struct maxpool_parameters maxpool;
     // Bilinear interpolation (2D).
     struct ibilinear_parameters ibilinear;
-    struct vunary_parameters abs;
-    struct vunary_parameters clamp;
-    struct vunary_parameters elu;
-    struct vunary_parameters hswish;
-    struct vunary_parameters lrelu;
-    struct vunary_parameters neg;
-    struct vunary_parameters rndne;
-    struct vunary_parameters rndz;
-    struct vunary_parameters rndu;
-    struct vunary_parameters rndd;
-    struct vunary_parameters sigmoid;
-    struct vunary_parameters sqr;
-    struct vunary_parameters sqrt;
     struct prelu_parameters prelu;
-    struct xnn_binary_elementwise_config vadd;
-    struct xnn_binary_elementwise_config vdiv;
-    struct xnn_binary_elementwise_config vmax;
-    struct xnn_binary_elementwise_config vmin;
-    struct xnn_binary_elementwise_config vmul;
-    struct xnn_binary_elementwise_config vsub;
-    struct xnn_binary_elementwise_config vsqrdiff;
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
     xnn_rmax_ukernel_fn rmax;
@@ -594,28 +511,7 @@ struct xnn_parameters {
     struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
     // Bilinear interpolation (2D).
     struct ibilinear_parameters ibilinear;
-    struct vunary_parameters abs;
-    struct vunary_parameters clamp;
-    struct vunary_parameters elu;
-    struct vunary_parameters hswish;
-    struct vunary_parameters lrelu;
-    struct vunary_parameters neg;
-    struct vunary_parameters relu;
-    struct vunary_parameters rndne;
-    struct vunary_parameters rndz;
-    struct vunary_parameters rndu;
-    struct vunary_parameters rndd;
-    struct vunary_parameters sigmoid;
-    struct vunary_parameters sqr;
-    struct vunary_parameters sqrt;
     struct prelu_parameters prelu;
-    struct xnn_binary_elementwise_config vadd;
-    struct xnn_binary_elementwise_config vdiv;
-    struct xnn_binary_elementwise_config vmax;
-    struct xnn_binary_elementwise_config vmin;
-    struct xnn_binary_elementwise_config vmul;
-    struct xnn_binary_elementwise_config vsub;
-    struct xnn_binary_elementwise_config vsqrdiff;
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
     xnn_rmax_ukernel_fn rmax;
@@ -641,24 +537,9 @@ struct xnn_parameters {
     struct ibilinear_chw_parameters ibilinear_chw;
   } f32;
   struct {
-    struct vunary_parameters f16_to_f32;
-    struct vunary_parameters f32_to_f16;
-    struct vunary_parameters f32_to_qs8;
-    struct vunary_parameters f32_to_qu8;
-    struct vunary_parameters qs8;
-    struct vunary_parameters qs8_to_f32;
-    struct vunary_parameters qu8;
-    struct vunary_parameters qu8_to_f32;
-  } vcvt;
-  struct {
     xnn_unpool_ukernel_fn unpool;
     struct zip_parameters zip;
   } x32;
-  struct {
-    xnn_vunary_ukernel_fn copy;
-    struct fill_parameters fill;
-    struct pad_parameters pad;
-  } xx;
 };
 
 #ifdef __cplusplus

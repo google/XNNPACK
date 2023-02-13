@@ -1,0 +1,72 @@
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert BATCH_TILE >= 1
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <xnnpack/math.h>
+#include <xnnpack/vcvt.h>
+
+
+void xnn_qs16_qs8_vcvt_ukernel__scalar_x${BATCH_TILE}(
+    size_t batch,
+    const int16_t* input,
+    int8_t* output,
+    const union xnn_qs16_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int16_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const int32_t vmultiplier = params->scalar.multiplier;
+  const int64_t vbias = (int64_t) params->scalar.bias;
+  $if BATCH_TILE == 1:
+    do {
+      const int32_t vx = (int32_t) *input++;
+
+      int32_t vout = (int32_t) math_asr_s64(math_mulext_s32(vx, vmultiplier) + vbias, 16);
+
+      vout = math_max_s32(vout, -128);
+      vout = math_min_s32(vout, 127);
+      *output++ = (int8_t) vout;
+
+      batch -= sizeof(int16_t);
+    } while (batch != 0);
+  $else:
+    for (; batch >= ${BATCH_TILE} * sizeof(int16_t); batch -= ${BATCH_TILE} * sizeof(int16_t)) {
+
+      $for N in range(BATCH_TILE):
+        const int32_t vx${ABC[N]} = (int32_t) input[${N}];
+      input += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        int32_t vout${ABC[N]} = (int32_t) math_asr_s64(math_mulext_s32(vx${ABC[N]}, vmultiplier) + vbias, 16);
+
+      $for N in range(BATCH_TILE):
+        vout${ABC[N]} = math_max_s32(vout${ABC[N]}, -128);
+
+      $for N in range(BATCH_TILE):
+        vout${ABC[N]} = math_min_s32(vout${ABC[N]}, 127);
+
+      $for N in range(BATCH_TILE):
+        output[${N}] = (int8_t) vout${ABC[N]};
+      output += ${BATCH_TILE};
+    }
+    if XNN_UNLIKELY(batch != 0) {
+      do {
+        const int32_t vx = (int32_t) *input++;
+
+        int32_t vout = (int32_t) math_asr_s64(math_mulext_s32(vx, vmultiplier) + vbias, 16);
+
+        vout = math_max_s32(vout, -128);
+        vout = math_min_s32(vout, 127);
+        *output++ = (int8_t) vout;
+
+        batch -= sizeof(int16_t);
+      } while (batch != 0);
+    }
+}

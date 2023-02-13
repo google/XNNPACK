@@ -1,5 +1,6 @@
 # Basic build settings
 build --jobs 128
+build --cxxopt='-std=gnu++14'
 
 # Sets the default Apple platform to macOS.
 build --apple_platform_type=macos

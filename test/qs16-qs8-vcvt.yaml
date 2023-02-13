@@ -1,0 +1,46 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# NEON
+- name: xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_x16
+  init: xnn_init_qs16_qs8_cvt_neon_params
+- name: xnn_qs16_qs8_vcvt_ukernel__neon_x8
+  init: xnn_init_qs16_qs8_cvt_neon_params
+- name: xnn_qs16_qs8_vcvt_ukernel__neon_x16
+  init: xnn_init_qs16_qs8_cvt_neon_params
+- name: xnn_qs16_qs8_vcvt_ukernel__neon_x32
+  init: xnn_init_qs16_qs8_cvt_neon_params
+
+# x86 SSE2
+- name: xnn_qs16_qs8_vcvt_ukernel__sse2_x4
+  init: xnn_init_qs16_qs8_cvt_sse2_params
+- name: xnn_qs16_qs8_vcvt_ukernel__sse2_x8
+  init: xnn_init_qs16_qs8_cvt_sse2_params
+- name: xnn_qs16_qs8_vcvt_ukernel__sse2_x16
+  init: xnn_init_qs16_qs8_cvt_sse2_params
+
+# x86 SSE4.1
+- name: xnn_qs16_qs8_vcvt_ukernel__sse41_x4
+  init: xnn_init_qs16_qs8_cvt_sse4_params
+- name: xnn_qs16_qs8_vcvt_ukernel__sse41_x8
+  init: xnn_init_qs16_qs8_cvt_sse4_params
+- name: xnn_qs16_qs8_vcvt_ukernel__sse41_x16
+  init: xnn_init_qs16_qs8_cvt_sse4_params
+
+# x86 AVX (VEX128)
+- name: xnn_qs16_qs8_vcvt_ukernel__avx_x4
+  init: xnn_init_qs16_qs8_cvt_sse4_params
+- name: xnn_qs16_qs8_vcvt_ukernel__avx_x8
+  init: xnn_init_qs16_qs8_cvt_sse4_params
+- name: xnn_qs16_qs8_vcvt_ukernel__avx_x16
+  init: xnn_init_qs16_qs8_cvt_sse4_params
+
+# Scalar
+- name: xnn_qs16_qs8_vcvt_ukernel__scalar_x1
+  init: xnn_init_qs16_qs8_cvt_scalar_params
+- name: xnn_qs16_qs8_vcvt_ukernel__scalar_x2
+  init: xnn_init_qs16_qs8_cvt_scalar_params
+- name: xnn_qs16_qs8_vcvt_ukernel__scalar_x4
+  init: xnn_init_qs16_qs8_cvt_scalar_params

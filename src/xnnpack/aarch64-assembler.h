@@ -16,6 +16,42 @@ namespace aarch64 {
 
 constexpr size_t kInstructionSizeInBytesLog2 = 2;
 
+struct WRegister {
+  uint8_t code;
+};
+
+constexpr WRegister w0{0};
+constexpr WRegister w1{1};
+constexpr WRegister w2{2};
+constexpr WRegister w3{3};
+constexpr WRegister w4{4};
+constexpr WRegister w5{5};
+constexpr WRegister w6{6};
+constexpr WRegister w7{7};
+constexpr WRegister w8{8};
+constexpr WRegister w9{9};
+constexpr WRegister w10{10};
+constexpr WRegister w11{11};
+constexpr WRegister w12{12};
+constexpr WRegister w13{13};
+constexpr WRegister w14{14};
+constexpr WRegister w15{15};
+constexpr WRegister w16{16};
+constexpr WRegister w17{17};
+constexpr WRegister w18{18};
+constexpr WRegister w19{19};
+constexpr WRegister w20{20};
+constexpr WRegister w21{21};
+constexpr WRegister w22{22};
+constexpr WRegister w23{23};
+constexpr WRegister w24{24};
+constexpr WRegister w25{25};
+constexpr WRegister w26{26};
+constexpr WRegister w27{27};
+constexpr WRegister w28{28};
+constexpr WRegister w29{29};
+constexpr WRegister w30{30};
+
 struct XRegister {
   uint8_t code;
 };
@@ -58,6 +94,7 @@ struct VRegisterLane {
   uint8_t code;
   uint8_t size;
   uint8_t lane;
+  bool is_h() const { return size == 1; };
   bool is_s() const { return size == 2; };
 };
 
@@ -84,9 +121,11 @@ struct VRegister {
   VRegister v1d() const { return {code, 3, 0}; }
   VRegister v2d() const { return {code, 3, 1}; }
 
+  ScalarVRegister h() const { return {code, 1}; }
   ScalarVRegister s() const { return {code, 2}; }
   ScalarVRegister d() const { return {code, 3}; }
 
+  bool is_h() const { return size == 1; };
   bool is_s() const { return size == 2; };
 };
 
@@ -147,6 +186,43 @@ struct ScalarVRegisterList {
   ScalarVRegister vt1;
   uint8_t length;
 };
+
+struct HRegister {
+  uint8_t code;
+};
+
+constexpr HRegister h0{0};
+constexpr HRegister h1{1};
+constexpr HRegister h2{2};
+constexpr HRegister h3{3};
+constexpr HRegister h4{4};
+constexpr HRegister h5{5};
+constexpr HRegister h6{6};
+constexpr HRegister h7{7};
+constexpr HRegister h8{8};
+constexpr HRegister h9{9};
+constexpr HRegister h10{10};
+constexpr HRegister h11{11};
+constexpr HRegister h12{12};
+constexpr HRegister h13{13};
+constexpr HRegister h14{14};
+constexpr HRegister h15{15};
+constexpr HRegister h16{16};
+constexpr HRegister h17{17};
+constexpr HRegister h18{18};
+constexpr HRegister h19{19};
+constexpr HRegister h20{20};
+constexpr HRegister h21{21};
+constexpr HRegister h22{22};
+constexpr HRegister h23{23};
+constexpr HRegister h24{24};
+constexpr HRegister h25{25};
+constexpr HRegister h26{26};
+constexpr HRegister h27{27};
+constexpr HRegister h28{28};
+constexpr HRegister h29{29};
+constexpr HRegister h30{30};
+constexpr HRegister h31{31};
 
 struct SRegister {
   uint8_t code;
@@ -344,12 +420,15 @@ class Assembler : public AssemblerBase {
   // Base instructions.
   void add(XRegister xd, XRegister xn, uint16_t imm12);
   void add(XRegister xd, XRegister xn, XRegister xm);
+  void adds(XRegister xd, XRegister xn, uint16_t imm12);
+  void ands(XRegister xd, XRegister xn, uint16_t imm12);
   void b(Label& l);
   void b_eq(Label& l) { return b(kEQ, l); }
   void b_hi(Label& l) { return b(kHI, l); }
   void b_hs(Label& l) { return b(kHS, l); }
   void b_lo(Label& l) { return b(kLO, l); }
   void b_ne(Label& l) { return b(kNE, l); }
+  void bl(int32_t offset);
   void cmp(XRegister xn, uint16_t imm12);
   void cmp(XRegister xn, XRegister xm);
   void csel(XRegister xd, XRegister xn, XRegister xm, Condition c);
@@ -357,8 +436,11 @@ class Assembler : public AssemblerBase {
   void ldp(XRegister xt1, XRegister xt2, MemOperand xn);
   void ldp(XRegister xt1, XRegister xt2, MemOperand xn, int32_t imm);
   void ldr(XRegister xt, MemOperand xn);
+  void ldr(WRegister xt, MemOperand xn, int32_t imm);
   void ldr(XRegister xt, MemOperand xn, int32_t imm);
+  void mov(XRegister xd, uint16_t imm);
   void mov(XRegister xd, XRegister xn);
+  void movk(XRegister xd, uint16_t imm, uint8_t shift);
   void nop();
   void prfm(PrefetchOp prfop, MemOperand xn);
   void ret();
@@ -372,7 +454,9 @@ class Assembler : public AssemblerBase {
   void tst(XRegister xn, uint8_t imm);
 
   // SIMD instructions
-  void dup(DRegister dd, VRegisterLane vn);
+  void dup(DRegister vd, VRegisterLane vn);
+  void dup(SRegister vd, VRegisterLane vn);
+  void dup(VRegister vd, VRegisterLane vn);
   void fabs(VRegister vd, VRegister vn);
   void fadd(VRegister vd, VRegister vn, VRegister vm);
   void fmax(VRegister vd, VRegister vn, VRegister vm);
@@ -394,19 +478,25 @@ class Assembler : public AssemblerBase {
   void ldp(DRegister dt1, DRegister dt2, MemOperand xn, int32_t imm);
   void ldp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
   void ldr(DRegister dt, MemOperand xn);
+  void ldr(SRegister dt, MemOperand xn);
+  void ldr(QRegister dt, MemOperand xn);
   void ldr(DRegister dt, MemOperand xn, int32_t imm);
+  void ldr(HRegister dt, MemOperand xn, int32_t imm);
   void ldr(QRegister qt, MemOperand xn, int32_t imm);
   void ldr(SRegister st, MemOperand xn, int32_t imm);
   void mov(VRegister vd, VRegister vn);
   void movi(VRegister vd, uint8_t imm);
+  // MOV (to general).
+  void mov(XRegister xd, VRegisterLane vn);
   void st1(VRegisterList vs, MemOperand xn, int32_t imm);
   void st1(VRegisterList vs, MemOperand xn, XRegister xm);
   void stp(DRegister dt1, DRegister dt2, MemOperand xn);
   void stp(QRegister qt1, QRegister qt2, MemOperand xn);
   void stp(QRegister qt1, QRegister qt2, MemOperand xn, int32_t imm);
+  void str(HRegister ht, MemOperand xn);
+  void str(SRegister st, MemOperand xn);
   void str(DRegister dt, MemOperand xn, int32_t imm);
   void str(QRegister qt, MemOperand xn, int32_t imm);
-  void str(SRegister st, MemOperand xn);
   void str(SRegister st, MemOperand xn, int32_t imm);
 
   // Aligns the buffer to n (must be a power of 2).
@@ -431,6 +521,7 @@ class MacroAssembler : public Assembler {
    void f32_hardswish(VRegister sixth, VRegister three, VRegister six,
                       VRegister zero, const VRegister *accs, size_t num_accs,
                       const VRegister *tmps, size_t num_tmps);
+   void Mov(XRegister xd, uint64_t imm);
 };
 
 }  // namespace aarch64

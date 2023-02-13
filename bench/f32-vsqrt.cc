@@ -197,6 +197,33 @@ static void f32_vsqrt(
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM64 || XNN_ARCH_ARM64
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_vsqrt, rvv_sqrt_x1v,
+                    xnn_f32_vsqrt_ukernel__rvv_sqrt_x1v,
+                    nullptr /* init params */,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsqrt, rvv_sqrt_x2v,
+                    xnn_f32_vsqrt_ukernel__rvv_sqrt_x2v,
+                    nullptr /* init params */,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsqrt, rvv_sqrt_x4v,
+                    xnn_f32_vsqrt_ukernel__rvv_sqrt_x4v,
+                    nullptr /* init params */,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsqrt, rvv_sqrt_x8v,
+                    xnn_f32_vsqrt_ukernel__rvv_sqrt_x8v,
+                    nullptr /* init params */,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_vsqrt, avx512f_nr1fma1adj_x16,
                     xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_x16,

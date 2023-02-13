@@ -463,6 +463,14 @@ void Assembler::vmlal_s16(QRegister qd, DRegister dn, DRegisterLane dm) {
   emit32(0xF2900240 | encode(qd, 22, 12) | encode(dn, 7, 16) | lane_top << 5 | lane_bot << 3 | dm.code);
 }
 
+void Assembler::vmov_i32(QRegister qd, uint8_t imm) {
+  if (imm != 0) {
+    error_ = Error::kInvalidOperand;
+    return;
+  }
+  vmov(qd, imm);
+}
+
 void Assembler::vmov(QRegister qd, uint8_t imm) {
   if (imm != 0) {
     error_ = Error::kInvalidOperand;
@@ -657,6 +665,26 @@ void MacroAssembler::f32_hardswish(QRegister sixth, QRegister three,
                                    QRegister six, QRegister zero,
                                    const QRegister* accs, size_t num_accs,
                                    const QRegister* tmps, size_t num_tmps) {
+  if (num_accs < 4) {
+    assert(num_tmps >= num_accs);
+    for (size_t i = 0; i < num_accs; i++) {
+      vmul_f32(tmps[i], accs[i], sixth.low()[0]);
+    }
+    for (size_t i = 0; i < num_accs; i++) {
+      vadd_f32(accs[i], accs[i], three);
+    }
+    for (size_t i = 0; i < num_accs; i++) {
+      vmax_f32(accs[i], accs[i], zero);
+    }
+    for (size_t i = 0; i < num_accs; i++) {
+      vmin_f32(accs[i], accs[i], six);
+    }
+    for (size_t i = 0; i < num_accs; i++) {
+      vmul_f32(accs[i], accs[i], tmps[i]);
+    }
+    return;
+  }
+
   assert(num_accs >= 4);
   assert(num_accs % 4 == 0);
   assert(num_tmps == 4);

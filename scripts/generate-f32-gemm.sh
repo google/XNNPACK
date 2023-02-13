@@ -105,12 +105,14 @@ tools/xngen src/f32-gemm/6x8-aarch64-neonfma-cortex-a73.S.in  -D INC=0 -o src/f3
 tools/xngen src/f32-gemm/6x8-aarch64-neonfma-cortex-a73.S.in  -D INC=1 -o src/f32-gemm/gen/f32-gemminc-6x8-minmax-asm-aarch64-neonfma-cortex-a73.S &
 
 ############################### AArch32 assembly ##############################
+tools/xngen src/f32-gemm/1x8-aarch32-neon-cortex-a53.S.in       -D INC=0 -D PREFETCH=0 -o src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch32-neon-cortex-a53.S &
+tools/xngen src/f32-gemm/1x8-aarch32-neon-cortex-a53.S.in       -D INC=0 -D PREFETCH=1 -o src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S &
 tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a53.S.in       -D INC=0 -D PREFETCH=0 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a53.S &
 tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a53.S.in       -D INC=0 -D PREFETCH=1 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S &
 tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a75.S.in       -D INC=0 -D PREFETCH=0 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a75.S &
 tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a75.S.in       -D INC=0 -D PREFETCH=1 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a75.S &
-tools/xngen src/f32-gemm/4x8-minmax-aarch32-neon-cortex-a7.S.in -D INC=0 -D PREFETCH=1 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S &
-tools/xngen src/f32-gemm/4x8-minmax-aarch32-neon-ld64.S.in      -D INC=0 -D PREFETCH=0 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-ld64.S &
+tools/xngen src/f32-gemm/4x8-aarch32-neon-cortex-a7.S.in        -D INC=0 -D PREFETCH=1 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S &
+tools/xngen src/f32-gemm/4x8-aarch32-neon-ld64.S.in             -D INC=0 -D PREFETCH=0 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-ld64.S &
 
 ################################### ARM NEON ##################################
 ### LD64 micro-kernels
@@ -609,14 +611,17 @@ wait # JIT requires the assembly files to be generated first.
 # AArch32
 scripts/convert-assembly-to-jit.py --reload-params -i src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S -o src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a7.cc &
 scripts/convert-assembly-to-jit.py --reload-params -i src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-ld64.S -o src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-ld64.cc &
+scripts/convert-assembly-to-jit.py --reload-params -i src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S -o src/f32-gemm/gen/f32-gemm-1x8-aarch32-neon-cortex-a53.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a53.S -o src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a53.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-gemm/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a55.S -o src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a55.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-prfm-cortex-a75.S -o src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a75.cc &
 # AArch64
+scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch64-neonfma-ld64.S -o src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-ld64.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch64-neonfma-prfm-cortex-a53.S -o src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-cortex-a53.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-cortex-a75.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch64-neonfma-prfm-cortex-a53.S -o src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a53.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch64-neonfma-cortex-a55.S -o src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a55.cc &
+scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch64-neonfma-ld128.S -o src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-ld128.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch64-neonfma-prfm-cortex-a75.S -o src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a75.cc &
 scripts/convert-assembly-to-jit.py -i src/f32-gemm/gen/f32-gemm-6x8-minmax-asm-aarch64-neonfma-ld128.S -o src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-ld128.cc &
 scripts/convert-assembly-to-jit.py --no-post-op -i src/f32-gemm/gen/f32-gemm-6x8-minmax-asm-aarch64-neonfma-prfm-cortex-a53.S -o src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-cortex-a53.cc &

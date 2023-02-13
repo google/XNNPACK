@@ -45,7 +45,7 @@
 
   TEST(F16_VSQRT__AARCH64_NEONFP16ARITH_SQRT_X8, batch_gt_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t batch_size = 9; batch_size < 16; batch_size++) {
+    for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x8);
@@ -92,7 +92,7 @@
 
   TEST(F16_VSQRT__AARCH64_NEONFP16ARITH_SQRT_X16, batch_gt_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
+    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x16);
@@ -139,7 +139,7 @@
 
   TEST(F16_VSQRT__NEONFP16ARITH_NR1FMA1ADJ_X8, batch_gt_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t batch_size = 9; batch_size < 16; batch_size++) {
+    for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x8);
@@ -186,7 +186,7 @@
 
   TEST(F16_VSQRT__NEONFP16ARITH_NR1FMA1ADJ_X16, batch_gt_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
+    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x16);
@@ -233,7 +233,7 @@
 
   TEST(F16_VSQRT__NEONFP16ARITH_NR1FMA1ADJ_X24, batch_gt_24) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t batch_size = 25; batch_size < 48; batch_size++) {
+    for (size_t batch_size = 24 + 1; batch_size < 48; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x24);
@@ -280,7 +280,7 @@
 
   TEST(F16_VSQRT__NEONFP16ARITH_NR1FMA1ADJ_X32, batch_gt_32) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t batch_size = 33; batch_size < 64; batch_size++) {
+    for (size_t batch_size = 32 + 1; batch_size < 64; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x32);
@@ -309,7 +309,7 @@
 
   TEST(F16_VSQRT__FP16ARITH_SQRT_X1, batch_gt_1) {
     TEST_REQUIRES_ARM_FP16_ARITH;
-    for (size_t batch_size = 2; batch_size < 10; batch_size++) {
+    for (size_t batch_size = 1 + 1; batch_size < 10; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vsqrt_ukernel__fp16arith_sqrt_x1);
@@ -356,7 +356,7 @@
 
   TEST(F16_VSQRT__FP16ARITH_SQRT_X2, batch_gt_2) {
     TEST_REQUIRES_ARM_FP16_ARITH;
-    for (size_t batch_size = 3; batch_size < 4; batch_size++) {
+    for (size_t batch_size = 2 + 1; batch_size < 4; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vsqrt_ukernel__fp16arith_sqrt_x2);
@@ -403,7 +403,7 @@
 
   TEST(F16_VSQRT__FP16ARITH_SQRT_X4, batch_gt_4) {
     TEST_REQUIRES_ARM_FP16_ARITH;
-    for (size_t batch_size = 5; batch_size < 8; batch_size++) {
+    for (size_t batch_size = 4 + 1; batch_size < 8; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vsqrt_ukernel__fp16arith_sqrt_x4);
@@ -450,7 +450,7 @@
 
   TEST(F16_VSQRT__F16C_SQRT_X8, batch_gt_8) {
     TEST_REQUIRES_X86_F16C;
-    for (size_t batch_size = 9; batch_size < 16; batch_size++) {
+    for (size_t batch_size = 8 + 1; batch_size < 16; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vsqrt_ukernel__f16c_sqrt_x8);
@@ -497,7 +497,7 @@
 
   TEST(F16_VSQRT__F16C_SQRT_X16, batch_gt_16) {
     TEST_REQUIRES_X86_F16C;
-    for (size_t batch_size = 17; batch_size < 32; batch_size++) {
+    for (size_t batch_size = 16 + 1; batch_size < 32; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .Test(xnn_f16_vsqrt_ukernel__f16c_sqrt_x16);

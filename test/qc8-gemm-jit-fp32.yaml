@@ -1,0 +1,18 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# AArch32 JIT
+- name: xnn_generate_qc8_gemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64
+  prototype: xnn_qc8_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neonv8_mlal_lane_ld64
+  init: xnn_init_qc8_conv_minmax_fp32_neonv8_params
+  k-block: 8
+- name: xnn_generate_qc8_gemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_prfm_ld64
+  prototype: xnn_qc8_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neonv8_mlal_lane_prfm_ld64
+  init: xnn_init_qc8_conv_minmax_fp32_neonv8_params
+  k-block: 8
+- name: xnn_generate_qc8_gemm_fp32_ukernel_4x8c4__aarch32_neondot_ld64
+  prototype: xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_ld64
+  init: xnn_init_qc8_conv_minmax_fp32_neonv8_params
+  k-block: 8

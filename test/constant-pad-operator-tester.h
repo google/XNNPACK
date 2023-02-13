@@ -287,9 +287,6 @@ class ConstantPadOperatorTester {
         }
       }
 
-      // Initialize and run Constant Pad operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-
       ASSERT_EQ(xnn_status_success,
         xnn_run_constant_pad_nd_x8(
           0 /* flags */,
@@ -506,9 +503,6 @@ class ConstantPadOperatorTester {
         }
       }
 
-      // Initialize and run Constant Pad operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-
       ASSERT_EQ(xnn_status_success,
         xnn_run_constant_pad_nd_x16(
           0 /* flags */,
@@ -724,9 +718,6 @@ class ConstantPadOperatorTester {
           }
         }
       }
-
-      // Initialize and run Constant Pad operator.
-      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_constant_pad_nd_x32(

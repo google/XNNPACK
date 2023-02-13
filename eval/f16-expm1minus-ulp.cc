@@ -126,6 +126,11 @@ static void ExpM1Error(
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(ExpM1Error, avx2_rr1_p2,
+                    xnn_math_f16_expm1minus__avx2_rr1_p2,
+                    benchmark::utils::CheckAVX2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
   BENCHMARK_CAPTURE(ExpM1Error, avx2_rr1_p3,
                     xnn_math_f16_expm1minus__avx2_rr1_p3,
                     benchmark::utils::CheckAVX2)

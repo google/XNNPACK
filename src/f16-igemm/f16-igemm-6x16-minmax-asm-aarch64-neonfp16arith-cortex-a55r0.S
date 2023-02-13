@@ -30,7 +30,6 @@
 // A5 x23  v2[1]  v5[1]
 // B   x5  v12 v13 v14 v15 second set of B
 // B       v16 v17 v18 v19 first set
-
 // C0  x6  v20 v21
 // C1 x16  v22 v23
 // C2 x17  v24 v25
@@ -39,8 +38,7 @@
 // C5  x7  v30 v31
 // clamp  v6, (v4), (v5)
 // unused     v7 v8 v9 v10 v11
-
-// x8 temporary vector shadow register
+// temporary vector shadow register x8
 
 BEGIN_FUNCTION xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55r0
 

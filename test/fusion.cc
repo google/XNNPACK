@@ -460,7 +460,7 @@ TEST(CONSTANT_PAD_THEN_CONVOLUTION, not_fused_due_to_padding_value_not_zero) {
   uint32_t filter_id = 2;
   uint32_t bias_id = 3;
   uint32_t output_id = 4;
-  size_t pre_paddings[4] = {0, 2, 4, 0};
+  size_t pre_paddings[4] = {1, 2, 4, 0};
   size_t post_paddings[4] = {0, 6, 8, 0};
   float padding_value = 1.0f;
 

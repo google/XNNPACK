@@ -8096,6 +8096,68 @@ TEST(CONVOLUTION_NHWC_F16, weights_cache_depthwise_2x2d2) {
     .TestNHWCxF16();
 }
 
+#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+TEST(CONVOLUTION_NHWC_F16, jit_1x1) {
+  ConvolutionOperatorTester()
+    .input_size(27, 37)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(19)
+    .use_jit(true)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+TEST(CONVOLUTION_NHWC_F16, jit_1x1_with_qmin) {
+  ConvolutionOperatorTester()
+    .input_size(27, 37)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(19)
+    .qmin(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+TEST(CONVOLUTION_NHWC_F16, jit_1x1_with_qmax) {
+  ConvolutionOperatorTester()
+    .input_size(27, 37)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(19)
+    .qmax(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+TEST(CONVOLUTION_NHWC_F16, jit_1x3) {
+  ConvolutionOperatorTester()
+    .input_size(20, 19)
+    .padding_width(1)
+    .kernel_size(1, 3)
+    .group_input_channels(17)
+    .group_output_channels(15)
+    .iterations(3)
+    .use_jit(true)
+    .TestNHWCxF16();
+}
+
+TEST(CONVOLUTION_NHWC_F16, jit_3x3) {
+  ConvolutionOperatorTester()
+    .input_size(13, 12)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(17)
+    .iterations(3)
+    .use_jit(true)
+    .TestNHWCxF16();
+}
+#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+
+
 TEST(DEPTHWISE_CONVOLUTION_NHWC_F16, 1x1) {
   ConvolutionOperatorTester()
     .depthwise_layout(true)

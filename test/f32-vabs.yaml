@@ -6,6 +6,11 @@
 # ARM NEON
 - name: xnn_f32_vabs_ukernel__neon_x4
 - name: xnn_f32_vabs_ukernel__neon_x8
+# RISC-V Vector
+- name: xnn_f32_vabs_ukernel__rvv_x1v
+- name: xnn_f32_vabs_ukernel__rvv_x2v
+- name: xnn_f32_vabs_ukernel__rvv_x4v
+- name: xnn_f32_vabs_ukernel__rvv_x8v
 # x86 SSE
 - name: xnn_f32_vabs_ukernel__sse_x4
   init: xnn_init_f32_abs_sse_params

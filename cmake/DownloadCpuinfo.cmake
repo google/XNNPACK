@@ -12,8 +12,8 @@ PROJECT(cpuinfo-download NONE)
 
 INCLUDE(ExternalProject)
 ExternalProject_Add(cpuinfo
-  URL https://github.com/Maratyszcza/cpuinfo/archive/0a38bc5cf17837bf3b536b57b9d35a259b6b2283.zip
-  URL_HASH SHA256=fc79c33f10b7dcb710c5eb0fcd7fe4467bf98cdc6ff1925883b175fbb800c53e
+  URL https://github.com/pytorch/cpuinfo/archive/3dc310302210c1891ffcfb12ae67b11a3ad3a150.zip
+  URL_HASH SHA256=ba668f9f8ea5b4890309b7db1ed2e152aaaf98af6f9a8a63dbe1b75c04e52cb9
   SOURCE_DIR "${CMAKE_BINARY_DIR}/cpuinfo-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/cpuinfo"
   CONFIGURE_COMMAND ""

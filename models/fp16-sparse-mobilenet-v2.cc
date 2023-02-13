@@ -441,12 +441,12 @@ ExecutionPlan FP16SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
 
   ExecutionPlan operators;
   xnn_status status;
+  xnn_caches caches = {};
+#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
   xnn_code_cache code_cache;
-#if XNN_PLATFORM_JIT
   xnn_init_code_cache(&code_cache);
-#endif
-  xnn_caches caches = { 0 };
   caches.code_cache = &code_cache;
+#endif
 
   xnn_operator_t op0 = nullptr;
   status = xnn_create_convolution2d_nchw_f16(
@@ -1789,7 +1789,7 @@ ExecutionPlan FP16SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
   }
   operators.emplace_back(op63, xnn_delete_operator);
 
-#if XNN_PLATFORM_JIT
+#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
   xnn_finalize_code_memory(&code_cache.cache.code);
 #endif
 

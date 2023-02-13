@@ -203,6 +203,14 @@ print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), sing
 
 lb = round(-log(2)/2, single, RN);
 ub = round(log(2)/2, single, RN);
+P = fpminimax(expm1(x), [|2,3|], [|SG...|], [lb; ub], relative, 0+x);
+print("Degree-3 P[expm1(x)] with 0+x constraint on [-log(2)/2, log(2)/2] =", horner(P));
+print("  -log(2)/2 = ", lb);
+print("  +log(2)/2 =", ub);
+print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), single, RU));
+
+lb = round(-log(2)/2, single, RN);
+ub = round(log(2)/2, single, RN);
 P = fpminimax(expm1(x), [|1,2|], [|SG...|], [lb; ub], relative, 0);
 print("Degree-2 P[expm1(x)] with 0 constraint on [-log(2)/2, log(2)/2] =", horner(P));
 print("  -log(2)/2 = ", lb);

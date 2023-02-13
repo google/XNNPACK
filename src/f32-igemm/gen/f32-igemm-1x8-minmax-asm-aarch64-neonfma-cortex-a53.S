@@ -21,12 +21,12 @@
 #     size_t cn_stride,                  [sp] -> x10
 #     size_t a_offset,                   [sp + 8] -> x11
 #     const float* zero,                 [sp + 16] -> x12
-#     const xnn_f32_minmax_params params [sp + 24] -> (x13)
+#     const xnn_f32_minmax_params params [sp + 24] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0  x8 v0     v1
+# A0 x13 v0     v1
 # B   x5 v20 v21 v22 v23
 # B      v24 v25 v26 v27
 # C   x6 v16   v17
@@ -39,26 +39,25 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53
         LDP     x10, x11, [sp]
 
         # Load zero, params pointer
-        LDP     x12, x13, [sp, 16]
+        LDP     x12, x8, [sp, 16]
 
         # Load min/max values
-        LD2R    {v30.4s, v31.4s}, [x13]
+        LD2R    {v30.4s, v31.4s}, [x8]
 
 0:
         # Load initial bias from w into accumulators
         LDP     q16, q17, [x5], 32
         MOVI    v18.4s, 0               // second set of C for pipelining FMLA
         MOVI    v19.4s, 0
-
         MOV     x9, x3                  // p = ks
 
 1:
         # Load next A pointer
-        LDR     x8, [x4], 8
+        LDR     x13, [x4], 8
 
-        CMP     x8, x12                 // if a0 == zero
-        ADD     x8, x8, x11             // a0 += a_offset
-        CSEL    x8, x12, x8, EQ         //   a0 = zero, else += a0 + a_offset
+        CMP     x13, x12                 // if a0 == zero
+        ADD     x13, x13, x11             // a0 += a_offset
+        CSEL    x13, x12, x13, EQ         //   a0 = zero, else += a0 + a_offset
 
         # Is there at least 8 floats (32 bytes) for prologue + epilogue?
         SUBS    x0, x2, 32              // k = kc - 32
@@ -70,7 +69,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53
         LDP     q22, q23, [x5], 32
         LDP     q24, q25, [x5], 32
         LDP     q26, q27, [x5], 32
-        LDR     q0, [x8], 16
+        LDR     q0, [x13], 16
 
         # Is there at least 8.  yes do main loop
         SUBS    x0, x0, 32
@@ -80,7 +79,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53
 2:
         # First block of 4.  FMA for first 4, loads for 2nd block of 4.
         FMLA    v16.4s, v20.4s, v0.s[0]
-        LDR     q1, [x8], 16
+        LDR     q1, [x13], 16
         FMLA    v17.4s, v21.4s, v0.s[0]
         LDR     q20, [x5], 16
         FMLA    v18.4s, v22.4s, v0.s[1]
@@ -100,7 +99,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53
 
         # Second block of 4.  FMA for second 4, loads for 1st block of 4.
         FMLA    v16.4s, v20.4s, v1.s[0]
-        LDR     q0, [x8], 16
+        LDR     q0, [x13], 16
         FMLA    v17.4s, v21.4s, v1.s[0]
         LDR     q20, [x5], 16
         FMLA    v18.4s, v22.4s, v1.s[1]
@@ -124,7 +123,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53
 
         # First block of 4.  FMA for first 4, loads for 2nd block of 4.
         FMLA    v16.4s, v20.4s, v0.s[0]
-        LDR     q1, [x8], 16
+        LDR     q1, [x13], 16
         FMLA    v17.4s, v21.4s, v0.s[0]
         LDR     q20, [x5], 16
         FMLA    v18.4s, v22.4s, v0.s[1]
@@ -187,7 +186,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53
         # Remainder- 4 floats of A (16 bytes)
         LDR     q20, [x5], 16
         LDR     q21, [x5], 16
-        LDR     q0, [x8], 16
+        LDR     q0, [x13], 16
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v21.4s, v0.s[0]
         LDR     q22, [x5], 16
@@ -208,7 +207,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53
         # Remainder- 2 floats of A (8 bytes)
         LDR     q20, [x5], 16
         LDR     q21, [x5], 16
-        LDR     d0, [x8], 8
+        LDR     d0, [x13], 8
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v21.4s, v0.s[0]
         LDR     q22, [x5], 16
@@ -220,7 +219,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53
         # Remainder- 1 float of A (4 bytes)
         LDR     q20, [x5], 16
         LDR     q21, [x5], 16
-        LDR     s0, [x8], 4
+        LDR     s0, [x13], 4
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v21.4s, v0.s[0]
         B       4b

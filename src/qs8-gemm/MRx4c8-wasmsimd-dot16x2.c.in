@@ -44,7 +44,7 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c8__w
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(${XINT8_T}));
   const ${XINT8_T}* a0 = a;
   ${XINT8_T}* c0 = c;
   $for M in range(1, MR):
@@ -77,8 +77,8 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c8__w
         v128_t vacc${M}x${N} = vacc0x${N};
     w = (const void*) ((const int32_t*) w + 4);
 
-    size_t k = 0;
-    while (k < kc) {
+    size_t k = kc;
+    do {
       $for M in range(MR):
         const v128_t vxa${M} = ${WASM_X16X8_LOAD8X8}(a${M});
         a${M} += 8;
@@ -125,8 +125,8 @@ void xnn_${DATATYPE.lower()}_gemm${GEMM_SUFFIX}_minmax_fp32_ukernel_${MR}x4c8__w
         w = (const void*) ((const int16_t*) w + 32);
       $else:
         w = (const void*) ((const ${XINT8_T}*) w + 32);
-      k += 8 * sizeof(${XINT8_T});
-    }
+      k -= 8 * sizeof(${XINT8_T});
+    } while (k != 0);
 
     $for M in range(MR):
       const v128_t vacc${M}x02 = wasm_i32x4_add(wasm_v32x4_shuffle(vacc${M}x0, vacc${M}x2, 0, 4, 1, 5), wasm_v32x4_shuffle(vacc${M}x0, vacc${M}x2, 2, 6, 3, 7));

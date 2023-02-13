@@ -20,6 +20,7 @@ ISA_LIST = frozenset({
   'avx512skx',
   'avx512vbmi',
   'f16c',
+  'fma',
   'fma3',
   'fp16arith',
   'hexagon',
@@ -30,6 +31,7 @@ ISA_LIST = frozenset({
   'neonfp16',
   'neonfp16arith',
   'neonv8',
+  'rvv',
   'scalar',
   'sse',
   'sse2',
@@ -38,12 +40,14 @@ ISA_LIST = frozenset({
   'wasm',
   'wasmrelaxedsimd',
   'wasmpshufb',
+  'wasmsdot',
   'wasmsimd',
   'xop',
 })
 
 ISA_MAP = {
   'wasmpshufb': 'wasmrelaxedsimd',
+  'wasmsdot': 'wasmrelaxedsimd',
 }
 
 ARCH_LIST = frozenset({
@@ -70,7 +74,7 @@ def main(args):
   src_dir = os.path.join(root_dir, 'src')
   ignore_roots = {
     src_dir,
-    os.path.join(src_dir, 'amalgam'),
+    os.path.join(src_dir, 'amalgam', 'gen'),
     os.path.join(src_dir, 'enums'),
     os.path.join(src_dir, 'jit'),
     os.path.join(src_dir, 'operators'),

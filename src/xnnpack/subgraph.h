@@ -108,6 +108,9 @@ struct xnn_value {
   /// Set during analysis in xnn_subgraph_rewrite_for_fp16.
   /// Indicates Value ID of the FP32 variant of this Value.
   uint32_t fp32_id;
+  /// Used during analysis in xnn_subgraph_rewrite_for_fp16.
+  /// Temporary buffer to convert static data to FP16.
+  void* fp16_temp_data;
 };
 
 
@@ -150,6 +153,8 @@ enum xnn_allocation_type {
   xnn_allocation_type_external,
   // Persistent data is internal to XNNPACK-managed workspace, but shared by multiple runtime/subgraph.
   xnn_allocation_type_persistent,
+  /// Data allocated and managed by XNNPACK.
+  xnn_allocation_type_dynamic,
 };
 
 struct xnn_blob {
@@ -396,7 +401,7 @@ struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph);
 
 struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph);
 
-void xnn_subgraph_add_nodes(xnn_subgraph_t subgraph, size_t num_nodes);
+enum xnn_status xnn_subgraph_add_nodes(xnn_subgraph_t subgraph, size_t num_nodes);
 
 size_t xnn_tensor_get_size(
   xnn_subgraph_t subgraph,

@@ -24,6 +24,7 @@
 #include <xnnpack/indirection.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
+#include <xnnpack/microkernel-utils.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/operator-utils.h>
 #include <xnnpack/pack.h>
@@ -54,157 +55,24 @@ static inline const struct dwconv_parameters* find_dwconv_ukernel(
       if (best_ukernel == NULL || ukernel->primary_tile < best_ukernel->primary_tile) {
         best_ukernel = ukernel;
       }
+    } else if (ukernel->last_tile != 0 && kernel_size >= 25) {
+      // Use multi-pass for large kernel sizes.
+      best_ukernel = ukernel;
     }
     ukernel++;
   }
+  if (best_ukernel == NULL) {
+    xnn_log_debug("no dwconv ukernel found");
+  } else if (best_ukernel->last_tile == 0) {
+    xnn_log_debug("dwconv unipass ukernel of primary tile %"PRIu8" found", best_ukernel->primary_tile);
+  } else {
+    xnn_log_debug("dwconv multipass ukernel of tiles %"PRIu8", %"PRIu8", %"PRIu8" found",
+                  best_ukernel->primary_tile,
+                  best_ukernel->middle_tile,
+                  best_ukernel->last_tile);
+  }
   return best_ukernel;
 }
-
-#if XNN_PLATFORM_JIT
-static inline uintptr_t cached_code_at_offset(xnn_operator_t op, size_t offset)
-{
-  return (uintptr_t)op->code_cache->cache.code.start + offset;
-}
-
-static size_t get_generated_gemm(
-    struct xnn_hmp_gemm_codegen generators,
-    const struct jit_gemm_params *jit_gemm_params,
-    size_t mr,
-    size_t group_output_channels,
-    size_t nr,
-    size_t group_input_channels,
-    size_t log2_input_element_size,
-    struct xnn_code_cache* code_cache)
-{
-  size_t offset = XNN_CACHE_NOT_FOUND;
-  xnn_jit_gemm_code_generator_fn generator = generators.function[XNN_UARCH_DEFAULT];
-  if (generator == NULL) {
-    goto error;
-  }
-
-  enum xnn_status status = xnn_status_success;
-
-  status = xnn_reserve_code_memory(&code_cache->cache.code, XNN_DEFAULT_MICROKERNEL_SIZE);
-  if (xnn_status_success != status) {
-    xnn_log_error("failed to ensure sufficient space in the code buffer for a microkernel");
-    goto error;
-  }
-
-  const size_t old_size = code_cache->cache.code.size;
-  void* old_code = (uint8_t*) code_cache->cache.code.start + old_size;
-  status = generator(&code_cache->cache.code, mr, group_output_channels % nr,
-                     group_input_channels << log2_input_element_size,
-                     jit_gemm_params);
-
-  if (xnn_status_success != status) {
-    xnn_log_error("failed to generate GEMM microkernel");
-    goto error;
-  }
-
-  const size_t new_size = code_cache->cache.code.size;
-  return xnn_get_or_insert_code_cache(code_cache, old_code, new_size - old_size);
-
-error:
-  return offset;
-}
-
-static void generate_gemms_up_to_max_mr(
-    size_t max_mr,
-    struct gemm_codegens generators,
-    const struct jit_gemm_params *jit_gemm_params,
-    size_t group_output_channels,
-    size_t nr,
-    size_t group_input_channels,
-    size_t log2_input_element_size,
-    xnn_operator_t convolution_op)
-{
-  assert(XNN_MAX_MR >= max_mr);
-  if (convolution_op->code_cache == NULL) {
-    return;
-  }
-  for (size_t mr = 1; mr <= max_mr; mr++) {
-    // Get smallest generator that is >= mr.
-    size_t smallest_mr = mr;
-    while (generators.gemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] == NULL && smallest_mr <= max_mr) {
-      smallest_mr++;
-    }
-    xnn_log_debug("using generator for mr %zu to generate gemm of mr %zu", smallest_mr, mr);
-    convolution_op->ukernel.gemm.gemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT] =
-      get_generated_gemm(generators.gemm[smallest_mr - 1], jit_gemm_params, mr, group_output_channels, nr,
-                         group_input_channels, log2_input_element_size, convolution_op->code_cache);
-  }
-}
-
-static size_t get_generated_igemm(
-    struct xnn_hmp_igemm_codegen generators,
-    const struct jit_gemm_params *jit_gemm_params,
-    size_t group_output_channels,
-    size_t nr,
-    size_t group_input_channels,
-    size_t log2_input_element_size,
-    size_t kernel_size,
-    size_t mr,
-    struct xnn_code_cache* code_cache)
-{
-  size_t offset = XNN_CACHE_NOT_FOUND;
-  xnn_jit_igemm_code_generator_fn generator = generators.function[XNN_UARCH_DEFAULT];
-  if (generator == NULL) {
-    goto error;
-  }
-  enum xnn_status status = xnn_status_success;
-
-  status = xnn_reserve_code_memory(&code_cache->cache.code, XNN_DEFAULT_MICROKERNEL_SIZE);
-  if (xnn_status_success != status) {
-    xnn_log_error("failed to ensure sufficient space in code buffer for microkernel");
-    goto error;
-  }
-
-  const size_t old_size = code_cache->cache.code.size;
-  void* old_code = (uint8_t*) code_cache->cache.code.start + old_size;
-  status = generator(&code_cache->cache.code, mr, group_output_channels % nr,
-                     group_input_channels << log2_input_element_size,
-                     kernel_size * mr * sizeof(void*), jit_gemm_params);
-  if (status != xnn_status_success) {
-    xnn_log_error("failed to generate IGEMM microkernel");
-    goto error;
-  }
-
-  const size_t new_size = code_cache->cache.code.size;
-  return xnn_get_or_insert_code_cache(code_cache, old_code, new_size - old_size);
-
-error:
-  return offset;
-}
-
-static void generate_igemms_up_to_max_mr(
-    size_t max_mr,
-    struct gemm_codegens generators,
-    const struct jit_gemm_params *jit_gemm_params,
-    size_t group_output_channels,
-    size_t nr,
-    size_t group_input_channels,
-    size_t log2_input_element_size,
-    size_t kernel_size,
-    xnn_operator_t convolution_op)
-{
-  assert(XNN_MAX_MR >= max_mr);
-  if (convolution_op->code_cache == NULL) {
-    return;
-  }
-  for (size_t mr = 1; mr <= max_mr; mr++) {
-    // Get smallest generator that is >= mr.
-    size_t smallest_mr = mr;
-    while (generators.igemm[smallest_mr - 1].function[XNN_UARCH_DEFAULT] == NULL && smallest_mr <= max_mr) {
-      smallest_mr++;
-    }
-    xnn_log_debug("using generator for mr %zu to generate igemm of mr %zu", smallest_mr, mr);
-    convolution_op->ukernel.igemm.igemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT] =
-      get_generated_igemm(generators.igemm[smallest_mr - 1], jit_gemm_params, group_output_channels, nr,
-                          group_input_channels, log2_input_element_size, kernel_size, mr,
-                          convolution_op->code_cache);
-  }
-}
-#endif  // XNN_PLATFORM_JIT
 
 static enum xnn_status create_vmulcaddc_path(
     uint32_t groups,
@@ -270,6 +138,8 @@ static enum xnn_status create_dwconv_path(
     uint32_t bias_element_size,
     xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w,
     xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w,
+    xnn_pack_dwconv_multipass_hwg_w_fn pack_dwconv_multipass_hwg_w,
+    xnn_pack_dwconv_multipass_ghw_w_fn pack_dwconv_multipass_ghw_w,
     const void* packing_params,
     int packed_weights_padding_byte,
     size_t extra_weights_bytes,
@@ -286,11 +156,32 @@ static enum xnn_status create_dwconv_path(
   assert(dwconv_ukernel != NULL);
   enum xnn_status status = xnn_status_out_of_memory;
   const uint8_t primary_tile = dwconv_ukernel->primary_tile;
-  assert(primary_tile >= kernel_height * kernel_width);
+  const bool is_unipass = dwconv_ukernel->last_tile == 0;
+  const size_t kernel_size = kernel_height * kernel_width;
+  if (is_unipass) {
+    assert(primary_tile >= kernel_size);
+    xnn_log_debug("using dwconv unipass of primary_tile %u", primary_tile);
+  } else {
+    assert(kernel_size > primary_tile);
+    xnn_log_debug("using dwconv multipass ukernel of tiles %d, %d, %d",
+                  primary_tile,
+                  dwconv_ukernel->middle_tile,
+                  dwconv_ukernel->last_tile);
+  }
 
   const size_t c_stride = round_up_po2(groups, dwconv_ukernel->channel_tile);
-  const size_t packed_weights_size =
-      ((primary_tile << log2_filter_element_size) + bias_element_size + extra_weights_bytes) * c_stride;
+  size_t tile_size = 0;
+  size_t packed_weights_size = 0;
+  if (is_unipass) {
+    tile_size = primary_tile;
+    packed_weights_size = ((primary_tile << log2_filter_element_size) + bias_element_size + extra_weights_bytes) * c_stride;
+  } else {
+    tile_size = xnn_dwconv_multipass_tile_size(
+      kernel_size, primary_tile, dwconv_ukernel->middle_tile, dwconv_ukernel->last_tile);
+    packed_weights_size = xnn_dwconv_multipass_weights_size(
+      tile_size, groups, dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile,
+      dwconv_ukernel->channel_round, bias_element_size, log2_filter_element_size, extra_weights_bytes);
+  }
   size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
   void* weights_ptr = xnn_get_pointer_to_write_weights(
       convolution_op, aligned_total_weights_size, packed_weights_padding_byte);
@@ -305,25 +196,53 @@ static enum xnn_status create_dwconv_path(
   memcpy(&convolution_op->params, dwconv_params, dwconv_params_size);
 
   if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
-    pack_dwconv_hwg_w(
-        dwconv_ukernel->primary_tile,
-        kernel_height, kernel_width,
-        groups, dwconv_ukernel->channel_tile,
-        kernel, bias, weights_ptr,
-        dwconv_ukernel->channel_tile * extra_weights_bytes,
-        packing_params);
+    if (is_unipass) {
+      pack_dwconv_hwg_w(
+          primary_tile,
+          kernel_height, kernel_width,
+          groups, dwconv_ukernel->channel_tile,
+          kernel, bias, weights_ptr,
+          dwconv_ukernel->channel_tile * extra_weights_bytes,
+          packing_params);
+    } else {
+      pack_dwconv_multipass_hwg_w(
+          primary_tile,
+          dwconv_ukernel->middle_tile,
+          dwconv_ukernel->last_tile,
+          kernel_height, kernel_width,
+          groups, dwconv_ukernel->channel_tile,
+          dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
+          kernel, bias, weights_ptr,
+          dwconv_ukernel->channel_tile * extra_weights_bytes,
+          packing_params);
+    }
   } else {
-    pack_dwconv_ghw_w(
-        dwconv_ukernel->primary_tile,
-        kernel_height, kernel_width,
-        groups, dwconv_ukernel->channel_tile,
-        kernel, bias, weights_ptr,
-        dwconv_ukernel->channel_tile * extra_weights_bytes,
-        packing_params);
+    if (is_unipass) {
+      pack_dwconv_ghw_w(
+          primary_tile,
+          kernel_height, kernel_width,
+          groups, dwconv_ukernel->channel_tile,
+          kernel, bias, weights_ptr,
+          dwconv_ukernel->channel_tile * extra_weights_bytes,
+          packing_params);
+    } else {
+      pack_dwconv_multipass_ghw_w(
+          primary_tile,
+          dwconv_ukernel->middle_tile,
+          dwconv_ukernel->last_tile,
+          kernel_height, kernel_width,
+          groups, dwconv_ukernel->channel_tile,
+          dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
+          kernel, bias, weights_ptr,
+          dwconv_ukernel->channel_tile * extra_weights_bytes,
+          packing_params);
+    }
   }
 
   if (scale_params != NULL) {
     assert(init_scale_params != NULL);
+    // TODO(zhin): QC8 DWCONV multipass is not implemented for now, fix this when it is supported.
+    assert(is_unipass);
 
     init_scale_params(
         /*channels=*/groups,
@@ -346,11 +265,17 @@ static enum xnn_status create_dwconv_path(
     ukernels = &dwconv_ukernel->linear;
   }
   convolution_op->ukernel.dwconv = (struct xnn_ukernel_dwconv) {
-    .unipass_fn = ukernels->unipass,
-    .primary_tile = dwconv_ukernel->primary_tile,
+    .primary_tile = primary_tile,
     .middle_tile = dwconv_ukernel->middle_tile,
     .last_tile = dwconv_ukernel->last_tile,
+    .tile_size = tile_size,
   };
+
+  if (is_unipass) {
+    convolution_op->ukernel.dwconv.unipass_fn = ukernels->unipass;
+  } else {
+    convolution_op->ukernel.dwconv.multipass_fn = ukernels->multipass;
+  }
 
   *zero_size = XNN_EXTRA_BYTES + (c_stride << log2_input_element_size);
   return xnn_status_success;
@@ -440,9 +365,9 @@ static enum xnn_status create_gemm_or_igemm(
       }
 
 #if XNN_PLATFORM_JIT
-      generate_gemms_up_to_max_mr(
-          mr, gemm_parameters->generator, jit_gemm_params, group_output_channels, nr,
-          group_input_channels, log2_input_element_size, convolution_op);
+      xnn_generate_gemms_up_to_max_mr(
+        mr, gemm_parameters->generator, jit_gemm_params, group_output_channels, nr,
+        group_input_channels, log2_input_element_size, convolution_op);
 #endif  // XNN_PLATFORM_JIT
 
       break;
@@ -471,7 +396,7 @@ static enum xnn_status create_gemm_or_igemm(
       }
 
 #if XNN_PLATFORM_JIT
-      generate_igemms_up_to_max_mr(
+      xnn_generate_igemms_up_to_max_mr(
           mr, gemm_parameters->generator, jit_gemm_params, group_output_channels, nr,
           group_input_channels, log2_input_element_size, kernel_size, convolution_op);
 #endif  // XNN_PLATFORM_JIT
@@ -536,6 +461,8 @@ static enum xnn_status create_convolution2d_nhwc(
     xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w,
     xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w,
     xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w,
+    xnn_pack_dwconv_multipass_hwg_w_fn pack_dwconv_multipass_hwg_w,
+    xnn_pack_dwconv_multipass_ghw_w_fn pack_dwconv_multipass_ghw_w,
     xnn_pack_gemm_goi_w_fn pack_gemm_goi_w,
     xnn_pack_conv_kgo_w_fn pack_conv_kgo_w,
     xnn_pack_conv_goki_w_fn pack_conv_goki_w,
@@ -726,7 +653,8 @@ static enum xnn_status create_convolution2d_nhwc(
           kernel_height, kernel_width,
           groups, kernel, bias, flags,
           log2_input_element_size, log2_filter_element_size, bias_element_size,
-          pack_dwconv_hwg_w, pack_dwconv_ghw_w, packing_params, packed_weights_padding_byte, extra_weights_bytes,
+          pack_dwconv_hwg_w, pack_dwconv_ghw_w, pack_dwconv_multipass_hwg_w, pack_dwconv_multipass_ghw_w,
+          packing_params, packed_weights_padding_byte, extra_weights_bytes,
           init_scale_params, scale_params,
           dwconv_params, dwconv_params_size, dwconv_ukernel,
           linear_activation, operator_type, &zero_size, convolution_op);
@@ -909,6 +837,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qu8_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qu8_dwconv_ghw_w,
+    (xnn_pack_dwconv_multipass_hwg_w_fn) NULL,
+    (xnn_pack_dwconv_multipass_ghw_w_fn) NULL,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_qu8_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_qu8_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_qu8_conv_goki_w,
@@ -1035,6 +965,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qs8_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qs8_dwconv_ghw_w,
+    (xnn_pack_dwconv_multipass_hwg_w_fn) NULL,
+    (xnn_pack_dwconv_multipass_ghw_w_fn) NULL,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_qs8_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_qs8_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_conv_goki_w,
@@ -1169,6 +1101,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qs8_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qs8_dwconv_ghw_w,
+    (xnn_pack_dwconv_multipass_hwg_w_fn) NULL,
+    (xnn_pack_dwconv_multipass_ghw_w_fn) NULL,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_qs8_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_qs8_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_conv_goki_w,
@@ -1265,9 +1199,20 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     xnn_params.f16.vmulcaddc.init.f16(&vmulcaddc_params, fp16_output_min, fp16_output_max);
   }
 
+  struct jit_gemm_params jit_gemm_params = {
+    .f16_minmax = {
+      .min = fp16_output_min,
+      .max = fp16_output_max
+    }
+  };
+
   xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_fn) xnn_pack_f16_vmulcaddc_w;
   xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f16_dwconv_hwg_w;
   xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f16_dwconv_ghw_w;
+  xnn_pack_dwconv_multipass_hwg_w_fn pack_dwconv_multipass_hwg_w = (xnn_pack_dwconv_multipass_hwg_w_fn)
+      xnn_pack_f16_dwconv_multipass_hwg_w;
+  xnn_pack_dwconv_multipass_ghw_w_fn pack_dwconv_multipass_ghw_w = (xnn_pack_dwconv_multipass_ghw_w_fn)
+      xnn_pack_f16_dwconv_multipass_ghw_w;
   xnn_pack_gemm_goi_w_fn pack_gemm_goi_w = (xnn_pack_gemm_goi_w_fn) xnn_pack_f16_gemm_goi_w;
   xnn_pack_conv_kgo_w_fn pack_conv_kgo_w = (xnn_pack_conv_kgo_w_fn) xnn_pack_f16_conv_kgo_w;
   xnn_pack_conv_goki_w_fn pack_conv_goki_w = (xnn_pack_conv_goki_w_fn) xnn_pack_f16_conv_goki_w;
@@ -1275,6 +1220,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_to_f16_vmulcaddc_w;
     pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_to_f16_dwconv_hwg_w;
     pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_to_f16_dwconv_ghw_w;
+    pack_dwconv_multipass_hwg_w  = (xnn_pack_dwconv_multipass_hwg_w_fn) xnn_pack_f32_to_f16_dwconv_multipass_hwg_w;
+    pack_dwconv_multipass_ghw_w  = (xnn_pack_dwconv_multipass_ghw_w_fn) xnn_pack_f32_to_f16_dwconv_multipass_ghw_w;
     pack_gemm_goi_w = (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_to_f16_gemm_goi_w;
     pack_conv_kgo_w = (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_to_f16_conv_kgo_w;
     pack_conv_goki_w = (xnn_pack_conv_goki_w_fn) xnn_pack_f32_to_f16_conv_goki_w;
@@ -1294,6 +1241,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     pack_vmulcaddc_w,
     pack_dwconv_hwg_w,
     pack_dwconv_ghw_w,
+    pack_dwconv_multipass_hwg_w,
+    pack_dwconv_multipass_ghw_w,
     pack_gemm_goi_w,
     pack_conv_kgo_w,
     pack_conv_goki_w,
@@ -1312,7 +1261,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     /*gemm_parameters=*/&xnn_params.f16.gemm,
     /*dwconv_ukernel=*/dwconv_ukernel,
     /*vmulcaddc_parameters=*/&xnn_params.f16.vmulcaddc,
-    /*jit_gemm_params=*/NULL,
+    /*jit_gemm_params=*/&jit_gemm_params,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
     /*datatype_init_flags=*/XNN_INIT_FLAG_F16,
@@ -1418,6 +1367,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_vmulcaddc_w,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_dwconv_ghw_w,
+    (xnn_pack_dwconv_multipass_hwg_w_fn) xnn_pack_f32_dwconv_multipass_hwg_w,
+    (xnn_pack_dwconv_multipass_ghw_w_fn) xnn_pack_f32_dwconv_multipass_ghw_w,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_f32_conv_goki_w,
@@ -1524,6 +1475,8 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_vmulcaddc_w,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_dwconv_ghw_w,
+    (xnn_pack_dwconv_multipass_hwg_w_fn) xnn_pack_f32_dwconv_multipass_hwg_w,
+    (xnn_pack_dwconv_multipass_ghw_w_fn) xnn_pack_f32_dwconv_multipass_ghw_w,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_f32_conv_goki_w,
@@ -1588,20 +1541,7 @@ static enum xnn_status setup_gemm(
   #endif
 
   #if XNN_PLATFORM_JIT
-    if (convolution_op->code_cache != NULL) {
-      const size_t jit_code_offset = gemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT];
-      if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
-        gemm_cases[mr - 1].function[XNN_UARCH_DEFAULT] =
-            (xnn_gemm_ukernel_fn) cached_code_at_offset(convolution_op, jit_code_offset);
-        // TODO(zhin): different code generators for different uarch.
-        #if XNN_MAX_UARCH_TYPES > 1
-          for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            gemm_cases[mr - 1].function[i] =
-                (xnn_gemm_ukernel_fn) cached_code_at_offset(convolution_op, jit_code_offset);
-          }
-        #endif
-      }
-    }
+    xnn_overwrite_gemm_cases_with_generated_code(convolution_op, gemm_cases, mr);
   #endif  // XNN_PLATFORM_JIT
   struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr - 1];
 
@@ -1712,20 +1652,7 @@ static enum xnn_status setup_igemm(
   #endif
 
   #if XNN_PLATFORM_JIT
-    if (convolution_op->code_cache != NULL) {
-      const size_t jit_code_offset = igemm_cases[mr - 1].generated_code_offset[XNN_UARCH_DEFAULT];
-      if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
-        igemm_cases[mr - 1].function[XNN_UARCH_DEFAULT] =
-            (xnn_igemm_ukernel_fn) cached_code_at_offset(convolution_op, jit_code_offset);
-        // TODO(zhin): different code generators for different uarch.
-        #if XNN_MAX_UARCH_TYPES > 1
-          for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-            igemm_cases[mr - 1].function[i] =
-                (xnn_igemm_ukernel_fn) cached_code_at_offset(convolution_op, jit_code_offset);
-          }
-        #endif
-      }
-    }
+    xnn_overwrite_igemm_cases_with_generated_code(convolution_op, igemm_cases, mr);
   #endif  // XNN_PLATFORM_JIT
   struct xnn_hmp_igemm_ukernel igemm_ukernel = igemm_cases[mr - 1];
 
@@ -1891,11 +1818,13 @@ static enum xnn_status setup_dwconv(
   const size_t step_width = convolution_op->dilation_width == 1 ?
       min(convolution_op->stride_width, kernel_width) : kernel_width;
   const size_t step_height = kernel_size + (output_width - 1) * step_width * kernel_height;
-  const size_t primary_tile = convolution_op->ukernel.dwconv.primary_tile;
+  const struct xnn_ukernel_dwconv dwconv_ukernel = convolution_op->ukernel.dwconv;
+  const bool is_unipass = dwconv_ukernel.last_tile == 0;
+  const size_t tile_size = dwconv_ukernel.tile_size;
   if (input_height != convolution_op->last_input_height || input_width != convolution_op->last_input_width) {
-    // Micro-kernel will read (primary_tile - kernel_size) elements after the end of indirection buffer.
+    // Micro-kernel will read (tile_size - kernel_size) elements after the end of indirection buffer.
     const size_t indirection_buffer_size =
-      sizeof(void*) * (primary_tile - kernel_size + output_height * step_height);
+      sizeof(void*) * (tile_size - kernel_size + output_height * step_height);
 
     const void** indirection_buffer =
       (const void**) xnn_reallocate_memory(convolution_op->indirection_buffer, indirection_buffer_size);
@@ -1912,7 +1841,7 @@ static enum xnn_status setup_dwconv(
       memset(convolution_op->indirection_buffer, 0, indirection_buffer_size);
     #endif
 
-    xnn_indirection_init_dwconv2d(convolution_op, step_height, step_width, primary_tile, log2_input_element_size);
+    xnn_indirection_init_dwconv2d(convolution_op, step_height, step_width, tile_size, log2_input_element_size);
 
     #if XNN_TEST_MODE
       for (size_t i = 0; i < indirection_buffer_size / sizeof(void*); i++) {
@@ -1927,9 +1856,11 @@ static enum xnn_status setup_dwconv(
   }
 
   const size_t groups = convolution_op->groups;
+  int32_t extra_input_advanced = is_unipass ? 0 : tile_size - convolution_op->ukernel.dwconv.last_tile;
   convolution_op->context.dwconv = (struct dwconv_context) {
+      .kernel_size = kernel_size,
       .indirect_input = convolution_op->indirection_buffer,
-      .indirect_input_width_stride = kernel_height * step_width * sizeof(void*),
+      .indirect_input_width_stride = (kernel_height * step_width - extra_input_advanced) * sizeof(void*),
       .indirect_input_height_stride = step_height * sizeof(void*),
       .input_offset = (size_t) ((uintptr_t) convolution_op->input - (uintptr_t) convolution_op->last_input),
       .input_batch_stride = (input_height * input_width * convolution_op->input_pixel_stride) << log2_input_element_size,
@@ -1941,15 +1872,21 @@ static enum xnn_status setup_dwconv(
       .groups = groups,
       .zero = convolution_op->zero_buffer,
       .output_increment = (convolution_op->output_pixel_stride - groups) << log2_output_element_size,
-      .unipass_ukernel = convolution_op->ukernel.dwconv.unipass_fn,
   };
   memcpy(&convolution_op->context.dwconv.params, &convolution_op->params, sizeof(convolution_op->context.dwconv.params));
 
   convolution_op->compute.type = xnn_parallelization_type_2d;
-  convolution_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_unipass;
   convolution_op->compute.range[0] = convolution_op->batch_size;
   convolution_op->compute.range[1] = output_height;
   convolution_op->state = xnn_run_state_ready;
+
+  if (is_unipass) {
+    convolution_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_unipass;
+    convolution_op->context.dwconv.unipass_ukernel = convolution_op->ukernel.dwconv.unipass_fn;
+  } else {
+    convolution_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_multipass;
+    convolution_op->context.dwconv.multipass_ukernel = convolution_op->ukernel.dwconv.multipass_fn;
+  }
 
   return xnn_status_success;
 }

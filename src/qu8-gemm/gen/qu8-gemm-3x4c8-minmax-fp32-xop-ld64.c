@@ -41,7 +41,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x4c8__xop_ld64(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(uint8_t));
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
   const uint8_t* a1 = (const uint8_t*) ((uintptr_t) a0 + a_stride);

@@ -568,100 +568,202 @@ static void f32_dwconv(
       16 /* channel tile */, 25 /* primary tile */,
       benchmark::utils::CheckNEONFMA);
   }
-  static void f32_dwconv_2f2m2l4c4s4r__neon(benchmark::State& state, const char* net) {
+
+  static void f32_dwconv_5f5m5l4c4s4r__neonfma(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__neon,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__neonfma,
       xnn_init_f32_minmax_scalar_params,
-      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
       4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
       benchmark::utils::CheckNEON);
   }
-  static void f32_dwconv_2f2m2l4c4s4r__neon_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_5f5m5l4c4s4r__neonfma_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__neon_acc2,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__neonfma_acc2,
       xnn_init_f32_minmax_scalar_params,
-      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
       4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
       benchmark::utils::CheckNEON);
   }
-  static void f32_dwconv_2f2m2l4c4s4r__neonfma(benchmark::State& state, const char* net) {
+  static void f32_dwconv_5f5m5l8c4s4r__neonfma(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__neonfma,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l8c4s4r__neonfma,
       xnn_init_f32_minmax_scalar_params,
-      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+      8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_5f5m5l8c4s4r__neonfma_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l8c4s4r__neonfma_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+      8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+
+  static void f32_dwconv_6f6m7l4c4s4r__neonfma(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_6f6m7l4c4s4r__neonfma,
+      xnn_init_f32_minmax_scalar_params,
+      6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
       4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
       benchmark::utils::CheckNEON);
   }
-  static void f32_dwconv_2f2m2l4c4s4r__neonfma_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_6f6m7l4c4s4r__neonfma_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_2f2m2l4c4s4r__neonfma_acc2,
+      xnn_f32_dwconv_minmax_ukernel_6f6m7l4c4s4r__neonfma_acc2,
       xnn_init_f32_minmax_scalar_params,
-      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
       4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
       benchmark::utils::CheckNEON);
   }
-  static void f32_dwconv_2f2m2l8c4s4r__neon(benchmark::State& state, const char* net) {
+  static void f32_dwconv_6f6m7l8c4s4r__neonfma(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__neon,
+      xnn_f32_dwconv_minmax_ukernel_6f6m7l8c4s4r__neonfma,
       xnn_init_f32_minmax_scalar_params,
-      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
       8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
       benchmark::utils::CheckNEON);
   }
-  static void f32_dwconv_2f2m2l8c4s4r__neon_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_6f6m7l8c4s4r__neonfma_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__neon_acc2,
+      xnn_f32_dwconv_minmax_ukernel_6f6m7l8c4s4r__neonfma_acc2,
       xnn_init_f32_minmax_scalar_params,
-      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
       8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
       benchmark::utils::CheckNEON);
   }
-  static void f32_dwconv_2f2m2l8c4s4r__neonfma(benchmark::State& state, const char* net) {
+
+  static void f32_dwconv_8f8m9l4c4s4r__neonfma(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__neonfma,
+      xnn_f32_dwconv_minmax_ukernel_8f8m9l4c4s4r__neonfma,
       xnn_init_f32_minmax_scalar_params,
-      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+      4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_8f8m9l4c4s4r__neonfma_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_8f8m9l4c4s4r__neonfma_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      8 /* first pass tile */, 8 /* middle pass tile */, 8 /* last pass tile */,
+      4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_8f8m9l8c4s4r__neonfma(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_8f8m9l8c4s4r__neonfma,
+      xnn_init_f32_minmax_scalar_params,
+      8 /* first pass tile */, 8 /* middle pass tile */, 8 /* last pass tile */,
       8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
       benchmark::utils::CheckNEON);
   }
-  static void f32_dwconv_2f2m2l8c4s4r__neonfma_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_8f8m9l8c4s4r__neonfma_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_2f2m2l8c4s4r__neonfma_acc2,
+      xnn_f32_dwconv_minmax_ukernel_8f8m9l8c4s4r__neonfma_acc2,
       xnn_init_f32_minmax_scalar_params,
-      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+      8 /* first pass tile */, 8 /* middle pass tile */, 8 /* last pass tile */,
       8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
       benchmark::utils::CheckNEON);
   }
-  static void f32_dwconv_2f2m2l16c4s4r__neon(benchmark::State& state, const char* net) {
+
+  static void f32_dwconv_5f5m5l4c4s4r__neon(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__neon,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__neon,
       xnn_init_f32_minmax_scalar_params,
-      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-      16 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+      4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
       benchmark::utils::CheckNEON);
   }
-  static void f32_dwconv_2f2m2l16c4s4r__neon_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_5f5m5l4c4s4r__neon_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__neon_acc2,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__neon_acc2,
       xnn_init_f32_minmax_scalar_params,
-      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-      16 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+      4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
       benchmark::utils::CheckNEON);
   }
-  static void f32_dwconv_2f2m2l16c4s4r__neonfma(benchmark::State& state, const char* net) {
+  static void f32_dwconv_5f5m5l8c4s4r__neon(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__neonfma,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l8c4s4r__neon,
       xnn_init_f32_minmax_scalar_params,
-      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-      16 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+      8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
       benchmark::utils::CheckNEON);
   }
-  static void f32_dwconv_2f2m2l16c4s4r__neonfma_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_5f5m5l8c4s4r__neon_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_2f2m2l16c4s4r__neonfma_acc2,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l8c4s4r__neon_acc2,
       xnn_init_f32_minmax_scalar_params,
-      2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-      16 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+      8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+
+  static void f32_dwconv_6f6m7l4c4s4r__neon(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_6f6m7l4c4s4r__neon,
+      xnn_init_f32_minmax_scalar_params,
+      6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+      4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_6f6m7l4c4s4r__neon_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_6f6m7l4c4s4r__neon_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+      4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_6f6m7l8c4s4r__neon(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_6f6m7l8c4s4r__neon,
+      xnn_init_f32_minmax_scalar_params,
+      6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+      8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_6f6m7l8c4s4r__neon_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_6f6m7l8c4s4r__neon_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+      8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+
+  static void f32_dwconv_8f8m9l4c4s4r__neon(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_8f8m9l4c4s4r__neon,
+      xnn_init_f32_minmax_scalar_params,
+      8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+      4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_8f8m9l4c4s4r__neon_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_8f8m9l4c4s4r__neon_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+      4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_8f8m9l8c4s4r__neon(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_8f8m9l8c4s4r__neon,
+      xnn_init_f32_minmax_scalar_params,
+      8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+      8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
+      benchmark::utils::CheckNEON);
+  }
+  static void f32_dwconv_8f8m9l8c4s4r__neon_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_8f8m9l8c4s4r__neon_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+      8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */,
       benchmark::utils::CheckNEON);
   }
 
@@ -686,6 +788,21 @@ static void f32_dwconv(
   BENCHMARK_DWCONV(f32_dwconv_25p16c__neonfma)
   BENCHMARK_DWCONV(f32_dwconv_25p16c__neonfma_acc2)
 
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__neonfma)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__neonfma_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l8c4s4r__neonfma)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l8c4s4r__neonfma_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l4c4s4r__neonfma)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l4c4s4r__neonfma_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l8c4s4r__neonfma)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l8c4s4r__neonfma_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l4c4s4r__neonfma)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l4c4s4r__neonfma_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l8c4s4r__neonfma)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l8c4s4r__neonfma_acc2)
+
   BENCHMARK_DWCONV(f32_dwconv_4p4c__neon)
   BENCHMARK_DWCONV(f32_dwconv_4p4c__neon_acc2)
   BENCHMARK_DWCONV(f32_dwconv_4p8c__neon)
@@ -707,45 +824,59 @@ static void f32_dwconv(
   BENCHMARK_DWCONV(f32_dwconv_25p16c__neon)
   BENCHMARK_DWCONV(f32_dwconv_25p16c__neon_acc2)
 
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l4c4s4r__neon)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l4c4s4r__neon_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l4c4s4r__neonfma)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l4c4s4r__neonfma_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c4s4r__neon)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c4s4r__neon_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c4s4r__neonfma)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c4s4r__neonfma_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l16c4s4r__neon)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l16c4s4r__neon_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l16c4s4r__neonfma)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l16c4s4r__neonfma_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__neon)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__neon_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l8c4s4r__neon)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l8c4s4r__neon_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l4c4s4r__neon)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l4c4s4r__neon_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l8c4s4r__neon)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l8c4s4r__neon_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l4c4s4r__neon)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l4c4s4r__neon_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l8c4s4r__neon)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l8c4s4r__neon_acc2)
+
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void f32_dwconv_4p4c__sse(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_4p4c__sse,
-      xnn_init_f32_minmax_sse_params,
-      4 /* channel tile */, 4 /* primary tile */);
+               xnn_f32_dwconv_minmax_ukernel_4p4c__sse,
+               xnn_init_f32_minmax_sse_params,
+               4 /* channel tile */, 4 /* primary tile */);
   }
   static void f32_dwconv_9p4c__sse(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_9p4c__sse,
-      xnn_init_f32_minmax_sse_params,
-      4 /* channel tile */, 9 /* primary tile */);
+               xnn_f32_dwconv_minmax_ukernel_9p4c__sse,
+               xnn_init_f32_minmax_sse_params,
+               4 /* channel tile */, 9 /* primary tile */);
   }
   static void f32_dwconv_25p4c__sse(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_25p4c__sse,
-      xnn_init_f32_minmax_sse_params,
-      4 /* channel tile */, 25 /* primary tile */);
+               xnn_f32_dwconv_minmax_ukernel_25p4c__sse,
+               xnn_init_f32_minmax_sse_params,
+               4 /* channel tile */, 25 /* primary tile */);
   }
   static void f32_dwconv_25p8c__sse(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-      xnn_f32_dwconv_minmax_ukernel_25p8c__sse,
-      xnn_init_f32_minmax_sse_params,
-      8 /* channel tile */, 25 /* primary tile */);
+               xnn_f32_dwconv_minmax_ukernel_25p8c__sse,
+               xnn_init_f32_minmax_sse_params,
+               8 /* channel tile */, 25 /* primary tile */);
+  }
+
+  static void f32_dwconv_5f5m5l4c4s4r__sse(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__sse, xnn_init_f32_minmax_sse_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+  static void f32_dwconv_5f5m5l4c4s4r__sse_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__sse_acc2, xnn_init_f32_minmax_sse_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
   static void f32_dwconv_5f5m5l8c4s4r__sse(benchmark::State& state, const char* net) {
     f32_dwconv(state,
@@ -759,125 +890,358 @@ static void f32_dwconv(
                5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
                8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
-  static void f32_dwconv_7f6m6l8c4s4r__sse(benchmark::State& state, const char* net) {
+  static void f32_dwconv_5f5m5l16c4s4r__sse(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse, xnn_init_f32_minmax_sse_params,
-               7 /* first pass tile */, 6 /* middle pass tile */, 6 /* last pass tile */,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l16c4s4r__sse, xnn_init_f32_minmax_sse_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               16 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+  static void f32_dwconv_5f5m5l16c4s4r__sse_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l16c4s4r__sse_acc2, xnn_init_f32_minmax_sse_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               16 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+
+  static void f32_dwconv_6f6m7l4c4s4r__sse(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_6f6m7l4c4s4r__sse, xnn_init_f32_minmax_sse_params,
+               6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+  static void f32_dwconv_6f6m7l4c4s4r__sse_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_6f6m7l4c4s4r__sse_acc2, xnn_init_f32_minmax_sse_params,
+               6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+  static void f32_dwconv_6f6m7l8c4s4r__sse(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_6f6m7l8c4s4r__sse, xnn_init_f32_minmax_sse_params,
+               6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
                8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
-  static void f32_dwconv_7f6m6l8c4s4r__sse_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_6f6m7l8c4s4r__sse_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_7f6m6l8c4s4r__sse_acc2, xnn_init_f32_minmax_sse_params,
-               7 /* first pass tile */, 6 /* middle pass tile */, 6 /* last pass tile */,
+               xnn_f32_dwconv_minmax_ukernel_6f6m7l8c4s4r__sse_acc2, xnn_init_f32_minmax_sse_params,
+               6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
                8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
-  static void f32_dwconv_2f2m2l8c8s4r__avx(benchmark::State& state, const char* net) {
+  static void f32_dwconv_6f6m7l16c4s4r__sse(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               8 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_6f6m7l16c4s4r__sse, xnn_init_f32_minmax_sse_params,
+               6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+               16 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
-  static void f32_dwconv_2f2m2l8c8s4r__avx_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_6f6m7l16c4s4r__sse_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__avx_acc2, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               8 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_6f6m7l16c4s4r__sse_acc2, xnn_init_f32_minmax_sse_params,
+               6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+               16 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
-  static void f32_dwconv_2f2m2l16c8s4r__avx(benchmark::State& state, const char* net) {
+
+  static void f32_dwconv_8f8m9l4c4s4r__sse(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l16c8s4r__avx, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               16 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_8f8m9l4c4s4r__sse, xnn_init_f32_minmax_sse_params,
+               8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
-  static void f32_dwconv_2f2m2l16c8s4r__avx_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_8f8m9l4c4s4r__sse_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l16c8s4r__avx_acc2, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               16 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_8f8m9l4c4s4r__sse_acc2, xnn_init_f32_minmax_sse_params,
+               8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
-  static void f32_dwconv_2f2m2l32c8s4r__avx(benchmark::State& state, const char* net) {
+  static void f32_dwconv_8f8m9l8c4s4r__sse(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l32c8s4r__avx, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               32 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_8f8m9l8c4s4r__sse, xnn_init_f32_minmax_sse_params,
+               8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+               8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
-  static void f32_dwconv_2f2m2l32c8s4r__avx_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_8f8m9l8c4s4r__sse_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l32c8s4r__avx_acc2, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               32 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_8f8m9l8c4s4r__sse_acc2, xnn_init_f32_minmax_sse_params,
+               8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+               8 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
-  static void f32_dwconv_2f2m2l8c8s4r__fma3(benchmark::State& state, const char* net) {
+  static void f32_dwconv_8f8m9l16c4s4r__sse(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__fma3, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               8 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_8f8m9l16c4s4r__sse, xnn_init_f32_minmax_sse_params,
+               8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+               16 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
-  static void f32_dwconv_2f2m2l8c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_8f8m9l16c4s4r__sse_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l8c8s4r__fma3_acc2, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               8 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_8f8m9l16c4s4r__sse_acc2, xnn_init_f32_minmax_sse_params,
+               8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+               16 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
   }
-  static void f32_dwconv_2f2m2l16c8s4r__fma3(benchmark::State& state, const char* net) {
+
+  static void f32_dwconv_25p8c__avx(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l16c8s4r__fma3, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               16 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_25p8c__avx,
+               xnn_init_f32_minmax_avx_params,
+               8 /* channel tile */, 25 /* primary tile */,
+               benchmark::utils::CheckAVX);
   }
-  static void f32_dwconv_2f2m2l16c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_25p8c__avx_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l16c8s4r__fma3_acc2, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               16 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_25p8c__avx_acc2,
+               xnn_init_f32_minmax_avx_params,
+               8 /* channel tile */, 25 /* primary tile */,
+               benchmark::utils::CheckAVX);
   }
-  static void f32_dwconv_2f2m2l32c8s4r__fma3(benchmark::State& state, const char* net) {
+  static void f32_dwconv_25p16c__avx(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l32c8s4r__fma3, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               32 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_25p16c__avx,
+               xnn_init_f32_minmax_avx_params,
+               16 /* channel tile */, 25 /* primary tile */,
+               benchmark::utils::CheckAVX);
   }
-  static void f32_dwconv_2f2m2l32c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_25p16c__avx_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l32c8s4r__fma3_acc2, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               32 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_25p16c__avx_acc2,
+               xnn_init_f32_minmax_avx_params,
+               16 /* channel tile */, 25 /* primary tile */,
+               benchmark::utils::CheckAVX);
   }
-  static void f32_dwconv_2f2m2l16c16s4r__avx512f(benchmark::State& state, const char* net) {
+
+  static void f32_dwconv_5f5m5l8c8s4r__avx(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l16c16s4r__avx512f, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               16 /* channel tile */, 16 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__avx, xnn_init_f32_minmax_avx_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               8 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckAVX);
   }
-  static void f32_dwconv_2f2m2l16c16s4r__avx512f_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_5f5m5l8c8s4r__avx_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l16c16s4r__avx512f_acc2, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               16 /* channel tile */, 16 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__avx_acc2, xnn_init_f32_minmax_avx_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               8 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckAVX);
   }
-  static void f32_dwconv_2f2m2l32c16s4r__avx512f(benchmark::State& state, const char* net) {
+  static void f32_dwconv_5f5m5l16c8s4r__avx(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               32 /* channel tile */, 16 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l16c8s4r__avx, xnn_init_f32_minmax_avx_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               16 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckAVX);
   }
-  static void f32_dwconv_2f2m2l32c16s4r__avx512f_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_5f5m5l16c8s4r__avx_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l32c16s4r__avx512f_acc2, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               32 /* channel tile */, 16 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l16c8s4r__avx_acc2, xnn_init_f32_minmax_avx_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               16 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckAVX);
   }
-  static void f32_dwconv_2f2m2l64c16s4r__avx512f(benchmark::State& state, const char* net) {
+
+  static void f32_dwconv_6f6m7l8c8s4r__avx(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l64c16s4r__avx512f, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               64 /* channel tile */, 16 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx, xnn_init_f32_minmax_avx_params,
+               6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+               8 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckAVX);
   }
-  static void f32_dwconv_2f2m2l64c16s4r__avx512f_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_6f6m7l8c8s4r__avx_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_2f2m2l64c16s4r__avx512f_acc2, xnn_init_f32_minmax_avx_params,
-               2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
-               64 /* channel tile */, 16 /* channel subtile */, 4 /* channel round */);
+               xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx_acc2, xnn_init_f32_minmax_avx_params,
+               6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+               8 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckAVX);
+  }
+  static void f32_dwconv_6f6m7l16c8s4r__avx(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_6f6m7l16c8s4r__avx, xnn_init_f32_minmax_avx_params,
+               6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+               16 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckAVX);
+  }
+  static void f32_dwconv_6f6m7l16c8s4r__avx_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_6f6m7l16c8s4r__avx_acc2, xnn_init_f32_minmax_avx_params,
+               6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+               16 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckAVX);
+  }
+
+  static void f32_dwconv_8f8m9l8c8s4r__avx(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_8f8m9l8c8s4r__avx, xnn_init_f32_minmax_avx_params,
+               8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+               8 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckAVX);
+  }
+  static void f32_dwconv_8f8m9l8c8s4r__avx_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_8f8m9l8c8s4r__avx_acc2, xnn_init_f32_minmax_avx_params,
+               8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+               8 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckAVX);
+  }
+  static void f32_dwconv_8f8m9l16c8s4r__avx(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_8f8m9l16c8s4r__avx, xnn_init_f32_minmax_avx_params,
+               8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+               16 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckAVX);
+  }
+  static void f32_dwconv_8f8m9l16c8s4r__avx_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_8f8m9l16c8s4r__avx_acc2, xnn_init_f32_minmax_avx_params,
+               8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+               16 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckAVX);
+  }
+
+  static void f32_dwconv_25p8c__fma3(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_25p8c__fma3,
+               xnn_init_f32_minmax_avx_params,
+               8 /* channel tile */, 25 /* primary tile */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_25p8c__fma3_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_25p8c__fma3_acc2,
+               xnn_init_f32_minmax_avx_params,
+               8 /* channel tile */, 25 /* primary tile */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_25p16c__fma3(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_25p16c__fma3,
+               xnn_init_f32_minmax_avx_params,
+               16 /* channel tile */, 25 /* primary tile */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_25p16c__fma3_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_25p16c__fma3_acc2,
+               xnn_init_f32_minmax_avx_params,
+               16 /* channel tile */, 25 /* primary tile */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_5f5m5l8c8s4r__fma3(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__fma3, xnn_init_f32_minmax_avx_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               8 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_5f5m5l8c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__fma3_acc2, xnn_init_f32_minmax_avx_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               8 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_5f5m5l16c8s4r__fma3(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l16c8s4r__fma3, xnn_init_f32_minmax_avx_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               16 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_5f5m5l16c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l16c8s4r__fma3_acc2, xnn_init_f32_minmax_avx_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               16 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_5f5m5l32c8s4r__fma3(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l32c8s4r__fma3, xnn_init_f32_minmax_avx_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               32 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_5f5m5l32c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l32c8s4r__fma3_acc2, xnn_init_f32_minmax_avx_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               32 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_7f6m6l8c8s4r__fma3(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_7f6m6l8c8s4r__fma3, xnn_init_f32_minmax_avx_params,
+               7 /* first pass tile */, 6 /* middle pass tile */, 6 /* last pass tile */,
+               8 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_7f6m6l8c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_7f6m6l8c8s4r__fma3_acc2, xnn_init_f32_minmax_avx_params,
+               7 /* first pass tile */, 6 /* middle pass tile */, 6 /* last pass tile */,
+               8 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_7f6m6l16c8s4r__fma3(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_7f6m6l16c8s4r__fma3, xnn_init_f32_minmax_avx_params,
+               7 /* first pass tile */, 6 /* middle pass tile */, 6 /* last pass tile */,
+               16 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_7f6m6l16c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_7f6m6l16c8s4r__fma3_acc2, xnn_init_f32_minmax_avx_params,
+               7 /* first pass tile */, 6 /* middle pass tile */, 6 /* last pass tile */,
+               16 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_7f6m6l32c8s4r__fma3(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_7f6m6l32c8s4r__fma3, xnn_init_f32_minmax_avx_params,
+               7 /* first pass tile */, 6 /* middle pass tile */, 6 /* last pass tile */,
+               32 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckFMA3);
+  }
+  static void f32_dwconv_7f6m6l32c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_7f6m6l32c8s4r__fma3_acc2, xnn_init_f32_minmax_avx_params,
+               7 /* first pass tile */, 6 /* middle pass tile */, 6 /* last pass tile */,
+               32 /* channel tile */, 8 /* channel subtile */, 4 /* channel round */,
+               benchmark::utils::CheckFMA3);
+  }
+
+  static void f32_dwconv_25p16c__avx512f(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_25p16c__avx512f,
+               xnn_init_f32_minmax_scalar_params,
+               16 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckAVX512F);
+  }
+  static void f32_dwconv_25p16c__avx512f_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_25p16c__avx512f_acc2,
+               xnn_init_f32_minmax_scalar_params,
+               16 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckAVX512F);
+  }
+  static void f32_dwconv_25p32c__avx512f(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_25p32c__avx512f,
+               xnn_init_f32_minmax_scalar_params,
+               32 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckAVX512F);
+  }
+  static void f32_dwconv_25p32c__avx512f_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_25p32c__avx512f_acc2,
+               xnn_init_f32_minmax_scalar_params,
+               32 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckAVX512F);
+  }
+
+  static void f32_dwconv_5f5m5l16c16s4r__avx512f(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f, xnn_init_f32_minmax_scalar_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               16 /* channel tile */, 16 /* channel subtile */, 4 /* channel round */, benchmark::utils::CheckAVX512F);
+  }
+  static void f32_dwconv_5f5m5l16c16s4r__avx512f_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f_acc2, xnn_init_f32_minmax_scalar_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               16 /* channel tile */, 16 /* channel subtile */, 4 /* channel round */, benchmark::utils::CheckAVX512F);
   }
 
   BENCHMARK_DWCONV(f32_dwconv_4p4c__sse)
@@ -885,30 +1249,321 @@ static void f32_dwconv(
   BENCHMARK_DWCONV(f32_dwconv_25p4c__sse)
   BENCHMARK_DWCONV(f32_dwconv_25p8c__sse)
 
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__sse)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__sse_acc2)
   BENCHMARK_DWCONV(f32_dwconv_5f5m5l8c4s4r__sse)
   BENCHMARK_DWCONV(f32_dwconv_5f5m5l8c4s4r__sse_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_7f6m6l8c4s4r__sse)
-  BENCHMARK_DWCONV(f32_dwconv_7f6m6l8c4s4r__sse_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l16c4s4r__sse)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l16c4s4r__sse_acc2)
 
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c8s4r__avx)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c8s4r__avx_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l16c8s4r__avx)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l16c8s4r__avx_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l32c8s4r__avx)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l32c8s4r__avx_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c8s4r__fma3)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l8c8s4r__fma3_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l16c8s4r__fma3)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l16c8s4r__fma3_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l32c8s4r__fma3)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l32c8s4r__fma3_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l16c16s4r__avx512f)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l16c16s4r__avx512f_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l32c16s4r__avx512f)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l32c16s4r__avx512f_acc2)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l64c16s4r__avx512f)
-  BENCHMARK_DWCONV(f32_dwconv_2f2m2l64c16s4r__avx512f_acc2)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l4c4s4r__sse)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l4c4s4r__sse_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l8c4s4r__sse)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l8c4s4r__sse_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l16c4s4r__sse)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l16c4s4r__sse_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l4c4s4r__sse)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l4c4s4r__sse_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l8c4s4r__sse)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l8c4s4r__sse_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l16c4s4r__sse)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l16c4s4r__sse_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__avx)
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__avx_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_25p16c__avx)
+  BENCHMARK_DWCONV(f32_dwconv_25p16c__avx_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l8c8s4r__avx)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l8c8s4r__avx_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l16c8s4r__avx)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l16c8s4r__avx_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l8c8s4r__avx)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l8c8s4r__avx_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l16c8s4r__avx)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l16c8s4r__avx_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l8c8s4r__avx)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l8c8s4r__avx_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l16c8s4r__avx)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l16c8s4r__avx_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__fma3)
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__fma3_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_25p16c__fma3)
+  BENCHMARK_DWCONV(f32_dwconv_25p16c__fma3_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l8c8s4r__fma3)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l8c8s4r__fma3_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l16c8s4r__fma3)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l16c8s4r__fma3_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l32c8s4r__fma3)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l32c8s4r__fma3_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_7f6m6l8c8s4r__fma3)
+  BENCHMARK_DWCONV(f32_dwconv_7f6m6l8c8s4r__fma3_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_7f6m6l16c8s4r__fma3)
+  BENCHMARK_DWCONV(f32_dwconv_7f6m6l16c8s4r__fma3_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_7f6m6l32c8s4r__fma3)
+  BENCHMARK_DWCONV(f32_dwconv_7f6m6l32c8s4r__fma3_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_25p16c__avx512f)
+  BENCHMARK_DWCONV(f32_dwconv_25p16c__avx512f_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_25p32c__avx512f)
+  BENCHMARK_DWCONV(f32_dwconv_25p32c__avx512f_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l16c16s4r__avx512f)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l16c16s4r__avx512f_acc2)
+#endif  // XNN_ARCH_X88 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_WASM
+  static void f32_dwconv_25p1c__wasm(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p1c__wasm,
+      xnn_init_f32_minmax_scalar_params,
+      1 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p1c__wasm_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p1c__wasm_acc2,
+      xnn_init_f32_minmax_scalar_params,
+      1 /* channel tile */, 25 /* primary tile */);
+  }
+
+  static void f32_dwconv_5f5m5l1c1s1r__wasm(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l1c1s1r__wasm, xnn_init_f32_minmax_scalar_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               1 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+  }
+  static void f32_dwconv_5f5m5l1c1s1r__wasm_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l1c1s1r__wasm_acc2, xnn_init_f32_minmax_scalar_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               1 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+  }
+
+  static void f32_dwconv_6f6m7l1c1s1r__wasm(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_6f6m7l1c1s1r__wasm, xnn_init_f32_minmax_scalar_params,
+               6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+               1 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+  }
+  static void f32_dwconv_6f6m7l1c1s1r__wasm_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_6f6m7l1c1s1r__wasm_acc2, xnn_init_f32_minmax_scalar_params,
+               6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+               1 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+  }
+
+  static void f32_dwconv_8f8m9l1c1s1r__wasm(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_8f8m9l1c1s1r__wasm, xnn_init_f32_minmax_scalar_params,
+               8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+               1 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+  }
+  static void f32_dwconv_8f8m9l1c1s1r__wasm_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_8f8m9l1c1s1r__wasm_acc2, xnn_init_f32_minmax_scalar_params,
+               8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+               1 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+  }
+
+  BENCHMARK_DWCONV(f32_dwconv_25p1c__wasm)
+  BENCHMARK_DWCONV(f32_dwconv_25p1c__wasm_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l1c1s1r__wasm)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l1c1s1r__wasm_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l1c1s1r__wasm)
+  BENCHMARK_DWCONV(f32_dwconv_6f6m7l1c1s1r__wasm_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l1c1s1r__wasm)
+  BENCHMARK_DWCONV(f32_dwconv_8f8m9l1c1s1r__wasm_acc2)
+
+#endif  // XNN_ARCH_WASMSIMD
+
+#if XNN_ARCH_WASMSIMD
+  static void f32_dwconv_25p4c__wasmsimd_arm(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_arm,
+      xnn_init_f32_minmax_wasmsimd_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p4c__wasmsimd_arm_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_arm_acc2,
+      xnn_init_f32_minmax_wasmsimd_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p4c__wasmsimd_x86(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_x86,
+      xnn_init_f32_minmax_wasmsimd_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p4c__wasmsimd_x86_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_x86_acc2,
+      xnn_init_f32_minmax_wasmsimd_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmsimd_arm(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_arm,
+      xnn_init_f32_minmax_wasmsimd_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmsimd_arm_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_arm_acc2,
+      xnn_init_f32_minmax_wasmsimd_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmsimd_x86(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86,
+      xnn_init_f32_minmax_wasmsimd_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmsimd_x86_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2,
+      xnn_init_f32_minmax_wasmsimd_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+
+  static void f32_dwconv_5f5m5l4c4s4r__wasmsimd_arm(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_arm, xnn_init_f32_minmax_wasmsimd_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+  static void f32_dwconv_5f5m5l4c4s4r__wasmsimd_arm_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_arm_acc2, xnn_init_f32_minmax_wasmsimd_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+
+  static void f32_dwconv_5f5m5l4c4s4r__wasmsimd_x86(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_x86, xnn_init_f32_minmax_wasmsimd_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+  static void f32_dwconv_5f5m5l4c4s4r__wasmsimd_x86_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_x86_acc2, xnn_init_f32_minmax_wasmsimd_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+
+  BENCHMARK_DWCONV(f32_dwconv_25p4c__wasmsimd_arm)
+  BENCHMARK_DWCONV(f32_dwconv_25p4c__wasmsimd_arm_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_25p4c__wasmsimd_x86)
+  BENCHMARK_DWCONV(f32_dwconv_25p4c__wasmsimd_x86_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__wasmsimd_arm)
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__wasmsimd_arm_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__wasmsimd_x86)
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__wasmsimd_x86_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__wasmsimd_arm)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__wasmsimd_arm_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__wasmsimd_x86)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__wasmsimd_x86_acc2)
+#endif
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+  static void f32_dwconv_25p4c__wasmrelaxedsimd(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd,
+      xnn_init_f32_minmax_wasmsimd_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p4c__wasmrelaxedsimd_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_acc2,
+      xnn_init_f32_minmax_wasmsimd_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p4c__wasmrelaxedsimd_fma(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_fma,
+      xnn_init_f32_minmax_wasmsimd_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p4c__wasmrelaxedsimd_fma_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_fma_acc2,
+      xnn_init_f32_minmax_wasmsimd_params,
+      4 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmrelaxedsimd(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd,
+      xnn_init_f32_minmax_wasmsimd_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmrelaxedsimd_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd_acc2,
+      xnn_init_f32_minmax_wasmsimd_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmrelaxedsimd_fma(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd_fma,
+      xnn_init_f32_minmax_wasmsimd_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+  static void f32_dwconv_25p8c__wasmrelaxedsimd_fma_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+      xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd_fma_acc2,
+      xnn_init_f32_minmax_wasmsimd_params,
+      8 /* channel tile */, 25 /* primary tile */);
+  }
+
+  static void f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd, xnn_init_f32_minmax_wasmsimd_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+  static void f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd_acc2, xnn_init_f32_minmax_wasmsimd_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+  static void f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd_fma(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd_fma, xnn_init_f32_minmax_wasmsimd_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+  static void f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd_fma_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmrelaxedsimd_fma_acc2, xnn_init_f32_minmax_wasmsimd_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               4 /* channel tile */, 4 /* channel subtile */, 4 /* channel round */);
+  }
+
+  BENCHMARK_DWCONV(f32_dwconv_25p4c__wasmrelaxedsimd)
+  BENCHMARK_DWCONV(f32_dwconv_25p4c__wasmrelaxedsimd_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_25p4c__wasmrelaxedsimd_fma)
+  BENCHMARK_DWCONV(f32_dwconv_25p4c__wasmrelaxedsimd_fma_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__wasmrelaxedsimd)
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__wasmrelaxedsimd_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__wasmrelaxedsimd_fma)
+  BENCHMARK_DWCONV(f32_dwconv_25p8c__wasmrelaxedsimd_fma_acc2)
+
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd_fma)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd_fma_acc2)
+#endif
 
 
 static void f32_dwconv_4p1c__scalar(benchmark::State& state, const char* net) {
@@ -984,6 +1639,67 @@ static void f32_dwconv_25p2c__scalar_acc2(benchmark::State& state, const char* n
     2 /* channel tile */, 25 /* primary tile */);
 }
 
+static void f32_dwconv_2f2m2l1c1s1r__scalar(benchmark::State& state, const char* net) {
+  f32_dwconv(state,
+             xnn_f32_dwconv_minmax_ukernel_2f2m2l1c1s1r__scalar, xnn_init_f32_minmax_scalar_params,
+             2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+             1 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+}
+static void f32_dwconv_2f2m2l1c1s1r__scalar_acc2(benchmark::State& state, const char* net) {
+  f32_dwconv(state,
+             xnn_f32_dwconv_minmax_ukernel_2f2m2l1c1s1r__scalar_acc2, xnn_init_f32_minmax_scalar_params,
+             2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+             1 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+}
+static void f32_dwconv_2f2m2l4c1s1r__scalar(benchmark::State& state, const char* net) {
+  f32_dwconv(state,
+             xnn_f32_dwconv_minmax_ukernel_2f2m2l4c1s1r__scalar, xnn_init_f32_minmax_scalar_params,
+             2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+             4 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+}
+static void f32_dwconv_2f2m2l4c1s1r__scalar_acc2(benchmark::State& state, const char* net) {
+  f32_dwconv(state,
+             xnn_f32_dwconv_minmax_ukernel_2f2m2l4c1s1r__scalar_acc2, xnn_init_f32_minmax_scalar_params,
+             2 /* first pass tile */, 2 /* middle pass tile */, 2 /* last pass tile */,
+             4 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+}
+static void f32_dwconv_5f5m5l1c1s1r__scalar(benchmark::State& state, const char* net) {
+  f32_dwconv(state,
+             xnn_f32_dwconv_minmax_ukernel_5f5m5l1c1s1r__scalar, xnn_init_f32_minmax_scalar_params,
+             5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+             1 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+}
+static void f32_dwconv_5f5m5l1c1s1r__scalar_acc2(benchmark::State& state, const char* net) {
+  f32_dwconv(state,
+             xnn_f32_dwconv_minmax_ukernel_5f5m5l1c1s1r__scalar_acc2, xnn_init_f32_minmax_scalar_params,
+             5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+             1 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+}
+static void f32_dwconv_6f6m7l1c1s1r__scalar(benchmark::State& state, const char* net) {
+  f32_dwconv(state,
+             xnn_f32_dwconv_minmax_ukernel_6f6m7l1c1s1r__scalar, xnn_init_f32_minmax_scalar_params,
+             6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+             1 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+}
+static void f32_dwconv_6f6m7l1c1s1r__scalar_acc2(benchmark::State& state, const char* net) {
+  f32_dwconv(state,
+             xnn_f32_dwconv_minmax_ukernel_6f6m7l1c1s1r__scalar_acc2, xnn_init_f32_minmax_scalar_params,
+             6 /* first pass tile */, 6 /* middle pass tile */, 7 /* last pass tile */,
+             1 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+}
+static void f32_dwconv_8f8m9l1c1s1r__scalar(benchmark::State& state, const char* net) {
+  f32_dwconv(state,
+             xnn_f32_dwconv_minmax_ukernel_8f8m9l1c1s1r__scalar, xnn_init_f32_minmax_scalar_params,
+             8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+             1 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+}
+static void f32_dwconv_8f8m9l1c1s1r__scalar_acc2(benchmark::State& state, const char* net) {
+  f32_dwconv(state,
+             xnn_f32_dwconv_minmax_ukernel_8f8m9l1c1s1r__scalar_acc2, xnn_init_f32_minmax_scalar_params,
+             8 /* first pass tile */, 8 /* middle pass tile */, 9 /* last pass tile */,
+             1 /* channel tile */, 1 /* channel subtile */, 1 /* channel round */);
+}
+
 BENCHMARK_DWCONV(f32_dwconv_4p1c__scalar)
 BENCHMARK_DWCONV(f32_dwconv_4p1c__scalar_acc2)
 BENCHMARK_DWCONV(f32_dwconv_4p2c__scalar)
@@ -999,6 +1715,16 @@ BENCHMARK_DWCONV(f32_dwconv_25p1c__scalar_acc2)
 BENCHMARK_DWCONV(f32_dwconv_25p2c__scalar)
 BENCHMARK_DWCONV(f32_dwconv_25p2c__scalar_acc2)
 
+BENCHMARK_DWCONV(f32_dwconv_2f2m2l1c1s1r__scalar)
+BENCHMARK_DWCONV(f32_dwconv_2f2m2l1c1s1r__scalar_acc2)
+BENCHMARK_DWCONV(f32_dwconv_2f2m2l4c1s1r__scalar)
+BENCHMARK_DWCONV(f32_dwconv_2f2m2l4c1s1r__scalar_acc2)
+BENCHMARK_DWCONV(f32_dwconv_5f5m5l1c1s1r__scalar)
+BENCHMARK_DWCONV(f32_dwconv_5f5m5l1c1s1r__scalar_acc2)
+BENCHMARK_DWCONV(f32_dwconv_6f6m7l1c1s1r__scalar)
+BENCHMARK_DWCONV(f32_dwconv_6f6m7l1c1s1r__scalar_acc2)
+BENCHMARK_DWCONV(f32_dwconv_8f8m9l1c1s1r__scalar)
+BENCHMARK_DWCONV(f32_dwconv_8f8m9l1c1s1r__scalar_acc2)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

@@ -156,7 +156,7 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
                 vacc${M}x${ABC[0:4]} = vext_f16(vacc${M}x${ABC[0:4]}, vacc${M}x${ABC[0:4]}, 2);
             $elif LOG2N == 0:
               $for M in reversed(range(MR)):
-                vst1_lane_f16(c${M}, vacc${M}x${ABC[0:4]}, 0);
+                vst1_lane_u16(c${M}, vreinterpret_u16_f16(vacc${M}x${ABC[0:4]}), 0);
           }
         $if LOG2N == 3:
           $for M in reversed(range(MR)):

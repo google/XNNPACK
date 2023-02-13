@@ -8303,6 +8303,59 @@ TEST(DECONVOLUTION_NHWC_F16, 1x1_without_bias) {
     .TestF16();
 }
 
+#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+TEST(DECONVOLUTION_NHWC_F16, jit_1x1) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, jit_1x1_with_qmin) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .qmin(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, jit_1x1_with_qmax) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .qmax(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, jit_1x1_with_relu) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .activation(DeconvolutionOperatorTester::Activation::Relu)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+
 /**************************** Future GEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F16, grouped_1x1) {
@@ -9072,6 +9125,63 @@ TEST(DECONVOLUTION_NHWC_F16, weights_cache_3x3) {
     .iterations(3)
     .TestF16();
 }
+
+#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+TEST(DECONVOLUTION_NHWC_F16, jit_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, jit_3x3_with_qmin) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .qmin(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, jit_3x3_with_qmax) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .qmax(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, jit_3x3_with_relu) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .activation(DeconvolutionOperatorTester::Activation::Relu)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
 
 /**************************** CONV path, grouped ****************************/
 
@@ -10455,6 +10565,67 @@ TEST(DECONVOLUTION_NHWC_F16, weights_cache_3x3s2) {
     .TestF16();
 }
 
+#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+TEST(DECONVOLUTION_NHWC_F16, jit_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, jit_3x3s2_with_qmin) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .qmin(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, jit_3x3s2_with_qmax) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .qmax(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, jit_3x3s2_with_relu) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .activation(DeconvolutionOperatorTester::Activation::Relu)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+
 /**************************** SUBCONV2D/IGEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F16, grouped_3x3s2) {
@@ -11696,6 +11867,63 @@ TEST(DECONVOLUTION_NHWC_F16, weights_cache_2x2s2) {
     .TestF16();
 }
 
+#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+TEST(DECONVOLUTION_NHWC_F16, jit_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, jit_2x2s2_with_qmin) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .qmin(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, jit_2x2s2_with_qmax) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .qmax(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+
+TEST(DECONVOLUTION_NHWC_F16, jit_2x2s2_with_relu) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f16.gemm.nr * 2 + 3)
+    .activation(DeconvolutionOperatorTester::Activation::Relu)
+    .use_jit(true)
+    .iterations(3)
+    .TestF16();
+}
+#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+
 /**************************** SUBCONV2D/GEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F16, grouped_2x2s2) {
@@ -12574,6 +12802,59 @@ TEST(DECONVOLUTION_NHWC_F32, 1x1_without_bias) {
     .TestF32();
 }
 
+#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+TEST(DECONVOLUTION_NHWC_F32, jit_1x1) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, jit_1x1_with_qmin) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .qmin(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, jit_1x1_with_qmax) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .qmax(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, jit_1x1_with_relu) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .kernel_size(1, 1)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .activation(DeconvolutionOperatorTester::Activation::Relu)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+
 /**************************** Future GEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_1x1) {
@@ -13290,6 +13571,63 @@ TEST(DECONVOLUTION_NHWC_F32, weights_cache_3x3) {
     .iterations(3)
     .TestF32();
 }
+
+#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+TEST(DECONVOLUTION_NHWC_F32, jit_3x3) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, jit_3x3_with_qmin) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .qmin(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, jit_3x3_with_qmax) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .qmax(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, jit_3x3_with_relu) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .activation(DeconvolutionOperatorTester::Activation::Relu)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
 
 /**************************** CONV path, grouped ****************************/
 
@@ -14630,6 +14968,67 @@ TEST(DECONVOLUTION_NHWC_F32, stress_weights_cache_5x5s4) {
     .StressWeightsCacheTestF32();
 }
 
+#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+TEST(DECONVOLUTION_NHWC_F32, jit_3x3s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, jit_3x3s2_with_qmin) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .qmin(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, jit_3x3s2_with_qmax) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .qmax(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, jit_3x3s2_with_relu) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .padding(1)
+    .kernel_size(3, 3)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .activation(DeconvolutionOperatorTester::Activation::Relu)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+
 /**************************** SUBCONV2D/IGEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2) {
@@ -15824,6 +16223,63 @@ TEST(DECONVOLUTION_NHWC_F32, weights_cache_2x2s2) {
     .iterations(3)
     .TestF32();
 }
+
+#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+TEST(DECONVOLUTION_NHWC_F32, jit_2x2s2) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(15)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, jit_2x2s2_with_qmin) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .qmin(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, jit_2x2s2_with_qmax) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .qmax(128)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+
+TEST(DECONVOLUTION_NHWC_F32, jit_2x2s2_with_relu) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+  DeconvolutionOperatorTester()
+    .input_size(kStridedInputHeight, kStridedInputWidth)
+    .kernel_size(2, 2)
+    .stride(2)
+    .group_input_channels(23)
+    .group_output_channels(xnn_params.f32.gemm.nr * 2 + 3)
+    .activation(DeconvolutionOperatorTester::Activation::Relu)
+    .use_jit(true)
+    .iterations(3)
+    .TestF32();
+}
+#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
 
 /**************************** SUBCONV2D/GEMM path, grouped ****************************/
 

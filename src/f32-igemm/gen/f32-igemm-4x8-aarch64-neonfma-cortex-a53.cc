@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -168,8 +168,16 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   bind(l1);
   // Load next 4 A pointers
-  ldp(x13, x14, mem[x4], 16);
-  if (max_mr > 2) {
+  if (max_mr == 1) {
+    ldr(x13, mem[x4], 8);
+  }
+  if (max_mr > 1) {
+    ldp(x13, x14, mem[x4], 16);
+  }
+  if (max_mr == 3) {
+    ldr(x15, mem[x4], 8);
+  }
+  if (max_mr > 3) {
     ldp(x15, x20, mem[x4], 16);
   }
 

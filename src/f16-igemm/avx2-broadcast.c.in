@@ -5,6 +5,8 @@
 
 $assert NR % 8 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert ACCTYPE in ["F16", "F32"]
+$ACC_SUFFIX = "_f32acc" if ACCTYPE == "F32" else ""
 #include <assert.h>
 
 #include <immintrin.h>
@@ -13,7 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/intrinsics-polyfill.h>
 
 
-void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
+void xnn_f16${ACC_SUFFIX}_igemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -87,7 +89,10 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
 
         $for M in range(MR):
           $for N in range(0, NR, 8):
-            vacc${M}x${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va${M}, vb${ABC[N:N+8]}, vacc${M}x${ABC[N:N+8]}), _MM_FROUND_TO_NEAREST_INT));
+            $if ACCTYPE == "F32":
+              vacc${M}x${ABC[N:N+8]} = _mm256_fmadd_ps(va${M}, vb${ABC[N:N+8]}, vacc${M}x${ABC[N:N+8]});
+            $else:
+              vacc${M}x${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va${M}, vb${ABC[N:N+8]}, vacc${M}x${ABC[N:N+8]}), _MM_FROUND_TO_NEAREST_INT));
 
         k -= sizeof(uint16_t);
       } while (k != 0);

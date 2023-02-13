@@ -40,7 +40,7 @@ void xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}
   assert(nc != 0);
   assert(kc != 0);
 
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
+  kc = round_up_po2(kc, 4 * sizeof(${XINT8_T}));
   const ${XINT8_T}* a0 = a;
   ${XINT8_T}* c0 = c;
   $for M in range(1, MR):

@@ -239,6 +239,18 @@ tools/xngen src/qs8-igemm/MRx4c8-wasmsimd-dot16x2.c.in -D MR=2 -D VARIANT=LD128 
 tools/xngen src/qs8-igemm/MRx4c8-wasmsimd-dot16x2.c.in -D MR=3 -D VARIANT=LD128 -D REQUANTIZATION=FP32     -D DATATYPE=QU8 -o src/qu8-igemm/gen/qu8-igemm-3x4c8-minmax-fp32-wasmsimd-dot16x2-ld128.c &
 tools/xngen src/qs8-igemm/MRx4c8-wasmsimd-dot16x2.c.in -D MR=4 -D VARIANT=LD128 -D REQUANTIZATION=FP32     -D DATATYPE=QU8 -o src/qu8-igemm/gen/qu8-igemm-4x4c8-minmax-fp32-wasmsimd-dot16x2-ld128.c &
 
+############################## WAsm Relaxed SIMD ##############################
+### C16 micro-kernels
+tools/xngen src/qs8-igemm/MRx4c16-wasmsdot.c.in -D MR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-igemm/gen/qc8-igemm-1x4c16-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-igemm/MRx4c16-wasmsdot.c.in -D MR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-igemm/gen/qc8-igemm-2x4c16-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-igemm/MRx4c16-wasmsdot.c.in -D MR=3 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-igemm/gen/qc8-igemm-3x4c16-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-igemm/MRx4c16-wasmsdot.c.in -D MR=4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-igemm/gen/qc8-igemm-4x4c16-minmax-fp32-wasmsdot.c &
+
+tools/xngen src/qs8-igemm/MRx4c16-wasmsdot.c.in -D MR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-igemm/gen/qs8-igemm-1x4c16-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-igemm/MRx4c16-wasmsdot.c.in -D MR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-igemm/gen/qs8-igemm-2x4c16-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-igemm/MRx4c16-wasmsdot.c.in -D MR=3 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-igemm/gen/qs8-igemm-3x4c16-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-igemm/MRx4c16-wasmsdot.c.in -D MR=4 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o src/qs8-igemm/gen/qs8-igemm-4x4c16-minmax-fp32-wasmsdot.c &
+
 ################################## ARMv6 SIMD #################################
 tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=1 -D NR=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-igemm/gen/qc8-igemm-1x1c4-minmax-fp32-armsimd32.c &
 tools/xngen src/qs8-igemm/c4-armsimd32.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qc8-igemm/gen/qc8-igemm-1x2c4-minmax-fp32-armsimd32.c &
@@ -1240,8 +1252,10 @@ tools/xngen src/qs8-igemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D DAT
 tools/generate-gemm-test.py --spec test/qc8-igemm-minmax-fp32.yaml --output test/qc8-igemm-minmax-fp32.cc --output test/qc8-igemm-minmax-fp32-2.cc --output test/qc8-igemm-minmax-fp32-3.cc &
 tools/generate-gemm-test.py --spec test/qs8-igemm-minmax-fp32.yaml --output test/qs8-igemm-minmax-fp32.cc --output test/qs8-igemm-minmax-fp32-2.cc &
 tools/generate-gemm-test.py --spec test/qu8-igemm-minmax-fp32.yaml --output test/qu8-igemm-minmax-fp32.cc --output test/qu8-igemm-minmax-fp32-2.cc &
+tools/generate-gemm-test.py --spec test/qc8-igemm-jit-fp32.yaml --output test/qc8-igemm-jit-fp32.cc &
 
 tools/generate-gemm-test.py --spec test/qs8-igemm-minmax-rndnu.yaml --output test/qs8-igemm-minmax-rndnu.cc --output test/qs8-igemm-minmax-rndnu-2.cc --output test/qs8-igemm-minmax-rndnu-3.cc --output test/qs8-igemm-minmax-rndnu-4.cc &
 tools/generate-gemm-test.py --spec test/qu8-igemm-minmax-rndnu.yaml --output test/qu8-igemm-minmax-rndnu.cc --output test/qu8-igemm-minmax-rndnu-2.cc &
+tools/generate-gemm-test.py --spec test/qs8-igemm-jit-rndnu.yaml --output test/qs8-igemm-jit-rndnu.cc &
 
 wait

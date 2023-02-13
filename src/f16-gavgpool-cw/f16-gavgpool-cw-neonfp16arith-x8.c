@@ -73,6 +73,6 @@ void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_x8(
     vout = vmax_f16(vout, voutput_min);
     vout = vmin_f16(vout, voutput_max);
 
-    vst1_lane_f16(o, vout, 0); o += 1;
+    vst1_lane_u16(o, vreinterpret_u16_f16(vout), 0); o += 1;
   } while (--channels != 0);
 }

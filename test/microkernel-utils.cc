@@ -41,3 +41,63 @@ TEST(MULTIPASS_DWCONV_WEIGHTS_COUNT, channels_gt_channel_tile_channel_round) {
   ASSERT_EQ((1 + 1) * (16 + 8), xnn_dwconv_multipass_weights_count(1, 17, 16, 8, 4));
   ASSERT_EQ((1 + 1) * (16 + 8 + 8), xnn_dwconv_multipass_weights_count(1, 25, 16, 8, 4));
 }
+
+TEST(MULTIPASS_DWCONV_ELEMENTS_READ, elements_read) {
+  // | First pass | middle pass | last pass | total            |
+  // |------------|-------------|-----------|------------------|
+  // | 3 * 16     | 3 * 16      | 3 * 16    | 144 inputs read  |
+  // | 1 * 16     | 0           | 0         | 16 bias read     |
+  // | 3 * 16     | 3 * 16      | 3 * 16    | 144 weights read |
+  // | 0          | 16          | 16        | 32 buffers read  |
+  ASSERT_EQ(144 + 16 + 144 + 32,
+            xnn_dwconv_multipass_bytes_read(
+              /*kernel_size=*/3 * 3,
+              /*first_pass_tile=*/3, /*middle_pass_tile=*/3, /*last_pass_tile=*/3,
+              /*channels=*/16, /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
+              /*log2_input_size=*/0, /*log2_filter_size=*/0, /*bias_element_size=*/1, /*log2_accumulator_size=*/0));
+}
+
+TEST(MULTIPASS_DWCONV_ELEMENTS_READ, different_sizes_for_weights) {
+  // | First pass | middle pass | last pass | size | total            |
+  // |------------|-------------|-----------|------|------------------|
+  // | 3 * 16     | 3 * 16      | 3 * 16    |   1  | 144 inputs read  |
+  // | 1 * 16     | 0           | 0         |   1  | 16 bias read     |
+  // | 3 * 16     | 3 * 16      | 3 * 16    |   4  | 144 weights read |
+  // | 0          | 16          | 16        |   4  | 32 buffers read  |
+  ASSERT_EQ(144 * 1 + 16 * 1 + 144 * 4 + 32 * 4,
+            xnn_dwconv_multipass_bytes_read(
+              /*kernel_size=*/3 * 3,
+              /*first_pass_tile=*/3, /*middle_pass_tile=*/3, /*last_pass_tile=*/3,
+              /*channels=*/16, /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/4,
+              /*log2_input_size=*/0, /*log2_filter_size=*/2, /*bias_element_size=*/1, /*log2_accumulator_size=*/2));
+}
+
+TEST(MULTIPASS_DWCONV_ELEMENTS_WRITTEN, elements_written) {
+  // 16 + 16 = 32 buffers written.
+  // 16 outputs written.
+  // | First pass | middle pass | last pass | total              |
+  // |------------|-------------|-----------|--------------------|
+  // | 0          | 16          | 16        | 32 buffers written |
+  // | 0          | 0           | 16        | 16 outputs written |
+  ASSERT_EQ(32 + 16,
+            xnn_dwconv_multipass_bytes_written(
+              /*kernel_size=*/3 * 3,
+              /*first_pass_tile=*/3, /*middle_pass_tile=*/3, /*last_pass_tile=*/3,
+              /*channels=*/16, /*channel_round=*/4,
+              /*log2_accumulator_size=*/0, /*log2_output_size=*/0));
+}
+
+TEST(MULTIPASS_DWCONV_ELEMENTS_WRITTEN, different_accumulator_size) {
+  // 16 + 16 = 32 buffers written.
+  // 16 outputs written.
+  // | First pass | middle pass | last pass | size | total              |
+  // |------------|-------------|-----------|------|--------------------|
+  // | 0          | 16          | 16        |  4   | 32 buffers written |
+  // | 0          | 0           | 16        |  1   | 16 outputs written |
+  ASSERT_EQ(32 * 4 + 16 * 1,
+            xnn_dwconv_multipass_bytes_written(
+              /*kernel_size=*/3 * 3,
+              /*first_pass_tile=*/3, /*middle_pass_tile=*/3, /*last_pass_tile=*/3,
+              /*channels=*/16, /*channel_round=*/4,
+              /*log2_accumulator_size=*/2, /*log2_output_size=*/0));
+}

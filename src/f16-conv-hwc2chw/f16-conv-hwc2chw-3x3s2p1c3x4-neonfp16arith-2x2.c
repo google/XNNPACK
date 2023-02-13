@@ -777,11 +777,11 @@ void xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2(
         float16x4_t vi4x3 = vreinterpret_f16_u16(vmov_n_u16(0));
         if (iw > 2) {
           // viMx3 = ( 0.0, 0.0, 0.0, iM3c2 )
-          vi0x3 = vld1_lane_f16(i0 + 8, vi0x3, 0);
-          vi1x3 = vld1_lane_f16(i1 + 8, vi1x3, 0);
-          vi2x3 = vld1_lane_f16(i2 + 8, vi2x3, 0);
-          vi3x3 = vld1_lane_f16(i3 + 8, vi3x3, 0);
-          vi4x3 = vld1_lane_f16(i4 + 8, vi4x3, 0);
+          vi0x3 = vreinterpret_f16_u16(vld1_lane_u16(i0 + 8, vreinterpret_u16_f16(vi0x3), 0));
+          vi1x3 = vreinterpret_f16_u16(vld1_lane_u16(i1 + 8, vreinterpret_u16_f16(vi1x3), 0));
+          vi2x3 = vreinterpret_f16_u16(vld1_lane_u16(i2 + 8, vreinterpret_u16_f16(vi2x3), 0));
+          vi3x3 = vreinterpret_f16_u16(vld1_lane_u16(i3 + 8, vreinterpret_u16_f16(vi3x3), 0));
+          vi4x3 = vreinterpret_f16_u16(vld1_lane_u16(i4 + 8, vreinterpret_u16_f16(vi4x3), 0));
         }
 
 #if XNN_ARCH_ARM64
@@ -933,15 +933,15 @@ void xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2(
         } else {
           // Exactly 1 output width element remaining
 
-          vst1_lane_f16(o1c0, vo1x0, 0); o1c0 += 1;
-          vst1_lane_f16(o1c1, vo1x0, 1); o1c1 += 1;
-          vst1_lane_f16(o1c2, vo1x0, 2); o1c2 += 1;
-          vst1_lane_f16(o1c3, vo1x0, 3); o1c3 += 1;
+          vst1_lane_u16(o1c0, vreinterpret_u16_f16(vo1x0), 0); o1c0 += 1;
+          vst1_lane_u16(o1c1, vreinterpret_u16_f16(vo1x0), 1); o1c1 += 1;
+          vst1_lane_u16(o1c2, vreinterpret_u16_f16(vo1x0), 2); o1c2 += 1;
+          vst1_lane_u16(o1c3, vreinterpret_u16_f16(vo1x0), 3); o1c3 += 1;
 
-          vst1_lane_f16(o0c0, vo0x0, 0); o0c0 += 1;
-          vst1_lane_f16(o0c1, vo0x0, 1); o0c1 += 1;
-          vst1_lane_f16(o0c2, vo0x0, 2); o0c2 += 1;
-          vst1_lane_f16(o0c3, vo0x0, 3); o0c3 += 1;
+          vst1_lane_u16(o0c0, vreinterpret_u16_f16(vo0x0), 0); o0c0 += 1;
+          vst1_lane_u16(o0c1, vreinterpret_u16_f16(vo0x0), 1); o0c1 += 1;
+          vst1_lane_u16(o0c2, vreinterpret_u16_f16(vo0x0), 2); o0c2 += 1;
+          vst1_lane_u16(o0c3, vreinterpret_u16_f16(vo0x0), 3); o0c3 += 1;
         }
       }
       // Move output pointers back to the position of the first pixel in a row,

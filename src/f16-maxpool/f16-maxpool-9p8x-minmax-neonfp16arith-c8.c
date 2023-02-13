@@ -128,7 +128,7 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8(
           vout_lo = vext_f16(vout_lo, vout_lo, 2);
         }
         if (c & 1) {
-          vst1_lane_f16(o, vout_lo, 0); o += 1;
+          vst1_lane_u16(o, vreinterpret_u16_f16(vout_lo), 0); o += 1;
         }
       }
     }
@@ -228,7 +228,7 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8(
           vout_lo = vext_f16(vout_lo, vout_lo, 2);
         }
         if (c & 1) {
-          vst1_lane_f16(o, vout_lo, 0); o += 1;
+          vst1_lane_u16(o, vreinterpret_u16_f16(vout_lo), 0); o += 1;
         }
       }
     }

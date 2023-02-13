@@ -40,7 +40,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_dot16x2_ld128(
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(uint8_t));
   uint8_t* c0 = c;
   uint8_t* c1 = (uint8_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr != 2) {
@@ -71,8 +71,8 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_dot16x2_ld128(
       }
       a += 2;
 
-      size_t k = 0;
-      while (k < kc) {
+      size_t k = kc;
+      do {
         const v128_t vxa0 = wasm_u16x8_load8x8(a0);
         a0 += 8;
         const v128_t vxa1 = wasm_u16x8_load8x8(a1);
@@ -96,8 +96,8 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__wasmsimd_dot16x2_ld128(
         vacc1x3 = wasm_i32x4_add(vacc1x3, wasm_i32x4_dot_i16x8(vxa1, vxb3));
 
         w = (const void*) ((const uint8_t*) w + 32);
-        k += 8 * sizeof(uint8_t);
-      }
+        k -= 8 * sizeof(uint8_t);
+      } while (k != 0);
       p -= 2 * sizeof(void*);
     } while (p != 0);
 

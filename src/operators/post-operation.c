@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <xnnpack/allocator.h>
+#include <xnnpack/config.h>
 #include <xnnpack/microparams.h>
 #include <xnnpack/params.h>
 #include <xnnpack/post-operation.h>
@@ -22,10 +23,13 @@ char* allocate_and_initialize_post_operation_params(
     const struct xnn_post_operation post_op = post_operations[i];
     switch (post_op.op_type) {
       case xnn_post_operation_type_hardswish:
-        if (xnn_params.f32.hswish.init.f32_hswish != NULL) {
-          total_size += xnn_params.f32.hswish.init.f32_hswish(&post_op_params.hswish_params);
+      {
+        const struct xnn_unary_elementwise_config* f32_hswish_config = xnn_init_f32_hswish_config();
+        if (f32_hswish_config->init.f32_hswish != NULL) {
+          total_size += f32_hswish_config->init.f32_hswish(&post_op_params.hswish_params);
         }
         break;
+      }
       default:
         XNN_UNREACHABLE;
     }
@@ -37,12 +41,15 @@ char* allocate_and_initialize_post_operation_params(
     const struct xnn_post_operation post_op = post_operations[i];
     switch (post_op.op_type) {
       case xnn_post_operation_type_hardswish:
-        if (xnn_params.f32.hswish.init.f32_hswish != NULL) {
-          const size_t initialized_size = xnn_params.f32.hswish.init.f32_hswish(&post_op_params.hswish_params);
+      {
+        const struct xnn_unary_elementwise_config* f32_hswish_config = xnn_init_f32_hswish_config();
+        if (f32_hswish_config->init.f32_hswish!= NULL) {
+          const size_t initialized_size = f32_hswish_config->init.f32_hswish(&post_op_params.hswish_params);
           memcpy(cur_params, &post_op_params.hswish_params, initialized_size);
           cur_params += initialized_size;
         }
         break;
+      }
       default:
         XNN_UNREACHABLE;
     }

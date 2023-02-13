@@ -23,8 +23,6 @@ static enum xnn_status create_divide_operator(
   struct xnn_operator_data* opdata,
   const struct xnn_caches* caches)
 {
-  assert(node->compute_type == xnn_compute_type_fp32);
-
   assert(node->num_inputs == 2);
   const uint32_t input1_id = node->inputs[0];
   assert(input1_id != XNN_INVALID_VALUE_ID);

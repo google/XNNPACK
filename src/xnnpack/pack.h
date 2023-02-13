@@ -616,6 +616,22 @@ XNN_INTERNAL void xnn_pack_qs8_dwconv_hwg_w(
 // tiles is round_up_po2(channels, channel_round)/channel_tile. We use channel_round because rounding to channel_subtile
 // might exceed the padding that we have.
 
+typedef void (*xnn_pack_dwconv_multipass_ghw_w_fn)(
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
+  const void* k,
+  const void* b,
+  void* packed_weights,
+  size_t extra_bytes,
+  const void* params);
+
 // Weights layout is channels/(g)roups, (h)eight, (w)idth.
 XNN_INTERNAL void xnn_pack_f32_dwconv_multipass_ghw_w(
   size_t first_pass_tile,
@@ -633,6 +649,54 @@ XNN_INTERNAL void xnn_pack_f32_dwconv_multipass_ghw_w(
   size_t extra_bytes,
   const void* params);
 
+XNN_INTERNAL void xnn_pack_f16_dwconv_multipass_ghw_w(
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
+  const uint16_t* k,
+  const uint16_t* b,
+  uint16_t* packed_weights,
+  size_t extra_bytes,
+  const void* params);
+
+XNN_INTERNAL void xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
+  const float* k,
+  const float* b,
+  uint16_t* packed_weights,
+  size_t extra_bytes,
+  const void* params);
+
+typedef void (*xnn_pack_dwconv_multipass_hwg_w_fn)(
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
+  const void* k,
+  const void* b,
+  void* packed_weights,
+  size_t extra_bytes,
+  const void* params);
+
 // Weights layout is (h)eight, (w)idth, channels/(g)roups.
 XNN_INTERNAL void xnn_pack_f32_dwconv_multipass_hwg_w(
   size_t first_pass_tile,
@@ -647,6 +711,38 @@ XNN_INTERNAL void xnn_pack_f32_dwconv_multipass_hwg_w(
   const float* k,
   const float* b,
   float* packed_weights,
+  size_t extra_bytes,
+  const void* params);
+
+XNN_INTERNAL void xnn_pack_f16_dwconv_multipass_hwg_w(
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
+  const uint16_t* k,
+  const uint16_t* b,
+  uint16_t* packed_weights,
+  size_t extra_bytes,
+  const void* params);
+
+XNN_INTERNAL void xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
+  const float* k,
+  const float* b,
+  uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params);
 
@@ -846,26 +942,26 @@ struct xnn_spmm_packing_params {
   size_t num_block4_nonzeroes;
 };
 
-typedef void (*xnn_analyze_spmm_fn)(
+typedef void (*xnn_analyze_spmm_w_fn)(
   size_t group_output_channels,
   size_t group_input_channels,
   const void* kernel,
   struct xnn_spmm_packing_params* params);
 
-XNN_INTERNAL void xnn_analyze_f32_spmm(
+XNN_INTERNAL void xnn_analyze_f32_spmm_w(
   size_t group_output_channels,
   size_t group_input_channels,
   const float* kernel,
   struct xnn_spmm_packing_params* params);
 
-XNN_INTERNAL void xnn_analyze_f16_spmm(
+XNN_INTERNAL void xnn_analyze_f16_spmm_w(
   size_t group_output_channels,
   size_t group_input_channels,
   const uint16_t* kernel,
   struct xnn_spmm_packing_params* params);
 
 
-typedef enum xnn_status (*xnn_pack_spmm_fn)(
+typedef enum xnn_status (*xnn_pack_spmm_w_fn)(
   size_t group_output_channels,
   size_t output_channels_block_size,
   size_t group_input_channels,
@@ -876,7 +972,7 @@ typedef enum xnn_status (*xnn_pack_spmm_fn)(
   void* nonzero_values,
   size_t* first_input_channel);
 
-XNN_INTERNAL enum xnn_status xnn_pack_f32_spmm(
+XNN_INTERNAL enum xnn_status xnn_pack_f32_spmm_w(
   size_t group_output_channels,
   size_t output_channels_block_size,
   size_t group_input_channels,
@@ -887,7 +983,7 @@ XNN_INTERNAL enum xnn_status xnn_pack_f32_spmm(
   float* nonzero_values,
   size_t* first_input_channel);
 
-XNN_INTERNAL enum xnn_status xnn_pack_f32_to_f16_spmm(
+XNN_INTERNAL enum xnn_status xnn_pack_f32_to_f16_spmm_w(
   size_t group_output_channels,
   size_t output_channels_block_size,
   size_t group_input_channels,
@@ -898,7 +994,7 @@ XNN_INTERNAL enum xnn_status xnn_pack_f32_to_f16_spmm(
   uint16_t* nonzero_values,
   size_t* first_input_channel);
 
-XNN_INTERNAL enum xnn_status xnn_pack_f16_spmm(
+XNN_INTERNAL enum xnn_status xnn_pack_f16_spmm_w(
   size_t group_output_channels,
   size_t output_channels_block_size,
   size_t group_input_channels,

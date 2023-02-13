@@ -488,6 +488,7 @@ struct conv2d_context {
 #endif
 
 struct dwconv_context {
+  size_t kernel_size;
   const void** indirect_input;
   intptr_t indirect_input_width_stride;
   size_t indirect_input_height_stride;
@@ -509,11 +510,16 @@ struct dwconv_context {
   } params;
   union {
     xnn_dwconv_unipass_ukernel_fn unipass_ukernel;
+    xnn_dwconv_multipass_ukernel_fn multipass_ukernel;
   };
 };
 
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_dwconv_unipass(
+      const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
+      size_t output_y);
+  XNN_PRIVATE void xnn_compute_dwconv_multipass(
       const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t output_y);
@@ -944,6 +950,7 @@ struct univector_strided_context {
     union xnn_f32_sigmoid_params f32_sigmoid;
     union xnn_f32_sqrt_params f32_sqrt;
     union xnn_qs8_cvt_params qs8_cvt;
+    union xnn_qs16_qs8_cvt_params qs16_qs8_cvt;
     union xnn_qs8_f32_cvt_params qs8_f32_cvt;
     union xnn_qs8_lrelu_params qs8_lrelu;
     union xnn_qu8_cvt_params qu8_cvt;
@@ -990,6 +997,7 @@ struct univector_contiguous_context {
     union xnn_f32_sigmoid_params f32_sigmoid;
     union xnn_f32_sqrt_params f32_sqrt;
     union xnn_qs8_cvt_params qs8_cvt;
+    union xnn_qs16_qs8_cvt_params qs16_qs8_cvt;
     union xnn_qs8_f32_cvt_params qs8_f32_cvt;
     union xnn_qs8_lrelu_params qs8_lrelu;
     union xnn_qu8_cvt_params qu8_cvt;

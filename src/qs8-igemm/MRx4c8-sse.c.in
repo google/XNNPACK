@@ -56,7 +56,7 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_fp32_ukernel_${MR}x4c8__${ISA}_${VARIA
   assert(w != NULL);
   assert(c != NULL);
 
-  kc = round_up_po2(kc, 8);
+  kc = round_up_po2(kc, 8 * sizeof(${XINT8_T}));
   ${XINT8_T}* c0 = c;
   $for M in range(1, MR):
     ${XINT8_T}* c${M} = (${XINT8_T}*) ((uintptr_t) c${M-1} + cm_stride);

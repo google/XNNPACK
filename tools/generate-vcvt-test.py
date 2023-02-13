@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f32|qs8|qu8)(_(f16|f32|qs8|qu8))?_vcvt_ukernel__(.+)_x(\d+)", name)
+  match = re.fullmatch(r"xnn_(f16|f32|qs16|qs8|qu8)(_(f16|f32|qs8|qu8))?_vcvt_ukernel__(.+)_x(\d+)", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 
@@ -36,6 +36,7 @@ def split_ukernel_name(name):
     output_datatype = match.group(3)
   else:
     output_datatype = input_datatype
+
   batch_tile = int(match.group(5))
 
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(4))
@@ -48,6 +49,8 @@ TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}) {
     ${ISA_CHECK};
   VCvtMicrokernelTester()
     .batch_size(${BATCH_TILE})
+    $if INPUT_DATATYPE == "QS16":
+      .input_zero_point(0)
     $if OUTPUT_DATATYPE == "QS8":
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
@@ -64,6 +67,8 @@ $if BATCH_TILE > 1:
     for (size_t batch_size = ${BATCH_TILE*2}; batch_size < ${BATCH_TILE*10}; batch_size += ${BATCH_TILE}) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
+        $if INPUT_DATATYPE == "QS16":
+          .input_zero_point(0)
         $if OUTPUT_DATATYPE == "QS8":
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
@@ -80,6 +85,8 @@ $if BATCH_TILE > 1:
     for (size_t batch_size = 1; batch_size < ${BATCH_TILE}; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
+        $if INPUT_DATATYPE == "QS16":
+          .input_zero_point(0)
         $if OUTPUT_DATATYPE == "QS8":
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
@@ -96,6 +103,8 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   for (size_t batch_size = ${BATCH_TILE+1}; batch_size < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch_size++) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
+      $if INPUT_DATATYPE == "QS16":
+        .input_zero_point(0)
       $if OUTPUT_DATATYPE == "QS8":
         .qmin(std::numeric_limits<int8_t>::min())
         .qmax(std::numeric_limits<int8_t>::max())
@@ -114,6 +123,8 @@ $if INPUT_DATATYPE.startswith("Q") or OUTPUT_DATATYPE.startswith("Q"):
       VCvtMicrokernelTester()
         .batch_size(batch_size)
         .scale(50)
+        $if INPUT_DATATYPE == "QS16":
+          .input_zero_point(0)
         $if OUTPUT_DATATYPE == "QS8":
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
@@ -153,6 +164,8 @@ $if OUTPUT_DATATYPE in ["QS8", "QU8"]:
       for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
         VCvtMicrokernelTester()
           .batch_size(batch_size)
+          $if INPUT_DATATYPE == "QS16":
+            .input_zero_point(0)
           .output_zero_point(output_zero_point)
           $if OUTPUT_DATATYPE == "QS8":
             .qmin(std::numeric_limits<int8_t>::min())
@@ -191,6 +204,8 @@ $if OUTPUT_DATATYPE in ["QS8", "QU8"]:
         VCvtMicrokernelTester()
           .batch_size(batch_size)
           .scale(4294967296.0f)
+          $if INPUT_DATATYPE == "QS16":
+            .input_zero_point(0)
           $if OUTPUT_DATATYPE == "QS8":
             .qmin(std::numeric_limits<int8_t>::min())
             .qmax(std::numeric_limits<int8_t>::max())
@@ -225,6 +240,8 @@ $if INPUT_DATATYPE == "F32" and OUTPUT_DATATYPE == "QS8":
         VCvtMicrokernelTester()
           .batch_size(batch_size)
           .scale(500)
+          $if INPUT_DATATYPE == "QS16":
+            .input_zero_point(0)
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(qmax)
           .Test(${", ".join(TEST_ARGS)});

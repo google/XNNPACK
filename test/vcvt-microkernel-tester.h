@@ -281,6 +281,48 @@ class VCvtMicrokernelTester {
     }
   }
 
+  void Test(xnn_qs16_qs8_vcvt_ukernel_fn vcvt, xnn_init_qs16_qs8_cvt_params_fn init_params) const {
+    ASSERT_EQ(input_zero_point(), 0);
+    ASSERT_GE(output_zero_point(), std::numeric_limits<int8_t>::min());
+    ASSERT_LE(output_zero_point(), std::numeric_limits<int8_t>::max());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_int_distribution<int16_t> i16dist;
+
+    std::vector<int16_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
+    std::vector<int8_t> output(batch_size());
+    std::vector<int8_t> output_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return i16dist(rng); });
+      std::fill(output.begin(), output.end(), INT8_C(0xA5));
+
+      union xnn_qs16_qs8_cvt_params params;
+      init_params(&params, scale(), output_zero_point());
+
+      // Call optimized micro-kernel.
+      vcvt(batch_size() * sizeof(int16_t), input.data(), output.data(), &params);
+
+      // Compute reference results
+      const int64_t multiplier = std::llrintf(65536.0f * scale());
+      for (size_t i = 0; i < batch_size(); i++) {
+        const int64_t input_value = input[i];
+        int32_t output_value = static_cast<int32_t>(math_asr_s64(input_value * multiplier + INT64_C(0x8000), 16)) + output_zero_point();
+        output_value = std::min<int32_t>(output_value, std::numeric_limits<int8_t>::max());
+        output_value = std::max<int32_t>(output_value, std::numeric_limits<int8_t>::min());
+        output_ref[i] = static_cast<int8_t>(output_value);
+      }
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        EXPECT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
+          << "at " << i << " / " << batch_size()
+          << ", x[" << i << "] = " << input[i]
+          << " * scale " << scale() << " = " << int32_t(output_ref[i]);
+      }
+    }
+  }
+
   void Test(xnn_qs8_f32_vcvt_ukernel_fn vcvt, xnn_init_qs8_f32_cvt_params_fn init_params) const {
     ASSERT_GE(input_zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(input_zero_point(), std::numeric_limits<int8_t>::max());

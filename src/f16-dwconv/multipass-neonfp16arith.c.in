@@ -1,0 +1,345 @@
+// Copyright 2022 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$CHANNEL_SUBTILE = 8
+$assert CHANNEL_TILE % CHANNEL_SUBTILE == 0
+$CHANNEL_ROUND = 4
+$assert MIDDLE_PASS_TILE <= LAST_PASS_TILE
+$assert FIRST_PASS_TILE >= 1
+$assert MIDDLE_PASS_TILE >= 1
+$assert LAST_PASS_TILE >= 1
+$assert ACCUMULATORS >= 1
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <arm_neon.h>
+
+#include <xnnpack/dwconv.h>
+#include <xnnpack/math.h>
+
+
+void xnn_f16_dwconv_minmax_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST_PASS_TILE}l${CHANNEL_TILE}c${CHANNEL_SUBTILE}s${CHANNEL_ROUND}r__neonfp16arith${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+    size_t channels,
+    size_t output_width,
+    const void** input,
+    const void* weights,
+    void* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    const void* zero,
+    size_t kernel_size,
+    void* buffer,
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(channels != 0);
+  assert(output_width != 0);
+  assert(kernel_size > ${FIRST_PASS_TILE});
+
+  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
+  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+  do {
+    const uint16_t* w = weights;
+
+    // First pass to process ${FIRST_PASS_TILE} inputs.
+    {
+      uint16_t* b = buffer;
+      $for K in range(FIRST_PASS_TILE):
+        const uint16_t* i${K} = input[${K}];
+        assert(i${K} != NULL);
+        if XNN_UNPREDICTABLE(i${K} != zero) {
+          i${K} = (const uint16_t*) ((uintptr_t) i${K} + input_offset);
+        }
+      input += ${FIRST_PASS_TILE};
+
+      size_t c = round_up_po2(channels, ${CHANNEL_ROUND});
+      $if CHANNEL_TILE > 8:
+        for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+          $for C in range(0, CHANNEL_TILE, 8):
+            float16x8_t vacc${ABC[C:C+8]}p0 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+          $for K in range(FIRST_PASS_TILE):
+
+            $for C in range(0, CHANNEL_TILE, 8):
+              const float16x8_t vi${K}x${ABC[C:C+8]} = vreinterpretq_f16_u16(vld1q_u16(i${K})); i${K} += 8;
+            $for C in range(0, CHANNEL_TILE, 8):
+              const float16x8_t vk${K}x${ABC[C:C+8]} = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+            $for C in range(0, CHANNEL_TILE, 8):
+              $if 1 <= K < ACCUMULATORS:
+                float16x8_t vacc${ABC[C:C+8]}p${K} = vmulq_f16(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+              $else:
+                vacc${ABC[C:C+8]}p${K % ACCUMULATORS} = vfmaq_f16(vacc${ABC[C:C+8]}p${K % ACCUMULATORS}, vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+
+          $if ACCUMULATORS > 1:
+            // Add up all accumulators to vacc${ABC[0:8]}p0
+            $ACC_SLICE = 1
+            $while ACC_SLICE < ACCUMULATORS:
+              $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                $if A + ACC_SLICE < ACCUMULATORS:
+                  $for C in range(0, CHANNEL_TILE, 8):
+                    vacc${ABC[C:C+8]}p${A} = vaddq_f16(vacc${ABC[C:C+8]}p${A}, vacc${ABC[C:C+8]}p${A + ACC_SLICE});
+              $ACC_SLICE *= 2
+
+          $for C in range(0, CHANNEL_TILE, 8):
+            vst1q_u16(b, vreinterpretq_u16_f16(vacc${ABC[C:C+8]}p0)); b += 8;
+        }
+
+      for (; c >= ${CHANNEL_SUBTILE}; c -= ${CHANNEL_SUBTILE}) {
+        float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+
+        $for K in range(FIRST_PASS_TILE):
+
+          const float16x8_t vi${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(i${K})); i${K} += 8;
+          const float16x8_t vk${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+          $if 1 <= K < ACCUMULATORS:
+            float16x8_t vacc01234567p${K} = vmulq_f16(vi${K}x01234567, vk${K}x01234567);
+          $else:
+            vacc01234567p${K % ACCUMULATORS} = vfmaq_f16(vacc01234567p${K % ACCUMULATORS}, vi${K}x01234567, vk${K}x01234567);
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc01234567p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc01234567p${A} = vaddq_f16(vacc01234567p${A}, vacc01234567p${A + ACC_SLICE});
+            $ACC_SLICE *= 2
+
+        vst1q_u16(b, vreinterpretq_u16_f16(vacc01234567p0)); b += 8;
+      }
+
+      if (c != 0) {
+        float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+        $for K in range(FIRST_PASS_TILE):
+
+          const float16x8_t vi${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(i${K})); i${K} += 8;
+          const float16x8_t vk${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+          $if 1 <= K < ACCUMULATORS:
+            float16x8_t vacc01234567p${K} = vmulq_f16(vi${K}x01234567, vk${K}x01234567);
+          $else:
+            vacc01234567p${K % ACCUMULATORS} = vfmaq_f16(vacc01234567p${K % ACCUMULATORS}, vi${K}x01234567, vk${K}x01234567);
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc0123p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc01234567p${A} = vaddq_f16(vacc01234567p${A}, vacc01234567p${A + ACC_SLICE});
+            $ACC_SLICE *= 2
+
+        vst1q_u16(b, vreinterpretq_u16_f16(vacc01234567p0)); b += 8;
+      }
+    }
+
+    // Middle pass to process ${MIDDLE_PASS_TILE} inputs in each iteration.
+    for (size_t ks = kernel_size - ${FIRST_PASS_TILE}; ks > ${LAST_PASS_TILE}; ks -= ${MIDDLE_PASS_TILE}) {
+      uint16_t* b = buffer;
+      $for K in range(MIDDLE_PASS_TILE):
+        const uint16_t* i${K} = input[${K}];
+        assert(i${K} != NULL);
+        if XNN_UNPREDICTABLE(i${K} != zero) {
+          i${K} = (const uint16_t*) ((uintptr_t) i${K} + input_offset);
+        }
+      input += ${MIDDLE_PASS_TILE};
+
+      size_t c = round_up_po2(channels, ${CHANNEL_ROUND});
+      $if CHANNEL_TILE > 8:
+        for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+          float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(b));
+          $for C in range(8, CHANNEL_TILE, 8):
+            float16x8_t vacc${ABC[C:C+8]}p0 = vreinterpretq_f16_u16(vld1q_u16(b + ${C}));
+          $for K in range(MIDDLE_PASS_TILE):
+
+            $for C in range(0, CHANNEL_TILE, 8):
+              const float16x8_t vi${K}x${ABC[C:C+8]} = vreinterpretq_f16_u16(vld1q_u16(i${K})); i${K} += 8;
+            $for C in range(0, CHANNEL_TILE, 8):
+              const float16x8_t vk${K}x${ABC[C:C+8]} = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+            $for C in range(0, CHANNEL_TILE, 8):
+              $if 1 <= K < ACCUMULATORS:
+                float16x8_t vacc${ABC[C:C+8]}p${K} = vmulq_f16(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+              $else:
+                vacc${ABC[C:C+8]}p${K % ACCUMULATORS} = vfmaq_f16(vacc${ABC[C:C+8]}p${K % ACCUMULATORS}, vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+
+          $if ACCUMULATORS > 1:
+            // Add up all accumulators to vacc${ABC[0:8]}p0
+            $ACC_SLICE = 1
+            $while ACC_SLICE < ACCUMULATORS:
+              $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                $if A + ACC_SLICE < ACCUMULATORS:
+                  $for C in range(0, CHANNEL_TILE, 8):
+                    vacc${ABC[C:C+8]}p${A} = vaddq_f16(vacc${ABC[C:C+8]}p${A}, vacc${ABC[C:C+8]}p${A + ACC_SLICE});
+              $ACC_SLICE *= 2
+
+          $for C in range(0, CHANNEL_TILE, 8):
+            vst1q_u16(b, vreinterpretq_u16_f16(vacc${ABC[C:C+8]}p0)); b += 8;
+        }
+
+      for (; c >= ${CHANNEL_SUBTILE}; c -= ${CHANNEL_SUBTILE}) {
+        float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(b));
+
+        $for K in range(MIDDLE_PASS_TILE):
+
+          const float16x8_t vi${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(i${K})); i${K} += 8;
+          const float16x8_t vk${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+          $if 1 <= K < ACCUMULATORS:
+            float16x8_t vacc01234567p${K} = vmulq_f16(vi${K}x01234567, vk${K}x01234567);
+          $else:
+            vacc01234567p${K % ACCUMULATORS} = vfmaq_f16(vacc01234567p${K % ACCUMULATORS}, vi${K}x01234567, vk${K}x01234567);
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc${ABC[0:8]}p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc01234567p${A} = vaddq_f16(vacc01234567p${A}, vacc01234567p${A + ACC_SLICE});
+            $ACC_SLICE *= 2
+
+        vst1q_u16(b, vreinterpretq_u16_f16(vacc01234567p0)); b += 8;
+      }
+
+      if (c != 0) {
+        float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(b));
+        $for K in range(MIDDLE_PASS_TILE):
+
+          const float16x8_t vi${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(i${K})); i${K} += 8;
+          const float16x8_t vk${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+          $if 1 <= K < ACCUMULATORS:
+            float16x8_t vacc01234567p${K} = vmulq_f16(vi${K}x01234567, vk${K}x01234567);
+          $else:
+            vacc01234567p${K % ACCUMULATORS} = vfmaq_f16(vacc01234567p${K % ACCUMULATORS}, vi${K}x01234567, vk${K}x01234567);
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc01234567p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc01234567p${A} = vaddq_f16(vacc01234567p${A}, vacc01234567p${A + ACC_SLICE});
+            $ACC_SLICE *= 2
+
+        vst1q_u16(b, vreinterpretq_u16_f16(vacc01234567p0)); b += 8;
+      }
+    }
+
+    // Last pass to process up to ${LAST_PASS_TILE} inputs.
+    {
+      uint16_t* b = buffer;
+      $for K in range(0, LAST_PASS_TILE):
+        const uint16_t* i${K} = input[${K}];
+        assert(i${K} != NULL);
+        if XNN_UNPREDICTABLE(i${K} != zero) {
+          i${K} = (const uint16_t*) ((uintptr_t) i${K} + input_offset);
+        }
+
+      size_t c = channels;
+      $if CHANNEL_TILE > 8:
+        for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+          $for C in range(0, CHANNEL_TILE, 8):
+            float16x8_t vacc${ABC[C:C+8]}p0 = vreinterpretq_f16_u16(vld1q_u16(b)); b += 8;
+          $for K in range(LAST_PASS_TILE):
+
+            $for C in range(0, CHANNEL_TILE, 8):
+              const float16x8_t vi${K}x${ABC[C:C+8]} = vreinterpretq_f16_u16(vld1q_u16(i${K})); i${K} += 8;
+            $for C in range(0, CHANNEL_TILE, 8):
+              float16x8_t vk${K}x${ABC[C:C+8]} = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+            $for C in range(0, CHANNEL_TILE, 8):
+              $if 1 <= K < ACCUMULATORS:
+                float16x8_t vacc${ABC[C:C+8]}p${K} = vmulq_f16(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+              $else:
+                vacc${ABC[C:C+8]}p${K % ACCUMULATORS} = vfmaq_f16(vacc${ABC[C:C+8]}p${K % ACCUMULATORS}, vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+
+          $if ACCUMULATORS > 1:
+            // Add up all accumulators to vacc${ABC[0:8]}p0
+            $ACC_SLICE = 1
+            $while ACC_SLICE < ACCUMULATORS:
+              $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+                $if A + ACC_SLICE < ACCUMULATORS:
+                  $for C in range(0, CHANNEL_TILE, 8):
+                    vacc${ABC[C:C+8]}p${A} = vaddq_f16(vacc${ABC[C:C+8]}p${A}, vacc${ABC[C:C+8]}p${A + ACC_SLICE});
+              $ACC_SLICE *= 2
+
+          $for C in range(0, CHANNEL_TILE, 8):
+            float16x8_t vacc${ABC[C:C+8]} = vmaxq_f16(vacc${ABC[C:C+8]}p0, vmin);
+
+          $for C in range(0, CHANNEL_TILE, 8):
+            vacc${ABC[C:C+8]} = vminq_f16(vacc${ABC[C:C+8]}, vmax);
+
+          $for C in range(0, CHANNEL_TILE, 8):
+            vst1q_u16(output, vreinterpretq_u16_f16(vacc${ABC[C:C+8]})); output = (uint16_t*) output + 8;
+        }
+
+
+      for (; c >= 8; c -= 8) {
+        float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(b)); b += 8;
+        $for K in range(LAST_PASS_TILE):
+
+          const float16x8_t vi${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(i${K})); i${K} += 8;
+          float16x8_t vk${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+          $if 1 <= K < ACCUMULATORS:
+            float16x8_t vacc01234567p${K} = vmulq_f16(vi${K}x01234567, vk${K}x01234567);
+          $else:
+            vacc01234567p${K % ACCUMULATORS} = vfmaq_f16(vacc01234567p${K % ACCUMULATORS}, vi${K}x01234567, vk${K}x01234567);
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc01234567p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc01234567p${A} = vaddq_f16(vacc01234567p${A}, vacc01234567p${A + ACC_SLICE});
+            $ACC_SLICE *= 2
+
+        float16x8_t vacc01234567 = vmaxq_f16(vacc01234567p0, vmin);
+
+        vacc01234567 = vminq_f16(vacc01234567, vmax);
+
+        vst1q_u16(output, vreinterpretq_u16_f16(vacc01234567)); output = (uint16_t*) output + 8;
+      }
+
+      if XNN_UNLIKELY(c != 0) {
+        float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(b));
+        $for K in range(LAST_PASS_TILE):
+
+          const float16x8_t vi${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(i${K}));
+          float16x8_t vk${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+          $if 1 <= K < ACCUMULATORS:
+            float16x8_t vacc01234567p${K} = vmulq_f16(vi${K}x01234567, vk${K}x01234567);
+          $else:
+            vacc01234567p${K % ACCUMULATORS} = vfmaq_f16(vacc01234567p${K % ACCUMULATORS}, vi${K}x01234567, vk${K}x01234567);
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc${ABC[0:4]}p0
+          $ACC_SLICE = 1
+          $while ACC_SLICE < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+              $if A + ACC_SLICE < ACCUMULATORS:
+                vacc01234567p${A} = vaddq_f16(vacc01234567p${A}, vacc01234567p${A + ACC_SLICE});
+            $ACC_SLICE *= 2
+
+        float16x8_t vacc01234567 = vmaxq_f16(vacc01234567p0, vmin);
+        vacc01234567 = vminq_f16(vacc01234567, vmax);
+
+        float16x4_t vacc0123 = vget_low_f16(vacc01234567);
+        if (c & 4) {
+          vst1_u16(output, vreinterpret_u16_f16(vacc0123)); output = (uint16_t*) output + 4;
+          vacc0123 = vget_high_f16(vacc01234567);
+        }
+        if (c & 2) {
+          vst1_lane_u32((void*) output, vreinterpret_u32_f16(vacc0123), 0); output = (uint16_t*) output + 2;
+          vacc0123 = vext_f16(vacc0123, vacc0123, 2);
+        }
+        if (c & 1) {
+          vst1_lane_u16(output, vreinterpret_u16_f16(vacc0123), 0); output = (uint16_t*) output + 1;
+        }
+      }
+
+    }
+    input = (const void**) (const uint16_t**) ((uintptr_t) input + input_stride);
+    output = (uint16_t*) ((uintptr_t) output + output_increment);
+  } while (--output_width != 0);
+}
