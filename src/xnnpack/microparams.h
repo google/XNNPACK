@@ -1293,6 +1293,15 @@ union xnn_qs16_qs8_cvt_params {
   } sse2;
   struct {
     XNN_ALIGN(16) int32_t multiplier[4];
+    XNN_ALIGN(16) int64_t bias[2];  // Adjust for input bias multiplied.
+    XNN_ALIGN(16) uint16_t input_bias[8];  // Convert to unsigned.
+    XNN_ALIGN(16) uint8_t shuffle01[16];  // shuffle first 2 inputs
+    XNN_ALIGN(16) uint8_t shuffle23[16];  // shuffle next 2 inputs
+    XNN_ALIGN(16) uint8_t shuffle45[16];  // shuffle another 2 inputs
+    XNN_ALIGN(16) uint8_t shuffle67[16];  // shuffle last 2 inputs
+  } ssse3;
+  struct {
+    XNN_ALIGN(16) int32_t multiplier[4];
     XNN_ALIGN(16) int64_t bias[2];  // Rounding + output_zero_point.
     XNN_ALIGN(16) uint8_t shuffle01[16];  // shuffle first 2 inputs
     XNN_ALIGN(16) uint8_t shuffle23[16];  // shuffle next 2 inputs

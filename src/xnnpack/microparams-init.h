@@ -975,8 +975,9 @@ DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs8_cvt_scalar_params)
 
 DECLARE_INIT_QS16_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs16_qs8_cvt_scalar_params)
 DECLARE_INIT_QS16_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs16_qs8_cvt_neon_params)
-DECLARE_INIT_QS16_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs16_qs8_cvt_sse4_params)
 DECLARE_INIT_QS16_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs16_qs8_cvt_sse2_params)
+DECLARE_INIT_QS16_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs16_qs8_cvt_ssse3_params)
+DECLARE_INIT_QS16_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs16_qs8_cvt_sse4_params)
 
 #define DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \

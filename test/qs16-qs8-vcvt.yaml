@@ -21,6 +21,14 @@
 - name: xnn_qs16_qs8_vcvt_ukernel__sse2_x16
   init: xnn_init_qs16_qs8_cvt_sse2_params
 
+# x86 SSSE3
+- name: xnn_qs16_qs8_vcvt_ukernel__ssse3_x4
+  init: xnn_init_qs16_qs8_cvt_ssse3_params
+- name: xnn_qs16_qs8_vcvt_ukernel__ssse3_x8
+  init: xnn_init_qs16_qs8_cvt_ssse3_params
+- name: xnn_qs16_qs8_vcvt_ukernel__ssse3_x16
+  init: xnn_init_qs16_qs8_cvt_ssse3_params
+
 # x86 SSE4.1
 - name: xnn_qs16_qs8_vcvt_ukernel__sse41_x4
   init: xnn_init_qs16_qs8_cvt_sse4_params

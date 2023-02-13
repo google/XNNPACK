@@ -6532,6 +6532,100 @@ size_t xnn_init_qs16_qs8_cvt_sse2_params(
   return sizeof(params->sse2);
 }
 
+size_t xnn_init_qs16_qs8_cvt_ssse3_params(
+  union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  int8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-16);
+  assert(input_output_scale <= 0x1.0p+8);
+
+  const long multiplier = lrintf(65536.0f * input_output_scale);
+  assert(multiplier >= 1L);
+  assert(multiplier <= 0x01000000L);
+  const int64_t bias = (int64_t) ((uint64_t) output_zero_point << 32) + INT64_C(0x80000000) -
+      (INT64_C(0x80000000) * (int64_t) multiplier);
+
+  for (uint32_t i = 0; i < 8; i++) {
+    params->ssse3.input_bias[i] = UINT16_C(0x8000);
+  }
+  for (uint32_t i = 0; i < 4; i++) {
+    params->ssse3.multiplier[i] = (int32_t) multiplier;
+  }
+  for (uint32_t i = 0; i < 2; i++) {
+    params->ssse3.bias[i] = (int64_t) bias;
+  }
+  params->ssse3.shuffle01[0]  = 0x80;
+  params->ssse3.shuffle01[1]  = 0x80;
+  params->ssse3.shuffle01[2]  = 0;
+  params->ssse3.shuffle01[3]  = 1;
+  params->ssse3.shuffle01[4]  = 0x80;
+  params->ssse3.shuffle01[5]  = 0x80;
+  params->ssse3.shuffle01[6]  = 0x80;
+  params->ssse3.shuffle01[7]  = 0x80;
+  params->ssse3.shuffle01[8]  = 0x80;
+  params->ssse3.shuffle01[9]  = 0x80;
+  params->ssse3.shuffle01[10] = 2;
+  params->ssse3.shuffle01[11] = 3;
+  params->ssse3.shuffle01[12] = 0x80;
+  params->ssse3.shuffle01[13] = 0x80;
+  params->ssse3.shuffle01[14] = 0x80;
+  params->ssse3.shuffle01[15] = 0x80;
+
+  params->ssse3.shuffle23[0]  = 0x80;
+  params->ssse3.shuffle23[1]  = 0x80;
+  params->ssse3.shuffle23[2]  = 4;
+  params->ssse3.shuffle23[3]  = 5;
+  params->ssse3.shuffle23[4]  = 0x80;
+  params->ssse3.shuffle23[5]  = 0x80;
+  params->ssse3.shuffle23[6]  = 0x80;
+  params->ssse3.shuffle23[7]  = 0x80;
+  params->ssse3.shuffle23[8]  = 0x80;
+  params->ssse3.shuffle23[9]  = 0x80;
+  params->ssse3.shuffle23[10] = 6;
+  params->ssse3.shuffle23[11] = 7;
+  params->ssse3.shuffle23[12] = 0x80;
+  params->ssse3.shuffle23[13] = 0x80;
+  params->ssse3.shuffle23[14] = 0x80;
+  params->ssse3.shuffle23[15] = 0x80;
+
+  params->ssse3.shuffle45[0]  = 0x80;
+  params->ssse3.shuffle45[1]  = 0x80;
+  params->ssse3.shuffle45[2]  = 8;
+  params->ssse3.shuffle45[3]  = 9;
+  params->ssse3.shuffle45[4]  = 0x80;
+  params->ssse3.shuffle45[5]  = 0x80;
+  params->ssse3.shuffle45[6]  = 0x80;
+  params->ssse3.shuffle45[7]  = 0x80;
+  params->ssse3.shuffle45[8]  = 0x80;
+  params->ssse3.shuffle45[9]  = 0x80;
+  params->ssse3.shuffle45[10] = 10;
+  params->ssse3.shuffle45[11] = 11;
+  params->ssse3.shuffle45[12] = 0x80;
+  params->ssse3.shuffle45[13] = 0x80;
+  params->ssse3.shuffle45[14] = 0x80;
+  params->ssse3.shuffle45[15] = 0x80;
+
+  params->ssse3.shuffle67[0]  = 0x80;
+  params->ssse3.shuffle67[1]  = 0x80;
+  params->ssse3.shuffle67[2]  = 12;
+  params->ssse3.shuffle67[3]  = 13;
+  params->ssse3.shuffle67[4]  = 0x80;
+  params->ssse3.shuffle67[5]  = 0x80;
+  params->ssse3.shuffle67[6]  = 0x80;
+  params->ssse3.shuffle67[7]  = 0x80;
+  params->ssse3.shuffle67[8]  = 0x80;
+  params->ssse3.shuffle67[9]  = 0x80;
+  params->ssse3.shuffle67[10] = 14;
+  params->ssse3.shuffle67[11] = 15;
+  params->ssse3.shuffle67[12] = 0x80;
+  params->ssse3.shuffle67[13] = 0x80;
+  params->ssse3.shuffle67[14] = 0x80;
+  params->ssse3.shuffle67[15] = 0x80;
+  return sizeof(params->ssse3);
+}
+
+
 size_t xnn_init_qs16_qs8_cvt_sse4_params(
   union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float input_output_scale,
