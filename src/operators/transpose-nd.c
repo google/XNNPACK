@@ -93,7 +93,8 @@ static enum xnn_status setup_transpose_nd(
   const size_t* perm,
   const size_t* input_stride,
   const size_t* output_stride,
-  size_t element_size)
+  size_t element_size,
+  const bool prevent_perm_normalization)
 {
   transpose_op->state = xnn_run_state_invalid;
   enum xnn_status status = xnn_status_invalid_parameter;
@@ -185,8 +186,22 @@ static enum xnn_status setup_transpose_nd(
   size_t normalized_shape[XNN_MAX_TENSOR_DIMS];
   size_t normalized_perm[XNN_MAX_TENSOR_DIMS];
   size_t normalized_element_size;
-  xnn_normalize_transpose_permutation(num_dims, element_size, perm, input_shape, input_stride, output_stride, &normalized_dims,
-                                      &normalized_element_size, normalized_perm, normalized_shape, context->input_stride, context->output_stride);
+  if(!prevent_perm_normalization) {
+    xnn_normalize_transpose_permutation(num_dims, element_size, perm, input_shape, input_stride, output_stride,
+                                        &normalized_dims, &normalized_element_size, normalized_perm, normalized_shape,
+                                        context->input_stride, context->output_stride);
+  } else {
+    normalized_dims = num_dims;
+    memcpy(normalized_shape, input_shape, num_dims * sizeof(size_t));
+    memcpy(normalized_perm, perm, num_dims * sizeof(size_t));
+    normalized_element_size = element_size;
+    context->input_stride[normalized_dims - 1] = normalized_element_size;
+    context->output_stride[normalized_dims - 1] = normalized_element_size;
+    for(size_t i = normalized_dims - 1; i > 0; --i) {
+      context->input_stride[i - 1] = context->input_stride[i] * normalized_shape[i];
+      context->output_stride[i - 1] = context->output_stride[i] * normalized_shape[normalized_perm[i]];
+    }
+  }
 
   size_t loop_order[XNN_MAX_TENSOR_DIMS];
   memcpy(loop_order, normalized_perm, sizeof(size_t) * normalized_dims);
@@ -378,7 +393,7 @@ enum xnn_status xnn_setup_transpose_nd_x32(
     transpose_op,
     input, output,
     num_dims, shape, perm, NULL, NULL,
-    sizeof(uint32_t));
+    sizeof(uint32_t), false);
 }
 
 enum xnn_status xnn_setup_transpose_nd_x16(
@@ -401,7 +416,7 @@ enum xnn_status xnn_setup_transpose_nd_x16(
     transpose_op,
     input, output,
     num_dims, shape, perm, NULL, NULL,
-    sizeof(uint16_t));
+    sizeof(uint16_t), false);
 }
 
 enum xnn_status xnn_setup_transpose_nd_x8(
@@ -424,7 +439,7 @@ enum xnn_status xnn_setup_transpose_nd_x8(
     transpose_op,
     input, output,
     num_dims, shape, perm, NULL, NULL,
-    sizeof(uint8_t));
+    sizeof(uint8_t), false);
 }
 
 enum xnn_status run_transpose_nd(
@@ -446,7 +461,7 @@ enum xnn_status run_transpose_nd(
     &transpose_op,
     input, output,
     num_dims, input_shape, output_perm, NULL, NULL,
-    element_size);
+    element_size, false);
   if (status != xnn_status_success) {
     return status;
   }
@@ -671,7 +686,7 @@ enum xnn_status setup_depth_to_space_nchw2nhwc(
     depth_to_space_op,
     input, output,
     6, input_shape, perm, input_stride, output_stride,
-    element_size);
+    element_size, false);
 }
 
 enum xnn_status xnn_setup_depth_to_space_nchw2nhwc_x16(
@@ -916,7 +931,7 @@ static enum xnn_status setup_depth_to_space_nhwc(
     depth_to_space_op,
     input, output,
     5, input_shape, perm, input_stride, output_stride,
-    element_size);
+    element_size, false);
 }
 
 enum xnn_status xnn_setup_depth_to_space_nhwc_x8(
@@ -1182,7 +1197,7 @@ static enum xnn_status setup_space_to_depth_nhwc(
     space_to_depth_op,
     input, output,
     5, input_shape, perm, input_stride, output_stride,
-    element_size);
+    element_size, false);
 }
 
 enum xnn_status xnn_setup_space_to_depth_nhwc_x8(
