@@ -166,6 +166,24 @@ static void qs16_qs8_vcvt(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(qs16_qs8_vcvt, wasmsimd_x8,
+                    xnn_qs16_qs8_vcvt_ukernel__wasmsimd_x8,
+                    xnn_init_qs16_qs8_cvt_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int16_t, int8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qs16_qs8_vcvt, wasmsimd_x16,
+                    xnn_qs16_qs8_vcvt_ukernel__wasmsimd_x16,
+                    xnn_init_qs16_qs8_cvt_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int16_t, int8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qs16_qs8_vcvt, wasmsimd_x32,
+                    xnn_qs16_qs8_vcvt_ukernel__wasmsimd_x32,
+                    xnn_init_qs16_qs8_cvt_wasmsimd_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int16_t, int8_t>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
 BENCHMARK_CAPTURE(qs16_qs8_vcvt, scalar_x1,
                   xnn_qs16_qs8_vcvt_ukernel__scalar_x1,
                   xnn_init_qs16_qs8_cvt_scalar_params)

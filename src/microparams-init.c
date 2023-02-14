@@ -6625,7 +6625,6 @@ size_t xnn_init_qs16_qs8_cvt_ssse3_params(
   return sizeof(params->ssse3);
 }
 
-
 size_t xnn_init_qs16_qs8_cvt_sse4_params(
   union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float input_output_scale,
@@ -6715,6 +6714,30 @@ size_t xnn_init_qs16_qs8_cvt_sse4_params(
   return sizeof(params->sse4);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+size_t xnn_init_qs16_qs8_cvt_wasmsimd_params(
+  union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  float input_output_scale,
+  int8_t output_zero_point)
+{
+  assert(input_output_scale >= 0x1.0p-16);
+  assert(input_output_scale <= 0x1.0p+8);
+
+  const long multiplier = lrintf(65536.0f * input_output_scale);
+  const int64_t bias = ((int32_t) output_zero_point << 16) + INT32_C(0x8000);
+  assert(multiplier >= 1L);
+  assert(multiplier <= 0x01000000L);
+
+  for (uint32_t i = 0; i < 4; i++) {
+    params->wasmsimd.multiplier[i] = (int32_t) multiplier;
+  }
+  for (uint32_t i = 0; i < 2; i++) {
+    params->wasmsimd.bias[i] = (int64_t) bias;
+  }
+  return sizeof(params->wasmsimd);
+}
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 size_t xnn_init_qs8_f32_cvt_scalar_params(
   union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
