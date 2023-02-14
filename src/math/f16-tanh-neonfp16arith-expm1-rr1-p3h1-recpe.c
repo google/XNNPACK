@@ -53,9 +53,7 @@ void xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h1_recpe(
     float16x8_t vz = vabsq_f16(vx);
 
     // The function f[-z] saturates at -1 for large inputs: tanhf(-z) == -1.0f for z >= sat_cutoff ~= 4.5078125.
-    // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
-    // tanhf(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
-    vz = vminq_f16(vz, vsat_cutoff);
+    const uint16x8_t vm = vcgeq_f16(vz, vsat_cutoff);
 
     // Compute reduced argument n := round(-z / log(2), 1).
     // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
@@ -101,7 +99,11 @@ void xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h1_recpe(
     const float16x8_t vrep1 = vrecpeq_f16(vep1);
 
     // Reconstruct tanh(-z) := expm1(-2z) / (2.0 + expm1(-2z))
-    const float16x8_t vabsy = vmulq_f16(vem1, vrep1);
+    float16x8_t vabsy = vmulq_f16(vem1, vrep1);
+
+    // Saturate tanh(-z) at -1 for large inputs.
+    // We use 1 instead of -1 because sign will be copied from the input in the next step.
+    vabsy = vbslq_f16(vm, vone, vabsy);
 
     // Reconstruct tanh[x] = sign(x) * tanh[-abs(x)]
     const float16x8_t vy = vbslq_f16(vsign_mask, vx, vabsy);
