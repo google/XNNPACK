@@ -705,8 +705,8 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/math/f16-sigmoid-avx2-rr1-p2-rcp.c
   src/math/f16-sigmoid-avx2-rr1-p3-div.c
   src/math/f16-sigmoid-avx2-rr1-p3-rcp.c
-  src/math/f16-tanh-avx2-expm1-rr1-p3-div.c
-  src/math/f16-tanh-avx2-expm1-rr1-p3-rcp.c
+  src/math/f16-tanh-avx2-expm1-rr1-p3h2-div.c
+  src/math/f16-tanh-avx2-expm1-rr1-p3h2-rcp.c
   src/math/f32-exp-avx2-rr2-lut8-p3-perm.c
   src/math/f32-exp-avx2-rr2-lut8-p4-perm.c
   src/math/f32-exp-avx2-rr2-p5.c
@@ -1262,7 +1262,7 @@ SET(ALL_F16C_MICROKERNEL_SRCS
   src/f32-f16-vcvt/gen/f32-f16-vcvt-f16c-x8.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-f16c-x16.c
   src/math/f16-f32-cvt-f16c.c
-  src/math/f16-tanh-f16c-p19.c
+  src/math/f16-tanh-f16c-p19h9t2.c
   src/math/f32-f16-cvt-f16c.c)
 
 SET(ALL_FMA_MICROKERNEL_SRCS
@@ -1402,8 +1402,8 @@ SET(ALL_FMA3_MICROKERNEL_SRCS
   src/f32-vsqrt/gen/f32-vsqrt-fma3-nr1fma1adj-x48.c
   src/f32-vsqrt/gen/f32-vsqrt-fma3-nr1fma1adj-x56.c
   src/f32-vsqrt/gen/f32-vsqrt-fma3-nr1fma1adj-x64.c
-  src/math/f16-tanh-fma3-p17.c
-  src/math/f16-tanh-fma3-p19.c
+  src/math/f16-tanh-fma3-p17h8t2.c
+  src/math/f16-tanh-fma3-p19h9t2.c
   src/math/f32-sqrt-fma3-nr1fma1adj.c
   src/math/f32-sqrt-fma3-nr1fma.c
   src/math/f32-sqrt-fma3-nr2fma.c
@@ -3357,9 +3357,9 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/math/f16-sqrt-neonfp16arith-nr1fma1adj.c
   src/math/f16-sqrt-neonfp16arith-nr1fma.c
   src/math/f16-sqrt-neonfp16arith-nr1rsqrts.c
-  src/math/f16-tanh-neonfp16arith-expm1-rr1-p3-nr1fma.c
-  src/math/f16-tanh-neonfp16arith-expm1-rr1-p3-nr1recps.c
-  src/math/f16-tanh-neonfp16arith-expm1-rr1-p3-recpe.c)
+  src/math/f16-tanh-neonfp16arith-expm1-rr1-p3h1-nr1fma.c
+  src/math/f16-tanh-neonfp16arith-expm1-rr1-p3h1-nr1recps.c
+  src/math/f16-tanh-neonfp16arith-expm1-rr1-p3h1-recpe.c)
 
 SET(ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vdiv-minmax-aarch64-neonfp16arith-x8.c
@@ -3383,7 +3383,7 @@ SET(ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
   src/math/f16-sigmoid-aarch64-neonfp16arith-rr2-p2-div.c
   src/math/f16-sigmoid-aarch64-neonfp16arith-rr2-p3-div.c
   src/math/f16-sqrt-aarch64-neonfp16arith-sqrt.c
-  src/math/f16-tanh-aarch64-neonfp16arith-expm1-rr1-p3-div.c)
+  src/math/f16-tanh-aarch64-neonfp16arith-expm1-rr1-p3h1-div.c)
 
 SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-x8.c

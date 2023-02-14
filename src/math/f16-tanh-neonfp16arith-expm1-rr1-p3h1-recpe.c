@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f16_tanh__aarch64_neonfp16arith_expm1_rr1_p3_div(
+void xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h1_recpe(
     size_t n,
     const void* input,
     void* output)
@@ -92,9 +92,16 @@ void xnn_math_f16_tanh__aarch64_neonfp16arith_expm1_rr1_p3_div(
     vp = vfmaq_f16(vt, vp, vt);
     const float16x8_t vem1 = vfmaq_f16(vsm1, vp, vminus_two);
 
-    // Reconstruct tanh(-z) := expm1(-2z) / (2 + expm1(-2z))
+    // Denominator of the tanh fraction: expm1(-2z) + 2
     const float16x8_t vep1 = vsubq_f16(vem1, vminus_two);
-    const float16x8_t vabsy = vdivq_f16(vem1, vep1);
+
+    // Compute approximate reciprocal of denominator.
+    // Note: 2 < exp(-2z) + 1 <= 3, because z >= 0.0 and 0 < exp(-2z) <= 1.0.
+    // Thus the reciprocal of the denominator never overflows.
+    const float16x8_t vrep1 = vrecpeq_f16(vep1);
+
+    // Reconstruct tanh(-z) := expm1(-2z) / (2.0 + expm1(-2z))
+    const float16x8_t vabsy = vmulq_f16(vem1, vrep1);
 
     // Reconstruct tanh[x] = sign(x) * tanh[-abs(x)]
     const float16x8_t vy = vbslq_f16(vsign_mask, vx, vabsy);

@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f16_tanh__f16c_p19(
+void xnn_math_f16_tanh__f16c_p19h9t2(
     size_t n,
     const void* input,
     void* output)

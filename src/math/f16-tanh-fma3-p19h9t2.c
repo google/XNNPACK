@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f16_tanh__fma3_p17(
+void xnn_math_f16_tanh__fma3_p19h9t2(
     size_t n,
     const void* input,
     void* output)
@@ -23,21 +23,22 @@ void xnn_math_f16_tanh__fma3_p17(
 
   // The smallest number x above -0x1.208p+2h (the largest number z for which tanhh(z) is saturated at -1.0h) for which
   // this implementation of tanh(x) produce -1.0h output.
-  const __m256 vneg_cutoff = _mm256_set1_ps(-0x1.05C000p+2f);
+  const __m256 vneg_cutoff = _mm256_set1_ps(-0x1.1F0000p+2f);
   // The largest number x below 0x1.208p+2h (the smallest number z for which tanhh(z) is saturated at 1.0h) for which
   // this implementation of tanh(x) produce 1.0h output.
-  const __m256 vpos_cutoff = _mm256_set1_ps(0x1.05C000p+2f);
+  const __m256 vpos_cutoff = _mm256_set1_ps(0x1.1F0000p+2f);
   // Coefficient of polynomial approximation
-  //   tanh(x) ~ x * (1 + t * (c3 + t * (c5 + t * (c7 + t * (c9 + t * (c11 + t * (c13 + t * (c15 + t * c17))))))))
+  //   tanh(x) ~ x * (1 + t * (c3 + t * (c5 + t * (c7 + t * (c9 + t * (c11 + t * (c13 + t * (c15 + t * (c17 + t * c19)))))))))
   // on [-0x1.208p+2h, 0x1.208p+2] where t = x * x
-  const __m256 vc17 = _mm256_set1_ps(0x1.6B90F0p-29f);
-  const __m256 vc15 = _mm256_set1_ps(-0x1.036B86p-22f);
-  const __m256 vc13 = _mm256_set1_ps(0x1.3699B6p-17f);
-  const __m256 vc11 = _mm256_set1_ps(-0x1.964AECp-13f);
-  const __m256 vc9 = _mm256_set1_ps(0x1.3DD52Cp-9f);
-  const __m256 vc7 = _mm256_set1_ps(-0x1.348432p-6f);
-  const __m256 vc5 = _mm256_set1_ps(0x1.7D516Ap-4f);
-  const __m256 vc3 = _mm256_set1_ps(-0x1.41F3C8p-2f);
+  const __m256 vc19 = _mm256_set1_ps(-0x1.1D841Cp-32f);
+  const __m256 vc17 = _mm256_set1_ps(0x1.C4FC88p-26f);
+  const __m256 vc15 = _mm256_set1_ps(-0x1.332066p-20f);
+  const __m256 vc13 = _mm256_set1_ps(0x1.D1AEA2p-16f);
+  const __m256 vc11 = _mm256_set1_ps(-0x1.B2782Ep-12f);
+  const __m256 vc9 = _mm256_set1_ps(0x1.03CAEAp-8f);
+  const __m256 vc7 = _mm256_set1_ps(-0x1.967628p-6f);
+  const __m256 vc5 = _mm256_set1_ps(0x1.ABC35Cp-4f);
+  const __m256 vc3 = _mm256_set1_ps(-0x1.499D08p-2f);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
@@ -56,9 +57,10 @@ void xnn_math_f16_tanh__fma3_p17(
     // Compute t = x * x to use for polynomial evaluation
     const __m256 vt = _mm256_mul_ps(vx, vx);
 
-    // Compute degree-17 polynomial approximation for tanh(x) on [-0x1.208p+2, 0x1.208p+2].
-    //   P(t) = c3 + t * (c5 + t * (c7 + t * (c9 + t * (c11 + t * (c13 + t * (c15 + t * c17))))))
-    __m256 vp = _mm256_fmadd_ps(vc17, vt, vc15);
+    // Compute degree-19 polynomial approximation for tanh(x) on [-0x1.208p+2, 0x1.208p+2].
+    //   P(t) = c3 + t * (c5 + t * (c7 + t * (c9 + t * (c11 + t * (c13 + t * (c15 + t * (c17 + t * c19)))))))
+    __m256 vp = _mm256_fmadd_ps(vc19, vt, vc17);
+    vp = _mm256_fmadd_ps(vp, vt, vc15);
     vp = _mm256_fmadd_ps(vp, vt, vc13);
     vp = _mm256_fmadd_ps(vp, vt, vc11);
     vp = _mm256_fmadd_ps(vp, vt, vc9);

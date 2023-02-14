@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3_recpe(
+void xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h1_nr1fma(
     size_t n,
     const void* input,
     void* output)
@@ -95,10 +95,11 @@ void xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3_recpe(
     // Denominator of the tanh fraction: expm1(-2z) + 2
     const float16x8_t vep1 = vsubq_f16(vem1, vminus_two);
 
-    // Compute approximate reciprocal of denominator.
+    // Use Newton-Raphson method (1 iteration) to compute reciprocal of denominator.
     // Note: 2 < exp(-2z) + 1 <= 3, because z >= 0.0 and 0 < exp(-2z) <= 1.0.
     // Thus the reciprocal of the denominator never overflows.
-    const float16x8_t vrep1 = vrecpeq_f16(vep1);
+    float16x8_t vrep1 = vrecpeq_f16(vep1);
+    vrep1 = vfmaq_f16(vrep1, vrep1, vfmsq_f16(vone, vrep1, vep1));
 
     // Reconstruct tanh(-z) := expm1(-2z) / (2.0 + expm1(-2z))
     const float16x8_t vabsy = vmulq_f16(vem1, vrep1);
