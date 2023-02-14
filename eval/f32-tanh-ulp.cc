@@ -230,6 +230,11 @@ static void TanhError(benchmark::State& state,
                     benchmark::utils::CheckAVX)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, avx_expm1_rr1_lut4_p4h3_perm_div,
+                    xnn_math_f32_tanh__avx_expm1_rr1_lut4_p4h3_perm_div,
+                    benchmark::utils::CheckAVX)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, avx_expm1_rr1_p6h5_div,
                     xnn_math_f32_tanh__avx_expm1_rr1_p6h5_div,
                     benchmark::utils::CheckAVX)
@@ -296,6 +301,10 @@ BENCHMARK_CAPTURE(TanhError, fma_expm1_rr1_p6h5_div,
 
 BENCHMARK_CAPTURE(TanhError, scalar_expm1_rr1_lut4_p4h2_div,
                   xnn_math_f32_tanh__scalar_expm1_rr1_lut4_p4h2_div)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1_rr1_lut4_p4h3_div,
+                  xnn_math_f32_tanh__scalar_expm1_rr1_lut4_p4h3_div)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, scalar_expm1_rr1_lut8_p3h1_div,

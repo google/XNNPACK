@@ -137,6 +137,11 @@ static void TanhError(
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, aarch64_neonfp16arith_expm1_rr1_p3h2_div,
+                    xnn_math_f16_tanh__aarch64_neonfp16arith_expm1_rr1_p3h2_div,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
@@ -145,13 +150,28 @@ static void TanhError(
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1_rr1_p3h2_nr1fma,
+                    xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h2_nr1fma,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1_rr1_p3h1_nr1recps,
                     xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h1_nr1recps,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1_rr1_p3h2_nr1recps,
+                    xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h2_nr1recps,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1_rr1_p3h1_recpe,
                     xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h1_recpe,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1_rr1_p3h2_recpe,
+                    xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h2_recpe,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
