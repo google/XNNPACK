@@ -99,7 +99,7 @@ void xnn_math_f32_tanh__sse2_expm1_rr1_p6h5_div(
     const __m128 vsm1 = _mm_sub_ps(vs, vone);
     const __m128 vem1 = _mm_add_ps(_mm_mul_ps(vp, vts), vsm1);
 
-    // Reconstruct tanh(-z) := expm1(-2z) / (2 + expm1(-2z))
+    // Reconstruct tanh(z) := expm1(2z) / (2 + expm1(2z))
     const __m128 vep1 = _mm_add_ps(vem1, vtwo);
     const __m128 vabsy = _mm_div_ps(vem1, vep1);
 

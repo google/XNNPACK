@@ -38,8 +38,8 @@ void xnn_math_f32_tanh__avx2_expm1_rr1_lut8_p4h3_perm_div(
   const __m256 vc4 = _mm256_set1_ps(0x1.5558ECp-1f);
   const __m256 vc3 = _mm256_set1_ps(0x1.555C20p+0f);
   const __m256 vc2 = _mm256_set1_ps(0x1.000000p+1f);
-  const __m256 vone = _mm256_set1_ps(1.0f);
   const __m256 vtwo = _mm256_set1_ps(2.0f);
+  const __m256 vone = _mm256_set1_ps(1.0f);
 
   for (; n != 0; n -= 8 * sizeof(float)) {
     const __m256 vx = _mm256_load_ps(input);
@@ -111,7 +111,7 @@ void xnn_math_f32_tanh__avx2_expm1_rr1_lut8_p4h3_perm_div(
     const __m256 vsm1 = _mm256_sub_ps(vs, vone);
     const __m256 vem1 = _mm256_fmadd_ps(vp, vts, vsm1);
 
-    // Reconstruct tanh(-z) := expm1(-2z) / (2 + expm1(-2z))
+    // Reconstruct tanh(z) := expm1(2z) / (2 + expm1(2z))
     const __m256 vep1 = _mm256_add_ps(vem1, vtwo);
     const __m256 vabsy = _mm256_div_ps(vem1, vep1);
 

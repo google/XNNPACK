@@ -733,8 +733,14 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/math/f32-sigmoid-avx2-rr2-p5-nr1fma.c
   src/math/f32-sigmoid-avx2-rr2-p5-nr2fma.c
   src/math/f32-tanh-avx2-expm1-rr1-lut4-p4h3-perm-div.c
+  src/math/f32-tanh-avx2-expm1-rr1-lut4-p4h3-perm-nr1fma1adj.c
+  src/math/f32-tanh-avx2-expm1-rr1-lut4-p4h3-perm-nr1fma.c
   src/math/f32-tanh-avx2-expm1-rr1-lut8-p4h3-perm-div.c
+  src/math/f32-tanh-avx2-expm1-rr1-lut8-p4h3-perm-nr1fma1adj.c
+  src/math/f32-tanh-avx2-expm1-rr1-lut8-p4h3-perm-nr1fma.c
   src/math/f32-tanh-avx2-expm1-rr1-p6h5-div.c
+  src/math/f32-tanh-avx2-expm1-rr1-p6h5-nr1fma1adj.c
+  src/math/f32-tanh-avx2-expm1-rr1-p6h5-nr1fma.c
   src/qc8-dwconv/gen/qc8-dwconv-3p16c-minmax-fp32-avx2-mul32.c
   src/qc8-dwconv/gen/qc8-dwconv-9p8c-minmax-fp32-avx2-mul32.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-avx2-mul16-add16-vpunpck.c
