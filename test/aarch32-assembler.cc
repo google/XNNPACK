@@ -31,6 +31,8 @@ TEST(AArch32Assembler, InstructionEncoding) {
 
   CHECK_ENCODING(0xE2025007, a.and_(r5, r2, 7));
 
+  CHECK_ENCODING(0xE12FFF38, a.blx(r8));
+
   CHECK_ENCODING(0xE3CC2003, a.bic(r2, r12, 3));
 
   CHECK_ENCODING(0xE12FFF1E, a.bx(lr));
@@ -56,6 +58,9 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0x31A0C003, a.movlo(r12, r3));
   CHECK_ENCODING(0x91A0A00C, a.movls(r10, r12));
   CHECK_ENCODING(0xE1A0A00C, a.mov(r10, r12));
+
+  CHECK_ENCODING(0xE30D3EAD, a.mov(r3, 0xDEAD));
+  CHECK_ENCODING(0xE34D3EAD, a.movt(r3, 0xDEAD));
 
   CHECK_ENCODING(0xE320F000, a.nop());
 
@@ -187,10 +192,14 @@ TEST(AArch32Assembler, InstructionEncoding) {
   CHECK_ENCODING(0xF2C0E050, a.vmov(q15, 0));
   EXPECT_ERROR(Error::kInvalidOperand, a.vmov(q15, 1));
 
+  CHECK_ENCODING(0xEE1E4A10, a.vmov(r4, s28));
+  CHECK_ENCODING(0xEE0E4A10, a.vmov(s28, r4));
   CHECK_ENCODING(0xEEB0EA4F, a.vmov(s28, s30));
   CHECK_ENCODING(0xF2245114, a.vmov(d5, d4));
   CHECK_ENCODING(0xF26101B1, a.vmov(d16, d17));
   CHECK_ENCODING(0xEC420B1F, a.vmov(d15, r0, r2));
+  CHECK_ENCODING(0xEC454B18, a.vmov(d8, r4, r5));
+  CHECK_ENCODING(0xEC554B18, a.vmov(r4, r5, d8));
   CHECK_ENCODING(0xF26041F0, a.vmov(q10, q8));
 
   CHECK_ENCODING(0xEEB08A49, a.vmov_f32(s16, s18));
@@ -587,6 +596,29 @@ INSTANTIATE_TEST_SUITE_P(
   F32HardswishTest,
   testing::Values(
     std::vector<QRegister>({q4, q5, q6, q7}), std::vector<QRegister>({q4, q5, q6, q7, q12, q13, q14, q15})));
+
+typedef void (*MovFn)(uint32_t*);
+
+TEST(MovTest, Mov) {
+  xnn_code_buffer buffer;
+  xnn_allocate_code_memory(&buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  MacroAssembler assm(&buffer);
+
+  const uint32_t expected = 0x01234567;
+  assm.Mov(r1, expected);
+  assm.str(r1, mem[r0]);
+  assm.bx(lr);
+
+  MovFn mov_fn = reinterpret_cast<MovFn>(assm.finalize());
+  uint32_t out = 0;
+  mov_fn(&out);
+
+  xnn_finalize_code_memory(&buffer);
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&buffer));
+
+  EXPECT_EQ(expected, out);
+}
+
 #endif
 }  // namespace aarch32
 }  // namespace xnnpack

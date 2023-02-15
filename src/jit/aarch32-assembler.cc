@@ -150,6 +150,10 @@ void Assembler::bind(Label& l) {
   }
 }
 
+void Assembler::blx(CoreRegister rm) {
+  emit32(kAL | 0x012FFF30 | rm.code);
+}
+
 void Assembler::bic(CoreRegister rd, CoreRegister rn, uint8_t imm) {
   emit32(kAL | 0x03C00000 | rn.code << 16 | rd.code << 12 | imm);
 }
@@ -190,6 +194,14 @@ void Assembler::ldrd(CoreRegister rt, CoreRegister rt2, MemOperand op) {
   const uint32_t offset_bot = (offset & 0xF);
 
   emit32(kAL | 0x004000D0 | encode_mem_puw(op) | rt.code << 12 | offset_top | offset_bot);
+}
+
+void Assembler::mov(CoreRegister rd, uint16_t imm) {
+  emit32(kAL | 0x03000000 | (0xF000 & imm) << 4 | rd.code << 12 | (imm & 0xFFF));
+}
+
+void Assembler::movt(CoreRegister rd, uint16_t imm) {
+  emit32(kAL | 0x03400000 | (0xF000 & imm) << 4 | rd.code << 12 | (imm & 0xFFF));
 }
 
 void Assembler::mov(CoreRegister rd, CoreRegister rm) {
@@ -480,12 +492,24 @@ void Assembler::vmov(QRegister qd, uint8_t imm) {
   emit32(0xF2800050 | encode(qd, 22, 12));
 }
 
+void Assembler::vmov(CoreRegister rt, SRegister sn) {
+  emit32(kAL | 0x0E100A10 | encode(sn, 7, 16) | rt.code << 12);
+}
+
+void Assembler::vmov(SRegister sn, CoreRegister rt) {
+  emit32(kAL | 0x0E000A10 | encode(sn, 7, 16) | rt.code << 12);
+}
+
 void Assembler::vmov(SRegister sd, SRegister sm) {
   emit32(kAL | 0x0EB00A40 | encode(sd, 22, 12) | encode(sm, 5, 0));
 }
 
 void Assembler::vmov(DRegister dm, CoreRegister rt, CoreRegister rt2) {
   emit32(kAL | 0x0C400B10 | rt2.code << 16 | rt.code << 12 | encode(dm, 5, 0));
+}
+
+void Assembler::vmov(CoreRegister rt, CoreRegister rt2, DRegister dm) {
+  emit32(kAL | 0x0C500B10 | rt2.code << 16 | rt.code << 12 | encode(dm, 5, 0));
 }
 
 void Assembler::vmov(DRegister dd, DRegister dm) {
@@ -717,6 +741,155 @@ void MacroAssembler::f32_hardswish(QRegister sixth, QRegister three,
   }
 }
 
+void MacroAssembler::Mov(CoreRegister rd, uint32_t imm) {
+  mov(rd, imm & 0xFFFF);
+  movt(rd, (imm >> 16));
+}
+
+constexpr uint32_t CorruptValue(CoreRegister reg) {
+  return kRRegisterCorruptValue | reg.code;
+}
+
+constexpr uint32_t CorruptValue(SRegister reg) {
+  return kSRegisterCorruptValue | reg.code;
+}
+
+void TrampolineGenerator::generate(size_t args_on_stack) {
+  // Only handle 6 (GEMM) and 8 (IGEMM) for now.
+  assert(args_on_stack == 6 || args_on_stack == 8);
+
+  // AArch32 ABI specifies these callee-saved registers:
+  // - r4-r11, lr (9 registers)
+  // - s16-s31 (16 registers, or d8 to d15)
+  // Push r12 as well to keep stack aligned to 8.
+  push({r4, r5, r6, r7, r8, r9, r10, r11, r12, lr});
+  vpush({s16-s31});
+  constexpr int num_regs_pushed = 16 + 10;
+
+  // lr holds the address of microkernel to jump to.
+  ldr(lr, mem[sp, (num_regs_pushed + args_on_stack) * 4]);
+  // r11 points to arguments to microkernel.
+  add(r11, sp, num_regs_pushed * 4);
+  // Place microkernel arguments passed via the stack into the right relative
+  // location for the microkernel to load.
+  ldr(r4, mem[r11]);
+  ldr(r5, mem[r11, 4]);
+  ldr(r6, mem[r11, 8]);
+  ldr(r7, mem[r11, 12]);
+  ldr(r8, mem[r11, 16]);
+  ldr(r9, mem[r11, 20]);
+  if (args_on_stack == 8) {
+    ldr(r10, mem[r11, 24]);
+    ldr(r11, mem[r11, 28]);
+  }
+  if (args_on_stack == 6) {
+    push({r4, r5, r6, r7, r8, r9});
+  } else if (args_on_stack == 8) {
+    push({r4, r5, r6, r7, r8, r9, r10, r11});
+  }
+
+  // Stack looks like this now:
+  // [ args passed on stack, pushed by caller   ]
+  // [ general-purpose registers saved on stack ]
+  // [ simd registers saved on stack            ]
+  // [ args copied for microkernel to load      ] <- sp
+
+  // Set callee-saved registers to special values.
+  // Easier to copy from a GP than to construct an immediate in DRegister.
+  // Use r4 as a temporary, it will be corrupted later.
+  Mov(r4, CorruptValue(s16));
+  Mov(r5, CorruptValue(s17));
+  vmov(d8, r4, r5);
+  Mov(r4, CorruptValue(s18));
+  Mov(r5, CorruptValue(s19));
+  vmov(d9, r4, r5);
+  Mov(r4, CorruptValue(s20));
+  Mov(r5, CorruptValue(s21));
+  vmov(d10, r4, r5);
+  Mov(r4, CorruptValue(s22));
+  Mov(r5, CorruptValue(s23));
+  vmov(d11, r4, r5);
+  Mov(r4, CorruptValue(s24));
+  Mov(r5, CorruptValue(s25));
+  vmov(d12, r4, r5);
+  Mov(r4, CorruptValue(s26));
+  Mov(r5, CorruptValue(s27));
+  vmov(d13, r4, r5);
+  Mov(r4, CorruptValue(s28));
+  Mov(r5, CorruptValue(s29));
+  vmov(d14, r4, r5);
+  Mov(r4, CorruptValue(s30));
+  Mov(r5, CorruptValue(s31));
+  vmov(d15, r4, r5);
+
+  Mov(r4, CorruptValue(r4));
+  Mov(r5, CorruptValue(r5));
+  Mov(r6, CorruptValue(r6));
+  Mov(r7, CorruptValue(r7));
+  Mov(r8, CorruptValue(r8));
+  Mov(r9, CorruptValue(r9));
+  Mov(r10, CorruptValue(r10));
+  Mov(r11, CorruptValue(r11));
+
+  // Can't corrupt lr, since we use it to hold address of microkernel to cal.
+  // Call microkernel.
+  blx(lr);
+
+  // Use 2 labels to avoid increasing maximum number of label users.
+  Label exit_core;
+  // Check that all callee-saved registers are correctly saved by microkernel.
+  CheckRegisterMatch(r4, exit_core);
+  CheckRegisterMatch(r5, exit_core);
+  CheckRegisterMatch(r6, exit_core);
+  CheckRegisterMatch(r7, exit_core);
+  CheckRegisterMatch(r8, exit_core);
+  CheckRegisterMatch(r9, exit_core);
+  CheckRegisterMatch(r10, exit_core);
+  CheckRegisterMatch(r11, exit_core);
+
+  Label exit_simd;
+  CheckRegisterMatch(d8, exit_simd);
+  CheckRegisterMatch(d9, exit_simd);
+  CheckRegisterMatch(d10, exit_simd);
+  CheckRegisterMatch(d11, exit_simd);
+  CheckRegisterMatch(d12, exit_simd);
+  CheckRegisterMatch(d13, exit_simd);
+  CheckRegisterMatch(d14, exit_simd);
+  CheckRegisterMatch(d15, exit_simd);
+
+  // No errors, set return value to 0.
+  mov(r0, 0);
+
+  bind(exit_core);
+  bind(exit_simd);
+  // Pop arguments for microkernel on stack.
+  add(sp, sp, args_on_stack * 4);
+
+  // Restore callee saved registers.
+  vpop({d8-d15});
+  // Pop to pc directly to return.
+  pop({r4, r5, r6, r7, r8, r9, r10, r11, r12, pc});
+
+  align(16);
+}
+
+void TrampolineGenerator::CheckRegisterMatch(DRegister actual, Label& exit) {
+  // Use r1 and r2 as a tmp. We don't care if r1 is modified as this is right before return.
+  // Only the low 64-bits are preserved, so we can load 64 bits, and copy to a general-purpose register to compare.
+  vmov(r1, r2, actual);
+  Mov(r0, CorruptValue(actual.low()));
+  cmp(r0, r1);
+  bne(exit);
+  Mov(r0, CorruptValue(actual.high()));
+  cmp(r0, r2);
+  bne(exit);
+}
+
+void TrampolineGenerator::CheckRegisterMatch(CoreRegister actual, Label& exit) {
+  Mov(r0, CorruptValue(actual));
+  cmp(r0, actual);
+  bne(exit);
+}
 
 }  // namespace aarch32
 }  // namespace xnnpack
