@@ -1082,32 +1082,34 @@ void TrampolineGenerator::generate(size_t args_on_stack) {
   // Call microkernel.
   blr(x12);
 
-  Label exit;
+  // Use 2 labels to avoid increasing max number of label users.
+  Label exit_gp, exit_simd;
   // Check that all callee-saved registers are correctly saved by microkernel.
-  CheckRegisterMatch(x18, exit);
-  CheckRegisterMatch(x19, exit);
-  CheckRegisterMatch(x20, exit);
-  CheckRegisterMatch(x21, exit);
-  CheckRegisterMatch(x22, exit);
-  CheckRegisterMatch(x23, exit);
-  CheckRegisterMatch(x24, exit);
-  CheckRegisterMatch(x25, exit);
-  CheckRegisterMatch(x26, exit);
-  CheckRegisterMatch(x27, exit);
-  CheckRegisterMatch(x28, exit);
-  CheckRegisterMatch(v8.d()[0], exit);
-  CheckRegisterMatch(v9.d()[0], exit);
-  CheckRegisterMatch(v10.d()[0], exit);
-  CheckRegisterMatch(v11.d()[0], exit);
-  CheckRegisterMatch(v12.d()[0], exit);
-  CheckRegisterMatch(v13.d()[0], exit);
-  CheckRegisterMatch(v14.d()[0], exit);
-  CheckRegisterMatch(v15.d()[0], exit);
+  CheckRegisterMatch(x18, exit_gp);
+  CheckRegisterMatch(x19, exit_gp);
+  CheckRegisterMatch(x20, exit_gp);
+  CheckRegisterMatch(x21, exit_gp);
+  CheckRegisterMatch(x22, exit_gp);
+  CheckRegisterMatch(x23, exit_gp);
+  CheckRegisterMatch(x24, exit_gp);
+  CheckRegisterMatch(x25, exit_gp);
+  CheckRegisterMatch(x26, exit_gp);
+  CheckRegisterMatch(x27, exit_gp);
+  CheckRegisterMatch(x28, exit_gp);
+  CheckRegisterMatch(v8.d()[0], exit_simd);
+  CheckRegisterMatch(v9.d()[0], exit_simd);
+  CheckRegisterMatch(v10.d()[0], exit_simd);
+  CheckRegisterMatch(v11.d()[0], exit_simd);
+  CheckRegisterMatch(v12.d()[0], exit_simd);
+  CheckRegisterMatch(v13.d()[0], exit_simd);
+  CheckRegisterMatch(v14.d()[0], exit_simd);
+  CheckRegisterMatch(v15.d()[0], exit_simd);
 
   // No errors, set return value to 0.
   mov(x0, 0);
 
-  bind(exit);
+  bind(exit_gp);
+  bind(exit_simd);
   // Pop arguments for microkernel on stack.
   add(sp, sp, args_on_stack * 8);
 
