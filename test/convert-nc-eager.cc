@@ -180,13 +180,13 @@ TEST(CONVERT_NC_F32_QS8, small_batch_with_input_and_output_stride) {
   }
 }
 
-TEST(CONVERT_NC_F32_QS8, scale) {
-  for (float scale : std::vector<float>{{0.1f, 1.0f, 10.0f}}) {
+TEST(CONVERT_NC_F32_QS8, output_scale) {
+  for (float output_scale : std::vector<float>{{0.1f, 1.0f, 10.0f}}) {
     for (size_t channels = 1; channels < 100; channels++) {
       ConvertOperatorTester()
           .batch_size(3)
           .channels(channels)
-          .scale(scale)
+          .output_scale(output_scale)
           .qmin(std::numeric_limits<int8_t>::min())
           .qmax(std::numeric_limits<int8_t>::max())
           .iterations(3)
@@ -268,12 +268,12 @@ TEST(CONVERT_NC_QS8_F32, small_batch_with_input_and_output_stride) {
 }
 
 TEST(CONVERT_NC_QS8_F32, input_scale) {
-  for (float scale : std::vector<float>{{0.1f, 1.0f, 10.0f}}) {
+  for (float input_scale : std::vector<float>{{0.1f, 1.0f, 10.0f}}) {
     for (size_t channels = 1; channels < 100; channels++) {
       ConvertOperatorTester()
           .batch_size(3)
           .channels(channels)
-          .scale(scale)
+          .input_scale(input_scale)
           .iterations(3)
           .TestRunQS8toF32();
     }
@@ -360,13 +360,13 @@ TEST(CONVERT_NC_F32_QU8, small_batch_with_input_and_output_stride) {
   }
 }
 
-TEST(CONVERT_NC_F32_QU8, scale) {
-  for (float scale : std::vector<float>{{0.1f, 1.0f, 10.0f}}) {
+TEST(CONVERT_NC_F32_QU8, output_scale) {
+  for (float output_scale : std::vector<float>{{0.1f, 1.0f, 10.0f}}) {
     for (size_t channels = 1; channels < 100; channels++) {
       ConvertOperatorTester()
           .batch_size(3)
           .channels(channels)
-          .scale(scale)
+          .output_scale(output_scale)
           .qmin(std::numeric_limits<uint8_t>::min())
           .qmax(std::numeric_limits<uint8_t>::max())
           .iterations(3)
@@ -448,12 +448,12 @@ TEST(CONVERT_NC_QU8_F32, small_batch_with_input_and_output_stride) {
 }
 
 TEST(CONVERT_NC_QU8_F32, input_scale) {
-  for (float scale : std::vector<float>{{0.1f, 1.0f, 10.0f}}) {
+  for (float input_scale : std::vector<float>{{0.1f, 1.0f, 10.0f}}) {
     for (size_t channels = 1; channels < 100; channels++) {
       ConvertOperatorTester()
           .batch_size(3)
           .channels(channels)
-          .scale(scale)
+          .input_scale(input_scale)
           .iterations(3)
           .TestRunQU8toF32();
     }

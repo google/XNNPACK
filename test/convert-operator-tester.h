@@ -72,15 +72,26 @@ class ConvertOperatorTester {
     return this->batch_size_;
   }
 
-  inline ConvertOperatorTester& scale(float scale) {
-    assert(scale >= 0.0f);
-    assert(std::isnormal(scale));
-    this->scale_ = scale;
+  inline ConvertOperatorTester& input_scale(float input_scale) {
+    assert(input_scale >= 0.0f);
+    assert(std::isnormal(input_scale));
+    this->input_scale_ = input_scale;
     return *this;
   }
 
-  inline float scale() const {
-    return this->scale_;
+  inline float input_scale() const {
+    return this->input_scale_;
+  }
+
+  inline ConvertOperatorTester& output_scale(float output_scale) {
+    assert(output_scale >= 0.0f);
+    assert(std::isnormal(output_scale));
+    this->output_scale_ = output_scale;
+    return *this;
+  }
+
+  inline float output_scale() const {
+    return this->output_scale_;
   }
 
   inline ConvertOperatorTester& zero_point(int16_t zero_point) {
@@ -246,7 +257,7 @@ class ConvertOperatorTester {
       std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
-      const float inv_scale = 1.0f / scale();
+      const float inv_scale = 1.0f / output_scale();
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           float scaled_input = input[i * input_stride() + c] * inv_scale;
@@ -263,7 +274,7 @@ class ConvertOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_create_convert_nc_f32_qs8(
           channels(), input_stride(), output_stride(),
-          scale(), int8_t(zero_point()), int8_t(qmin()), int8_t(qmax()),
+          output_scale(), int8_t(zero_point()), int8_t(qmin()), int8_t(qmax()),
           0, &convert_op));
       ASSERT_NE(nullptr, convert_op);
 
@@ -311,7 +322,7 @@ class ConvertOperatorTester {
       std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results.
-      const float inv_scale = 1.0f / scale();
+      const float inv_scale = 1.0f / output_scale();
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           float scaled_input = input[i * input_stride() + c] * inv_scale;
@@ -328,7 +339,7 @@ class ConvertOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_create_convert_nc_f32_qu8(
           channels(), input_stride(), output_stride(),
-          scale(), uint8_t(zero_point()), uint8_t(qmin()), uint8_t(qmax()),
+          output_scale(), uint8_t(zero_point()), uint8_t(qmin()), uint8_t(qmax()),
           0, &convert_op));
       ASSERT_NE(nullptr, convert_op);
 
@@ -375,7 +386,7 @@ class ConvertOperatorTester {
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[i * channels() + c] = float(input[i * input_stride() + c] - zero_point()) * scale();
+          output_ref[i * channels() + c] = float(input[i * input_stride() + c] - zero_point()) * input_scale();
         }
       }
 
@@ -386,7 +397,7 @@ class ConvertOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_create_convert_nc_qs8_f32(
           channels(), input_stride(), output_stride(),
-          scale(), int8_t(zero_point()),
+          input_scale(), int8_t(zero_point()),
           0, &convert_op));
       ASSERT_NE(nullptr, convert_op);
 
@@ -433,7 +444,7 @@ class ConvertOperatorTester {
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[i * channels() + c] = float(input[i * input_stride() + c] - zero_point()) * scale();
+          output_ref[i * channels() + c] = float(input[i * input_stride() + c] - zero_point()) * input_scale();
         }
       }
 
@@ -444,7 +455,7 @@ class ConvertOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_create_convert_nc_qu8_f32(
           channels(), input_stride(), output_stride(),
-          scale(), uint8_t(zero_point()),
+          input_scale(), uint8_t(zero_point()),
           0, &convert_op));
       ASSERT_NE(nullptr, convert_op);
 
@@ -576,7 +587,7 @@ class ConvertOperatorTester {
       std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
-      const float inv_scale = 1.0f / scale();
+      const float inv_scale = 1.0f / output_scale();
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           float scaled_input = input[i * input_stride() + c] * inv_scale;
@@ -592,7 +603,7 @@ class ConvertOperatorTester {
         xnn_run_convert_nc_f32_qs8(
           channels(), input_stride(), output_stride(),batch_size(),
           input.data(), output.data(),
-          scale(), int8_t(zero_point()),
+          output_scale(), int8_t(zero_point()),
           0,
           nullptr /* thread pool */));
 
@@ -626,7 +637,7 @@ class ConvertOperatorTester {
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[i * channels() + c] = float(input[i * input_stride() + c] - zero_point()) * scale();
+          output_ref[i * channels() + c] = float(input[i * input_stride() + c] - zero_point()) * input_scale();
         }
       }
 
@@ -637,7 +648,7 @@ class ConvertOperatorTester {
         xnn_run_convert_nc_qs8_f32(
           channels(), input_stride(), output_stride(), batch_size(),
           input.data(), output.data(),
-          scale(), int8_t(zero_point()),
+          input_scale(), int8_t(zero_point()),
           0, nullptr /* thread pool */));
 
       // Verify results.
@@ -671,7 +682,7 @@ class ConvertOperatorTester {
       std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results.
-      const float inv_scale = 1.0f / scale();
+      const float inv_scale = 1.0f / output_scale();
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           float scaled_input = input[i * input_stride() + c] * inv_scale;
@@ -688,7 +699,7 @@ class ConvertOperatorTester {
         xnn_run_convert_nc_f32_qu8(
           channels(), input_stride(), output_stride(),
           batch_size(), input.data(), output.data(),
-          scale(), uint8_t(zero_point()),
+          output_scale(), uint8_t(zero_point()),
           0, nullptr /* thread pool */));
 
       // Verify results.
@@ -721,7 +732,7 @@ class ConvertOperatorTester {
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[i * channels() + c] = float(input[i * input_stride() + c] - zero_point()) * scale();
+          output_ref[i * channels() + c] = float(input[i * input_stride() + c] - zero_point()) * input_scale();
         }
       }
 
@@ -731,7 +742,7 @@ class ConvertOperatorTester {
         xnn_run_convert_nc_qu8_f32(
           channels(), input_stride(), output_stride(),
           batch_size(), input.data(), output.data(),
-          scale(), uint8_t(zero_point()),
+          input_scale(), uint8_t(zero_point()),
           0, nullptr /* thread pool */));
 
       // Verify results.
@@ -749,7 +760,8 @@ class ConvertOperatorTester {
   size_t channels_{1};
   size_t input_stride_{0};
   size_t output_stride_{0};
-  float scale_{150.0f};
+  float input_scale_{150.0f};
+  float output_scale_{3.0f};
   int16_t zero_point_{1};
   int16_t qmin_{std::numeric_limits<int16_t>::min()};
   int16_t qmax_{std::numeric_limits<int16_t>::max()};
