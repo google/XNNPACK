@@ -31,7 +31,7 @@ enum class Error {
 };
 
 // Biggest user of label is for callee-saved registers check in test mode.
-constexpr size_t max_label_users = 18;
+constexpr size_t max_label_users = 19;
 // Label is a target of a branch. You call Assembler::bind to bind a label to an
 // actual location in the instruction stream.
 //

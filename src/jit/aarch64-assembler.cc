@@ -1021,18 +1021,19 @@ void TrampolineGenerator::generate(size_t args_on_stack) {
   stp(x29, x30, mem[sp, -16]++);
 
   // AArch64 ABI specifies these callee-saved registers:
-  // - r19-r29
+  // - x18-x29
   // - v8-v15, only the bottom 64 bits
-  stp(x19, x20, mem[sp, -144]++);
-  stp(x21, x22, mem[sp, 16]);
-  stp(x23, x24, mem[sp, 32]);
-  stp(x25, x26, mem[sp, 48]);
-  stp(x27, x28, mem[sp, 64]);
+  str(x18, mem[sp, -160]++);
+  stp(x19, x20, mem[sp, 16]);
+  stp(x21, x22, mem[sp, 32]);
+  stp(x23, x24, mem[sp, 48]);
+  stp(x25, x26, mem[sp, 64]);
+  stp(x27, x28, mem[sp, 80]);
   // Only need to preserve the lower 64 bits of SIMD registers, so use DRegister.
-  stp(d8, d9, mem[sp, 80]);
-  stp(d10, d11, mem[sp, 96]);
-  stp(d12, d13, mem[sp, 112]);
-  stp(d14, d15, mem[sp, 128]);
+  stp(d8, d9, mem[sp, 96]);
+  stp(d10, d11, mem[sp, 112]);
+  stp(d12, d13, mem[sp, 128]);
+  stp(d14, d15, mem[sp, 144]);
 
   // Place microkernel arguments passed via the stack into the right relative
   // location for the microkernel to load.
@@ -1049,6 +1050,7 @@ void TrampolineGenerator::generate(size_t args_on_stack) {
 
 
   // Set callee-saved registers to special values.
+  Mov(x18, CorruptValue(x18));
   Mov(x19, CorruptValue(x19));
   Mov(x20, CorruptValue(x20));
   Mov(x21, CorruptValue(x21));
@@ -1082,6 +1084,7 @@ void TrampolineGenerator::generate(size_t args_on_stack) {
 
   Label exit;
   // Check that all callee-saved registers are correctly saved by microkernel.
+  CheckRegisterMatch(x18, exit);
   CheckRegisterMatch(x19, exit);
   CheckRegisterMatch(x20, exit);
   CheckRegisterMatch(x21, exit);
@@ -1109,15 +1112,16 @@ void TrampolineGenerator::generate(size_t args_on_stack) {
   add(sp, sp, args_on_stack * 8);
 
   // Restore callee saved registers.
-  ldp(x21, x22, mem[sp, 16]);
-  ldp(x23, x24, mem[sp, 32]);
-  ldp(x25, x26, mem[sp, 48]);
-  ldp(x27, x28, mem[sp, 64]);
-  ldp(d8, d9, mem[sp, 80]);
-  ldp(d10, d11, mem[sp, 96]);
-  ldp(d12, d13, mem[sp, 112]);
-  ldp(d14, d15, mem[sp, 128]);
-  ldp(x19, x20, mem[sp], 144);
+  ldp(x19, x20, mem[sp, 16]);
+  ldp(x21, x22, mem[sp, 32]);
+  ldp(x23, x24, mem[sp, 48]);
+  ldp(x25, x26, mem[sp, 64]);
+  ldp(x27, x28, mem[sp, 80]);
+  ldp(d8, d9, mem[sp, 96]);
+  ldp(d10, d11, mem[sp, 112]);
+  ldp(d12, d13, mem[sp, 128]);
+  ldp(d14, d15, mem[sp, 144]);
+  ldr(x18, mem[sp], 160);
 
   // Restore link register.
   ldp(x29, x30, mem[sp], 16);
