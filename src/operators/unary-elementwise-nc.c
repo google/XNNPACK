@@ -676,7 +676,7 @@ enum xnn_status xnn_create_convert_nc_qs8(
 
   if (output_scale <= 0.0f || !isnormal(output_scale)) {
     xnn_log_error(
-      "failed to create %s operator with %.7g input scale parameter: scale must be finite, normalized, and positive",
+      "failed to create %s operator with %.7g output scale parameter: scale must be finite, normalized, and positive",
       xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs8), output_scale);
     return xnn_status_invalid_parameter;
   }
@@ -759,7 +759,7 @@ enum xnn_status xnn_create_convert_nc_qu8(
 
   if (output_scale <= 0.0f || !isnormal(output_scale)) {
     xnn_log_error(
-      "failed to create %s operator with %.7g input scale parameter: scale must be finite, normalized, and positive",
+      "failed to create %s operator with %.7g output scale parameter: scale must be finite, normalized, and positive",
       xnn_operator_type_to_string(xnn_operator_type_convert_nc_qu8), output_scale);
     return xnn_status_invalid_parameter;
   }
