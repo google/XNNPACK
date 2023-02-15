@@ -77,7 +77,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${K
         $for C in range(0, CHANNEL_TILE, 8):
           $if K == 0:
             v128_t vprod${ABC[C:C+8]} = wasm_i16x8_mul(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
-          $elif K % 2 == 0 or K + 1 == KERNEL_TILE or not ADD16:
+          $elif K % 2 == 0 or not ADD16:
             vprod${ABC[C:C+8]} = wasm_i16x8_mul(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
           $else:
             vprod${ABC[C:C+8]} = wasm_i16x8_add(vprod${ABC[C:C+8]}, wasm_i16x8_mul(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]}));
@@ -176,7 +176,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${K
 
           $if K == 0:
             v128_t vprod${ABC[0:8]} = wasm_i16x8_mul(vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]});
-          $elif K % 2 == 0 or K + 1 == KERNEL_TILE or not ADD16:
+          $elif K % 2 == 0 or not ADD16:
             vprod${ABC[0:8]} = wasm_i16x8_mul(vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]});
           $else:
             vprod${ABC[0:8]} = wasm_i16x8_add(vprod${ABC[0:8]}, wasm_i16x8_mul(vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]}));

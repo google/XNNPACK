@@ -81,7 +81,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${K
             $for C in range(0, CHANNEL_TILE, 16):
               int16x8_t vprod${ABC[C:C+8]} = vmull_s8(vget_low_s8(vi${K}x${ABC[C:C+16]}), vget_low_s8(vk${K}x${ABC[C:C+16]}));
               int16x8_t vprod${ABC[C+8:C+16]} = vmull_s8(vget_high_s8(vi${K}x${ABC[C:C+16]}), vget_high_s8(vk${K}x${ABC[C:C+16]}));
-          $elif K % 2 == 0 or K + 1 == KERNEL_TILE or not MLA:
+          $elif K % 2 == 0 or not MLA:
             $for C in range(0, CHANNEL_TILE, 16):
               vprod${ABC[C:C+8]} = vmull_s8(vget_low_s8(vi${K}x${ABC[C:C+16]}), vget_low_s8(vk${K}x${ABC[C:C+16]}));
               vprod${ABC[C+8:C+16]} = vmull_s8(vget_high_s8(vi${K}x${ABC[C:C+16]}), vget_high_s8(vk${K}x${ABC[C:C+16]}));
@@ -97,7 +97,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${K
           $if K == 0:
             $for C in range(0, CHANNEL_TILE, 8):
               int16x8_t vprod${ABC[C:C+8]} = vmull_s8(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
-          $elif K % 2 == 0 or K + 1 == KERNEL_TILE or not MLA:
+          $elif K % 2 == 0 or not MLA:
             $for C in range(0, CHANNEL_TILE, 8):
               vprod${ABC[C:C+8]} = vmull_s8(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
           $else:
@@ -217,7 +217,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${K
 
           $if K == 0:
             int16x8_t vprod${ABC[0:8]} = vmull_s8(vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]});
-          $elif K % 2 == 0 or K + 1 == KERNEL_TILE or not MLA:
+          $elif K % 2 == 0 or not MLA:
             vprod${ABC[0:8]} = vmull_s8(vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]});
           $else:
             vprod${ABC[0:8]} = vmlal_s8(vprod${ABC[0:8]}, vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]});
