@@ -249,8 +249,28 @@ static void TanhError(benchmark::State& state,
                     benchmark::utils::CheckFMA3)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, fma3_expm1_rr1_lut4_p4h3_perm_nr1fma,
+                    xnn_math_f32_tanh__fma3_expm1_rr1_lut4_p4h3_perm_nr1fma,
+                    benchmark::utils::CheckFMA3)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, fma3_expm1_rr1_lut4_p4h3_perm_nr1fma1adj,
+                    xnn_math_f32_tanh__fma3_expm1_rr1_lut4_p4h3_perm_nr1fma1adj,
+                    benchmark::utils::CheckFMA3)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, fma3_expm1_rr1_p6h5_div,
                     xnn_math_f32_tanh__fma3_expm1_rr1_p6h5_div,
+                    benchmark::utils::CheckFMA3)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, fma3_expm1_rr1_p6h5_nr1fma,
+                    xnn_math_f32_tanh__fma3_expm1_rr1_p6h5_nr1fma,
+                    benchmark::utils::CheckFMA3)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, fma3_expm1_rr1_p6h5_nr1fma1adj,
+                    xnn_math_f32_tanh__fma3_expm1_rr1_p6h5_nr1fma1adj,
                     benchmark::utils::CheckFMA3)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);

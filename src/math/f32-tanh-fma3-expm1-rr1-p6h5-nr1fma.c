@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__avx2_expm1_rr1_p6h5_nr1fma1adj(
+void xnn_math_f32_tanh__fma3_expm1_rr1_p6h5_nr1fma(
     size_t n,
     const float* input,
     float* output)
@@ -38,7 +38,7 @@ void xnn_math_f32_tanh__avx2_expm1_rr1_p6h5_nr1fma1adj(
   const __m256 vc3 = _mm256_set1_ps(0x1.5554B0p+0f);
   const __m256 vc2 = _mm256_set1_ps(0x1.FFFFFEp+0f);
   const __m256 vtwo = _mm256_set1_ps(2.0f);
-  const __m256 vone = _mm256_set1_ps(1.0f);
+  const __m256 vminus_one = _mm256_set1_ps(-1.0f);
 
   for (; n != 0; n -= 8 * sizeof(float)) {
     const __m256 vx = _mm256_load_ps(input);
@@ -57,11 +57,8 @@ void xnn_math_f32_tanh__avx2_expm1_rr1_p6h5_nr1fma1adj(
     // Inverted mask for the sign of input: 0x00000000 for negative x, 0x80000000 for positive x.
     const __m256 vinvsignx = _mm256_xor_ps(vx, vz);
 
-    // The function f[z] saturates at -1 for large inputs: tanhf(x) == -1.0f for x <= sat_cutoff ~= -9.010913.
-    // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
-    // tanhf(sat_cutoff) == -1.0f. The order of operands in the [V]MAXPS instruction matters: it ensures that NaN
-    // inputs are passed unchanged.
-    vz = _mm256_max_ps(vsat_cutoff, vz);
+    // Mask for tanh[z] saturation at -1 for large inputs: tanhf(z) == -1.0f for z <= sat_cutoff ~= -4.5078125.
+    const __m256 vm = _mm256_cmp_ps(vz, vsat_cutoff, _CMP_LE_OS);
 
     // Compute reduced argument n := round(z / log(2), 1).
     // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
@@ -74,7 +71,10 @@ void xnn_math_f32_tanh__avx2_expm1_rr1_p6h5_nr1fma1adj(
 
     // Create a floating-point number s (scale) such that s == 2**(2n) for inputs which don't cause underflow, i.e.
     // -9.010913 <= z <= 0, and -13 <= n <= 0 accordingly.
-    const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn), 23));
+    const __m128 vn_hi = _mm256_extractf128_ps(vn, 1);
+    __m256 vs = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn)), 23)));
+    const __m128 vs_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn_hi), 23));
+    vs = _mm256_insertf128_ps(vs, vs_hi, 1);
 
     // Subtract the large number back to get final n := round(z / log(2), 1) as a floating-point number.
     vn = _mm256_sub_ps(vn, vmagic_bias);
@@ -96,7 +96,7 @@ void xnn_math_f32_tanh__avx2_expm1_rr1_p6h5_nr1fma1adj(
     //              = (s - 1) + s * t * p
     //              = (s - 1) + (t * s) * p
     const __m256 vts = _mm256_mul_ps(vt, vs);
-    const __m256 vsm1 = _mm256_sub_ps(vs, vone);
+    const __m256 vsm1 = _mm256_add_ps(vs, vminus_one);
     const __m256 vem1 = _mm256_fmadd_ps(vp, vts, vsm1);
 
     // Denominator of the tanh fraction: 1.0 + exp(2z) = 2.0 + expm1(2z)
@@ -106,11 +106,13 @@ void xnn_math_f32_tanh__avx2_expm1_rr1_p6h5_nr1fma1adj(
     // Note: 2 < exp(-2z) + 1 <= 3, because z >= 0.0 and 0 < exp(-2z) <= 1.0.
     // Thus the reciprocal of the denominator never overflows.
     __m256 vrep1 = _mm256_rcp_ps(vep1);
-    vrep1 = _mm256_fmadd_ps(_mm256_fnmadd_ps(vrep1, vep1, vone), vrep1, vrep1);
+    vrep1 = _mm256_fmadd_ps(_mm256_fnmsub_ps(vrep1, vep1, vminus_one), vrep1, vrep1);
 
-    // Reconstruct tanh(z) := expm1(2z) / (2 + expm1(2z)) with adjustment to match IEEE division result
+    // Reconstruct tanh(z) := expm1(2z) / (2 + expm1(2z))
     __m256 vabsy = _mm256_mul_ps(vem1, vrep1);
-    vabsy = _mm256_fmadd_ps(_mm256_fnmadd_ps(vabsy, vep1, vem1), vrep1, vabsy);
+
+    // Saturate tanh(z) at -1 for large inputs.
+    vabsy = _mm256_blendv_ps(vabsy, vminus_one, vm);
 
     // Reconstruct tanh[x] = sign(x) * tanh[-abs(x)].
     // As tanh[-abs(x)] is negative, flips the sign bit if x is positive.

@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__avx2_expm1_rr1_p6h5_nr1fma1adj(
+void xnn_math_f32_tanh__fma3_expm1_rr1_p6h5_nr1fma1adj(
     size_t n,
     const float* input,
     float* output)
@@ -74,7 +74,10 @@ void xnn_math_f32_tanh__avx2_expm1_rr1_p6h5_nr1fma1adj(
 
     // Create a floating-point number s (scale) such that s == 2**(2n) for inputs which don't cause underflow, i.e.
     // -9.010913 <= z <= 0, and -13 <= n <= 0 accordingly.
-    const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn), 23));
+    const __m128 vn_hi = _mm256_extractf128_ps(vn, 1);
+    __m256 vs = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn)), 23)));
+    const __m128 vs_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn_hi), 23));
+    vs = _mm256_insertf128_ps(vs, vs_hi, 1);
 
     // Subtract the large number back to get final n := round(z / log(2), 1) as a floating-point number.
     vn = _mm256_sub_ps(vn, vmagic_bias);

@@ -1415,7 +1415,11 @@ SET(ALL_FMA3_MICROKERNEL_SRCS
   src/math/f32-sqrt-fma3-nr1fma.c
   src/math/f32-sqrt-fma3-nr2fma.c
   src/math/f32-tanh-fma3-expm1-rr1-lut4-p4h3-perm-div.c
-  src/math/f32-tanh-fma3-expm1-rr1-p6h5-div.c)
+  src/math/f32-tanh-fma3-expm1-rr1-lut4-p4h3-perm-nr1fma1adj.c
+  src/math/f32-tanh-fma3-expm1-rr1-lut4-p4h3-perm-nr1fma.c
+  src/math/f32-tanh-fma3-expm1-rr1-p6h5-div.c
+  src/math/f32-tanh-fma3-expm1-rr1-p6h5-nr1fma1adj.c
+  src/math/f32-tanh-fma3-expm1-rr1-p6h5-nr1fma.c)
 
 SET(ALL_FP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vadd-minmax-fp16arith-x1.c
