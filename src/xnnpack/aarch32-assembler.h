@@ -84,6 +84,9 @@ constexpr uint32_t kRRegisterCorruptValue = UINT32_C(0xDEADBE00);
 constexpr uint32_t kSRegisterCorruptValue = UINT32_C(0x7FF00000);
 constexpr uint8_t kRegisterCorruptMask = UINT8_C(0xFF);
 
+// Instruction used to align code, is a nop.
+constexpr uint32_t kAlignInstruction = 0xE320F000;
+
 enum class SpecialFPRegister {
   kFPSCR = 1,
 };

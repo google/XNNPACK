@@ -298,7 +298,7 @@ void Assembler::csel(XRegister xd, XRegister xn, XRegister xm, Condition c) {
 }
 
 void Assembler::hlt() {
-  emit32(0xD4400000);
+  emit32(kAlignInstruction);
 }
 
 void Assembler::ldp(XRegister xt1, XRegister xt2, MemOperand xn) {

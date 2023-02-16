@@ -22,6 +22,9 @@ constexpr uint64_t kXRegisterCorruptValue = UINT64_C(0xDEADBEEF12345600);
 constexpr uint64_t kVRegisterCorruptValue = UINT64_C(0x7FF000007F801000);
 constexpr uint8_t kRegisterCorruptMask = UINT8_C(0xFF);
 
+// Instruction used to align code, is a hlt.
+constexpr uint32_t kAlignInstruction = 0xD4400000;
+
 struct WRegister {
   uint8_t code;
 };

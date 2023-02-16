@@ -889,11 +889,29 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE == 'f32' and POST_OP:
           ${", ".join(TEST_ARGS)},
           fused_operators);
   }
+
+$if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16']:
+  TEST(${TEST_NAME}, matches_assembly) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    GemmMicrokernelTester()
+      .mr(${MR})
+      .nr(${NR})
+      .kr(${KR})
+      .sr(${SR})
+      .m(${MR})
+      .n(${NR})
+      .k(${KBLOCK})
+      .Test(
+          ${", ".join(TEST_ARGS)},
+          &${PROTOTYPE});
+  }
+
 """
 
 
 def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
-                        requantization, is_pipelined, isa, jit, post_op):
+                        requantization, is_pipelined, isa, jit, prototype, post_op):
   """Generates all tests cases for a GEMM micro-kernel.
 
   Args:
@@ -941,6 +959,10 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
     if "minmax" in init_fn:
       activation = "minmax"
 
+  if jit and not prototype:
+    printf("JIT microkernel does not have prototype specified in YAML file.")
+    sys.exit(1);
+
   return xngen.preprocess(
       GEMM_TEST_CODE, {
           "TEST_NAME": ukernel_name.upper().replace("UKERNEL_", ""),
@@ -959,6 +981,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
           "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
           "next_prime": next_prime,
           "POST_OP": post_op,
+          "PROTOTYPE": prototype,
       })
 
 
@@ -1007,13 +1030,14 @@ def main(args):
       init_fn = ukernel_spec.get("init")
       pipelined = bool(ukernel_spec.get("pipelined", False))
       jit = name.startswith("xnn_generate")
+      prototype = ukernel_spec.get("prototype")
       post_op = ukernel_spec.get("post-op", True)
       mr, nr, kr, sr, xw, requantization, arch, isa, assembly = \
         split_ukernel_name(name)
 
       test_case = generate_test_cases(name, mr, nr, kr, sr, xw, k_block,
                                       init_fn, requantization, pipelined, isa,
-                                      jit, post_op)
+                                      jit, prototype, post_op)
 
       # Hash the name of each microkernel and figure out which output file to
       # write it to.

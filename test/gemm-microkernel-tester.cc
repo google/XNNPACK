@@ -19,6 +19,7 @@
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/pack.h>
+#include <xnnpack/memory.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/requantization.h>
@@ -2983,6 +2984,134 @@ void GemmMicrokernelTester::Test(
       }
     }
   }
+}
+
+#if XNN_ARCH_ARM
+using xnnpack::aarch32::kAlignInstruction;
+#endif  // XNN_ARCH_ARM
+
+#if XNN_ARCH_ARM64
+using xnnpack::aarch64::kAlignInstruction;
+#endif  // XNN_ARCH_ARM64
+
+// Returns the index of last instruction before all the alignment instructions at the end of the JIT microkernel.
+static size_t FindEndOfCodeBeforeAlignment(xnn_code_buffer* code_buffer, uint32_t* jit_start)
+{
+    size_t stop = code_buffer->size / 4;
+    while (jit_start[stop - 1] == kAlignInstruction) {
+      stop -= 1;
+    }
+    return stop;
+}
+
+void GemmMicrokernelTester::Test(
+  xnn_jit_gemm_code_generator_fn gemm_generator,
+  xnn_init_f16_minmax_params_fn init_params,
+  xnn_f16_gemm_minmax_ukernel_fn gemm_minmax) const
+{
+    struct xnn_code_buffer code_buffer;
+    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
+
+    // Don't use (-)infinity as JIT will omit the code.
+    jit_gemm_params p = {};
+    p.f16_minmax.min = fp16_ieee_from_fp32_value(-1.0f);
+    p.f16_minmax.max = fp16_ieee_from_fp32_value(1.0f);
+    ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(float), &p));
+    ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
+    ASSERT_LT(0, code_buffer.size);
+    ASSERT_EQ(0, code_buffer.size % 4);
+
+    uint32_t* gemm_addr = (uint32_t*) gemm_minmax;
+    uint32_t* jit_addr = (uint32_t*) code_buffer.start;
+    size_t stop = FindEndOfCodeBeforeAlignment(&code_buffer, jit_addr);
+    for (size_t i = 0; i < stop; i++) {
+      EXPECT_EQ(gemm_addr[i], jit_addr[i]) << "mismatch at i: " << i;
+    }
+
+    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+}
+
+void GemmMicrokernelTester::Test(
+  xnn_jit_igemm_code_generator_fn igemm_generator,
+  xnn_init_f16_minmax_params_fn init_params,
+  xnn_f16_igemm_minmax_ukernel_fn igemm_minmax) const
+{
+    struct xnn_code_buffer code_buffer;
+    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
+
+    // Don't use (-)infinity as JIT will omit the code.
+    jit_gemm_params p = {};
+    p.f16_minmax.min = fp16_ieee_from_fp32_value(-1.0f);
+    p.f16_minmax.max = fp16_ieee_from_fp32_value(1.0f);
+    ASSERT_EQ(xnn_status_success,
+              igemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(float), ks() * mr() * sizeof(void *), &p));
+    ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
+    ASSERT_LT(0, code_buffer.size);
+    ASSERT_EQ(0, code_buffer.size % 4);
+
+    uint32_t* igemm_addr = (uint32_t*) igemm_minmax;
+    uint32_t* jit_addr = (uint32_t*) code_buffer.start;
+    size_t stop = FindEndOfCodeBeforeAlignment(&code_buffer, jit_addr);
+    for (size_t i = 0; i < stop; i++) {
+      EXPECT_EQ(igemm_addr[i], jit_addr[i]) << "mismatch at i: " << i;
+    }
+
+    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+}
+
+void GemmMicrokernelTester::Test(
+  xnn_jit_gemm_code_generator_fn gemm_generator,
+  xnn_init_f32_minmax_params_fn init_params,
+  xnn_f32_gemm_minmax_ukernel_fn gemm_minmax) const
+{
+    struct xnn_code_buffer code_buffer;
+    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
+
+    // Don't use (-)infinity as JIT will omit the code.
+    jit_gemm_params p = {};
+    p.f32_minmax.min = -1.0f;
+    p.f32_minmax.max = 1.0f;
+    ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(float), &p));
+    ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
+    ASSERT_LT(0, code_buffer.size);
+    ASSERT_EQ(0, code_buffer.size % 4);
+
+    uint32_t* gemm_addr = (uint32_t*) gemm_minmax;
+    uint32_t* jit_addr = (uint32_t*) code_buffer.start;
+    size_t stop = FindEndOfCodeBeforeAlignment(&code_buffer, jit_addr);
+    for (size_t i = 0; i < stop; i++) {
+      EXPECT_EQ(gemm_addr[i], jit_addr[i]) << "mismatch at i: " << i;
+    }
+
+    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+}
+
+void GemmMicrokernelTester::Test(
+  xnn_jit_igemm_code_generator_fn igemm_generator,
+  xnn_init_f32_minmax_params_fn init_params,
+  xnn_f32_igemm_minmax_ukernel_fn igemm_minmax) const
+{
+    struct xnn_code_buffer code_buffer;
+    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
+
+    // Don't use (-)infinity as JIT will omit the code.
+    jit_gemm_params p = {};
+    p.f32_minmax.min = -1.0f;
+    p.f32_minmax.max = 1.0f;
+    ASSERT_EQ(xnn_status_success,
+              igemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(float), ks() * mr() * sizeof(void *), &p));
+    ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
+    ASSERT_LT(0, code_buffer.size);
+    ASSERT_EQ(0, code_buffer.size % 4);
+
+    uint32_t* igemm_addr = (uint32_t*) igemm_minmax;
+    uint32_t* jit_addr = (uint32_t*) code_buffer.start;
+    size_t stop = FindEndOfCodeBeforeAlignment(&code_buffer, jit_addr);
+    for (size_t i = 0; i < stop; i++) {
+      EXPECT_EQ(igemm_addr[i], jit_addr[i]) << "mismatch at i: " << i;
+    }
+
+    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
 }
 
 #endif  // XNN_PLATFORM_JIT

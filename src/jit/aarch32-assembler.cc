@@ -213,7 +213,7 @@ void Assembler::mov(Condition c, CoreRegister Rd, CoreRegister Rm) {
 }
 
 void Assembler::nop() {
-  emit32(kAL | 0x0320F000);
+  emit32(kAlignInstruction);
 }
 
 void Assembler::pld(MemOperand op) {

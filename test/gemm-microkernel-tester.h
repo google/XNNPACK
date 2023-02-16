@@ -288,6 +288,24 @@ class GemmMicrokernelTester {
     xnn_jit_igemm_code_generator_fn gemm_generator,
     xnn_init_f32_minmax_params_fn init_params,
     const std::vector<xnn_post_operation>& fused_operators) const;
+
+  // Test that JIT generated code matches assembly.
+  void Test(
+    xnn_jit_gemm_code_generator_fn gemm_generator,
+    xnn_init_f16_minmax_params_fn init_params,
+    xnn_f16_gemm_minmax_ukernel_fn gemm_minmax) const;
+  void Test(
+    xnn_jit_igemm_code_generator_fn igemm_generator,
+    xnn_init_f16_minmax_params_fn init_params,
+    xnn_f16_igemm_minmax_ukernel_fn igemm_minmax) const;
+  void Test(
+    xnn_jit_gemm_code_generator_fn gemm_generator,
+    xnn_init_f32_minmax_params_fn init_params,
+    xnn_f32_gemm_minmax_ukernel_fn gemm_minmax) const;
+  void Test(
+    xnn_jit_igemm_code_generator_fn igemm_generator,
+    xnn_init_f32_minmax_params_fn init_params,
+    xnn_f32_igemm_minmax_ukernel_fn igemm_minmax) const;
 #endif  // XNN_PLATFORM_JIT
 
  private:
