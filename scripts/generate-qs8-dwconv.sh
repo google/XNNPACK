@@ -9,6 +9,8 @@ tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=
 tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=3  -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -D DATATYPE=QC8 -D WASM=0 -o src/qc8-dwconv/gen/qc8-dwconv-3p2c-minmax-fp32-scalar-imagic.c &
 tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=3  -D REQUANTIZATION=FP32 -D VARIANT=LRINTF -D DATATYPE=QC8 -D WASM=0 -o src/qc8-dwconv/gen/qc8-dwconv-3p2c-minmax-fp32-scalar-lrintf.c &
 
+tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=4  -D REQUANTIZATION=FP32 -D VARIANT=IMAGIC -D DATATYPE=QC8 -D WASM=0 -o src/qc8-dwconv/gen/qc8-dwconv-4p2c-minmax-fp32-scalar-imagic.c &
+
 tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=1 -D KERNEL_TILE=9  -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=0 -o src/qc8-dwconv/gen/qc8-dwconv-9p1c-minmax-fp32-scalar-fmagic.c &
 tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=2 -D KERNEL_TILE=9  -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=0 -o src/qc8-dwconv/gen/qc8-dwconv-9p2c-minmax-fp32-scalar-fmagic.c &
 tools/xngen src/qs8-dwconv/unipass-scalar.c.in -D CHANNEL_TILE=4 -D KERNEL_TILE=9  -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=0 -o src/qc8-dwconv/gen/qc8-dwconv-9p4c-minmax-fp32-scalar-fmagic.c &
@@ -124,6 +126,8 @@ tools/xngen src/qs8-dwconv/unipass-neon-mul8.c.in -D CHANNEL_TILE=16 -D KERNEL_T
 tools/xngen src/qs8-dwconv/unipass-neon-mul8.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=3  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D MLA=1 -D LOAD_VARIANT=LD64  -D ARMV8=1 -o src/qc8-dwconv/gen/qc8-dwconv-3p8c-minmax-fp32-neonv8-mla8-ld64.c &
 tools/xngen src/qs8-dwconv/unipass-neon-mul8.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=3  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D MLA=1 -D LOAD_VARIANT=LD64  -D ARMV8=1 -o src/qc8-dwconv/gen/qc8-dwconv-3p16c-minmax-fp32-neonv8-mla8-ld64.c &
 tools/xngen src/qs8-dwconv/unipass-neon-mul8.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=3  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D MLA=1 -D LOAD_VARIANT=LD128 -D ARMV8=1 -o src/qc8-dwconv/gen/qc8-dwconv-3p16c-minmax-fp32-neonv8-mla8-ld128.c &
+
+tools/xngen src/qs8-dwconv/unipass-neon-mul8.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=4  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D MLA=1 -D LOAD_VARIANT=LD64  -D ARMV8=0 -o src/qc8-dwconv/gen/qc8-dwconv-4p8c-minmax-fp32-neon-mla8-ld64.c &
 
 tools/xngen src/qs8-dwconv/unipass-neon-mul8.c.in -D CHANNEL_TILE=8  -D KERNEL_TILE=9  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D MLA=0 -D LOAD_VARIANT=LD64  -D ARMV8=0 -o src/qc8-dwconv/gen/qc8-dwconv-9p8c-minmax-fp32-neon-mul8-ld64.c &
 tools/xngen src/qs8-dwconv/unipass-neon-mul8.c.in -D CHANNEL_TILE=16 -D KERNEL_TILE=9  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D MLA=0 -D LOAD_VARIANT=LD64  -D ARMV8=0 -o src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-neon-mul8-ld64.c &

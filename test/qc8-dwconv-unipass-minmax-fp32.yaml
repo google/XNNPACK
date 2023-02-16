@@ -20,6 +20,8 @@
   init: xnn_init_qc8_conv_minmax_fp32_neonv8_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__neonv8_mla8_ld128
   init: xnn_init_qc8_conv_minmax_fp32_neonv8_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_4p8c__neon_mla8_ld64
+  init: xnn_init_qc8_conv_minmax_fp32_neon_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_9p8c__neon_mla8_ld64
   init: xnn_init_qc8_conv_minmax_fp32_neon_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_9p8c__neon_mul8_ld64
@@ -310,10 +312,14 @@
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_25p4c__wasm_fmagic
   init: xnn_init_qc8_conv_minmax_fp32_scalar_fmagic_params
 # Scalar
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_3p1c__scalar_fmagic
+  init: xnn_init_qc8_conv_minmax_fp32_scalar_fmagic_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_3p2c__scalar_imagic
   init: xnn_init_qc8_conv_minmax_fp32_scalar_imagic_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_3p2c__scalar_lrintf
   init: xnn_init_qc8_conv_minmax_fp32_scalar_lrintf_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_4p2c__scalar_imagic
+  init: xnn_init_qc8_conv_minmax_fp32_scalar_imagic_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_9p1c__scalar_fmagic
   init: xnn_init_qc8_conv_minmax_fp32_scalar_fmagic_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_9p1c__scalar_imagic
