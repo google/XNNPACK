@@ -129,6 +129,22 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     vmov(q15, q9);
   }
 
+  pld(mem[r3, 0]); // Prefetch A
+  pld(mem[r3, 64]);
+  pld(mem[r12, 0]);
+  pld(mem[r12, 64]);
+  pld(mem[r10, 0]);
+  pld(mem[r10, 64]);
+  pld(mem[r0, 0]);
+  pld(mem[r0, 64]);
+  pld(mem[r9, 0]); // Prefetch B
+  pld(mem[r9, 64]);
+  pld(mem[r9, 128]);
+  pld(mem[r9, 192]);
+  pld(mem[r9, 256]);
+  pld(mem[r9, 320]);
+  pld(mem[r9, 384]);
+  pld(mem[r9, 448]);
   blo(l3); // less than 2 channels?
 
   // Main loop - 2 floats of A (8 bytes)
@@ -178,6 +194,11 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     vmla_f32(q14, q6, d3[1]);
     vmla_f32(q15, q7, d3[1]);
   }
+  pld(mem[r9, 448]); // Prefetch B
+  pld(mem[r3, 128]); // Prefetch A0
+  pld(mem[r12, 128]); // Prefetch A1
+  pld(mem[r10, 128]); // Prefetch A2
+  pld(mem[r0, 128]); // Prefetch A3
   bhs(l1);
 
   // Is there a remainder?- 1 float of A (4 bytes)
