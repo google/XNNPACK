@@ -134,16 +134,28 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   mov(x9, x3); // p = ks
   if (max_mr > 1) {
     mov(v22.v16b(), v20.v16b());
+  }
+  prfm(kPLDL1KEEP, mem[x5, 0]); // Prefetch B
+  if (max_mr > 1) {
     mov(v23.v16b(), v21.v16b());
   }
+  prfm(kPLDL1KEEP, mem[x5, 64]);
   if (max_mr > 2) {
     mov(v24.v16b(), v20.v16b());
+  }
+  prfm(kPLDL1KEEP, mem[x5, 128]);
+  if (max_mr > 2) {
     mov(v25.v16b(), v21.v16b());
   }
+  prfm(kPLDL1KEEP, mem[x5, 192]);
   if (max_mr > 3) {
     mov(v26.v16b(), v20.v16b());
+  }
+  prfm(kPLDL1KEEP, mem[x5, 256]);
+  if (max_mr > 3) {
     mov(v27.v16b(), v21.v16b());
   }
+  prfm(kPLDL1KEEP, mem[x5, 320]);
   if (max_mr > 4) {
     mov(v28.v16b(), v20.v16b());
     mov(v29.v16b(), v21.v16b());
@@ -589,23 +601,29 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   // Second group of 24 FMA, First group of loads
   // BLOCK 0
   fmla(v20.v4s(), v12.v4s(), v3.s()[0]);
+  prfm(kPSTL1KEEP, mem[x6]); // Prefetch C0
   if (max_mr > 1) {
     fmla(v22.v4s(), v12.v4s(), v3.s()[2]);
   }
+  prfm(kPSTL1KEEP, mem[x16]); // Prefetch C1
   if (max_mr > 2) {
     fmla(v24.v4s(), v12.v4s(), v4.s()[0]);
   }
+  prfm(kPSTL1KEEP, mem[x17]); // Prefetch C2
 
   // BLOCK 1
   if (max_mr > 3) {
     fmla(v26.v4s(), v12.v4s(), v4.s()[2]);
   }
+  prfm(kPSTL1KEEP, mem[x10]); // Prefetch C3
   if (max_mr > 4) {
     fmla(v28.v4s(), v12.v4s(), v5.s()[0]);
   }
+  prfm(kPSTL1KEEP, mem[x13]); // Prefetch C4
   if (max_mr > 5) {
     fmla(v30.v4s(), v12.v4s(), v5.s()[2]);
   }
+  prfm(kPSTL1KEEP, mem[x7]); // Prefetch C5
 
   // BLOCK 2
   fmla(v21.v4s(), v13.v4s(), v3.s()[0]);

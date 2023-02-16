@@ -113,10 +113,18 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
     vmov(q12, q8);
     vmov(q13, q9);
   }
+  pld(mem[r9, 0]); // Prefetch B
+  pld(mem[r9, 64]);
   if (max_mr > 3) {
     vmov(q14, q8);
+  }
+  pld(mem[r9, 128]);
+  pld(mem[r9, 192]);
+  if (max_mr > 3) {
     vmov(q15, q9);
   }
+  pld(mem[r9, 256]);
+  pld(mem[r9, 320]);
 
   bind(l1);
   // Load next 4 A pointers
@@ -131,9 +139,17 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
     ldr(r7, mem[r5, 12]);
   }
   add(r5, r5, 16);
+  pld(mem[r3, 0]); // Prefetch A
   str(r5, mem[sp, 104]); // a
+  pld(mem[r3, 64]);
   ldr(r0, mem[sp, 128]); // zero
+  pld(mem[r12, 0]);
   ldr(r5, mem[sp, 124]); // a_offset
+  pld(mem[r12, 64]);
+  pld(mem[r10, 0]);
+  pld(mem[r10, 64]);
+  pld(mem[r7, 0]);
+  pld(mem[r7, 64]);
 
   // Add a_offset
   cmp(r3, r0); // if a0 == zero
