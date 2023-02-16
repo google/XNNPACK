@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__avx_expm1_rr1_lut4_p4h2_perm_div(
+void xnn_math_f32_tanh__avx_expm1_rr1_lut4_p4h2_perm_nr1(
     size_t n,
     const float* input,
     float* output)
@@ -61,11 +61,8 @@ void xnn_math_f32_tanh__avx_expm1_rr1_lut4_p4h2_perm_div(
     // Inverted mask for the sign of input: 0x00000000 for negative x, 0x80000000 for positive x.
     const __m256 vinvsignx = _mm256_xor_ps(vx, vz);
 
-    // The function f[z] saturates at -1 for large inputs: tanhf(x) == -1.0f for x <= sat_cutoff ~= -9.010913.
-    // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
-    // tanhf(sat_cutoff) == -1.0f. The order of operands in the [V]MAXPS instruction matters: it ensures that NaN
-    // inputs are passed unchanged.
-    vz = _mm256_max_ps(vsat_cutoff, vz);
+    // Mask for tanh[z] saturation at -1 for large inputs: tanhf(z) == -1.0f for z <= sat_cutoff ~= -4.5078125.
+    const __m256 vm = _mm256_cmp_ps(vz, vsat_cutoff, _CMP_LE_OS);
 
     // Compute reduced argument n := round(-z / log(2), 3).
     // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
@@ -120,9 +117,20 @@ void xnn_math_f32_tanh__avx_expm1_rr1_lut4_p4h2_perm_div(
     vp = _mm256_add_ps(_mm256_mul_ps(vp, vts), vts);
     const __m256 vem1 = _mm256_add_ps(_mm256_mul_ps(vp, vtwo), vsm1);
 
-    // Reconstruct tanh(z) := expm1(2z) / (2 + expm1(2z))
+    // Denominator of the tanh fraction: 1.0 + exp(2z) = 2.0 + expm1(2z)
     const __m256 vep1 = _mm256_add_ps(vem1, vtwo);
-    const __m256 vabsy = _mm256_div_ps(vem1, vep1);
+
+    // Use Newton-Raphson method (1 iteration) to compute reciprocal of denominator.
+    // Note: 2 < exp(2z) + 1 <= 3, because z <= 0.0 and 0 < exp(2z) <= 1.0.
+    // Thus the reciprocal of the denominator never overflows.
+    __m256 vrep1 = _mm256_rcp_ps(vep1);
+    vrep1 = _mm256_mul_ps(vrep1, _mm256_sub_ps(vtwo, _mm256_mul_ps(vrep1, vep1)));
+
+    // Reconstruct tanh(z) := expm1(2z) / (2 + expm1(2z))
+    __m256 vabsy = _mm256_mul_ps(vem1, vrep1);
+
+    // Saturate tanh(z) at -1 for large inputs.
+    vabsy = _mm256_blendv_ps(vabsy, vminus_one, vm);
 
     // Reconstruct tanh[x] = sign(x) * tanh[-abs(x)].
     // As tanh[-abs(x)] is negative, flips the sign bit if x is positive.

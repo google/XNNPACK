@@ -280,6 +280,16 @@ static void TanhError(benchmark::State& state,
                     benchmark::utils::CheckAVX)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, avx_expm1_rr1_lut4_p4h2_perm_nr1,
+                    xnn_math_f32_tanh__avx_expm1_rr1_lut4_p4h2_perm_nr1,
+                    benchmark::utils::CheckAVX)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, avx_expm1_rr1_lut4_p4h2_perm_nr2,
+                    xnn_math_f32_tanh__avx_expm1_rr1_lut4_p4h2_perm_nr2,
+                    benchmark::utils::CheckAVX)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, avx_expm1_rr1_lut4_p4h3_perm_div,
                     xnn_math_f32_tanh__avx_expm1_rr1_lut4_p4h3_perm_div,
                     benchmark::utils::CheckAVX)
@@ -290,9 +300,27 @@ static void TanhError(benchmark::State& state,
                     benchmark::utils::CheckAVX)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, avx_expm1_rr1_p6h5_nr1,
+                    xnn_math_f32_tanh__avx_expm1_rr1_p6h5_nr1,
+                    benchmark::utils::CheckAVX)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, avx_expm1_rr1_p6h5_nr2,
+                    xnn_math_f32_tanh__avx_expm1_rr1_p6h5_nr2,
+                    benchmark::utils::CheckAVX)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
 
   BENCHMARK_CAPTURE(TanhError, sse2_expm1_rr1_p6h5_div,
                     xnn_math_f32_tanh__sse2_expm1_rr1_p6h5_div)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, sse2_expm1_rr1_p6h5_nr1,
+                    xnn_math_f32_tanh__sse2_expm1_rr1_p6h5_nr1)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, sse2_expm1_rr1_p6h5_nr2,
+                    xnn_math_f32_tanh__sse2_expm1_rr1_p6h5_nr2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

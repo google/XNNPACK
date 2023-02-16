@@ -103,7 +103,7 @@ void xnn_math_f32_tanh__fma3_expm1_rr1_p6h5_nr1fma(
     const __m256 vep1 = _mm256_add_ps(vem1, vtwo);
 
     // Use Newton-Raphson method (1 iteration) to compute reciprocal of denominator.
-    // Note: 2 < exp(-2z) + 1 <= 3, because z >= 0.0 and 0 < exp(-2z) <= 1.0.
+    // Note: 2 < exp(2z) + 1 <= 3, because z <= 0.0 and 0 < exp(2z) <= 1.0.
     // Thus the reciprocal of the denominator never overflows.
     __m256 vrep1 = _mm256_rcp_ps(vep1);
     vrep1 = _mm256_fmadd_ps(_mm256_fnmsub_ps(vrep1, vep1, vminus_one), vrep1, vrep1);
