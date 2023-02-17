@@ -891,21 +891,23 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE == 'f32' and POST_OP:
   }
 
 $if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16']:
-  TEST(${TEST_NAME}, matches_assembly) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    GemmMicrokernelTester()
-      .mr(${MR})
-      .nr(${NR})
-      .kr(${KR})
-      .sr(${SR})
-      .m(${MR})
-      .n(${NR})
-      .k(${KBLOCK})
-      .Test(
-          ${", ".join(TEST_ARGS)},
-          &${PROTOTYPE});
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(${TEST_NAME}, matches_assembly) {
+      $if ISA_CHECK:
+        ${ISA_CHECK};
+      GemmMicrokernelTester()
+        .mr(${MR})
+        .nr(${NR})
+        .kr(${KR})
+        .sr(${SR})
+        .m(${MR})
+        .n(${NR})
+        .k(${KBLOCK})
+        .Test(
+            ${", ".join(TEST_ARGS)},
+            &${PROTOTYPE});
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 
 """
 

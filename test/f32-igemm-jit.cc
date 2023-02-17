@@ -526,20 +526,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_1X8__AARCH32_NEON_CORTEX_A53, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON;
-    GemmMicrokernelTester()
-      .mr(1)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(1)
-      .n(8)
-      .k(2)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_1x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_1X8__AARCH32_NEON_CORTEX_A53, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON;
+      GemmMicrokernelTester()
+        .mr(1)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(1)
+        .n(8)
+        .k(2)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_1x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 
 
@@ -1045,20 +1047,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_1X8__AARCH32_NEON_PRFM_CORTEX_A53, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON;
-    GemmMicrokernelTester()
-      .mr(1)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(1)
-      .n(8)
-      .k(2)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_1x8__aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_1X8__AARCH32_NEON_PRFM_CORTEX_A53, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON;
+      GemmMicrokernelTester()
+        .mr(1)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(1)
+        .n(8)
+        .k(2)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_1x8__aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_prfm_cortex_a53);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 
 
@@ -1564,20 +1568,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A7, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(8)
-      .k(2)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a7);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A7, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON;
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(8)
+        .k(2)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a7);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 
 
@@ -2114,20 +2120,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A53, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(8)
-      .k(4)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a53);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A53, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON;
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a53);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 
 
@@ -2664,20 +2672,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A55, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(8)
-      .k(4)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a55);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A55, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON;
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a55);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 
 
@@ -3214,20 +3224,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A75, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(8)
-      .k(4)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a75);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A75, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON;
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a75);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 
 
@@ -3733,20 +3745,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_LD64, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(8)
-      .k(2)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_ld64);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_LD64, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON;
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(8)
+        .k(2)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_ld64);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 
 
@@ -4283,20 +4297,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_PRFM_CORTEX_A53, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(8)
-      .k(4)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_prfm_cortex_a53);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_PRFM_CORTEX_A53, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON;
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_prfm_cortex_a53);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 
 
@@ -4833,20 +4849,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_PRFM_CORTEX_A75, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(8)
-      .k(4)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_prfm_cortex_a75, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_prfm_cortex_a75);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_PRFM_CORTEX_A75, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON;
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_prfm_cortex_a75, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch32_neon_prfm_cortex_a75);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 
 
@@ -5383,20 +5401,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_CORTEX_A53, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(1)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(1)
-      .n(8)
-      .k(8)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_CORTEX_A53, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(1)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(1)
+        .n(8)
+        .k(8)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -5933,20 +5953,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_CORTEX_A75, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(1)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(1)
-      .n(8)
-      .k(8)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_CORTEX_A75, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(1)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(1)
+        .n(8)
+        .k(8)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -6483,20 +6505,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_PRFM_CORTEX_A53, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(1)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(1)
-      .n(8)
-      .k(8)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_cortex_a53);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_PRFM_CORTEX_A53, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(1)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(1)
+        .n(8)
+        .k(8)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_cortex_a53);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -7033,20 +7057,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_PRFM_CORTEX_A75, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(1)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(1)
-      .n(8)
-      .k(8)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_cortex_a75);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_PRFM_CORTEX_A75, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(1)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(1)
+        .n(8)
+        .k(8)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_prfm_cortex_a75, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_cortex_a75);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -7583,20 +7609,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_CORTEX_A53, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(8)
-      .k(4)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a53);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_CORTEX_A53, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a53);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -8117,20 +8145,22 @@
     }
   }
 
-  TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_CORTEX_A55, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(8)
-      .k(4)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a55);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_CORTEX_A55, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a55);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -8667,20 +8697,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_CORTEX_A75, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(8)
-      .k(8)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a75);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_CORTEX_A75, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(8)
+        .k(8)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a75);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -9170,20 +9202,22 @@
     }
   }
 
-  TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_LD128, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(8)
-      .k(4)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_ld128, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_LD128, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_ld128, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -9720,20 +9754,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_PRFM_CORTEX_A53, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(8)
-      .k(4)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex_a53);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_PRFM_CORTEX_A53, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex_a53);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -10270,20 +10306,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_PRFM_CORTEX_A75, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(4)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(4)
-      .n(8)
-      .k(8)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex_a75);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_PRFM_CORTEX_A75, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(4)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(4)
+        .n(8)
+        .k(8)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_prfm_cortex_a75, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex_a75);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -10804,20 +10842,22 @@
     }
   }
 
-  TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A53, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(6)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(6)
-      .n(8)
-      .k(4)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a53);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A53, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(6)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(6)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a53);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -11354,20 +11394,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A55, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(6)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(6)
-      .n(8)
-      .k(4)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a55);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A55, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(6)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(6)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a55);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -11904,20 +11946,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A75, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(6)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(6)
-      .n(8)
-      .k(8)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a75, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a75);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A75, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(6)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(6)
+        .n(8)
+        .k(8)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a75, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a75);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -12423,20 +12467,22 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_LD128, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(6)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(6)
-      .n(8)
-      .k(4)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_ld128, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_LD128, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(6)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(6)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_ld128, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -12957,20 +13003,22 @@
     }
   }
 
-  TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_PRFM_CORTEX_A53, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(6)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(6)
-      .n(8)
-      .k(4)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_prfm_cortex_a53);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_PRFM_CORTEX_A53, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(6)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(6)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a53, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_prfm_cortex_a53);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
 
 
@@ -13507,18 +13555,20 @@
           fused_operators);
   }
 
-  TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_PRFM_CORTEX_A75, matches_assembly) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    GemmMicrokernelTester()
-      .mr(6)
-      .nr(8)
-      .kr(1)
-      .sr(1)
-      .m(6)
-      .n(8)
-      .k(8)
-      .Test(
-          xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75, xnn_init_f32_minmax_scalar_params,
-          &xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_prfm_cortex_a75);
-  }
+  #if XNN_ENABLE_ASSEMBLY
+    TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_PRFM_CORTEX_A75, matches_assembly) {
+      TEST_REQUIRES_ARM_NEON_FMA;
+      GemmMicrokernelTester()
+        .mr(6)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(6)
+        .n(8)
+        .k(8)
+        .Test(
+            xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75, xnn_init_f32_minmax_scalar_params,
+            &xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_prfm_cortex_a75);
+    }
+  #endif // XNN_ENABLE_ASSEMBLY
 #endif  // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
