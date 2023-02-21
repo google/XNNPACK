@@ -6846,6 +6846,10 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/math/f32-roundz-wasmsimd-native.c
   src/math/f32-sigmoid-wasmsimd-rr2-lut64-p2-div.c
   src/math/f32-sigmoid-wasmsimd-rr2-p5-div.c
+  src/math/f32-tanh-wasmsimd-expm1-rr1-lut8-p4h3-div-abs-min.c
+  src/math/f32-tanh-wasmsimd-expm1-rr1-lut8-p4h3-div-abs-pmin.c
+  src/math/f32-tanh-wasmsimd-expm1-rr1-lut8-p4h3-div-nabs-max.c
+  src/math/f32-tanh-wasmsimd-expm1-rr1-lut8-p4h3-div-nabs-pmax.c
   src/math/f32-tanh-wasmsimd-expm1-rr1-p6h5-div-abs-min.c
   src/math/f32-tanh-wasmsimd-expm1-rr1-p6h5-div-abs-pmin.c
   src/math/f32-tanh-wasmsimd-expm1-rr1-p6h5-div-nabs-max.c
