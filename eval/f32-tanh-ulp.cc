@@ -311,6 +311,19 @@ static void TanhError(benchmark::State& state,
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
 
+  BENCHMARK_CAPTURE(TanhError, sse2_expm1_rr1_lut8_p4h3_div,
+                    xnn_math_f32_tanh__sse2_expm1_rr1_lut8_p4h3_div)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, sse2_expm1_rr1_lut8_p4h3_nr1,
+                    xnn_math_f32_tanh__sse2_expm1_rr1_lut8_p4h3_nr1)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, sse2_expm1_rr1_lut8_p4h3_nr2,
+                    xnn_math_f32_tanh__sse2_expm1_rr1_lut8_p4h3_nr2)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+
   BENCHMARK_CAPTURE(TanhError, sse2_expm1_rr1_p6h5_div,
                     xnn_math_f32_tanh__sse2_expm1_rr1_p6h5_div)
     ->Unit(benchmark::kMillisecond)
