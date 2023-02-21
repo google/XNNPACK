@@ -2816,6 +2816,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(x24-transpose-test PRIVATE hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME x24-transpose-test COMMAND x24-transpose-test)
 
+  ADD_EXECUTABLE(x32-packw-test test/x32-packw.cc)
+  TARGET_INCLUDE_DIRECTORIES(x32-packw-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(x32-packw-test PRIVATE pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(x32-packw-test PRIVATE hardware-config logging microkernels-all)
+  ADD_TEST(NAME x32-packw-test COMMAND x32-packw-test)
+
   ADD_EXECUTABLE(x32-packx-test test/x32-packx.cc)
   TARGET_INCLUDE_DIRECTORIES(x32-packx-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(x32-packx-test PRIVATE pthreadpool gtest gtest_main)

@@ -4530,6 +4530,8 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x24-transposec/gen/x24-transposec-4x1-scalar.c
   src/x24-transposec/gen/x24-transposec-4x2-scalar.c
   src/x24-transposec/gen/x24-transposec-4x4-scalar.c
+  src/x32-packw/gen/x32-packw-x2-scalar.c
+  src/x32-packw/gen/x32-packw-x4-scalar.c
   src/x32-packx/x32-packx-x2-scalar.c
   src/x32-packx/x32-packx-x3-scalar.c
   src/x32-packx/x32-packx-x4-scalar.c
