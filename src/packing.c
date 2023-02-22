@@ -2411,7 +2411,6 @@ void xnn_pack_f32_dwconv_multipass_hwg_w(
     assert(kernel_size <= last_pass_tile);
     size_t cr_block_start = 0;
     for (; cr_block_start < round_down_po2(c, channel_tile); cr_block_start += channel_tile) {
-    // for (; cr_block_start <= c - channel_tile; cr_block_start += channel_tile) {
       x = processed_x;
       y = processed_y;
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
@@ -2643,7 +2642,6 @@ void xnn_pack_f16_dwconv_multipass_hwg_w(
     assert(kernel_size <= last_pass_tile);
     size_t cr_block_start = 0;
     for (; cr_block_start < round_down_po2(c, channel_tile); cr_block_start += channel_tile) {
-    // for (; cr_block_start <= c - channel_tile; cr_block_start += channel_tile) {
       x = processed_x;
       y = processed_y;
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
@@ -2875,7 +2873,6 @@ void xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
     assert(kernel_size <= last_pass_tile);
     size_t cr_block_start = 0;
     for (; cr_block_start < round_down_po2(c, channel_tile); cr_block_start += channel_tile) {
-    // for (; cr_block_start <= c - channel_tile; cr_block_start += channel_tile) {
       x = processed_x;
       y = processed_y;
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
