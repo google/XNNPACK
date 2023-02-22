@@ -3385,7 +3385,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
   const std::vector<float> expected = {
     // First pass.
     0.0f, 1.0f, 2.0f, 3.0f,  // bias, 4 channels
-    5.0f, 9.0f, 13.0, 17.0f,  // 2 weights, 4 channels first, then columns
+    5.0f, 9.0f, 13.0f, 17.0f,  // 2 weights, 4 channels first, then columns
     7.0f, 11.0f, 15.0f, 19.0f,
     4.0f, 0.0f, // bias, 1 last channel, 1 padding up to channel_subtile
     21.0f, 0.0f, // 2 weights, 1 last channel, 1 padding up to channel_subtile
@@ -3446,7 +3446,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
   const std::vector<float> expected = {
     // First pass.
     0.0f, 1.0f, 2.0f, 3.0f,  // bias, 4 channels
-    5.0f, 9.0f, 13.0, 17.0f,  // 1 weight, 4 channels first, then columns
+    5.0f, 9.0f, 13.0f, 17.0f,  // 1 weight, 4 channels first, then columns
     4.0f, 0.0f, // bias, 1 last channel, 1 padding up to channel_subtile
     21.0f, 0.0f, // 1 weight, 1 last channel, 1 padding up to channel_subtile
     // 1 middle pass
@@ -3513,7 +3513,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
   const std::vector<float> expected = {
     // First pass.
     0.0f, 1.0f, 2.0f, 3.0f,  // bias, 4 channels
-    7.0f, 11.0f, 15.0, 19.0f,  // 2 weights, 4 channels first, then columns
+    7.0f, 11.0f, 15.0f, 19.0f,  // 2 weights, 4 channels first, then columns
     9.0f, 13.0f, 17.0f, 21.0f,
     4.0f, 5.0f, 6.0f, 0.0f, // bias, 3 remainder channels, 1 padding up to channel_tile
     23.0f, 27.0f, 31.0f, 0.0f,  // 2 weights, 3 remainder channels, 1 padding up to channel_tile
@@ -3644,7 +3644,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rounded) {
   const std::vector<float> expected = {
     // First pass.
     0.0f, 1.0f, 2.0f, 3.0f,  // bias, 4 channels
-    7.0f, 11.0f, 15.0, 19.0f,  // 1 weight, 4 channels first, then columns
+    7.0f, 11.0f, 15.0f, 19.0f,  // 1 weight, 4 channels first, then columns
     4.0f, 5.0f, 6.0f, 0.0f, // bias, 4 channels, 1 padding up to channel_tile
     23.0f, 27.0f, 31.0f, 0.0f,  // 1 weight, 3 remainder channels, 1 padding up to channel_tile
     // 1 middle pass.
@@ -5101,7 +5101,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_chan
   const std::vector<float> expected = {
     // First pass.
     0.0f, 1.0f, 2.0f, 3.0f,  // bias, 4 channels
-    5.0f, 9.0f, 13.0, 17.0f,  // 2 weights, 4 channels first, then columns
+    5.0f, 9.0f, 13.0f, 17.0f,  // 2 weights, 4 channels first, then columns
     7.0f, 11.0f, 15.0f, 19.0f,
     4.0f, 0.0f, // bias, 1 last channel, 1 padding up to channel_subtile
     21.0f, 0.0f, // 2 weights, 1 last channel, 1 padding up to channel_subtile
@@ -5162,7 +5162,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
   const std::vector<float> expected = {
     // First pass.
     0.0f, 1.0f, 2.0f, 3.0f,  // bias, 4 channels
-    5.0f, 9.0f, 13.0, 17.0f,  // 1 weight, 4 channels first, then columns
+    5.0f, 9.0f, 13.0f, 17.0f,  // 1 weight, 4 channels first, then columns
     4.0f, 0.0f, // bias, 1 last channel, 1 padding up to channel_subtile
     21.0f, 0.0f, // 1 weight, 1 last channel, 1 padding up to channel_subtile
     // 1 middle pass
@@ -5229,7 +5229,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_chan
   const std::vector<float> expected = {
     // First pass.
     0.0f, 1.0f, 2.0f, 3.0f,  // bias, 4 channels
-    7.0f, 11.0f, 15.0, 19.0f,  // 2 weights, 4 channels first, then columns
+    7.0f, 11.0f, 15.0f, 19.0f,  // 2 weights, 4 channels first, then columns
     9.0f, 13.0f, 17.0f, 21.0f,
     4.0f, 5.0f, 6.0f, 0.0f, // bias, 3 remainder channels, 1 padding up to channel_tile
     23.0f, 27.0f, 31.0f, 0.0f,  // 2 weights, 3 remainder channels, 1 padding up to channel_tile
@@ -5360,7 +5360,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rou
   const std::vector<float> expected = {
     // First pass.
     0.0f, 1.0f, 2.0f, 3.0f,  // bias, 4 channels
-    7.0f, 11.0f, 15.0, 19.0f,  // 1 weight, 4 channels first, then columns
+    7.0f, 11.0f, 15.0f, 19.0f,  // 1 weight, 4 channels first, then columns
     4.0f, 5.0f, 6.0f, 0.0f, // bias, 4 channels, 1 padding up to channel_tile
     23.0f, 27.0f, 31.0f, 0.0f,  // 1 weight, 3 remainder channels, 1 padding up to channel_tile
     // 1 middle pass.
