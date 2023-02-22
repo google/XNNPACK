@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/math/f32-tanh-wasmsimd-expm1-nabs.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -17,7 +21,7 @@
 // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_math_f32_tanh__wasmsimd_expm1_rr1_lut8_p4h3_div_nabs_pmax(
+void xnn_math_f32_tanh__wasmsimd_expm1_rr1_lut8_p4h3_div_nabs_max(
     size_t n,
     const float* input,
     float* output)
@@ -53,33 +57,31 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_lut8_p4h3_div_nabs_pmax(
     //   f[x] :=
     //           \ -f[-x] if x >= 0
     //
-    // First we compute f[z] := expm1(2z) / (2 + expm1(2z)) where z = -abs(x),
-    // then replace result with -f[z] if x >= 0.
+    // First we compute f[z] := expm1(2z) / (2 + expm1(2z)) where z = -abs(x), then negate the result if x >= 0.
     v128_t vz = wasm_v128_or(vx, vsign_mask);
 
     // Inverted mask for the sign of input: 0x00000000 for negative x, 0x80000000 for positive x.
     const v128_t vinvsignx = wasm_v128_xor(vx, vz);
 
-    // The function f[-z] saturates at -1 for large inputs: tanhf(x) == -1.0f for x <= sat_cutoff ~= -9.010913.
+    // The function f[z] saturates at -1 for large inputs: tanhf(z) == -1.0f for z <= sat_cutoff ~= -9.010913.
     // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
     // tanhf(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
-    vz = wasm_f32x4_pmax(vz, vsat_cutoff);
+    vz = wasm_f32x4_max(vz, vsat_cutoff);
 
-    // Compute reduced argument n := round(-z / log(2), 4).
+    // Compute reduced argument n := round(z / log(2), 4).
     // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
     // the large number back. The trick with adding large number is valid only within certain bounds
-    // (|-z / log(2)| <= 2**18, i.e. |z| <= 0x1.62E43p+17 = 181704.375), but that is acceptable, because inputs x
-    // outside of [-9.010913, 9.010913] (i.e. z outsize [0, 9.010913]) saturate tanhf(x). We fixup the result for such
-    // inputs at the very end of the algorithm.
+    // (|z / log(2)| <= 2**18, i.e. |z| <= 0x1.62E43p+17 = 181704.375), but that is acceptable, because inputs x
+    // outside of [-9.010913, 9.010913] (i.e. z outsize [-9.010913, 0]) saturate tanhf(x).
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
     v128_t vn = wasm_f32x4_add(wasm_f32x4_mul(vz, vlog2e), vmagic_bias);
 
-    // Create a floating-point number s (scale) such that s := 2**(2n) for valid inputs, i.e. -17.328680 <= x <= 0.0. As
+    // Create a floating-point number s (scale) such that s := 2**(2n) for valid inputs, i.e. -9.010913 <= z <= 0]. As
     // n has 4 fractional bits, we split s == 2**(2n) = 2**int(2n) * 2**frac(2n). We create s in two steps:
     // 1. Fetch 2**frac(2n) from the table using the 3 low bits of n, as integer. Note that the fetched values are in
     //    the [1.0, 2.0) range, i.e. their unbiased floating-point exponent is 0.
     // 2. Adjust fetched value by addition of int(2n) to its floating-point exponent. The result is always a normalized
-    //    number, because for 0 <= z <= 9.010913 we have -13 <= int(n) <= 0, and thus the adjusted exponent is not
+    //    number, because for -9.010913 <= z <= 0 we have -13 <= int(n) <= 0, and thus the adjusted exponent is not
     //    lower than -13.
     //
     // Shift bits 3:11 into 23:31 (position of floating-point exponent).
@@ -97,33 +99,36 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_lut8_p4h3_div_nabs_pmax(
     // Adjust exponent of the value l fetched from the table to get the final s value.
     const v128_t vs = wasm_i32x4_add(vl, ve);
 
-    // Subtract the large number back to get final n := round(-z / log(2), 1) as a floating-point number.
+    // Subtract the large number back to get final n := round(z / log(2), 4) as a floating-point number.
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
-    // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
+    // Compute reduced argument t := z - n * log(2).
     v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2), vz);
 
-    // Compute degree-4 polynomial approximation for exp(-2t) - 1 on [-log(2)/32, log(2)/32].
-    //   P(-2t) = t * (-2 + t * (c2 + t * (c3 + t * c4)))
-    //          = t * p
+    // Compute degree-4 polynomial approximation for exp(2t) - 1 on [-log(2)/32, log(2)/32].
+    //   P(t) = t * (2 + t * (c2 + t * (c3 + t * c4)))
+    //        = t * p
     v128_t vp = wasm_f32x4_add(wasm_f32x4_mul(vc4, vt), vc3);
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc2);
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vtwo);
 
-    // Reconstruct the exp(x) - 1 value:
-    //   exp(x) - 1 = s * (-2 + t * (c2 + t * (c3 + t * c4))) - 1
-    //              = (s - 1) + s * t * p
-    //              = (s - 1) + (t * s) * p
+    // Reconstruct the exp(2z) - 1 value:
+    //   exp(2z) - 1 = s * (t * (2 + t * (c2 + t * (c3 + t * c4))) + 1) - 1
+    //               = s * t * p + (s - 1)
+    //               = (s - 1) + (t * s) * p
     const v128_t vts = wasm_f32x4_mul(vt, vs);
     const v128_t vsm1 = wasm_f32x4_sub(vs, vone);
     const v128_t vem1 = wasm_f32x4_add(wasm_f32x4_mul(vp, vts), vsm1);
 
-    // Reconstruct tanh(-z) := expm1(-2z) / (2 + expm1(-2z))
+    // Reconstruct tanh(z) = expm1(2z) / (expm1(2z) + 2)
     const v128_t vep1 = wasm_f32x4_add(vem1, vtwo);
     const v128_t vabsy = wasm_f32x4_div(vem1, vep1);
 
-    // Reconstruct tanh[x] = sign(x) * tanh[-abs(x)].
-    // As tanh[-abs(x)] is negative, flips the sign bit if x is positive.
+    // Reconstruct tanh(x):
+    //
+    //             / tanh(z) if x <= 0
+    //   tanh[x] =
+    //             \ -tanh(z) if x >= 0
     const v128_t vy = wasm_v128_xor(vabsy, vinvsignx);
 
     wasm_v128_store(output, vy);

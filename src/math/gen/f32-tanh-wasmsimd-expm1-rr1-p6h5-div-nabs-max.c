@@ -1,4 +1,8 @@
-// Copyright 2022 Google LLC
+// Auto-generated file. Do not edit!
+//   Template: src/math/f32-tanh-wasmsimd-expm1-nabs.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -14,7 +18,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__wasmsimd_expm1_rr1_p6h5_div_nabs_pmax(
+void xnn_math_f32_tanh__wasmsimd_expm1_rr1_p6h5_div_nabs_max(
     size_t n,
     const float* input,
     float* output)
@@ -32,7 +36,7 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_p6h5_div_nabs_pmax(
   // Coefficient of polynomial approximation
   //   exp(2t) - 1 ~ t * (2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
   // on [-log(2)/4, log(2)/4]
-  const v128_t vc6 = wasm_f32x4_const_splat(0x1.6b7338p-4f);
+  const v128_t vc6 = wasm_f32x4_const_splat(0x1.6B7338p-4f);
   const v128_t vc5 = wasm_f32x4_const_splat(0x1.12278Ep-2f);
   const v128_t vc4 = wasm_f32x4_const_splat(0x1.555716p-1f);
   const v128_t vc3 = wasm_f32x4_const_splat(0x1.5554B0p+0f);
@@ -50,25 +54,22 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_p6h5_div_nabs_pmax(
     //   f[x] :=
     //           \ -f[-x] if x >= 0
     //
-    // First we compute f[z] := expm1(2z) / (2 + expm1(2z)) where z = -abs(x),
-    // then replace result with -f[z] if x >= 0.
+    // First we compute f[z] := expm1(2z) / (2 + expm1(2z)) where z = -abs(x), then negate the result if x >= 0.
     v128_t vz = wasm_v128_or(vx, vsign_mask);
 
     // Inverted mask for the sign of input: 0x00000000 for negative x, 0x80000000 for positive x.
     const v128_t vinvsignx = wasm_v128_xor(vx, vz);
 
-    // The function f[z] saturates at -1 for large inputs: tanhf(x) == -1.0f for x <= sat_cutoff ~= -9.010913.
+    // The function f[z] saturates at -1 for large inputs: tanhf(z) == -1.0f for z <= sat_cutoff ~= -9.010913.
     // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
-    // tanhf(sat_cutoff) == -1.0f. The order of operands in the f32x4.pmax instruction matters: it ensures that NaN
-    // inputs are passed unchanged.
-    vz = wasm_f32x4_pmax(vz, vsat_cutoff);
+    // tanhf(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
+    vz = wasm_f32x4_max(vz, vsat_cutoff);
 
     // Compute reduced argument n := round(z / log(2), 1).
     // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
     // the large number back. The trick with adding large number is valid only within certain bounds
-    // (|-z / log(2)| <= 2**21, i.e. |z| <= 0x1.62E43p+20 = 1453635.0), but that is acceptable, because inputs x
-    // outside of [-9.010913, 9.010913] (i.e. z outsize [-9.010913, 0]) saturate tanhf(x). We fixup the result for such
-    // inputs at the very end of the algorithm.
+    // (|z / log(2)| <= 2**21, i.e. |z| <= 0x1.62E43p+20 = 1453635.0), but that is acceptable, because inputs x
+    // outside of [-9.010913, 9.010913] (i.e. z outsize [-9.010913, 0]) saturate tanhf(x).
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
     v128_t vn = wasm_f32x4_add(wasm_f32x4_mul(vz, vlog2e), vmagic_bias);
 
@@ -80,31 +81,34 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_p6h5_div_nabs_pmax(
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2).
-    const v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2), vz);
+    v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2), vz);
 
     // Compute degree-6 polynomial approximation for exp(2t) - 1 on [-log(2)/4, log(2)/4].
-    //   P(2t) = t * (2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
-    //         = t * p
+    //   P(t) = t * (2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
+    //        = t * p
     v128_t vp = wasm_f32x4_add(wasm_f32x4_mul(vc6, vt), vc5);
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc4);
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc3);
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc2);
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vtwo);
 
-    // Reconstruct the exp(x) - 1 value:
-    //   exp(x) - 1 = s * (2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6))))) - 1
-    //              = (s - 1) + s * t * p
-    //              = (s - 1) + (t * s) * p
+    // Reconstruct the exp(2z) - 1 value:
+    //   exp(2z) - 1 = s * (t * (2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6))))) + 1) - 1
+    //               = s * t * p + (s - 1)
+    //               = (s - 1) + (t * s) * p
     const v128_t vts = wasm_f32x4_mul(vt, vs);
     const v128_t vsm1 = wasm_f32x4_sub(vs, vone);
     const v128_t vem1 = wasm_f32x4_add(wasm_f32x4_mul(vp, vts), vsm1);
 
-    // Reconstruct tanh(-z) := expm1(-2z) / (2 + expm1(-2z))
+    // Reconstruct tanh(z) = expm1(2z) / (expm1(2z) + 2)
     const v128_t vep1 = wasm_f32x4_add(vem1, vtwo);
     const v128_t vabsy = wasm_f32x4_div(vem1, vep1);
 
-    // Reconstruct tanh[x] = sign(x) * tanh[-abs(x)].
-    // As tanh[-abs(x)] is negative, flips the sign bit if x is positive.
+    // Reconstruct tanh(x):
+    //
+    //             / tanh(z) if x <= 0
+    //   tanh[x] =
+    //             \ -tanh(z) if x >= 0
     const v128_t vy = wasm_v128_xor(vabsy, vinvsignx);
 
     wasm_v128_store(output, vy);
