@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert NR > 1
+$assert KR >= 1
 
 #include <assert.h>
 
@@ -52,17 +53,17 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__scalar(
         $for N in range(1, NR):
           const uint32_t* w${N} = w${N-1} + kc;
 
-        // KC main loop multiple of ${NR}x${NR}
+        // KC main loop multiple of ${NR}x${KR}
         size_t k = kc;
-        for (; k >= ${NR}; k -= ${NR}) {
+        for (; k >= ${KR}; k -= ${KR}) {
           $for N in range(NR):
-            $for K in range(NR):
+            $for K in range(KR):
               const uint32_t v${N}${K} = w${N}[${K}];
-            w${N} += ${NR};
-          $for K in range(NR):
+            w${N} += ${KR};
+          $for K in range(KR):
             $for N in range(NR):
               packed_weights[${N+K*NR}] = v${N}${K};
-          packed_weights += ${NR*NR};
+          packed_weights += ${NR*KR};
         }
 
         // KC remainder

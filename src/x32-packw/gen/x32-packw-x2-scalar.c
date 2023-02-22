@@ -54,20 +54,28 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar(
         const uint32_t* w0 = w;
         const uint32_t* w1 = w0 + kc;
 
-        // KC main loop multiple of 2x2
+        // KC main loop multiple of 2x4
         size_t k = kc;
-        for (; k >= 2; k -= 2) {
+        for (; k >= 4; k -= 4) {
           const uint32_t v00 = w0[0];
           const uint32_t v01 = w0[1];
-          w0 += 2;
+          const uint32_t v02 = w0[2];
+          const uint32_t v03 = w0[3];
+          w0 += 4;
           const uint32_t v10 = w1[0];
           const uint32_t v11 = w1[1];
-          w1 += 2;
+          const uint32_t v12 = w1[2];
+          const uint32_t v13 = w1[3];
+          w1 += 4;
           packed_weights[0] = v00;
           packed_weights[1] = v10;
           packed_weights[2] = v01;
           packed_weights[3] = v11;
-          packed_weights += 4;
+          packed_weights[4] = v02;
+          packed_weights[5] = v12;
+          packed_weights[6] = v03;
+          packed_weights[7] = v13;
+          packed_weights += 8;
         }
 
         // KC remainder
