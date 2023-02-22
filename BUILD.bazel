@@ -11312,10 +11312,18 @@ config_setting(
 )
 
 config_setting(
-    name = "macos_x86_64",
+    name = "macos_x86_64_legacy",
     values = {
         "apple_platform_type": "macos",
         "cpu": "darwin",
+    },
+)
+
+config_setting(
+    name = "macos_x86_64",
+    values = {
+        "apple_platform_type": "macos",
+        "cpu": "darwin_x86_64",
     },
 )
 
@@ -11457,6 +11465,7 @@ selects.config_setting_group(
         ":ios_x86_64",
         ":linux_k8",
         ":macos_x86_64",
+        ":macos_x86_64_legacy",
         ":tvos_x86_64",
         ":watchos_x86_64",
         ":windows_x86_64",
