@@ -1,10 +1,15 @@
-// Copyright 2022 Google LLC
+// Auto-generated file. Do not edit!
+//   Template: src/math/f32-tanh-scalar-expm1.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <math.h>
 
 #include <xnnpack/common.h>
@@ -26,35 +31,35 @@ void xnn_math_f32_tanh__scalar_expm1_rr1_p6h5_div(
   // Coefficient of polynomial approximation
   //   exp(-2t) - 1 ~ t * (-2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
   // on [-log(2)/4, log(2)/4]
-  const float vc6 = 0x1.6b7338p-4f;
+  const float vc6 = 0x1.6B7338p-4f;
   const float vc5 = -0x1.12278Ep-2f;
   const float vc4 = 0x1.555716p-1f;
   const float vc3 = -0x1.5554B0p+0f;
   const float vc2 = 0x1.FFFFFEp+0f;
   const float vminus_two = -2.0f;
   const float vone = 1.0f;
-  // The largest z for which tanhf(-z) is not saturated at -1.0f.
-  const float vsat_cutoff = 0x1.205966p+3f;
+  // The smallest z for which tanhf(-z) is saturated at -1.0f.
+  const float vsat_cutoff = 0x1.205968p+3f;
 
   for (; n != 0; n -= sizeof(float)) {
     const float vx = *input++;
 
     // General structure of the algorithm:
     //
-    //           / expm1(2x) / (2 + expm1(2x)) if x <= 0
-    //   f[x] :=
-    //           \ -f[-x] if x >= 0
+    //           / -expm1(-2x) / (2 + expm1(-2x)) if x >= 0
+    //   f(x) :=
+    //           \ -f(-x) if x <= 0
     //
-    // First we compute f[-z] := expm1(-2z) / (2 + expm1(-2z)) where z = abs(x),
-    // then replace result with -f[-z] if x >= 0.
+    // First we compute y := expm1(-2z) / (2 + expm1(-2z)) where z = abs(x),
+    // then set its sign according to the sign of x: f(x) := sign(x) * abs(y).
     const float vz = fabsf(vx);
 
     // Compute reduced argument n := round(-z / log(2), 1).
-    // We do it by adding a large number (magic bias), which cause rounding of the result to integer, then subtracing
-    // the large number back. The trick with adding large number is valid only within certain bounds
+    // We do it by adding a large number (magic bias), which cause rounding of the result to 1 fractional bit,
+    // then subtracing the large number back. The trick with adding large number is valid only within certain bounds
     // (|-z / log(2)| <= 2**21, i.e. |z| <= 0x1.62E43p+20 = 1453635.0), but that is acceptable, because inputs x
-    // outside of [-9.010913, 9.010913] (i.e. z outsize [0, 9.010913]) saturate tanhf(x). We fixup the result for such
-    // inputs at the very end of the algorithm.
+    // outside of [-9.010913, 9.010913] (i.e. z outsize [0, 9.010913]) saturate tanhf(x).
+    // Additionally, we fuse addition of the floating-point exponent bias (127) into the magic bias.
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
     float vn = vz * vminus_log2e + vmagic_bias;
 
@@ -66,37 +71,37 @@ void xnn_math_f32_tanh__scalar_expm1_rr1_p6h5_div(
     vn -= vmagic_bias;
 
     // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
-    float vt = vn * vln2 + vz;
+    const float vt = vn * vln2 + vz;
 
-    // Compute degree-6 polynomial approximation for exp(2t) - 1 on [-log(2)/4, log(2)/4].
-    //   P(-2t) = t * (-2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
-    //          = t * p
+    // Compute degree-6 polynomial approximation for exp(-2t) - 1 on [-log(2)/4, log(2)/4].
+    //   P(t) = t * (-2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
+    //        = t * p
     float vp = vc6 * vt + vc5;
     vp = vp * vt + vc4;
     vp = vp * vt + vc3;
     vp = vp * vt + vc2;
     vp = vp * vt + vminus_two;
 
-    // Reconstruct the exp(x) - 1 value:
-    //   exp(x) - 1 = s * (-2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6))))) - 1
-    //              = (s - 1) + s * t * p
-    //              = (s - 1) + (t * s) * p
+    // Reconstruct the exp(-2z) - 1 value:
+    //   exp(-2z) - 1 = s * (t * (-2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6))))) + 1) - 1
+    //                = s * t * p + (s - 1)
+    //                = (s - 1) + (t * s) * p
     const float vts = vt * vs;
     const float vsm1 = vs - vone;
     const float vem1 = vp * vts + vsm1;
 
-    // Reconstruct tanh(-z) := expm1(-2z) / (2 + expm1(-2z))
+    // Reconstruct y = expm1(-2z) / (expm1(-2z) + 2)
     const float vep1 = vem1 - vminus_two;
-    float vabsy = vem1 / vep1;
+    float vy = vem1 / vep1;
 
-    // The function saturates at +-1 for large inputs: tanhf(z) == +-1.0f for z > sat_cutoff ~= 9.010913.
-    // Note that we use 1.0f, because sign will be copied from the input right after.
-    if XNN_UNPREDICTABLE(vz > vsat_cutoff) {
-      vabsy = vone;
+    // The function tanh(z) saturates at -1 for large inputs: tanhf(z) == -1.0f for z >= sat_cutoff ~= 9.010913.
+    // Note that we use +1.0 instead of -1.0, because sign will be copied from the input in the next step.
+    if XNN_UNPREDICTABLE(vz >= vsat_cutoff) {
+      vy = vone;
     }
 
-    // Reconstruct tanh[x] = sign(x) * tanh[-abs(x)]
-    const float vy = copysignf(vabsy, vx);
+    // Reconstruct tanh(x) = copysign(y, x)
+    vy = copysignf(vy, vx);
 
     *output++ = vy;
   }
