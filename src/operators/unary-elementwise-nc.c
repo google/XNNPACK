@@ -739,6 +739,55 @@ enum xnn_status xnn_create_convert_nc_qs8_f32(
     convert_op_out);
 }
 
+enum xnn_status xnn_create_convert_nc_qs16_qs8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float input_scale,
+  float output_scale,
+  int8_t output_zero_point,
+  uint32_t flags,
+  xnn_operator_t* convert_op_out)
+{
+  if (input_scale <= 0.0f || !isnormal(input_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input scale parameter: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs16_qs8), input_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_scale <= 0.0f || !isnormal(output_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale parameter: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs16_qs8), output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  const float input_output_scale = input_scale / output_scale;
+  if (input_output_scale < 0x1.0p-16f || input_output_scale > 0x1.0p+8f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input-to-output scale ratio: scale ratio must be in [2**-16, 2**8] range",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs16_qs8), input_output_scale);
+    return xnn_status_invalid_parameter;
+  }
+  const struct xnn_unary_elementwise_config* qs16_qs8_cvt_config = xnn_init_qs16_to_qs8_cvt_config();
+  if (qs16_qs8_cvt_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs16_qs8));
+    return xnn_status_unsupported_hardware;
+  }
+  union xnn_qs16_qs8_cvt_params params;
+  assert(qs16_qs8_cvt_config->init.qs16_qs8_cvt != NULL);
+  qs16_qs8_cvt_config->init.qs16_qs8_cvt(&params, input_output_scale, output_zero_point);
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_convert_nc_qs16_qs8,
+    qs16_qs8_cvt_config,
+    convert_op_out);
+}
+
 enum xnn_status xnn_create_convert_nc_qu8(
   size_t channels,
   size_t input_stride,
@@ -1720,6 +1769,22 @@ enum xnn_status xnn_setup_convert_nc_qs8(
     pthreadpool_get_threads_count(threadpool));
 }
 
+enum xnn_status xnn_setup_convert_nc_qs16_qs8(
+  xnn_operator_t convert_op,
+  size_t batch_size,
+  const int16_t* input,
+  int8_t* output,
+  pthreadpool_t threadpool)
+{
+  return setup_unary_elementwise_nc(
+    convert_op, xnn_operator_type_convert_nc_qs16_qs8,
+    batch_size, input, output,
+    1 /* log2(sizeof(int16_t)) */,
+    0 /* log2(sizeof(int8_t)) */,
+    &convert_op->params.qs16_qs8_cvt, sizeof(convert_op->params.qs16_qs8_cvt),
+    pthreadpool_get_threads_count(threadpool));
+}
+
 enum xnn_status xnn_setup_convert_nc_qs8_f32(
   xnn_operator_t convert_op,
   size_t batch_size,
@@ -2565,6 +2630,63 @@ enum xnn_status xnn_run_convert_nc_qs8_f32(
     qs8_to_f32_cvt_config,
     &params, sizeof(params),
     0 /* log2(sizeof(int8_t)) */, 2 /* log2(sizeof(float)) */,
+    flags,
+    threadpool);
+}
+
+enum xnn_status xnn_run_convert_nc_qs16_qs8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const int16_t* input,
+  int8_t* output,
+  float input_scale,
+  float output_scale,
+  int8_t output_zero_point,
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+  if (input_scale <= 0.0f || !isnormal(input_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input scale parameter: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs16_qs8), input_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_scale <= 0.0f || !isnormal(output_scale)) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g output scale parameter: scale must be finite, normalized, and positive",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs16_qs8), output_scale);
+    return xnn_status_invalid_parameter;
+  }
+
+  const float input_output_scale = input_scale / output_scale;
+  if (input_output_scale < 0x1.0p-16f || input_output_scale > 0x1.0p+8f) {
+    xnn_log_error(
+      "failed to create %s operator with %.7g input-to-output scale ratio: scale ratio must be in [2**-16, 2**8] range",
+      xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs16_qs8), input_output_scale);
+    return xnn_status_invalid_parameter;
+  }
+  const struct xnn_unary_elementwise_config* qs16_to_qs8_cvt_config = xnn_init_qs16_to_qs8_cvt_config();
+  if (qs16_to_qs8_cvt_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(xnn_operator_type_convert_nc_qs16_qs8));
+    return xnn_status_unsupported_hardware;
+  }
+  union xnn_qs16_qs8_cvt_params params;
+  assert(qs16_to_qs8_cvt_config->init.qs16_qs8_cvt != NULL);
+  qs16_to_qs8_cvt_config->init.qs16_qs8_cvt(&params, input_output_scale, output_zero_point);
+  return run_unary_elementwise_nc(
+    xnn_operator_type_convert_nc_qs16_qs8,
+    channels,
+    input_stride, output_stride,
+    batch_size,
+    input, output,
+    qs16_to_qs8_cvt_config,
+    &params, sizeof(params),
+    1 /* log2(sizeof(int16_t)) */, 0 /* log2(sizeof(int8_t)) */,
     flags,
     threadpool);
 }

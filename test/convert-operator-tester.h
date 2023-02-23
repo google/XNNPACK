@@ -19,7 +19,6 @@
 
 #include <xnnpack.h>
 
-
 class ConvertOperatorTester {
  public:
   inline ConvertOperatorTester& channels(size_t channels) {
@@ -424,6 +423,72 @@ class ConvertOperatorTester {
     }
   }
 
+  void TestQS16toQS8() const {
+    ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
+    ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
+    ASSERT_LT(qmin(), qmax());
+
+    ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
+    ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_int_distribution<int16_t> qs16dist;
+
+    std::vector<int16_t> input(XNN_EXTRA_BYTES / sizeof(int16_t) +
+      (batch_size() - 1) * input_stride() + channels());
+    std::vector<int8_t> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<int8_t> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return qs16dist(rng); });
+      std::fill(output.begin(), output.end(), INT8_C(0xA5));
+
+      // Compute reference results.
+      const int64_t multiplier = static_cast<int64_t> (std::llrintf(32768.0f * input_scale()));
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          const int64_t input_value = input[i * input_stride() + c];
+          int32_t output_value = static_cast<int32_t>(static_cast<uint64_t>(input_value * multiplier + UINT64_C(0x4000)) >> 15) + zero_point();
+          output_value = std::min<int32_t>(output_value, std::numeric_limits<int8_t>::max());
+          output_value = std::max<int32_t>(output_value, std::numeric_limits<int8_t>::min());
+          output_ref[i * channels() + c] = static_cast<int8_t>(output_value);
+        }
+      }
+
+      // Create, setup, run, and destroy Convert operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t convert_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_create_convert_nc_qs16_qs8(
+          channels(), input_stride(), output_stride(),
+          input_scale(), 1.0f, int8_t(zero_point()),
+          0, &convert_op));
+      ASSERT_NE(nullptr, convert_op);
+
+      // Smart pointer to automatically delete convert op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_convert_nc_qs16_qs8(
+          convert_op,
+          batch_size(),
+          input.data(), output.data(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(convert_op, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          EXPECT_EQ(int32_t(output_ref[i * channels() + c]), int32_t(output[i * output_stride() + c]))
+            << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
+        }
+      }
+    }
+  }
+
   void TestQU8toF32() const {
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
@@ -655,6 +720,58 @@ class ConvertOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           EXPECT_EQ(output_ref[i * channels() + c], output[i * output_stride() + c])
+            << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
+        }
+      }
+    }
+  }
+
+  void TestRunQS16toQS8() const {
+    ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
+    ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
+    ASSERT_LT(qmin(), qmax());
+
+    ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
+    ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_int_distribution<int16_t> qs16dist;
+
+    std::vector<int16_t> input(XNN_EXTRA_BYTES / sizeof(int16_t) +
+      (batch_size() - 1) * input_stride() + channels());
+    std::vector<int8_t> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<int8_t> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return qs16dist(rng); });
+      std::fill(output.begin(), output.end(), INT8_C(0xA5));
+
+      // Compute reference results.
+      const int64_t multiplier = static_cast<int64_t> (std::llrintf(32768.0f * input_scale()));
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          const int64_t input_value = input[i * input_stride() + c];
+          int32_t output_value = static_cast<int32_t>(static_cast<uint64_t>(input_value * multiplier + UINT64_C(0x4000)) >> 15) + zero_point();
+          output_value = std::min<int32_t>(output_value, std::numeric_limits<int8_t>::max());
+          output_value = std::max<int32_t>(output_value, std::numeric_limits<int8_t>::min());
+          output_ref[i * channels() + c] = static_cast<int8_t>(output_value);
+        }
+      }
+
+      // Create, setup, run, and destroy Convert operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_convert_nc_qs16_qs8(
+          channels(), input_stride(), output_stride(), batch_size(),
+          input.data(), output.data(),
+          input_scale(), 1.0f, int8_t(zero_point()),
+          0, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          EXPECT_EQ(int32_t(output_ref[i * channels() + c]), int32_t(output[i * output_stride() + c]))
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }

@@ -4482,6 +4482,36 @@ enum xnn_status xnn_run_convert_nc_qs8_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_convert_nc_qs16_qs8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  float input_scale,
+  float output_scale,
+  int8_t output_zero_point,
+  uint32_t flags,
+  xnn_operator_t* convert_op_out);
+
+enum xnn_status xnn_setup_convert_nc_qs16_qs8(
+  xnn_operator_t convert_op,
+  size_t batch_size,
+  const int16_t* input,
+  int8_t* output,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_run_convert_nc_qs16_qs8(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const int16_t* input,
+  int8_t* output,
+  float input_scale,
+  float output_scale,
+  int8_t output_zero_point,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_convert_nc_qu8(
   size_t channels,
   size_t input_stride,
