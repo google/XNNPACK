@@ -125,6 +125,18 @@ TEST(${TEST_NAME}, k_gt_${NR}) {
   }
 }
 
+TEST(${TEST_NAME}, null_bias) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t n = 1; n < ${10 if NR == 1 else NR*2}; n++) {
+    PackWMicrokernelTester()
+      .n(n)
+      .nr(${NR})
+      .nullbias(true)
+      .Test(${", ".join(TEST_ARGS)});
+  }
+}
+
 """
 
 

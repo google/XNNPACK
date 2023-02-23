@@ -56,6 +56,15 @@ class PackWMicrokernelTester {
     return this->k_;
   }
 
+  inline PackWMicrokernelTester& nullbias(bool nullbias) {
+    this->nullbias_ = nullbias;
+    return *this;
+  }
+
+  inline bool nullbias() const {
+    return this->nullbias_;
+  }
+
   inline PackWMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -75,18 +84,21 @@ class PackWMicrokernelTester {
     std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> packed_w(packed_n() * k() + packed_n());
     std::vector<uint32_t> packed_w_ref(packed_n() * k() + packed_n());
 
+
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(weights.begin(), weights.end(), std::ref(u32rng));
       std::generate(bias.begin(), bias.end(), std::ref(u32rng));
       std::fill(packed_w.begin(), packed_w.end(), INT32_C(0));
       std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT32_C(0));
 
+      const uint32_t* bias_data = nullbias() ? NULL : bias.data();
+
       // Compute reference results.
       xnn_pack_f32_gemm_goi_w(1, n(), k(), nr(), 1 /* kr */, 1 /* sr */,
-        reinterpret_cast<const float *>(weights.data()), reinterpret_cast<const float *>(bias.data()), reinterpret_cast<float *>(packed_w_ref.data()), 0, nullptr);
+        reinterpret_cast<const float *>(weights.data()), reinterpret_cast<const float *>(bias_data), reinterpret_cast<float *>(packed_w_ref.data()), 0, nullptr);
 
       // Call optimized micro-kernel.
-      packw(1, n(), k(), nr(), 1 /* kr */, 1 /* sr */, weights.data(), bias.data(), packed_w.data(), 0, nullptr);
+      packw(1, n(), k(), nr(), 1 /* kr */, 1 /* sr */, weights.data(), bias_data, packed_w.data(), 0, nullptr);
 
       // Verify results.
       for (size_t i = 0; i < (packed_n() * k() + packed_n()); i++) {
@@ -100,5 +112,7 @@ class PackWMicrokernelTester {
   size_t n_{1};
   size_t nr_{1};
   size_t k_{100};
+  bool nullbias_{false};
   size_t iterations_{15};
+
 };

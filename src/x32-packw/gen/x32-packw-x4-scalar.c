@@ -49,8 +49,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar(
           packed_weights[1] = bias[1];
           packed_weights[2] = bias[2];
           packed_weights[3] = bias[3];
+          bias += 4;
         }
-        bias += 4;
         packed_weights += 4;
 
         const uint32_t* w0 = w;
@@ -121,8 +121,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar(
         do {
           *packed_weights++  = *bias++;
         } while (--nb != 0);
+        packed_weights += (4 - n);
+      } else {
+        packed_weights += 4;
       }
-      packed_weights += (4 - n);
 
       size_t k = kc;
       do {

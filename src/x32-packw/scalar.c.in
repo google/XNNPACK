@@ -45,8 +45,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__scalar(
         if XNN_LIKELY(bias != NULL) {
           $for N in range(NR):
             packed_weights[${N}] = bias[${N}];
+          bias += ${NR};
         }
-        bias += ${NR};
         packed_weights += ${NR};
 
         const uint32_t* w0 = w;
@@ -100,8 +100,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__scalar(
           do {
             *packed_weights++  = *bias++;
           } while (--nb != 0);
+          packed_weights += (${NR} - n);
+        } else {
+          packed_weights += ${NR};
         }
-        packed_weights += (${NR} - n);
 
         size_t k = kc;
         do {

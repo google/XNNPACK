@@ -89,6 +89,16 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR, k_gt_2) {
   }
 }
 
+TEST(X32_PACKW_GEMM_GOI_X2__SCALAR, null_bias) {
+  for (size_t n = 1; n < 4; n++) {
+    PackWMicrokernelTester()
+      .n(n)
+      .nr(2)
+      .nullbias(true)
+      .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar);
+  }
+}
+
 
 TEST(X32_PACKW_GEMM_GOI_X4__SCALAR, n_eq_4) {
   PackWMicrokernelTester()
@@ -158,6 +168,16 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR, k_gt_4) {
       .k(n)
       .n(n)
       .nr(4)
+      .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar);
+  }
+}
+
+TEST(X32_PACKW_GEMM_GOI_X4__SCALAR, null_bias) {
+  for (size_t n = 1; n < 8; n++) {
+    PackWMicrokernelTester()
+      .n(n)
+      .nr(4)
+      .nullbias(true)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar);
   }
 }

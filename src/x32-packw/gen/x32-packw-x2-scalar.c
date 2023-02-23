@@ -47,8 +47,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar(
         if XNN_LIKELY(bias != NULL) {
           packed_weights[0] = bias[0];
           packed_weights[1] = bias[1];
+          bias += 2;
         }
-        bias += 2;
         packed_weights += 2;
 
         const uint32_t* w0 = w;
