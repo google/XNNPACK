@@ -7,10 +7,9 @@ $import math
 $assert RR == 1
 $assert LOG2LUT in [0, 2, 3, 4, 5, 6]
 $assert P == H + 1 or P == H + 2
-$assert DIV in ["DIV", "NR1", "NR2", "NR1ADJ"]
+$assert DIV in ["DIV", "NR1", "NR1ADJ"]
 $assert SAT in ["MINMAX", "SELECT"]
-$assert FMA in [0, 3]
-$assert not PERM or LOG2LUT == 2
+$assert not PERM or LOG2LUT in [2, 3]
 $LUT = 1 << LOG2LUT
 #include <assert.h>
 #include <stddef.h>
@@ -49,10 +48,9 @@ $else:
   $COEFFS = [float.hex(0.5 * float.fromhex(c)).upper().replace("0X", "0x").replace("0000000P", "p") for c in COEFFS]
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
 $POLY_SUFFIX = "p%dh%d_" % (P, H)
-$PERM_SUFFIX = "perm_" if PERM else ""
+$GATHER_SUFFIX = "perm_" if PERM else "gather_" if LOG2LUT != 0 else ""
 $DIV_SUFFIX = DIV.lower()
-$ISA = {0: "avx", 3: "fma3"}[FMA]
-void xnn_math_f32_tanh__${ISA}_expm1_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${PERM_SUFFIX}${DIV_SUFFIX}(
+void xnn_math_f32_tanh__avx2_expm1_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${GATHER_SUFFIX}${DIV_SUFFIX}(
     size_t n,
     const float* input,
     float* output)
@@ -67,23 +65,23 @@ void xnn_math_f32_tanh__${ISA}_expm1_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${PERM_S
   $if LOG2LUT == 0:
     // Large number such that ulp(magic bias) == 0.5 and magic bias === 63.5 mod 2**21.
     const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp+22f);
-  $elif PERM:
-    // Large number such that ulp(magic bias) == exp2(-3) and magic bias === 63.5 mod 2**19.
-    const __m256 vmagic_bias = _mm256_set1_ps(0x1.8003F8p+20f);
   $else:
     // Large number such that ulp(magic bias) == exp2(${-1-LOG2LUT})
     const __m256 vmagic_bias = _mm256_set1_ps(0x1.800000p+${22-LOG2LUT}f);
   $if LOG2LUT != 0:
     $if PERM:
-      // Mask for the lowest 2 bits
-      const __m256 vindex_mask = _mm256_castsi256_ps(_mm256_set1_epi32(0x3));
-      // Table of exp2(k / 4) values, k = 0..3
-      const __m256 vtable = _mm256_set_ps(
-        0x1.AE89FAp+0f, 0x1.6A09E6p+0f, 0x1.306FE0p+0f, 0x1.000000p+0f,
-        0x1.AE89FAp+0f, 0x1.6A09E6p+0f, 0x1.306FE0p+0f, 0x1.000000p+0f);
+      $if LOG2LUT == 2:
+        // Table of exp2(k / 4) values decremented (as integer) by (k << 21), k = 0..3
+        const __m256 vtable = _mm256_set_ps(
+          0x1.EE89FAp-1f, 0x1.EA09E6p-1f, 0x1.F06FE0p-1f, 0x1.000000p+0f,
+          0x1.EE89FAp-1f, 0x1.EA09E6p-1f, 0x1.F06FE0p-1f, 0x1.000000p+0f);
+      $elif LOG2LUT == 3:
+        // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
+        const __m256i vtable = _mm256_set_epi32(
+          0x3F7AC0C7, 0x3F7744FD, 0x3F75672A, 0x3F7504F3, 0x3F75FED7, 0x3F7837F0, 0x3F7B95C2, 0x3F800000);
     $else:
       // Mask for the lowest ${LOG2LUT} bits
-      const __m128i vindex_mask = _mm_set1_epi32(0x${"%X" % (LUT-1)});
+      const __m256i vindex_mask = _mm256_set1_epi32(0x${"%X" % (LUT-1)});
   const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
   // Coefficient of polynomial approximation
   $if P == H + 1:
@@ -134,18 +132,12 @@ void xnn_math_f32_tanh__${ISA}_expm1_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${PERM_S
     $if LOG2LUT == 0:
       // Additionally, we fuse addition of the floating-point exponent bias (127) into the magic bias.
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
-    $if FMA == 3:
-      __m256 vn = _mm256_fmadd_ps(vz, vlog2e, vmagic_bias);
-    $else:
-      __m256 vn = _mm256_add_ps(_mm256_mul_ps(vz, vlog2e), vmagic_bias);
+    __m256 vn = _mm256_fmadd_ps(vz, vlog2e, vmagic_bias);
 
     $if LOG2LUT == 0:
       // Create a floating-point number s (scale) such that s == 2**(2n) for inputs which don't cause underflow, i.e.
       // -9.010913 <= z <= 0, and -13 <= n <= 0 accordingly.
-      const __m128 vn_hi = _mm256_extractf128_ps(vn, 1);
-      __m256 vs = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn)), 23)));
-      const __m128 vs_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn_hi), 23));
-      vs = _mm256_insertf128_ps(vs, vs_hi, 1);
+      const __m256 vs = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn), 23));
     $elif PERM:
       // Create a floating-point number s (scale) such that s := 2**(2n) for valid inputs, i.e. -9.010913 <= z <= 0. As
       // n has ${1+LOG2LUT} fractional bits, we split s == 2**(2n) = 2**int(2n) * 2**frac(2n). We create s in two steps:
@@ -156,17 +148,16 @@ void xnn_math_f32_tanh__${ISA}_expm1_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${PERM_S
       //    lower than -13.
       //
       // Shift bits ${LOG2LUT}:${LOG2LUT+8} into 23:31 (position of floating-point exponent).
-      const __m256 ve = _mm256_andnot_ps(vindex_mask, vn);
-      const __m128 ve_hi = _mm256_extractf128_ps(ve, 1);
-      __m256 vs = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(ve)), ${23-LOG2LUT})));
-      const __m128 vs_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(ve_hi), ${23-LOG2LUT}));
-      vs = _mm256_insertf128_ps(vs, vs_hi, 1);
+      const __m256i ve = _mm256_slli_epi32(_mm256_castps_si256(vn), ${23-LOG2LUT});
 
       // Use bits 0:${LOG2LUT} bits of n, as integer, as an index for table lookup of l := 2**frac(2n).
-      const __m256 vl = _mm256_permutevar_ps(vtable, _mm256_castps_si256(vn));
+      $if LOG2LUT == 2:
+        const __m256i vl = _mm256_castps_si256(_mm256_permutevar_ps(vtable, _mm256_castps_si256(vn)));
+      $elif LOG2LUT == 3:
+        const __m256i vl = _mm256_permutevar8x32_epi32(vtable, _mm256_castps_si256(vn));
 
       // Adjust exponent of the value l fetched from the table to get the final s value.
-      vs = _mm256_mul_ps(vs, vl);
+      const __m256 vs = _mm256_castsi256_ps(_mm256_add_epi32(vl, ve));
     $else:
       // Create a floating-point number s (scale) such that s := 2**(2n) for valid inputs, i.e. -9.010913 <= z <= 0. As
       // n has ${1+LOG2LUT} fractional bits, we split s == 2**(2n) = 2**int(2n) * 2**frac(2n). We create s in two steps:
@@ -225,10 +216,7 @@ void xnn_math_f32_tanh__${ISA}_expm1_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${PERM_S
     vn = _mm256_sub_ps(vn, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2).
-    $if FMA == 3:
-      const __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vz);
-    $else:
-      const __m256 vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2), vz);
+    const __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vz);
 
     // Compute degree-${1+len(COEFFS)} polynomial approximation for exp(2t) - 1 on [-log(2)/${4*LUT}, log(2)/${4*LUT}].
     $if P == H + 1:
@@ -237,20 +225,11 @@ void xnn_math_f32_tanh__${ISA}_expm1_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${PERM_S
     $else:
       //   P(t) = 2 * (t + t * (t * ${POLYNOMIAL}))
       //        = 2 * (t + t * p)
-    $if FMA == 3:
-      __m256 vp = _mm256_fmadd_ps(vc${1+len(COEFFS)}, vt, vc${len(COEFFS)});
-    $else:
-      __m256 vp = _mm256_add_ps(_mm256_mul_ps(vc${1+len(COEFFS)}, vt), vc${len(COEFFS)});
+    __m256 vp = _mm256_fmadd_ps(vc${1+len(COEFFS)}, vt, vc${len(COEFFS)});
     $for i in reversed(range(len(COEFFS)-2)):
-      $if FMA == 3:
-        vp = _mm256_fmadd_ps(vp, vt, vc${2+i});
-      $else:
-        vp = _mm256_add_ps(_mm256_mul_ps(vp, vt), vc${2+i});
+      vp = _mm256_fmadd_ps(vp, vt, vc${2+i});
     $if P == H + 1:
-      $if FMA == 3:
-        vp = _mm256_fmadd_ps(vp, vt, vtwo);
-      $else:
-        vp = _mm256_add_ps(_mm256_mul_ps(vp, vt), vtwo);
+      vp = _mm256_fmadd_ps(vp, vt, vtwo);
     $else:
       vp = _mm256_mul_ps(vp, vt);
 
@@ -266,17 +245,10 @@ void xnn_math_f32_tanh__${ISA}_expm1_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${PERM_S
     const __m256 vts = _mm256_mul_ps(vt, vs);
     const __m256 vsm1 = _mm256_add_ps(vs, vminus_one);
     $if P == H + 1:
-      $if FMA == 3:
-        const __m256 vem1 = _mm256_fmadd_ps(vp, vts, vsm1);
-      $else:
-        const __m256 vem1 = _mm256_add_ps(_mm256_mul_ps(vp, vts), vsm1);
+      const __m256 vem1 = _mm256_fmadd_ps(vp, vts, vsm1);
     $else:
-      $if FMA == 3:
-        vp = _mm256_fmadd_ps(vp, vts, vts);
-        const __m256 vem1 = _mm256_fmadd_ps(vp, vtwo, vsm1);
-      $else:
-        vp = _mm256_add_ps(_mm256_mul_ps(vp, vts), vts);
-        const __m256 vem1 = _mm256_add_ps(_mm256_mul_ps(vp, vtwo), vsm1);
+      vp = _mm256_fmadd_ps(vp, vts, vts);
+      const __m256 vem1 = _mm256_fmadd_ps(vp, vtwo, vsm1);
 
     // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
     const __m256 vep1 = _mm256_add_ps(vem1, vtwo);
@@ -289,13 +261,8 @@ void xnn_math_f32_tanh__${ISA}_expm1_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${PERM_S
       // Note: 2 < exp(2z) + 1 <= 3, because z <= 0 and 0 < exp(2z) <= 1.
       // Thus the reciprocal of the denominator never overflows.
       __m256 vrep1 = _mm256_rcp_ps(vep1);
-      $if FMA:
-        const __m256 verep1 = _mm256_fnmsub_ps(vrep1, vep1, vminus_one);
-        vrep1 = _mm256_fmadd_ps(verep1, vrep1, vrep1);
-      $else:
-        vrep1 = _mm256_mul_ps(vrep1, _mm256_sub_ps(vtwo, _mm256_mul_ps(vrep1, vep1)));
-        $if DIV == "NR2":
-          vrep1 = _mm256_mul_ps(vrep1, _mm256_sub_ps(vtwo, _mm256_mul_ps(vrep1, vep1)));
+      const __m256 verep1 = _mm256_fnmsub_ps(vrep1, vep1, vminus_one);
+      vrep1 = _mm256_fmadd_ps(verep1, vrep1, vrep1);
 
       // Reconstruct tanh(z) := expm1(2z) / (2 + expm1(2z))
       __m256 vy = _mm256_mul_ps(vem1, vrep1);

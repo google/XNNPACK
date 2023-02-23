@@ -203,13 +203,13 @@ static void TanhError(benchmark::State& state,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_lut4_p4h3_perm_nr1fma,
-                    xnn_math_f32_tanh__avx2_expm1_rr1_lut4_p4h3_perm_nr1fma,
+  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_lut4_p4h3_perm_nr1,
+                    xnn_math_f32_tanh__avx2_expm1_rr1_lut4_p4h3_perm_nr1,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_lut4_p4h3_perm_nr1fma1adj,
-                    xnn_math_f32_tanh__avx2_expm1_rr1_lut4_p4h3_perm_nr1fma1adj,
+  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_lut4_p4h3_perm_nr1adj,
+                    xnn_math_f32_tanh__avx2_expm1_rr1_lut4_p4h3_perm_nr1adj,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
@@ -218,13 +218,13 @@ static void TanhError(benchmark::State& state,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_lut8_p4h3_perm_nr1fma,
-                    xnn_math_f32_tanh__avx2_expm1_rr1_lut8_p4h3_perm_nr1fma,
+  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_lut8_p4h3_perm_nr1,
+                    xnn_math_f32_tanh__avx2_expm1_rr1_lut8_p4h3_perm_nr1,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_lut8_p4h3_perm_nr1fma1adj,
-                    xnn_math_f32_tanh__avx2_expm1_rr1_lut8_p4h3_perm_nr1fma1adj,
+  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_lut8_p4h3_perm_nr1adj,
+                    xnn_math_f32_tanh__avx2_expm1_rr1_lut8_p4h3_perm_nr1adj,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
@@ -233,13 +233,13 @@ static void TanhError(benchmark::State& state,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_p6h5_nr1fma,
-                    xnn_math_f32_tanh__avx2_expm1_rr1_p6h5_nr1fma,
+  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_p6h5_nr1,
+                    xnn_math_f32_tanh__avx2_expm1_rr1_p6h5_nr1,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_p6h5_nr1fma1adj,
-                    xnn_math_f32_tanh__avx2_expm1_rr1_p6h5_nr1fma1adj,
+  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_p6h5_nr1adj,
+                    xnn_math_f32_tanh__avx2_expm1_rr1_p6h5_nr1adj,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);

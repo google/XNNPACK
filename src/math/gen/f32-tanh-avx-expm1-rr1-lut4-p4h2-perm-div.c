@@ -35,7 +35,7 @@ void xnn_math_f32_tanh__avx_expm1_rr1_lut4_p4h2_perm_div(
   const __m256 vmagic_bias = _mm256_set1_ps(0x1.8003F8p+20f);
   // Mask for the lowest 2 bits
   const __m256 vindex_mask = _mm256_castsi256_ps(_mm256_set1_epi32(0x3));
-  // Table of exp2(k / 4) values decremented (as integer) by (k << 21), k = 0..3
+  // Table of exp2(k / 4) values, k = 0..3
   const __m256 vtable = _mm256_set_ps(
     0x1.AE89FAp+0f, 0x1.6A09E6p+0f, 0x1.306FE0p+0f, 0x1.000000p+0f,
     0x1.AE89FAp+0f, 0x1.6A09E6p+0f, 0x1.306FE0p+0f, 0x1.000000p+0f);

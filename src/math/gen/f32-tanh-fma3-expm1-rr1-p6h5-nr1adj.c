@@ -62,9 +62,9 @@ void xnn_math_f32_tanh__fma3_expm1_rr1_p6h5_nr1adj(
     const __m256 vinvsignx = _mm256_xor_ps(vx, vz);
 
     // The function saturates at -1 for large negative inputs: tanhf(z) == -1.0f for z <= sat_cutoff ~= -9.010913.
-    // To guarantee this behaviour, we compute the saturation mask here, and later use it to replace computed outputs
-    // with the saturation value (-1). Note that for NaN inputs the saturation mask is inactive.
-    const __m256 vm = _mm256_cmp_ps(vz, vsat_cutoff, _CMP_LE_OS);
+    // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
+    // tanhf(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
+    vz = _mm256_max_ps(vsat_cutoff, vz);
 
     // Compute reduced argument n := round(z / log(2), 1).
     // We do it by adding a large number (magic bias), which cause rounding of the result to 1 fractional bit,
@@ -122,8 +122,6 @@ void xnn_math_f32_tanh__fma3_expm1_rr1_p6h5_nr1adj(
     const __m256 vey = _mm256_fnmadd_ps(vy, vep1, vem1);
     vy = _mm256_fmadd_ps(vey, vrep1, vy);
 
-    // Saturate tanh(z) at -1 for large inputs.
-    vy = _mm256_blendv_ps(vy, vminus_one, vm);
 
     // Reconstruct tanh(x):
     //
