@@ -143,8 +143,18 @@ static void TanhError(benchmark::State& state,
                     benchmark::utils::CheckNEONFMA)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, neonfma_expm1_rr1_p6h5_nr1recps1fmaadj,
+                    xnn_math_f32_tanh__neonfma_expm1_rr1_p6h5_nr1recps1fmaadj,
+                    benchmark::utils::CheckNEONFMA)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, neonfma_expm1_rr1_p6h5_nr2fma,
                     xnn_math_f32_tanh__neonfma_expm1_rr1_p6h5_nr2fma,
+                    benchmark::utils::CheckNEONFMA)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, neonfma_expm1_rr1_p6h5_nr2fmaadj,
+                    xnn_math_f32_tanh__neonfma_expm1_rr1_p6h5_nr2fmaadj,
                     benchmark::utils::CheckNEONFMA)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
@@ -156,11 +166,6 @@ static void TanhError(benchmark::State& state,
 
   BENCHMARK_CAPTURE(TanhError, neon_expm1_rr1_p6h5_nr2recps,
                     xnn_math_f32_tanh__neon_expm1_rr1_p6h5_nr2recps,
-                    benchmark::utils::CheckNEON)
-    ->Unit(benchmark::kMillisecond)
-    ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neon_expm1_rr2_p6h5_nr2recps,
-                    xnn_math_f32_tanh__neon_expm1_rr2_p6h5_nr2recps,
                     benchmark::utils::CheckNEON)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
