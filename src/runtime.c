@@ -511,23 +511,18 @@ enum xnn_status xnn_setup_runtime(
 
   for (size_t i = 0; i < runtime->num_ops; i++) {
     const struct xnn_operator_data* opdata = &runtime->opdata[i];
-    if (opdata->operator_objects[0] == NULL) {
-      // Operator was removed during optimization
-      continue;
-    }
+    for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
+      if (opdata->operator_objects[j] == NULL) {
+        // Operator was removed during optimization
+        continue;
+      }
 
-    // Ensure that weights cache is finalized.
-    struct xnn_weights_cache* weights_cache = opdata->operator_objects[0]->weights_cache;
-    if (weights_cache != NULL && !xnn_weights_cache_is_finalized(weights_cache)) {
-      xnn_log_error("weights cache needs to be finalized before setup/infer");
-      return xnn_status_invalid_state;
-    }
-
-    assert(opdata->setup != NULL);
-    const enum xnn_status status = opdata->setup(opdata, runtime->blobs, runtime->num_blobs, runtime->threadpool);
-    if (status != xnn_status_success) {
-      xnn_log_error("failed to setup runtime: error in operator #%zu", i);
-      return status;
+      assert(opdata->setup != NULL);
+      const enum xnn_status status = opdata->setup(opdata, runtime->blobs, runtime->num_blobs, runtime->threadpool);
+      if (status != xnn_status_success) {
+        xnn_log_error("failed to setup runtime: error in operator #%zu", i);
+        return status;
+      }
     }
   }
 

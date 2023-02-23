@@ -10820,6 +10820,7 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "subgraph_test",
     srcs = [
+        "test/runtime-tester.h",
         "test/subgraph.cc",
         "test/subgraph-tester.h",
     ],

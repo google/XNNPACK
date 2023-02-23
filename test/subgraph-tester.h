@@ -331,7 +331,7 @@ class SubgraphTester {
     return *this;
   }
 
-  inline SubgraphTester& AddSplit3(uint32_t input_id, uint32_t output_id0, uint32_t output_id1, uint32_t output_id2) {
+  inline SubgraphTester& AddEvenSplit3(uint32_t input_id, uint32_t output_id0, uint32_t output_id1, uint32_t output_id2) {
     const xnn_status status = xnn_define_even_split3(
         subgraph_.get(), 0, input_id, output_id0, output_id1, output_id2, 0 /*flags */);
     EXPECT_EQ(status, xnn_status_success);

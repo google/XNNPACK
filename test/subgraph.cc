@@ -5,6 +5,7 @@
 
 #include <xnnpack.h>
 
+#include "runtime-tester.h"
 #include "subgraph-tester.h"
 #include <gtest/gtest.h>
 
@@ -48,18 +49,37 @@ TEST(SUBGRAPH, multiple_outputs_with_hanging_nodes) {
     .AddDynamicTensorF32({32}, 2)
     .AddOutputTensorF32({32}, 3)
     // Add split3 with 1 consumed output and two unconsumed outputs.
-    .AddSplit3(0, 1, 2, 3)
+    .AddEvenSplit3(0, 1, 2, 3)
     .Optimize();
 
   // The node is still there.
   ASSERT_EQ(tester.NumNodes(), 1);
   // And all four values also.
   ASSERT_EQ(tester.NumValues(), 4);
-  // THe first two outputs are optimized away.
+  // The first two outputs are optimized away.
   ASSERT_EQ(tester.Value(1)->type, xnn_value_type_invalid);
   ASSERT_EQ(tester.Value(2)->type, xnn_value_type_invalid);
   // The last output is consumed.
   ASSERT_EQ(tester.Value(3)->type, xnn_value_type_dense_tensor);
+}
+
+TEST(SUBGRAPH, even_split3_first_two_outputs_optimized_away) {
+  RuntimeTester tester(5);
+  // auto tester = RuntimeTester(4);
+  constexpr size_t size = 9;
+  float inputs[size] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+  tester
+    .AddStaticTensorF32({size}, TensorType::kDense, 0, 0, inputs)
+    .AddDynamicTensorF32({3}, 1)
+    .AddDynamicTensorF32({3}, 2)
+    .AddOutputTensorF32({3}, 3)
+    // Add split3 with 1 consumed output and two unconsumed outputs.
+    .AddEvenSplit3(0, 1, 2, 3);
+  // Regression test for a crash where we could not deal with a split where the
+  // 0th output is not used (and optimized away).
+  auto output = tester.RunWithFusion<float>();
+  std::vector<float> expected = {6, 7, 8};
+  ASSERT_EQ(expected, output);
 }
 
 }  // namespace xnnpack
