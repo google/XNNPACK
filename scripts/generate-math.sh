@@ -28,6 +28,14 @@ tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=4 -D P=4 -D H
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=5 -D P=3 -D H=1 -D FMA=1 -o src/math/gen/f32-tanh-fma-expm1-rr1-lut32-p3h1-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=6 -D P=3 -D H=1 -D FMA=1 -o src/math/gen/f32-tanh-fma-expm1-rr1-lut64-p3h1-div.c &
 
+# SSE
+tools/xngen src/math/f32-tanh-sse-expm1.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=DIV -D SAT=MINMAX -o src/math/gen/f32-tanh-sse2-expm1-rr1-p6h5-div.c &
+tools/xngen src/math/f32-tanh-sse-expm1.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR1 -D SAT=SELECT -o src/math/gen/f32-tanh-sse2-expm1-rr1-p6h5-nr1.c &
+tools/xngen src/math/f32-tanh-sse-expm1.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2 -D SAT=SELECT -o src/math/gen/f32-tanh-sse2-expm1-rr1-p6h5-nr2.c &
+tools/xngen src/math/f32-tanh-sse-expm1.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=DIV -D SAT=MINMAX -o src/math/gen/f32-tanh-sse2-expm1-rr1-lut8-p4h3-div.c &
+tools/xngen src/math/f32-tanh-sse-expm1.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR1 -D SAT=SELECT -o src/math/gen/f32-tanh-sse2-expm1-rr1-lut8-p4h3-nr1.c &
+tools/xngen src/math/f32-tanh-sse-expm1.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR2 -D SAT=SELECT -o src/math/gen/f32-tanh-sse2-expm1-rr1-lut8-p4h3-nr2.c &
+
 # WAsm SIMD
 tools/xngen src/math/f32-tanh-wasmsimd-expm1-abs.c.in  -D LOG2LUT=0 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1-rr1-p6h5-div-abs-min.c &
 tools/xngen src/math/f32-tanh-wasmsimd-expm1-abs.c.in  -D LOG2LUT=0 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1-rr1-p6h5-div-abs-pmin.c &

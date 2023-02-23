@@ -32,9 +32,9 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_lut8_p4h3_div_nabs_pmax(
   const v128_t vsign_mask = wasm_f32x4_const_splat(-0.0f);
   // The largest z for which tanhf(z) is saturated at -1.0f.
   const v128_t vsat_cutoff = wasm_f32x4_const_splat(-0x1.205968p+3f);
+  const v128_t vlog2e = wasm_f32x4_const_splat(0x1.715476p+0f);
   // Large number such that ulp(magic bias) == exp2(-4)
   const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.800000p19f);
-  const v128_t vlog2e = wasm_f32x4_const_splat(0x1.715476p+0f);
   // Mask for the lowest 3 bits
   const v128_t vindex_mask = wasm_u32x4_const_splat(UINT32_C(0x7));
   const v128_t vminus_ln2 = wasm_f32x4_const_splat(-0x1.62E430p-1f);
@@ -63,7 +63,7 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_lut8_p4h3_div_nabs_pmax(
     // Inverted mask for the sign of input: 0x00000000 for negative x, 0x80000000 for positive x.
     const v128_t vinvsignx = wasm_v128_xor(vx, vz);
 
-    // The function f(z) saturates at -1 for large negative inputs: tanhf(z) == -1.0f for z <= sat_cutoff ~= -9.010913.
+    // The function saturates at -1 for large negative inputs: tanhf(z) == -1.0f for z <= sat_cutoff ~= -9.010913.
     // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
     // tanhf(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
     vz = wasm_f32x4_pmax(vz, vsat_cutoff);

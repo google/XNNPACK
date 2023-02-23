@@ -27,9 +27,9 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_p6h5_div_abs_min(
 
   // The smallest z for which tanhf(-z) is saturated at -1.0f.
   const v128_t vsat_cutoff = wasm_f32x4_const_splat(0x1.205968p+3f);
+  const v128_t vminus_log2e = wasm_f32x4_const_splat(-0x1.715476p+0f);
   // Large number such that ulp(magic bias) == 0.5 and magic bias === 63.5 mod 2**21.
   const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.8000FEp+22f);
-  const v128_t vminus_log2e = wasm_f32x4_const_splat(-0x1.715476p+0f);
   const v128_t vln2 = wasm_f32x4_const_splat(0x1.62E430p-1f);
   // Coefficient of polynomial approximation
   //   exp(-2t) - 1 ~ t * (-2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
@@ -58,9 +58,9 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_p6h5_div_abs_min(
     // then set its sign according to the sign of x: f(x) := sign(x) * abs(y).
     v128_t vz = wasm_f32x4_abs(vx);
 
-    // The function f(z) saturates at -1 for large inputs: tanhf(-z) == -1.0f for z >= sat_cutoff ~= 9.010913.
+    // The function saturates at -1 for large positive inputs: tanhf(-z) == -1.0f for z >= sat_cutoff ~= 9.010913.
     // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
-    // tanhf(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
+    // tanhf(-sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
     vz = wasm_f32x4_min(vz, vsat_cutoff);
 
     // Compute reduced argument n := round(-z / log(2), 1).

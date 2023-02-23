@@ -24,9 +24,9 @@ void xnn_math_f32_tanh__scalar_expm1_rr1_p6h5_div(
 {
   assert(n % sizeof(float) == 0);
 
+  const float vminus_log2e = -0x1.715476p+0f;
   // Large number such that ulp(magic bias) == 0.5 and magic bias === 63.5 mod 2**21.
   const float vmagic_bias = 0x1.8000FEp+22f;
-  const float vminus_log2e = -0x1.715476p+0f;
   const float vln2 = 0x1.62E430p-1f;
   // Coefficient of polynomial approximation
   //   exp(-2t) - 1 ~ t * (-2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
@@ -94,8 +94,10 @@ void xnn_math_f32_tanh__scalar_expm1_rr1_p6h5_div(
     const float vep1 = vem1 - vminus_two;
     float vy = vem1 / vep1;
 
-    // The function tanh(z) saturates at -1 for large inputs: tanhf(z) == -1.0f for z >= sat_cutoff ~= 9.010913.
-    // Note that we use +1.0 instead of -1.0, because sign will be copied from the input in the next step.
+    // The function saturates at -1 for large negative positive inputs: tanhf(-z) == -1.0f for z >= sat_cutoff ~= 9.010913.
+    // To guarantee this behaviour, we replace computed outputs with the saturation value (supposed to be -1, but we use +1
+    // because sign will be copied from the input in the next step).
+    // Note that for NaN values the predicate is false and no replacement takes place.
     if XNN_UNPREDICTABLE(vz >= vsat_cutoff) {
       vy = vone;
     }
