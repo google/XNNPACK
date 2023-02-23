@@ -3,7 +3,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-# AArch32 JIT assembly
+# AArch32 JIT
 - name: xnn_generate_f32_gemm_ukernel_1x8__aarch32_neon_cortex_a53
   prototype: xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
@@ -45,7 +45,7 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
   pipelined: true
-# AArch64 JIT assembly
+# AArch64 JIT
 - name: xnn_generate_f32_gemm_ukernel_1x8__aarch64_neonfma_cortex_a53
   prototype: xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53
   init: xnn_init_f32_minmax_scalar_params
