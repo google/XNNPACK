@@ -66,6 +66,14 @@ tools/xngen src/math/f32-tanh-avx2-expm1.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3
 tools/xngen src/math/f32-tanh-avx2-expm1.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR1    -D SAT=SELECT -D PERM=0 -o src/math/gen/f32-tanh-avx2-expm1-rr1-lut8-p4h3-gather-nr1.c &
 tools/xngen src/math/f32-tanh-avx2-expm1.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR1ADJ -D SAT=MINMAX -D PERM=0 -o src/math/gen/f32-tanh-avx2-expm1-rr1-lut8-p4h3-gather-nr1adj.c &
 
+# AVX512
+tools/xngen src/math/f32-tanh-avx512f-expm1.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=DIV    -D PERM=0 -o src/math/gen/f32-tanh-avx512f-expm1-rr1-p6h5-div.c &
+tools/xngen src/math/f32-tanh-avx512f-expm1.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR1    -D PERM=0 -o src/math/gen/f32-tanh-avx512f-expm1-rr1-p6h5-nr1.c &
+tools/xngen src/math/f32-tanh-avx512f-expm1.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR1ADJ -D PERM=0 -o src/math/gen/f32-tanh-avx512f-expm1-rr1-p6h5-nr1adj.c &
+tools/xngen src/math/f32-tanh-avx512f-expm1.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=3 -D DIV=DIV    -D PERM=1 -o src/math/gen/f32-tanh-avx512f-expm1-rr1-lut4-p4h3-perm-div.c &
+tools/xngen src/math/f32-tanh-avx512f-expm1.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=3 -D DIV=NR1    -D PERM=1 -o src/math/gen/f32-tanh-avx512f-expm1-rr1-lut4-p4h3-perm-nr1.c &
+tools/xngen src/math/f32-tanh-avx512f-expm1.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=3 -D DIV=NR1ADJ -D PERM=1 -o src/math/gen/f32-tanh-avx512f-expm1-rr1-lut4-p4h3-perm-nr1adj.c &
+
 # WAsm SIMD
 tools/xngen src/math/f32-tanh-wasmsimd-expm1-abs.c.in  -D LOG2LUT=0 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1-rr1-p6h5-div-abs-min.c &
 tools/xngen src/math/f32-tanh-wasmsimd-expm1-abs.c.in  -D LOG2LUT=0 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1-rr1-p6h5-div-abs-pmin.c &

@@ -1121,12 +1121,12 @@ ALL_AVX512F_MICROKERNEL_SRCS = [
     "src/math/f32-sqrt-avx512f-nr1fma1adj.c",
     "src/math/f32-sqrt-avx512f-nr1fma.c",
     "src/math/f32-sqrt-avx512f-nr2fma.c",
-    "src/math/f32-tanh-avx512f-expm1-rr1-lut4-p4h3-perm-div.c",
-    "src/math/f32-tanh-avx512f-expm1-rr1-lut4-p4h3-perm-nr1fma1adj.c",
-    "src/math/f32-tanh-avx512f-expm1-rr1-lut4-p4h3-perm-nr1fma.c",
-    "src/math/f32-tanh-avx512f-expm1-rr1-p6h5-div.c",
-    "src/math/f32-tanh-avx512f-expm1-rr1-p6h5-nr1fma1adj.c",
-    "src/math/f32-tanh-avx512f-expm1-rr1-p6h5-nr1fma.c",
+    "src/math/gen/f32-tanh-avx512f-expm1-rr1-lut4-p4h3-perm-div.c",
+    "src/math/gen/f32-tanh-avx512f-expm1-rr1-lut4-p4h3-perm-nr1.c",
+    "src/math/gen/f32-tanh-avx512f-expm1-rr1-lut4-p4h3-perm-nr1adj.c",
+    "src/math/gen/f32-tanh-avx512f-expm1-rr1-p6h5-div.c",
+    "src/math/gen/f32-tanh-avx512f-expm1-rr1-p6h5-nr1.c",
+    "src/math/gen/f32-tanh-avx512f-expm1-rr1-p6h5-nr1adj.c",
 ]
 
 ALL_AVX512SKX_MICROKERNEL_SRCS = [
