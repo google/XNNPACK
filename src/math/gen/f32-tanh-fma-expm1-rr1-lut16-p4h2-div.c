@@ -29,7 +29,7 @@ void xnn_math_f32_tanh__fma_expm1_rr1_lut16_p4h2_div(
 
   const float vminus_log2e = -0x1.715476p+0f;
   // Large number such that ulp(magic bias) == exp2(-5)
-  const float vmagic_bias = 0x1.800000p18f;
+  const float vmagic_bias = 0x1.800000p+18f;
   // Mask for the lowest 4 bits
   const uint32_t vindex_mask = UINT32_C(0xF);
   const float vln2 = 0x1.62E430p-1f;

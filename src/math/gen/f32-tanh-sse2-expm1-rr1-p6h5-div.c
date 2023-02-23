@@ -35,7 +35,7 @@ void xnn_math_f32_tanh__sse2_expm1_rr1_p6h5_div(
   const __m128 vmagic_bias = _mm_set1_ps(0x1.8000FEp+22f);
   const __m128 vminus_ln2 = _mm_set1_ps(-0x1.62E430p-1f);
   // Coefficient of polynomial approximation
-  //   exp(-2t) - 1 ~ t * (2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
+  //   exp(2t) - 1 ~ t * (2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
   // on [-log(2)/4, log(2)/4]
   const __m128 vc6 = _mm_set1_ps(0x1.6B7338p-4f);
   const __m128 vc5 = _mm_set1_ps(0x1.12278Ep-2f);

@@ -32,7 +32,7 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_lut8_p4h3_div_abs_pmin(
   const v128_t vsat_cutoff = wasm_f32x4_const_splat(0x1.205968p+3f);
   const v128_t vminus_log2e = wasm_f32x4_const_splat(-0x1.715476p+0f);
   // Large number such that ulp(magic bias) == exp2(-4)
-  const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.800000p19f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.800000p+19f);
   // Mask for the lowest 3 bits
   const v128_t vindex_mask = wasm_u32x4_const_splat(UINT32_C(0x7));
   const v128_t vln2 = wasm_f32x4_const_splat(0x1.62E430p-1f);

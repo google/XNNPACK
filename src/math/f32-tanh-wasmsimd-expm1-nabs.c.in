@@ -51,7 +51,7 @@ void xnn_math_f32_tanh__wasmsimd_expm1_rr1_${LUT_SUFFIX}${POLY_SUFFIX}div_nabs_$
     const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.8000FEp+22f);
   $else:
     // Large number such that ulp(magic bias) == exp2(${-1-LOG2LUT})
-    const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.800000p${22-LOG2LUT}f);
+    const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.800000p+${22-LOG2LUT}f);
   $if LOG2LUT != 0:
     // Mask for the lowest ${LOG2LUT} bits
     const v128_t vindex_mask = wasm_u32x4_const_splat(UINT32_C(0x${"%X" % (LUT-1)}));

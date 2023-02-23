@@ -63,7 +63,7 @@ void xnn_math_f32_tanh__${ISA}_expm1_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}div(
     const float vmagic_bias = 0x1.8000FEp+22f;
   $else:
     // Large number such that ulp(magic bias) == exp2(${-1-LOG2LUT})
-    const float vmagic_bias = 0x1.800000p${22-LOG2LUT}f;
+    const float vmagic_bias = 0x1.800000p+${22-LOG2LUT}f;
   $if LOG2LUT != 0:
     // Mask for the lowest ${LOG2LUT} bits
     const uint32_t vindex_mask = UINT32_C(0x${"%X" % (LUT-1)});

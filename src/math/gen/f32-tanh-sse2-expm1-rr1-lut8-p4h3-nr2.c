@@ -35,12 +35,12 @@ void xnn_math_f32_tanh__sse2_expm1_rr1_lut8_p4h3_nr2(
   const __m128 vsat_cutoff = _mm_set1_ps(-0x1.205968p+3f);
   const __m128 vlog2e = _mm_set1_ps(0x1.715476p+0f);
   // Large number such that ulp(magic bias) == exp2(-4)
-  const __m128 vmagic_bias = _mm_set1_ps(0x1.800000p19f);
+  const __m128 vmagic_bias = _mm_set1_ps(0x1.800000p+19f);
   // Mask for the lowest 3 bits
   const __m128i vindex_mask = _mm_set1_epi32(0x7);
   const __m128 vminus_ln2 = _mm_set1_ps(-0x1.62E430p-1f);
   // Coefficient of polynomial approximation
-  //   exp(-2t) - 1 ~ t * (2 + t * (c2 + t * (c3 + t * c4)))
+  //   exp(2t) - 1 ~ t * (2 + t * (c2 + t * (c3 + t * c4)))
   // on [-log(2)/32, log(2)/32]
   const __m128 vc4 = _mm_set1_ps(0x1.5558ECp-1f);
   const __m128 vc3 = _mm_set1_ps(0x1.555C20p+0f);
