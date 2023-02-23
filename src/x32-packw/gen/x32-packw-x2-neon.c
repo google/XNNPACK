@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/x32-packw/scalar.c.in
+//   Template: src/x32-packw/NR2-neon.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -13,7 +13,10 @@
 #include <xnnpack/math.h>
 #include <xnnpack/packw.h>
 
-void xnn_x32_packw_gemm_goi_ukernel_x2__scalar(
+#include <arm_neon.h>
+
+
+void xnn_x32_packw_gemm_goi_ukernel_x2__neon(
   size_t g,
   size_t nc,
   size_t kc,
@@ -36,52 +39,43 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar(
   assert(weights != NULL);
   assert(packed_weights != NULL);
 
-  do {
+  uint32x2x2_t v00;
+  v00.val[0] = vdup_n_u32(0);
+  v00.val[1] = vdup_n_u32(0);
 
+  do {
     // NC main loop multiple of 2
     const uint32_t* w = weights;
-
     size_t n = nc;
     if XNN_LIKELY(n >= 2) {
       do {
         if XNN_LIKELY(bias != NULL) {
-          packed_weights[0] = bias[0];
-          packed_weights[1] = bias[1];
+          uint32x2_t vb0 = vld1_u32(bias + 0);
+          vst1_u32(packed_weights + 0, vb0);
           bias += 2;
         }
         packed_weights += 2;
-
         const uint32_t* w0 = w;
         const uint32_t* w1 = w0 + kc;
-
-        // KC main loop multiple of 2x4
+        // KC main loop multiple of 2x2
         size_t k = kc;
-        for (; k >= 4; k -= 4) {
-          const uint32_t v00 = w0[0];
-          const uint32_t v01 = w0[1];
-          const uint32_t v02 = w0[2];
-          const uint32_t v03 = w0[3];
-          w0 += 4;
-          const uint32_t v10 = w1[0];
-          const uint32_t v11 = w1[1];
-          const uint32_t v12 = w1[2];
-          const uint32_t v13 = w1[3];
-          w1 += 4;
-          packed_weights[0] = v00;
-          packed_weights[1] = v10;
-          packed_weights[2] = v01;
-          packed_weights[3] = v11;
-          packed_weights[4] = v02;
-          packed_weights[5] = v12;
-          packed_weights[6] = v03;
-          packed_weights[7] = v13;
-          packed_weights += 8;
+        for (; k >= 2; k -= 2) {
+          v00 = vld2_lane_u32(w0 + 0, v00, 0);
+          w0 += 2;
+          v00 = vld2_lane_u32(w1 + 0, v00, 1);
+          w1 += 2;
+          vst1_u32(packed_weights + 0, v00.val[0]);
+          vst1_u32(packed_weights + 2, v00.val[1]);
+          packed_weights += 4;
         }
 
         // KC remainder
         for (; k >= 1; --k) {
-          packed_weights[0] = *w0++;
-          packed_weights[1] = *w1++;
+          v00.val[0] = vld1_lane_u32(w0 + 0, v00.val[0], 0);
+          w0 += 1;
+          v00.val[0] = vld1_lane_u32(w1 + 0, v00.val[0], 1);
+          w1 += 1;
+          vst1_u32(packed_weights + 0, v00.val[0]);
           packed_weights += 2;
         }
         packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
@@ -96,13 +90,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar(
         *packed_weights = *bias++;
       }
       packed_weights += 2;
-
       size_t k = kc;
       do {
         *packed_weights = *w++;
         packed_weights += 2;
       } while (--k);
-
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
     }
     weights += nc * kc;

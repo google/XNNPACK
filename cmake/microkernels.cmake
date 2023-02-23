@@ -2620,6 +2620,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x16-transposec/gen/x16-transposec-8x8-reuse-multi-zip-neon.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-switch-zip-neon.c
   src/x24-transposec/x24-transposec-2x2-neon-tbl64.c
+  src/x32-packw/gen/x32-packw-x2-neon.c
+  src/x32-packw/gen/x32-packw-x8-neon.c
+  src/x32-packw/gen/x32-packw-x12-neon.c
   src/x32-packx/x32-packx-x4-neon-st4.c
   src/x32-transposec/gen/x32-transposec-2x2-multi-dec-zip-neon.c
   src/x32-transposec/gen/x32-transposec-2x2-multi-mov-zip-neon.c

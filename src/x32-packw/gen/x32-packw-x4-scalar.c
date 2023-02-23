@@ -138,8 +138,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar(
         packed_weights += (4 - n);
       } while (--k);
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
-      }
-
+    }
     weights += nc * kc;
   } while (--g != 0);
 }

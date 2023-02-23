@@ -3,15 +3,18 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert NR > 1
-$assert KR >= 1
+$assert NR >= 4
+$assert KR >= 4
 
 #include <assert.h>
 
 #include <xnnpack/math.h>
 #include <xnnpack/packw.h>
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}__scalar(
+#include <arm_neon.h>
+
+
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
   size_t g,
   size_t nc,
   size_t kc,
@@ -34,17 +37,23 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__scalar(
   assert(weights != NULL);
   assert(packed_weights != NULL);
 
-  do {
+  $for N in range(0,NR,4):
+    $for K in range(0,KR,4):
+      uint32x4x4_t v${N}${K};
+      $for NN in range(0,4):
+        v${N}${K}.val[${NN}] = vdupq_n_u32(0);
 
+  do {
     // NC main loop multiple of ${NR}
     const uint32_t* w = weights;
-
     size_t n = nc;
     if XNN_LIKELY(n >= ${NR}) {
       do {
         if XNN_LIKELY(bias != NULL) {
-          $for N in range(NR):
-            packed_weights[${N}] = bias[${N}];
+          $for N in range(0,NR,4):
+            uint32x4_t vb${N} = vld1q_u32(bias + ${N});
+          $for N in range(0,NR,4):
+            vst1q_u32(packed_weights + ${N}, vb${N});
           bias += ${NR};
         }
         packed_weights += ${NR};
@@ -56,21 +65,29 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__scalar(
         // KC main loop multiple of ${NR}x${KR}
         size_t k = kc;
         for (; k >= ${KR}; k -= ${KR}) {
-          $for N in range(NR):
-            $for K in range(KR):
-              const uint32_t v${N}${K} = w${N}[${K}];
-            w${N} += ${KR};
-          $for K in range(KR):
-            $for N in range(NR):
-              packed_weights[${N+K*NR}] = v${N}${K};
+          $for N in range(0,NR,4):
+            $for NN in range(0,4):
+              $for K in range(0,KR,4):
+                v${N}${K} = vld4q_lane_u32(w${N+NN} + ${K}, v${N}${K}, ${NN});
+              w${N+NN} += ${KR};
+          $for K in range(0,KR,4):
+            $for NN in range(0,4):
+              $for N in range(0,NR,4):
+                vst1q_u32(packed_weights + ${N+NN*NR+K*KR}, v${N}${K}.val[${NN}]);
           packed_weights += ${NR*KR};
         }
 
         // KC remainder
         for (; k >= 1; --k) {
-          $for N in range(NR):
-            packed_weights[${N}] = *w${N}++;
-          packed_weights += ${NR};
+          $for N in range(0,NR,4):
+            $for NN in range(0,4):
+              $for K in range(0,KR,4):
+                v${N}${K}.val[0] = vld1q_lane_u32(w${N+NN} + ${K}, v${N}${K}.val[0], ${NN});
+              w${N+NN} += ${KR//4};
+          $for K in range(0,KR,4):
+            $for N in range(0,NR,4):
+              vst1q_u32(packed_weights + ${N+K*KR}, v${N}${K}.val[0]);
+          packed_weights += ${NR*KR//4};
         }
         packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
         w = w${NR-1};
@@ -85,7 +102,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__scalar(
           *packed_weights = *bias++;
         }
         packed_weights += ${NR};
-
         size_t k = kc;
         do {
           *packed_weights = *w++;

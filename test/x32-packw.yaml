@@ -7,3 +7,8 @@
 # Scalar
 - name: xnn_x32_packw_gemm_goi_ukernel_x2__scalar
 - name: xnn_x32_packw_gemm_goi_ukernel_x4__scalar
+
+# ARM NEON
+- name: xnn_x32_packw_gemm_goi_ukernel_x2__neon
+- name: xnn_x32_packw_gemm_goi_ukernel_x8__neon
+- name: xnn_x32_packw_gemm_goi_ukernel_x12__neon
