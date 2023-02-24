@@ -540,6 +540,1623 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
   EXPECT_EQ(expected, packed_weights);
 }
 
+TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
+  const size_t first_pass_tile = 2;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 3;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 2;
+  const size_t cr = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
+  std::vector<uint8_t> k(c * h * w);  // k = [2, 3, 4, 5, 6, 7, 8, 9]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, cr));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      cr,
+      cr,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass, bias first.
+    // 64516 + 0 - (2 + 3 + 4 + 5) * 127 = 62738 = 0xF512
+    0x12, 0xF5, 0, 0,
+    // 64516 + 1 - (6 + 7 + 8 + 9) * 127 = 60707 = 0xED23
+    0x23, 0xED, 0, 0,
+    2, 6,  // 2 weights, channels first, then columns.
+    4, 8,
+    3, 7,  // Last pass, 2 weights.
+    5, 9,
+    0, 0,  // Padding to last_pass_tile.
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channels_gt_cr) {
+  const size_t first_pass_tile = 2;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 3;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
+  std::vector<uint8_t> k(c * h * w);  // k = [5, 6, 7, 8, // first 2x2 kernel
+                                    //      9, 10, 11, 12, // second 2x2 kernel
+                                    //      13, 14, 15, 16, // third 2x2 kernel
+                                    //      17, 18, 19, 20, // fourth 2x2 kernel
+                                    //      21, 22, 23, 24, // fifth 2x2 kernel
+                                    //      ]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, cr));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      cr,
+      cr,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass, bias first.
+    // 64516 + 0 - (5 + 6 + 7 + 8) * 127 = 61214 = 0xEF1E
+    0x1E, 0xEF, 0, 0, // bias
+    // 64516 + 1 - (9 + 10 + 11 + 12) * 127 = 59183 = 0xE72F
+    0x2F, 0xE7, 0, 0,
+    5, 9, // 2 weights, 2 channels first, then columns
+    7, 11,
+    // Bias.
+    // 64516 + 2 - (13 + 14 + 15 + 16) * 127 = 57152 = 0xDF40
+    0x40, 0xDF, 0, 0,
+    // 64516 + 3 - (17 + 18 + 19 + 20) * 127 = 55121 = 0xD751
+    0x51, 0xD7, 0, 0,
+    13, 17, // 2 weights, 2 channels first, then columns
+    15, 19,
+    // 64516 + 4 - (21 + 22 + 23 + 24) * 127 = 53090 = 0xCF62
+    0x62, 0xCF, 0, 0,
+    0, 0, 0, 0,
+    21, 0, // 2 weights, 1 remainder channels first, then columns
+    23, 0,
+    // No middle pass.
+    6, 10, // last pass, 2 weights, 2 channels first, then columns
+    8, 12,
+    0, 0,  // padding
+    14, 18,
+    16, 20,
+    0, 0,  // padding
+    22, 0,
+    24, 0,
+    0, 0,  // padding
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 1;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 2;
+  const size_t cr = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
+  std::vector<uint8_t> k(c * h * w);  // k = [2, 3, // first 2x2 kernel
+                                    //      4, 5,
+                                    //      6, 7, // second 2x2 kernel
+                                    //      8, 9]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, cr));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      cr,
+      cr,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass only has 1 element.
+    // 64516 + 0 - (2 + 3 + 4 + 5) * 127 = 62738 = 0xF512
+    0x12, 0xF5, 0, 0,
+    // 64516 + 1 - (6 + 7 + 8 + 9) * 127 = 60707 = 0xED23
+    0x23, 0xED, 0, 0,
+    2, 6, // weights, 2 channels, 1 element.
+    // Middle pass has 2 elements, columns first.
+    4, 8,
+    3, 7,
+    // Last pass.
+    5, 9,
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 2;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
+  std::vector<uint8_t> k(c * h * w);  // k = [5, 6, // first 2x2 kernel
+                                    //      7, 8,
+                                    //      9, 10, // second 2x2 kernel
+                                    //      11, 12,
+                                    //      13, 14, // third 2x2 kernel
+                                    //      15, 16,
+                                    //      17, 18, // fourth 2x2 kernel
+                                    //      19, 20,
+                                    //      21, 22, // fifth 2x2 kernel
+                                    //      23, 24,
+                                    //      ]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, cr));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      cr,
+      cr,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass only has 1 element, bias first.
+    // 64516 + 0 - (5 + 6 + 7 + 8) * 127 = 61214 = 0xEF1E
+    0x1E, 0xEF, 0, 0, // bias
+    // 64516 + 1 - (9 + 10 + 11 + 12) * 127 = 59183 = 0xE72F
+    0x2F, 0xE7, 0, 0,
+    5, 9, // weights, 2 channels, 1 element.
+    // Bias.
+    // 64516 + 2 - (13 + 14 + 15 + 16) * 127 = 57152 = 0xDF40
+    0x40, 0xDF, 0, 0,
+    // 64516 + 3 - (17 + 18 + 19 + 20) * 127 = 55121 = 0xD751
+    0x51, 0xD7, 0, 0,
+    13, 17, // weights, 2 channels, 1 element.
+    // Bias.
+    // 64516 + 4 - (21 + 22 + 23 + 24) * 127 = 53090 = 0xCF62
+    0x62, 0xCF, 0, 0,
+    0, 0, 0, 0,
+    21, 0, // weights, 1 remainder channel, 1 element.
+    // Middle pass has 2 elements, channels first, then columns.
+    7, 11,
+    6, 10,
+    15, 19,
+    14, 18,
+    // Middle pass, 1 remainder channel.
+    23, 0,
+    22, 0,
+    // Last pass,
+    8, 12,
+    0, 0,  // padding
+    16, 20,
+    0, 0,  // padding
+    24, 0,
+    0, 0,  // padding
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 2;
+  const size_t h = 2;
+  const size_t w = 3;
+  const size_t c = 2;
+  const size_t cr = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
+  std::vector<uint8_t> k(c * h * w);  // k = [2, 3, 4, // first 2x3 kernel
+                                    //      5, 6, 7,
+                                    //      8, 9, 10, // second 2x3 kernel
+                                    //      11, 12, 13]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, cr));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      cr,
+      cr,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 96774);
+  const std::vector<uint8_t> expected = {
+    // First pass has 2 elements.
+    // 96774 + 0 - (2 + 3 + 4 + 5 + 6 + 7) * 127 = 93345 = 0x16CA1
+    0xA1, 0x6C, 0x01, 0,
+    // 96774 + 1 - (8 + 9 + 10 + 11 + 12 + 13) * 127 = 88774 = 0x15AC6
+    0xC6, 0x5A, 0x01, 0,
+    2, 8, // 1 weight, 2 channels first, then columns
+    // Middle pass 1 (2 elements per pass).
+    5, 11,
+    3, 9,
+    // Middle pass 2 (2 elements per pass).
+    6, 12,
+    4, 10,
+    // Last pass.
+    7, 13,
+    0, 0,  // padding
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_gt_cr) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 2;
+  const size_t h = 2;
+  const size_t w = 3;
+  const size_t c = 5;
+  const size_t cr = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
+  std::vector<uint8_t> k(c * h * w);  // k = [5, 6, 7, // first 2x3 kernel
+                                    //      8, 9, 10,
+                                    //      11, 12, 13, // second 2x3 kernel
+                                    //      14, 15, 16,
+                                    //      17, 18, 19, // third 2x3 kernel
+                                    //      20, 21, 22,
+                                    //      23, 24, 25, // fourth 2x3 kernel
+                                    //      26, 27, 28,
+                                    //      29, 30, 31, // fifth 2x3 kernel
+                                    //      32, 33, 34,
+                                    //      ]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, cr));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      cr,
+      cr,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 96774);
+  const std::vector<uint8_t> expected = {
+    // First pass only has 1 element, bias first.
+    // 96774 + 0 - (5 + 6 + 7 + 8 + 9 + 10) * 127 = 91059 = 0x163B3
+    0xB3, 0x63, 0x01, 0,
+    // 96774 + 1 - (11 + 12 + 13 + 14 + 15 + 16) * 127 = 86488 = 0x151D8
+    0xD8, 0x51, 0x01, 0,
+    5, 11, // 1 weight, 2 channels, 2 elements.
+    // 96774 + 2 - (17 + 18 + 19 + 20 + 21 + 22) * 127 = 81917 = 0x13FFD
+    0xFD, 0x3F, 0x01, 0,
+    // 96774 + 3 - (23 + 24 + 25 + 26 + 27 + 28) * 127 = 77346 = 0x12E22
+    0x22, 0x2E, 0x01, 0,
+    17, 23, // 1 weight, 2 channels, 2 elements.
+    // 96774 + 4 - (29 + 30 + 31 + 32 + 33 + 34) * 127 = 72775 = 0x11C47
+    0x47, 0x1C, 0x01, 0,
+    0, 0, 0, 0,
+    29, 0, // 1 weight, 1 remainder channel, 2 elements.
+    // Middle pass has 2 elements, channels first, then columns.
+    8, 14,
+    6, 12,
+    20, 26,
+    18, 24,
+    // 1 remainder channel.
+    32, 0,
+    30, 0,
+    // Second middle pass, 2 elements.
+    9, 15,
+    7, 13,
+    21, 27,
+    19, 25,
+    // 1 remainder channel.
+    33, 0,
+    31, 0,
+    // Last pass
+    10, 16,
+    0, 0,  // padding
+    22, 28,
+    0, 0,  // padding
+    // 1 remainder channel.
+    34, 0,
+    0, 0,  // padding
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_subtile) {
+  const size_t first_pass_tile = 2;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 3;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
+  std::vector<uint8_t> k(c * h * w);  // k = [5, 6, // first 2x2 kernel
+                                    //      7, 8,
+                                    //      9, 10, // second 2x2 kernel
+                                    //      11, 12,
+                                    //      13, 14, // third 2x2 kernel
+                                    //      15, 16,
+                                    //      17, 18, // fourth 2x2 kernel
+                                    //      19, 20,
+                                    //      21, 22, // fifth 2x2 kernel
+                                    //      23, 24 ]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass.
+    // 64516 + 0 - (5 + 6 + 7 + 8) * 127 = 61214 = 0xEF1E
+    0x1E, 0xEF, 0, 0, // bias
+    // 64516 + 1 - (9 + 10 + 11 + 12) * 127 = 59183 = 0xE72F
+    0x2F, 0xE7, 0, 0,
+    // 64516 + 2 - (13 + 14 + 15 + 16) * 127 = 57152 = 0xDF40
+    0x40, 0xDF, 0, 0,
+    // 64516 + 3 - (17 + 18 + 19 + 20) * 127 = 55121 = 0xD751
+    0x51, 0xD7, 0, 0,
+    5, 9, 13, 17,  // 2 weights, 4 channels first, then columns
+    7, 11, 15, 19,
+    // Bias, 1 last channel, 1 padding up to channel_subtile
+    // 64516 + 4 - (21 + 22 + 23 + 24) * 127 = 53090 = 0xCF62
+    0x62, 0xCF, 0, 0,
+    0, 0, 0, 0,
+    21, 0, // 2 weights, 1 last channel, 1 padding up to channel_subtile
+    23, 0,
+    // No middle pass.
+    6, 10, 14, 18,  // last pass, 2 weights, 4 channels first
+    8, 12, 16, 20,
+    0, 0, 0, 0, // padding to last_pass_tile
+    22, 0, // 2 weights, 1 last channel, 1 padding up to channel_subtile
+    24, 0,
+    0, 0, // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 2;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
+  std::vector<uint8_t> k(c * h * w);  // k = [5, 6, // first 2x2 kernel
+                                    //      7, 8,
+                                    //      9, 10, // second 2x2 kernel
+                                    //      11, 12,
+                                    //      13, 14, // third 2x2 kernel
+                                    //      15, 16,
+                                    //      17, 18, // fourth 2x2 kernel
+                                    //      19, 20,
+                                    //      21, 22, // fifth 2x2 kernel
+                                    //      23, 24 ]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass, bias, 4 channels.
+    // 64516 + 0 - (5 + 6 + 7 + 8) * 127 = 61214 = 0xEF1E
+    0x1E, 0xEF, 0, 0, // bias
+    // 64516 + 1 - (9 + 10 + 11 + 12) * 127 = 59183 = 0xE72F
+    0x2F, 0xE7, 0, 0,
+    // 64516 + 2 - (13 + 14 + 15 + 16) * 127 = 57152 = 0xDF40
+    0x40, 0xDF, 0, 0,
+    // 64516 + 3 - (17 + 18 + 19 + 20) * 127 = 55121 = 0xD751
+    0x51, 0xD7, 0, 0,
+    5, 9, 13, 17,  // 1 weight, 4 channels first, then columns
+    // Bias, 1 last channel, 1 padding up to channel_subtile.
+    // 64516 + 4 - (21 + 22 + 23 + 24) * 127 = 53090 = 0xCF62
+    0x62, 0xCF, 0, 0,
+    0, 0, 0, 0,
+    21, 0, // 1 weight, 1 last channel, 1 padding up to channel_subtile
+    // 1 middle pass
+    7, 11, 15, 19, // 2 weights, 4 channels first, then columns
+    6, 10, 14, 18,
+    23, 0, // 2 weights, 1 last channel, 1 padding up to channel_subtile
+    22, 0,
+    // Last pass.
+    8, 12, 16, 20,  // 1 weight, 4 channels first
+    0, 0, 0, 0, // padding to last_pass_tile
+    24, 0, // 1 weight, 1 last channel, 1 padding up to channel_subtile
+    0, 0, // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_subtile_rounded) {
+  const size_t first_pass_tile = 2;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 3;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 7;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+  // c rounded to channel_subtile is 8, so we will have 2 channel_tile loops in the first and middle pass.
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4, 5, 6]
+  std::vector<uint8_t> k(c * h * w);  // k = [7, 8, // first 2x2 kernel
+                                    //      9, 10,
+                                    //      11, 12, // second 2x2 kernel
+                                    //      13, 14,
+                                    //      15, 16, // third 2x2 kernel
+                                    //      17, 18,
+                                    //      19, 20, // fourth 2x2 kernel
+                                    //      21, 22,
+                                    //      23, 24, // fifth 2x2 kernel
+                                    //      25, 26,
+                                    //      27, 28, // sixth 2x2 kernel
+                                    //      29, 30,
+                                    //      31, 32, // seventh 2x2 kernel
+                                    //      33, 34]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass, bias, 4 channels.
+    // 64516 + 0 - (7 + 8 + 9 + 10) * 127 = 60198 = 0xEB26
+    0x26, 0xEB, 0, 0,
+    // 64516 + 1 - (11 + 12 + 13 + 14) * 127 = 58167 = 0xE337
+    0x37, 0xE3, 0, 0,
+    // 64516 + 2 - (15 + 16 + 17 + 18) * 127 = 56136 = 0xDB48
+    0x48, 0xDB, 0, 0,
+    // 64516 + 3 - (19 + 20 + 21 + 22) * 127 = 54105 = 0xD359
+    0x59, 0xD3, 0, 0,
+    7, 11, 15, 19,  // 2 weights, 4 channels first, then columns
+    9, 13, 17, 21,
+    // Bias, 3 remainder channels, 1 padding up to channel_Tile.
+    // 64516 + 4 - (23 + 24 + 25 + 26) * 127 = 52074 = 0xCB6A
+    0x6A, 0xCB, 0, 0,
+    // 64516 + 5 - (27 + 28 + 29 + 30) * 127 = 50043 = 0xC37B
+    0x7B, 0xC3, 0, 0,
+    // 64516 + 6 - (31 + 32 + 33 + 34) * 127 = 48012 = 0xBB8C
+    0x8C, 0xBB, 0, 0,
+    0, 0, 0, 0,
+    23, 27, 31, 0,  // 2 weights, 3 remainder channels, 1 padding up to channel_tile
+    25, 29, 33, 0,
+    // No middle pass.
+    // Last pass.
+    8, 12, 16, 20,  // last pass, 2 weights, 4 channels first
+    10, 14, 18, 22,
+    0, 0, 0, 0, // padding to last_pass_tile
+    24, 28, // last pass, 2 weights, channel_subtile (2)
+    26, 30,
+    0, 0, // padding to last_pass_tile
+    32, 0, // 1 remainder channel, 1 padding up to channel_subtile
+    34, 0, // 1 remainder channel, 1 padding up to channel_subtile
+    0, 0, // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_subtile_rounded_to_channel_round) {
+  const size_t first_pass_tile = 2;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 3;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 6;
+  const size_t cr = 8;
+  const size_t channel_subtile = 4;
+  const size_t channel_round = 2;
+  // c rounded to channel_round is 6, so we will have 0 channel_tile and 2 channel_subtile loops
+  // for first and middle pass.
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4, 5]
+  std::vector<uint8_t> k(c * h * w);  // k = [6, 7, 8, 9,
+                                    //      10, 11, 12, 13
+                                    //      14, 15, 16, 17,
+                                    //      18, 19, 20, 21,
+                                    //      22, 23, 24, 25,
+                                    //      26, 27, 28, 29,]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile, channel_round));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      channel_round,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass, bias, 4 channels.
+    // 64516 + 0 - (6 + 7 + 8 + 9) * 127 = 60706 = 0xED22
+    0x22, 0xED, 0, 0,
+    // 64516 + 1 - (10 + 11 + 12 + 13) * 127 = 58675 = 0xE533
+    0x33, 0xE5, 0, 0,
+    // 64516 + 2 - (14 + 15 + 16 + 17) * 127 = 56644 = 0xDD44
+    0x44, 0xDD, 0, 0,
+    // 64516 + 3 - (18 + 19 + 20 + 21) * 127 = 54613 = 0xD555
+    0x55, 0xD5, 0, 0,
+    6, 10, 14, 18, // 2 weights, 4 channels first, then columns
+    8, 12, 16, 20,
+    // Bias, 2 remainder channels, 2 padding up to channel_subtile.
+    // 64516 + 4 - (22 + 23 + 24 + 25) * 127 = 52582 = 0xCD66
+    0x66, 0xCD, 0, 0,
+    // 64516 + 5 - (26 + 27 + 28 + 29) * 127 = 50551 = 0xC577
+    0x77, 0xC5, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    22, 26, 0, 0, // 2 weights, 2 remainder channel, 2 padding up to channel_subtile
+    24, 28, 0, 0,
+    // No middle pass.
+    7, 11, 15, 19, // last pass, 2 weights, 4 channels first.
+    9, 13, 17, 21,
+    0, 0, 0, 0, // padding to last_pass_tile
+    23, 27, 0, 0, // 2 weights, channel_subtile (4)
+    25, 29, 0, 0,
+    0, 0, 0, 0, // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rounded) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 2;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 7;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+  // c rounded to channel_subtile is 8, so we will have 2 channel_tile loops in first and middle pass.
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4, 5, 6]
+  std::vector<uint8_t> k(c * h * w);  // k = [7, 8, // first 2x2 kernel
+                                    //      9, 10,
+                                    //      11, 12, // second 2x2 kernel
+                                    //      13, 14,
+                                    //      15, 16, // third 2x2 kernel
+                                    //      17, 18,
+                                    //      19, 20, // fourth 2x2 kernel
+                                    //      21, 22,
+                                    //      23, 24, // fifth 2x2 kernel
+                                    //      25, 26,
+                                    //      27, 28, // sixth 2x2 kernel
+                                    //      29, 30,
+                                    //      31, 32, // seventh 2x2 kernel
+                                    //      33, 34]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_ghw_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass, bias, 4 channels.
+    // 64516 + 0 - (7 + 8 + 9 + 10) * 127 = 60198 = 0xEB26
+    0x26, 0xEB, 0, 0,
+    // 64516 + 1 - (11 + 12 + 13 + 14) * 127 = 58167 = 0xE337
+    0x37, 0xE3, 0, 0,
+    // 64516 + 2 - (15 + 16 + 17 + 18) * 127 = 56136 = 0xDB48
+    0x48, 0xDB, 0, 0,
+    // 64516 + 3 - (19 + 20 + 21 + 22) * 127 = 54105 = 0xD359
+    0x59, 0xD3, 0, 0,
+    7, 11, 15, 19,  // 1 weight, 4 channels first, then columns
+    // Bias, 3 remainder channels, 1 padding up to channel_Tile.
+    // 64516 + 4 - (23 + 24 + 25 + 26) * 127 = 52074 = 0xCB6A
+    0x6A, 0xCB, 0, 0,
+    // 64516 + 5 - (27 + 28 + 29 + 30) * 127 = 50043 = 0xC37B
+    0x7B, 0xC3, 0, 0,
+    // 64516 + 6 - (31 + 32 + 33 + 34) * 127 = 48012 = 0xBB8C
+    0x8C, 0xBB, 0, 0,
+    0, 0, 0, 0,
+    23, 27, 31, 0,  // 1 weight, 3 remainder channels, 1 padding up to channel_tile
+    // 1 middle pass.
+    9, 13, 17, 21, // 2 weights, 4 channels first
+    8, 12, 16, 20,
+    25, 29, 33, 0, // 3 remainder channels, 1 padding up to channel_tile
+    24, 28, 32, 0,
+    // Last pass.
+    10, 14, 18, 22,  // last pass, 1 weight, 4 channels first
+    0, 0, 0, 0, // padding to last_pass_tile
+    26, 30, // 1 weight, channel_subtile,
+    0, 0, // padding to last_pass_tile
+    34, 0, // 1 weight, 1 remainder channel, 1 padding up to channel_subtile
+    0, 0, // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
+  const size_t first_pass_tile = 2;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 3;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 2;
+  const size_t cr = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
+  std::vector<uint8_t> k(c * h * w);  // k = [2, 3,
+                                    //      4, 5,
+                                    //      6, 7,
+                                    //      8, 9]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, cr));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      cr,
+      cr,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass, bias first.
+    // 64516 + 0 - (2 + 4 + 6 + 8) * 127 = 61976 = 0xF218
+    0x18, 0xF2, 0, 0,
+    // 64516 + 1 - (3 + 5 + 7 + 9) * 127 = 61469 = 0xF01D
+    0x1D, 0xF0, 0, 0,
+    2, 3, // First pass, 2 weights, channels first, then columns
+    6, 7,
+    // No middle pass.
+    4, 5, // Last pass, 2 weights
+    8, 9,
+    0, 0,  // padding
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channels_gt_cr) {
+  const size_t first_pass_tile = 2;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 3;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
+  std::vector<uint8_t> k(c * h * w);  // k = [5, 6, 7, 8, 9,
+                                    //      10, 11, 12, 13, 14,
+                                    //      15, 16, 17, 18, 19,
+                                    //      20, 21, 22, 23, 24,
+                                    //      ]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, cr));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      cr,
+      cr,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass.
+    // 64516 + 0 - (5 + 10 + 15 + 20) * 127 = 58166 = 0xE336
+    0x36, 0xE3, 0, 0,
+    // 64516 + 1 - (6 + 11 + 16 + 21) * 127 = 57659 = 0xE13B
+    0x3B, 0xE1, 0, 0,
+    5, 6, // 2 weights, 2 channels first, then columns
+    15, 16,
+    // 64516 + 2 - (7 + 12 + 17 + 22) * 127 = 57152 = 0xDF40
+    0x40, 0xDF, 0, 0,
+    // 64516 + 3 - (8 + 13 + 18 + 23) * 127 = 56645 = 0xDD45
+    0x45, 0xDD, 0, 0,
+    7, 8, // 2 weights, 2 channels first, then columns
+    17, 18,
+    // Bias, 1 remainder channel, 1 padding up to channel_subtile.
+    // 64516 + 4 - (9 + 14 + 19 + 24) * 127 = 56138 = 0xDB4A
+    0x4A, 0xDB, 0, 0,
+    0, 0, 0, 0,
+    9, 0, // weights, 1 remainder channels first, then columns
+    19, 0,
+    // No middle pass.
+    // Last pass, 2 weights
+    10, 11,
+    20, 21,
+    0, 0,  // padding
+    12, 13,
+    22, 23,
+    0, 0,  // padding
+    14, 0,
+    24, 0,
+    0, 0,  // padding
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 1;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 2;
+  const size_t cr = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1]
+  std::vector<uint8_t> k(c * h * w);  // k = [2, 3,
+                                    //      4, 5,
+                                    //      6, 7,
+                                    //      8, 9]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, cr));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      cr,
+      cr,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass only has 1 element.
+    // 64516 + 0 - (2 + 4 + 6 + 8) * 127 = 61976 = 0xF218
+    0x18, 0xF2, 0, 0,
+    // 64516 + 1 - (3 + 5 + 7 + 9) * 127 = 61469 = 0xF01D
+    0x1D, 0xF0, 0, 0,
+    2, 3, // weights, 2 channels, 1 element.
+    // Middle pass has 2 elements, columns first.
+    6, 7,
+    4, 5,
+    // Last pass.
+    8, 9,
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 2;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
+  std::vector<uint8_t> k(c * h * w);  // k = [5, 6, 7, 8, 9,
+                                    //      10, 11, 12, 13, 14,
+                                    //      15, 16, 17, 18, 19,
+                                    //      20, 21, 22, 23, 24,
+                                    //      ]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, cr));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      cr,
+      cr,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass only has 1 element.
+    // 64516 + 0 - (5 + 10 + 15 + 20) * 127 = 58166 = 0xE336
+    0x36, 0xE3, 0, 0,
+    // 64516 + 1 - (6 + 11 + 16 + 21) * 127 = 57659 = 0xE13B
+    0x3B, 0xE1, 0, 0,
+    5, 6, // weights, 2 channels, 1 element.
+    // 64516 + 2 - (7 + 12 + 17 + 22) * 127 = 57152 = 0xDF40
+    0x40, 0xDF, 0, 0,
+    // 64516 + 3 - (8 + 13 + 18 + 23) * 127 = 56645 = 0xDD45
+    0x45, 0xDD, 0, 0,
+    7, 8, // weights, 2 channels, 1 element.
+    // Bias, 1 remainder channel, 1 padding up to channel_subtile.
+    // 64516 + 4 - (9 + 14 + 19 + 24) * 127 = 56138 = 0xDB4A
+    0x4A, 0xDB, 0, 0,
+    0, 0, 0, 0,
+    9, 0, // weights, 1 remainder channel, 1 element.
+    // Middle pass has 2 elements, channels first, then columns.
+    15, 16,
+    10, 11,
+    17, 18,
+    12, 13,
+    // Middle pass, 1 remainder channel.
+    19, 0,
+    14, 0,
+    // Last pass.
+    20, 21,
+    0, 0,  // padding
+    22, 23,
+    0, 0,  // padding
+    24, 0,
+    0, 0,  // padding
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 2;
+  const size_t h = 2;
+  const size_t w = 3;
+  const size_t c = 2;
+  const size_t cr = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
+  std::vector<uint8_t> k(c * h * w);  // k = [2, 3,
+                                    //      4, 5,
+                                    //      6, 7,
+                                    //      8, 9,
+                                    //      10, 11,
+                                    //      12, 13]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, cr));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      cr,
+      cr,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 96774);
+  const std::vector<uint8_t> expected = {
+    // First pass has 2 elements.
+    // 96774 + 0 - (2 + 4 + 6 + 8 + 10 + 12) * 127 = 91440 = 0x16530
+    0x30, 0x65, 0x01, 0,
+    // 96774 + 1 - (3 + 5 + 7 + 9 + 11 + 13) * 127 = 90679 = 0x16237
+    0x37, 0x62, 0x01, 0,
+    2, 3, // 1 weight, 2 channels first, then columns
+    // 2 passes of middle pass (2 elements per pass).
+    8, 9,
+    4, 5,
+    10, 11,
+    6, 7,
+    // Last pass.
+    12, 13,
+    0, 0,  // padding
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_gt_cr) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 2;
+  const size_t h = 2;
+  const size_t w = 3;
+  const size_t c = 5;
+  const size_t cr = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
+  std::vector<uint8_t> k(c * h * w);  // k = [5, 6, 7, 8, 9,
+                                    //      10, 11, 12, 13, 14,
+                                    //      15, 16, 17, 18, 19,
+                                    //      20, 21, 22, 23, 24,
+                                    //      25, 26, 27, 28, 29,
+                                    //      30, 31, 32, 33, 34,
+                                    //      ]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, cr));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      cr,
+      cr,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 96774);
+  const std::vector<uint8_t> expected = {
+    // First pass.
+    // 96774 + 0 - (5 + 10 + 15 + 20 + 25 + 30) * 127 = 83439 = 0x145EF
+    0xEF, 0x45, 0x01, 0,
+    // 96774 + 1 - (6 + 11 + 16 + 21 + 26 + 31) * 127 = 82678 = 0x142F6
+    0xF6, 0x42, 0x01, 0,
+    5, 6, // weights, 2 channels, 2 elements.
+    // 96774 + 2 - (7 + 12 + 17 + 22 + 27 + 32) * 127 = 81917 = 0x13FFD
+    0xFD, 0x3F, 0x01, 0,
+    // 96774 + 3 - (8 + 13 + 18 + 23 + 28 + 33) * 127 = 81156 = 0x13D04
+    0x04, 0x3D, 0x01, 0,
+    7, 8, // weights, 2 channels, 2 elements.
+    // Bias, 1 remainder channel, 1 padding up to channel_subtile.
+    // 96774 + 4 - (9 + 14 + 19 + 24 + 29 + 34) * 127 = 80395 = 0x13A0B
+    0x0B, 0x3A, 0x01, 0,
+    0, 0, 0, 0,
+    9, 0, // weights, 1 remainder channel, 2 elements.
+    // Middle pass has 2 elements, channels first, then columns.
+    20, 21,
+    10, 11,
+    22, 23,
+    12, 13,
+    // 1 remainder channel.
+    24, 0,
+    14, 0,
+    // Second middle pass, 2 elements.
+    25, 26,
+    15, 16,
+    27, 28,
+    17, 18,
+    29, 0,
+    // 1 remainder channel.
+    19, 0,
+    // Last pass.
+    30, 31,
+    0, 0,  // padding
+    32, 33,
+    0, 0,  // padding
+    // 1 remainder channel.
+    34, 0,
+    0, 0,  // padding
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_subtile) {
+  const size_t first_pass_tile = 2;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 3;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
+  std::vector<uint8_t> k(c * h * w);  // k = [5, 6, 7, 8, 9, // first channel
+                                    //      10, 11, 12, 13, 14, // second channel
+                                    //      15, 16, 17, 18, 19, // third channel
+                                    //      20, 21, 22, 23, 24] // fourth channel
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass, bias 4 channels.
+    // 64516 + 0 - (5 + 10 + 15 + 20) * 127 = 58166 = 0xE336
+    0x36, 0xE3, 0, 0,
+    // 64516 + 1 - (6 + 11 + 16 + 21) * 127 = 57659 = 0xE13B
+    0x3B, 0xE1, 0, 0,
+    // 64516 + 2 - (7 + 12 + 17 + 22) * 127 = 57152 = 0xDF40
+    0x40, 0xDF, 0, 0,
+    // 64516 + 3 - (8 + 13 + 18 + 23) * 127 = 56645 = 0xDD45
+    0x45, 0xDD, 0, 0,
+    5, 6, 7, 8, // first pass, 2 weights, 4 channels first, then columns
+    15, 16, 17, 18,
+    // Bias, 1 remainder channel, 1 padding up to channel_subtile.
+    // 64516 + 4 - (9 + 14 + 19 + 24) * 127 = 56138 = 0xDB4A
+    0x4A, 0xDB, 0, 0,
+    0, 0, 0, 0,
+    9, 0, // 2 weights, 1 last channel, 1 padding up to channel_subtile
+    19, 0,
+    // No middle pass.
+    10, 11, 12, 13, // last pass, 2 weights, 4 channels first.
+    20, 21, 22, 23,
+    0, 0, 0, 0, // padding to last_pass_tile
+    14, 0, // 2 weights, 1 last channel, 1 padding up to channel_subtile
+    24, 0, // 2 weights, 1 last channel, 1 padding up to channel_subtile
+    0, 0,  // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 2;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 5;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4]
+  std::vector<uint8_t> k(c * h * w);  // k = [5, 6, 7, 8, 9,
+                                    //      10, 11, 12, 13, 14,
+                                    //      15, 16, 17, 18, 19,
+                                    //      20, 21, 22, 23, 24]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass, bias 4 channels.
+    // 64516 + 0 - (5 + 10 + 15 + 20) * 127 = 58166 = 0xE336
+    0x36, 0xE3, 0, 0,
+    // 64516 + 1 - (6 + 11 + 16 + 21) * 127 = 57659 = 0xE13B
+    0x3B, 0xE1, 0, 0,
+    // 64516 + 2 - (7 + 12 + 17 + 22) * 127 = 57152 = 0xDF40
+    0x40, 0xDF, 0, 0,
+    // 64516 + 3 - (8 + 13 + 18 + 23) * 127 = 56645 = 0xDD45
+    0x45, 0xDD, 0, 0,
+    5, 6, 7, 8, // first pass, 1 weight, 4 channels first, then columns
+    // Bias, 1 remainder channel, 1 padding up to channel_subtile.
+    // 64516 + 4 - (9 + 14 + 19 + 24) * 127 = 56138 = 0xDB4A
+    0x4A, 0xDB, 0, 0,
+    0, 0, 0, 0,
+    9, 0, // 1 weight, 1 last channel, 1 padding up to channel_subtile
+    // 1 middle pass.
+    15, 16, 17, 18, // 2 weights, 4 channels first.
+    10, 11, 12, 13,
+    19, 0, // 2 weights, 1 last channel, 1 padding up to channel_subtile
+    14, 0,
+    // Last pass.
+    20, 21, 22, 23, // 1 weight, 4 channels first.
+    0, 0, 0, 0, // padding to last_pass_tile
+    24, 0, // 1 weight, 1 last channel, 1 padding up to channel_subtile
+    0, 0,  // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_subtile_rounded) {
+  const size_t first_pass_tile = 2;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 3;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 7;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+  // c rounded to channel_subtile is 8, so we will have 2 channel_tile loops for first and middle pass.
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4, 5, 6]
+  std::vector<uint8_t> k(c * h * w);  // k = [7, 8, 9, 10, 11, 12, 13,
+                                    //      14, 15, 16, 17, 18, 19, 20,
+                                    //      21, 22, 23, 24, 25, 26, 27,
+                                    //      28, 29, 30, 31, 32, 33, 34]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass, bias, 4 channels.
+    // 64516 + 0 - (7 + 14 + 21 + 28) * 127 = 55626 = 0xD94A
+    0x4A, 0xD9, 0, 0,
+    // 64516 + 1 - (8 + 15 + 22 + 29) * 127 = 55119 = 0xD74F
+    0x4F, 0xD7, 0, 0,
+    // 64516 + 2 - (9 + 16 + 23 + 30) * 127 = 54612 = 0xD554
+    0x54, 0xD5, 0, 0,
+    // 64516 + 3 - (10 + 17 + 24 + 31) * 127 = 54105 = 0xD359
+    0x59, 0xD3, 0, 0,
+    7, 8, 9, 10, // 2 weights, 4 channels first, then columns
+    21, 22, 23, 24,
+    // Bias, 3 remainder channels, 1 padding up to channel_subtile.
+    // 64516 + 4 - (11 + 18 + 25 + 32) * 127 = 53598 = 0xD15E
+    0x5E, 0xD1, 0, 0,
+    // 64516 + 5 - (12 + 19 + 26 + 33) * 127 = 53091 = 0xCF63
+    0x63, 0xCF, 0, 0,
+    // 64516 + 6 - (13 + 20 + 27 + 34) * 127 = 52584 = 0xCD68
+    0x68, 0xCD, 0, 0,
+    0, 0, 0, 0,
+    11, 12, 13, 0, // 2 weights, 3 remainder channel, 1 padding up to channel_subtile
+    25, 26, 27, 0,
+    // No middle pass.
+    14, 15, 16, 17, // last pass, 2 weights, 4 channels first.
+    28, 29, 30, 31,
+    0, 0, 0, 0, // padding to last_pass_tile
+    18, 19, // 2 weights, channel_subtile (2)
+    32, 33,
+    0, 0,  // padding to last_pass_tile
+    20, 0, // 2 weights, 1 remainder channel, 1 padding up to channel_subtile
+    34, 0,
+    0, 0,  // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile_rounded) {
+  const size_t first_pass_tile = 1;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 2;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 7;
+  const size_t cr = 4;
+  const size_t channel_subtile = 2;
+  // c rounded to channel_subtile is 8, so we will have 2 channel_tile loops for first and middle pass.
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4, 5, 6]
+  std::vector<uint8_t> k(c * h * w);  // k = [7, 8, 9, 10, 11, 12, 13,
+                                    //      14, 15, 16, 17, 18, 19, 20,
+                                    //      21, 22, 23, 24, 25, 26, 27,
+                                    //      28, 29, 30, 31, 32, 33, 34]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      channel_subtile,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass, bias, 4 channels.
+    // 64516 + 0 - (7 + 14 + 21 + 28) * 127 = 55626 = 0xD94A
+    0x4A, 0xD9, 0, 0,
+    // 64516 + 1 - (8 + 15 + 22 + 29) * 127 = 55119 = 0xD74F
+    0x4F, 0xD7, 0, 0,
+    // 64516 + 2 - (9 + 16 + 23 + 30) * 127 = 54612 = 0xD554
+    0x54, 0xD5, 0, 0,
+    // 64516 + 3 - (10 + 17 + 24 + 31) * 127 = 54105 = 0xD359
+    0x59, 0xD3, 0, 0,
+    7, 8, 9, 10, // 1 weight, 4 channels first, then columns
+    // Bias, 3 remainder channels, 1 padding up to channel_subtile.
+    // 64516 + 4 - (11 + 18 + 25 + 32) * 127 = 53598 = 0xD15E
+    0x5E, 0xD1, 0, 0,
+    // 64516 + 5 - (12 + 19 + 26 + 33) * 127 = 53091 = 0xCF63
+    0x63, 0xCF, 0, 0,
+    // 64516 + 6 - (13 + 20 + 27 + 34) * 127 = 52584 = 0xCD68
+    0x68, 0xCD, 0, 0,
+    0, 0, 0, 0,
+    11, 12, 13, 0, // 1 weight, 3 remainder channel, 1 padding up to channel_subtile
+    // 1 middle pass.
+    21, 22, 23, 24, // 2 weights, 4 channels first
+    14, 15, 16, 17,
+    25, 26, 27, 0, // 3 remainder channels first, 1 padding up to channel_tile
+    18, 19, 20, 0,
+    // Last pass.
+    28, 29, 30, 31, // last pass, 1 weight, 4 channels first.
+    0, 0, 0, 0, // padding to last_pass_tile
+    32, 33, // last pass, 1 weight, channel_subtile (2)
+    0, 0,  // padding to last_pass_tile
+    34, 0, // last pass, 1 remainder channel, 1 padding up to channel_subtile
+    0, 0,  // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_subtile_rounded_to_channel_round) {
+  const size_t first_pass_tile = 2;
+  const size_t middle_pass_tile = 2;
+  const size_t last_pass_tile = 3;
+  const size_t h = 2;
+  const size_t w = 2;
+  const size_t c = 6;
+  const size_t cr = 8;
+  const size_t channel_subtile = 4;
+  const size_t channel_round = 2;
+  // c rounded to channel_round is 6, so we will have 0 channel_tile and 2 channel_subtile loops
+  // for first and middle pass.
+
+  std::vector<int32_t> b(c);
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4, 5]
+  std::vector<uint8_t> k(c * h * w);  // k = [6, 7, 8, 9, 10, 11,
+                                    //      12, 13, 14, 15, 16, 17,
+                                    //      18, 19, 20, 21, 22, 23,
+                                    //      24, 25, 26, 27, 28, 29,]
+  std::iota(k.begin(), k.end(), static_cast<uint8_t>(b.size()));
+  std::vector<uint8_t> packed_weights(
+    qs8_multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile, channel_round));
+
+  xnn_qu8_packing_params params = {};
+  params.input_zero_point = 127;
+  params.kernel_zero_point = 127;
+  xnn_pack_qu8_dwconv_multipass_hwg_w(
+      first_pass_tile,
+      middle_pass_tile,
+      last_pass_tile,
+      h,
+      w,
+      c,
+      cr,
+      channel_subtile,
+      channel_round,
+      k.data(),
+      b.data(),
+      packed_weights.data(),
+      0,
+      &params);
+
+
+  const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
+  ASSERT_EQ(bias_offset, 64516);
+  const std::vector<uint8_t> expected = {
+    // First pass, bias, 4 channels.
+    // 64516 + 0 - (6 + 12 + 18 + 24) * 127 = 56896 = 0xDE40
+    0x40, 0xDE, 0, 0,
+    // 64516 + 1 - (7 + 13 + 19 + 25) * 127 = 56389 = 0xDC45
+    0x45, 0xDC, 0, 0,
+    // 64516 + 2 - (8 + 14 + 20 + 26) * 127 = 55882 = 0xDA4A
+    0x4A, 0xDA, 0, 0,
+    // 64516 + 3 - (9 + 15 + 21 + 27) * 127 = 55375 = 0xD84F
+    0x4F, 0xD8, 0, 0,
+    6, 7, 8, 9, // 2 weights, 4 channels first, then columns
+    18, 19, 20, 21,
+    // Bias, 2 remainder channels, 2 padding up to channel_subtile
+    // 64516 + 4 - (10 + 16 + 22 + 28) * 127 = 54868 = 0xD654
+    0x54, 0xD6, 0, 0,
+    // 64516 + 5 - (11 + 17 + 23 + 29) * 127 = 54361 = 0xD459
+    0x59, 0xD4, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    10, 11, 0, 0, // 2 weights, 2 remainder channel, 1 padding up to channel_subtile
+    22, 23, 0, 0,
+    // No middle pass.
+    12, 13, 14, 15, // last pass, 2 weights, 4 channels first.
+    24, 25, 26, 27,
+    0, 0, 0, 0, // padding to last_pass_tile
+    16, 17, 0, 0, // 2 weights, channel_subtile (4)
+    28, 29, 0, 0,
+    0, 0, 0, 0, // padding to last_pass_tile
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
 TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
   const size_t primary_tile = 3;
   const size_t h = 3;

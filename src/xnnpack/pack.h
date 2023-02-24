@@ -697,6 +697,22 @@ XNN_INTERNAL void xnn_pack_qs8_dwconv_multipass_ghw_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params);
 
+XNN_INTERNAL void xnn_pack_qu8_dwconv_multipass_ghw_w(
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
+  const uint8_t* k,
+  const int32_t* b,
+  void* packed_weights,
+  size_t extra_bytes,
+  const struct xnn_qu8_packing_params* params);
+
 typedef void (*xnn_pack_dwconv_multipass_hwg_w_fn)(
   size_t first_pass_tile,
   size_t middle_pass_tile,
@@ -777,6 +793,22 @@ XNN_INTERNAL void xnn_pack_qs8_dwconv_multipass_hwg_w(
   void* packed_weights,
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params);
+
+XNN_INTERNAL void xnn_pack_qu8_dwconv_multipass_hwg_w(
+  size_t first_pass_tile,
+  size_t middle_pass_tile,
+  size_t last_pass_tile,
+  size_t h,
+  size_t w,
+  size_t c,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
+  const uint8_t* k,
+  const int32_t* b,
+  void* packed_weights,
+  size_t extra_bytes,
+  const struct xnn_qu8_packing_params* params);
 
 XNN_INTERNAL void xnn_pack_f32_gemminc_goi_w(
   size_t g,
