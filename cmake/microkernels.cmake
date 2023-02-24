@@ -1303,7 +1303,31 @@ SET(ALL_FMA_MICROKERNEL_SRCS
   src/math/gen/f32-tanh-fma-expm1minus-rr2-lut32-p3h1-div.c
   src/math/gen/f32-tanh-fma-expm1minus-rr2-lut64-p3h1-div.c
   src/math/gen/f32-tanh-fma-expm1minus-rr2-p6h4-div.c
-  src/math/gen/f32-tanh-fma-expm1minus-rr2-p6h5-div.c)
+  src/math/gen/f32-tanh-fma-expm1minus-rr2-p6h5-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr1-lut4-p4h2-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr1-lut4-p4h3-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr1-lut8-p3h1-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr1-lut8-p4h2-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr1-lut8-p4h3-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr1-lut16-p3h1-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr1-lut16-p4h2-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr1-lut16-p4h3-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr1-lut32-p3h1-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr1-lut64-p3h1-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr1-p6h4-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr1-p6h5-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr2-lut4-p4h2-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr2-lut4-p4h3-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr2-lut8-p3h1-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr2-lut8-p4h2-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr2-lut8-p4h3-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr2-lut16-p3h1-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr2-lut16-p4h2-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr2-lut16-p4h3-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr2-lut32-p3h1-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr2-lut64-p3h1-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr2-p6h4-div.c
+  src/math/gen/f32-tanh-fma-expm1plus-rr2-p6h5-div.c)
 
 SET(ALL_FMA3_MICROKERNEL_SRCS
   src/f16-dwconv/gen/f16-dwconv-3p8c-minmax-fma3-acc2.c
@@ -4148,6 +4172,30 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/math/gen/f32-tanh-scalar-expm1minus-rr2-lut64-p3h1-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr2-p6h4-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr2-p6h5-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr1-lut4-p4h2-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr1-lut4-p4h3-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr1-lut8-p3h1-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr1-lut8-p4h2-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr1-lut8-p4h3-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr1-lut16-p3h1-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr1-lut16-p4h2-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr1-lut16-p4h3-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr1-lut32-p3h1-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr1-lut64-p3h1-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr1-p6h4-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr1-p6h5-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr2-lut4-p4h2-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr2-lut4-p4h3-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr2-lut8-p3h1-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr2-lut8-p4h2-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr2-lut8-p4h3-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr2-lut16-p3h1-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr2-lut16-p4h2-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr2-lut16-p4h3-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr2-lut32-p3h1-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr2-lut64-p3h1-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr2-p6h4-div.c
+  src/math/gen/f32-tanh-scalar-expm1plus-rr2-p6h5-div.c
   src/math/u32-sqrt-scalar-bitmanip.c
   src/math/u32-sqrt-scalar-clz-binsearch.c
   src/math/u32-sqrt-scalar-clz-newton.c
