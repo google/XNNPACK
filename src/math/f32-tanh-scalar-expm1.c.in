@@ -40,6 +40,8 @@ $elif LOG2LUT == 5:
 $elif LOG2LUT == 6:
   $COEFFS = {3: ["0x1.00001Ep+1", "-0x1.55555Ep+0"]}[P]
   $LN2 = ("0x1.62E800p-1", "-0x1.E8082Ep-16")
+$if FMA:
+  $LN2 = ("0x1.62E430p-1", "-0x1.05C610p-29")
 $POLYNOMIAL = "c%d" % (len(COEFFS) + 1)
 $for i in reversed(range(len(COEFFS)-1)):
 $  POLYNOMIAL = "(c%d + t * %s)" % (i+2, POLYNOMIAL)
