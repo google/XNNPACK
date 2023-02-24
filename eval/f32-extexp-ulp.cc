@@ -68,11 +68,11 @@ static void ExtExpError(benchmark::State& state,
   const uint32_t max_input = 0x44317217;
   // Number of elements in one block of inputs/outputs.
   // Combining multiple elements in a block reduce function call overhead.
-  const size_t block_size = 16384;
+  const size_t block_size = 1048576;
   // Number of elements in one parallelization tile. Worker threads process this many elements in each task.
   const size_t tile_size = 64;
 
-  uint32_t num_threads = cpuinfo_get_cores_count();
+  uint32_t num_threads = cpuinfo_get_processors_count();
   #if XNN_ARCH_ARM || XNN_ARCH_ARM64
     // Use all cores except for the least performant cluster
     if (cpuinfo_get_clusters_count() > 1) {
