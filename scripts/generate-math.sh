@@ -6,18 +6,30 @@
 
 ################################### F32 TanH ##################################
 # Scalar
+tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=4 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr1-p6h4-div.c &
+tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=2 -D LOG2LUT=0 -D P=6 -D H=4 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr2-p6h4-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr1-p6h5-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=2 -D LOG2LUT=0 -D P=6 -D H=5 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr2-p6h5-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=2 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr1-lut4-p4h2-div.c &
+tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=2 -D LOG2LUT=2 -D P=4 -D H=2 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr2-lut4-p4h2-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=3 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr1-lut4-p4h3-div.c &
+tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=2 -D LOG2LUT=2 -D P=4 -D H=3 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr2-lut4-p4h3-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=3 -D P=3 -D H=1 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr1-lut8-p3h1-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=2 -D LOG2LUT=3 -D P=3 -D H=1 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr2-lut8-p3h1-div.c &
+tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=2 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr1-lut8-p4h2-div.c &
+tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=2 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr2-lut8-p4h2-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr1-lut8-p4h3-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=3 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr2-lut8-p4h3-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=4 -D P=3 -D H=1 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr1-lut16-p3h1-div.c &
+tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=2 -D LOG2LUT=4 -D P=3 -D H=1 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr2-lut16-p3h1-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=4 -D P=4 -D H=2 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr1-lut16-p4h2-div.c &
+tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=2 -D LOG2LUT=4 -D P=4 -D H=2 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr2-lut16-p4h2-div.c &
+tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=4 -D P=4 -D H=3 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr1-lut16-p4h3-div.c &
+tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=2 -D LOG2LUT=4 -D P=4 -D H=3 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr2-lut16-p4h3-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=5 -D P=3 -D H=1 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr1-lut32-p3h1-div.c &
+tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=2 -D LOG2LUT=5 -D P=3 -D H=1 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr2-lut32-p3h1-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=6 -D P=3 -D H=1 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr1-lut64-p3h1-div.c &
+tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=2 -D LOG2LUT=6 -D P=3 -D H=1 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1-rr2-lut64-p3h1-div.c &
 
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=4 -D FMA=1 -o src/math/gen/f32-tanh-fma-expm1-rr1-p6h4-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1.c.in -D RR=2 -D LOG2LUT=0 -D P=6 -D H=4 -D FMA=1 -o src/math/gen/f32-tanh-fma-expm1-rr2-p6h4-div.c &
