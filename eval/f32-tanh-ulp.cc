@@ -39,9 +39,19 @@ static void ComputeError(
   const float* output = context->output;
   float* error = context->error;
   for (size_t i = start; i < start + range; i++) {
-    const double input_val = input[i];
+    double input_val = double(input[i]);
+    double output_val = double(output[i]);
+    if (std::abs(input_val) < std::numeric_limits<float>::min()) {
+      input_val = std::copysign(0.0, input_val);
+    } else if (std::abs(input_val) == std::numeric_limits<float>::min()) {
+      // For the smallest normalized floating-point number the implementation is likely to produce 0
+      // instead of the correct result (same as input) due to denormals in intermediate computations.
+      if (output_val == 0.0) {
+        output_val = input_val;
+      }
+    }
     const double output_ref = std::tanh(input_val);
-    const double abs_error = std::abs(output_ref - double(output[i]));
+    const double abs_error = std::abs(output_ref - output_val);
     const float output_abs = std::abs(output_ref);
     const float output_ulp = uint32_as_float(float_as_uint32(output_abs) + 1) - output_abs;
     error[i] = float(abs_error / output_ulp);
@@ -68,7 +78,7 @@ static void TanhError(benchmark::State& state,
   // Combining multiple elements in a block reduce function call overhead.
   const size_t block_size = 1048576;
   // Number of elements in one parallelization tile. Worker threads process this many elements in each task.
-  const size_t tile_size = 64;
+  const size_t tile_size = 1024;
 
   uint32_t num_threads = cpuinfo_get_processors_count();
   #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -97,13 +107,18 @@ static void TanhError(benchmark::State& state,
       }
       std::fill(y.begin(), y.end(), std::nanf(""));
 
-      tanh(block_size * sizeof(float), x.data(), y.data());
+      pthreadpool_parallelize_1d_tile_1d(
+        nullptr,
+        [&](size_t offset, size_t size) {
+          tanh(size * sizeof(float), x.data() + offset, y.data() + offset);
+        },
+        block_size, tile_size, /*flags=*/PTHREADPOOL_FLAG_DISABLE_DENORMALS);
 
       pthreadpool_parallelize_1d_tile_1d(
           threadpool.get(),
           reinterpret_cast<pthreadpool_task_1d_tile_1d_t>(ComputeError),
           static_cast<void*>(&context),
-          block_size, tile_size, 0 /* flags */);
+          block_size, tile_size, /*flags=*/0);
 
       max_ulp_error = std::accumulate(ulp_error.cbegin(), ulp_error.cend(), max_ulp_error,
         static_cast<const float& (*)(const float&, const float&)>(std::max<float>));
@@ -114,13 +129,18 @@ static void TanhError(benchmark::State& state,
       }
       std::fill(y.begin(), y.end(), std::nanf(""));
 
-      tanh(block_size * sizeof(float), x.data(), y.data());
+      pthreadpool_parallelize_1d_tile_1d(
+        nullptr,
+        [&](size_t offset, size_t size) {
+          tanh(size * sizeof(float), x.data() + offset, y.data() + offset);
+        },
+        block_size, tile_size, /*flags=*/PTHREADPOOL_FLAG_DISABLE_DENORMALS);
 
       pthreadpool_parallelize_1d_tile_1d(
           threadpool.get(),
           reinterpret_cast<pthreadpool_task_1d_tile_1d_t>(ComputeError),
           static_cast<void*>(&context),
-          block_size, tile_size, 0 /* flags */);
+          block_size, tile_size, /*flags=*/0);
 
       max_ulp_error = std::accumulate(ulp_error.cbegin(), ulp_error.cend(), max_ulp_error,
         static_cast<const float& (*)(const float&, const float&)>(std::max<float>));
