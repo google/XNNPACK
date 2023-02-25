@@ -114,6 +114,13 @@ tools/xngen src/math/f32-tanh-neon-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -
 tools/xngen src/math/f32-tanh-neon-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2FMA          -D FMA=1 -o src/math/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr2fma.c &
 tools/xngen src/math/f32-tanh-neon-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2FMAADJ       -D FMA=1 -o src/math/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr2fmaadj.c &
 tools/xngen src/math/f32-tanh-neon-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2RECPS        -D FMA=0 -o src/math/gen/f32-tanh-neon-expm1minus-rr1-p6h5-nr2recps.c &
+tools/xngen src/math/f32-tanh-neon-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=DIV             -D FMA=1 -o src/math/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-lut8-p4h3-div.c &
+tools/xngen src/math/f32-tanh-neon-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR2RECPS        -D FMA=1 -o src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3-nr2recps.c &
+tools/xngen src/math/f32-tanh-neon-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR1RECPS1FMA    -D FMA=1 -o src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3-nr1recps1fma.c &
+tools/xngen src/math/f32-tanh-neon-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR1RECPS1FMAADJ -D FMA=1 -o src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3-nr1recps1fmaadj.c &
+tools/xngen src/math/f32-tanh-neon-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR2FMA          -D FMA=1 -o src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3-nr2fma.c &
+tools/xngen src/math/f32-tanh-neon-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR2FMAADJ       -D FMA=1 -o src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3-nr2fmaadj.c &
+tools/xngen src/math/f32-tanh-neon-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR2RECPS        -D FMA=0 -o src/math/gen/f32-tanh-neon-expm1minus-rr1-lut8-p4h3-nr2recps.c &
 
 # SSE
 tools/xngen src/math/f32-tanh-sse-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=DIV -D SAT=MINMAX -o src/math/gen/f32-tanh-sse2-expm1minus-rr1-p6h5-div.c &

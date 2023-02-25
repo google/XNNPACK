@@ -74,7 +74,7 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${D
     const float32x4_t vmagic_bias = vmovq_n_f32(0x1.800000p+${22-LOG2LUT}f);
   $if LOG2LUT != 0:
     // Mask for the lowest ${LOG2LUT} bits
-    const uint32x4_t vindex_mask = vmovq_n_u32(UINT32_C(0x${"%X" % (LUT-1)}));
+    const uint64x2_t vindex_mask = vreinterpretq_u64_u32(vmovq_n_u32(UINT32_C(0x${"%X" % (LUT-1)})));
   $if RR == 1:
     const float32x4_t vln2 = vmovq_n_f32(0x1.62E430p-1f);
   $else:
@@ -140,15 +140,20 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${D
       //    lower than -13.
       //
       // Shift bits ${LOG2LUT}:${LOG2LUT+8} into 23:31 (position of float32x4_ting-point exponent).
-      const uint32_t vb = float32x4_t_as_uint32(vn);
-      const uint32_t ve = vb << ${23-LOG2LUT};
+      const uint32x4_t ve = vshlq_n_u32(vreinterpretq_u32_f32(vn), ${23-LOG2LUT});
 
       // Use bits 0:${LOG2LUT} bits of n, as integer, as an index for table lookup of l := 2**frac(n).
-      const uint32_t vidx = vb & vindex_mask;
-      const uint32_t vl = xnn_table_exp2minus_k_over_${LUT}[vidx];
+      const uint64x2_t vidx = vandq_u64(vreinterpretq_u64_f32(vn), vindex_mask);
+      const uint64_t vidx_lo = vgetq_lane_u64(vidx, 0);
+      const uint64_t vidx_hi = vgetq_lane_u64(vidx, 1);
+      uint32x2_t vl_lo = vld1_dup_u32(&xnn_table_exp2minus_k_over_${LUT}[(uint32_t) vidx_lo]);
+      uint32x2_t vl_hi = vld1_dup_u32(&xnn_table_exp2minus_k_over_${LUT}[(uint32_t) vidx_hi]);
+      vl_lo = vld1_lane_u32(&xnn_table_exp2minus_k_over_${LUT}[(uint32_t) (vidx_lo >> 32)], vl_lo, 1);
+      vl_hi = vld1_lane_u32(&xnn_table_exp2minus_k_over_${LUT}[(uint32_t) (vidx_hi >> 32)], vl_hi, 1);
+      const uint32x4_t vl = vcombine_u32(vl_lo, vl_hi);
 
       // Adjust exponent of the value l fetched from the table to get the final s value.
-      const float32x4_t vs = uint32_as_float32x4_t(vl + ve);
+      const float32x4_t vs = vreinterpretq_f32_u32(vaddq_u32(vl, ve));
 
     // Subtract the large number back to get final n := round(-z / log(2), ${1+LOG2LUT}) as a float32x4_ting-point number.
     vn = vsubq_f32(vn, vmagic_bias);

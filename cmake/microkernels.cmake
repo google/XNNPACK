@@ -1870,6 +1870,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/math/f32-sqrt-neon-nr1rsqrts.c
   src/math/f32-sqrt-neon-nr2rsqrts.c
   src/math/f32-sqrt-neon-nr3rsqrts.c
+  src/math/gen/f32-tanh-neon-expm1minus-rr1-lut8-p4h3-nr2recps.c
   src/math/gen/f32-tanh-neon-expm1minus-rr1-p6h5-nr2recps.c
   src/qc8-dwconv/gen/qc8-dwconv-3p8c-minmax-fp32-neon-mla8-ld64.c
   src/qc8-dwconv/gen/qc8-dwconv-3p16c-minmax-fp32-neon-mla8-ld64.c
@@ -3047,6 +3048,11 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/math/f32-sqrt-neonfma-nr2fma1adj.c
   src/math/f32-sqrt-neonfma-nr2fma.c
   src/math/f32-sqrt-neonfma-nr3fma.c
+  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3-nr1recps1fma.c
+  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3-nr1recps1fmaadj.c
+  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3-nr2fma.c
+  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3-nr2fmaadj.c
+  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3-nr2recps.c
   src/math/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr1recps1fma.c
   src/math/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr1recps1fmaadj.c
   src/math/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr2fma.c
@@ -3160,6 +3166,7 @@ SET(ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS
   src/math/f32-sigmoid-aarch64-neonfma-rr2-lut64-p2-div.c
   src/math/f32-sigmoid-aarch64-neonfma-rr2-lut2048-p1-div.c
   src/math/f32-sigmoid-aarch64-neonfma-rr2-p5-div.c
+  src/math/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-lut8-p4h3-div.c
   src/math/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-p6h5-div.c)
 
 SET(ALL_NEONFP16_MICROKERNEL_SRCS
