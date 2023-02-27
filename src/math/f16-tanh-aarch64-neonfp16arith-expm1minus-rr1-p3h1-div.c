@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f16_tanh__aarch64_neonfp16arith_expm1_rr1_p3h1_div(
+void xnn_math_f16_tanh__aarch64_neonfp16arith_expm1minus_rr1_p3h1_div(
     size_t n,
     const void* input,
     void* output)

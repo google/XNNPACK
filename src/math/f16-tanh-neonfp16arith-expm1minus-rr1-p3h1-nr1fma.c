@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h2_nr1fma(
+void xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1fma(
     size_t n,
     const void* input,
     void* output)
@@ -28,12 +28,12 @@ void xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h2_nr1fma(
   const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xBDC5)));  // -0x1.714p+0h
   const float16x8_t vln2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x398C)));  // 0x1.630p-1h
   // Coefficient of polynomial approximation
-  //   exp(-2t) - 1 ~ t * (-2 + t * (c2 + t * c3))
+  //   exp(-2t) - 1 ~ -2t * (1 + t * (c2 + t * c3))
   // on [-log(2)/4, log(2)/4]
-  const float16x8_t vc3 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xBD5B)));  // -0x1.56Cp+0h
-  const float16x8_t vc2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x4008)));  // 0x1.020p+1h
-  const float16x8_t vminus_two = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xC000)));  // -2.0h
+  const float16x8_t vc3 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x395B)));  // 0x1.56Cp-1h
+  const float16x8_t vc2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xBC08)));  // -0x1.020p+0h
   const float16x8_t vone = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x3C00)));  // 1.0h
+  const float16x8_t vminus_two = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xC000)));  // -2.0h
   // Mask for the sign bit.
   const uint16x8_t vsign_mask = vmovq_n_u16(UINT16_C(0x8000));
 
@@ -77,18 +77,20 @@ void xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h2_nr1fma(
     float16x8_t vt = vfmaq_f16(vz, vn, vln2);
 
     // Compute degree-3 polynomial approximation for exp(-2t) - 1 on [-log(2)/4, log(2)/4].
-    //   P(-2t) = t * (-2 + t * (c2 + t * c3))
-    //          = t * p
+    //   P(-2t) = -2t * (1 + t * (c2 + t * c3))
+    //          = -2 * (t + t * (t * (c2 + t * c3)))
+    //          = -2 * (t + t * p)
     float16x8_t vp = vfmaq_f16(vc2, vc3, vt);
-    vp = vfmaq_f16(vminus_two, vp, vt);
+    vp = vmulq_f16(vp, vt);
 
     // Reconstruct the exp(z) - 1 value:
-    //   exp(x) - 1 = s * (-2 + t * (c2 + t * c3)) - 1
-    //              = (s - 1) + s * t * p
-    //              = (s - 1) + (t * s) * p
-    const float16x8_t vts = vmulq_f16(vt, vs);
+    //   exp(z) - 1 = s * (1 - 2t * (1 + t * (c2 + t * c3))) - 1
+    //              = (s - 1) + s * (-2t) * (t + t * p)
+    //              = (s - 1) - 2 * ((t * s) + (t * s) * p)
+    vt = vmulq_f16(vt, vs);
     const float16x8_t vsm1 = vsubq_f16(vs, vone);
-    const float16x8_t vem1 = vfmaq_f16(vsm1, vts, vp);
+    vp = vfmaq_f16(vt, vp, vt);
+    const float16x8_t vem1 = vfmaq_f16(vsm1, vp, vminus_two);
 
     // Denominator of the tanh fraction: expm1(-2z) + 2
     const float16x8_t vep1 = vsubq_f16(vem1, vminus_two);

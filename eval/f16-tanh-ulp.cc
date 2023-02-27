@@ -12,7 +12,6 @@
 #include <random>
 #include <vector>
 
-#include <cpuinfo.h>
 #include <pthreadpool.h>
 
 #include <benchmark/benchmark.h>
@@ -39,8 +38,23 @@ static void ComputeError(
   const uint16_t* output = context->output;
   float* error = context->error;
   for (size_t i = start; i < start + range; i++) {
-    const float output_ref = std::tanh(fp16_ieee_to_fp32_value(input[i]));
-    const float abs_error = std::abs(output_ref - fp16_ieee_to_fp32_value(output[i]));
+    uint16_t input_val = input[i];
+    uint16_t output_val = output[i];
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+    if ((input_val & UINT16_C(0x7FFF)) < UINT16_C(0x0400)) {
+      // Replace denormal inputs with signed zeroes
+      input_val = input_val & UINT16_C(0x8000);
+    } else if ((input_val & UINT16_C(0x7FFF)) == UINT16_C(0x0400)) {
+      // For the smallest normalized floating-point number the implementation is likely to produce 0
+      // instead of the correct result (same as input) due to denormals in intermediate computations.
+      if ((output_val & UINT16_C(0x7FFF)) == 0) {
+        output_val = input_val;
+      }
+    }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+    const float output_ref = std::tanh(fp16_ieee_to_fp32_value(input_val));
+    const float abs_error = std::abs(output_ref - fp16_ieee_to_fp32_value(output_val));
     const uint16_t output_abs = fp16_ieee_from_fp32_value(std::abs(output_ref));
     const float output_ulp = fp16_ieee_to_fp32_value(output_abs + 1) - fp16_ieee_to_fp32_value(output_abs);
     error[i] = float(abs_error / output_ulp);
@@ -52,10 +66,6 @@ static void TanhError(
   xnn_f16_unary_math_fn tanh,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (!cpuinfo_initialize()) {
-    state.SkipWithError("failed cpuinfo init");
-    return;
-  }
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
@@ -70,17 +80,6 @@ static void TanhError(
   const size_t block_size = 16384;
   // Number of elements in one parallelization tile. Worker threads process this many elements in each task.
   const size_t tile_size = 64;
-
-  uint32_t num_threads = cpuinfo_get_cores_count();
-  #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-    // Use all cores except for the least performant cluster
-    if (cpuinfo_get_clusters_count() > 1) {
-      num_threads -= cpuinfo_get_cluster(cpuinfo_get_clusters_count() - 1)->core_count;
-    }
-  #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-  std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> threadpool(
-    pthreadpool_create(num_threads), pthreadpool_destroy);
 
   std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> x(block_size);
   std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> y(block_size);
@@ -98,13 +97,18 @@ static void TanhError(
       }
       std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
 
-      tanh(block_size * sizeof(uint16_t), x.data(), y.data());
+      pthreadpool_parallelize_1d_tile_1d(
+        nullptr,
+        [&](size_t offset, size_t size) {
+          tanh(size * sizeof(uint16_t), x.data() + offset, y.data() + offset);
+        },
+        block_size, tile_size, /*flags=*/PTHREADPOOL_FLAG_DISABLE_DENORMALS);
 
       pthreadpool_parallelize_1d_tile_1d(
-          threadpool.get(),
+          /*threadpool=*/nullptr,
           reinterpret_cast<pthreadpool_task_1d_tile_1d_t>(ComputeError),
           static_cast<void*>(&context),
-          block_size, tile_size, 0 /* flags */);
+          block_size, tile_size, /*flags=*/0);
 
       max_ulp_error = std::accumulate(ulp_error.cbegin(), ulp_error.cend(), max_ulp_error,
         static_cast<const float& (*)(const float&, const float&)>(std::max<float>));
@@ -115,13 +119,18 @@ static void TanhError(
       }
       std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
 
-      tanh(block_size * sizeof(uint16_t), x.data(), y.data());
+      pthreadpool_parallelize_1d_tile_1d(
+        nullptr,
+        [&](size_t offset, size_t size) {
+          tanh(size * sizeof(uint16_t), x.data() + offset, y.data() + offset);
+        },
+        block_size, tile_size, /*flags=*/PTHREADPOOL_FLAG_DISABLE_DENORMALS);
 
       pthreadpool_parallelize_1d_tile_1d(
-          threadpool.get(),
+          /*threadpool=*/nullptr,
           reinterpret_cast<pthreadpool_task_1d_tile_1d_t>(ComputeError),
           static_cast<void*>(&context),
-          block_size, tile_size, 0 /* flags */);
+          block_size, tile_size, /*flags=*/0);
 
       max_ulp_error = std::accumulate(ulp_error.cbegin(), ulp_error.cend(), max_ulp_error,
         static_cast<const float& (*)(const float&, const float&)>(std::max<float>));
@@ -132,59 +141,59 @@ static void TanhError(
 }
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(TanhError, aarch64_neonfp16arith_expm1_rr1_p3h1_div,
-                    xnn_math_f16_tanh__aarch64_neonfp16arith_expm1_rr1_p3h1_div,
+  BENCHMARK_CAPTURE(TanhError, aarch64_neonfp16arith_expm1minus_rr1_p3h1_div,
+                    xnn_math_f16_tanh__aarch64_neonfp16arith_expm1minus_rr1_p3h1_div,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, aarch64_neonfp16arith_expm1_rr1_p3h2_div,
-                    xnn_math_f16_tanh__aarch64_neonfp16arith_expm1_rr1_p3h2_div,
+  BENCHMARK_CAPTURE(TanhError, aarch64_neonfp16arith_expm1minus_rr1_p3h2_div,
+                    xnn_math_f16_tanh__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1_rr1_p3h1_nr1fma,
-                    xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h1_nr1fma,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_nr1fma,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1fma,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1_rr1_p3h2_nr1fma,
-                    xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h2_nr1fma,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_nr1fma,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1fma,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1_rr1_p3h1_nr1recps,
-                    xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h1_nr1recps,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_nr1recps,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1recps,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1_rr1_p3h2_nr1recps,
-                    xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h2_nr1recps,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_nr1recps,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1recps,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1_rr1_p3h1_recpe,
-                    xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h1_recpe,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_recpe,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_recpe,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1_rr1_p3h2_recpe,
-                    xnn_math_f16_tanh__neonfp16arith_expm1_rr1_p3h2_recpe,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_recpe,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_recpe,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_p3h2_div,
-                    xnn_math_f16_tanh__avx2_expm1_rr1_p3h2_div,
+  BENCHMARK_CAPTURE(TanhError, avx2_expm1minus_rr1_p3h2_div,
+                    xnn_math_f16_tanh__avx2_expm1minus_rr1_p3h2_div,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, avx2_expm1_rr1_p3h2_rcp,
-                    xnn_math_f16_tanh__avx2_expm1_rr1_p3h2_rcp,
+  BENCHMARK_CAPTURE(TanhError, avx2_expm1minus_rr1_p3h2_rcp,
+                    xnn_math_f16_tanh__avx2_expm1minus_rr1_p3h2_rcp,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);

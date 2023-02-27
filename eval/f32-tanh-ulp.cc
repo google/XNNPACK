@@ -41,6 +41,7 @@ static void ComputeError(
   for (size_t i = start; i < start + range; i++) {
     double input_val = double(input[i]);
     double output_val = double(output[i]);
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64 || XNN_ARCH_X86 || XNN_ARCH_X86_64
     if (std::abs(input_val) < std::numeric_limits<float>::min()) {
       input_val = std::copysign(0.0, input_val);
     } else if (std::abs(input_val) == std::numeric_limits<float>::min()) {
@@ -50,6 +51,7 @@ static void ComputeError(
         output_val = input_val;
       }
     }
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 || XNN_ARCH_X86 || XNN_ARCH_X86_64
     const double output_ref = std::tanh(input_val);
     const double abs_error = std::abs(output_ref - output_val);
     const float output_abs = std::abs(output_ref);

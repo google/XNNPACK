@@ -710,8 +710,8 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/math/f16-sigmoid-avx2-rr1-p2-rcp.c
   src/math/f16-sigmoid-avx2-rr1-p3-div.c
   src/math/f16-sigmoid-avx2-rr1-p3-rcp.c
-  src/math/f16-tanh-avx2-expm1-rr1-p3h2-div.c
-  src/math/f16-tanh-avx2-expm1-rr1-p3h2-rcp.c
+  src/math/f16-tanh-avx2-expm1minus-rr1-p3h2-div.c
+  src/math/f16-tanh-avx2-expm1minus-rr1-p3h2-rcp.c
   src/math/f32-exp-avx2-rr2-lut8-p3-perm.c
   src/math/f32-exp-avx2-rr2-lut8-p4-perm.c
   src/math/f32-exp-avx2-rr2-p5.c
@@ -3427,12 +3427,12 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/math/f16-sqrt-neonfp16arith-nr1fma1adj.c
   src/math/f16-sqrt-neonfp16arith-nr1fma.c
   src/math/f16-sqrt-neonfp16arith-nr1rsqrts.c
-  src/math/f16-tanh-neonfp16arith-expm1-rr1-p3h1-nr1fma.c
-  src/math/f16-tanh-neonfp16arith-expm1-rr1-p3h1-nr1recps.c
-  src/math/f16-tanh-neonfp16arith-expm1-rr1-p3h1-recpe.c
-  src/math/f16-tanh-neonfp16arith-expm1-rr1-p3h2-nr1fma.c
-  src/math/f16-tanh-neonfp16arith-expm1-rr1-p3h2-nr1recps.c
-  src/math/f16-tanh-neonfp16arith-expm1-rr1-p3h2-recpe.c)
+  src/math/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-nr1fma.c
+  src/math/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-nr1recps.c
+  src/math/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-recpe.c
+  src/math/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fma.c
+  src/math/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recps.c
+  src/math/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-recpe.c)
 
 SET(ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vdiv-minmax-aarch64-neonfp16arith-x8.c
@@ -3456,8 +3456,8 @@ SET(ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
   src/math/f16-sigmoid-aarch64-neonfp16arith-rr2-p2-div.c
   src/math/f16-sigmoid-aarch64-neonfp16arith-rr2-p3-div.c
   src/math/f16-sqrt-aarch64-neonfp16arith-sqrt.c
-  src/math/f16-tanh-aarch64-neonfp16arith-expm1-rr1-p3h1-div.c
-  src/math/f16-tanh-aarch64-neonfp16arith-expm1-rr1-p3h2-div.c)
+  src/math/f16-tanh-aarch64-neonfp16arith-expm1minus-rr1-p3h1-div.c
+  src/math/f16-tanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2-div.c)
 
 SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neonv8-x8.c
