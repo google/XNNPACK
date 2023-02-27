@@ -5228,6 +5228,7 @@ xnnpack_cc_library(
     ],
     deps = [
         ":allocator",
+        ":microkernel_configs",
         ":microparams",
         ":params",
     ],
