@@ -46,8 +46,7 @@ void xnn_math_f32_tanh__neonfma_expm1minus_rr1_p6h5_nr2fmaadj(
   const uint32x4_t vsign_mask = vmovq_n_u32(UINT32_C(0x80000000));
 
   for (; n != 0; n -= sizeof(float32x4_t)) {
-    const float32x4_t vx = vld1q_f32(input);
-    input += 4;
+    const float32x4_t vx = vld1q_f32(input); input += 4;
 
     // General structure of the algorithm:
     //
@@ -69,15 +68,15 @@ void xnn_math_f32_tanh__neonfma_expm1minus_rr1_p6h5_nr2fmaadj(
     // then subtracing the large number back. The trick with adding large number is valid only within certain bounds
     // (|-z / log(2)| <= 2**21, i.e. |z| <= 0x1.62E43p+20 = 1453635.0), but that is acceptable, because inputs x
     // outside of [-9.010913, 9.010913] (i.e. z outsize [0, 9.010913]) saturate tanhf(x).
-    // Additionally, we fuse addition of the float32x4_ting-point exponent bias (127) into the magic bias.
+    // Additionally, we fuse addition of the floating-point exponent bias (127) into the magic bias.
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
     float32x4_t vn = vfmaq_f32(vmagic_bias, vz, vminus_log2e);
 
-    // Create a float32x4_ting-point number s (scale) such that s == 2**(2n) for inputs which don't cause underflow, i.e.
+    // Create a floating-point number s (scale) such that s == 2**(2n) for inputs which don't cause underflow, i.e.
     // 0 <= z <= 9.010913, and -13 <= n <= 0 accordingly.
     const float32x4_t vs = vreinterpretq_f32_s32(vshlq_n_s32(vreinterpretq_s32_f32(vn), 23));
 
-    // Subtract the large number back to get final n := round(-z / log(2), 1) as a float32x4_ting-point number.
+    // Subtract the large number back to get final n := round(-z / log(2), 1) as a floating-point number.
     vn = vsubq_f32(vn, vmagic_bias);
 
     // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
@@ -122,7 +121,6 @@ void xnn_math_f32_tanh__neonfma_expm1minus_rr1_p6h5_nr2fmaadj(
     // Reconstruct tanh(x) = copysign(y, x)
     vy = vbslq_f32(vsign_mask, vx, vy);
 
-    vst1q_f32(output, vy);
-    output += 4;
+    vst1q_f32(output, vy); output += 4;
   }
 }

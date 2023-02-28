@@ -4,6 +4,24 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+################################### F16 TanH ##################################
+# NEON+FP16ARITH
+tools/xngen src/math/f16-tanh-neonfp16arith-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=3 -D H=1 -D SAT=MINMAX -D DIV=DIV         -o src/math/gen/f16-tanh-aarch64-neonfp16arith-expm1minus-rr1-p3h1-div.c &
+tools/xngen src/math/f16-tanh-neonfp16arith-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=3 -D H=1 -D SAT=SELECT -D DIV=RECPE       -o src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-recpe.c &
+tools/xngen src/math/f16-tanh-neonfp16arith-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=3 -D H=1 -D SAT=MINMAX -D DIV=RECPEADJ    -o src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-recpeadj.c &
+tools/xngen src/math/f16-tanh-neonfp16arith-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=3 -D H=1 -D SAT=MINMAX -D DIV=NR1RECPS    -o src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-nr1recps.c &
+tools/xngen src/math/f16-tanh-neonfp16arith-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=3 -D H=1 -D SAT=MINMAX -D DIV=NR1RECPSADJ -o src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-nr1recpsadj.c &
+tools/xngen src/math/f16-tanh-neonfp16arith-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=3 -D H=1 -D SAT=MINMAX -D DIV=NR1FMA      -o src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-nr1fma.c &
+tools/xngen src/math/f16-tanh-neonfp16arith-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=3 -D H=1 -D SAT=MINMAX -D DIV=NR1FMAADJ   -o src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-nr1fmaadj.c &
+
+tools/xngen src/math/f16-tanh-neonfp16arith-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=3 -D H=2 -D SAT=MINMAX -D DIV=DIV         -o src/math/gen/f16-tanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2-div.c &
+tools/xngen src/math/f16-tanh-neonfp16arith-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=3 -D H=2 -D SAT=SELECT -D DIV=RECPE       -o src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-recpe.c &
+tools/xngen src/math/f16-tanh-neonfp16arith-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=3 -D H=2 -D SAT=MINMAX -D DIV=RECPEADJ    -o src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-recpeadj.c &
+tools/xngen src/math/f16-tanh-neonfp16arith-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=3 -D H=2 -D SAT=MINMAX -D DIV=NR1RECPS    -o src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recps.c &
+tools/xngen src/math/f16-tanh-neonfp16arith-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=3 -D H=2 -D SAT=MINMAX -D DIV=NR1RECPSADJ -o src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recpsadj.c &
+tools/xngen src/math/f16-tanh-neonfp16arith-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=3 -D H=2 -D SAT=MINMAX -D DIV=NR1FMA      -o src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fma.c &
+tools/xngen src/math/f16-tanh-neonfp16arith-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=3 -D H=2 -D SAT=MINMAX -D DIV=NR1FMAADJ   -o src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fmaadj.c &
+
 ################################### F32 TanH ##################################
 # Scalar
 tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=4 -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1minus-rr1-p6h4-div.c &

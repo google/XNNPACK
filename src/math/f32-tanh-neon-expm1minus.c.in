@@ -98,8 +98,7 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${D
   const uint32x4_t vsign_mask = vmovq_n_u32(UINT32_C(0x80000000));
 
   for (; n != 0; n -= sizeof(float32x4_t)) {
-    const float32x4_t vx = vld1q_f32(input);
-    input += 4;
+    const float32x4_t vx = vld1q_f32(input); input += 4;
 
     // General structure of the algorithm:
     //
@@ -122,24 +121,24 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${D
     // (|-z / log(2)| <= 2**${21-LOG2LUT}, i.e. |z| <= 0x1.62E43p+${20-LOG2LUT} = ${math.ldexp(float.fromhex("0x1.62E43p+20"), -LOG2LUT)}), but that is acceptable, because inputs x
     // outside of [-9.010913, 9.010913] (i.e. z outsize [0, 9.010913]) saturate tanhf(x).
     $if LOG2LUT == 0:
-      // Additionally, we fuse addition of the float32x4_ting-point exponent bias (127) into the magic bias.
+      // Additionally, we fuse addition of the floating-point exponent bias (127) into the magic bias.
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
     float32x4_t vn = ${VMLAQ_F32}(vmagic_bias, vz, vminus_log2e);
 
     $if LOG2LUT == 0:
-      // Create a float32x4_ting-point number s (scale) such that s == 2**(2n) for inputs which don't cause underflow, i.e.
+      // Create a floating-point number s (scale) such that s == 2**(2n) for inputs which don't cause underflow, i.e.
       // 0 <= z <= 9.010913, and -13 <= n <= 0 accordingly.
       const float32x4_t vs = vreinterpretq_f32_s32(vshlq_n_s32(vreinterpretq_s32_f32(vn), 23));
     $else:
-      // Create a float32x4_ting-point number s (scale) such that s := 2**(2n) for valid inputs, i.e. 0 <= z <= 9.010913. As
+      // Create a floating-point number s (scale) such that s := 2**(2n) for valid inputs, i.e. 0 <= z <= 9.010913. As
       // n has ${1+LOG2LUT} fractional bits, we split s == 2**(2n) = 2**int(2n) * 2**frac(2n). We create s in two steps:
       // 1. Fetch 2**frac(2n) from the table using the ${LOG2LUT} low bits of n, as integer. Note that the fetched values are in
-      //    the [1.0, 2.0) range, i.e. their unbiased float32x4_ting-point exponent is 0.
-      // 2. Adjust fetched value by addition of int(2n) to its float32x4_ting-point exponent. The result is always a normalized
+      //    the [1.0, 2.0) range, i.e. their unbiased floating-point exponent is 0.
+      // 2. Adjust fetched value by addition of int(2n) to its floating-point exponent. The result is always a normalized
       //    number, because for 0 <= z <= 9.010913 we have -13 <= int(n) <= 0, and thus the adjusted exponent is not
       //    lower than -13.
       //
-      // Shift bits ${LOG2LUT}:${LOG2LUT+8} into 23:31 (position of float32x4_ting-point exponent).
+      // Shift bits ${LOG2LUT}:${LOG2LUT+8} into 23:31 (position of floating-point exponent).
       const uint32x4_t ve = vshlq_n_u32(vreinterpretq_u32_f32(vn), ${23-LOG2LUT});
 
       // Use bits 0:${LOG2LUT} bits of n, as integer, as an index for table lookup of l := 2**frac(n).
@@ -155,7 +154,7 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${D
       // Adjust exponent of the value l fetched from the table to get the final s value.
       const float32x4_t vs = vreinterpretq_f32_u32(vaddq_u32(vl, ve));
 
-    // Subtract the large number back to get final n := round(-z / log(2), ${1+LOG2LUT}) as a float32x4_ting-point number.
+    // Subtract the large number back to get final n := round(-z / log(2), ${1+LOG2LUT}) as a floating-point number.
     vn = vsubq_f32(vn, vmagic_bias);
 
     // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
@@ -179,7 +178,7 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${D
     $if P == H + 1:
       vp = ${VMLSQ_F32}(vtwo, vp, vt);
     $else:
-      vp *= vt;
+      vp = vmulq_f32(vp, vt);
 
     // Reconstruct the exp(-2z) - 1 value:
     $if P == H + 1:
@@ -233,7 +232,6 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${D
     // Reconstruct tanh(x) = copysign(y, x)
     vy = vbslq_f32(vsign_mask, vx, vy);
 
-    vst1q_f32(output, vy);
-    output += 4;
+    vst1q_f32(output, vy); output += 4;
   }
 }

@@ -91,6 +91,32 @@
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H1_NR1FMAADJ, positive_saturation) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .input_range(0x1.208p+2f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1fmaadj, 1.0f);
+  }
+
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H1_NR1FMAADJ, negative_saturation) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.208p+2f)
+      .TestOutputMatchReference(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1fmaadj, -1.0f);
+  }
+
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H1_NR1FMAADJ, nan) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1fmaadj);
+  }
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H1_NR1RECPS, positive_saturation) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
 
@@ -112,6 +138,32 @@
 
     MathEvaluationTester()
       .TestNaN(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1recps);
+  }
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H1_NR1RECPSADJ, positive_saturation) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .input_range(0x1.208p+2f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1recpsadj, 1.0f);
+  }
+
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H1_NR1RECPSADJ, negative_saturation) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.208p+2f)
+      .TestOutputMatchReference(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1recpsadj, -1.0f);
+  }
+
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H1_NR1RECPSADJ, nan) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1recpsadj);
   }
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
@@ -143,6 +195,32 @@
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H1_RECPEADJ, positive_saturation) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .input_range(0x1.208p+2f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_recpeadj, 1.0f);
+  }
+
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H1_RECPEADJ, negative_saturation) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.208p+2f)
+      .TestOutputMatchReference(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_recpeadj, -1.0f);
+  }
+
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H1_RECPEADJ, nan) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_recpeadj);
+  }
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H2_NR1FMA, positive_saturation) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
 
@@ -164,6 +242,32 @@
 
     MathEvaluationTester()
       .TestNaN(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1fma);
+  }
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H2_NR1FMAADJ, positive_saturation) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .input_range(0x1.208p+2f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1fmaadj, 1.0f);
+  }
+
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H2_NR1FMAADJ, negative_saturation) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.208p+2f)
+      .TestOutputMatchReference(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1fmaadj, -1.0f);
+  }
+
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H2_NR1FMAADJ, nan) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1fmaadj);
   }
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
@@ -195,6 +299,32 @@
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H2_NR1RECPSADJ, positive_saturation) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .input_range(0x1.208p+2f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1recpsadj, 1.0f);
+  }
+
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H2_NR1RECPSADJ, negative_saturation) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.208p+2f)
+      .TestOutputMatchReference(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1recpsadj, -1.0f);
+  }
+
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H2_NR1RECPSADJ, nan) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1recpsadj);
+  }
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H2_RECPE, positive_saturation) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
 
@@ -216,6 +346,32 @@
 
     MathEvaluationTester()
       .TestNaN(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_recpe);
+  }
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
+
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H2_RECPEADJ, positive_saturation) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .input_range(0x1.208p+2f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_recpeadj, 1.0f);
+  }
+
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H2_RECPEADJ, negative_saturation) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.208p+2f)
+      .TestOutputMatchReference(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_recpeadj, -1.0f);
+  }
+
+  TEST(TANH__NEONFP16ARITH_EXPM1MINUS_RR1_P3H2_RECPEADJ, nan) {
+    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
+
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_recpeadj);
   }
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 

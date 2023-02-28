@@ -3442,12 +3442,18 @@ ALL_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/math/f16-sqrt-neonfp16arith-nr1fma1adj.c",
     "src/math/f16-sqrt-neonfp16arith-nr1fma.c",
     "src/math/f16-sqrt-neonfp16arith-nr1rsqrts.c",
-    "src/math/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-nr1fma.c",
-    "src/math/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-nr1recps.c",
-    "src/math/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-recpe.c",
-    "src/math/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fma.c",
-    "src/math/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recps.c",
-    "src/math/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-recpe.c",
+    "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-nr1fma.c",
+    "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-nr1fmaadj.c",
+    "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-nr1recps.c",
+    "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-nr1recpsadj.c",
+    "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-recpe.c",
+    "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h1-recpeadj.c",
+    "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fma.c",
+    "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fmaadj.c",
+    "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recps.c",
+    "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recpsadj.c",
+    "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-recpe.c",
+    "src/math/gen/f16-tanh-neonfp16arith-expm1minus-rr1-p3h2-recpeadj.c",
 ]
 
 ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS = [
@@ -3472,8 +3478,8 @@ ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS = [
     "src/math/f16-sigmoid-aarch64-neonfp16arith-rr2-p2-div.c",
     "src/math/f16-sigmoid-aarch64-neonfp16arith-rr2-p3-div.c",
     "src/math/f16-sqrt-aarch64-neonfp16arith-sqrt.c",
-    "src/math/f16-tanh-aarch64-neonfp16arith-expm1minus-rr1-p3h1-div.c",
-    "src/math/f16-tanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2-div.c",
+    "src/math/gen/f16-tanh-aarch64-neonfp16arith-expm1minus-rr1-p3h1-div.c",
+    "src/math/gen/f16-tanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2-div.c",
 ]
 
 ALL_NEONV8_MICROKERNEL_SRCS = [

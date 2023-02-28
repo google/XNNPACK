@@ -49,8 +49,7 @@ void xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3_nr2fmaadj(
   const uint32x4_t vsign_mask = vmovq_n_u32(UINT32_C(0x80000000));
 
   for (; n != 0; n -= sizeof(float32x4_t)) {
-    const float32x4_t vx = vld1q_f32(input);
-    input += 4;
+    const float32x4_t vx = vld1q_f32(input); input += 4;
 
     // General structure of the algorithm:
     //
@@ -75,15 +74,15 @@ void xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3_nr2fmaadj(
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
     float32x4_t vn = vfmaq_f32(vmagic_bias, vz, vminus_log2e);
 
-    // Create a float32x4_ting-point number s (scale) such that s := 2**(2n) for valid inputs, i.e. 0 <= z <= 9.010913. As
+    // Create a floating-point number s (scale) such that s := 2**(2n) for valid inputs, i.e. 0 <= z <= 9.010913. As
     // n has 4 fractional bits, we split s == 2**(2n) = 2**int(2n) * 2**frac(2n). We create s in two steps:
     // 1. Fetch 2**frac(2n) from the table using the 3 low bits of n, as integer. Note that the fetched values are in
-    //    the [1.0, 2.0) range, i.e. their unbiased float32x4_ting-point exponent is 0.
-    // 2. Adjust fetched value by addition of int(2n) to its float32x4_ting-point exponent. The result is always a normalized
+    //    the [1.0, 2.0) range, i.e. their unbiased floating-point exponent is 0.
+    // 2. Adjust fetched value by addition of int(2n) to its floating-point exponent. The result is always a normalized
     //    number, because for 0 <= z <= 9.010913 we have -13 <= int(n) <= 0, and thus the adjusted exponent is not
     //    lower than -13.
     //
-    // Shift bits 3:11 into 23:31 (position of float32x4_ting-point exponent).
+    // Shift bits 3:11 into 23:31 (position of floating-point exponent).
     const uint32x4_t ve = vshlq_n_u32(vreinterpretq_u32_f32(vn), 20);
 
     // Use bits 0:3 bits of n, as integer, as an index for table lookup of l := 2**frac(n).
@@ -99,7 +98,7 @@ void xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3_nr2fmaadj(
     // Adjust exponent of the value l fetched from the table to get the final s value.
     const float32x4_t vs = vreinterpretq_f32_u32(vaddq_u32(vl, ve));
 
-    // Subtract the large number back to get final n := round(-z / log(2), 4) as a float32x4_ting-point number.
+    // Subtract the large number back to get final n := round(-z / log(2), 4) as a floating-point number.
     vn = vsubq_f32(vn, vmagic_bias);
 
     // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
@@ -142,7 +141,6 @@ void xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3_nr2fmaadj(
     // Reconstruct tanh(x) = copysign(y, x)
     vy = vbslq_f32(vsign_mask, vx, vy);
 
-    vst1q_f32(output, vy);
-    output += 4;
+    vst1q_f32(output, vy); output += 4;
   }
 }
