@@ -9,11 +9,13 @@
 
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <arm_neon.h>
 
 #include <xnnpack/math.h>
 #include <xnnpack/packw.h>
-
-#include <arm_neon.h>
 
 
 void xnn_x32_packw_gemm_goi_ukernel_x8__neon(
@@ -35,7 +37,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon(
   assert(nr == 8);   // This kernel is for NR=8
   assert(kr == 1);
   assert(sr == 1);
-  assert(nr >= sr);
   assert(weights != NULL);
   assert(packed_weights != NULL);
 
@@ -105,7 +106,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon(
         }
 
         // KC remainder
-        for (; k >= 1; --k) {
+        for (; k != 0; --k) {
           v00.val[0] = vld1q_lane_u32(w0 + 0, v00.val[0], 0);
           w0 += 1;
           v00.val[0] = vld1q_lane_u32(w1 + 0, v00.val[0], 1);

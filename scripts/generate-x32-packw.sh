@@ -6,16 +6,16 @@
 
 #################################### Scalar ###################################
 ### Generic C micro-kernels
-tools/xngen src/x32-packw/scalar.c.in -D NR=2 -D KR=4 -o src/x32-packw/gen/x32-packw-x2-scalar.c &
-tools/xngen src/x32-packw/scalar.c.in -D NR=4 -D KR=4 -o src/x32-packw/gen/x32-packw-x4-scalar.c &
+tools/xngen src/x32-packw/scalar.c.in -D NR=2 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x2-scalar.c &
+tools/xngen src/x32-packw/scalar.c.in -D NR=4 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x4-scalar.c &
 
 ################################### ARM NEON ##################################
 ### NR multiple of 4
-tools/xngen src/x32-packw/neon.c.in -D NR=8  -D KR=4 -o src/x32-packw/gen/x32-packw-x8-neon.c &
-tools/xngen src/x32-packw/neon.c.in -D NR=12 -D KR=4 -o src/x32-packw/gen/x32-packw-x12-neon.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=8  -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8-neon.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=12 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x12-neon.c &
 
 ### NR2 micro-kernels
-tools/xngen src/x32-packw/NR2-neon.c.in -D NR=2 -D KR=2 -o src/x32-packw/gen/x32-packw-x2-neon.c &
+tools/xngen src/x32-packw/NR2-neon.c.in -D NR=2 -D KUNROLL=2 -o src/x32-packw/gen/x32-packw-x2-neon.c &
 
 ################################## Unit tests #################################
 tools/generate-packw-test.py --spec test/x32-packw.yaml --output test/x32-packw.cc &
