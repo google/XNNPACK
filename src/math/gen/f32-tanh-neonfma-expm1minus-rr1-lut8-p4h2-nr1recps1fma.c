@@ -22,7 +22,7 @@
 // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_math_f32_tanh__neon_expm1minus_rr1_lut8_p4h3_nr2recps(
+void xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h2_nr1recps1fma(
     size_t n,
     const float* input,
     float* output)
@@ -38,13 +38,13 @@ void xnn_math_f32_tanh__neon_expm1minus_rr1_lut8_p4h3_nr2recps(
   const uint64x2_t vindex_mask = vreinterpretq_u64_u32(vmovq_n_u32(UINT32_C(0x7)));
   const float32x4_t vln2 = vmovq_n_f32(0x1.62E430p-1f);
   // Coefficients of polynomial approximation
-  //   exp(-2t) - 1 ~ t * (-2 + t * (c2 + t * (c3 + t * c4)))
+  //   exp(-2t) - 1 ~ -2 * (t + t * (t * (c2 + t * (c3 + t * c4))))
   // on [-log(2)/32, log(2)/32]
-  const float32x4_t vc4 = vmovq_n_f32(0x1.5558ECp-1f);
-  const float32x4_t vc3 = vmovq_n_f32(-0x1.555C20p+0f);
-  const float32x4_t vc2 = vmovq_n_f32(0x1.000000p+1f);
-  const float32x4_t vtwo = vmovq_n_f32(2.0f);
+  const float32x4_t vc4 = vmovq_n_f32(-0x1.5558ECp-2f);
+  const float32x4_t vc3 = vmovq_n_f32(0x1.555C20p-1f);
+  const float32x4_t vc2 = vmovq_n_f32(-0x1.000000p+0f);
   const float32x4_t vone = vmovq_n_f32(1.0f);
+  const float32x4_t vtwo = vmovq_n_f32(2.0f);
   // Mask for the sign bit.
   const uint32x4_t vsign_mask = vmovq_n_u32(UINT32_C(0x80000000));
 
@@ -72,7 +72,7 @@ void xnn_math_f32_tanh__neon_expm1minus_rr1_lut8_p4h3_nr2recps(
     // (|-z / log(2)| <= 2**18, i.e. |z| <= 0x1.62E43p+17 = 181704.375), but that is acceptable, because inputs x
     // outside of [-9.010913, 9.010913] (i.e. z outsize [0, 9.010913]) saturate tanhf(x).
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
-    float32x4_t vn = vmlaq_f32(vmagic_bias, vz, vminus_log2e);
+    float32x4_t vn = vfmaq_f32(vmagic_bias, vz, vminus_log2e);
 
     // Create a floating-point number s (scale) such that s := 2**(2n) for valid inputs, i.e. 0 <= z <= 9.010913. As
     // n has 4 fractional bits, we split s == 2**(2n) = 2**int(2n) * 2**frac(2n). We create s in two steps:
@@ -102,34 +102,35 @@ void xnn_math_f32_tanh__neon_expm1minus_rr1_lut8_p4h3_nr2recps(
     vn = vsubq_f32(vn, vmagic_bias);
 
     // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
-    const float32x4_t vt = vmlaq_f32(vz, vn, vln2);
+    const float32x4_t vt = vfmaq_f32(vz, vn, vln2);
 
     // Compute degree-4 polynomial approximation for exp(-2t) - 1 on [-log(2)/32, log(2)/32].
-    //   P(t) = t * (-2 + t * (c2 + t * (c3 + t * c4)))
-    //        = t * (-p)
-    float32x4_t vp = vmlaq_f32(vc3, vc4, vt);
-    vp = vmlaq_f32(vc2, vp, vt);
-    vp = vmlsq_f32(vtwo, vp, vt);
+    //   P(t) = -2 * (t + t * (t * (c2 + t * (c3 + t * c4))))
+    //        = -2 * (t + t * p)
+    float32x4_t vp = vfmaq_f32(vc3, vc4, vt);
+    vp = vfmaq_f32(vc2, vp, vt);
+    vp = vmulq_f32(vp, vt);
 
     // Reconstruct the exp(-2z) - 1 value:
-    //   exp(-2z) - 1 = s * (t * (-2 + t * (c2 + t * (c3 + t * c4))) + 1) - 1
-    //                = s * t * (-p) + (s - 1)
-    //                = (s - 1) - (t * s) * p
+    //   exp(-2z) - 1 = s * (-2 * (t + t * (t * (c2 + t * (c3 + t * c4)))) + 1) - 1
+    //                = s * (-2 * (t + t * p) + 1) - 1
+    //                = (s - 1) - 2 * ((t * s) + (t * s) * p)
     const float32x4_t vts = vmulq_f32(vt, vs);
     const float32x4_t vsmo = vsubq_f32(vs, vone);
-    const float32x4_t vemo = vmlsq_f32(vsmo, vp, vts);
+    vp = vfmaq_f32(vts, vp, vts);
+    const float32x4_t vemo = vfmsq_f32(vsmo, vp, vtwo);
 
     // Denominator of the tanh fraction: exp(-2z) + 1 = expm1(-2z) + 2
     const float32x4_t vepo = vaddq_f32(vemo, vtwo);
 
-    // Use Newton-Raphson method (2 iterations) to compute reciprocal of denominator.
+    // Use Newton-Raphson method (1 iteration) to compute reciprocal of denominator.
     // Note: 2 < exp(-2z) + 1 <= 3, because z <= 0 and 0 < exp(2z) <= 1.
     // Thus the reciprocal of the denominator never overflows.
     float32x4_t vrepo = vrecpeq_f32(vepo);
     float32x4_t verepo = vrecpsq_f32(vrepo, vepo);
     vrepo = vmulq_f32(vrepo, verepo);
-    verepo = vrecpsq_f32(vrepo, vepo);
-    vrepo = vmulq_f32(vrepo, verepo);
+    verepo = vfmsq_f32(vone, vrepo, vepo);
+    vrepo = vfmaq_f32(vrepo, vrepo, verepo);
 
     // Reconstruct y = expm1(-2z) / (expm1(-2z) + 2)
     float32x4_t vy = vmulq_f32(vemo, vrepo);
