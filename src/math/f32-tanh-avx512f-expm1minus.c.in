@@ -5,10 +5,10 @@
 
 $import math
 $assert RR == 1
-$assert LOG2LUT in [0, 2, 3, 4, 5, 6]
+$assert LOG2LUT in [0, 2, 3]
 $assert P == H + 1 or P == H + 2
 $assert DIV in ["DIV", "NR1", "NR1ADJ"]
-$assert not PERM or LOG2LUT == 2
+$assert not PERM or LOG2LUT in [2, 3]
 $LUT = 1 << LOG2LUT
 #include <assert.h>
 #include <stddef.h>
@@ -31,13 +31,7 @@ $if LOG2LUT == 0:
 $elif LOG2LUT == 2:
   $COEFFS = {4: ["0x1.000002p+1", "-0x1.557082p+0", "0x1.554F9Ap-1"]}[P]
 $elif LOG2LUT == 3:
-  $COEFFS = {3: ["0x1.0007ACp+1", "-0x1.555862p+0"], 4: ["0x1.000000p+1", "-0x1.555C20p+0", "0x1.5558ECp-1"]}[P]
-$elif LOG2LUT == 4:
-  $COEFFS = {3: ["0x1.0001ECp+1", "-0x1.55561Cp+0"], 4: ["0x1.000000p+1", "-0x1.555708p+0", "0x1.55563Ap-1"]}[P]
-$elif LOG2LUT == 5:
-  $COEFFS = {3: ["0x1.00007Ap+1", "-0x1.555582p+0"]}[P]
-$elif LOG2LUT == 6:
-  $COEFFS = {3: ["0x1.00001Ep+1", "-0x1.55555Ep+0"]}[P]
+  $COEFFS = {4: ["0x1.000000p+1", "-0x1.555C20p+0", "0x1.5558ECp-1"]}[P]
 $POLYNOMIAL = "c%d" % P
 $for i in reversed(range(len(COEFFS)-1)):
 $  POLYNOMIAL = "(c%d + t * %s)" % (i+2, POLYNOMIAL)
@@ -69,12 +63,18 @@ void xnn_math_f32_tanh__avx512f_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${
     const __m512 vmagic_bias = _mm512_set1_ps(0x1.800000p+${22-LOG2LUT}f);
   $if LOG2LUT != 0:
     $if PERM:
-      // Table of exp2(k / 4) values decremented (as integer) by (k << 21), k = 0..3
-      const __m512 vtable = _mm512_set_ps(
-        0x1.EE89FAp-1f, 0x1.EA09E6p-1f, 0x1.F06FE0p-1f, 0x1.000000p+0f,
-        0x1.EE89FAp-1f, 0x1.EA09E6p-1f, 0x1.F06FE0p-1f, 0x1.000000p+0f,
-        0x1.EE89FAp-1f, 0x1.EA09E6p-1f, 0x1.F06FE0p-1f, 0x1.000000p+0f,
-        0x1.EE89FAp-1f, 0x1.EA09E6p-1f, 0x1.F06FE0p-1f, 0x1.000000p+0f);
+      $if LOG2LUT == 2:
+        // Table of exp2(k / 4) values decremented (as integer) by (k << 21), k = 0..3
+        const __m512 vtable = _mm512_set_ps(
+          0x1.EE89FAp-1f, 0x1.EA09E6p-1f, 0x1.F06FE0p-1f, 0x1.000000p+0f,
+          0x1.EE89FAp-1f, 0x1.EA09E6p-1f, 0x1.F06FE0p-1f, 0x1.000000p+0f,
+          0x1.EE89FAp-1f, 0x1.EA09E6p-1f, 0x1.F06FE0p-1f, 0x1.000000p+0f,
+          0x1.EE89FAp-1f, 0x1.EA09E6p-1f, 0x1.F06FE0p-1f, 0x1.000000p+0f);
+      $elif LOG2LUT == 3:
+        // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
+        const __m512i vtable = _mm512_set_epi32(
+          0x3F7AC0C7, 0x3F7744FD, 0x3F75672A, 0x3F7504F3, 0x3F75FED7, 0x3F7837F0, 0x3F7B95C2, 0x3F800000,
+          0x3F7AC0C7, 0x3F7744FD, 0x3F75672A, 0x3F7504F3, 0x3F75FED7, 0x3F7837F0, 0x3F7B95C2, 0x3F800000);
     $else:
       // Mask for the lowest ${LOG2LUT} bits
       const __m512i vindex_mask = _mm512_set1_epi32(0x${"%X" % (LUT-1)});
@@ -143,10 +143,10 @@ void xnn_math_f32_tanh__avx512f_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${
         $if LOG2LUT == 2:
           const __m512i vl = _mm512_castps_si512(_mm512_permutevar_ps(vtable, _mm512_castps_si512(vn)));
         $elif LOG2LUT == 3:
-          const __m512i vl = _mm512_permutevar8x32_epi32(vtable, _mm512_castps_si512(vn));
+          const __m512i vl = _mm512_permutexvar_epi32(_mm512_castps_si512(vn), vtable);
       $else:
         const __m512i vidx = _mm512_and_si512(_mm512_castps_si512(vn), vindex_mask);
-        const __m512i vl = _mm512_i32gather_epi32((const int*) xnn_table_exp2minus_k_over_${LUT}, vidx, sizeof(uint32_t));
+        const __m512i vl = _mm512_i32gather_epi32(vidx, xnn_table_exp2minus_k_over_${LUT}, sizeof(uint32_t));
 
       // Adjust exponent of the value l fetched from the table to get the final s value.
       const __m512 vs = _mm512_castsi512_ps(_mm512_add_epi32(vl, ve));

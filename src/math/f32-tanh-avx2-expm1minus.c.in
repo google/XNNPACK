@@ -5,7 +5,7 @@
 
 $import math
 $assert RR == 1
-$assert LOG2LUT in [0, 2, 3, 4, 5, 6]
+$assert LOG2LUT in [0, 2, 3]
 $assert P == H + 1 or P == H + 2
 $assert DIV in ["DIV", "NR1", "NR1ADJ"]
 $assert SAT in ["MINMAX", "SELECT"]
@@ -32,13 +32,7 @@ $if LOG2LUT == 0:
 $elif LOG2LUT == 2:
   $COEFFS = {4: ["0x1.000002p+1", "0x1.557082p+0", "0x1.554F9Ap-1"]}[P]
 $elif LOG2LUT == 3:
-  $COEFFS = {3: ["0x1.0007ACp+1", "0x1.555862p+0"], 4: ["0x1.000000p+1", "0x1.555C20p+0", "0x1.5558ECp-1"]}[P]
-$elif LOG2LUT == 4:
-  $COEFFS = {3: ["0x1.0001ECp+1", "0x1.55561Cp+0"], 4: ["0x1.000000p+1", "0x1.555708p+0", "0x1.55563Ap-1"]}[P]
-$elif LOG2LUT == 5:
-  $COEFFS = {3: ["0x1.00007Ap+1", "0x1.555582p+0"]}[P]
-$elif LOG2LUT == 6:
-  $COEFFS = {3: ["0x1.00001Ep+1", "0x1.55555Ep+0"]}[P]
+  $COEFFS = {4: ["0x1.000000p+1", "0x1.555C20p+0", "0x1.5558ECp-1"]}[P]
 $POLYNOMIAL = "c%d" % P
 $for i in reversed(range(len(COEFFS)-1)):
 $  POLYNOMIAL = "(c%d + t * %s)" % (i+2, POLYNOMIAL)
