@@ -240,6 +240,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/floor.c
   src/subgraph/fully-connected.c
   src/subgraph/global-average-pooling.c
+  src/subgraph/global-sum-pooling.c
   src/subgraph/hardswish.c
   src/subgraph/leaky-relu.c
   src/subgraph/max-pooling-2d.c
@@ -1135,6 +1136,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(global-average-pooling-ncw-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME global-average-pooling-ncw-test COMMAND global-average-pooling-ncw-test)
 
+    ADD_EXECUTABLE(global-sum-pooling-nwc-test test/global-sum-pooling-nwc.cc)
+    TARGET_INCLUDE_DIRECTORIES(global-sum-pooling-nwc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(global-sum-pooling-nwc-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME global-sum-pooling-nwc-test COMMAND global-sum-pooling-nwc-test)
+
     ADD_EXECUTABLE(hardswish-nc-test test/hardswish-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(hardswish-nc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(hardswish-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
@@ -1474,6 +1480,16 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(global-average-pooling-2d-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(global-average-pooling-2d-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
     ADD_TEST(NAME global-average-pooling-2d-test COMMAND global-average-pooling-2d-test)
+
+    ADD_EXECUTABLE(global-sum-pooling-1d-test test/global-sum-pooling-1d.cc)
+    TARGET_INCLUDE_DIRECTORIES(global-sum-pooling-1d-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(global-sum-pooling-1d-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+    ADD_TEST(NAME global-sum-pooling-1d-test COMMAND global-sum-pooling-1d-test)
+
+    ADD_EXECUTABLE(global-sum-pooling-2d-test test/global-sum-pooling-2d.cc)
+    TARGET_INCLUDE_DIRECTORIES(global-sum-pooling-2d-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(global-sum-pooling-2d-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+    ADD_TEST(NAME global-sum-pooling-2d-test COMMAND global-sum-pooling-2d-test)
 
     ADD_EXECUTABLE(hardswish-test test/hardswish.cc)
     TARGET_INCLUDE_DIRECTORIES(hardswish-test PRIVATE src test)
