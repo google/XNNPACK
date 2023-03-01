@@ -9749,6 +9749,16 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "global_sum_pooling_nwc_test",
+    srcs = [
+        "test/global-sum-pooling-nwc.cc",
+        "test/global-sum-pooling-operator-tester.h",
+    ],
+    shard_count = 10,
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "hardswish_nc_test",
     srcs = [
         "test/hardswish-nc.cc",

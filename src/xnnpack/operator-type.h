@@ -86,6 +86,8 @@ enum xnn_operator_type {
   xnn_operator_type_global_average_pooling_nwc_f32,
   xnn_operator_type_global_average_pooling_nwc_qs8,
   xnn_operator_type_global_average_pooling_nwc_qu8,
+  xnn_operator_type_global_sum_pooling_nwc_f16,
+  xnn_operator_type_global_sum_pooling_nwc_f32,
   xnn_operator_type_hardswish_nc_f16,
   xnn_operator_type_hardswish_nc_f32,
   xnn_operator_type_leaky_relu_nc_f16,

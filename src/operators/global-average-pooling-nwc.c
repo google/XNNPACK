@@ -335,6 +335,100 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f32(
     global_average_pooling_op_out);
 }
 
+enum xnn_status xnn_create_global_sum_pooling_nwc_f16(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* global_sum_pooling_op_out)
+{
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_global_sum_pooling_nwc_f16));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_global_sum_pooling_nwc_f16));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_min)) >= fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_max))) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_global_sum_pooling_nwc_f16),
+      fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_min)),
+      fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_max)));
+    return xnn_status_invalid_parameter;
+  }
+
+  union xnn_f16_scaleminmax_params params;
+  if (xnn_params.f16.gavgpool.init.f16 != NULL) {
+    xnn_params.f16.gavgpool.init.f16(
+      &params,
+      /*scale=*/UINT16_C(0x3C00) /* 1.0h */,
+      fp16_ieee_from_fp32_value(output_min),
+      fp16_ieee_from_fp32_value(output_max));
+  }
+  return create_global_average_pooling_nwc(
+    channels, input_stride, output_stride, flags,
+    1 /* log2(sizeof(uint16_t)) */,
+    offsetof(struct xnn_operator, params.f16_scaleminmax),
+    &params, sizeof(params),
+    XNN_INIT_FLAG_F16,
+    xnn_operator_type_global_sum_pooling_nwc_f16,
+    global_sum_pooling_op_out);
+}
+
+enum xnn_status xnn_create_global_sum_pooling_nwc_f32(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* global_sum_pooling_op_out)
+{
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_global_sum_pooling_nwc_f32));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_global_sum_pooling_nwc_f32));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_min >= output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_global_sum_pooling_nwc_f32), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  union xnn_f32_scaleminmax_params params;
+  if (xnn_params.f32.gavgpool.init.f32 != NULL) {
+    xnn_params.f32.gavgpool.init.f32(&params, /*scale=*/1.0f, output_min, output_max);
+  }
+  return create_global_average_pooling_nwc(
+    channels, input_stride, output_stride, flags,
+    2 /* log2(sizeof(float)) */,
+    offsetof(struct xnn_operator, params.f32_scaleminmax),
+    &params, sizeof(params),
+    XNN_INIT_FLAG_F32,
+    xnn_operator_type_global_sum_pooling_nwc_f32,
+    global_sum_pooling_op_out);
+}
+
 static enum xnn_status setup_global_average_pooling_nwc(
     xnn_operator_t global_average_pooling_op,
     size_t batch_size,
@@ -386,7 +480,9 @@ static enum xnn_status setup_global_average_pooling_nwc(
   global_average_pooling_op->input = input;
   global_average_pooling_op->output = output;
 
-  update_params(global_average_pooling_op, width);
+  if (update_params != NULL) {
+    update_params(global_average_pooling_op, width);
+  }
 
   assert(gavgpool->row_tile != 0);
 
@@ -537,5 +633,49 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_f32(
     &global_average_pooling_op->params.f32_scaleminmax,
     sizeof(global_average_pooling_op->params.f32_scaleminmax),
     update_params_f32,
+    threadpool);
+}
+
+enum xnn_status xnn_setup_global_sum_pooling_nwc_f16(
+    xnn_operator_t global_sum_pooling_op,
+    size_t batch_size,
+    size_t width,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_global_average_pooling_nwc(
+    global_sum_pooling_op,
+    batch_size, width,
+    input, output,
+    1 /* log2(sizeof(uint16_t)) */,
+    &xnn_params.f16.gavgpool,
+    XNN_INIT_FLAG_F16,
+    xnn_operator_type_global_sum_pooling_nwc_f16,
+    &global_sum_pooling_op->params.f16_scaleminmax,
+    sizeof(global_sum_pooling_op->params.f16_scaleminmax),
+    /*update_params=*/NULL,
+    threadpool);
+}
+
+enum xnn_status xnn_setup_global_sum_pooling_nwc_f32(
+    xnn_operator_t global_sum_pooling_op,
+    size_t batch_size,
+    size_t width,
+    const float* input,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  return setup_global_average_pooling_nwc(
+    global_sum_pooling_op,
+    batch_size, width,
+    input, output,
+    2 /* log2(sizeof(float)) */,
+    &xnn_params.f32.gavgpool,
+    XNN_INIT_FLAG_F32,
+    xnn_operator_type_global_sum_pooling_nwc_f32,
+    &global_sum_pooling_op->params.f32_scaleminmax,
+    sizeof(global_sum_pooling_op->params.f32_scaleminmax),
+    /*update_params=*/NULL,
     threadpool);
 }

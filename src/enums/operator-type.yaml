@@ -143,6 +143,10 @@
   string: "Global Average Pooling (NWC, QS8)"
 - name: xnn_operator_type_global_average_pooling_nwc_qu8
   string: "Global Average Pooling (NWC, QU8)"
+- name: xnn_operator_type_global_sum_pooling_nwc_f16
+  string: "Global Sum Pooling (NWC, F16)"
+- name: xnn_operator_type_global_sum_pooling_nwc_f32
+  string: "Global Sum Pooling (NWC, F32)"
 - name: xnn_operator_type_hardswish_nc_f16
   string: "HardSwish (NC, F16)"
 - name: xnn_operator_type_hardswish_nc_f32
