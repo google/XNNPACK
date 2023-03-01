@@ -1289,6 +1289,12 @@ ALL_F16C_MICROKERNEL_SRCS = [
 ]
 
 ALL_FMA_MICROKERNEL_SRCS = [
+    "src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-lut8-p4h3-div-x1.c",
+    "src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-lut8-p4h3-div-x2.c",
+    "src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-lut8-p4h3-div-x4.c",
+    "src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-p6h5-div-x1.c",
+    "src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-p6h5-div-x2.c",
+    "src/f32-vtanh/gen/f32-vtanh-fma-expm1minus-rr1-p6h5-div-x4.c",
     "src/math/gen/f32-tanh-fma-expm1minus-rr1-lut4-p4h2-div.c",
     "src/math/gen/f32-tanh-fma-expm1minus-rr1-lut4-p4h2-rcp.c",
     "src/math/gen/f32-tanh-fma-expm1minus-rr1-lut4-p4h3-div.c",
@@ -4162,6 +4168,12 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/f32-vsqrt/gen/f32-vsqrt-scalar-sqrt-x1.c",
     "src/f32-vsqrt/gen/f32-vsqrt-scalar-sqrt-x2.c",
     "src/f32-vsqrt/gen/f32-vsqrt-scalar-sqrt-x4.c",
+    "src/f32-vtanh/gen/f32-vtanh-scalar-expm1minus-rr1-lut8-p4h3-div-x1.c",
+    "src/f32-vtanh/gen/f32-vtanh-scalar-expm1minus-rr1-lut8-p4h3-div-x2.c",
+    "src/f32-vtanh/gen/f32-vtanh-scalar-expm1minus-rr1-lut8-p4h3-div-x4.c",
+    "src/f32-vtanh/gen/f32-vtanh-scalar-expm1minus-rr1-p6h5-div-x1.c",
+    "src/f32-vtanh/gen/f32-vtanh-scalar-expm1minus-rr1-p6h5-div-x2.c",
+    "src/f32-vtanh/gen/f32-vtanh-scalar-expm1minus-rr1-p6h5-div-x4.c",
     "src/f32-vunary/gen/f32-vabs-scalar-x1.c",
     "src/f32-vunary/gen/f32-vabs-scalar-x2.c",
     "src/f32-vunary/gen/f32-vabs-scalar-x4.c",

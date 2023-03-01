@@ -937,6 +937,43 @@ class VUnaryMicrokernelTester {
     }
   }
 
+  void Test(xnn_f32_vtanh_ukernel_fn vtanh, xnn_init_f32_tanh_params_fn init_params) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
+
+    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    std::vector<double> y_ref(batch_size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      if (inplace()) {
+        std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
+      } else {
+        std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
+        std::fill(y.begin(), y.end(), nanf(""));
+      }
+      const float* x_data = inplace() ? y.data() : x.data();
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        y_ref[i] = std::tanh(double(x_data[i]));
+      }
+
+      // Prepare parameters.
+      union xnn_f32_tanh_params params;
+      init_params(&params);
+
+      // Call optimized micro-kernel.
+      vtanh(batch_size() * sizeof(float), x_data, y.data(), &params);
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        EXPECT_NEAR(y[i], y_ref[i], std::max(5.0e-6, std::abs(y_ref[i]) * 1.0e-5))
+          << "at " << i << " / " << batch_size() << ", x[" << i << "] = " << x[i];
+      }
+    }
+  }
+
   void Test(xnn_f16_vclamp_ukernel_fn vclamp, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());

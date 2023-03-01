@@ -2418,6 +2418,37 @@ union xnn_f32_sqrt_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
+
+// TanH (Hyperbolic Tangent): used by VTANH microkernels.
+
+union xnn_f32_tanh_params {
+  struct {
+    float minus_log2e;
+    float magic_bias;
+    float ln2;
+    float c6;
+    float c5;
+    float c4;
+    float c3;
+    float c2;
+    float minus_two;
+    float one;
+    float sat_cutoff;
+  } scalar_expm1minus_rr1_p6h5;
+  struct {
+    float minus_log2e;
+    float magic_bias;
+    float ln2;
+    float c4;
+    float c3;
+    float c2;
+    float minus_two;
+    float one;
+    float sat_cutoff;
+  } scalar_expm1minus_rr1_lut8_p4h3;
+};
+
+
 // CHW: used by CONV/DWCONV microkernels in CHW layout with Min+Max parameters.
 
 union xnn_f16_chw_params {

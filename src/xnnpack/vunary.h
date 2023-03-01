@@ -1150,6 +1150,30 @@ DECLARE_F32_VSQR_UKERNEL_FUNCTION(xnn_f32_vsqr_ukernel__scalar_x2)
 DECLARE_F32_VSQR_UKERNEL_FUNCTION(xnn_f32_vsqr_ukernel__scalar_x4)
 
 
+#define DECLARE_F32_VTANH_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                        \
+      size_t n,                                     \
+      const float* x,                               \
+      float* y,                                     \
+      const union xnn_f32_tanh_params* params);
+
+DECLARE_F32_VTANH_UKERNEL_FUNCTION(xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3_div_x1)
+DECLARE_F32_VTANH_UKERNEL_FUNCTION(xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3_div_x2)
+DECLARE_F32_VTANH_UKERNEL_FUNCTION(xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3_div_x4)
+
+DECLARE_F32_VTANH_UKERNEL_FUNCTION(xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_p6h5_div_x1)
+DECLARE_F32_VTANH_UKERNEL_FUNCTION(xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_p6h5_div_x2)
+DECLARE_F32_VTANH_UKERNEL_FUNCTION(xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_p6h5_div_x4)
+
+DECLARE_F32_VTANH_UKERNEL_FUNCTION(xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3_div_x1)
+DECLARE_F32_VTANH_UKERNEL_FUNCTION(xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3_div_x2)
+DECLARE_F32_VTANH_UKERNEL_FUNCTION(xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3_div_x4)
+
+DECLARE_F32_VTANH_UKERNEL_FUNCTION(xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_p6h5_div_x1)
+DECLARE_F32_VTANH_UKERNEL_FUNCTION(xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_p6h5_div_x2)
+DECLARE_F32_VTANH_UKERNEL_FUNCTION(xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_p6h5_div_x4)
+
+
 #define DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                        \
       size_t n,                                     \

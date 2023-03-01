@@ -2360,6 +2360,38 @@ size_t xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+size_t xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params(
+  union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->scalar_expm1minus_rr1_lut8_p4h3.minus_log2e = -0x1.715476p+0f;
+  params->scalar_expm1minus_rr1_lut8_p4h3.magic_bias = 0x1.800000p+19f;
+  params->scalar_expm1minus_rr1_lut8_p4h3.ln2 = 0x1.62E430p-1f;
+  params->scalar_expm1minus_rr1_lut8_p4h3.c4 = 0x1.5558ECp-1f;
+  params->scalar_expm1minus_rr1_lut8_p4h3.c3 = -0x1.555C20p+0f;
+  params->scalar_expm1minus_rr1_lut8_p4h3.c2 = 0x1.000000p+1f;
+  params->scalar_expm1minus_rr1_lut8_p4h3.minus_two = -2.0f;
+  params->scalar_expm1minus_rr1_lut8_p4h3.one = 1.0f;
+  params->scalar_expm1minus_rr1_lut8_p4h3.sat_cutoff = 0x1.205968p+3f;
+  return sizeof(params->scalar_expm1minus_rr1_lut8_p4h3);
+}
+
+size_t xnn_init_f32_tanh_scalar_expm1minus_rr1_p6h5_params(
+  union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)])
+{
+  params->scalar_expm1minus_rr1_p6h5.minus_log2e = -0x1.715476p+0f;
+  params->scalar_expm1minus_rr1_p6h5.magic_bias = 0x1.8000FEp+22f;
+  params->scalar_expm1minus_rr1_p6h5.ln2 = 0x1.62E430p-1f;
+  params->scalar_expm1minus_rr1_p6h5.c6 = 0x1.6B7338p-4f;
+  params->scalar_expm1minus_rr1_p6h5.c5 = -0x1.12278Ep-2f;
+  params->scalar_expm1minus_rr1_p6h5.c4 = 0x1.555716p-1f;
+  params->scalar_expm1minus_rr1_p6h5.c3 = -0x1.5554B0p+0f;
+  params->scalar_expm1minus_rr1_p6h5.c2 = 0x1.FFFFFEp+0f;
+  params->scalar_expm1minus_rr1_p6h5.minus_two = -2.0f;
+  params->scalar_expm1minus_rr1_p6h5.one = 1.0f;
+  params->scalar_expm1minus_rr1_p6h5.sat_cutoff = 0x1.205968p+3f;
+  return sizeof(params->scalar_expm1minus_rr1_p6h5);
+}
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f16_abs_sse_params(
   union xnn_f16_abs_params params[XNN_MIN_ELEMENTS(1)])

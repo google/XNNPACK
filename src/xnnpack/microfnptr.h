@@ -1456,6 +1456,14 @@ typedef void (*xnn_u64_u32_vsqrtshift_ukernel_fn)(
     uint32_t* output,
     uint32_t shift);
 
+// VTANH: Vector TANH elementwise
+
+typedef void (*xnn_f32_vtanh_ukernel_fn)(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_tanh_params* params);
+
 // LUT: vector LookUp Table elementwise
 
 typedef void (*xnn_x8_lut_ukernel_fn)(
@@ -2132,6 +2140,9 @@ typedef size_t (*xnn_init_f16_sqrt_params_fn)(
 
 typedef size_t (*xnn_init_f32_sqrt_params_fn)(
   union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef size_t (*xnn_init_f32_tanh_params_fn)(
+  union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_init_qc8_scale_params_fn)(
   size_t channels,
