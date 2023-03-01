@@ -23,10 +23,13 @@
 #include <xnnpack/math-stubs.h>
 
 
+constexpr uint16_t kNumSubnormalValues = 1024;
+
 struct ComputeErrorContext {
   const uint16_t* input;
   const uint16_t* output;
   float* error;
+  uint16_t num_flush_to_zero_values;
 };
 
 static void ComputeError(
@@ -40,18 +43,21 @@ static void ComputeError(
   for (size_t i = start; i < start + range; i++) {
     uint16_t input_val = input[i];
     uint16_t output_val = output[i];
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-    if ((input_val & UINT16_C(0x7FFF)) < UINT16_C(0x0400)) {
-      // Replace denormal inputs with signed zeroes
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64 || XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const uint16_t num_flush_to_zero_values = context->num_flush_to_zero_values;
+    const uint16_t abs_input_val = input_val & UINT16_C(0x7FFF);
+    if (abs_input_val < std::min<uint16_t>(num_flush_to_zero_values, kNumSubnormalValues)) {
+      // Replace subnormal inputs with signed zeroes
       input_val = input_val & UINT16_C(0x8000);
-    } else if ((input_val & UINT16_C(0x7FFF)) == UINT16_C(0x0400)) {
-      // For the smallest normalized floating-point number the implementation is likely to produce 0
+    } else if (abs_input_val < num_flush_to_zero_values) {
+      // For the smallest normalized floating-point numbers the implementation is likely to produce 0
       // instead of the correct result (same as input) due to denormals in intermediate computations.
-      if ((output_val & UINT16_C(0x7FFF)) == 0) {
+      const uint16_t abs_output_val = output_val & UINT16_C(0x7FFF);
+      if (abs_output_val == 0) {
         output_val = input_val;
       }
     }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 || XNN_ARCH_X86 || XNN_ARCH_X86_64
 
     const float output_ref = std::tanh(fp16_ieee_to_fp32_value(input_val));
     const float abs_error = std::abs(output_ref - fp16_ieee_to_fp32_value(output_val));
@@ -64,6 +70,7 @@ static void ComputeError(
 static void TanhError(
   benchmark::State& state,
   xnn_f16_unary_math_fn tanh,
+  uint16_t num_flush_to_zero_values,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check != nullptr && !isa_check(state)) {
@@ -90,6 +97,7 @@ static void TanhError(
   context.input = x.data();
   context.output = y.data();
   context.error = ulp_error.data();
+  context.num_flush_to_zero_values = num_flush_to_zero_values;
   for (auto _ : state) {
     for (uint16_t n = min_input; int16_t(n) < 0; n -= block_size) {
       for (uint16_t i = 0; i < block_size; i++) {
@@ -143,11 +151,13 @@ static void TanhError(
 #if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(TanhError, aarch64_neonfp16arith_expm1minus_rr1_p3h1_div,
                     xnn_math_f16_tanh__aarch64_neonfp16arith_expm1minus_rr1_p3h1_div,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues + 1,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, aarch64_neonfp16arith_expm1minus_rr1_p3h2_div,
                     xnn_math_f16_tanh__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
@@ -156,61 +166,73 @@ static void TanhError(
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_nr1fma,
                     xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1fma,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues + 1,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_nr1fmaadj,
                     xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1fmaadj,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues + 1,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_nr1recps,
                     xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1recps,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues + 1,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_nr1recpsadj,
                     xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1recpsadj,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues + 1,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_recpe,
                     xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_recpe,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues + 3,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_recpeadj,
                     xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_recpeadj,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues + 3,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_nr1fma,
                     xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1fma,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_nr1fmaadj,
                     xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1fmaadj,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_nr1recps,
                     xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1recps,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_nr1recpsadj,
                     xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1recpsadj,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_recpe,
                     xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_recpe,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues + 3,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_recpeadj,
                     xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_recpeadj,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues + 3,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
@@ -219,28 +241,33 @@ static void TanhError(
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(TanhError, avx2_expm1minus_rr1_p3h2_div,
                     xnn_math_f16_tanh__avx2_expm1minus_rr1_p3h2_div,
+                    /*num_flush_to_zero_values=*/0,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, avx2_expm1minus_rr1_p3h2_rcp,
                     xnn_math_f16_tanh__avx2_expm1minus_rr1_p3h2_rcp,
+                    /*num_flush_to_zero_values=*/0,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
 
   BENCHMARK_CAPTURE(TanhError, fma3_p17h8t2,
                     xnn_math_f16_tanh__fma3_p17h8t2,
+                    /*num_flush_to_zero_values=*/0,
                     benchmark::utils::CheckFMA3)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, fma3_p19h9t2,
                     xnn_math_f16_tanh__fma3_p19h9t2,
+                    /*num_flush_to_zero_values=*/0,
                     benchmark::utils::CheckFMA3)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
 
   BENCHMARK_CAPTURE(TanhError, f16c_p19h9t2,
                     xnn_math_f16_tanh__f16c_p19h9t2,
+                    /*num_flush_to_zero_values=*/0,
                     benchmark::utils::CheckF16C)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
