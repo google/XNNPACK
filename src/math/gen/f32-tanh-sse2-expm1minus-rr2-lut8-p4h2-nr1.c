@@ -48,7 +48,7 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h2_nr1(
   const __m128 vc3 = _mm_set1_ps(0x1.555C20p-1f);
   const __m128 vc2 = _mm_set1_ps(0x1.000000p+0f);
   const __m128 vminus_one = _mm_set1_ps(-1.0f);
-  const __m128 vtwo = _mm_set1_ps(2.0f);
+  const __m128 vminus_two = _mm_set1_ps(-2.0f);
 
   for (; n != 0; n -= sizeof(__m128)) {
     const __m128 vx = _mm_load_ps(input);
@@ -142,16 +142,16 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h2_nr1(
     const __m128 vts = _mm_mul_ps(vt, vs);
     const __m128 vsmo = _mm_add_ps(vs, vminus_one);
     vp = _mm_add_ps(_mm_mul_ps(vp, vts), vts);
-    const __m128 vemo = _mm_add_ps(_mm_mul_ps(vp, vtwo), vsmo);
+    const __m128 vemo = _mm_sub_ps(vsmo, _mm_mul_ps(vp, vminus_two));
 
     // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
-    const __m128 vepo = _mm_add_ps(vemo, vtwo);
+    const __m128 vepo = _mm_sub_ps(vminus_two, vemo);
 
     // Use Newton-Raphson method (1 iteration) to compute reciprocal of denominator.
     // Note: 2 < exp(2z) + 1 <= 3, because z <= 0 and 0 < exp(2z) <= 1.
     // Thus the reciprocal of the denominator never overflows.
     __m128 vrepo = _mm_rcp_ps(vepo);
-    vrepo = _mm_mul_ps(vrepo, _mm_sub_ps(vtwo, _mm_mul_ps(vrepo, vepo)));
+    vrepo = _mm_mul_ps(vrepo, _mm_add_ps(_mm_mul_ps(vrepo, vepo), vminus_two));
 
     // Reconstruct tanh(z) := expm1(2z) / (2 + expm1(2z))
     __m128 vy = _mm_mul_ps(vemo, vrepo);

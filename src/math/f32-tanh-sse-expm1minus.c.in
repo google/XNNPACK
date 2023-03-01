@@ -80,10 +80,7 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DIV
     const __m128 vc${2+i} = _mm_set1_ps(${COEFFS[i]}f);
   $if P != H + 1:
     const __m128 vminus_one = _mm_set1_ps(-1.0f);
-  $if DIV == "NR1":
-    const __m128 vtwo = _mm_set1_ps(2.0f);
-  $else:
-    const __m128 vminus_two = _mm_set1_ps(-2.0f);
+  const __m128 vminus_two = _mm_set1_ps(-2.0f);
   $if P == H + 1:
     const __m128 vminus_one = _mm_set1_ps(-1.0f);
 
@@ -192,10 +189,7 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DIV
     $for i in reversed(range(2, P - 1)):
       vp = _mm_add_ps(_mm_mul_ps(vp, vt), vc${i});
     $if P == H + 1:
-      $if DIV == "NR1":
-        vp = _mm_add_ps(_mm_mul_ps(vp, vt), vtwo);
-      $else:
-        vp = _mm_sub_ps(_mm_mul_ps(vp, vt), vminus_two);
+      vp = _mm_sub_ps(_mm_mul_ps(vp, vt), vminus_two);
     $else:
       vp = _mm_mul_ps(vp, vt);
 
@@ -212,21 +206,24 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DIV
     const __m128 vsmo = _mm_add_ps(vs, vminus_one);
     $if P == H + 1:
       const __m128 vemo = _mm_add_ps(_mm_mul_ps(vp, vts), vsmo);
-    $else:
-      vp = _mm_add_ps(_mm_mul_ps(vp, vts), vts);
-      $if DIV == "NR1":
-        const __m128 vemo = _mm_add_ps(_mm_mul_ps(vp, vtwo), vsmo);
-      $else:
-        const __m128 vemo = _mm_sub_ps(_mm_mul_ps(vp, vminus_two), vsmo);
 
-    // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
-    $if DIV == "NR1":
-      const __m128 vepo = _mm_add_ps(vemo, vtwo);
-    $else:
-      $if P == H + 1:
+      // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
+      $if DIV == "DIV":
         const __m128 vepo = _mm_sub_ps(vemo, vminus_two);
       $else:
+        const __m128 vepo = _mm_sub_ps(vminus_two, vemo);
+    $else:
+      vp = _mm_add_ps(_mm_mul_ps(vp, vts), vts);
+      $if DIV == "DIV":
+        const __m128 vemo = _mm_sub_ps(_mm_mul_ps(vp, vminus_two), vsmo);
+
+        // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
         const __m128 vepo = _mm_add_ps(vemo, vminus_two);
+      $else:
+        const __m128 vemo = _mm_sub_ps(vsmo, _mm_mul_ps(vp, vminus_two));
+
+        // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
+        const __m128 vepo = _mm_sub_ps(vminus_two, vemo);
 
     $if DIV == "DIV":
       // Reconstruct tanh(z) = expm1(2z) / (expm1(2z) + 2)
@@ -236,11 +233,9 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DIV
       // Note: 2 < exp(2z) + 1 <= 3, because z <= 0 and 0 < exp(2z) <= 1.
       // Thus the reciprocal of the denominator never overflows.
       __m128 vrepo = _mm_rcp_ps(vepo);
-      $if DIV == "NR1":
-        vrepo = _mm_mul_ps(vrepo, _mm_sub_ps(vtwo, _mm_mul_ps(vrepo, vepo)));
-      $else:
-        vrepo = _mm_mul_ps(vrepo, _mm_add_ps(_mm_mul_ps(vrepo, vepo), vminus_two));
-        vrepo = _mm_mul_ps(vrepo, _mm_sub_ps(vminus_two, _mm_mul_ps(vrepo, vepo)));
+      vrepo = _mm_mul_ps(vrepo, _mm_add_ps(_mm_mul_ps(vrepo, vepo), vminus_two));
+      $if DIV == "NR2":
+        vrepo = _mm_mul_ps(vrepo, _mm_sub_ps(_mm_mul_ps(vrepo, vepo), vminus_two));
 
       // Reconstruct tanh(z) := expm1(2z) / (2 + expm1(2z))
       __m128 vy = _mm_mul_ps(vemo, vrepo);
