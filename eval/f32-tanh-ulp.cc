@@ -399,26 +399,14 @@ static void TanhError(
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
 
-  BENCHMARK_CAPTURE(TanhError, avx_expm1minus_rr1_lut4_p4h2_perm_div,
-                    xnn_math_f32_tanh__avx_expm1minus_rr1_lut4_p4h2_perm_div,
+  BENCHMARK_CAPTURE(TanhError, avx_expm1minus_rr1_lut8_p4h3_div,
+                    xnn_math_f32_tanh__avx_expm1minus_rr1_lut8_p4h3_div,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckAVX)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, avx_expm1minus_rr1_lut4_p4h2_perm_nr1,
-                    xnn_math_f32_tanh__avx_expm1minus_rr1_lut4_p4h2_perm_nr1,
-                    /*num_flush_to_zero_values=*/kNumSubnormalValues + 1,
-                    benchmark::utils::CheckAVX)
-    ->Unit(benchmark::kMillisecond)
-    ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, avx_expm1minus_rr1_lut4_p4h2_perm_nr2,
-                    xnn_math_f32_tanh__avx_expm1minus_rr1_lut4_p4h2_perm_nr2,
-                    /*num_flush_to_zero_values=*/kNumSubnormalValues + 1,
-                    benchmark::utils::CheckAVX)
-    ->Unit(benchmark::kMillisecond)
-    ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, avx_expm1minus_rr1_lut4_p4h3_perm_div,
-                    xnn_math_f32_tanh__avx_expm1minus_rr1_lut4_p4h3_perm_div,
+  BENCHMARK_CAPTURE(TanhError, avx_expm1minus_rr1_lut4_p4h2_perm_div,
+                    xnn_math_f32_tanh__avx_expm1minus_rr1_lut4_p4h2_perm_div,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckAVX)
     ->Unit(benchmark::kMillisecond)
@@ -442,18 +430,28 @@ static void TanhError(
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
 
+  BENCHMARK_CAPTURE(TanhError, sse2_expm1minus_rr2_lut8_p4h2_nr1,
+                    xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h2_nr1,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues + 1)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, sse2_expm1minus_rr2_lut8_p4h2_nr2,
+                    xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h2_nr2,
+                    /*num_flush_to_zero_values=*/kNumSubnormalValues + 1)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, sse2_expm1minus_rr1_lut8_p4h3_div,
                     xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3_div,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, sse2_expm1minus_rr1_lut8_p4h3_nr1,
-                    xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3_nr1,
+  BENCHMARK_CAPTURE(TanhError, sse2_expm1minus_rr2_lut8_p4h3_nr1,
+                    xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h3_nr1,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues + 1)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, sse2_expm1minus_rr1_lut8_p4h3_nr2,
-                    xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3_nr2,
+  BENCHMARK_CAPTURE(TanhError, sse2_expm1minus_rr2_lut8_p4h3_nr2,
+                    xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h3_nr2,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues + 1)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);

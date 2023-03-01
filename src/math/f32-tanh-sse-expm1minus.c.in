@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 
 $import math
-$assert RR == 1
-$assert LOG2LUT in [0, 2, 3, 4, 5, 6]
+$assert RR == 1 or RR == 2
+$assert LOG2LUT in [0, 3]
 $assert P == H + 1 or P == H + 2
 $assert DIV in ["DIV", "NR1", "NR2"]
 $NR_ITER = {"NR1": 1, "NR2": 2, "DIV": 0}[DIV]
@@ -29,16 +29,10 @@ $if LOG2LUT != 0:
 
 $if LOG2LUT == 0:
   $COEFFS = {6: ["0x1.FFFFFEp+0", "0x1.5554B0p+0", "0x1.555716p-1", "0x1.12278Ep-2", "0x1.6B7338p-4"]}[P]
-$elif LOG2LUT == 2:
-  $COEFFS = {4: ["0x1.000002p+1", "0x1.557082p+0", "0x1.554F9Ap-1"]}[P]
+  $MINUS_LN2 = ("-0x1.62E420p-1", "-0x1.FDF474p-22")
 $elif LOG2LUT == 3:
-  $COEFFS = {3: ["0x1.0007ACp+1", "0x1.555862p+0"], 4: ["0x1.000000p+1", "0x1.555C20p+0", "0x1.5558ECp-1"]}[P]
-$elif LOG2LUT == 4:
-  $COEFFS = {3: ["0x1.0001ECp+1", "0x1.55561Cp+0"], 4: ["0x1.000000p+1", "0x1.555708p+0", "0x1.55563Ap-1"]}[P]
-$elif LOG2LUT == 5:
-  $COEFFS = {3: ["0x1.00007Ap+1", "0x1.555582p+0"]}[P]
-$elif LOG2LUT == 6:
-  $COEFFS = {3: ["0x1.00001Ep+1", "0x1.55555Ep+0"]}[P]
+  $COEFFS = {4: ["0x1.000000p+1", "0x1.555C20p+0", "0x1.5558ECp-1"]}[P]
+  $MINUS_LN2 = ("-0x1.62E400p-1", "-0x1.7F7D1Cp-20")
 $POLYNOMIAL = "c%d" % P
 $for i in reversed(range(P-2)):
 $  POLYNOMIAL = "(c%d + t * %s)" % (i+2, POLYNOMIAL)
@@ -70,7 +64,12 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DIV
   $if LOG2LUT != 0:
     // Mask for the lowest ${LOG2LUT} bits
     const __m128i vindex_mask = _mm_set1_epi32(0x${"%X" % (LUT-1)});
-  const __m128 vminus_ln2 = _mm_set1_ps(-0x1.62E430p-1f);
+  $if RR == 1:
+    const __m128 vminus_ln2 = _mm_set1_ps(-0x1.62E430p-1f);
+  $else:
+    // Last ${4+LOG2LUT} bits are zeroes
+    const __m128 vminus_ln2_hi = _mm_set1_ps(${MINUS_LN2[0]}f);
+    const __m128 vminus_ln2_lo = _mm_set1_ps(${MINUS_LN2[1]}f);
   // Coefficients of polynomial approximation
   $if P == H + 1:
     //   exp(2t) - 1 ~ t * ${POLYNOMIAL}
@@ -175,7 +174,12 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DIV
     vn = _mm_sub_ps(vn, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2).
-    const __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2), vz);
+    $if RR == 1:
+      const __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2), vz);
+    $else:
+      // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+      __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_hi), vz);
+      vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_lo), vt);
 
     // Compute degree-${P} polynomial approximation for exp(2t) - 1 on [-log(2)/${4*LUT}, log(2)/${4*LUT}].
     $if P == H + 1:
@@ -210,13 +214,19 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DIV
       const __m128 vemo = _mm_add_ps(_mm_mul_ps(vp, vts), vsmo);
     $else:
       vp = _mm_add_ps(_mm_mul_ps(vp, vts), vts);
-      const __m128 vemo = _mm_add_ps(_mm_mul_ps(vp, vtwo), vsmo);
+      $if DIV == "NR1":
+        const __m128 vemo = _mm_add_ps(_mm_mul_ps(vp, vtwo), vsmo);
+      $else:
+        const __m128 vemo = _mm_sub_ps(_mm_mul_ps(vp, vminus_two), vsmo);
 
     // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
     $if DIV == "NR1":
       const __m128 vepo = _mm_add_ps(vemo, vtwo);
     $else:
-      const __m128 vepo = _mm_sub_ps(vemo, vminus_two);
+      $if P == H + 1:
+        const __m128 vepo = _mm_sub_ps(vemo, vminus_two);
+      $else:
+        const __m128 vepo = _mm_add_ps(vemo, vminus_two);
 
     $if DIV == "DIV":
       // Reconstruct tanh(z) = expm1(2z) / (expm1(2z) + 2)

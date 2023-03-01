@@ -22,7 +22,7 @@
 // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3_nr2(
+void xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h3_nr2(
     size_t n,
     const float* input,
     float* output)
@@ -38,7 +38,9 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3_nr2(
   const __m128 vmagic_bias = _mm_set1_ps(0x1.800000p+19f);
   // Mask for the lowest 3 bits
   const __m128i vindex_mask = _mm_set1_epi32(0x7);
-  const __m128 vminus_ln2 = _mm_set1_ps(-0x1.62E430p-1f);
+  // Last 7 bits are zeroes
+  const __m128 vminus_ln2_hi = _mm_set1_ps(-0x1.62E400p-1f);
+  const __m128 vminus_ln2_lo = _mm_set1_ps(-0x1.7F7D1Cp-20f);
   // Coefficients of polynomial approximation
   //   exp(2t) - 1 ~ t * (2 + t * (c2 + t * (c3 + t * c4)))
   // on [-log(2)/32, log(2)/32]
@@ -122,7 +124,9 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3_nr2(
     vn = _mm_sub_ps(vn, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2).
-    const __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2), vz);
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_hi), vz);
+    vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_lo), vt);
 
     // Compute degree-4 polynomial approximation for exp(2t) - 1 on [-log(2)/32, log(2)/32].
     //   P(t) = t * (2 + t * (c2 + t * (c3 + t * c4)))

@@ -157,18 +157,18 @@ tools/xngen src/math/f32-tanh-neon-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -
 tools/xngen src/math/f32-tanh-sse-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=DIV -D SAT=MINMAX -o src/math/gen/f32-tanh-sse2-expm1minus-rr1-p6h5-div.c &
 tools/xngen src/math/f32-tanh-sse-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR1 -D SAT=SELECT -o src/math/gen/f32-tanh-sse2-expm1minus-rr1-p6h5-nr1.c &
 tools/xngen src/math/f32-tanh-sse-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2 -D SAT=SELECT -o src/math/gen/f32-tanh-sse2-expm1minus-rr1-p6h5-nr2.c &
+tools/xngen src/math/f32-tanh-sse-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=2 -D DIV=NR1 -D SAT=SELECT -o src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h2-nr1.c &
+tools/xngen src/math/f32-tanh-sse-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=2 -D DIV=NR2 -D SAT=SELECT -o src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h2-nr2.c &
 tools/xngen src/math/f32-tanh-sse-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=DIV -D SAT=MINMAX -o src/math/gen/f32-tanh-sse2-expm1minus-rr1-lut8-p4h3-div.c &
-tools/xngen src/math/f32-tanh-sse-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR1 -D SAT=SELECT -o src/math/gen/f32-tanh-sse2-expm1minus-rr1-lut8-p4h3-nr1.c &
-tools/xngen src/math/f32-tanh-sse-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR2 -D SAT=SELECT -o src/math/gen/f32-tanh-sse2-expm1minus-rr1-lut8-p4h3-nr2.c &
+tools/xngen src/math/f32-tanh-sse-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR1 -D SAT=SELECT -o src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h3-nr1.c &
+tools/xngen src/math/f32-tanh-sse-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR2 -D SAT=SELECT -o src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h3-nr2.c &
 
 # AVX
 tools/xngen src/math/f32-tanh-avx-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=DIV -D SAT=MINMAX -D FMA=0 -D PERM=0 -o src/math/gen/f32-tanh-avx-expm1minus-rr1-p6h5-div.c &
 tools/xngen src/math/f32-tanh-avx-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR1 -D SAT=SELECT -D FMA=0 -D PERM=0 -o src/math/gen/f32-tanh-avx-expm1minus-rr1-p6h5-nr1.c &
 tools/xngen src/math/f32-tanh-avx-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2 -D SAT=SELECT -D FMA=0 -D PERM=0 -o src/math/gen/f32-tanh-avx-expm1minus-rr1-p6h5-nr2.c &
 tools/xngen src/math/f32-tanh-avx-expm1minus.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=2 -D DIV=DIV -D SAT=MINMAX -D FMA=0 -D PERM=1 -o src/math/gen/f32-tanh-avx-expm1minus-rr1-lut4-p4h2-perm-div.c &
-tools/xngen src/math/f32-tanh-avx-expm1minus.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=2 -D DIV=NR1 -D SAT=SELECT -D FMA=0 -D PERM=1 -o src/math/gen/f32-tanh-avx-expm1minus-rr1-lut4-p4h2-perm-nr1.c &
-tools/xngen src/math/f32-tanh-avx-expm1minus.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=2 -D DIV=NR2 -D SAT=SELECT -D FMA=0 -D PERM=1 -o src/math/gen/f32-tanh-avx-expm1minus-rr1-lut4-p4h2-perm-nr2.c &
-tools/xngen src/math/f32-tanh-avx-expm1minus.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=3 -D DIV=DIV -D SAT=MINMAX -D FMA=0 -D PERM=1 -o src/math/gen/f32-tanh-avx-expm1minus-rr1-lut4-p4h3-perm-div.c &
+tools/xngen src/math/f32-tanh-avx-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=DIV -D SAT=MINMAX -D FMA=0 -D PERM=0 -o src/math/gen/f32-tanh-avx-expm1minus-rr1-lut8-p4h3-div.c &
 
 tools/xngen src/math/f32-tanh-avx-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=DIV    -D SAT=MINMAX -D FMA=3 -D PERM=0 -o src/math/gen/f32-tanh-fma3-expm1minus-rr1-p6h5-div.c &
 tools/xngen src/math/f32-tanh-avx-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR1    -D SAT=SELECT -D FMA=3 -D PERM=0 -o src/math/gen/f32-tanh-fma3-expm1minus-rr1-p6h5-nr1.c &

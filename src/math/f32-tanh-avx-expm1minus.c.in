@@ -177,7 +177,7 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${P
       //    lower than -13.
       //
       // Shift bits ${LOG2LUT}:${LOG2LUT+8} into 23:31 (position of floating-point exponent).
-      const __m128i vn_hi = _mm256_extractf128_ps(vn, 1);
+      const __m128 vn_hi = _mm256_extractf128_ps(vn, 1);
       const __m128i ve_lo = _mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn)), ${23-LOG2LUT});
       const __m128i ve_hi = _mm_slli_epi32(_mm_castps_si128(vn_hi), ${23-LOG2LUT});
 

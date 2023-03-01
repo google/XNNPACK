@@ -22,7 +22,7 @@
 // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3_nr1(
+void xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h2_nr1(
     size_t n,
     const float* input,
     float* output)
@@ -38,15 +38,17 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3_nr1(
   const __m128 vmagic_bias = _mm_set1_ps(0x1.800000p+19f);
   // Mask for the lowest 3 bits
   const __m128i vindex_mask = _mm_set1_epi32(0x7);
-  const __m128 vminus_ln2 = _mm_set1_ps(-0x1.62E430p-1f);
+  // Last 7 bits are zeroes
+  const __m128 vminus_ln2_hi = _mm_set1_ps(-0x1.62E400p-1f);
+  const __m128 vminus_ln2_lo = _mm_set1_ps(-0x1.7F7D1Cp-20f);
   // Coefficients of polynomial approximation
-  //   exp(2t) - 1 ~ t * (2 + t * (c2 + t * (c3 + t * c4)))
+  //   exp(2t) - 1 ~ 2 * (t + t * (t * (c2 + t * (c3 + t * c4))))
   // on [-log(2)/32, log(2)/32]
-  const __m128 vc4 = _mm_set1_ps(0x1.5558ECp-1f);
-  const __m128 vc3 = _mm_set1_ps(0x1.555C20p+0f);
-  const __m128 vc2 = _mm_set1_ps(0x1.000000p+1f);
-  const __m128 vtwo = _mm_set1_ps(2.0f);
+  const __m128 vc4 = _mm_set1_ps(0x1.5558ECp-2f);
+  const __m128 vc3 = _mm_set1_ps(0x1.555C20p-1f);
+  const __m128 vc2 = _mm_set1_ps(0x1.000000p+0f);
   const __m128 vminus_one = _mm_set1_ps(-1.0f);
+  const __m128 vtwo = _mm_set1_ps(2.0f);
 
   for (; n != 0; n -= sizeof(__m128)) {
     const __m128 vx = _mm_load_ps(input);
@@ -122,22 +124,25 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3_nr1(
     vn = _mm_sub_ps(vn, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2).
-    const __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2), vz);
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_hi), vz);
+    vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_lo), vt);
 
     // Compute degree-4 polynomial approximation for exp(2t) - 1 on [-log(2)/32, log(2)/32].
-    //   P(t) = t * (2 + t * (c2 + t * (c3 + t * c4)))
-    //        = t * p
+    //   P(t) = 2 * (t + t * (t * (c2 + t * (c3 + t * c4))))
+    //        = 2 * (t + t * p)
     __m128 vp = _mm_add_ps(_mm_mul_ps(vc4, vt), vc3);
     vp = _mm_add_ps(_mm_mul_ps(vp, vt), vc2);
-    vp = _mm_add_ps(_mm_mul_ps(vp, vt), vtwo);
+    vp = _mm_mul_ps(vp, vt);
 
     // Reconstruct the exp(2z) - 1 value:
-    //   exp(2z) - 1 = s * (t * (2 + t * (c2 + t * (c3 + t * c4))) + 1) - 1
-    //               = s * t * p + (s - 1)
-    //               = (s - 1) + (t * s) * p
+    //   exp(2z) - 1 = s * (2 * (t + t * (t * (c2 + t * (c3 + t * c4)))) + 1) - 1
+    //               = s * (2 * (t + t * p) + 1) - 1
+    //               = (s - 1) + 2 * ((t * s) + (t * s) * p)
     const __m128 vts = _mm_mul_ps(vt, vs);
     const __m128 vsmo = _mm_add_ps(vs, vminus_one);
-    const __m128 vemo = _mm_add_ps(_mm_mul_ps(vp, vts), vsmo);
+    vp = _mm_add_ps(_mm_mul_ps(vp, vts), vts);
+    const __m128 vemo = _mm_add_ps(_mm_mul_ps(vp, vtwo), vsmo);
 
     // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
     const __m128 vepo = _mm_add_ps(vemo, vtwo);
