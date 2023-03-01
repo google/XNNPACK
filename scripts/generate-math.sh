@@ -97,6 +97,7 @@ tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=3
 tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=2 -D DIV=DIV -D FMA=1 -o src/math/gen/f32-tanh-fma-expm1minus-rr1-lut8-p4h2-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=2 -D DIV=RCP -D FMA=1 -o src/math/gen/f32-tanh-fma-expm1minus-rr1-lut8-p4h2-rcp.c &
 tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=2 -D DIV=DIV -D FMA=1 -o src/math/gen/f32-tanh-fma-expm1minus-rr2-lut8-p4h2-div.c &
+tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=2 -D DIV=RCP -D FMA=1 -o src/math/gen/f32-tanh-fma-expm1minus-rr2-lut8-p4h2-rcp.c &
 tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=DIV -D FMA=1 -o src/math/gen/f32-tanh-fma-expm1minus-rr1-lut8-p4h3-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=RCP -D FMA=1 -o src/math/gen/f32-tanh-fma-expm1minus-rr1-lut8-p4h3-rcp.c &
 tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=DIV -D FMA=1 -o src/math/gen/f32-tanh-fma-expm1minus-rr2-lut8-p4h3-div.c &

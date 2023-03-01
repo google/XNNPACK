@@ -1303,6 +1303,7 @@ ALL_FMA_MICROKERNEL_SRCS = [
     "src/math/gen/f32-tanh-fma-expm1minus-rr2-lut4-p4h3-div.c",
     "src/math/gen/f32-tanh-fma-expm1minus-rr2-lut8-p3h1-div.c",
     "src/math/gen/f32-tanh-fma-expm1minus-rr2-lut8-p4h2-div.c",
+    "src/math/gen/f32-tanh-fma-expm1minus-rr2-lut8-p4h2-rcp.c",
     "src/math/gen/f32-tanh-fma-expm1minus-rr2-lut8-p4h3-div.c",
     "src/math/gen/f32-tanh-fma-expm1minus-rr2-lut16-p3h1-div.c",
     "src/math/gen/f32-tanh-fma-expm1minus-rr2-lut16-p4h2-div.c",

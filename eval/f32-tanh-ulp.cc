@@ -572,6 +572,11 @@ BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr2_lut8_p4h2_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr2_lut8_p4h2_rcp,
+                  xnn_math_f32_tanh__fma_expm1minus_rr2_lut8_p4h2_rcp,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_lut8_p4h3_div,
                   xnn_math_f32_tanh__fma_expm1minus_rr1_lut8_p4h3_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)

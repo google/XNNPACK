@@ -1684,6 +1684,24 @@ TEST(TANH__FMA_EXPM1MINUS_RR2_LUT8_P4H2_DIV, nan) {
 }
 
 
+TEST(TANH__FMA_EXPM1MINUS_RR2_LUT8_P4H2_RCP, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr2_lut8_p4h2_rcp, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR2_LUT8_P4H2_RCP, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr2_lut8_p4h2_rcp, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR2_LUT8_P4H2_RCP, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr2_lut8_p4h2_rcp);
+}
+
+
 TEST(TANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
