@@ -236,16 +236,12 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-avx-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-avx-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-avx-mul32.c
-  src/qc8-dwconv/gen/qc8-dwconv-9p24c-minmax-fp32-avx-mul16.c
-  src/qc8-dwconv/gen/qc8-dwconv-9p24c-minmax-fp32-avx-mul32.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-avx-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-avx-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-avx-mul32.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-avx-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-avx-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-avx-mul32.c
-  src/qc8-dwconv/gen/qc8-dwconv-25p24c-minmax-fp32-avx-mul16.c
-  src/qc8-dwconv/gen/qc8-dwconv-25p24c-minmax-fp32-avx-mul32.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2-minmax-fp32-avx-ld64.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2-minmax-fp32-avx-ld128.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2s4-minmax-fp32-avx-ld64.c
@@ -296,16 +292,12 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-avx-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-avx-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-avx-mul32.c
-  src/qs8-dwconv/gen/qs8-dwconv-9p24c-minmax-fp32-avx-mul16.c
-  src/qs8-dwconv/gen/qs8-dwconv-9p24c-minmax-fp32-avx-mul32.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-avx-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-avx-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-avx-mul32.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-avx-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-avx-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-avx-mul32.c
-  src/qs8-dwconv/gen/qs8-dwconv-25p24c-minmax-fp32-avx-mul16.c
-  src/qs8-dwconv/gen/qs8-dwconv-25p24c-minmax-fp32-avx-mul32.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx-x8.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx-x16.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx-x24.c
@@ -753,7 +745,6 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-avx2-mul16-vpmovsx.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-avx2-mul16-vpunpck.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-avx2-mul32.c
-  src/qc8-dwconv/gen/qc8-dwconv-9p24c-minmax-fp32-avx2-mul32.c
   src/qc8-dwconv/gen/qc8-dwconv-9p32c-minmax-fp32-avx2-mul16-add16-vpunpck.c
   src/qc8-dwconv/gen/qc8-dwconv-9p32c-minmax-fp32-avx2-mul16-vpmovsx.c
   src/qc8-dwconv/gen/qc8-dwconv-9p32c-minmax-fp32-avx2-mul16-vpunpck.c
@@ -763,7 +754,6 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-avx2-mul16-vpmovsx.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-avx2-mul16-vpunpck.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-avx2-mul32.c
-  src/qc8-dwconv/gen/qc8-dwconv-25p24c-minmax-fp32-avx2-mul32.c
   src/qc8-dwconv/gen/qc8-dwconv-25p32c-minmax-fp32-avx2-mul16-add16-vpunpck.c
   src/qc8-dwconv/gen/qc8-dwconv-25p32c-minmax-fp32-avx2-mul16-vpmovsx.c
   src/qc8-dwconv/gen/qc8-dwconv-25p32c-minmax-fp32-avx2-mul16-vpunpck.c
@@ -782,7 +772,6 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-avx2-mul16-vpmovsx.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-avx2-mul16-vpunpck.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-avx2-mul32.c
-  src/qs8-dwconv/gen/qs8-dwconv-9p24c-minmax-fp32-avx2-mul32.c
   src/qs8-dwconv/gen/qs8-dwconv-9p32c-minmax-fp32-avx2-mul16-add16-vpunpck.c
   src/qs8-dwconv/gen/qs8-dwconv-9p32c-minmax-fp32-avx2-mul16-vpmovsx.c
   src/qs8-dwconv/gen/qs8-dwconv-9p32c-minmax-fp32-avx2-mul16-vpunpck.c
@@ -792,7 +781,6 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-avx2-mul16-vpmovsx.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-avx2-mul16-vpunpck.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-avx2-mul32.c
-  src/qs8-dwconv/gen/qs8-dwconv-25p24c-minmax-fp32-avx2-mul32.c
   src/qs8-dwconv/gen/qs8-dwconv-25p32c-minmax-fp32-avx2-mul16-add16-vpunpck.c
   src/qs8-dwconv/gen/qs8-dwconv-25p32c-minmax-fp32-avx2-mul16-vpmovsx.c
   src/qs8-dwconv/gen/qs8-dwconv-25p32c-minmax-fp32-avx2-mul16-vpunpck.c
@@ -1907,7 +1895,6 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-neon-mul8-ld64.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-neon-mul8-ld128.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-neon-mul16.c
-  src/qc8-dwconv/gen/qc8-dwconv-9p24c-minmax-fp32-neon-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p32c-minmax-fp32-neon-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-neon-mla8-ld64.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-neon-mul8-ld64.c
@@ -1917,7 +1904,6 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-neon-mul8-ld64.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-neon-mul8-ld128.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-neon-mul16.c
-  src/qc8-dwconv/gen/qc8-dwconv-25p24c-minmax-fp32-neon-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p32c-minmax-fp32-neon-mul16.c
   src/qc8-gemm/gen/qc8-gemm-1x8-minmax-fp32-neon-mlal-lane-prfm.c
   src/qc8-gemm/gen/qc8-gemm-1x8-minmax-fp32-neon-mlal-lane.c
@@ -2009,8 +1995,6 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-rndnu-neon-mul8-ld64.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-rndnu-neon-mul8-ld128.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-rndnu-neon-mul16.c
-  src/qs8-dwconv/gen/qs8-dwconv-9p24c-minmax-fp32-neon-mul16.c
-  src/qs8-dwconv/gen/qs8-dwconv-9p24c-minmax-rndnu-neon-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p32c-minmax-fp32-neon-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p32c-minmax-rndnu-neon-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-neon-mul16.c
@@ -2023,8 +2007,6 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-rndnu-neon-mul8-ld64.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-rndnu-neon-mul8-ld128.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-rndnu-neon-mul16.c
-  src/qs8-dwconv/gen/qs8-dwconv-25p24c-minmax-fp32-neon-mul16.c
-  src/qs8-dwconv/gen/qs8-dwconv-25p24c-minmax-rndnu-neon-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p32c-minmax-fp32-neon-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p32c-minmax-rndnu-neon-mul16.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-neon-x8.c
@@ -2529,9 +2511,6 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/qu8-dwconv-9p16c-minmax-fp32-neon-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-9p16c-minmax-rndnu-neon-mul8.c
   src/qu8-dwconv/gen/qu8-dwconv-9p16c-minmax-rndnu-neon-mul16.c
-  src/qu8-dwconv/gen/qu8-dwconv-9p24c-minmax-fp32-neon-mul16.c
-  src/qu8-dwconv/gen/qu8-dwconv-9p24c-minmax-rndnu-neon-mul8.c
-  src/qu8-dwconv/gen/qu8-dwconv-9p24c-minmax-rndnu-neon-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-9p32c-minmax-fp32-neon-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-9p32c-minmax-rndnu-neon-mul8.c
   src/qu8-dwconv/gen/qu8-dwconv-9p32c-minmax-rndnu-neon-mul16.c
@@ -2541,9 +2520,6 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/qu8-dwconv-25p16c-minmax-fp32-neon-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-25p16c-minmax-rndnu-neon-mul8.c
   src/qu8-dwconv/gen/qu8-dwconv-25p16c-minmax-rndnu-neon-mul16.c
-  src/qu8-dwconv/gen/qu8-dwconv-25p24c-minmax-fp32-neon-mul16.c
-  src/qu8-dwconv/gen/qu8-dwconv-25p24c-minmax-rndnu-neon-mul8.c
-  src/qu8-dwconv/gen/qu8-dwconv-25p24c-minmax-rndnu-neon-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-25p32c-minmax-fp32-neon-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-25p32c-minmax-rndnu-neon-mul8.c
   src/qu8-dwconv/gen/qu8-dwconv-25p32c-minmax-rndnu-neon-mul16.c
@@ -3527,7 +3503,6 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-neonv8-mul8-ld64.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-neonv8-mul8-ld128.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-neonv8-mul16.c
-  src/qc8-dwconv/gen/qc8-dwconv-9p24c-minmax-fp32-neonv8-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p32c-minmax-fp32-neonv8-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-neonv8-mla8-ld64.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-neonv8-mul8-ld64.c
@@ -3537,7 +3512,6 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-neonv8-mul8-ld64.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-neonv8-mul8-ld128.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-neonv8-mul16.c
-  src/qc8-dwconv/gen/qc8-dwconv-25p24c-minmax-fp32-neonv8-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p32c-minmax-fp32-neonv8-mul16.c
   src/qc8-gemm/gen/qc8-gemm-1x8-minmax-fp32-neonv8-mlal-lane-prfm.c
   src/qc8-gemm/gen/qc8-gemm-1x8-minmax-fp32-neonv8-mlal-lane.c
@@ -3621,11 +3595,9 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/qc8-igemm/gen/qc8-igemm-6x16-minmax-fp32-neonv8-mlal-lane.c
   src/qs8-dwconv/gen/qs8-dwconv-9p8c-minmax-fp32-neonv8-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-neonv8-mul16.c
-  src/qs8-dwconv/gen/qs8-dwconv-9p24c-minmax-fp32-neonv8-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p32c-minmax-fp32-neonv8-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-neonv8-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-neonv8-mul16.c
-  src/qs8-dwconv/gen/qs8-dwconv-25p24c-minmax-fp32-neonv8-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p32c-minmax-fp32-neonv8-mul16.c
   src/qs8-gavgpool/gen/qs8-gavgpool-7p7x-minmax-fp32-neonv8-c8.c
   src/qs8-gavgpool/gen/qs8-gavgpool-7p7x-minmax-fp32-neonv8-c16.c
@@ -3687,11 +3659,9 @@ SET(ALL_NEONV8_MICROKERNEL_SRCS
   src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-neonv8-ld128-x16.c
   src/qu8-dwconv/gen/qu8-dwconv-9p8c-minmax-fp32-neonv8-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-9p16c-minmax-fp32-neonv8-mul16.c
-  src/qu8-dwconv/gen/qu8-dwconv-9p24c-minmax-fp32-neonv8-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-9p32c-minmax-fp32-neonv8-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-25p8c-minmax-fp32-neonv8-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-25p16c-minmax-fp32-neonv8-mul16.c
-  src/qu8-dwconv/gen/qu8-dwconv-25p24c-minmax-fp32-neonv8-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-25p32c-minmax-fp32-neonv8-mul16.c
   src/qu8-gavgpool/gen/qu8-gavgpool-7p7x-minmax-fp32-neonv8-c8.c
   src/qu8-gavgpool/gen/qu8-gavgpool-7p7x-minmax-fp32-neonv8-c16.c
@@ -5023,12 +4993,10 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/qc8-dwconv-9p8c-minmax-fp32-sse2-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-sse2-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-sse2-mul16.c
-  src/qc8-dwconv/gen/qc8-dwconv-9p24c-minmax-fp32-sse2-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-sse2-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-sse2-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-sse2-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-sse2-mul16.c
-  src/qc8-dwconv/gen/qc8-dwconv-25p24c-minmax-fp32-sse2-mul16.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2-minmax-fp32-sse2-ld64.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2-minmax-fp32-sse2-ld128.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2s4-minmax-fp32-sse2-ld64.c
@@ -5077,12 +5045,10 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/qs8-dwconv-9p8c-minmax-fp32-sse2-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-sse2-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-sse2-mul16.c
-  src/qs8-dwconv/gen/qs8-dwconv-9p24c-minmax-fp32-sse2-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-sse2-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-sse2-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-sse2-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-sse2-mul16.c
-  src/qs8-dwconv/gen/qs8-dwconv-25p24c-minmax-fp32-sse2-mul16.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-sse2-x8.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-sse2-x16.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-sse2-x24.c
@@ -5353,16 +5319,12 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-sse41-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-sse41-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-sse41-mul32.c
-  src/qc8-dwconv/gen/qc8-dwconv-9p24c-minmax-fp32-sse41-mul16.c
-  src/qc8-dwconv/gen/qc8-dwconv-9p24c-minmax-fp32-sse41-mul32.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-sse41-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-sse41-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-sse41-mul32.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-sse41-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-sse41-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-sse41-mul32.c
-  src/qc8-dwconv/gen/qc8-dwconv-25p24c-minmax-fp32-sse41-mul16.c
-  src/qc8-dwconv/gen/qc8-dwconv-25p24c-minmax-fp32-sse41-mul32.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2-minmax-fp32-sse41-ld64.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2-minmax-fp32-sse41-ld128.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2s4-minmax-fp32-sse41-ld64.c
@@ -5413,16 +5375,12 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-sse41-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-sse41-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-sse41-mul32.c
-  src/qs8-dwconv/gen/qs8-dwconv-9p24c-minmax-fp32-sse41-mul16.c
-  src/qs8-dwconv/gen/qs8-dwconv-9p24c-minmax-fp32-sse41-mul32.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-sse41-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-sse41-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-sse41-mul32.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-sse41-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-sse41-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-sse41-mul32.c
-  src/qs8-dwconv/gen/qs8-dwconv-25p24c-minmax-fp32-sse41-mul16.c
-  src/qs8-dwconv/gen/qs8-dwconv-25p24c-minmax-fp32-sse41-mul32.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-sse41-x8.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-sse41-x16.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-sse41-x24.c
@@ -7001,14 +6959,10 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/qc8-dwconv-9p8c-minmax-fp32-wasmsimd-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-wasmsimd-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-wasmsimd-mul16.c
-  src/qc8-dwconv/gen/qc8-dwconv-9p24c-minmax-fp32-wasmsimd-mul16-add16.c
-  src/qc8-dwconv/gen/qc8-dwconv-9p24c-minmax-fp32-wasmsimd-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-wasmsimd-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-wasmsimd-mul16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-wasmsimd-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-wasmsimd-mul16.c
-  src/qc8-dwconv/gen/qc8-dwconv-25p24c-minmax-fp32-wasmsimd-mul16-add16.c
-  src/qc8-dwconv/gen/qc8-dwconv-25p24c-minmax-fp32-wasmsimd-mul16.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2-minmax-fp32-wasmsimd-dot16x2-ld64.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2-minmax-fp32-wasmsimd-dot16x2-ld128.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2s4-minmax-fp32-wasmsimd-dot16x2-ld64.c
@@ -7061,14 +7015,10 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/qs8-dwconv-9p8c-minmax-fp32-wasmsimd-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-wasmsimd-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-wasmsimd-mul16.c
-  src/qs8-dwconv/gen/qs8-dwconv-9p24c-minmax-fp32-wasmsimd-mul16-add16.c
-  src/qs8-dwconv/gen/qs8-dwconv-9p24c-minmax-fp32-wasmsimd-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-wasmsimd-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-wasmsimd-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-wasmsimd-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-wasmsimd-mul16.c
-  src/qs8-dwconv/gen/qs8-dwconv-25p24c-minmax-fp32-wasmsimd-mul16-add16.c
-  src/qs8-dwconv/gen/qs8-dwconv-25p24c-minmax-fp32-wasmsimd-mul16.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-wasmsimd-x8.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-wasmsimd-x16.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-wasmsimd-x24.c
@@ -7164,10 +7114,8 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-wasmsimd-x32.c
   src/qu8-dwconv/gen/qu8-dwconv-9p8c-minmax-fp32-wasmsimd-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-9p16c-minmax-fp32-wasmsimd-mul16.c
-  src/qu8-dwconv/gen/qu8-dwconv-9p24c-minmax-fp32-wasmsimd-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-25p8c-minmax-fp32-wasmsimd-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-25p16c-minmax-fp32-wasmsimd-mul16.c
-  src/qu8-dwconv/gen/qu8-dwconv-25p24c-minmax-fp32-wasmsimd-mul16.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-wasmsimd-x8.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-wasmsimd-x16.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-wasmsimd-x24.c
@@ -7292,12 +7240,10 @@ SET(ALL_XOP_MICROKERNEL_SRCS
   src/qc8-dwconv/gen/qc8-dwconv-9p8c-minmax-fp32-xop-mul32.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-xop-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-9p16c-minmax-fp32-xop-mul32.c
-  src/qc8-dwconv/gen/qc8-dwconv-9p24c-minmax-fp32-xop-mul32.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-xop-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p8c-minmax-fp32-xop-mul32.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-xop-mul16-add16.c
   src/qc8-dwconv/gen/qc8-dwconv-25p16c-minmax-fp32-xop-mul32.c
-  src/qc8-dwconv/gen/qc8-dwconv-25p24c-minmax-fp32-xop-mul32.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2-minmax-fp32-xop-ld64.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2-minmax-fp32-xop-ld128.c
   src/qc8-gemm/gen/qc8-gemm-1x4c2s4-minmax-fp32-xop-ld64.c
@@ -7346,12 +7292,10 @@ SET(ALL_XOP_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/qs8-dwconv-9p8c-minmax-fp32-xop-mul32.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-xop-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-xop-mul32.c
-  src/qs8-dwconv/gen/qs8-dwconv-9p24c-minmax-fp32-xop-mul32.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-xop-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-xop-mul32.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-xop-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-xop-mul32.c
-  src/qs8-dwconv/gen/qs8-dwconv-25p24c-minmax-fp32-xop-mul32.c
   src/qs8-gemm/gen/qs8-gemm-1x4c2-minmax-fp32-xop-ld64.c
   src/qs8-gemm/gen/qs8-gemm-1x4c2-minmax-fp32-xop-ld128.c
   src/qs8-gemm/gen/qs8-gemm-1x4c2-xw-minmax-fp32-xop.c

@@ -97,12 +97,6 @@ static void DWConvEnd2EndBenchmark(
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
       16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
   }
-  static void qu8_dwconv_9p24c__neon_mul8(benchmark::State& state, models::ExecutionPlanFactory model) {
-    DWConvEnd2EndBenchmark(state, model,
-      xnn_qu8_dwconv_minmax_rndnu_ukernel_9p24c__neon_mul8,
-      xnn_init_qu8_conv_minmax_rndnu_neon_params,
-      24 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
-  }
   static void qu8_dwconv_9p32c__neon_mul8(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_qu8_dwconv_minmax_rndnu_ukernel_9p32c__neon_mul8,
@@ -121,12 +115,6 @@ static void DWConvEnd2EndBenchmark(
       xnn_init_qu8_conv_minmax_rndnu_neon_params,
       16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
   }
-  static void qu8_dwconv_9p24c__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
-    DWConvEnd2EndBenchmark(state, model,
-      xnn_qu8_dwconv_minmax_rndnu_ukernel_9p24c__neon_mul16,
-      xnn_init_qu8_conv_minmax_rndnu_neon_params,
-      24 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
-  }
   static void qu8_dwconv_9p32c__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
       xnn_qu8_dwconv_minmax_rndnu_ukernel_9p32c__neon_mul16,
@@ -136,11 +124,9 @@ static void DWConvEnd2EndBenchmark(
 
   BENCHMARK_QU8_END2END(qu8_dwconv_9p8c__neon_mul8);
   BENCHMARK_QU8_END2END(qu8_dwconv_9p16c__neon_mul8);
-  BENCHMARK_QU8_END2END(qu8_dwconv_9p24c__neon_mul8);
   BENCHMARK_QU8_END2END(qu8_dwconv_9p32c__neon_mul8);
   BENCHMARK_QU8_END2END(qu8_dwconv_9p8c__neon_mul16);
   BENCHMARK_QU8_END2END(qu8_dwconv_9p16c__neon_mul16);
-  BENCHMARK_QU8_END2END(qu8_dwconv_9p24c__neon_mul16);
   BENCHMARK_QU8_END2END(qu8_dwconv_9p32c__neon_mul16);
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 

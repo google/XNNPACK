@@ -12,10 +12,6 @@
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
 - name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p16c__neon_mul16
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p24c__neon_mul8
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p24c__neon_mul16
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
 - name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p32c__neon_mul8
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
 - name: xnn_qu8_dwconv_minmax_rndnu_ukernel_9p32c__neon_mul16
@@ -27,10 +23,6 @@
 - name: xnn_qu8_dwconv_minmax_rndnu_ukernel_25p16c__neon_mul8
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
 - name: xnn_qu8_dwconv_minmax_rndnu_ukernel_25p16c__neon_mul16
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_25p24c__neon_mul8
-  init: xnn_init_qu8_conv_minmax_rndnu_neon_params
-- name: xnn_qu8_dwconv_minmax_rndnu_ukernel_25p24c__neon_mul16
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
 - name: xnn_qu8_dwconv_minmax_rndnu_ukernel_25p32c__neon_mul8
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params

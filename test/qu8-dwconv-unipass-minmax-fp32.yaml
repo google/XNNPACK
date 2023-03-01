@@ -12,10 +12,6 @@
   init: xnn_init_qu8_conv_minmax_fp32_neon_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__neonv8_mul16
   init: xnn_init_qu8_conv_minmax_fp32_neonv8_params
-- name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p24c__neon_mul16
-  init: xnn_init_qu8_conv_minmax_fp32_neon_params
-- name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p24c__neonv8_mul16
-  init: xnn_init_qu8_conv_minmax_fp32_neonv8_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p32c__neon_mul16
   init: xnn_init_qu8_conv_minmax_fp32_neon_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p32c__neonv8_mul16
@@ -27,10 +23,6 @@
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__neon_mul16
   init: xnn_init_qu8_conv_minmax_fp32_neon_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__neonv8_mul16
-  init: xnn_init_qu8_conv_minmax_fp32_neonv8_params
-- name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p24c__neon_mul16
-  init: xnn_init_qu8_conv_minmax_fp32_neon_params
-- name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p24c__neonv8_mul16
   init: xnn_init_qu8_conv_minmax_fp32_neonv8_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p32c__neon_mul16
   init: xnn_init_qu8_conv_minmax_fp32_neon_params
@@ -112,13 +104,9 @@
   init: xnn_init_qu8_conv_minmax_fp32_wasmsimd_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__wasmsimd_mul16
   init: xnn_init_qu8_conv_minmax_fp32_wasmsimd_params
-- name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p24c__wasmsimd_mul16
-  init: xnn_init_qu8_conv_minmax_fp32_wasmsimd_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p8c__wasmsimd_mul16
   init: xnn_init_qu8_conv_minmax_fp32_wasmsimd_params
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__wasmsimd_mul16
-  init: xnn_init_qu8_conv_minmax_fp32_wasmsimd_params
-- name: xnn_qu8_dwconv_minmax_fp32_ukernel_25p24c__wasmsimd_mul16
   init: xnn_init_qu8_conv_minmax_fp32_wasmsimd_params
 # WAsm
 - name: xnn_qu8_dwconv_minmax_fp32_ukernel_9p1c__wasm_fmagic

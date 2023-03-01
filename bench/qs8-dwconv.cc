@@ -210,12 +210,6 @@ static void DWConvBenchmark(benchmark::State& state,
       xnn_init_qs8_conv_minmax_rndnu_neon_params,
       16 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
   }
-  static void qs8_dwconv_9p24c__neon_mul16(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
-      xnn_qs8_dwconv_minmax_rndnu_ukernel_9p24c__neon_mul16,
-      xnn_init_qs8_conv_minmax_rndnu_neon_params,
-      24 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
-  }
   static void qs8_dwconv_9p32c__neon_mul16(benchmark::State& state, const char* net) {
     DWConvBenchmark(state,
       xnn_qs8_dwconv_minmax_rndnu_ukernel_9p32c__neon_mul16,
@@ -270,12 +264,6 @@ static void DWConvBenchmark(benchmark::State& state,
       xnn_init_qs8_conv_minmax_rndnu_neon_params,
       16 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckNEON);
   }
-  static void qs8_dwconv_25p24c__neon_mul16(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
-      xnn_qs8_dwconv_minmax_rndnu_ukernel_25p24c__neon_mul16,
-      xnn_init_qs8_conv_minmax_rndnu_neon_params,
-      24 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckNEON);
-  }
   static void qs8_dwconv_25p32c__neon_mul16(benchmark::State& state, const char* net) {
     DWConvBenchmark(state,
       xnn_qs8_dwconv_minmax_rndnu_ukernel_25p32c__neon_mul16,
@@ -291,7 +279,6 @@ static void DWConvBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(qs8_dwconv_9p16c__neon_mla8_ld128);
   BENCHMARK_DWCONV(qs8_dwconv_9p8c__neon_mul16);
   BENCHMARK_DWCONV(qs8_dwconv_9p16c__neon_mul16);
-  BENCHMARK_DWCONV(qs8_dwconv_9p24c__neon_mul16);
   BENCHMARK_DWCONV(qs8_dwconv_9p32c__neon_mul16);
   BENCHMARK_DWCONV(qs8_dwconv_25p8c__neon_mul8_ld64);
   BENCHMARK_DWCONV(qs8_dwconv_25p16c__neon_mul8_ld64);
@@ -301,7 +288,6 @@ static void DWConvBenchmark(benchmark::State& state,
   BENCHMARK_DWCONV(qs8_dwconv_25p16c__neon_mla8_ld128);
   BENCHMARK_DWCONV(qs8_dwconv_25p8c__neon_mul16);
   BENCHMARK_DWCONV(qs8_dwconv_25p16c__neon_mul16);
-  BENCHMARK_DWCONV(qs8_dwconv_25p24c__neon_mul16);
   BENCHMARK_DWCONV(qs8_dwconv_25p32c__neon_mul16);
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
