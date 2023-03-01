@@ -3281,6 +3281,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     ADD_EXECUTABLE(truncation-bench bench/truncation.cc)
     TARGET_INCLUDE_DIRECTORIES(truncation-bench PRIVATE .)
     TARGET_LINK_LIBRARIES(truncation-bench PRIVATE XNNPACK benchmark bench-utils)
+
+    ADD_EXECUTABLE(tanh-bench bench/tanh.cc)
+    TARGET_INCLUDE_DIRECTORIES(tanh-bench PRIVATE .)
+    TARGET_LINK_LIBRARIES(tanh-bench PRIVATE XNNPACK fp16 benchmark bench-utils)
   ENDIF()
 
   # ---[ Build microkernel-level microbenchmarks

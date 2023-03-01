@@ -6585,16 +6585,16 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "sigmoid_bench",
-    srcs = ["bench/sigmoid.cc"],
+    name = "prelu_bench",
+    srcs = ["bench/prelu.cc"],
     copts = xnnpack_optional_tflite_copts(),
     tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
 )
 
 xnnpack_benchmark(
-    name = "prelu_bench",
-    srcs = ["bench/prelu.cc"],
+    name = "sigmoid_bench",
+    srcs = ["bench/sigmoid.cc"],
     copts = xnnpack_optional_tflite_copts(),
     tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
@@ -6619,6 +6619,14 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "square_root_bench",
     srcs = ["bench/square-root.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
+    name = "tanh_bench",
+    srcs = ["bench/tanh.cc"],
     copts = xnnpack_optional_tflite_copts(),
     tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
