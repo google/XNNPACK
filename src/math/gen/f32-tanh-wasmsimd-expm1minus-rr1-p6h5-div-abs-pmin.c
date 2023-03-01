@@ -31,7 +31,7 @@ void xnn_math_f32_tanh__wasmsimd_expm1minus_rr1_p6h5_div_abs_pmin(
   // Large number such that ulp(magic bias) == 0.5 and magic bias === 63.5 mod 2**21.
   const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.8000FEp+22f);
   const v128_t vln2 = wasm_f32x4_const_splat(0x1.62E430p-1f);
-  // Coefficient of polynomial approximation
+  // Coefficients of polynomial approximation
   //   exp(-2t) - 1 ~ t * (-2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
   // on [-log(2)/4, log(2)/4]
   const v128_t vc6 = wasm_f32x4_const_splat(0x1.6B7338p-4f);

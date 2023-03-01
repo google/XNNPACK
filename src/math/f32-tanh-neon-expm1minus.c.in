@@ -43,7 +43,7 @@ $elif LOG2LUT == 5:
 $elif LOG2LUT == 6:
   $COEFFS = {3: ["0x1.00001Ep+1", "-0x1.55555Ep+0"]}[P]
   $LN2 = ("0x1.62E800p-1", "-0x1.E8082Ep-16")
-$POLYNOMIAL = "c%d" % (len(COEFFS) + 1)
+$POLYNOMIAL = "c%d" % P
 $for i in reversed(range(len(COEFFS)-1)):
 $  POLYNOMIAL = "(c%d + t * %s)" % (i+2, POLYNOMIAL)
 $if P == H + 1:
@@ -81,7 +81,7 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${D
     // Last ${4+LOG2LUT} bits are zeroes
     const float32x4_t vln2_hi = vmovq_n_f32(${LN2[0]}f);
     const float32x4_t vln2_lo = vmovq_n_f32(${LN2[1]}f);
-  // Coefficient of polynomial approximation
+  // Coefficients of polynomial approximation
   $if P == H + 1:
     //   exp(-2t) - 1 ~ t * ${POLYNOMIAL}
   $else:

@@ -37,7 +37,7 @@ void xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3_nr1recps1fmaadj(
   // Mask for the lowest 3 bits
   const uint64x2_t vindex_mask = vreinterpretq_u64_u32(vmovq_n_u32(UINT32_C(0x7)));
   const float32x4_t vln2 = vmovq_n_f32(0x1.62E430p-1f);
-  // Coefficient of polynomial approximation
+  // Coefficients of polynomial approximation
   //   exp(-2t) - 1 ~ t * (-2 + t * (c2 + t * (c3 + t * c4)))
   // on [-log(2)/32, log(2)/32]
   const float32x4_t vc4 = vmovq_n_f32(0x1.5558ECp-1f);

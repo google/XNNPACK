@@ -7,6 +7,7 @@ $import math
 $assert RR == 1 or RR == 2
 $assert LOG2LUT in [0, 2, 3, 4, 5, 6]
 $assert P == H + 1 or P == H + 2
+$assert DIV in ["DIV", "RCP"]
 $LUT = 1 << LOG2LUT
 #include <assert.h>
 #include <stddef.h>
@@ -42,7 +43,7 @@ $elif LOG2LUT == 6:
   $LN2 = ("0x1.62E800p-1", "-0x1.E8082Ep-16")
 $if FMA:
   $LN2 = ("0x1.62E430p-1", "-0x1.05C610p-29")
-$POLYNOMIAL = "c%d" % (len(COEFFS) + 1)
+$POLYNOMIAL = "c%d" % P
 $for i in reversed(range(len(COEFFS)-1)):
 $  POLYNOMIAL = "(c%d + t * %s)" % (i+2, POLYNOMIAL)
 $if P == H + 1:
@@ -51,8 +52,9 @@ $else:
   $COEFFS = [float.hex(-0.5 * float.fromhex(c)).upper().replace("0X", "0x").replace("0000000P", "p") for c in COEFFS]
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
 $POLY_SUFFIX = "p%dh%d_" % (P, H)
+$DIV_SUFFIX = DIV.lower()
 $ISA = "fma" if FMA else "scalar"
-void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}div(
+void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DIV_SUFFIX}(
     size_t n,
     const float* input,
     float* output)
@@ -75,7 +77,7 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}div
     // Last ${4+LOG2LUT} bits are zeroes
     const float vln2_hi = ${LN2[0]}f;
     const float vln2_lo = ${LN2[1]}f;
-  // Coefficient of polynomial approximation
+  // Coefficients of polynomial approximation
   $if P == H + 1:
     //   exp(-2t) - 1 ~ t * ${POLYNOMIAL}
   $else:
@@ -207,9 +209,18 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}div
         vp = vp * vts + vts;
         const float vemo = vp * vminus_two + vsmo;
 
-    // Reconstruct y = expm1(-2z) / (expm1(-2z) + 2)
+    // Denominator of the tanh fraction: exp(-2z) + 1 = expm1(-2z) + 2
     const float vepo = vemo - vminus_two;
-    float vy = vemo / vepo;
+
+    $if DIV == "DIV":
+      // Reconstruct y = expm1(-2z) / (expm1(-2z) + 2)
+      float vy = vemo / vepo;
+    $else:
+      // Compute reciprocal of denominator.
+      const float vrepo = vone / vepo;
+
+      // Reconstruct y = expm1(-2z) / (expm1(-2z) + 2)
+      float vy = vemo * vrepo;
 
     // The function saturates at -1 for large negative positive inputs: tanhf(-z) == -1.0f for z >= sat_cutoff ~= 9.010913.
     // To guarantee this behaviour, we replace computed outputs with the saturation value (supposed to be -1, but we use +1

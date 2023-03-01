@@ -40,7 +40,7 @@ $elif LOG2LUT == 5:
   $COEFFS = {3: ["0x1.00007Ap+1", "0x1.555582p+0"]}[P]
 $elif LOG2LUT == 6:
   $COEFFS = {3: ["0x1.00001Ep+1", "0x1.55555Ep+0"]}[P]
-$POLYNOMIAL = "c%d" % (len(COEFFS) + 1)
+$POLYNOMIAL = "c%d" % P
 $for i in reversed(range(len(COEFFS)-1)):
 $  POLYNOMIAL = "(c%d + t * %s)" % (i+2, POLYNOMIAL)
 $if P == H + 1:
@@ -85,7 +85,7 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${P
       // Mask for the lowest ${LOG2LUT} bits
       const __m128i vindex_mask = _mm_set1_epi32(0x${"%X" % (LUT-1)});
   const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
-  // Coefficient of polynomial approximation
+  // Coefficients of polynomial approximation
   $if P == H + 1:
     //   exp(2t) - 1 ~ t * ${POLYNOMIAL}
   $else:

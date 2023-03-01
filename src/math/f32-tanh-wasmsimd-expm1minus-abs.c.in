@@ -26,7 +26,7 @@ $if LOG2LUT == 3:
   $COEFFS = ["0x1.000000p+1", "-0x1.555C20p+0", "0x1.5558ECp-1"]
 $elif LOG2LUT == 0:
   $COEFFS = ["0x1.FFFFFEp+0", "-0x1.5554B0p+0", "0x1.555716p-1", "-0x1.12278Ep-2", "0x1.6B7338p-4"]
-$POLYNOMIAL = "c%d" % (len(COEFFS) + 1)
+$POLYNOMIAL = "c%d" % P
 $for i in reversed(range(len(COEFFS)-1)):
 $  POLYNOMIAL = "(c%d + t * %s)" % (i+2, POLYNOMIAL)
 $POLYNOMIAL = "(-2 + t * %s)" % POLYNOMIAL
@@ -54,7 +54,7 @@ void xnn_math_f32_tanh__wasmsimd_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}div_a
     // Mask for the lowest ${LOG2LUT} bits
     const v128_t vindex_mask = wasm_u32x4_const_splat(UINT32_C(0x${"%X" % (LUT-1)}));
   const v128_t vln2 = wasm_f32x4_const_splat(0x1.62E430p-1f);
-  // Coefficient of polynomial approximation
+  // Coefficients of polynomial approximation
   //   exp(-2t) - 1 ~ t * ${POLYNOMIAL}
   // on [-log(2)/${4*LUT}, log(2)/${4*LUT}]
   $for i in reversed(range(len(COEFFS))):

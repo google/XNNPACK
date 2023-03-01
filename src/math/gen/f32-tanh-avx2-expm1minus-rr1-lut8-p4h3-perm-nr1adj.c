@@ -37,7 +37,7 @@ void xnn_math_f32_tanh__avx2_expm1minus_rr1_lut8_p4h3_perm_nr1adj(
   const __m256i vtable = _mm256_set_epi32(
     0x3F7AC0C7, 0x3F7744FD, 0x3F75672A, 0x3F7504F3, 0x3F75FED7, 0x3F7837F0, 0x3F7B95C2, 0x3F800000);
   const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
-  // Coefficient of polynomial approximation
+  // Coefficients of polynomial approximation
   //   exp(2t) - 1 ~ t * (2 + t * (c2 + t * (c3 + t * c4)))
   // on [-log(2)/32, log(2)/32]
   const __m256 vc4 = _mm256_set1_ps(0x1.5558ECp-1f);

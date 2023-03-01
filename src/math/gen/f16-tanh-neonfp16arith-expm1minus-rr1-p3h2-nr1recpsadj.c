@@ -31,7 +31,7 @@ void xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1recpsadj(
   const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x620F)));  // 0x1.83Cp+9h
   const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xBDC5)));  // -0x1.714p+0h
   const float16x8_t vln2 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x398C)));  // 0x1.630p-1h
-  // Coefficient of polynomial approximation
+  // Coefficients of polynomial approximation
   //   exp(-2t) - 1 ~ t * (-2 + t * (c2 + t * c3))
   // on [-log(2)/4, log(2)/4]
   const float16x8_t vc3 = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xBD5B)));  // -0x1.56Cp+0h

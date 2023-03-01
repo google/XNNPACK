@@ -34,7 +34,7 @@ void xnn_math_f32_tanh__avx_expm1minus_rr1_p6h5_div(
   // Large number such that ulp(magic bias) == 0.5 and magic bias === 63.5 mod 2**21.
   const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp+22f);
   const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
-  // Coefficient of polynomial approximation
+  // Coefficients of polynomial approximation
   //   exp(2t) - 1 ~ t * (2 + t * (c2 + t * (c3 + t * (c4 + t * (c5 + t * c6)))))
   // on [-log(2)/4, log(2)/4]
   const __m256 vc6 = _mm256_set1_ps(0x1.6B7338p-4f);

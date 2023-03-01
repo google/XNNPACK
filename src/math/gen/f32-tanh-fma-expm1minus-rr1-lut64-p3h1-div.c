@@ -33,7 +33,7 @@ void xnn_math_f32_tanh__fma_expm1minus_rr1_lut64_p3h1_div(
   // Mask for the lowest 6 bits
   const uint32_t vindex_mask = UINT32_C(0x3F);
   const float vln2 = 0x1.62E430p-1f;
-  // Coefficient of polynomial approximation
+  // Coefficients of polynomial approximation
   //   exp(-2t) - 1 ~ -2 * (t + t * (t * (c2 + t * c3)))
   // on [-log(2)/256, log(2)/256]
   const float vc3 = 0x1.55555Ep-1f;
@@ -104,8 +104,10 @@ void xnn_math_f32_tanh__fma_expm1minus_rr1_lut64_p3h1_div(
     vp = fmaf(vp, vts, vts);
     const float vemo = fmaf(vp, vminus_two, vsmo);
 
-    // Reconstruct y = expm1(-2z) / (expm1(-2z) + 2)
+    // Denominator of the tanh fraction: exp(-2z) + 1 = expm1(-2z) + 2
     const float vepo = vemo - vminus_two;
+
+    // Reconstruct y = expm1(-2z) / (expm1(-2z) + 2)
     float vy = vemo / vepo;
 
     // The function saturates at -1 for large negative positive inputs: tanhf(-z) == -1.0f for z >= sat_cutoff ~= 9.010913.

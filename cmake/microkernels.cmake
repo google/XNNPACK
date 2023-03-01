@@ -1281,17 +1281,23 @@ SET(ALL_F16C_MICROKERNEL_SRCS
 
 SET(ALL_FMA_MICROKERNEL_SRCS
   src/math/gen/f32-tanh-fma-expm1minus-rr1-lut4-p4h2-div.c
+  src/math/gen/f32-tanh-fma-expm1minus-rr1-lut4-p4h2-rcp.c
   src/math/gen/f32-tanh-fma-expm1minus-rr1-lut4-p4h3-div.c
+  src/math/gen/f32-tanh-fma-expm1minus-rr1-lut4-p4h3-rcp.c
   src/math/gen/f32-tanh-fma-expm1minus-rr1-lut8-p3h1-div.c
   src/math/gen/f32-tanh-fma-expm1minus-rr1-lut8-p4h2-div.c
+  src/math/gen/f32-tanh-fma-expm1minus-rr1-lut8-p4h2-rcp.c
   src/math/gen/f32-tanh-fma-expm1minus-rr1-lut8-p4h3-div.c
+  src/math/gen/f32-tanh-fma-expm1minus-rr1-lut8-p4h3-rcp.c
   src/math/gen/f32-tanh-fma-expm1minus-rr1-lut16-p3h1-div.c
   src/math/gen/f32-tanh-fma-expm1minus-rr1-lut16-p4h2-div.c
+  src/math/gen/f32-tanh-fma-expm1minus-rr1-lut16-p4h2-rcp.c
   src/math/gen/f32-tanh-fma-expm1minus-rr1-lut16-p4h3-div.c
   src/math/gen/f32-tanh-fma-expm1minus-rr1-lut32-p3h1-div.c
   src/math/gen/f32-tanh-fma-expm1minus-rr1-lut64-p3h1-div.c
   src/math/gen/f32-tanh-fma-expm1minus-rr1-p6h4-div.c
   src/math/gen/f32-tanh-fma-expm1minus-rr1-p6h5-div.c
+  src/math/gen/f32-tanh-fma-expm1minus-rr1-p6h5-rcp.c
   src/math/gen/f32-tanh-fma-expm1minus-rr2-lut4-p4h2-div.c
   src/math/gen/f32-tanh-fma-expm1minus-rr2-lut4-p4h3-div.c
   src/math/gen/f32-tanh-fma-expm1minus-rr2-lut8-p3h1-div.c
@@ -4162,22 +4168,29 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/math/f32-sigmoid-scalar-rr2-lut2048-p1-div.c
   src/math/f32-sigmoid-scalar-rr2-p5-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut4-p4h2-div.c
+  src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut4-p4h2-rcp.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut4-p4h3-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut8-p3h1-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut8-p4h2-div.c
+  src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut8-p4h2-rcp.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut8-p4h3-div.c
+  src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut8-p4h3-rcp.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut16-p3h1-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut16-p4h2-div.c
+  src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut16-p4h2-rcp.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut16-p4h3-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut32-p3h1-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut64-p3h1-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr1-p6h4-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr1-p6h5-div.c
+  src/math/gen/f32-tanh-scalar-expm1minus-rr1-p6h5-rcp.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr2-lut4-p4h2-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr2-lut4-p4h3-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr2-lut8-p3h1-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr2-lut8-p4h2-div.c
+  src/math/gen/f32-tanh-scalar-expm1minus-rr2-lut8-p4h2-rcp.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr2-lut8-p4h3-div.c
+  src/math/gen/f32-tanh-scalar-expm1minus-rr2-lut8-p4h3-rcp.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr2-lut16-p3h1-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr2-lut16-p4h2-div.c
   src/math/gen/f32-tanh-scalar-expm1minus-rr2-lut16-p4h3-div.c

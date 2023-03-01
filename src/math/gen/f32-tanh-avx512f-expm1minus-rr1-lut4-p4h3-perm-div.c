@@ -40,7 +40,7 @@ void xnn_math_f32_tanh__avx512f_expm1minus_rr1_lut4_p4h3_perm_div(
     0x1.EE89FAp-1f, 0x1.EA09E6p-1f, 0x1.F06FE0p-1f, 0x1.000000p+0f,
     0x1.EE89FAp-1f, 0x1.EA09E6p-1f, 0x1.F06FE0p-1f, 0x1.000000p+0f);
   const __m512 vln2 = _mm512_set1_ps(0x1.62E430p-1f);
-  // Coefficient of polynomial approximation
+  // Coefficients of polynomial approximation
   //   exp(2t) - 1 ~ t * (-2 + t * (c2 + t * (c3 + t * c4)))
   // on [-log(2)/16, log(2)/16]
   const __m512 vc4 = _mm512_set1_ps(0x1.554F9Ap-1f);

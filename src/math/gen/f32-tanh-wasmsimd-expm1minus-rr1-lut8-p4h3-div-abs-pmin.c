@@ -36,7 +36,7 @@ void xnn_math_f32_tanh__wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_pmin(
   // Mask for the lowest 3 bits
   const v128_t vindex_mask = wasm_u32x4_const_splat(UINT32_C(0x7));
   const v128_t vln2 = wasm_f32x4_const_splat(0x1.62E430p-1f);
-  // Coefficient of polynomial approximation
+  // Coefficients of polynomial approximation
   //   exp(-2t) - 1 ~ t * (-2 + t * (c2 + t * (c3 + t * c4)))
   // on [-log(2)/32, log(2)/32]
   const v128_t vc4 = wasm_f32x4_const_splat(0x1.5558ECp-1f);
