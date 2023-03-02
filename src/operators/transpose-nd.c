@@ -187,6 +187,7 @@ static enum xnn_status setup_transpose_nd(
   size_t normalized_element_size;
   xnn_normalize_transpose_permutation(num_dims, element_size, perm, input_shape, input_stride, output_stride, &normalized_dims,
                                       &normalized_element_size, normalized_perm, normalized_shape, context->input_stride, context->output_stride);
+  assert(normalized_dims);
 
   size_t loop_order[XNN_MAX_TENSOR_DIMS];
   memcpy(loop_order, normalized_perm, sizeof(size_t) * normalized_dims);
@@ -217,7 +218,8 @@ static enum xnn_status setup_transpose_nd(
   assert(transpose_config != NULL);
 
   bool variable_size_ukernel = false;
-  switch (normalized_element_size) {
+  const size_t ukernel_selector = normalized_perm[normalized_dims-1] == normalized_dims-1 ? 0 : normalized_element_size;
+  switch (ukernel_selector) {
     case 1:
       context->const_size_ukernel = transpose_config->x8.const_size_ukernel;
       transpose_op->compute.tile[0] = transpose_config->x8.tile_size;
