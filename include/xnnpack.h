@@ -2119,8 +2119,6 @@ enum xnn_status xnn_run_maximum_nd_f32(
   const float* input1,
   const float* input2,
   float* output,
-  float output_min,
-  float output_max,
   uint32_t flags,
   pthreadpool_t threadpool);
 
@@ -2147,8 +2145,6 @@ enum xnn_status xnn_run_minimum_nd_f32(
   const float* input1,
   const float* input2,
   float* output,
-  float output_min,
-  float output_max,
   uint32_t flags,
   pthreadpool_t threadpool);
 
@@ -2349,8 +2345,6 @@ enum xnn_status xnn_run_squared_difference_nd_f32(
   const float* input1,
   const float* input2,
   float* output,
-  float output_min,
-  float output_max,
   uint32_t flags,
   pthreadpool_t threadpool);
 

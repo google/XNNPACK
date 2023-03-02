@@ -1171,7 +1171,6 @@ class BinaryElementwiseOperatorTester {
                     num_input1_dims(), input1_shape().data(),
                     num_input2_dims(), input2_shape().data(),
                     input1.data(), input2.data(), output.data(),
-                    output_min, output_max,
                     0,
                     nullptr /* thread pool */));
           break;
@@ -1181,7 +1180,6 @@ class BinaryElementwiseOperatorTester {
                     num_input1_dims(), input1_shape().data(),
                     num_input2_dims(), input2_shape().data(),
                     input1.data(), input2.data(), output.data(),
-                    output_min, output_max,
                     0,
                     nullptr /* thread pool */));
           break;
@@ -1211,7 +1209,6 @@ class BinaryElementwiseOperatorTester {
                     num_input1_dims(), input1_shape().data(),
                     num_input2_dims(), input2_shape().data(),
                     input1.data(), input2.data(), output.data(),
-                    output_min, output_max,
                     0,
                     nullptr /* thread pool */));
           break;

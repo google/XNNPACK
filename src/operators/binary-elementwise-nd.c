@@ -1415,8 +1415,6 @@ enum xnn_status xnn_run_maximum_nd_f32(
   const float* input1,
   const float* input2,
   float* output,
-  float output_min,
-  float output_max,
   uint32_t flags,
   pthreadpool_t threadpool)
 {
@@ -1432,11 +1430,7 @@ enum xnn_status xnn_run_maximum_nd_f32(
     f32_vmax_config->init.f32_default(&params);
   }
 
-  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
   const struct xnn_binary_elementwise_subconfig* binary_elementwise_subconfig = &f32_vmax_config->minmax;
-  if (linear_activation && f32_vmax_config->linear.op_ukernel != NULL) {
-    binary_elementwise_subconfig = &f32_vmax_config->linear;
-  }
 
   return run_binary_elementwise_nd(
     xnn_operator_type_maximum_nd_f32,
@@ -1461,8 +1455,6 @@ enum xnn_status xnn_run_minimum_nd_f32(
   const float* input1,
   const float* input2,
   float* output,
-  float output_min,
-  float output_max,
   uint32_t flags,
   pthreadpool_t threadpool)
 {
@@ -1477,11 +1469,7 @@ enum xnn_status xnn_run_minimum_nd_f32(
   if (f32_vmin_config->init.f32_default != NULL) {
     f32_vmin_config->init.f32_default(&params);
   }
-  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
   const struct xnn_binary_elementwise_subconfig* binary_elementwise_subconfig = &f32_vmin_config->minmax;
-  if (linear_activation && f32_vmin_config->linear.op_ukernel != NULL) {
-    binary_elementwise_subconfig = &f32_vmin_config->linear;
-  }
 
   return run_binary_elementwise_nd(
     xnn_operator_type_minimum_nd_f32,
@@ -1554,32 +1542,9 @@ enum xnn_status xnn_run_squared_difference_nd_f32(
   const float* input1,
   const float* input2,
   float* output,
-  float output_min,
-  float output_max,
   uint32_t flags,
   pthreadpool_t threadpool)
 {
-  if (isnan(output_min)) {
-    xnn_log_error(
-      "failed to run %s operator with NaN output lower bound: lower bound must be non-NaN",
-      xnn_operator_type_to_string(xnn_operator_type_squared_difference_nd_f32));
-    return xnn_status_invalid_parameter;
-  }
-
-  if (isnan(output_max)) {
-      xnn_log_error(
-        "failed to run %s operator with NaN output upper bound: upper bound must be non-NaN",
-        xnn_operator_type_to_string(xnn_operator_type_squared_difference_nd_f32));
-      return xnn_status_invalid_parameter;
-    }
-
-  if (output_min >= output_max) {
-      xnn_log_error(
-        "failed to run %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
-        xnn_operator_type_to_string(xnn_operator_type_squared_difference_nd_f32), output_min, output_max);
-      return xnn_status_invalid_parameter;
-    }
-
   const struct xnn_binary_elementwise_config* f32_vsqrdiff_config = xnn_init_f32_vsqrdiff_config();
   if (f32_vsqrdiff_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
@@ -1592,11 +1557,7 @@ enum xnn_status xnn_run_squared_difference_nd_f32(
     f32_vsqrdiff_config->init.f32_default(&params);
   }
 
-  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
   const struct xnn_binary_elementwise_subconfig* binary_elementwise_subconfig = &f32_vsqrdiff_config->minmax;
-  if (linear_activation && f32_vsqrdiff_config->linear.op_ukernel != NULL) {
-    binary_elementwise_subconfig = &f32_vsqrdiff_config->linear;
-  }
 
   return run_binary_elementwise_nd(
     xnn_operator_type_squared_difference_nd_f32,
