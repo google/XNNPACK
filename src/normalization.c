@@ -95,18 +95,20 @@ static bool can_dimension_be_removed(
     const size_t* input_stride,
     const size_t* output_stride,
     const size_t* shape,
-    const size_t* perm,
-    size_t dim) {
-  if (dim == 0 && perm[dim] == 0) {
+    const size_t* inverted_perm,
+    size_t input_dim,
+    const size_t num_dims) {
+  const size_t output_dim = inverted_perm[input_dim];
+  if (input_dim == 0 && output_dim == 0) {
     return true;
   }
-  if (input_stride != NULL && dim > 0) {
-    if (input_stride[dim - 1] != input_stride[dim] * shape[dim]) {
+  if (input_stride != NULL && input_dim > 0) {
+    if (input_stride[input_dim - 1] != input_stride[input_dim] * shape[input_dim]) {
       return false;
     }
   }
-  if (output_stride != NULL && perm[dim] > 0) {
-    if (output_stride[perm[dim] - 1] != output_stride[perm[dim]] * shape[dim]) {
+  if (output_stride != NULL && output_dim > 0) {
+    if (output_stride[output_dim - 1] != output_stride[output_dim] * shape[input_dim]) {
       return false;
     }
   }
@@ -114,36 +116,51 @@ static bool can_dimension_be_removed(
 }
 
 // Remove dimension perm[dim] from shape, perm, input & output strides.
-static void remove_dimension(
+static void fold_into_previous_dim(
     size_t* shape,
     size_t* perm,
+    size_t* inverted_perm,
     size_t* input_stride,
     size_t* output_stride,
     size_t num_dims,
-    size_t dim)
+    size_t input_dim)
 {
-  for (size_t j = perm[dim]; j + 1 < num_dims; ++j) {
+  const size_t perm_idx = inverted_perm[input_dim];
+  // Update preceding dimension size.
+  if (input_dim > 0) {
+    shape[input_dim - 1] *= shape[input_dim];
+  }
+  // Shift shape to the left to overwrite the squashed dim.
+  for (size_t j = input_dim; j + 1 < num_dims; ++j) {
     shape[j] = shape[j + 1];
   }
+  // Shift strides to the left to overwrite the squashed dim.
   if (input_stride != NULL) {
-    for (size_t j = max(1, perm[dim]) - 1; j + 1 < num_dims; ++j) {
+    for (size_t j = max(1, input_dim) - 1; j + 1 < num_dims; ++j) {
       input_stride[j] = input_stride[j + 1];
     }
   }
   if (output_stride != NULL) {
-    for (size_t j = max(1, dim) - 1; j + 1 < num_dims; ++j) {
+    for (size_t j = max(1, perm_idx) - 1; j + 1 < num_dims; ++j) {
       output_stride[j] = output_stride[j + 1];
     }
   }
+  // Update dimensions that were greater than the one removed.
   for (size_t j = 0; j < num_dims; ++j) {
-    if (perm[j] > perm[dim]) {
+    if (perm[j] > input_dim) {
       perm[j] -= 1;
     }
   }
-  for (size_t j = dim; j + 1 < num_dims; ++j) {
+  // Shift permutation.
+  for (size_t j = perm_idx; j + 1 < num_dims; ++j) {
     perm[j] = perm[j + 1];
   }
+  // Update the inverted perm.
+  for (size_t j = 0; j + 1 < num_dims; ++j) {
+    inverted_perm[perm[j]] = j;
+  }
 }
+
 void xnn_normalize_transpose_permutation(
     const size_t num_dims,
     const size_t element_size,
@@ -172,30 +189,37 @@ void xnn_normalize_transpose_permutation(
     normalized_output_stride_ptr = normalized_output_stride;
   }
 
-  size_t output_pos = 0;
+  size_t normalized_inverted_perm[XNN_MAX_TENSOR_DIMS];
+  for (size_t i = 0; i < num_dims; ++i) {
+    normalized_inverted_perm[perm[i]] = i;
+  }
+
+  size_t input_dim = 0;
   // Remove dimensions of size 1 and fold dimensions which are adjacent in both input and output tensors.
-  for (; output_pos < output_dims;) {
-    if (can_dimension_be_removed(normalized_input_stride_ptr, normalized_output_stride_ptr, normalized_shape,
-                                 normalized_perm, normalized_perm[output_pos])
-        && ((normalized_shape[normalized_perm[output_pos]] == 1)
-            || (output_pos > 0 && normalized_perm[output_pos] == normalized_perm[output_pos - 1] + 1))) {
-      if (output_pos > 0) {
-        normalized_shape[normalized_perm[output_pos - 1]] *= normalized_shape[normalized_perm[output_pos]];
-      }
-      remove_dimension(normalized_shape, normalized_perm, normalized_input_stride_ptr, normalized_output_stride_ptr,
-                       output_dims, output_pos);
+  while (input_dim < output_dims) {
+    const bool has_size_1 = normalized_shape[input_dim] == 1;
+    const bool previous_dim_in_output_is_previous_dim_in_input = input_dim > 0 &&
+        normalized_inverted_perm[input_dim] == normalized_inverted_perm[input_dim-1] + 1;
+    const bool strides_allow_fold_left = can_dimension_be_removed(
+        normalized_input_stride_ptr, normalized_output_stride_ptr, normalized_shape,
+        normalized_inverted_perm, input_dim, output_dims);
+    if (strides_allow_fold_left && (has_size_1 || previous_dim_in_output_is_previous_dim_in_input)) {
+      fold_into_previous_dim(normalized_shape, normalized_perm, normalized_inverted_perm,
+                             normalized_input_stride_ptr, normalized_output_stride_ptr,
+                             output_dims, input_dim);
       output_dims -= 1;
       // When a dimension has been removed, new folds may be possible so check
       // it again.
-      if (output_pos > 0) {
-        output_pos -= 1;
+      if (input_dim > 0) {
+        input_dim -= 1;
       }
     } else {
-      output_pos += 1;
+      input_dim += 1;
     }
   }
+
   // All dimensions are size 1.
-  if (output_pos == 0) {
+  if (input_dim == 0) {
     *normalized_num_dims = 1;
     *normalized_element_size_out = element_size;
     normalized_perm[0] = 0;
@@ -209,24 +233,26 @@ void xnn_normalize_transpose_permutation(
   // element.
   size_t normalized_element_size = element_size;
   if (normalized_perm[output_dims - 1] == output_dims - 1) {
-    normalized_element_size = element_size * normalized_shape[output_dims - 1];
-    if (output_dims > 1 && can_dimension_be_removed(normalized_input_stride_ptr, normalized_output_stride_ptr, normalized_shape,
-                                 normalized_perm, output_dims - 1)) {
+    const size_t last_dim = output_dims - 1;
+    normalized_element_size = element_size * normalized_shape[last_dim];
+    if (output_dims > 1 && can_dimension_be_removed(normalized_input_stride_ptr,
+                                                    normalized_output_stride_ptr, normalized_shape,
+                                                    normalized_inverted_perm, last_dim, output_dims)) {
       output_dims -= 1;
     } else {
       if (normalized_input_stride != NULL) {
-        normalized_input_stride[output_dims - 1] *= normalized_shape[output_dims - 1];
+        normalized_input_stride[last_dim] *= normalized_shape[last_dim];
       }
       if (normalized_output_stride != NULL) {
-        normalized_output_stride[normalized_perm[output_dims - 1]] *= normalized_shape[output_dims - 1];
+        normalized_output_stride[normalized_perm[last_dim]] *= normalized_shape[last_dim];
       }
-      normalized_shape[output_dims - 1] = 1;
+      normalized_shape[last_dim] = 1;
     }
   }
   // If input_strides is not provided, calculate it using normalized_shape and normalized_element_size.
   if (input_stride == NULL) {
     normalized_input_stride[output_dims - 1] = normalized_element_size;
-    for(size_t i = output_dims - 1; i > 0; --i) {
+    for (size_t i = output_dims - 1; i > 0; --i) {
       normalized_input_stride[i - 1] = normalized_input_stride[i] * normalized_shape[i];
     }
   } else {
@@ -238,7 +264,7 @@ void xnn_normalize_transpose_permutation(
   // If output_strides is not provided, calculate it using normalized_shape and normalized_element_size.
   if (output_stride == NULL) {
     normalized_output_stride[output_dims - 1] = normalized_element_size;
-    for(size_t i = output_dims - 1; i > 0; --i) {
+    for (size_t i = output_dims - 1; i > 0; --i) {
       normalized_output_stride[i - 1] = normalized_output_stride[i] * normalized_shape[normalized_perm[i]];
     }
   } else {

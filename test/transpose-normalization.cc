@@ -216,7 +216,7 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, input_output_stride_no_remove_dim_size_1) {
       .Test();
 }
 
-TEST(TRANSPOSE_NORMALIZATION_TEST, input_output_stride_no_remove_dim_1_no_fold) {
+TEST(TRANSPOSE_NORMALIZATION_TEST, input_output_stride_no_remove_dim_1_fold) {
     TransposeNormalizationTester()
       .num_dims(6)
       .element_size(1)
@@ -224,12 +224,12 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, input_output_stride_no_remove_dim_1_no_fold) 
       .shape({4,9,7,2,1,6})
       .input_stride({882,98,14,7,6,1})
       .output_stride({505,505,56,8,2,1})
-      .expected_shape({4,9,7,2,1,6})
-      .expected_perm({5,4,1,2,0,3})
-      .expected_dims(6)
+      .expected_shape({4,63,2,1,6})
+      .expected_perm({4,3,1,0,2})
+      .expected_dims(5)
       .expected_element_size(1)
-      .expected_input_stride({882,98,14,7,6,1})
-      .expected_output_stride({505,505,56,8,2,1})
+      .expected_input_stride({882,14,7,6,1})
+      .expected_output_stride({505,505,8,2,1})
       .Test();
 }
 
@@ -407,6 +407,23 @@ TEST(TRANSPOSE_NORMALIZATION_TEST, input_output_stride_flatten_last_dim_strided_
       .expected_element_size(28)
       .calculate_expected_input_stride()
       .expected_output_stride({960,192,64,32,28})
+      .Test();
+}
+
+TEST(TRANSPOSE_NORMALIZATION_TEST, input_output_stride_nofold_contiguous_remove_last_dim) {
+    TransposeNormalizationTester()
+      .num_dims(6)
+      .element_size(1)
+      .perm({2, 3, 0, 4, 1, 5})
+      .shape({1, 1, 2, 3, 3, 1})
+      .input_stride({54, 18, 9, 3, 1, 1})
+      .output_stride({49, 21, 7, 3, 1, 1})
+      .expected_shape({1, 1, 2, 3, 3})
+      .expected_perm({2, 3, 0, 4, 1})
+      .expected_dims(5)
+      .expected_element_size(1)
+      .expected_input_stride({54, 18, 9, 3, 1})
+      .expected_output_stride({49, 21, 7, 3, 1})
       .Test();
 }
 
