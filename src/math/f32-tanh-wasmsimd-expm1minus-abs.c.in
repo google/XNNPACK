@@ -27,12 +27,12 @@ $if LOG2LUT == 3:
 $elif LOG2LUT == 0:
   $COEFFS = ["0x1.FFFFFEp+0", "-0x1.5554B0p+0", "0x1.555716p-1", "-0x1.12278Ep-2", "0x1.6B7338p-4"]
 $POLYNOMIAL = "c%d" % P
-$for i in reversed(range(len(COEFFS)-1)):
-$  POLYNOMIAL = "(c%d + t * %s)" % (i+2, POLYNOMIAL)
+$for i in reversed(range(2, P)):
+$  POLYNOMIAL = "(c%d + t * %s)" % (i, POLYNOMIAL)
 $POLYNOMIAL = "(-2 + t * %s)" % POLYNOMIAL
 $WASM_F32X4_MIN = {"WASM": "wasm_f32x4_min", "PSEUDO": "wasm_f32x4_pmin"}[MINMAX]
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
-$POLY_SUFFIX = "p%dh%d_" % (len(COEFFS)+1, len(COEFFS))
+$POLY_SUFFIX = "p%dh%d_" % (P, H)
 $MINMAX_SUFFIX = {"WASM": "min", "PSEUDO": "pmin"}[MINMAX]
 void xnn_math_f32_tanh__wasmsimd_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}div_abs_${MINMAX_SUFFIX}(
     size_t n,
@@ -58,7 +58,7 @@ void xnn_math_f32_tanh__wasmsimd_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}div_a
   //   exp(-2t) - 1 ~ t * ${POLYNOMIAL}
   // on [-log(2)/${4*LUT}, log(2)/${4*LUT}]
   $for i in reversed(range(len(COEFFS))):
-    const v128_t vc${2+i} = wasm_f32x4_const_splat(${COEFFS[i]}f);
+    const v128_t vc${i+P-len(COEFFS)+1} = wasm_f32x4_const_splat(${COEFFS[i]}f);
   const v128_t vminus_two = wasm_f32x4_const_splat(-2.0f);
   const v128_t vone = wasm_f32x4_const_splat(1.0f);
   // Mask for the sign bit.
@@ -127,12 +127,12 @@ void xnn_math_f32_tanh__wasmsimd_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}div_a
     // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
     const v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vln2), vz);
 
-    // Compute degree-${1+len(COEFFS)} polynomial approximation for exp(-2t) - 1 on [-log(2)/${4*LUT}, log(2)/${4*LUT}].
+    // Compute degree-${P} polynomial approximation for exp(-2t) - 1 on [-log(2)/${4*LUT}, log(2)/${4*LUT}].
     //   P(t) = t * ${POLYNOMIAL}
     //        = t * p
-    v128_t vp = wasm_f32x4_add(wasm_f32x4_mul(vc${1+len(COEFFS)}, vt), vc${len(COEFFS)});
-    $for i in reversed(range(len(COEFFS)-2)):
-      vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc${2+i});
+    v128_t vp = wasm_f32x4_add(wasm_f32x4_mul(vc${P}, vt), vc${P-1});
+    $for i in reversed(range(2, P-1)):
+      vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc${i});
     vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vminus_two);
 
     // Reconstruct the exp(-2z) - 1 value:

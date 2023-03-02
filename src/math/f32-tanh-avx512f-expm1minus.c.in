@@ -33,8 +33,8 @@ $elif LOG2LUT == 2:
 $elif LOG2LUT == 3:
   $COEFFS = {4: ["0x1.000000p+1", "-0x1.555C20p+0", "0x1.5558ECp-1"]}[P]
 $POLYNOMIAL = "c%d" % P
-$for i in reversed(range(len(COEFFS)-1)):
-$  POLYNOMIAL = "(c%d + t * %s)" % (i+2, POLYNOMIAL)
+$for i in reversed(range(2, P)):
+$  POLYNOMIAL = "(c%d + t * %s)" % (i, POLYNOMIAL)
 $if P == H + 1:
   $POLYNOMIAL = "(-2 + t * %s)" % POLYNOMIAL
 $else:
@@ -86,7 +86,7 @@ void xnn_math_f32_tanh__avx512f_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${
     //   exp(2t) - 1 ~ -2 * (t + t * (t * ${POLYNOMIAL}))
   // on [-log(2)/${4*LUT}, log(2)/${4*LUT}]
   $for i in reversed(range(len(COEFFS))):
-    const __m512 vc${2+i} = _mm512_set1_ps(${COEFFS[i]}f);
+    const __m512 vc${i+P-len(COEFFS)+1} = _mm512_set1_ps(${COEFFS[i]}f);
   $if P != H + 1:
     const __m512 vone = _mm512_set1_ps(1.0f);
   const __m512 vminus_two = _mm512_set1_ps(-2.0f);
@@ -157,16 +157,16 @@ void xnn_math_f32_tanh__avx512f_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${
     // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
     const __m512 vt = _mm512_fmadd_ps(vn, vln2, vz);
 
-    // Compute degree-${1+len(COEFFS)} polynomial approximation for exp(-2t) - 1 on [-log(2)/${4*LUT}, log(2)/${4*LUT}].
+    // Compute degree-${P} polynomial approximation for exp(-2t) - 1 on [-log(2)/${4*LUT}, log(2)/${4*LUT}].
     $if P == H + 1:
       //   P(t) = t * ${POLYNOMIAL}
       //        = t * p
     $else:
       //   P(t) = -2 * (t + t * (t * ${POLYNOMIAL}))
       //        = -2 * (t + t * p)
-    __m512 vp = _mm512_fmadd_ps(vc${1+len(COEFFS)}, vt, vc${len(COEFFS)});
-    $for i in reversed(range(len(COEFFS)-2)):
-      vp = _mm512_fmadd_ps(vp, vt, vc${2+i});
+    __m512 vp = vc${P};
+    $for i in reversed(range(2, P)):
+      vp = _mm512_fmadd_ps(vp, vt, vc${i});
     $if P == H + 1:
       vp = _mm512_fmadd_ps(vp, vt, vminus_two);
     $else:

@@ -102,7 +102,8 @@ void xnn_math_f32_tanh__avx512f_expm1minus_rr1_lut8_p4h3_gather_div(
     // Compute degree-4 polynomial approximation for exp(-2t) - 1 on [-log(2)/32, log(2)/32].
     //   P(t) = t * (-2 + t * (c2 + t * (c3 + t * c4)))
     //        = t * p
-    __m512 vp = _mm512_fmadd_ps(vc4, vt, vc3);
+    __m512 vp = vc4;
+    vp = _mm512_fmadd_ps(vp, vt, vc3);
     vp = _mm512_fmadd_ps(vp, vt, vc2);
     vp = _mm512_fmadd_ps(vp, vt, vminus_two);
 

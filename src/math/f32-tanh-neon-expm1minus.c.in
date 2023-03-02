@@ -32,8 +32,8 @@ $elif LOG2LUT == 3:
   $COEFFS = {4: ["0x1.000000p+1", "-0x1.555C20p+0", "0x1.5558ECp-1"]}[P]
   $LN2 = ("0x1.62E400p-1", "0x1.7F7D1Cp-20")
 $POLYNOMIAL = "c%d" % P
-$for i in reversed(range(len(COEFFS)-1)):
-$  POLYNOMIAL = "(c%d + t * %s)" % (i+2, POLYNOMIAL)
+$for i in reversed(range(2, P)):
+$  POLYNOMIAL = "(c%d + t * %s)" % (i, POLYNOMIAL)
 $if P == H + 1:
   $POLYNOMIAL = "(-2 + t * %s)" % POLYNOMIAL
 $else:
@@ -76,7 +76,7 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${D
     //   exp(-2t) - 1 ~ -2 * (t + t * (t * ${POLYNOMIAL}))
   // on [-log(2)/${4*LUT}, log(2)/${4*LUT}]
   $for i in reversed(range(len(COEFFS))):
-    const float32x4_t vc${2+i} = vmovq_n_f32(${COEFFS[i]}f);
+    const float32x4_t vc${i+P-len(COEFFS)+1} = vmovq_n_f32(${COEFFS[i]}f);
   $if P == H + 1:
     const float32x4_t vtwo = vmovq_n_f32(2.0f);
   const float32x4_t vone = vmovq_n_f32(1.0f);
@@ -153,16 +153,16 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${D
       float32x4_t vt = ${VMLAQ_F32}(vz, vn, vln2_hi);
       vt = ${VMLAQ_F32}(vt, vn, vln2_lo);
 
-    // Compute degree-${1+len(COEFFS)} polynomial approximation for exp(-2t) - 1 on [-log(2)/${4*LUT}, log(2)/${4*LUT}].
+    // Compute degree-${P} polynomial approximation for exp(-2t) - 1 on [-log(2)/${4*LUT}, log(2)/${4*LUT}].
     $if P == H + 1:
       //   P(t) = t * ${POLYNOMIAL}
       //        = t * (-p)
     $else:
       //   P(t) = -2 * (t + t * (t * ${POLYNOMIAL}))
       //        = -2 * (t + t * p)
-    float32x4_t vp = ${VMLAQ_F32}(vc${len(COEFFS)}, vc${1+len(COEFFS)}, vt);
-    $for i in reversed(range(len(COEFFS)-2)):
-      vp = ${VMLAQ_F32}(vc${2+i}, vp, vt);
+    float32x4_t vp = ${VMLAQ_F32}(vc${P-1}, vc${P}, vt);
+    $for i in reversed(range(2, P-1)):
+      vp = ${VMLAQ_F32}(vc${i}, vp, vt);
     $if P == H + 1:
       vp = ${VMLSQ_F32}(vtwo, vp, vt);
     $else:

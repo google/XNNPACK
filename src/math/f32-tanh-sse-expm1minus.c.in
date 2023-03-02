@@ -33,8 +33,8 @@ $elif LOG2LUT == 3:
   $COEFFS = {4: ["0x1.000000p+1", "0x1.555C20p+0", "0x1.5558ECp-1"]}[P]
   $MINUS_LN2 = ("-0x1.62E400p-1", "-0x1.7F7D1Cp-20")
 $POLYNOMIAL = "c%d" % P
-$for i in reversed(range(P-2)):
-$  POLYNOMIAL = "(c%d + t * %s)" % (i+2, POLYNOMIAL)
+$for i in reversed(range(2, P)):
+$  POLYNOMIAL = "(c%d + t * %s)" % (i, POLYNOMIAL)
 $if P == H + 1:
   $POLYNOMIAL = "(2 + t * %s)" % POLYNOMIAL
 $else:
@@ -75,8 +75,8 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DIV
   $else:
     //   exp(2t) - 1 ~ 2 * (t + t * (t * ${POLYNOMIAL}))
   // on [-log(2)/${4*LUT}, log(2)/${4*LUT}]
-  $for i in reversed(range(P - 1)):
-    const __m128 vc${2+i} = _mm_set1_ps(${COEFFS[i]}f);
+  $for i in reversed(range(len(COEFFS))):
+    const __m128 vc${i+P-len(COEFFS)+1} = _mm_set1_ps(${COEFFS[i]}f);
   $if P != H + 1:
     const __m128 vminus_one = _mm_set1_ps(-1.0f);
   const __m128 vminus_two = _mm_set1_ps(-2.0f);

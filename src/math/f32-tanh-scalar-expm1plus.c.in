@@ -43,8 +43,8 @@ $elif LOG2LUT == 6:
 $if FMA:
   $MINUS_LN2 = ("-0x1.62E430p-1", "0x1.05C610p-29")
 $POLYNOMIAL = "c%d" % P
-$for i in reversed(range(len(COEFFS)-1)):
-$  POLYNOMIAL = "(c%d + t * %s)" % (i+2, POLYNOMIAL)
+$for i in reversed(range(2, P)):
+$  POLYNOMIAL = "(c%d + t * %s)" % (i, POLYNOMIAL)
 $if P == H + 1:
   $POLYNOMIAL = "(2 + t * %s)" % POLYNOMIAL
 $else:
@@ -83,7 +83,7 @@ void xnn_math_f32_tanh__${ISA}_expm1plus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DI
     //   exp(2t) - 1 ~ 2 * (t + t * (t * ${POLYNOMIAL}))
   // on [-log(2)/${4*LUT}, log(2)/${4*LUT}]
   $for i in reversed(range(len(COEFFS))):
-    const float vc${2+i} = ${COEFFS[i]}f;
+    const float vc${i+P-len(COEFFS)+1} = ${COEFFS[i]}f;
   $if P == H + 1:
     const float vtwo = 2.0f;
   const float vone = 1.0f;
@@ -160,7 +160,7 @@ void xnn_math_f32_tanh__${ISA}_expm1plus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DI
         float vt = vn * vminus_ln2_hi + vz;
         vt = vn * vminus_ln2_lo + vt;
 
-    // Compute degree-${1+len(COEFFS)} polynomial approximation for exp(2t) - 1 on [-log(2)/${4*LUT}, log(2)/${4*LUT}].
+    // Compute degree-${P} polynomial approximation for exp(2t) - 1 on [-log(2)/${4*LUT}, log(2)/${4*LUT}].
     $if P == H + 1:
       //   P(t) = t * ${POLYNOMIAL}
       //        = t * p
@@ -168,14 +168,14 @@ void xnn_math_f32_tanh__${ISA}_expm1plus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DI
       //   P(t) = 2 * (t + t * (t * ${POLYNOMIAL}))
       //        = 2 * (t + t * p)
     $if FMA:
-      float vp = fmaf(vc${1+len(COEFFS)}, vt, vc${len(COEFFS)});
+      float vp = fmaf(vc${P}, vt, vc${P-1});
     $else:
-      float vp = vc${1+len(COEFFS)} * vt + vc${len(COEFFS)};
-    $for i in reversed(range(len(COEFFS)-2)):
+      float vp = vc${P} * vt + vc${P-1};
+    $for i in reversed(range(2, P-1)):
       $if FMA:
-        vp = fmaf(vp, vt, vc${2+i});
+        vp = fmaf(vp, vt, vc${i});
       $else:
-        vp = vp * vt + vc${2+i};
+        vp = vp * vt + vc${i};
     $if P == H + 1:
       $if FMA:
         vp = fmaf(vp, vt, vtwo);
