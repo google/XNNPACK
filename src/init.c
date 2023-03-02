@@ -1096,6 +1096,8 @@ static void init(void) {
         xnn_params.f32.dwconv[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_25p8c__neon_acc2;
         xnn_params.f32.dwconv[3].init.f32 = xnn_init_f32_minmax_scalar_params;
         xnn_params.f32.dwconv[3].channel_tile = 8;
+        xnn_params.f32.dwconv[3].channel_subtile = 8;
+        xnn_params.f32.dwconv[3].channel_round = 1;
         xnn_params.f32.dwconv[3].primary_tile = 25;
       #endif  // XNN_ENABLE_DWCONV_MULTIPASS
 
