@@ -34,6 +34,7 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_di
   assert(input != NULL);
   assert(output != NULL);
 
+  const float vsat_cutoff = params->${PARAMS_STRUCT}.sat_cutoff;
   const float vminus_log2e = params->${PARAMS_STRUCT}.minus_log2e;
   const float vmagic_bias = params->${PARAMS_STRUCT}.magic_bias;
   $if LOG2LUT != 0:
@@ -43,7 +44,6 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_di
     const float vc${i} = params->${PARAMS_STRUCT}.c${i};
   const float vminus_two = params->${PARAMS_STRUCT}.minus_two;
   const float vone = params->${PARAMS_STRUCT}.one;
-  const float vsat_cutoff = params->${PARAMS_STRUCT}.sat_cutoff;
 
   $if BATCH_TILE > 1:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
@@ -52,7 +52,10 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_di
       input += ${BATCH_TILE};
 
       $for N in range(BATCH_TILE):
-        const float vz${N} = fabsf(vx${N});
+        float vz${N} = fabsf(vx${N});
+
+      $for N in range(BATCH_TILE):
+        vz${N} = math_pmin_f32(vz${N}, vsat_cutoff);
 
       $for N in range(BATCH_TILE):
         $if FMA:
@@ -119,11 +122,6 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_di
         float vy${N} = vemo${N} / vepo${N};
 
       $for N in range(BATCH_TILE):
-        if XNN_UNPREDICTABLE(vz${N} >= vsat_cutoff) {
-          vy${N} = vone;
-        }
-
-      $for N in range(BATCH_TILE):
         vy${N} = copysignf(vy${N}, vx${N});
 
       $for N in range(BATCH_TILE):
@@ -134,7 +132,9 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_di
     do {
       const float vx = *input++;
 
-      const float vz = fabsf(vx);
+      float vz = fabsf(vx);
+
+      vz = math_pmin_f32(vz, vsat_cutoff);
 
       $if FMA:
         float vn = fmaf(vz, vminus_log2e, vmagic_bias);
@@ -182,10 +182,6 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_di
       const float vepo = vemo - vminus_two;
 
       float vy = vemo / vepo;
-
-      if XNN_UNPREDICTABLE(vz >= vsat_cutoff) {
-        vy = vone;
-      }
 
       vy = copysignf(vy, vx);
 
@@ -197,7 +193,9 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_di
     if XNN_UNLIKELY(batch != 0) {
       const float vx = *input;
 
-      const float vz = fabsf(vx);
+      float vz = fabsf(vx);
+
+      vz = math_pmin_f32(vz, vsat_cutoff);
 
       $if FMA:
         float vn = fmaf(vz, vminus_log2e, vmagic_bias);
@@ -246,10 +244,6 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_di
 
       float vy = vemo / vepo;
 
-      if XNN_UNPREDICTABLE(vz >= vsat_cutoff) {
-        vy = vone;
-      }
-
       vy = copysignf(vy, vx);
 
       *output = vy;
@@ -259,7 +253,9 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_di
       do {
         const float vx = *input++;
 
-        const float vz = fabsf(vx);
+        float vz = fabsf(vx);
+
+        vz = math_pmin_f32(vz, vsat_cutoff);
 
         $if FMA:
           float vn = fmaf(vz, vminus_log2e, vmagic_bias);
@@ -307,10 +303,6 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_di
         const float vepo = vemo - vminus_two;
 
         float vy = vemo / vepo;
-
-        if XNN_UNPREDICTABLE(vz >= vsat_cutoff) {
-          vy = vone;
-        }
 
         vy = copysignf(vy, vx);
 

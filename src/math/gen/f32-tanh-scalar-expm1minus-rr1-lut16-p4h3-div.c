@@ -27,6 +27,8 @@ void xnn_math_f32_tanh__scalar_expm1minus_rr1_lut16_p4h3_div(
 {
   assert(n % sizeof(float) == 0);
 
+  // The smallest z for which tanhf(-z) is saturated at -1.0f.
+  const float vsat_cutoff = 0x1.205968p+3f;
   const float vminus_log2e = -0x1.715476p+0f;
   // Large number such that ulp(magic bias) == exp2(-5)
   const float vmagic_bias = 0x1.800000p+18f;
@@ -41,8 +43,6 @@ void xnn_math_f32_tanh__scalar_expm1minus_rr1_lut16_p4h3_div(
   const float vc2 = 0x1.000000p+1f;
   const float vminus_two = -2.0f;
   const float vone = 1.0f;
-  // The smallest z for which tanhf(-z) is saturated at -1.0f.
-  const float vsat_cutoff = 0x1.205968p+3f;
 
   for (; n != 0; n -= sizeof(float)) {
     const float vx = *input++;
@@ -55,7 +55,12 @@ void xnn_math_f32_tanh__scalar_expm1minus_rr1_lut16_p4h3_div(
     //
     // First we compute y := expm1(-2z) / (2 + expm1(-2z)) where z = abs(x),
     // then set its sign according to the sign of x: f(x) := sign(x) * abs(y).
-    const float vz = fabsf(vx);
+    float vz = fabsf(vx);
+
+    // The function saturates at -1 for large positive inputs: tanhf(-z) == -1.0f for z >= sat_cutoff ~= 9.010913.
+    // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
+    // tanhf(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
+    vz = math_pmin_f32(vz, vsat_cutoff);
 
     // Compute reduced argument n := round(-z / log(2), 5).
     // We do it by adding a large number (magic bias), which cause rounding of the result to 5 fractional bits,
@@ -110,14 +115,6 @@ void xnn_math_f32_tanh__scalar_expm1minus_rr1_lut16_p4h3_div(
 
     // Reconstruct y = expm1(-2z) / (expm1(-2z) + 2)
     float vy = vemo / vepo;
-
-    // The function saturates at -1 for large negative positive inputs: tanhf(-z) == -1.0f for z >= sat_cutoff ~= 9.010913.
-    // To guarantee this behaviour, we replace computed outputs with the saturation value (supposed to be -1, but we use +1
-    // because sign will be copied from the input in the next step).
-    // Note that for NaN values the predicate is false and no replacement takes place.
-    if XNN_UNPREDICTABLE(vz >= vsat_cutoff) {
-      vy = vone;
-    }
 
     // Reconstruct tanh(x) = copysign(y, x)
     vy = copysignf(vy, vx);

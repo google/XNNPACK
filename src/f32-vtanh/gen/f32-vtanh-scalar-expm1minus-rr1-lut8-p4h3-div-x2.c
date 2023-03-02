@@ -30,6 +30,7 @@ void xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3_div_x2(
   assert(input != NULL);
   assert(output != NULL);
 
+  const float vsat_cutoff = params->scalar_expm1minus_rr1_lut8_p4h3.sat_cutoff;
   const float vminus_log2e = params->scalar_expm1minus_rr1_lut8_p4h3.minus_log2e;
   const float vmagic_bias = params->scalar_expm1minus_rr1_lut8_p4h3.magic_bias;
   const uint32_t vindex_mask = UINT32_C(0x7);
@@ -39,15 +40,17 @@ void xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3_div_x2(
   const float vc2 = params->scalar_expm1minus_rr1_lut8_p4h3.c2;
   const float vminus_two = params->scalar_expm1minus_rr1_lut8_p4h3.minus_two;
   const float vone = params->scalar_expm1minus_rr1_lut8_p4h3.one;
-  const float vsat_cutoff = params->scalar_expm1minus_rr1_lut8_p4h3.sat_cutoff;
 
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
     const float vx0 = input[0];
     const float vx1 = input[1];
     input += 2;
 
-    const float vz0 = fabsf(vx0);
-    const float vz1 = fabsf(vx1);
+    float vz0 = fabsf(vx0);
+    float vz1 = fabsf(vx1);
+
+    vz0 = math_pmin_f32(vz0, vsat_cutoff);
+    vz1 = math_pmin_f32(vz1, vsat_cutoff);
 
     float vn0 = vz0 * vminus_log2e + vmagic_bias;
     float vn1 = vz1 * vminus_log2e + vmagic_bias;
@@ -94,13 +97,6 @@ void xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3_div_x2(
     float vy0 = vemo0 / vepo0;
     float vy1 = vemo1 / vepo1;
 
-    if XNN_UNPREDICTABLE(vz0 >= vsat_cutoff) {
-      vy0 = vone;
-    }
-    if XNN_UNPREDICTABLE(vz1 >= vsat_cutoff) {
-      vy1 = vone;
-    }
-
     vy0 = copysignf(vy0, vx0);
     vy1 = copysignf(vy1, vx1);
 
@@ -111,7 +107,9 @@ void xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3_div_x2(
   if XNN_UNLIKELY(batch != 0) {
     const float vx = *input;
 
-    const float vz = fabsf(vx);
+    float vz = fabsf(vx);
+
+    vz = math_pmin_f32(vz, vsat_cutoff);
 
     float vn = vz * vminus_log2e + vmagic_bias;
 
@@ -137,10 +135,6 @@ void xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3_div_x2(
     const float vepo = vemo - vminus_two;
 
     float vy = vemo / vepo;
-
-    if XNN_UNPREDICTABLE(vz >= vsat_cutoff) {
-      vy = vone;
-    }
 
     vy = copysignf(vy, vx);
 

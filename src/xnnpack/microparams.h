@@ -2423,6 +2423,7 @@ union xnn_f32_sqrt_params {
 
 union xnn_f32_tanh_params {
   struct {
+    float sat_cutoff;
     float minus_log2e;
     float magic_bias;
     float ln2;
@@ -2433,9 +2434,9 @@ union xnn_f32_tanh_params {
     float c2;
     float minus_two;
     float one;
-    float sat_cutoff;
   } scalar_expm1minus_rr1_p6h5;
   struct {
+    float sat_cutoff;
     float minus_log2e;
     float magic_bias;
     float ln2;
@@ -2444,7 +2445,6 @@ union xnn_f32_tanh_params {
     float c2;
     float minus_two;
     float one;
-    float sat_cutoff;
   } scalar_expm1minus_rr1_lut8_p4h3;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {

@@ -160,6 +160,22 @@ XNN_INLINE static float math_muladd_f32(float x, float y, float acc) {
   #endif
 }
 
+XNN_INLINE static float math_pmin_f32(float a, float b) {
+  return XNN_UNPREDICTABLE(b < a) ? b : a;
+}
+
+XNN_INLINE static float math_pmax_f32(float a, float b) {
+  return XNN_UNPREDICTABLE(b < a) ? a : b;
+}
+
+XNN_INLINE static double math_pmin_f64(double a, double b) {
+  return XNN_UNPREDICTABLE(b < a) ? b : a;
+}
+
+XNN_INLINE static double math_pmax_f64(double a, double b) {
+  return XNN_UNPREDICTABLE(b < a) ? a : b;
+}
+
 XNN_INLINE static float math_min_f32(float a, float b) {
   #if defined(__GNUC__) && defined(__ARM_ARCH) && (__ARM_ARCH >= 8)
     return __builtin_fminf(a, b);

@@ -30,6 +30,7 @@ void xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3_div_x1(
   assert(input != NULL);
   assert(output != NULL);
 
+  const float vsat_cutoff = params->scalar_expm1minus_rr1_lut8_p4h3.sat_cutoff;
   const float vminus_log2e = params->scalar_expm1minus_rr1_lut8_p4h3.minus_log2e;
   const float vmagic_bias = params->scalar_expm1minus_rr1_lut8_p4h3.magic_bias;
   const uint32_t vindex_mask = UINT32_C(0x7);
@@ -39,12 +40,13 @@ void xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3_div_x1(
   const float vc2 = params->scalar_expm1minus_rr1_lut8_p4h3.c2;
   const float vminus_two = params->scalar_expm1minus_rr1_lut8_p4h3.minus_two;
   const float vone = params->scalar_expm1minus_rr1_lut8_p4h3.one;
-  const float vsat_cutoff = params->scalar_expm1minus_rr1_lut8_p4h3.sat_cutoff;
 
   do {
     const float vx = *input++;
 
-    const float vz = fabsf(vx);
+    float vz = fabsf(vx);
+
+    vz = math_pmin_f32(vz, vsat_cutoff);
 
     float vn = fmaf(vz, vminus_log2e, vmagic_bias);
 
@@ -70,10 +72,6 @@ void xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3_div_x1(
     const float vepo = vemo - vminus_two;
 
     float vy = vemo / vepo;
-
-    if XNN_UNPREDICTABLE(vz >= vsat_cutoff) {
-      vy = vone;
-    }
 
     vy = copysignf(vy, vx);
 
