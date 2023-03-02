@@ -2561,6 +2561,59 @@ union xnn_f32_tanh_params {
     XNN_ALIGN(32) float minus_one[8];
     int32_t mask_table[14];
   } avx2_expm1minus_rr1_lut8_p4h3_perm;
+  struct {
+    uint32_t sign_mask;
+    float sat_cutoff;
+    float minus_log2e;
+    float magic_bias;
+    float ln2;
+    float c6;
+    float c5;
+    float c4;
+    float c3;
+    float c2;
+    float minus_two;
+    float one;
+  } avx512_expm1minus_rr1_p6h5;
+  struct {
+    uint32_t sign_mask;
+    float sat_cutoff;
+    float minus_log2e;
+    float magic_bias;
+    uint32_t index_mask;
+    float ln2;
+    float c4;
+    float c3;
+    float c2;
+    float minus_two;
+    float one;
+  } avx512_expm1minus_rr1_lut8_p4h3;
+  struct {
+    uint32_t sign_mask;
+    float sat_cutoff;
+    float minus_log2e;
+    float magic_bias;
+    float ln2;
+    float c4;
+    float c3;
+    float c2;
+    float minus_two;
+    float one;
+    XNN_ALIGN(64) float table[16];
+  } avx512_expm1minus_rr1_lut4_p4h3_perm;
+  struct {
+    uint32_t sign_mask;
+    float sat_cutoff;
+    float minus_log2e;
+    float magic_bias;
+    float ln2;
+    float c4;
+    float c3;
+    float c2;
+    float minus_two;
+    float one;
+    XNN_ALIGN(64) uint32_t table[16];
+  } avx512_expm1minus_rr1_lut8_p4h3_perm;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
