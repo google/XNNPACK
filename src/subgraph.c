@@ -972,6 +972,8 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
     }
   }
 
+  xnn_log_info("XNNPACK has switched to FP16 inference mode!");
+
   return true;
 
 error:
