@@ -111,16 +111,17 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}${P
         $else:
           const __m256 vt${N} = _mm256_add_ps(_mm256_mul_ps(vn${N}, vminus_ln2), vz${N});
 
-      $for N in range(SIMD_TILE):
-        $if FMA == 3:
-          __m256 vp${N} = _mm256_fmadd_ps(vc${P}, vt${N}, vc${P-1});
-        $else:
-          __m256 vp${N} = _mm256_add_ps(_mm256_mul_ps(vc${P}, vt${N}), vc${P-1});
-      $for i in reversed(range(2, P-1)):
+      $if FMA == 3:
         $for N in range(SIMD_TILE):
-          $if FMA == 3:
+          __m256 vp${N} = vc${P};
+        $for i in reversed(range(2, P)):
+          $for N in range(SIMD_TILE):
             vp${N} = _mm256_fmadd_ps(vp${N}, vt${N}, vc${i});
-          $else:
+      $else:
+        $for N in range(SIMD_TILE):
+          __m256 vp${N} = _mm256_add_ps(_mm256_mul_ps(vc${P}, vt${N}), vc${P-1});
+        $for i in reversed(range(2, P-1)):
+          $for N in range(SIMD_TILE):
             vp${N} = _mm256_add_ps(_mm256_mul_ps(vp${N}, vt${N}), vc${i});
       $for N in range(SIMD_TILE):
         $if P == H + 1:
@@ -236,13 +237,12 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}${P
       const __m256 vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2), vz);
 
     $if FMA == 3:
-      __m256 vp = _mm256_fmadd_ps(vc${P}, vt, vc${P-1});
+      __m256 vp = vc${P};
+      $for i in reversed(range(2, P)):
+        vp = _mm256_fmadd_ps(vp, vt, vc${i});
     $else:
       __m256 vp = _mm256_add_ps(_mm256_mul_ps(vc${P}, vt), vc${P-1});
-    $for i in reversed(range(2, P-1)):
-      $if FMA == 3:
-        vp = _mm256_fmadd_ps(vp, vt, vc${i});
-      $else:
+      $for i in reversed(range(2, P-1)):
         vp = _mm256_add_ps(_mm256_mul_ps(vp, vt), vc${i});
     $if P == H + 1:
       $if FMA == 3:
@@ -339,13 +339,12 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}${P
       const __m256 vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2), vz);
 
     $if FMA == 3:
-      __m256 vp = _mm256_fmadd_ps(vc${P}, vt, vc${P-1});
+      __m256 vp = vc${P};
+      $for i in reversed(range(2, P)):
+        vp = _mm256_fmadd_ps(vp, vt, vc${i});
     $else:
       __m256 vp = _mm256_add_ps(_mm256_mul_ps(vc${P}, vt), vc${P-1});
-    $for i in reversed(range(2, P-1)):
-      $if FMA == 3:
-        vp = _mm256_fmadd_ps(vp, vt, vc${i});
-      $else:
+      $for i in reversed(range(2, P-1)):
         vp = _mm256_add_ps(_mm256_mul_ps(vp, vt), vc${i});
     $if P == H + 1:
       $if FMA == 3:

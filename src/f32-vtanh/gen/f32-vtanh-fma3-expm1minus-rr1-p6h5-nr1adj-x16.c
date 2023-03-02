@@ -73,8 +73,10 @@ void xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1adj_x16(
     const __m256 vt0 = _mm256_fmadd_ps(vn0, vminus_ln2, vz0);
     const __m256 vt1 = _mm256_fmadd_ps(vn1, vminus_ln2, vz1);
 
-    __m256 vp0 = _mm256_fmadd_ps(vc6, vt0, vc5);
-    __m256 vp1 = _mm256_fmadd_ps(vc6, vt1, vc5);
+    __m256 vp0 = vc6;
+    __m256 vp1 = vc6;
+    vp0 = _mm256_fmadd_ps(vp0, vt0, vc5);
+    vp1 = _mm256_fmadd_ps(vp1, vt1, vc5);
     vp0 = _mm256_fmadd_ps(vp0, vt0, vc4);
     vp1 = _mm256_fmadd_ps(vp1, vt1, vc4);
     vp0 = _mm256_fmadd_ps(vp0, vt0, vc3);
@@ -136,7 +138,8 @@ void xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1adj_x16(
 
     const __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vz);
 
-    __m256 vp = _mm256_fmadd_ps(vc6, vt, vc5);
+    __m256 vp = vc6;
+    vp = _mm256_fmadd_ps(vp, vt, vc5);
     vp = _mm256_fmadd_ps(vp, vt, vc4);
     vp = _mm256_fmadd_ps(vp, vt, vc3);
     vp = _mm256_fmadd_ps(vp, vt, vc2);
@@ -184,7 +187,8 @@ void xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1adj_x16(
 
     const __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vz);
 
-    __m256 vp = _mm256_fmadd_ps(vc6, vt, vc5);
+    __m256 vp = vc6;
+    vp = _mm256_fmadd_ps(vp, vt, vc5);
     vp = _mm256_fmadd_ps(vp, vt, vc4);
     vp = _mm256_fmadd_ps(vp, vt, vc3);
     vp = _mm256_fmadd_ps(vp, vt, vc2);

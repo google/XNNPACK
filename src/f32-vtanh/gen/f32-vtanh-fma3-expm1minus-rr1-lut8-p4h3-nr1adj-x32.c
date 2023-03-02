@@ -237,10 +237,14 @@ void xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut8_p4h3_nr1adj_x32(
     const __m256 vtGHIJKLMN = _mm256_fmadd_ps(vnGHIJKLMN, vminus_ln2, vzGHIJKLMN);
     const __m256 vtOPQRSTUV = _mm256_fmadd_ps(vnOPQRSTUV, vminus_ln2, vzOPQRSTUV);
 
-    __m256 vp01234567 = _mm256_fmadd_ps(vc4, vt01234567, vc3);
-    __m256 vp89ABCDEF = _mm256_fmadd_ps(vc4, vt89ABCDEF, vc3);
-    __m256 vpGHIJKLMN = _mm256_fmadd_ps(vc4, vtGHIJKLMN, vc3);
-    __m256 vpOPQRSTUV = _mm256_fmadd_ps(vc4, vtOPQRSTUV, vc3);
+    __m256 vp01234567 = vc4;
+    __m256 vp89ABCDEF = vc4;
+    __m256 vpGHIJKLMN = vc4;
+    __m256 vpOPQRSTUV = vc4;
+    vp01234567 = _mm256_fmadd_ps(vp01234567, vt01234567, vc3);
+    vp89ABCDEF = _mm256_fmadd_ps(vp89ABCDEF, vt89ABCDEF, vc3);
+    vpGHIJKLMN = _mm256_fmadd_ps(vpGHIJKLMN, vtGHIJKLMN, vc3);
+    vpOPQRSTUV = _mm256_fmadd_ps(vpOPQRSTUV, vtOPQRSTUV, vc3);
     vp01234567 = _mm256_fmadd_ps(vp01234567, vt01234567, vc2);
     vp89ABCDEF = _mm256_fmadd_ps(vp89ABCDEF, vt89ABCDEF, vc2);
     vpGHIJKLMN = _mm256_fmadd_ps(vpGHIJKLMN, vtGHIJKLMN, vc2);
@@ -362,7 +366,8 @@ void xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut8_p4h3_nr1adj_x32(
 
     const __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vz);
 
-    __m256 vp = _mm256_fmadd_ps(vc4, vt, vc3);
+    __m256 vp = vc4;
+    vp = _mm256_fmadd_ps(vp, vt, vc3);
     vp = _mm256_fmadd_ps(vp, vt, vc2);
     vp = _mm256_fmadd_ps(vp, vt, vtwo);
 
@@ -442,7 +447,8 @@ void xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut8_p4h3_nr1adj_x32(
 
     const __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vz);
 
-    __m256 vp = _mm256_fmadd_ps(vc4, vt, vc3);
+    __m256 vp = vc4;
+    vp = _mm256_fmadd_ps(vp, vt, vc3);
     vp = _mm256_fmadd_ps(vp, vt, vc2);
     vp = _mm256_fmadd_ps(vp, vt, vtwo);
 
