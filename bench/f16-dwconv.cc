@@ -89,8 +89,10 @@ static void f16_dwconv(benchmark::State& state,
 
   std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), UINT16_C(0));
-  xnn_pack_f16_dwconv_ghw_w(primary_tile, kernel_height, kernel_width, channels, channel_tile,
-      k.data(), b.data(), w.data(), 0 /* extra bytes */, nullptr);
+  xnn_pack_f16_dwconv_ghw_w(primary_tile, kernel_height, kernel_width, channels,
+                            channel_tile, channel_tile, /*channel_round=*/1,
+                            k.data(), b.data(), w.data(),
+                            /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
   }
@@ -229,7 +231,7 @@ static void f16_dwconv(benchmark::State& state,
     first_pass_tile, middle_pass_tile, last_pass_tile,
     kernel_height, kernel_width,
     channels, channel_tile, channel_subtile, channel_round,
-    k.data(), b.data(), w.data(), 0 /* extra bytes */, nullptr);
+    k.data(), b.data(), w.data(), /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
   }

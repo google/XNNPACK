@@ -113,9 +113,12 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -162,9 +165,12 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -222,9 +228,12 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -278,9 +287,12 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -342,9 +354,12 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -389,9 +404,12 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -449,9 +467,12 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -499,9 +520,12 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -574,6 +598,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
@@ -630,6 +655,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channels_gt
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -705,6 +731,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
@@ -767,6 +794,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -845,6 +873,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
@@ -911,6 +940,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_gt_cr) 
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -1004,6 +1034,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
@@ -1079,6 +1110,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -1162,6 +1194,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
@@ -1244,6 +1277,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -1329,6 +1363,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rounded) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
@@ -1405,6 +1440,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
@@ -1461,6 +1497,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channels_gt
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -1537,6 +1574,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
@@ -1593,6 +1631,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -1672,6 +1711,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
@@ -1733,6 +1773,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_gt_cr) 
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -1820,6 +1861,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const int32_t bias_offset = h * w * params.input_zero_point * params.kernel_zero_point;
@@ -1889,6 +1931,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -1961,6 +2004,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -2039,6 +2083,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile_rounded) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -2120,6 +2165,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
 
@@ -2179,9 +2225,12 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -2225,9 +2274,12 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -2282,9 +2334,12 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -2335,9 +2390,12 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -2396,9 +2454,12 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -2440,9 +2501,12 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -2497,9 +2561,12 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -2544,9 +2611,12 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -2616,6 +2686,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const std::vector<uint8_t> expected = {
@@ -2669,6 +2740,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channels_gt
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -2741,6 +2813,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const std::vector<uint8_t> expected = {
@@ -2800,6 +2873,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -2875,6 +2949,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const std::vector<uint8_t> expected = {
@@ -2938,6 +3013,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_gt_cr) 
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -3028,6 +3104,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const std::vector<uint8_t> expected = {
@@ -3100,6 +3177,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -3180,6 +3258,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const std::vector<uint8_t> expected = {
@@ -3259,6 +3338,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -3342,6 +3422,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rounded) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const std::vector<uint8_t> expected = {
@@ -3415,6 +3496,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const std::vector<uint8_t> expected = {
@@ -3468,6 +3550,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channels_gt
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -3541,6 +3624,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const std::vector<uint8_t> expected = {
@@ -3594,6 +3678,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -3670,6 +3755,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const std::vector<uint8_t> expected = {
@@ -3728,6 +3814,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_gt_cr) 
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -3812,6 +3899,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
   const std::vector<uint8_t> expected = {
@@ -3878,6 +3966,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -3947,6 +4036,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -4022,6 +4112,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile_rounded) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       &params);
 
@@ -4100,6 +4191,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       &params);
 
 
@@ -4154,9 +4246,12 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -4195,9 +4290,12 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -4242,9 +4340,12 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -4290,9 +4391,12 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -4340,9 +4444,12 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -4379,9 +4486,12 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -4426,9 +4536,12 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -4468,9 +4581,12 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -4532,6 +4648,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<uint16_t> expected = {
@@ -4581,6 +4698,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channels_gt
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -4643,6 +4761,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<uint16_t> expected = {
@@ -4697,6 +4816,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -4760,6 +4880,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<uint16_t> expected = {
@@ -4818,6 +4939,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_gt_cr) 
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -4898,6 +5020,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<uint16_t> expected = {
@@ -4958,6 +5081,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -5026,6 +5150,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<uint16_t> expected = {
@@ -5090,6 +5215,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -5157,6 +5283,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rounded) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<uint16_t> expected = {
@@ -5214,6 +5341,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<uint16_t> expected = {
@@ -5262,6 +5390,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channels_gt
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -5324,6 +5453,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<uint16_t> expected = {
@@ -5372,6 +5502,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -5437,6 +5568,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<uint16_t> expected = {
@@ -5490,6 +5622,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_gt_cr) 
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -5564,6 +5697,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<uint16_t> expected = {
@@ -5618,6 +5752,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -5675,6 +5810,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -5734,6 +5870,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile_rounded) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -5797,6 +5934,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<uint16_t> expected = {
@@ -5837,9 +5975,12 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -5878,9 +6019,12 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -5925,9 +6069,12 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -5973,9 +6120,12 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -6023,9 +6173,12 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -6062,9 +6215,12 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -6109,9 +6265,12 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -6151,9 +6310,12 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      1,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -6215,6 +6377,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -6264,6 +6427,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channels_gt
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -6326,6 +6490,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -6380,6 +6545,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -6443,6 +6609,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -6501,6 +6668,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_gt_cr) 
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -6581,6 +6749,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -6641,6 +6810,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -6709,6 +6879,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -6773,6 +6944,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -6840,6 +7012,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rounded) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -6897,6 +7070,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -6945,6 +7119,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channels_gt
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -7007,6 +7182,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -7055,6 +7231,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -7120,6 +7297,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -7173,6 +7351,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_gt_cr) 
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -7247,6 +7426,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -7301,6 +7481,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -7358,6 +7539,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -7417,6 +7599,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile_rounded) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -7480,6 +7663,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -7520,9 +7704,12 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      cr,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -7564,9 +7751,12 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      cr,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -7614,9 +7804,12 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      cr,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -7665,9 +7858,12 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      cr,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -7718,9 +7914,12 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      cr,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -7760,9 +7959,12 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      cr,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -7810,9 +8012,12 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
       w,
       c,
       cr,
+      cr,
+      cr,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -7855,9 +8060,12 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
       w,
       c,
       cr,
+      cr,
+      cr,
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -7930,6 +8138,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -7980,6 +8189,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_chan
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -8042,6 +8252,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -8096,6 +8307,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -8159,6 +8371,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -8217,6 +8430,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -8297,6 +8511,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_chan
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -8357,6 +8572,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -8425,6 +8641,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_chan
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -8489,6 +8706,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_chan
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -8556,6 +8774,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rou
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -8613,6 +8832,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -8661,6 +8881,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_chan
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -8723,6 +8944,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -8771,6 +8993,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -8836,6 +9059,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -8889,6 +9113,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -8963,6 +9188,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_chan
       b.data(),
       packed_weights.data(),
       0,
+      0,
       nullptr);
 
   const std::vector<float> expected = {
@@ -9017,6 +9243,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile) {
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -9074,6 +9301,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_chan
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -9133,6 +9361,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile_rou
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 
@@ -9195,6 +9424,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_chan
       k.data(),
       b.data(),
       packed_weights.data(),
+      0,
       0,
       nullptr);
 

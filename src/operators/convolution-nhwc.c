@@ -200,9 +200,11 @@ static enum xnn_status create_dwconv_path(
       pack_dwconv_hwg_w(
           primary_tile,
           kernel_height, kernel_width,
-          groups, dwconv_ukernel->channel_tile,
+          groups,
+          dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
           kernel, bias, weights_ptr,
           dwconv_ukernel->channel_tile * extra_weights_bytes,
+          dwconv_ukernel->channel_subtile * extra_weights_bytes,
           packing_params);
     } else {
       pack_dwconv_multipass_hwg_w(
@@ -210,10 +212,11 @@ static enum xnn_status create_dwconv_path(
           dwconv_ukernel->middle_tile,
           dwconv_ukernel->last_tile,
           kernel_height, kernel_width,
-          groups, dwconv_ukernel->channel_tile,
-          dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
+          groups,
+          dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
           kernel, bias, weights_ptr,
           dwconv_ukernel->channel_tile * extra_weights_bytes,
+          dwconv_ukernel->channel_subtile * extra_weights_bytes,
           packing_params);
     }
   } else {
@@ -221,9 +224,11 @@ static enum xnn_status create_dwconv_path(
       pack_dwconv_ghw_w(
           primary_tile,
           kernel_height, kernel_width,
-          groups, dwconv_ukernel->channel_tile,
+          groups,
+          dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
           kernel, bias, weights_ptr,
           dwconv_ukernel->channel_tile * extra_weights_bytes,
+          dwconv_ukernel->channel_subtile * extra_weights_bytes,
           packing_params);
     } else {
       pack_dwconv_multipass_ghw_w(
@@ -231,10 +236,11 @@ static enum xnn_status create_dwconv_path(
           dwconv_ukernel->middle_tile,
           dwconv_ukernel->last_tile,
           kernel_height, kernel_width,
-          groups, dwconv_ukernel->channel_tile,
-          dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
+          groups,
+          dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
           kernel, bias, weights_ptr,
           dwconv_ukernel->channel_tile * extra_weights_bytes,
+          dwconv_ukernel->channel_subtile * extra_weights_bytes,
           packing_params);
     }
   }

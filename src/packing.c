@@ -1474,11 +1474,14 @@ void xnn_pack_f32_dwconv_ghw_w(
   size_t h,
   size_t w,
   size_t c,
-  size_t cr,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
   const float* k,
   const float* b,
   float* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const void* params)
 {
   assert(primary_tile >= h * w);
@@ -1489,13 +1492,14 @@ void xnn_pack_f32_dwconv_ghw_w(
       h,
       w,
       c,
-      cr,
-      cr,
-      cr,
+      channel_tile,
+      channel_subtile,
+      channel_round,
       k,
       b,
       packed_weights,
-      extra_bytes,
+      per_tile_extra_bytes,
+      per_subtile_extra_bytes,
       params);
 }
 
@@ -1520,7 +1524,8 @@ void xnn_pack_f32_dwconv_multipass_ghw_w(
   const float* k,
   const float* b,
   float* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const void* params)
 {
   assert(k != NULL);
@@ -1669,8 +1674,7 @@ void xnn_pack_f32_dwconv_multipass_ghw_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_tile;
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (float*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (float*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       // Last pass does not pack to rounded c, since it handles remainder.
@@ -1687,8 +1691,7 @@ void xnn_pack_f32_dwconv_multipass_ghw_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_subtile;
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (float*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (float*) ((uintptr_t) packed_weights + per_subtile_extra_bytes);
     }
   }
 }
@@ -1698,11 +1701,14 @@ void xnn_pack_f16_dwconv_ghw_w(
   size_t h,
   size_t w,
   size_t c,
-  size_t cr,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
   const uint16_t* k,
   const uint16_t* b,
   uint16_t* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const void* params)
 {
   assert(primary_tile >= h * w);
@@ -1713,13 +1719,14 @@ void xnn_pack_f16_dwconv_ghw_w(
     h,
     w,
     c,
-    cr,
-    cr,
-    cr,
+    channel_tile,
+    channel_subtile,
+    channel_round,
     k,
     b,
     packed_weights,
-    extra_bytes,
+    per_tile_extra_bytes,
+    per_subtile_extra_bytes,
     params);
 }
 
@@ -1736,7 +1743,8 @@ void xnn_pack_f16_dwconv_multipass_ghw_w(
   const uint16_t* k,
   const uint16_t* b,
   uint16_t* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const void* params)
 {
   assert(k != NULL);
@@ -1885,8 +1893,7 @@ void xnn_pack_f16_dwconv_multipass_ghw_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_tile;
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       // Last pass does not pack to rounded c, since it handles remainder.
@@ -1903,8 +1910,7 @@ void xnn_pack_f16_dwconv_multipass_ghw_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_subtile;
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + per_subtile_extra_bytes);
     }
   }
 }
@@ -1914,11 +1920,14 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
   size_t h,
   size_t w,
   size_t c,
-  size_t cr,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
   const float* k,
   const float* b,
   uint16_t* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const void* params)
 {
   assert(primary_tile >= h * w);
@@ -1929,13 +1938,14 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
     h,
     w,
     c,
-    cr,
-    cr,
-    cr,
+    channel_tile,
+    channel_subtile,
+    channel_round,
     k,
     b,
     packed_weights,
-    extra_bytes,
+    per_tile_extra_bytes,
+    per_subtile_extra_bytes,
     params);
 }
 
@@ -1952,7 +1962,8 @@ void xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
   const float* k,
   const float* b,
   uint16_t* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const void* params)
 {
   assert(k != NULL);
@@ -2101,8 +2112,7 @@ void xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_tile;
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       // Last pass does not pack to rounded c, since it handles remainder.
@@ -2119,8 +2129,7 @@ void xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_subtile;
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + per_subtile_extra_bytes);
     }
   }
 }
@@ -2130,11 +2139,14 @@ void xnn_pack_qu8_dwconv_ghw_w(
   size_t h,
   size_t w,
   size_t c,
-  size_t cr,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
   const uint8_t* k,
   const int32_t* b,
   void* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const struct xnn_qu8_packing_params* params)
 {
   assert(k != NULL);
@@ -2142,8 +2154,8 @@ void xnn_pack_qu8_dwconv_ghw_w(
 
   const int32_t izp = (int32_t) params->input_zero_point;
   const int32_t boff = (int32_t) h * (int32_t) w * izp * (int32_t) params->kernel_zero_point;
-  for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
-    const size_t cr_block_size = min(c - cr_block_start, cr);
+  for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += channel_tile) {
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
     int32_t* packed_b = (int32_t*) packed_weights;
     if XNN_LIKELY(b != NULL) {
       for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
@@ -2157,7 +2169,7 @@ void xnn_pack_qu8_dwconv_ghw_w(
         packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
       } while (--n != 0);
     }
-    packed_weights = (void*) ((uintptr_t) packed_weights + (cr - cr_block_size) * sizeof(int32_t));
+    packed_weights = (void*) ((uintptr_t) packed_weights + (channel_tile - cr_block_size) * sizeof(int32_t));
     for (size_t x = 0; x < w; x++) {
       for (size_t y = 0; y < h; y++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
@@ -2166,11 +2178,11 @@ void xnn_pack_qu8_dwconv_ghw_w(
           *((uint8_t*) packed_weights) = kv;
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(uint8_t));
         }
-        packed_weights = (void*) ((uintptr_t) packed_weights + (cr - cr_block_size) * sizeof(uint8_t));
+        packed_weights = (void*) ((uintptr_t) packed_weights + (channel_tile - cr_block_size) * sizeof(uint8_t));
       }
     }
     packed_weights = (void*) ((uintptr_t) packed_weights + (primary_tile - (h * w)) * cr_block_size * sizeof(uint8_t));
-    packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+    packed_weights = (void*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
   }
 }
 
@@ -2187,7 +2199,8 @@ void xnn_pack_qu8_dwconv_multipass_ghw_w(
   const uint8_t* k,
   const int32_t* b,
   void* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const struct xnn_qu8_packing_params* params)
 {
   assert(k != NULL);
@@ -2372,8 +2385,7 @@ void xnn_pack_qu8_dwconv_multipass_ghw_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights = (void*) ((uintptr_t) packed_weights + (last_pass_tile - kernel_size) * channel_tile);
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (void*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       // Last pass does not pack to rounded c, since it handles remainder.
@@ -2391,8 +2403,7 @@ void xnn_pack_qu8_dwconv_multipass_ghw_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights = (void*) ((uintptr_t) packed_weights + (last_pass_tile - kernel_size) * channel_subtile);
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (void*) ((uintptr_t) packed_weights + per_subtile_extra_bytes);
     }
   }
 }
@@ -2402,19 +2413,22 @@ void xnn_pack_qs8_dwconv_ghw_w(
   size_t h,
   size_t w,
   size_t c,
-  size_t cr,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
   const int8_t* k,
   const int32_t* b,
   void* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
   assert(k != NULL);
   assert(packed_weights != NULL);
 
   const uint32_t izp = (uint32_t) params->input_zero_point;
-  for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
-    const size_t cr_block_size = min(c - cr_block_start, cr);
+  for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += channel_tile) {
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
     int32_t* packed_b = (int32_t*) packed_weights;
     if XNN_LIKELY(b != NULL) {
       for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
@@ -2428,7 +2442,7 @@ void xnn_pack_qs8_dwconv_ghw_w(
         packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
       } while (--n != 0);
     }
-    packed_weights = (void*) ((uintptr_t) packed_weights + (cr - cr_block_size) * sizeof(int32_t));
+    packed_weights = (void*) ((uintptr_t) packed_weights + (channel_tile - cr_block_size) * sizeof(int32_t));
     for (size_t x = 0; x < w; x++) {
       for (size_t y = 0; y < h; y++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
@@ -2437,11 +2451,11 @@ void xnn_pack_qs8_dwconv_ghw_w(
           *((int8_t*) packed_weights) = kv;
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int8_t));
         }
-        packed_weights = (void*) ((uintptr_t) packed_weights + (cr - cr_block_size) * sizeof(int8_t));
+        packed_weights = (void*) ((uintptr_t) packed_weights + (channel_tile - cr_block_size) * sizeof(int8_t));
       }
     }
     packed_weights = (void*) ((uintptr_t) packed_weights + (primary_tile - (h * w)) * cr_block_size * sizeof(int8_t));
-    packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+    packed_weights = (void*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
   }
 }
 
@@ -2458,7 +2472,8 @@ void xnn_pack_qs8_dwconv_multipass_ghw_w(
   const int8_t* k,
   const int32_t* b,
   void* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
   assert(k != NULL);
@@ -2642,8 +2657,7 @@ void xnn_pack_qs8_dwconv_multipass_ghw_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights = (void*) ((uintptr_t) packed_weights + (last_pass_tile - kernel_size) * channel_tile);
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (void*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       // Last pass does not pack to rounded c, since it handles remainder.
@@ -2661,8 +2675,7 @@ void xnn_pack_qs8_dwconv_multipass_ghw_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights = (void*) ((uintptr_t) packed_weights + (last_pass_tile - kernel_size) * channel_subtile);
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (void*) ((uintptr_t) packed_weights + per_subtile_extra_bytes);
     }
   }
 }
@@ -2672,11 +2685,14 @@ void xnn_pack_f32_dwconv_hwg_w(
   size_t h,
   size_t w,
   size_t c,
-  size_t cr,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
   const float* k,
   const float* b,
   float* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const void* params)
 {
   assert(primary_tile >= h * w);
@@ -2687,13 +2703,14 @@ void xnn_pack_f32_dwconv_hwg_w(
       h,
       w,
       c,
-      cr,
-      cr,
-      cr,
+      channel_tile,
+      channel_subtile,
+      channel_round,
       k,
       b,
       packed_weights,
-      extra_bytes,
+      per_tile_extra_bytes,
+      per_subtile_extra_bytes,
       params);
 }
 
@@ -2710,7 +2727,8 @@ void xnn_pack_f32_dwconv_multipass_hwg_w(
   const float* k,
   const float* b,
   float* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const void* params)
 {
   assert(k != NULL);
@@ -2872,8 +2890,7 @@ void xnn_pack_f32_dwconv_multipass_hwg_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_tile;
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (float*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (float*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       x = processed_x;
@@ -2892,8 +2909,7 @@ void xnn_pack_f32_dwconv_multipass_hwg_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_subtile;
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (float*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (float*) ((uintptr_t) packed_weights + per_subtile_extra_bytes);
     }
   }
 }
@@ -2903,11 +2919,14 @@ void xnn_pack_f16_dwconv_hwg_w(
   size_t h,
   size_t w,
   size_t c,
-  size_t cr,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
   const uint16_t* k,
   const uint16_t* b,
   uint16_t* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const void* params)
 {
   assert(primary_tile >= h * w);
@@ -2918,13 +2937,14 @@ void xnn_pack_f16_dwconv_hwg_w(
     h,
     w,
     c,
-    cr,
-    cr,
-    cr,
+    channel_tile,
+    channel_subtile,
+    channel_round,
     k,
     b,
     packed_weights,
-    extra_bytes,
+    per_tile_extra_bytes,
+    per_subtile_extra_bytes,
     params);
 }
 
@@ -2941,7 +2961,8 @@ void xnn_pack_f16_dwconv_multipass_hwg_w(
   const uint16_t* k,
   const uint16_t* b,
   uint16_t* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const void* params)
 {
   assert(k != NULL);
@@ -3103,8 +3124,7 @@ void xnn_pack_f16_dwconv_multipass_hwg_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_tile;
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       x = processed_x;
@@ -3123,8 +3143,7 @@ void xnn_pack_f16_dwconv_multipass_hwg_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_subtile;
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + per_subtile_extra_bytes);
     }
   }
 }
@@ -3134,11 +3153,14 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
   size_t h,
   size_t w,
   size_t c,
-  size_t cr,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
   const float* k,
   const float* b,
   uint16_t* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const void* params)
 {
   assert(primary_tile >= h * w);
@@ -3149,13 +3171,14 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
     h,
     w,
     c,
-    cr,
-    cr,
-    cr,
+    channel_tile,
+    channel_subtile,
+    channel_round,
     k,
     b,
     packed_weights,
-    extra_bytes,
+    per_tile_extra_bytes,
+    per_subtile_extra_bytes,
     params);
 }
 
@@ -3172,7 +3195,8 @@ void xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
   const float* k,
   const float* b,
   uint16_t* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const void* params)
 {
   assert(k != NULL);
@@ -3334,8 +3358,7 @@ void xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_tile;
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       x = processed_x;
@@ -3354,8 +3377,7 @@ void xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_subtile;
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + per_subtile_extra_bytes);
     }
   }
 }
@@ -3365,11 +3387,14 @@ void xnn_pack_qu8_dwconv_hwg_w(
   size_t h,
   size_t w,
   size_t c,
-  size_t cr,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
   const uint8_t* k,
   const int32_t* b,
   void* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const struct xnn_qu8_packing_params* params)
 {
   assert(k != NULL);
@@ -3377,8 +3402,8 @@ void xnn_pack_qu8_dwconv_hwg_w(
 
   const int32_t izp = (int32_t) params->input_zero_point;
   const int32_t boff = (int32_t) h * (int32_t) w * izp * (int32_t) params->kernel_zero_point;
-  for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
-    const size_t cr_block_size = min(c - cr_block_start, cr);
+  for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += channel_tile) {
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
     int32_t* packed_b = (int32_t*) packed_weights;
     if XNN_LIKELY(b != NULL) {
       for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
@@ -3392,7 +3417,7 @@ void xnn_pack_qu8_dwconv_hwg_w(
         packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
       } while (--n != 0);
     }
-    packed_weights = (void*) ((uintptr_t) packed_weights + (cr - cr_block_size) * sizeof(int32_t));
+    packed_weights = (void*) ((uintptr_t) packed_weights + (channel_tile - cr_block_size) * sizeof(int32_t));
     for (size_t x = 0; x < w; x++) {
       for (size_t y = 0; y < h; y++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
@@ -3401,11 +3426,11 @@ void xnn_pack_qu8_dwconv_hwg_w(
           *((uint8_t*) packed_weights) = kv;
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(uint8_t));
         }
-        packed_weights = (void*) ((uintptr_t) packed_weights + (cr - cr_block_size) * sizeof(uint8_t));
+        packed_weights = (void*) ((uintptr_t) packed_weights + (channel_tile - cr_block_size) * sizeof(uint8_t));
       }
     }
     packed_weights = (void*) ((uintptr_t) packed_weights + (primary_tile - (h * w)) * cr_block_size * sizeof(uint8_t));
-    packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+    packed_weights = (void*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
   }
 }
 
@@ -3422,7 +3447,8 @@ void xnn_pack_qu8_dwconv_multipass_hwg_w(
   const uint8_t* k,
   const int32_t* b,
   void* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const struct xnn_qu8_packing_params* params)
 {
   assert(k != NULL);
@@ -3607,8 +3633,7 @@ void xnn_pack_qu8_dwconv_multipass_hwg_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights = (void*) ((uintptr_t) packed_weights + (last_pass_tile - kernel_size) * channel_tile);
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (void*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       // Last pass does not pack to rounded c, since it handles remainder.
@@ -3626,8 +3651,7 @@ void xnn_pack_qu8_dwconv_multipass_hwg_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights = (void*) ((uintptr_t) packed_weights + (last_pass_tile - kernel_size) * channel_subtile);
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (void*) ((uintptr_t) packed_weights + per_subtile_extra_bytes);
     }
   }
 }
@@ -3637,19 +3661,22 @@ void xnn_pack_qs8_dwconv_hwg_w(
   size_t h,
   size_t w,
   size_t c,
-  size_t cr,
+  size_t channel_tile,
+  size_t channel_subtile,
+  size_t channel_round,
   const int8_t* k,
   const int32_t* b,
   void* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
   assert(k != NULL);
   assert(packed_weights != NULL);
 
   const uint32_t izp = (int32_t) params->input_zero_point;
-  for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
-    const size_t cr_block_size = min(c - cr_block_start, cr);
+  for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += channel_tile) {
+    const size_t cr_block_size = min(c - cr_block_start, channel_tile);
     int32_t* packed_b = (int32_t*) packed_weights;
     if XNN_LIKELY(b != NULL) {
       for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
@@ -3663,7 +3690,7 @@ void xnn_pack_qs8_dwconv_hwg_w(
         packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
       } while (--n != 0);
     }
-    packed_weights = (void*) ((uintptr_t) packed_weights + (cr - cr_block_size) * sizeof(int32_t));
+    packed_weights = (void*) ((uintptr_t) packed_weights + (channel_tile - cr_block_size) * sizeof(int32_t));
     for (size_t x = 0; x < w; x++) {
       for (size_t y = 0; y < h; y++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
@@ -3672,11 +3699,11 @@ void xnn_pack_qs8_dwconv_hwg_w(
           *((int8_t*) packed_weights) = kv;
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int8_t));
         }
-        packed_weights = (void*) ((uintptr_t) packed_weights + (cr - cr_block_size) * sizeof(int8_t));
+        packed_weights = (void*) ((uintptr_t) packed_weights + (channel_tile - cr_block_size) * sizeof(int8_t));
       }
     }
     packed_weights = (void*) ((uintptr_t) packed_weights + (primary_tile - (h * w)) * cr_block_size * sizeof(int8_t));
-    packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+    packed_weights = (void*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
   }
 }
 
@@ -3693,7 +3720,8 @@ void xnn_pack_qs8_dwconv_multipass_hwg_w(
   const int8_t* k,
   const int32_t* b,
   void* packed_weights,
-  size_t extra_bytes,
+  size_t per_tile_extra_bytes,
+  size_t per_subtile_extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
   assert(k != NULL);
@@ -3877,8 +3905,7 @@ void xnn_pack_qs8_dwconv_multipass_hwg_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights = (void*) ((uintptr_t) packed_weights + (last_pass_tile - kernel_size) * channel_tile);
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (void*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       // Last pass does not pack to rounded c, since it handles remainder.
@@ -3896,8 +3923,7 @@ void xnn_pack_qs8_dwconv_multipass_hwg_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights = (void*) ((uintptr_t) packed_weights + (last_pass_tile - kernel_size) * channel_subtile);
-      // TODO(zhin): support extra bytes for channel_tile and subtile.
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (void*) ((uintptr_t) packed_weights + per_subtile_extra_bytes);
     }
   }
 }
