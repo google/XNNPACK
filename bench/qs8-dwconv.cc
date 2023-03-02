@@ -92,7 +92,7 @@ static void DWConvBenchmark(benchmark::State& state,
   std::fill(w.begin(), w.end(), 0);
   struct xnn_qs8_packing_params packing_params;
   packing_params.input_zero_point = 0;
-  xnn_pack_qs8_dwconv_ghw_w(primary_tile, kernel_height, kernel_width, channels,
+  xnn_pack_qs8_dwconv_ghw_w(primary_tile, 0, 0, kernel_height, kernel_width, channels,
                             channel_tile, channel_tile, /*channel_round=*/1,
                             k.data(), b.data(), w.data(),
                             /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, &packing_params);

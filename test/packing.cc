@@ -109,6 +109,8 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
   params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -161,6 +163,8 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
   params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -224,6 +228,8 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
   params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -283,6 +289,8 @@ TEST(PACK_QU8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
   params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -350,6 +358,8 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
   params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -400,6 +410,8 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
   params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -463,6 +475,8 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
   params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -516,6 +530,8 @@ TEST(PACK_QU8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
   params.kernel_zero_point = 127;
   xnn_pack_qu8_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -584,7 +600,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_ghw_w(
+  xnn_pack_qu8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -642,7 +658,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channels_gt
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_ghw_w(
+  xnn_pack_qu8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -717,7 +733,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_ghw_w(
+  xnn_pack_qu8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -781,7 +797,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr) {
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_ghw_w(
+  xnn_pack_qu8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -859,7 +875,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_ghw_w(
+  xnn_pack_qu8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -927,7 +943,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_gt_cr) 
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_ghw_w(
+  xnn_pack_qu8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1020,7 +1036,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_ghw_w(
+  xnn_pack_qu8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1097,7 +1113,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_ghw_w(
+  xnn_pack_qu8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1180,7 +1196,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_ghw_w(
+  xnn_pack_qu8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1264,7 +1280,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_ghw_w(
+  xnn_pack_qu8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1349,7 +1365,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rounded) {
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_ghw_w(
+  xnn_pack_qu8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1426,7 +1442,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_hwg_w(
+  xnn_pack_qu8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1484,7 +1500,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channels_gt
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_hwg_w(
+  xnn_pack_qu8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1560,7 +1576,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_hwg_w(
+  xnn_pack_qu8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1618,7 +1634,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr) {
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_hwg_w(
+  xnn_pack_qu8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1697,7 +1713,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_hwg_w(
+  xnn_pack_qu8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1760,7 +1776,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_gt_cr) 
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_hwg_w(
+  xnn_pack_qu8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1847,7 +1863,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_hwg_w(
+  xnn_pack_qu8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1918,7 +1934,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile) {
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_hwg_w(
+  xnn_pack_qu8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -1991,7 +2007,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_hwg_w(
+  xnn_pack_qu8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2070,7 +2086,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile_rounded) {
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_hwg_w(
+  xnn_pack_qu8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2151,7 +2167,7 @@ TEST(PACK_QU8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
   xnn_qu8_packing_params params = {};
   params.input_zero_point = 127;
   params.kernel_zero_point = 127;
-  xnn_pack_qu8_dwconv_multipass_hwg_w(
+  xnn_pack_qu8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2221,6 +2237,8 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
   params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -2270,6 +2288,8 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
   params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -2330,6 +2350,8 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
   params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -2386,6 +2408,8 @@ TEST(PACK_QS8_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
   params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -2450,6 +2474,8 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
   params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -2497,6 +2523,8 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
   params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -2557,6 +2585,8 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
   params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -2607,6 +2637,8 @@ TEST(PACK_QS8_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
   params.input_zero_point = 127;
   xnn_pack_qs8_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -2672,7 +2704,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_ghw_w(
+  xnn_pack_qs8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2727,7 +2759,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channels_gt
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_ghw_w(
+  xnn_pack_qs8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2799,7 +2831,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_ghw_w(
+  xnn_pack_qs8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2860,7 +2892,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr) {
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_ghw_w(
+  xnn_pack_qs8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -2935,7 +2967,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_ghw_w(
+  xnn_pack_qs8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -3000,7 +3032,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_gt_cr) 
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_ghw_w(
+  xnn_pack_qs8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -3090,7 +3122,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_ghw_w(
+  xnn_pack_qs8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -3164,7 +3196,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_ghw_w(
+  xnn_pack_qs8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -3244,7 +3276,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_ghw_w(
+  xnn_pack_qs8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -3325,7 +3357,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_ghw_w(
+  xnn_pack_qs8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -3408,7 +3440,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rounded) {
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_ghw_w(
+  xnn_pack_qs8_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -3482,7 +3514,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_hwg_w(
+  xnn_pack_qs8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -3537,7 +3569,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channels_gt
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_hwg_w(
+  xnn_pack_qs8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -3610,7 +3642,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_hwg_w(
+  xnn_pack_qs8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -3665,7 +3697,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr) {
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_hwg_w(
+  xnn_pack_qs8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -3741,7 +3773,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_hwg_w(
+  xnn_pack_qs8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -3801,7 +3833,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_gt_cr) 
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_hwg_w(
+  xnn_pack_qs8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -3885,7 +3917,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_hwg_w(
+  xnn_pack_qs8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -3953,7 +3985,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile) {
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_hwg_w(
+  xnn_pack_qs8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -4023,7 +4055,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_hwg_w(
+  xnn_pack_qs8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -4099,7 +4131,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile_rounded) {
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_hwg_w(
+  xnn_pack_qs8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -4177,7 +4209,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
 
   xnn_qs8_packing_params params = {};
   params.input_zero_point = 127;
-  xnn_pack_qs8_dwconv_multipass_hwg_w(
+  xnn_pack_qs8_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -4242,6 +4274,8 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
 
   xnn_pack_f16_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -4286,6 +4320,8 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 
   xnn_pack_f16_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -4336,6 +4372,8 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
 
   xnn_pack_f16_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -4387,6 +4425,8 @@ TEST(PACK_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 
   xnn_pack_f16_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -4440,6 +4480,8 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
 
   xnn_pack_f16_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -4482,6 +4524,8 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 
   xnn_pack_f16_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -4532,6 +4576,8 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
 
   xnn_pack_f16_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -4577,6 +4623,8 @@ TEST(PACK_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 
   xnn_pack_f16_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -4634,7 +4682,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -4685,7 +4733,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channels_gt
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -4747,7 +4795,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -4803,7 +4851,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -4866,7 +4914,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -4926,7 +4974,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_gt_cr) 
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5006,7 +5054,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5068,7 +5116,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5136,7 +5184,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5202,7 +5250,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
     multipass_weights_count(
       h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile, channel_round));
 
-  xnn_pack_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5269,7 +5317,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rounded) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5327,7 +5375,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5377,7 +5425,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channels_gt
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5439,7 +5487,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5489,7 +5537,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5554,7 +5602,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5609,7 +5657,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_gt_cr) 
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5683,7 +5731,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5739,7 +5787,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5797,7 +5845,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5857,7 +5905,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile_rounded) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5920,7 +5968,7 @@ TEST(PACK_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
     multipass_weights_count(
       h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile, channel_round));
 
-  xnn_pack_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -5971,6 +6019,8 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
 
   xnn_pack_f32_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -6015,6 +6065,8 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 
   xnn_pack_f32_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -6065,6 +6117,8 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
 
   xnn_pack_f32_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -6116,6 +6170,8 @@ TEST(PACK_F32_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 
   xnn_pack_f32_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -6169,6 +6225,8 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
 
   xnn_pack_f32_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -6211,6 +6269,8 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 
   xnn_pack_f32_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -6261,6 +6321,8 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
 
   xnn_pack_f32_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -6306,6 +6368,8 @@ TEST(PACK_F32_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 
   xnn_pack_f32_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -6363,7 +6427,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_dwconv_multipass_ghw_w(
+  xnn_pack_f32_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -6414,7 +6478,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channels_gt
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_dwconv_multipass_ghw_w(
+  xnn_pack_f32_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -6476,7 +6540,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_dwconv_multipass_ghw_w(
+  xnn_pack_f32_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -6532,7 +6596,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_dwconv_multipass_ghw_w(
+  xnn_pack_f32_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -6595,7 +6659,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_dwconv_multipass_ghw_w(
+  xnn_pack_f32_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -6655,7 +6719,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_gt_cr) 
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_dwconv_multipass_ghw_w(
+  xnn_pack_f32_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -6735,7 +6799,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_dwconv_multipass_ghw_w(
+  xnn_pack_f32_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -6797,7 +6861,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_dwconv_multipass_ghw_w(
+  xnn_pack_f32_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -6865,7 +6929,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_dwconv_multipass_ghw_w(
+  xnn_pack_f32_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -6931,7 +6995,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_channel_sub
     multipass_weights_count(
       h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile, channel_round));
 
-  xnn_pack_f32_dwconv_multipass_ghw_w(
+  xnn_pack_f32_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -6998,7 +7062,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rounded) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_dwconv_multipass_ghw_w(
+  xnn_pack_f32_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -7056,7 +7120,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_dwconv_multipass_hwg_w(
+  xnn_pack_f32_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -7106,7 +7170,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channels_gt
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_dwconv_multipass_hwg_w(
+  xnn_pack_f32_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -7168,7 +7232,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_dwconv_multipass_hwg_w(
+  xnn_pack_f32_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -7218,7 +7282,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_dwconv_multipass_hwg_w(
+  xnn_pack_f32_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -7283,7 +7347,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_dwconv_multipass_hwg_w(
+  xnn_pack_f32_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -7338,7 +7402,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_gt_cr) 
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_dwconv_multipass_hwg_w(
+  xnn_pack_f32_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -7412,7 +7476,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_dwconv_multipass_hwg_w(
+  xnn_pack_f32_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -7468,7 +7532,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_dwconv_multipass_hwg_w(
+  xnn_pack_f32_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -7526,7 +7590,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_dwconv_multipass_hwg_w(
+  xnn_pack_f32_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -7586,7 +7650,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile_rounded) {
   std::vector<float> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_dwconv_multipass_hwg_w(
+  xnn_pack_f32_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -7649,7 +7713,7 @@ TEST(PACK_F32_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_channel_sub
     multipass_weights_count(
       h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile, channel_round));
 
-  xnn_pack_f32_dwconv_multipass_hwg_w(
+  xnn_pack_f32_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -7700,6 +7764,8 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size) {
 
   xnn_pack_f32_to_f16_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -7747,6 +7813,8 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 
   xnn_pack_f32_to_f16_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -7800,6 +7868,8 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size) {
 
   xnn_pack_f32_to_f16_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -7854,6 +7924,8 @@ TEST(PACK_F32_TO_F16_DWCONV_GHW_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 
   xnn_pack_f32_to_f16_dwconv_ghw_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -7910,6 +7982,8 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size) {
 
   xnn_pack_f32_to_f16_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -7955,6 +8029,8 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_eq_kernel_size_channels_gt_cr) {
 
   xnn_pack_f32_to_f16_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -8008,6 +8084,8 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size) {
 
   xnn_pack_f32_to_f16_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -8056,6 +8134,8 @@ TEST(PACK_F32_TO_F16_DWCONV_HWG_W, primary_tile_gt_kernel_size_channels_gt_cr) {
 
   xnn_pack_f32_to_f16_dwconv_hwg_w(
       primary_tile,
+      0,
+      0,
       h,
       w,
       c,
@@ -8124,7 +8204,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f32_to_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -8176,7 +8256,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_chan
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f32_to_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -8238,7 +8318,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f32_to_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -8294,7 +8374,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_tile_channels_gt_cr
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f32_to_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -8357,7 +8437,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f32_to_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -8417,7 +8497,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, multiple_middle_pass_tile_channels_
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f32_to_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -8497,7 +8577,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_chan
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f32_to_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -8559,7 +8639,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f32_to_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -8627,7 +8707,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_chan
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f32_to_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -8693,7 +8773,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, first_pass_once_last_pass_once_chan
     multipass_weights_count(
       h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile, channel_round));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f32_to_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -8760,7 +8840,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rou
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
+  xnn_pack_f32_to_f16_dwconv_ghw_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -8818,7 +8898,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f32_to_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -8868,7 +8948,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_chan
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f32_to_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -8930,7 +9010,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f32_to_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -8980,7 +9060,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile_channels_gt_cr
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f32_to_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -9045,7 +9125,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f32_to_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -9100,7 +9180,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, multiple_middle_pass_tile_channels_
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f32_to_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -9174,7 +9254,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_chan
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f32_to_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -9230,7 +9310,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile) {
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f32_to_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -9288,7 +9368,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_chan
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f32_to_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -9348,7 +9428,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, one_middle_pass_channel_subtile_rou
   std::vector<uint16_t> packed_weights(
     multipass_weights_count(h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f32_to_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,
@@ -9411,7 +9491,7 @@ TEST(PACK_F32_TO_F16_MULTIPASS_DWCONV_HWG_W, first_pass_once_last_pass_once_chan
     multipass_weights_count(
       h * w, first_pass_tile, middle_pass_tile, last_pass_tile, c, cr, channel_subtile, channel_round));
 
-  xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
+  xnn_pack_f32_to_f16_dwconv_hwg_w(
       first_pass_tile,
       middle_pass_tile,
       last_pass_tile,

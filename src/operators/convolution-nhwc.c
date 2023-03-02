@@ -138,8 +138,6 @@ static enum xnn_status create_dwconv_path(
     uint32_t bias_element_size,
     xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w,
     xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w,
-    xnn_pack_dwconv_multipass_hwg_w_fn pack_dwconv_multipass_hwg_w,
-    xnn_pack_dwconv_multipass_ghw_w_fn pack_dwconv_multipass_ghw_w,
     const void* packing_params,
     int packed_weights_padding_byte,
     size_t extra_weights_bytes,
@@ -196,53 +194,29 @@ static enum xnn_status create_dwconv_path(
   memcpy(&convolution_op->params, dwconv_params, dwconv_params_size);
 
   if (flags & XNN_FLAG_DEPTHWISE_CONVOLUTION) {
-    if (is_unipass) {
-      pack_dwconv_hwg_w(
-          primary_tile,
-          kernel_height, kernel_width,
-          groups,
-          dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
-          kernel, bias, weights_ptr,
-          dwconv_ukernel->channel_tile * extra_weights_bytes,
-          dwconv_ukernel->channel_subtile * extra_weights_bytes,
-          packing_params);
-    } else {
-      pack_dwconv_multipass_hwg_w(
-          primary_tile,
-          dwconv_ukernel->middle_tile,
-          dwconv_ukernel->last_tile,
-          kernel_height, kernel_width,
-          groups,
-          dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
-          kernel, bias, weights_ptr,
-          dwconv_ukernel->channel_tile * extra_weights_bytes,
-          dwconv_ukernel->channel_subtile * extra_weights_bytes,
-          packing_params);
-    }
+    pack_dwconv_hwg_w(
+        primary_tile,
+        dwconv_ukernel->middle_tile,
+        dwconv_ukernel->last_tile,
+        kernel_height, kernel_width,
+        groups,
+        dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
+        kernel, bias, weights_ptr,
+        dwconv_ukernel->channel_tile * extra_weights_bytes,
+        dwconv_ukernel->channel_subtile * extra_weights_bytes,
+        packing_params);
   } else {
-    if (is_unipass) {
-      pack_dwconv_ghw_w(
-          primary_tile,
-          kernel_height, kernel_width,
-          groups,
-          dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
-          kernel, bias, weights_ptr,
-          dwconv_ukernel->channel_tile * extra_weights_bytes,
-          dwconv_ukernel->channel_subtile * extra_weights_bytes,
-          packing_params);
-    } else {
-      pack_dwconv_multipass_ghw_w(
-          primary_tile,
-          dwconv_ukernel->middle_tile,
-          dwconv_ukernel->last_tile,
-          kernel_height, kernel_width,
-          groups,
-          dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
-          kernel, bias, weights_ptr,
-          dwconv_ukernel->channel_tile * extra_weights_bytes,
-          dwconv_ukernel->channel_subtile * extra_weights_bytes,
-          packing_params);
-    }
+    pack_dwconv_ghw_w(
+        primary_tile,
+        dwconv_ukernel->middle_tile,
+        dwconv_ukernel->last_tile,
+        kernel_height, kernel_width,
+        groups,
+        dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
+        kernel, bias, weights_ptr,
+        dwconv_ukernel->channel_tile * extra_weights_bytes,
+        dwconv_ukernel->channel_subtile * extra_weights_bytes,
+        packing_params);
   }
 
   if (scale_params != NULL) {
@@ -467,8 +441,6 @@ static enum xnn_status create_convolution2d_nhwc(
     xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w,
     xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w,
     xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w,
-    xnn_pack_dwconv_multipass_hwg_w_fn pack_dwconv_multipass_hwg_w,
-    xnn_pack_dwconv_multipass_ghw_w_fn pack_dwconv_multipass_ghw_w,
     xnn_pack_gemm_goi_w_fn pack_gemm_goi_w,
     xnn_pack_conv_kgo_w_fn pack_conv_kgo_w,
     xnn_pack_conv_goki_w_fn pack_conv_goki_w,
@@ -659,7 +631,7 @@ static enum xnn_status create_convolution2d_nhwc(
           kernel_height, kernel_width,
           groups, kernel, bias, flags,
           log2_input_element_size, log2_filter_element_size, bias_element_size,
-          pack_dwconv_hwg_w, pack_dwconv_ghw_w, pack_dwconv_multipass_hwg_w, pack_dwconv_multipass_ghw_w,
+          pack_dwconv_hwg_w, pack_dwconv_ghw_w,
           packing_params, packed_weights_padding_byte, extra_weights_bytes,
           init_scale_params, scale_params,
           dwconv_params, dwconv_params_size, dwconv_ukernel,
@@ -843,8 +815,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qu8_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qu8_dwconv_ghw_w,
-    (xnn_pack_dwconv_multipass_hwg_w_fn) NULL,
-    (xnn_pack_dwconv_multipass_ghw_w_fn) NULL,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_qu8_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_qu8_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_qu8_conv_goki_w,
@@ -971,8 +941,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qs8_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qs8_dwconv_ghw_w,
-    (xnn_pack_dwconv_multipass_hwg_w_fn) NULL,
-    (xnn_pack_dwconv_multipass_ghw_w_fn) NULL,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_qs8_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_qs8_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_conv_goki_w,
@@ -1107,8 +1075,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qs8_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qs8_dwconv_ghw_w,
-    (xnn_pack_dwconv_multipass_hwg_w_fn) NULL,
-    (xnn_pack_dwconv_multipass_ghw_w_fn) NULL,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_qs8_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_qs8_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_conv_goki_w,
@@ -1215,10 +1181,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
   xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_fn) xnn_pack_f16_vmulcaddc_w;
   xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f16_dwconv_hwg_w;
   xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f16_dwconv_ghw_w;
-  xnn_pack_dwconv_multipass_hwg_w_fn pack_dwconv_multipass_hwg_w = (xnn_pack_dwconv_multipass_hwg_w_fn)
-      xnn_pack_f16_dwconv_multipass_hwg_w;
-  xnn_pack_dwconv_multipass_ghw_w_fn pack_dwconv_multipass_ghw_w = (xnn_pack_dwconv_multipass_ghw_w_fn)
-      xnn_pack_f16_dwconv_multipass_ghw_w;
   xnn_pack_gemm_goi_w_fn pack_gemm_goi_w = (xnn_pack_gemm_goi_w_fn) xnn_pack_f16_gemm_goi_w;
   xnn_pack_conv_kgo_w_fn pack_conv_kgo_w = (xnn_pack_conv_kgo_w_fn) xnn_pack_f16_conv_kgo_w;
   xnn_pack_conv_goki_w_fn pack_conv_goki_w = (xnn_pack_conv_goki_w_fn) xnn_pack_f16_conv_goki_w;
@@ -1226,8 +1188,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_to_f16_vmulcaddc_w;
     pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_to_f16_dwconv_hwg_w;
     pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_to_f16_dwconv_ghw_w;
-    pack_dwconv_multipass_hwg_w  = (xnn_pack_dwconv_multipass_hwg_w_fn) xnn_pack_f32_to_f16_dwconv_multipass_hwg_w;
-    pack_dwconv_multipass_ghw_w  = (xnn_pack_dwconv_multipass_ghw_w_fn) xnn_pack_f32_to_f16_dwconv_multipass_ghw_w;
     pack_gemm_goi_w = (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_to_f16_gemm_goi_w;
     pack_conv_kgo_w = (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_to_f16_conv_kgo_w;
     pack_conv_goki_w = (xnn_pack_conv_goki_w_fn) xnn_pack_f32_to_f16_conv_goki_w;
@@ -1247,8 +1207,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     pack_vmulcaddc_w,
     pack_dwconv_hwg_w,
     pack_dwconv_ghw_w,
-    pack_dwconv_multipass_hwg_w,
-    pack_dwconv_multipass_ghw_w,
     pack_gemm_goi_w,
     pack_conv_kgo_w,
     pack_conv_goki_w,
@@ -1373,8 +1331,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_vmulcaddc_w,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_dwconv_ghw_w,
-    (xnn_pack_dwconv_multipass_hwg_w_fn) xnn_pack_f32_dwconv_multipass_hwg_w,
-    (xnn_pack_dwconv_multipass_ghw_w_fn) xnn_pack_f32_dwconv_multipass_ghw_w,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_f32_conv_goki_w,
@@ -1481,8 +1437,6 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_vmulcaddc_w,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_dwconv_ghw_w,
-    (xnn_pack_dwconv_multipass_hwg_w_fn) xnn_pack_f32_dwconv_multipass_hwg_w,
-    (xnn_pack_dwconv_multipass_ghw_w_fn) xnn_pack_f32_dwconv_multipass_ghw_w,
     (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_gemm_goi_w,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_f32_conv_goki_w,

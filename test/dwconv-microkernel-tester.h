@@ -257,7 +257,7 @@ class DWConvMicrokernelTester {
       std::fill(packed_weights.begin(), packed_weights.end(), kernel_zero_point());
       const xnn_qu8_packing_params packing_params = { input_zero_point(), kernel_zero_point() };
       xnn_pack_qu8_dwconv_ghw_w(
-        kernel_tile(), kernel_tile(), 1, channels(),
+        kernel_tile(), 0, 0, kernel_tile(), 1, channels(),
         channel_tile(), channel_tile(), channel_tile(),
         kernel.data(), bias.data(), packed_weights.data(),
         /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, &packing_params);
@@ -370,7 +370,7 @@ class DWConvMicrokernelTester {
       std::fill(packed_weights.begin(), packed_weights.end(), 0);
       const xnn_qs8_packing_params packing_params = { int8_t(input_zero_point() - 0x80) };
       xnn_pack_qs8_dwconv_ghw_w(
-        kernel_tile(), kernel_tile(), 1, channels(),
+        kernel_tile(), 0, 0, kernel_tile(), 1, channels(),
         channel_tile(), channel_tile(), channel_tile(),
         kernel.data(), bias.data(), packed_weights.data(),
         /*per_tile_extra_bytes=*/ channel_tile() * sizeof(float),
@@ -492,7 +492,7 @@ class DWConvMicrokernelTester {
       std::fill(packed_weights.begin(), packed_weights.end(), 0);
       const xnn_qs8_packing_params packing_params = { int8_t(input_zero_point() - 0x80) };
       xnn_pack_qs8_dwconv_ghw_w(
-        kernel_tile(), kernel_tile(), 1, channels(),
+        kernel_tile(), 0, 0, kernel_tile(), 1, channels(),
         channel_tile(), channel_tile(), channel_tile(),
         kernel.data(), bias.data(), packed_weights.data(),
         /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, &packing_params);
@@ -591,7 +591,7 @@ class DWConvMicrokernelTester {
 
       std::fill(packed_weights.begin(), packed_weights.end(), 0);
       xnn_pack_f16_dwconv_ghw_w(
-        kernel_tile(), kernel_tile(), 1, channels(),
+        kernel_tile(), 0, 0, kernel_tile(), 1, channels(),
         channel_tile(), channel_tile(), channel_tile(),
         kernel.data(), bias.data(), packed_weights.data(),
         /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, nullptr);
@@ -688,7 +688,7 @@ class DWConvMicrokernelTester {
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       std::fill(packed_weights.begin(), packed_weights.end(), 0);
-      xnn_pack_f16_dwconv_multipass_ghw_w(
+      xnn_pack_f16_dwconv_ghw_w(
         first_pass_tile(), middle_pass_tile(), last_pass_tile(), kernel_size(), 1,
         channels(), channel_tile(), channel_subtile(), channel_round(),
         kernel.data(), bias.data(), packed_weights.data(),
@@ -794,7 +794,7 @@ class DWConvMicrokernelTester {
 
       std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
       xnn_pack_f32_dwconv_ghw_w(
-        kernel_tile(), kernel_tile(), 1, channels(),
+        kernel_tile(), 0, 0, kernel_tile(), 1, channels(),
         channel_tile(), channel_tile(), channel_tile(),
         kernel.data(), bias.data(), packed_weights.data(),
         /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, nullptr);
@@ -867,7 +867,7 @@ class DWConvMicrokernelTester {
 
       std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
       xnn_pack_f32_dwconv_ghw_w(
-        kernel_tile(), kernel_tile(), 1, channels(), channel_tile(), channel_tile(), channel_tile(),
+        kernel_tile(), 0, 0, kernel_tile(), 1, channels(), channel_tile(), channel_tile(), channel_tile(),
         kernel.data(), bias.data(), packed_weights.data(),
         /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, nullptr);
       for (size_t i = 0; i < indirection.size(); i++) {
@@ -963,7 +963,7 @@ class DWConvMicrokernelTester {
       std::fill(output.begin(), output.end(), nanf(""));
 
       std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
-      xnn_pack_f32_dwconv_multipass_ghw_w(
+      xnn_pack_f32_dwconv_ghw_w(
         first_pass_tile(), middle_pass_tile(), last_pass_tile(), kernel_size(), 1,
         channels(), channel_tile(), channel_subtile(), channel_round(),
         kernel.data(), bias.data(), packed_weights.data(),
@@ -1052,7 +1052,7 @@ class DWConvMicrokernelTester {
       std::fill(output.begin(), output.end(), nanf(""));
 
       std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
-      xnn_pack_f32_dwconv_multipass_ghw_w(
+      xnn_pack_f32_dwconv_ghw_w(
         first_pass_tile(), middle_pass_tile(), last_pass_tile(), kernel_size(), 1,
         channels(), channel_tile(), channel_subtile(), channel_round(),
         kernel.data(), bias.data(), packed_weights.data(),

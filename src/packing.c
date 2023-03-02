@@ -1469,40 +1469,6 @@ void xnn_pack_qu8_deconv_goki_w(
   }
 }
 
-void xnn_pack_f32_dwconv_ghw_w(
-  size_t primary_tile,
-  size_t h,
-  size_t w,
-  size_t c,
-  size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
-  const float* k,
-  const float* b,
-  float* packed_weights,
-  size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
-  const void* params)
-{
-  assert(primary_tile >= h * w);
-  xnn_pack_f32_dwconv_multipass_ghw_w(
-      primary_tile,
-      /*middle_pass_tile=*/0,
-      /*last_pass_tile=*/0,
-      h,
-      w,
-      c,
-      channel_tile,
-      channel_subtile,
-      channel_round,
-      k,
-      b,
-      packed_weights,
-      per_tile_extra_bytes,
-      per_subtile_extra_bytes,
-      params);
-}
-
 // Helper function to advance x and y indices.
 inline static void advance_x_y(size_t h, size_t* x, size_t* y) {
   if (++*y == h) {
@@ -1511,7 +1477,7 @@ inline static void advance_x_y(size_t h, size_t* x, size_t* y) {
   }
 }
 
-void xnn_pack_f32_dwconv_multipass_ghw_w(
+void xnn_pack_f32_dwconv_ghw_w(
   size_t first_pass_tile,
   size_t middle_pass_tile,
   size_t last_pass_tile,
@@ -1697,40 +1663,6 @@ void xnn_pack_f32_dwconv_multipass_ghw_w(
 }
 
 void xnn_pack_f16_dwconv_ghw_w(
-  size_t primary_tile,
-  size_t h,
-  size_t w,
-  size_t c,
-  size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
-  const uint16_t* k,
-  const uint16_t* b,
-  uint16_t* packed_weights,
-  size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
-  const void* params)
-{
-  assert(primary_tile >= h * w);
-  xnn_pack_f16_dwconv_multipass_ghw_w(
-    primary_tile,
-    /*middle_pass_tile=*/0,
-    /*last_pass_tile=*/0,
-    h,
-    w,
-    c,
-    channel_tile,
-    channel_subtile,
-    channel_round,
-    k,
-    b,
-    packed_weights,
-    per_tile_extra_bytes,
-    per_subtile_extra_bytes,
-    params);
-}
-
-void xnn_pack_f16_dwconv_multipass_ghw_w(
   size_t first_pass_tile,
   size_t middle_pass_tile,
   size_t last_pass_tile,
@@ -1916,40 +1848,6 @@ void xnn_pack_f16_dwconv_multipass_ghw_w(
 }
 
 void xnn_pack_f32_to_f16_dwconv_ghw_w(
-  size_t primary_tile,
-  size_t h,
-  size_t w,
-  size_t c,
-  size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
-  const float* k,
-  const float* b,
-  uint16_t* packed_weights,
-  size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
-  const void* params)
-{
-  assert(primary_tile >= h * w);
-  xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
-    primary_tile,
-    /*middle_pass_tile=*/0,
-    /*last_pass_tile=*/0,
-    h,
-    w,
-    c,
-    channel_tile,
-    channel_subtile,
-    channel_round,
-    k,
-    b,
-    packed_weights,
-    per_tile_extra_bytes,
-    per_subtile_extra_bytes,
-    params);
-}
-
-void xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
   size_t first_pass_tile,
   size_t middle_pass_tile,
   size_t last_pass_tile,
@@ -2134,41 +2032,8 @@ void xnn_pack_f32_to_f16_dwconv_multipass_ghw_w(
   }
 }
 
-void xnn_pack_qu8_dwconv_ghw_w(
-  size_t primary_tile,
-  size_t h,
-  size_t w,
-  size_t c,
-  size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
-  const uint8_t* k,
-  const int32_t* b,
-  void* packed_weights,
-  size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
-  const struct xnn_qu8_packing_params* params)
-{
-  assert(primary_tile >= h * w);
-  xnn_pack_qu8_dwconv_multipass_ghw_w(
-      primary_tile,
-      /*middle_pass_tile=*/0,
-      /*last_pass_tile=*/0,
-      h,
-      w,
-      c,
-      channel_tile,
-      channel_subtile,
-      channel_round,
-      k,
-      b,
-      packed_weights,
-      per_tile_extra_bytes,
-      per_subtile_extra_bytes,
-      params);
-}
 
-void xnn_pack_qu8_dwconv_multipass_ghw_w(
+void xnn_pack_qu8_dwconv_ghw_w(
   size_t first_pass_tile,
   size_t middle_pass_tile,
   size_t last_pass_tile,
@@ -2391,40 +2256,6 @@ void xnn_pack_qu8_dwconv_multipass_ghw_w(
 }
 
 void xnn_pack_qs8_dwconv_ghw_w(
-  size_t primary_tile,
-  size_t h,
-  size_t w,
-  size_t c,
-  size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
-  const int8_t* k,
-  const int32_t* b,
-  void* packed_weights,
-  size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
-  const struct xnn_qs8_packing_params* params)
-{
-  assert(primary_tile >= h * w);
-  xnn_pack_qs8_dwconv_multipass_ghw_w(
-      primary_tile,
-      /*middle_pass_tile=*/0,
-      /*last_pass_tile=*/0,
-      h,
-      w,
-      c,
-      channel_tile,
-      channel_subtile,
-      channel_round,
-      k,
-      b,
-      packed_weights,
-      per_tile_extra_bytes,
-      per_subtile_extra_bytes,
-      params);
-}
-
-void xnn_pack_qs8_dwconv_multipass_ghw_w(
   size_t first_pass_tile,
   size_t middle_pass_tile,
   size_t last_pass_tile,
@@ -2654,40 +2485,6 @@ void xnn_pack_qs8_dwconv_multipass_ghw_w(
 }
 
 void xnn_pack_f32_dwconv_hwg_w(
-  size_t primary_tile,
-  size_t h,
-  size_t w,
-  size_t c,
-  size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
-  const float* k,
-  const float* b,
-  float* packed_weights,
-  size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
-  const void* params)
-{
-  assert(primary_tile >= h * w);
-  xnn_pack_f32_dwconv_multipass_hwg_w(
-      primary_tile,
-      /*middle_pass_tile=*/0,
-      /*last_pass_tile=*/0,
-      h,
-      w,
-      c,
-      channel_tile,
-      channel_subtile,
-      channel_round,
-      k,
-      b,
-      packed_weights,
-      per_tile_extra_bytes,
-      per_subtile_extra_bytes,
-      params);
-}
-
-void xnn_pack_f32_dwconv_multipass_hwg_w(
   size_t first_pass_tile,
   size_t middle_pass_tile,
   size_t last_pass_tile,
@@ -2888,40 +2685,6 @@ void xnn_pack_f32_dwconv_multipass_hwg_w(
 }
 
 void xnn_pack_f16_dwconv_hwg_w(
-  size_t primary_tile,
-  size_t h,
-  size_t w,
-  size_t c,
-  size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
-  const uint16_t* k,
-  const uint16_t* b,
-  uint16_t* packed_weights,
-  size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
-  const void* params)
-{
-  assert(primary_tile >= h * w);
-  xnn_pack_f16_dwconv_multipass_hwg_w(
-    primary_tile,
-    /*middle_pass_tile=*/0,
-    /*last_pass_tile=*/0,
-    h,
-    w,
-    c,
-    channel_tile,
-    channel_subtile,
-    channel_round,
-    k,
-    b,
-    packed_weights,
-    per_tile_extra_bytes,
-    per_subtile_extra_bytes,
-    params);
-}
-
-void xnn_pack_f16_dwconv_multipass_hwg_w(
   size_t first_pass_tile,
   size_t middle_pass_tile,
   size_t last_pass_tile,
@@ -3122,40 +2885,6 @@ void xnn_pack_f16_dwconv_multipass_hwg_w(
 }
 
 void xnn_pack_f32_to_f16_dwconv_hwg_w(
-  size_t primary_tile,
-  size_t h,
-  size_t w,
-  size_t c,
-  size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
-  const float* k,
-  const float* b,
-  uint16_t* packed_weights,
-  size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
-  const void* params)
-{
-  assert(primary_tile >= h * w);
-  xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
-    primary_tile,
-    /*middle_pass_tile=*/0,
-    /*last_pass_tile=*/0,
-    h,
-    w,
-    c,
-    channel_tile,
-    channel_subtile,
-    channel_round,
-    k,
-    b,
-    packed_weights,
-    per_tile_extra_bytes,
-    per_subtile_extra_bytes,
-    params);
-}
-
-void xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
   size_t first_pass_tile,
   size_t middle_pass_tile,
   size_t last_pass_tile,
@@ -3356,40 +3085,6 @@ void xnn_pack_f32_to_f16_dwconv_multipass_hwg_w(
 }
 
 void xnn_pack_qu8_dwconv_hwg_w(
-  size_t primary_tile,
-  size_t h,
-  size_t w,
-  size_t c,
-  size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
-  const uint8_t* k,
-  const int32_t* b,
-  void* packed_weights,
-  size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
-  const struct xnn_qu8_packing_params* params)
-{
-  assert(primary_tile >= h * w);
-  xnn_pack_qu8_dwconv_multipass_hwg_w(
-      primary_tile,
-      /*middle_pass_tile=*/0,
-      /*last_pass_tile=*/0,
-      h,
-      w,
-      c,
-      channel_tile,
-      channel_subtile,
-      channel_round,
-      k,
-      b,
-      packed_weights,
-      per_tile_extra_bytes,
-      per_subtile_extra_bytes,
-      params);
-}
-
-void xnn_pack_qu8_dwconv_multipass_hwg_w(
   size_t first_pass_tile,
   size_t middle_pass_tile,
   size_t last_pass_tile,
@@ -3612,40 +3307,6 @@ void xnn_pack_qu8_dwconv_multipass_hwg_w(
 }
 
 void xnn_pack_qs8_dwconv_hwg_w(
-  size_t primary_tile,
-  size_t h,
-  size_t w,
-  size_t c,
-  size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round,
-  const int8_t* k,
-  const int32_t* b,
-  void* packed_weights,
-  size_t per_tile_extra_bytes,
-  size_t per_subtile_extra_bytes,
-  const struct xnn_qs8_packing_params* params)
-{
-  assert(primary_tile >= h * w);
-  xnn_pack_qs8_dwconv_multipass_hwg_w(
-      primary_tile,
-      /*middle_pass_tile=*/0,
-      /*last_pass_tile=*/0,
-      h,
-      w,
-      c,
-      channel_tile,
-      channel_subtile,
-      channel_round,
-      k,
-      b,
-      packed_weights,
-      per_tile_extra_bytes,
-      per_subtile_extra_bytes,
-      params);
-}
-
-void xnn_pack_qs8_dwconv_multipass_hwg_w(
   size_t first_pass_tile,
   size_t middle_pass_tile,
   size_t last_pass_tile,
