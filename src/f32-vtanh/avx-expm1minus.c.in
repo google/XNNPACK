@@ -19,12 +19,6 @@ $LUT = 1 << LOG2LUT
 #include <xnnpack/common.h>
 #include <xnnpack/vunary.h>
 
-$if LOG2LUT == 0:
-  $COEFFS = ["0x1.FFFFFEp+0", "0x1.5554B0p+0", "0x1.555716p-1", "0x1.12278Ep-2", "0x1.6B7338p-4"]
-$elif LOG2LUT == 2:
-  $COEFFS = ["0x1.000002p+1", "0x1.557082p+0", "0x1.554F9Ap-1"]
-$if P != H + 1:
-  $COEFFS = [float.hex(0.5 * float.fromhex(c)).upper().replace("0X", "0x").replace("0000000P", "p") for c in COEFFS]
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
 $POLY_SUFFIX = "p%dh%d" % (P, H)
 $PERM_SUFFIX = "_perm" if LOG2LUT != 0 else ""
@@ -120,15 +114,15 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}${P
 
       $for N in range(SIMD_TILE):
         $if FMA == 3:
-          __m256 vp${N} = _mm256_fmadd_ps(vc${1+len(COEFFS)}, vt${N}, vc${len(COEFFS)});
+          __m256 vp${N} = _mm256_fmadd_ps(vc${P}, vt${N}, vc${P-1});
         $else:
-          __m256 vp${N} = _mm256_add_ps(_mm256_mul_ps(vc${1+len(COEFFS)}, vt${N}), vc${len(COEFFS)});
-      $for i in reversed(range(len(COEFFS)-2)):
+          __m256 vp${N} = _mm256_add_ps(_mm256_mul_ps(vc${P}, vt${N}), vc${P-1});
+      $for i in reversed(range(2, P-1)):
         $for N in range(SIMD_TILE):
           $if FMA == 3:
-            vp${N} = _mm256_fmadd_ps(vp${N}, vt${N}, vc${2+i});
+            vp${N} = _mm256_fmadd_ps(vp${N}, vt${N}, vc${i});
           $else:
-            vp${N} = _mm256_add_ps(_mm256_mul_ps(vp${N}, vt${N}), vc${2+i});
+            vp${N} = _mm256_add_ps(_mm256_mul_ps(vp${N}, vt${N}), vc${i});
       $for N in range(SIMD_TILE):
         $if P == H + 1:
           $if FMA == 3:
@@ -243,14 +237,14 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}${P
       const __m256 vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2), vz);
 
     $if FMA == 3:
-      __m256 vp = _mm256_fmadd_ps(vc${1+len(COEFFS)}, vt, vc${len(COEFFS)});
+      __m256 vp = _mm256_fmadd_ps(vc${P}, vt, vc${P-1});
     $else:
-      __m256 vp = _mm256_add_ps(_mm256_mul_ps(vc${1+len(COEFFS)}, vt), vc${len(COEFFS)});
-    $for i in reversed(range(len(COEFFS)-2)):
+      __m256 vp = _mm256_add_ps(_mm256_mul_ps(vc${P}, vt), vc${P-1});
+    $for i in reversed(range(2, P-1)):
       $if FMA == 3:
-        vp = _mm256_fmadd_ps(vp, vt, vc${2+i});
+        vp = _mm256_fmadd_ps(vp, vt, vc${i});
       $else:
-        vp = _mm256_add_ps(_mm256_mul_ps(vp, vt), vc${2+i});
+        vp = _mm256_add_ps(_mm256_mul_ps(vp, vt), vc${i});
     $if P == H + 1:
       $if FMA == 3:
         vp = _mm256_fmadd_ps(vp, vt, vtwo);
@@ -346,14 +340,14 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}${P
       const __m256 vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2), vz);
 
     $if FMA == 3:
-      __m256 vp = _mm256_fmadd_ps(vc${1+len(COEFFS)}, vt, vc${len(COEFFS)});
+      __m256 vp = _mm256_fmadd_ps(vc${P}, vt, vc${P-1});
     $else:
-      __m256 vp = _mm256_add_ps(_mm256_mul_ps(vc${1+len(COEFFS)}, vt), vc${len(COEFFS)});
-    $for i in reversed(range(len(COEFFS)-2)):
+      __m256 vp = _mm256_add_ps(_mm256_mul_ps(vc${P}, vt), vc${P-1});
+    $for i in reversed(range(2, P-1)):
       $if FMA == 3:
-        vp = _mm256_fmadd_ps(vp, vt, vc${2+i});
+        vp = _mm256_fmadd_ps(vp, vt, vc${i});
       $else:
-        vp = _mm256_add_ps(_mm256_mul_ps(vp, vt), vc${2+i});
+        vp = _mm256_add_ps(_mm256_mul_ps(vp, vt), vc${i});
     $if P == H + 1:
       $if FMA == 3:
         vp = _mm256_fmadd_ps(vp, vt, vtwo);

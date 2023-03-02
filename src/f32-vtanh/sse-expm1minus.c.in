@@ -27,10 +27,6 @@ $if LOG2LUT != 0:
   // Table of exp2(k / ${LUT}) values decremented (as integer) by (k << ${23-LOG2LUT}), k = 0..${LUT-1}
   extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_${LUT}[${LUT}];
 
-$if LOG2LUT == 0:
-  $COEFFS = ["0x1.FFFFFEp+0", "0x1.5554B0p+0", "0x1.555716p-1", "0x1.12278Ep-2", "0x1.6B7338p-4"]
-$elif LOG2LUT == 3:
-  $COEFFS = ["0x1.000000p+1", "0x1.555C20p+0", "0x1.5558ECp-1"]
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
 $POLY_SUFFIX = "p%dh%d" % (P, H)
 $DIV_SUFFIX = DIV.lower()
