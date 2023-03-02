@@ -2393,6 +2393,47 @@ size_t xnn_init_f32_tanh_scalar_expm1minus_rr1_p6h5_params(
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+size_t xnn_init_f32_tanh_sse_expm1minus_rr1_lut8_p4h3_params(
+  union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse_expm1minus_rr1_lut8_p4h3.sign_mask[i] = -0.0f;
+    params->sse_expm1minus_rr1_lut8_p4h3.sat_cutoff[i] = -0x1.205968p+3f;
+    params->sse_expm1minus_rr1_lut8_p4h3.log2e[i] = 0x1.715476p+0f;
+    params->sse_expm1minus_rr1_lut8_p4h3.magic_bias[i] = 0x1.800000p+19f;
+    params->sse_expm1minus_rr1_lut8_p4h3.index_mask[i] = UINT32_C(0x7);
+    params->sse_expm1minus_rr1_lut8_p4h3.minus_ln2[i] = -0x1.62E430p-1f;
+    params->sse_expm1minus_rr1_lut8_p4h3.c4[i] = 0x1.5558ECp-1f;
+    params->sse_expm1minus_rr1_lut8_p4h3.c3[i] = 0x1.555C20p+0f;
+    params->sse_expm1minus_rr1_lut8_p4h3.c2[i] = 0x1.000000p+1f;
+    params->sse_expm1minus_rr1_lut8_p4h3.minus_two[i] = -2.0f;
+    params->sse_expm1minus_rr1_lut8_p4h3.minus_one[i] = -1.0f;
+  }
+  return sizeof(params->sse_expm1minus_rr1_lut8_p4h3);
+}
+
+size_t xnn_init_f32_tanh_sse_expm1minus_rr1_p6h5_params(
+  union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse_expm1minus_rr1_p6h5.sign_mask[i] = -0.0f;
+    params->sse_expm1minus_rr1_p6h5.sat_cutoff[i] = -0x1.205968p+3f;
+    params->sse_expm1minus_rr1_p6h5.log2e[i] = 0x1.715476p+0f;
+    params->sse_expm1minus_rr1_p6h5.magic_bias[i] = 0x1.8000FEp+22f;
+    params->sse_expm1minus_rr1_p6h5.minus_ln2[i] = -0x1.62E430p-1f;
+    params->sse_expm1minus_rr1_p6h5.c6[i] = 0x1.6B7338p-4f;
+    params->sse_expm1minus_rr1_p6h5.c5[i] = 0x1.12278Ep-2f;
+    params->sse_expm1minus_rr1_p6h5.c4[i] = 0x1.555716p-1f;
+    params->sse_expm1minus_rr1_p6h5.c3[i] = 0x1.5554B0p+0f;
+    params->sse_expm1minus_rr1_p6h5.c2[i] = 0x1.FFFFFEp+0f;
+    params->sse_expm1minus_rr1_p6h5.minus_two[i] = -2.0f;
+    params->sse_expm1minus_rr1_p6h5.minus_one[i] = -1.0f;
+  }
+  return sizeof(params->sse_expm1minus_rr1_p6h5);
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f16_abs_sse_params(
   union xnn_f16_abs_params params[XNN_MIN_ELEMENTS(1)])
 {

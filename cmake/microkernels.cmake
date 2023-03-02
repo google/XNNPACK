@@ -4962,6 +4962,22 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-p5-div-x16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-p5-div-x20.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-p5-div-x24.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-lut8-p4h3-div-x4.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-lut8-p4h3-div-x8.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-lut8-p4h3-div-x12.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-lut8-p4h3-div-x16.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-p6h5-div-x4.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-p6h5-div-x8.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-p6h5-div-x12.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-p6h5-div-x16.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-p6h5-nr1-x4.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-p6h5-nr1-x8.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-p6h5-nr1-x12.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-p6h5-nr1-x16.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-p6h5-nr2-x4.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-p6h5-nr2-x8.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-p6h5-nr2-x12.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-expm1minus-rr1-p6h5-nr2-x16.c
   src/math/f16-f32-cvt-sse2-int16.c
   src/math/f16-f32-cvt-sse2-int32.c
   src/math/f32-exp-sse2-rr2-lut64-p2.c
@@ -5305,6 +5321,30 @@ SET(ALL_SSE41_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-sse41-rr2-p5-div-x16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse41-rr2-p5-div-x20.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse41-rr2-p5-div-x24.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3-div-x4.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3-div-x8.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3-div-x12.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3-div-x16.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3-div-x20.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-lut8-p4h3-div-x24.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-div-x4.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-div-x8.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-div-x12.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-div-x16.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-div-x20.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-div-x24.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-nr1-x4.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-nr1-x8.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-nr1-x12.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-nr1-x16.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-nr1-x20.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-nr1-x24.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-nr2-x4.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-nr2-x8.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-nr2-x12.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-nr2-x16.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-nr2-x20.c
+  src/f32-vtanh/gen/f32-vtanh-sse41-expm1minus-rr1-p6h5-nr2-x24.c
   src/math/f16-f32-cvt-sse41-int16.c
   src/math/f16-f32-cvt-sse41-int32.c
   src/math/f32-f16-cvt-sse41.c

@@ -2446,6 +2446,35 @@ union xnn_f32_tanh_params {
     float one;
     float sat_cutoff;
   } scalar_expm1minus_rr1_lut8_p4h3;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(16) float sign_mask[4];
+    XNN_ALIGN(16) float sat_cutoff[4];
+    XNN_ALIGN(16) float log2e[4];
+    XNN_ALIGN(16) float magic_bias[4];
+    XNN_ALIGN(16) float minus_ln2[4];
+    XNN_ALIGN(16) float c6[4];
+    XNN_ALIGN(16) float c5[4];
+    XNN_ALIGN(16) float c4[4];
+    XNN_ALIGN(16) float c3[4];
+    XNN_ALIGN(16) float c2[4];
+    XNN_ALIGN(16) float minus_two[4];
+    XNN_ALIGN(16) float minus_one[4];
+  } sse_expm1minus_rr1_p6h5;
+  struct {
+    XNN_ALIGN(16) float sign_mask[4];
+    XNN_ALIGN(16) float sat_cutoff[4];
+    XNN_ALIGN(16) float log2e[4];
+    XNN_ALIGN(16) float magic_bias[4];
+    XNN_ALIGN(16) uint32_t index_mask[4];
+    XNN_ALIGN(16) float minus_ln2[4];
+    XNN_ALIGN(16) float c4[4];
+    XNN_ALIGN(16) float c3[4];
+    XNN_ALIGN(16) float c2[4];
+    XNN_ALIGN(16) float minus_two[4];
+    XNN_ALIGN(16) float minus_one[4];
+  } sse_expm1minus_rr1_lut8_p4h3;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 

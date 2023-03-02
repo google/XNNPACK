@@ -8,7 +8,6 @@ $assert RR == 1 or RR == 2
 $assert LOG2LUT in [0, 3]
 $assert P == H + 1 or P == H + 2
 $assert DIV in ["DIV", "NR1", "NR2"]
-$NR_ITER = {"NR1": 1, "NR2": 2, "DIV": 0}[DIV]
 $assert SAT in ["MINMAX", "SELECT"]
 $LUT = 1 << LOG2LUT
 #include <assert.h>

@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$import math
 $assert (LOG2LUT, P, H) in [(0, 6, 5), (3, 4, 3)]
 $LUT = 1 << LOG2LUT
 #include <assert.h>
