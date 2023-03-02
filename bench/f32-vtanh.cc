@@ -63,6 +63,621 @@ static void f32_vtanh(
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_div_x8,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_div_x8,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_div_x16,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_div_x16,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_div_x24,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_div_x24,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_div_x32,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_div_x32,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_div_x40,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_div_x40,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_div_x48,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_div_x48,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_div_x56,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_div_x56,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_div_x64,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_div_x64,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_div_x72,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_div_x72,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_div_x80,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_div_x80,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x8,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x8,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x16,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x16,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x24,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x24,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x32,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x32,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x40,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x40,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x48,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x48,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x56,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x56,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x64,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x64,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x72,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x72,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x80,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_nr1adj_x80,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut8_p4h3_div_x8,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut8_p4h3_div_x8,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut8_p4h3_div_x16,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut8_p4h3_div_x16,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut8_p4h3_div_x24,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut8_p4h3_div_x24,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut8_p4h3_div_x32,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut8_p4h3_div_x32,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut8_p4h3_nr1adj_x8,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut8_p4h3_nr1adj_x8,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut8_p4h3_nr1adj_x16,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut8_p4h3_nr1adj_x16,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut8_p4h3_nr1adj_x24,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut8_p4h3_nr1adj_x24,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_lut8_p4h3_nr1adj_x32,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut8_p4h3_nr1adj_x32,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_div_x8,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_div_x8,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_div_x16,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_div_x16,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_div_x24,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_div_x24,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_div_x32,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_div_x32,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_div_x40,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_div_x40,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_div_x48,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_div_x48,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_div_x56,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_div_x56,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_div_x64,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_div_x64,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_div_x72,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_div_x72,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_div_x80,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_div_x80,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1_x8,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1_x8,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1_x16,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1_x16,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1_x24,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1_x24,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1_x32,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1_x32,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1_x40,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1_x40,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1_x48,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1_x48,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1_x56,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1_x56,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1_x64,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1_x64,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1_x72,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1_x72,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1_x80,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1_x80,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1adj_x8,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1adj_x8,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1adj_x16,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1adj_x16,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1adj_x24,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1adj_x24,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1adj_x32,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1adj_x32,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1adj_x40,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1adj_x40,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1adj_x48,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1adj_x48,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1adj_x56,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1adj_x56,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1adj_x64,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1adj_x64,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1adj_x72,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1adj_x72,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, fma3_expm1minus_rr1_p6h5_nr1adj_x80,
+                    xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1adj_x80,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_lut4_p4h2_perm_div_x8,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x8,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h2_perm_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_lut4_p4h2_perm_div_x16,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x16,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h2_perm_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_lut4_p4h2_perm_div_x24,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x24,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h2_perm_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_lut4_p4h2_perm_div_x32,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x32,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h2_perm_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_lut4_p4h2_perm_div_x40,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x40,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h2_perm_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_lut4_p4h2_perm_div_x48,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x48,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h2_perm_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_lut4_p4h2_perm_div_x56,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x56,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h2_perm_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_lut4_p4h2_perm_div_x64,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x64,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h2_perm_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_lut4_p4h2_perm_div_x72,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x72,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h2_perm_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_lut4_p4h2_perm_div_x80,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x80,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h2_perm_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_div_x8,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_div_x8,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_div_x16,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_div_x16,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_div_x24,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_div_x24,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_div_x32,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_div_x32,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_div_x40,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_div_x40,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_div_x48,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_div_x48,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_div_x56,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_div_x56,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_div_x64,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_div_x64,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_div_x72,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_div_x72,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_div_x80,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_div_x80,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr1_x8,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr1_x8,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr1_x16,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr1_x16,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr1_x24,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr1_x24,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr1_x32,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr1_x32,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr1_x40,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr1_x40,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr1_x48,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr1_x48,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr1_x56,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr1_x56,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr1_x64,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr1_x64,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr1_x72,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr1_x72,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr1_x80,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr1_x80,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr2_x8,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr2_x8,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr2_x16,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr2_x16,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr2_x24,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr2_x24,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr2_x32,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr2_x32,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr2_x40,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr2_x40,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr2_x48,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr2_x48,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr2_x56,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr2_x56,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr2_x64,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr2_x64,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr2_x72,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr2_x72,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_p6h5_nr2_x80,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_p6h5_nr2_x80,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_lut8_p4h3_div_x8,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut8_p4h3_div_x8,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_lut8_p4h3_div_x16,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut8_p4h3_div_x16,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_lut8_p4h3_div_x24,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut8_p4h3_div_x24,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, avx_expm1minus_rr1_lut8_p4h3_div_x32,
+                    xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut8_p4h3_div_x32,
+                    xnn_init_f32_tanh_avx_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
   BENCHMARK_CAPTURE(f32_vtanh, sse41_expm1minus_rr1_lut8_p4h3_div_x4,
                     xnn_f32_vtanh_ukernel__sse41_expm1minus_rr1_lut8_p4h3_div_x4,
                     xnn_init_f32_tanh_sse_expm1minus_rr1_lut8_p4h3_params,

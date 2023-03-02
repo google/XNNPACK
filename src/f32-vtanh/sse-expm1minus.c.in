@@ -6,6 +6,8 @@
 $assert (LOG2LUT, P, H) in [(0, 6, 5), (3, 4, 3)]
 $assert DIV in ["DIV", "NR1", "NR2"]
 $assert SAT in ["MINMAX", "SELECT"]
+$assert BATCH_TILE % 4 == 0
+$assert BATCH_TILE >= 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $LUT = 1 << LOG2LUT
 #include <assert.h>

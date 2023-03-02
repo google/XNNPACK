@@ -2431,6 +2431,123 @@ size_t xnn_init_f32_tanh_sse_expm1minus_rr1_p6h5_params(
   }
   return sizeof(params->sse_expm1minus_rr1_p6h5);
 }
+
+size_t xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h2_perm_params(
+  union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx_expm1minus_rr1_lut4_p4h2_perm.sign_mask[i] = -0.0f;
+    params->avx_expm1minus_rr1_lut4_p4h2_perm.sat_cutoff[i] = -0x1.205968p+3f;
+    params->avx_expm1minus_rr1_lut4_p4h2_perm.log2e[i] = 0x1.715476p+0f;
+    params->avx_expm1minus_rr1_lut4_p4h2_perm.magic_bias[i] = 0x1.8003F8p+20f;
+    params->avx_expm1minus_rr1_lut4_p4h2_perm.index_mask[i] = UINT32_C(0x3);
+    params->avx_expm1minus_rr1_lut4_p4h2_perm.minus_ln2[i] = -0x1.62E430p-1f;
+    params->avx_expm1minus_rr1_lut4_p4h2_perm.c4[i] = 0x1.554F9Ap-2f;
+    params->avx_expm1minus_rr1_lut4_p4h2_perm.c3[i] = 0x1.557082p-1f;
+    params->avx_expm1minus_rr1_lut4_p4h2_perm.c2[i] = 0x1.000002p+0f;
+    params->avx_expm1minus_rr1_lut4_p4h2_perm.two[i] = 2.0f;
+    params->avx_expm1minus_rr1_lut4_p4h2_perm.minus_one[i] = -1.0f;
+  }
+  params->avx_expm1minus_rr1_lut4_p4h2_perm.table[0] = 0x1.000000p+0f;
+  params->avx_expm1minus_rr1_lut4_p4h2_perm.table[1] = 0x1.306FE0p+0f;
+  params->avx_expm1minus_rr1_lut4_p4h2_perm.table[2] = 0x1.6A09E6p+0f;
+  params->avx_expm1minus_rr1_lut4_p4h2_perm.table[3] = 0x1.AE89FAp+0f;
+  params->avx_expm1minus_rr1_lut4_p4h2_perm.table[4] = 0x1.000000p+0f;
+  params->avx_expm1minus_rr1_lut4_p4h2_perm.table[5] = 0x1.306FE0p+0f;
+  params->avx_expm1minus_rr1_lut4_p4h2_perm.table[6] = 0x1.6A09E6p+0f;
+  params->avx_expm1minus_rr1_lut4_p4h2_perm.table[7] = 0x1.AE89FAp+0f;
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx_expm1minus_rr1_lut4_p4h2_perm.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx_expm1minus_rr1_lut4_p4h2_perm.mask_table[i] = 0;
+  }
+  return sizeof(params->avx_expm1minus_rr1_lut4_p4h2_perm);
+}
+
+size_t xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params(
+  union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx_expm1minus_rr1_lut4_p4h3_perm.sign_mask[i] = -0.0f;
+    params->avx_expm1minus_rr1_lut4_p4h3_perm.sat_cutoff[i] = -0x1.205968p+3f;
+    params->avx_expm1minus_rr1_lut4_p4h3_perm.log2e[i] = 0x1.715476p+0f;
+    params->avx_expm1minus_rr1_lut4_p4h3_perm.magic_bias[i] = 0x1.8003F8p+20f;
+    params->avx_expm1minus_rr1_lut4_p4h3_perm.index_mask[i] = UINT32_C(0x3);
+    params->avx_expm1minus_rr1_lut4_p4h3_perm.minus_ln2[i] = -0x1.62E430p-1f;
+    params->avx_expm1minus_rr1_lut4_p4h3_perm.c4[i] = 0x1.554F9Ap-1f;
+    params->avx_expm1minus_rr1_lut4_p4h3_perm.c3[i] = 0x1.557082p+0f;
+    params->avx_expm1minus_rr1_lut4_p4h3_perm.c2[i] = 0x1.000002p+1f;
+    params->avx_expm1minus_rr1_lut4_p4h3_perm.two[i] = 2.0f;
+    params->avx_expm1minus_rr1_lut4_p4h3_perm.minus_one[i] = -1.0f;
+  }
+  params->avx_expm1minus_rr1_lut4_p4h3_perm.table[0] = 0x1.000000p+0f;
+  params->avx_expm1minus_rr1_lut4_p4h3_perm.table[1] = 0x1.306FE0p+0f;
+  params->avx_expm1minus_rr1_lut4_p4h3_perm.table[2] = 0x1.6A09E6p+0f;
+  params->avx_expm1minus_rr1_lut4_p4h3_perm.table[3] = 0x1.AE89FAp+0f;
+  params->avx_expm1minus_rr1_lut4_p4h3_perm.table[4] = 0x1.000000p+0f;
+  params->avx_expm1minus_rr1_lut4_p4h3_perm.table[5] = 0x1.306FE0p+0f;
+  params->avx_expm1minus_rr1_lut4_p4h3_perm.table[6] = 0x1.6A09E6p+0f;
+  params->avx_expm1minus_rr1_lut4_p4h3_perm.table[7] = 0x1.AE89FAp+0f;
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx_expm1minus_rr1_lut4_p4h3_perm.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx_expm1minus_rr1_lut4_p4h3_perm.mask_table[i] = 0;
+  }
+  return sizeof(params->avx_expm1minus_rr1_lut4_p4h3_perm);
+}
+
+size_t xnn_init_f32_tanh_avx_expm1minus_rr1_lut8_p4h3_params(
+  union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx_expm1minus_rr1_lut8_p4h3.sign_mask[i] = -0.0f;
+    params->avx_expm1minus_rr1_lut8_p4h3.sat_cutoff[i] = -0x1.205968p+3f;
+    params->avx_expm1minus_rr1_lut8_p4h3.log2e[i] = 0x1.715476p+0f;
+    params->avx_expm1minus_rr1_lut8_p4h3.magic_bias[i] = 0x1.800000p+19f;
+    params->avx_expm1minus_rr1_lut8_p4h3.index_mask[i] = UINT32_C(0x7);
+    params->avx_expm1minus_rr1_lut8_p4h3.minus_ln2[i] = -0x1.62E430p-1f;
+    params->avx_expm1minus_rr1_lut8_p4h3.c4[i] = 0x1.5558ECp-1f;
+    params->avx_expm1minus_rr1_lut8_p4h3.c3[i] = 0x1.555C20p+0f;
+    params->avx_expm1minus_rr1_lut8_p4h3.c2[i] = 0x1.000000p+1f;
+    params->avx_expm1minus_rr1_lut8_p4h3.two[i] = 2.0f;
+    params->avx_expm1minus_rr1_lut8_p4h3.minus_one[i] = -1.0f;
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx_expm1minus_rr1_lut8_p4h3.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx_expm1minus_rr1_lut8_p4h3.mask_table[i] = 0;
+  }
+  return sizeof(params->avx_expm1minus_rr1_lut8_p4h3);
+}
+
+size_t xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params(
+  union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx_expm1minus_rr1_p6h5.sign_mask[i] = -0.0f;
+    params->avx_expm1minus_rr1_p6h5.sat_cutoff[i] = -0x1.205968p+3f;
+    params->avx_expm1minus_rr1_p6h5.log2e[i] = 0x1.715476p+0f;
+    params->avx_expm1minus_rr1_p6h5.magic_bias[i] = 0x1.8000FEp+22f;
+    params->avx_expm1minus_rr1_p6h5.minus_ln2[i] = -0x1.62E430p-1f;
+    params->avx_expm1minus_rr1_p6h5.c6[i] = 0x1.6B7338p-4f;
+    params->avx_expm1minus_rr1_p6h5.c5[i] = 0x1.12278Ep-2f;
+    params->avx_expm1minus_rr1_p6h5.c4[i] = 0x1.555716p-1f;
+    params->avx_expm1minus_rr1_p6h5.c3[i] = 0x1.5554B0p+0f;
+    params->avx_expm1minus_rr1_p6h5.c2[i] = 0x1.FFFFFEp+0f;
+    params->avx_expm1minus_rr1_p6h5.two[i] = 2.0f;
+    params->avx_expm1minus_rr1_p6h5.minus_one[i] = -1.0f;
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx_expm1minus_rr1_p6h5.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx_expm1minus_rr1_p6h5.mask_table[i] = 0;
+  }
+  return sizeof(params->avx_expm1minus_rr1_p6h5);
+}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

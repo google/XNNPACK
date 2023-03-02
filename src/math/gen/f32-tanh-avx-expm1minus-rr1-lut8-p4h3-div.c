@@ -117,12 +117,12 @@ void xnn_math_f32_tanh__avx_expm1minus_rr1_lut8_p4h3_div(
       vl_hi = _mm_insert_epi32(vl_hi, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx5], 1);
       const uint32_t vidx2 = (uint32_t) _mm_extract_epi32(vidx_lo, 2);
       const uint32_t vidx6 = (uint32_t) _mm_extract_epi32(vidx_hi, 2);
-      vl_lo = _mm_insert_epi32(vl_lo, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx1], 2);
-      vl_hi = _mm_insert_epi32(vl_hi, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx5], 2);
+      vl_lo = _mm_insert_epi32(vl_lo, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx2], 2);
+      vl_hi = _mm_insert_epi32(vl_hi, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx6], 2);
       const uint32_t vidx3 = (uint32_t) _mm_extract_epi32(vidx_lo, 3);
       const uint32_t vidx7 = (uint32_t) _mm_extract_epi32(vidx_hi, 3);
-      vl_lo = _mm_insert_epi32(vl_lo, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx1], 3);
-      vl_hi = _mm_insert_epi32(vl_hi, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx5], 3);
+      vl_lo = _mm_insert_epi32(vl_lo, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx3], 3);
+      vl_hi = _mm_insert_epi32(vl_hi, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx7], 3);
     #endif
 
     // Adjust exponent of the value l fetched from the table to get the final s value.

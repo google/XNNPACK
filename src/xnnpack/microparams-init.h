@@ -425,8 +425,11 @@ DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_scalar_expm1minus_rr1_p6
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_sse_expm1minus_rr1_lut8_p4h3_params)
   DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_sse_expm1minus_rr1_p6h5_params)
+  DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h2_perm_params)
+  DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params)
+  DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_avx_expm1minus_rr1_lut8_p4h3_params)
+  DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
 
 #define DECLARE_INIT_F32_ABS_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                             \
