@@ -41,20 +41,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon(
   assert(packed_weights != NULL);
 
   uint32x4x4_t v00;
-  v00.val[0] = vdupq_n_u32(0);
-  v00.val[1] = vdupq_n_u32(0);
-  v00.val[2] = vdupq_n_u32(0);
-  v00.val[3] = vdupq_n_u32(0);
   uint32x4x4_t v40;
-  v40.val[0] = vdupq_n_u32(0);
-  v40.val[1] = vdupq_n_u32(0);
-  v40.val[2] = vdupq_n_u32(0);
-  v40.val[3] = vdupq_n_u32(0);
   uint32x4x4_t v80;
-  v80.val[0] = vdupq_n_u32(0);
-  v80.val[1] = vdupq_n_u32(0);
-  v80.val[2] = vdupq_n_u32(0);
-  v80.val[3] = vdupq_n_u32(0);
 
   do {
     // NC main loop multiple of 12
@@ -89,7 +77,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon(
         // KC main loop multiple of 12x4
         size_t k = kc;
         for (; k >= 4; k -= 4) {
-          v00 = vld4q_lane_u32(w0, v00, 0);
+          v00 = vld4q_dup_u32(w0);
           w0 += 4;
           v00 = vld4q_lane_u32(w1, v00, 1);
           w1 += 4;
@@ -97,7 +85,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon(
           w2 += 4;
           v00 = vld4q_lane_u32(w3, v00, 3);
           w3 += 4;
-          v40 = vld4q_lane_u32(w4, v40, 0);
+          v40 = vld4q_dup_u32(w4);
           w4 += 4;
           v40 = vld4q_lane_u32(w5, v40, 1);
           w5 += 4;
@@ -105,7 +93,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon(
           w6 += 4;
           v40 = vld4q_lane_u32(w7, v40, 3);
           w7 += 4;
-          v80 = vld4q_lane_u32(w8, v80, 0);
+          v80 = vld4q_dup_u32(w8);
           w8 += 4;
           v80 = vld4q_lane_u32(w9, v80, 1);
           w9 += 4;
@@ -135,11 +123,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon(
             // KC remainder of 12x1
             case 1:
             {
-              uint32x4_t v0 = vdupq_n_u32(0);
-              uint32x4_t v4 = vdupq_n_u32(0);
-              uint32x4_t v8 = vdupq_n_u32(0);
+              uint32x4_t v0;
+              uint32x4_t v4;
+              uint32x4_t v8;
 
-              v0 = vld1q_lane_u32(w0, v0, 0);
+              v0 = vld1q_dup_u32(w0);
               w0 += 1;
               v0 = vld1q_lane_u32(w1, v0, 1);
               w1 += 1;
@@ -147,7 +135,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon(
               w2 += 1;
               v0 = vld1q_lane_u32(w3, v0, 3);
               w3 += 1;
-              v4 = vld1q_lane_u32(w4, v4, 0);
+              v4 = vld1q_dup_u32(w4);
               w4 += 1;
               v4 = vld1q_lane_u32(w5, v4, 1);
               w5 += 1;
@@ -155,7 +143,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon(
               w6 += 1;
               v4 = vld1q_lane_u32(w7, v4, 3);
               w7 += 1;
-              v8 = vld1q_lane_u32(w8, v8, 0);
+              v8 = vld1q_dup_u32(w8);
               w8 += 1;
               v8 = vld1q_lane_u32(w9, v8, 1);
               w9 += 1;
@@ -174,16 +162,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon(
             case 2:
             {
               uint32x4x2_t v0;
-              v0.val[0] = vdupq_n_u32(0);
-              v0.val[1] = vdupq_n_u32(0);
               uint32x4x2_t v4;
-              v4.val[0] = vdupq_n_u32(0);
-              v4.val[1] = vdupq_n_u32(0);
               uint32x4x2_t v8;
-              v8.val[0] = vdupq_n_u32(0);
-              v8.val[1] = vdupq_n_u32(0);
 
-              v0 = vld2q_lane_u32(w0, v0, 0);
+              v0 = vld2q_dup_u32(w0);
               w0 += 2;
               v0 = vld2q_lane_u32(w1, v0, 1);
               w1 += 2;
@@ -191,7 +173,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon(
               w2 += 2;
               v0 = vld2q_lane_u32(w3, v0, 3);
               w3 += 2;
-              v4 = vld2q_lane_u32(w4, v4, 0);
+              v4 = vld2q_dup_u32(w4);
               w4 += 2;
               v4 = vld2q_lane_u32(w5, v4, 1);
               w5 += 2;
@@ -199,7 +181,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon(
               w6 += 2;
               v4 = vld2q_lane_u32(w7, v4, 3);
               w7 += 2;
-              v8 = vld2q_lane_u32(w8, v8, 0);
+              v8 = vld2q_dup_u32(w8);
               w8 += 2;
               v8 = vld2q_lane_u32(w9, v8, 1);
               w9 += 2;
@@ -221,19 +203,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon(
             case 3:
             {
               uint32x4x3_t v0;
-              v0.val[0] = vdupq_n_u32(0);
-              v0.val[1] = vdupq_n_u32(0);
-              v0.val[2] = vdupq_n_u32(0);
               uint32x4x3_t v4;
-              v4.val[0] = vdupq_n_u32(0);
-              v4.val[1] = vdupq_n_u32(0);
-              v4.val[2] = vdupq_n_u32(0);
               uint32x4x3_t v8;
-              v8.val[0] = vdupq_n_u32(0);
-              v8.val[1] = vdupq_n_u32(0);
-              v8.val[2] = vdupq_n_u32(0);
 
-              v0 = vld3q_lane_u32(w0, v0, 0);
+              v0 = vld3q_dup_u32(w0);
               w0 += 3;
               v0 = vld3q_lane_u32(w1, v0, 1);
               w1 += 3;
@@ -241,7 +214,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon(
               w2 += 3;
               v0 = vld3q_lane_u32(w3, v0, 3);
               w3 += 3;
-              v4 = vld3q_lane_u32(w4, v4, 0);
+              v4 = vld3q_dup_u32(w4);
               w4 += 3;
               v4 = vld3q_lane_u32(w5, v4, 1);
               w5 += 3;
@@ -249,7 +222,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon(
               w6 += 3;
               v4 = vld3q_lane_u32(w7, v4, 3);
               w7 += 3;
-              v8 = vld3q_lane_u32(w8, v8, 0);
+              v8 = vld3q_dup_u32(w8);
               w8 += 3;
               v8 = vld3q_lane_u32(w9, v8, 1);
               w9 += 3;

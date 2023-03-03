@@ -41,8 +41,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
   $for N in range(0,NR,4):
     $for K in range(0,KUNROLL,4):
       uint32x4x4_t v${N}${K};
-      $for NN in range(0,4):
-        v${N}${K}.val[${NN}] = vdupq_n_u32(0);
 
   do {
     // NC main loop multiple of ${NR}
@@ -68,9 +66,15 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
         for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
           $for N in range(0,NR,4):
             $for NN in range(0,4):
-              v${N}0 = vld4q_lane_u32(w${N+NN}, v${N}0, ${NN});
+              $if NN == 0:
+                v${N}0 = vld4q_dup_u32(w${N+NN});
+              $else:
+                v${N}0 = vld4q_lane_u32(w${N+NN}, v${N}0, ${NN});
               $for K in range(4,KUNROLL,4):
-                v${N}${K} = vld4q_lane_u32(w${N+NN} + ${K}, v${N}${K}, ${NN});
+                $if NN == 0:
+                  v${N}${K} = vld4q_dup_u32(w${N+NN} + ${K});
+                $else:
+                  v${N}${K} = vld4q_lane_u32(w${N+NN} + ${K}, v${N}${K}, ${NN});
               w${N+NN} += ${KUNROLL};
           $for K in range(0,KUNROLL,4):
             $for NN in range(0,4):
@@ -90,16 +94,17 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
                 {
                   $if K == 1:
                     $for N in range(0,NR,4):
-                      uint32x4_t v${N} = vdupq_n_u32(0);
+                      uint32x4_t v${N};
                   $else:
                     $for N in range(0,NR,4):
                       uint32x4x${K}_t v${N};
-                      $for NN in range(0,K):
-                        v${N}.val[${NN}] = vdupq_n_u32(0);
 
                   $for N in range(0,NR,4):
                     $for NN in range(0,4):
-                      v${N} = vld${K}q_lane_u32(w${N+NN}, v${N}, ${NN});
+                      $if NN == 0:
+                        v${N} = vld${K}q_dup_u32(w${N+NN});
+                      $else:
+                        v${N} = vld${K}q_lane_u32(w${N+NN}, v${N}, ${NN});
                       w${N+NN} += ${K};
 
                   $for NN in range(0,K):
@@ -119,7 +124,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
               $for N in range(0,NR,4):
                 $for NN in range(0,4):
                   $for K in range(0,KUNROLL,4):
-                    v${N}${K}.val[0] = vld1q_lane_u32(w${N+NN} + ${K}, v${N}${K}.val[0], ${NN});
+                    $if NN == 0:
+                      v${N}${K}.val[0] = vld1q_dup_u32(w${N+NN} + ${K});
+                    $else:
+                      v${N}${K}.val[0] = vld1q_lane_u32(w${N+NN} + ${K}, v${N}${K}.val[0], ${NN});
                   w${N+NN} += ${KUNROLL//4};
               $for K in range(0,KUNROLL,4):
                 $for N in range(0,NR,4):
