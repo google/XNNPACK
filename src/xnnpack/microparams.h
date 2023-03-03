@@ -2495,36 +2495,6 @@ union xnn_f32_tanh_params {
     XNN_ALIGN(32) float log2e[8];
     XNN_ALIGN(32) float magic_bias[8];
     XNN_ALIGN(32) uint32_t index_mask[8];
-    XNN_ALIGN(32) float table[8];
-    XNN_ALIGN(32) float minus_ln2[8];
-    XNN_ALIGN(32) float c4[8];
-    XNN_ALIGN(32) float c3[8];
-    XNN_ALIGN(32) float c2[8];
-    XNN_ALIGN(32) float two[8];
-    XNN_ALIGN(32) float minus_one[8];
-    int32_t mask_table[14];
-  } avx_expm1minus_rr1_lut4_p4h2_perm;
-  struct {
-    XNN_ALIGN(32) float sign_mask[8];
-    XNN_ALIGN(32) float sat_cutoff[8];
-    XNN_ALIGN(32) float log2e[8];
-    XNN_ALIGN(32) float magic_bias[8];
-    XNN_ALIGN(32) uint32_t index_mask[8];
-    XNN_ALIGN(32) float table[8];
-    XNN_ALIGN(32) float minus_ln2[8];
-    XNN_ALIGN(32) float c4[8];
-    XNN_ALIGN(32) float c3[8];
-    XNN_ALIGN(32) float c2[8];
-    XNN_ALIGN(32) float two[8];
-    XNN_ALIGN(32) float minus_one[8];
-    int32_t mask_table[14];
-  } avx_expm1minus_rr1_lut4_p4h3_perm;
-  struct {
-    XNN_ALIGN(32) float sign_mask[8];
-    XNN_ALIGN(32) float sat_cutoff[8];
-    XNN_ALIGN(32) float log2e[8];
-    XNN_ALIGN(32) float magic_bias[8];
-    XNN_ALIGN(32) uint32_t index_mask[8];
     XNN_ALIGN(32) float minus_ln2[8];
     XNN_ALIGN(32) float c4[8];
     XNN_ALIGN(32) float c3[8];
@@ -2546,7 +2516,21 @@ union xnn_f32_tanh_params {
     XNN_ALIGN(32) float two[8];
     XNN_ALIGN(32) float minus_one[8];
     int32_t mask_table[14];
-  } avx2_expm1minus_rr1_lut4_p4h3_perm;
+  } avx_expm1minus_rr1_lut4_p4h2_perm;
+  struct {
+    XNN_ALIGN(32) float sign_mask[8];
+    XNN_ALIGN(32) float sat_cutoff[8];
+    XNN_ALIGN(32) float log2e[8];
+    XNN_ALIGN(32) float magic_bias[8];
+    XNN_ALIGN(32) float table[8];
+    XNN_ALIGN(32) float minus_ln2[8];
+    XNN_ALIGN(32) float c4[8];
+    XNN_ALIGN(32) float c3[8];
+    XNN_ALIGN(32) float c2[8];
+    XNN_ALIGN(32) float two[8];
+    XNN_ALIGN(32) float minus_one[8];
+    int32_t mask_table[14];
+  } avx_expm1minus_rr1_lut4_p4h3_perm;
   struct {
     XNN_ALIGN(32) float sign_mask[8];
     XNN_ALIGN(32) float sat_cutoff[8];
@@ -2560,7 +2544,7 @@ union xnn_f32_tanh_params {
     XNN_ALIGN(32) float two[8];
     XNN_ALIGN(32) float minus_one[8];
     int32_t mask_table[14];
-  } avx2_expm1minus_rr1_lut8_p4h3_perm;
+  } avx_expm1minus_rr1_lut8_p4h3_perm;
   struct {
     uint32_t sign_mask;
     float sat_cutoff;

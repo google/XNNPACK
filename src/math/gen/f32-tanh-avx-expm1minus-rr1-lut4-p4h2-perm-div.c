@@ -31,14 +31,11 @@ void xnn_math_f32_tanh__avx_expm1minus_rr1_lut4_p4h2_perm_div(
   // The largest z for which tanhf(z) is saturated at -1.0f.
   const __m256 vsat_cutoff = _mm256_set1_ps(-0x1.205968p+3f);
   const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
-  // Large number such that ulp(magic bias) == exp2(-3) and magic bias === 63.5 mod 2**19.
-  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8003F8p+20f);
-  // Mask for the lowest 2 bits
-  const __m256 vindex_mask = _mm256_castsi256_ps(_mm256_set1_epi32(0x3));
-  // Table of exp2(k / 4) values, k = 0..3
-  const __m256 vtable = _mm256_set_ps(
-    0x1.AE89FAp+0f, 0x1.6A09E6p+0f, 0x1.306FE0p+0f, 0x1.000000p+0f,
-    0x1.AE89FAp+0f, 0x1.6A09E6p+0f, 0x1.306FE0p+0f, 0x1.000000p+0f);
+  // Large number such that ulp(magic bias) == exp2(-3)
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.800000p+20f);
+  // Table of exp2(k / 4) values decremented (as integer) by (k << 21), k = 0..3
+  const __m128 vtable = _mm_set_ps(
+    0x1.EE89FAp-1f, 0x1.EA09E6p-1f, 0x1.F06FE0p-1f, 0x1.000000p+0f);
   const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
   // Coefficients of polynomial approximation
   //   exp(2t) - 1 ~ 2 * (t + t * (t * (c2 + t * (c3 + t * c4))))
@@ -87,17 +84,18 @@ void xnn_math_f32_tanh__avx_expm1minus_rr1_lut4_p4h2_perm_div(
     //    lower than -13.
     //
     // Shift bits 2:10 into 23:31 (position of floating-point exponent).
-    const __m256 ve = _mm256_andnot_ps(vindex_mask, vn);
-    const __m128 ve_hi = _mm256_extractf128_ps(ve, 1);
-    __m256 vs = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(ve)), 21)));
-    const __m128 vs_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(ve_hi), 21));
-    vs = _mm256_insertf128_ps(vs, vs_hi, 1);
+    const __m128 vn_hi = _mm256_extractf128_ps(vn, 1);
+    __m128i ve_lo = _mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn)), 21);
+    __m128i ve_hi = _mm_slli_epi32(_mm_castps_si128(vn_hi), 21);
 
     // Use bits 0:2 bits of n, as integer, as an index for table lookup of l := 2**frac(2n).
-    const __m256 vl = _mm256_permutevar_ps(vtable, _mm256_castps_si256(vn));
+    const __m128i vl_lo = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(_mm256_castps256_ps128(vn))));
+    const __m128i vl_hi = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(vn_hi)));
 
     // Adjust exponent of the value l fetched from the table to get the final s value.
-    vs = _mm256_mul_ps(vs, vl);
+    const __m128 vs_lo = _mm_castsi128_ps(_mm_add_epi32(ve_lo, vl_lo));
+    const __m128 vs_hi = _mm_castsi128_ps(_mm_add_epi32(ve_hi, vl_hi));
+    const __m256 vs = _mm256_insertf128_ps(_mm256_castps128_ps256(vs_lo), vs_hi, 1);
 
     // Subtract the large number back to get final n := round(z / log(2), 3) as a floating-point number.
     vn = _mm256_sub_ps(vn, vmagic_bias);

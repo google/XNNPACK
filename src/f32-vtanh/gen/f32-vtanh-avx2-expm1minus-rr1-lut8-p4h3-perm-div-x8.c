@@ -28,17 +28,17 @@ void xnn_f32_vtanh_ukernel__avx2_expm1minus_rr1_lut8_p4h3_perm_div_x8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vsign_mask = _mm256_load_ps(params->avx2_expm1minus_rr1_lut8_p4h3_perm.sign_mask);
-  const __m256 vsat_cutoff = _mm256_load_ps(params->avx2_expm1minus_rr1_lut8_p4h3_perm.sat_cutoff);
-  const __m256 vlog2e = _mm256_load_ps(params->avx2_expm1minus_rr1_lut8_p4h3_perm.log2e);
-  const __m256 vmagic_bias = _mm256_load_ps(params->avx2_expm1minus_rr1_lut8_p4h3_perm.magic_bias);
-  const __m256i vtable = _mm256_load_si256((const __m256i*) params->avx2_expm1minus_rr1_lut8_p4h3_perm.table);
-  const __m256 vminus_ln2 = _mm256_load_ps(params->avx2_expm1minus_rr1_lut8_p4h3_perm.minus_ln2);
-  const __m256 vc4 = _mm256_load_ps(params->avx2_expm1minus_rr1_lut8_p4h3_perm.c4);
-  const __m256 vc3 = _mm256_load_ps(params->avx2_expm1minus_rr1_lut8_p4h3_perm.c3);
-  const __m256 vc2 = _mm256_load_ps(params->avx2_expm1minus_rr1_lut8_p4h3_perm.c2);
-  const __m256 vtwo = _mm256_load_ps(params->avx2_expm1minus_rr1_lut8_p4h3_perm.two);
-  const __m256 vminus_one = _mm256_load_ps(params->avx2_expm1minus_rr1_lut8_p4h3_perm.minus_one);
+  const __m256 vsign_mask = _mm256_load_ps(params->avx_expm1minus_rr1_lut8_p4h3_perm.sign_mask);
+  const __m256 vsat_cutoff = _mm256_load_ps(params->avx_expm1minus_rr1_lut8_p4h3_perm.sat_cutoff);
+  const __m256 vlog2e = _mm256_load_ps(params->avx_expm1minus_rr1_lut8_p4h3_perm.log2e);
+  const __m256 vmagic_bias = _mm256_load_ps(params->avx_expm1minus_rr1_lut8_p4h3_perm.magic_bias);
+  const __m256i vtable = _mm256_load_si256((const __m256i*) params->avx_expm1minus_rr1_lut8_p4h3_perm.table);
+  const __m256 vminus_ln2 = _mm256_load_ps(params->avx_expm1minus_rr1_lut8_p4h3_perm.minus_ln2);
+  const __m256 vc4 = _mm256_load_ps(params->avx_expm1minus_rr1_lut8_p4h3_perm.c4);
+  const __m256 vc3 = _mm256_load_ps(params->avx_expm1minus_rr1_lut8_p4h3_perm.c3);
+  const __m256 vc2 = _mm256_load_ps(params->avx_expm1minus_rr1_lut8_p4h3_perm.c2);
+  const __m256 vtwo = _mm256_load_ps(params->avx_expm1minus_rr1_lut8_p4h3_perm.two);
+  const __m256 vminus_one = _mm256_load_ps(params->avx_expm1minus_rr1_lut8_p4h3_perm.minus_one);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m256 vx = _mm256_loadu_ps(input);
@@ -81,7 +81,7 @@ void xnn_f32_vtanh_ukernel__avx2_expm1minus_rr1_lut8_p4h3_perm_div_x8(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2_expm1minus_rr1_lut8_p4h3_perm.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx_expm1minus_rr1_lut8_p4h3_perm.mask_table[7] - batch));
 
     const __m256 vx = _mm256_maskload_ps(input, vmask);
 

@@ -31,8 +31,7 @@ void xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x40(
   const __m256 vsat_cutoff = _mm256_load_ps(params->avx_expm1minus_rr1_lut4_p4h2_perm.sat_cutoff);
   const __m256 vlog2e = _mm256_load_ps(params->avx_expm1minus_rr1_lut4_p4h2_perm.log2e);
   const __m256 vmagic_bias = _mm256_load_ps(params->avx_expm1minus_rr1_lut4_p4h2_perm.magic_bias);
-  const __m256 vindex_mask = _mm256_load_ps((const float*) params->avx_expm1minus_rr1_lut4_p4h2_perm.index_mask);
-  const __m256 vtable = _mm256_load_ps(params->avx_expm1minus_rr1_lut4_p4h2_perm.table);
+  const __m128 vtable = _mm_load_ps(params->avx_expm1minus_rr1_lut4_p4h2_perm.table);
   const __m256 vminus_ln2 = _mm256_load_ps(params->avx_expm1minus_rr1_lut4_p4h2_perm.minus_ln2);
   const __m256 vc4 = _mm256_load_ps(params->avx_expm1minus_rr1_lut4_p4h2_perm.c4);
   const __m256 vc3 = _mm256_load_ps(params->avx_expm1minus_rr1_lut4_p4h2_perm.c3);
@@ -71,45 +70,49 @@ void xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x40(
     __m256 vn3 = _mm256_add_ps(_mm256_mul_ps(vz3, vlog2e), vmagic_bias);
     __m256 vn4 = _mm256_add_ps(_mm256_mul_ps(vz4, vlog2e), vmagic_bias);
 
-    const __m256 ve0 = _mm256_andnot_ps(vindex_mask, vn0);
-    const __m256 ve1 = _mm256_andnot_ps(vindex_mask, vn1);
-    const __m256 ve2 = _mm256_andnot_ps(vindex_mask, vn2);
-    const __m256 ve3 = _mm256_andnot_ps(vindex_mask, vn3);
-    const __m256 ve4 = _mm256_andnot_ps(vindex_mask, vn4);
+    const __m128 vn0_hi = _mm256_extractf128_ps(vn0, 1);
+    __m128i ve0_lo = _mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn0)), 21);
+    const __m128 vn1_hi = _mm256_extractf128_ps(vn1, 1);
+    __m128i ve1_lo = _mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn1)), 21);
+    const __m128 vn2_hi = _mm256_extractf128_ps(vn2, 1);
+    __m128i ve2_lo = _mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn2)), 21);
+    const __m128 vn3_hi = _mm256_extractf128_ps(vn3, 1);
+    __m128i ve3_lo = _mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn3)), 21);
+    const __m128 vn4_hi = _mm256_extractf128_ps(vn4, 1);
+    __m128i ve4_lo = _mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn4)), 21);
 
-    const __m128 ve0_hi = _mm256_extractf128_ps(ve0, 1);
-    __m256 vs0 = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(ve0)), 21)));
-    const __m128 ve1_hi = _mm256_extractf128_ps(ve1, 1);
-    __m256 vs1 = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(ve1)), 21)));
-    const __m128 ve2_hi = _mm256_extractf128_ps(ve2, 1);
-    __m256 vs2 = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(ve2)), 21)));
-    const __m128 ve3_hi = _mm256_extractf128_ps(ve3, 1);
-    __m256 vs3 = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(ve3)), 21)));
-    const __m128 ve4_hi = _mm256_extractf128_ps(ve4, 1);
-    __m256 vs4 = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(ve4)), 21)));
+    __m128i ve0_hi = _mm_slli_epi32(_mm_castps_si128(vn0_hi), 21);
+    const __m128i vl0_lo = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(_mm256_castps256_ps128(vn0))));
+    const __m128i vl0_hi = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(vn0_hi)));
+    __m128i ve1_hi = _mm_slli_epi32(_mm_castps_si128(vn1_hi), 21);
+    const __m128i vl1_lo = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(_mm256_castps256_ps128(vn1))));
+    const __m128i vl1_hi = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(vn1_hi)));
+    __m128i ve2_hi = _mm_slli_epi32(_mm_castps_si128(vn2_hi), 21);
+    const __m128i vl2_lo = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(_mm256_castps256_ps128(vn2))));
+    const __m128i vl2_hi = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(vn2_hi)));
+    __m128i ve3_hi = _mm_slli_epi32(_mm_castps_si128(vn3_hi), 21);
+    const __m128i vl3_lo = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(_mm256_castps256_ps128(vn3))));
+    const __m128i vl3_hi = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(vn3_hi)));
+    __m128i ve4_hi = _mm_slli_epi32(_mm_castps_si128(vn4_hi), 21);
+    const __m128i vl4_lo = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(_mm256_castps256_ps128(vn4))));
+    const __m128i vl4_hi = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(vn4_hi)));
 
-    const __m256 vl0 = _mm256_permutevar_ps(vtable, _mm256_castps_si256(vn0));
-    const __m128 vs0_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(ve0_hi), 21));
-    const __m256 vl1 = _mm256_permutevar_ps(vtable, _mm256_castps_si256(vn1));
-    const __m128 vs1_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(ve1_hi), 21));
-    const __m256 vl2 = _mm256_permutevar_ps(vtable, _mm256_castps_si256(vn2));
-    const __m128 vs2_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(ve2_hi), 21));
-    const __m256 vl3 = _mm256_permutevar_ps(vtable, _mm256_castps_si256(vn3));
-    const __m128 vs3_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(ve3_hi), 21));
-    const __m256 vl4 = _mm256_permutevar_ps(vtable, _mm256_castps_si256(vn4));
-    const __m128 vs4_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(ve4_hi), 21));
+    const __m128 vs0_lo = _mm_castsi128_ps(_mm_add_epi32(ve0_lo, vl0_lo));
+    const __m128 vs0_hi = _mm_castsi128_ps(_mm_add_epi32(ve0_hi, vl0_hi));
+    const __m128 vs1_lo = _mm_castsi128_ps(_mm_add_epi32(ve1_lo, vl1_lo));
+    const __m128 vs1_hi = _mm_castsi128_ps(_mm_add_epi32(ve1_hi, vl1_hi));
+    const __m128 vs2_lo = _mm_castsi128_ps(_mm_add_epi32(ve2_lo, vl2_lo));
+    const __m128 vs2_hi = _mm_castsi128_ps(_mm_add_epi32(ve2_hi, vl2_hi));
+    const __m128 vs3_lo = _mm_castsi128_ps(_mm_add_epi32(ve3_lo, vl3_lo));
+    const __m128 vs3_hi = _mm_castsi128_ps(_mm_add_epi32(ve3_hi, vl3_hi));
+    const __m128 vs4_lo = _mm_castsi128_ps(_mm_add_epi32(ve4_lo, vl4_lo));
+    const __m128 vs4_hi = _mm_castsi128_ps(_mm_add_epi32(ve4_hi, vl4_hi));
 
-    vs0 = _mm256_insertf128_ps(vs0, vs0_hi, 1);
-    vs1 = _mm256_insertf128_ps(vs1, vs1_hi, 1);
-    vs2 = _mm256_insertf128_ps(vs2, vs2_hi, 1);
-    vs3 = _mm256_insertf128_ps(vs3, vs3_hi, 1);
-    vs4 = _mm256_insertf128_ps(vs4, vs4_hi, 1);
-
-    vs0 = _mm256_mul_ps(vs0, vl0);
-    vs1 = _mm256_mul_ps(vs1, vl1);
-    vs2 = _mm256_mul_ps(vs2, vl2);
-    vs3 = _mm256_mul_ps(vs3, vl3);
-    vs4 = _mm256_mul_ps(vs4, vl4);
+    const __m256 vs0 = _mm256_insertf128_ps(_mm256_castps128_ps256(vs0_lo), vs0_hi, 1);
+    const __m256 vs1 = _mm256_insertf128_ps(_mm256_castps128_ps256(vs1_lo), vs1_hi, 1);
+    const __m256 vs2 = _mm256_insertf128_ps(_mm256_castps128_ps256(vs2_lo), vs2_hi, 1);
+    const __m256 vs3 = _mm256_insertf128_ps(_mm256_castps128_ps256(vs3_lo), vs3_hi, 1);
+    const __m256 vs4 = _mm256_insertf128_ps(_mm256_castps128_ps256(vs4_lo), vs4_hi, 1);
 
     vn0 = _mm256_sub_ps(vn0, vmagic_bias);
     vn1 = _mm256_sub_ps(vn1, vmagic_bias);
@@ -196,14 +199,16 @@ void xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x40(
 
     __m256 vn = _mm256_add_ps(_mm256_mul_ps(vz, vlog2e), vmagic_bias);
 
-    const __m256 ve = _mm256_andnot_ps(vindex_mask, vn);
-    const __m128 ve_hi = _mm256_extractf128_ps(ve, 1);
-    __m256 vs = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(ve)), 21)));
-    const __m256 vl = _mm256_permutevar_ps(vtable, _mm256_castps_si256(vn));
-    const __m128 vs_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(ve_hi), 21));
-    vs = _mm256_insertf128_ps(vs, vs_hi, 1);
+    const __m128 vn_hi = _mm256_extractf128_ps(vn, 1);
+    __m128i ve_lo = _mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn)), 21);
+    __m128i ve_hi = _mm_slli_epi32(_mm_castps_si128(vn_hi), 21);
 
-    vs = _mm256_mul_ps(vs, vl);
+    const __m128i vl_lo = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(_mm256_castps256_ps128(vn))));
+    const __m128i vl_hi = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(vn_hi)));
+
+    const __m128 vs_lo = _mm_castsi128_ps(_mm_add_epi32(ve_lo, vl_lo));
+    const __m128 vs_hi = _mm_castsi128_ps(_mm_add_epi32(ve_hi, vl_hi));
+    const __m256 vs = _mm256_insertf128_ps(_mm256_castps128_ps256(vs_lo), vs_hi, 1);
 
     vn = _mm256_sub_ps(vn, vmagic_bias);
 
@@ -240,14 +245,16 @@ void xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x40(
 
     __m256 vn = _mm256_add_ps(_mm256_mul_ps(vz, vlog2e), vmagic_bias);
 
-    const __m256 ve = _mm256_andnot_ps(vindex_mask, vn);
-    const __m128 ve_hi = _mm256_extractf128_ps(ve, 1);
-    __m256 vs = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(ve)), 21)));
-    const __m256 vl = _mm256_permutevar_ps(vtable, _mm256_castps_si256(vn));
-    const __m128 vs_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(ve_hi), 21));
-    vs = _mm256_insertf128_ps(vs, vs_hi, 1);
+    const __m128 vn_hi = _mm256_extractf128_ps(vn, 1);
+    __m128i ve_lo = _mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn)), 21);
+    __m128i ve_hi = _mm_slli_epi32(_mm_castps_si128(vn_hi), 21);
 
-    vs = _mm256_mul_ps(vs, vl);
+    const __m128i vl_lo = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(_mm256_castps256_ps128(vn))));
+    const __m128i vl_hi = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(vn_hi)));
+
+    const __m128 vs_lo = _mm_castsi128_ps(_mm_add_epi32(ve_lo, vl_lo));
+    const __m128 vs_hi = _mm_castsi128_ps(_mm_add_epi32(ve_hi, vl_hi));
+    const __m256 vs = _mm256_insertf128_ps(_mm256_castps128_ps256(vs_lo), vs_hi, 1);
 
     vn = _mm256_sub_ps(vn, vmagic_bias);
 

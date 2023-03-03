@@ -40,8 +40,7 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}${P
   const __m256 vlog2e = _mm256_load_ps(params->${PARAMS_STRUCT}.log2e);
   const __m256 vmagic_bias = _mm256_load_ps(params->${PARAMS_STRUCT}.magic_bias);
   $if LOG2LUT != 0:
-    const __m256 vindex_mask = _mm256_load_ps((const float*) params->${PARAMS_STRUCT}.index_mask);
-    const __m256 vtable = _mm256_load_ps(params->${PARAMS_STRUCT}.table);
+    const __m128 vtable = _mm_load_ps(params->${PARAMS_STRUCT}.table);
   const __m256 vminus_ln2 = _mm256_load_ps(params->${PARAMS_STRUCT}.minus_ln2);
   $for i in reversed(range(2, P+1)):
     const __m256 vc${i} = _mm256_load_ps(params->${PARAMS_STRUCT}.c${i});
@@ -86,21 +85,20 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}${P
           vs${N} = _mm256_insertf128_ps(vs${N}, vs${N}_hi, 1);
       $else:
         $for N in range(SIMD_TILE):
-          const __m256 ve${N} = _mm256_andnot_ps(vindex_mask, vn${N});
+          const __m128 vn${N}_hi = _mm256_extractf128_ps(vn${N}, 1);
+          __m128i ve${N}_lo = _mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn${N})), ${23-LOG2LUT});
 
         $for N in range(SIMD_TILE):
-          const __m128 ve${N}_hi = _mm256_extractf128_ps(ve${N}, 1);
-          __m256 vs${N} = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(ve${N})), ${23-LOG2LUT})));
+          __m128i ve${N}_hi = _mm_slli_epi32(_mm_castps_si128(vn${N}_hi), ${23-LOG2LUT});
+          const __m128i vl${N}_lo = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(_mm256_castps256_ps128(vn${N}))));
+          const __m128i vl${N}_hi = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(vn${N}_hi)));
 
         $for N in range(SIMD_TILE):
-          const __m256 vl${N} = _mm256_permutevar_ps(vtable, _mm256_castps_si256(vn${N}));
-          const __m128 vs${N}_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(ve${N}_hi), ${23-LOG2LUT}));
+          const __m128 vs${N}_lo = _mm_castsi128_ps(_mm_add_epi32(ve${N}_lo, vl${N}_lo));
+          const __m128 vs${N}_hi = _mm_castsi128_ps(_mm_add_epi32(ve${N}_hi, vl${N}_hi));
 
         $for N in range(SIMD_TILE):
-          vs${N} = _mm256_insertf128_ps(vs${N}, vs${N}_hi, 1);
-
-        $for N in range(SIMD_TILE):
-          vs${N} = _mm256_mul_ps(vs${N}, vl${N});
+          const __m256 vs${N} = _mm256_insertf128_ps(_mm256_castps128_ps256(vs${N}_lo), vs${N}_hi, 1);
 
       $for N in range(SIMD_TILE):
         vn${N} = _mm256_sub_ps(vn${N}, vmagic_bias);
@@ -220,14 +218,16 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}${P
       const __m128 vs_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn_hi), 23));
       vs = _mm256_insertf128_ps(vs, vs_hi, 1);
     $else:
-      const __m256 ve = _mm256_andnot_ps(vindex_mask, vn);
-      const __m128 ve_hi = _mm256_extractf128_ps(ve, 1);
-      __m256 vs = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(ve)), ${23-LOG2LUT})));
-      const __m256 vl = _mm256_permutevar_ps(vtable, _mm256_castps_si256(vn));
-      const __m128 vs_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(ve_hi), ${23-LOG2LUT}));
-      vs = _mm256_insertf128_ps(vs, vs_hi, 1);
+      const __m128 vn_hi = _mm256_extractf128_ps(vn, 1);
+      __m128i ve_lo = _mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn)), ${23-LOG2LUT});
+      __m128i ve_hi = _mm_slli_epi32(_mm_castps_si128(vn_hi), ${23-LOG2LUT});
 
-      vs = _mm256_mul_ps(vs, vl);
+      const __m128i vl_lo = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(_mm256_castps256_ps128(vn))));
+      const __m128i vl_hi = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(vn_hi)));
+
+      const __m128 vs_lo = _mm_castsi128_ps(_mm_add_epi32(ve_lo, vl_lo));
+      const __m128 vs_hi = _mm_castsi128_ps(_mm_add_epi32(ve_hi, vl_hi));
+      const __m256 vs = _mm256_insertf128_ps(_mm256_castps128_ps256(vs_lo), vs_hi, 1);
 
     vn = _mm256_sub_ps(vn, vmagic_bias);
 
@@ -322,14 +322,16 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}${P
       const __m128 vs_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn_hi), 23));
       vs = _mm256_insertf128_ps(vs, vs_hi, 1);
     $else:
-      const __m256 ve = _mm256_andnot_ps(vindex_mask, vn);
-      const __m128 ve_hi = _mm256_extractf128_ps(ve, 1);
-      __m256 vs = _mm256_castps128_ps256(_mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(ve)), ${23-LOG2LUT})));
-      const __m256 vl = _mm256_permutevar_ps(vtable, _mm256_castps_si256(vn));
-      const __m128 vs_hi = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(ve_hi), ${23-LOG2LUT}));
-      vs = _mm256_insertf128_ps(vs, vs_hi, 1);
+      const __m128 vn_hi = _mm256_extractf128_ps(vn, 1);
+      __m128i ve_lo = _mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn)), ${23-LOG2LUT});
+      __m128i ve_hi = _mm_slli_epi32(_mm_castps_si128(vn_hi), ${23-LOG2LUT});
 
-      vs = _mm256_mul_ps(vs, vl);
+      const __m128i vl_lo = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(_mm256_castps256_ps128(vn))));
+      const __m128i vl_hi = _mm_castps_si128(_mm_permutevar_ps(vtable, _mm_castps_si128(vn_hi)));
+
+      const __m128 vs_lo = _mm_castsi128_ps(_mm_add_epi32(ve_lo, vl_lo));
+      const __m128 vs_hi = _mm_castsi128_ps(_mm_add_epi32(ve_hi, vl_hi));
+      const __m256 vs = _mm256_insertf128_ps(_mm256_castps128_ps256(vs_lo), vs_hi, 1);
 
     vn = _mm256_sub_ps(vn, vmagic_bias);
 
