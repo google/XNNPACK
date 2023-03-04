@@ -193,8 +193,8 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${D
       // Reconstruct y = expm1(-2z) / (expm1(-2z) + 2)
       float32x4_t vy = vdivq_f32(vemo, vepo);
     $else:
-      // Use Newton-Raphson method (${"1 iteration" if DIV.startswith("NR1") else "2 iterations"}) to compute reciprocal of denominator.
-      // Note: 2 < exp(-2z) + 1 <= 3, because z <= 0 and 0 < exp(2z) <= 1.
+      // Use Newton-Raphson method (2 iterations) to compute reciprocal of the denominator.
+      // Note: 2 < exp(-2z) + 1 <= 3, because z <= 0 and 0 < exp(-2z) <= 1.
       // Thus the reciprocal of the denominator never overflows.
       float32x4_t vrepo = vrecpeq_f32(vepo);
       $if DIV.startswith("NR1RECPS") or DIV.startswith("NR2RECPS"):

@@ -202,7 +202,7 @@ void xnn_math_f32_tanh__avx2_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${GAT
       // Reconstruct tanh(z) = expm1(2z) / (expm1(2z) + 2)
       __m256 vy = _mm256_div_ps(vemo, vepo);
     $else:
-      // Use Newton-Raphson method (${"1 iteration" if DIV.startswith("NR1") else "2 iterations"}) to compute reciprocal of denominator.
+      // Use Newton-Raphson method (${"1 iteration" if DIV.startswith("NR1") else "2 iterations"}) to compute reciprocal of the denominator.
       // Note: 2 < exp(2z) + 1 <= 3, because z <= 0 and 0 < exp(2z) <= 1.
       // Thus the reciprocal of the denominator never overflows.
       __m256 vrepo = _mm256_rcp_ps(vepo);

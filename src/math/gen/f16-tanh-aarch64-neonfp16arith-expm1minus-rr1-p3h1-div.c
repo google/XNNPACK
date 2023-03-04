@@ -25,7 +25,7 @@ void xnn_math_f16_tanh__aarch64_neonfp16arith_expm1minus_rr1_p3h1_div(
 {
   assert(n % sizeof(float16x8_t) == 0);
 
-  // The smallest z for which tanhh(-z) is saturated at -1.0f.
+  // The smallest z for which tanhh(-z) is saturated at -1.0h.
   const float16x8_t vsat_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x4482)));  // 0x1.208p+2h
   // Large number such that ulp(magic bias) == 0.5 and magic bias === 7.5 mod 2**8.
   const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x620F)));  // 0x1.83Cp+9h
@@ -56,9 +56,9 @@ void xnn_math_f16_tanh__aarch64_neonfp16arith_expm1minus_rr1_p3h1_div(
     // then set its sign according to the sign of x: f(x) := sign(x) * abs(y).
     float16x8_t vz = vabsq_f16(vx);
 
-    // The function saturates at -1 for large positive inputs: tanhh(-z) == -1.0f for z >= sat_cutoff ~= 4.5078125.
+    // The function saturates at -1 for large positive inputs: tanhh(-z) == -1.0h for z >= sat_cutoff ~= 9.010913.
     // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
-    // tanhh(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
+    // tanhf(sat_cutoff) == -1.0h. NaN inputs are passed unchanged.
     vz = vminq_f16(vz, vsat_cutoff);
 
     // Compute reduced argument n := round(-z / log(2), 1).

@@ -122,8 +122,8 @@ void xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3_nr2recps(
     // Denominator of the tanh fraction: exp(-2z) + 1 = expm1(-2z) + 2
     const float32x4_t vepo = vaddq_f32(vemo, vtwo);
 
-    // Use Newton-Raphson method (2 iterations) to compute reciprocal of denominator.
-    // Note: 2 < exp(-2z) + 1 <= 3, because z <= 0 and 0 < exp(2z) <= 1.
+    // Use Newton-Raphson method (2 iterations) to compute reciprocal of the denominator.
+    // Note: 2 < exp(-2z) + 1 <= 3, because z <= 0 and 0 < exp(-2z) <= 1.
     // Thus the reciprocal of the denominator never overflows.
     float32x4_t vrepo = vrecpeq_f32(vepo);
     float32x4_t verepo = vrecpsq_f32(vrepo, vepo);
