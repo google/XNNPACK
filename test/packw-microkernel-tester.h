@@ -88,10 +88,10 @@ class PackWMicrokernelTester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(weights.begin(), weights.end(), std::ref(u32rng));
       std::generate(bias.begin(), bias.end(), std::ref(u32rng));
-      std::fill(packed_w.begin(), packed_w.end(), INT32_C(0));
-      std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT32_C(0));
+      std::fill(packed_w.begin(), packed_w.end(), UINT32_C(0x12345678));
+      std::fill(packed_w_ref.begin(), packed_w_ref.end(), UINT32_C(0xDEADBEEF));
 
-      const uint32_t* bias_data = nullbias() ? NULL : bias.data();
+      const uint32_t* bias_data = nullbias() ? nullptr : bias.data();
 
       // Compute reference results.
       xnn_pack_f32_gemm_goi_w(1, n(), k(), nr(), 1 /* kr */, 1 /* sr */,
@@ -102,8 +102,10 @@ class PackWMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < (packed_n() * k() + packed_n()); i++) {
-        EXPECT_EQ(packed_w[i], packed_w_ref[i])
-            << "at n " << i << n();
+        if (packed_w_ref[i] !=  UINT32_C(0xDEADBEEF)) {  // Allow pad to differ
+          EXPECT_EQ(packed_w[i], packed_w_ref[i])
+              << "at n " << i << n();
+        }
       }
     }
   }
