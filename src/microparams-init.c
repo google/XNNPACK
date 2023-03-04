@@ -2582,7 +2582,6 @@ size_t xnn_init_f32_tanh_avx_expm1minus_rr1_p6h5_params(
 size_t xnn_init_f32_tanh_avx512_expm1minus_rr1_lut4_p4h3_perm_params(
   union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)])
 {
-  params->avx512_expm1minus_rr1_lut4_p4h3_perm.sign_mask = UINT32_C(0x80000000);
   params->avx512_expm1minus_rr1_lut4_p4h3_perm.sat_cutoff = 0x1.205968p+3f;
   params->avx512_expm1minus_rr1_lut4_p4h3_perm.minus_log2e = -0x1.715476p+0f;
   params->avx512_expm1minus_rr1_lut4_p4h3_perm.magic_bias = 0x1.800000p+20f;
@@ -2592,6 +2591,7 @@ size_t xnn_init_f32_tanh_avx512_expm1minus_rr1_lut4_p4h3_perm_params(
   params->avx512_expm1minus_rr1_lut4_p4h3_perm.c2 = 0x1.000002p+1f;
   params->avx512_expm1minus_rr1_lut4_p4h3_perm.minus_two = -2.0f;
   params->avx512_expm1minus_rr1_lut4_p4h3_perm.one = 1.0f;
+  params->avx512_expm1minus_rr1_lut4_p4h3_perm.sign_mask = UINT32_C(0x80000000);
   params->avx512_expm1minus_rr1_lut4_p4h3_perm.table[ 0] = 0x1.000000p+0f;
   params->avx512_expm1minus_rr1_lut4_p4h3_perm.table[ 1] = 0x1.F06FE0p-1f;
   params->avx512_expm1minus_rr1_lut4_p4h3_perm.table[ 2] = 0x1.EA09E6p-1f;
@@ -2614,7 +2614,6 @@ size_t xnn_init_f32_tanh_avx512_expm1minus_rr1_lut4_p4h3_perm_params(
 size_t xnn_init_f32_tanh_avx512_expm1minus_rr1_lut8_p4h3_perm_params(
   union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)])
 {
-  params->avx512_expm1minus_rr1_lut8_p4h3_perm.sign_mask = UINT32_C(0x80000000);
   params->avx512_expm1minus_rr1_lut8_p4h3_perm.sat_cutoff = 0x1.205968p+3f;
   params->avx512_expm1minus_rr1_lut8_p4h3_perm.minus_log2e = -0x1.715476p+0f;
   params->avx512_expm1minus_rr1_lut8_p4h3_perm.magic_bias = 0x1.800000p+19f;
@@ -2624,6 +2623,7 @@ size_t xnn_init_f32_tanh_avx512_expm1minus_rr1_lut8_p4h3_perm_params(
   params->avx512_expm1minus_rr1_lut8_p4h3_perm.c2 = 0x1.000000p+1f;
   params->avx512_expm1minus_rr1_lut8_p4h3_perm.minus_two = -2.0f;
   params->avx512_expm1minus_rr1_lut8_p4h3_perm.one = 1.0f;
+  params->avx512_expm1minus_rr1_lut8_p4h3_perm.sign_mask = UINT32_C(0x80000000);
   params->avx512_expm1minus_rr1_lut8_p4h3_perm.table[ 0] = UINT32_C(0x3F800000);
   params->avx512_expm1minus_rr1_lut8_p4h3_perm.table[ 1] = UINT32_C(0x3F7B95C2);
   params->avx512_expm1minus_rr1_lut8_p4h3_perm.table[ 2] = UINT32_C(0x3F7837F0);
@@ -2646,7 +2646,6 @@ size_t xnn_init_f32_tanh_avx512_expm1minus_rr1_lut8_p4h3_perm_params(
 size_t xnn_init_f32_tanh_avx512_expm1minus_rr1_lut8_p4h3_params(
   union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)])
 {
-  params->avx512_expm1minus_rr1_lut8_p4h3.sign_mask = UINT32_C(0x80000000);
   params->avx512_expm1minus_rr1_lut8_p4h3.sat_cutoff = 0x1.205968p+3f;
   params->avx512_expm1minus_rr1_lut8_p4h3.minus_log2e = -0x1.715476p+0f;
   params->avx512_expm1minus_rr1_lut8_p4h3.magic_bias = 0x1.800000p+19f;
@@ -2657,6 +2656,7 @@ size_t xnn_init_f32_tanh_avx512_expm1minus_rr1_lut8_p4h3_params(
   params->avx512_expm1minus_rr1_lut8_p4h3.c2 = 0x1.000000p+1f;
   params->avx512_expm1minus_rr1_lut8_p4h3.minus_two = -2.0f;
   params->avx512_expm1minus_rr1_lut8_p4h3.one = 1.0f;
+  params->avx512_expm1minus_rr1_lut8_p4h3.sign_mask = UINT32_C(0x80000000);
   return sizeof(params->avx512_expm1minus_rr1_lut8_p4h3);
 }
 

@@ -108,7 +108,7 @@ void xnn_math_f32_tanh__avx_expm1minus_rr1_p6h5_nr2(
     // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
     const __m256 vepo = _mm256_add_ps(vemo, vtwo);
 
-    // Use Newton-Raphson method (2 iterations) to compute reciprocal of denominator.
+    // Use Newton-Raphson method (2 iterations) to compute reciprocal of the denominator.
     // Note: 2 < exp(2z) + 1 <= 3, because z <= 0 and 0 < exp(2z) <= 1.
     // Thus the reciprocal of the denominator never overflows.
     __m256 vrepo = _mm256_rcp_ps(vepo);

@@ -3,13 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$import math
-$assert RR == 1
-$assert LOG2LUT  == 0
 $assert (P, H) in [(3, 2), (3, 1)]
 $assert DIV in ["DIV", "RECPE", "RECPEADJ", "NR1RECPS", "NR1RECPSADJ", "NR1FMA", "NR1FMAADJ"]
 $assert SAT in ["MINMAX", "SELECT"]
-$LUT = 1 << LOG2LUT
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -29,14 +25,14 @@ $if P == H + 1:
 $POLY_SUFFIX = "p%dh%d_" % (P, H)
 $DIV_SUFFIX = DIV.lower()
 $ISA = "aarch64_neonfp16arith" if DIV == "DIV" else "neonfp16arith"
-void xnn_math_f16_tanh__${ISA}_expm1minus_rr${RR}_${POLY_SUFFIX}${DIV_SUFFIX}(
+void xnn_math_f16_tanh__${ISA}_expm1minus_rr1_${POLY_SUFFIX}${DIV_SUFFIX}(
     size_t n,
     const void* input,
     void* output)
 {
   assert(n % sizeof(float16x8_t) == 0);
 
-  // The smallest z for which tanhh(-z) is saturated at -1.0f.
+  // The smallest z for which tanhh(-z) is saturated at -1.0h.
   const float16x8_t vsat_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x4482)));  // 0x1.208p+2h
   // Large number such that ulp(magic bias) == 0.5 and magic bias === 7.5 mod 2**8.
   const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x620F)));  // 0x1.83Cp+9h
@@ -75,20 +71,20 @@ void xnn_math_f16_tanh__${ISA}_expm1minus_rr${RR}_${POLY_SUFFIX}${DIV_SUFFIX}(
     float16x8_t vz = vabsq_f16(vx);
 
     $if SAT == "MINMAX":
-      // The function saturates at -1 for large positive inputs: tanhh(-z) == -1.0f for z >= sat_cutoff ~= 4.5078125.
+      // The function saturates at -1 for large positive inputs: tanhh(-z) == -1.0h for z >= sat_cutoff ~= 9.010913.
       // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
-      // tanhh(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
+      // tanhf(sat_cutoff) == -1.0h. NaN inputs are passed unchanged.
       vz = vminq_f16(vz, vsat_cutoff);
     $elif SAT == "SELECT":
-      // The function saturates at -1 for large positive inputs: tanhh(-z) == -1.0f for z >= sat_cutoff ~= 4.5078125.
+      // The function saturates at -1 for large positive inputs: tanhh(-z) == -1.0h for z >= sat_cutoff ~= 4.5078125.
       // To guarantee this behaviour, we compute the saturation mask here, and later use it to replace computed outputs
       // with the saturation value (-1). Note that for NaN inputs the saturation mask is inactive.
       const uint16x8_t vm = vcgeq_f16(vz, vsat_cutoff);
 
-    // Compute reduced argument n := round(-z / log(2), ${1+LOG2LUT}).
-    // We do it by adding a large number (magic bias), which cause rounding of the result to ${1+LOG2LUT} fractional ${"bit" if LOG2LUT == 0 else "bits"},
+    // Compute reduced argument n := round(-z / log(2), 1).
+    // We do it by adding a large number (magic bias), which cause rounding of the result to 1 fractional bit,
     // then subtracing the large number back. The trick with adding large number is valid only within certain bounds
-    // (|-z / log(2)| <= 2**${10-LOG2LUT}, i.e. |z| <= 0x1.630p+${7-LOG2LUT} = ${math.ldexp(float.fromhex("0x1.630p+7"), -LOG2LUT)}), but that is acceptable, because inputs x
+    // (|-z / log(2)| <= 2**10, i.e. |z| <= 0x1.630p+7 = 177.5), but that is acceptable, because inputs x
     // outside of [-4.5078125, 4.5078125] (i.e. z outsize [0, 4.5078125]) saturate tanhh(x).
     // Additionally, we fuse addition of the floating-point exponent bias (15) into the magic bias.
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
@@ -98,13 +94,13 @@ void xnn_math_f16_tanh__${ISA}_expm1minus_rr${RR}_${POLY_SUFFIX}${DIV_SUFFIX}(
     // 0 <= z <= 4.5078125, and -7 <= n <= 0 accordingly.
     const float16x8_t vs = vreinterpretq_f16_s16(vshlq_n_s16(vreinterpretq_s16_f16(vn), 10));
 
-    // Subtract the large number back to get final n := round(-z / log(2), ${1+LOG2LUT}) as a floating-point number.
+    // Subtract the large number back to get final n := round(-z / log(2), 1) as a floating-point number.
     vn = vsubq_f16(vn, vmagic_bias);
 
     // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
     const float16x8_t vt = vfmaq_f16(vz, vn, vln2);
 
-    // Compute degree-${P} polynomial approximation for exp(-2t) - 1 on [-log(2)/${4*LUT}, log(2)/${4*LUT}].
+    // Compute degree-${P} polynomial approximation for exp(-2t) - 1 on [-log(2)/4, log(2)/4].
     $if P == H + 1:
       //   P(t) = t * ${POLYNOMIAL}
       //        = t * (-p)
@@ -143,9 +139,12 @@ void xnn_math_f16_tanh__${ISA}_expm1minus_rr${RR}_${POLY_SUFFIX}${DIV_SUFFIX}(
       // Reconstruct y = expm1(-2z) / (expm1(-2z) + 2)
       float16x8_t vy = vdivq_f16(vemo, vepo);
     $else:
-      // Use Newton-Raphson method (${"1 iteration" if DIV.startswith("NR1") else "2 iterations"}) to compute reciprocal of denominator.
-      // Note: 2 < exp(-2z) + 1 <= 3, because z <= 0 and 0 < exp(2z) <= 1.
-      // Thus the reciprocal of the denominator never overflows.
+      $if DIV == "RECPE":
+        // Compute approximate reciprocal of the denominator using the hardware instruction.
+      $else:
+        // Use Newton-Raphson method (1 iteration) to compute reciprocal of the denominator.
+        // Note: 2 < exp(-2z) + 1 <= 3, because z <= 0 and 0 < exp(-2z) <= 1.
+        // Thus the reciprocal of the denominator never overflows.
       float16x8_t vrepo = vrecpeq_f16(vepo);
       $if DIV.startswith("NR1RECPS"):
         const float16x8_t verepo = vrecpsq_f16(vrepo, vepo);

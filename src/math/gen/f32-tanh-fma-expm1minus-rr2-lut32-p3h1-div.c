@@ -34,7 +34,6 @@ void xnn_math_f32_tanh__fma_expm1minus_rr2_lut32_p3h1_div(
   const float vmagic_bias = 0x1.800000p+17f;
   // Mask for the lowest 5 bits
   const uint32_t vindex_mask = UINT32_C(0x1F);
-  // Last 9 bits are zeroes
   const float vln2_hi = 0x1.62E430p-1f;
   const float vln2_lo = -0x1.05C610p-29f;
   // Coefficients of polynomial approximation

@@ -25,7 +25,7 @@ void xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_recpe(
 {
   assert(n % sizeof(float16x8_t) == 0);
 
-  // The smallest z for which tanhh(-z) is saturated at -1.0f.
+  // The smallest z for which tanhh(-z) is saturated at -1.0h.
   const float16x8_t vsat_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x4482)));  // 0x1.208p+2h
   // Large number such that ulp(magic bias) == 0.5 and magic bias === 7.5 mod 2**8.
   const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x620F)));  // 0x1.83Cp+9h
@@ -56,7 +56,7 @@ void xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_recpe(
     // then set its sign according to the sign of x: f(x) := sign(x) * abs(y).
     float16x8_t vz = vabsq_f16(vx);
 
-    // The function saturates at -1 for large positive inputs: tanhh(-z) == -1.0f for z >= sat_cutoff ~= 4.5078125.
+    // The function saturates at -1 for large positive inputs: tanhh(-z) == -1.0h for z >= sat_cutoff ~= 4.5078125.
     // To guarantee this behaviour, we compute the saturation mask here, and later use it to replace computed outputs
     // with the saturation value (-1). Note that for NaN inputs the saturation mask is inactive.
     const uint16x8_t vm = vcgeq_f16(vz, vsat_cutoff);
@@ -98,9 +98,7 @@ void xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_recpe(
     // Denominator of the tanh fraction: exp(-2z) + 1 = expm1(-2z) + 2
     const float16x8_t vepo = vaddq_f16(vemo, vtwo);
 
-    // Use Newton-Raphson method (2 iterations) to compute reciprocal of denominator.
-    // Note: 2 < exp(-2z) + 1 <= 3, because z <= 0 and 0 < exp(2z) <= 1.
-    // Thus the reciprocal of the denominator never overflows.
+    // Compute approximate reciprocal of the denominator using the hardware instruction.
     float16x8_t vrepo = vrecpeq_f16(vepo);
 
     // Reconstruct y = expm1(-2z) / (expm1(-2z) + 2)
