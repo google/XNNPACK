@@ -75,7 +75,8 @@ void xnn_math_f32_tanh__${ISA}_expm1plus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DI
   $if RR == 1:
     const float vminus_ln2 = -0x1.62E430p-1f;
   $else:
-    // Last ${4+LOG2LUT} bits are zeroes
+    $if not FMA:
+      // Last ${4+LOG2LUT} bits are zeroes
     const float vminus_ln2_hi = ${MINUS_LN2[0]}f;
     const float vminus_ln2_lo = ${MINUS_LN2[1]}f;
   // Coefficients of polynomial approximation

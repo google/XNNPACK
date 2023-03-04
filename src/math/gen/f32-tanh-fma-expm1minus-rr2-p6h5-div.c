@@ -29,7 +29,6 @@ void xnn_math_f32_tanh__fma_expm1minus_rr2_p6h5_div(
   const float vminus_log2e = -0x1.715476p+0f;
   // Large number such that ulp(magic bias) == 0.5 and magic bias === 63.5 mod 2**21.
   const float vmagic_bias = 0x1.8000FEp+22f;
-  // Last 4 bits are zeroes
   const float vln2_hi = 0x1.62E430p-1f;
   const float vln2_lo = -0x1.05C610p-29f;
   // Coefficients of polynomial approximation
