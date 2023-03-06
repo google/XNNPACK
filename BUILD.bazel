@@ -6199,6 +6199,20 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_bgemm_bench",
+    srcs = [
+        "bench/bgemm.h",
+        "bench/f32-bgemm.cc",
+    ],
+    copts = xnnpack_optional_ruy_copts(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":allocator",
+        ":math",
+        ":packing",
+    ] + xnnpack_optional_ruy_deps(),
+)
+
+xnnpack_benchmark(
     name = "f32_gemm_bench",
     srcs = [
         "bench/f32-gemm.cc",
