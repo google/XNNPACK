@@ -881,6 +881,8 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       if (xnn_value_is_static(value)) {
         const size_t num_elements = xnn_shape_multiply_all_dims(&value->shape);
         xnn_run_convert_nc_f32_f16(1, 1, 1, num_elements, value->data, value->fp16_temp_data, 0, NULL);
+        // Remember pointer to the original fp32 data, nodes like convolution need fp32 weights/biases.
+        value->fp32_data = value->data;
         value->data = value->fp16_temp_data;
         value->fp16_temp_data = NULL;
         value->datatype = xnn_datatype_fp16;

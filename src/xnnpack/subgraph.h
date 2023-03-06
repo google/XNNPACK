@@ -111,6 +111,13 @@ struct xnn_value {
   /// Used during analysis in xnn_subgraph_rewrite_for_fp16.
   /// Temporary buffer to convert static data to FP16.
   void* fp16_temp_data;
+  // Pointer to original fp32 data if this value was converted from fp32 to fp16 (only for static values). This is used
+  // for nodes like Convolution, where the filter is expected to be kept as fp32, but could have been converted to fp16
+  // if another node (like Subtraction) also consumed the weights.
+  // If NULL, no conversion to fp16 was done, use field `data`.
+  // If not NULL, points to the original fp32 data, (which should be `data` before it was overwritten to point to
+  // converted fp16 buffer.
+  const void* fp32_data;
 };
 
 

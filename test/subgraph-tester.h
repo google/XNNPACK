@@ -381,6 +381,13 @@ class SubgraphTester {
     return *this;
   }
 
+  inline SubgraphTester& AddPrelu(uint32_t input_id, uint32_t slope_id, uint32_t output_id) {
+    const xnn_status status = xnn_define_prelu(subgraph_.get(), input_id, slope_id, output_id, /*flags=*/0);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
+  }
+
   inline SubgraphTester& AddSubtract(uint32_t input_id1, uint32_t input_id2, uint32_t output_id) {
     const xnn_status status =
         xnn_define_subtract(subgraph_.get(), -std::numeric_limits<float>::infinity(),

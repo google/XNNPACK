@@ -41,7 +41,7 @@ static enum xnn_status create_deconvolution_operator(
     assert(bias_id != XNN_INVALID_VALUE_ID);
     assert(bias_id < num_values);
 
-    bias_data = values[bias_id].data;
+    bias_data = values[bias_id].fp32_data != NULL ? values[bias_id].fp32_data : values[bias_id].data;
     assert(bias_data != NULL);
   }
 
@@ -50,7 +50,7 @@ static enum xnn_status create_deconvolution_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const void* filter_data = values[filter_id].data;
+  const void* filter_data = values[filter_id].fp32_data != NULL ? values[filter_id].fp32_data : values[filter_id].data;
   assert(filter_data != NULL);
 
   enum xnn_status status = xnn_status_uninitialized;
