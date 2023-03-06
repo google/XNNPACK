@@ -14,6 +14,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/microparams.h>
 #include <xnnpack/vunary.h>
 
 // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7

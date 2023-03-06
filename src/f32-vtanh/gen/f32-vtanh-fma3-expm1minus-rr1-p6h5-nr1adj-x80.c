@@ -14,6 +14,7 @@
 #include <immintrin.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/microparams.h>
 #include <xnnpack/vunary.h>
 
 void xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_p6h5_nr1adj_x80(

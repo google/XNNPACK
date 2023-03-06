@@ -15,6 +15,7 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/intrinsics-polyfill.h>
+#include <xnnpack/microparams.h>
 #include <xnnpack/vunary.h>
 
 

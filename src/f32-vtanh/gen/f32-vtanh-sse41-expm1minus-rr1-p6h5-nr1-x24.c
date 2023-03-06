@@ -14,6 +14,7 @@
 #include <smmintrin.h>
 
 #include <xnnpack/common.h>
+#include <xnnpack/microparams.h>
 #include <xnnpack/vunary.h>
 
 
