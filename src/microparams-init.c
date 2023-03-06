@@ -830,12 +830,46 @@ void xnn_init_qc8_scale_fp32_params(
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w)
 {
-  for (size_t tile_start = 0; tile_start < channels; tile_start += channels_tile) {
-    const size_t tile_size = min(channels - tile_start, channels_tile);
+  // TODO(zhin): change all callers to call multipass directly.
+  xnn_init_qc8_scale_fp32_params_dwconv_multipass(
+      channels,
+      channels_tile,
+      channels_tile,
+      stride,
+      stride,
+      0,
+      scale,
+      packed_w);
+}
+
+void xnn_init_qc8_scale_fp32_params_dwconv_multipass(
+  size_t channels,
+  size_t channels_tile,
+  size_t channels_subtile,
+  size_t stride,
+  size_t substride,
+  size_t stride_offset,
+  const float scale[XNN_MIN_ELEMENTS(1)],
+  void* packed_w)
+{
+  const size_t tiled_channels = round_down_po2(channels, channels_tile);
+  size_t tile_start = 0;
+  for (; tile_start < tiled_channels; tile_start += channels_tile) {
+    const size_t tile_size = channels_tile;
     for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
       unaligned_indexed_store_f32(packed_w, tile_offset, scale[tile_start + tile_offset]);
     }
     packed_w = (void*) ((uintptr_t) packed_w + stride);
+  }
+
+  packed_w = (void*) ((uintptr_t) packed_w - stride_offset);
+
+  for (; tile_start < channels; tile_start += channels_subtile) {
+    const size_t tile_size = min(channels - tile_start, channels_subtile);
+    for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
+      unaligned_indexed_store_f32(packed_w, tile_offset, scale[tile_start + tile_offset]);
+    }
+    packed_w = (void*) ((uintptr_t) packed_w + substride);
   }
 }
 

@@ -506,6 +506,48 @@ typedef void (*xnn_f32_dwconv_multipass_minmax_ukernel_fn)(
     float* buffer,
     const union xnn_f32_minmax_params* params);
 
+typedef void (*xnn_qs8_dwconv_minmax_multipass_ukernel_fn)(
+    size_t channels,
+    size_t output_width,
+    const int8_t** input,
+    const void* weights,
+    int8_t* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    const int8_t* zero,
+    size_t kernel_size,
+    uint32_t* buffer,
+    const union xnn_qs8_conv_minmax_params* params);
+
+typedef void (*xnn_qu8_dwconv_minmax_multipass_ukernel_fn)(
+    size_t channels,
+    size_t output_width,
+    const uint8_t** input,
+    const void* weights,
+    uint8_t* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    const uint8_t* zero,
+    size_t kernel_size,
+    uint32_t* buffer,
+    const union xnn_qu8_conv_minmax_params* params);
+
+typedef void (*xnn_qc8_dwconv_minmax_multipass_ukernel_fn)(
+    size_t channels,
+    size_t output_width,
+    const int8_t** input,
+    const void* weights,
+    int8_t* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    const int8_t* zero,
+    size_t kernel_size,
+    uint32_t* buffer,
+    const union xnn_qc8_conv_minmax_params* params);
+
 // VMULCADDC: Vector MULtiply-by-Constant, ADD-Constant
 
 typedef void (*xnn_vmulcaddc_ukernel_fn)(

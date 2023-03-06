@@ -1,0 +1,54 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# x86 SSE
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l8c8s8r__sse2_mul16
+  init: xnn_init_qs8_conv_minmax_fp32_sse2_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l16c8s8r__sse2_mul16
+  init: xnn_init_qs8_conv_minmax_fp32_sse2_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_6f6m7l8c8s8r__sse2_mul16
+  init: xnn_init_qs8_conv_minmax_fp32_sse2_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_6f6m7l16c8s8r__sse2_mul16
+  init: xnn_init_qs8_conv_minmax_fp32_sse2_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_8f8m9l8c8s8r__sse2_mul16
+  init: xnn_init_qs8_conv_minmax_fp32_sse2_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_8f8m9l16c8s8r__sse2_mul16
+  init: xnn_init_qs8_conv_minmax_fp32_sse2_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l8c8s8r__sse2_mul16_add16
+  init: xnn_init_qs8_conv_minmax_fp32_sse2_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l16c8s8r__sse2_mul16_add16
+  init: xnn_init_qs8_conv_minmax_fp32_sse2_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_6f6m7l8c8s8r__sse2_mul16_add16
+  init: xnn_init_qs8_conv_minmax_fp32_sse2_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_6f6m7l16c8s8r__sse2_mul16_add16
+  init: xnn_init_qs8_conv_minmax_fp32_sse2_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_8f8m9l8c8s8r__sse2_mul16_add16
+  init: xnn_init_qs8_conv_minmax_fp32_sse2_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_8f8m9l16c8s8r__sse2_mul16_add16
+  init: xnn_init_qs8_conv_minmax_fp32_sse2_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l8c8s8r__sse41_mul16
+  init: xnn_init_qs8_conv_minmax_fp32_sse4_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l16c8s8r__sse41_mul16
+  init: xnn_init_qs8_conv_minmax_fp32_sse4_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_6f6m7l8c8s8r__sse41_mul16
+  init: xnn_init_qs8_conv_minmax_fp32_sse4_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_6f6m7l16c8s8r__sse41_mul16
+  init: xnn_init_qs8_conv_minmax_fp32_sse4_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_8f8m9l8c8s8r__sse41_mul16
+  init: xnn_init_qs8_conv_minmax_fp32_sse4_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_8f8m9l16c8s8r__sse41_mul16
+  init: xnn_init_qs8_conv_minmax_fp32_sse4_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l8c8s8r__sse41_mul16_add16
+  init: xnn_init_qs8_conv_minmax_fp32_sse4_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l16c8s8r__sse41_mul16_add16
+  init: xnn_init_qs8_conv_minmax_fp32_sse4_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_6f6m7l8c8s8r__sse41_mul16_add16
+  init: xnn_init_qs8_conv_minmax_fp32_sse4_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_6f6m7l16c8s8r__sse41_mul16_add16
+  init: xnn_init_qs8_conv_minmax_fp32_sse4_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_8f8m9l8c8s8r__sse41_mul16_add16
+  init: xnn_init_qs8_conv_minmax_fp32_sse4_params
+- name: xnn_qs8_dwconv_minmax_fp32_ukernel_8f8m9l16c8s8r__sse41_mul16_add16
+  init: xnn_init_qs8_conv_minmax_fp32_sse4_params

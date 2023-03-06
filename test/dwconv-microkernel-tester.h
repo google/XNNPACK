@@ -333,6 +333,130 @@ class DWConvMicrokernelTester {
   }
 
   void Test(
+    xnn_qu8_dwconv_minmax_multipass_ukernel_fn dwconv_minmax,
+    xnn_init_qu8_conv_minmax_params_fn init_params,
+    xnn_qu8_requantize_fn requantize) const
+  {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
+    std::uniform_int_distribution<int32_t> u8dist(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
+
+    const size_t tile_size = xnn_dwconv_multipass_tile_size(
+      kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
+    std::vector<const uint8_t*> indirection((width() - 1) * step() + tile_size);
+    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + indirection.size() * channels());
+    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> buffer(
+      XNN_ALLOCATION_ALIGNMENT / sizeof(uint32_t) + channels());
+    std::vector<uint8_t> kernel(channels() * kernel_size());
+    std::vector<int32_t> bias(channels());
+    std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_weights(
+      xnn_dwconv_multipass_weights_size(
+        tile_size, channels(), channel_tile(), channel_subtile(), channel_round(),
+        /*bias_element_size=*/4, /*log2_filter_element_size=*/0, /*extra_weights_byte=*/0));
+    std::vector<uint8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    std::vector<uint8_t> output((width() - 1) * output_stride() + channels());
+    std::vector<int32_t> accumulators(width() * channels());
+    std::vector<uint8_t> output_ref(width() * channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      do {
+        std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
+      } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
+      do {
+        std::generate(kernel.begin(), kernel.end(), [&]() { return u8dist(rng); });
+      } while (kernel.size() > 1 && *std::max_element(kernel.cbegin(), kernel.cend()) == *std::min_element(kernel.cbegin(), kernel.cend()));
+      std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
+      std::fill(zero.begin(), zero.end(), input_zero_point());
+      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
+
+      std::fill(packed_weights.begin(), packed_weights.end(), kernel_zero_point());
+      const xnn_qu8_packing_params packing_params = { input_zero_point(), kernel_zero_point() };
+      xnn_pack_qu8_dwconv_ghw_w(
+        first_pass_tile(), middle_pass_tile(), last_pass_tile(), kernel_size(), 1,
+        channels(), channel_tile(), channel_subtile(), channel_round(),
+        kernel.data(), bias.data(), packed_weights.data(),
+        /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, &packing_params);
+      for (size_t i = 0; i < indirection.size(); i++) {
+        indirection[i] = input.data() + i * channels() - input_offset();
+      }
+      std::shuffle(indirection.begin(), indirection.end(), rng);
+      if (zero_index() != SIZE_MAX) {
+        for (size_t i = 0; i < indirection.size(); i += kernel_size()) {
+          indirection[i + zero_index()] = zero.data();
+        }
+      }
+
+      // Compute reference results, without renormalization.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          float acc = bias[c];
+          for (size_t k = 0; k < kernel_size(); k++) {
+            if (indirection[x * step() + k] != zero.data()) {
+              acc +=
+                (int32_t(indirection[x * step() + k][c + input_offset()]) - int32_t(input_zero_point())) *
+                (int32_t(kernel[c * kernel_size() + k]) - int32_t(kernel_zero_point()));
+            }
+          }
+          accumulators[x * channels() + c] = acc;
+        }
+      }
+
+      // Compute renormalization parameters.
+      const int32_t accumulated_min = *std::min_element(accumulators.cbegin(), accumulators.cend());
+      const int32_t accumulated_max = *std::max_element(accumulators.cbegin(), accumulators.cend());
+      const uint32_t accumulated_range = uint32_t(accumulated_max) - uint32_t(accumulated_min);
+      const double output_scale = accumulated_range >= 256 ? double(accumulated_range) / 255.0 : 1.00001;
+      const uint8_t output_zero_point = uint8_t(std::max(std::min(
+        lrint(127.5 - 0.5 * double(accumulated_min + accumulated_max) / output_scale),
+        long(std::numeric_limits<uint8_t>::max())), long(std::numeric_limits<uint8_t>::min())));
+
+      // Prepare parameters.
+      const float requantization_scale = 1.0f / float(output_scale);
+      union xnn_qu8_conv_minmax_params quantization_params;
+      init_params(&quantization_params,
+        kernel_zero_point(), requantization_scale, output_zero_point, qmin(), qmax());
+
+      // Renormalize reference results.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          output_ref[x * channels() + c] = requantize(
+            accumulators[x * channels() + c], requantization_scale, output_zero_point, qmin(), qmax());
+        }
+      }
+
+      // input_stride is step() - first and middle pass
+      size_t num_middle_pass =
+        divide_round_up(doz(tile_size, first_pass_tile() + last_pass_tile()), middle_pass_tile());
+      const int input_advanced = first_pass_tile() + num_middle_pass * middle_pass_tile();
+      int input_stride_elements = step() - input_advanced;
+      // Call optimized micro-kernel.
+      dwconv_minmax(
+        channels(), width(),
+        indirection.data(), packed_weights.data(), output.data(),
+        input_stride_elements * sizeof(void*),
+        (output_stride() - channels()) * sizeof(uint8_t),
+        input_offset() * sizeof(uint8_t), zero.data(),
+        kernel_size(),
+        buffer.data(),
+        &quantization_params);
+
+      // Verify results.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          EXPECT_GE(uint32_t(output[x * output_stride() + c]), uint32_t(qmin()))
+            << "x = " << x << ", channel = " << c;
+          EXPECT_LE(uint32_t(output[x * output_stride() + c]), uint32_t(qmax()))
+            << "x = " << x << ", channel = " << c;
+          EXPECT_EQ(uint32_t(output[x * output_stride() + c]), uint32_t(output_ref[x * channels() + c]))
+            << "x = " << x << ", channel = " << c << ", accumulator = " << accumulators[x * channels() + c];
+        }
+      }
+    }
+  }
+
+  void Test(
     xnn_qc8_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
     xnn_init_qc8_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const
@@ -416,7 +540,8 @@ class DWConvMicrokernelTester {
       }
       xnn_init_qc8_scale_fp32_params(
         channels(), channel_tile(),
-        channel_tile() * (kernel_tile() * sizeof(int8_t) + sizeof(int32_t) + sizeof(float)), scale.data(),
+        channel_tile() * (kernel_tile() * sizeof(int8_t) + sizeof(int32_t) + sizeof(float)),
+        scale.data(),
         (void*) ((uintptr_t) packed_weights.data() + channel_tile() * (kernel_tile() * sizeof(int8_t) + sizeof(int32_t))));
 
       // Prepare parameters.
@@ -450,6 +575,155 @@ class DWConvMicrokernelTester {
             << "x = " << x << ", channel = " << c;
           EXPECT_EQ(int32_t(output[x * output_stride() + c]), int32_t(output_ref[x * channels() + c]))
             << "x = " << x << ", channel = " << c << ", accumulator = " << accumulators[x * channels() + c];
+        }
+      }
+    }
+  }
+
+  void Test(
+    xnn_qc8_dwconv_minmax_multipass_ukernel_fn dwconv_minmax,
+    xnn_init_qc8_conv_minmax_params_fn init_params,
+    xnn_qs8_requantize_fn requantize) const
+  {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
+    std::uniform_int_distribution<int32_t> i8dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    std::uniform_int_distribution<int32_t> w8dist(
+      -std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max());
+
+    const size_t tile_size = xnn_dwconv_multipass_tile_size(
+      kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
+    std::vector<const int8_t*> indirection((width() - 1) * step() + tile_size);
+    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + indirection.size() * channels());
+    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> buffer(
+      XNN_ALLOCATION_ALIGNMENT / sizeof(uint32_t) + channels());
+    std::vector<int8_t> kernel(channels() * kernel_size());
+    std::vector<int32_t> bias(channels());
+    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_weights(
+      xnn_dwconv_multipass_weights_size(
+        tile_size, channels(), channel_tile(), channel_subtile(), channel_round(),
+        /*bias_element_size=*/4, /*log2_filter_element_size=*/0, /*extra_weights_byte=*/sizeof(float)));
+    std::vector<int8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    std::vector<int8_t> output((width() - 1) * output_stride() + channels());
+    std::vector<int32_t> accumulators(width() * channels());
+    std::vector<float> scale(channels());
+    std::vector<int8_t> output_ref(width() * channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      do {
+        std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
+      } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
+      do {
+        std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
+      } while (kernel.size() > 1 && *std::max_element(kernel.cbegin(), kernel.cend()) == *std::min_element(kernel.cbegin(), kernel.cend()));
+      std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
+      std::fill(zero.begin(), zero.end(), int8_t(input_zero_point() - 0x80));
+      std::fill(output.begin(), output.end(), INT8_C(0xA5));
+
+      std::fill(packed_weights.begin(), packed_weights.end(), 0);
+      const xnn_qs8_packing_params packing_params = { int8_t(input_zero_point() - 0x80) };
+      xnn_pack_qs8_dwconv_ghw_w(
+        first_pass_tile(), middle_pass_tile(), last_pass_tile(), kernel_size(), 1,
+        channels(), channel_tile(), channel_subtile(), channel_round(),
+        kernel.data(), bias.data(), packed_weights.data(),
+        /*per_tile_extra_bytes=*/channel_tile() * sizeof(float),
+        /*per_subtile_extra_bytes=*/channel_subtile() * sizeof(float),
+        &packing_params);
+      for (size_t i = 0; i < indirection.size(); i++) {
+        indirection[i] = input.data() + i * channels() - input_offset();
+      }
+      std::shuffle(indirection.begin(), indirection.end(), rng);
+      if (zero_index() != SIZE_MAX) {
+        for (size_t i = 0; i < indirection.size(); i += kernel_size()) {
+          indirection[i + zero_index()] = zero.data();
+        }
+      }
+
+      // Compute reference results, without renormalization.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          float acc = bias[c];
+          for (size_t k = 0; k < kernel_size(); k++) {
+            if (indirection[x * step() + k] != zero.data()) {
+              acc +=
+                (int32_t(indirection[x * step() + k][c + input_offset()]) - int32_t(input_zero_point() - 0x80)) *
+                int32_t(kernel[c * kernel_size() + k]);
+            }
+          }
+          accumulators[x * channels() + c] = acc;
+        }
+      }
+
+      // Compute renormalization parameters.
+      const int8_t output_zero_point = -1;
+      for (size_t c = 0; c < channels(); c++) {
+        int32_t accumulated_min = accumulators[c];
+        int32_t accumulated_max = accumulators[c];
+        for (size_t x = 0; x < width(); x++) {
+          accumulated_min = std::min(accumulated_min, accumulators[x * channels() + c]);
+          accumulated_max = std::max(accumulated_max, accumulators[x * channels() + c]);
+        }
+        const uint32_t accumulated_range = uint32_t(accumulated_max - accumulated_min);
+        const float output_scale = accumulated_range >= 256 ? double(accumulated_range) / 255.0 : 1.00001;
+        scale[c] = 1.0f / output_scale;
+        scale[c] = 1.0f;
+      }
+
+      size_t num_middle_pass =
+        divide_round_up(doz(tile_size, first_pass_tile() + last_pass_tile()), middle_pass_tile());
+      const size_t rounded_c = round_up_po2(channels(), channel_round());
+      const size_t packed_weights_offset_to_last_tile =
+          first_pass_tile() * rounded_c * sizeof(int8_t)+ rounded_c * sizeof(int32_t) +
+          num_middle_pass * middle_pass_tile() * rounded_c * sizeof(int8_t) +
+          last_pass_tile() * channel_tile();
+
+      xnn_init_qc8_scale_fp32_params_dwconv_multipass(
+        channels(), channel_tile(), channel_subtile(),
+        channel_tile() * (last_pass_tile() * sizeof(int8_t) + sizeof(int32_t)),
+        channel_subtile() * (last_pass_tile() * sizeof(int8_t) + sizeof(int32_t)),
+        (channel_tile()- channel_subtile()) * last_pass_tile() * sizeof(int8_t),
+        scale.data(),
+        (void*) ((uintptr_t) packed_weights.data() + packed_weights_offset_to_last_tile));
+
+      // Prepare parameters.
+      union xnn_qc8_conv_minmax_params minmax_params;
+      init_params(&minmax_params,
+        output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+
+      // Renormalize reference results.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          output_ref[x * channels() + c] = requantize(
+            accumulators[x * channels() + c], scale[c], output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+        }
+      }
+
+      // input_stride is step() - first and middle pass
+      const int input_advanced = first_pass_tile() + num_middle_pass * middle_pass_tile();
+      int input_stride_elements = step() - input_advanced;
+      // Call optimized micro-kernel.
+      dwconv_minmax(
+        channels(), width(),
+        indirection.data(), packed_weights.data(), output.data(),
+        input_stride_elements * sizeof(void*),
+        (output_stride() - channels()) * sizeof(int8_t),
+        input_offset() * sizeof(int8_t), zero.data(),
+        kernel_size(),
+        buffer.data(),
+        &minmax_params);
+
+      // Verify results.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          EXPECT_GE(int32_t(output[x * output_stride() + c]), int32_t(qmin()) - 0x80)
+            << "x = " << x << ", channel = " << c;
+          EXPECT_LE(int32_t(output[x * output_stride() + c]), int32_t(qmax()) - 0x80)
+            << "x = " << x << ", channel = " << c;
+          EXPECT_EQ(int32_t(output[x * output_stride() + c]), int32_t(output_ref[x * channels() + c]))
+            << "x = " << x << ", channel = " << c << ", accumulator = " << accumulators[x * channels() + c]
+            << ", channels = " << channels();
         }
       }
     }
@@ -551,6 +825,132 @@ class DWConvMicrokernelTester {
         step() * sizeof(void*),
         (output_stride() - channels()) * sizeof(int8_t),
         input_offset() * sizeof(int8_t), zero.data(),
+        &quantization_params);
+
+      // Verify results.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          EXPECT_GE(int32_t(output[x * output_stride() + c]), int32_t(qmin()) - 0x80)
+            << "x = " << x << ", channel = " << c;
+          EXPECT_LE(int32_t(output[x * output_stride() + c]), int32_t(qmax()) - 0x80)
+            << "x = " << x << ", channel = " << c;
+          EXPECT_EQ(int32_t(output[x * output_stride() + c]), int32_t(output_ref[x * channels() + c]))
+            << "x = " << x << ", channel = " << c << ", accumulator = " << accumulators[x * channels() + c];
+        }
+      }
+    }
+  }
+
+  void Test(
+    xnn_qs8_dwconv_minmax_multipass_ukernel_fn dwconv_minmax,
+    xnn_init_qs8_conv_minmax_params_fn init_params,
+    xnn_qs8_requantize_fn requantize) const
+  {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_int_distribution<int32_t> i32dist(-10000, 10000);
+    std::uniform_int_distribution<int32_t> i8dist(
+      std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+    std::uniform_int_distribution<int32_t> w8dist(
+      -std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max());
+
+    const size_t tile_size = xnn_dwconv_multipass_tile_size(
+      kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
+    std::vector<const int8_t*> indirection((width() - 1) * step() + tile_size);
+    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + indirection.size() * channels());
+    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> buffer(
+      XNN_ALLOCATION_ALIGNMENT / sizeof(uint32_t) + channels());
+    std::vector<int8_t> kernel(channels() * kernel_size());
+    std::vector<int32_t> bias(channels());
+    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_weights(
+      xnn_dwconv_multipass_weights_size(
+        tile_size, channels(), channel_tile(), channel_subtile(), channel_round(),
+        /*bias_element_size=*/4, /*log2_filter_element_size=*/0, /*extra_weights_byte=*/0));
+    std::vector<int8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    std::vector<int8_t> output((width() - 1) * output_stride() + channels());
+    std::vector<int32_t> accumulators(width() * channels());
+    std::vector<int8_t> output_ref(width() * channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      do {
+        std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
+      } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
+      do {
+        std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
+      } while (kernel.size() > 1 && *std::max_element(kernel.cbegin(), kernel.cend()) == *std::min_element(kernel.cbegin(), kernel.cend()));
+      std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
+      std::fill(zero.begin(), zero.end(), int8_t(input_zero_point() - 0x80));
+      std::fill(output.begin(), output.end(), INT8_C(0xA5));
+
+      std::fill(packed_weights.begin(), packed_weights.end(), 0);
+      const xnn_qs8_packing_params packing_params = { int8_t(input_zero_point() - 0x80) };
+      xnn_pack_qs8_dwconv_ghw_w(
+        first_pass_tile(), middle_pass_tile(), last_pass_tile(), kernel_size(), 1,
+        channels(), channel_tile(), channel_subtile(), channel_round(),
+        kernel.data(), bias.data(), packed_weights.data(),
+        /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, &packing_params);
+      for (size_t i = 0; i < indirection.size(); i++) {
+        indirection[i] = input.data() + i * channels() - input_offset();
+      }
+      std::shuffle(indirection.begin(), indirection.end(), rng);
+      if (zero_index() != SIZE_MAX) {
+        for (size_t i = 0; i < indirection.size(); i += kernel_size()) {
+          indirection[i + zero_index()] = zero.data();
+        }
+      }
+
+      // Compute reference results, without renormalization.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          float acc = bias[c];
+          for (size_t k = 0; k < kernel_size(); k++) {
+            if (indirection[x * step() + k] != zero.data()) {
+              acc +=
+                (int32_t(indirection[x * step() + k][c + input_offset()]) - int32_t(input_zero_point() - 0x80)) *
+                int32_t(kernel[c * kernel_size() + k]);
+            }
+          }
+          accumulators[x * channels() + c] = acc;
+        }
+      }
+
+      // Compute renormalization parameters.
+      const int32_t accumulated_min = *std::min_element(accumulators.cbegin(), accumulators.cend());
+      const int32_t accumulated_max = *std::max_element(accumulators.cbegin(), accumulators.cend());
+      const uint32_t accumulated_range = uint32_t(accumulated_max) - uint32_t(accumulated_min);
+      const double output_scale = accumulated_range >= 256 ? double(accumulated_range) / 255.0 : 1.00001;
+      const int8_t output_zero_point = int8_t(std::max(std::min(
+        lrint(-0.5 - 0.5 * double(accumulated_min + accumulated_max) / output_scale),
+        long(std::numeric_limits<int8_t>::max())), long(std::numeric_limits<int8_t>::min())));
+
+      // Prepare parameters.
+      const float requantization_scale = 1.0f / float(output_scale);
+      union xnn_qs8_conv_minmax_params quantization_params;
+      init_params(&quantization_params,
+        requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+
+      // Renormalize reference results.
+      for (size_t x = 0; x < width(); x++) {
+        for (size_t c = 0; c < channels(); c++) {
+          output_ref[x * channels() + c] = requantize(
+            accumulators[x * channels() + c], requantization_scale, output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
+        }
+      }
+
+      // input_stride is step() - first and middle pass
+      size_t num_middle_pass =
+        divide_round_up(doz(tile_size, first_pass_tile() + last_pass_tile()), middle_pass_tile());
+      const int input_advanced = first_pass_tile() + num_middle_pass * middle_pass_tile();
+      int input_stride_elements = step() - input_advanced;
+      // Call optimized micro-kernel.
+      dwconv_minmax(
+        channels(), width(),
+        indirection.data(), packed_weights.data(), output.data(),
+        input_stride_elements * sizeof(void*),
+        (output_stride() - channels()) * sizeof(int8_t),
+        input_offset() * sizeof(int8_t), zero.data(),
+        kernel_size(),
+        buffer.data(),
         &quantization_params);
 
       // Verify results.
