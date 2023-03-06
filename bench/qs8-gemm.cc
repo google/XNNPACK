@@ -150,6 +150,7 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
   ruy::MakeSimpleLayout(kc, mc, ruy::Order::kColMajor, ruy_b.mutable_layout());
   ruy_b.set_data(a.data());
   ruy_b.set_zero_point(127);
+  ruy_b.set_cache_policy(ruy::CachePolicy::kAlwaysCache);
   ruy::Matrix<int8_t> ruy_c;
   ruy::MakeSimpleLayout(nc, mc, ruy::Order::kColMajor, ruy_c.mutable_layout());
   ruy_c.set_zero_point(127);

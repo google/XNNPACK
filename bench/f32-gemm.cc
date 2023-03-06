@@ -302,6 +302,7 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads)
   ruy::Matrix<float> ruy_b;
   ruy::MakeSimpleLayout(kc, mc, ruy::Order::kColMajor, ruy_b.mutable_layout());
   ruy_b.set_data(a.data());
+  ruy_b.set_cache_policy(ruy::CachePolicy::kAlwaysCache);
   ruy::Matrix<float> ruy_c;
   ruy::MakeSimpleLayout(nc, mc, ruy::Order::kColMajor, ruy_c.mutable_layout());
 
