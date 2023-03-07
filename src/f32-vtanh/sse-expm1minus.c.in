@@ -95,6 +95,8 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_${
           $for N in range(0, BATCH_TILE, 4):
             const uint64_t vidx${ABC[N:N+2]} = (uint64_t) _mm_cvtsi128_si64(vidx${ABC[N:N+4]});
             vidx${ABC[N:N+4]} = _mm_unpackhi_epi64(vidx${ABC[N:N+4]}, vidx${ABC[N:N+4]});
+
+          $for N in range(0, BATCH_TILE, 4):
             const uint64_t vidx${ABC[N+2:N+4]} = (uint64_t) _mm_cvtsi128_si64(vidx${ABC[N:N+4]});
 
           $if SSE == 4:
@@ -107,9 +109,15 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_${
             $for N in range(0, BATCH_TILE, 4):
               const __m128i vl${ABC[N]} = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_${LUT}[(uint32_t) vidx${ABC[N:N+2]}]);
               const __m128i vl${ABC[N+1]} = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_${LUT}[(uint32_t) (vidx${ABC[N:N+2]} >> 32)]);
+
+            $for N in range(0, BATCH_TILE, 4):
               const __m128i vl${ABC[N:N+2]} = _mm_unpacklo_epi32(vl${ABC[N]}, vl${ABC[N+1]});
+
+            $for N in range(0, BATCH_TILE, 4):
               const __m128i vl${ABC[N+2]} = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_${LUT}[(uint32_t) vidx${ABC[N+2:N+4]}]);
               const __m128i vl${ABC[N+3]} = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_${LUT}[(uint32_t) (vidx${ABC[N+2:N+4]} >> 32)]);
+
+            $for N in range(0, BATCH_TILE, 4):
               const __m128i vl${ABC[N+2:N+4]} = _mm_unpacklo_epi32(vl${ABC[N+2]}, vl${ABC[N+3]});
         #else
           $for N in range(0, BATCH_TILE, 4):
@@ -184,7 +192,6 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_${
 
       $for N in range(0, BATCH_TILE, 4):
         const __m128 vts${ABC[N:N+4]} = _mm_mul_ps(vt${ABC[N:N+4]}, vs${ABC[N:N+4]});
-      $for N in range(0, BATCH_TILE, 4):
         const __m128 vsmo${ABC[N:N+4]} = _mm_add_ps(vs${ABC[N:N+4]}, vminus_one);
       $for N in range(0, BATCH_TILE, 4):
         const __m128 vemo${ABC[N:N+4]} = _mm_add_ps(_mm_mul_ps(vp${ABC[N:N+4]}, vts${ABC[N:N+4]}), vsmo${ABC[N:N+4]});

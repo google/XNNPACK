@@ -98,21 +98,22 @@ void xnn_f32_vtanh_ukernel__sse41_expm1minus_rr1_lut8_p4h3_div_x24(
 
       const uint64_t vidx01 = (uint64_t) _mm_cvtsi128_si64(vidx0123);
       vidx0123 = _mm_unpackhi_epi64(vidx0123, vidx0123);
-      const uint64_t vidx23 = (uint64_t) _mm_cvtsi128_si64(vidx0123);
       const uint64_t vidx45 = (uint64_t) _mm_cvtsi128_si64(vidx4567);
       vidx4567 = _mm_unpackhi_epi64(vidx4567, vidx4567);
-      const uint64_t vidx67 = (uint64_t) _mm_cvtsi128_si64(vidx4567);
       const uint64_t vidx89 = (uint64_t) _mm_cvtsi128_si64(vidx89AB);
       vidx89AB = _mm_unpackhi_epi64(vidx89AB, vidx89AB);
-      const uint64_t vidxAB = (uint64_t) _mm_cvtsi128_si64(vidx89AB);
       const uint64_t vidxCD = (uint64_t) _mm_cvtsi128_si64(vidxCDEF);
       vidxCDEF = _mm_unpackhi_epi64(vidxCDEF, vidxCDEF);
-      const uint64_t vidxEF = (uint64_t) _mm_cvtsi128_si64(vidxCDEF);
       const uint64_t vidxGH = (uint64_t) _mm_cvtsi128_si64(vidxGHIJ);
       vidxGHIJ = _mm_unpackhi_epi64(vidxGHIJ, vidxGHIJ);
-      const uint64_t vidxIJ = (uint64_t) _mm_cvtsi128_si64(vidxGHIJ);
       const uint64_t vidxKL = (uint64_t) _mm_cvtsi128_si64(vidxKLMN);
       vidxKLMN = _mm_unpackhi_epi64(vidxKLMN, vidxKLMN);
+
+      const uint64_t vidx23 = (uint64_t) _mm_cvtsi128_si64(vidx0123);
+      const uint64_t vidx67 = (uint64_t) _mm_cvtsi128_si64(vidx4567);
+      const uint64_t vidxAB = (uint64_t) _mm_cvtsi128_si64(vidx89AB);
+      const uint64_t vidxEF = (uint64_t) _mm_cvtsi128_si64(vidxCDEF);
+      const uint64_t vidxIJ = (uint64_t) _mm_cvtsi128_si64(vidxGHIJ);
       const uint64_t vidxMN = (uint64_t) _mm_cvtsi128_si64(vidxKLMN);
 
       __m128i vl0123 = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx01]);
@@ -245,16 +246,16 @@ void xnn_f32_vtanh_ukernel__sse41_expm1minus_rr1_lut8_p4h3_div_x24(
     vpKLMN = _mm_sub_ps(_mm_mul_ps(vpKLMN, vtKLMN), vminus_two);
 
     const __m128 vts0123 = _mm_mul_ps(vt0123, vs0123);
-    const __m128 vts4567 = _mm_mul_ps(vt4567, vs4567);
-    const __m128 vts89AB = _mm_mul_ps(vt89AB, vs89AB);
-    const __m128 vtsCDEF = _mm_mul_ps(vtCDEF, vsCDEF);
-    const __m128 vtsGHIJ = _mm_mul_ps(vtGHIJ, vsGHIJ);
-    const __m128 vtsKLMN = _mm_mul_ps(vtKLMN, vsKLMN);
     const __m128 vsmo0123 = _mm_add_ps(vs0123, vminus_one);
+    const __m128 vts4567 = _mm_mul_ps(vt4567, vs4567);
     const __m128 vsmo4567 = _mm_add_ps(vs4567, vminus_one);
+    const __m128 vts89AB = _mm_mul_ps(vt89AB, vs89AB);
     const __m128 vsmo89AB = _mm_add_ps(vs89AB, vminus_one);
+    const __m128 vtsCDEF = _mm_mul_ps(vtCDEF, vsCDEF);
     const __m128 vsmoCDEF = _mm_add_ps(vsCDEF, vminus_one);
+    const __m128 vtsGHIJ = _mm_mul_ps(vtGHIJ, vsGHIJ);
     const __m128 vsmoGHIJ = _mm_add_ps(vsGHIJ, vminus_one);
+    const __m128 vtsKLMN = _mm_mul_ps(vtKLMN, vsKLMN);
     const __m128 vsmoKLMN = _mm_add_ps(vsKLMN, vminus_one);
     const __m128 vemo0123 = _mm_add_ps(_mm_mul_ps(vp0123, vts0123), vsmo0123);
     const __m128 vemo4567 = _mm_add_ps(_mm_mul_ps(vp4567, vts4567), vsmo4567);

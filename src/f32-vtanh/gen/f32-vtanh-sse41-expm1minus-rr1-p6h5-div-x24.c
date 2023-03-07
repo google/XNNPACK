@@ -132,16 +132,16 @@ void xnn_f32_vtanh_ukernel__sse41_expm1minus_rr1_p6h5_div_x24(
     vpKLMN = _mm_sub_ps(_mm_mul_ps(vpKLMN, vtKLMN), vminus_two);
 
     const __m128 vts0123 = _mm_mul_ps(vt0123, vs0123);
-    const __m128 vts4567 = _mm_mul_ps(vt4567, vs4567);
-    const __m128 vts89AB = _mm_mul_ps(vt89AB, vs89AB);
-    const __m128 vtsCDEF = _mm_mul_ps(vtCDEF, vsCDEF);
-    const __m128 vtsGHIJ = _mm_mul_ps(vtGHIJ, vsGHIJ);
-    const __m128 vtsKLMN = _mm_mul_ps(vtKLMN, vsKLMN);
     const __m128 vsmo0123 = _mm_add_ps(vs0123, vminus_one);
+    const __m128 vts4567 = _mm_mul_ps(vt4567, vs4567);
     const __m128 vsmo4567 = _mm_add_ps(vs4567, vminus_one);
+    const __m128 vts89AB = _mm_mul_ps(vt89AB, vs89AB);
     const __m128 vsmo89AB = _mm_add_ps(vs89AB, vminus_one);
+    const __m128 vtsCDEF = _mm_mul_ps(vtCDEF, vsCDEF);
     const __m128 vsmoCDEF = _mm_add_ps(vsCDEF, vminus_one);
+    const __m128 vtsGHIJ = _mm_mul_ps(vtGHIJ, vsGHIJ);
     const __m128 vsmoGHIJ = _mm_add_ps(vsGHIJ, vminus_one);
+    const __m128 vtsKLMN = _mm_mul_ps(vtKLMN, vsKLMN);
     const __m128 vsmoKLMN = _mm_add_ps(vsKLMN, vminus_one);
     const __m128 vemo0123 = _mm_add_ps(_mm_mul_ps(vp0123, vts0123), vsmo0123);
     const __m128 vemo4567 = _mm_add_ps(_mm_mul_ps(vp4567, vts4567), vsmo4567);

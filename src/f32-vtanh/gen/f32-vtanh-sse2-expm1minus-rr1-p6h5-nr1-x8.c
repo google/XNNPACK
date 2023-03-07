@@ -80,8 +80,8 @@ void xnn_f32_vtanh_ukernel__sse2_expm1minus_rr1_p6h5_nr1_x8(
     vp4567 = _mm_sub_ps(_mm_mul_ps(vp4567, vt4567), vminus_two);
 
     const __m128 vts0123 = _mm_mul_ps(vt0123, vs0123);
-    const __m128 vts4567 = _mm_mul_ps(vt4567, vs4567);
     const __m128 vsmo0123 = _mm_add_ps(vs0123, vminus_one);
+    const __m128 vts4567 = _mm_mul_ps(vt4567, vs4567);
     const __m128 vsmo4567 = _mm_add_ps(vs4567, vminus_one);
     const __m128 vemo0123 = _mm_add_ps(_mm_mul_ps(vp0123, vts0123), vsmo0123);
     const __m128 vemo4567 = _mm_add_ps(_mm_mul_ps(vp4567, vts4567), vsmo4567);
