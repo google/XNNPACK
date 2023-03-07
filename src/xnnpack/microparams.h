@@ -2616,6 +2616,62 @@ union xnn_f32_tanh_params {
     XNN_ALIGN(64) uint32_t table[16];
   } avx512_expm1minus_rr1_lut8_p4h3_perm;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  struct {
+    XNN_ALIGN(8) float sat_cutoff[2];
+    XNN_ALIGN(8) float minus_log2e[2];
+    XNN_ALIGN(8) float magic_bias[2];
+    XNN_ALIGN(8) float ln2[2];
+    XNN_ALIGN(8) float c6[2];
+    XNN_ALIGN(8) float c5[2];
+    XNN_ALIGN(8) float c4[2];
+    XNN_ALIGN(8) float c3[2];
+    XNN_ALIGN(8) float c2[2];
+    XNN_ALIGN(8) float minus_two[2];
+    XNN_ALIGN(8) float one[2];
+    XNN_ALIGN(8) float sign_mask[2];
+  } wasmsimd_expm1minus_rr1_p6h5_abs;
+  struct {
+    XNN_ALIGN(8) float sat_cutoff[2];
+    XNN_ALIGN(8) float minus_log2e[2];
+    XNN_ALIGN(8) float magic_bias[2];
+    XNN_ALIGN(8) uint32_t index_mask[2];
+    XNN_ALIGN(8) float ln2[2];
+    XNN_ALIGN(8) float c4[2];
+    XNN_ALIGN(8) float c3[2];
+    XNN_ALIGN(8) float c2[2];
+    XNN_ALIGN(8) float minus_two[2];
+    XNN_ALIGN(8) float one[2];
+    XNN_ALIGN(8) float sign_mask[2];
+  } wasmsimd_expm1minus_rr1_lut8_p4h3_abs;
+  struct {
+    XNN_ALIGN(8) float sign_mask[2];
+    XNN_ALIGN(8) float sat_cutoff[2];
+    XNN_ALIGN(8) float log2e[2];
+    XNN_ALIGN(8) float magic_bias[2];
+    XNN_ALIGN(8) float minus_ln2[2];
+    XNN_ALIGN(8) float c6[2];
+    XNN_ALIGN(8) float c5[2];
+    XNN_ALIGN(8) float c4[2];
+    XNN_ALIGN(8) float c3[2];
+    XNN_ALIGN(8) float c2[2];
+    XNN_ALIGN(8) float two[2];
+    XNN_ALIGN(8) float one[2];
+  } wasmsimd_expm1minus_rr1_p6h5_nabs;
+  struct {
+    XNN_ALIGN(8) float sign_mask[2];
+    XNN_ALIGN(8) float sat_cutoff[2];
+    XNN_ALIGN(8) float log2e[2];
+    XNN_ALIGN(8) float magic_bias[2];
+    XNN_ALIGN(8) uint32_t index_mask[2];
+    XNN_ALIGN(8) float minus_ln2[2];
+    XNN_ALIGN(8) float c4[2];
+    XNN_ALIGN(8) float c3[2];
+    XNN_ALIGN(8) float c2[2];
+    XNN_ALIGN(8) float two[2];
+    XNN_ALIGN(8) float one[2];
+  } wasmsimd_expm1minus_rr1_lut8_p4h3_nabs;
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
 

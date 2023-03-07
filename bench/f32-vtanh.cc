@@ -1930,6 +1930,177 @@ static void f32_vtanh(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_min_x4,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_min_x4,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_min_x8,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_min_x8,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_min_x12,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_min_x12,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_min_x16,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_min_x16,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_pmin_x4,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_pmin_x4,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_pmin_x8,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_pmin_x8,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_pmin_x12,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_pmin_x12,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_pmin_x16,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_abs_pmin_x16,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_max_x4,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_max_x4,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_max_x8,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_max_x8,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_max_x12,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_max_x12,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_max_x16,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_max_x16,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_pmax_x4,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_pmax_x4,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_pmax_x8,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_pmax_x8,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_pmax_x12,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_pmax_x12,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_pmax_x16,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_lut8_p4h3_div_nabs_pmax_x16,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_abs_min_x4,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_abs_min_x4,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_abs_min_x8,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_abs_min_x8,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_abs_min_x12,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_abs_min_x12,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_abs_min_x16,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_abs_min_x16,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_abs_pmin_x4,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_abs_pmin_x4,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_abs_pmin_x8,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_abs_pmin_x8,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_abs_pmin_x12,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_abs_pmin_x12,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_abs_pmin_x16,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_abs_pmin_x16,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_abs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_nabs_max_x4,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_nabs_max_x4,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_nabs_max_x8,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_nabs_max_x8,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_nabs_max_x12,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_nabs_max_x12,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_nabs_max_x16,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_nabs_max_x16,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_nabs_pmax_x4,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_nabs_pmax_x4,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_nabs_pmax_x8,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_nabs_pmax_x8,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_nabs_pmax_x12,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_nabs_pmax_x12,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_nabs_pmax_x16,
+                  xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_nabs_pmax_x16,
+                  xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_nabs_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
 BENCHMARK_CAPTURE(f32_vtanh, fma_expm1minus_rr1_lut8_p4h3_div_x1,
                   xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3_div_x1,
                   xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params)

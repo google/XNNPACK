@@ -354,6 +354,42 @@ tools/xngen src/f32-vtanh/avx512skx-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -
 tools/xngen src/f32-vtanh/avx512skx-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D BATCH_TILE=144 -D DIV=NR1ADJ -D PERM=0 -o src/f32-vtanh/gen/f32-vtanh-avx512skx-expm1minus-rr1-lut8-p4h3-gather-nr1adj-x144.c &
 tools/xngen src/f32-vtanh/avx512skx-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D BATCH_TILE=160 -D DIV=NR1ADJ -D PERM=0 -o src/f32-vtanh/gen/f32-vtanh-avx512skx-expm1minus-rr1-lut8-p4h3-gather-nr1adj-x160.c &
 
+################################### Wasm SIMD ####################################
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=WASM   -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-min-x4.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=WASM   -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-min-x8.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=WASM   -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-min-x12.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=WASM   -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-min-x16.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=PSEUDO -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-pmin-x4.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=PSEUDO -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-pmin-x8.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=PSEUDO -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-pmin-x12.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=PSEUDO -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-pmin-x16.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=WASM   -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-max-x4.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=WASM   -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-max-x8.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=WASM   -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-max-x12.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=WASM   -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-max-x16.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=PSEUDO -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-pmax-x4.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=PSEUDO -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-pmax-x8.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=PSEUDO -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-pmax-x12.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=PSEUDO -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-pmax-x16.c &
+
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-min-x4.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-min-x8.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-min-x12.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-min-x16.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-pmin-x4.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-pmin-x8.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-pmin-x12.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-pmin-x16.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-max-x4.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-max-x8.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-max-x12.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-max-x16.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-pmax-x4.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-pmax-x8.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-pmax-x12.c &
+tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-pmax-x16.c &
+
+
 ################################## Unit tests #################################
 tools/generate-vunary-test.py --spec test/f32-vtanh.yaml --output test/f32-vtanh.cc &
 

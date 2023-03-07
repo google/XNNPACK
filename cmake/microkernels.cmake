@@ -7355,6 +7355,38 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x24.c
   src/f32-vsqrt/gen/f32-vsqrt-wasmsimd-sqrt-x4.c
   src/f32-vsqrt/gen/f32-vsqrt-wasmsimd-sqrt-x8.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-min-x4.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-min-x8.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-min-x12.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-min-x16.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-pmin-x4.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-pmin-x8.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-pmin-x12.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-abs-pmin-x16.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-max-x4.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-max-x8.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-max-x12.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-max-x16.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-pmax-x4.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-pmax-x8.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-pmax-x12.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-pmax-x16.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-min-x4.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-min-x8.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-min-x12.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-min-x16.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-pmin-x4.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-pmin-x8.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-pmin-x12.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-abs-pmin-x16.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-max-x4.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-max-x8.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-max-x12.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-max-x16.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-pmax-x4.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-pmax-x8.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-pmax-x12.c
+  src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5-div-nabs-pmax-x16.c
   src/f32-vunary/gen/f32-vabs-wasmsimd-x4.c
   src/f32-vunary/gen/f32-vabs-wasmsimd-x8.c
   src/f32-vunary/gen/f32-vneg-wasmsimd-x4.c

@@ -8705,6 +8705,7 @@ xnnpack_unit_test(
         "test/f32-vtanh.cc",
         "test/vunary-microkernel-tester.h",
     ],
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS,
 )
 
