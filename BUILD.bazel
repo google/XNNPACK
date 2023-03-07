@@ -5764,6 +5764,7 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":operators",
         ":indirection",
+        ":microkernel_utils",
         ":packing",
     ],
 )
