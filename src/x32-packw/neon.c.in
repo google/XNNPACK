@@ -55,9 +55,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
         $for N in range(0,NR,4):
           uint32x4_t vb${N} = vld1q_u32(bias); bias += 4;
         $for N in range(0,NR,4):
-          vst1q_u32(packed_weights + ${N}, vb${N});
+          vst1q_u32(packed_weights, vb${N}); packed_weights += 4;
+      } else {
+        packed_weights += ${NR};
       }
-      packed_weights += ${NR};
 
       const uint32_t* w0 = w;
       $for N in range(1, NR):
@@ -74,8 +75,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
         $for K in range(0,KUNROLL,4):
           $for NN in range(0,4):
             $for N in range(0,NR,4):
-              vst1q_u32(packed_weights + ${N+NN*NR+K*KUNROLL}, v${N}${K}.val[${NN}]);
-        packed_weights += ${NR*KUNROLL};
+              vst1q_u32(packed_weights, v${N}${K}.val[${NN}]); packed_weights += 4;
       }
 
       // KC remainder of 1..${KUNROLL-1}
@@ -103,10 +103,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
                 $for NN in range(0,K):
                   $for N in range(0,NR,4):
                     $if K == 1:
-                      vst1q_u32(packed_weights + ${N+NN*NR}, v${N});
+                      vst1q_u32(packed_weights, v${N}); packed_weights += 4;
                     $else:
-                      vst1q_u32(packed_weights + ${N+NN*NR}, v${N}.val[${NN}]);
-                packed_weights += ${NR*K};
+                      vst1q_u32(packed_weights, v${N}.val[${NN}]); packed_weights += 4;
                 break;
               }
             default:
@@ -120,8 +119,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
                   v${N}${K}.val[0] = vld1q_lane_u32(w${N+NN}, v${N}${K}.val[0], ${NN}); w${N+NN} += 4;
             $for K in range(0,KUNROLL,4):
               $for N in range(0,NR,4):
-                vst1q_u32(packed_weights + ${N+K*KUNROLL}, v${N}${K}.val[0]);
-            packed_weights += ${NR*KUNROLL//4};
+                vst1q_u32(packed_weights, v${N}${K}.val[0]); packed_weights += 4;
           }
       }
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
@@ -167,8 +165,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
         $for K in range(0,KUNROLL,4):
           $for NN in range(0,4):
             $for N in range(0,NR,4):
-              vst1q_u32(packed_weights + ${N+NN*NR+K*KUNROLL}, v${N}${K}.val[${NN}]);
-        packed_weights += ${NR*KUNROLL};
+              vst1q_u32(packed_weights, v${N}${K}.val[${NN}]); packed_weights += 4;
       }
 
       // KC remainder of 1..${KUNROLL-1}
@@ -197,10 +194,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
                 $for NN in range(0,K):
                   $for N in range(0,NR,4):
                     $if K == 1:
-                      vst1q_u32(packed_weights + ${N+NN*NR}, v${N});
+                      vst1q_u32(packed_weights, v${N}); packed_weights += 4;
                     $else:
-                      vst1q_u32(packed_weights + ${N+NN*NR}, v${N}.val[${NN}]);
-                packed_weights += ${NR*K};
+                      vst1q_u32(packed_weights, v${N}.val[${NN}]); packed_weights += 4;
                 break;
               }
             default:
@@ -215,8 +211,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
                     v${N}${K}.val[0] = vld1q_lane_u32(w${N+NN}, v${N}${K}.val[0], ${NN}); w${N+NN} += 4;
             $for K in range(0,KUNROLL,4):
               $for N in range(0,NR,4):
-                vst1q_u32(packed_weights + ${N+K*KUNROLL}, v${N}${K}.val[0]);
-            packed_weights += ${NR*KUNROLL//4};
+                vst1q_u32(packed_weights, v${N}${K}.val[0]); packed_weights += 4;
           }
       }
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
