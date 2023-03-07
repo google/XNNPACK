@@ -78,7 +78,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   assert(num_post_operations == 0 || (!clamp_min && !clamp_max));
 
   // Load zero, params pointer
-  ldp(x12, x8, mem[sp, 16]);
+  ldp(x12, x8, mem[{sp, 16}]);
 
   // Clamp C pointers
   if (max_mr > 1) {
@@ -99,7 +99,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   }
 
   // Save x20,x21,x22,x23 on stack
-  stp(x20, x21, mem[sp, -32]++);
+  stp(x20, x21, mem[{sp, -32}]++);
 
   if (max_mr > 3) {
     cmp(x0, 4); // if mr < 4
@@ -107,7 +107,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
     csel(x10, x17, x10, kLO); //   c3 = c2
   }
 
-  stp(x22, x23, mem[sp, 16]);
+  stp(x22, x23, mem[{sp, 16}]);
 
   if (max_mr > 4) {
     add(x13, x10, x7); // c4 = c3 + cm_stride
@@ -116,7 +116,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   }
 
   // Load a_offset
-  ldr(x11, mem[sp, 40]);
+  ldr(x11, mem[{sp, 40}]);
 
   if (max_mr > 5) {
     cmp(x0, 6); // if mr < 6
@@ -373,7 +373,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
     fmax(v20.v4s(), v20.v4s(), v6.v4s());
   }
   // Load cn_stride
-  ldr(x0, mem[sp, 32]);
+  ldr(x0, mem[{sp, 32}]);
   if (clamp_min) {
     fmax(v21.v4s(), v21.v4s(), v6.v4s());
     if (max_mr > 1) {
@@ -456,7 +456,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   b_hi(l0);
 
   // Restore x20,x21,x22,x23 from stack
-  ldp(x22, x23, mem[sp, 16]);
+  ldp(x22, x23, mem[{sp, 16}]);
   ldp(x20, x21, mem[sp], 32);
   ret();
 
@@ -685,7 +685,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   str(s20, mem[x6]);
   bind(l9);
   // Restore x20,x21,x22,x23 from stack
-  ldp(x22, x23, mem[sp, 16]);
+  ldp(x22, x23, mem[{sp, 16}]);
   ldp(x20, x21, mem[sp], 32);
   ret();
 

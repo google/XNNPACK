@@ -75,7 +75,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   assert(num_post_operations == 0 || (!clamp_min && !clamp_max));
 
   // Load params pointer
-  ldr(x8, mem[sp, 8]);
+  ldr(x8, mem[{sp, 8}]);
 
   // Clamp A and C pointers
   if (max_mr > 1) {
@@ -129,19 +129,19 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 1) {
     mov(v22.v16b(), v20.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 0]); // Prefetch B
+  prfm(kPLDL1KEEP, mem[{x5, 0}]); // Prefetch B
   if (max_mr > 1) {
     mov(v23.v16b(), v21.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 64]);
+  prfm(kPLDL1KEEP, mem[{x5, 64}]);
   if (max_mr > 2) {
     mov(v24.v16b(), v20.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 128]);
+  prfm(kPLDL1KEEP, mem[{x5, 128}]);
   if (max_mr > 2) {
     mov(v25.v16b(), v21.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 192]);
+  prfm(kPLDL1KEEP, mem[{x5, 192}]);
   if (max_mr > 3) {
     mov(v26.v16b(), v20.v16b());
   }

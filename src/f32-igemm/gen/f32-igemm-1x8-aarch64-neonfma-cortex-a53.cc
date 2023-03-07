@@ -71,7 +71,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   ldp(x10, x11, mem[sp]);
 
   // Load zero, params pointer
-  ldp(x12, x8, mem[sp, 16]);
+  ldp(x12, x8, mem[{sp, 16}]);
 
   // Load min/max values
   if (clamp_min || clamp_max) {
@@ -87,13 +87,13 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
   movi(v19.v4s(), 0);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 64]);
-    prfm(kPLDL1KEEP, mem[x5, 128]);
-    prfm(kPLDL1KEEP, mem[x5, 192]);
-    prfm(kPLDL1KEEP, mem[x5, 256]);
-    prfm(kPLDL1KEEP, mem[x5, 320]);
-    prfm(kPLDL1KEEP, mem[x5, 384]);
-    prfm(kPLDL1KEEP, mem[x5, 448]);
+    prfm(kPLDL1KEEP, mem[{x5, 64}]);
+    prfm(kPLDL1KEEP, mem[{x5, 128}]);
+    prfm(kPLDL1KEEP, mem[{x5, 192}]);
+    prfm(kPLDL1KEEP, mem[{x5, 256}]);
+    prfm(kPLDL1KEEP, mem[{x5, 320}]);
+    prfm(kPLDL1KEEP, mem[{x5, 384}]);
+    prfm(kPLDL1KEEP, mem[{x5, 448}]);
   }
   mov(x9, x3); // p = ks
 
@@ -143,11 +143,11 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   ldr(q27, mem[x5], 16);
 
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 384]); // Prefetch B
-    prfm(kPLDL1KEEP, mem[x5, 448]);
-    prfm(kPLDL1KEEP, mem[x5, 512]);
-    prfm(kPLDL1KEEP, mem[x5, 576]);
-    prfm(kPLDL1KEEP, mem[x13, 128]); // Prefetch A0
+    prfm(kPLDL1KEEP, mem[{x5, 384}]); // Prefetch B
+    prfm(kPLDL1KEEP, mem[{x5, 448}]);
+    prfm(kPLDL1KEEP, mem[{x5, 512}]);
+    prfm(kPLDL1KEEP, mem[{x5, 576}]);
+    prfm(kPLDL1KEEP, mem[{x13, 128}]); // Prefetch A0
   }
 
   // Second block of 4.  FMA for second 4, loads for 1st block of 4.

@@ -266,7 +266,7 @@ AARCH32_POST_OP_RELOAD = """void Generator::perform_post_operations(
   if (num_post_operations == 0) {
     return;
   }
-  ldr(PARAMS_REG_PLACEHOLDER, mem[sp, PARAMS_OFFSET_PLACEHOLDER]);  // params
+  ldr(PARAMS_REG_PLACEHOLDER, mem[{sp, PARAMS_OFFSET_PLACEHOLDER}]);  // params
   for (size_t i = 0; i < num_post_operations; i++) {
     switch (post_operations[i].op_type) {
       case xnn_post_operation_type_hardswish: {
@@ -702,7 +702,7 @@ def emit_instruction(instr: str,
     return
 
   if ((instr_name == 'stp' or instr_name == 'ldp') and
-      reg in get_callee_saved()) and 'mem[sp' in instr:
+      reg in get_callee_saved()) and ('mem[sp' in instr or 'mem[{sp' in instr):
     # pushing and popping from stack, no max_mr guard.
     instructions.append(instr)
     return
@@ -731,7 +731,7 @@ def emit_instruction(instr: str,
     instructions.append(instr)
     return
 
-  if 'mem[sp' in instr:  # loading from stack is almost always a parameter load.
+  if 'mem[sp' in instr or 'mem[{sp' in instr:  # loading from stack is almost always a parameter load.
     instructions.append(instr)
     return
 
@@ -835,11 +835,11 @@ def parse_microkernel(
     if m:
       if m[1].lower() == 'pld':
         emit_prefetch_instruction(
-            f'{fix_instr_name(m[1])}(mem[{m[2]}, {m[3]}]){sc} {m[4]}', prfm_mode,
+            f'{fix_instr_name(m[1])}(mem[{{{m[2]}, {m[3]}}}]){sc} {m[4]}', prfm_mode,
             instructions)
       else:
         emit_instruction(
-            f'{fix_instr_name(m[1])}(mem[{m[2]}, {m[3]}]){sc} {m[4]}',
+            f'{fix_instr_name(m[1])}(mem[{{{m[2]}, {m[3]}}}]){sc} {m[4]}',
             instructions, vector_register_map, vector_register_usage)
       continue
     m = re.fullmatch(INSTR_MEMOP_RE, line)
@@ -869,11 +869,11 @@ def parse_microkernel(
     if m:
       if m[5]:  # wb
         emit_instruction(
-            f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]++){sc} {m[6]}',
+            f'{fix_instr_name(m[1])}({m[2]}, mem[{{{m[3]}, {m[4]}}}]++){sc} {m[6]}',
             instructions, vector_register_map, is_a53, vector_register_usage)
       else:  # no wb
         emit_instruction(
-            f'{fix_instr_name(m[1])}({m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[6]}',
+            f'{fix_instr_name(m[1])}({m[2]}, mem[{{{m[3]}, {m[4]}}}]){sc} {m[6]}',
             instructions, vector_register_map, is_a53, vector_register_usage)
       continue
     m = re.fullmatch(INSTR_REG_REG_MEMOP_RE, line)
@@ -886,11 +886,11 @@ def parse_microkernel(
     if m:
       if m[6]:  # wb
         emit_instruction(
-            f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}, {m[5]}]++){sc} {m[7]}',
+            f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{{{m[4]}, {m[5]}}}]++){sc} {m[7]}',
             instructions, vector_register_map, vector_register_usage)
       else:  # no wb
         emit_instruction(
-            f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{m[4]}, {m[5]}]){sc} {m[7]}',
+            f'{fix_instr_name(m[1])}({m[2]}, {m[3]}, mem[{{{m[4]}, {m[5]}}}]){sc} {m[7]}',
             instructions, vector_register_map, vector_register_usage)
       continue
     m = re.fullmatch(INSTR_REG_REG_MEMOP_IMM_RE, line)
@@ -1015,7 +1015,7 @@ def parse_microkernel(
     m = re.fullmatch(INSTR_PLD_MEMOP_OFFSET, line)
     if m:
       emit_prefetch_instruction(
-          f'{fix_instr_name(m[1])}(k{m[2]}, mem[{m[3]}, {m[4]}]){sc} {m[5]}',
+          f'{fix_instr_name(m[1])}(k{m[2]}, mem[{{{m[3]}, {m[4]}}}]){sc} {m[5]}',
           prfm_mode, instructions)
       continue
     m = re.fullmatch(INSTR_REG_REG_REG_COND_RE, line)

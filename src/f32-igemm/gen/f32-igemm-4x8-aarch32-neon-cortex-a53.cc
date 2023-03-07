@@ -79,10 +79,10 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   sub(sp, sp, 4); // 4
   vpush({d8-d15}); // +64 = 112
 
-  ldr(r11, mem[sp, 120]); // c
-  ldr(r6, mem[sp, 124]); // cm_stride
-  ldr(r5, mem[sp, 112]); // a
-  ldr(r9, mem[sp, 116]); // w
+  ldr(r11, mem[{sp, 120}]); // c
+  ldr(r6, mem[{sp, 124}]); // cm_stride
+  ldr(r5, mem[{sp, 112}]); // a
+  ldr(r9, mem[{sp, 116}]); // w
   mov(r14, r3); // p = ks
 
   // Clamp C pointers
@@ -112,73 +112,73 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     vmov(q10, q8);
   }
   if (prefetch) {
-    pld(mem[r9, 0]); // Prefetch B
+    pld(mem[{r9, 0}]); // Prefetch B
   }
   if (max_mr > 1) {
     vmov(q11, q9);
   }
   if (prefetch) {
-    pld(mem[r9, 64]);
+    pld(mem[{r9, 64}]);
   }
   if (max_mr > 2) {
     vmov(q12, q8);
   }
   if (prefetch) {
-    pld(mem[r9, 128]);
+    pld(mem[{r9, 128}]);
   }
   if (max_mr > 2) {
     vmov(q13, q9);
   }
   if (prefetch) {
-    pld(mem[r9, 192]);
+    pld(mem[{r9, 192}]);
   }
   if (max_mr > 3) {
     vmov(q14, q8);
   }
   if (prefetch) {
-    pld(mem[r9, 256]);
+    pld(mem[{r9, 256}]);
   }
   if (max_mr > 3) {
     vmov(q15, q9);
   }
   if (prefetch) {
-    pld(mem[r9, 320]);
+    pld(mem[{r9, 320}]);
   }
 
   bind(l1);
   // Load next 4 A pointers
-  ldr(r3, mem[r5, 0]);
+  ldr(r3, mem[{r5, 0}]);
   if (max_mr > 1) {
-    ldr(r12, mem[r5, 4]);
+    ldr(r12, mem[{r5, 4}]);
   }
   if (max_mr > 2) {
-    ldr(r10, mem[r5, 8]);
+    ldr(r10, mem[{r5, 8}]);
   }
   if (max_mr > 3) {
-    ldr(r7, mem[r5, 12]);
+    ldr(r7, mem[{r5, 12}]);
   }
   add(r5, r5, max_mr * sizeof(void*)); // a += MR * sizeof(void*)
   if (prefetch) {
-    pld(mem[r3, 0]); // Prefetch A
+    pld(mem[{r3, 0}]); // Prefetch A
   }
-  str(r5, mem[sp, 112]); // a
+  str(r5, mem[{sp, 112}]); // a
   if (prefetch) {
-    pld(mem[r3, 64]);
+    pld(mem[{r3, 64}]);
   }
-  ldr(r0, mem[sp, 136]); // zero
+  ldr(r0, mem[{sp, 136}]); // zero
   if (prefetch) {
-    pld(mem[r12, 0]);
+    pld(mem[{r12, 0}]);
   }
-  ldr(r5, mem[sp, 132]); // a_offset
+  ldr(r5, mem[{sp, 132}]); // a_offset
   if (prefetch) {
-    pld(mem[r12, 64]);
+    pld(mem[{r12, 64}]);
   }
-  ldr(r2, mem[sp, 68]); // kc
+  ldr(r2, mem[{sp, 68}]); // kc
   if (prefetch) {
-    pld(mem[r10, 0]);
-    pld(mem[r10, 64]);
-    pld(mem[r7, 0]);
-    pld(mem[r7, 64]);
+    pld(mem[{r10, 0}]);
+    pld(mem[{r10, 64}]);
+    pld(mem[{r7, 0}]);
+    pld(mem[{r7, 64}]);
   }
 
   // Add a_offset
@@ -217,9 +217,9 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
   subs(r5, r5, 16);
   vldm(mem[r9], {d8-d11}); // B0
-  ldr(r0, mem[r9, 56]); // B1 low   VMOV is in BLOCK 0
-  ldr(r2, mem[r9, 60]); // B1 high
-  vldr(d13, mem[r9, 40]); // B1
+  ldr(r0, mem[{r9, 56}]); // B1 low   VMOV is in BLOCK 0
+  ldr(r2, mem[{r9, 60}]); // B1 high
+  vldr(d13, mem[{r9, 40}]); // B1
 
   blo(l3); // less than 4 channels?  skip main loop
 
@@ -235,31 +235,31 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 1) {
     ldr(r0, mem[r12]); // A1 low
     vmla_f32(q10, q4, d1[0]);
-    ldr(r2, mem[r12, 4]); // A1 high
+    ldr(r2, mem[{r12, 4}]); // A1 high
   }
   if (max_mr > 2) {
     vmla_f32(q12, q4, d2[0]);
   }
   if (prefetch) {
-    pld(mem[r3, 128]); // Prefetch A0
+    pld(mem[{r3, 128}]); // Prefetch A0
   }
 
   // BLOCK 1
-  vldr(d12, mem[r9, 32]); // B1
+  vldr(d12, mem[{r9, 32}]); // B1
   if (max_mr > 1) {
     vmov(d5, r0, r2); // a1 VMOV
   }
   if (max_mr > 3) {
     vmla_f32(q14, q4, d3[0]);
   }
-  ldr(r0, mem[r9, 72]); // B0 low
+  ldr(r0, mem[{r9, 72}]); // B0 low
   vmla_f32(q9, q5, d0[0]);
-  ldr(r2, mem[r9, 76]); // B0 high
+  ldr(r2, mem[{r9, 76}]); // B0 high
   if (max_mr > 1) {
     vmla_f32(q11, q5, d1[0]);
   }
   if (prefetch) {
-    pld(mem[r12, 128]); // Prefetch A1
+    pld(mem[{r12, 128}]); // Prefetch A1
   }
 
   // BLOCK 2
@@ -273,61 +273,61 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 3) {
     ldr(r0, mem[r7]); // A3 low
     vmla_f32(q15, q5, d3[0]);
-    ldr(r2, mem[r7, 4]); // A3 high
+    ldr(r2, mem[{r7, 4}]); // A3 high
   }
   vmla_f32(q8, q6, d0[1]);
   if (prefetch) {
-    pld(mem[r10, 128]); // Prefetch A2
+    pld(mem[{r10, 128}]); // Prefetch A2
   }
 
   // BLOCK 3
-  vldr(d14, mem[r9, 48]); // B1
+  vldr(d14, mem[{r9, 48}]); // B1
   if (max_mr > 3) {
     vmov(d7, r0, r2); // a3 VMOV
   }
   if (max_mr > 1) {
     vmla_f32(q10, q6, d1[1]);
   }
-  ldr(r0, mem[r9, 88]); // B0 low
+  ldr(r0, mem[{r9, 88}]); // B0 low
   if (max_mr > 2) {
     vmla_f32(q12, q6, d2[1]);
   }
-  ldr(r2, mem[r9, 92]); // B0 high
+  ldr(r2, mem[{r9, 92}]); // B0 high
   if (max_mr > 3) {
     vmla_f32(q14, q6, d3[1]);
   }
   if (prefetch) {
-    pld(mem[r7, 128]); // Prefetch A3
+    pld(mem[{r7, 128}]); // Prefetch A3
   }
 
   // BLOCK 4
-  vldr(d8, mem[r9, 64]); // B0
+  vldr(d8, mem[{r9, 64}]); // B0
   vmov(d11, r0, r2); // B0 VMOV
   vmla_f32(q9, q7, d0[1]);
-  ldr(r0, mem[r9, 104]); // B1 low   VMOV is in BLOCK 0
+  ldr(r0, mem[{r9, 104}]); // B1 low   VMOV is in BLOCK 0
   if (max_mr > 1) {
     vmla_f32(q11, q7, d1[1]);
   }
-  ldr(r2, mem[r9, 108]); // B1 high
+  ldr(r2, mem[{r9, 108}]); // B1 high
   if (max_mr > 2) {
     vmla_f32(q13, q7, d2[1]);
   }
   if (prefetch) {
-    pld(mem[r9, 384]); // Prefetch B
+    pld(mem[{r9, 384}]); // Prefetch B
   }
 
   // BLOCK 5
-  vldr(d10, mem[r9, 80]); // B0
+  vldr(d10, mem[{r9, 80}]); // B0
   vmov(d13, r0, r2); // b1 VMOV b from second group
   if (max_mr > 3) {
     vmla_f32(q15, q7, d3[1]);
   }
-  ldr(r0, mem[r9, 120]); // B1 low   VMOV is in BLOCK 0
+  ldr(r0, mem[{r9, 120}]); // B1 low   VMOV is in BLOCK 0
   nop();
-  ldr(r2, mem[r9, 124]); // B1 high
+  ldr(r2, mem[{r9, 124}]); // B1 high
   nop();
   if (prefetch) {
-    pld(mem[r9, 448]); // Prefetch B
+    pld(mem[{r9, 448}]); // Prefetch B
   }
 
   // Second group of 16 FMA, First group of loads
@@ -336,9 +336,9 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   vmov(d15, r0, r2); // b1 VMOV b from second group
   vmla_f32(q8, q4, d4[0]);
   if (max_mr > 1) {
-    ldr(r0, mem[r12, 8]); // A1 low
+    ldr(r0, mem[{r12, 8}]); // A1 low
     vmla_f32(q10, q4, d5[0]);
-    ldr(r2, mem[r12, 12]); // A1 high
+    ldr(r2, mem[{r12, 12}]); // A1 high
   }
   if (max_mr > 2) {
     vmla_f32(q12, q4, d6[0]);
@@ -346,16 +346,16 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // NOP
 
   // BLOCK 1
-  vldr(d12, mem[r9, 96]); // B1
+  vldr(d12, mem[{r9, 96}]); // B1
   if (max_mr > 1) {
     vmov(d1, r0, r2); // a1 VMOV
   }
   if (max_mr > 3) {
     vmla_f32(q14, q4, d7[0]);
   }
-  ldr(r0, mem[r9, 136]); // B0 low
+  ldr(r0, mem[{r9, 136}]); // B0 low
   vmla_f32(q9, q5, d4[0]);
-  ldr(r2, mem[r9, 140]); // B0 high
+  ldr(r2, mem[{r9, 140}]); // B0 high
   if (max_mr > 1) {
     vmla_f32(q11, q5, d5[0]);
   }
@@ -370,26 +370,26 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     vmla_f32(q13, q5, d6[0]);
   }
   if (max_mr > 3) {
-    ldr(r0, mem[r7, 8]); // A3 low
+    ldr(r0, mem[{r7, 8}]); // A3 low
     vmla_f32(q15, q5, d7[0]);
-    ldr(r2, mem[r7, 12]); // A3 high
+    ldr(r2, mem[{r7, 12}]); // A3 high
   }
   vmla_f32(q8, q6, d4[1]);
   // NOP
 
   // BLOCK 3
-  vldr(d14, mem[r9, 112]); // B1
+  vldr(d14, mem[{r9, 112}]); // B1
   if (max_mr > 3) {
     vmov(d3, r0, r2); // a3 VMOV
   }
   if (max_mr > 1) {
     vmla_f32(q10, q6, d5[1]);
   }
-  ldr(r0, mem[r9, 152]); // B0 low
+  ldr(r0, mem[{r9, 152}]); // B0 low
   if (max_mr > 2) {
     vmla_f32(q12, q6, d6[1]);
   }
-  ldr(r2, mem[r9, 156]); // B0 high
+  ldr(r2, mem[{r9, 156}]); // B0 high
   if (max_mr > 3) {
     vmla_f32(q14, q6, d7[1]);
   }
@@ -398,14 +398,14 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
 
   // BLOCK 4
-  vldr(d8, mem[r9, 128]); // B0
+  vldr(d8, mem[{r9, 128}]); // B0
   vmov(d11, r0, r2); // B0 VMOV
   vmla_f32(q9, q7, d4[1]);
-  ldr(r0, mem[r9, 168]); // B1 low
+  ldr(r0, mem[{r9, 168}]); // B1 low
   if (max_mr > 1) {
     vmla_f32(q11, q7, d5[1]);
   }
-  ldr(r2, mem[r9, 172]); // B1 high
+  ldr(r2, mem[{r9, 172}]); // B1 high
   if (max_mr > 2) {
     vmla_f32(q13, q7, d6[1]);
   }
@@ -414,14 +414,14 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
 
   // BLOCK 5
-  vldr(d10, mem[r9, 144]); // B0
+  vldr(d10, mem[{r9, 144}]); // B0
   vmov(d13, r0, r2); // b1 VMOV b
   if (max_mr > 3) {
     vmla_f32(q15, q7, d7[1]);
   }
-  ldr(r0, mem[r9, 184]); // B1 low   VMOV is in BLOCK 0
+  ldr(r0, mem[{r9, 184}]); // B1 low   VMOV is in BLOCK 0
   subs(r5, r5, 16);
-  ldr(r2, mem[r9, 188]); // B1 high
+  ldr(r2, mem[{r9, 188}]); // B1 high
   add(r9, r9, 128); // B++
   bhs(l2);
 
@@ -435,7 +435,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 1) {
     ldr(r0, mem[r12]); // A1 low
     vmla_f32(q10, q4, d1[0]);
-    ldr(r2, mem[r12, 4]); // A1 high
+    ldr(r2, mem[{r12, 4}]); // A1 high
   }
   if (max_mr > 2) {
     vmla_f32(q12, q4, d2[0]);
@@ -443,16 +443,16 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // NOP
 
   // BLOCK 1
-  vldr(d12, mem[r9, 32]); // B1
+  vldr(d12, mem[{r9, 32}]); // B1
   if (max_mr > 1) {
     vmov(d5, r0, r2); // a1 VMOV
   }
   if (max_mr > 3) {
     vmla_f32(q14, q4, d3[0]);
   }
-  ldr(r0, mem[r9, 72]); // B0 low
+  ldr(r0, mem[{r9, 72}]); // B0 low
   vmla_f32(q9, q5, d0[0]);
-  ldr(r2, mem[r9, 76]); // B0 high
+  ldr(r2, mem[{r9, 76}]); // B0 high
   if (max_mr > 1) {
     vmla_f32(q11, q5, d1[0]);
   }
@@ -469,58 +469,58 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 3) {
     ldr(r0, mem[r7]); // A3 low
     vmla_f32(q15, q5, d3[0]);
-    ldr(r2, mem[r7, 4]); // A3 high
+    ldr(r2, mem[{r7, 4}]); // A3 high
   }
   vmla_f32(q8, q6, d0[1]);
   // NOP
 
   // BLOCK 3
-  vldr(d14, mem[r9, 48]); // B1
+  vldr(d14, mem[{r9, 48}]); // B1
   if (max_mr > 3) {
     vmov(d7, r0, r2); // a3 VMOV
   }
   if (max_mr > 1) {
     vmla_f32(q10, q6, d1[1]);
   }
-  ldr(r0, mem[r9, 88]); // B0 low
+  ldr(r0, mem[{r9, 88}]); // B0 low
   if (max_mr > 2) {
     vmla_f32(q12, q6, d2[1]);
   }
-  ldr(r2, mem[r9, 92]); // B0 high
+  ldr(r2, mem[{r9, 92}]); // B0 high
   if (max_mr > 3) {
     vmla_f32(q14, q6, d3[1]);
   }
   // NOP
 
   // BLOCK 4
-  vldr(d8, mem[r9, 64]); // B0
+  vldr(d8, mem[{r9, 64}]); // B0
   vmov(d11, r0, r2); // B0 VMOV
   vmla_f32(q9, q7, d0[1]);
-  ldr(r0, mem[r9, 104]); // B1 low
+  ldr(r0, mem[{r9, 104}]); // B1 low
   if (max_mr > 1) {
     vmla_f32(q11, q7, d1[1]);
   }
-  ldr(r2, mem[r9, 108]); // B1 high
+  ldr(r2, mem[{r9, 108}]); // B1 high
   if (max_mr > 2) {
     vmla_f32(q13, q7, d2[1]);
   }
   // NOP
 
   // BLOCK 5
-  vldr(d10, mem[r9, 80]); // B0
+  vldr(d10, mem[{r9, 80}]); // B0
   vmov(d13, r0, r2); // b1 VMOV b
   if (max_mr > 3) {
     vmla_f32(q15, q7, d3[1]);
   }
-  ldr(r0, mem[r9, 120]); // B1 low   VMOV is in BLOCK 0
+  ldr(r0, mem[{r9, 120}]); // B1 low   VMOV is in BLOCK 0
   nop();
-  ldr(r2, mem[r9, 124]); // B1 high
+  ldr(r2, mem[{r9, 124}]); // B1 high
   nop();
   nop();
 
   // Second group of 16 FMA, First group of loads
   // BLOCK 0
-  vldr(d12, mem[r9, 96]); // B1
+  vldr(d12, mem[{r9, 96}]); // B1
   vmov(d15, r0, r2); // b1 VMOV b from second group
   vmla_f32(q8, q4, d4[0]);
   if (max_mr > 1) {
@@ -531,7 +531,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
 
   // BLOCK 1
-  vldr(d14, mem[r9, 112]); // B1
+  vldr(d14, mem[{r9, 112}]); // B1
   if (max_mr > 3) {
     vmla_f32(q14, q4, d7[0]);
   }
@@ -585,16 +585,16 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   align(8);
   bind(l4);
-  ldr(r5, mem[sp, 112]); // a
+  ldr(r5, mem[{sp, 112}]); // a
   subs(r14, r14, max_mr * sizeof(void*)); // ks -= MR * sizeof(void*)
 
   // ks loop
   bhi(l1);
 
   // Load params pointer
-  ldr(r0, mem[sp, 128]); // cn_stride
-  ldr(r2, mem[sp, 140]); // params
-  ldr(r14, mem[sp, 72]); // p = ks
+  ldr(r0, mem[{sp, 128}]); // cn_stride
+  ldr(r2, mem[{sp, 140}]); // params
+  ldr(r14, mem[{sp, 72}]); // p = ks
   subs(r1, r1, 8);
 
   // Load min/max values

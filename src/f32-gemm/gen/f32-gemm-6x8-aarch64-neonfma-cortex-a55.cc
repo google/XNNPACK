@@ -75,7 +75,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   assert(num_post_operations == 0 || (!clamp_min && !clamp_max));
 
   // Load params pointer
-  ldr(x8, mem[sp, 8]);
+  ldr(x8, mem[{sp, 8}]);
 
   // Clamp A and C pointers
   if (max_mr > 1) {
@@ -124,61 +124,61 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   }
 
   // Save d12-d15 on stack
-  stp(d12, d13, mem[sp, -32]++);
-  stp(d14, d15, mem[sp, 16]);
+  stp(d12, d13, mem[{sp, -32}]++);
+  stp(d14, d15, mem[{sp, 16}]);
 
   bind(l0);
   // Load initial bias from w into accumulators
   ldp(q20, q21, mem[x5], 32);
   subs(x0, x2, 16); // k = kc - 16
-  prfm(kPLDL1KEEP, mem[x3, 0]); // Prefetch A
-  prfm(kPLDL1KEEP, mem[x3, 64]);
+  prfm(kPLDL1KEEP, mem[{x3, 0}]); // Prefetch A
+  prfm(kPLDL1KEEP, mem[{x3, 64}]);
   if (max_mr > 1) {
     mov(v22.v16b(), v20.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x9, 0]);
-  prfm(kPLDL1KEEP, mem[x9, 64]);
+  prfm(kPLDL1KEEP, mem[{x9, 0}]);
+  prfm(kPLDL1KEEP, mem[{x9, 64}]);
   if (max_mr > 1) {
     mov(v23.v16b(), v21.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x10, 0]);
-  prfm(kPLDL1KEEP, mem[x10, 64]);
+  prfm(kPLDL1KEEP, mem[{x10, 0}]);
+  prfm(kPLDL1KEEP, mem[{x10, 64}]);
   if (max_mr > 2) {
     mov(v24.v16b(), v20.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x11, 0]);
-  prfm(kPLDL1KEEP, mem[x11, 64]);
+  prfm(kPLDL1KEEP, mem[{x11, 0}]);
+  prfm(kPLDL1KEEP, mem[{x11, 64}]);
   if (max_mr > 2) {
     mov(v25.v16b(), v21.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x12, 0]);
-  prfm(kPLDL1KEEP, mem[x12, 64]);
+  prfm(kPLDL1KEEP, mem[{x12, 0}]);
+  prfm(kPLDL1KEEP, mem[{x12, 64}]);
   if (max_mr > 3) {
     mov(v26.v16b(), v20.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x4, 0]);
-  prfm(kPLDL1KEEP, mem[x4, 64]);
-  prfm(kPLDL1KEEP, mem[x5, 0]); // Prefetch B
+  prfm(kPLDL1KEEP, mem[{x4, 0}]);
+  prfm(kPLDL1KEEP, mem[{x4, 64}]);
+  prfm(kPLDL1KEEP, mem[{x5, 0}]); // Prefetch B
   if (max_mr > 3) {
     mov(v27.v16b(), v21.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 64]);
+  prfm(kPLDL1KEEP, mem[{x5, 64}]);
   if (max_mr > 4) {
     mov(v28.v16b(), v20.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 128]);
+  prfm(kPLDL1KEEP, mem[{x5, 128}]);
   if (max_mr > 4) {
     mov(v29.v16b(), v21.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 192]);
+  prfm(kPLDL1KEEP, mem[{x5, 192}]);
   if (max_mr > 5) {
     mov(v30.v16b(), v20.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 256]);
+  prfm(kPLDL1KEEP, mem[{x5, 256}]);
   if (max_mr > 5) {
     mov(v31.v16b(), v21.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 320]);
+  prfm(kPLDL1KEEP, mem[{x5, 320}]);
 
   // Is there at least 4 floats (16 bytes) for prologue + epilogue?
   b_lo(l4);
@@ -241,7 +241,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 5) {
     fmla(v30.v4s(), v16.v4s(), v2.s()[2]);
   }
-  ldr(x8, mem[x5, 8]); // b
+  ldr(x8, mem[{x5, 8}]); // b
 
   // BLOCK 2
   fmla(v21.v4s(), v17.v4s(), v0.s()[0]);
@@ -277,7 +277,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
 
   // BLOCK 4
   fmla(v20.v4s(), v18.v4s(), v0.s()[1]);
-  ldr(d13, mem[x5, 16]);
+  ldr(d13, mem[{x5, 16}]);
   if (max_mr > 1) {
     fmla(v22.v4s(), v18.v4s(), v0.s()[3]);
   }
@@ -287,13 +287,13 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 2) {
     fmla(v24.v4s(), v18.v4s(), v1.s()[1]);
   }
-  ldr(x8, mem[x5, 24]);
+  ldr(x8, mem[{x5, 24}]);
 
   // BLOCK 5
   if (max_mr > 3) {
     fmla(v26.v4s(), v18.v4s(), v1.s()[3]);
   }
-  ldr(d14, mem[x5, 32]);
+  ldr(d14, mem[{x5, 32}]);
   if (max_mr > 4) {
     fmla(v28.v4s(), v18.v4s(), v2.s()[1]);
   }
@@ -301,11 +301,11 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 5) {
     fmla(v30.v4s(), v18.v4s(), v2.s()[3]);
   }
-  ldr(x8, mem[x5, 40]);
+  ldr(x8, mem[{x5, 40}]);
 
   // BLOCK 6
   fmla(v21.v4s(), v19.v4s(), v0.s()[1]);
-  ldr(d15, mem[x5, 48]);
+  ldr(d15, mem[{x5, 48}]);
   if (max_mr > 1) {
     fmla(v23.v4s(), v19.v4s(), v0.s()[3]);
   }
@@ -313,7 +313,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 2) {
     fmla(v25.v4s(), v19.v4s(), v1.s()[1]);
   }
-  ldr(x8, mem[x5, 56]);
+  ldr(x8, mem[{x5, 56}]);
 
   // BLOCK 7
   if (max_mr > 3) {
@@ -345,7 +345,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 3) {
     fmla(v26.v4s(), v12.v4s(), v4.s()[2]);
   }
-  ldr(d16, mem[x5, 64]);
+  ldr(d16, mem[{x5, 64}]);
   if (max_mr > 4) {
     fmla(v28.v4s(), v12.v4s(), v5.s()[0]);
   }
@@ -355,7 +355,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 5) {
     fmla(v30.v4s(), v12.v4s(), v5.s()[2]);
   }
-  ldr(x8, mem[x5, 72]); // b
+  ldr(x8, mem[{x5, 72}]); // b
 
   // BLOCK 2
   fmla(v21.v4s(), v13.v4s(), v3.s()[0]);
@@ -391,7 +391,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
 
   // BLOCK 4
   fmla(v20.v4s(), v14.v4s(), v3.s()[1]);
-  ldr(d17, mem[x5, 80]);
+  ldr(d17, mem[{x5, 80}]);
   if (max_mr > 1) {
     fmla(v22.v4s(), v14.v4s(), v3.s()[3]);
   }
@@ -401,13 +401,13 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 2) {
     fmla(v24.v4s(), v14.v4s(), v4.s()[1]);
   }
-  ldr(x8, mem[x5, 88]);
+  ldr(x8, mem[{x5, 88}]);
 
   // BLOCK 5
   if (max_mr > 3) {
     fmla(v26.v4s(), v14.v4s(), v4.s()[3]);
   }
-  ldr(d18, mem[x5, 96]);
+  ldr(d18, mem[{x5, 96}]);
   if (max_mr > 4) {
     fmla(v28.v4s(), v14.v4s(), v5.s()[1]);
   }
@@ -415,11 +415,11 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 5) {
     fmla(v30.v4s(), v14.v4s(), v5.s()[3]);
   }
-  ldr(x8, mem[x5, 104]);
+  ldr(x8, mem[{x5, 104}]);
 
   // BLOCK 6
   fmla(v21.v4s(), v15.v4s(), v3.s()[1]);
-  ldr(d19, mem[x5, 112]);
+  ldr(d19, mem[{x5, 112}]);
   if (max_mr > 1) {
     fmla(v23.v4s(), v15.v4s(), v3.s()[3]);
   }
@@ -427,7 +427,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 2) {
     fmla(v25.v4s(), v15.v4s(), v4.s()[1]);
   }
-  ldr(x8, mem[x5, 120]);
+  ldr(x8, mem[{x5, 120}]);
 
   // BLOCK 7
   if (max_mr > 3) {
@@ -475,7 +475,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 5) {
     fmla(v30.v4s(), v16.v4s(), v2.s()[2]);
   }
-  ldr(x8, mem[x5, 8]); // b
+  ldr(x8, mem[{x5, 8}]); // b
 
   // BLOCK 2
   fmla(v21.v4s(), v17.v4s(), v0.s()[0]);
@@ -511,7 +511,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
 
   // BLOCK 4
   fmla(v20.v4s(), v18.v4s(), v0.s()[1]);
-  ldr(d13, mem[x5, 16]);
+  ldr(d13, mem[{x5, 16}]);
   if (max_mr > 1) {
     fmla(v22.v4s(), v18.v4s(), v0.s()[3]);
   }
@@ -521,13 +521,13 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 2) {
     fmla(v24.v4s(), v18.v4s(), v1.s()[1]);
   }
-  ldr(x8, mem[x5, 24]);
+  ldr(x8, mem[{x5, 24}]);
 
   // BLOCK 5
   if (max_mr > 3) {
     fmla(v26.v4s(), v18.v4s(), v1.s()[3]);
   }
-  ldr(d14, mem[x5, 32]);
+  ldr(d14, mem[{x5, 32}]);
   if (max_mr > 4) {
     fmla(v28.v4s(), v18.v4s(), v2.s()[1]);
   }
@@ -535,11 +535,11 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 5) {
     fmla(v30.v4s(), v18.v4s(), v2.s()[3]);
   }
-  ldr(x8, mem[x5, 40]);
+  ldr(x8, mem[{x5, 40}]);
 
   // BLOCK 6
   fmla(v21.v4s(), v19.v4s(), v0.s()[1]);
-  ldr(d15, mem[x5, 48]);
+  ldr(d15, mem[{x5, 48}]);
   if (max_mr > 1) {
     fmla(v23.v4s(), v19.v4s(), v0.s()[3]);
   }
@@ -547,7 +547,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 2) {
     fmla(v25.v4s(), v19.v4s(), v1.s()[1]);
   }
-  ldr(x8, mem[x5, 56]);
+  ldr(x8, mem[{x5, 56}]);
 
   // BLOCK 7
   if (max_mr > 3) {
@@ -658,7 +658,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     fmax(v20.v4s(), v20.v4s(), v6.v4s());
   }
   // Load cn_stride
-  ldr(x0, mem[sp, 32]);
+  ldr(x0, mem[{sp, 32}]);
   if (clamp_min) {
     fmax(v21.v4s(), v21.v4s(), v6.v4s());
     if (max_mr > 1) {
@@ -737,7 +737,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   b_hi(l0);
 
   // Restore d12-d15 from stack
-  ldp(d14, d15, mem[sp, 16]);
+  ldp(d14, d15, mem[{sp, 16}]);
   ldp(d12, d13, mem[sp], 32);
   ret();
 
@@ -971,7 +971,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   }
   bind(l9);
   // Restore d12-d15 from stack
-  ldp(d14, d15, mem[sp, 16]);
+  ldp(d14, d15, mem[{sp, 16}]);
   ldp(d12, d13, mem[sp], 32);
   ret();
 

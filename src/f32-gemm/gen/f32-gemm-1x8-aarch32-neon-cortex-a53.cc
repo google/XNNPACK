@@ -66,15 +66,15 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Push 8 bytes
   push({r7, r9}); // 8
 
-  ldr(r0, mem[sp, 28]); // params
-  ldr(r9, mem[sp, 12]); // w
-  ldr(r12, mem[sp, 16]); // c
+  ldr(r0, mem[{sp, 28}]); // params
+  ldr(r9, mem[{sp, 12}]); // w
+  ldr(r12, mem[{sp, 16}]); // c
 
   // Load min/max values
   if (clamp_min || clamp_max) {
     vld1r_32({d4, d5}, mem[r0]++);
   }
-  ldr(r7, mem[sp, 24]); // cn_stride
+  ldr(r7, mem[{sp, 24}]); // cn_stride
   if (clamp_min || clamp_max) {
     vld1r_32({d6, d7}, mem[r0]);
   }
@@ -87,18 +87,18 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   vmov_i32(q11, 0);
 
   if (prefetch) {
-    pld(mem[r3, 0]); // Prefetch A
-    pld(mem[r3, 64]);
-    pld(mem[r9, 0]); // Prefetch B
-    pld(mem[r9, 64]);
-    pld(mem[r9, 128]);
-    pld(mem[r9, 192]);
-    pld(mem[r9, 256]);
-    pld(mem[r9, 320]);
-    pld(mem[r9, 384]);
-    pld(mem[r9, 448]);
-    pld(mem[r9, 512]);
-    pld(mem[r9, 576]);
+    pld(mem[{r3, 0}]); // Prefetch A
+    pld(mem[{r3, 64}]);
+    pld(mem[{r9, 0}]); // Prefetch B
+    pld(mem[{r9, 64}]);
+    pld(mem[{r9, 128}]);
+    pld(mem[{r9, 192}]);
+    pld(mem[{r9, 256}]);
+    pld(mem[{r9, 320}]);
+    pld(mem[{r9, 384}]);
+    pld(mem[{r9, 448}]);
+    pld(mem[{r9, 512}]);
+    pld(mem[{r9, 576}]);
   }
   blo(l3); // less than 2 channels?
 
@@ -110,13 +110,13 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   vmla_f32(q8, q12, d0[0]);
   vmla_f32(q9, q13, d0[0]);
   if (prefetch) {
-    pld(mem[r9, 576]); // Prefetch B
+    pld(mem[{r9, 576}]); // Prefetch B
   }
   vmla_f32(q10, q14, d0[1]);
   vmla_f32(q11, q15, d0[1]);
   subs(r0, r0, 8);
   if (prefetch) {
-    pld(mem[r3, 128]); // Prefetch A0
+    pld(mem[{r3, 128}]); // Prefetch A0
   }
   bhs(l1);
 
@@ -192,7 +192,7 @@ void Generator::perform_post_operations(
   if (num_post_operations == 0) {
     return;
   }
-  ldr(r0, mem[sp, 28]);  // params
+  ldr(r0, mem[{sp, 28}]);  // params
   for (size_t i = 0; i < num_post_operations; i++) {
     switch (post_operations[i].op_type) {
       case xnn_post_operation_type_hardswish: {

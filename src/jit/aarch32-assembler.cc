@@ -767,20 +767,20 @@ void TrampolineGenerator::generate(size_t args_on_stack) {
   constexpr int num_regs_pushed = 16 + 10;
 
   // lr holds the address of microkernel to jump to.
-  ldr(lr, mem[sp, (num_regs_pushed + args_on_stack) * 4]);
+  ldr(lr, mem[{sp, static_cast<int32_t>((num_regs_pushed + args_on_stack) * 4)}]);
   // r11 points to arguments to microkernel.
   add(r11, sp, num_regs_pushed * 4);
   // Place microkernel arguments passed via the stack into the right relative
   // location for the microkernel to load.
   ldr(r4, mem[r11]);
-  ldr(r5, mem[r11, 4]);
-  ldr(r6, mem[r11, 8]);
-  ldr(r7, mem[r11, 12]);
-  ldr(r8, mem[r11, 16]);
-  ldr(r9, mem[r11, 20]);
+  ldr(r5, mem[{r11, 4}]);
+  ldr(r6, mem[{r11, 8}]);
+  ldr(r7, mem[{r11, 12}]);
+  ldr(r8, mem[{r11, 16}]);
+  ldr(r9, mem[{r11, 20}]);
   if (args_on_stack == 8) {
-    ldr(r10, mem[r11, 24]);
-    ldr(r11, mem[r11, 28]);
+    ldr(r10, mem[{r11, 24}]);
+    ldr(r11, mem[{r11, 28}]);
   }
   if (args_on_stack == 6) {
     push({r4, r5, r6, r7, r8, r9});

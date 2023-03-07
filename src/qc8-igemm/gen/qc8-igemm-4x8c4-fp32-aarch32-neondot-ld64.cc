@@ -74,11 +74,11 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   sub(sp, sp, 4); // 4
   vpush({d8-d13}); // +48 = 96
 
-  ldr(r11, mem[sp, 104]); // c
-  ldr(r6, mem[sp, 108]); // cm_stride
-  ldr(r2, mem[sp, 96]); // a
-  ldr(r9, mem[sp, 100]); // w
-  ldr(r5, mem[sp, 124]); // params
+  ldr(r11, mem[{sp, 104}]); // c
+  ldr(r6, mem[{sp, 108}]); // cm_stride
+  ldr(r2, mem[{sp, 96}]); // a
+  ldr(r9, mem[{sp, 100}]); // w
+  ldr(r5, mem[{sp, 124}]); // params
   mov(r14, r3); // p = ks
 
   // Clamp C pointers
@@ -107,15 +107,15 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
 
   bind(l1);
   // Load next 4 A pointers
-  ldr(r3, mem[r2, 0]);
-  ldr(r12, mem[r2, 4]);
-  ldr(r10, mem[r2, 8]);
-  ldr(r0, mem[r2, 12]);
+  ldr(r3, mem[{r2, 0}]);
+  ldr(r12, mem[{r2, 4}]);
+  ldr(r10, mem[{r2, 8}]);
+  ldr(r0, mem[{r2, 12}]);
   add(r2, r2, 16);
 
   // Add a_offset
-  ldr(r5, mem[sp, 116]); // a_offset
-  ldr(r7, mem[sp, 120]); // zero
+  ldr(r5, mem[{sp, 116}]); // a_offset
+  ldr(r7, mem[{sp, 120}]); // zero
   cmp(r3, r7); // if a0 == zero
   add(r3, r3, r5); // a0 += a_offset
   moveq(r3, r7); //   a0 = zero, else += a0 + a_offset
@@ -127,7 +127,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   moveq(r10, r7); //   a2 = zero, else += a2 + a_offset
   cmp(r0, r7); // if a3 == zero
   add(r0, r0, r5); // a3 += a_offset
-  ldr(r5, mem[sp, 52]); // kc
+  ldr(r5, mem[{sp, 52}]); // kc
   moveq(r0, r7); //   a3 = zero, else += a3 + a_offset
 
   subs(r5, r5, 8); // kc - 8
@@ -175,8 +175,8 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   subs(r14, r14, 16); // ks -= MR * sizeof(void*)
   bhi(l1);
 
-  ldr(r7, mem[sp, 112]); // cn_stride
-  ldr(r14, mem[sp, 56]); // p = ks
+  ldr(r7, mem[{sp, 112}]); // cn_stride
+  ldr(r14, mem[{sp, 56}]); // p = ks
 
   // QC8 FP32 quantization
   vld1_8({q0-q1}, mem[r9]++);

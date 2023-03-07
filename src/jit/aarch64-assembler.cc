@@ -1010,36 +1010,36 @@ void TrampolineGenerator::generate(size_t args_on_stack) {
   // x12 holds the address of microkernel to jump to.
   if (args_on_stack == 2) {
     ldp(x8, x9, mem[sp]);
-    ldp(x12, x13, mem[sp, 16]);
+    ldp(x12, x13, mem[{sp, 16}]);
   } else if (args_on_stack == 4) {
     ldp(x8, x9, mem[sp]);
-    ldp(x10, x11, mem[sp, 16]);
-    ldp(x12, x13, mem[sp, 32]);
+    ldp(x10, x11, mem[{sp, 16}]);
+    ldp(x12, x13, mem[{sp, 32}]);
   }
 
   // Store link register so we know where to return to.
-  stp(x29, x30, mem[sp, -16]++);
+  stp(x29, x30, mem[{sp, -16}]++);
 
   // AArch64 ABI specifies these callee-saved registers:
   // - x18-x29
   // - v8-v15, only the bottom 64 bits
-  str(x18, mem[sp, -160]++);
-  stp(x19, x20, mem[sp, 16]);
-  stp(x21, x22, mem[sp, 32]);
-  stp(x23, x24, mem[sp, 48]);
-  stp(x25, x26, mem[sp, 64]);
-  stp(x27, x28, mem[sp, 80]);
+  str(x18, mem[{sp, -160}]++);
+  stp(x19, x20, mem[{sp, 16}]);
+  stp(x21, x22, mem[{sp, 32}]);
+  stp(x23, x24, mem[{sp, 48}]);
+  stp(x25, x26, mem[{sp, 64}]);
+  stp(x27, x28, mem[{sp, 80}]);
   // Only need to preserve the lower 64 bits of SIMD registers, so use DRegister.
-  stp(d8, d9, mem[sp, 96]);
-  stp(d10, d11, mem[sp, 112]);
-  stp(d12, d13, mem[sp, 128]);
-  stp(d14, d15, mem[sp, 144]);
+  stp(d8, d9, mem[{sp, 96}]);
+  stp(d10, d11, mem[{sp, 112}]);
+  stp(d12, d13, mem[{sp, 128}]);
+  stp(d14, d15, mem[{sp, 144}]);
 
   // Place microkernel arguments passed via the stack into the right relative
   // location for the microkernel to load.
   sub(sp, sp, args_on_stack * 8);
   if (args_on_stack == 4) {
-    stp(x10, x11, mem[sp, 16]);
+    stp(x10, x11, mem[{sp, 16}]);
   }
   stp(x8, x9, mem[sp]);
   // Stack looks like this now:
@@ -1114,15 +1114,15 @@ void TrampolineGenerator::generate(size_t args_on_stack) {
   add(sp, sp, args_on_stack * 8);
 
   // Restore callee saved registers.
-  ldp(x19, x20, mem[sp, 16]);
-  ldp(x21, x22, mem[sp, 32]);
-  ldp(x23, x24, mem[sp, 48]);
-  ldp(x25, x26, mem[sp, 64]);
-  ldp(x27, x28, mem[sp, 80]);
-  ldp(d8, d9, mem[sp, 96]);
-  ldp(d10, d11, mem[sp, 112]);
-  ldp(d12, d13, mem[sp, 128]);
-  ldp(d14, d15, mem[sp, 144]);
+  ldp(x19, x20, mem[{sp, 16}]);
+  ldp(x21, x22, mem[{sp, 32}]);
+  ldp(x23, x24, mem[{sp, 48}]);
+  ldp(x25, x26, mem[{sp, 64}]);
+  ldp(x27, x28, mem[{sp, 80}]);
+  ldp(d8, d9, mem[{sp, 96}]);
+  ldp(d10, d11, mem[{sp, 112}]);
+  ldp(d12, d13, mem[{sp, 128}]);
+  ldp(d14, d15, mem[{sp, 144}]);
   ldr(x18, mem[sp], 160);
 
   // Restore link register.

@@ -73,11 +73,11 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   push({r4, r5, r6, r7, r8, r9, r10, r11}); // 32
   vpush({d8-d15}); // +64 = 96
 
-  ldr(r7, mem[sp, 96]); // a_stride
-  ldr(r11, mem[sp, 104]); // c
-  ldr(r6, mem[sp, 108]); // cm_stride
-  ldr(r9, mem[sp, 100]); // w
-  ldr(r5, mem[sp, 116]); // params
+  ldr(r7, mem[{sp, 96}]); // a_stride
+  ldr(r11, mem[{sp, 104}]); // c
+  ldr(r6, mem[{sp, 108}]); // cm_stride
+  ldr(r9, mem[{sp, 100}]); // w
+  ldr(r5, mem[{sp, 116}]); // params
 
   // Clamp A and C pointers
   if (max_mr > 1) {
@@ -107,7 +107,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (clamp_min || clamp_max) {
     vld1r_32({d4, d5}, mem[r5]++);
   }
-  ldr(r7, mem[sp, 112]); // cn_stride
+  ldr(r7, mem[{sp, 112}]); // cn_stride
   if (clamp_min || clamp_max) {
     vld1r_32({d6, d7}, mem[r5]);
   }
@@ -129,22 +129,22 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     vmov(q15, q9);
   }
 
-  pld(mem[r3, 0]); // Prefetch A
-  pld(mem[r3, 64]);
-  pld(mem[r12, 0]);
-  pld(mem[r12, 64]);
-  pld(mem[r10, 0]);
-  pld(mem[r10, 64]);
-  pld(mem[r0, 0]);
-  pld(mem[r0, 64]);
-  pld(mem[r9, 0]); // Prefetch B
-  pld(mem[r9, 64]);
-  pld(mem[r9, 128]);
-  pld(mem[r9, 192]);
-  pld(mem[r9, 256]);
-  pld(mem[r9, 320]);
-  pld(mem[r9, 384]);
-  pld(mem[r9, 448]);
+  pld(mem[{r3, 0}]); // Prefetch A
+  pld(mem[{r3, 64}]);
+  pld(mem[{r12, 0}]);
+  pld(mem[{r12, 64}]);
+  pld(mem[{r10, 0}]);
+  pld(mem[{r10, 64}]);
+  pld(mem[{r0, 0}]);
+  pld(mem[{r0, 64}]);
+  pld(mem[{r9, 0}]); // Prefetch B
+  pld(mem[{r9, 64}]);
+  pld(mem[{r9, 128}]);
+  pld(mem[{r9, 192}]);
+  pld(mem[{r9, 256}]);
+  pld(mem[{r9, 320}]);
+  pld(mem[{r9, 384}]);
+  pld(mem[{r9, 448}]);
   blo(l3); // less than 2 channels?
 
   // Main loop - 2 floats of A (8 bytes)
@@ -194,11 +194,11 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     vmla_f32(q14, q6, d3[1]);
     vmla_f32(q15, q7, d3[1]);
   }
-  pld(mem[r9, 448]); // Prefetch B
-  pld(mem[r3, 128]); // Prefetch A0
-  pld(mem[r12, 128]); // Prefetch A1
-  pld(mem[r10, 128]); // Prefetch A2
-  pld(mem[r0, 128]); // Prefetch A3
+  pld(mem[{r9, 448}]); // Prefetch B
+  pld(mem[{r3, 128}]); // Prefetch A0
+  pld(mem[{r12, 128}]); // Prefetch A1
+  pld(mem[{r10, 128}]); // Prefetch A2
+  pld(mem[{r0, 128}]); // Prefetch A3
   bhs(l1);
 
   // Is there a remainder?- 1 float of A (4 bytes)
@@ -378,7 +378,7 @@ void Generator::perform_post_operations(
   if (num_post_operations == 0) {
     return;
   }
-  ldr(r5, mem[sp, 116]);  // params
+  ldr(r5, mem[{sp, 116}]);  // params
   for (size_t i = 0; i < num_post_operations; i++) {
     switch (post_operations[i].op_type) {
       case xnn_post_operation_type_hardswish: {

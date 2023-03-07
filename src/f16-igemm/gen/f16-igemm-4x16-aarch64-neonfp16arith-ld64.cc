@@ -74,7 +74,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   ldp(x10, x11, mem[sp]);
 
   // Load zero, params pointer
-  ldp(x12, x8, mem[sp, 16]);
+  ldp(x12, x8, mem[{sp, 16}]);
 
   // Load params values
   if (clamp_min || clamp_max) {

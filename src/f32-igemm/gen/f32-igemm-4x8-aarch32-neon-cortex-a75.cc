@@ -78,10 +78,10 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   sub(sp, sp, 4); // 4
   vpush({d8-d15}); // +64 = 112
 
-  ldr(r11, mem[sp, 120]); // c
-  ldr(r6, mem[sp, 124]); // cm_stride
-  ldr(r2, mem[sp, 112]); // a
-  ldr(r9, mem[sp, 116]); // w
+  ldr(r11, mem[{sp, 120}]); // c
+  ldr(r6, mem[{sp, 124}]); // cm_stride
+  ldr(r2, mem[{sp, 112}]); // a
+  ldr(r9, mem[{sp, 116}]); // w
   mov(r14, r3); // p = ks
 
   // Clamp C pointers
@@ -119,32 +119,32 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
 
   if (prefetch) {
-    pld(mem[r9, 0]); // Prefetch B
-    pld(mem[r9, 64]);
-    pld(mem[r9, 128]);
-    pld(mem[r9, 192]);
-    pld(mem[r9, 256]);
-    pld(mem[r9, 320]);
-    pld(mem[r9, 384]);
+    pld(mem[{r9, 0}]); // Prefetch B
+    pld(mem[{r9, 64}]);
+    pld(mem[{r9, 128}]);
+    pld(mem[{r9, 192}]);
+    pld(mem[{r9, 256}]);
+    pld(mem[{r9, 320}]);
+    pld(mem[{r9, 384}]);
   }
 
   bind(l1);
   // Load next 4 A pointers
-  ldr(r3, mem[r2, 0]);
+  ldr(r3, mem[{r2, 0}]);
   if (max_mr > 1) {
-    ldr(r12, mem[r2, 4]);
+    ldr(r12, mem[{r2, 4}]);
   }
   if (max_mr > 2) {
-    ldr(r10, mem[r2, 8]);
+    ldr(r10, mem[{r2, 8}]);
   }
   if (max_mr > 3) {
-    ldr(r0, mem[r2, 12]);
+    ldr(r0, mem[{r2, 12}]);
   }
   add(r2, r2, max_mr * sizeof(void*)); // a += MR * sizeof(void*)
 
   // Add a_offset
-  ldr(r5, mem[sp, 132]); // a_offset
-  ldr(r7, mem[sp, 136]); // zero
+  ldr(r5, mem[{sp, 132}]); // a_offset
+  ldr(r7, mem[{sp, 136}]); // zero
   cmp(r3, r7); // if a0 == zero
   add(r3, r3, r5); // a0 += a_offset
   moveq(r3, r7); //   a0 = zero, else += a0 + a_offset
@@ -162,20 +162,20 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     cmp(r0, r7); // if a3 == zero
     add(r0, r0, r5); // a3 += a_offset
   }
-  ldr(r5, mem[sp, 68]); // kc
+  ldr(r5, mem[{sp, 68}]); // kc
   if (max_mr > 3) {
     moveq(r0, r7); //   a3 = zero, else += a3 + a_offset
   }
 
   if (prefetch) {
-    pld(mem[r3, 0]); // Prefetch A
-    pld(mem[r3, 64]);
-    pld(mem[r12, 0]);
-    pld(mem[r12, 64]);
-    pld(mem[r10, 0]);
-    pld(mem[r10, 64]);
-    pld(mem[r0, 0]);
-    pld(mem[r0, 64]);
+    pld(mem[{r3, 0}]); // Prefetch A
+    pld(mem[{r3, 64}]);
+    pld(mem[{r12, 0}]);
+    pld(mem[{r12, 64}]);
+    pld(mem[{r10, 0}]);
+    pld(mem[{r10, 64}]);
+    pld(mem[{r0, 0}]);
+    pld(mem[{r0, 64}]);
   }
 
   subs(r5, r5, 16); // kc - 16
@@ -258,7 +258,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     vmla_f32(q10, q4, d5[0]);
   }
   if (prefetch) {
-    pld(mem[r3, 128]); // Prefetch A0
+    pld(mem[{r3, 128}]); // Prefetch A0
   }
   if (max_mr > 2) {
     vmla_f32(q12, q4, d6[0]);
@@ -268,7 +268,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     vmla_f32(q14, q4, d7[0]);
   }
   if (prefetch) {
-    pld(mem[r12, 128]); // Prefetch A1
+    pld(mem[{r12, 128}]); // Prefetch A1
   }
   vmla_f32(q9, q5, d4[0]);
   if (max_mr > 1) {
@@ -276,7 +276,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     vmla_f32(q11, q5, d5[0]);
   }
   if (prefetch) {
-    pld(mem[r10, 128]); // Prefetch A2
+    pld(mem[{r10, 128}]); // Prefetch A2
   }
   if (max_mr > 2) {
     vmla_f32(q13, q5, d6[0]);
@@ -286,7 +286,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     vmla_f32(q15, q5, d7[0]);
   }
   if (prefetch) {
-    pld(mem[r0, 128]); // Prefetch A3
+    pld(mem[{r0, 128}]); // Prefetch A3
   }
   vmla_f32(q8, q6, d4[1]);
   if (max_mr > 3) {
@@ -296,13 +296,13 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     vmla_f32(q10, q6, d5[1]);
   }
   if (prefetch) {
-    pld(mem[r9, 352]); // Prefetch B
+    pld(mem[{r9, 352}]); // Prefetch B
   }
   if (max_mr > 2) {
     vmla_f32(q12, q6, d6[1]);
   }
   if (prefetch) {
-    pld(mem[r9, 416]); // Prefetch B
+    pld(mem[{r9, 416}]); // Prefetch B
   }
   if (max_mr > 3) {
     vmla_f32(q14, q6, d7[1]);
@@ -427,9 +427,9 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   bhi(l1);
 
   // Load params pointer
-  ldr(r5, mem[sp, 140]); // params
-  ldr(r7, mem[sp, 128]); // cn_stride
-  ldr(r14, mem[sp, 72]); // p = ks
+  ldr(r5, mem[{sp, 140}]); // params
+  ldr(r7, mem[{sp, 128}]); // cn_stride
+  ldr(r14, mem[{sp, 72}]); // p = ks
 
   // Load min/max values
   if (clamp_min || clamp_max) {

@@ -80,9 +80,9 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
   movi(v19.v4s(), 0);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 64]);
-    prfm(kPLDL1KEEP, mem[x5, 128]);
-    prfm(kPLDL1KEEP, mem[x5, 192]);
+    prfm(kPLDL1KEEP, mem[{x5, 64}]);
+    prfm(kPLDL1KEEP, mem[{x5, 128}]);
+    prfm(kPLDL1KEEP, mem[{x5, 192}]);
   }
 
   // Is there at least 8 floats (32 bytes) for prologue + epilogue?
@@ -111,7 +111,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   ldp(q20, q21, mem[x5], 32);
   fmla(v18.v4s(), v22.v4s(), v0.s()[1]);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 96]);
+    prfm(kPLDL1KEEP, mem[{x5, 96}]);
   }
   fmla(v19.v4s(), v23.v4s(), v0.s()[1]);
   ldp(q22, q23, mem[x5], 32);

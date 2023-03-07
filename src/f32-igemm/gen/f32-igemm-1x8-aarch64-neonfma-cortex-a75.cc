@@ -70,7 +70,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   ldp(x10, x11, mem[sp]);
 
   // Load zero, params pointer
-  ldp(x12, x7, mem[sp, 16]);
+  ldp(x12, x7, mem[{sp, 16}]);
 
   // Load min/max values
   if (clamp_min || clamp_max) {
@@ -86,9 +86,9 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
   movi(v19.v4s(), 0);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 64]);
-    prfm(kPLDL1KEEP, mem[x5, 128]);
-    prfm(kPLDL1KEEP, mem[x5, 192]);
+    prfm(kPLDL1KEEP, mem[{x5, 64}]);
+    prfm(kPLDL1KEEP, mem[{x5, 128}]);
+    prfm(kPLDL1KEEP, mem[{x5, 192}]);
   }
 
   mov(x9, x3); // p = ks
@@ -131,11 +131,11 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   fmla(v17.v4s(), v25.v4s(), v0.s()[2]);
   ldp(q24, q25, mem[x5], 32);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 128]);
+    prfm(kPLDL1KEEP, mem[{x5, 128}]);
   }
   fmla(v18.v4s(), v26.v4s(), v0.s()[3]);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 256]);
+    prfm(kPLDL1KEEP, mem[{x5, 256}]);
   }
   fmla(v19.v4s(), v27.v4s(), v0.s()[3]);
   ldp(q26, q27, mem[x5], 32);
@@ -152,11 +152,11 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   fmla(v17.v4s(), v25.v4s(), v1.s()[2]);
   ldp(q24, q25, mem[x5], 32);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 128]);
+    prfm(kPLDL1KEEP, mem[{x5, 128}]);
   }
   fmla(v18.v4s(), v26.v4s(), v1.s()[3]);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 256]);
+    prfm(kPLDL1KEEP, mem[{x5, 256}]);
   }
   fmla(v19.v4s(), v27.v4s(), v1.s()[3]);
   subs(x0, x0, 32);
@@ -178,11 +178,11 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   fmla(v17.v4s(), v25.v4s(), v0.s()[2]);
   ldp(q24, q25, mem[x5], 32);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 128]);
+    prfm(kPLDL1KEEP, mem[{x5, 128}]);
   }
   fmla(v18.v4s(), v26.v4s(), v0.s()[3]);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 256]);
+    prfm(kPLDL1KEEP, mem[{x5, 256}]);
   }
   fmla(v19.v4s(), v27.v4s(), v0.s()[3]);
   ldp(q26, q27, mem[x5], 32);

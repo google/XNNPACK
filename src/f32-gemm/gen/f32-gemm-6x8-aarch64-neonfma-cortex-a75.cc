@@ -77,7 +77,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   if (max_mr > 1) {
     cmp(x0, 2); // if mr < 2
   }
-  stp(d8, d9, mem[sp, -64]++);
+  stp(d8, d9, mem[{sp, -64}]++);
   if (max_mr > 1) {
     add(x9, x3, x4); // a1 = a0 + a_stride
     add(x16, x6, x7); // c1 = c0 + cm_stride
@@ -85,7 +85,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     csel(x16, x6, x16, kLO); //   c1 = c0
   }
 
-  stp(d10, d11, mem[sp, 16]);
+  stp(d10, d11, mem[{sp, 16}]);
   if (max_mr > 2) {
     add(x10, x9, x4); // a2 = a1 + a_stride
     add(x17, x16, x7); // c2 = c1 + cm_stride
@@ -94,7 +94,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     csel(x17, x16, x17, kLS); //   c2 = c1
   }
 
-  stp(d12, d13, mem[sp, 32]);
+  stp(d12, d13, mem[{sp, 32}]);
   if (max_mr > 3) {
     cmp(x0, 4); // if mr < 4
     add(x11, x10, x4); // a3 = a2 + a_stride
@@ -103,7 +103,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     csel(x14, x17, x14, kLO); //   c3 = c2
   }
 
-  stp(d14, d15, mem[sp, 48]);
+  stp(d14, d15, mem[{sp, 48}]);
   if (max_mr > 4) {
     add(x12, x11, x4); // a4 = a3 + a_stride
     add(x13, x14, x7); // c4 = c3 + cm_stride
@@ -113,7 +113,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
 
   // Load params pointer
-  ldr(x8, mem[sp, 72]);
+  ldr(x8, mem[{sp, 72}]);
 
   if (max_mr > 5) {
     cmp(x0, 6); // if mr < 6
@@ -127,35 +127,35 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   // Load initial bias from w into accumulators
   ldp(q20, q21, mem[x5], 32);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 0]); // Prefetch B
+    prfm(kPLDL1KEEP, mem[{x5, 0}]); // Prefetch B
   }
   subs(x0, x2, 32); // k = kc - 32
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 64]);
+    prfm(kPLDL1KEEP, mem[{x5, 64}]);
   }
   if (max_mr > 1) {
     mov(v22.v16b(), v20.v16b());
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 128]);
+    prfm(kPLDL1KEEP, mem[{x5, 128}]);
   }
   if (max_mr > 1) {
     mov(v23.v16b(), v21.v16b());
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 192]);
+    prfm(kPLDL1KEEP, mem[{x5, 192}]);
   }
   if (max_mr > 2) {
     mov(v24.v16b(), v20.v16b());
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 256]);
+    prfm(kPLDL1KEEP, mem[{x5, 256}]);
   }
   if (max_mr > 2) {
     mov(v25.v16b(), v21.v16b());
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 320]);
+    prfm(kPLDL1KEEP, mem[{x5, 320}]);
   }
   if (max_mr > 3) {
     mov(v26.v16b(), v20.v16b());
@@ -243,7 +243,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     fmla(v30.v4s(), v12.v4s(), v5.s()[0]);
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 256]); // Prefetch B
+    prfm(kPLDL1KEEP, mem[{x5, 256}]); // Prefetch B
   }
   fmla(v21.v4s(), v13.v4s(), v0.s()[0]);
   if (max_mr > 1) {
@@ -253,7 +253,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     fmla(v25.v4s(), v13.v4s(), v2.s()[0]);
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 320]);
+    prfm(kPLDL1KEEP, mem[{x5, 320}]);
   }
   if (max_mr > 3) {
     fmla(v27.v4s(), v13.v4s(), v3.s()[0]);
@@ -265,7 +265,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     fmla(v31.v4s(), v13.v4s(), v5.s()[0]);
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 384]);
+    prfm(kPLDL1KEEP, mem[{x5, 384}]);
   }
   fmla(v20.v4s(), v14.v4s(), v0.s()[1]);
   if (max_mr > 1) {
@@ -275,7 +275,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     fmla(v24.v4s(), v14.v4s(), v2.s()[1]);
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 448]);
+    prfm(kPLDL1KEEP, mem[{x5, 448}]);
   }
   if (max_mr > 3) {
     fmla(v26.v4s(), v14.v4s(), v3.s()[1]);
@@ -558,7 +558,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     fmla(v30.v4s(), v12.v4s(), v5.s()[0]);
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 256]); // Prefetch B
+    prfm(kPLDL1KEEP, mem[{x5, 256}]); // Prefetch B
   }
   fmla(v21.v4s(), v13.v4s(), v0.s()[0]);
   if (max_mr > 1) {
@@ -568,7 +568,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     fmla(v25.v4s(), v13.v4s(), v2.s()[0]);
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 320]);
+    prfm(kPLDL1KEEP, mem[{x5, 320}]);
   }
   if (max_mr > 3) {
     fmla(v27.v4s(), v13.v4s(), v3.s()[0]);
@@ -580,7 +580,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     fmla(v31.v4s(), v13.v4s(), v5.s()[0]);
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 384]);
+    prfm(kPLDL1KEEP, mem[{x5, 384}]);
   }
   fmla(v20.v4s(), v14.v4s(), v0.s()[1]);
   if (max_mr > 1) {
@@ -590,7 +590,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     fmla(v24.v4s(), v14.v4s(), v2.s()[1]);
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 448]);
+    prfm(kPLDL1KEEP, mem[{x5, 448}]);
   }
   if (max_mr > 3) {
     fmla(v26.v4s(), v14.v4s(), v3.s()[1]);
@@ -854,7 +854,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
       fmax(v24.v4s(), v24.v4s(), v6.v4s());
     }
   }
-  ldr(x0, mem[sp, 64]); // Load cn_stride
+  ldr(x0, mem[{sp, 64}]); // Load cn_stride
   if (clamp_min) {
     if (max_mr > 2) {
       fmax(v25.v4s(), v25.v4s(), v6.v4s());
@@ -934,9 +934,9 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   b_hi(l0);
 
   // Restore d8-d15 from stack
-  ldp(d14, d15, mem[sp, 48]);
-  ldp(d12, d13, mem[sp, 32]);
-  ldp(d10, d11, mem[sp, 16]);
+  ldp(d14, d15, mem[{sp, 48}]);
+  ldp(d12, d13, mem[{sp, 32}]);
+  ldp(d10, d11, mem[{sp, 16}]);
   ldp(d8, d9, mem[sp], 64);
   ret();
 
@@ -1336,9 +1336,9 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
   bind(l10);
   // Restore d8-d15 from stack
-  ldp(d14, d15, mem[sp, 48]);
-  ldp(d12, d13, mem[sp, 32]);
-  ldp(d10, d11, mem[sp, 16]);
+  ldp(d14, d15, mem[{sp, 48}]);
+  ldp(d12, d13, mem[{sp, 32}]);
+  ldp(d10, d11, mem[{sp, 16}]);
   ldp(d8, d9, mem[sp], 64);
   ret();
 

@@ -70,11 +70,11 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   push({r4, r5, r6, r7, r8, r9, r10, r11}); // 32
   vpush({d8-d11}); // +32 = 64
 
-  ldr(r7, mem[sp, 64]); // a_stride
-  ldr(r11, mem[sp, 72]); // c
-  ldr(r6, mem[sp, 76]); // cm_stride
-  ldr(r9, mem[sp, 68]); // w
-  ldr(r5, mem[sp, 84]); // params
+  ldr(r7, mem[{sp, 64}]); // a_stride
+  ldr(r11, mem[{sp, 72}]); // c
+  ldr(r6, mem[{sp, 76}]); // cm_stride
+  ldr(r9, mem[{sp, 68}]); // w
+  ldr(r5, mem[{sp, 84}]); // params
 
   // Clamp A and C pointers
   cmp(r0, 2); // if mr >= 2
@@ -96,15 +96,15 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   // Load params values
   vldm(mem[r5], {d10-d11}); // RNDNU params
-  ldr(r7, mem[sp, 80]); // cn_stride
+  ldr(r7, mem[{sp, 80}]); // cn_stride
 
   if (prefetch) {
-    pld(mem[r9, 64]); // Prefetch B
-    pld(mem[r9, 128]);
-    pld(mem[r9, 192]);
-    pld(mem[r9, 256]);
-    pld(mem[r9, 320]);
-    pld(mem[r9, 384]);
+    pld(mem[{r9, 64}]); // Prefetch B
+    pld(mem[{r9, 128}]);
+    pld(mem[{r9, 192}]);
+    pld(mem[{r9, 256}]);
+    pld(mem[{r9, 320}]);
+    pld(mem[{r9, 384}]);
   }
 
   align(8);
@@ -115,19 +115,19 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
 
   vmov(q10, q8);
   if (prefetch) {
-    pld(mem[r3, 64]); // Prefetch A
+    pld(mem[{r3, 64}]); // Prefetch A
   }
   vmov(q11, q9);
   if (prefetch) {
-    pld(mem[r12, 64]);
+    pld(mem[{r12, 64}]);
   }
   vmov(q12, q8);
   if (prefetch) {
-    pld(mem[r10, 64]);
+    pld(mem[{r10, 64}]);
   }
   vmov(q13, q9);
   if (prefetch) {
-    pld(mem[r0, 64]);
+    pld(mem[{r0, 64}]);
   }
   vmov(q14, q8);
   vmov(q15, q9);
@@ -144,23 +144,23 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   vld1_8({d6}, mem[r0]++); // A3
   subs(r5, r5, 8);
   if (prefetch) {
-    pld(mem[r3, 128]);
+    pld(mem[{r3, 128}]);
   }
   vmovl_s8(q0, d0);
   if (prefetch) {
-    pld(mem[r12, 128]);
+    pld(mem[{r12, 128}]);
   }
   vmovl_s8(q4, d8);
   if (prefetch) {
-    pld(mem[r10, 128]);
+    pld(mem[{r10, 128}]);
   }
   vmovl_s8(q1, d2);
   if (prefetch) {
-    pld(mem[r0, 128]);
+    pld(mem[{r0, 128}]);
   }
   vmovl_s8(q2, d4);
   if (prefetch) {
-    pld(mem[r9, 448]);
+    pld(mem[{r9, 448}]);
   }
   vmovl_s8(q3, d6);
   vmlal_s16(q8, d8, d0[0]);

@@ -62,19 +62,19 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
 
   CHECK_ENCODING(0xA9403FEE, a.ldp(x14, x15, mem[sp]));
   CHECK_ENCODING(0xA8C13FEE, a.ldp(x14, x15, mem[sp], 16));
-  CHECK_ENCODING(0xA9413FEE, a.ldp(x14, x15, mem[sp, 16]));
-  CHECK_ENCODING(0xA9603FEE, a.ldp(x14, x15, mem[sp, -512]));
-  CHECK_ENCODING(0xA95FBFEE, a.ldp(x14, x15, mem[sp, 504]));
+  CHECK_ENCODING(0xA9413FEE, a.ldp(x14, x15, mem[{sp, 16}]));
+  CHECK_ENCODING(0xA9603FEE, a.ldp(x14, x15, mem[{sp, -512}]));
+  CHECK_ENCODING(0xA95FBFEE, a.ldp(x14, x15, mem[{sp, 504}]));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldp(x14, x15, mem[sp], 15));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldp(x14, x15, mem[sp], -520));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldp(x14, x15, mem[sp], 512));
-  EXPECT_ERROR(Error::kInvalidOperand, a.ldp(x14, x15, mem[sp, 16], 16));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldp(x14, x15, mem[{sp, 16}], 16));
 
-  CHECK_ENCODING(0xF9400BE8, a.ldr(x8, mem[sp, 16]));
-  CHECK_ENCODING(0xF97FFFE8, a.ldr(x8, mem[sp, 32760]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, mem[sp, -8]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, mem[sp, 7]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, mem[sp, 32768]));
+  CHECK_ENCODING(0xF9400BE8, a.ldr(x8, mem[{sp, 16}]));
+  CHECK_ENCODING(0xF97FFFE8, a.ldr(x8, mem[{sp, 32760}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, mem[{sp, -8}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, mem[{sp, 7}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, mem[{sp, 32768}]));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(x8, MemOperand(sp, 16, AddressingMode::kPostIndex)));
 
   CHECK_ENCODING(0xB8408488, a.ldr(w8, mem[x4], 8));
@@ -105,13 +105,13 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
   CHECK_ENCODING(0xD503201F, a.nop());
 
   CHECK_ENCODING(0xF98000A0, a.prfm(kPLDL1KEEP, mem[x5]));
-  CHECK_ENCODING(0xF98020A0, a.prfm(kPLDL1KEEP, mem[x5, 64]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.prfm(kPLDL1KEEP, mem[x5, -8]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.prfm(kPLDL1KEEP, mem[x5, 32761]));
+  CHECK_ENCODING(0xF98020A0, a.prfm(kPLDL1KEEP, mem[{x5, 64}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.prfm(kPLDL1KEEP, mem[{x5, -8}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.prfm(kPLDL1KEEP, mem[{x5, 32761}]));
 
   CHECK_ENCODING(0xF9800210, a.prfm(kPSTL1KEEP, mem[x16]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.prfm(kPSTL1KEEP, mem[x5, -8]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.prfm(kPSTL1KEEP, mem[x5, 32761]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.prfm(kPSTL1KEEP, mem[{x5, -8}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.prfm(kPSTL1KEEP, mem[{x5, 32761}]));
 
   CHECK_ENCODING(0xD65F03C0, a.ret());
 
@@ -121,24 +121,24 @@ TEST(AArch64Assembler, BaseInstructionEncoding) {
   CHECK_ENCODING(0xD13FFC83, a.sub(x3, x4, 4095));
   EXPECT_ERROR(Error::kInvalidOperand, a.sub(x0, x2, 4096));  // Out of bounds.
 
-  CHECK_ENCODING(0xA90457F4, a.stp(x20, x21, mem[sp, 64]));
-  CHECK_ENCODING(0xA98457F4, a.stp(x20, x21, mem[sp, 64]++));
-  CHECK_ENCODING(0xA91FD7F4, a.stp(x20, x21, mem[sp, 504]));
-  CHECK_ENCODING(0xA92057F4, a.stp(x20, x21, mem[sp, -512]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.stp(x20, x21, mem[sp, 3]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.stp(x20, x21, mem[sp, 512]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.stp(x20, x21, mem[sp, -520]));
+  CHECK_ENCODING(0xA90457F4, a.stp(x20, x21, mem[{sp, 64}]));
+  CHECK_ENCODING(0xA98457F4, a.stp(x20, x21, mem[{sp, 64}]++));
+  CHECK_ENCODING(0xA91FD7F4, a.stp(x20, x21, mem[{sp, 504}]));
+  CHECK_ENCODING(0xA92057F4, a.stp(x20, x21, mem[{sp, -512}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.stp(x20, x21, mem[{sp, 3}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.stp(x20, x21, mem[{sp, 512}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.stp(x20, x21, mem[{sp, -520}]));
 
-  CHECK_ENCODING(0xF80FFFF4, a.str(x20, mem[sp, 255]++));
-  CHECK_ENCODING(0xF81B0FF4, a.str(x20, mem[sp, -80]++));
-  CHECK_ENCODING(0xF8100FF4, a.str(x20, mem[sp, -256]++));
-  CHECK_ENCODING(0xF90003F4, a.str(x20, mem[sp, 0]));
-  CHECK_ENCODING(0xF93FFFF4, a.str(x20, mem[sp, 32760]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[sp, -257]++));
-  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[sp, 256]++));
-  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[sp, 3]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[sp, -1]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[sp, 32768]));
+  CHECK_ENCODING(0xF80FFFF4, a.str(x20, mem[{sp, 255}]++));
+  CHECK_ENCODING(0xF81B0FF4, a.str(x20, mem[{sp, -80}]++));
+  CHECK_ENCODING(0xF8100FF4, a.str(x20, mem[{sp, -256}]++));
+  CHECK_ENCODING(0xF90003F4, a.str(x20, mem[{sp, 0}]));
+  CHECK_ENCODING(0xF93FFFF4, a.str(x20, mem[{sp, 32760}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[{sp, -257}]++));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[{sp, 256}]++));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[{sp, 3}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[{sp, -1}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(sp, mem[{sp, 32768}]));
 
   CHECK_ENCODING(0xF1008040, a.subs(x0, x2, 32));
   CHECK_ENCODING(0xF13FFC40, a.subs(x0, x2, 4095));
@@ -227,10 +227,10 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   CHECK_ENCODING(0x4DDF8520, a.ld1({v0.d()}, 1, mem[x9], 8));
   CHECK_ENCODING(0x4DDF4120, a.ld1({v0.h()}, 4, mem[x9], 2));
 
-  CHECK_ENCODING(0x6D433FEE, a.ldp(d14, d15, mem[sp, 48]));
-  CHECK_ENCODING(0x6DC33FEE, a.ldp(d14, d15, mem[sp, 48]++));
+  CHECK_ENCODING(0x6D433FEE, a.ldp(d14, d15, mem[{sp, 48}]));
+  CHECK_ENCODING(0x6DC33FEE, a.ldp(d14, d15, mem[{sp, 48}]++));
   CHECK_ENCODING(0x6CC427E8, a.ldp(d8, d9, mem[sp], 64));
-  EXPECT_ERROR(Error::kInvalidOperand, a.ldp(d14, d15, mem[sp, 7]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldp(d14, d15, mem[{sp, 7}]));
 
   CHECK_ENCODING(0xACC154B4, a.ldp(q20, q21, mem[x5], 32));
   CHECK_ENCODING(0xACE054B4, a.ldp(q20, q21, mem[x5], -1024));
@@ -241,39 +241,39 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
 
   CHECK_ENCODING(0x7C402460, a.ldr(h0, mem[x3], 2));
 
-  CHECK_ENCODING(0xFD4020B0, a.ldr(d16, mem[x5, 64]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(d16, mem[x5, 32768]));
+  CHECK_ENCODING(0xFD4020B0, a.ldr(d16, mem[{x5, 64}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(d16, mem[{x5, 32768}]));
 
   CHECK_ENCODING(0xFC408460, a.ldr(d0, mem[x3], 8));
 
   CHECK_ENCODING(0xBD400106, a.ldr(s6, mem[x8]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(s6, mem[x6, 16384]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(s6, mem[{x6, 16384}]));
 
   CHECK_ENCODING(0xBC404460, a.ldr(s0, mem[x3], 4));
 
-  CHECK_ENCODING(0x3DC004B9, a.ldr(q25, mem[x5, 16]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q25, mem[x5, -16]));  // Negative offset.
-  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q25, mem[x5, 17]));  // Not multiple of 16.
-  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q25, mem[x5, 65536]));  // Out of range.
+  CHECK_ENCODING(0x3DC004B9, a.ldr(q25, mem[{x5, 16}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q25, mem[{x5, -16}]));  // Negative offset.
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q25, mem[{x5, 17}]));  // Not multiple of 16.
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q25, mem[{x5, 65536}]));  // Out of range.
 
   CHECK_ENCODING(0x3CC10460, a.ldr(q0, mem[x3], 16));
   CHECK_ENCODING(0x3CCFF460, a.ldr(q0, mem[x3], 255));
   CHECK_ENCODING(0x3CD00460, a.ldr(q0, mem[x3], -256));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q0, mem[x3], -257));
   EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q0, mem[x3], 256));
-  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q0, mem[x3, 16], 16));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ldr(q0, mem[{x3, 16}], 16));
 
   CHECK_ENCODING(0x4D40C904, a.ld1r({v4.v4s()}, mem[x8]));
   EXPECT_ERROR(Error::kInvalidOperand, a.ld1r({v4.v4s(), v5.v4s()}, mem[x8]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.ld1r({v4.v4s()}, mem[x8, 16]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ld1r({v4.v4s()}, mem[{x8, 16}]));
 
   CHECK_ENCODING(0x4D60C902, a.ld2r({v2.v4s(), v3.v4s()}, mem[x8]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.ld2r({v2.v4s(), v3.v4s()}, mem[x8, 16]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ld2r({v2.v4s(), v3.v4s()}, mem[{x8, 16}]));
   EXPECT_ERROR(Error::kInvalidOperand, a.ld2r({v2.v4s(), v4.v4s()}, mem[x8]));
   EXPECT_ERROR(Error::kInvalidOperand, a.ld2r({v2.v4s(), v3.v8b()}, mem[x8]));
 
   CHECK_ENCODING(0x4D40E906, a.ld3r({v6.v4s(), v7.v4s(), v8.v4s()}, mem[x8]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.ld3r({v6.v4s(), v7.v4s(), v8.v4s()}, mem[x8, 16]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.ld3r({v6.v4s(), v7.v4s(), v8.v4s()}, mem[{x8, 16}]));
   EXPECT_ERROR(Error::kInvalidOperand, a.ld3r({v6.v4s(), v7.v4s(), v9.v4s()}, mem[x8]));
   EXPECT_ERROR(Error::kInvalidOperand, a.ld3r({v6.v4s(), v7.v2s(), v8.v4s()}, mem[x8]));
 
@@ -326,17 +326,17 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.st1({v20.v2d(), v21.v2d(), v22.v2d(), v23.v2s()}, mem[x29], x1));
   EXPECT_ERROR(Error::kInvalidOperand, a.st1({v20.v2d(), v21.v2d(), v22.v2d(), v27.v2d()}, mem[x29], x1));
 
-  CHECK_ENCODING(0x6D012FEA, a.stp(d10, d11, mem[sp, 16]));
-  CHECK_ENCODING(0x6D202FEA, a.stp(d10, d11, mem[sp, -512]));
-  CHECK_ENCODING(0x6D1FAFEA, a.stp(d10, d11, mem[sp, 504]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.stp(d10, d11, mem[sp, -520]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.stp(d10, d11, mem[sp, 512]));
+  CHECK_ENCODING(0x6D012FEA, a.stp(d10, d11, mem[{sp, 16}]));
+  CHECK_ENCODING(0x6D202FEA, a.stp(d10, d11, mem[{sp, -512}]));
+  CHECK_ENCODING(0x6D1FAFEA, a.stp(d10, d11, mem[{sp, 504}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.stp(d10, d11, mem[{sp, -520}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.stp(d10, d11, mem[{sp, 512}]));
 
-  CHECK_ENCODING(0x6D812FEA, a.stp(d10, d11, mem[sp, 16]++));
+  CHECK_ENCODING(0x6D812FEA, a.stp(d10, d11, mem[{sp, 16}]++));
 
   CHECK_ENCODING(0xAD0075BC, a.stp(q28, q29, mem[x13]));
-  CHECK_ENCODING(0xAD80F5BC, a.stp(q28, q29, mem[x13, 16]++));
-  EXPECT_ERROR(Error::kInvalidOperand, a.stp(q28, q28, mem[x13, 7]));
+  CHECK_ENCODING(0xAD80F5BC, a.stp(q28, q29, mem[{x13, 16}]++));
+  EXPECT_ERROR(Error::kInvalidOperand, a.stp(q28, q28, mem[{x13, 7}]));
 
   CHECK_ENCODING(0xAC8144D0, a.stp(q16, q17, mem[x6], 32));
   CHECK_ENCODING(0xAC9FC4D0, a.stp(q16, q17, mem[x6], 1008));
@@ -353,10 +353,10 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.str(q16, mem[x6], -257));
 
   CHECK_ENCODING(0xBD0000D0, a.str(s16, mem[x6]));
-  CHECK_ENCODING(0xBD3FFCD0, a.str(s16, mem[x6, 16380]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.str(s16, mem[x6, 3]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.str(s16, mem[x6, -4]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.str(s16, mem[x6, 16384]));
+  CHECK_ENCODING(0xBD3FFCD0, a.str(s16, mem[{x6, 16380}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(s16, mem[{x6, 3}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(s16, mem[{x6, -4}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(s16, mem[{x6, 16384}]));
 
   CHECK_ENCODING(0xBC0044D0, a.str(s16, mem[x6], 4));
   CHECK_ENCODING(0xBC0FF4D0, a.str(s16, mem[x6], 255));
@@ -365,10 +365,10 @@ TEST(AArch64Assembler, SIMDInstructionEncoding) {
   EXPECT_ERROR(Error::kInvalidOperand, a.str(s16, mem[x6], -257));
 
   CHECK_ENCODING(0x7D0000D4, a.str(h20, mem[x6]));
-  CHECK_ENCODING(0x7D3FFCD4, a.str(h20, mem[x6, 8190]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.str(h20, mem[x6, 1]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.str(h20, mem[x6, -2]));
-  EXPECT_ERROR(Error::kInvalidOperand, a.str(h20, mem[x6, 8192]));
+  CHECK_ENCODING(0x7D3FFCD4, a.str(h20, mem[{x6, 8190}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(h20, mem[{x6, 1}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(h20, mem[{x6, -2}]));
+  EXPECT_ERROR(Error::kInvalidOperand, a.str(h20, mem[{x6, 8192}]));
 
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
 }

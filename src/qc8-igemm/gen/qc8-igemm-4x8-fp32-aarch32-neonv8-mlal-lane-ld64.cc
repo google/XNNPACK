@@ -72,11 +72,11 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   sub(sp, sp, 4); // 4
   vpush({d8-d11}); // +32 = 80
 
-  ldr(r11, mem[sp, 88]); // c
-  ldr(r6, mem[sp, 92]); // cm_stride
-  ldr(r2, mem[sp, 80]); // a
-  ldr(r9, mem[sp, 84]); // w
-  ldr(r5, mem[sp, 108]); // params
+  ldr(r11, mem[{sp, 88}]); // c
+  ldr(r6, mem[{sp, 92}]); // cm_stride
+  ldr(r2, mem[{sp, 80}]); // a
+  ldr(r9, mem[{sp, 84}]); // w
+  ldr(r5, mem[{sp, 108}]); // params
   mov(r14, r3); // p = ks
 
   // Clamp C pointers
@@ -94,12 +94,12 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   vld1r_32({d11}, mem[r5]); // QC8 params
 
   if (prefetch) {
-    pld(mem[r9, 64]); // Prefetch B
-    pld(mem[r9, 128]);
-    pld(mem[r9, 192]);
-    pld(mem[r9, 256]);
-    pld(mem[r9, 320]);
-    pld(mem[r9, 384]);
+    pld(mem[{r9, 64}]); // Prefetch B
+    pld(mem[{r9, 128}]);
+    pld(mem[{r9, 192}]);
+    pld(mem[{r9, 256}]);
+    pld(mem[{r9, 320}]);
+    pld(mem[{r9, 384}]);
   }
 
   align(8);
@@ -116,22 +116,22 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   align(8);
   bind(l1);
   // Load next 4 A pointers
-  ldr(r3, mem[r2, 0]);
-  ldr(r12, mem[r2, 4]);
-  ldr(r10, mem[r2, 8]);
-  ldr(r0, mem[r2, 12]);
+  ldr(r3, mem[{r2, 0}]);
+  ldr(r12, mem[{r2, 4}]);
+  ldr(r10, mem[{r2, 8}]);
+  ldr(r0, mem[{r2, 12}]);
   add(r2, r2, 16);
 
   if (prefetch) {
-    pld(mem[r3, 64]);
-    pld(mem[r12, 64]);
-    pld(mem[r10, 64]);
-    pld(mem[r0, 64]);
+    pld(mem[{r3, 64}]);
+    pld(mem[{r12, 64}]);
+    pld(mem[{r10, 64}]);
+    pld(mem[{r0, 64}]);
   }
 
   // Add a_offset
-  ldr(r5, mem[sp, 100]); // a_offset
-  ldr(r7, mem[sp, 104]); // zero
+  ldr(r5, mem[{sp, 100}]); // a_offset
+  ldr(r7, mem[{sp, 104}]); // zero
   cmp(r3, r7); // if a0 == zero
   add(r3, r3, r5); // a0 += a_offset
   moveq(r3, r7); //   a0 = zero, else += a0 + a_offset
@@ -143,7 +143,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   moveq(r10, r7); //   a2 = zero, else += a2 + a_offset
   cmp(r0, r7); // if a3 == zero
   add(r0, r0, r5); // a3 += a_offset
-  ldr(r5, mem[sp, 36]); // kc
+  ldr(r5, mem[{sp, 36}]); // kc
   moveq(r0, r7); //   a3 = zero, else += a3 + a_offset
 
   subs(r5, r5, 8); // kc - 8
@@ -160,23 +160,23 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   vld1_8({d6}, mem[r0]++); // A3
   subs(r5, r5, 8);
   if (prefetch) {
-    pld(mem[r3, 128]);
+    pld(mem[{r3, 128}]);
   }
   vmovl_s8(q0, d0);
   if (prefetch) {
-    pld(mem[r12, 128]);
+    pld(mem[{r12, 128}]);
   }
   vmovl_s8(q4, d8);
   if (prefetch) {
-    pld(mem[r10, 128]);
+    pld(mem[{r10, 128}]);
   }
   vmovl_s8(q1, d2);
   if (prefetch) {
-    pld(mem[r0, 128]);
+    pld(mem[{r0, 128}]);
   }
   vmovl_s8(q2, d4);
   if (prefetch) {
-    pld(mem[r9, 448]);
+    pld(mem[{r9, 448}]);
   }
   vmovl_s8(q3, d6);
   vmlal_s16(q8, d8, d0[0]);
@@ -275,8 +275,8 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   subs(r14, r14, 16); // ks -= MR * sizeof(void*)
   bhi(l1);
 
-  ldr(r7, mem[sp, 96]); // cn_stride
-  ldr(r14, mem[sp, 40]); // p = ks
+  ldr(r7, mem[{sp, 96}]); // cn_stride
+  ldr(r14, mem[{sp, 40}]); // p = ks
 
   // QC8 FP32 quantization
   vld1_8({q0-q1}, mem[r9]++);

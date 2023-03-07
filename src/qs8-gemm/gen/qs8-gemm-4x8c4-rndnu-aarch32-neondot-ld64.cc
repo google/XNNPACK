@@ -70,13 +70,13 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const void*
   push({r4, r5, r6, r7, r8, r9, r10, r11}); // 32
   vpush({d8-d13}); // +48 = 80
 
-  ldr(r7, mem[sp, 80]); // a_stride
+  ldr(r7, mem[{sp, 80}]); // a_stride
   add(r2, r2, 3); // kc = (kc + 3) & ~3
-  ldr(r11, mem[sp, 88]); // c
-  ldr(r6, mem[sp, 92]); // cm_stride
-  ldr(r9, mem[sp, 84]); // w
+  ldr(r11, mem[{sp, 88}]); // c
+  ldr(r6, mem[{sp, 92}]); // cm_stride
+  ldr(r9, mem[{sp, 84}]); // w
   bic(r2, r2, 3);
-  ldr(r5, mem[sp, 100]); // params
+  ldr(r5, mem[{sp, 100}]); // params
 
   // Clamp A and C pointers
   cmp(r0, 2); // if mr >= 2
@@ -98,7 +98,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const void*
 
   // Load params values
   vldm(mem[r5], {d12-d13}); // RNDNU params
-  ldr(r7, mem[sp, 96]); // cn_stride
+  ldr(r7, mem[{sp, 96}]); // cn_stride
 
   align(8);
   bind(l0);

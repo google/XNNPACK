@@ -67,7 +67,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   ldp(x10, x11, mem[sp]);
 
   // Load zero, params pointer
-  ldp(x12, x8, mem[sp, 16]);
+  ldp(x12, x8, mem[{sp, 16}]);
 
   // Load params values
   if (clamp_min || clamp_max) {
@@ -103,14 +103,14 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   // Main loop - 2 halffloats of A (4 bytes)
   bind(l2);
   ldr(d0, mem[x8], 8);
-  ldr(q24, mem[x5, 0]);
-  ldr(q25, mem[x5, 16]);
-  ldr(q26, mem[x5, 32]);
-  ldr(q27, mem[x5, 48]);
-  ldr(q28, mem[x5, 64]);
-  ldr(q29, mem[x5, 80]);
-  ldr(q30, mem[x5, 96]);
-  ldr(q31, mem[x5, 112]);
+  ldr(q24, mem[{x5, 0}]);
+  ldr(q25, mem[{x5, 16}]);
+  ldr(q26, mem[{x5, 32}]);
+  ldr(q27, mem[{x5, 48}]);
+  ldr(q28, mem[{x5, 64}]);
+  ldr(q29, mem[{x5, 80}]);
+  ldr(q30, mem[{x5, 96}]);
+  ldr(q31, mem[{x5, 112}]);
   subs(x0, x0, 8);
   fmla(v16.v8h(), v24.v8h(), v0.h()[0]);
   fmla(v17.v8h(), v25.v8h(), v0.h()[0]);
@@ -167,10 +167,10 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   bind(l4);
   tbz(x0, 2, l5);
   ldr(s0, mem[x8], 4);
-  ldr(q24, mem[x5, 0]);
-  ldr(q25, mem[x5, 16]);
-  ldr(q26, mem[x5, 32]);
-  ldr(q27, mem[x5, 48]);
+  ldr(q24, mem[{x5, 0}]);
+  ldr(q25, mem[{x5, 16}]);
+  ldr(q26, mem[{x5, 32}]);
+  ldr(q27, mem[{x5, 48}]);
   fmla(v16.v8h(), v24.v8h(), v0.h()[0]);
   fmla(v17.v8h(), v25.v8h(), v0.h()[0]);
   fmla(v18.v8h(), v26.v8h(), v0.h()[1]);
@@ -179,8 +179,8 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   tbz(x0, 1, l3);
   bind(l5);
   ldr(h0, mem[x8], 2);
-  ldr(q24, mem[x5, 0]);
-  ldr(q25, mem[x5, 16]);
+  ldr(q24, mem[{x5, 0}]);
+  ldr(q25, mem[{x5, 16}]);
   fmla(v16.v8h(), v24.v8h(), v0.h()[0]);
   fmla(v17.v8h(), v25.v8h(), v0.h()[0]);
   add(x5, x5, 32);

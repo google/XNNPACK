@@ -80,10 +80,10 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
 
   // Save d8-d15 on stack
-  stp(d8, d9, mem[sp, -64]++);
-  stp(d10, d11, mem[sp, 16]);
-  stp(d12, d13, mem[sp, 32]);
-  stp(d14, d15, mem[sp, 48]);
+  stp(d8, d9, mem[{sp, -64}]++);
+  stp(d10, d11, mem[{sp, 16}]);
+  stp(d12, d13, mem[{sp, 32}]);
+  stp(d14, d15, mem[{sp, 48}]);
 
   // Clamp A and C pointers
   if (max_mr > 1) {
@@ -198,14 +198,14 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
   fmla(v24.v4s(), v20.v4s(), v0.s()[2]);
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 128]);
+    prfm(kPLDL1KEEP, mem[{x5, 128}]);
   }
   fmla(v25.v4s(), v21.v4s(), v0.s()[2]);
   if (max_mr > 1) {
     fmla(v26.v4s(), v20.v4s(), v1.s()[2]);
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 192]);
+    prfm(kPLDL1KEEP, mem[{x5, 192}]);
   }
   if (max_mr > 1) {
     fmla(v27.v4s(), v21.v4s(), v1.s()[2]);
@@ -214,7 +214,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     fmla(v28.v4s(), v20.v4s(), v2.s()[2]);
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 256]);
+    prfm(kPLDL1KEEP, mem[{x5, 256}]);
   }
   if (max_mr > 2) {
     fmla(v29.v4s(), v21.v4s(), v2.s()[2]);
@@ -223,7 +223,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     fmla(v30.v4s(), v20.v4s(), v3.s()[2]);
   }
   if (prefetch) {
-    prfm(kPLDL1KEEP, mem[x5, 320]);
+    prfm(kPLDL1KEEP, mem[{x5, 320}]);
   }
   if (max_mr > 3) {
     fmla(v31.v4s(), v21.v4s(), v3.s()[2]);
@@ -672,9 +672,9 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   b_hi(l0);
 
   // Restore d8-d15 from stack
-  ldp(d14, d15, mem[sp, 48]);
-  ldp(d12, d13, mem[sp, 32]);
-  ldp(d10, d11, mem[sp, 16]);
+  ldp(d14, d15, mem[{sp, 48}]);
+  ldp(d12, d13, mem[{sp, 32}]);
+  ldp(d10, d11, mem[{sp, 16}]);
   ldp(d8, d9, mem[sp], 64);
   ret();
 
@@ -733,9 +733,9 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
   bind(l10);
   // Restore d8-d15 from stack
-  ldp(d14, d15, mem[sp, 48]);
-  ldp(d12, d13, mem[sp, 32]);
-  ldp(d10, d11, mem[sp, 16]);
+  ldp(d14, d15, mem[{sp, 48}]);
+  ldp(d12, d13, mem[{sp, 32}]);
+  ldp(d10, d11, mem[{sp, 16}]);
   ldp(d8, d9, mem[sp], 64);
   ret();
 

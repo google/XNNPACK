@@ -105,7 +105,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   ldp(x10, x11, mem[sp]);
 
   // Load zero, params pointer
-  ldp(x12, x8, mem[sp, 16]);
+  ldp(x12, x8, mem[{sp, 16}]);
 
   // Load min/max values
   if (clamp_min || clamp_max) {
@@ -113,9 +113,9 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   }
 
   // Save x19, d12-d15 on stack
-  stp(d12, d13, mem[sp, -48]++);
-  stp(d14, d15, mem[sp, 16]);
-  str(x19, mem[sp, 32]);
+  stp(d12, d13, mem[{sp, -48}]++);
+  stp(d14, d15, mem[{sp, 16}]);
+  str(x19, mem[{sp, 32}]);
 
   bind(l0);
   // Load initial bias from w into accumulators
@@ -123,33 +123,33 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 1) {
     mov(v22.v16b(), v20.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x13, 0]); // Prefetch A
-  prfm(kPLDL1KEEP, mem[x13, 64]);
+  prfm(kPLDL1KEEP, mem[{x13, 0}]); // Prefetch A
+  prfm(kPLDL1KEEP, mem[{x13, 64}]);
   if (max_mr > 1) {
     mov(v23.v16b(), v21.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x14, 0]);
-  prfm(kPLDL1KEEP, mem[x14, 64]);
+  prfm(kPLDL1KEEP, mem[{x14, 0}]);
+  prfm(kPLDL1KEEP, mem[{x14, 64}]);
   if (max_mr > 2) {
     mov(v24.v16b(), v20.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x15, 0]);
-  prfm(kPLDL1KEEP, mem[x15, 64]);
+  prfm(kPLDL1KEEP, mem[{x15, 0}]);
+  prfm(kPLDL1KEEP, mem[{x15, 64}]);
   if (max_mr > 2) {
     mov(v25.v16b(), v21.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x8, 0]);
-  prfm(kPLDL1KEEP, mem[x8, 64]);
+  prfm(kPLDL1KEEP, mem[{x8, 0}]);
+  prfm(kPLDL1KEEP, mem[{x8, 64}]);
   if (max_mr > 3) {
     mov(v26.v16b(), v20.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 0]); // Prefetch B
-  prfm(kPLDL1KEEP, mem[x5, 64]);
+  prfm(kPLDL1KEEP, mem[{x5, 0}]); // Prefetch B
+  prfm(kPLDL1KEEP, mem[{x5, 64}]);
   if (max_mr > 3) {
     mov(v27.v16b(), v21.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 128]);
-  prfm(kPLDL1KEEP, mem[x5, 192]);
+  prfm(kPLDL1KEEP, mem[{x5, 128}]);
+  prfm(kPLDL1KEEP, mem[{x5, 192}]);
 
   mov(x9, x3); // p = ks
 
@@ -239,7 +239,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
     ins(v3.d()[1], x19); // a1 ins
     fmla(v23.v4s(), v17.v4s(), v0.s()[2]);
   }
-  ldr(x19, mem[x5, 8]); // b
+  ldr(x19, mem[{x5, 8}]); // b
 
   // BLOCK 2
   if (max_mr > 2) {
@@ -259,7 +259,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 1) {
     fmla(v22.v4s(), v18.v4s(), v0.s()[3]);
   }
-  ldr(d13, mem[x5, 16]);
+  ldr(d13, mem[{x5, 16}]);
   if (max_mr > 2) {
     fmla(v24.v4s(), v18.v4s(), v1.s()[1]);
   }
@@ -267,11 +267,11 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
     ins(v4.d()[1], x19); // a3 ins
     fmla(v26.v4s(), v18.v4s(), v1.s()[3]);
   }
-  ldr(x19, mem[x5, 24]);
+  ldr(x19, mem[{x5, 24}]);
 
   // BLOCK 4
   fmla(v21.v4s(), v19.v4s(), v0.s()[1]);
-  ldr(d14, mem[x5, 32]);
+  ldr(d14, mem[{x5, 32}]);
   if (max_mr > 1) {
     fmla(v23.v4s(), v19.v4s(), v0.s()[3]);
   }
@@ -279,18 +279,18 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 2) {
     fmla(v25.v4s(), v19.v4s(), v1.s()[1]);
   }
-  ldr(x19, mem[x5, 40]);
+  ldr(x19, mem[{x5, 40}]);
 
   // BLOCK 5
   // NOPs to ensure 4 cycle LDR lands on next LDR
   if (max_mr > 3) {
     fmla(v27.v4s(), v19.v4s(), v1.s()[3]);
   }
-  ldr(d15, mem[x5, 48]);
+  ldr(d15, mem[{x5, 48}]);
   nop();
   ins(v14.d()[1], x19); // b from previous
   subs(x0, x0, 16);
-  ldr(x19, mem[x5, 56]);
+  ldr(x19, mem[{x5, 56}]);
 
   // Second group of 16 FMA, First group of loads
   // BLOCK 0
@@ -311,13 +311,13 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 3) {
     fmla(v26.v4s(), v12.v4s(), v4.s()[2]);
   }
-  ldr(d16, mem[x5, 64]);
+  ldr(d16, mem[{x5, 64}]);
   fmla(v21.v4s(), v13.v4s(), v3.s()[0]);
   if (max_mr > 1) {
     ins(v0.d()[1], x19); // a1 ins
     fmla(v23.v4s(), v13.v4s(), v3.s()[2]);
   }
-  ldr(x19, mem[x5, 72]); // b
+  ldr(x19, mem[{x5, 72}]); // b
 
   // BLOCK 2
   if (max_mr > 2) {
@@ -337,7 +337,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 1) {
     fmla(v22.v4s(), v14.v4s(), v3.s()[3]);
   }
-  ldr(d17, mem[x5, 80]);
+  ldr(d17, mem[{x5, 80}]);
   if (max_mr > 2) {
     fmla(v24.v4s(), v14.v4s(), v4.s()[1]);
   }
@@ -345,11 +345,11 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
     ins(v1.d()[1], x19); // a3 ins
     fmla(v26.v4s(), v14.v4s(), v4.s()[3]);
   }
-  ldr(x19, mem[x5, 88]);
+  ldr(x19, mem[{x5, 88}]);
 
   // BLOCK 4
   fmla(v21.v4s(), v15.v4s(), v3.s()[1]);
-  ldr(d18, mem[x5, 96]);
+  ldr(d18, mem[{x5, 96}]);
   if (max_mr > 1) {
     fmla(v23.v4s(), v15.v4s(), v3.s()[3]);
   }
@@ -357,16 +357,16 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 2) {
     fmla(v25.v4s(), v15.v4s(), v4.s()[1]);
   }
-  ldr(x19, mem[x5, 104]);
+  ldr(x19, mem[{x5, 104}]);
 
   // BLOCK 5
   // NOTE that block needs to be 4 cycles for LDR not to stall
   if (max_mr > 3) {
     fmla(v27.v4s(), v15.v4s(), v4.s()[3]);
   }
-  ldr(d19, mem[x5, 112]);
+  ldr(d19, mem[{x5, 112}]);
   ins(v18.d()[1], x19);
-  ldr(x19, mem[x5, 120]);
+  ldr(x19, mem[{x5, 120}]);
   add(x5, x5, 128);
   b_hs(l2);
 
@@ -394,7 +394,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 3) {
     fmla(v26.v4s(), v16.v4s(), v1.s()[2]);
   }
-  ldr(x19, mem[x5, 8]); // b
+  ldr(x19, mem[{x5, 8}]); // b
   fmla(v21.v4s(), v17.v4s(), v0.s()[0]);
   if (max_mr > 1) {
     fmla(v23.v4s(), v17.v4s(), v0.s()[2]);
@@ -415,14 +415,14 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   fmla(v20.v4s(), v18.v4s(), v0.s()[1]);
 
   // BLOCK 3
-  ldr(d13, mem[x5, 16]);
+  ldr(d13, mem[{x5, 16}]);
   if (max_mr > 3) {
     ins(v4.d()[1], x19); // a3 ins
   }
   if (max_mr > 1) {
     fmla(v22.v4s(), v18.v4s(), v0.s()[3]);
   }
-  ldr(x19, mem[x5, 24]);
+  ldr(x19, mem[{x5, 24}]);
   if (max_mr > 2) {
     fmla(v24.v4s(), v18.v4s(), v1.s()[1]);
   }
@@ -431,10 +431,10 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   }
 
   // BLOCK 4
-  ldr(d14, mem[x5, 32]);
+  ldr(d14, mem[{x5, 32}]);
   ins(v13.d()[1], x19); // b
   fmla(v21.v4s(), v19.v4s(), v0.s()[1]);
-  ldr(x19, mem[x5, 40]);
+  ldr(x19, mem[{x5, 40}]);
   if (max_mr > 1) {
     fmla(v23.v4s(), v19.v4s(), v0.s()[3]);
   }
@@ -444,12 +444,12 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
 
   // BLOCK 5
   // NOPs to ensure 4 cycle LDR lands on next LDR
-  ldr(d15, mem[x5, 48]);
+  ldr(d15, mem[{x5, 48}]);
   ins(v14.d()[1], x19);
   if (max_mr > 3) {
     fmla(v27.v4s(), v19.v4s(), v1.s()[3]);
   }
-  ldr(x19, mem[x5, 56]);
+  ldr(x19, mem[{x5, 56}]);
   nop(); // fma
   nop();
   nop(); // fma
@@ -579,8 +579,8 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   b_hi(l0);
 
   // Restore x19, d12-d15 from stack
-  ldr(x19, mem[sp, 32]);
-  ldp(d14, d15, mem[sp, 16]);
+  ldr(x19, mem[{sp, 32}]);
+  ldp(d14, d15, mem[{sp, 16}]);
   ldp(d12, d13, mem[sp], 48);
   ret();
 
@@ -734,8 +734,8 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   str(s20, mem[x6]);
   bind(l11);
   // Restore x19, d12-d15 from stack
-  ldr(x19, mem[sp, 32]);
-  ldp(d14, d15, mem[sp, 16]);
+  ldr(x19, mem[{sp, 32}]);
+  ldp(d14, d15, mem[{sp, 16}]);
   ldp(d12, d13, mem[sp], 48);
   ret();
 

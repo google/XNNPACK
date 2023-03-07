@@ -86,14 +86,14 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   // Main loop - 4 halffloats of A (8 bytes)
   bind(l1);
   ldr(d0, mem[x3], 8);
-  ldr(q24, mem[x5, 0]);
-  ldr(q25, mem[x5, 16]);
-  ldr(q26, mem[x5, 32]);
-  ldr(q27, mem[x5, 48]);
-  ldr(q28, mem[x5, 64]);
-  ldr(q29, mem[x5, 80]);
-  ldr(q30, mem[x5, 96]);
-  ldr(q31, mem[x5, 112]);
+  ldr(q24, mem[{x5, 0}]);
+  ldr(q25, mem[{x5, 16}]);
+  ldr(q26, mem[{x5, 32}]);
+  ldr(q27, mem[{x5, 48}]);
+  ldr(q28, mem[{x5, 64}]);
+  ldr(q29, mem[{x5, 80}]);
+  ldr(q30, mem[{x5, 96}]);
+  ldr(q31, mem[{x5, 112}]);
   subs(x0, x0, 8);
   fmla(v16.v8h(), v24.v8h(), v0.h()[0]);
   fmla(v17.v8h(), v25.v8h(), v0.h()[0]);
@@ -146,10 +146,10 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   bind(l3);
   tbz(x0, 2, l4);
   ldr(s0, mem[x3], 4);
-  ldr(q24, mem[x5, 0]);
-  ldr(q25, mem[x5, 16]);
-  ldr(q26, mem[x5, 32]);
-  ldr(q27, mem[x5, 48]);
+  ldr(q24, mem[{x5, 0}]);
+  ldr(q25, mem[{x5, 16}]);
+  ldr(q26, mem[{x5, 32}]);
+  ldr(q27, mem[{x5, 48}]);
   fmla(v16.v8h(), v24.v8h(), v0.h()[0]);
   fmla(v17.v8h(), v25.v8h(), v0.h()[0]);
   fmla(v18.v8h(), v26.v8h(), v0.h()[1]);
@@ -159,8 +159,8 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
 
   bind(l4);
   ldr(h0, mem[x3], 2);
-  ldr(q24, mem[x5, 0]);
-  ldr(q25, mem[x5, 16]);
+  ldr(q24, mem[{x5, 0}]);
+  ldr(q25, mem[{x5, 16}]);
   fmla(v16.v8h(), v24.v8h(), v0.h()[0]);
   fmla(v17.v8h(), v25.v8h(), v0.h()[0]);
   add(x5, x5, 32);

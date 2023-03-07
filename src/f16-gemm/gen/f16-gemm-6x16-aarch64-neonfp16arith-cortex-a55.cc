@@ -76,7 +76,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   assert(num_post_operations == 0 || (!clamp_min && !clamp_max));
 
   // Load params pointer
-  ldr(x8, mem[sp, 8]);
+  ldr(x8, mem[{sp, 8}]);
 
   // Clamp A and C pointers
   if (max_mr > 1) {

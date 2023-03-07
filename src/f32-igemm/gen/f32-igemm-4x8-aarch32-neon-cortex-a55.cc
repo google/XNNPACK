@@ -76,10 +76,10 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   push({r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}); // +40
   vpush({d8-d15}); // +64 = 104
 
-  ldr(r11, mem[sp, 112]); // c
-  ldr(r6, mem[sp, 116]); // cm_stride
-  ldr(r5, mem[sp, 104]); // a
-  ldr(r9, mem[sp, 108]); // w
+  ldr(r11, mem[{sp, 112}]); // c
+  ldr(r6, mem[{sp, 116}]); // cm_stride
+  ldr(r5, mem[{sp, 104}]); // a
+  ldr(r9, mem[{sp, 108}]); // w
   mov(r14, r3); // p = ks
 
   // Clamp C pointers
@@ -113,43 +113,43 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
     vmov(q12, q8);
     vmov(q13, q9);
   }
-  pld(mem[r9, 0]); // Prefetch B
-  pld(mem[r9, 64]);
+  pld(mem[{r9, 0}]); // Prefetch B
+  pld(mem[{r9, 64}]);
   if (max_mr > 3) {
     vmov(q14, q8);
   }
-  pld(mem[r9, 128]);
-  pld(mem[r9, 192]);
+  pld(mem[{r9, 128}]);
+  pld(mem[{r9, 192}]);
   if (max_mr > 3) {
     vmov(q15, q9);
   }
-  pld(mem[r9, 256]);
-  pld(mem[r9, 320]);
+  pld(mem[{r9, 256}]);
+  pld(mem[{r9, 320}]);
 
   bind(l1);
   // Load next 4 A pointers
-  ldr(r3, mem[r5, 0]);
+  ldr(r3, mem[{r5, 0}]);
   if (max_mr > 1) {
-    ldr(r12, mem[r5, 4]);
+    ldr(r12, mem[{r5, 4}]);
   }
   if (max_mr > 2) {
-    ldr(r10, mem[r5, 8]);
+    ldr(r10, mem[{r5, 8}]);
   }
   if (max_mr > 3) {
-    ldr(r7, mem[r5, 12]);
+    ldr(r7, mem[{r5, 12}]);
   }
   add(r5, r5, 16);
-  pld(mem[r3, 0]); // Prefetch A
-  str(r5, mem[sp, 104]); // a
-  pld(mem[r3, 64]);
-  ldr(r0, mem[sp, 128]); // zero
-  pld(mem[r12, 0]);
-  ldr(r5, mem[sp, 124]); // a_offset
-  pld(mem[r12, 64]);
-  pld(mem[r10, 0]);
-  pld(mem[r10, 64]);
-  pld(mem[r7, 0]);
-  pld(mem[r7, 64]);
+  pld(mem[{r3, 0}]); // Prefetch A
+  str(r5, mem[{sp, 104}]); // a
+  pld(mem[{r3, 64}]);
+  ldr(r0, mem[{sp, 128}]); // zero
+  pld(mem[{r12, 0}]);
+  ldr(r5, mem[{sp, 124}]); // a_offset
+  pld(mem[{r12, 64}]);
+  pld(mem[{r10, 0}]);
+  pld(mem[{r10, 64}]);
+  pld(mem[{r7, 0}]);
+  pld(mem[{r7, 64}]);
 
   // Add a_offset
   cmp(r3, r0); // if a0 == zero
@@ -187,8 +187,8 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   }
   subs(r5, r5, 16);
   vldm(mem[r9], {d8-d11}); // B0
-  vldr(d15, mem[r9, 56]); // B1CK 0
-  vldr(d13, mem[r9, 40]); // B1
+  vldr(d15, mem[{r9, 56}]); // B1CK 0
+  vldr(d13, mem[{r9, 40}]); // B1
 
   blo(l3); // less than 4 channels?  skip main loop
 
@@ -212,9 +212,9 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 3) {
     vmla_f32(q14, q4, d3[0]);
   }
-  vldr(d12, mem[r9, 32]); // B1
+  vldr(d12, mem[{r9, 32}]); // B1
   vmla_f32(q9, q5, d0[0]);
-  vldr(d9, mem[r9, 72]); // B0
+  vldr(d9, mem[{r9, 72}]); // B0
   if (max_mr > 1) {
     vmla_f32(q11, q5, d1[0]);
   }
@@ -234,32 +234,32 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 1) {
     vmla_f32(q10, q6, d1[1]);
   }
-  vldr(d14, mem[r9, 48]); // B1
+  vldr(d14, mem[{r9, 48}]); // B1
   if (max_mr > 2) {
     vmla_f32(q12, q6, d2[1]);
   }
-  vldr(d11, mem[r9, 88]); // B0
+  vldr(d11, mem[{r9, 88}]); // B0
   if (max_mr > 3) {
     vmla_f32(q14, q6, d3[1]);
   }
 
   // BLOCK 4
   vmla_f32(q9, q7, d0[1]);
-  vldr(d8, mem[r9, 64]); // B0
+  vldr(d8, mem[{r9, 64}]); // B0
   if (max_mr > 1) {
     vmla_f32(q11, q7, d1[1]);
   }
-  vldr(d13, mem[r9, 104]); // B1
+  vldr(d13, mem[{r9, 104}]); // B1
   if (max_mr > 2) {
     vmla_f32(q13, q7, d2[1]);
   }
-  vldr(d10, mem[r9, 80]); // B0
+  vldr(d10, mem[{r9, 80}]); // B0
 
   // BLOCK 5
   if (max_mr > 3) {
     vmla_f32(q15, q7, d3[1]);
   }
-  vldr(d15, mem[r9, 120]); // B1
+  vldr(d15, mem[{r9, 120}]); // B1
 
   // Second group of 16 FMA, First group of loads
   // BLOCK 0
@@ -277,9 +277,9 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 3) {
     vmla_f32(q14, q4, d7[0]);
   }
-  vldr(d12, mem[r9, 96]); // B1
+  vldr(d12, mem[{r9, 96}]); // B1
   vmla_f32(q9, q5, d4[0]);
-  vldr(d9, mem[r9, 136]); // B0
+  vldr(d9, mem[{r9, 136}]); // B0
   if (max_mr > 1) {
     vmla_f32(q11, q5, d5[0]);
   }
@@ -300,32 +300,32 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 1) {
     vmla_f32(q10, q6, d5[1]);
   }
-  vldr(d14, mem[r9, 112]); // B1
+  vldr(d14, mem[{r9, 112}]); // B1
   if (max_mr > 2) {
     vmla_f32(q12, q6, d6[1]);
   }
-  vldr(d11, mem[r9, 152]); // B0
+  vldr(d11, mem[{r9, 152}]); // B0
   if (max_mr > 3) {
     vmla_f32(q14, q6, d7[1]);
   }
 
   // BLOCK 4
   vmla_f32(q9, q7, d4[1]);
-  vldr(d8, mem[r9, 128]); // B0
+  vldr(d8, mem[{r9, 128}]); // B0
   if (max_mr > 1) {
     vmla_f32(q11, q7, d5[1]);
   }
-  vldr(d13, mem[r9, 168]); // B1
+  vldr(d13, mem[{r9, 168}]); // B1
   if (max_mr > 2) {
     vmla_f32(q13, q7, d6[1]);
   }
-  vldr(d10, mem[r9, 144]); // B0
+  vldr(d10, mem[{r9, 144}]); // B0
 
   // BLOCK 5
   if (max_mr > 3) {
     vmla_f32(q15, q7, d7[1]);
   }
-  vldr(d15, mem[r9, 184]); // B1
+  vldr(d15, mem[{r9, 184}]); // B1
   add(r9, r9, 128); // B++
   bhs(l2);
 
@@ -347,9 +347,9 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 3) {
     vmla_f32(q14, q4, d3[0]);
   }
-  vldr(d12, mem[r9, 32]); // B1
+  vldr(d12, mem[{r9, 32}]); // B1
   vmla_f32(q9, q5, d0[0]);
-  vldr(d9, mem[r9, 72]); // B0
+  vldr(d9, mem[{r9, 72}]); // B0
   if (max_mr > 1) {
     vmla_f32(q11, q5, d1[0]);
   }
@@ -369,37 +369,37 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 1) {
     vmla_f32(q10, q6, d1[1]);
   }
-  vldr(d14, mem[r9, 48]); // B1
+  vldr(d14, mem[{r9, 48}]); // B1
   if (max_mr > 2) {
     vmla_f32(q12, q6, d2[1]);
   }
-  vldr(d11, mem[r9, 88]); // B0
+  vldr(d11, mem[{r9, 88}]); // B0
   if (max_mr > 3) {
     vmla_f32(q14, q6, d3[1]);
   }
 
   // BLOCK 4
   vmla_f32(q9, q7, d0[1]);
-  vldr(d8, mem[r9, 64]); // B0
+  vldr(d8, mem[{r9, 64}]); // B0
   if (max_mr > 1) {
     vmla_f32(q11, q7, d1[1]);
   }
-  vldr(d13, mem[r9, 104]); // B1
+  vldr(d13, mem[{r9, 104}]); // B1
   if (max_mr > 2) {
     vmla_f32(q13, q7, d2[1]);
   }
-  vldr(d10, mem[r9, 80]); // B0
+  vldr(d10, mem[{r9, 80}]); // B0
 
   // BLOCK 5
   if (max_mr > 3) {
     vmla_f32(q15, q7, d3[1]);
   }
-  vldr(d15, mem[r9, 120]); // B1
+  vldr(d15, mem[{r9, 120}]); // B1
 
   // Second group of 16 FMA, First group of loads
   // BLOCK 0
   vmla_f32(q8, q4, d4[0]);
-  vldr(d12, mem[r9, 96]); // B1
+  vldr(d12, mem[{r9, 96}]); // B1
   if (max_mr > 1) {
     vmla_f32(q10, q4, d5[0]);
   }
@@ -411,7 +411,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 3) {
     vmla_f32(q14, q4, d7[0]);
   }
-  vldr(d14, mem[r9, 112]); // B1
+  vldr(d14, mem[{r9, 112}]); // B1
   vmla_f32(q9, q5, d4[0]);
   if (max_mr > 1) {
     vmla_f32(q11, q5, d5[0]);
@@ -458,21 +458,21 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
 
   align(8);
   bind(l4);
-  ldr(r5, mem[sp, 104]); // a
+  ldr(r5, mem[{sp, 104}]); // a
   subs(r14, r14, max_mr * sizeof(void*)); // ks -= MR * sizeof(void*)
 
   // ks loop
   bhi(l1);
 
   // Load params pointer
-  ldr(r14, mem[sp, 132]); // params
+  ldr(r14, mem[{sp, 132}]); // params
   // Load min/max values
   if (clamp_min || clamp_max) {
     vld1r_32({d4,d5}, mem[r14]++);
     vld1r_32({d6,d7}, mem[r14]);
   }
   subs(r1, r1, 8);
-  ldr(r0, mem[sp, 120]); // cn_stride
+  ldr(r0, mem[{sp, 120}]); // cn_stride
 
   // Clamp
   if (clamp_min) {
@@ -510,7 +510,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   perform_post_operations(max_mr, num_post_operations, post_operations);
 
   // Store full 4 x 8
-  ldr(r14, mem[sp, 64]); // p = ks
+  ldr(r14, mem[{sp, 64}]); // p = ks
   blo(l7);
   if (max_mr > 3) {
     vst1_32({d28-d31}, mem[r6], r0);
@@ -692,7 +692,7 @@ void Generator::perform_post_operations(
   if (num_post_operations == 0) {
     return;
   }
-  ldr(r14, mem[sp, 132]);  // params
+  ldr(r14, mem[{sp, 132}]);  // params
   for (size_t i = 0; i < num_post_operations; i++) {
     switch (post_operations[i].op_type) {
       case xnn_post_operation_type_hardswish: {

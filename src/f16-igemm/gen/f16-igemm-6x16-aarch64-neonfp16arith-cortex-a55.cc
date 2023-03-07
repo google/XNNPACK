@@ -78,7 +78,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   assert(num_post_operations == 0 || (!clamp_min && !clamp_max));
 
   // Load zero, params pointer
-  ldp(x12, x8, mem[sp, 16]);
+  ldp(x12, x8, mem[{sp, 16}]);
 
   // Clamp C pointers
   if (max_mr > 1) {
@@ -114,8 +114,8 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   ldp(x8, x11, mem[sp]); // load cn_stride, a_offset
 
   // Save x20-x23 on stack
-  stp(x20, x21, mem[sp, -32]++);
-  stp(x22, x23, mem[sp, 16]);
+  stp(x20, x21, mem[{sp, -32}]++);
+  stp(x22, x23, mem[{sp, 16}]);
 
   bind(l0);
   // Load initial bias from w into accumulators
@@ -124,27 +124,27 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   if (max_mr > 1) {
     mov(v22.v16b(), v20.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 0]); // Prefetch B
+  prfm(kPLDL1KEEP, mem[{x5, 0}]); // Prefetch B
   if (max_mr > 1) {
     mov(v23.v16b(), v21.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 64]);
+  prfm(kPLDL1KEEP, mem[{x5, 64}]);
   if (max_mr > 2) {
     mov(v24.v16b(), v20.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 128]);
+  prfm(kPLDL1KEEP, mem[{x5, 128}]);
   if (max_mr > 2) {
     mov(v25.v16b(), v21.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 192]);
+  prfm(kPLDL1KEEP, mem[{x5, 192}]);
   if (max_mr > 3) {
     mov(v26.v16b(), v20.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 256]);
+  prfm(kPLDL1KEEP, mem[{x5, 256}]);
   if (max_mr > 3) {
     mov(v27.v16b(), v21.v16b());
   }
-  prfm(kPLDL1KEEP, mem[x5, 320]);
+  prfm(kPLDL1KEEP, mem[{x5, 320}]);
   if (max_mr > 4) {
     mov(v28.v16b(), v20.v16b());
     mov(v29.v16b(), v21.v16b());
@@ -461,7 +461,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   b_hi(l0);
 
   // Restore x20-x23 from stack
-  ldp(x22, x23, mem[sp, 16]);
+  ldp(x22, x23, mem[{sp, 16}]);
   ldp(x20, x21, mem[sp], 32);
   ret();
 
@@ -628,7 +628,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, 
   str(h20, mem[x6]);
   bind(l10);
   // Restore x20-x23 from stack
-  ldp(x22, x23, mem[sp, 16]);
+  ldp(x22, x23, mem[{sp, 16}]);
   ldp(x20, x21, mem[sp], 32);
   ret();
 

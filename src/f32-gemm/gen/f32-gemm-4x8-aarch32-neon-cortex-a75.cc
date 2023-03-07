@@ -73,10 +73,10 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   push({r4, r5, r6, r7, r8, r9, r10, r11}); // 32
   vpush({d8-d15}); // +64 = 96
 
-  ldr(r7, mem[sp, 96]); // a_stride
-  ldr(r6, mem[sp, 108]); // cm_stride
-  ldr(r11, mem[sp, 104]); // c
-  ldr(r9, mem[sp, 100]); // w
+  ldr(r7, mem[{sp, 96}]); // a_stride
+  ldr(r6, mem[{sp, 108}]); // cm_stride
+  ldr(r11, mem[{sp, 104}]); // c
+  ldr(r9, mem[{sp, 100}]); // w
 
   // Clamp A and C pointers
   if (max_mr > 1) {
@@ -102,7 +102,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     movlo(r6, r8); // c3
   }
 
-  ldr(r7, mem[sp, 112]); // cn_stride
+  ldr(r7, mem[{sp, 112}]); // cn_stride
 
   align(8);
   bind(l0);
@@ -123,21 +123,21 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   }
 
   if (prefetch) {
-    pld(mem[r3, 0]); // Prefetch A
-    pld(mem[r3, 64]);
-    pld(mem[r12, 0]);
-    pld(mem[r12, 64]);
-    pld(mem[r10, 0]);
-    pld(mem[r10, 64]);
-    pld(mem[r0, 0]);
-    pld(mem[r0, 64]);
-    pld(mem[r9, 0]); // Prefetch B
-    pld(mem[r9, 64]);
-    pld(mem[r9, 128]);
-    pld(mem[r9, 192]);
-    pld(mem[r9, 256]);
-    pld(mem[r9, 320]);
-    pld(mem[r9, 384]);
+    pld(mem[{r3, 0}]); // Prefetch A
+    pld(mem[{r3, 64}]);
+    pld(mem[{r12, 0}]);
+    pld(mem[{r12, 64}]);
+    pld(mem[{r10, 0}]);
+    pld(mem[{r10, 64}]);
+    pld(mem[{r0, 0}]);
+    pld(mem[{r0, 64}]);
+    pld(mem[{r9, 0}]); // Prefetch B
+    pld(mem[{r9, 64}]);
+    pld(mem[{r9, 128}]);
+    pld(mem[{r9, 192}]);
+    pld(mem[{r9, 256}]);
+    pld(mem[{r9, 320}]);
+    pld(mem[{r9, 384}]);
   }
 
   blo(l4); // less than 4 channels?
@@ -219,7 +219,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     vmla_f32(q10, q4, d5[0]);
   }
   if (prefetch) {
-    pld(mem[r3, 128]); // Prefetch A0
+    pld(mem[{r3, 128}]); // Prefetch A0
   }
   if (max_mr > 2) {
     vmla_f32(q12, q4, d6[0]);
@@ -229,7 +229,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     vmla_f32(q14, q4, d7[0]);
   }
   if (prefetch) {
-    pld(mem[r12, 128]); // Prefetch A1
+    pld(mem[{r12, 128}]); // Prefetch A1
   }
   vmla_f32(q9, q5, d4[0]);
   if (max_mr > 1) {
@@ -237,7 +237,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     vmla_f32(q11, q5, d5[0]);
   }
   if (prefetch) {
-    pld(mem[r10, 128]); // Prefetch A2
+    pld(mem[{r10, 128}]); // Prefetch A2
   }
   if (max_mr > 2) {
     vmla_f32(q13, q5, d6[0]);
@@ -247,7 +247,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     vmla_f32(q15, q5, d7[0]);
   }
   if (prefetch) {
-    pld(mem[r0, 128]); // Prefetch A3
+    pld(mem[{r0, 128}]); // Prefetch A3
   }
   vmla_f32(q8, q6, d4[1]);
   if (max_mr > 3) {
@@ -257,13 +257,13 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
     vmla_f32(q10, q6, d5[1]);
   }
   if (prefetch) {
-    pld(mem[r9, 352]); // Prefetch B
+    pld(mem[{r9, 352}]); // Prefetch B
   }
   if (max_mr > 2) {
     vmla_f32(q12, q6, d6[1]);
   }
   if (prefetch) {
-    pld(mem[r9, 416]); // Prefetch B
+    pld(mem[{r9, 416}]); // Prefetch B
   }
   if (max_mr > 3) {
     vmla_f32(q14, q6, d7[1]);
@@ -384,7 +384,7 @@ void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t 
   align(8);
   bind(l3);
   // Load params pointer
-  ldr(r5, mem[sp, 116]); // params
+  ldr(r5, mem[{sp, 116}]); // params
 
   // Load min/max values
   if (clamp_min || clamp_max) {
