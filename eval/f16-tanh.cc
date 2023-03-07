@@ -429,6 +429,58 @@
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(TANH__FMA3_EXPM1MINUS_RR1_P3H2_DIV, positive_saturation) {
+    TEST_REQUIRES_X86_FMA3;
+
+    MathEvaluationTester()
+      .input_range(0x1.208p+2f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f16_tanh__fma3_expm1minus_rr1_p3h2_div, 1.0f);
+  }
+
+  TEST(TANH__FMA3_EXPM1MINUS_RR1_P3H2_DIV, negative_saturation) {
+    TEST_REQUIRES_X86_FMA3;
+
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.208p+2f)
+      .TestOutputMatchReference(xnn_math_f16_tanh__fma3_expm1minus_rr1_p3h2_div, -1.0f);
+  }
+
+  TEST(TANH__FMA3_EXPM1MINUS_RR1_P3H2_DIV, nan) {
+    TEST_REQUIRES_X86_FMA3;
+
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f16_tanh__fma3_expm1minus_rr1_p3h2_div);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(TANH__FMA3_EXPM1MINUS_RR1_P3H2_RCP, positive_saturation) {
+    TEST_REQUIRES_X86_FMA3;
+
+    MathEvaluationTester()
+      .input_range(0x1.208p+2f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f16_tanh__fma3_expm1minus_rr1_p3h2_rcp, 1.0f);
+  }
+
+  TEST(TANH__FMA3_EXPM1MINUS_RR1_P3H2_RCP, negative_saturation) {
+    TEST_REQUIRES_X86_FMA3;
+
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.208p+2f)
+      .TestOutputMatchReference(xnn_math_f16_tanh__fma3_expm1minus_rr1_p3h2_rcp, -1.0f);
+  }
+
+  TEST(TANH__FMA3_EXPM1MINUS_RR1_P3H2_RCP, nan) {
+    TEST_REQUIRES_X86_FMA3;
+
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f16_tanh__fma3_expm1minus_rr1_p3h2_rcp);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(TANH__FMA3_POLYNOMIAL_P17H8T2, positive_saturation) {
     TEST_REQUIRES_X86_FMA3;
 
@@ -476,6 +528,58 @@
 
     MathEvaluationTester()
       .TestNaN(xnn_math_f16_tanh__fma3_polynomial_p19h9t2);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(TANH__F16C_EXPM1MINUS_RR1_P3H2_DIV, positive_saturation) {
+    TEST_REQUIRES_X86_F16C;
+
+    MathEvaluationTester()
+      .input_range(0x1.208p+2f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f16_tanh__f16c_expm1minus_rr1_p3h2_div, 1.0f);
+  }
+
+  TEST(TANH__F16C_EXPM1MINUS_RR1_P3H2_DIV, negative_saturation) {
+    TEST_REQUIRES_X86_F16C;
+
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.208p+2f)
+      .TestOutputMatchReference(xnn_math_f16_tanh__f16c_expm1minus_rr1_p3h2_div, -1.0f);
+  }
+
+  TEST(TANH__F16C_EXPM1MINUS_RR1_P3H2_DIV, nan) {
+    TEST_REQUIRES_X86_F16C;
+
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f16_tanh__f16c_expm1minus_rr1_p3h2_div);
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  TEST(TANH__F16C_EXPM1MINUS_RR1_P3H2_RCP, positive_saturation) {
+    TEST_REQUIRES_X86_F16C;
+
+    MathEvaluationTester()
+      .input_range(0x1.208p+2f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f16_tanh__f16c_expm1minus_rr1_p3h2_rcp, 1.0f);
+  }
+
+  TEST(TANH__F16C_EXPM1MINUS_RR1_P3H2_RCP, negative_saturation) {
+    TEST_REQUIRES_X86_F16C;
+
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.208p+2f)
+      .TestOutputMatchReference(xnn_math_f16_tanh__f16c_expm1minus_rr1_p3h2_rcp, -1.0f);
+  }
+
+  TEST(TANH__F16C_EXPM1MINUS_RR1_P3H2_RCP, nan) {
+    TEST_REQUIRES_X86_F16C;
+
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f16_tanh__f16c_expm1minus_rr1_p3h2_rcp);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
