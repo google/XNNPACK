@@ -2421,6 +2421,23 @@ union xnn_f32_sqrt_params {
 
 // TanH (Hyperbolic Tangent): used by VTANH microkernels.
 
+union xnn_f16_tanh_params {
+  char _; // Dummy member variable to comply with the C standard
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    XNN_ALIGN(32) uint16_t sign_mask[16];
+    XNN_ALIGN(32) float sat_cutoff[8];
+    XNN_ALIGN(32) float log2e[8];
+    XNN_ALIGN(32) float magic_bias[8];
+    XNN_ALIGN(32) float minus_ln2[8];
+    XNN_ALIGN(32) float c3[8];
+    XNN_ALIGN(32) float c2[8];
+    XNN_ALIGN(32) float two[8];
+    XNN_ALIGN(32) float minus_one[8];
+  } avx_expm1minus_rr1_p3h2;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
 union xnn_f32_tanh_params {
   struct {
     float sat_cutoff;

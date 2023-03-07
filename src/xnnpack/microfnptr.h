@@ -1500,6 +1500,12 @@ typedef void (*xnn_u64_u32_vsqrtshift_ukernel_fn)(
 
 // VTANH: Vector TANH elementwise
 
+typedef void (*xnn_f16_vtanh_ukernel_fn)(
+    size_t batch,
+    const void* input,
+    void* output,
+    const union xnn_f16_tanh_params* params);
+
 typedef void (*xnn_f32_vtanh_ukernel_fn)(
     size_t batch,
     const float* input,
@@ -2182,6 +2188,9 @@ typedef size_t (*xnn_init_f16_sqrt_params_fn)(
 
 typedef size_t (*xnn_init_f32_sqrt_params_fn)(
   union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef size_t (*xnn_init_f16_tanh_params_fn)(
+  union xnn_f16_tanh_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f32_tanh_params_fn)(
   union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)]);

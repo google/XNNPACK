@@ -427,6 +427,15 @@ DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_scalar_rr2_p5_para
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
+#define DECLARE_INIT_F16_TANH_PARAMS_FUNCTION(fn_name)      \
+  XNN_INTERNAL size_t fn_name(                              \
+    union xnn_f16_tanh_params params[XNN_MIN_ELEMENTS(1)]);
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  DECLARE_INIT_F16_TANH_PARAMS_FUNCTION(xnn_init_f16_tanh_avx_expm1minus_rr1_p3h2_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
 #define DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                              \
     union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)]);

@@ -6019,6 +6019,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_vtanh_bench",
+    srcs = [
+        "bench/f16-vtanh.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f16_f32_vcvt_bench",
     srcs = [
         "bench/f16-f32-vcvt.cc",
@@ -7837,6 +7845,15 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-vrsubc-minmax.cc",
         "test/vbinaryc-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_vtanh_test",
+    srcs = [
+        "test/f16-vtanh.cc",
+        "test/vunary-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

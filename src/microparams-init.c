@@ -2394,6 +2394,27 @@ size_t xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+size_t xnn_init_f16_tanh_avx_expm1minus_rr1_p3h2_params(
+  union xnn_f16_tanh_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx_expm1minus_rr1_p3h2.sign_mask[i] = UINT16_C(0x8000);
+  }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx_expm1minus_rr1_p3h2.sat_cutoff[i] = -0x1.208000p+2f;
+    params->avx_expm1minus_rr1_p3h2.log2e[i] = 0x1.715476p+0f;
+    params->avx_expm1minus_rr1_p3h2.magic_bias[i] = 0x1.8000FEp+22f;
+    params->avx_expm1minus_rr1_p3h2.minus_ln2[i] = -0x1.62E430p-1f;
+    params->avx_expm1minus_rr1_p3h2.c3[i] = 0x1.560722p+0f;
+    params->avx_expm1minus_rr1_p3h2.c2[i] = 0x1.01E2A2p+1f;
+    params->avx_expm1minus_rr1_p3h2.two[i] = 2.0f;
+    params->avx_expm1minus_rr1_p3h2.minus_one[i] = -1.0f;
+  }
+  return sizeof(params->avx_expm1minus_rr1_p3h2);
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 size_t xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params(
   union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)])
 {
