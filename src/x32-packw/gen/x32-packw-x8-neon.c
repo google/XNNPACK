@@ -52,7 +52,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon(
 
   do {
     // NC main loop multiple of 8
-    const uint32_t* w = weights;
+    const uint32_t* w0 = weights;
     size_t n = nc;
 
     for (;n >= 8; n -= 8) {
@@ -65,7 +65,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon(
         packed_weights += 8;
       }
 
-      const uint32_t* w0 = w;
       const uint32_t* w1 = w0 + kc;
       const uint32_t* w2 = w1 + kc;
       const uint32_t* w3 = w2 + kc;
@@ -177,7 +176,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon(
         }
       }
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
-      w = w7;
+      w0 = w7;
     }
 
     // NC remainder (1..7)
@@ -195,7 +194,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon(
       }
 
       // NR remainder has less than 8 rows so last row is not loaded
-      const uint32_t* w0 = w;
       const uint32_t* w1 = w0 + kc;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
