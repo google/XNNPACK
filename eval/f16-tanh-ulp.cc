@@ -264,14 +264,14 @@ static void TanhError(
                     benchmark::utils::CheckFMA3)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, fma3_p17h8t2,
-                    xnn_math_f16_tanh__fma3_p17h8t2,
+  BENCHMARK_CAPTURE(TanhError, fma3_polynomial_p17h8t2,
+                    xnn_math_f16_tanh__fma3_polynomial_p17h8t2,
                     /*num_flush_to_zero_values=*/0,
                     benchmark::utils::CheckFMA3)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, fma3_p19h9t2,
-                    xnn_math_f16_tanh__fma3_p19h9t2,
+  BENCHMARK_CAPTURE(TanhError, fma3_polynomial_p19h9t2,
+                    xnn_math_f16_tanh__fma3_polynomial_p19h9t2,
                     /*num_flush_to_zero_values=*/0,
                     benchmark::utils::CheckFMA3)
     ->Unit(benchmark::kMillisecond)
@@ -289,8 +289,8 @@ static void TanhError(
                     benchmark::utils::CheckF16C)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, f16c_p19h9t2,
-                    xnn_math_f16_tanh__f16c_p19h9t2,
+  BENCHMARK_CAPTURE(TanhError, f16c_polynomial_p19h9t2,
+                    xnn_math_f16_tanh__f16c_polynomial_p19h9t2,
                     /*num_flush_to_zero_values=*/0,
                     benchmark::utils::CheckF16C)
     ->Unit(benchmark::kMillisecond)

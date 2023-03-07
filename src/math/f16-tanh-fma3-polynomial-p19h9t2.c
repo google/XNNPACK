@@ -14,7 +14,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f16_tanh__fma3_p19h9t2(
+void xnn_math_f16_tanh__fma3_polynomial_p19h9t2(
     size_t n,
     const void* input,
     void* output)

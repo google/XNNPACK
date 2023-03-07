@@ -429,78 +429,78 @@
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(TANH__FMA3_P17H8T2, positive_saturation) {
+  TEST(TANH__FMA3_POLYNOMIAL_P17H8T2, positive_saturation) {
     TEST_REQUIRES_X86_FMA3;
 
     MathEvaluationTester()
       .input_range(0x1.208p+2f, std::numeric_limits<float>::infinity())
-      .TestOutputMatchReference(xnn_math_f16_tanh__fma3_p17h8t2, 1.0f);
+      .TestOutputMatchReference(xnn_math_f16_tanh__fma3_polynomial_p17h8t2, 1.0f);
   }
 
-  TEST(TANH__FMA3_P17H8T2, negative_saturation) {
+  TEST(TANH__FMA3_POLYNOMIAL_P17H8T2, negative_saturation) {
     TEST_REQUIRES_X86_FMA3;
 
     MathEvaluationTester()
       .input_range(-std::numeric_limits<float>::infinity(), -0x1.208p+2f)
-      .TestOutputMatchReference(xnn_math_f16_tanh__fma3_p17h8t2, -1.0f);
+      .TestOutputMatchReference(xnn_math_f16_tanh__fma3_polynomial_p17h8t2, -1.0f);
   }
 
-  TEST(TANH__FMA3_P17H8T2, nan) {
+  TEST(TANH__FMA3_POLYNOMIAL_P17H8T2, nan) {
     TEST_REQUIRES_X86_FMA3;
 
     MathEvaluationTester()
-      .TestNaN(xnn_math_f16_tanh__fma3_p17h8t2);
+      .TestNaN(xnn_math_f16_tanh__fma3_polynomial_p17h8t2);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(TANH__FMA3_P19H9T2, positive_saturation) {
+  TEST(TANH__FMA3_POLYNOMIAL_P19H9T2, positive_saturation) {
     TEST_REQUIRES_X86_FMA3;
 
     MathEvaluationTester()
       .input_range(0x1.208p+2f, std::numeric_limits<float>::infinity())
-      .TestOutputMatchReference(xnn_math_f16_tanh__fma3_p19h9t2, 1.0f);
+      .TestOutputMatchReference(xnn_math_f16_tanh__fma3_polynomial_p19h9t2, 1.0f);
   }
 
-  TEST(TANH__FMA3_P19H9T2, negative_saturation) {
+  TEST(TANH__FMA3_POLYNOMIAL_P19H9T2, negative_saturation) {
     TEST_REQUIRES_X86_FMA3;
 
     MathEvaluationTester()
       .input_range(-std::numeric_limits<float>::infinity(), -0x1.208p+2f)
-      .TestOutputMatchReference(xnn_math_f16_tanh__fma3_p19h9t2, -1.0f);
+      .TestOutputMatchReference(xnn_math_f16_tanh__fma3_polynomial_p19h9t2, -1.0f);
   }
 
-  TEST(TANH__FMA3_P19H9T2, nan) {
+  TEST(TANH__FMA3_POLYNOMIAL_P19H9T2, nan) {
     TEST_REQUIRES_X86_FMA3;
 
     MathEvaluationTester()
-      .TestNaN(xnn_math_f16_tanh__fma3_p19h9t2);
+      .TestNaN(xnn_math_f16_tanh__fma3_polynomial_p19h9t2);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(TANH__F16C_P19H9T2, positive_saturation) {
+  TEST(TANH__F16C_POLYNOMIAL_P19H9T2, positive_saturation) {
     TEST_REQUIRES_X86_F16C;
 
     MathEvaluationTester()
       .input_range(0x1.208p+2f, std::numeric_limits<float>::infinity())
-      .TestOutputMatchReference(xnn_math_f16_tanh__f16c_p19h9t2, 1.0f);
+      .TestOutputMatchReference(xnn_math_f16_tanh__f16c_polynomial_p19h9t2, 1.0f);
   }
 
-  TEST(TANH__F16C_P19H9T2, negative_saturation) {
+  TEST(TANH__F16C_POLYNOMIAL_P19H9T2, negative_saturation) {
     TEST_REQUIRES_X86_F16C;
 
     MathEvaluationTester()
       .input_range(-std::numeric_limits<float>::infinity(), -0x1.208p+2f)
-      .TestOutputMatchReference(xnn_math_f16_tanh__f16c_p19h9t2, -1.0f);
+      .TestOutputMatchReference(xnn_math_f16_tanh__f16c_polynomial_p19h9t2, -1.0f);
   }
 
-  TEST(TANH__F16C_P19H9T2, nan) {
+  TEST(TANH__F16C_POLYNOMIAL_P19H9T2, nan) {
     TEST_REQUIRES_X86_F16C;
 
     MathEvaluationTester()
-      .TestNaN(xnn_math_f16_tanh__f16c_p19h9t2);
+      .TestNaN(xnn_math_f16_tanh__f16c_polynomial_p19h9t2);
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
