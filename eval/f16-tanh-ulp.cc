@@ -289,6 +289,12 @@ static void TanhError(
                     benchmark::utils::CheckF16C)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
+  BENCHMARK_CAPTURE(TanhError, f16c_polynomial_p17h8t2,
+                    xnn_math_f16_tanh__f16c_polynomial_p17h8t2,
+                    /*num_flush_to_zero_values=*/0,
+                    benchmark::utils::CheckF16C)
+    ->Unit(benchmark::kMillisecond)
+    ->Iterations(1);
   BENCHMARK_CAPTURE(TanhError, f16c_polynomial_p19h9t2,
                     xnn_math_f16_tanh__f16c_polynomial_p19h9t2,
                     /*num_flush_to_zero_values=*/0,

@@ -32,6 +32,12 @@ tools/xngen src/math/f16-tanh-avx-expm1minus.c.in -D P=3 -D H=2 -D DIV=RCP -D SA
 tools/xngen src/math/f16-tanh-avx-expm1minus.c.in -D P=3 -D H=2 -D DIV=DIV -D SAT=MINMAX -D FMA=3 -D AVX=2 -o src/math/gen/f16-tanh-avx2-expm1minus-rr1-p3h2-div.c &
 tools/xngen src/math/f16-tanh-avx-expm1minus.c.in -D P=3 -D H=2 -D DIV=RCP -D SAT=SELECT -D FMA=3 -D AVX=2 -o src/math/gen/f16-tanh-avx2-expm1minus-rr1-p3h2-rcp.c &
 
+tools/xngen src/math/f16-tanh-avx-polynomial.c.in -D P=17 -D H=8 -D FMA=0 -o src/math/gen/f16-tanh-f16c-polynomial-p17h8t2.c &
+tools/xngen src/math/f16-tanh-avx-polynomial.c.in -D P=19 -D H=9 -D FMA=0 -o src/math/gen/f16-tanh-f16c-polynomial-p19h9t2.c &
+
+tools/xngen src/math/f16-tanh-avx-polynomial.c.in -D P=17 -D H=8 -D FMA=3 -o src/math/gen/f16-tanh-fma3-polynomial-p17h8t2.c &
+tools/xngen src/math/f16-tanh-avx-polynomial.c.in -D P=19 -D H=9 -D FMA=3 -o src/math/gen/f16-tanh-fma3-polynomial-p19h9t2.c &
+
 ################################### F32 TanH ##################################
 # Scalar
 tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=4 -D DIV=DIV -D FMA=0 -o src/math/gen/f32-tanh-scalar-expm1minus-rr1-p6h4-div.c &

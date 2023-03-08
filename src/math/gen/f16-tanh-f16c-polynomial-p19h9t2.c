@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/math/f16-tanh-avx-polynomial.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -23,10 +27,10 @@ void xnn_math_f16_tanh__f16c_polynomial_p19h9t2(
 
   // The smallest number x above -0x1.208p+2h (the largest number z for which tanhh(z) is saturated at -1.0h) for which
   // this implementation of tanh(x) produce -1.0h output.
-  const __m256 vneg_cutoff = _mm256_set1_ps(-0x1.1F0000p+2f);
+  const __m256 vneg_sat_cutoff = _mm256_set1_ps(-0x1.1F0000p+2f);
   // The largest number x below 0x1.208p+2h (the smallest number z for which tanhh(z) is saturated at 1.0h) for which
   // this implementation of tanh(x) produce 1.0h output.
-  const __m256 vpos_cutoff = _mm256_set1_ps(0x1.1F0000p+2f);
+  const __m256 vpos_sat_cutoff = _mm256_set1_ps(0x1.1F0000p+2f);
   // Coefficient of polynomial approximation
   //   tanh(x) ~ x * (1 + t * (c3 + t * (c5 + t * (c7 + t * (c9 + t * (c11 + t * (c13 + t * (c15 + t * (c17 + t * c19)))))))))
   // on [-0x1.208p+2h, 0x1.208p+2] where t = x * x
@@ -48,11 +52,11 @@ void xnn_math_f16_tanh__f16c_polynomial_p19h9t2(
 
     // tanhh(x) saturates at -1 for large negative inputs and at +1 for large positive inputs: tanhh(x) == -1.0h for
     // x <= -0x1.208p+2 ~= -4.5078125 and tanhh(x) == 1.0h for x >= 0x1.208p+2 ~= 4.5078125. To guarantee this
-    // behaviour, we clip input x on [neg_sat_cutoff, pos_sat_cutoff], and leverage the fact that for our implementation
-    // tanhh(neg_sat_cutoff) == -1.0h and tanhh(pos_sat_cutoff) == 1.0h. The order of operands in the VMAXPS & VMINPS
-    // instructions matters: it ensures that NaN inputs are passed unchanged.
-    vx = _mm256_max_ps(vneg_cutoff, vx);
-    vx = _mm256_min_ps(vpos_cutoff, vx);
+    // behaviour, we clip input x on [neg_sat_cutoff, pos_sat_cutoff] containing [-0x1.208p+2, 0x1.208p+2], and
+    // leverage the fact that for our implementation tanhh(neg_sat_cutoff) == -1.0h and tanhh(pos_sat_cutoff) == 1.0h.
+    // NaN inputs are passed unchanged.
+    vx = _mm256_max_ps(vneg_sat_cutoff, vx);
+    vx = _mm256_min_ps(vpos_sat_cutoff, vx);
 
     // Compute t = x * x to use for polynomial evaluation
     const __m256 vt = _mm256_mul_ps(vx, vx);
