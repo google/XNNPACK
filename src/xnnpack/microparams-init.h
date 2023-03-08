@@ -433,6 +433,7 @@ DECLARE_INIT_F32_SIGMOID_PARAMS_FUNCTION(xnn_init_f32_sigmoid_scalar_rr2_p5_para
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F16_TANH_PARAMS_FUNCTION(xnn_init_f16_tanh_avx_expm1minus_rr1_p3h2_params)
+  DECLARE_INIT_F16_TANH_PARAMS_FUNCTION(xnn_init_f16_tanh_avx_polynomial_p19h9t2_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 

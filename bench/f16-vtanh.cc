@@ -308,6 +308,66 @@ static void f16_vtanh(
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, fma3_polynomial_p19h9t2_x8,
+                    xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x8,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, fma3_polynomial_p19h9t2_x16,
+                    xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x16,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, fma3_polynomial_p19h9t2_x24,
+                    xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x24,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, fma3_polynomial_p19h9t2_x32,
+                    xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x32,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, fma3_polynomial_p19h9t2_x40,
+                    xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x40,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, fma3_polynomial_p19h9t2_x48,
+                    xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x48,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, fma3_polynomial_p19h9t2_x56,
+                    xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x56,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, fma3_polynomial_p19h9t2_x64,
+                    xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x64,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, fma3_polynomial_p19h9t2_x72,
+                    xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x72,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, fma3_polynomial_p19h9t2_x80,
+                    xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x80,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckFMA3)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
 
   BENCHMARK_CAPTURE(f16_vtanh, f16c_expm1minus_rr1_p3h2_div_x8,
                     xnn_f16_vtanh_ukernel__f16c_expm1minus_rr1_p3h2_div_x8,
@@ -426,6 +486,66 @@ static void f16_vtanh(
   BENCHMARK_CAPTURE(f16_vtanh, f16c_expm1minus_rr1_p3h2_rcp_x80,
                     xnn_f16_vtanh_ukernel__f16c_expm1minus_rr1_p3h2_rcp_x80,
                     xnn_init_f16_tanh_avx_expm1minus_rr1_p3h2_params,
+                    benchmark::utils::CheckF16C)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, f16c_polynomial_p19h9t2_x8,
+                    xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x8,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckF16C)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, f16c_polynomial_p19h9t2_x16,
+                    xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x16,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckF16C)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, f16c_polynomial_p19h9t2_x24,
+                    xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x24,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckF16C)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, f16c_polynomial_p19h9t2_x32,
+                    xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x32,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckF16C)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, f16c_polynomial_p19h9t2_x40,
+                    xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x40,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckF16C)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, f16c_polynomial_p19h9t2_x48,
+                    xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x48,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckF16C)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, f16c_polynomial_p19h9t2_x56,
+                    xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x56,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckF16C)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, f16c_polynomial_p19h9t2_x64,
+                    xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x64,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckF16C)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, f16c_polynomial_p19h9t2_x72,
+                    xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x72,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
+                    benchmark::utils::CheckF16C)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, f16c_polynomial_p19h9t2_x80,
+                    xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x80,
+                    xnn_init_f16_tanh_avx_polynomial_p19h9t2_params,
                     benchmark::utils::CheckF16C)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();

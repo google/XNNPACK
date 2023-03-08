@@ -45,6 +45,27 @@
 - name: xnn_f16_vtanh_ukernel__f16c_expm1minus_rr1_p3h2_rcp_x80
   init: xnn_init_f16_tanh_avx_expm1minus_rr1_p3h2_params
 
+- name: xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x8
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x16
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x24
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x32
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x40
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x48
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x56
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x64
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x72
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__f16c_polynomial_p19h9t2_x80
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+
 # FMA3
 - name: xnn_f16_vtanh_ukernel__fma3_expm1minus_rr1_p3h2_div_x8
   init: xnn_init_f16_tanh_avx_expm1minus_rr1_p3h2_params
@@ -86,6 +107,27 @@
   init: xnn_init_f16_tanh_avx_expm1minus_rr1_p3h2_params
 - name: xnn_f16_vtanh_ukernel__fma3_expm1minus_rr1_p3h2_rcp_x80
   init: xnn_init_f16_tanh_avx_expm1minus_rr1_p3h2_params
+
+- name: xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x8
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x16
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x24
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x32
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x40
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x48
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x56
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x64
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x72
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
+- name: xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x80
+  init: xnn_init_f16_tanh_avx_polynomial_p19h9t2_params
 
 # AVX2
 - name: xnn_f16_vtanh_ukernel__avx2_expm1minus_rr1_p3h2_div_x8

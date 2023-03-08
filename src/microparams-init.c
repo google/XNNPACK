@@ -2413,6 +2413,25 @@ size_t xnn_init_f16_tanh_avx_expm1minus_rr1_p3h2_params(
   }
   return sizeof(params->avx_expm1minus_rr1_p3h2);
 }
+
+size_t xnn_init_f16_tanh_avx_polynomial_p19h9t2_params(
+  union xnn_f16_tanh_params params[XNN_MIN_ELEMENTS(1)])
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx_polynomial_p19h9t2.neg_sat_cutoff[i] = -0x1.1F0000p+2f;
+    params->avx_polynomial_p19h9t2.pos_sat_cutoff[i] = 0x1.1F0000p+2f;
+    params->avx_polynomial_p19h9t2.c19[i] = -0x1.1D841Cp-32f;
+    params->avx_polynomial_p19h9t2.c17[i] = 0x1.C4FC88p-26f;
+    params->avx_polynomial_p19h9t2.c15[i] = -0x1.332066p-20f;
+    params->avx_polynomial_p19h9t2.c13[i] = 0x1.D1AEA2p-16f;
+    params->avx_polynomial_p19h9t2.c11[i] = -0x1.B2782Ep-12f;
+    params->avx_polynomial_p19h9t2.c9[i] = 0x1.03CAEAp-8f;
+    params->avx_polynomial_p19h9t2.c7[i] = -0x1.967628p-6f;
+    params->avx_polynomial_p19h9t2.c5[i] = 0x1.ABC35Cp-4f;
+    params->avx_polynomial_p19h9t2.c3[i] = -0x1.499D08p-2f;
+  }
+  return sizeof(params->avx_polynomial_p19h9t2);
+}
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 size_t xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params(

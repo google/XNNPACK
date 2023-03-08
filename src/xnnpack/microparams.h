@@ -2435,6 +2435,19 @@ union xnn_f16_tanh_params {
     XNN_ALIGN(32) float two[8];
     XNN_ALIGN(32) float minus_one[8];
   } avx_expm1minus_rr1_p3h2;
+  struct {
+    XNN_ALIGN(32) float neg_sat_cutoff[8];
+    XNN_ALIGN(32) float pos_sat_cutoff[8];
+    XNN_ALIGN(32) float c19[8];
+    XNN_ALIGN(32) float c17[8];
+    XNN_ALIGN(32) float c15[8];
+    XNN_ALIGN(32) float c13[8];
+    XNN_ALIGN(32) float c11[8];
+    XNN_ALIGN(32) float c9[8];
+    XNN_ALIGN(32) float c7[8];
+    XNN_ALIGN(32) float c5[8];
+    XNN_ALIGN(32) float c3[8];
+  } avx_polynomial_p19h9t2;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 

@@ -68,6 +68,28 @@ tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D BATCH_TILE=64 -D 
 tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D BATCH_TILE=72 -D DIV=RCP -D SAT=SELECT -D AVX=2 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2-rcp-x72.c &
 tools/xngen src/f16-vtanh/avx-expm1minus.c.in -D P=3 -D H=2 -D BATCH_TILE=80 -D DIV=RCP -D SAT=SELECT -D AVX=2 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2-rcp-x80.c &
 
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=8  -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-polynomial-p19h9-x8.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=16 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-polynomial-p19h9-x16.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=24 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-polynomial-p19h9-x24.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=32 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-polynomial-p19h9-x32.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=40 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-polynomial-p19h9-x40.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=48 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-polynomial-p19h9-x48.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=56 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-polynomial-p19h9-x56.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=64 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-polynomial-p19h9-x64.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=72 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-polynomial-p19h9-x72.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=80 -D FMA=0 -o src/f16-vtanh/gen/f16-vtanh-f16c-polynomial-p19h9-x80.c &
+
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=8  -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9-x8.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=16 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9-x16.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=24 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9-x24.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=32 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9-x32.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=40 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9-x40.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=48 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9-x48.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=56 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9-x56.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=64 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9-x64.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=72 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9-x72.c &
+tools/xngen src/f16-vtanh/avx-polynomial.c.in -D P=19 -D H=9 -D BATCH_TILE=80 -D FMA=3 -o src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9-x80.c &
+
 ################################## Unit tests #################################
 tools/generate-vunary-test.py --spec test/f16-vtanh.yaml --output test/f16-vtanh.cc &
 
