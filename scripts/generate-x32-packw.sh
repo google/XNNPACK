@@ -6,8 +6,10 @@
 
 #################################### Scalar ###################################
 ### Generic C micro-kernels
-tools/xngen src/x32-packw/scalar.c.in -D NR=2 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x2-scalar.c &
-tools/xngen src/x32-packw/scalar.c.in -D NR=4 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x4-scalar.c &
+tools/xngen src/x32-packw/scalar.c.in -D NR=2 -D KUNROLL=4 -D TYPE=uint32_t -o src/x32-packw/gen/x32-packw-x2-scalar-int.c &
+tools/xngen src/x32-packw/scalar.c.in -D NR=4 -D KUNROLL=4 -D TYPE=uint32_t -o src/x32-packw/gen/x32-packw-x4-scalar-int.c &
+tools/xngen src/x32-packw/scalar.c.in -D NR=2 -D KUNROLL=4 -D TYPE=float    -o src/x32-packw/gen/x32-packw-x2-scalar-float.c &
+tools/xngen src/x32-packw/scalar.c.in -D NR=4 -D KUNROLL=4 -D TYPE=float    -o src/x32-packw/gen/x32-packw-x4-scalar-float.c &
 
 ################################### ARM NEON ##################################
 ### NR multiple of 4

@@ -15,7 +15,9 @@
 #include <xnnpack/math.h>
 #include <xnnpack/packw.h>
 
-void xnn_x32_packw_gemm_goi_ukernel_x2__scalar(
+
+
+void xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int(
   size_t g,
   size_t nc,
   size_t kc,
@@ -37,19 +39,20 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar(
   assert(weights != NULL);
   assert(packed_weights != NULL);
 
-
+  uint32_t* out = (uint32_t*) packed_weights;
+  const uint32_t* b = (const uint32_t*) bias;
   do {
     // NC main loop multiple of 2
-    const uint32_t* w0 = weights;
+    const uint32_t* w0 = (const uint32_t*) weights;
     size_t n = nc;
 
     for (;n >= 2; n -= 2) {
-      if XNN_LIKELY(bias != NULL) {
-        packed_weights[0] = bias[0];
-        packed_weights[1] = bias[1];
-        bias += 2;
+      if XNN_LIKELY(b != NULL) {
+        out[0] = b[0];
+        out[1] = b[1];
+        b += 2;
       }
-      packed_weights += 2;
+      out += 2;
 
       const uint32_t* w1 = w0 + kc;
 
@@ -66,37 +69,37 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar(
         const uint32_t v12 = w1[2];
         const uint32_t v13 = w1[3];
         w1 += 4;
-        packed_weights[0] = v00;
-        packed_weights[1] = v10;
-        packed_weights[2] = v01;
-        packed_weights[3] = v11;
-        packed_weights[4] = v02;
-        packed_weights[5] = v12;
-        packed_weights[6] = v03;
-        packed_weights[7] = v13;
-        packed_weights += 8;
+        out[0] = v00;
+        out[1] = v10;
+        out[2] = v01;
+        out[3] = v11;
+        out[4] = v02;
+        out[5] = v12;
+        out[6] = v03;
+        out[7] = v13;
+        out += 8;
       }
 
       // KC remainder
       for (; k != 0; --k) {
-        packed_weights[0] = *w0++;
-        packed_weights[1] = *w1++;
-        packed_weights += 2;
+        out[0] = *w0++;
+        out[1] = *w1++;
+        out += 2;
       }
-      packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
+      out = (uint32_t*) ((uintptr_t) out + extra_bytes);
       w0 = w1;
     }
 
     if XNN_UNLIKELY(n != 0) {
       // NC remainder (1..1)
-      if XNN_LIKELY(bias != NULL) {
+      if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         do {
-          *packed_weights++  = *bias++;
+          *out++  = *b++;
         } while (--nb != 0);
-        packed_weights += (2 - n);
+        out += (2 - n);
       } else {
-        packed_weights += 2;
+        out += 2;
       }
 
 
@@ -108,19 +111,19 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar(
         const uint32_t v02 = w0[2];
         const uint32_t v03 = w0[3];
         w0 += 4;
-        packed_weights[0] = v00;
-        packed_weights[2] = v01;
-        packed_weights[4] = v02;
-        packed_weights[6] = v03;
-        packed_weights += 8;
+        out[0] = v00;
+        out[2] = v01;
+        out[4] = v02;
+        out[6] = v03;
+        out += 8;
       }
 
       // KC remainder of 1..3
       for (; k != 0; --k) {
-        packed_weights[0] = *w0++;
-        packed_weights += 2;
+        out[0] = *w0++;
+        out += 2;
       }
-      packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
+      out = (uint32_t*) ((uintptr_t) out + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);

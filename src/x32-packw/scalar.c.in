@@ -5,6 +5,7 @@
 
 $assert NR > 1
 $assert KUNROLL >= 1
+$assert TYPE in ["uint32_t", "float"]
 
 #include <assert.h>
 #include <stddef.h>
@@ -13,7 +14,10 @@ $assert KUNROLL >= 1
 #include <xnnpack/math.h>
 #include <xnnpack/packw.h>
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}__scalar(
+$TYPE_SUFFIX = {"uint32_t": "int", "float": "float"}[TYPE]
+
+
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -35,62 +39,63 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__scalar(
   assert(weights != NULL);
   assert(packed_weights != NULL);
 
-
+  ${TYPE}* out = (${TYPE}*) packed_weights;
+  const ${TYPE}* b = (const ${TYPE}*) bias;
   do {
     // NC main loop multiple of ${NR}
-    const uint32_t* w0 = weights;
+    const ${TYPE}* w0 = (const ${TYPE}*) weights;
     size_t n = nc;
 
     for (;n >= ${NR}; n -= ${NR}) {
-      if XNN_LIKELY(bias != NULL) {
+      if XNN_LIKELY(b != NULL) {
         $for N in range(NR):
-          packed_weights[${N}] = bias[${N}];
-        bias += ${NR};
+          out[${N}] = b[${N}];
+        b += ${NR};
       }
-      packed_weights += ${NR};
+      out += ${NR};
 
       $for N in range(1, NR):
-        const uint32_t* w${N} = w${N-1} + kc;
+        const ${TYPE}* w${N} = w${N-1} + kc;
 
       // KC main loop multiple of ${NR}x${KUNROLL}
       size_t k = kc;
       for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
         $for N in range(NR):
           $for K in range(KUNROLL):
-            const uint32_t v${N}${K} = w${N}[${K}];
+            const ${TYPE} v${N}${K} = w${N}[${K}];
           w${N} += ${KUNROLL};
         $for K in range(KUNROLL):
           $for N in range(NR):
-            packed_weights[${N+K*NR}] = v${N}${K};
-        packed_weights += ${NR*KUNROLL};
+            out[${N+K*NR}] = v${N}${K};
+        out += ${NR*KUNROLL};
       }
 
       // KC remainder
       for (; k != 0; --k) {
         $for N in range(NR):
-          packed_weights[${N}] = *w${N}++;
-        packed_weights += ${NR};
+          out[${N}] = *w${N}++;
+        out += ${NR};
       }
-      packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
+      out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
       w0 = w${NR-1};
     }
 
     if XNN_UNLIKELY(n != 0) {
       // NC remainder (1..${NR-1})
-      if XNN_LIKELY(bias != NULL) {
+      if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         do {
-          *packed_weights++  = *bias++;
+          *out++  = *b++;
         } while (--nb != 0);
-        packed_weights += (${NR} - n);
+        out += (${NR} - n);
       } else {
-        packed_weights += ${NR};
+        out += ${NR};
       }
 
       $if NR > 2:
         // NR remainder has less than ${NR} rows so last row is not loaded
       $for N in range(1, NR-1):
-        const uint32_t* w${N} = w${N-1} + kc;
+        const ${TYPE}* w${N} = w${N-1} + kc;
         $if N % 2 == 0:
           if XNN_UNPREDICTABLE(n <= ${N}) {
             w${N} = w${N-1};
@@ -105,21 +110,21 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__scalar(
       for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
         $for N in range(NR-1):
           $for K in range(KUNROLL):
-            const uint32_t v${N}${K} = w${N}[${K}];
+            const ${TYPE} v${N}${K} = w${N}[${K}];
           w${N} += ${KUNROLL};
         $for K in range(KUNROLL):
           $for N in range(NR-1):
-            packed_weights[${N+K*NR}] = v${N}${K};
-        packed_weights += ${NR*KUNROLL};
+            out[${N+K*NR}] = v${N}${K};
+        out += ${NR*KUNROLL};
       }
 
       // KC remainder of 1..${KUNROLL-1}
       for (; k != 0; --k) {
         $for N in range(NR-1):
-          packed_weights[${N}] = *w${N}++;
-        packed_weights += ${NR};
+          out[${N}] = *w${N}++;
+        out += ${NR};
       }
-      packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
+      out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);

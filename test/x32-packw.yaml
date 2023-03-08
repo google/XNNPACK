@@ -5,8 +5,10 @@
 
 
 # Scalar
-- name: xnn_x32_packw_gemm_goi_ukernel_x2__scalar
-- name: xnn_x32_packw_gemm_goi_ukernel_x4__scalar
+- name: xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int
+- name: xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int
+- name: xnn_x32_packw_gemm_goi_ukernel_x2__scalar_float
+- name: xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float
 
 # ARM NEON
 - name: xnn_x32_packw_gemm_goi_ukernel_x2__neon
