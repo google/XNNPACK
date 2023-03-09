@@ -64,6 +64,7 @@
   init: xnn_init_qc8_conv_minmax_fp32_sse4_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_8f8m9l16c4s4r__sse41_mul32
   init: xnn_init_qc8_conv_minmax_fp32_sse4_params
+# x86 AVX
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_5f5m5l8c4s4r__avx_mul32
   init: xnn_init_qc8_conv_minmax_fp32_sse4_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_5f5m5l16c4s4r__avx_mul32
@@ -99,4 +100,28 @@
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_8f8m9l16c16s16r__avx2_mul16_vpmovsx
   init: xnn_init_qc8_conv_minmax_fp32_avx2_params
 - name: xnn_qc8_dwconv_minmax_fp32_ukernel_8f8m9l32c16s16r__avx2_mul16_vpmovsx
+  init: xnn_init_qc8_conv_minmax_fp32_avx2_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_5f5m5l16c16s16r__avx2_mul16_vpunpck
+  init: xnn_init_qc8_conv_minmax_fp32_avx2_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_5f5m5l32c16s16r__avx2_mul16_vpunpck
+  init: xnn_init_qc8_conv_minmax_fp32_avx2_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_5f5m5l16c16s16r__avx2_mul16_add16_vpunpck
+  init: xnn_init_qc8_conv_minmax_fp32_avx2_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_5f5m5l32c16s16r__avx2_mul16_add16_vpunpck
+  init: xnn_init_qc8_conv_minmax_fp32_avx2_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_6f6m7l16c16s16r__avx2_mul16_vpunpck
+  init: xnn_init_qc8_conv_minmax_fp32_avx2_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_6f6m7l32c16s16r__avx2_mul16_vpunpck
+  init: xnn_init_qc8_conv_minmax_fp32_avx2_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_6f6m7l16c16s16r__avx2_mul16_add16_vpunpck
+  init: xnn_init_qc8_conv_minmax_fp32_avx2_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_6f6m7l32c16s16r__avx2_mul16_add16_vpunpck
+  init: xnn_init_qc8_conv_minmax_fp32_avx2_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_8f8m9l16c16s16r__avx2_mul16_vpunpck
+  init: xnn_init_qc8_conv_minmax_fp32_avx2_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_8f8m9l32c16s16r__avx2_mul16_vpunpck
+  init: xnn_init_qc8_conv_minmax_fp32_avx2_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_8f8m9l16c16s16r__avx2_mul16_add16_vpunpck
+  init: xnn_init_qc8_conv_minmax_fp32_avx2_params
+- name: xnn_qc8_dwconv_minmax_fp32_ukernel_8f8m9l32c16s16r__avx2_mul16_add16_vpunpck
   init: xnn_init_qc8_conv_minmax_fp32_avx2_params
