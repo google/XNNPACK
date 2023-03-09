@@ -49,10 +49,34 @@ print("  -log(2)/2 = ", lb);
 print("  +log(2)/2 =", ub);
 print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), single, RU));
 
+lb = round(-log(2)/2, single, RN);
+ub = round(log(2)/2, single, RN);
+P = fpminimax(expm1(x), [|3,4,5|], [|SG...|], [lb; ub], relative, 0+x+0.5*x^2);
+print("Degree-5 P[expm1(x)] with 0+x+x^2/2 constraint on [-log(2)/2, log(2)/2] =", horner(P));
+print("  -log(2)/2 = ", lb);
+print("  +log(2)/2 =", ub);
+print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), single, RU));
+
+lb = round(-log(2)/2, single, RN);
+ub = round(log(2)/2, single, RN);
+P = fpminimax(expm1(x), [|3,4,5,6|], [|SG...|], [lb; ub], relative, 0+x+0.5*x^2);
+print("Degree-6 P[expm1(x)] with 0+x+x^2/2 constraint on [-log(2)/2, log(2)/2] =", horner(P));
+print("  -log(2)/2 = ", lb);
+print("  +log(2)/2 =", ub);
+print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), single, RU));
+
 lb = round(-log(2)/8, single, RN);
 ub = round(log(2)/8, single, RN);
 P = fpminimax(expm1(x), [|2,3,4|], [|SG...|], [lb; ub], relative, 0+x);
 print("Degree-4 P[expm1(x)] with 0+x constraint on [-log(2)/8, log(2)/8] =", horner(P));
+print("  -log(2)/8 =", lb);
+print("  +log(2)/8 =", ub);
+print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), single, RU));
+
+lb = round(-log(2)/8, single, RN);
+ub = round(log(2)/8, single, RN);
+P = fpminimax(expm1(x), [|3,4|], [|SG...|], [lb; ub], relative, 0+x+0.5*x^2);
+print("Degree-4 P[expm1(x)] with 0+x+x^2/2 constraint on [-log(2)/8, log(2)/8] =", horner(P));
 print("  -log(2)/8 =", lb);
 print("  +log(2)/8 =", ub);
 print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), single, RU));
@@ -69,6 +93,14 @@ lb = round(-log(2)/16, single, RN);
 ub = round(log(2)/16, single, RN);
 P = fpminimax(expm1(x), [|2,3,4|], [|SG...|], [lb; ub], relative, 0+x);
 print("Degree-4 P[expm1(x)] with 0+x constraint on [-log(2)/16, log(2)/16] =", horner(P));
+print("  -log(2)/16 =", lb);
+print("  +log(2)/16 =", ub);
+print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), single, RU));
+
+lb = round(-log(2)/16, single, RN);
+ub = round(log(2)/16, single, RN);
+P = fpminimax(expm1(x), [|3,4|], [|SG...|], [lb; ub], relative, 0+x+0.5*x^2);
+print("Degree-4 P[expm1(x)] with 0+x+x^2/2 constraint on [-log(2)/16, log(2)/16] =", horner(P));
 print("  -log(2)/16 =", lb);
 print("  +log(2)/16 =", ub);
 print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), single, RU));
@@ -193,6 +225,14 @@ print("  -log(2)/2 = ", lb);
 print("  +log(2)/2 =", ub);
 print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), halfprecision, RU));
 
+lb = round(-log(2)/2, halfprecision, RN);
+ub = round(log(2)/2, halfprecision, RN);
+P = fpminimax(expm1(x), [|3|], [|HP...|], [lb; ub], relative, 0+x+0.5*x^2);
+print("Degree-3 P[expm1(x)] with 0+x+x^2/2 constraint on [-log(2)/2, log(2)/2] =", horner(P));
+print("  -log(2)/2 = ", lb);
+print("  +log(2)/2 =", ub);
+print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), halfprecision, RU));
+
 lb = round(-log(2)/2, single, RN);
 ub = round(log(2)/2, single, RN);
 P = fpminimax(expm1(x), [|1,2,3|], [|SG...|], [lb; ub], relative, 0);
@@ -205,6 +245,14 @@ lb = round(-log(2)/2, single, RN);
 ub = round(log(2)/2, single, RN);
 P = fpminimax(expm1(x), [|2,3|], [|SG...|], [lb; ub], relative, 0+x);
 print("Degree-3 P[expm1(x)] with 0+x constraint on [-log(2)/2, log(2)/2] =", horner(P));
+print("  -log(2)/2 = ", lb);
+print("  +log(2)/2 =", ub);
+print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), single, RU));
+
+lb = round(-log(2)/2, single, RN);
+ub = round(log(2)/2, single, RN);
+P = fpminimax(expm1(x), [|3|], [|SG...|], [lb; ub], relative, 0+x+0.5*x^2);
+print("Degree-3 P[expm1(x)] with 0+x+x^2/2 constraint on [-log(2)/2, log(2)/2] =", horner(P));
 print("  -log(2)/2 = ", lb);
 print("  +log(2)/2 =", ub);
 print("  relative error =", round(dirtyinfnorm(P / expm1(x) - 1, [lb; ub]), single, RU));
