@@ -3784,6 +3784,36 @@ SET(ALL_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vsqrt/gen/f16-vsqrt-neonfp16arith-nr1fma1adj-x16.c
   src/f16-vsqrt/gen/f16-vsqrt-neonfp16arith-nr1fma1adj-x24.c
   src/f16-vsqrt/gen/f16-vsqrt-neonfp16arith-nr1fma1adj-x32.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fma-x8.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fma-x16.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fma-x24.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fma-x32.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fma-x40.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fma-x48.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fma-x56.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fma-x64.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fma-x72.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1fma-x80.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recps-x8.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recps-x16.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recps-x24.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recps-x32.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recps-x40.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recps-x48.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recps-x56.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recps-x64.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recps-x72.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-nr1recps-x80.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-recpeadj-x8.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-recpeadj-x16.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-recpeadj-x24.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-recpeadj-x32.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-recpeadj-x40.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-recpeadj-x48.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-recpeadj-x56.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-recpeadj-x64.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-recpeadj-x72.c
+  src/f16-vtanh/gen/f16-vtanh-neonfp16arith-expm1minus-rr1-p3h2-recpeadj-x80.c
   src/f16-vunary/gen/f16-vabs-neonfp16arith-x8.c
   src/f16-vunary/gen/f16-vabs-neonfp16arith-x16.c
   src/f16-vunary/gen/f16-vneg-neonfp16arith-x8.c
@@ -3836,6 +3866,16 @@ SET(ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS
   src/f16-vsigmoid/gen/f16-vsigmoid-aarch64-neonfp16arith-rr2-p2-div-x64.c
   src/f16-vsqrt/gen/f16-vsqrt-aarch64-neonfp16arith-sqrt-x8.c
   src/f16-vsqrt/gen/f16-vsqrt-aarch64-neonfp16arith-sqrt-x16.c
+  src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2-div-x8.c
+  src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2-div-x16.c
+  src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2-div-x24.c
+  src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2-div-x32.c
+  src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2-div-x40.c
+  src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2-div-x48.c
+  src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2-div-x56.c
+  src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2-div-x64.c
+  src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2-div-x72.c
+  src/f16-vtanh/gen/f16-vtanh-aarch64-neonfp16arith-expm1minus-rr1-p3h2-div-x80.c
   src/math/f16-sigmoid-aarch64-neonfp16arith-rr1-p2-div.c
   src/math/f16-sigmoid-aarch64-neonfp16arith-rr1-p3-div.c
   src/math/f16-sigmoid-aarch64-neonfp16arith-rr2-p2-div.c

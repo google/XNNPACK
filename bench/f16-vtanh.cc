@@ -551,6 +551,257 @@ static void f16_vtanh(
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
+  BENCHMARK_CAPTURE(f16_vtanh, aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x8,
+                    xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x8,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x16,
+                    xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x16,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x24,
+                    xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x24,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x32,
+                    xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x32,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x40,
+                    xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x40,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x48,
+                    xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x48,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x56,
+                    xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x56,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x64,
+                    xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x64,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x72,
+                    xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x72,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x80,
+                    xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x80,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
+
+
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x8,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x8,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x16,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x16,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x24,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x24,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x32,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x32,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x40,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x40,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x48,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x48,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x56,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x56,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x64,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x64,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x72,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x72,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x80,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x80,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+
+
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x8,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x8,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x16,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x16,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x24,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x24,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x32,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x32,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x40,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x40,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x48,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x48,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x56,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x56,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x64,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x64,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x72,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x72,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x80,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1recps_x80,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+
+
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x8,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x8,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x16,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x16,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x24,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x24,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x32,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x32,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x40,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x40,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x48,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x48,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x56,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x56,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x64,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x64,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x72,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x72,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f16_vtanh, neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x80,
+                    xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_recpeadj_x80,
+                    nullptr,
+                    benchmark::utils::CheckNEONFP16ARITH)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
