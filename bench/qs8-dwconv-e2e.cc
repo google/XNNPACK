@@ -825,6 +825,55 @@ static void DWConvEnd2EndBenchmark(
       /*primary_tile_to_replace=*/25, benchmark::utils::CheckXOP);
   }
 
+  static void qs8_dwconv_5f5m5l16c16s16r__avx2_mul16_vpmovsx(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l16c16s16r__avx2_mul16_vpmovsx,
+      xnn_init_qs8_conv_minmax_fp32_sse4_params,
+      /*channel_tile=*/16, /*channel_subtile=*/16, /*channel_round=*/16,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25, benchmark::utils::CheckAVX2);
+  }
+  static void qs8_dwconv_5f5m5l32c16s16r__avx2_mul16_vpmovsx(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l32c16s16r__avx2_mul16_vpmovsx,
+      xnn_init_qs8_conv_minmax_fp32_sse4_params,
+      /*channel_tile=*/32, /*channel_subtile=*/16, /*channel_round=*/16,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25, benchmark::utils::CheckAVX2);
+  }
+  static void qs8_dwconv_6f6m7l16c16s16r__avx2_mul16_vpmovsx(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_6f6m7l16c16s16r__avx2_mul16_vpmovsx,
+      xnn_init_qs8_conv_minmax_fp32_sse4_params,
+      /*channel_tile=*/16, /*channel_subtile=*/16, /*channel_round=*/16,
+      /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
+      /*primary_tile_to_replace=*/25, benchmark::utils::CheckAVX2);
+  }
+  static void qs8_dwconv_6f6m7l32c16s16r__avx2_mul16_vpmovsx(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_6f6m7l32c16s16r__avx2_mul16_vpmovsx,
+      xnn_init_qs8_conv_minmax_fp32_sse4_params,
+      /*channel_tile=*/32, /*channel_subtile=*/16, /*channel_round=*/16,
+      /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
+      /*primary_tile_to_replace=*/25, benchmark::utils::CheckAVX2);
+  }
+  static void qs8_dwconv_8f8m9l16c16s16r__avx2_mul16_vpmovsx(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_8f8m9l16c16s16r__avx2_mul16_vpmovsx,
+      xnn_init_qs8_conv_minmax_fp32_sse4_params,
+      /*channel_tile=*/16, /*channel_subtile=*/16, /*channel_round=*/16,
+      /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
+      /*primary_tile_to_replace=*/25, benchmark::utils::CheckAVX2);
+  }
+  static void qs8_dwconv_8f8m9l32c16s16r__avx2_mul16_vpmovsx(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qs8_dwconv_minmax_fp32_ukernel_8f8m9l32c16s16r__avx2_mul16_vpmovsx,
+      xnn_init_qs8_conv_minmax_fp32_sse4_params,
+      /*channel_tile=*/32, /*channel_subtile=*/16, /*channel_round=*/16,
+      /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
+      /*primary_tile_to_replace=*/25, benchmark::utils::CheckAVX2);
+  }
+
   BENCHMARK_QS8_END2END(qs8_dwconv_9p16c__avx512skx_mul32);
   BENCHMARK_QS8_END2END(qs8_dwconv_9p32c__avx512skx_mul32);
 
@@ -921,6 +970,13 @@ static void DWConvEnd2EndBenchmark(
   BENCHMARK_QS8_END2END(qs8_dwconv_6f6m7l16c4s4r__xop_mul32);
   BENCHMARK_QS8_END2END(qs8_dwconv_8f8m9l8c4s4r__xop_mul32);
   BENCHMARK_QS8_END2END(qs8_dwconv_8f8m9l16c4s4r__xop_mul32);
+
+  BENCHMARK_QS8_END2END(qs8_dwconv_5f5m5l16c16s16r__avx2_mul16_vpmovsx);
+  BENCHMARK_QS8_END2END(qs8_dwconv_5f5m5l32c16s16r__avx2_mul16_vpmovsx);
+  BENCHMARK_QS8_END2END(qs8_dwconv_6f6m7l16c16s16r__avx2_mul16_vpmovsx);
+  BENCHMARK_QS8_END2END(qs8_dwconv_6f6m7l32c16s16r__avx2_mul16_vpmovsx);
+  BENCHMARK_QS8_END2END(qs8_dwconv_8f8m9l16c16s16r__avx2_mul16_vpmovsx);
+  BENCHMARK_QS8_END2END(qs8_dwconv_8f8m9l32c16s16r__avx2_mul16_vpmovsx);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
