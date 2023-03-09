@@ -371,7 +371,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${F
               output += 4;
             }
             if (c & 2) {
-              unaligned_store_u16(output, _mm_extract_epi16(vout${ABC[0:16]}, 0));
+              unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout${ABC[0:16]}, 0));
               vout${ABC[0:16]} = _mm_srli_epi32(vout${ABC[0:16]}, 16);
               output += 2;
             }

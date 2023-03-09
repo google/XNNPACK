@@ -421,7 +421,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_5f5m5l16c16s16r__avx2_mul16_vpmovsx(
             output += 4;
           }
           if (c & 2) {
-            unaligned_store_u16(output, _mm_extract_epi16(vout0123456789ABCDEF, 0));
+            unaligned_store_u16(output, (uint16_t) _mm_extract_epi16(vout0123456789ABCDEF, 0));
             vout0123456789ABCDEF = _mm_srli_epi32(vout0123456789ABCDEF, 16);
             output += 2;
           }
