@@ -28,6 +28,16 @@ void xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x16(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
+  for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
+    float16x8_t vacc0 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+    float16x8_t vacc1 = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
+
+    vacc0 = vsqrtq_f16(vacc0);
+    vacc1 = vsqrtq_f16(vacc1);
+
+    vst1q_u16(o, vreinterpretq_u16_f16(vacc0)); o += 8;
+    vst1q_u16(o, vreinterpretq_u16_f16(vacc1)); o += 8;
+  }
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     float16x8_t vacc = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
     vacc = vsqrtq_f16(vacc);

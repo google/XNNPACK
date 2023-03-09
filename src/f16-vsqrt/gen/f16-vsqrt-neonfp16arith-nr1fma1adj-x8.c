@@ -48,7 +48,7 @@ void xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x8(
     const float16x8_t vresidual = vfmsq_f16(vhalf, vsqrtx, vhalfrsqrtx);
     const uint16x8_t vzero_mask = vceqq_f16(vi, vreinterpretq_f16_u16(vmovq_n_u16(0)));
     uint16x8_t vspecial_value = vmovq_n_u16(UINT16_C(0x7E00));
-    
+
     vsqrtx = vfmaq_f16(vsqrtx, vresidual, vsqrtx);
     vspecial_mask = vorrq_u16(vspecial_mask, vzero_mask);
     const uint16x8_t vinfinity_mask = vceqq_u16(vreinterpretq_u16_f16(vi), vpositive_infinity);
@@ -81,7 +81,7 @@ void xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x8(
     const float16x8_t vresidual = vfmsq_f16(vhalf, vsqrtx, vhalfrsqrtx);
     const uint16x8_t vzero_mask = vceqq_f16(vi, vreinterpretq_f16_u16(vmovq_n_u16(0)));
     uint16x8_t vspecial_value = vmovq_n_u16(UINT16_C(0x7E00));
-    
+
     vsqrtx = vfmaq_f16(vsqrtx, vresidual, vsqrtx);
     vspecial_mask = vorrq_u16(vspecial_mask, vzero_mask);
     const uint16x8_t vinfinity_mask = vceqq_u16(vreinterpretq_u16_f16(vi), vpositive_infinity);

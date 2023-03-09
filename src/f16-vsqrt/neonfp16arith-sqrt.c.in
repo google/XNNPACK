@@ -28,7 +28,7 @@ void xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x${BATCH_TILE}(
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
-  $if SIMD_TILE > 8:
+  $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
       $for N in range(SIMD_TILE):
         float16x8_t vacc${ABC[N]} = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
