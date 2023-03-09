@@ -33,6 +33,15 @@ class PackWMicrokernelTester {
     return this->nr_;
   }
 
+  inline PackWMicrokernelTester& kr(size_t kr) {
+    this->kr_ = kr;
+    return *this;
+  }
+
+  inline size_t kr() const {
+    return this->kr_;
+  }
+
   inline PackWMicrokernelTester& sr(size_t sr) {
     this->sr_ = sr;
     return *this;
@@ -91,7 +100,6 @@ class PackWMicrokernelTester {
 
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-
       std::iota(weights.begin(), weights.end(), 0);
       std::iota(bias.begin(), bias.end(), UINT32_C(0x80000000));
       std::fill(packed_w.begin(), packed_w.end(), UINT32_C(0x12345678));
@@ -100,11 +108,11 @@ class PackWMicrokernelTester {
       const uint32_t* bias_data = nullbias() ? nullptr : bias.data();
 
       // Compute reference results.
-      xnn_pack_f32_gemm_goi_w(1, n(), k(), nr(), 1 /* kr */, sr(),
+      xnn_pack_f32_gemm_goi_w(1, n(), k(), nr(), kr(), sr(),
         reinterpret_cast<const float *>(weights.data()), reinterpret_cast<const float *>(bias_data), reinterpret_cast<float *>(packed_w_ref.data()), 0, nullptr);
 
       // Call optimized micro-kernel.
-      packw(1, n(), k(), nr(), 1 /* kr */, sr(), weights.data(), bias_data, packed_w.data(), 0, nullptr);
+      packw(1, n(), k(), nr(), kr(), sr(), weights.data(), bias_data, packed_w.data(), 0, nullptr);
 
       // Verify results.
       for (size_t i = 0; i < (packed_n() * k() + packed_n()); i++) {
@@ -119,6 +127,7 @@ class PackWMicrokernelTester {
  private:
   size_t n_{1};
   size_t nr_{1};
+  size_t kr_{1};
   size_t sr_{1};
   size_t k_{100};
   bool nullbias_{false};

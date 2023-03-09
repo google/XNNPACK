@@ -26,15 +26,19 @@ parser.add_argument("-o", "--output", metavar="FILE", required=True,
 parser.set_defaults(defines=list())
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_x32_packw_gemm_goi_ukernel_x(\d+)(s(\d+))?__(.+)", name)
+  match = re.fullmatch(r"xnn_x(\d+)_packw_gemm_goi_ukernel_x(\d+)(c(\d+))?(s(\d+))?__(.+)", name)
   assert match is not None
-  nr = int(match.group(1))
-  if match.group(2):
-    sr = int(match.group(3))
+  nr = int(match.group(2))
+  if match.group(3):
+    kr = int(match.group(4))
+  else:
+    kr = 1
+  if match.group(5):
+    sr = int(match.group(6))
   else:
     sr = 1
-  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(4))
-  return nr, sr, arch, isa
+  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(7))
+  return nr, kr, sr, arch, isa
 
 
 PACKW_TEST_TEMPLATE = """\
@@ -44,6 +48,7 @@ TEST(${TEST_NAME}, n_eq_${NR}) {
   PackWMicrokernelTester()
     .n(${NR})
     .nr(${NR})
+    .kr(${KR})
     .sr(${SR})
     .Test(${", ".join(TEST_ARGS)});
 }
@@ -56,6 +61,7 @@ $if NR > 1:
       PackWMicrokernelTester()
         .n(n)
         .nr(${NR})
+        .kr(${KR})
         .sr(${SR})
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -68,6 +74,7 @@ $if NR > 1:
       PackWMicrokernelTester()
         .n(n)
         .nr(${NR})
+        .kr(${KR})
         .sr(${SR})
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -80,6 +87,7 @@ TEST(${TEST_NAME}, n_gt_${NR}) {
     PackWMicrokernelTester()
       .n(n)
       .nr(${NR})
+      .kr(${KR})
       .sr(${SR})
       .Test(${", ".join(TEST_ARGS)});
   }
@@ -105,6 +113,7 @@ $if NR > 1:
         .k(n)
         .n(n)
         .nr(${NR})
+        .kr(${KR})
         .sr(${SR})
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -118,6 +127,7 @@ $if NR > 1:
         .k(n)
         .n(n)
         .nr(${NR})
+        .kr(${KR})
         .sr(${SR})
         .Test(${", ".join(TEST_ARGS)});
     }
@@ -131,6 +141,7 @@ TEST(${TEST_NAME}, k_gt_${NR}) {
       .k(n)
       .n(n)
       .nr(${NR})
+      .kr(${KR})
       .sr(${SR})
       .Test(${", ".join(TEST_ARGS)});
   }
@@ -143,6 +154,7 @@ TEST(${TEST_NAME}, null_bias) {
     PackWMicrokernelTester()
       .n(n)
       .nr(${NR})
+      .kr(${KR})
       .sr(${SR})
       .nullbias(true)
       .Test(${", ".join(TEST_ARGS)});
@@ -152,12 +164,13 @@ TEST(${TEST_NAME}, null_bias) {
 """
 
 
-def generate_test_cases(ukernel, nr, sr, isa):
+def generate_test_cases(ukernel, nr, kr, sr, isa):
   """Generates all tests cases for a PackW micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
     nr: NR parameter of the PACKW micro-kernel.
+    kr: KR parameter of the PACKW micro-kernel.
     sr: SR parameter of the PACKW micro-kernel.
     isa: instruction set required to run the micro-kernel. Generated unit test
          will skip execution if the host processor doesn't support this ISA.
@@ -171,6 +184,7 @@ def generate_test_cases(ukernel, nr, sr, isa):
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": [ukernel],
       "NR": nr,
+      "KR": kr,
       "SR": sr,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
@@ -207,9 +221,9 @@ def main(args):
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
-      nr, sr, arch, isa = split_ukernel_name(name)
+      nr, kr, sr, arch, isa = split_ukernel_name(name)
 
-      test_case = generate_test_cases(name, nr, sr, isa)
+      test_case = generate_test_cases(name, nr, kr, sr, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     txt_changed = True

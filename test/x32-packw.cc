@@ -21,6 +21,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_INT, n_eq_2) {
   PackWMicrokernelTester()
     .n(2)
     .nr(2)
+    .kr(1)
     .sr(1)
     .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int);
 }
@@ -30,6 +31,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_INT, n_div_2) {
     PackWMicrokernelTester()
       .n(n)
       .nr(2)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int);
   }
@@ -40,6 +42,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_INT, n_lt_2) {
     PackWMicrokernelTester()
       .n(n)
       .nr(2)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int);
   }
@@ -50,6 +53,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_INT, n_gt_2) {
     PackWMicrokernelTester()
       .n(n)
       .nr(2)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int);
   }
@@ -70,6 +74,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_INT, k_div_2) {
       .k(n)
       .n(n)
       .nr(2)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int);
   }
@@ -81,6 +86,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_INT, k_lt_2) {
       .k(n)
       .n(n)
       .nr(2)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int);
   }
@@ -92,6 +98,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_INT, k_gt_2) {
       .k(n)
       .n(n)
       .nr(2)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int);
   }
@@ -102,6 +109,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_INT, null_bias) {
     PackWMicrokernelTester()
       .n(n)
       .nr(2)
+      .kr(1)
       .sr(1)
       .nullbias(true)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int);
@@ -113,6 +121,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_INT, n_eq_4) {
   PackWMicrokernelTester()
     .n(4)
     .nr(4)
+    .kr(1)
     .sr(1)
     .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int);
 }
@@ -122,6 +131,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_INT, n_div_4) {
     PackWMicrokernelTester()
       .n(n)
       .nr(4)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int);
   }
@@ -132,6 +142,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_INT, n_lt_4) {
     PackWMicrokernelTester()
       .n(n)
       .nr(4)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int);
   }
@@ -142,6 +153,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_INT, n_gt_4) {
     PackWMicrokernelTester()
       .n(n)
       .nr(4)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int);
   }
@@ -162,6 +174,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_INT, k_div_4) {
       .k(n)
       .n(n)
       .nr(4)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int);
   }
@@ -173,6 +186,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_INT, k_lt_4) {
       .k(n)
       .n(n)
       .nr(4)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int);
   }
@@ -184,6 +198,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_INT, k_gt_4) {
       .k(n)
       .n(n)
       .nr(4)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int);
   }
@@ -194,6 +209,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_INT, null_bias) {
     PackWMicrokernelTester()
       .n(n)
       .nr(4)
+      .kr(1)
       .sr(1)
       .nullbias(true)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int);
@@ -205,6 +221,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_FLOAT, n_eq_2) {
   PackWMicrokernelTester()
     .n(2)
     .nr(2)
+    .kr(1)
     .sr(1)
     .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_float);
 }
@@ -214,6 +231,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_FLOAT, n_div_2) {
     PackWMicrokernelTester()
       .n(n)
       .nr(2)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_float);
   }
@@ -224,6 +242,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_FLOAT, n_lt_2) {
     PackWMicrokernelTester()
       .n(n)
       .nr(2)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_float);
   }
@@ -234,6 +253,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_FLOAT, n_gt_2) {
     PackWMicrokernelTester()
       .n(n)
       .nr(2)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_float);
   }
@@ -254,6 +274,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_FLOAT, k_div_2) {
       .k(n)
       .n(n)
       .nr(2)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_float);
   }
@@ -265,6 +286,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_FLOAT, k_lt_2) {
       .k(n)
       .n(n)
       .nr(2)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_float);
   }
@@ -276,6 +298,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_FLOAT, k_gt_2) {
       .k(n)
       .n(n)
       .nr(2)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_float);
   }
@@ -286,6 +309,7 @@ TEST(X32_PACKW_GEMM_GOI_X2__SCALAR_FLOAT, null_bias) {
     PackWMicrokernelTester()
       .n(n)
       .nr(2)
+      .kr(1)
       .sr(1)
       .nullbias(true)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__scalar_float);
@@ -297,6 +321,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, n_eq_4) {
   PackWMicrokernelTester()
     .n(4)
     .nr(4)
+    .kr(1)
     .sr(1)
     .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float);
 }
@@ -306,6 +331,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, n_div_4) {
     PackWMicrokernelTester()
       .n(n)
       .nr(4)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float);
   }
@@ -316,6 +342,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, n_lt_4) {
     PackWMicrokernelTester()
       .n(n)
       .nr(4)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float);
   }
@@ -326,6 +353,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, n_gt_4) {
     PackWMicrokernelTester()
       .n(n)
       .nr(4)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float);
   }
@@ -346,6 +374,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, k_div_4) {
       .k(n)
       .n(n)
       .nr(4)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float);
   }
@@ -357,6 +386,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, k_lt_4) {
       .k(n)
       .n(n)
       .nr(4)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float);
   }
@@ -368,6 +398,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, k_gt_4) {
       .k(n)
       .n(n)
       .nr(4)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float);
   }
@@ -378,6 +409,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
     PackWMicrokernelTester()
       .n(n)
       .nr(4)
+      .kr(1)
       .sr(1)
       .nullbias(true)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float);
@@ -391,6 +423,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
     PackWMicrokernelTester()
       .n(2)
       .nr(2)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x2__neon);
   }
@@ -401,6 +434,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
       PackWMicrokernelTester()
         .n(n)
         .nr(2)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x2__neon);
     }
@@ -412,6 +446,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
       PackWMicrokernelTester()
         .n(n)
         .nr(2)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x2__neon);
     }
@@ -423,6 +458,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
       PackWMicrokernelTester()
         .n(n)
         .nr(2)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x2__neon);
     }
@@ -445,6 +481,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
         .k(n)
         .n(n)
         .nr(2)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x2__neon);
     }
@@ -457,6 +494,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
         .k(n)
         .n(n)
         .nr(2)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x2__neon);
     }
@@ -469,6 +507,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
         .k(n)
         .n(n)
         .nr(2)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x2__neon);
     }
@@ -480,6 +519,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
       PackWMicrokernelTester()
         .n(n)
         .nr(2)
+        .kr(1)
         .sr(1)
         .nullbias(true)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x2__neon);
@@ -494,6 +534,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
     PackWMicrokernelTester()
       .n(8)
       .nr(8)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x8__neon);
   }
@@ -504,6 +545,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
       PackWMicrokernelTester()
         .n(n)
         .nr(8)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x8__neon);
     }
@@ -515,6 +557,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
       PackWMicrokernelTester()
         .n(n)
         .nr(8)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x8__neon);
     }
@@ -526,6 +569,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
       PackWMicrokernelTester()
         .n(n)
         .nr(8)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x8__neon);
     }
@@ -548,6 +592,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
         .k(n)
         .n(n)
         .nr(8)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x8__neon);
     }
@@ -560,6 +605,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
         .k(n)
         .n(n)
         .nr(8)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x8__neon);
     }
@@ -572,6 +618,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
         .k(n)
         .n(n)
         .nr(8)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x8__neon);
     }
@@ -583,6 +630,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
       PackWMicrokernelTester()
         .n(n)
         .nr(8)
+        .kr(1)
         .sr(1)
         .nullbias(true)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x8__neon);
@@ -597,6 +645,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
     PackWMicrokernelTester()
       .n(12)
       .nr(12)
+      .kr(1)
       .sr(1)
       .Test(xnn_x32_packw_gemm_goi_ukernel_x12__neon);
   }
@@ -607,6 +656,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
       PackWMicrokernelTester()
         .n(n)
         .nr(12)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x12__neon);
     }
@@ -618,6 +668,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
       PackWMicrokernelTester()
         .n(n)
         .nr(12)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x12__neon);
     }
@@ -629,6 +680,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
       PackWMicrokernelTester()
         .n(n)
         .nr(12)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x12__neon);
     }
@@ -651,6 +703,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
         .k(n)
         .n(n)
         .nr(12)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x12__neon);
     }
@@ -663,6 +716,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
         .k(n)
         .n(n)
         .nr(12)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x12__neon);
     }
@@ -675,6 +729,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
         .k(n)
         .n(n)
         .nr(12)
+        .kr(1)
         .sr(1)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x12__neon);
     }
@@ -686,6 +741,7 @@ TEST(X32_PACKW_GEMM_GOI_X4__SCALAR_FLOAT, null_bias) {
       PackWMicrokernelTester()
         .n(n)
         .nr(12)
+        .kr(1)
         .sr(1)
         .nullbias(true)
         .Test(xnn_x32_packw_gemm_goi_ukernel_x12__neon);
