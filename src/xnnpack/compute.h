@@ -936,6 +936,7 @@ struct univector_strided_context {
     union xnn_f16_minmax_params f16_minmax;
     union xnn_f16_neg_params f16_neg;
     union xnn_f16_sigmoid_params f16_sigmoid;
+    union xnn_f16_tanh_params f16_tanh;
     union xnn_f32_abs_params f32_abs;
     union xnn_f32_default_params f32_default;
     union xnn_f32_elu_params f32_elu;

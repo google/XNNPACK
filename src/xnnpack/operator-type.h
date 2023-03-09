@@ -139,6 +139,7 @@ enum xnn_operator_type {
   xnn_operator_type_subtract_nd_f32,
   xnn_operator_type_subtract_nd_qs8,
   xnn_operator_type_subtract_nd_qu8,
+  xnn_operator_type_tanh_nc_f16,
   xnn_operator_type_tanh_nc_qs8,
   xnn_operator_type_tanh_nc_qu8,
   xnn_operator_type_transpose_nd_x8,

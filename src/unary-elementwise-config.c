@@ -32,6 +32,7 @@ static struct xnn_unary_elementwise_config f16_rndz_config = {0};
 static struct xnn_unary_elementwise_config f16_sigmoid_config = {0};
 static struct xnn_unary_elementwise_config f16_sqr_config = {0};
 static struct xnn_unary_elementwise_config f16_sqrt_config = {0};
+static struct xnn_unary_elementwise_config f16_tanh_config = {0};
 static struct xnn_unary_elementwise_config f16_to_f32_cvt_config = {0};
 static struct xnn_unary_elementwise_config f32_abs_config = {0};
 static struct xnn_unary_elementwise_config f32_clamp_config = {0};
@@ -76,6 +77,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
   static INIT_ONCE init_guard_f16_sigmoid = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f16_sqr = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f16_sqrt = INIT_ONCE_STATIC_INIT;
+  static INIT_ONCE init_guard_f16_tanh = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f16_to_f32_cvt = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_abs = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_clamp = INIT_ONCE_STATIC_INIT;
@@ -118,6 +120,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
   static pthread_once_t init_guard_f16_sigmoid = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f16_sqr = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f16_sqrt = PTHREAD_ONCE_INIT;
+  static pthread_once_t init_guard_f16_tanh = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f16_to_f32_cvt = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_abs = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_clamp = PTHREAD_ONCE_INIT;
@@ -479,6 +482,36 @@ static void init_f16_sqrt_config(void) {
     if (hardware_config->use_x86_f16c) {
       f16_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vsqrt_ukernel__f16c_sqrt_x8;
       f16_sqrt_config.element_tile = 8;
+    }
+  #endif
+}
+
+static void init_f16_tanh_config(void) {
+  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon_fp16_arith) {
+      f16_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2_nr1fma_x32;
+      f16_tanh_config.element_tile = 32;
+    }
+  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon_fp16_arith) {
+      f16_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x32;
+      f16_tanh_config.element_tile = 32;
+    }
+  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_x86_fma3) {
+      f16_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x32;
+      f16_tanh_config.init.f16_tanh = xnn_init_f16_tanh_avx_polynomial_p19h9t2_params;
+      f16_tanh_config.element_tile = 32;
+    } else if (hardware_config->use_x86_f16c) {
+      f16_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vtanh_ukernel__f16c_expm1minus_rr1_p3h2_rcp_x72;
+      f16_tanh_config.init.f16_tanh = xnn_init_f16_tanh_avx_expm1minus_rr1_p3h2_params;
+      f16_tanh_config.element_tile = 72;
     }
   #endif
 }
@@ -2091,6 +2124,11 @@ static void init_xx_copy_config(void) {
     return TRUE;
   }
 
+  static BOOL CALLBACK init_f16_tanh_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
+    init_f16_tanh_config();
+    return TRUE;
+  }
+
   static BOOL CALLBACK init_f32_abs_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
     init_f32_abs_config();
     return TRUE;
@@ -2410,6 +2448,19 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_sqrt_config() {
     pthread_once(&init_guard_f16_sqrt, &init_f16_sqrt_config);
   #endif
   return &f16_sqrt_config;
+}
+
+const struct xnn_unary_elementwise_config* xnn_init_f16_tanh_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL || !is_f16_compatible_config(hardware_config)) {
+    return NULL;
+  }
+  #if XNN_PLATFORM_WINDOWS
+    InitOnceExecuteOnce(&init_guard_f16_tanh, &init_f16_tanh_config_windows, NULL, NULL);
+  #else
+    pthread_once(&init_guard_f16_tanh, &init_f16_tanh_config);
+  #endif
+  return &f16_tanh_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_f16_to_f32_cvt_config() {

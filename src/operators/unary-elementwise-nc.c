@@ -1488,6 +1488,38 @@ enum xnn_status xnn_create_square_root_nc_f32(
     sqrt_op_out);
 }
 
+enum xnn_status xnn_create_tanh_nc_f16(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* tanh_op_out)
+{
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_F16) != XNN_INIT_FLAG_F16) {
+    xnn_log_error("failed to create %s operator: operations on data type are not supported",
+      xnn_operator_type_to_string(xnn_operator_type_tanh_nc_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
+  const struct xnn_unary_elementwise_config* f16_tanh_config = xnn_init_f16_tanh_config();
+  if (f16_tanh_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(xnn_operator_type_tanh_nc_f16));
+    return xnn_status_unsupported_hardware;
+  }
+  union xnn_f16_tanh_params params;
+  if (f16_tanh_config->init.f16_tanh != NULL) {
+    f16_tanh_config->init.f16_tanh(&params);
+  }
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_tanh_nc_f16,
+    f16_tanh_config,
+    tanh_op_out);
+}
+
 enum xnn_status xnn_create_truncation_nc_f16(
     size_t channels,
     size_t input_stride,
@@ -2166,6 +2198,22 @@ enum xnn_status xnn_setup_square_root_nc_f32(
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
     &sqrt_op->params.f32_sqrt, sizeof(sqrt_op->params.f32_sqrt),
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_tanh_nc_f16(
+    xnn_operator_t tanh_op,
+    size_t batch_size,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_unary_elementwise_nc(
+    tanh_op, xnn_operator_type_tanh_nc_f16,
+    batch_size, input, output,
+    1 /* log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(uint16_t)) */,
+    &tanh_op->params.f16_tanh, sizeof(tanh_op->params.f16_tanh),
     pthreadpool_get_threads_count(threadpool));
 }
 

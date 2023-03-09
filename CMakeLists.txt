@@ -1293,7 +1293,7 @@ IF(XNNPACK_BUILD_TESTS)
 
     ADD_EXECUTABLE(tanh-nc-test test/tanh-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(tanh-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(tanh-nc-test PRIVATE XNNPACK gtest gtest_main)
+    TARGET_LINK_LIBRARIES(tanh-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME tanh-nc-test COMMAND tanh-nc-test)
 
     ADD_EXECUTABLE(transpose-nd-test test/transpose-nd.cc)
