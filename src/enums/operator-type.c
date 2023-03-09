@@ -24,7 +24,7 @@ static const uint16_t offset[130] = {
   2701, 2720, 2740, 2760, 2781, 2802
 };
 
-static const char data[] = 
+static const char data[] =
   "Invalid\0"
   "Abs (NC, F16)\0"
   "Abs (NC, F32)\0"

@@ -74,7 +74,7 @@ def generate_source(enum_name, spec_path, output_path, header_path):
       offset_type = 'uint32_t'
 
     offset_declaration = f'static const {offset_type} offset[{len(spec_yaml)}] = {{\n ';
-    string_declaration = 'static const char data[] = \n'
+    string_declaration = 'static const char data[] =\n'
     pos = 0
     for i, spec_entry in enumerate(spec_yaml):
       enum_item_name = spec_entry['name']

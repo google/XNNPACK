@@ -18,7 +18,7 @@ static const uint8_t offset[10] = {
   0, 8, 24, 39, 46, 51, 57, 83, 88, 98
 };
 
-static const char data[] = 
+static const char data[] =
   "Default\0"
   "Average Pooling\0"
   "Conv2D HWC2CHW\0"
