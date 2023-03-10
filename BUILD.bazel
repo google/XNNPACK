@@ -9410,6 +9410,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "x16_packw_test",
+    srcs = [
+        "test/packw-microkernel-tester.h",
+        "test/x16-packw.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":packing",
+    ],
+)
+
+xnnpack_unit_test(
     name = "x32_packw_test",
     srcs = [
         "test/packw-microkernel-tester.h",

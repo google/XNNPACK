@@ -5,7 +5,7 @@
 
 $assert NR > 1
 $assert KUNROLL >= 1
-$assert TYPE in ["uint32_t", "float"]
+$assert TYPE in ["uint16_t", "uint32_t", "float"]
 
 #include <assert.h>
 #include <stddef.h>
@@ -14,19 +14,20 @@ $assert TYPE in ["uint32_t", "float"]
 #include <xnnpack/math.h>
 #include <xnnpack/packw.h>
 
-$TYPE_SUFFIX = {"uint32_t": "int", "float": "float"}[TYPE]
+$TYPE_SUFFIX = {"uint16_t": "int", "uint32_t": "int", "float": "float"}[TYPE]
+$BITS = {"uint16_t": 16, "uint32_t": 32, "float": 32}[TYPE]
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}(
+void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}(
   size_t g,
   size_t nc,
   size_t kc,
   size_t nr,
   size_t kr,
   size_t sr,
-  const uint32_t* weights,
-  const uint32_t* bias,
-  uint32_t* packed_weights,
+  const uint${BITS}_t* weights,
+  const uint${BITS}_t* bias,
+  uint${BITS}_t* packed_weights,
   size_t extra_bytes,
   const void* params)
 {

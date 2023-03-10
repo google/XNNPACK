@@ -1155,6 +1155,19 @@ typedef void (*xnn_packw_gemm_goi_ukernel_fn)(
     size_t extra_bytes,                  \
     const void* params);                 \
 
+typedef void (*xnn_x16_packw_gemm_goi_ukernel_fn)(
+    size_t g,                            \
+    size_t nc,                           \
+    size_t kc,                           \
+    size_t nr,                           \
+    size_t kr,                           \
+    size_t sr,                           \
+    const uint16_t* k,                   \
+    const uint16_t* b,                   \
+    uint16_t* packed_weights,            \
+    size_t extra_bytes,                  \
+    const void* params);                 \
+
 typedef void (*xnn_x32_packw_gemm_goi_ukernel_fn)(
     size_t g,                            \
     size_t nc,                           \

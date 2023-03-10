@@ -93,6 +93,39 @@ class PackWMicrokernelTester {
     return this->iterations_;
   }
 
+  void Test(xnn_x16_packw_gemm_goi_ukernel_fn packw) const {
+    std::vector<uint16_t> weights(n() * k());
+    std::vector<uint16_t> bias(n());
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(packed_n() * k() + packed_n());
+    std::vector<uint16_t> packed_w_ref(packed_n() * k() + packed_n());
+
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+
+      std::iota(weights.begin(), weights.end(), 0);
+      std::iota(bias.begin(), bias.end(), UINT16_C(0x8000));
+      std::fill(packed_w.begin(), packed_w.end(), UINT16_C(0xBEEF));
+      std::fill(packed_w_ref.begin(), packed_w_ref.end(), UINT16_C(0xDEAD));
+
+      const uint16_t* bias_data = nullbias() ? nullptr : bias.data();
+
+      // Compute reference results.
+      xnn_pack_f16_gemm_goi_w(1, n(), k(), nr(), 1 /* kr */, sr(),
+        reinterpret_cast<const uint16_t *>(weights.data()), reinterpret_cast<const uint16_t *>(bias_data), reinterpret_cast<uint16_t *>(packed_w_ref.data()), 0, nullptr);
+
+      // Call optimized micro-kernel.
+      packw(1, n(), k(), nr(), 1 /* kr */, sr(), weights.data(), bias_data, packed_w.data(), 0, nullptr);
+
+      // Verify results.
+      for (size_t i = 0; i < (packed_n() * k() + packed_n()); i++) {
+        if (packed_w_ref[i] !=  UINT16_C(0xDEAD)) {  // Allow pad to differ
+          EXPECT_EQ(packed_w[i], packed_w_ref[i])
+              << "at n " << i << " of " << (packed_n() * k() + packed_n());
+        }
+      }
+    }
+  }
+
   void Test(xnn_x32_packw_gemm_goi_ukernel_fn packw) const {
     std::vector<uint32_t> weights(n() * k());
     std::vector<uint32_t> bias(n());
