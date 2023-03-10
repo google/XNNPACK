@@ -68,7 +68,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${K
           $for C in range(0, CHANNEL_TILE, 16):
             $if K == 0:
               __m256i vacc${ABC[C:C+16]} = _mm256_mullo_epi16(vi${K}x${ABC[C:C+16]}, vk${K}x${ABC[C:C+16]});
-            $elif K % 2 == 0 or K + 1 == KERNEL_TILE:
+            $elif K % 2 == 0:
               vacc${ABC[C:C+16]} = _mm256_mullo_epi16(vi${K}x${ABC[C:C+16]}, vk${K}x${ABC[C:C+16]});
             $else:
               vacc${ABC[C:C+16]} = _mm256_add_epi16(vacc${ABC[C:C+16]}, _mm256_mullo_epi16(vi${K}x${ABC[C:C+16]}, vk${K}x${ABC[C:C+16]}));
