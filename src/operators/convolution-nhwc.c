@@ -334,9 +334,9 @@ static enum xnn_status create_gemm_or_igemm(
           kernel, bias, weights_ptr, gemm_parameters->nr * extra_weights_bytes, packing_params);
       convolution_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
         .mr = mr,
-            .nr = nr,
-            .kr = kr,
-            .sr = sr,
+        .nr = nr,
+        .kr = kr,
+        .sr = sr,
       };
 
       assert(XNN_MAX_MR >= mr);
