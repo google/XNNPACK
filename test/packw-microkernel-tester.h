@@ -25,6 +25,15 @@
 class PackWMicrokernelTester {
  public:
 
+  inline PackWMicrokernelTester& g(size_t g) {
+    this->g_ = g;
+    return *this;
+  }
+
+  inline size_t g() const {
+    return this->g_;
+  }
+
   inline PackWMicrokernelTester& nr(size_t nr) {
     this->nr_ = nr;
     return *this;
@@ -94,10 +103,10 @@ class PackWMicrokernelTester {
   }
 
   void Test(xnn_x16_packw_gemm_goi_ukernel_fn packw) const {
-    std::vector<uint16_t> weights(n() * k());
-    std::vector<uint16_t> bias(n());
-    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(packed_n() * k() + packed_n());
-    std::vector<uint16_t> packed_w_ref(packed_n() * k() + packed_n());
+    std::vector<uint16_t> weights(g() * n() * k());
+    std::vector<uint16_t> bias(g() * n());
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(g() * (packed_n() * k() + packed_n()));
+    std::vector<uint16_t> packed_w_ref(g() * (packed_n() * k() + packed_n()));
 
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -110,27 +119,27 @@ class PackWMicrokernelTester {
       const uint16_t* bias_data = nullbias() ? nullptr : bias.data();
 
       // Compute reference results.
-      xnn_pack_f16_gemm_goi_w(1, n(), k(), nr(), 1 /* kr */, sr(),
+      xnn_pack_f16_gemm_goi_w(g(), n(), k(), nr(), kr(), sr(),
         reinterpret_cast<const uint16_t *>(weights.data()), reinterpret_cast<const uint16_t *>(bias_data), reinterpret_cast<uint16_t *>(packed_w_ref.data()), 0, nullptr);
 
       // Call optimized micro-kernel.
-      packw(1, n(), k(), nr(), 1 /* kr */, sr(), weights.data(), bias_data, packed_w.data(), 0, nullptr);
+      packw(g(), n(), k(), nr(), kr(), sr(), weights.data(), bias_data, packed_w.data(), 0, nullptr);
 
       // Verify results.
-      for (size_t i = 0; i < (packed_n() * k() + packed_n()); i++) {
+      for (size_t i = 0; i < g() * (packed_n() * k() + packed_n()); i++) {
         if (packed_w_ref[i] !=  UINT16_C(0xDEAD)) {  // Allow pad to differ
           EXPECT_EQ(packed_w[i], packed_w_ref[i])
-              << "at n " << i << " of " << (packed_n() * k() + packed_n());
+              << "at n " << i << " of " << (g() * (packed_n() * k() + packed_n()));
         }
       }
     }
   }
 
   void Test(xnn_x32_packw_gemm_goi_ukernel_fn packw) const {
-    std::vector<uint32_t> weights(n() * k());
-    std::vector<uint32_t> bias(n());
-    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> packed_w(packed_n() * k() + packed_n());
-    std::vector<uint32_t> packed_w_ref(packed_n() * k() + packed_n());
+    std::vector<uint32_t> weights(g() * n() * k());
+    std::vector<uint32_t> bias(g() * n());
+    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> packed_w(g() * (packed_n() * k() + packed_n()));
+    std::vector<uint32_t> packed_w_ref(g() * (packed_n() * k() + packed_n()));
 
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -142,23 +151,24 @@ class PackWMicrokernelTester {
       const uint32_t* bias_data = nullbias() ? nullptr : bias.data();
 
       // Compute reference results.
-      xnn_pack_f32_gemm_goi_w(1, n(), k(), nr(), kr(), sr(),
+      xnn_pack_f32_gemm_goi_w(g(), n(), k(), nr(), kr(), sr(),
         reinterpret_cast<const float *>(weights.data()), reinterpret_cast<const float *>(bias_data), reinterpret_cast<float *>(packed_w_ref.data()), 0, nullptr);
 
       // Call optimized micro-kernel.
-      packw(1, n(), k(), nr(), kr(), sr(), weights.data(), bias_data, packed_w.data(), 0, nullptr);
+      packw(g(), n(), k(), nr(), kr(), sr(), weights.data(), bias_data, packed_w.data(), 0, nullptr);
 
       // Verify results.
-      for (size_t i = 0; i < (packed_n() * k() + packed_n()); i++) {
+      for (size_t i = 0; i < g() * (packed_n() * k() + packed_n()); i++) {
         if (packed_w_ref[i] !=  UINT32_C(0xDEADBEEF)) {  // Allow pad to differ
           EXPECT_EQ(packed_w[i], packed_w_ref[i])
-              << "at n " << i << " of " << (packed_n() * k() + packed_n());
+              << "at n " << i << " of " << (g() * (packed_n() * k() + packed_n()));
         }
       }
     }
   }
 
  private:
+  size_t g_{1};
   size_t n_{1};
   size_t nr_{1};
   size_t kr_{1};

@@ -53,6 +53,18 @@ TEST(${TEST_NAME}, n_eq_${NR}) {
     .Test(${", ".join(TEST_ARGS)});
 }
 
+TEST(${TEST_NAME}, g_eq_2) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  PackWMicrokernelTester()
+    .g(2)
+    .n(${NR})
+    .nr(${NR})
+    .kr(${KR})
+    .sr(${SR})
+    .Test(${", ".join(TEST_ARGS)});
+}
+
 $if NR > 1:
   TEST(${TEST_NAME}, n_div_${NR}) {
     $if ISA_CHECK:
