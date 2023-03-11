@@ -3389,7 +3389,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ADD_EXECUTABLE(f32-bgemm-bench bench/f32-bgemm.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-bgemm-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-bgemm-bench PRIVATE benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-bgemm-bench PRIVATE bench-utils logging microkernels-all)
+  TARGET_LINK_LIBRARIES(f32-bgemm-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(f32-conv-hwc-bench bench/f32-conv-hwc.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-bench PRIVATE . include src)
