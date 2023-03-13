@@ -6502,6 +6502,19 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
+xnnpack_benchmark(
+    name = "x32_packw_bench",
+    srcs = [
+        "bench/bgemm.h",
+        "bench/x32-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":allocator",
+        ":math",
+        ":packing",
+    ],
+)
+
 ########################### Benchmarks for operators ###########################
 
 xnnpack_benchmark(
