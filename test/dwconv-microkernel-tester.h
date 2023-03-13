@@ -668,7 +668,6 @@ class DWConvMicrokernelTester {
         const uint32_t accumulated_range = uint32_t(accumulated_max - accumulated_min);
         const float output_scale = accumulated_range >= 256 ? double(accumulated_range) / 255.0 : 1.00001;
         scale[c] = 1.0f / output_scale;
-        scale[c] = 1.0f;
       }
 
       size_t num_middle_pass =
