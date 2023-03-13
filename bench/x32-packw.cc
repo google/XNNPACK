@@ -79,6 +79,23 @@ static void x32_packw(benchmark::State& state,
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
+#if XNN_ARCH_ARM
+  static void x32_packw_x8__asm_aarch32_neon_prfm(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x8__asm_aarch32_neon_prfm,
+      /*nr=*/8, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckNEON);
+  }
+  static void x32_packw_x8__asm_aarch32_neon(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x8__asm_aarch32_neon,
+      /*nr=*/8, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckNEON);
+  }
+
+  BENCHMARK_BGEMM(x32_packw_x8__asm_aarch32_neon_prfm)
+  BENCHMARK_BGEMM(x32_packw_x8__asm_aarch32_neon)
+#endif  // XNN_ARCH_ARM
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   static void x32_packw_x8__neon(benchmark::State& state, const char* net) {

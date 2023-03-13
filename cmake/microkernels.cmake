@@ -5087,6 +5087,8 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x8-lut/gen/x8-lut-scalar-x4.c
   src/x8-lut/gen/x8-lut-scalar-x8.c
   src/x8-lut/gen/x8-lut-scalar-x16.c
+  src/x8-packw/gen/x8-packw-x2-scalar-int.c
+  src/x8-packw/gen/x8-packw-x4-scalar-int.c
   src/x8-transposec/gen/x8-transposec-1x2-scalar-int.c
   src/x8-transposec/gen/x8-transposec-1x4-scalar-int.c
   src/x8-transposec/gen/x8-transposec-2x1-scalar-int.c
@@ -5099,8 +5101,6 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x8-zip/x8-zip-x3-scalar.c
   src/x8-zip/x8-zip-x4-scalar.c
   src/x8-zip/x8-zip-xm-scalar.c
-  src/x8-packw/gen/x8-packw-x2-scalar-int.c
-  src/x8-packw/gen/x8-packw-x4-scalar-int.c
   src/x16-packw/gen/x16-packw-x8-scalar-int.c
   src/x16-packw/gen/x16-packw-x16-scalar-int.c
   src/x16-transposec/gen/x16-transposec-1x2-scalar-int.c
@@ -8168,7 +8168,9 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-ld64.S
   src/u32-filterbank-accumulate/u32-filterbank-accumulate-asm-aarch32-arm-x1.S
   src/u32-filterbank-accumulate/u32-filterbank-accumulate-asm-aarch32-neon-x1.S
-  src/u32-filterbank-accumulate/u32-filterbank-accumulate-asm-aarch32-neon-x2.S)
+  src/u32-filterbank-accumulate/u32-filterbank-accumulate-asm-aarch32-neon-x2.S
+  src/x32-packw/gen/x32-packw-x8-asm-aarch32-neon-prfm.S
+  src/x32-packw/gen/x32-packw-x8-asm-aarch32-neon.S)
 
 SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f16-gemm/gen/f16-gemm-1x8-minmax-asm-aarch64-neonfp16arith-ld64.S

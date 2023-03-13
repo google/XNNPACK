@@ -13,4 +13,6 @@
 # ARM NEON
 - name: xnn_x32_packw_gemm_goi_ukernel_x2__neon
 - name: xnn_x32_packw_gemm_goi_ukernel_x8__neon
+- name: xnn_x32_packw_gemm_goi_ukernel_x8__asm_aarch32_neon
+- name: xnn_x32_packw_gemm_goi_ukernel_x8__asm_aarch32_neon_prfm
 - name: xnn_x32_packw_gemm_goi_ukernel_x12__neon

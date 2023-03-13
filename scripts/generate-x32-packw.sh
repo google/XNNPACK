@@ -16,6 +16,10 @@ tools/xngen src/x32-packw/scalar.c.in -D NR=4 -D KUNROLL=4 -D TYPE=float    -o s
 tools/xngen src/x32-packw/neon.c.in -D NR=8  -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8-neon.c &
 tools/xngen src/x32-packw/neon.c.in -D NR=12 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x12-neon.c &
 
+############################### AArch32 assembly ##############################
+tools/xngen src/x32-packw/x8-aarch32-neon.S.in -D PREFETCH=0 -o src/x32-packw/gen/x32-packw-x8-asm-aarch32-neon.S &
+tools/xngen src/x32-packw/x8-aarch32-neon.S.in -D PREFETCH=1 -o src/x32-packw/gen/x32-packw-x8-asm-aarch32-neon-prfm.S &
+
 ### NR2 micro-kernels
 tools/xngen src/x32-packw/NR2-neon.c.in -D NR=2 -D KUNROLL=2 -o src/x32-packw/gen/x32-packw-x2-neon.c &
 
