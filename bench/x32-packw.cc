@@ -46,13 +46,23 @@ static void x32_packw(benchmark::State& state,
   std::generate(b.begin(), b.end(), std::ref(f32rng));
 
   const size_t w_elements = stride_n * stride_k + stride_n;
-  std::vector<float, AlignedAllocator<float, 64>> w(batch * w_elements);
+  const size_t num_buffers = 1 +
+    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
+      sizeof(float) * batch * (w_elements + dim_n * dim_k));
+
+  std::vector<float, AlignedAllocator<float, 64>> w(num_buffers * batch * w_elements);
   std::fill(w.begin(), w.end(), 0.0f);
 
+  size_t buffer_index = 0;
   for (auto _ : state) {
+    if (++buffer_index == num_buffers) {
+      buffer_index = 0;
+    }
+
     packw(batch, dim_n, dim_k, nr, kr, sr,
-      reinterpret_cast<const uint32_t*>(b.data()), /*bias=*/nullptr,
-      reinterpret_cast<uint32_t*>(w.data()),
+      reinterpret_cast<const uint32_t*>(b.data() + buffer_index * batch * dim_n * dim_k),
+      /*bias=*/nullptr,
+      reinterpret_cast<uint32_t*>(w.data() + buffer_index * batch * w_elements),
       /*extra_bytes=*/0, nullptr);
   }
 
