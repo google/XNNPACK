@@ -5,7 +5,7 @@
 
 $assert NR > 1
 $assert KUNROLL >= 1
-$assert TYPE in ["uint16_t", "uint32_t", "float"]
+$assert TYPE in ["int8_t", "uint16_t", "uint32_t", "float"]
 
 #include <assert.h>
 #include <stddef.h>
@@ -14,8 +14,10 @@ $assert TYPE in ["uint16_t", "uint32_t", "float"]
 #include <xnnpack/math.h>
 #include <xnnpack/packw.h>
 
-$TYPE_SUFFIX = {"uint16_t": "int", "uint32_t": "int", "float": "float"}[TYPE]
-$BITS = {"uint16_t": 16, "uint32_t": 32, "float": 32}[TYPE]
+$TYPE_SUFFIX = {"int8_t": "int", "uint16_t": "int", "uint32_t": "int", "float": "float"}[TYPE]
+$BITS = {"int8_t": 8, "uint16_t": 16, "uint32_t": 32, "float": 32}[TYPE]
+$BTYPE = {"int8_t": "int32_t", "uint16_t": "uint16_t", "uint32_t": "uint32_t", "float": "float"}[TYPE]
+$WTYPE = {"int8_t": "int8_t", "uint16_t": "uint16_t", "uint32_t": "uint32_t", "float": "uint32_t"}[TYPE]
 
 
 void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}(
@@ -25,9 +27,12 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}(
   size_t nr,
   size_t kr,
   size_t sr,
-  const uint${BITS}_t* weights,
-  const uint${BITS}_t* bias,
-  uint${BITS}_t* packed_weights,
+  const ${WTYPE}* weights,
+  $if BITS == 8:
+    const int32_t* bias,
+  $else:
+    const ${WTYPE}* bias,
+  ${WTYPE}* packed_weights,
   size_t extra_bytes,
   const void* params)
 {
@@ -41,22 +46,41 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}(
   assert(packed_weights != NULL);
 
   ${TYPE}* out = (${TYPE}*) packed_weights;
-  const ${TYPE}* b = (const ${TYPE}*) bias;
+  const ${BTYPE}* b = (const ${BTYPE}*) bias;
+  $if BITS == 8:
+    const uint32_t izp = (uint32_t) ((const struct xnn_qs8_packw_params*) params)->input_zero_point;
+
   do {
     // NC main loop multiple of ${NR}
     const ${TYPE}* w0 = (const ${TYPE}*) weights;
     size_t n = nc;
-
     for (;n >= ${NR}; n -= ${NR}) {
+      $if BITS == 8:
+        int32_t* packed_b = (int32_t*) out;
       if XNN_LIKELY(b != NULL) {
         $for N in range(NR):
-          out[${N}] = b[${N}];
+          $if BTYPE == TYPE:
+            out[${N}] = b[${N}];
+          $else:
+            ((${BTYPE}*) out)[${N}] = b[${N}];
         b += ${NR};
+      } else {
+        $for N in range(NR):
+          $if BTYPE == TYPE:
+            out[${N}] = 0;
+          $else:
+            ((${BTYPE}*) out)[${N}] = 0;
       }
-      out += ${NR};
+      $if BTYPE == TYPE:
+        out += ${NR};
+      $else:
+        out += ${NR} * sizeof(${BTYPE});
 
       $for N in range(1, NR):
         const ${TYPE}* w${N} = w${N-1} + kc;
+      $if BITS == 8:
+        $for N in range(NR):
+          uint32_t ksum${N} = 0;
 
       // KC main loop multiple of ${NR}x${KUNROLL}
       size_t k = kc;
@@ -64,6 +88,8 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}(
         $for N in range(NR):
           $for K in range(KUNROLL):
             const ${TYPE} v${N}${K} = w${N}[${K}];
+            $if BITS == 8:
+              ksum${N} += (uint32_t) v${N}${K};
           w${N} += ${KUNROLL};
         $for K in range(KUNROLL):
           $for N in range(NR):
@@ -74,24 +100,46 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}(
       // KC remainder
       for (; k != 0; --k) {
         $for N in range(NR):
-          out[${N}] = *w${N}++;
+          const ${TYPE} v${N} = *w${N}++;
+          $if BITS == 8:
+            ksum${N} += (uint32_t) v${N};
+          out[${N}] = v${N};
         out += ${NR};
       }
+      $if BITS == 8:
+        $for N in range(NR):
+          packed_b[${N}] -= ksum${N} * izp;
       out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
       w0 = w${NR-1};
     }
 
+    // NC remainder (1..${NR-1})
     if XNN_UNLIKELY(n != 0) {
-      // NC remainder (1..${NR-1})
+      $if BITS == 8:
+        int32_t* packed_b = (int32_t*) out;
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         do {
-          *out++  = *b++;
+          $if BTYPE == TYPE:
+            *out++ = *b++;
+          $else:
+            *((${BTYPE}*) out) = *b++;
+            out += sizeof(${BTYPE});
         } while (--nb != 0);
-        out += (${NR} - n);
       } else {
-        out += ${NR};
+        size_t nb = n;
+        do {
+          $if BTYPE == TYPE:
+            *out++ = 0;
+          $else:
+            *((${BTYPE}*) out) = 0;
+            out += sizeof(${BTYPE});
+        } while (--nb != 0);
       }
+      $if BTYPE == TYPE:
+        out += (${NR} - n);
+      $else:
+        out += (${NR} - n) * sizeof(${BTYPE});
 
       $if NR > 2:
         // NR remainder has less than ${NR} rows so last row is not loaded
@@ -105,6 +153,9 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}(
           if XNN_UNPREDICTABLE(n < ${N+1}) {
             w${N} = w${N-1};
           }
+      $if BITS == 8:
+        $for N in range(NR-1):
+          uint32_t ksum${N} = 0;
 
       // KC main loop multiple of ${NR}x${KUNROLL}
       size_t k = kc;
@@ -112,6 +163,8 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}(
         $for N in range(NR-1):
           $for K in range(KUNROLL):
             const ${TYPE} v${N}${K} = w${N}[${K}];
+            $if BITS == 8:
+              ksum${N} += (uint32_t) v${N}${K};
           w${N} += ${KUNROLL};
         $for K in range(KUNROLL):
           $for N in range(NR-1):
@@ -122,9 +175,15 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}(
       // KC remainder of 1..${KUNROLL-1}
       for (; k != 0; --k) {
         $for N in range(NR-1):
-          out[${N}] = *w${N}++;
+          const ${TYPE} v${N} = *w${N}++;
+          $if BITS == 8:
+            ksum${N} += (uint32_t) v${N};
+          out[${N}] = v${N};
         out += ${NR};
       }
+      $if BITS == 8:
+        $for N in range(NR-1):
+          packed_b[${N}] -= ksum${N} * izp;
       out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
     }
     weights += nc * kc;

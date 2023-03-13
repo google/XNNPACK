@@ -41,16 +41,19 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int(
 
   uint32_t* out = (uint32_t*) packed_weights;
   const uint32_t* b = (const uint32_t*) bias;
+
   do {
     // NC main loop multiple of 2
     const uint32_t* w0 = (const uint32_t*) weights;
     size_t n = nc;
-
     for (;n >= 2; n -= 2) {
       if XNN_LIKELY(b != NULL) {
         out[0] = b[0];
         out[1] = b[1];
         b += 2;
+      } else {
+        out[0] = 0;
+        out[1] = 0;
       }
       out += 2;
 
@@ -82,25 +85,30 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int(
 
       // KC remainder
       for (; k != 0; --k) {
-        out[0] = *w0++;
-        out[1] = *w1++;
+        const uint32_t v0 = *w0++;
+        out[0] = v0;
+        const uint32_t v1 = *w1++;
+        out[1] = v1;
         out += 2;
       }
       out = (uint32_t*) ((uintptr_t) out + extra_bytes);
       w0 = w1;
     }
 
+    // NC remainder (1..1)
     if XNN_UNLIKELY(n != 0) {
-      // NC remainder (1..1)
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         do {
-          *out++  = *b++;
+          *out++ = *b++;
         } while (--nb != 0);
-        out += (2 - n);
       } else {
-        out += 2;
+        size_t nb = n;
+        do {
+          *out++ = 0;
+        } while (--nb != 0);
       }
+      out += (2 - n);
 
 
       // KC main loop multiple of 2x4
@@ -120,7 +128,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int(
 
       // KC remainder of 1..3
       for (; k != 0; --k) {
-        out[0] = *w0++;
+        const uint32_t v0 = *w0++;
+        out[0] = v0;
         out += 2;
       }
       out = (uint32_t*) ((uintptr_t) out + extra_bytes);

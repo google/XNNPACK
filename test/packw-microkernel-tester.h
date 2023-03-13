@@ -102,12 +102,44 @@ class PackWMicrokernelTester {
     return this->iterations_;
   }
 
+  void Test(xnn_x8_packw_gemm_goi_ukernel_fn packw) const {
+    std::vector<int8_t> weights(n() * k());
+    std::vector<int32_t> bias(n());
+    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * k() + packed_n() * sizeof(int32_t));
+    std::vector<int8_t> packed_w_ref(packed_n() * k() + packed_n() * sizeof(int32_t));
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+
+      std::iota(weights.begin(), weights.end(), 0);
+      std::iota(bias.begin(), bias.end(), INT32_C(0));
+      std::fill(packed_w.begin(), packed_w.end(), INT8_C(0x12));
+      std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT8_C(0x7B));
+
+      const int32_t* bias_data = nullbias() ? nullptr : bias.data();
+      const xnn_qs8_packing_params packing_params = { 127 };
+
+      // Compute reference results.
+      xnn_pack_qs8_gemm_goi_w(1, n(), k(), nr(), 1 /* kr */, sr(),
+        reinterpret_cast<const int8_t *>(weights.data()), reinterpret_cast<const int32_t *>(bias_data), reinterpret_cast<int8_t *>(packed_w_ref.data()), 0, &packing_params);
+
+      // Call optimized micro-kernel.
+      packw(1, n(), k(), nr(), 1 /* kr */, sr(), weights.data(), bias_data, packed_w.data(), 0, &packing_params);
+
+      // Verify results.
+      for (size_t i = 0; i < (packed_n() * k() + packed_n() * sizeof(int32_t)); i++) {
+        if (packed_w_ref[i] !=  INT8_C(0x7B)) {  // Allow pad to differ
+          EXPECT_EQ((int32_t) packed_w[i], (int32_t) packed_w_ref[i])
+              << "at n " << i << " of " << (int32_t) (packed_n() * k() + packed_n());
+        }
+      }
+    }
+  }
+
   void Test(xnn_x16_packw_gemm_goi_ukernel_fn packw) const {
     std::vector<uint16_t> weights(g() * n() * k());
     std::vector<uint16_t> bias(g() * n());
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(g() * (packed_n() * k() + packed_n()));
     std::vector<uint16_t> packed_w_ref(g() * (packed_n() * k() + packed_n()));
-
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
 
@@ -141,7 +173,6 @@ class PackWMicrokernelTester {
     std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> packed_w(g() * (packed_n() * k() + packed_n()));
     std::vector<uint32_t> packed_w_ref(g() * (packed_n() * k() + packed_n()));
 
-
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(weights.begin(), weights.end(), 0);
       std::iota(bias.begin(), bias.end(), UINT32_C(0x80000000));
@@ -173,7 +204,7 @@ class PackWMicrokernelTester {
   size_t nr_{1};
   size_t kr_{1};
   size_t sr_{1};
-  size_t k_{100};
+  size_t k_{1};
   bool nullbias_{false};
   size_t iterations_{15};
 

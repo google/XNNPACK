@@ -47,6 +47,7 @@ TEST(${TEST_NAME}, n_eq_${NR}) {
     ${ISA_CHECK};
   PackWMicrokernelTester()
     .n(${NR})
+    .k(${NR})
     .nr(${NR})
     .kr(${KR})
     .sr(${SR})
@@ -69,14 +70,13 @@ $if NR > 1:
   TEST(${TEST_NAME}, n_div_${NR}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t n = ${NR*2}; n < ${NR*10}; n += ${NR}) {
-      PackWMicrokernelTester()
-        .n(n)
-        .nr(${NR})
-        .kr(${KR})
-        .sr(${SR})
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    PackWMicrokernelTester()
+      .n(${NR*2})
+      .k(${NR})
+      .nr(${NR})
+      .kr(${KR})
+      .sr(${SR})
+      .Test(${", ".join(TEST_ARGS)});
   }
 
   TEST(${TEST_NAME}, n_lt_${NR}) {

@@ -41,11 +41,11 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int(
 
   uint16_t* out = (uint16_t*) packed_weights;
   const uint16_t* b = (const uint16_t*) bias;
+
   do {
     // NC main loop multiple of 8
     const uint16_t* w0 = (const uint16_t*) weights;
     size_t n = nc;
-
     for (;n >= 8; n -= 8) {
       if XNN_LIKELY(b != NULL) {
         out[0] = b[0];
@@ -57,6 +57,15 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int(
         out[6] = b[6];
         out[7] = b[7];
         b += 8;
+      } else {
+        out[0] = 0;
+        out[1] = 0;
+        out[2] = 0;
+        out[3] = 0;
+        out[4] = 0;
+        out[5] = 0;
+        out[6] = 0;
+        out[7] = 0;
       }
       out += 8;
 
@@ -148,31 +157,42 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int(
 
       // KC remainder
       for (; k != 0; --k) {
-        out[0] = *w0++;
-        out[1] = *w1++;
-        out[2] = *w2++;
-        out[3] = *w3++;
-        out[4] = *w4++;
-        out[5] = *w5++;
-        out[6] = *w6++;
-        out[7] = *w7++;
+        const uint16_t v0 = *w0++;
+        out[0] = v0;
+        const uint16_t v1 = *w1++;
+        out[1] = v1;
+        const uint16_t v2 = *w2++;
+        out[2] = v2;
+        const uint16_t v3 = *w3++;
+        out[3] = v3;
+        const uint16_t v4 = *w4++;
+        out[4] = v4;
+        const uint16_t v5 = *w5++;
+        out[5] = v5;
+        const uint16_t v6 = *w6++;
+        out[6] = v6;
+        const uint16_t v7 = *w7++;
+        out[7] = v7;
         out += 8;
       }
       out = (uint16_t*) ((uintptr_t) out + extra_bytes);
       w0 = w7;
     }
 
+    // NC remainder (1..7)
     if XNN_UNLIKELY(n != 0) {
-      // NC remainder (1..7)
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         do {
-          *out++  = *b++;
+          *out++ = *b++;
         } while (--nb != 0);
-        out += (8 - n);
       } else {
-        out += 8;
+        size_t nb = n;
+        do {
+          *out++ = 0;
+        } while (--nb != 0);
       }
+      out += (8 - n);
 
       // NR remainder has less than 8 rows so last row is not loaded
       const uint16_t* w1 = w0 + kc;
@@ -271,13 +291,20 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int(
 
       // KC remainder of 1..3
       for (; k != 0; --k) {
-        out[0] = *w0++;
-        out[1] = *w1++;
-        out[2] = *w2++;
-        out[3] = *w3++;
-        out[4] = *w4++;
-        out[5] = *w5++;
-        out[6] = *w6++;
+        const uint16_t v0 = *w0++;
+        out[0] = v0;
+        const uint16_t v1 = *w1++;
+        out[1] = v1;
+        const uint16_t v2 = *w2++;
+        out[2] = v2;
+        const uint16_t v3 = *w3++;
+        out[3] = v3;
+        const uint16_t v4 = *w4++;
+        out[4] = v4;
+        const uint16_t v5 = *w5++;
+        out[5] = v5;
+        const uint16_t v6 = *w6++;
+        out[6] = v6;
         out += 8;
       }
       out = (uint16_t*) ((uintptr_t) out + extra_bytes);

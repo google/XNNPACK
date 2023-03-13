@@ -41,11 +41,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int(
 
   uint32_t* out = (uint32_t*) packed_weights;
   const uint32_t* b = (const uint32_t*) bias;
+
   do {
     // NC main loop multiple of 4
     const uint32_t* w0 = (const uint32_t*) weights;
     size_t n = nc;
-
     for (;n >= 4; n -= 4) {
       if XNN_LIKELY(b != NULL) {
         out[0] = b[0];
@@ -53,6 +53,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int(
         out[2] = b[2];
         out[3] = b[3];
         b += 4;
+      } else {
+        out[0] = 0;
+        out[1] = 0;
+        out[2] = 0;
+        out[3] = 0;
       }
       out += 4;
 
@@ -104,27 +109,34 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int(
 
       // KC remainder
       for (; k != 0; --k) {
-        out[0] = *w0++;
-        out[1] = *w1++;
-        out[2] = *w2++;
-        out[3] = *w3++;
+        const uint32_t v0 = *w0++;
+        out[0] = v0;
+        const uint32_t v1 = *w1++;
+        out[1] = v1;
+        const uint32_t v2 = *w2++;
+        out[2] = v2;
+        const uint32_t v3 = *w3++;
+        out[3] = v3;
         out += 4;
       }
       out = (uint32_t*) ((uintptr_t) out + extra_bytes);
       w0 = w3;
     }
 
+    // NC remainder (1..3)
     if XNN_UNLIKELY(n != 0) {
-      // NC remainder (1..3)
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         do {
-          *out++  = *b++;
+          *out++ = *b++;
         } while (--nb != 0);
-        out += (4 - n);
       } else {
-        out += 4;
+        size_t nb = n;
+        do {
+          *out++ = 0;
+        } while (--nb != 0);
       }
+      out += (4 - n);
 
       // NR remainder has less than 4 rows so last row is not loaded
       const uint32_t* w1 = w0 + kc;
@@ -171,9 +183,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int(
 
       // KC remainder of 1..3
       for (; k != 0; --k) {
-        out[0] = *w0++;
-        out[1] = *w1++;
-        out[2] = *w2++;
+        const uint32_t v0 = *w0++;
+        out[0] = v0;
+        const uint32_t v1 = *w1++;
+        out[1] = v1;
+        const uint32_t v2 = *w2++;
+        out[2] = v2;
         out += 4;
       }
       out = (uint32_t*) ((uintptr_t) out + extra_bytes);

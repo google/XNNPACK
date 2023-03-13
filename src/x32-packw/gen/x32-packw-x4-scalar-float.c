@@ -41,11 +41,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float(
 
   float* out = (float*) packed_weights;
   const float* b = (const float*) bias;
+
   do {
     // NC main loop multiple of 4
     const float* w0 = (const float*) weights;
     size_t n = nc;
-
     for (;n >= 4; n -= 4) {
       if XNN_LIKELY(b != NULL) {
         out[0] = b[0];
@@ -53,6 +53,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float(
         out[2] = b[2];
         out[3] = b[3];
         b += 4;
+      } else {
+        out[0] = 0;
+        out[1] = 0;
+        out[2] = 0;
+        out[3] = 0;
       }
       out += 4;
 
@@ -104,27 +109,34 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float(
 
       // KC remainder
       for (; k != 0; --k) {
-        out[0] = *w0++;
-        out[1] = *w1++;
-        out[2] = *w2++;
-        out[3] = *w3++;
+        const float v0 = *w0++;
+        out[0] = v0;
+        const float v1 = *w1++;
+        out[1] = v1;
+        const float v2 = *w2++;
+        out[2] = v2;
+        const float v3 = *w3++;
+        out[3] = v3;
         out += 4;
       }
       out = (float*) ((uintptr_t) out + extra_bytes);
       w0 = w3;
     }
 
+    // NC remainder (1..3)
     if XNN_UNLIKELY(n != 0) {
-      // NC remainder (1..3)
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         do {
-          *out++  = *b++;
+          *out++ = *b++;
         } while (--nb != 0);
-        out += (4 - n);
       } else {
-        out += 4;
+        size_t nb = n;
+        do {
+          *out++ = 0;
+        } while (--nb != 0);
       }
+      out += (4 - n);
 
       // NR remainder has less than 4 rows so last row is not loaded
       const float* w1 = w0 + kc;
@@ -171,9 +183,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float(
 
       // KC remainder of 1..3
       for (; k != 0; --k) {
-        out[0] = *w0++;
-        out[1] = *w1++;
-        out[2] = *w2++;
+        const float v0 = *w0++;
+        out[0] = v0;
+        const float v1 = *w1++;
+        out[1] = v1;
+        const float v2 = *w2++;
+        out[2] = v2;
         out += 4;
       }
       out = (float*) ((uintptr_t) out + extra_bytes);
