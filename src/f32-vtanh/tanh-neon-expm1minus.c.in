@@ -79,15 +79,15 @@ void xnn_f32_vtanh_ukernel__${ISA_PREFIX}${ISA}_expm1minus_rr1_${LUT_SUFFIX}${PO
         $for N in range(0, BATCH_TILE, 4):
           const uint64_t vidx${ABC[N:N+2]} = vgetq_lane_u64(vidx${ABC[N:N+4]}, 0);
         $for N in range(0, BATCH_TILE, 4):
-          uint32x2_t vl_lo${ABC[N:N+4]} = vld1_dup_u32(&xnn_table_exp2minus_k_over_${LUT}[(uint32_t) vidx${ABC[N:N+2]}]);
+          uint32x2_t vl${ABC[N:N+2]} = vld1_dup_u32(&xnn_table_exp2minus_k_over_${LUT}[(uint32_t) vidx${ABC[N:N+2]}]);
           const uint64_t vidx${ABC[N+2:N+4]} = vgetq_lane_u64(vidx${ABC[N:N+4]}, 1);
         $for N in range(0, BATCH_TILE, 4):
-          uint32x2_t vl_hi${ABC[N:N+4]} = vld1_dup_u32(&xnn_table_exp2minus_k_over_${LUT}[(uint32_t) vidx${ABC[N+2:N+4]}]);
+          uint32x2_t vl${ABC[N+2:N+4]} = vld1_dup_u32(&xnn_table_exp2minus_k_over_${LUT}[(uint32_t) vidx${ABC[N+2:N+4]}]);
         $for N in range(0, BATCH_TILE, 4):
-          vl_lo${ABC[N:N+4]} = vld1_lane_u32(&xnn_table_exp2minus_k_over_${LUT}[(uint32_t) (vidx${ABC[N:N+2]} >> 32)], vl_lo${ABC[N:N+4]}, 1);
-          vl_hi${ABC[N:N+4]} = vld1_lane_u32(&xnn_table_exp2minus_k_over_${LUT}[(uint32_t) (vidx${ABC[N+2:N+4]} >> 32)], vl_hi${ABC[N:N+4]}, 1);
+          vl${ABC[N:N+2]} = vld1_lane_u32(&xnn_table_exp2minus_k_over_${LUT}[(uint32_t) (vidx${ABC[N:N+2]} >> 32)], vl${ABC[N:N+2]}, 1);
+          vl${ABC[N+2:N+4]} = vld1_lane_u32(&xnn_table_exp2minus_k_over_${LUT}[(uint32_t) (vidx${ABC[N+2:N+4]} >> 32)], vl${ABC[N+2:N+4]}, 1);
         $for N in range(0, BATCH_TILE, 4):
-          const uint32x4_t vl${ABC[N:N+4]} = vcombine_u32(vl_lo${ABC[N:N+4]}, vl_hi${ABC[N:N+4]});
+          const uint32x4_t vl${ABC[N:N+4]} = vcombine_u32(vl${ABC[N:N+2]}, vl${ABC[N+2:N+4]});
         $for N in range(0, BATCH_TILE, 4):
           const float32x4_t vs${ABC[N:N+4]} = vreinterpretq_f32_u32(vaddq_u32(vl${ABC[N:N+4]}, ve${ABC[N:N+4]}));
 
