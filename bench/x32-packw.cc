@@ -125,11 +125,23 @@ static void x32_packw_x4__scalar_int(benchmark::State& state, const char* net) {
     xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int,
     /*nr=*/4, /*kr=*/1, /*sr=*/1);
 }
+static void x32_packw_x8__scalar_float(benchmark::State& state, const char* net) {
+  x32_packw(state,
+    xnn_x32_packw_gemm_goi_ukernel_x8__scalar_float,
+    /*nr=*/8, /*kr=*/1, /*sr=*/1);
+}
+static void x32_packw_x8__scalar_int(benchmark::State& state, const char* net) {
+  x32_packw(state,
+    xnn_x32_packw_gemm_goi_ukernel_x8__scalar_int,
+    /*nr=*/8, /*kr=*/1, /*sr=*/1);
+}
 
 BENCHMARK_BGEMM(x32_packw_x2__scalar_float)
 BENCHMARK_BGEMM(x32_packw_x2__scalar_int)
 BENCHMARK_BGEMM(x32_packw_x4__scalar_float)
 BENCHMARK_BGEMM(x32_packw_x4__scalar_int)
+BENCHMARK_BGEMM(x32_packw_x8__scalar_float)
+BENCHMARK_BGEMM(x32_packw_x8__scalar_int)
 
 void x32_packw__reference(
   size_t batch,

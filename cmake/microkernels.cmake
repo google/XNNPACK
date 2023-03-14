@@ -5155,6 +5155,8 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x32-packw/gen/x32-packw-x2-scalar-int.c
   src/x32-packw/gen/x32-packw-x4-scalar-float.c
   src/x32-packw/gen/x32-packw-x4-scalar-int.c
+  src/x32-packw/gen/x32-packw-x8-scalar-float.c
+  src/x32-packw/gen/x32-packw-x8-scalar-int.c
   src/x32-packx/x32-packx-x2-scalar.c
   src/x32-packx/x32-packx-x3-scalar.c
   src/x32-packx/x32-packx-x4-scalar.c
