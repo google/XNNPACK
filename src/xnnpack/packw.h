@@ -22,9 +22,9 @@ struct xnn_qs8_packw_params {
 
 #define DECLARE_X8_PACKW_GEMM_GOI_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                \
-      size_t g,                                             \
-      size_t nc,                                            \
-      size_t kc,                                            \
+      size_t batch,                                         \
+      size_t dim_n,                                         \
+      size_t dim_k,                                         \
       size_t nr,                                            \
       size_t kr,                                            \
       size_t sr,                                            \
@@ -39,9 +39,9 @@ DECLARE_X8_PACKW_GEMM_GOI_UKERNEL_FUNCTION(xnn_x8_packw_gemm_goi_ukernel_x4__sca
 
 #define DECLARE_X16_PACKW_GEMM_GOI_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                 \
-      size_t g,                                              \
-      size_t nc,                                             \
-      size_t kc,                                             \
+      size_t batch,                                          \
+      size_t dim_n,                                          \
+      size_t dim_k,                                          \
       size_t nr,                                             \
       size_t kr,                                             \
       size_t sr,                                             \
@@ -56,9 +56,9 @@ DECLARE_X16_PACKW_GEMM_GOI_UKERNEL_FUNCTION(xnn_x16_packw_gemm_goi_ukernel_x16__
 
 #define DECLARE_X32_PACKW_GEMM_GOI_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                 \
-      size_t g,                                              \
-      size_t nc,                                             \
-      size_t kc,                                             \
+      size_t batch,                                          \
+      size_t dim_n,                                          \
+      size_t dim_k,                                          \
       size_t nr,                                             \
       size_t kr,                                             \
       size_t sr,                                             \
