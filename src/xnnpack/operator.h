@@ -208,6 +208,7 @@ struct xnn_operator {
     union xnn_f32_rnd_params f32_rnd;
     union xnn_f32_sigmoid_params f32_sigmoid;
     union xnn_f32_sqrt_params f32_sqrt;
+    union xnn_f32_tanh_params f32_tanh;
     // Parameters for Global Average Pooling in CHW layout
     union xnn_f16_gavgpool_params f16_gavgpool;
     union xnn_f32_gavgpool_params f32_gavgpool;

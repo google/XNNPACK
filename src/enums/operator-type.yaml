@@ -251,6 +251,8 @@
   string: "Subtract (ND, QU8)"
 - name: xnn_operator_type_tanh_nc_f16
   string: "Tanh (NC, F16)"
+- name: xnn_operator_type_tanh_nc_f32
+  string: "Tanh (NC, F32)"
 - name: xnn_operator_type_tanh_nc_qs8
   string: "Tanh (NC, QS8)"
 - name: xnn_operator_type_tanh_nc_qu8

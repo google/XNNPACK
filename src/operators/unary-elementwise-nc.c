@@ -1520,6 +1520,32 @@ enum xnn_status xnn_create_tanh_nc_f16(
     tanh_op_out);
 }
 
+enum xnn_status xnn_create_tanh_nc_f32(
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    uint32_t flags,
+    xnn_operator_t* tanh_op_out)
+{
+  const struct xnn_unary_elementwise_config* f32_tanh_config = xnn_init_f32_tanh_config();
+  if (f32_tanh_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(xnn_operator_type_tanh_nc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+  union xnn_f32_tanh_params params;
+  if (f32_tanh_config->init.f32_tanh != NULL) {
+    f32_tanh_config->init.f32_tanh(&params);
+  }
+  return create_unary_elementwise_nc(
+    channels, input_stride, output_stride, flags,
+    &params, sizeof(params),
+    xnn_operator_type_tanh_nc_f32,
+    f32_tanh_config,
+    tanh_op_out);
+}
+
 enum xnn_status xnn_create_truncation_nc_f16(
     size_t channels,
     size_t input_stride,
@@ -2214,6 +2240,22 @@ enum xnn_status xnn_setup_tanh_nc_f16(
     1 /* log2(sizeof(uint16_t)) */,
     1 /* log2(sizeof(uint16_t)) */,
     &tanh_op->params.f16_tanh, sizeof(tanh_op->params.f16_tanh),
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_tanh_nc_f32(
+    xnn_operator_t tanh_op,
+    size_t batch_size,
+    const float* input,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  return setup_unary_elementwise_nc(
+    tanh_op, xnn_operator_type_tanh_nc_f32,
+    batch_size, input, output,
+    2 /* log2(sizeof(float)) */,
+    2 /* log2(sizeof(float)) */,
+    &tanh_op->params.f32_tanh, sizeof(tanh_op->params.f32_tanh),
     pthreadpool_get_threads_count(threadpool));
 }
 

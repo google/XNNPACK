@@ -63,6 +63,61 @@ TEST(TANH_NC_F16, strided_batch) {
 }
 
 
+TEST(TANH_NC_F32, unit_batch) {
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    TanhOperatorTester()
+      .batch_size(1)
+      .channels(channels)
+      .iterations(3)
+      .TestF32();
+  }
+}
+
+TEST(TANH_NC_F32, small_batch) {
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    TanhOperatorTester()
+      .batch_size(3)
+      .channels(channels)
+      .iterations(3)
+      .TestF32();
+  }
+}
+
+TEST(TANH_NC_F32, small_batch_with_input_stride) {
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    TanhOperatorTester()
+      .batch_size(3)
+      .channels(channels)
+      .input_stride(129)
+      .iterations(3)
+      .TestF32();
+  }
+}
+
+TEST(TANH_NC_F32, small_batch_with_output_stride) {
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    TanhOperatorTester()
+      .batch_size(3)
+      .channels(channels)
+      .output_stride(117)
+      .iterations(3)
+      .TestF32();
+  }
+}
+
+TEST(TANH_NC_F32, strided_batch) {
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    TanhOperatorTester()
+      .batch_size(3)
+      .channels(channels)
+      .input_stride(129)
+      .output_stride(117)
+      .iterations(3)
+      .TestF32();
+  }
+}
+
+
 TEST(TANH_NC_QS8, unit_batch) {
   for (size_t channels = 1; channels < 100; channels += 15) {
     TanhOperatorTester()

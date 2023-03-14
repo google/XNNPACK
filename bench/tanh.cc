@@ -93,6 +93,69 @@ static void xnnpack_tanh_f16(benchmark::State& state) {
 }
 #endif  // XNN_NO_F16_OPERATORS
 
+static void xnnpack_tanh_f32(benchmark::State& state) {
+  const size_t batch_size = state.range(0);
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
+
+  std::vector<float> input(batch_size + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float> output(batch_size);
+  std::generate(input.begin(), input.end(), std::ref(f32rng));
+  std::fill(output.begin(), output.end(), std::nanf(""));
+
+  xnn_status status = xnn_initialize(nullptr /* allocator */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to initialize XNNPACK");
+    return;
+  }
+
+  xnn_operator_t tanh_op = nullptr;
+  status = xnn_create_tanh_nc_f32(
+    1 /* channels */, 1 /* input stride */, 1 /* output stride */,
+    0 /* flags */, &tanh_op);
+  if (status != xnn_status_success || tanh_op == nullptr) {
+    state.SkipWithError("failed to create Tanh operator");
+    return;
+  }
+
+  status = xnn_setup_tanh_nc_f32(
+    tanh_op, batch_size,
+    input.data(), output.data(),
+    nullptr /* thread pool */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup Tanh operator");
+    return;
+  }
+
+  for (auto _ : state) {
+    status = xnn_run_operator(tanh_op, nullptr /* thread pool */);
+    if (status != xnn_status_success) {
+      state.SkipWithError("failed to run Tanh operator");
+      return;
+    }
+  }
+
+  status = xnn_delete_operator(tanh_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to delete Tanh operator");
+    return;
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+
+  state.counters["elements"] =
+    benchmark::Counter(uint64_t(state.iterations()) * batch_size, benchmark::Counter::kIsRate);
+
+  const size_t bytes_per_iteration = 2 * batch_size * sizeof(float);
+  state.counters["bytes"] =
+    benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
+}
+
 #ifndef XNN_NO_QS8_OPERATORS
 static void xnnpack_tanh_qs8(benchmark::State& state) {
   const size_t batch_size = state.range(0);
@@ -547,6 +610,9 @@ static void tflite_tanh_qu8(benchmark::State& state) {
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
 #endif  // XNN_NO_F16_OPERATORS
+BENCHMARK(xnnpack_tanh_f32)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+  ->UseRealTime();
 #ifndef XNN_NO_QS8_OPERATORS
   BENCHMARK(xnnpack_tanh_qs8)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
