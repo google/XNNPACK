@@ -31,27 +31,26 @@ static void x32_packw(benchmark::State& state,
     return;
   }
 
-  const size_t batch = state.range(0);
-  const size_t dim_n = state.range(2);
-  const size_t dim_k = state.range(3);
+  const size_t batch = state.range(0);  // batch is g parameter for packw
+  const size_t dim_n = state.range(2);  // dim_n is nc parameter
+  const size_t dim_k = state.range(3);  // dim_k is kc parameter
 
-  const size_t stride_n = benchmark::utils::RoundUp(dim_n, nr);
-  const size_t stride_k = benchmark::utils::RoundUp(dim_k, kr * sr);
+  const size_t rounded_n = benchmark::utils::RoundUp(dim_n, nr);
+  const size_t rounded_k = benchmark::utils::RoundUp(dim_k, kr * sr);
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  std::vector<float> b(batch * dim_n * dim_k);
-  std::generate(b.begin(), b.end(), std::ref(f32rng));
-
-  const size_t w_elements = stride_n * stride_k + stride_n;
+  // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
-      sizeof(float) * batch * (w_elements + dim_n * dim_k));
+      sizeof(float) * batch * (dim_n * dim_k + rounded_n * rounded_k + rounded_n));
 
-  std::vector<float, AlignedAllocator<float, 64>> w(num_buffers * batch * w_elements);
-  std::fill(w.begin(), w.end(), 0.0f);
+  std::vector<float, AlignedAllocator<float, 64>> weights(num_buffers * batch * dim_n * dim_k);
+  std::generate(weights.begin(), weights.end(), std::ref(f32rng));
+  std::vector<float, AlignedAllocator<float, 64>> packed_weights(num_buffers * batch * (rounded_n * rounded_k + rounded_n));
+  std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -60,10 +59,10 @@ static void x32_packw(benchmark::State& state,
     }
 
     packw(batch, dim_n, dim_k, nr, kr, sr,
-      reinterpret_cast<const uint32_t*>(b.data()),
-      /*bias=*/nullptr,
-      reinterpret_cast<uint32_t*>(w.data() + buffer_index * batch * w_elements),
-      /*extra_bytes=*/0, nullptr);
+      reinterpret_cast<uint32_t*>(weights.data() + buffer_index * batch * dim_n * dim_k),
+       /*bias=*/nullptr,
+      reinterpret_cast<uint32_t*>(packed_weights.data() + buffer_index * batch * (rounded_n * rounded_k + rounded_n)),
+      /*extra_bytes=*/0, /*params=*/nullptr);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -75,7 +74,7 @@ static void x32_packw(benchmark::State& state,
   state.counters["elements"] =
     benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = batch * (dim_n * dim_k + w_elements) * sizeof(float);
+  const size_t bytes_per_iteration = (elements_per_iteration + batch * (rounded_n * rounded_k + rounded_n)) * sizeof(float);
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
@@ -125,10 +124,32 @@ BENCHMARK_BGEMM(x32_packw_x2__scalar_int)
 BENCHMARK_BGEMM(x32_packw_x4__scalar_float)
 BENCHMARK_BGEMM(x32_packw_x4__scalar_int)
 
+void x32_packw__reference(
+  size_t batch,
+  size_t dim_n,
+  size_t dim_k,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const uint32_t* weights,
+  const uint32_t* bias,
+  uint32_t* packed_weights,
+  size_t extra_bytes,
+  const void* params)
+{
+  xnn_pack_f32_gemm_goi_w(batch, dim_n, dim_k, nr, kr, sr,
+     (const float*) weights,
+     (const float*) bias,
+     (float*) packed_weights,
+     extra_bytes, params);
+}
 
-#ifdef BENCHMARK_RUY
-BENCHMARK_BGEMM(ruy_st)
-#endif  // BENCHMARK_RUY
+static void x32_packw_x8__reference(benchmark::State& state, const char* net) {
+  x32_packw(state,
+    x32_packw__reference,
+    /*nr=*/8, /*kr=*/1, /*sr=*/1);
+}
+BENCHMARK_BGEMM(x32_packw_x8__reference)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
