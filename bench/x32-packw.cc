@@ -81,6 +81,12 @@ static void x32_packw(benchmark::State& state,
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  static void x32_packw_x2__neon(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x2__neon,
+      /*nr=*/2, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckNEON);
+  }
   static void x32_packw_x8__neon(benchmark::State& state, const char* net) {
     x32_packw(state,
       xnn_x32_packw_gemm_goi_ukernel_x8__neon,
@@ -94,6 +100,7 @@ static void x32_packw(benchmark::State& state,
       benchmark::utils::CheckNEON);
   }
 
+  BENCHMARK_BGEMM(x32_packw_x2__neon)
   BENCHMARK_BGEMM(x32_packw_x8__neon)
   BENCHMARK_BGEMM(x32_packw_x12__neon)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
