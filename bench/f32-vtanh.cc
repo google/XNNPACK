@@ -2111,7 +2111,7 @@ BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_nabs_pmax_x16,
                     xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vtanh, arch64_neonfma_expm1minus_rr1_lut8_p4h3_div_x12,
+  BENCHMARK_CAPTURE(f32_vtanh, aarch64_neonfma_expm1minus_rr1_lut8_p4h3_div_x12,
                     xnn_f32_vtanh_ukernel__aarch64_neonfma_expm1minus_rr1_lut8_p4h3_div_x12,
                     xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
