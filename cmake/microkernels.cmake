@@ -6452,6 +6452,54 @@ SET(ALL_WASM_MICROKERNEL_SRCS
   src/f32-vrelu/gen/f32-vrelu-wasm-x2.c
   src/f32-vrelu/gen/f32-vrelu-wasm-x4.c
   src/f32-vrelu/gen/f32-vrelu-wasm-x8.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut4-p4h2-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut4-p4h3-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut8-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut8-p4h2-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut8-p4h3-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut16-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut16-p4h2-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut16-p4h3-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut32-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut64-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr1-p6h4-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr1-p6h5-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut4-p4h2-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut4-p4h3-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut8-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut8-p4h2-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut8-p4h3-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut16-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut16-p4h2-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut16-p4h3-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut32-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut64-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr2-p6h4-div.c
+  src/math/gen/f32-tanh-wasm-expm1minus-rr2-p6h5-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut4-p4h2-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut4-p4h3-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut8-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut8-p4h2-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut8-p4h3-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut16-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut16-p4h2-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut16-p4h3-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut32-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut64-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr1-p6h4-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr1-p6h5-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut4-p4h2-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut4-p4h3-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut8-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut8-p4h2-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut8-p4h3-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut16-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut16-p4h2-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut16-p4h3-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut32-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut64-p3h1-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr2-p6h4-div.c
+  src/math/gen/f32-tanh-wasm-expm1plus-rr2-p6h5-div.c
   src/qc8-dwconv/gen/qc8-dwconv-3p2c-minmax-fp32-wasm-fmagic.c
   src/qc8-dwconv/gen/qc8-dwconv-9p1c-minmax-fp32-wasm-fmagic.c
   src/qc8-dwconv/gen/qc8-dwconv-9p2c-minmax-fp32-wasm-fmagic.c

@@ -8,6 +8,7 @@ $assert RR == 1 or RR == 2
 $assert LOG2LUT in [0, 2, 3, 4, 5, 6]
 $assert P == H + 1 or P == H + 2
 $assert DIV in ["DIV", "RCP"]
+$assert not WASM or not FMA
 $LUT = 1 << LOG2LUT
 #include <assert.h>
 #include <stddef.h>
@@ -53,7 +54,7 @@ $else:
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
 $POLY_SUFFIX = "p%dh%d_" % (P, H)
 $DIV_SUFFIX = DIV.lower()
-$ISA = "fma" if FMA else "scalar"
+$ISA = "fma" if FMA else "wasm" if WASM else "scalar"
 void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DIV_SUFFIX}(
     size_t n,
     const float* input,
@@ -110,7 +111,10 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${D
     // The function saturates at -1 for large positive inputs: tanhf(-z) == -1.0f for z >= sat_cutoff ~= 9.010913.
     // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
     // tanhf(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
-    vz = math_pmin_f32(vz, vsat_cutoff);
+    $if WASM:
+      vz = __builtin_wasm_min_f32(vz, vsat_cutoff);
+    $else:
+      vz = math_pmin_f32(vz, vsat_cutoff);
 
     // Compute reduced argument n := round(-z / log(2), ${1+LOG2LUT}).
     // We do it by adding a large number (magic bias), which cause rounding of the result to ${1+LOG2LUT} fractional ${"bit" if LOG2LUT == 0 else "bits"},
