@@ -5,6 +5,7 @@
 
 $assert (LOG2LUT, P, H) in [(0, 6, 5), (3, 4, 3)]
 $assert BATCH_TILE >= 1
+$assert not WASM or not FMA
 $LUT = 1 << LOG2LUT
 #include <assert.h>
 #include <stddef.h>
@@ -23,7 +24,8 @@ $if LOG2LUT != 0:
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
 $POLY_SUFFIX = "p%dh%d" % (P, H)
 $PARAMS_STRUCT = "scalar_expm1minus_rr1_" + LUT_SUFFIX + POLY_SUFFIX
-$ISA = "fma" if FMA else "scalar"
+$MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_pmin_f32"
+$ISA = "fma" if FMA else "wasm" if WASM else "scalar"
 void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_div_x${BATCH_TILE}(
     size_t batch,
     const float* input,
@@ -56,7 +58,7 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_di
         float vz${N} = fabsf(vx${N});
 
       $for N in range(BATCH_TILE):
-        vz${N} = math_pmin_f32(vz${N}, vsat_cutoff);
+        vz${N} = ${MIN_F32}(vz${N}, vsat_cutoff);
 
       $for N in range(BATCH_TILE):
         $if FMA:
@@ -135,7 +137,7 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_di
 
       float vz = fabsf(vx);
 
-      vz = math_pmin_f32(vz, vsat_cutoff);
+      vz = ${MIN_F32}(vz, vsat_cutoff);
 
       $if FMA:
         float vn = fmaf(vz, vminus_log2e, vmagic_bias);
@@ -196,7 +198,7 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_di
 
       float vz = fabsf(vx);
 
-      vz = math_pmin_f32(vz, vsat_cutoff);
+      vz = ${MIN_F32}(vz, vsat_cutoff);
 
       $if FMA:
         float vn = fmaf(vz, vminus_log2e, vmagic_bias);
@@ -256,7 +258,7 @@ void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_di
 
         float vz = fabsf(vx);
 
-        vz = math_pmin_f32(vz, vsat_cutoff);
+        vz = ${MIN_F32}(vz, vsat_cutoff);
 
         $if FMA:
           float vn = fmaf(vz, vminus_log2e, vmagic_bias);

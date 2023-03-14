@@ -1549,6 +1549,7 @@ PROD_WASM_MICROKERNEL_SRCS = [
     "src/f32-vhswish/gen/f32-vhswish-wasm-x4.c",
     "src/f32-vmulcaddc/gen/f32-vmulcaddc-c1-minmax-wasm-2x.c",
     "src/f32-vrelu/gen/f32-vrelu-wasm-x8.c",
+    "src/f32-vtanh/gen/f32-vtanh-wasm-expm1minus-rr1-p6h5-div-x4.c",
     "src/qc8-dwconv/gen/qc8-dwconv-3p2c-minmax-fp32-wasm-fmagic.c",
     "src/qc8-dwconv/gen/qc8-dwconv-9p2c-minmax-fp32-wasm-fmagic.c",
     "src/qc8-dwconv/gen/qc8-dwconv-25p2c-minmax-fp32-wasm-fmagic.c",
