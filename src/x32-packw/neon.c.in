@@ -7,6 +7,8 @@ $assert NR >= 4
 $assert NR % 4 == 0
 $assert KUNROLL >= 4
 $assert KUNROLL % 4 == 0
+$assert KUNROLL == 4
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <assert.h>
 #include <stddef.h>
@@ -39,22 +41,22 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
   assert(weights != NULL);
   assert(packed_weights != NULL);
 
-  $for N in range(0,NR,4):
-    $for K in range(0,KUNROLL,4):
-      uint32x4x4_t v${N}${K};
-      $for NN in range(0,4):
-        v${N}${K}.val[${NN}] = vdupq_n_u32(0);
+  $for N in range(0, NR, 4):
+    $for K in range(0, KUNROLL, 4):
+      uint32x4x4_t vtmp${ABC[K:K+4]}x${ABC[N:N+4]};
+      $for L in range(4):
+        vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[${L}] = vdupq_n_u32(0);
 
   do {
     // NC main loop multiple of ${NR}
     const uint32_t* w0 = weights;
     size_t n = nc;
 
-    for (;n >= ${NR}; n -= ${NR}) {
+    for (; n >= ${NR}; n -= ${NR}) {
       if XNN_LIKELY(bias != NULL) {
-        $for N in range(0,NR,4):
+        $for N in range(0, NR, 4):
           uint32x4_t vb${N} = vld1q_u32(bias); bias += 4;
-        $for N in range(0,NR,4):
+        $for N in range(0, NR, 4):
           vst1q_u32(packed_weights, vb${N}); packed_weights += 4;
       } else {
         packed_weights += ${NR};
@@ -66,15 +68,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
       // KC main loop multiple of ${NR}x${KUNROLL}
       size_t k = kc;
       for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
-        $for N in range(0,NR,4):
-          $for NN in range(0,4):
-            v${N}0 = vld4q_lane_u32(w${N+NN}, v${N}0, ${NN}); w${N+NN} += 4;
-            $for K in range(4,KUNROLL,4):
-              v${N}${K} = vld4q_lane_u32(w${N+NN}, v${N}${K}, ${NN}); w${N+NN} += 4;
-        $for K in range(0,KUNROLL,4):
-          $for NN in range(0,4):
-            $for N in range(0,NR,4):
-              vst1q_u32(packed_weights, v${N}${K}.val[${NN}]); packed_weights += 4;
+        $for L in range(4):
+          $for N in range(0, NR, 4):
+            $for K in range(0, KUNROLL, 4):
+              vtmp${ABC[K:K+4]}x${ABC[N:N+4]} = vld4q_lane_u32(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}, ${L}); w${N+L} += 4;
+        $for K in range(0, KUNROLL, 4):
+          $for L in range(4):
+            $for N in range(0, NR, 4):
+              vst1q_u32(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
       }
 
       // KC remainder of 1..${KUNROLL-1}
@@ -82,44 +83,44 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
       if XNN_UNLIKELY(k != 0) {
         $if KUNROLL == 4:
           switch (k) {
-            $for K in range(1,4):
+            $for K in range(1, 4):
               // KC remainder of ${NR}x${K}
               case ${K}:
               {
                 $if K == 1:
-                  $for N in range(0,NR,4):
-                    uint32x4_t v${N} = vdupq_n_u32(0);
+                  $for N in range(0, NR, 4):
+                    uint32x4_t vtmp${ABC[0:K]}x${ABC[N:N+4]} = vdupq_n_u32(0);
                 $else:
-                  $for N in range(0,NR,4):
-                    uint32x4x${K}_t v${N};
-                    $for NN in range(0,K):
-                      v${N}.val[${NN}] = vdupq_n_u32(0);
+                  $for N in range(0, NR, 4):
+                    uint32x4x${K}_t vtmp${ABC[0:K]}x${ABC[N:N+4]};
+                    $for L in range(0, K):
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}] = vdupq_n_u32(0);
 
-                $for N in range(0,NR,4):
-                  $for NN in range(0,4):
-                    v${N} = vld${K}q_lane_u32(w${N+NN}, v${N}, ${NN}); w${N+NN} += ${K};
+                $for L in range(4):
+                  $for N in range(0, NR, 4):
+                    vtmp${ABC[0:K]}x${ABC[N:N+4]} = vld${K}q_lane_u32(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+4]}, ${L}); w${N+L} += ${K};
 
-                $for NN in range(0,K):
-                  $for N in range(0,NR,4):
+                $for L in range(K):
+                  $for N in range(0, NR, 4):
                     $if K == 1:
-                      vst1q_u32(packed_weights, v${N}); packed_weights += 4;
+                      vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}); packed_weights += 4;
                     $else:
-                      vst1q_u32(packed_weights, v${N}.val[${NN}]); packed_weights += 4;
+                      vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
                 break;
               }
             default:
               XNN_UNREACHABLE;
           }
         $else:
-          for (; k != 0; --k) {
-            $for N in range(0,NR,4):
-              $for NN in range(0,4):
-                $for K in range(0,KUNROLL,4):
-                  v${N}${K}.val[0] = vld1q_lane_u32(w${N+NN}, v${N}${K}.val[0], ${NN}); w${N+NN} += 4;
-            $for K in range(0,KUNROLL,4):
-              $for N in range(0,NR,4):
-                vst1q_u32(packed_weights, v${N}${K}.val[0]); packed_weights += 4;
-          }
+          do {
+            $for L in range(4):
+              $for N in range(0, NR, 4):
+                $for K in range(0, KUNROLL, 4):
+                  vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0] = vld1q_lane_u32(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0], ${L}); w${N+L} += 4;
+            $for K in range(0, KUNROLL, 4):
+              $for N in range(0, NR, 4):
+                vst1q_u32(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0]); packed_weights += 4;
+          } while (--k != 0);
       }
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
       w0 = w${NR-1};
@@ -154,16 +155,15 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
       // KC main loop multiple of ${NR}x${KUNROLL}
       size_t k = kc;
       for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
-        $for N in range(0,NR,4):
-          $for NN in range(0,4):
-            $if N+NN != NR-1:
-              v${N}0 = vld4q_lane_u32(w${N+NN}, v${N}0, ${NN}); w${N+NN} += 4;
-              $for K in range(4,KUNROLL,4):
-                v${N}${K} = vld4q_lane_u32(w${N+NN}, v${N}${K}, ${NN}); w${N+NN} += 4;
-        $for K in range(0,KUNROLL,4):
-          $for NN in range(0,4):
-            $for N in range(0,NR,4):
-              vst1q_u32(packed_weights, v${N}${K}.val[${NN}]); packed_weights += 4;
+        $for L in range(4):
+          $for N in range(0, NR, 4):
+            $if N+L != NR-1:
+              $for K in range(0, KUNROLL, 4):
+                vtmp${ABC[K:K+4]}x${ABC[N:N+4]} = vld4q_lane_u32(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}, ${L}); w${N+L} += 4;
+        $for K in range(0, KUNROLL, 4):
+          $for L in range(4):
+            $for N in range(0, NR, 4):
+              vst1q_u32(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
       }
 
       // KC remainder of 1..${KUNROLL-1}
@@ -171,46 +171,46 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon(
       if XNN_UNLIKELY(k != 0) {
         $if KUNROLL == 4:
           switch (k) {
-            $for K in range(1,4):
+            $for K in range(1, 4):
               // KC remainder of ${NR}x${K}
               case ${K}:
               {
                 $if K == 1:
-                  $for N in range(0,NR,4):
-                    uint32x4_t v${N} = vdupq_n_u32(0);
+                  $for N in range(0, NR, 4):
+                    uint32x4_t vtmp${ABC[0:K]}x${ABC[N:N+4]} = vdupq_n_u32(0);
                 $else:
-                  $for N in range(0,NR,4):
-                    uint32x4x${K}_t v${N};
-                    $for NN in range(0,K):
-                      v${N}.val[${NN}] = vdupq_n_u32(0);
+                  $for N in range(0, NR, 4):
+                    uint32x4x${K}_t vtmp${ABC[0:K]}x${ABC[N:N+4]};
+                    $for L in range(0, K):
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}] = vdupq_n_u32(0);
 
-                $for N in range(0,NR,4):
-                  $for NN in range(0,4):
-                    $if N+NN != NR-1:
-                      v${N} = vld${K}q_lane_u32(w${N+NN}, v${N}, ${NN}); w${N+NN} += ${K};
+                $for L in range(4):
+                  $for N in range(0, NR, 4):
+                    $if N+L != NR-1:
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]} = vld${K}q_lane_u32(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+4]}, ${L}); w${N+L} += ${K};
 
-                $for NN in range(0,K):
-                  $for N in range(0,NR,4):
+                $for L in range(K):
+                  $for N in range(0, NR, 4):
                     $if K == 1:
-                      vst1q_u32(packed_weights, v${N}); packed_weights += 4;
+                      vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}); packed_weights += 4;
                     $else:
-                      vst1q_u32(packed_weights, v${N}.val[${NN}]); packed_weights += 4;
+                      vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
                 break;
               }
             default:
               XNN_UNREACHABLE;
           }
         $else:
-          for (; k != 0; --k) {
-            $for N in range(0,NR,4):
-              $for NN in range(0,4):
-                $if N+NN != NR-1:
-                  $for K in range(0,KUNROLL,4):
-                    v${N}${K}.val[0] = vld1q_lane_u32(w${N+NN}, v${N}${K}.val[0], ${NN}); w${N+NN} += 4;
-            $for K in range(0,KUNROLL,4):
-              $for N in range(0,NR,4):
-                vst1q_u32(packed_weights, v${N}${K}.val[0]); packed_weights += 4;
-          }
+          do {
+            $for N in range(0, NR, 4):
+              $for L in range(4):
+                $if N+L != NR-1:
+                  $for K in range(0, KUNROLL, 4):
+                    vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0] = vld1q_lane_u32(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0], ${L}); w${N+L} += 4;
+            $for K in range(0, KUNROLL, 4):
+              $for N in range(0, NR, 4):
+                vst1q_u32(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0]); packed_weights += 4;
+          } while (--k != 0);
       }
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
     }
