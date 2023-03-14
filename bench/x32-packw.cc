@@ -60,7 +60,7 @@ static void x32_packw(benchmark::State& state,
     }
 
     packw(batch, dim_n, dim_k, nr, kr, sr,
-      reinterpret_cast<const uint32_t*>(b.data() + buffer_index * batch * dim_n * dim_k),
+      reinterpret_cast<const uint32_t*>(b.data()),
       /*bias=*/nullptr,
       reinterpret_cast<uint32_t*>(w.data() + buffer_index * batch * w_elements),
       /*extra_bytes=*/0, nullptr);
