@@ -389,6 +389,40 @@ tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H
 tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-pmax-x12.c &
 tools/xngen src/f32-vtanh/wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-pmax-x16.c &
 
+################################### ARM NEON ##################################
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=DIV          -D FMA=1 -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-lut8-p4h3-div-x4.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=DIV          -D FMA=1 -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-lut8-p4h3-div-x8.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=DIV          -D FMA=1 -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-lut8-p4h3-div-x12.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=DIV          -D FMA=1 -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-lut8-p4h3-div-x16.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=DIV          -D FMA=1 -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-p6h5-div-x4.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=DIV          -D FMA=1 -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-p6h5-div-x8.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=DIV          -D FMA=1 -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-p6h5-div-x12.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=DIV          -D FMA=1 -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-p6h5-div-x16.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR1RECPS1FMA -D FMA=1 -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p4h3-nr1recps1fma-x4.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR1RECPS1FMA -D FMA=1 -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p4h3-nr1recps1fma-x8.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR1RECPS1FMA -D FMA=1 -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p4h3-nr1recps1fma-x12.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR1RECPS1FMA -D FMA=1 -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p4h3-nr1recps1fma-x16.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR2FMA       -D FMA=1 -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p4h3-nr2fma-x4.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR2FMA       -D FMA=1 -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p4h3-nr2fma-x8.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR2FMA       -D FMA=1 -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p4h3-nr2fma-x12.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR2FMA       -D FMA=1 -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p4h3-nr2fma-x16.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR1RECPS1FMA -D FMA=1 -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr1recps1fma-x4.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR1RECPS1FMA -D FMA=1 -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr1recps1fma-x8.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR1RECPS1FMA -D FMA=1 -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr1recps1fma-x12.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR1RECPS1FMA -D FMA=1 -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr1recps1fma-x16.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2FMA       -D FMA=1 -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr2fma-x4.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2FMA       -D FMA=1 -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr2fma-x8.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2FMA       -D FMA=1 -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr2fma-x12.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2FMA       -D FMA=1 -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr2fma-x16.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2RECPS     -D FMA=1 -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr2recps-x4.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2RECPS     -D FMA=1 -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr2recps-x8.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2RECPS     -D FMA=1 -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr2recps-x12.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2RECPS     -D FMA=1 -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5-nr2recps-x16.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2RECPS     -D FMA=0 -D BATCH_TILE=4  -o src/f32-vtanh/gen/f32-tanh-neon-expm1minus-rr1-p6h5-nr2recps-x4.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2RECPS     -D FMA=0 -D BATCH_TILE=8  -o src/f32-vtanh/gen/f32-tanh-neon-expm1minus-rr1-p6h5-nr2recps-x8.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2RECPS     -D FMA=0 -D BATCH_TILE=12 -o src/f32-vtanh/gen/f32-tanh-neon-expm1minus-rr1-p6h5-nr2recps-x12.c &
+tools/xngen src/f32-vtanh/tanh-neon-expm1minus.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=NR2RECPS     -D FMA=0 -D BATCH_TILE=16 -o src/f32-vtanh/gen/f32-tanh-neon-expm1minus-rr1-p6h5-nr2recps-x16.c &
+
 
 ################################## Unit tests #################################
 tools/generate-vunary-test.py --spec test/f32-vtanh.yaml --output test/f32-vtanh.cc &

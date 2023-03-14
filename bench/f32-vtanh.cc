@@ -2100,6 +2100,195 @@ BENCHMARK_CAPTURE(f32_vtanh, wasmsimd_expm1minus_rr1_p6h5_div_nabs_pmax_x16,
   ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_ARM64
+  BENCHMARK_CAPTURE(f32_vtanh, aarch64_neonfma_expm1minus_rr1_lut8_p4h3_div_x4,
+                    xnn_f32_vtanh_ukernel__aarch64_neonfma_expm1minus_rr1_lut8_p4h3_div_x4,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, aarch64_neonfma_expm1minus_rr1_lut8_p4h3_div_x8,
+                    xnn_f32_vtanh_ukernel__aarch64_neonfma_expm1minus_rr1_lut8_p4h3_div_x8,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, arch64_neonfma_expm1minus_rr1_lut8_p4h3_div_x12,
+                    xnn_f32_vtanh_ukernel__aarch64_neonfma_expm1minus_rr1_lut8_p4h3_div_x12,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, aarch64_neonfma_expm1minus_rr1_lut8_p4h3_div_x16,
+                    xnn_f32_vtanh_ukernel__aarch64_neonfma_expm1minus_rr1_lut8_p4h3_div_x16,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, aarch64_neonfma_expm1minus_rr1_p6h5_div_x4,
+                    xnn_f32_vtanh_ukernel__aarch64_neonfma_expm1minus_rr1_p6h5_div_x4,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, aarch64_neonfma_expm1minus_rr1_p6h5_div_x8,
+                    xnn_f32_vtanh_ukernel__aarch64_neonfma_expm1minus_rr1_p6h5_div_x8,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, aarch64_neonfma_expm1minus_rr1_p6h5_div_x12,
+                    xnn_f32_vtanh_ukernel__aarch64_neonfma_expm1minus_rr1_p6h5_div_x12,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, aarch64_neonfma_expm1minus_rr1_p6h5_div_x16,
+                    xnn_f32_vtanh_ukernel__aarch64_neonfma_expm1minus_rr1_p6h5_div_x16,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_ARM64
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_lut8_p4h3_nr1recps1fma_x4,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_lut8_p4h3_nr1recps1fma_x4,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_lut8_p4h3_nr1recps1fma_x8,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_lut8_p4h3_nr1recps1fma_x8,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_lut8_p4h3_nr1recps1fma_x12,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_lut8_p4h3_nr1recps1fma_x12,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_lut8_p4h3_nr1recps1fma_x16,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_lut8_p4h3_nr1recps1fma_x16,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_lut8_p4h3_nr2fma_x4,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_lut8_p4h3_nr2fma_x4,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_lut8_p4h3_nr2fma_x8,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_lut8_p4h3_nr2fma_x8,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_lut8_p4h3_nr2fma_x12,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_lut8_p4h3_nr2fma_x12,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_lut8_p4h3_nr2fma_x16,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_lut8_p4h3_nr2fma_x16,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_p6h5_nr1recps1fma_x4,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5_nr1recps1fma_x4,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_p6h5_nr1recps1fma_x8,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5_nr1recps1fma_x8,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_p6h5_nr1recps1fma_x12,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5_nr1recps1fma_x12,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_p6h5_nr1recps1fma_x16,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5_nr1recps1fma_x16,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_p6h5_nr2fma_x4,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5_nr2fma_x4,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_p6h5_nr2fma_x8,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5_nr2fma_x8,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEONFMA)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_p6h5_nr2fma_x12,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5_nr2fma_x12,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEONFMA)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_p6h5_nr2fma_x16,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5_nr2fma_x16,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_p6h5_nr2recps_x4,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5_nr2recps_x4,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_p6h5_nr2recps_x8,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5_nr2recps_x8,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_p6h5_nr2recps_x12,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5_nr2recps_x12,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neonfma_expm1minus_rr1_p6h5_nr2recps_x16,
+                    xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5_nr2recps_x16,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEONFMA)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neon_expm1minus_rr1_p6h5_nr2recps_x4,
+                    xnn_f32_vtanh_ukernel__neon_expm1minus_rr1_p6h5_nr2recps_x4,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neon_expm1minus_rr1_p6h5_nr2recps_x8,
+                    xnn_f32_vtanh_ukernel__neon_expm1minus_rr1_p6h5_nr2recps_x8,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neon_expm1minus_rr1_p6h5_nr2recps_x12,
+                    xnn_f32_vtanh_ukernel__neon_expm1minus_rr1_p6h5_nr2recps_x12,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vtanh, neon_expm1minus_rr1_p6h5_nr2recps_x16,
+                    xnn_f32_vtanh_ukernel__neon_expm1minus_rr1_p6h5_nr2recps_x16,
+                    xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params,
+                    benchmark::utils::CheckNEON)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 BENCHMARK_CAPTURE(f32_vtanh, fma_expm1minus_rr1_lut8_p4h3_div_x1,
                   xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3_div_x1,

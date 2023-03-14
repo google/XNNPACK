@@ -2685,6 +2685,28 @@ union xnn_f32_tanh_params {
     XNN_ALIGN(8) float one[2];
   } wasmsimd_expm1minus_rr1_lut8_p4h3_nabs;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    float sat_cutoff;
+    float minus_log2e;
+    float magic_bias;
+    float ln2;
+    float c6;
+    float c5;
+    float c4;
+    float c3;
+    float c2;
+  } neon_expm1minus_rr1_p6h5;
+  struct {
+    float sat_cutoff;
+    float minus_log2e;
+    float magic_bias;
+    float ln2;
+    float c4;
+    float c3;
+    float c2;
+  } neon_expm1minus_rr1_lut8_p4h3;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 };
 
 
