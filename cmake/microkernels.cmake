@@ -3101,9 +3101,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x16-transposec/gen/x16-transposec-8x8-reuse-multi-zip-neon.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-switch-zip-neon.c
   src/x24-transposec/x24-transposec-2x2-neon-tbl64.c
-  src/x32-packw/gen/x32-packw-x2-neon.c
-  src/x32-packw/gen/x32-packw-x8-neon.c
-  src/x32-packw/gen/x32-packw-x12-neon.c
+  src/x32-packw/gen/x32-packw-x2-neon-ld2lane.c
+  src/x32-packw/gen/x32-packw-x8-neon-ld4lane.c
+  src/x32-packw/gen/x32-packw-x12-neon-ld4lane.c
   src/x32-packx/x32-packx-x4-neon-st4.c
   src/x32-transposec/gen/x32-transposec-2x2-multi-dec-zip-neon.c
   src/x32-transposec/gen/x32-transposec-2x2-multi-mov-zip-neon.c
@@ -5119,6 +5119,8 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x8-lut/gen/x8-lut-scalar-x4.c
   src/x8-lut/gen/x8-lut-scalar-x8.c
   src/x8-lut/gen/x8-lut-scalar-x16.c
+  src/x8-packw/gen/x8-packw-x2-scalar-int.c
+  src/x8-packw/gen/x8-packw-x4-scalar-int.c
   src/x8-transposec/gen/x8-transposec-1x2-scalar-int.c
   src/x8-transposec/gen/x8-transposec-1x4-scalar-int.c
   src/x8-transposec/gen/x8-transposec-2x1-scalar-int.c
@@ -5131,8 +5133,6 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x8-zip/x8-zip-x3-scalar.c
   src/x8-zip/x8-zip-x4-scalar.c
   src/x8-zip/x8-zip-xm-scalar.c
-  src/x8-packw/gen/x8-packw-x2-scalar-int.c
-  src/x8-packw/gen/x8-packw-x4-scalar-int.c
   src/x16-packw/gen/x16-packw-x8-scalar-int.c
   src/x16-packw/gen/x16-packw-x16-scalar-int.c
   src/x16-transposec/gen/x16-transposec-1x2-scalar-int.c

@@ -11,6 +11,6 @@
 - name: xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float
 
 # ARM NEON
-- name: xnn_x32_packw_gemm_goi_ukernel_x2__neon
-- name: xnn_x32_packw_gemm_goi_ukernel_x8__neon
-- name: xnn_x32_packw_gemm_goi_ukernel_x12__neon
+- name: xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane
+- name: xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane
+- name: xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane

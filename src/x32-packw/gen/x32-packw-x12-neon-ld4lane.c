@@ -17,7 +17,7 @@
 #include <xnnpack/packw.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x12__neon(
+void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane(
   size_t g,
   size_t nc,
   size_t kc,
