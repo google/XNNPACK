@@ -761,6 +761,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_static_transpose:
       case xnn_node_type_square:
       case xnn_node_type_square_root:
+      case xnn_node_type_tanh:
         break;
       default:
         xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not supported for FP16 inference",

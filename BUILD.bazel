@@ -150,6 +150,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/static-slice.c",
     "src/subgraph/static-transpose.c",
     "src/subgraph/subtract.c",
+    "src/subgraph/tanh.c",
     "src/subgraph/unpooling-2d.c",
     "src/subgraph/validation.c",
     "src/tensor.c",
@@ -10975,6 +10976,20 @@ xnnpack_unit_test(
         ":operators_test_mode",
         ":subgraph_binary_tester",
         ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "tanh_test",
+    srcs = [
+        "test/tanh.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
+        ":subgraph_unary_tester",
     ],
 )
 

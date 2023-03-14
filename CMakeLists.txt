@@ -261,6 +261,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/static-slice.c
   src/subgraph/static-transpose.c
   src/subgraph/subtract.c
+  src/subgraph/tanh.c
   src/subgraph/unpooling-2d.c
   src/subgraph/validation.c
   src/tensor.c)
@@ -1592,6 +1593,12 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(subtract2-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(subtract2-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
     ADD_TEST(NAME subtract2-test COMMAND subtract2-test)
+
+    ADD_EXECUTABLE(tanh-test test/sigmoid.cc)
+    SET_TARGET_PROPERTIES(tanh-test PROPERTIES CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(tanh-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(tanh-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+    ADD_TEST(NAME tanh-test COMMAND tanh-test)
 
     ADD_EXECUTABLE(unpooling-2d-test test/unpooling-2d.cc)
     TARGET_INCLUDE_DIRECTORIES(unpooling-2d-test PRIVATE src test)

@@ -112,6 +112,8 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Static Transpose";
     case xnn_node_type_subtract:
       return "Subtract";
+    case xnn_node_type_tanh:
+      return "Tanh";
     case xnn_node_type_unpooling_2d:
       return "Unpooling 2D";
   }
