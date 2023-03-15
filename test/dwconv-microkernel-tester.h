@@ -672,7 +672,7 @@ class DWConvMicrokernelTester {
         divide_round_up(doz(tile_size, first_pass_tile() + last_pass_tile()), middle_pass_tile());
       const size_t rounded_c = round_up_po2(channels(), channel_subtile());
       const size_t packed_weights_offset_to_last_tile =
-          first_pass_tile() * rounded_c * sizeof(int8_t)+ rounded_c * sizeof(int32_t) +
+          first_pass_tile() * rounded_c * sizeof(int8_t) + rounded_c * sizeof(int32_t) +
           num_middle_pass * middle_pass_tile() * rounded_c * sizeof(int8_t) +
           last_pass_tile() * channel_tile();
 

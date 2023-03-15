@@ -8836,6 +8836,19 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qs8_dwconv_multipass_minmax_rndnu_test",
+    srcs = [
+        "test/dwconv-microkernel-tester.h",
+        "test/qs8-dwconv-multipass-minmax-rndnu.cc",
+    ],
+    shard_count = 10,
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":packing",
+        ":microkernel_utils",
+    ],
+)
+
+xnnpack_unit_test(
     name = "qs8_dwconv_unipass_minmax_fp32_test",
     srcs = [
         "test/dwconv-microkernel-tester.h",
