@@ -12,11 +12,12 @@ $assert KUNROLL >= 2
 
 #include <arm_neon.h>
 
-#include <xnnpack/math.h>
 #include <xnnpack/packw.h>
+$if PREFETCH:
+  #include <xnnpack/prefetch.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane${"_prfm" if PREFETCH else ""}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -69,6 +70,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane(
               $for K in range(0,KUNROLL,2):
                 v${N}${K} = vld2_lane_u32(w${N+NN} + ${K}, v${N}${K}, ${NN});
               w${N+NN} += ${KUNROLL};
+          $if PREFETCH:
+            $for N in range(0, NR):
+              xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
+
           $for K in range(0,KUNROLL,2):
             $for NN in range(0,2):
               $for N in range(0,NR,2):

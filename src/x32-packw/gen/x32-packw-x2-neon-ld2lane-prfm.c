@@ -15,9 +15,10 @@
 #include <arm_neon.h>
 
 #include <xnnpack/packw.h>
+#include <xnnpack/prefetch.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane(
+void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_prfm(
   size_t g,
   size_t nc,
   size_t kc,
@@ -64,6 +65,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane(
           w0 += 2;
           v00 = vld2_lane_u32(w1 + 0, v00, 1);
           w1 += 2;
+          xnn_prefetch_to_l1((const int8_t*) w0 + 128);
+          xnn_prefetch_to_l1((const int8_t*) w1 + 128);
 
           vst1_u32(packed_weights + 0, v00.val[0]);
           vst1_u32(packed_weights + 2, v00.val[1]);

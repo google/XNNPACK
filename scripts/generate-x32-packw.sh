@@ -15,11 +15,14 @@ tools/xngen src/x32-packw/scalar.c.in -D NR=8 -D KUNROLL=4 -D TYPE=float    -o s
 
 ################################### ARM NEON ##################################
 ### NR multiple of 4
-tools/xngen src/x32-packw/neon.c.in -D NR=8  -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8-neon-ld4lane.c &
-tools/xngen src/x32-packw/neon.c.in -D NR=12 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=8  -D PREFETCH=0 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8-neon-ld4lane.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=8  -D PREFETCH=1 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8-neon-ld4lane-prfm.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=12 -D PREFETCH=0 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=12 -D PREFETCH=1 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane-prfm.c &
 
 ### NR2 micro-kernels
-tools/xngen src/x32-packw/NR2-neon.c.in -D NR=2 -D KUNROLL=2 -o src/x32-packw/gen/x32-packw-x2-neon-ld2lane.c &
+tools/xngen src/x32-packw/NR2-neon.c.in -D NR=2 -D PREFETCH=0 -D KUNROLL=2 -o src/x32-packw/gen/x32-packw-x2-neon-ld2lane.c &
+tools/xngen src/x32-packw/NR2-neon.c.in -D NR=2 -D PREFETCH=1 -D KUNROLL=2 -o src/x32-packw/gen/x32-packw-x2-neon-ld2lane-prfm.c &
 
 ################################## Unit tests #################################
 tools/generate-packw-test.py --spec test/x32-packw.yaml --output test/x32-packw.cc &

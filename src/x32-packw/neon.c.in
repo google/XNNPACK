@@ -17,9 +17,11 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <arm_neon.h>
 
 #include <xnnpack/packw.h>
+$if PREFETCH:
+  #include <xnnpack/prefetch.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH else ""}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -72,6 +74,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane(
           $for N in range(0, NR, 4):
             $for K in range(0, KUNROLL, 4):
               vtmp${ABC[K:K+4]}x${ABC[N:N+4]} = vld4q_lane_u32(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}, ${L}); w${N+L} += 4;
+        $if PREFETCH:
+          $for N in range(0, NR):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
         $for K in range(0, KUNROLL, 4):
           $for L in range(4):
             $for N in range(0, NR, 4):
