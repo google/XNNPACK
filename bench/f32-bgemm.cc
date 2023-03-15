@@ -189,7 +189,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   }
   static void f32_gemm_4x8__asm_aarch64_neonfma_prfm_cortex_a53(benchmark::State& state, const char* net) {
     f32_gemm(state,
-      xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane,
+      xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm,
       xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex_a53,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1);
@@ -210,7 +210,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   }
   static void f32_gemm_4x8__asm_aarch64_neonfma_prfm_cortex_a75(benchmark::State& state, const char* net) {
     f32_gemm(state,
-      xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane,
+      xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm,
       xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_prfm_cortex_a75,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1);
@@ -238,7 +238,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   }
   static void f32_gemm_5x8__asm_aarch64_neonfma_prfm_cortex_a75(benchmark::State& state, const char* net) {
     f32_gemm(state,
-      xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane,
+      xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm,
       xnn_f32_gemm_minmax_ukernel_5x8__asm_aarch64_neonfma_prfm_cortex_a75,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/5, /*nr=*/8, /*kr=*/1, /*sr=*/1);
@@ -266,7 +266,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   }
   static void f32_gemm_6x8__asm_aarch64_neonfma_prfm_cortex_a53(benchmark::State& state, const char* net) {
     f32_gemm(state,
-      xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane,
+      xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm,
       xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_prfm_cortex_a53,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1);
@@ -294,7 +294,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   }
   static void f32_gemm_6x8__asm_aarch64_neonfma_prfm_cortex_a75(benchmark::State& state, const char* net) {
     f32_gemm(state,
-      xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane,
+      xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm,
       xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_prfm_cortex_a75,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1);
@@ -356,7 +356,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   }
   static void f32_gemm_4x8__asm_aarch32_neon_prfm_cortex_a53(benchmark::State& state, const char* net) {
     f32_gemm(state,
-      xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane,
+      xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm,
       xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_prfm_cortex_a53,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
@@ -380,7 +380,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   }
   static void f32_gemm_4x8__asm_aarch32_neon_prfm_cortex_a75(benchmark::State& state, const char* net) {
     f32_gemm(state,
-      xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane,
+      xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm,
       xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_prfm_cortex_a75,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
