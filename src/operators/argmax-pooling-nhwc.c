@@ -274,6 +274,8 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
     .channels = channels,
     .input_increment = (pooling_height * step_width - multipass_adjustment) * sizeof(void*),
     .output_increment = output_width_stride - channels * sizeof(float),
+    .accumulation_buffer_size = (channels + XNN_MAX_SIMD_SIZE / sizeof(float)) * sizeof(float),
+    .index_buffer_size = (channels + XNN_MAX_SIMD_SIZE / sizeof(float)) * sizeof(uint32_t),
   };
   argmax_pooling_op->compute.type = xnn_parallelization_type_2d;
   argmax_pooling_op->compute.range[0] = batch_size;

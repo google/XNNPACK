@@ -1765,6 +1765,7 @@ static enum xnn_status setup_igemm(
 static enum xnn_status setup_dwconv(
     xnn_operator_t convolution_op,
     uint32_t log2_input_element_size,
+    uint32_t log2_accumulator_element_size,
     uint32_t log2_output_element_size,
     size_t num_threads)
 {
@@ -1846,6 +1847,8 @@ static enum xnn_status setup_dwconv(
   } else {
     convolution_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_multipass;
     convolution_op->context.dwconv.multipass_ukernel = convolution_op->ukernel.dwconv.multipass_fn;
+    convolution_op->context.dwconv.buffer_size =
+      (groups + (XNN_MAX_SIMD_SIZE >> log2_input_element_size)) << log2_accumulator_element_size;
   }
 
   return xnn_status_success;
@@ -1904,6 +1907,7 @@ static enum xnn_status setup_convolution2d_nhwc(
   uint32_t datatype_init_flags,
   uint32_t log2_input_element_size,
   uint32_t log2_filter_element_size,
+  uint32_t log2_accumulator_element_size,
   uint32_t extra_weights_elements_size,
   uint32_t log2_output_element_size,
   size_t num_threads)
@@ -1996,7 +2000,7 @@ static enum xnn_status setup_convolution2d_nhwc(
     case xnn_microkernel_type_dwconv:
       return setup_dwconv(
           convolution_op,
-          log2_input_element_size, log2_output_element_size,
+          log2_input_element_size, log2_accumulator_element_size, log2_output_element_size,
           num_threads);
     case xnn_microkernel_type_vmulcaddc:
       return setup_vmulcaddc(
@@ -2024,6 +2028,7 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qu8(
     XNN_INIT_FLAG_QU8,
     /*log2_input_element_size=*/0,  // log2(sizeof(uint8_t))
     /*log2_filter_element_size=*/0,  // log2(sizeof(uint8_t))
+    /*log2_accumulator_element_size=*/2,  // log2(sizeof(int32_t))
     /*extra_weights_elements_size=*/sizeof(int32_t),
     /*log2_output_element_size=*/0,  // log2(sizeof(uint8_t))
     /*num_threads=*/pthreadpool_get_threads_count(threadpool));
@@ -2045,6 +2050,7 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qs8(
     XNN_INIT_FLAG_QS8,
     /*log2_input_element_size=*/0,  // log2(sizeof(int8_t))
     /*log2_filter_element_size=*/0,  // log2(sizeof(int8_t))
+    /*log2_accumulator_element_size=*/2,  // log2(sizeof(int32_t))
     /*extra_weights_elements_size=*/sizeof(int32_t),
     /*log2_output_element_size=*/0,  // log2(sizeof(int8_t))
     /*num_threads=*/pthreadpool_get_threads_count(threadpool));
@@ -2066,6 +2072,7 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qc8(
     XNN_INIT_FLAG_QC8,
     /*log2_input_element_size=*/0,  // log2(sizeof(int8_t))
     /*log2_filter_element_size=*/0,  // log2(sizeof(int8_t))
+    /*log2_accumulator_element_size=*/2,  // log2(sizeof(int32_t))
     /*extra_weights_elements_size=*/sizeof(int32_t) + sizeof(float),
     /*log2_output_element_size=*/0,  // log2(sizeof(int8_t))
     /*num_threads=*/pthreadpool_get_threads_count(threadpool));
@@ -2087,6 +2094,7 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f16(
     XNN_INIT_FLAG_F16,
     /*log2_input_element_size=*/1,  // log2(sizeof(uint16_t))
     /*log2_filter_element_size=*/1,  // log2(sizeof(uint16_t))
+    /*log2_accumulator_element_size=*/1,  // log2(sizeof(uint16_t))
     /*extra_weights_elements_size=*/sizeof(uint16_t),
     /*log2_output_element_size=*/1,  // log2(sizeof(uint16_t))
     /*num_threads=*/pthreadpool_get_threads_count(threadpool));
@@ -2108,6 +2116,7 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f32(
     XNN_INIT_FLAG_F32,
     /*log2_input_element_size=*/2,  // log2(sizeof(float))
     /*log2_filter_element_size=*/2,  // log2(sizeof(float))
+    /*log2_accumulator_element_size=*/2,  // log2(sizeof(float))
     /*extra_weights_elements_size=*/sizeof(float),
     /*log2_output_element_size=*/2,  // log2(sizeof(float))
     /*num_threads=*/pthreadpool_get_threads_count(threadpool));

@@ -347,8 +347,7 @@ class DWConvMicrokernelTester {
       kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
     std::vector<const uint8_t*> indirection((width() - 1) * step() + tile_size);
     std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + indirection.size() * channels());
-    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> buffer(
-      XNN_ALLOCATION_ALIGNMENT / sizeof(uint32_t) + channels());
+    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> buffer(XNN_MAX_SIMD_SIZE / sizeof(uint8_t) + channels());
     std::vector<uint8_t> kernel(channels() * kernel_size());
     std::vector<int32_t> bias(channels());
     std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_weights(
@@ -597,8 +596,7 @@ class DWConvMicrokernelTester {
       kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
     std::vector<const int8_t*> indirection((width() - 1) * step() + tile_size);
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + indirection.size() * channels());
-    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> buffer(
-      XNN_ALLOCATION_ALIGNMENT / sizeof(uint32_t) + channels());
+    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> buffer(XNN_MAX_SIMD_SIZE / sizeof(int8_t) + channels());
     std::vector<int8_t> kernel(channels() * kernel_size());
     std::vector<int32_t> bias(channels());
     std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_weights(
@@ -857,8 +855,7 @@ class DWConvMicrokernelTester {
       kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
     std::vector<const int8_t*> indirection((width() - 1) * step() + tile_size);
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + indirection.size() * channels());
-    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> buffer(
-      XNN_ALLOCATION_ALIGNMENT / sizeof(uint32_t) + channels());
+    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> buffer(XNN_MAX_SIMD_SIZE / sizeof(int8_t) + channels());
     std::vector<int8_t> kernel(channels() * kernel_size());
     std::vector<int32_t> bias(channels());
     std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_weights(
@@ -1067,8 +1064,7 @@ class DWConvMicrokernelTester {
       kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
     std::vector<const uint16_t*> indirection((width() - 1) * step() + tile_size);
     std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + indirection.size() * channels());
-    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> buffer(
-      XNN_ALLOCATION_ALIGNMENT / sizeof(uint16_t) + channels());
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> buffer(XNN_MAX_SIMD_SIZE / sizeof(uint16_t) + channels());
     std::vector<uint16_t> kernel(channels() * kernel_size());
     std::vector<uint16_t> bias(channels());
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_weights(
@@ -1343,7 +1339,7 @@ class DWConvMicrokernelTester {
       kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
     std::vector<const float*> indirection((width() - 1) * step() + tile_size);
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
-    std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_ALLOCATION_ALIGNMENT / sizeof(float) + channels());
+    std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_MAX_SIMD_SIZE / sizeof(float) + channels());
     std::vector<float> kernel(channels() * kernel_size());
     std::vector<float> bias(channels());
     std::vector<float, AlignedAllocator<float, 64>> packed_weights(
@@ -1432,7 +1428,7 @@ class DWConvMicrokernelTester {
       kernel_size(), first_pass_tile(), middle_pass_tile(), last_pass_tile());
     std::vector<const float*> indirection((width() - 1) * step() + tile_size);
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
-    std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_ALLOCATION_ALIGNMENT / sizeof(float) + channels());
+    std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_MAX_SIMD_SIZE / sizeof(float) + channels());
     std::vector<float> kernel(channels() * kernel_size());
     std::vector<float> bias(channels());
     std::vector<float, AlignedAllocator<float, 64>> packed_weights(

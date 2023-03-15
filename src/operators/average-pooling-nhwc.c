@@ -617,6 +617,7 @@ static enum xnn_status setup_average_pooling2d(
   void* output,
   uint32_t log2_data_element_size,
   uint32_t log2_weight_element_size,
+  uint32_t log2_accumulator_element_size,
   xnn_indirection_init_pavgpool2d_fn indirection_init_pavgpool2d,
   struct avgpool_parameters avgpool[restrict XNN_MIN_ELEMENTS(1)],
   struct pavgpool_parameters pavgpool[restrict 1],
@@ -712,6 +713,8 @@ static enum xnn_status setup_average_pooling2d(
       average_pooling_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_unipass;
       average_pooling_op->context.global_average_pooling_nwc.unipass_ukernel = gavgpool->unipass;
     } else {
+      average_pooling_op->context.global_average_pooling_nwc.buffer_size =
+        (channels + (XNN_MAX_SIMD_SIZE >> log2_data_element_size)) << log2_accumulator_element_size;
       average_pooling_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_multipass;
       average_pooling_op->context.global_average_pooling_nwc.multipass_ukernel = gavgpool->multipass;
     }
@@ -805,6 +808,8 @@ static enum xnn_status setup_average_pooling2d(
         average_pooling_op->context.pixelwise_average_pooling.unipass_ukernel = pavgpool->unipass;
         average_pooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_pixelwise_average_pooling_unipass;
       } else {
+        average_pooling_op->context.pixelwise_average_pooling.buffer_size =
+          (channels + (XNN_MAX_SIMD_SIZE >> log2_data_element_size)) << log2_accumulator_element_size;
         average_pooling_op->context.pixelwise_average_pooling.multipass_ukernel = pavgpool->multipass;
         average_pooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_pixelwise_average_pooling_multipass;
       }
@@ -833,6 +838,8 @@ static enum xnn_status setup_average_pooling2d(
         average_pooling_op->context.average_pooling.unipass_ukernel = avgpool->unipass;
         average_pooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_average_pooling_unipass;
       } else {
+        average_pooling_op->context.average_pooling.buffer_size =
+          (channels + (XNN_MAX_SIMD_SIZE >> log2_data_element_size)) << log2_accumulator_element_size;
         average_pooling_op->context.average_pooling.multipass_ukernel = avgpool->multipass;
         average_pooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_average_pooling_multipass;
       }
@@ -879,6 +886,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_qu8(
     input, output,
     0 /* log2(sizeof(data element)) = log2(sizeof(uint8_t)) */,
     0 /* log2(sizeof(weight element)) = log2(sizeof(uint8_t)) */,
+    2 /* log2(sizeof(accumulator element))= log2(sizeof(int32_t)) */,
     NULL /* indirection_init_pavgpool2d */,
     &xnn_params.qu8.avgpool,
     NULL /* no PAVGPOOL micro-kernel */,
@@ -926,6 +934,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f16(
     input, output,
     1 /* log2(sizeof(data element)) = log2(sizeof(uint16_t)) */,
     1 /* log2(sizeof(weight element)) = log2(sizeof(uint16_t)) */,
+    1 /* log2(sizeof(accumulator element))= log2(sizeof(uint16_t)) */,
     (xnn_indirection_init_pavgpool2d_fn) xnn_indirection_init_pavgpool2d_f16,
     &xnn_params.f16.avgpool, &xnn_params.f16.pavgpool, &xnn_params.f16.gavgpool,
     pooling_params, pooling_params_size,
@@ -969,6 +978,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
     input, output,
     2 /* log2(sizeof(data element)) = log2(sizeof(float)) */,
     2 /* log2(sizeof(weight element)) = log2(sizeof(float)) */,
+    2 /* log2(sizeof(accumulator element))= log2(sizeof(float)) */,
     (xnn_indirection_init_pavgpool2d_fn) xnn_indirection_init_pavgpool2d_f32,
     &xnn_params.f32.avgpool, &xnn_params.f32.pavgpool, &xnn_params.f32.gavgpool,
     pooling_params, pooling_params_size,

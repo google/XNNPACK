@@ -329,3 +329,18 @@
 #else
   #define XNN_ALLOCATION_ALIGNMENT 16
 #endif
+
+// Number of extra elements to allocate for DWCONV accumulators/buffers.
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  // For AVX512.
+  #define XNN_MAX_SIMD_SIZE 64
+#elif XNN_ARCH_RISCV || XNN_ARCH_WASM
+  // Scalable vectors, assume masked loads and stores.
+  // Wasm without SIMD.
+  #define XNN_MAX_SIMD_SIZE 0
+#elif XNN_ARCH_HEXAGON
+  #define XNN_MAX_SIMD_SIZE 128
+#else
+  // XNN_ARCH_ARM, XNN_ARCH_ARM64, XNN_ARCH_WASMSIMD, XNN_ARCH_WASMRELAXEDSIMD.
+  #define XNN_MAX_SIMD_SIZE 16
+#endif
