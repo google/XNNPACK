@@ -16,7 +16,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_qs8_dwconv_minmax_rndnu_ukernel_8f8m8l16c8s8r__neon_mla8_ld64(
+void xnn_qs8_dwconv_minmax_rndnu_ukernel_8f8m9l16c8s8r__neon_mla8_ld64(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -259,7 +259,7 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_8f8m8l16c8s8r__neon_mla8_ld64(
     }
 
     // Middle pass to process 8 inputs in each iteration.
-    for (size_t ks = kernel_size - 8; ks > 8; ks -= 8) {
+    for (size_t ks = kernel_size - 8; ks > 9; ks -= 8) {
       uint32_t* b = buffer;
 
       const int8_t* i0 = input[0];
@@ -474,7 +474,7 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_8f8m8l16c8s8r__neon_mla8_ld64(
       }
     }
 
-    // Last pass to process up to 8 inputs.
+    // Last pass to process up to 9 inputs.
     {
       uint32_t* b = buffer;
       const int8_t* i0 = input[0];
@@ -516,6 +516,11 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_8f8m8l16c8s8r__neon_mla8_ld64(
       assert(i7 != NULL);
       if XNN_UNPREDICTABLE(i7 != zero) {
         i7 = (const int8_t*) ((uintptr_t) i7 + input_offset);
+      }
+      const int8_t* i8 = input[8];
+      assert(i8 != NULL);
+      if XNN_UNPREDICTABLE(i8 != zero) {
+        i8 = (const int8_t*) ((uintptr_t) i8 + input_offset);
       }
 
       size_t c = channels;
@@ -613,6 +618,19 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_8f8m8l16c8s8r__neon_mla8_ld64(
         vacc89AB = vaddw_s16(vacc89AB, vget_low_s16(vprod89ABCDEF));
         vaccCDEF = vaddw_s16(vaccCDEF, vget_high_s16(vprod89ABCDEF));
 
+        const int8x8_t vi8x01234567 = vld1_s8(i8); i8 += 8;
+        const int8x8_t vk8x01234567 = vld1_s8(w); w = (const void*) ((const int8_t*) w + 8);
+        const int8x8_t vi8x89ABCDEF = vld1_s8(i8); i8 += 8;
+        const int8x8_t vk8x89ABCDEF = vld1_s8(w); w = (const void*) ((const int8_t*) w + 8);
+
+        vprod01234567 = vmull_s8(vi8x01234567, vk8x01234567);
+        vprod89ABCDEF = vmull_s8(vi8x89ABCDEF, vk8x89ABCDEF);
+
+        vacc0123 = vaddw_s16(vacc0123, vget_low_s16(vprod01234567));
+        vacc4567 = vaddw_s16(vacc4567, vget_high_s16(vprod01234567));
+        vacc89AB = vaddw_s16(vacc89AB, vget_low_s16(vprod89ABCDEF));
+        vaccCDEF = vaddw_s16(vaccCDEF, vget_high_s16(vprod89ABCDEF));
+
         vacc0123 = vqshlq_s32(vacc0123, vright_pre_shift);
         vacc4567 = vqshlq_s32(vacc4567, vright_pre_shift);
         vacc89AB = vqshlq_s32(vacc89AB, vright_pre_shift);
@@ -704,6 +722,13 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_8f8m8l16c8s8r__neon_mla8_ld64(
           const int8x8_t vk7x01234567 = vld1_s8(w); w = (const void*) ((const int8_t*) w + 8);
 
           vprod01234567 = vmlal_s8(vprod01234567, vi7x01234567, vk7x01234567);
+
+          vacc0123 = vaddw_s16(vacc0123, vget_low_s16(vprod01234567));
+          vacc4567 = vaddw_s16(vacc4567, vget_high_s16(vprod01234567));
+          const int8x8_t vi8x01234567 = vld1_s8(i8); i8 += 8;
+          const int8x8_t vk8x01234567 = vld1_s8(w); w = (const void*) ((const int8_t*) w + 8);
+
+          vprod01234567 = vmull_s8(vi8x01234567, vk8x01234567);
 
           vacc0123 = vaddw_s16(vacc0123, vget_low_s16(vprod01234567));
           vacc4567 = vaddw_s16(vacc4567, vget_high_s16(vprod01234567));
