@@ -2642,6 +2642,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(qu8-dwconv-multipass-minmax-fp32-test PRIVATE hardware-config logging microkernel-utils microkernels-all microparams-init packing)
   ADD_TEST(NAME qu8-dwconv-multipass-minmax-fp32-test COMMAND qu8-dwconv-multipass-minmax-fp32-test)
 
+  ADD_EXECUTABLE(qu8-dwconv-multipass-minmax-rndnu-test test/qu8-dwconv-multipass-minmax-rndnu.cc)
+  TARGET_INCLUDE_DIRECTORIES(qu8-dwconv-multipass-minmax-rndnu-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(qu8-dwconv-multipass-minmax-rndnu-test PRIVATE fp16 pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(qu8-dwconv-multipass-minmax-rndnu-test PRIVATE hardware-config logging microkernel-utils microkernels-all microparams-init packing)
+  ADD_TEST(NAME qu8-dwconv-multipass-minmax-rndnu-test COMMAND qu8-dwconv-multipass-minmax-rndnu-test)
+
   ADD_EXECUTABLE(qu8-dwconv-unipass-minmax-fp32-test test/qu8-dwconv-unipass-minmax-fp32.cc)
   TARGET_INCLUDE_DIRECTORIES(qu8-dwconv-unipass-minmax-fp32-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qu8-dwconv-unipass-minmax-fp32-test PRIVATE fp16 pthreadpool gtest gtest_main)
