@@ -56,6 +56,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
   vtmp0123x89AB.val[2] = vdupq_n_u32(0);
   vtmp0123x89AB.val[3] = vdupq_n_u32(0);
 
+
   do {
     // NC main loop multiple of 12
     const uint32_t* w0 = weights;
@@ -89,17 +90,18 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
       size_t k = kc;
       for (; k >= 4; k -= 4) {
         vtmp0123x0123 = vld4q_lane_u32(w0, vtmp0123x0123, 0); w0 += 4;
-        vtmp0123x4567 = vld4q_lane_u32(w4, vtmp0123x4567, 0); w4 += 4;
-        vtmp0123x89AB = vld4q_lane_u32(w8, vtmp0123x89AB, 0); w8 += 4;
         vtmp0123x0123 = vld4q_lane_u32(w1, vtmp0123x0123, 1); w1 += 4;
-        vtmp0123x4567 = vld4q_lane_u32(w5, vtmp0123x4567, 1); w5 += 4;
-        vtmp0123x89AB = vld4q_lane_u32(w9, vtmp0123x89AB, 1); w9 += 4;
         vtmp0123x0123 = vld4q_lane_u32(w2, vtmp0123x0123, 2); w2 += 4;
-        vtmp0123x4567 = vld4q_lane_u32(w6, vtmp0123x4567, 2); w6 += 4;
-        vtmp0123x89AB = vld4q_lane_u32(w10, vtmp0123x89AB, 2); w10 += 4;
         vtmp0123x0123 = vld4q_lane_u32(w3, vtmp0123x0123, 3); w3 += 4;
+        vtmp0123x4567 = vld4q_lane_u32(w4, vtmp0123x4567, 0); w4 += 4;
+        vtmp0123x4567 = vld4q_lane_u32(w5, vtmp0123x4567, 1); w5 += 4;
+        vtmp0123x4567 = vld4q_lane_u32(w6, vtmp0123x4567, 2); w6 += 4;
         vtmp0123x4567 = vld4q_lane_u32(w7, vtmp0123x4567, 3); w7 += 4;
+        vtmp0123x89AB = vld4q_lane_u32(w8, vtmp0123x89AB, 0); w8 += 4;
+        vtmp0123x89AB = vld4q_lane_u32(w9, vtmp0123x89AB, 1); w9 += 4;
+        vtmp0123x89AB = vld4q_lane_u32(w10, vtmp0123x89AB, 2); w10 += 4;
         vtmp0123x89AB = vld4q_lane_u32(w11, vtmp0123x89AB, 3); w11 += 4;
+
         xnn_prefetch_to_l1((const int8_t*) w0 + 128);
         xnn_prefetch_to_l1((const int8_t*) w1 + 128);
         xnn_prefetch_to_l1((const int8_t*) w2 + 128);
@@ -112,6 +114,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
         xnn_prefetch_to_l1((const int8_t*) w9 + 128);
         xnn_prefetch_to_l1((const int8_t*) w10 + 128);
         xnn_prefetch_to_l1((const int8_t*) w11 + 128);
+
         vst1q_u32(packed_weights, vtmp0123x0123.val[0]); packed_weights += 4;
         vst1q_u32(packed_weights, vtmp0123x4567.val[0]); packed_weights += 4;
         vst1q_u32(packed_weights, vtmp0123x89AB.val[0]); packed_weights += 4;
@@ -126,6 +129,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
         vst1q_u32(packed_weights, vtmp0123x89AB.val[3]); packed_weights += 4;
       }
 
+
       // KC remainder of 1..3
       // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
@@ -136,7 +140,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
             uint32x4_t vtmp0x0123 = vdupq_n_u32(0);
             uint32x4_t vtmp0x4567 = vdupq_n_u32(0);
             uint32x4_t vtmp0x89AB = vdupq_n_u32(0);
-
             vtmp0x0123 = vld1q_lane_u32(w0, vtmp0x0123, 0); w0 += 1;
             vtmp0x4567 = vld1q_lane_u32(w4, vtmp0x4567, 0); w4 += 1;
             vtmp0x89AB = vld1q_lane_u32(w8, vtmp0x89AB, 0); w8 += 1;
@@ -149,7 +152,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
             vtmp0x0123 = vld1q_lane_u32(w3, vtmp0x0123, 3); w3 += 1;
             vtmp0x4567 = vld1q_lane_u32(w7, vtmp0x4567, 3); w7 += 1;
             vtmp0x89AB = vld1q_lane_u32(w11, vtmp0x89AB, 3); w11 += 1;
-
             vst1q_u32(packed_weights, vtmp0x0123); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp0x4567); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp0x89AB); packed_weights += 4;
@@ -167,7 +169,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
             uint32x4x2_t vtmp01x89AB;
             vtmp01x89AB.val[0] = vdupq_n_u32(0);
             vtmp01x89AB.val[1] = vdupq_n_u32(0);
-
             vtmp01x0123 = vld2q_lane_u32(w0, vtmp01x0123, 0); w0 += 2;
             vtmp01x4567 = vld2q_lane_u32(w4, vtmp01x4567, 0); w4 += 2;
             vtmp01x89AB = vld2q_lane_u32(w8, vtmp01x89AB, 0); w8 += 2;
@@ -180,7 +181,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
             vtmp01x0123 = vld2q_lane_u32(w3, vtmp01x0123, 3); w3 += 2;
             vtmp01x4567 = vld2q_lane_u32(w7, vtmp01x4567, 3); w7 += 2;
             vtmp01x89AB = vld2q_lane_u32(w11, vtmp01x89AB, 3); w11 += 2;
-
             vst1q_u32(packed_weights, vtmp01x0123.val[0]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp01x4567.val[0]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp01x89AB.val[0]); packed_weights += 4;
@@ -204,7 +204,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
             vtmp012x89AB.val[0] = vdupq_n_u32(0);
             vtmp012x89AB.val[1] = vdupq_n_u32(0);
             vtmp012x89AB.val[2] = vdupq_n_u32(0);
-
             vtmp012x0123 = vld3q_lane_u32(w0, vtmp012x0123, 0); w0 += 3;
             vtmp012x4567 = vld3q_lane_u32(w4, vtmp012x4567, 0); w4 += 3;
             vtmp012x89AB = vld3q_lane_u32(w8, vtmp012x89AB, 0); w8 += 3;
@@ -217,7 +216,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
             vtmp012x0123 = vld3q_lane_u32(w3, vtmp012x0123, 3); w3 += 3;
             vtmp012x4567 = vld3q_lane_u32(w7, vtmp012x4567, 3); w7 += 3;
             vtmp012x89AB = vld3q_lane_u32(w11, vtmp012x89AB, 3); w11 += 3;
-
             vst1q_u32(packed_weights, vtmp012x0123.val[0]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp012x4567.val[0]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp012x89AB.val[0]); packed_weights += 4;
@@ -252,6 +250,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
       }
 
       // NR remainder has less than 12 rows so last row is not loaded
+      // For SR=4 the
       const uint32_t* w1 = w0 + kc;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
@@ -297,16 +296,16 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
       size_t k = kc;
       for (; k >= 4; k -= 4) {
         vtmp0123x0123 = vld4q_lane_u32(w0, vtmp0123x0123, 0); w0 += 4;
-        vtmp0123x4567 = vld4q_lane_u32(w4, vtmp0123x4567, 0); w4 += 4;
-        vtmp0123x89AB = vld4q_lane_u32(w8, vtmp0123x89AB, 0); w8 += 4;
         vtmp0123x0123 = vld4q_lane_u32(w1, vtmp0123x0123, 1); w1 += 4;
-        vtmp0123x4567 = vld4q_lane_u32(w5, vtmp0123x4567, 1); w5 += 4;
-        vtmp0123x89AB = vld4q_lane_u32(w9, vtmp0123x89AB, 1); w9 += 4;
         vtmp0123x0123 = vld4q_lane_u32(w2, vtmp0123x0123, 2); w2 += 4;
-        vtmp0123x4567 = vld4q_lane_u32(w6, vtmp0123x4567, 2); w6 += 4;
-        vtmp0123x89AB = vld4q_lane_u32(w10, vtmp0123x89AB, 2); w10 += 4;
         vtmp0123x0123 = vld4q_lane_u32(w3, vtmp0123x0123, 3); w3 += 4;
+        vtmp0123x4567 = vld4q_lane_u32(w4, vtmp0123x4567, 0); w4 += 4;
+        vtmp0123x4567 = vld4q_lane_u32(w5, vtmp0123x4567, 1); w5 += 4;
+        vtmp0123x4567 = vld4q_lane_u32(w6, vtmp0123x4567, 2); w6 += 4;
         vtmp0123x4567 = vld4q_lane_u32(w7, vtmp0123x4567, 3); w7 += 4;
+        vtmp0123x89AB = vld4q_lane_u32(w8, vtmp0123x89AB, 0); w8 += 4;
+        vtmp0123x89AB = vld4q_lane_u32(w9, vtmp0123x89AB, 1); w9 += 4;
+        vtmp0123x89AB = vld4q_lane_u32(w10, vtmp0123x89AB, 2); w10 += 4;
         vst1q_u32(packed_weights, vtmp0123x0123.val[0]); packed_weights += 4;
         vst1q_u32(packed_weights, vtmp0123x4567.val[0]); packed_weights += 4;
         vst1q_u32(packed_weights, vtmp0123x89AB.val[0]); packed_weights += 4;
@@ -331,7 +330,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
             uint32x4_t vtmp0x0123 = vdupq_n_u32(0);
             uint32x4_t vtmp0x4567 = vdupq_n_u32(0);
             uint32x4_t vtmp0x89AB = vdupq_n_u32(0);
-
             vtmp0x0123 = vld1q_lane_u32(w0, vtmp0x0123, 0); w0 += 1;
             vtmp0x4567 = vld1q_lane_u32(w4, vtmp0x4567, 0); w4 += 1;
             vtmp0x89AB = vld1q_lane_u32(w8, vtmp0x89AB, 0); w8 += 1;
@@ -343,7 +341,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
             vtmp0x89AB = vld1q_lane_u32(w10, vtmp0x89AB, 2); w10 += 1;
             vtmp0x0123 = vld1q_lane_u32(w3, vtmp0x0123, 3); w3 += 1;
             vtmp0x4567 = vld1q_lane_u32(w7, vtmp0x4567, 3); w7 += 1;
-
             vst1q_u32(packed_weights, vtmp0x0123); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp0x4567); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp0x89AB); packed_weights += 4;
@@ -361,7 +358,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
             uint32x4x2_t vtmp01x89AB;
             vtmp01x89AB.val[0] = vdupq_n_u32(0);
             vtmp01x89AB.val[1] = vdupq_n_u32(0);
-
             vtmp01x0123 = vld2q_lane_u32(w0, vtmp01x0123, 0); w0 += 2;
             vtmp01x4567 = vld2q_lane_u32(w4, vtmp01x4567, 0); w4 += 2;
             vtmp01x89AB = vld2q_lane_u32(w8, vtmp01x89AB, 0); w8 += 2;
@@ -373,7 +369,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
             vtmp01x89AB = vld2q_lane_u32(w10, vtmp01x89AB, 2); w10 += 2;
             vtmp01x0123 = vld2q_lane_u32(w3, vtmp01x0123, 3); w3 += 2;
             vtmp01x4567 = vld2q_lane_u32(w7, vtmp01x4567, 3); w7 += 2;
-
             vst1q_u32(packed_weights, vtmp01x0123.val[0]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp01x4567.val[0]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp01x89AB.val[0]); packed_weights += 4;
@@ -397,7 +392,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
             vtmp012x89AB.val[0] = vdupq_n_u32(0);
             vtmp012x89AB.val[1] = vdupq_n_u32(0);
             vtmp012x89AB.val[2] = vdupq_n_u32(0);
-
             vtmp012x0123 = vld3q_lane_u32(w0, vtmp012x0123, 0); w0 += 3;
             vtmp012x4567 = vld3q_lane_u32(w4, vtmp012x4567, 0); w4 += 3;
             vtmp012x89AB = vld3q_lane_u32(w8, vtmp012x89AB, 0); w8 += 3;
@@ -409,7 +403,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm(
             vtmp012x89AB = vld3q_lane_u32(w10, vtmp012x89AB, 2); w10 += 3;
             vtmp012x0123 = vld3q_lane_u32(w3, vtmp012x0123, 3); w3 += 3;
             vtmp012x4567 = vld3q_lane_u32(w7, vtmp012x4567, 3); w7 += 3;
-
             vst1q_u32(packed_weights, vtmp012x0123.val[0]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp012x4567.val[0]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp012x89AB.val[0]); packed_weights += 4;

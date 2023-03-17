@@ -3204,6 +3204,8 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/x32-packw/gen/x32-packw-x2-neon-ld2lane.c
   src/x32-packw/gen/x32-packw-x8-neon-ld4lane-prfm.c
   src/x32-packw/gen/x32-packw-x8-neon-ld4lane.c
+  src/x32-packw/gen/x32-packw-x8s4-neon-ld4lane-prfm.c
+  src/x32-packw/gen/x32-packw-x8s4-neon-ld4lane.c
   src/x32-packw/gen/x32-packw-x12-neon-ld4lane-prfm.c
   src/x32-packw/gen/x32-packw-x12-neon-ld4lane.c
   src/x32-packx/x32-packx-x4-neon-st4.c

@@ -19,4 +19,5 @@
 - name: xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm
 - name: xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane
 - name: xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm
-
+- name: xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane
+- name: xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm
