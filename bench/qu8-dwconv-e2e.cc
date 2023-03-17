@@ -209,12 +209,144 @@ static void DWConvEnd2EndBenchmark(
       32 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckNEON);
   }
 
+  static void qu8_dwconv_25p8c__neon_mul8(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_25p8c__neon_mul8,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      8 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckNEON);
+  }
+  static void qu8_dwconv_25p16c__neon_mul8(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_25p16c__neon_mul8,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      16 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckNEON);
+  }
+  static void qu8_dwconv_25p32c__neon_mul8(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_25p32c__neon_mul8,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      32 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckNEON);
+  }
+  static void qu8_dwconv_25p8c__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_25p8c__neon_mul16,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      8 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckNEON);
+  }
+  static void qu8_dwconv_25p16c__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_25p16c__neon_mul16,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      16 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckNEON);
+  }
+  static void qu8_dwconv_25p32c__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_25p32c__neon_mul16,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      32 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckNEON);
+  }
+
+  static void qu8_dwconv_5f5m5l8c8s8r__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_5f5m5l8c8s8r__neon_mul16,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/8,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25);
+  }
+  static void qu8_dwconv_5f5m5l16c8s8r__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_5f5m5l16c8s8r__neon_mul16,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/8,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25);
+  }
+  static void qu8_dwconv_5f5m5l32c8s8r__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_5f5m5l32c8s8r__neon_mul16,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/8,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25);
+  }
+
+  static void qu8_dwconv_6f6m7l8c8s8r__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_6f6m7l8c8s8r__neon_mul16,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/8,
+      /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
+      /*primary_tile_to_replace=*/25);
+  }
+  static void qu8_dwconv_6f6m7l16c8s8r__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_6f6m7l16c8s8r__neon_mul16,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/8,
+      /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
+      /*primary_tile_to_replace=*/25);
+  }
+  static void qu8_dwconv_6f6m7l32c8s8r__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_6f6m7l32c8s8r__neon_mul16,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/8,
+      /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
+      /*primary_tile_to_replace=*/25);
+  }
+
+  static void qu8_dwconv_8f8m9l8c8s8r__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_8f8m9l8c8s8r__neon_mul16,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/8,
+      /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
+      /*primary_tile_to_replace=*/25);
+  }
+  static void qu8_dwconv_8f8m9l16c8s8r__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_8f8m9l16c8s8r__neon_mul16,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/8,
+      /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
+      /*primary_tile_to_replace=*/25);
+  }
+  static void qu8_dwconv_8f8m9l32c8s8r__neon_mul16(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_qu8_dwconv_minmax_rndnu_ukernel_8f8m9l32c8s8r__neon_mul16,
+      xnn_init_qu8_conv_minmax_rndnu_neon_params,
+      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/8,
+      /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
+      /*primary_tile_to_replace=*/25);
+  }
+
   BENCHMARK_QU8_END2END(qu8_dwconv_9p8c__neon_mul8);
   BENCHMARK_QU8_END2END(qu8_dwconv_9p16c__neon_mul8);
   BENCHMARK_QU8_END2END(qu8_dwconv_9p32c__neon_mul8);
   BENCHMARK_QU8_END2END(qu8_dwconv_9p8c__neon_mul16);
   BENCHMARK_QU8_END2END(qu8_dwconv_9p16c__neon_mul16);
   BENCHMARK_QU8_END2END(qu8_dwconv_9p32c__neon_mul16);
+
+  BENCHMARK_QU8_END2END(qu8_dwconv_25p8c__neon_mul8);
+  BENCHMARK_QU8_END2END(qu8_dwconv_25p16c__neon_mul8);
+  BENCHMARK_QU8_END2END(qu8_dwconv_25p32c__neon_mul8);
+  BENCHMARK_QU8_END2END(qu8_dwconv_25p8c__neon_mul16);
+  BENCHMARK_QU8_END2END(qu8_dwconv_25p16c__neon_mul16);
+  BENCHMARK_QU8_END2END(qu8_dwconv_25p32c__neon_mul16);
+
+  BENCHMARK_QU8_END2END(qu8_dwconv_5f5m5l8c8s8r__neon_mul16);
+  BENCHMARK_QU8_END2END(qu8_dwconv_5f5m5l16c8s8r__neon_mul16);
+  BENCHMARK_QU8_END2END(qu8_dwconv_5f5m5l32c8s8r__neon_mul16);
+
+  BENCHMARK_QU8_END2END(qu8_dwconv_6f6m7l8c8s8r__neon_mul16);
+  BENCHMARK_QU8_END2END(qu8_dwconv_6f6m7l16c8s8r__neon_mul16);
+  BENCHMARK_QU8_END2END(qu8_dwconv_6f6m7l32c8s8r__neon_mul16);
+
+  BENCHMARK_QU8_END2END(qu8_dwconv_8f8m9l8c8s8r__neon_mul16);
+  BENCHMARK_QU8_END2END(qu8_dwconv_8f8m9l16c8s8r__neon_mul16);
+  BENCHMARK_QU8_END2END(qu8_dwconv_8f8m9l32c8s8r__neon_mul16);
+
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
