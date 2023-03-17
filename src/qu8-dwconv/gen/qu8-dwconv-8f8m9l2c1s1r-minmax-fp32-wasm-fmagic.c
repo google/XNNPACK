@@ -25,7 +25,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_8f8m9l2c1s1r__wasm_fmagic(
     size_t input_offset,
     const uint8_t* zero,
     size_t kernel_size,
-    uint32_t* buffer,
+    int32_t* buffer,
     const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(channels != 0);
@@ -43,7 +43,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_8f8m9l2c1s1r__wasm_fmagic(
 
     // First pass to process 8 inputs.
     {
-      int32_t* b = (int32_t*) buffer;
+      int32_t* b = buffer;
       const uint8_t* i0 = input[0];
       assert(i0 != NULL);
       if XNN_UNPREDICTABLE(i0 != zero) {
@@ -211,7 +211,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_8f8m9l2c1s1r__wasm_fmagic(
 
     // Middle pass to process 8 inputs in each iteration.
     for (size_t ks = kernel_size - 8; ks > 9; ks -= 8) {
-      int32_t* b = (int32_t*) buffer;
+      int32_t* b = buffer;
       const uint8_t* i0 = input[0];
       assert(i0 != NULL);
       if XNN_UNPREDICTABLE(i0 != zero) {
@@ -378,7 +378,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_8f8m9l2c1s1r__wasm_fmagic(
 
     // Last pass to process up to 9 inputs.
     {
-      const int32_t* b = (const int32_t*) buffer;
+      const int32_t* b = buffer;
       const uint8_t* i0 = input[0];
       assert(i0 != NULL);
       if XNN_UNPREDICTABLE(i0 != zero) {

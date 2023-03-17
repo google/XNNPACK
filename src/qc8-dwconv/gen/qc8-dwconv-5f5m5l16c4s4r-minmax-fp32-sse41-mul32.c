@@ -28,7 +28,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_5f5m5l16c4s4r__sse41_mul32(
     size_t input_offset,
     const int8_t* zero,
     size_t kernel_size,
-    uint32_t* buffer,
+    int32_t* buffer,
     const union xnn_qc8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
@@ -41,7 +41,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_5f5m5l16c4s4r__sse41_mul32(
 
     // First pass to process 5 inputs.
     {
-      uint32_t* b = buffer;
+      int32_t* b = buffer;
       const int8_t* i0 = input[0];
       assert(i0 != NULL);
       if XNN_UNPREDICTABLE(i0 != zero) {
@@ -207,7 +207,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_5f5m5l16c4s4r__sse41_mul32(
 
     // Middle pass to process 5 inputs in each iteration.
     for (size_t ks = kernel_size - 5; ks > 5; ks -= 5) {
-      uint32_t* b = buffer;
+      int32_t* b = buffer;
       const int8_t* i0 = input[0];
       assert(i0 != NULL);
       if XNN_UNPREDICTABLE(i0 != zero) {
@@ -373,7 +373,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_5f5m5l16c4s4r__sse41_mul32(
 
     // Last pass to process up to 5 inputs.
     {
-      uint32_t* b = buffer;
+      const int32_t* b = buffer;
       const int8_t* i0 = input[0];
       assert(i0 != NULL);
       if XNN_UNPREDICTABLE(i0 != zero) {

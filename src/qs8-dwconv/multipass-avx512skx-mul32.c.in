@@ -43,7 +43,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${F
     size_t input_offset,
     const ${XINT8_T}* zero,
     size_t kernel_size,
-    uint32_t* buffer,
+    int32_t* buffer,
     const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
@@ -69,7 +69,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${F
 
     // First pass to process ${FIRST_PASS_TILE} inputs.
     {
-      uint32_t* b = buffer;
+      int32_t* b = buffer;
       $for K in range(FIRST_PASS_TILE):
         const ${XINT8_T}* i${K} = input[${K}];
         assert(i${K} != NULL);
@@ -153,7 +153,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${F
 
     // Middle pass to process ${MIDDLE_PASS_TILE} inputs in each iteration.
     for (size_t ks = kernel_size - ${FIRST_PASS_TILE}; ks > ${LAST_PASS_TILE}; ks -= ${MIDDLE_PASS_TILE}) {
-      uint32_t* b = buffer;
+      int32_t* b = buffer;
       $for K in range(MIDDLE_PASS_TILE):
         const ${XINT8_T}* i${K} = input[${K}];
         assert(i${K} != NULL);
@@ -237,7 +237,7 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${F
 
     // Last pass to process up to ${LAST_PASS_TILE} inputs.
     {
-      uint32_t* b = buffer;
+      const int32_t* b = buffer;
       $for K in range(LAST_PASS_TILE):
         const ${XINT8_T}* i${K} = input[${K}];
         assert(i${K} != NULL);

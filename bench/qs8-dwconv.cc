@@ -221,7 +221,7 @@ static void DWConvBenchmark(benchmark::State& state,
   std::generate(b.begin(), b.end(), std::ref(i32rng));
 
   std::vector<int8_t> z(channels + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> buffer(
+  std::vector<int32_t, AlignedAllocator<int32_t, 64>> buffer(
     channels + XNN_MAX_SIMD_SIZE / sizeof(int8_t));
 
   const size_t tile_size = xnn_dwconv_multipass_tile_size(

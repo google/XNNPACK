@@ -27,7 +27,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l32c16s16r__avx2_mul16_add16_vpunpc
     size_t input_offset,
     const int8_t* zero,
     size_t kernel_size,
-    uint32_t* buffer,
+    int32_t* buffer,
     const union xnn_qs8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
@@ -39,7 +39,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l32c16s16r__avx2_mul16_add16_vpunpc
 
     // First pass to process 5 inputs.
     {
-      uint32_t* b = buffer;
+      int32_t* b = buffer;
 
       const int8_t* i0 = input[0];
       assert(i0 != NULL);
@@ -239,7 +239,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l32c16s16r__avx2_mul16_add16_vpunpc
 
     // Middle pass to process 5 inputs in each iteration.
     for (size_t ks = kernel_size - 5; ks > 5; ks -= 5) {
-        uint32_t* b = buffer;
+        int32_t* b = buffer;
 
         const int8_t* i0 = input[0];
         assert(i0 != NULL);
@@ -434,7 +434,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l32c16s16r__avx2_mul16_add16_vpunpc
 
     // Last pass to process up to 5 inputs.
     {
-      uint32_t* b = buffer;
+      const int32_t* b = buffer;
 
       const int8_t* i0 = input[0];
       assert(i0 != NULL);
