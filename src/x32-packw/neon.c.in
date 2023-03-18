@@ -84,17 +84,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
                 vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[2] = vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[1];
                 vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0];
                 vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0] = vsrtmp;
-
         $if PREFETCH:
           $for N in range(0, NR):
             xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
-
         $for K in range(0, KUNROLL, 4):
           $for L in range(4):
             $for N in range(0, NR, 4):
               vst1q_u32(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
       }
-
 
       // KC remainder of 1..${KUNROLL-1}
       // Same as main loop but ld1, ld2 or ld3
@@ -207,6 +204,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
                 vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[2] = vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[1];
                 vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0];
                 vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0] = vsrtmp;
+        $if PREFETCH:
+          $for N in range(0, NR-1):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
         $for K in range(0, KUNROLL, 4):
           $for L in range(4):
             $for N in range(0, NR, 4):
@@ -238,7 +238,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
                 $for L in range(4):
                   $for N in range(0, NR, 4):
                     $if N+L != NR-1:
-                      vtmp${ABC[0:K]}x${ABC[N:N+4]} = vld${K}q_lane_u32(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+4]}, ${L}); w${N+L} += ${K};
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]} = vld${K}q_lane_u32(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+4]}, ${L});
                     $if SR == 4:
                       $if K == 3:
                         vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
