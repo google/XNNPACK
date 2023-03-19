@@ -2565,6 +2565,8 @@ static void init(void) {
         case cpuinfo_uarch_cortex_a57:
         case cpuinfo_uarch_cortex_a75:
         case cpuinfo_uarch_cortex_a76:
+        case cpuinfo_uarch_exynos_m1:
+        case cpuinfo_uarch_exynos_m2:
         case cpuinfo_uarch_exynos_m3:
         case cpuinfo_uarch_exynos_m4:
           xnn_params.f32.gemm.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_prfm_cortex_a75);
@@ -2588,21 +2590,6 @@ static void init(void) {
             xnn_params.f32.gemm.generator.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_codegen(xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75);
             xnn_params.f32.gemm.generator.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_codegen(xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_prfm_cortex_a75);
           #endif
-          break;
-        case cpuinfo_uarch_exynos_m1:
-        case cpuinfo_uarch_exynos_m2:
-          xnn_params.f32.gemm.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_6x8s4__neonfma);
-          xnn_params.f32.gemm.minmax.igemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_6x8s4__neonfma);
-          #if XNN_ENABLE_GEMM_M_SPECIALIZATION
-            xnn_params.f32.gemm.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8s4__neonfma);
-            xnn_params.f32.gemm.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x8s4__neonfma);
-          #endif
-          xnn_params.f32.gemm.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_1x8s4__neonfma);
-          xnn_params.f32.gemm.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_1x8s4__neonfma);
-          xnn_params.f32.gemm.init.f32 = xnn_init_f32_minmax_scalar_params;
-          xnn_params.f32.gemm.mr = 6;
-          xnn_params.f32.gemm.nr = 8;
-          xnn_params.f32.gemm.log2_sr = 2;
           break;
         case cpuinfo_uarch_cortex_a53:
           xnn_params.f32.gemm.minmax.gemm[XNN_MR_TO_INDEX(6)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_prfm_cortex_a53);
