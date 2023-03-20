@@ -113,8 +113,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
                 $if SR == 4:
                   uint32x4_t vsrtmp;
                   $for N in range(0, NR, 4):
-                    $for R in range(K, 4):
-                      uint32x4_t vsrtmp${ABC[R]}x${ABC[N:N+4]} = vdupq_n_u32(0);
+                    $for L in range(K, 4):
+                      uint32x4_t vsrtmp${ABC[L]}x${ABC[N:N+4]} = vdupq_n_u32(0);
                 $for L in range(4):
                   $for N in range(0, NR, 4):
                     vtmp${ABC[0:K]}x${ABC[N:N+4]} = vld${K}q_lane_u32(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+4]}, ${L}); w${N+L} += ${K};
@@ -143,6 +143,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
                       vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}); packed_weights += 4;
                     $else:
                       vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
+                $if SR == 4:
+                  $for L in range(K, 4):
+                    $for N in range(0, NR, 4):
+                      vst1q_u32(packed_weights, vsrtmp${ABC[L]}x${ABC[N:N+4]}); packed_weights += 4;
                 break;
               }
             default:
@@ -233,8 +237,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
                 $if SR == 4:
                   uint32x4_t vsrtmp;
                   $for N in range(0, NR, 4):
-                    $for R in range(K, 4):
-                      uint32x4_t vsrtmp${ABC[R]}x${ABC[N:N+4]} = vdupq_n_u32(0);
+                    $for L in range(K, 4):
+                      uint32x4_t vsrtmp${ABC[L]}x${ABC[N:N+4]} = vdupq_n_u32(0);
                 $for L in range(4):
                   $for N in range(0, NR, 4):
                     $if N+L != NR-1:
@@ -264,6 +268,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
                       vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}); packed_weights += 4;
                     $else:
                       vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
+                $if SR == 4:
+                  $for L in range(K, 4):
+                    $for N in range(0, NR, 4):
+                      vst1q_u32(packed_weights, vsrtmp${ABC[L]}x${ABC[N:N+4]}); packed_weights += 4;
                 break;
               }
             default:
