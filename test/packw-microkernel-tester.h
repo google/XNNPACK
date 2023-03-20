@@ -71,6 +71,10 @@ class PackWMicrokernelTester {
     return this->n_;
   }
 
+  inline size_t packed_k() const {
+    return round_up_po2(k(), kr() * sr());
+  }
+
   inline size_t packed_n() const {
     return round_up(n(), nr());
   }
@@ -105,8 +109,8 @@ class PackWMicrokernelTester {
   void Test(xnn_x8_packw_gemm_goi_ukernel_fn packw) const {
     std::vector<int8_t> weights(n() * k());
     std::vector<int32_t> bias(n());
-    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * k() + packed_n() * sizeof(int32_t));
-    std::vector<int8_t> packed_w_ref(packed_n() * k() + packed_n() * sizeof(int32_t));
+    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(int32_t));
+    std::vector<int8_t> packed_w_ref(packed_n() * packed_k() + packed_n() * sizeof(int32_t));
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
 
@@ -126,10 +130,10 @@ class PackWMicrokernelTester {
       packw(1, n(), k(), nr(), 1 /* kr */, sr(), weights.data(), bias_data, packed_w.data(), 0, &packing_params);
 
       // Verify results.
-      for (size_t i = 0; i < (packed_n() * k() + packed_n() * sizeof(int32_t)); i++) {
+      for (size_t i = 0; i < (packed_n() * packed_k() + packed_n() * sizeof(int32_t)); i++) {
         if (packed_w_ref[i] !=  INT8_C(0x7B)) {  // Allow pad to differ
           EXPECT_EQ((int32_t) packed_w[i], (int32_t) packed_w_ref[i])
-              << "at n " << i << " of " << (int32_t) (packed_n() * k() + packed_n());
+              << "at n " << i << " of " << (int32_t) (packed_n() * packed_k() + packed_n());
         }
       }
     }
@@ -138,8 +142,8 @@ class PackWMicrokernelTester {
   void Test(xnn_x16_packw_gemm_goi_ukernel_fn packw) const {
     std::vector<uint16_t> weights(g() * n() * k());
     std::vector<uint16_t> bias(g() * n());
-    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(g() * (packed_n() * k() + packed_n()));
-    std::vector<uint16_t> packed_w_ref(g() * (packed_n() * k() + packed_n()));
+    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(g() * (packed_n() * packed_k() + packed_n()));
+    std::vector<uint16_t> packed_w_ref(g() * (packed_n() * packed_k() + packed_n()));
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
 
@@ -158,10 +162,10 @@ class PackWMicrokernelTester {
       packw(g(), n(), k(), nr(), kr(), sr(), weights.data(), bias_data, packed_w.data(), 0, nullptr);
 
       // Verify results.
-      for (size_t i = 0; i < g() * (packed_n() * k() + packed_n()); i++) {
+      for (size_t i = 0; i < g() * (packed_n() * packed_k() + packed_n()); i++) {
         if (packed_w_ref[i] !=  UINT16_C(0xDEAD)) {  // Allow pad to differ
           EXPECT_EQ(packed_w[i], packed_w_ref[i])
-              << "at n " << i << " of " << (g() * (packed_n() * k() + packed_n()));
+              << "at n " << i << " of " << (g() * (packed_n() * packed_k() + packed_n()));
         }
       }
     }
@@ -170,8 +174,8 @@ class PackWMicrokernelTester {
   void Test(xnn_x32_packw_gemm_goi_ukernel_fn packw) const {
     std::vector<uint32_t> weights(g() * n() * k());
     std::vector<uint32_t> bias(g() * n());
-    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> packed_w(g() * (packed_n() * k() + packed_n()));
-    std::vector<uint32_t> packed_w_ref(g() * (packed_n() * k() + packed_n()));
+    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> packed_w(g() * (packed_n() * packed_k() + packed_n()));
+    std::vector<uint32_t> packed_w_ref(g() * (packed_n() * packed_k() + packed_n()));
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(weights.begin(), weights.end(), 0);
@@ -189,10 +193,10 @@ class PackWMicrokernelTester {
       packw(g(), n(), k(), nr(), kr(), sr(), weights.data(), bias_data, packed_w.data(), 0, nullptr);
 
       // Verify results.
-      for (size_t i = 0; i < g() * (packed_n() * k() + packed_n()); i++) {
+      for (size_t i = 0; i < g() * (packed_n() * packed_k() + packed_n()); i++) {
         if (packed_w_ref[i] !=  UINT32_C(0xDEADBEEF)) {  // Allow pad to differ
           EXPECT_EQ(packed_w[i], packed_w_ref[i])
-              << "at n " << i << " of " << (g() * (packed_n() * k() + packed_n()));
+              << "at n " << i << " of " << (g() * (packed_n() * packed_k() + packed_n()));
         }
       }
     }
