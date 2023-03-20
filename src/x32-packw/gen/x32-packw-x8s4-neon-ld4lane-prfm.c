@@ -211,6 +211,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm(
             vtmp0x4567 = vsrtmp;
             vst1q_u32(packed_weights, vtmp0x0123); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp0x4567); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp1x0123); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp1x4567); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp2x0123); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp2x4567); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp3x0123); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp3x4567); packed_weights += 4;
             break;
           }
           // KC remainder of 8x2
@@ -279,6 +285,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm(
             vst1q_u32(packed_weights, vtmp01x4567.val[0]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp01x0123.val[1]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp01x4567.val[1]); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp2x0123); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp2x4567); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp3x0123); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp3x4567); packed_weights += 4;
             break;
           }
           // KC remainder of 8x3
@@ -349,6 +359,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm(
             vst1q_u32(packed_weights, vtmp012x4567.val[1]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp012x0123.val[2]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp012x4567.val[2]); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp3x0123); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp3x4567); packed_weights += 4;
             break;
           }
           default:
@@ -532,6 +544,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm(
             vtmp0x4567 = vsrtmp;
             vst1q_u32(packed_weights, vtmp0x0123); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp0x4567); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp1x0123); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp1x4567); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp2x0123); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp2x4567); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp3x0123); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp3x4567); packed_weights += 4;
             break;
           }
           // KC remainder of 8x2
@@ -599,6 +617,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm(
             vst1q_u32(packed_weights, vtmp01x4567.val[0]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp01x0123.val[1]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp01x4567.val[1]); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp2x0123); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp2x4567); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp3x0123); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp3x4567); packed_weights += 4;
             break;
           }
           // KC remainder of 8x3
@@ -668,6 +690,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm(
             vst1q_u32(packed_weights, vtmp012x4567.val[1]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp012x0123.val[2]); packed_weights += 4;
             vst1q_u32(packed_weights, vtmp012x4567.val[2]); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp3x0123); packed_weights += 4;
+            vst1q_u32(packed_weights, vsrtmp3x4567); packed_weights += 4;
             break;
           }
           default:
