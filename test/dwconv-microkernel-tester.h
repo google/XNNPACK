@@ -1068,8 +1068,10 @@ class DWConvMicrokernelTester {
     std::vector<uint16_t> kernel(channels() * kernel_size());
     std::vector<uint16_t> bias(channels());
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_weights(
-      xnn_dwconv_multipass_weights_count(
-        tile_size, channels(), channel_tile(), channel_subtile(), channel_round()));
+      xnn_dwconv_multipass_weights_size(
+        tile_size, channels(), channel_tile(), channel_subtile(), channel_round(),
+        /*bias_element_size=*/sizeof(uint16_t), /*log2_filter_element_size=*/1, /*extra_weights_byte=*/0) /
+      sizeof(uint16_t));
     std::vector<uint16_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
     std::vector<uint16_t> output((width() - 1) * output_stride() + channels());
     std::vector<float> output_ref(width() * channels());
@@ -1343,8 +1345,10 @@ class DWConvMicrokernelTester {
     std::vector<float> kernel(channels() * kernel_size());
     std::vector<float> bias(channels());
     std::vector<float, AlignedAllocator<float, 64>> packed_weights(
-      xnn_dwconv_multipass_weights_count(
-        tile_size, channels(), channel_tile(), channel_subtile(), channel_round()));
+      xnn_dwconv_multipass_weights_size(
+        tile_size, channels(), channel_tile(), channel_subtile(), channel_round(),
+        /*bias_element_size=*/sizeof(float), /*log2_filter_element_size=*/2, /*extra_weights_byte=*/0) /
+      sizeof(float));
     std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> output((width() - 1) * output_stride() + channels());
     std::vector<float> output_ref(width() * channels());
@@ -1432,8 +1436,10 @@ class DWConvMicrokernelTester {
     std::vector<float> kernel(channels() * kernel_size());
     std::vector<float> bias(channels());
     std::vector<float, AlignedAllocator<float, 64>> packed_weights(
-      xnn_dwconv_multipass_weights_count(
-        tile_size, channels(), channel_tile(), channel_subtile(), channel_round()));
+      xnn_dwconv_multipass_weights_size(
+        tile_size, channels(), channel_tile(), channel_subtile(), channel_round(),
+        /*bias_element_size=*/sizeof(float), /*log2_filter_element_size=*/2, /*extra_weights_byte=*/0) /
+      sizeof(float));
     std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
     std::vector<float> output((width() - 1) * output_stride() + channels());
     std::vector<float> output_ref(width() * channels());

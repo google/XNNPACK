@@ -16,6 +16,7 @@
 #include <fp16.h>
 
 // Calculates the size (number of elements) of packed weights required for a multi-pass dwconv.
+// Assume that bias and filter elements are of the same size, and extra_weights_byte is 0.
 static size_t multipass_weights_count(
   size_t kernel_size,
   size_t first_pass_tile,
@@ -26,9 +27,10 @@ static size_t multipass_weights_count(
   size_t channel_subtile,
   size_t channel_round)
 {
-  return xnn_dwconv_multipass_weights_count(
+  return xnn_dwconv_multipass_weights_size(
     xnn_dwconv_multipass_tile_size(kernel_size, first_pass_tile, middle_pass_tile, last_pass_tile), channels,
-    channel_tile, channel_subtile, channel_round);
+    channel_tile, channel_subtile, channel_round,
+    /*bias_element_size=*/1, /*log2_filter_element_size=*/0, /*extra_weights_byte=*/0);
 }
 
 // Convenient overload when channel_tile == channel_subtile.

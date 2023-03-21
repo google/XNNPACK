@@ -215,8 +215,11 @@ static void f32_dwconv(
 
   const size_t tile_size = xnn_dwconv_multipass_tile_size(
     kernel_size, first_pass_tile, middle_pass_tile, last_pass_tile);
-  const size_t w_elements = xnn_dwconv_multipass_weights_count(
-    tile_size, channels, channel_tile, channel_subtile, channel_round);
+  const size_t w_elements =
+    xnn_dwconv_multipass_weights_size(
+      tile_size, channels, channel_tile, channel_subtile, channel_round,
+      /*bias_element_size=*/sizeof(float), /*log2_filter_element_size=*/2, /*extra_weights_byte=*/0) /
+    sizeof(float);
   // Can read (tile_size - kernel_size) elements after end of indirection buffer.
   const size_t i_elements = tile_size - kernel_size + output_height * step_height;
   const size_t c_elements = output_size * channels;

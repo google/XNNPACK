@@ -20,14 +20,6 @@ XNN_INTERNAL size_t xnn_dwconv_multipass_tile_size(
   size_t middle_pass_tile,
   size_t last_pass_tile);
 
-// The total count of weights (in elements) needed for multipass dwconv.
-XNN_INTERNAL size_t xnn_dwconv_multipass_weights_count(
-  size_t tile_size,
-  size_t channels,
-  size_t channel_tile,
-  size_t channel_subtile,
-  size_t channel_round);
-
 // The total count of weights (in bytes) needed for multipass dwconv.
 size_t xnn_dwconv_multipass_weights_size(
   size_t tile_size,

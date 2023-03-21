@@ -216,8 +216,11 @@ static void f16_dwconv(benchmark::State& state,
 
   const size_t tile_size = xnn_dwconv_multipass_tile_size(
     kernel_size, first_pass_tile, middle_pass_tile, last_pass_tile);
-  const size_t w_elements = xnn_dwconv_multipass_weights_count(
-    tile_size, channels, channel_tile, channel_subtile, channel_round);
+  const size_t w_elements =
+    xnn_dwconv_multipass_weights_size(
+      tile_size, channels, channel_tile, channel_subtile, channel_round, /*bias_element_size=*/sizeof(uint16_t),
+      /*log2_filter_element_size=*/1, /*extra_weights_byte=*/0) /
+    sizeof(uint16_t);
   // Can read (primary_tile - kernel_size) elements after end of indirection buffer.
   const size_t i_elements = tile_size - kernel_size + output_height * step_height;
   const size_t c_elements = output_size * channels;
