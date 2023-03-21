@@ -438,6 +438,18 @@ tools/xngen src/qs8-dwconv/multipass-neon-mul8.c.in -D CHANNEL_TILE=16 -D FIRST_
 tools/xngen src/qs8-dwconv/multipass-neon-mul8.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=8  -D MIDDLE_PASS_TILE=8  -D LAST_PASS_TILE=9 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D MLA=0 -D LOAD_VARIANT=LD128 -D ARMV8=1 -o src/qc8-dwconv/gen/qc8-dwconv-8f8m9l16c8s8r-minmax-fp32-neonv8-mul8-ld128.c &
 tools/xngen src/qs8-dwconv/multipass-neon-mul8.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=8  -D MIDDLE_PASS_TILE=8  -D LAST_PASS_TILE=9 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D MLA=1 -D LOAD_VARIANT=LD128 -D ARMV8=1 -o src/qc8-dwconv/gen/qc8-dwconv-8f8m9l16c8s8r-minmax-fp32-neonv8-mla8-ld128.c &
 
+tools/xngen src/qu8-dwconv/multipass-neon-mul8.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=5  -D MIDDLE_PASS_TILE=5  -D LAST_PASS_TILE=5 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-dwconv/gen/qu8-dwconv-5f5m5l8c8s8r-minmax-rndnu-neon-mul8.c &
+tools/xngen src/qu8-dwconv/multipass-neon-mul8.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=5  -D MIDDLE_PASS_TILE=5  -D LAST_PASS_TILE=5 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-dwconv/gen/qu8-dwconv-5f5m5l16c8s8r-minmax-rndnu-neon-mul8.c &
+tools/xngen src/qu8-dwconv/multipass-neon-mul8.c.in -D CHANNEL_TILE=32 -D FIRST_PASS_TILE=5  -D MIDDLE_PASS_TILE=5  -D LAST_PASS_TILE=5 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-dwconv/gen/qu8-dwconv-5f5m5l32c8s8r-minmax-rndnu-neon-mul8.c &
+
+tools/xngen src/qu8-dwconv/multipass-neon-mul8.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=6  -D MIDDLE_PASS_TILE=6  -D LAST_PASS_TILE=7 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-dwconv/gen/qu8-dwconv-6f6m7l8c8s8r-minmax-rndnu-neon-mul8.c &
+tools/xngen src/qu8-dwconv/multipass-neon-mul8.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=6  -D MIDDLE_PASS_TILE=6  -D LAST_PASS_TILE=7 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-dwconv/gen/qu8-dwconv-6f6m7l16c8s8r-minmax-rndnu-neon-mul8.c &
+tools/xngen src/qu8-dwconv/multipass-neon-mul8.c.in -D CHANNEL_TILE=32 -D FIRST_PASS_TILE=6  -D MIDDLE_PASS_TILE=6  -D LAST_PASS_TILE=7 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-dwconv/gen/qu8-dwconv-6f6m7l32c8s8r-minmax-rndnu-neon-mul8.c &
+
+tools/xngen src/qu8-dwconv/multipass-neon-mul8.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=8  -D MIDDLE_PASS_TILE=8  -D LAST_PASS_TILE=9 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-dwconv/gen/qu8-dwconv-8f8m9l8c8s8r-minmax-rndnu-neon-mul8.c &
+tools/xngen src/qu8-dwconv/multipass-neon-mul8.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=8  -D MIDDLE_PASS_TILE=8  -D LAST_PASS_TILE=9 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-dwconv/gen/qu8-dwconv-8f8m9l16c8s8r-minmax-rndnu-neon-mul8.c &
+tools/xngen src/qu8-dwconv/multipass-neon-mul8.c.in -D CHANNEL_TILE=32 -D FIRST_PASS_TILE=8  -D MIDDLE_PASS_TILE=8  -D LAST_PASS_TILE=9 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-dwconv/gen/qu8-dwconv-8f8m9l32c8s8r-minmax-rndnu-neon-mul8.c &
+
 tools/xngen src/qs8-dwconv/multipass-neon-mul16.c.in -D CHANNEL_TILE=8  -D FIRST_PASS_TILE=5  -D MIDDLE_PASS_TILE=5  -D LAST_PASS_TILE=5 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-dwconv/gen/qs8-dwconv-5f5m5l8c8s8r-minmax-fp32-neon-mul16.c &
 tools/xngen src/qs8-dwconv/multipass-neon-mul16.c.in -D CHANNEL_TILE=16 -D FIRST_PASS_TILE=5  -D MIDDLE_PASS_TILE=5  -D LAST_PASS_TILE=5 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-dwconv/gen/qs8-dwconv-5f5m5l16c8s8r-minmax-fp32-neon-mul16.c &
 tools/xngen src/qs8-dwconv/multipass-neon-mul16.c.in -D CHANNEL_TILE=32 -D FIRST_PASS_TILE=5  -D MIDDLE_PASS_TILE=5  -D LAST_PASS_TILE=5 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-dwconv/gen/qs8-dwconv-5f5m5l32c8s8r-minmax-fp32-neon-mul16.c &
