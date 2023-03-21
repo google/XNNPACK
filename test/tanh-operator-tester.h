@@ -242,6 +242,47 @@ class TanhOperatorTester {
     }
   }
 
+  void TestRunF32() const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
+
+    std::vector<float> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
+    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<double> output_ref(batch_size() * channels());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::fill(output.begin(), output.end(), std::nanf(""));
+
+      // Compute reference results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          const double x = input[i * input_stride() + c];
+          output_ref[i * channels() + c] = std::tanh(x);
+        }
+      }
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_tanh_nc_f32(
+          channels(),
+          input_stride(),
+          output_stride(),
+          batch_size(),
+          input.data(), output.data(),
+          0, nullptr /* thread pool */));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          ASSERT_NEAR(
+            output[i * output_stride() + c],
+            output_ref[i * channels() + c],
+            5.0e-6);
+        }
+      }
+    }
+  }
+
   void TestQS8() const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());

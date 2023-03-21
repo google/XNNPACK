@@ -1297,6 +1297,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(tanh-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME tanh-nc-test COMMAND tanh-nc-test)
 
+    ADD_EXECUTABLE(tanh-nc-eager-test test/tanh-nc-eager.cc)
+    TARGET_INCLUDE_DIRECTORIES(tanh-nc-eager-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(tanh-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME tanh-nc-eager-test COMMAND tanh-nc-eager-test)
+
     ADD_EXECUTABLE(transpose-nd-test test/transpose-nd.cc)
     TARGET_INCLUDE_DIRECTORIES(transpose-nd-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(transpose-nd-test PRIVATE XNNPACK gtest gtest_main)

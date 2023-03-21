@@ -10251,6 +10251,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "tanh_nc_eager_test",
+    srcs = [
+        "test/tanh-nc-eager.cc",
+        "test/tanh-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "transpose_nd_test",
     srcs = [
         "test/transpose-nd.cc",

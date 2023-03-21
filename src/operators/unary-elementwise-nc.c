@@ -3130,6 +3130,40 @@ enum xnn_status xnn_run_square_root_nc_f32(
     threadpool);
 }
 
+enum xnn_status xnn_run_tanh_nc_f32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+  const struct xnn_unary_elementwise_config* f32_tanh_config = xnn_init_f32_tanh_config();
+  if (f32_tanh_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(xnn_operator_type_tanh_nc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+  union xnn_f32_tanh_params params;
+  if (f32_tanh_config->init.f32_tanh != NULL) {
+    f32_tanh_config->init.f32_tanh(&params);
+  }
+  return run_unary_elementwise_nc(
+    xnn_operator_type_tanh_nc_f32,
+    channels,
+    input_stride, output_stride,
+    batch_size,
+    input, output,
+    f32_tanh_config,
+    &params, sizeof(params),
+    2 /* log2(sizeof(float)) */, 2 /* log2(sizeof(float)) */,
+    flags,
+    threadpool);
+}
+
 enum xnn_status xnn_run_truncation_nc_f32(
   size_t channels,
   size_t input_stride,
