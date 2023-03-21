@@ -40,7 +40,7 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m
   assert(output_width != 0);
   assert(kernel_size > ${FIRST_PASS_TILE});
 
-  const uint16x8_t vkernel_zero_point16 = vmovl_u8(vld1_dup_u8(params->rndnu_neon.kernel_zero_point));
+  const uint16x8_t vkernel_zero_point = vmovl_u8(vld1_dup_u8(params->rndnu_neon.kernel_zero_point));
   const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->rndnu_neon.right_pre_shift);
   const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
   const int32x4_t vright_post_shift = vld1q_dup_s32(&params->rndnu_neon.right_post_shift);
@@ -93,8 +93,8 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m
             vacc${ABC[C+4:C+8]} = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(vacc${ABC[C+4:C+8]}), vget_high_u16(vprod${ABC[C:C+8]})));
 
         $for C in range(0, CHANNEL_TILE, 8):
-          vacc${ABC[C:C+4]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[C:C+4]}), vget_low_u16(vsum${ABC[C:C+8]}), vget_low_u16(vkernel_zero_point16)));
-          vacc${ABC[C+4:C+8]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[C+4:C+8]}), vget_high_u16(vsum${ABC[C:C+8]}), vget_high_u16(vkernel_zero_point16)));
+          vacc${ABC[C:C+4]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[C:C+4]}), vget_low_u16(vsum${ABC[C:C+8]}), vget_low_u16(vkernel_zero_point)));
+          vacc${ABC[C+4:C+8]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[C+4:C+8]}), vget_high_u16(vsum${ABC[C:C+8]}), vget_high_u16(vkernel_zero_point)));
 
         $for C in range(0, CHANNEL_TILE, 4):
           vst1q_s32(b, vacc${ABC[C:C+4]}); b += 4;
@@ -129,8 +129,8 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m
               vacc${ABC[0:0+4]} = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(vacc${ABC[0:0+4]}), vget_low_u16(vprod${ABC[0:8]})));
               vacc${ABC[0+4:8]} = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(vacc${ABC[0+4:8]}), vget_high_u16(vprod${ABC[0:8]})));
 
-            vacc${ABC[0:0+4]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[0:0+4]}), vget_low_u16(vsum${ABC[0:8]}), vget_low_u16(vkernel_zero_point16)));
-            vacc${ABC[0+4:8]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[0+4:8]}), vget_high_u16(vsum${ABC[0:8]}), vget_high_u16(vkernel_zero_point16)));
+            vacc${ABC[0:0+4]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[0:0+4]}), vget_low_u16(vsum${ABC[0:8]}), vget_low_u16(vkernel_zero_point)));
+            vacc${ABC[0+4:8]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[0+4:8]}), vget_high_u16(vsum${ABC[0:8]}), vget_high_u16(vkernel_zero_point)));
 
             vst1q_s32(b, vacc${ABC[0:4]}); b += 4;
             vst1q_s32(b, vacc${ABC[4:8]}); b += 4;
@@ -180,8 +180,8 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m
             vacc${ABC[C+4:C+8]} = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(vacc${ABC[C+4:C+8]}), vget_high_u16(vprod${ABC[C:C+8]})));
 
         $for C in range(0, CHANNEL_TILE, 8):
-          vacc${ABC[C:C+4]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[C:C+4]}), vget_low_u16(vsum${ABC[C:C+8]}), vget_low_u16(vkernel_zero_point16)));
-          vacc${ABC[C+4:C+8]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[C+4:C+8]}), vget_high_u16(vsum${ABC[C:C+8]}), vget_high_u16(vkernel_zero_point16)));
+          vacc${ABC[C:C+4]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[C:C+4]}), vget_low_u16(vsum${ABC[C:C+8]}), vget_low_u16(vkernel_zero_point)));
+          vacc${ABC[C+4:C+8]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[C+4:C+8]}), vget_high_u16(vsum${ABC[C:C+8]}), vget_high_u16(vkernel_zero_point)));
 
         $for C in range(0, CHANNEL_TILE, 4):
           vst1q_s32(b, vacc${ABC[C:C+4]}); b += 4;
@@ -216,8 +216,8 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m
               vacc${ABC[0:0+4]} = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(vacc${ABC[0:0+4]}), vget_low_u16(vprod${ABC[0:8]})));
               vacc${ABC[0+4:8]} = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(vacc${ABC[0+4:8]}), vget_high_u16(vprod${ABC[0:8]})));
 
-            vacc${ABC[0:0+4]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[0:0+4]}), vget_low_u16(vsum${ABC[0:8]}), vget_low_u16(vkernel_zero_point16)));
-            vacc${ABC[0+4:8]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[0+4:8]}), vget_high_u16(vsum${ABC[0:8]}), vget_high_u16(vkernel_zero_point16)));
+            vacc${ABC[0:0+4]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[0:0+4]}), vget_low_u16(vsum${ABC[0:8]}), vget_low_u16(vkernel_zero_point)));
+            vacc${ABC[0+4:8]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[0+4:8]}), vget_high_u16(vsum${ABC[0:8]}), vget_high_u16(vkernel_zero_point)));
 
             vst1q_s32(b, vacc${ABC[0:4]}); b += 4;
             vst1q_s32(b, vacc${ABC[4:8]}); b += 4;
@@ -265,8 +265,8 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m
             vacc${ABC[C+4:C+8]} = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(vacc${ABC[C+4:C+8]}), vget_high_u16(vprod${ABC[C:C+8]})));
 
         $for C in range(0, CHANNEL_TILE, 8):
-          vacc${ABC[C:C+4]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[C:C+4]}), vget_low_u16(vsum${ABC[C:C+8]}), vget_low_u16(vkernel_zero_point16)));
-          vacc${ABC[C+4:C+8]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[C+4:C+8]}), vget_high_u16(vsum${ABC[C:C+8]}), vget_high_u16(vkernel_zero_point16)));
+          vacc${ABC[C:C+4]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[C:C+4]}), vget_low_u16(vsum${ABC[C:C+8]}), vget_low_u16(vkernel_zero_point)));
+          vacc${ABC[C+4:C+8]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[C+4:C+8]}), vget_high_u16(vsum${ABC[C:C+8]}), vget_high_u16(vkernel_zero_point)));
 
         $for C in range(0, CHANNEL_TILE, 4):
           vacc${ABC[C:C+4]} = vshlq_s32(vacc${ABC[C:C+4]}, vright_pre_shift);
@@ -348,8 +348,8 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m
             vacc${ABC[0:0+4]} = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(vacc${ABC[0:0+4]}), vget_low_u16(vprod${ABC[0:8]})));
             vacc${ABC[0+4:8]} = vreinterpretq_s32_u32(vaddw_u16(vreinterpretq_u32_s32(vacc${ABC[0+4:8]}), vget_high_u16(vprod${ABC[0:8]})));
 
-          vacc${ABC[0:0+4]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[0:0+4]}), vget_low_u16(vsum${ABC[0:8]}), vget_low_u16(vkernel_zero_point16)));
-          vacc${ABC[0+4:8]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[0+4:8]}), vget_high_u16(vsum${ABC[0:8]}), vget_high_u16(vkernel_zero_point16)));
+          vacc${ABC[0:0+4]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[0:0+4]}), vget_low_u16(vsum${ABC[0:8]}), vget_low_u16(vkernel_zero_point)));
+          vacc${ABC[0+4:8]} = vreinterpretq_s32_u32(vmlsl_u16(vreinterpretq_u32_s32(vacc${ABC[0+4:8]}), vget_high_u16(vsum${ABC[0:8]}), vget_high_u16(vkernel_zero_point)));
 
           vacc${ABC[0:4]} = vrshlq_s32(vacc${ABC[0:4]}, vright_pre_shift);
           vacc${ABC[4:8]} = vrshlq_s32(vacc${ABC[4:8]}, vright_pre_shift);
