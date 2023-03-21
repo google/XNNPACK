@@ -92,7 +92,7 @@ static void DWConvEnd2EndBenchmark(
 static void DWConvEnd2EndBenchmark(
   benchmark::State& state,
   models::ExecutionPlanFactory model_factory,
-  xnn_f32_dwconv_multipass_minmax_ukernel_fn dwconv_minmax,
+  xnn_f32_dwconv_minmax_multipass_ukernel_fn dwconv_minmax,
   xnn_f32_dwconv_multipass_ukernel_fn dwconv,
   xnn_init_f32_minmax_params_fn init_params,
   uint8_t channel_tile, uint8_t channel_subtile, uint8_t channel_round,

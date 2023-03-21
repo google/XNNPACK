@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/qu8-dwconv-multipass-minmax-fp32.yaml
+//   Specification: test/qu8-dwconv-minmax-multipass-fp32.yaml
 //   Generator: tools/generate-dwconv-multipass-test.py
 
 

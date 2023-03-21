@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/qs8-dwconv-multipass-minmax-rndnu.yaml
+//   Specification: test/qs8-dwconv-minmax-multipass-rndnu.yaml
 //   Generator: tools/generate-dwconv-multipass-test.py
 
 

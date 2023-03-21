@@ -158,7 +158,7 @@ static void f32_dwconv(benchmark::State& state,
 
 static void f32_dwconv(
   benchmark::State& state,
-  xnn_f32_dwconv_multipass_minmax_ukernel_fn dwconv,
+  xnn_f32_dwconv_minmax_multipass_ukernel_fn dwconv,
   xnn_init_f32_minmax_params_fn init_params,
   uint32_t first_pass_tile,
   uint32_t middle_pass_tile,

@@ -441,8 +441,8 @@ tools/xngen src/f32-dwconv/multipass-avx512.c.in -D CHANNEL_TILE=16 -D FIRST_PAS
 
 ################################## Unit tests #################################
 tools/generate-dwconv-unipass-test.py --spec test/f32-dwconv-unipass.yaml --output test/f32-dwconv-unipass.cc &
-tools/generate-dwconv-unipass-test.py --spec test/f32-dwconv-unipass-minmax.yaml --output test/f32-dwconv-unipass-minmax.cc &
+tools/generate-dwconv-unipass-test.py --spec test/f32-dwconv-minmax-unipass.yaml --output test/f32-dwconv-minmax-unipass.cc &
 tools/generate-dwconv-multipass-test.py --spec test/f32-dwconv-multipass.yaml --output test/f32-dwconv-multipass.cc &
-tools/generate-dwconv-multipass-test.py --spec test/f32-dwconv-multipass-minmax.yaml --output test/f32-dwconv-multipass-minmax.cc &
+tools/generate-dwconv-multipass-test.py --spec test/f32-dwconv-minmax-multipass.yaml --output test/f32-dwconv-minmax-multipass.cc &
 
 wait

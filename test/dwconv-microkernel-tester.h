@@ -1055,7 +1055,7 @@ class DWConvMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_dwconv_multipass_minmax_ukernel_fn dwconv_minmax, xnn_init_f16_minmax_params_fn init_params) const {
+  void Test(xnn_f16_dwconv_minmax_multipass_ukernel_fn dwconv_minmax, xnn_init_f16_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;
@@ -1423,7 +1423,7 @@ class DWConvMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_dwconv_multipass_minmax_ukernel_fn dwconv_minmax, xnn_init_f32_minmax_params_fn init_params) const {
+  void Test(xnn_f32_dwconv_minmax_multipass_ukernel_fn dwconv_minmax, xnn_init_f32_minmax_params_fn init_params) const {
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist;

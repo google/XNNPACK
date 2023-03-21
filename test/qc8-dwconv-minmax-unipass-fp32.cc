@@ -7,7 +7,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/qc8-dwconv-unipass-minmax-fp32.yaml
+//   Specification: test/qc8-dwconv-minmax-unipass-fp32.yaml
 //   Generator: tools/generate-dwconv-unipass-test.py
 
 

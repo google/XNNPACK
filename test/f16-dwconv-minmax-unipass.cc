@@ -7,7 +7,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/f16-dwconv-unipass-minmax.yaml
+//   Specification: test/f16-dwconv-minmax-unipass.yaml
 //   Generator: tools/generate-dwconv-unipass-test.py
 
 

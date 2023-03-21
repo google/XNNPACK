@@ -7452,10 +7452,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f16_dwconv_multipass_minmax_test",
+    name = "f16_dwconv_minmax_multipass_test",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/f16-dwconv-multipass-minmax.cc",
+        "test/f16-dwconv-minmax-multipass.cc",
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -7465,10 +7465,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f16_dwconv_unipass_minmax_test",
+    name = "f16_dwconv_minmax_unipass_test",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/f16-dwconv-unipass-minmax.cc",
+        "test/f16-dwconv-minmax-unipass.cc",
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -8028,10 +8028,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f32_dwconv_multipass_minmax_test",
+    name = "f32_dwconv_minmax_multipass_test",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/f32-dwconv-multipass-minmax.cc",
+        "test/f32-dwconv-minmax-multipass.cc",
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -8041,10 +8041,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f32_dwconv_unipass_minmax_test",
+    name = "f32_dwconv_minmax_unipass_test",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/f32-dwconv-unipass-minmax.cc",
+        "test/f32-dwconv-minmax-unipass.cc",
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -8745,11 +8745,11 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qc8_dwconv_multipass_minmax_fp32_test",
+    name = "qc8_dwconv_minmax_multipass_fp32_test",
     timeout = "moderate",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/qc8-dwconv-multipass-minmax-fp32.cc",
+        "test/qc8-dwconv-minmax-multipass-fp32.cc",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -8759,11 +8759,11 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qc8_dwconv_unipass_minmax_fp32_test",
+    name = "qc8_dwconv_minmax_unipass_fp32_test",
     timeout = "moderate",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/qc8-dwconv-unipass-minmax-fp32.cc",
+        "test/qc8-dwconv-minmax-unipass-fp32.cc",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -8823,10 +8823,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_dwconv_multipass_minmax_fp32_test",
+    name = "qs8_dwconv_minmax_multipass_fp32_test",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/qs8-dwconv-multipass-minmax-fp32.cc",
+        "test/qs8-dwconv-minmax-multipass-fp32.cc",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -8836,10 +8836,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_dwconv_multipass_minmax_rndnu_test",
+    name = "qs8_dwconv_minmax_multipass_rndnu_test",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/qs8-dwconv-multipass-minmax-rndnu.cc",
+        "test/qs8-dwconv-minmax-multipass-rndnu.cc",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -8849,10 +8849,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_dwconv_unipass_minmax_fp32_test",
+    name = "qs8_dwconv_minmax_unipass_fp32_test",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/qs8-dwconv-unipass-minmax-fp32.cc",
+        "test/qs8-dwconv-minmax-unipass-fp32.cc",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -8862,10 +8862,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_dwconv_unipass_minmax_rndnu_test",
+    name = "qs8_dwconv_minmax_unipass_rndnu_test",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/qs8-dwconv-unipass-minmax-rndnu.cc",
+        "test/qs8-dwconv-minmax-unipass-rndnu.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":packing",
@@ -9079,10 +9079,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qu8_dwconv_multipass_minmax_fp32_test",
+    name = "qu8_dwconv_minmax_multipass_fp32_test",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/qu8-dwconv-multipass-minmax-fp32.cc",
+        "test/qu8-dwconv-minmax-multipass-fp32.cc",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -9092,10 +9092,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qu8_dwconv_multipass_minmax_rndnu_test",
+    name = "qu8_dwconv_minmax_multipass_rndnu_test",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/qu8-dwconv-multipass-minmax-rndnu.cc",
+        "test/qu8-dwconv-minmax-multipass-rndnu.cc",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -9105,10 +9105,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qu8_dwconv_unipass_minmax_fp32_test",
+    name = "qu8_dwconv_minmax_unipass_fp32_test",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/qu8-dwconv-unipass-minmax-fp32.cc",
+        "test/qu8-dwconv-minmax-unipass-fp32.cc",
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -9118,10 +9118,10 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qu8_dwconv_unipass_minmax_rndnu_test",
+    name = "qu8_dwconv_minmax_unipass_rndnu_test",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/qu8-dwconv-unipass-minmax-rndnu.cc",
+        "test/qu8-dwconv-minmax-unipass-rndnu.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":packing",
