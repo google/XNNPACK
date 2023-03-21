@@ -14,10 +14,9 @@
 #include <immintrin.h>
 
 #include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
 
 
-void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
+void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s1r__avx512f_acc2(
     size_t channels,
     size_t output_width,
     const float** input,
@@ -29,7 +28,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
     const float* zero,
     size_t kernel_size,
     float* buffer,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(channels != 0);
   assert(output_width != 0);
@@ -71,7 +70,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
       input += 5;
 
       // Process c channels and write to buffer.
-      size_t c = round_up_po2(channels, 4);
+      size_t c = channels;
 
       for (; c >= 16; c -= 16) {
         __m512 vaccp0 = _mm512_load_ps(w);
@@ -87,7 +86,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
         i1 += 16;
 
         const __m512 vk1x0 = _mm512_load_ps(w + 32);
-        vaccp0 = _mm512_fmadd_ps(vi1x0, vk1x0, vaccp0);
+        __m512 vaccp1 = _mm512_mul_ps(vi1x0, vk1x0);
 
         const __m512 vi2x0 = _mm512_loadu_ps(i2);
         i2 += 16;
@@ -99,7 +98,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
         i3 += 16;
 
         const __m512 vk3x0 = _mm512_load_ps(w + 64);
-        vaccp0 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp0);
+        vaccp1 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp1);
 
         const __m512 vi4x0 = _mm512_loadu_ps(i4);
         i4 += 16;
@@ -109,6 +108,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
 
         w += 96;
 
+        // Add up all accumulators to vaccp0
+        vaccp0 = _mm512_add_ps(vaccp0, vaccp1);
 
         _mm512_store_ps(b, vaccp0);
         b += 16;
@@ -129,7 +130,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
         const __m512 vi1x0 = _mm512_maskz_loadu_ps(vmask, i1);
 
         const __m512 vk1x0 = _mm512_load_ps(w + 32);
-        vaccp0 = _mm512_fmadd_ps(vi1x0, vk1x0, vaccp0);
+        __m512 vaccp1 = _mm512_mul_ps(vi1x0, vk1x0);
 
         const __m512 vi2x0 = _mm512_maskz_loadu_ps(vmask, i2);
 
@@ -139,7 +140,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
         const __m512 vi3x0 = _mm512_maskz_loadu_ps(vmask, i3);
 
         const __m512 vk3x0 = _mm512_load_ps(w + 64);
-        vaccp0 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp0);
+        vaccp1 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp1);
 
         const __m512 vi4x0 = _mm512_maskz_loadu_ps(vmask, i4);
 
@@ -148,6 +149,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
 
         w += 96;
 
+        // Add up all accumulators to vaccp0
+        vaccp0 = _mm512_add_ps(vaccp0, vaccp1);
 
         _mm512_store_ps(b, vaccp0);
       }
@@ -183,7 +186,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
       }
       input += 5;
 
-      size_t c = round_up_po2(channels, 4);
+      size_t c = channels;
 
       for (; c >= 16; c -= 16) {
         __m512 vaccp0 = _mm512_load_ps(b);
@@ -199,7 +202,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
         i1 += 16;
 
         const __m512 vk1x0 = _mm512_load_ps(w + 16);
-        vaccp0 = _mm512_fmadd_ps(vi1x0, vk1x0, vaccp0);
+        __m512 vaccp1 = _mm512_mul_ps(vi1x0, vk1x0);
 
         const __m512 vi2x0 = _mm512_loadu_ps(i2);
         i2 += 16;
@@ -211,7 +214,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
         i3 += 16;
 
         const __m512 vk3x0 = _mm512_load_ps(w + 48);
-        vaccp0 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp0);
+        vaccp1 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp1);
 
         const __m512 vi4x0 = _mm512_loadu_ps(i4);
         i4 += 16;
@@ -221,6 +224,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
 
         w += 80;
 
+        // Add up all accumulators to vaccp0
+        vaccp0 = _mm512_add_ps(vaccp0, vaccp1);
 
         _mm512_store_ps(b, vaccp0);
         b += 16;
@@ -241,7 +246,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
         const __m512 vi1x0 = _mm512_maskz_loadu_ps(vmask, i1);
 
         const __m512 vk1x0 = _mm512_load_ps(w + 16);
-        vaccp0 = _mm512_fmadd_ps(vi1x0, vk1x0, vaccp0);
+        __m512 vaccp1 = _mm512_mul_ps(vi1x0, vk1x0);
 
         const __m512 vi2x0 = _mm512_maskz_loadu_ps(vmask, i2);
 
@@ -251,7 +256,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
         const __m512 vi3x0 = _mm512_maskz_loadu_ps(vmask, i3);
 
         const __m512 vk3x0 = _mm512_load_ps(w + 48);
-        vaccp0 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp0);
+        vaccp1 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp1);
 
         const __m512 vi4x0 = _mm512_maskz_loadu_ps(vmask, i4);
 
@@ -260,6 +265,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
 
         w += 80;
 
+        // Add up all accumulators to vaccp0
+        vaccp0 = _mm512_add_ps(vaccp0, vaccp1);
 
         _mm512_store_ps(b, vaccp0);
       }
@@ -314,7 +321,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
 
         __m512 vk1x0 = _mm512_load_ps(w + 16);
 
-        vaccp0 = _mm512_fmadd_ps(vi1x0, vk1x0, vaccp0);
+        __m512 vaccp1 = _mm512_mul_ps(vi1x0, vk1x0);
 
         const __m512 vi2x0 = _mm512_loadu_ps(i2);
         i2 += 16;
@@ -328,7 +335,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
 
         __m512 vk3x0 = _mm512_load_ps(w + 48);
 
-        vaccp0 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp0);
+        vaccp1 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp1);
 
         const __m512 vi4x0 = _mm512_loadu_ps(i4);
         i4 += 16;
@@ -340,6 +347,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
         w += 80;
 
 
+        // Add up all accumulators to vaccp0
+        vaccp0 = _mm512_add_ps(vaccp0, vaccp1);
 
         __m512 vacc = _mm512_max_ps(vaccp0, vmin);
 
@@ -361,7 +370,7 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
 
         const __m512 vi1x0 = _mm512_maskz_loadu_ps(vmask, i1);
         __m512 vk1x0 = _mm512_load_ps(w + 16);
-        vaccp0 = _mm512_fmadd_ps(vi1x0, vk1x0, vaccp0);
+        __m512 vaccp1 = _mm512_mul_ps(vi1x0, vk1x0);
 
         const __m512 vi2x0 = _mm512_maskz_loadu_ps(vmask, i2);
         __m512 vk2x0 = _mm512_load_ps(w + 32);
@@ -369,12 +378,14 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f(
 
         const __m512 vi3x0 = _mm512_maskz_loadu_ps(vmask, i3);
         __m512 vk3x0 = _mm512_load_ps(w + 48);
-        vaccp0 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp0);
+        vaccp1 = _mm512_fmadd_ps(vi3x0, vk3x0, vaccp1);
 
         const __m512 vi4x0 = _mm512_maskz_loadu_ps(vmask, i4);
         __m512 vk4x0 = _mm512_load_ps(w + 64);
         vaccp0 = _mm512_fmadd_ps(vi4x0, vk4x0, vaccp0);
 
+        // Add up all accumulators to vaccp0
+        vaccp0 = _mm512_add_ps(vaccp0, vaccp1);
 
         __m512 vacc = _mm512_max_ps(vaccp0, vmin);
         vacc = _mm512_min_ps(vacc, vmax);

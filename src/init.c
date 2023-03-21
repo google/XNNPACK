@@ -3798,7 +3798,7 @@ static void init(void) {
       xnn_params.f32.dwconv[2].primary_tile = 9;
 
       #if XNN_ENABLE_DWCONV_MULTIPASS
-        xnn_params.f32.dwconv[3].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f_acc2;
+        xnn_params.f32.dwconv[3].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f_acc2;
         xnn_params.f32.dwconv[3].init.f32 = xnn_init_f32_minmax_scalar_params;
         xnn_params.f32.dwconv[3].channel_tile = 16;
         xnn_params.f32.dwconv[3].channel_subtile = 16;

@@ -20,7 +20,6 @@ $assert LAST_PASS_TILE >= 1
 #include <immintrin.h>
 
 #include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
 #include <xnnpack/intrinsics-polyfill.h>
 
 
@@ -78,7 +77,6 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${F
         }
       input += ${FIRST_PASS_TILE};
 
-      // size_t c = round_up_po2(channels, ${CHANNEL_ROUND});
       size_t c = channels;
 
       for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
@@ -162,7 +160,6 @@ void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${F
         }
       input += ${MIDDLE_PASS_TILE};
 
-      // size_t c = round_up_po2(channels, ${CHANNEL_ROUND});
       size_t c = channels;
 
       for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {

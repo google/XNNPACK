@@ -1321,22 +1321,42 @@ static void DWConvEnd2EndBenchmark(
       xnn_init_f32_minmax_scalar_params,
       32 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckAVX512F);
   }
-  static void f32_dwconv_5f5m5l16c16s4r__avx512f(benchmark::State& state, models::ExecutionPlanFactory model) {
+  static void f32_dwconv_5f5m5l16c16s1r__avx512f(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
-      xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s1r__avx512f,
       nullptr /* dwconv */,
       xnn_init_f32_minmax_scalar_params,
-      /*channel_tile=*/16, /*channel_subtile=*/16, /*channel_round=*/4,
+      /*channel_tile=*/16, /*channel_subtile=*/16, /*channel_round=*/1,
       /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
       /*primary_tile_to_replace=*/25,
       benchmark::utils::CheckAVX512F);
   }
-  static void f32_dwconv_5f5m5l16c16s4r__avx512f_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+  static void f32_dwconv_5f5m5l16c16s1r__avx512f_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(state, model,
-      xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f_acc2,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s1r__avx512f_acc2,
       nullptr /* dwconv */,
       xnn_init_f32_minmax_scalar_params,
-      /*channel_tile=*/16, /*channel_subtile=*/16, /*channel_round=*/4,
+      /*channel_tile=*/16, /*channel_subtile=*/16, /*channel_round=*/1,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25,
+      benchmark::utils::CheckAVX512F);
+  }
+  static void f32_dwconv_5f5m5l32c16s1r__avx512f(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      /*channel_tile=*/32, /*channel_subtile=*/16, /*channel_round=*/1,
+      /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
+      /*primary_tile_to_replace=*/25,
+      benchmark::utils::CheckAVX512F);
+  }
+  static void f32_dwconv_5f5m5l32c16s1r__avx512f_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
+    DWConvEnd2EndBenchmark(state, model,
+      xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f_acc2,
+      nullptr /* dwconv */,
+      xnn_init_f32_minmax_scalar_params,
+      /*channel_tile=*/32, /*channel_subtile=*/16, /*channel_round=*/1,
       /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
       /*primary_tile_to_replace=*/25,
       benchmark::utils::CheckAVX512F);
@@ -1351,8 +1371,10 @@ static void DWConvEnd2EndBenchmark(
   BENCHMARK_FP32_END2END(f32_dwconv_25p32c__avx512f);
   BENCHMARK_FP32_END2END(f32_dwconv_25p32c__avx512f_acc2);
 
-  BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l16c16s4r__avx512f);
-  BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l16c16s4r__avx512f_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l16c16s1r__avx512f);
+  BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l16c16s1r__avx512f_acc2);
+  BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l32c16s1r__avx512f);
+  BENCHMARK_FP32_END2END(f32_dwconv_5f5m5l32c16s1r__avx512f_acc2);
 
   BENCHMARK_FP32_END2END(f32_dwconv_3p8c__fma3);
   BENCHMARK_FP32_END2END(f32_dwconv_3p8c__fma3_acc2);

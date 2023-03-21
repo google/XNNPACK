@@ -1237,17 +1237,29 @@ static void f32_dwconv(
                32 /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckAVX512F);
   }
 
-  static void f32_dwconv_5f5m5l16c16s4r__avx512f(benchmark::State& state, const char* net) {
+  static void f32_dwconv_5f5m5l16c16s1r__avx512f(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f, xnn_init_f32_minmax_scalar_params,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s1r__avx512f, xnn_init_f32_minmax_scalar_params,
                5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
-               16 /* channel tile */, 16 /* channel subtile */, 4 /* channel round */, benchmark::utils::CheckAVX512F);
+               16 /* channel tile */, 16 /* channel subtile */, 1 /* channel round */, benchmark::utils::CheckAVX512F);
   }
-  static void f32_dwconv_5f5m5l16c16s4r__avx512f_acc2(benchmark::State& state, const char* net) {
+  static void f32_dwconv_5f5m5l16c16s1r__avx512f_acc2(benchmark::State& state, const char* net) {
     f32_dwconv(state,
-               xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s4r__avx512f_acc2, xnn_init_f32_minmax_scalar_params,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s1r__avx512f_acc2, xnn_init_f32_minmax_scalar_params,
                5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
-               16 /* channel tile */, 16 /* channel subtile */, 4 /* channel round */, benchmark::utils::CheckAVX512F);
+               16 /* channel tile */, 16 /* channel subtile */, 1 /* channel round */, benchmark::utils::CheckAVX512F);
+  }
+  static void f32_dwconv_5f5m5l32c16s1r__avx512f(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f, xnn_init_f32_minmax_scalar_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               32 /* channel tile */, 16 /* channel subtile */, 1 /* channel round */, benchmark::utils::CheckAVX512F);
+  }
+  static void f32_dwconv_5f5m5l32c16s1r__avx512f_acc2(benchmark::State& state, const char* net) {
+    f32_dwconv(state,
+               xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f_acc2, xnn_init_f32_minmax_scalar_params,
+               5 /* first pass tile */, 5 /* middle pass tile */, 5 /* last pass tile */,
+               32 /* channel tile */, 16 /* channel subtile */, 1 /* channel round */, benchmark::utils::CheckAVX512F);
   }
 
   BENCHMARK_DWCONV(f32_dwconv_4p4c__sse)
@@ -1319,8 +1331,10 @@ static void f32_dwconv(
   BENCHMARK_DWCONV(f32_dwconv_25p32c__avx512f)
   BENCHMARK_DWCONV(f32_dwconv_25p32c__avx512f_acc2)
 
-  BENCHMARK_DWCONV(f32_dwconv_5f5m5l16c16s4r__avx512f)
-  BENCHMARK_DWCONV(f32_dwconv_5f5m5l16c16s4r__avx512f_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l16c16s1r__avx512f)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l16c16s1r__avx512f_acc2)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l32c16s1r__avx512f)
+  BENCHMARK_DWCONV(f32_dwconv_5f5m5l32c16s1r__avx512f_acc2)
 #endif  // XNN_ARCH_X88 || XNN_ARCH_X86_64
 
 

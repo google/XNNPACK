@@ -5,7 +5,7 @@
 
 $CHANNEL_SUBTILE = 16
 $assert CHANNEL_TILE % CHANNEL_SUBTILE == 0
-$CHANNEL_ROUND = 4
+$CHANNEL_ROUND = 1
 $assert MIDDLE_PASS_TILE <= LAST_PASS_TILE
 $assert FIRST_PASS_TILE >= 1
 $assert MIDDLE_PASS_TILE >= 1
@@ -19,7 +19,6 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <immintrin.h>
 
 #include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
 
 
 void xnn_f32_dwconv_minmax_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST_PASS_TILE}l${CHANNEL_TILE}c${CHANNEL_SUBTILE}s${CHANNEL_ROUND}r__avx512f${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
@@ -34,7 +33,7 @@ void xnn_f32_dwconv_minmax_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST
     const float* zero,
     size_t kernel_size,
     float* buffer,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(channels != 0);
   assert(output_width != 0);
@@ -57,7 +56,7 @@ void xnn_f32_dwconv_minmax_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST
       input += ${FIRST_PASS_TILE};
 
       // Process c channels and write to buffer.
-      size_t c = round_up_po2(channels, ${CHANNEL_ROUND});
+      size_t c = channels;
       $if CHANNEL_TILE > 16:
         for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
           $for C in range(0, CHANNEL_TILE, 16):
@@ -174,7 +173,7 @@ void xnn_f32_dwconv_minmax_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST
         }
       input += ${MIDDLE_PASS_TILE};
 
-      size_t c = round_up_po2(channels, ${CHANNEL_ROUND});
+      size_t c = channels;
       $if CHANNEL_TILE > 16:
         for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
           $for C in range(0, CHANNEL_TILE, 16):
