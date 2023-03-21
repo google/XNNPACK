@@ -538,8 +538,10 @@ class DWConvMicrokernelTester {
         scale[c] = 1.0f / output_scale;
       }
       xnn_init_qc8_scale_fp32_params(
-        channels(), channel_tile(),
+        channels(), channel_tile(), channel_tile(),
         channel_tile() * (kernel_tile() * sizeof(int8_t) + sizeof(int32_t) + sizeof(float)),
+        channel_tile() * (kernel_tile() * sizeof(int8_t) + sizeof(int32_t) + sizeof(float)),
+        0,
         scale.data(),
         (void*) ((uintptr_t) packed_weights.data() + channel_tile() * (kernel_tile() * sizeof(int8_t) + sizeof(int32_t))));
 
@@ -676,7 +678,7 @@ class DWConvMicrokernelTester {
           num_middle_pass * middle_pass_tile() * rounded_c * sizeof(int8_t) +
           last_pass_tile() * channel_tile();
 
-      xnn_init_qc8_scale_fp32_params_dwconv_multipass(
+      xnn_init_qc8_scale_fp32_params(
         channels(), channel_tile(), channel_subtile(),
         channel_tile() * (last_pass_tile() * sizeof(int8_t) + sizeof(int32_t)),
         channel_subtile() * (last_pass_tile() * sizeof(int8_t) + sizeof(int32_t)),

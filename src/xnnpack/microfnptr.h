@@ -2224,7 +2224,10 @@ typedef size_t (*xnn_init_f32_tanh_params_fn)(
 typedef void (*xnn_init_qc8_scale_params_fn)(
   size_t channels,
   size_t channels_tile,
+  size_t channels_subtile,
   size_t stride,
+  size_t substride,
+  size_t stride_offset,
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
 

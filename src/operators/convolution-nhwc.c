@@ -223,16 +223,20 @@ static enum xnn_status create_dwconv_path(
     assert(init_scale_params != NULL);
     // TODO(zhin): QC8 DWCONV multipass is not implemented for now, fix this when it is supported.
     assert(is_unipass);
+    size_t stride = dwconv_ukernel->channel_tile *
+                    ((primary_tile << log2_filter_element_size) + bias_element_size + extra_weights_bytes);
 
     init_scale_params(
-        /*channels=*/groups,
-        /*channels_tile=*/dwconv_ukernel->channel_tile,
-        /*stride=*/dwconv_ukernel->channel_tile *
-            ((primary_tile << log2_filter_element_size) + bias_element_size + extra_weights_bytes),
-        /*scale=*/scale_params,
-        /*packed_w=*/
-        (void*)((uintptr_t)weights_ptr +
-                dwconv_ukernel->channel_tile * ((primary_tile << log2_filter_element_size) + bias_element_size)));
+      /*channels=*/groups,
+      /*channels_tile=*/dwconv_ukernel->channel_tile,
+      /*channels_subtile=*/dwconv_ukernel->channel_tile,
+      /*stride=*/stride,
+      /*substride=*/stride,
+      /*stride_offset=*/0,
+      /*scale=*/scale_params,
+      /*packed_w=*/
+      (void*) ((uintptr_t) weights_ptr +
+               dwconv_ukernel->channel_tile * ((primary_tile << log2_filter_element_size) + bias_element_size)));
   }
 
   if (use_weights_cache(convolution_op)) {
@@ -396,8 +400,8 @@ static enum xnn_status create_gemm_or_igemm(
         (kernel_size * k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
     for (uint32_t group = 0; group < groups; group++) {
       init_scale_params(
-          group_output_channels, gemm_parameters->nr,
-          gemm_parameters->nr * weights_stride,
+          group_output_channels, gemm_parameters->nr, gemm_parameters->nr,
+          gemm_parameters->nr * weights_stride, gemm_parameters->nr * weights_stride, 0,
           scale_params, group_weights);
       scale_params += group_output_channels;
       group_weights = (void*) ((uintptr_t) group_weights + n_stride * weights_stride);

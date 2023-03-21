@@ -826,25 +826,6 @@ size_t xnn_init_qu8_conv_minmax_fp32_wasmsimd_params(
 void xnn_init_qc8_scale_fp32_params(
   size_t channels,
   size_t channels_tile,
-  size_t stride,
-  const float scale[XNN_MIN_ELEMENTS(1)],
-  void* packed_w)
-{
-  // TODO(zhin): change all callers to call multipass directly.
-  xnn_init_qc8_scale_fp32_params_dwconv_multipass(
-      channels,
-      channels_tile,
-      channels_tile,
-      stride,
-      stride,
-      0,
-      scale,
-      packed_w);
-}
-
-void xnn_init_qc8_scale_fp32_params_dwconv_multipass(
-  size_t channels,
-  size_t channels_tile,
   size_t channels_subtile,
   size_t stride,
   size_t substride,
