@@ -5832,7 +5832,6 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/qc8-igemm/gen/qc8-igemm-4x4c2-minmax-fp32-sse2-ld128.c
   src/qc8-igemm/gen/qc8-igemm-4x4c2s4-minmax-fp32-sse2-ld64.c
   src/qc8-igemm/gen/qc8-igemm-4x4c2s4-minmax-fp32-sse2-ld128.c
-  src/qs8-dwconv/gen/qs8-dwconv-3f3m3l8c8s8r-minmax-fp32-sse2-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-5f5m5l8c8s8r-minmax-fp32-sse2-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-5f5m5l8c8s8r-minmax-fp32-sse2-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-5f5m5l16c8s8r-minmax-fp32-sse2-mul16-add16.c
