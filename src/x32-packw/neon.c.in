@@ -22,7 +22,7 @@ $if PREFETCH:
   #include <xnnpack/prefetch.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4lane${"_prfm" if PREFETCH else ""}(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4lane${"_prfm" if PREFETCH else ""}_x${KUNROLL}(
   size_t g,
   size_t nc,
   size_t kc,

@@ -15,10 +15,9 @@
 #include <arm_neon.h>
 
 #include <xnnpack/packw.h>
-#include <xnnpack/prefetch.h>
 
 
-void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm(
+void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4(
   size_t g,
   size_t nc,
   size_t kc,
@@ -115,22 +114,6 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm(
         vtmp0123x4567 = vld4_lane_u16(w7, vtmp0123x4567, 3); w7 += 4;
         vtmp0123x89AB = vld4_lane_u16(w11, vtmp0123x89AB, 3); w11 += 4;
         vtmp0123xCDEF = vld4_lane_u16(w15, vtmp0123xCDEF, 3); w15 += 4;
-        xnn_prefetch_to_l1((const int8_t*) w0 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w1 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w2 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w3 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w4 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w5 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w6 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w7 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w8 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w9 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w10 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w11 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w12 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w13 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w14 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w15 + 128);
         vst1_u16(packed_weights, vtmp0123x0123.val[0]); packed_weights += 4;
         vst1_u16(packed_weights, vtmp0123x4567.val[0]); packed_weights += 4;
         vst1_u16(packed_weights, vtmp0123x89AB.val[0]); packed_weights += 4;

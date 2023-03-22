@@ -17,7 +17,7 @@
 
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int(
+void xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int_x4(
   size_t g,
   size_t nc,
   size_t kc,
@@ -33,7 +33,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int(
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
-  assert(nr == 4);   // This kernel is for NR=4
+  assert(nr == 2);   // This kernel is for NR=2
   assert(kr == 1);
   assert(sr == 1);
   assert(weights != NULL);
@@ -43,29 +43,23 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int(
   const uint32_t* b = (const uint32_t*) bias;
 
   do {
-    // NC main loop multiple of 4
+    // NC main loop multiple of 2
     const uint32_t* w0 = (const uint32_t*) weights;
     size_t n = nc;
-    for (;n >= 4; n -= 4) {
+    for (;n >= 2; n -= 2) {
       if XNN_LIKELY(b != NULL) {
         out[0] = b[0];
         out[1] = b[1];
-        out[2] = b[2];
-        out[3] = b[3];
-        b += 4;
+        b += 2;
       } else {
         out[0] = 0;
         out[1] = 0;
-        out[2] = 0;
-        out[3] = 0;
       }
-      out += 4;
+      out += 2;
 
       const uint32_t* w1 = w0 + kc;
-      const uint32_t* w2 = w1 + kc;
-      const uint32_t* w3 = w2 + kc;
 
-      // KC main loop multiple of 4x4
+      // KC main loop multiple of 2x4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
         const uint32_t v00 = w0[0];
@@ -78,33 +72,15 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int(
         const uint32_t v12 = w1[2];
         const uint32_t v13 = w1[3];
         w1 += 4;
-        const uint32_t v20 = w2[0];
-        const uint32_t v21 = w2[1];
-        const uint32_t v22 = w2[2];
-        const uint32_t v23 = w2[3];
-        w2 += 4;
-        const uint32_t v30 = w3[0];
-        const uint32_t v31 = w3[1];
-        const uint32_t v32 = w3[2];
-        const uint32_t v33 = w3[3];
-        w3 += 4;
         out[0] = v00;
         out[1] = v10;
-        out[2] = v20;
-        out[3] = v30;
-        out[4] = v01;
-        out[5] = v11;
-        out[6] = v21;
-        out[7] = v31;
-        out[8] = v02;
-        out[9] = v12;
-        out[10] = v22;
-        out[11] = v32;
-        out[12] = v03;
-        out[13] = v13;
-        out[14] = v23;
-        out[15] = v33;
-        out += 16;
+        out[2] = v01;
+        out[3] = v11;
+        out[4] = v02;
+        out[5] = v12;
+        out[6] = v03;
+        out[7] = v13;
+        out += 8;
       }
 
       // KC remainder
@@ -113,17 +89,13 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int(
         out[0] = v0;
         const uint32_t v1 = *w1++;
         out[1] = v1;
-        const uint32_t v2 = *w2++;
-        out[2] = v2;
-        const uint32_t v3 = *w3++;
-        out[3] = v3;
-        out += 4;
+        out += 2;
       }
       out = (uint32_t*) ((uintptr_t) out + extra_bytes);
-      w0 = w3;
+      w0 = w1;
     }
 
-    // NC remainder (1..3)
+    // NC remainder (1..1)
     if XNN_UNLIKELY(n != 0) {
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
@@ -136,19 +108,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int(
           *out++ = 0;
         } while (--nb != 0);
       }
-      out += (4 - n);
+      out += (2 - n);
 
-      // NR remainder has less than 4 rows so last row is not loaded
-      const uint32_t* w1 = w0 + kc;
-      if XNN_UNPREDICTABLE(n < 2) {
-        w1 = w0;
-      }
-      const uint32_t* w2 = w1 + kc;
-      if XNN_UNPREDICTABLE(n <= 2) {
-        w2 = w1;
-      }
 
-      // KC main loop multiple of 4x4
+      // KC main loop multiple of 2x4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
         const uint32_t v00 = w0[0];
@@ -156,40 +119,18 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int(
         const uint32_t v02 = w0[2];
         const uint32_t v03 = w0[3];
         w0 += 4;
-        const uint32_t v10 = w1[0];
-        const uint32_t v11 = w1[1];
-        const uint32_t v12 = w1[2];
-        const uint32_t v13 = w1[3];
-        w1 += 4;
-        const uint32_t v20 = w2[0];
-        const uint32_t v21 = w2[1];
-        const uint32_t v22 = w2[2];
-        const uint32_t v23 = w2[3];
-        w2 += 4;
         out[0] = v00;
-        out[1] = v10;
-        out[2] = v20;
-        out[4] = v01;
-        out[5] = v11;
-        out[6] = v21;
-        out[8] = v02;
-        out[9] = v12;
-        out[10] = v22;
-        out[12] = v03;
-        out[13] = v13;
-        out[14] = v23;
-        out += 16;
+        out[2] = v01;
+        out[4] = v02;
+        out[6] = v03;
+        out += 8;
       }
 
       // KC remainder of 1..3
       for (; k != 0; --k) {
         const uint32_t v0 = *w0++;
         out[0] = v0;
-        const uint32_t v1 = *w1++;
-        out[1] = v1;
-        const uint32_t v2 = *w2++;
-        out[2] = v2;
-        out += 4;
+        out += 2;
       }
       out = (uint32_t*) ((uintptr_t) out + extra_bytes);
     }
