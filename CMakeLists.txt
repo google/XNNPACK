@@ -3751,6 +3751,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(x24-transpose-bench PRIVATE benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(x24-transpose-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
+  ADD_EXECUTABLE(x16-packw-bench bench/x16-packw.cc)
+  TARGET_INCLUDE_DIRECTORIES(x16-packw-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(x16-packw-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(x16-packw-bench PRIVATE bench-utils hardware-config logging microkernels-all packing)
+
   ADD_EXECUTABLE(x32-packw-bench bench/x32-packw.cc)
   TARGET_INCLUDE_DIRECTORIES(x32-packw-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(x32-packw-bench PRIVATE benchmark pthreadpool)
