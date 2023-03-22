@@ -208,7 +208,7 @@ static void ruy_st(benchmark::State& state, const char* net)
 }
 #endif  // BENCHMARK_RUY
 
-#if XNN_ARCH_ARM && XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#if XNN_ARCH_ARM && XNN_PLATFORM_JIT
   static void GEMMBenchmark(benchmark::State& state,
     xnn_jit_gemm_code_generator_fn generator,
     xnn_init_qs8_conv_minmax_params_fn  init_params,
@@ -254,7 +254,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(jit_qs8_gemm_4x8c4__aarch32_neondot_ld64)
   BENCHMARK_GEMM(jit_qs8_gemm_4x8__aarch32_neon_mlal_lane_ld64)
   BENCHMARK_GEMM(jit_qs8_gemm_4x8__aarch32_neon_mlal_lane_prfm_ld64)
-#endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 
 #if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
   static void qs8_gemm_4x8c4__asm_aarch32_neondot_ld64(benchmark::State& state, const char* net) {
