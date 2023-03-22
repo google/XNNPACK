@@ -12,7 +12,6 @@
 #include <immintrin.h>
 
 #include <xnnpack/dwconv.h>
-#include <xnnpack/math.h>
 #include <xnnpack/intrinsics-polyfill.h>
 
 
@@ -78,7 +77,6 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_6f6m7l32c16s1r__avx512skx_mul32(
       }
       input += 6;
 
-      // size_t c = round_up_po2(channels, 1);
       size_t c = channels;
 
       for (; c >= 32; c -= 32) {
@@ -263,7 +261,6 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_6f6m7l32c16s1r__avx512skx_mul32(
       }
       input += 6;
 
-      // size_t c = round_up_po2(channels, 1);
       size_t c = channels;
 
       for (; c >= 32; c -= 32) {
