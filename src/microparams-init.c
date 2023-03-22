@@ -7213,12 +7213,9 @@ size_t xnn_init_qs16_qs8_cvt_wasmsimd_params(
   assert(multiplier >= 1L);
   assert(multiplier <= 0x01000000L);
 
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd.multiplier[i] = (int32_t) multiplier;
-  }
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd.bias[i] = (int64_t) bias;
-  }
+  params->wasmsimd.multiplier[0] = (int32_t) multiplier;
+  params->wasmsimd.multiplier[1] = (int32_t) multiplier;
+  params->wasmsimd.bias = bias;
   return sizeof(params->wasmsimd);
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

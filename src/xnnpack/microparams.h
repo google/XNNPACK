@@ -1311,8 +1311,8 @@ union xnn_qs16_qs8_cvt_params {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {
-    XNN_ALIGN(16) int32_t multiplier[4];
-    XNN_ALIGN(16) int64_t bias[2];  // Rounding + output_zero_point.
+    XNN_ALIGN(8) int32_t multiplier[2];
+    XNN_ALIGN(8) int64_t bias;  // Rounding + output_zero_point.
   } wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
