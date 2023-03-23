@@ -280,27 +280,6 @@ struct gavgpool_parameters {
   uint16_t channel_tile;
 };
 
-struct avgpool_parameters {
-  xnn_avgpool_unipass_ukernel_fn unipass;
-  xnn_avgpool_multipass_ukernel_fn multipass;
-  union {
-    xnn_init_f16_scaleminmax_params_fn f16;
-    xnn_init_f32_scaleminmax_params_fn f32;
-    xnn_init_qu8_avgpool_minmax_params_fn qu8;
-  } init;
-  // Number of rows in a primary tile.
-  // Unipass micro-kernel must be called with this number of rows, or fewer.
-  // Multipass micro-kernel must be called with more than this number of rows.
-  uint8_t primary_tile;
-  // Number of rows in an incremental tile.
-  // For best efficiency, multipass micro-kernel must process the number of rows in the primary tile plus a multiple
-  // of this number of rows in each call. This number has no meaning for the unipass micro-kernel.
-  uint8_t incremental_tile;
-  // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
-  uint16_t channel_tile;
-};
-
 struct pavgpool_parameters {
   xnn_pavgpool_unipass_ukernel_fn unipass;
   xnn_pavgpool_multipass_ukernel_fn multipass;
@@ -451,7 +430,6 @@ struct xnn_parameters {
   struct {
     struct gemm_parameters gemm;
     struct dwconv_parameters dwconv[XNN_MAX_QU8_DWCONV_UKERNELS];
-    struct avgpool_parameters avgpool;
     struct gavgpool_parameters gavgpool;
   } qu8;
   struct {
@@ -473,7 +451,6 @@ struct xnn_parameters {
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
     struct dwconv_parameters dwconv[XNN_MAX_F16_DWCONV_UKERNELS];
-    struct avgpool_parameters avgpool;
     struct pavgpool_parameters pavgpool;
     struct gavgpool_parameters gavgpool;
     struct maxpool_parameters maxpool;
@@ -504,7 +481,6 @@ struct xnn_parameters {
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
     struct dwconv_parameters dwconv[XNN_MAX_F32_DWCONV_UKERNELS];
-    struct avgpool_parameters avgpool;
     struct pavgpool_parameters pavgpool;
     struct gavgpool_parameters gavgpool;
     struct maxpool_parameters maxpool;

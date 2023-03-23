@@ -16,6 +16,7 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/cache.h>
 #include <xnnpack/compute.h>
+#include <xnnpack/config.h>
 #include <xnnpack/microkernel-type.h>
 #include <xnnpack/operator-type.h>
 #include <xnnpack/params.h>
@@ -275,6 +276,7 @@ struct xnn_operator {
   void* post_operation_params;
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
+  const struct xnn_avgpool_config* avgpool_config;
 
   struct compute_parameters compute;
   struct compute_parameters compute2;

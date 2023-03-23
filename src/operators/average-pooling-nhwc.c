@@ -18,6 +18,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/config.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/operator-utils.h>
 #include <xnnpack/common.h>
@@ -221,11 +222,15 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_qu8(
   average_pooling_op->input_scale = input_scale;
   average_pooling_op->output_scale = output_scale;
 
+  const struct xnn_avgpool_config* avgpool_config = xnn_init_qu8_avgpool_config();
+  assert(avgpool_config != NULL);
+  average_pooling_op->avgpool_config = avgpool_config;
+
   // Number of rows read in the AVGPOOL micro-kernel.
   const size_t avgpool_nrows =
-    round_up(doz(pooling_size, xnn_params.qu8.avgpool.primary_tile), xnn_params.qu8.avgpool.incremental_tile) + xnn_params.qu8.avgpool.primary_tile;
+    round_up(doz(pooling_size, avgpool_config->primary_tile), avgpool_config->incremental_tile) + avgpool_config->primary_tile;
   const float requantization_scale = input_scale / (output_scale * (float) pooling_size);
-  xnn_params.qu8.avgpool.init.qu8(&average_pooling_op->params.qu8_avgpool,
+  avgpool_config->init.qu8(&average_pooling_op->params.qu8_avgpool,
     (int32_t) -((uint32_t) input_zero_point * (uint32_t) avgpool_nrows),
     requantization_scale, output_zero_point, output_min, output_max);
   xnn_params.qu8.gavgpool.init.qu8(&average_pooling_op->params.qu8_gavgpool,
@@ -413,7 +418,16 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
   average_pooling_op->output_pixel_stride = output_pixel_stride;
 
   average_pooling_op->type = xnn_operator_type_average_pooling_nhwc_f16;
-  xnn_params.f16.avgpool.init.f16(&average_pooling_op->params.f16_scaleminmax,
+
+  const struct xnn_avgpool_config* avgpool_config = xnn_init_f16_avgpool_config();
+  if (avgpool_config == NULL) {
+    xnn_log_error(
+        "failed to create fill operator: unsupported hardware configuration");
+    return xnn_status_unsupported_hardware;
+  }
+  average_pooling_op->avgpool_config = avgpool_config;
+
+  avgpool_config->init.f16(&average_pooling_op->params.f16_scaleminmax,
     fp16_ieee_from_fp32_value(1.0f / (float) (int32_t) pooling_size), fp16_output_min, fp16_output_max);
   const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
   if (any_padding || tf_same_padding) {
@@ -589,7 +603,16 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
   average_pooling_op->output_pixel_stride = output_pixel_stride;
 
   average_pooling_op->type = xnn_operator_type_average_pooling_nhwc_f32;
-  xnn_params.f32.avgpool.init.f32(&average_pooling_op->params.f32_scaleminmax,
+
+  const struct xnn_avgpool_config* avgpool_config = xnn_init_f32_avgpool_config();
+  if (avgpool_config == NULL) {
+    xnn_log_error(
+        "failed to create fill operator: unsupported hardware configuration");
+    return xnn_status_unsupported_hardware;
+  }
+  average_pooling_op->avgpool_config = avgpool_config;
+
+  avgpool_config->init.f32(&average_pooling_op->params.f32_scaleminmax,
     1.0f / (float) (int32_t) pooling_size, output_min, output_max);
   const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
   if (any_padding || tf_same_padding) {
@@ -619,7 +642,7 @@ static enum xnn_status setup_average_pooling2d(
   uint32_t log2_weight_element_size,
   uint32_t log2_accumulator_element_size,
   xnn_indirection_init_pavgpool2d_fn indirection_init_pavgpool2d,
-  struct avgpool_parameters avgpool[restrict XNN_MIN_ELEMENTS(1)],
+  const struct xnn_avgpool_config avgpool[restrict XNN_MIN_ELEMENTS(1)],
   struct pavgpool_parameters pavgpool[restrict 1],
   struct gavgpool_parameters gavgpool[restrict XNN_MIN_ELEMENTS(1)],
   const void* params,
@@ -888,7 +911,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_qu8(
     0 /* log2(sizeof(weight element)) = log2(sizeof(uint8_t)) */,
     2 /* log2(sizeof(accumulator element))= log2(sizeof(int32_t)) */,
     NULL /* indirection_init_pavgpool2d */,
-    &xnn_params.qu8.avgpool,
+    average_pooling_op->avgpool_config,
     NULL /* no PAVGPOOL micro-kernel */,
     &xnn_params.qu8.gavgpool,
     &average_pooling_op->params.qu8_avgpool,
@@ -936,7 +959,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f16(
     1 /* log2(sizeof(weight element)) = log2(sizeof(uint16_t)) */,
     1 /* log2(sizeof(accumulator element))= log2(sizeof(uint16_t)) */,
     (xnn_indirection_init_pavgpool2d_fn) xnn_indirection_init_pavgpool2d_f16,
-    &xnn_params.f16.avgpool, &xnn_params.f16.pavgpool, &xnn_params.f16.gavgpool,
+    average_pooling_op->avgpool_config, &xnn_params.f16.pavgpool, &xnn_params.f16.gavgpool,
     pooling_params, pooling_params_size,
     &average_pooling_op->params.f16_scaleminmax, sizeof(average_pooling_op->params.f16_scaleminmax),
     pthreadpool_get_threads_count(threadpool),
@@ -980,7 +1003,7 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
     2 /* log2(sizeof(weight element)) = log2(sizeof(float)) */,
     2 /* log2(sizeof(accumulator element))= log2(sizeof(float)) */,
     (xnn_indirection_init_pavgpool2d_fn) xnn_indirection_init_pavgpool2d_f32,
-    &xnn_params.f32.avgpool, &xnn_params.f32.pavgpool, &xnn_params.f32.gavgpool,
+    average_pooling_op->avgpool_config, &xnn_params.f32.pavgpool, &xnn_params.f32.gavgpool,
     pooling_params, pooling_params_size,
     &average_pooling_op->params.f32_scaleminmax, sizeof(average_pooling_op->params.f32_scaleminmax),
     pthreadpool_get_threads_count(threadpool),

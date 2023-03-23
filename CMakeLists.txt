@@ -274,6 +274,7 @@ SET(LOGGING_SRCS
   src/log.c)
 
 SET(XNNPACK_SRCS
+  src/avgpool-config.c
   src/binary-elementwise-config.c
   src/init.c
   src/params.c
