@@ -32,7 +32,7 @@ $  POLYNOMIAL = "(c%d + t * %s)" % (i, POLYNOMIAL)
 $POLYNOMIAL = "(2 + t * %s)" % POLYNOMIAL
 $WASM_F32X4_MAX = {"WASM": "wasm_f32x4_max", "PSEUDO": "wasm_f32x4_pmax"}[MINMAX]
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
-$POLY_SUFFIX = "p%dh%d_" % (P, H)
+$POLY_SUFFIX = "p%dh%dts_" % (P, H)
 $MINMAX_SUFFIX = {"WASM": "max", "PSEUDO": "pmax"}[MINMAX]
 void xnn_math_f32_tanh__wasmsimd_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}div_nabs_${MINMAX_SUFFIX}(
     size_t n,

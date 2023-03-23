@@ -22,7 +22,7 @@ $for i in reversed(range(P-2)):
 $  POLYNOMIAL = "(c%d + t * %s)" % (i+2, POLYNOMIAL)
 $if P == H + 1:
   $POLYNOMIAL = "(-2 + t * %s)" % POLYNOMIAL
-$POLY_SUFFIX = "p%dh%d_" % (P, H)
+$POLY_SUFFIX = "p%dh%dts_" % (P, H)
 $DIV_SUFFIX = DIV.lower()
 $ISA = "aarch64_neonfp16arith" if DIV == "DIV" else "neonfp16arith"
 void xnn_math_f16_tanh__${ISA}_expm1minus_rr1_${POLY_SUFFIX}${DIV_SUFFIX}(

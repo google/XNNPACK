@@ -40,7 +40,7 @@ $if P == H + 1:
 $else:
   $COEFFS = [float.hex(0.5 * float.fromhex(c)).upper().replace("0X", "0x").replace("0000000P", "p") for c in COEFFS]
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
-$POLY_SUFFIX = "p%dh%d_" % (P, H)
+$POLY_SUFFIX = "p%dh%dts_" % (P, H)
 $DIV_SUFFIX = DIV.lower()
 void xnn_math_f32_tanh__sse2_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DIV_SUFFIX}(
     size_t n,

@@ -149,14 +149,14 @@ static void TanhError(
 }
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(TanhError, aarch64_neonfp16arith_expm1minus_rr1_p3h1_div,
-                    xnn_math_f16_tanh__aarch64_neonfp16arith_expm1minus_rr1_p3h1_div,
+  BENCHMARK_CAPTURE(TanhError, aarch64_neonfp16arith_expm1minus_rr1_p3h1ts_div,
+                    xnn_math_f16_tanh__aarch64_neonfp16arith_expm1minus_rr1_p3h1ts_div,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues + 1,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, aarch64_neonfp16arith_expm1minus_rr1_p3h2_div,
-                    xnn_math_f16_tanh__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div,
+  BENCHMARK_CAPTURE(TanhError, aarch64_neonfp16arith_expm1minus_rr1_p3h2ts_div,
+                    xnn_math_f16_tanh__aarch64_neonfp16arith_expm1minus_rr1_p3h2ts_div,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
@@ -164,74 +164,74 @@ static void TanhError(
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_nr1fma,
-                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1fma,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1ts_nr1fma,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1ts_nr1fma,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues + 1,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_nr1fmaadj,
-                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1fmaadj,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1ts_nr1fmaadj,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1ts_nr1fmaadj,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues + 1,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_nr1recps,
-                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1recps,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1ts_nr1recps,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1ts_nr1recps,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues + 1,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_nr1recpsadj,
-                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_nr1recpsadj,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1ts_nr1recpsadj,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1ts_nr1recpsadj,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues + 1,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_recpe,
-                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_recpe,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1ts_recpe,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1ts_recpe,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues + 3,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1_recpeadj,
-                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1_recpeadj,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h1ts_recpeadj,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h1ts_recpeadj,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues + 3,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_nr1fma,
-                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1fma,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2ts_nr1fma,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2ts_nr1fma,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_nr1fmaadj,
-                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1fmaadj,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2ts_nr1fmaadj,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2ts_nr1fmaadj,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_nr1recps,
-                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1recps,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2ts_nr1recps,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2ts_nr1recps,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_nr1recpsadj,
-                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_nr1recpsadj,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2ts_nr1recpsadj,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2ts_nr1recpsadj,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_recpe,
-                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_recpe,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2ts_recpe,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2ts_recpe,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues + 3,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2_recpeadj,
-                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2_recpeadj,
+  BENCHMARK_CAPTURE(TanhError, neonfp16arith_expm1minus_rr1_p3h2ts_recpeadj,
+                    xnn_math_f16_tanh__neonfp16arith_expm1minus_rr1_p3h2ts_recpeadj,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues + 3,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Unit(benchmark::kMillisecond)
@@ -239,27 +239,27 @@ static void TanhError(
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(TanhError, avx2_expm1minus_rr1_p3h2_div,
-                    xnn_math_f16_tanh__avx2_expm1minus_rr1_p3h2_div,
+  BENCHMARK_CAPTURE(TanhError, avx2_expm1minus_rr1_p3h2ts_div,
+                    xnn_math_f16_tanh__avx2_expm1minus_rr1_p3h2ts_div,
                     /*num_flush_to_zero_values=*/0,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, avx2_expm1minus_rr1_p3h2_rcp,
-                    xnn_math_f16_tanh__avx2_expm1minus_rr1_p3h2_rcp,
+  BENCHMARK_CAPTURE(TanhError, avx2_expm1minus_rr1_p3h2ts_rcp,
+                    xnn_math_f16_tanh__avx2_expm1minus_rr1_p3h2ts_rcp,
                     /*num_flush_to_zero_values=*/0,
                     benchmark::utils::CheckAVX2)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
 
-  BENCHMARK_CAPTURE(TanhError, fma3_expm1minus_rr1_p3h2_div,
-                    xnn_math_f16_tanh__fma3_expm1minus_rr1_p3h2_div,
+  BENCHMARK_CAPTURE(TanhError, fma3_expm1minus_rr1_p3h2ts_div,
+                    xnn_math_f16_tanh__fma3_expm1minus_rr1_p3h2ts_div,
                     /*num_flush_to_zero_values=*/0,
                     benchmark::utils::CheckFMA3)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, fma3_expm1minus_rr1_p3h2_rcp,
-                    xnn_math_f16_tanh__fma3_expm1minus_rr1_p3h2_rcp,
+  BENCHMARK_CAPTURE(TanhError, fma3_expm1minus_rr1_p3h2ts_rcp,
+                    xnn_math_f16_tanh__fma3_expm1minus_rr1_p3h2ts_rcp,
                     /*num_flush_to_zero_values=*/0,
                     benchmark::utils::CheckFMA3)
     ->Unit(benchmark::kMillisecond)
@@ -277,14 +277,14 @@ static void TanhError(
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
 
-  BENCHMARK_CAPTURE(TanhError, f16c_expm1minus_rr1_p3h2_div,
-                    xnn_math_f16_tanh__f16c_expm1minus_rr1_p3h2_div,
+  BENCHMARK_CAPTURE(TanhError, f16c_expm1minus_rr1_p3h2ts_div,
+                    xnn_math_f16_tanh__f16c_expm1minus_rr1_p3h2ts_div,
                     /*num_flush_to_zero_values=*/0,
                     benchmark::utils::CheckF16C)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, f16c_expm1minus_rr1_p3h2_rcp,
-                    xnn_math_f16_tanh__f16c_expm1minus_rr1_p3h2_rcp,
+  BENCHMARK_CAPTURE(TanhError, f16c_expm1minus_rr1_p3h2ts_rcp,
+                    xnn_math_f16_tanh__f16c_expm1minus_rr1_p3h2ts_rcp,
                     /*num_flush_to_zero_values=*/0,
                     benchmark::utils::CheckF16C)
     ->Unit(benchmark::kMillisecond)

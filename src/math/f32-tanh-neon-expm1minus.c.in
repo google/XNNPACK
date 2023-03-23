@@ -41,7 +41,7 @@ $else:
 $VMLAQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 $VMLSQ_F32 = "vfmsq_f32" if FMA else "vmlsq_f32"
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
-$POLY_SUFFIX = "p%dh%d_" % (P, H)
+$POLY_SUFFIX = "p%dh%dts_" % (P, H)
 $DIV_SUFFIX = DIV.lower()
 $ISA = "aarch64_neonfma" if DIV == "DIV" else "neonfma" if FMA else "neon"
 void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DIV_SUFFIX}(

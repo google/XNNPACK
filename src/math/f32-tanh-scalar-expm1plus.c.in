@@ -7,6 +7,7 @@ $import math
 $assert RR == 1 or RR == 2
 $assert LOG2LUT in [0, 2, 3, 4, 5, 6]
 $assert P == H + 1 or P == H + 2
+$assert P == H + 1 or not PS
 $assert not WASM or not FMA
 $LUT = 1 << LOG2LUT
 #include <assert.h>
@@ -51,7 +52,7 @@ $if P == H + 1:
 $else:
   $COEFFS = [float.hex(0.5 * float.fromhex(c)).upper().replace("0X", "0x").replace("0000000P", "p") for c in COEFFS]
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
-$POLY_SUFFIX = "p%dh%d_" % (P, H)
+$POLY_SUFFIX = "p%dh%d%s_" % (P, H, "ps" if PS else "ts")
 $DIV_SUFFIX = DIV.lower()
 $ISA = "fma" if FMA else "wasm" if WASM else "scalar"
 void xnn_math_f32_tanh__${ISA}_expm1plus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DIV_SUFFIX}(
@@ -195,18 +196,30 @@ void xnn_math_f32_tanh__${ISA}_expm1plus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DI
     $if P == H + 1:
       //   exp(2z) - 1 = s * (t * ${POLYNOMIAL} + 1) - 1
       //               = s * t * p + (s - 1)
-      //               = (s - 1) + (t * s) * p
+      $if PS:
+        //                = (s - 1) + (p * s) * t
+      $else:
+        //                = (s - 1) + (t * s) * p
     $else:
       //   exp(2z) - 1 = s * (2 * (t + t * (t * ${POLYNOMIAL})) + 1) - 1
       //               = s * (2 * (t + t * p) + 1) - 1
       //               = (s - 1) + 2 * ((t * s) + (t * s) * p)
-    const float vts = vt * vs;
+    $if PS:
+      const float vps = vp * vs;
+    $else:
+      const float vts = vt * vs;
     const float vsmo = vs - vone;
     $if P == H + 1:
-      $if FMA:
-        const float vemo = fmaf(vp, vts, vsmo);
+      $if PS:
+        $if FMA:
+          const float vemo = fmaf(vt, vps, vsmo);
+        $else:
+          const float vemo = vt * vps + vsmo;
       $else:
-        const float vemo = vp * vts + vsmo;
+        $if FMA:
+          const float vemo = fmaf(vp, vts, vsmo);
+        $else:
+          const float vemo = vp * vts + vsmo;
     $else:
       $if FMA:
         vp = fmaf(vp, vts, vts);
