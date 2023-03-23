@@ -1762,6 +1762,26 @@
 
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT4_P4H2TS_RCP, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut4_p4h2ts_rcp, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT4_P4H2TS_RCP, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut4_p4h2ts_rcp, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT4_P4H2TS_RCP, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut4_p4h2ts_rcp);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(TANH__WASM_EXPM1MINUS_RR2_LUT4_P4H2TS_DIV, positive_saturation) {
     MathEvaluationTester()
       .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -1782,6 +1802,26 @@
 
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT4_P4H3PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut4_p4h3ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT4_P4H3PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut4_p4h3ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT4_P4H3PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut4_p4h3ps_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(TANH__WASM_EXPM1MINUS_RR1_LUT4_P4H3TS_DIV, positive_saturation) {
     MathEvaluationTester()
       .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -1797,6 +1837,26 @@
   TEST(TANH__WASM_EXPM1MINUS_RR1_LUT4_P4H3TS_DIV, nan) {
     MathEvaluationTester()
       .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut4_p4h3ts_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT4_P4H3PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut4_p4h3ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT4_P4H3PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut4_p4h3ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT4_P4H3PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut4_p4h3ps_div);
   }
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
@@ -1882,6 +1942,26 @@
 
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT8_P4H2TS_RCP, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut8_p4h2ts_rcp, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT8_P4H2TS_RCP, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut8_p4h2ts_rcp, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT8_P4H2TS_RCP, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut8_p4h2ts_rcp);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H2TS_DIV, positive_saturation) {
     MathEvaluationTester()
       .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -1897,6 +1977,46 @@
   TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H2TS_DIV, nan) {
     MathEvaluationTester()
       .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut8_p4h2ts_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H2TS_RCP, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut8_p4h2ts_rcp, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H2TS_RCP, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut8_p4h2ts_rcp, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H2TS_RCP, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut8_p4h2ts_rcp);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT8_P4H3PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut8_p4h3ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT8_P4H3PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut8_p4h3ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT8_P4H3PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut8_p4h3ps_div);
   }
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
@@ -1922,6 +2042,66 @@
 
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT8_P4H3PS_RCP, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut8_p4h3ps_rcp, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT8_P4H3PS_RCP, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut8_p4h3ps_rcp, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT8_P4H3PS_RCP, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut8_p4h3ps_rcp);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT8_P4H3TS_RCP, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut8_p4h3ts_rcp, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT8_P4H3TS_RCP, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut8_p4h3ts_rcp, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT8_P4H3TS_RCP, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut8_p4h3ts_rcp);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H3PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut8_p4h3ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H3PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut8_p4h3ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H3PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut8_p4h3ps_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H3TS_DIV, positive_saturation) {
     MathEvaluationTester()
       .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -1937,6 +2117,46 @@
   TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H3TS_DIV, nan) {
     MathEvaluationTester()
       .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut8_p4h3ts_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H3PS_RCP, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut8_p4h3ps_rcp, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H3PS_RCP, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut8_p4h3ps_rcp, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H3PS_RCP, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut8_p4h3ps_rcp);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H3TS_RCP, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut8_p4h3ts_rcp, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H3TS_RCP, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut8_p4h3ts_rcp, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT8_P4H3TS_RCP, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut8_p4h3ts_rcp);
   }
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
@@ -2002,6 +2222,26 @@
 
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT16_P4H2TS_RCP, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut16_p4h2ts_rcp, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT16_P4H2TS_RCP, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut16_p4h2ts_rcp, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT16_P4H2TS_RCP, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut16_p4h2ts_rcp);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(TANH__WASM_EXPM1MINUS_RR2_LUT16_P4H2TS_DIV, positive_saturation) {
     MathEvaluationTester()
       .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -2022,6 +2262,26 @@
 
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT16_P4H3PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut16_p4h3ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT16_P4H3PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut16_p4h3ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_LUT16_P4H3PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut16_p4h3ps_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(TANH__WASM_EXPM1MINUS_RR1_LUT16_P4H3TS_DIV, positive_saturation) {
     MathEvaluationTester()
       .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -2037,6 +2297,26 @@
   TEST(TANH__WASM_EXPM1MINUS_RR1_LUT16_P4H3TS_DIV, nan) {
     MathEvaluationTester()
       .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr1_lut16_p4h3ts_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT16_P4H3PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut16_p4h3ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT16_P4H3PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut16_p4h3ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR2_LUT16_P4H3PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr2_lut16_p4h3ps_div);
   }
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
@@ -2182,6 +2462,26 @@
 
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR1_P6H5PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_p6h5ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_P6H5PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_p6h5ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_P6H5PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr1_p6h5ps_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(TANH__WASM_EXPM1MINUS_RR1_P6H5TS_DIV, positive_saturation) {
     MathEvaluationTester()
       .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -2197,6 +2497,66 @@
   TEST(TANH__WASM_EXPM1MINUS_RR1_P6H5TS_DIV, nan) {
     MathEvaluationTester()
       .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr1_p6h5ts_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR1_P6H5PS_RCP, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_p6h5ps_rcp, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_P6H5PS_RCP, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_p6h5ps_rcp, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_P6H5PS_RCP, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr1_p6h5ps_rcp);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR1_P6H5TS_RCP, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_p6h5ts_rcp, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_P6H5TS_RCP, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr1_p6h5ts_rcp, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR1_P6H5TS_RCP, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr1_p6h5ts_rcp);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1MINUS_RR2_P6H5PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr2_p6h5ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR2_P6H5PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1minus_rr2_p6h5ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1MINUS_RR2_P6H5PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1minus_rr2_p6h5ps_div);
   }
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
@@ -2262,6 +2622,26 @@
 
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1PLUS_RR1_LUT4_P4H3PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr1_lut4_p4h3ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR1_LUT4_P4H3PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr1_lut4_p4h3ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR1_LUT4_P4H3PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1plus_rr1_lut4_p4h3ps_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(TANH__WASM_EXPM1PLUS_RR1_LUT4_P4H3TS_DIV, positive_saturation) {
     MathEvaluationTester()
       .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -2277,6 +2657,26 @@
   TEST(TANH__WASM_EXPM1PLUS_RR1_LUT4_P4H3TS_DIV, nan) {
     MathEvaluationTester()
       .TestNaN(xnn_math_f32_tanh__wasm_expm1plus_rr1_lut4_p4h3ts_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1PLUS_RR2_LUT4_P4H3PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr2_lut4_p4h3ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR2_LUT4_P4H3PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr2_lut4_p4h3ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR2_LUT4_P4H3PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1plus_rr2_lut4_p4h3ps_div);
   }
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
@@ -2382,6 +2782,26 @@
 
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1PLUS_RR1_LUT8_P4H3PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr1_lut8_p4h3ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR1_LUT8_P4H3PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr1_lut8_p4h3ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR1_LUT8_P4H3PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1plus_rr1_lut8_p4h3ps_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(TANH__WASM_EXPM1PLUS_RR1_LUT8_P4H3TS_DIV, positive_saturation) {
     MathEvaluationTester()
       .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -2397,6 +2817,26 @@
   TEST(TANH__WASM_EXPM1PLUS_RR1_LUT8_P4H3TS_DIV, nan) {
     MathEvaluationTester()
       .TestNaN(xnn_math_f32_tanh__wasm_expm1plus_rr1_lut8_p4h3ts_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1PLUS_RR2_LUT8_P4H3PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr2_lut8_p4h3ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR2_LUT8_P4H3PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr2_lut8_p4h3ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR2_LUT8_P4H3PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1plus_rr2_lut8_p4h3ps_div);
   }
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
@@ -2502,6 +2942,26 @@
 
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1PLUS_RR1_LUT16_P4H3PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr1_lut16_p4h3ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR1_LUT16_P4H3PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr1_lut16_p4h3ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR1_LUT16_P4H3PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1plus_rr1_lut16_p4h3ps_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(TANH__WASM_EXPM1PLUS_RR1_LUT16_P4H3TS_DIV, positive_saturation) {
     MathEvaluationTester()
       .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -2517,6 +2977,26 @@
   TEST(TANH__WASM_EXPM1PLUS_RR1_LUT16_P4H3TS_DIV, nan) {
     MathEvaluationTester()
       .TestNaN(xnn_math_f32_tanh__wasm_expm1plus_rr1_lut16_p4h3ts_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1PLUS_RR2_LUT16_P4H3PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr2_lut16_p4h3ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR2_LUT16_P4H3PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr2_lut16_p4h3ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR2_LUT16_P4H3PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1plus_rr2_lut16_p4h3ps_div);
   }
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
@@ -2662,6 +3142,26 @@
 
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1PLUS_RR1_P6H5PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr1_p6h5ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR1_P6H5PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr1_p6h5ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR1_P6H5PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1plus_rr1_p6h5ps_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   TEST(TANH__WASM_EXPM1PLUS_RR1_P6H5TS_DIV, positive_saturation) {
     MathEvaluationTester()
       .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -2677,6 +3177,26 @@
   TEST(TANH__WASM_EXPM1PLUS_RR1_P6H5TS_DIV, nan) {
     MathEvaluationTester()
       .TestNaN(xnn_math_f32_tanh__wasm_expm1plus_rr1_p6h5ts_div);
+  }
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(TANH__WASM_EXPM1PLUS_RR2_P6H5PS_DIV, positive_saturation) {
+    MathEvaluationTester()
+      .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr2_p6h5ps_div, 1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR2_P6H5PS_DIV, negative_saturation) {
+    MathEvaluationTester()
+      .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+      .TestOutputMatchReference(xnn_math_f32_tanh__wasm_expm1plus_rr2_p6h5ps_div, -1.0f);
+  }
+
+  TEST(TANH__WASM_EXPM1PLUS_RR2_P6H5PS_DIV, nan) {
+    MathEvaluationTester()
+      .TestNaN(xnn_math_f32_tanh__wasm_expm1plus_rr2_p6h5ps_div);
   }
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
@@ -2752,6 +3272,23 @@ TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT4_P4H2TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut4_p4h2ts_div);
 }
 
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT4_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut4_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT4_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut4_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT4_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut4_p4h3ps_div);
+}
+
 TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT4_P4H3TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -2767,6 +3304,23 @@ TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT4_P4H3TS_DIV, negative_saturation) {
 TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT4_P4H3TS_DIV, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut4_p4h3ts_div);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT4_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut4_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT4_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut4_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT4_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut4_p4h3ps_div);
 }
 
 TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT4_P4H3TS_DIV, positive_saturation) {
@@ -2888,6 +3442,23 @@ TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT8_P4H2TS_RCP, nan) {
     .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut8_p4h2ts_rcp);
 }
 
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT8_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut8_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT8_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut8_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT8_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut8_p4h3ps_div);
+}
+
 TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT8_P4H3TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -2903,6 +3474,23 @@ TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT8_P4H3TS_DIV, negative_saturation) {
 TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT8_P4H3TS_DIV, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut8_p4h3ts_div);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT8_P4H3PS_RCP, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut8_p4h3ps_rcp, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT8_P4H3PS_RCP, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut8_p4h3ps_rcp, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT8_P4H3PS_RCP, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut8_p4h3ps_rcp);
 }
 
 TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT8_P4H3TS_RCP, positive_saturation) {
@@ -2922,6 +3510,23 @@ TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT8_P4H3TS_RCP, nan) {
     .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut8_p4h3ts_rcp);
 }
 
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT8_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut8_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT8_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut8_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT8_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut8_p4h3ps_div);
+}
+
 TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT8_P4H3TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -2937,6 +3542,23 @@ TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT8_P4H3TS_DIV, negative_saturation) {
 TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT8_P4H3TS_DIV, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut8_p4h3ts_div);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT8_P4H3PS_RCP, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut8_p4h3ps_rcp, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT8_P4H3PS_RCP, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut8_p4h3ps_rcp, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT8_P4H3PS_RCP, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut8_p4h3ps_rcp);
 }
 
 TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT8_P4H3TS_RCP, positive_saturation) {
@@ -3041,6 +3663,23 @@ TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT16_P4H2TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut16_p4h2ts_div);
 }
 
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT16_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut16_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT16_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut16_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT16_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut16_p4h3ps_div);
+}
+
 TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT16_P4H3TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -3056,6 +3695,23 @@ TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT16_P4H3TS_DIV, negative_saturation) {
 TEST(TANH__SCALAR_EXPM1MINUS_RR1_LUT16_P4H3TS_DIV, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr1_lut16_p4h3ts_div);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT16_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut16_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT16_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut16_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT16_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr2_lut16_p4h3ps_div);
 }
 
 TEST(TANH__SCALAR_EXPM1MINUS_RR2_LUT16_P4H3TS_DIV, positive_saturation) {
@@ -3177,6 +3833,23 @@ TEST(TANH__SCALAR_EXPM1MINUS_RR2_P6H4TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr2_p6h4ts_div);
 }
 
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_P6H5PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr1_p6h5ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_P6H5PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr1_p6h5ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_P6H5PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr1_p6h5ps_div);
+}
+
 TEST(TANH__SCALAR_EXPM1MINUS_RR1_P6H5TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -3194,6 +3867,23 @@ TEST(TANH__SCALAR_EXPM1MINUS_RR1_P6H5TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr1_p6h5ts_div);
 }
 
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_P6H5PS_RCP, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr1_p6h5ps_rcp, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_P6H5PS_RCP, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr1_p6h5ps_rcp, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR1_P6H5PS_RCP, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr1_p6h5ps_rcp);
+}
+
 TEST(TANH__SCALAR_EXPM1MINUS_RR1_P6H5TS_RCP, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -3209,6 +3899,23 @@ TEST(TANH__SCALAR_EXPM1MINUS_RR1_P6H5TS_RCP, negative_saturation) {
 TEST(TANH__SCALAR_EXPM1MINUS_RR1_P6H5TS_RCP, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr1_p6h5ts_rcp);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_P6H5PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr2_p6h5ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_P6H5PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1minus_rr2_p6h5ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1MINUS_RR2_P6H5PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1minus_rr2_p6h5ps_div);
 }
 
 TEST(TANH__SCALAR_EXPM1MINUS_RR2_P6H5TS_DIV, positive_saturation) {
@@ -3262,6 +3969,23 @@ TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT4_P4H2TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr2_lut4_p4h2ts_div);
 }
 
+TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT4_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr1_lut4_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT4_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr1_lut4_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT4_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr1_lut4_p4h3ps_div);
+}
+
 TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT4_P4H3TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -3277,6 +4001,23 @@ TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT4_P4H3TS_DIV, negative_saturation) {
 TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT4_P4H3TS_DIV, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr1_lut4_p4h3ts_div);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT4_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr2_lut4_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT4_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr2_lut4_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT4_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr2_lut4_p4h3ps_div);
 }
 
 TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT4_P4H3TS_DIV, positive_saturation) {
@@ -3364,6 +4105,23 @@ TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT8_P4H2TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr2_lut8_p4h2ts_div);
 }
 
+TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT8_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr1_lut8_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT8_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr1_lut8_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT8_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr1_lut8_p4h3ps_div);
+}
+
 TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT8_P4H3TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -3379,6 +4137,23 @@ TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT8_P4H3TS_DIV, negative_saturation) {
 TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT8_P4H3TS_DIV, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr1_lut8_p4h3ts_div);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT8_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr2_lut8_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT8_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr2_lut8_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT8_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr2_lut8_p4h3ps_div);
 }
 
 TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT8_P4H3TS_DIV, positive_saturation) {
@@ -3466,6 +4241,23 @@ TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT16_P4H2TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr2_lut16_p4h2ts_div);
 }
 
+TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT16_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr1_lut16_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT16_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr1_lut16_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT16_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr1_lut16_p4h3ps_div);
+}
+
 TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT16_P4H3TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -3481,6 +4273,23 @@ TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT16_P4H3TS_DIV, negative_saturation) {
 TEST(TANH__SCALAR_EXPM1PLUS_RR1_LUT16_P4H3TS_DIV, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr1_lut16_p4h3ts_div);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT16_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr2_lut16_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT16_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr2_lut16_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT16_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr2_lut16_p4h3ps_div);
 }
 
 TEST(TANH__SCALAR_EXPM1PLUS_RR2_LUT16_P4H3TS_DIV, positive_saturation) {
@@ -3602,6 +4411,23 @@ TEST(TANH__SCALAR_EXPM1PLUS_RR2_P6H4TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr2_p6h4ts_div);
 }
 
+TEST(TANH__SCALAR_EXPM1PLUS_RR1_P6H5PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr1_p6h5ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR1_P6H5PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr1_p6h5ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR1_P6H5PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr1_p6h5ps_div);
+}
+
 TEST(TANH__SCALAR_EXPM1PLUS_RR1_P6H5TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -3617,6 +4443,23 @@ TEST(TANH__SCALAR_EXPM1PLUS_RR1_P6H5TS_DIV, negative_saturation) {
 TEST(TANH__SCALAR_EXPM1PLUS_RR1_P6H5TS_DIV, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr1_p6h5ts_div);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR2_P6H5PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr2_p6h5ps_div, 1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR2_P6H5PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__scalar_expm1plus_rr2_p6h5ps_div, -1.0f);
+}
+
+TEST(TANH__SCALAR_EXPM1PLUS_RR2_P6H5PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__scalar_expm1plus_rr2_p6h5ps_div);
 }
 
 TEST(TANH__SCALAR_EXPM1PLUS_RR2_P6H5TS_DIV, positive_saturation) {
@@ -3687,6 +4530,23 @@ TEST(TANH__FMA_EXPM1MINUS_RR2_LUT4_P4H2TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr2_lut4_p4h2ts_div);
 }
 
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT4_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr1_lut4_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT4_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr1_lut4_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT4_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr1_lut4_p4h3ps_div);
+}
+
 TEST(TANH__FMA_EXPM1MINUS_RR1_LUT4_P4H3TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -3704,6 +4564,23 @@ TEST(TANH__FMA_EXPM1MINUS_RR1_LUT4_P4H3TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr1_lut4_p4h3ts_div);
 }
 
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT4_P4H3PS_RCP, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr1_lut4_p4h3ps_rcp, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT4_P4H3PS_RCP, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr1_lut4_p4h3ps_rcp, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT4_P4H3PS_RCP, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr1_lut4_p4h3ps_rcp);
+}
+
 TEST(TANH__FMA_EXPM1MINUS_RR1_LUT4_P4H3TS_RCP, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -3719,6 +4596,23 @@ TEST(TANH__FMA_EXPM1MINUS_RR1_LUT4_P4H3TS_RCP, negative_saturation) {
 TEST(TANH__FMA_EXPM1MINUS_RR1_LUT4_P4H3TS_RCP, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr1_lut4_p4h3ts_rcp);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR2_LUT4_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr2_lut4_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR2_LUT4_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr2_lut4_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR2_LUT4_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr2_lut4_p4h3ps_div);
 }
 
 TEST(TANH__FMA_EXPM1MINUS_RR2_LUT4_P4H3TS_DIV, positive_saturation) {
@@ -3840,6 +4734,23 @@ TEST(TANH__FMA_EXPM1MINUS_RR2_LUT8_P4H2TS_RCP, nan) {
     .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr2_lut8_p4h2ts_rcp);
 }
 
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr1_lut8_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr1_lut8_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr1_lut8_p4h3ps_div);
+}
+
 TEST(TANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -3857,6 +4768,23 @@ TEST(TANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr1_lut8_p4h3ts_div);
 }
 
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3PS_RCP, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr1_lut8_p4h3ps_rcp, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3PS_RCP, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr1_lut8_p4h3ps_rcp, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3PS_RCP, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr1_lut8_p4h3ps_rcp);
+}
+
 TEST(TANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3TS_RCP, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -3872,6 +4800,23 @@ TEST(TANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3TS_RCP, negative_saturation) {
 TEST(TANH__FMA_EXPM1MINUS_RR1_LUT8_P4H3TS_RCP, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr1_lut8_p4h3ts_rcp);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR2_LUT8_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr2_lut8_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR2_LUT8_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr2_lut8_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR2_LUT8_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr2_lut8_p4h3ps_div);
 }
 
 TEST(TANH__FMA_EXPM1MINUS_RR2_LUT8_P4H3TS_DIV, positive_saturation) {
@@ -3976,6 +4921,23 @@ TEST(TANH__FMA_EXPM1MINUS_RR2_LUT16_P4H2TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr2_lut16_p4h2ts_div);
 }
 
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT16_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr1_lut16_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT16_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr1_lut16_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR1_LUT16_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr1_lut16_p4h3ps_div);
+}
+
 TEST(TANH__FMA_EXPM1MINUS_RR1_LUT16_P4H3TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -3991,6 +4953,23 @@ TEST(TANH__FMA_EXPM1MINUS_RR1_LUT16_P4H3TS_DIV, negative_saturation) {
 TEST(TANH__FMA_EXPM1MINUS_RR1_LUT16_P4H3TS_DIV, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr1_lut16_p4h3ts_div);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR2_LUT16_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr2_lut16_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR2_LUT16_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr2_lut16_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR2_LUT16_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr2_lut16_p4h3ps_div);
 }
 
 TEST(TANH__FMA_EXPM1MINUS_RR2_LUT16_P4H3TS_DIV, positive_saturation) {
@@ -4112,6 +5091,23 @@ TEST(TANH__FMA_EXPM1MINUS_RR2_P6H4TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr2_p6h4ts_div);
 }
 
+TEST(TANH__FMA_EXPM1MINUS_RR1_P6H5PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr1_p6h5ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR1_P6H5PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr1_p6h5ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR1_P6H5PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr1_p6h5ps_div);
+}
+
 TEST(TANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -4129,6 +5125,23 @@ TEST(TANH__FMA_EXPM1MINUS_RR1_P6H5TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr1_p6h5ts_div);
 }
 
+TEST(TANH__FMA_EXPM1MINUS_RR1_P6H5PS_RCP, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr1_p6h5ps_rcp, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR1_P6H5PS_RCP, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr1_p6h5ps_rcp, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR1_P6H5PS_RCP, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr1_p6h5ps_rcp);
+}
+
 TEST(TANH__FMA_EXPM1MINUS_RR1_P6H5TS_RCP, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -4144,6 +5157,23 @@ TEST(TANH__FMA_EXPM1MINUS_RR1_P6H5TS_RCP, negative_saturation) {
 TEST(TANH__FMA_EXPM1MINUS_RR1_P6H5TS_RCP, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr1_p6h5ts_rcp);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR2_P6H5PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr2_p6h5ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR2_P6H5PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1minus_rr2_p6h5ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1MINUS_RR2_P6H5PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1minus_rr2_p6h5ps_div);
 }
 
 TEST(TANH__FMA_EXPM1MINUS_RR2_P6H5TS_DIV, positive_saturation) {
@@ -4197,6 +5227,23 @@ TEST(TANH__FMA_EXPM1PLUS_RR2_LUT4_P4H2TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr2_lut4_p4h2ts_div);
 }
 
+TEST(TANH__FMA_EXPM1PLUS_RR1_LUT4_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr1_lut4_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR1_LUT4_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr1_lut4_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR1_LUT4_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr1_lut4_p4h3ps_div);
+}
+
 TEST(TANH__FMA_EXPM1PLUS_RR1_LUT4_P4H3TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -4212,6 +5259,23 @@ TEST(TANH__FMA_EXPM1PLUS_RR1_LUT4_P4H3TS_DIV, negative_saturation) {
 TEST(TANH__FMA_EXPM1PLUS_RR1_LUT4_P4H3TS_DIV, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr1_lut4_p4h3ts_div);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR2_LUT4_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr2_lut4_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR2_LUT4_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr2_lut4_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR2_LUT4_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr2_lut4_p4h3ps_div);
 }
 
 TEST(TANH__FMA_EXPM1PLUS_RR2_LUT4_P4H3TS_DIV, positive_saturation) {
@@ -4299,6 +5363,23 @@ TEST(TANH__FMA_EXPM1PLUS_RR2_LUT8_P4H2TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr2_lut8_p4h2ts_div);
 }
 
+TEST(TANH__FMA_EXPM1PLUS_RR1_LUT8_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr1_lut8_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR1_LUT8_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr1_lut8_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR1_LUT8_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr1_lut8_p4h3ps_div);
+}
+
 TEST(TANH__FMA_EXPM1PLUS_RR1_LUT8_P4H3TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -4314,6 +5395,23 @@ TEST(TANH__FMA_EXPM1PLUS_RR1_LUT8_P4H3TS_DIV, negative_saturation) {
 TEST(TANH__FMA_EXPM1PLUS_RR1_LUT8_P4H3TS_DIV, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr1_lut8_p4h3ts_div);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR2_LUT8_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr2_lut8_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR2_LUT8_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr2_lut8_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR2_LUT8_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr2_lut8_p4h3ps_div);
 }
 
 TEST(TANH__FMA_EXPM1PLUS_RR2_LUT8_P4H3TS_DIV, positive_saturation) {
@@ -4401,6 +5499,23 @@ TEST(TANH__FMA_EXPM1PLUS_RR2_LUT16_P4H2TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr2_lut16_p4h2ts_div);
 }
 
+TEST(TANH__FMA_EXPM1PLUS_RR1_LUT16_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr1_lut16_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR1_LUT16_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr1_lut16_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR1_LUT16_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr1_lut16_p4h3ps_div);
+}
+
 TEST(TANH__FMA_EXPM1PLUS_RR1_LUT16_P4H3TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -4416,6 +5531,23 @@ TEST(TANH__FMA_EXPM1PLUS_RR1_LUT16_P4H3TS_DIV, negative_saturation) {
 TEST(TANH__FMA_EXPM1PLUS_RR1_LUT16_P4H3TS_DIV, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr1_lut16_p4h3ts_div);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR2_LUT16_P4H3PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr2_lut16_p4h3ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR2_LUT16_P4H3PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr2_lut16_p4h3ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR2_LUT16_P4H3PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr2_lut16_p4h3ps_div);
 }
 
 TEST(TANH__FMA_EXPM1PLUS_RR2_LUT16_P4H3TS_DIV, positive_saturation) {
@@ -4537,6 +5669,23 @@ TEST(TANH__FMA_EXPM1PLUS_RR2_P6H4TS_DIV, nan) {
     .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr2_p6h4ts_div);
 }
 
+TEST(TANH__FMA_EXPM1PLUS_RR1_P6H5PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr1_p6h5ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR1_P6H5PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr1_p6h5ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR1_P6H5PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr1_p6h5ps_div);
+}
+
 TEST(TANH__FMA_EXPM1PLUS_RR1_P6H5TS_DIV, positive_saturation) {
   MathEvaluationTester()
     .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
@@ -4552,6 +5701,23 @@ TEST(TANH__FMA_EXPM1PLUS_RR1_P6H5TS_DIV, negative_saturation) {
 TEST(TANH__FMA_EXPM1PLUS_RR1_P6H5TS_DIV, nan) {
   MathEvaluationTester()
     .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr1_p6h5ts_div);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR2_P6H5PS_DIV, positive_saturation) {
+  MathEvaluationTester()
+    .input_range(0x1.205968p+3f, std::numeric_limits<float>::infinity())
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr2_p6h5ps_div, 1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR2_P6H5PS_DIV, negative_saturation) {
+  MathEvaluationTester()
+    .input_range(-std::numeric_limits<float>::infinity(), -0x1.205968p+3f)
+    .TestOutputMatchReference(xnn_math_f32_tanh__fma_expm1plus_rr2_p6h5ps_div, -1.0f);
+}
+
+TEST(TANH__FMA_EXPM1PLUS_RR2_P6H5PS_DIV, nan) {
+  MathEvaluationTester()
+    .TestNaN(xnn_math_f32_tanh__fma_expm1plus_rr2_p6h5ps_div);
 }
 
 TEST(TANH__FMA_EXPM1PLUS_RR2_P6H5TS_DIV, positive_saturation) {

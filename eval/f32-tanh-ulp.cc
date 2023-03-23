@@ -877,13 +877,28 @@ BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr2_lut4_p4h2ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_lut4_p4h3ps_div,
+                  xnn_math_f32_tanh__fma_expm1minus_rr1_lut4_p4h3ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_lut4_p4h3ts_div,
                   xnn_math_f32_tanh__fma_expm1minus_rr1_lut4_p4h3ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_lut4_p4h3ps_rcp,
+                  xnn_math_f32_tanh__fma_expm1minus_rr1_lut4_p4h3ps_rcp,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_lut4_p4h3ts_rcp,
                   xnn_math_f32_tanh__fma_expm1minus_rr1_lut4_p4h3ts_rcp,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr2_lut4_p4h3ps_div,
+                  xnn_math_f32_tanh__fma_expm1minus_rr2_lut4_p4h3ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -922,13 +937,28 @@ BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr2_lut8_p4h2ts_rcp,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_lut8_p4h3ps_div,
+                  xnn_math_f32_tanh__fma_expm1minus_rr1_lut8_p4h3ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_lut8_p4h3ts_div,
                   xnn_math_f32_tanh__fma_expm1minus_rr1_lut8_p4h3ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_lut8_p4h3ps_rcp,
+                  xnn_math_f32_tanh__fma_expm1minus_rr1_lut8_p4h3ps_rcp,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_lut8_p4h3ts_rcp,
                   xnn_math_f32_tanh__fma_expm1minus_rr1_lut8_p4h3ts_rcp,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr2_lut8_p4h3ps_div,
+                  xnn_math_f32_tanh__fma_expm1minus_rr2_lut8_p4h3ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -962,8 +992,18 @@ BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr2_lut16_p4h2ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_lut16_p4h3ps_div,
+                  xnn_math_f32_tanh__fma_expm1minus_rr1_lut16_p4h3ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_lut16_p4h3ts_div,
                   xnn_math_f32_tanh__fma_expm1minus_rr1_lut16_p4h3ts_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr2_lut16_p4h3ps_div,
+                  xnn_math_f32_tanh__fma_expm1minus_rr2_lut16_p4h3ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -1002,13 +1042,28 @@ BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr2_p6h4ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_p6h5ps_div,
+                  xnn_math_f32_tanh__fma_expm1minus_rr1_p6h5ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_p6h5ts_div,
                   xnn_math_f32_tanh__fma_expm1minus_rr1_p6h5ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_p6h5ps_rcp,
+                  xnn_math_f32_tanh__fma_expm1minus_rr1_p6h5ps_rcp,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr1_p6h5ts_rcp,
                   xnn_math_f32_tanh__fma_expm1minus_rr1_p6h5ts_rcp,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1minus_rr2_p6h5ps_div,
+                  xnn_math_f32_tanh__fma_expm1minus_rr2_p6h5ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -1027,8 +1082,18 @@ BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr2_lut4_p4h2ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr1_lut4_p4h3ps_div,
+                  xnn_math_f32_tanh__fma_expm1plus_rr1_lut4_p4h3ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr1_lut4_p4h3ts_div,
                   xnn_math_f32_tanh__fma_expm1plus_rr1_lut4_p4h3ts_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr2_lut4_p4h3ps_div,
+                  xnn_math_f32_tanh__fma_expm1plus_rr2_lut4_p4h3ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -1057,8 +1122,18 @@ BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr2_lut8_p4h2ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr1_lut8_p4h3ps_div,
+                  xnn_math_f32_tanh__fma_expm1plus_rr1_lut8_p4h3ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr1_lut8_p4h3ts_div,
                   xnn_math_f32_tanh__fma_expm1plus_rr1_lut8_p4h3ts_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr2_lut8_p4h3ps_div,
+                  xnn_math_f32_tanh__fma_expm1plus_rr2_lut8_p4h3ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -1087,8 +1162,18 @@ BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr2_lut16_p4h2ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr1_lut16_p4h3ps_div,
+                  xnn_math_f32_tanh__fma_expm1plus_rr1_lut16_p4h3ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr1_lut16_p4h3ts_div,
                   xnn_math_f32_tanh__fma_expm1plus_rr1_lut16_p4h3ts_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr2_lut16_p4h3ps_div,
+                  xnn_math_f32_tanh__fma_expm1plus_rr2_lut16_p4h3ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -1127,8 +1212,18 @@ BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr2_p6h4ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr1_p6h5ps_div,
+                  xnn_math_f32_tanh__fma_expm1plus_rr1_p6h5ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr1_p6h5ts_div,
                   xnn_math_f32_tanh__fma_expm1plus_rr1_p6h5ts_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, fma_expm1plus_rr2_p6h5ps_div,
+                  xnn_math_f32_tanh__fma_expm1plus_rr2_p6h5ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -1153,8 +1248,18 @@ BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr2_lut4_p4h2ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr1_lut4_p4h3ps_div,
+                  xnn_math_f32_tanh__scalar_expm1minus_rr1_lut4_p4h3ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr1_lut4_p4h3ts_div,
                   xnn_math_f32_tanh__scalar_expm1minus_rr1_lut4_p4h3ts_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr2_lut4_p4h3ps_div,
+                  xnn_math_f32_tanh__scalar_expm1minus_rr2_lut4_p4h3ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -1193,8 +1298,18 @@ BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr2_lut8_p4h2ts_rcp,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr1_lut8_p4h3ps_div,
+                  xnn_math_f32_tanh__scalar_expm1minus_rr1_lut8_p4h3ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr1_lut8_p4h3ts_div,
                   xnn_math_f32_tanh__scalar_expm1minus_rr1_lut8_p4h3ts_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr1_lut8_p4h3ps_rcp,
+                  xnn_math_f32_tanh__scalar_expm1minus_rr1_lut8_p4h3ps_rcp,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -1203,8 +1318,18 @@ BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr1_lut8_p4h3ts_rcp,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr2_lut8_p4h3ps_div,
+                  xnn_math_f32_tanh__scalar_expm1minus_rr2_lut8_p4h3ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr2_lut8_p4h3ts_div,
                   xnn_math_f32_tanh__scalar_expm1minus_rr2_lut8_p4h3ts_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr2_lut8_p4h3ps_rcp,
+                  xnn_math_f32_tanh__scalar_expm1minus_rr2_lut8_p4h3ps_rcp,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -1238,8 +1363,18 @@ BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr2_lut16_p4h2ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr1_lut16_p4h3ps_div,
+                  xnn_math_f32_tanh__scalar_expm1minus_rr1_lut16_p4h3ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr1_lut16_p4h3ts_div,
                   xnn_math_f32_tanh__scalar_expm1minus_rr1_lut16_p4h3ts_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr2_lut16_p4h3ps_div,
+                  xnn_math_f32_tanh__scalar_expm1minus_rr2_lut16_p4h3ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -1278,13 +1413,28 @@ BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr2_p6h4ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr1_p6h5ps_div,
+                  xnn_math_f32_tanh__scalar_expm1minus_rr1_p6h5ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr1_p6h5ts_div,
                   xnn_math_f32_tanh__scalar_expm1minus_rr1_p6h5ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr1_p6h5ps_rcp,
+                  xnn_math_f32_tanh__scalar_expm1minus_rr1_p6h5ps_rcp,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr1_p6h5ts_rcp,
                   xnn_math_f32_tanh__scalar_expm1minus_rr1_p6h5ts_rcp,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1minus_rr2_p6h5ps_div,
+                  xnn_math_f32_tanh__scalar_expm1minus_rr2_p6h5ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -1303,8 +1453,18 @@ BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr2_lut4_p4h2ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr1_lut4_p4h3ps_div,
+                  xnn_math_f32_tanh__scalar_expm1plus_rr1_lut4_p4h3ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr1_lut4_p4h3ts_div,
                   xnn_math_f32_tanh__scalar_expm1plus_rr1_lut4_p4h3ts_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr2_lut4_p4h3ps_div,
+                  xnn_math_f32_tanh__scalar_expm1plus_rr2_lut4_p4h3ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -1333,8 +1493,18 @@ BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr2_lut8_p4h2ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr1_lut8_p4h3ps_div,
+                  xnn_math_f32_tanh__scalar_expm1plus_rr1_lut8_p4h3ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr1_lut8_p4h3ts_div,
                   xnn_math_f32_tanh__scalar_expm1plus_rr1_lut8_p4h3ts_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr2_lut8_p4h3ps_div,
+                  xnn_math_f32_tanh__scalar_expm1plus_rr2_lut8_p4h3ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -1363,8 +1533,18 @@ BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr2_lut16_p4h2ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr1_lut16_p4h3ps_div,
+                  xnn_math_f32_tanh__scalar_expm1plus_rr1_lut16_p4h3ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr1_lut16_p4h3ts_div,
                   xnn_math_f32_tanh__scalar_expm1plus_rr1_lut16_p4h3ts_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr2_lut16_p4h3ps_div,
+                  xnn_math_f32_tanh__scalar_expm1plus_rr2_lut16_p4h3ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
@@ -1403,8 +1583,18 @@ BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr2_p6h4ts_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr1_p6h5ps_div,
+                  xnn_math_f32_tanh__scalar_expm1plus_rr1_p6h5ps_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
 BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr1_p6h5ts_div,
                   xnn_math_f32_tanh__scalar_expm1plus_rr1_p6h5ts_div,
+                  /*num_flush_to_zero_values=*/kNumSubnormalValues)
+  ->Unit(benchmark::kMillisecond)
+  ->Iterations(1);
+BENCHMARK_CAPTURE(TanhError, scalar_expm1plus_rr2_p6h5ps_div,
+                  xnn_math_f32_tanh__scalar_expm1plus_rr2_p6h5ps_div,
                   /*num_flush_to_zero_values=*/kNumSubnormalValues)
   ->Unit(benchmark::kMillisecond)
   ->Iterations(1);
