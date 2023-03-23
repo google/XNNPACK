@@ -68,11 +68,11 @@ static void FP32MobileNetV3Small(benchmark::State& state) {
   End2EndBenchmark(state, models::FP32MobileNetV3Small);
 }
 
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#if XNN_PLATFORM_JIT
 static void FP32MobileNetV3SmallFused(benchmark::State& state) {
   End2EndBenchmark(state, models::FP32MobileNetV3SmallFused);
 }
-#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#endif  // XNN_PLATFORM_JIT
 
 static void FP32Sparse80MobileNetV1(benchmark::State& state) {
   End2EndBenchmark(state, [](pthreadpool_t threadpool) {
@@ -166,9 +166,9 @@ BENCHMARK(FP32MobileNetV1)->Apply(benchmark::utils::MultiThreadingParameters)->U
 BENCHMARK(FP32MobileNetV2)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(FP32MobileNetV3Large)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(FP32MobileNetV3Small)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#if XNN_PLATFORM_JIT
 BENCHMARK(FP32MobileNetV3SmallFused)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
-#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#endif  // XNN_PLATFORM_JIT
 
 BENCHMARK(FP32Sparse80MobileNetV1)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(FP32Sparse80MobileNetV2)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
