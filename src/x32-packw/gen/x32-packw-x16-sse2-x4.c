@@ -17,7 +17,7 @@
 #include <xnnpack/packw.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x16__sse_x4(
+void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_x4(
   size_t g,
   size_t nc,
   size_t kc,
@@ -185,22 +185,38 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse_x4(
           // c d
           // e f
           // g h
-          __m128 v0 = _mm_castsi128_ps(_mm_loadu_si64(w0));  w0 += 2;
-          __m128 v1 = _mm_castsi128_ps(_mm_loadu_si64(w1));  w1 += 2;
-          __m128 v2 = _mm_castsi128_ps(_mm_loadu_si64(w2));  w2 += 2;
-          __m128 v3 = _mm_castsi128_ps(_mm_loadu_si64(w3));  w3 += 2;
-          __m128 v4 = _mm_castsi128_ps(_mm_loadu_si64(w4));  w4 += 2;
-          __m128 v5 = _mm_castsi128_ps(_mm_loadu_si64(w5));  w5 += 2;
-          __m128 v6 = _mm_castsi128_ps(_mm_loadu_si64(w6));  w6 += 2;
-          __m128 v7 = _mm_castsi128_ps(_mm_loadu_si64(w7));  w7 += 2;
-          __m128 v8 = _mm_castsi128_ps(_mm_loadu_si64(w8));  w8 += 2;
-          __m128 v9 = _mm_castsi128_ps(_mm_loadu_si64(w9));  w9 += 2;
-          __m128 v10 = _mm_castsi128_ps(_mm_loadu_si64(w10));  w10 += 2;
-          __m128 v11 = _mm_castsi128_ps(_mm_loadu_si64(w11));  w11 += 2;
-          __m128 v12 = _mm_castsi128_ps(_mm_loadu_si64(w12));  w12 += 2;
-          __m128 v13 = _mm_castsi128_ps(_mm_loadu_si64(w13));  w13 += 2;
-          __m128 v14 = _mm_castsi128_ps(_mm_loadu_si64(w14));  w14 += 2;
-          __m128 v15 = _mm_castsi128_ps(_mm_loadu_si64(w15));  w15 += 2;
+          __m128 v0 = _mm_castpd_ps(_mm_load_sd((const double*) w0));
+          w0 += 2;
+          __m128 v1 = _mm_castpd_ps(_mm_load_sd((const double*) w1));
+          w1 += 2;
+          __m128 v2 = _mm_castpd_ps(_mm_load_sd((const double*) w2));
+          w2 += 2;
+          __m128 v3 = _mm_castpd_ps(_mm_load_sd((const double*) w3));
+          w3 += 2;
+          __m128 v4 = _mm_castpd_ps(_mm_load_sd((const double*) w4));
+          w4 += 2;
+          __m128 v5 = _mm_castpd_ps(_mm_load_sd((const double*) w5));
+          w5 += 2;
+          __m128 v6 = _mm_castpd_ps(_mm_load_sd((const double*) w6));
+          w6 += 2;
+          __m128 v7 = _mm_castpd_ps(_mm_load_sd((const double*) w7));
+          w7 += 2;
+          __m128 v8 = _mm_castpd_ps(_mm_load_sd((const double*) w8));
+          w8 += 2;
+          __m128 v9 = _mm_castpd_ps(_mm_load_sd((const double*) w9));
+          w9 += 2;
+          __m128 v10 = _mm_castpd_ps(_mm_load_sd((const double*) w10));
+          w10 += 2;
+          __m128 v11 = _mm_castpd_ps(_mm_load_sd((const double*) w11));
+          w11 += 2;
+          __m128 v12 = _mm_castpd_ps(_mm_load_sd((const double*) w12));
+          w12 += 2;
+          __m128 v13 = _mm_castpd_ps(_mm_load_sd((const double*) w13));
+          w13 += 2;
+          __m128 v14 = _mm_castpd_ps(_mm_load_sd((const double*) w14));
+          w14 += 2;
+          __m128 v15 = _mm_castpd_ps(_mm_load_sd((const double*) w15));
+          w15 += 2;
 
           // Transpose 2x2
           const __m128 vtmp0 = _mm_unpacklo_ps(v0, v1);  // a c b d   from row 0, 1
@@ -474,21 +490,36 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse_x4(
           // c d
           // e f
           // g h
-          __m128 v0 = _mm_castsi128_ps(_mm_loadu_si64(w0));  w0 += 2;
-          __m128 v1 = _mm_castsi128_ps(_mm_loadu_si64(w1));  w1 += 2;
-          __m128 v2 = _mm_castsi128_ps(_mm_loadu_si64(w2));  w2 += 2;
-          __m128 v3 = _mm_castsi128_ps(_mm_loadu_si64(w3));  w3 += 2;
-          __m128 v4 = _mm_castsi128_ps(_mm_loadu_si64(w4));  w4 += 2;
-          __m128 v5 = _mm_castsi128_ps(_mm_loadu_si64(w5));  w5 += 2;
-          __m128 v6 = _mm_castsi128_ps(_mm_loadu_si64(w6));  w6 += 2;
-          __m128 v7 = _mm_castsi128_ps(_mm_loadu_si64(w7));  w7 += 2;
-          __m128 v8 = _mm_castsi128_ps(_mm_loadu_si64(w8));  w8 += 2;
-          __m128 v9 = _mm_castsi128_ps(_mm_loadu_si64(w9));  w9 += 2;
-          __m128 v10 = _mm_castsi128_ps(_mm_loadu_si64(w10));  w10 += 2;
-          __m128 v11 = _mm_castsi128_ps(_mm_loadu_si64(w11));  w11 += 2;
-          __m128 v12 = _mm_castsi128_ps(_mm_loadu_si64(w12));  w12 += 2;
-          __m128 v13 = _mm_castsi128_ps(_mm_loadu_si64(w13));  w13 += 2;
-          __m128 v14 = _mm_castsi128_ps(_mm_loadu_si64(w14));  w14 += 2;
+          __m128 v0 = _mm_castpd_ps(_mm_load_sd((const double*) w0));
+          w0 += 2;
+          __m128 v1 = _mm_castpd_ps(_mm_load_sd((const double*) w1));
+          w1 += 2;
+          __m128 v2 = _mm_castpd_ps(_mm_load_sd((const double*) w2));
+          w2 += 2;
+          __m128 v3 = _mm_castpd_ps(_mm_load_sd((const double*) w3));
+          w3 += 2;
+          __m128 v4 = _mm_castpd_ps(_mm_load_sd((const double*) w4));
+          w4 += 2;
+          __m128 v5 = _mm_castpd_ps(_mm_load_sd((const double*) w5));
+          w5 += 2;
+          __m128 v6 = _mm_castpd_ps(_mm_load_sd((const double*) w6));
+          w6 += 2;
+          __m128 v7 = _mm_castpd_ps(_mm_load_sd((const double*) w7));
+          w7 += 2;
+          __m128 v8 = _mm_castpd_ps(_mm_load_sd((const double*) w8));
+          w8 += 2;
+          __m128 v9 = _mm_castpd_ps(_mm_load_sd((const double*) w9));
+          w9 += 2;
+          __m128 v10 = _mm_castpd_ps(_mm_load_sd((const double*) w10));
+          w10 += 2;
+          __m128 v11 = _mm_castpd_ps(_mm_load_sd((const double*) w11));
+          w11 += 2;
+          __m128 v12 = _mm_castpd_ps(_mm_load_sd((const double*) w12));
+          w12 += 2;
+          __m128 v13 = _mm_castpd_ps(_mm_load_sd((const double*) w13));
+          w13 += 2;
+          __m128 v14 = _mm_castpd_ps(_mm_load_sd((const double*) w14));
+          w14 += 2;
           __m128 v15 = _mm_setzero_ps();
 
           // Transpose 2x2

@@ -19,7 +19,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/packw.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}__sse_x${KUNROLL}(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}__sse2_x${KUNROLL}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -107,7 +107,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__sse_x${KUNROLL}(
           // e f
           // g h
           $for N in range(NR):
-            __m128 v${N} = _mm_castsi128_ps(_mm_loadu_si64(w${N}));  w${N} += 2;
+            __m128 v${N} = _mm_castpd_ps(_mm_load_sd((const double*) w${N}));
+            w${N} += 2;
 
           $for N in range(0,NR,4):
             // Transpose 2x2
@@ -224,7 +225,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__sse_x${KUNROLL}(
           // e f
           // g h
           $for N in range(NR-1):
-            __m128 v${N} = _mm_castsi128_ps(_mm_loadu_si64(w${N}));  w${N} += 2;
+            __m128 v${N} = _mm_castpd_ps(_mm_load_sd((const double*) w${N}));
+            w${N} += 2;
           __m128 v${NR-1} = _mm_setzero_ps();
 
           $for N in range(0,NR,4):
