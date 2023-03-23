@@ -269,6 +269,28 @@ XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_f16_avgpool_config();
 XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_f32_avgpool_config();
 XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_qu8_avgpool_config();
 
+struct xnn_pavgpool_config {
+  xnn_pavgpool_unipass_ukernel_fn unipass;
+  xnn_pavgpool_multipass_ukernel_fn multipass;
+  union {
+    xnn_init_f16_minmax_params_fn f16;
+    xnn_init_f32_minmax_params_fn f32;
+  } init;
+  // Number of rows in a primary tile.
+  // Unipass micro-kernel must be called with this number of rows, or fewer.
+  // Multipass micro-kernel must be called with more than this number of rows.
+  uint8_t primary_tile;
+  // Number of rows in an incremental tile.
+  // For best efficiency, multipass micro-kernel must process the number of rows in the primary tile plus a multiple
+  // of this number of rows in each call. This number has no meaning for the unipass micro-kernel.
+  uint8_t incremental_tile;
+  // Number of channels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  uint16_t channel_tile;
+};
+XNN_INTERNAL const struct xnn_pavgpool_config* xnn_init_f16_pavgpool_config();
+XNN_INTERNAL const struct xnn_pavgpool_config* xnn_init_f32_pavgpool_config();
+
 
 #ifdef __cplusplus
 }  // extern "C"

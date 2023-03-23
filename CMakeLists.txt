@@ -278,6 +278,7 @@ SET(XNNPACK_SRCS
   src/binary-elementwise-config.c
   src/init.c
   src/params.c
+  src/pavgpool-config.c
   src/transpose-config.c
   src/unary-elementwise-config.c
   src/x8-lut-config.c

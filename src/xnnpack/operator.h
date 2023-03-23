@@ -277,6 +277,7 @@ struct xnn_operator {
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
   const struct xnn_avgpool_config* avgpool_config;
+  const struct xnn_pavgpool_config* pavgpool_config;
 
   struct compute_parameters compute;
   struct compute_parameters compute2;
