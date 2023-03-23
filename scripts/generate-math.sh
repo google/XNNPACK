@@ -294,5 +294,8 @@ tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 
 tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-max.c &
 tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3-div-nabs-pmax.c &
 
+############################### Evaluation tests ##############################
+tools/generate-tanh-eval.py --spec eval/f16-tanh.yaml --output eval/f16-tanh.cc &
+tools/generate-tanh-eval.py --spec eval/f32-tanh.yaml --output eval/f32-tanh.cc &
 
 wait
