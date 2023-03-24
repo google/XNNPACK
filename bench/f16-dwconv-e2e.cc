@@ -59,8 +59,9 @@ static void DWConvEnd2EndBenchmark(
       // Note: do not directly assign to dwconv_config[i] because it breaks older gcc.
       dwconv_config[i].minmax.unipass = xnn_dwconv_unipass_ukernel_fn(dwconv_minmax);
       dwconv_config[i].channel_tile = channel_tile;
+      dwconv_config[i].channel_subtile = channel_tile;
+      dwconv_config[i].channel_round = 1;
       dwconv_config[i].primary_tile = primary_tile;
-      dwconv_config[i].last_tile = 0;
       dwconv_config[i].init.f16 = init_params;
       break;
     }
