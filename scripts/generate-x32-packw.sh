@@ -32,6 +32,8 @@ tools/xngen src/x32-packw/NR2-neon.c.in -D NR=2 -D PREFETCH=1 -D KUNROLL=2 -o sr
 tools/xngen src/x32-packw/sse.c.in -D NR=8  -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8-sse2-x4.c &
 tools/xngen src/x32-packw/sse.c.in -D NR=16 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x16-sse2-x4.c &
 
+tools/xngen src/x32-packw/c4-sse.c.in -D NR=2  -D KR=4 -o src/x32-packw/gen/x32-packw-x2c4-sse2-x1.c &
+
 ################################## Unit tests #################################
 tools/generate-packw-test.py --spec test/x32-packw.yaml --output test/x32-packw.cc &
 

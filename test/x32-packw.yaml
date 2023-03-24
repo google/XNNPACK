@@ -25,3 +25,4 @@
 # x86 SSE
 - name: xnn_x32_packw_gemm_goi_ukernel_x8__sse2_x4
 - name: xnn_x32_packw_gemm_goi_ukernel_x16__sse2_x4
+- name: xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1
