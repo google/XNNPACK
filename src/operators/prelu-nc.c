@@ -12,9 +12,11 @@
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
+#include <xnnpack/config.h>
 #include <xnnpack/cache.h>
 #include <xnnpack/log.h>
 #include <xnnpack/operator.h>
+#include <xnnpack/operator-type.h>
 #include <xnnpack/operator-utils.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/microparams-init.h>
@@ -31,6 +33,7 @@ static enum xnn_status create_prelu_nc(
     xnn_pack_prelu_w_fn pack_prelu_w,
     uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
+    const struct xnn_prelu_config* prelu_config,
     xnn_caches_t caches,
     xnn_operator_t* prelu_op_out)
 {
@@ -110,6 +113,7 @@ static enum xnn_status create_prelu_nc(
 
   prelu_op->type = operator_type;
   prelu_op->flags = flags;
+  prelu_op->prelu_config = prelu_config;
 
   prelu_op->state = xnn_run_state_invalid;
 
@@ -136,12 +140,20 @@ enum xnn_status xnn_create_prelu_nc_f16(
     pack_prelu_w = (xnn_pack_prelu_w_fn) xnn_pack_f32_to_f16_prelu_w;
   }
 
+  const struct xnn_prelu_config* prelu_config = xnn_init_f16_prelu_config();
+  if (prelu_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_prelu_nc_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
   return create_prelu_nc(
     channels, input_stride, output_stride,
     negative_slope, flags,
     1 /* log2(sizeof(uint16_t)) */,
     pack_prelu_w,
     XNN_INIT_FLAG_F16, xnn_operator_type_prelu_nc_f16,
+    prelu_config,
     caches,
     prelu_op_out);
 }
@@ -155,12 +167,20 @@ enum xnn_status xnn_create_prelu_nc_f32(
     xnn_caches_t caches,
     xnn_operator_t* prelu_op_out)
 {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f32_prelu_config();
+  if (prelu_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_prelu_nc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
   return create_prelu_nc(
     channels, input_stride, output_stride,
     negative_slope, flags,
     2 /* log2(sizeof(float)) */,
     (xnn_pack_prelu_w_fn) xnn_pack_f32_prelu_w,
     XNN_INIT_FLAG_F32, xnn_operator_type_prelu_nc_f32,
+    prelu_config,
     caches,
     prelu_op_out);
 }
@@ -173,7 +193,6 @@ static enum xnn_status setup_prelu_nc(
     float* output,
     uint32_t datatype_init_flags,
     uint32_t log2_element_size,
-    const struct prelu_parameters prelu[restrict XNN_MIN_ELEMENTS(1)],
     size_t num_threads)
 {
   if (prelu_op->type != expected_operator_type) {
@@ -206,6 +225,8 @@ static enum xnn_status setup_prelu_nc(
       xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_invalid_state;
   }
+
+  const struct xnn_prelu_config* prelu = prelu_op->prelu_config;
 
   const size_t channels = prelu_op->channels;
   prelu_op->context.prelu = (struct prelu_context) {
@@ -252,7 +273,6 @@ enum xnn_status xnn_setup_prelu_nc_f16(
     batch_size, input, output,
     XNN_INIT_FLAG_F16,
     1 /* log2(sizeof(uint16_t)) */,
-    &xnn_params.f16.prelu,
     pthreadpool_get_threads_count(threadpool));
 }
 
@@ -268,6 +288,5 @@ enum xnn_status xnn_setup_prelu_nc_f32(
     batch_size, input, output,
     XNN_INIT_FLAG_F32,
     2 /* log2(sizeof(float)) */,
-    &xnn_params.f32.prelu,
     pthreadpool_get_threads_count(threadpool));
 }

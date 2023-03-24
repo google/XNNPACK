@@ -248,12 +248,6 @@ struct zip_parameters {
   xnn_zipv_ukernel_fn xm;
 };
 
-struct prelu_parameters {
-  xnn_prelu_ukernel_fn ukernel;
-  uint16_t row_tile;
-  uint16_t channel_tile;
-};
-
 struct raddstoreexpminusmax_parameters {
   xnn_raddstoreexpminusmax_ukernel_fn ukernel;
   union {
@@ -342,7 +336,6 @@ struct xnn_parameters {
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
     struct maxpool_parameters maxpool;
-    struct prelu_parameters prelu;
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
     xnn_rmax_ukernel_fn rmax;
@@ -364,7 +357,6 @@ struct xnn_parameters {
     struct gemm_parameters gemm2;
     struct maxpool_parameters maxpool;
     struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
-    struct prelu_parameters prelu;
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
     xnn_rmax_ukernel_fn rmax;

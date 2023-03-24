@@ -401,6 +401,19 @@ struct xnn_ibilinear_chw_config {
 XNN_INTERNAL const struct xnn_ibilinear_chw_config* xnn_init_f16_ibilinear_chw_config();
 XNN_INTERNAL const struct xnn_ibilinear_chw_config* xnn_init_f32_ibilinear_chw_config();
 
+struct xnn_prelu_config {
+  xnn_prelu_ukernel_fn ukernel;
+  // Number of rows in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of rows in each call.
+  uint16_t row_tile;
+  // Number of channels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  uint16_t channel_tile;
+};
+
+XNN_INTERNAL const struct xnn_prelu_config* xnn_init_f16_prelu_config();
+XNN_INTERNAL const struct xnn_prelu_config* xnn_init_f32_prelu_config();
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

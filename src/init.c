@@ -669,12 +669,6 @@ static void init(void) {
             .qr = 8,
           };
 
-          xnn_params.f16.prelu = (struct prelu_parameters) {
-            .ukernel = (xnn_prelu_ukernel_fn) xnn_f16_prelu_ukernel__neonfp16arith_2x16,
-            .row_tile = 2,
-            .channel_tile = 16,
-          };
-
           xnn_params.f16.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
             .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x32,
             .init.f16 = xnn_init_f16_expminus_fp16arith_rr2_p2_params,
@@ -908,11 +902,6 @@ static void init(void) {
         .mr = 9,
         .qr = 8,
       };
-      xnn_params.f32.prelu = (struct prelu_parameters) {
-        .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__neon_2x8,
-        .row_tile = 2,
-        .channel_tile = 8,
-      };
       xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
         .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_lut64_p2_x8,
         .init.f32 = xnn_init_f32_expminus_neon_rr2_lut64_p2_params,
@@ -1119,11 +1108,6 @@ static void init(void) {
         .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1,
         .mr = 9,
         .qr = 8,
-      };
-      xnn_params.f32.prelu = (struct prelu_parameters) {
-        .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__scalar_2x4,
-        .row_tile = 4,
-        .channel_tile = 4,
       };
       xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
         .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x4_acc2,
@@ -1917,12 +1901,6 @@ static void init(void) {
           .qr = 8,
         };
 
-        xnn_params.f16.prelu = (struct prelu_parameters) {
-          .ukernel = (xnn_prelu_ukernel_fn) xnn_f16_prelu_ukernel__neonfp16arith_2x16,
-          .row_tile = 2,
-          .channel_tile = 16,
-        };
-
         xnn_params.f16.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
           .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x40,
           .init.f16 = xnn_init_f16_expminus_fp16arith_rr2_p2_params,
@@ -2302,11 +2280,6 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
-    xnn_params.f32.prelu = (struct prelu_parameters) {
-      .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__neon_2x8,
-      .row_tile = 2,
-      .channel_tile = 8,
-    };
     xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
       .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__neonfma_rr1_lut64_p2_x16,
       .init.f32 = xnn_init_f32_expminus_neonfma_rr1_lut64_p2_params,
@@ -2651,12 +2624,6 @@ static void init(void) {
         .qr = 8,
       };
 
-      xnn_params.f16.prelu = (struct prelu_parameters) {
-        .ukernel = (xnn_prelu_ukernel_fn) xnn_f16_prelu_ukernel__f16c_2x16,
-        .row_tile = 2,
-        .channel_tile = 16,
-      };
-
       xnn_params.f16.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
         .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_x40,
         .init.f16 = xnn_init_f16_expminus_avx2_rr1_p2_params,
@@ -2752,31 +2719,6 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      xnn_params.f32.prelu = (struct prelu_parameters) {
-        .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__avx512f_2x16,
-        .row_tile = 2,
-        .channel_tile = 16,
-      };
-    } else if (hardware_config->use_x86_avx) {
-      xnn_params.f32.prelu = (struct prelu_parameters) {
-        .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__avx_2x16,
-        .row_tile = 2,
-        .channel_tile = 16,
-      };
-    } else if (hardware_config->use_x86_sse4_1) {
-      xnn_params.f32.prelu = (struct prelu_parameters) {
-        .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__sse41_2x8,
-        .row_tile = 2,
-        .channel_tile = 8,
-      };
-    } else {
-      xnn_params.f32.prelu = (struct prelu_parameters) {
-        .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__sse2_2x8,
-        .row_tile = 2,
-        .channel_tile = 8,
-      };
-    }
     xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
       .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20_acc2,
       .init.f32 = xnn_init_f32_expminus_sse2_rr2_p5_params,
@@ -3132,38 +3074,12 @@ static void init(void) {
       .qr = 8,
     };
     #if XNN_ARCH_WASMRELAXEDSIMD
-      if (hardware_config->is_x86) {
-        xnn_params.f32.prelu = (struct prelu_parameters) {
-          .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__wasmrelaxedsimd_iminmax_2x4,
-          .row_tile = 2,
-          .channel_tile = 4,
-        };
-      } else {
-        xnn_params.f32.prelu = (struct prelu_parameters) {
-          .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__wasmrelaxedsimd_laneselect_2x4,
-          .row_tile = 2,
-          .channel_tile = 4,
-        };
-      }
       xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
         .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_x16_acc2,
         .init.f32 = xnn_init_f32_expminus_wasmsimd_rr2_p5_params,
         .element_tile = 16,
       };
     #else
-      if (hardware_config->is_x86) {
-        xnn_params.f32.prelu = (struct prelu_parameters) {
-          .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__wasmsimd_iminmax_2x8,
-          .row_tile = 2,
-          .channel_tile = 8,
-        };
-      } else {
-        xnn_params.f32.prelu = (struct prelu_parameters) {
-          .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__wasmsimd_laneselect_2x8,
-          .row_tile = 2,
-          .channel_tile = 8,
-        };
-      }
       xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
         .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x16_acc2,
         .init.f32 = xnn_init_f32_expminus_wasmsimd_rr2_p5_params,
@@ -3478,19 +3394,6 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
-    if (hardware_config->is_x86) {
-      xnn_params.f32.prelu = (struct prelu_parameters) {
-        .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__scalar_2x4,
-        .row_tile = 2,
-        .channel_tile = 4,
-      };
-    } else {
-      xnn_params.f32.prelu = (struct prelu_parameters) {
-        .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__wasm_2x4,
-        .row_tile = 2,
-        .channel_tile = 4,
-      };
-    }
     xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
       .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x4_acc2,
       .init.f32 = xnn_init_f32_expminus_scalar_rr2_p5_params,
@@ -3702,11 +3605,6 @@ static void init(void) {
       .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1,
       .mr = 9,
       .qr = 8,
-    };
-    xnn_params.f32.prelu = (struct prelu_parameters) {
-      .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__scalar_2x4,
-      .row_tile = 4,
-      .channel_tile = 4,
     };
     xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
       .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x4_acc2,

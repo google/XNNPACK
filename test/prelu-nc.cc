@@ -11,8 +11,11 @@
 
 
 TEST(PRELU_NC_F16, unit_batch) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f16_prelu_config();
+  if (prelu_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
       .batch_size(1)
       .channels(channels)
@@ -22,10 +25,13 @@ TEST(PRELU_NC_F16, unit_batch) {
 }
 
 TEST(PRELU_NC_F16, small_batch) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f16_prelu_config();
+  if (prelu_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(xnn_params.f16.prelu.row_tile)
+      .batch_size(prelu_config->row_tile)
       .channels(channels)
       .iterations(3)
       .TestF16();
@@ -33,10 +39,13 @@ TEST(PRELU_NC_F16, small_batch) {
 }
 
 TEST(PRELU_NC_F16, small_batch_with_x_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f16_prelu_config();
+  if (prelu_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(xnn_params.f16.prelu.row_tile)
+      .batch_size(prelu_config->row_tile)
       .channels(channels)
       .x_stride(337)
       .iterations(3)
@@ -45,10 +54,13 @@ TEST(PRELU_NC_F16, small_batch_with_x_stride) {
 }
 
 TEST(PRELU_NC_F16, small_batch_with_y_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f16_prelu_config();
+  if (prelu_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(xnn_params.f16.prelu.row_tile)
+      .batch_size(prelu_config->row_tile)
       .channels(channels)
       .y_stride(347)
       .iterations(3)
@@ -57,10 +69,13 @@ TEST(PRELU_NC_F16, small_batch_with_y_stride) {
 }
 
 TEST(PRELU_NC_F16, small_batch_with_x_stride_and_y_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f16_prelu_config();
+  if (prelu_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(xnn_params.f16.prelu.row_tile)
+      .batch_size(prelu_config->row_tile)
       .channels(channels)
       .x_stride(337)
       .y_stride(347)
@@ -70,10 +85,13 @@ TEST(PRELU_NC_F16, small_batch_with_x_stride_and_y_stride) {
 }
 
 TEST(PRELU_NC_F16, large_batch) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f16_prelu_config();
+  if (prelu_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(3 * xnn_params.f16.prelu.row_tile + 1)
+      .batch_size(3 * prelu_config->row_tile + 1)
       .channels(channels)
       .iterations(1)
       .TestF16();
@@ -81,10 +99,13 @@ TEST(PRELU_NC_F16, large_batch) {
 }
 
 TEST(PRELU_NC_F16, large_batch_with_x_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f16_prelu_config();
+  if (prelu_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(3 * xnn_params.f16.prelu.row_tile + 1)
+      .batch_size(3 * prelu_config->row_tile + 1)
       .channels(channels)
       .x_stride(337)
       .iterations(1)
@@ -93,10 +114,13 @@ TEST(PRELU_NC_F16, large_batch_with_x_stride) {
 }
 
 TEST(PRELU_NC_F16, large_batch_with_y_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f16_prelu_config();
+  if (prelu_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(3 * xnn_params.f16.prelu.row_tile + 1)
+      .batch_size(3 * prelu_config->row_tile + 1)
       .channels(channels)
       .y_stride(347)
       .iterations(1)
@@ -105,10 +129,13 @@ TEST(PRELU_NC_F16, large_batch_with_y_stride) {
 }
 
 TEST(PRELU_NC_F16, large_batch_with_x_stride_and_y_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f16_prelu_config();
+  if (prelu_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(3 * xnn_params.f16.prelu.row_tile + 1)
+      .batch_size(3 * prelu_config->row_tile + 1)
       .channels(channels)
       .x_stride(337)
       .y_stride(347)
@@ -118,10 +145,13 @@ TEST(PRELU_NC_F16, large_batch_with_x_stride_and_y_stride) {
 }
 
 TEST(PRELU_NC_F16, fp32_weights) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f16_prelu_config();
+  if (prelu_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(3 * xnn_params.f16.prelu.row_tile + 1)
+      .batch_size(3 * prelu_config->row_tile + 1)
       .channels(channels)
       .x_stride(337)
       .y_stride(347)
@@ -132,8 +162,11 @@ TEST(PRELU_NC_F16, fp32_weights) {
 }
 
 TEST(PRELU_NC_F16, weights_cache_unit_batch) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f16_prelu_config();
+  if (prelu_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
       .batch_size(1)
       .channels(channels)
@@ -144,10 +177,13 @@ TEST(PRELU_NC_F16, weights_cache_unit_batch) {
 }
 
 TEST(PRELU_NC_F16, weights_cache_fp32_weights) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f16.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f16.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f16_prelu_config();
+  if (prelu_config == nullptr) {
+    GTEST_SKIP();  // F16 unsupported.
+  }
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(3 * xnn_params.f16.prelu.row_tile + 1)
+      .batch_size(3 * prelu_config->row_tile + 1)
       .channels(channels)
       .x_stride(345)
       .y_stride(347)
@@ -159,8 +195,9 @@ TEST(PRELU_NC_F16, weights_cache_fp32_weights) {
 }
 
 TEST(PRELU_NC_F32, unit_batch) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f32_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
       .batch_size(1)
       .channels(channels)
@@ -170,10 +207,11 @@ TEST(PRELU_NC_F32, unit_batch) {
 }
 
 TEST(PRELU_NC_F32, small_batch) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f32_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(xnn_params.f32.prelu.row_tile)
+      .batch_size(prelu_config->row_tile)
       .channels(channels)
       .iterations(3)
       .TestF32();
@@ -181,10 +219,11 @@ TEST(PRELU_NC_F32, small_batch) {
 }
 
 TEST(PRELU_NC_F32, small_batch_with_x_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f32_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(xnn_params.f32.prelu.row_tile)
+      .batch_size(prelu_config->row_tile)
       .channels(channels)
       .x_stride(337)
       .iterations(3)
@@ -193,10 +232,11 @@ TEST(PRELU_NC_F32, small_batch_with_x_stride) {
 }
 
 TEST(PRELU_NC_F32, small_batch_with_y_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f32_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(xnn_params.f32.prelu.row_tile)
+      .batch_size(prelu_config->row_tile)
       .channels(channels)
       .y_stride(347)
       .iterations(3)
@@ -205,10 +245,11 @@ TEST(PRELU_NC_F32, small_batch_with_y_stride) {
 }
 
 TEST(PRELU_NC_F32, small_batch_with_x_stride_and_y_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f32_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(xnn_params.f32.prelu.row_tile)
+      .batch_size(prelu_config->row_tile)
       .channels(channels)
       .x_stride(337)
       .y_stride(347)
@@ -218,10 +259,11 @@ TEST(PRELU_NC_F32, small_batch_with_x_stride_and_y_stride) {
 }
 
 TEST(PRELU_NC_F32, large_batch) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f32_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(3 * xnn_params.f32.prelu.row_tile + 1)
+      .batch_size(3 * prelu_config->row_tile + 1)
       .channels(channels)
       .iterations(1)
       .TestF32();
@@ -229,10 +271,11 @@ TEST(PRELU_NC_F32, large_batch) {
 }
 
 TEST(PRELU_NC_F32, large_batch_with_x_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f32_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(3 * xnn_params.f32.prelu.row_tile + 1)
+      .batch_size(3 * prelu_config->row_tile + 1)
       .channels(channels)
       .x_stride(337)
       .iterations(1)
@@ -241,10 +284,11 @@ TEST(PRELU_NC_F32, large_batch_with_x_stride) {
 }
 
 TEST(PRELU_NC_F32, large_batch_with_y_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f32_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(3 * xnn_params.f32.prelu.row_tile + 1)
+      .batch_size(3 * prelu_config->row_tile + 1)
       .channels(channels)
       .y_stride(347)
       .iterations(1)
@@ -253,10 +297,11 @@ TEST(PRELU_NC_F32, large_batch_with_y_stride) {
 }
 
 TEST(PRELU_NC_F32, large_batch_with_x_stride_and_y_stride) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f32_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
-      .batch_size(3 * xnn_params.f32.prelu.row_tile + 1)
+      .batch_size(3 * prelu_config->row_tile + 1)
       .channels(channels)
       .x_stride(337)
       .y_stride(347)
@@ -266,8 +311,9 @@ TEST(PRELU_NC_F32, large_batch_with_x_stride_and_y_stride) {
 }
 
 TEST(PRELU_NC_F32, weights_cache_unit_batch) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  for (size_t channels = 1; channels < xnn_params.f32.prelu.channel_tile * 10; channels += std::max<size_t>(1, xnn_params.f32.prelu.channel_tile - 1)) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_f32_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t channels = 1; channels < prelu_config->channel_tile * 10; channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
     PReLUOperatorTester()
       .batch_size(1)
       .channels(channels)

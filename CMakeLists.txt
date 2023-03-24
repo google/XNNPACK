@@ -284,6 +284,7 @@ SET(XNNPACK_SRCS
   src/gavgpool-cw-config.c
   src/params.c
   src/pavgpool-config.c
+  src/prelu-config.c
   src/transpose-config.c
   src/unary-elementwise-config.c
   src/x8-lut-config.c
