@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert (P, H) in [(3, 2)]
+$assert not PS or (P, H) == (4, 3)
 $assert DIV in ["DIV", "RECPEADJ", "NR1RECPS", "NR1FMA"]
 $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
@@ -16,10 +17,10 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/common.h>
 #include <xnnpack/microparams.h>
 
-$POLY_SUFFIX = "p%dh%d_" % (P, H)
+$POLY_SUFFIX = "p%dh%d%s" % (P, H, "ps" if PS else "ts")
 $DIV_SUFFIX = DIV.lower()
 $ISA = "aarch64_neonfp16arith" if DIV == "DIV" else "neonfp16arith"
-void xnn_f16_vtanh_ukernel__${ISA}_expm1minus_rr1_${POLY_SUFFIX}${DIV_SUFFIX}_x${BATCH_TILE}(
+void xnn_f16_vtanh_ukernel__${ISA}_expm1minus_rr1_${POLY_SUFFIX}_${DIV_SUFFIX}_x${BATCH_TILE}(
     size_t n,
     const void* input,
     void* output,
@@ -30,7 +31,6 @@ void xnn_f16_vtanh_ukernel__${ISA}_expm1minus_rr1_${POLY_SUFFIX}${DIV_SUFFIX}_x$
   assert(input != NULL);
   assert(output != NULL);
 
-  (void) params;
   const float16x8_t vsat_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x4482)));
   const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x620F)));
   const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xBDC5)));

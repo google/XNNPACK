@@ -208,7 +208,7 @@ void xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x8(
   }
 }
 
-void xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x32(
+void xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2ts_div_x32(
     size_t n,
     const void* input,
     void* output,
@@ -219,7 +219,6 @@ void xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2_div_x32(
   assert(input != NULL);
   assert(output != NULL);
 
-  (void) params;
   const float16x8_t vsat_cutoff = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x4482)));
   const float16x8_t vmagic_bias = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0x620F)));
   const float16x8_t vminus_log2e = vreinterpretq_f16_u16(vmovq_n_u16(UINT16_C(0xBDC5)));

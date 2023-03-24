@@ -2938,7 +2938,7 @@ void xnn_f16_vsqrt_ukernel__f16c_sqrt_x8(
   }
 }
 
-void xnn_f16_vtanh_ukernel__f16c_expm1minus_rr1_p3h2_rcp_x72(
+void xnn_f16_vtanh_ukernel__f16c_expm1minus_rr1_p3h2ts_rcp_x72(
     size_t batch,
     const void* input,
     void* output,
