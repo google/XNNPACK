@@ -163,8 +163,8 @@ static void TanhError(
 }
 
 #if XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(TanhError, aarch64_neonfma_expm1minus_rr1_lut8_p4h3ts_div,
-                    xnn_math_f32_tanh__aarch64_neonfma_expm1minus_rr1_lut8_p4h3ts_div,
+  BENCHMARK_CAPTURE(TanhError, aarch64_neonfma_expm1minus_rr1_lut8_p4h3ps_div,
+                    xnn_math_f32_tanh__aarch64_neonfma_expm1minus_rr1_lut8_p4h3ps_div,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
@@ -194,38 +194,38 @@ static void TanhError(
                     benchmark::utils::CheckNEONFMA)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfma_expm1minus_rr1_lut8_p4h3ts_nr1recps1fma,
-                    xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ts_nr1recps1fma,
+  BENCHMARK_CAPTURE(TanhError, neonfma_expm1minus_rr1_lut8_p4h3ps_nr1recps1fma,
+                    xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ps_nr1recps1fma,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFMA)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfma_expm1minus_rr1_lut8_p4h3ts_nr1recps1fmaadj,
-                    xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ts_nr1recps1fmaadj,
+  BENCHMARK_CAPTURE(TanhError, neonfma_expm1minus_rr1_lut8_p4h3ps_nr1recps1fmaadj,
+                    xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ps_nr1recps1fmaadj,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFMA)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfma_expm1minus_rr1_lut8_p4h3ts_nr2fma,
-                    xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ts_nr2fma,
+  BENCHMARK_CAPTURE(TanhError, neonfma_expm1minus_rr1_lut8_p4h3ps_nr2fma,
+                    xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ps_nr2fma,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFMA)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfma_expm1minus_rr1_lut8_p4h3ts_nr2fmaadj,
-                    xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ts_nr2fmaadj,
+  BENCHMARK_CAPTURE(TanhError, neonfma_expm1minus_rr1_lut8_p4h3ps_nr2fmaadj,
+                    xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ps_nr2fmaadj,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFMA)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfma_expm1minus_rr1_lut8_p4h3ts_nr2recps,
-                    xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ts_nr2recps,
+  BENCHMARK_CAPTURE(TanhError, neonfma_expm1minus_rr1_lut8_p4h3ps_nr2recps,
+                    xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ps_nr2recps,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFMA)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neonfma_expm1minus_rr1_lut8_p4h3ts_nr2recpsadj,
-                    xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ts_nr2recpsadj,
+  BENCHMARK_CAPTURE(TanhError, neonfma_expm1minus_rr1_lut8_p4h3ps_nr2recpsadj,
+                    xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ps_nr2recpsadj,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEONFMA)
     ->Unit(benchmark::kMillisecond)
@@ -273,8 +273,8 @@ static void TanhError(
                     benchmark::utils::CheckNEON)
     ->Unit(benchmark::kMillisecond)
     ->Iterations(1);
-  BENCHMARK_CAPTURE(TanhError, neon_expm1minus_rr2_lut8_p4h3ts_nr2recps,
-                    xnn_math_f32_tanh__neon_expm1minus_rr2_lut8_p4h3ts_nr2recps,
+  BENCHMARK_CAPTURE(TanhError, neon_expm1minus_rr2_lut8_p4h3ps_nr2recps,
+                    xnn_math_f32_tanh__neon_expm1minus_rr2_lut8_p4h3ps_nr2recps,
                     /*num_flush_to_zero_values=*/kNumSubnormalValues,
                     benchmark::utils::CheckNEON)
     ->Unit(benchmark::kMillisecond)

@@ -7,6 +7,7 @@ $import math
 $assert RR == 1 or RR == 2
 $assert LOG2LUT in [0, 2, 3, 4, 5, 6]
 $assert P == H + 1 or P == H + 2
+$assert P == H + 1 or not PS
 $assert DIV in ["DIV", "NR2RECPS", "NR2RECPSADJ", "NR1RECPS1FMA", "NR1RECPS1FMAADJ", "NR2FMA", "NR2FMAADJ"]
 $LUT = 1 << LOG2LUT
 #include <assert.h>
@@ -41,7 +42,7 @@ $else:
 $VMLAQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 $VMLSQ_F32 = "vfmsq_f32" if FMA else "vmlsq_f32"
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
-$POLY_SUFFIX = "p%dh%dts_" % (P, H)
+$POLY_SUFFIX = "p%dh%d%s_" % (P, H, "ps" if PS else "ts")
 $DIV_SUFFIX = DIV.lower()
 $ISA = "aarch64_neonfma" if DIV == "DIV" else "neonfma" if FMA else "neon"
 void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${DIV_SUFFIX}(
@@ -173,15 +174,24 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${D
     $if P == H + 1:
       //   exp(-2z) - 1 = s * (t * ${POLYNOMIAL} + 1) - 1
       //                = s * t * (-p) + (s - 1)
-      //                = (s - 1) - (t * s) * p
+      $if PS:
+        //                = (s - 1) - (p * s) * t
+      $else:
+        //                = (s - 1) - (t * s) * p
     $else:
       //   exp(-2z) - 1 = s * (-2 * (t + t * (t * ${POLYNOMIAL})) + 1) - 1
       //                = s * (-2 * (t + t * p) + 1) - 1
       //                = (s - 1) - 2 * ((t * s) + (t * s) * p)
-    const float32x4_t vts = vmulq_f32(vt, vs);
+    $if PS:
+      const float32x4_t vps = vmulq_f32(vp, vs);
+    $else:
+      const float32x4_t vts = vmulq_f32(vt, vs);
     const float32x4_t vsmo = vsubq_f32(vs, vone);
     $if P == H + 1:
-      const float32x4_t vemo = ${VMLSQ_F32}(vsmo, vp, vts);
+      $if PS:
+        const float32x4_t vemo = ${VMLSQ_F32}(vsmo, vt, vps);
+      $else:
+        const float32x4_t vemo = ${VMLSQ_F32}(vsmo, vp, vts);
     $else:
       vp = ${VMLAQ_F32}(vts, vp, vts);
       const float32x4_t vemo = ${VMLSQ_F32}(vsmo, vp, vtwo);

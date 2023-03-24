@@ -22,7 +22,7 @@
 // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ts_nr2recps(
+void xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ps_nr1recps1fmaadj(
     size_t n,
     const float* input,
     float* output)
@@ -114,10 +114,10 @@ void xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ts_nr2recps(
     // Reconstruct the exp(-2z) - 1 value:
     //   exp(-2z) - 1 = s * (t * (-2 + t * (c2 + t * (c3 + t * c4))) + 1) - 1
     //                = s * t * (-p) + (s - 1)
-    //                = (s - 1) - (t * s) * p
-    const float32x4_t vts = vmulq_f32(vt, vs);
+    //                = (s - 1) - (p * s) * t
+    const float32x4_t vps = vmulq_f32(vp, vs);
     const float32x4_t vsmo = vsubq_f32(vs, vone);
-    const float32x4_t vemo = vfmsq_f32(vsmo, vp, vts);
+    const float32x4_t vemo = vfmsq_f32(vsmo, vt, vps);
 
     // Denominator of the tanh fraction: exp(-2z) + 1 = expm1(-2z) + 2
     const float32x4_t vepo = vaddq_f32(vemo, vtwo);
@@ -128,12 +128,15 @@ void xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ts_nr2recps(
     float32x4_t vrepo = vrecpeq_f32(vepo);
     float32x4_t verepo = vrecpsq_f32(vrepo, vepo);
     vrepo = vmulq_f32(vrepo, verepo);
-    verepo = vrecpsq_f32(vrepo, vepo);
-    vrepo = vmulq_f32(vrepo, verepo);
+    verepo = vfmsq_f32(vone, vrepo, vepo);
+    vrepo = vfmaq_f32(vrepo, vrepo, verepo);
 
     // Reconstruct y = expm1(-2z) / (expm1(-2z) + 2)
     float32x4_t vy = vmulq_f32(vemo, vrepo);
 
+    // Adjust reconstructred expm1(-2z) / (2 + expm1(-2z)) to match the correctly rounded division result
+    const float32x4_t vey = vfmsq_f32(vemo, vy, vepo);
+    vy = vfmaq_f32(vy, vey, vrepo);
 
     // Reconstruct tanh(x) = copysign(y, x)
     vy = vbslq_f32(vsign_mask, vx, vy);

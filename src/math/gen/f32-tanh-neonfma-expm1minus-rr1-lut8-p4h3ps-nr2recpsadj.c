@@ -22,7 +22,7 @@
 // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_math_f32_tanh__neon_expm1minus_rr2_lut8_p4h3ts_nr2recps(
+void xnn_math_f32_tanh__neonfma_expm1minus_rr1_lut8_p4h3ps_nr2recpsadj(
     size_t n,
     const float* input,
     float* output)
@@ -36,9 +36,7 @@ void xnn_math_f32_tanh__neon_expm1minus_rr2_lut8_p4h3ts_nr2recps(
   const float32x4_t vmagic_bias = vmovq_n_f32(0x1.800000p+19f);
   // Mask for the lowest 3 bits
   const uint64x2_t vindex_mask = vreinterpretq_u64_u32(vmovq_n_u32(UINT32_C(0x7)));
-  // Last 7 bits are zeroes
-  const float32x4_t vln2_hi = vmovq_n_f32(0x1.62E400p-1f);
-  const float32x4_t vln2_lo = vmovq_n_f32(0x1.7F7D1Cp-20f);
+  const float32x4_t vln2 = vmovq_n_f32(0x1.62E430p-1f);
   // Coefficients of polynomial approximation
   //   exp(-2t) - 1 ~ t * (-2 + t * (c2 + t * (c3 + t * c4)))
   // on [-log(2)/32, log(2)/32]
@@ -74,7 +72,7 @@ void xnn_math_f32_tanh__neon_expm1minus_rr2_lut8_p4h3ts_nr2recps(
     // (|-z / log(2)| <= 2**18, i.e. |z| <= 0x1.62E43p+17 = 181704.375), but that is acceptable, because inputs x
     // outside of [-9.010913, 9.010913] (i.e. z outsize [0, 9.010913]) saturate tanhf(x).
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
-    float32x4_t vn = vmlaq_f32(vmagic_bias, vz, vminus_log2e);
+    float32x4_t vn = vfmaq_f32(vmagic_bias, vz, vminus_log2e);
 
     // Create a floating-point number s (scale) such that s := 2**(2n) for valid inputs, i.e. 0 <= z <= 9.010913. As
     // n has 4 fractional bits, we split s == 2**(2n) = 2**int(2n) * 2**frac(2n). We create s in two steps:
@@ -104,24 +102,22 @@ void xnn_math_f32_tanh__neon_expm1minus_rr2_lut8_p4h3ts_nr2recps(
     vn = vsubq_f32(vn, vmagic_bias);
 
     // Compute reduced argument t := z + n * log(2). Note that -t = -z - n * log(2).
-    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    float32x4_t vt = vmlaq_f32(vz, vn, vln2_hi);
-    vt = vmlaq_f32(vt, vn, vln2_lo);
+    const float32x4_t vt = vfmaq_f32(vz, vn, vln2);
 
     // Compute degree-4 polynomial approximation for exp(-2t) - 1 on [-log(2)/32, log(2)/32].
     //   P(t) = t * (-2 + t * (c2 + t * (c3 + t * c4)))
     //        = t * (-p)
-    float32x4_t vp = vmlaq_f32(vc3, vc4, vt);
-    vp = vmlaq_f32(vc2, vp, vt);
-    vp = vmlsq_f32(vtwo, vp, vt);
+    float32x4_t vp = vfmaq_f32(vc3, vc4, vt);
+    vp = vfmaq_f32(vc2, vp, vt);
+    vp = vfmsq_f32(vtwo, vp, vt);
 
     // Reconstruct the exp(-2z) - 1 value:
     //   exp(-2z) - 1 = s * (t * (-2 + t * (c2 + t * (c3 + t * c4))) + 1) - 1
     //                = s * t * (-p) + (s - 1)
-    //                = (s - 1) - (t * s) * p
-    const float32x4_t vts = vmulq_f32(vt, vs);
+    //                = (s - 1) - (p * s) * t
+    const float32x4_t vps = vmulq_f32(vp, vs);
     const float32x4_t vsmo = vsubq_f32(vs, vone);
-    const float32x4_t vemo = vmlsq_f32(vsmo, vp, vts);
+    const float32x4_t vemo = vfmsq_f32(vsmo, vt, vps);
 
     // Denominator of the tanh fraction: exp(-2z) + 1 = expm1(-2z) + 2
     const float32x4_t vepo = vaddq_f32(vemo, vtwo);
@@ -138,6 +134,9 @@ void xnn_math_f32_tanh__neon_expm1minus_rr2_lut8_p4h3ts_nr2recps(
     // Reconstruct y = expm1(-2z) / (expm1(-2z) + 2)
     float32x4_t vy = vmulq_f32(vemo, vrepo);
 
+    // Adjust reconstructred expm1(-2z) / (2 + expm1(-2z)) to match the correctly rounded division result
+    const float32x4_t vey = vfmsq_f32(vemo, vy, vepo);
+    vy = vfmaq_f32(vy, vey, vrepo);
 
     // Reconstruct tanh(x) = copysign(y, x)
     vy = vbslq_f32(vsign_mask, vx, vy);

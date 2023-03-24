@@ -2363,7 +2363,7 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/math/f32-sqrt-neon-nr3rsqrts.c
   src/math/gen/f32-tanh-neon-expm1minus-rr1-p6h5ts-nr2recps.c
   src/math/gen/f32-tanh-neon-expm1minus-rr2-lut8-p4h2ts-nr2recps.c
-  src/math/gen/f32-tanh-neon-expm1minus-rr2-lut8-p4h3ts-nr2recps.c
+  src/math/gen/f32-tanh-neon-expm1minus-rr2-lut8-p4h3ps-nr2recps.c
   src/qc8-dwconv/gen/qc8-dwconv-3p8c-minmax-fp32-neon-mla8-ld64.c
   src/qc8-dwconv/gen/qc8-dwconv-3p16c-minmax-fp32-neon-mla8-ld64.c
   src/qc8-dwconv/gen/qc8-dwconv-3p16c-minmax-fp32-neon-mla8-ld128.c
@@ -3650,12 +3650,12 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h2ts-nr1recps1fma.c
   src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h2ts-nr2fma.c
   src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h2ts-nr2recps.c
-  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3ts-nr1recps1fma.c
-  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3ts-nr1recps1fmaadj.c
-  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3ts-nr2fma.c
-  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3ts-nr2fmaadj.c
-  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3ts-nr2recps.c
-  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3ts-nr2recpsadj.c
+  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3ps-nr1recps1fma.c
+  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3ps-nr1recps1fmaadj.c
+  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3ps-nr2fma.c
+  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3ps-nr2fmaadj.c
+  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3ps-nr2recps.c
+  src/math/gen/f32-tanh-neonfma-expm1minus-rr1-lut8-p4h3ps-nr2recpsadj.c
   src/math/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5ts-nr1recps1fma.c
   src/math/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5ts-nr1recps1fmaadj.c
   src/math/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5ts-nr2fma.c
@@ -3778,7 +3778,7 @@ SET(ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS
   src/math/f32-sigmoid-aarch64-neonfma-rr2-lut64-p2-div.c
   src/math/f32-sigmoid-aarch64-neonfma-rr2-lut2048-p1-div.c
   src/math/f32-sigmoid-aarch64-neonfma-rr2-p5-div.c
-  src/math/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-lut8-p4h3ts-div.c
+  src/math/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-lut8-p4h3ps-div.c
   src/math/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div.c)
 
 SET(ALL_NEONFP16_MICROKERNEL_SRCS
