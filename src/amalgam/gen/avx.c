@@ -5041,7 +5041,7 @@ void xnn_f32_vsqrt_ukernel__avx_sqrt_x8(
   }
 }
 
-void xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x48(
+void xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2ts_perm_div_x48(
     size_t batch,
     const float* input,
     float* output,

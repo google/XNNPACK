@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert (LOG2LUT, P, H) in [(0, 6, 5), (2, 4, 3), (2, 4, 2)]
+$assert not PS or (P, H) == (4, 3)
 $assert DIV in ["DIV", "NR1", "NR1ADJ", "NR2"]
 $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
@@ -20,10 +21,10 @@ $LUT = 1 << LOG2LUT
 #include <xnnpack/vunary.h>
 
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
-$POLY_SUFFIX = "p%dh%d" % (P, H)
+$POLY_SUFFIX = "p%dh%d%s" % (P, H, "ps" if PS else "ts")
 $PERM_SUFFIX = "_perm" if LOG2LUT != 0 else ""
 $DIV_SUFFIX = DIV.lower()
-$PARAMS_STRUCT = "avx_expm1minus_rr1_" + LUT_SUFFIX + POLY_SUFFIX + PERM_SUFFIX
+$PARAMS_STRUCT = "avx_expm1minus_rr1_" + LUT_SUFFIX + ("p%dh%d" % (P, H)) + PERM_SUFFIX
 $ISA = {0: "avx", 3: "fma3"}[FMA]
 void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}${PERM_SUFFIX}_${DIV_SUFFIX}_x${BATCH_TILE}(
     size_t batch,

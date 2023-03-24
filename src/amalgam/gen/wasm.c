@@ -4983,7 +4983,7 @@ void xnn_f32_vrelu_ukernel__wasm_x8(
   }
 }
 
-void xnn_f32_vtanh_ukernel__wasm_expm1minus_rr1_p6h5_div_x4(
+void xnn_f32_vtanh_ukernel__wasm_expm1minus_rr1_p6h5ts_div_x4(
     size_t batch,
     const float* input,
     float* output,

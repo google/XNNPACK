@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert (LOG2LUT, P, H) in [(0, 6, 5), (3, 4, 3)]
+$assert not PS or (P, H) == (4, 3)
 $assert DIV in ["DIV", "NR1", "NR2"]
 $assert SAT in ["MINMAX", "SELECT"]
 $assert BATCH_TILE % 4 == 0
@@ -29,9 +30,9 @@ $if LOG2LUT != 0:
   extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_${LUT}[${LUT}];
 
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
-$POLY_SUFFIX = "p%dh%d" % (P, H)
+$POLY_SUFFIX = "p%dh%d%s" % (P, H, "ps" if PS else "ts")
 $DIV_SUFFIX = DIV.lower()
-$PARAMS_STRUCT = "sse_expm1minus_rr1_" + LUT_SUFFIX + POLY_SUFFIX
+$PARAMS_STRUCT = "sse_expm1minus_rr1_" + LUT_SUFFIX + ("p%dh%d" % (P, H))
 $ISA = {2: "sse2", 4: "sse41"}[SSE]
 void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_${DIV_SUFFIX}_x${BATCH_TILE}(
     size_t batch,

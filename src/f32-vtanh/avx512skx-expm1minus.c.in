@@ -6,6 +6,7 @@
 $assert (LOG2LUT, P, H) in [(0, 6, 5), (2, 4, 3), (3, 4, 3)]
 $assert DIV in ["DIV", "NR1", "NR1ADJ"]
 $assert not PERM or LOG2LUT in [2, 3]
+$assert not PS or (P, H) == (4, 3)
 $assert BATCH_TILE % 16 == 0
 $assert BATCH_TILE >= 16
 $SIMD_TILE = BATCH_TILE // 16
@@ -27,10 +28,10 @@ $if LOG2LUT != 0 and not PERM:
   extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_${LUT}[${LUT}];
 
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
-$POLY_SUFFIX = "p%dh%d" % (P, H)
+$POLY_SUFFIX = "p%dh%d%s" % (P, H, "ps" if PS else "ts")
 $PERM_SUFFIX = "" if LOG2LUT == 0 else "_perm" if PERM else "_gather"
 $DIV_SUFFIX = DIV.lower()
-$PARAMS_STRUCT = "avx512_expm1minus_rr1_" + LUT_SUFFIX + POLY_SUFFIX + ("_perm" if PERM else "")
+$PARAMS_STRUCT = "avx512_expm1minus_rr1_" + LUT_SUFFIX + ("p%dh%d" % (P, H)) + ("_perm" if PERM else "")
 void xnn_f32_vtanh_ukernel__avx512skx_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}${PERM_SUFFIX}_${DIV_SUFFIX}_x${BATCH_TILE}(
     size_t batch,
     const float* input,

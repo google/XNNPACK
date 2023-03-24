@@ -5157,7 +5157,7 @@ void xnn_f32_vsqrt_ukernel__aarch64_neon_sqrt_x4(
   }
 }
 
-void xnn_f32_vtanh_ukernel__aarch64_neonfma_expm1minus_rr1_p6h5_div_x16(
+void xnn_f32_vtanh_ukernel__aarch64_neonfma_expm1minus_rr1_p6h5ts_div_x16(
     size_t batch,
     const float* input,
     float* output,

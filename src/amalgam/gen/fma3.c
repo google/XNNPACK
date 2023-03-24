@@ -4678,7 +4678,7 @@ void xnn_f32_vhswish_ukernel__fma3_x16(
   }
 }
 
-void xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_div_x40(
+void xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3ts_perm_div_x40(
     size_t batch,
     const float* input,
     float* output,

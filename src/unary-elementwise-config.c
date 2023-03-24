@@ -1294,47 +1294,47 @@ static void init_f32_tanh_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fma) {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5_nr2fma_x8;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5ts_nr2fma_x8;
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params;
       f32_tanh_config.element_tile = 8;
     } else if (hardware_config->use_arm_neon) {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__neon_expm1minus_rr1_p6h5_nr2recps_x8;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__neon_expm1minus_rr1_p6h5ts_nr2recps_x8;
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params;
       f32_tanh_config.element_tile = 8;
     } else if (!XNN_PLATFORM_MOBILE) {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3_div_x4;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3ts_div_x4;
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params;
       f32_tanh_config.element_tile = 4;
     }
   #elif XNN_ARCH_ARM64
-    f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__aarch64_neonfma_expm1minus_rr1_p6h5_div_x16;
+    f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__aarch64_neonfma_expm1minus_rr1_p6h5ts_div_x16;
     f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params;
     f32_tanh_config.element_tile = 16;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx512skx_expm1minus_rr1_lut4_p4h3_perm_div_x64;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx512skx_expm1minus_rr1_lut4_p4h3ts_perm_div_x64;
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_avx512_expm1minus_rr1_lut4_p4h3_perm_params;
       f32_tanh_config.element_tile = 64;
     } else if (hardware_config->use_x86_avx2) {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx2_expm1minus_rr1_lut4_p4h3_perm_div_x32;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx2_expm1minus_rr1_lut4_p4h3ts_perm_div_x32;
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h3_perm_params;
       f32_tanh_config.element_tile = 32;
     } else if (hardware_config->use_x86_fma3) {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3_perm_div_x40;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3ts_perm_div_x40;
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h2_perm_params;
       f32_tanh_config.element_tile = 40;
     } else if (hardware_config->use_x86_avx) {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2_perm_div_x48;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2ts_perm_div_x48;
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_avx_expm1minus_rr1_lut4_p4h2_perm_params;
       f32_tanh_config.element_tile = 48;
     } else if (hardware_config->use_x86_sse4_1) {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__sse41_expm1minus_rr1_lut8_p4h3_div_x20;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__sse41_expm1minus_rr1_lut8_p4h3ts_div_x20;
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_sse_expm1minus_rr1_lut8_p4h3_params;
       f32_tanh_config.element_tile = 20;
     } else {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__sse2_expm1minus_rr1_lut8_p4h3_div_x16;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__sse2_expm1minus_rr1_lut8_p4h3ts_div_x16;
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_sse_expm1minus_rr1_lut8_p4h3_params;
       f32_tanh_config.element_tile = 16;
     }
@@ -1342,11 +1342,11 @@ static void init_f32_tanh_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_nabs_pmax_x16;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5ts_div_nabs_pmax_x16;
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_nabs_params;
       f32_tanh_config.element_tile = 16;
     } else {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_abs_min_x16;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5ts_div_abs_min_x16;
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_abs_params;
       f32_tanh_config.element_tile = 16;
     }
@@ -1354,16 +1354,16 @@ static void init_f32_tanh_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3_div_x4;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3ts_div_x4;
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params;
       f32_tanh_config.element_tile = 4;
     } else {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__wasm_expm1minus_rr1_p6h5_div_x4;
+      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__wasm_expm1minus_rr1_p6h5ts_div_x4;
       f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_scalar_expm1minus_rr1_p6h5_params;
       f32_tanh_config.element_tile = 4;
     }
   #elif XNN_ARCH_RISCV
-    f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3_div_x4;
+    f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3ts_div_x4;
     f32_tanh_config.init.f32_tanh = xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params;
     f32_tanh_config.element_tile = 4;
   #endif

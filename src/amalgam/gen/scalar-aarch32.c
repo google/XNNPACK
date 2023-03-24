@@ -12310,7 +12310,7 @@ void xnn_f32_vsqrt_ukernel__scalar_sqrt_x1(
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3_div_x4(
+void xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3ts_div_x4(
     size_t batch,
     const float* input,
     float* output,

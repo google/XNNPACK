@@ -989,7 +989,7 @@ void xnn_f32_vsigmoid_ukernel__sse41_rr2_lut64_p2_div_x8(
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_f32_vtanh_ukernel__sse41_expm1minus_rr1_lut8_p4h3_div_x20(
+void xnn_f32_vtanh_ukernel__sse41_expm1minus_rr1_lut8_p4h3ts_div_x20(
     size_t batch,
     const float* input,
     float* output,

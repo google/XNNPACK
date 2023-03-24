@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert (LOG2LUT, P, H) in [(3, 4, 3), (0, 6, 5)]
+$assert not PS or (P, H) == (4, 3)
 $assert DIV in ["DIV", "NR2RECPS", "NR1RECPS1FMA", "NR2FMA"]
 $LUT = 1 << LOG2LUT
 
@@ -26,10 +27,10 @@ $if LOG2LUT == 3:
 $VMLAQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 $VMLSQ_F32 = "vfmsq_f32" if FMA else "vmlsq_f32"
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
-$POLY_SUFFIX = "p%dh%d" % (P, H)
+$POLY_SUFFIX = "p%dh%d%s" % (P, H, "ps" if PS else "ts")
 $DIV_SUFFIX = DIV.lower()
 $ISA = "neonfma" if DIV == "DIV" else "neonfma" if FMA else "neon"
-$PARAMS_STRUCT = "neon_expm1minus_rr1_" + LUT_SUFFIX + POLY_SUFFIX
+$PARAMS_STRUCT = "neon_expm1minus_rr1_" + LUT_SUFFIX + ("p%dh%d" % (P, H))
 $ISA_PREFIX = "aarch64_" if DIV == "DIV" else ""
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 

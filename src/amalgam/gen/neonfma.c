@@ -4970,7 +4970,7 @@ void xnn_f32_vsigmoid_ukernel__neonfma_rr1_lut64_p2_nr2recps_x16(
   }
 }
 
-void xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5_nr2fma_x8(
+void xnn_f32_vtanh_ukernel__neonfma_expm1minus_rr1_p6h5ts_nr2fma_x8(
     size_t batch,
     const float* input,
     float* output,

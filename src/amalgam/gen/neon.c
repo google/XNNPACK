@@ -9753,7 +9753,7 @@ void xnn_f32_vsigmoid_ukernel__neon_rr2_lut64_p2_nr2recps_x8(
   }
 }
 
-void xnn_f32_vtanh_ukernel__neon_expm1minus_rr1_p6h5_nr2recps_x8(
+void xnn_f32_vtanh_ukernel__neon_expm1minus_rr1_p6h5ts_nr2recps_x8(
     size_t batch,
     const float* input,
     float* output,

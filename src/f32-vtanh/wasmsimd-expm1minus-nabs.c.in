@@ -4,7 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 
 $import math
-$assert LOG2LUT in [0, 3]
+$assert (LOG2LUT, P, H) in [(3, 4, 3), (0, 6, 5)]
+$assert not PS or (P, H) == (4, 3)
 $LUT = 1 << LOG2LUT
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
@@ -27,9 +28,9 @@ $if LOG2LUT != 0:
 
 $WASM_F32X4_MAX = {"WASM": "wasm_f32x4_max", "PSEUDO": "wasm_f32x4_pmax"}[MINMAX]
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
-$POLY_SUFFIX = "p%dh%d" % (P, H)
+$POLY_SUFFIX = "p%dh%d%s" % (P, H, "ps" if PS else "ts")
 $MINMAX_SUFFIX = {"WASM": "max", "PSEUDO": "pmax"}[MINMAX]
-$PARAMS_STRUCT = "wasmsimd_expm1minus_rr1_" + LUT_SUFFIX + POLY_SUFFIX + "_nabs"
+$PARAMS_STRUCT = "wasmsimd_expm1minus_rr1_" + LUT_SUFFIX + ("p%dh%d" % (P, H)) + "_nabs"
 void xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_div_nabs_${MINMAX_SUFFIX}_x${BATCH_TILE}(
     size_t batch,
     const float* input,

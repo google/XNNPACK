@@ -22446,7 +22446,7 @@ void xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_x8(
   }
 }
 
-void xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_abs_min_x16(
+void xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5ts_div_abs_min_x16(
     size_t batch,
     const float* input,
     float* output,
@@ -22640,7 +22640,7 @@ void xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_abs_min_x16(
   }
 }
 
-void xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5_div_nabs_pmax_x16(
+void xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5ts_div_nabs_pmax_x16(
     size_t batch,
     const float* input,
     float* output,
