@@ -197,15 +197,15 @@ tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6
 tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut8-p4h3ps-div.c &
 
 # WAsm SIMD
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-min.c &
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-pmin.c &
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-max.c &
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-pmax.c &
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-min.c &
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-pmin.c &
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-max.c &
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-pmax.c &
 
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-abs-min.c &
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-abs-pmin.c &
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-nabs-max.c &
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-nabs-pmax.c &
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D PS=1 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ps-div-abs-min.c &
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D PS=1 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ps-div-abs-pmin.c &
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=1 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ps-div-nabs-max.c &
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D PS=1 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ps-div-nabs-pmax.c &
 
 # NEON
 tools/xngen src/math/f32-tanh-neon-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D DIV=DIV             -D FMA=1 -o src/math/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div.c &

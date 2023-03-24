@@ -7934,10 +7934,10 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/math/f32-roundz-wasmsimd-native.c
   src/math/f32-sigmoid-wasmsimd-rr2-lut64-p2-div.c
   src/math/f32-sigmoid-wasmsimd-rr2-p5-div.c
-  src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-abs-min.c
-  src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-abs-pmin.c
-  src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-nabs-max.c
-  src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-nabs-pmax.c
+  src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ps-div-abs-min.c
+  src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ps-div-abs-pmin.c
+  src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ps-div-nabs-max.c
+  src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ps-div-nabs-pmax.c
   src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-min.c
   src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-pmin.c
   src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-max.c

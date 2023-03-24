@@ -21,7 +21,7 @@
 // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_math_f32_tanh__wasmsimd_expm1minus_rr1_lut8_p4h3ts_div_nabs_max(
+void xnn_math_f32_tanh__wasmsimd_expm1minus_rr1_lut8_p4h3ps_div_nabs_max(
     size_t n,
     const float* input,
     float* output)
@@ -115,10 +115,10 @@ void xnn_math_f32_tanh__wasmsimd_expm1minus_rr1_lut8_p4h3ts_div_nabs_max(
     // Reconstruct the exp(2z) - 1 value:
     //   exp(2z) - 1 = s * (t * (2 + t * (c2 + t * (c3 + t * c4))) + 1) - 1
     //               = s * t * p + (s - 1)
-    //               = (s - 1) + (t * s) * p
-    const v128_t vts = wasm_f32x4_mul(vt, vs);
+    //               = (s - 1) + (p * s) * t
+    const v128_t vps = wasm_f32x4_mul(vp, vs);
     const v128_t vsmo = wasm_f32x4_sub(vs, vone);
-    const v128_t vemo = wasm_f32x4_add(wasm_f32x4_mul(vp, vts), vsmo);
+    const v128_t vemo = wasm_f32x4_add(wasm_f32x4_mul(vt, vps), vsmo);
 
     // Reconstruct tanh(z) = expm1(2z) / (expm1(2z) + 2)
     const v128_t vepo = wasm_f32x4_add(vemo, vtwo);

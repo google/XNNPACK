@@ -5,6 +5,8 @@
 
 $import math
 $assert LOG2LUT in [0, 3]
+$assert P == H + 1 or P == H + 2
+$assert P == H + 1 or not PS
 $LUT = 1 << LOG2LUT
 $assert MINMAX in ["WASM", "PSEUDO", "RELAXED"]
 #include <assert.h>
@@ -32,7 +34,7 @@ $  POLYNOMIAL = "(c%d + t * %s)" % (i, POLYNOMIAL)
 $POLYNOMIAL = "(2 + t * %s)" % POLYNOMIAL
 $WASM_F32X4_MAX = {"WASM": "wasm_f32x4_max", "PSEUDO": "wasm_f32x4_pmax"}[MINMAX]
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
-$POLY_SUFFIX = "p%dh%dts_" % (P, H)
+$POLY_SUFFIX = "p%dh%d%s_" % (P, H, "ps" if PS else "ts")
 $MINMAX_SUFFIX = {"WASM": "max", "PSEUDO": "pmax"}[MINMAX]
 void xnn_math_f32_tanh__wasmsimd_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}div_nabs_${MINMAX_SUFFIX}(
     size_t n,
@@ -140,10 +142,17 @@ void xnn_math_f32_tanh__wasmsimd_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}div_n
     // Reconstruct the exp(2z) - 1 value:
     //   exp(2z) - 1 = s * (t * ${POLYNOMIAL} + 1) - 1
     //               = s * t * p + (s - 1)
-    //               = (s - 1) + (t * s) * p
-    const v128_t vts = wasm_f32x4_mul(vt, vs);
+    $if PS:
+      //               = (s - 1) + (p * s) * t
+      const v128_t vps = wasm_f32x4_mul(vp, vs);
+    $else:
+      //               = (s - 1) + (t * s) * p
+      const v128_t vts = wasm_f32x4_mul(vt, vs);
     const v128_t vsmo = wasm_f32x4_sub(vs, vone);
-    const v128_t vemo = wasm_f32x4_add(wasm_f32x4_mul(vp, vts), vsmo);
+    $if PS:
+      const v128_t vemo = wasm_f32x4_add(wasm_f32x4_mul(vt, vps), vsmo);
+    $else:
+      const v128_t vemo = wasm_f32x4_add(wasm_f32x4_mul(vp, vts), vsmo);
 
     // Reconstruct tanh(z) = expm1(2z) / (expm1(2z) + 2)
     const v128_t vepo = wasm_f32x4_add(vemo, vtwo);
