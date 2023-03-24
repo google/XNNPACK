@@ -371,6 +371,35 @@ XNN_INTERNAL struct xnn_dwconv_config* xnn_init_qc8_dwconv_config();
 XNN_INTERNAL struct xnn_dwconv_config* xnn_init_qs8_dwconv_config();
 XNN_INTERNAL struct xnn_dwconv_config* xnn_init_qu8_dwconv_config();
 
+struct xnn_ibilinear_config {
+  xnn_ibilinear_ukernel_fn ukernel;
+  // Number of output pixels in a tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of pixels in each call.
+  uint8_t pixel_tile;
+  // Number of channels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  uint8_t channel_tile;
+};
+
+// Bilinear interpolation (2D).
+XNN_INTERNAL const struct xnn_ibilinear_config* xnn_init_f16_ibilinear_config();
+XNN_INTERNAL const struct xnn_ibilinear_config* xnn_init_f32_ibilinear_config();
+XNN_INTERNAL const struct xnn_ibilinear_config* xnn_init_s8_ibilinear_config();
+XNN_INTERNAL const struct xnn_ibilinear_config* xnn_init_u8_ibilinear_config();
+
+struct xnn_ibilinear_chw_config {
+  xnn_ibilinear_chw_ukernel_fn ukernel;
+  // Number of output pixels in a tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of pixels in each call.
+  uint8_t pixel_tile;
+  // Number of channels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  uint8_t channel_tile;
+};
+
+// Bilinear interpolation (2D) in CHW layout.
+XNN_INTERNAL const struct xnn_ibilinear_chw_config* xnn_init_f16_ibilinear_chw_config();
+XNN_INTERNAL const struct xnn_ibilinear_chw_config* xnn_init_f32_ibilinear_chw_config();
 
 #ifdef __cplusplus
 }  // extern "C"

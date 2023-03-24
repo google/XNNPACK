@@ -2414,6 +2414,8 @@ xnnpack_cc_library(
         "src/dwconv-config.c",
         "src/gavgpool-config.c",
         "src/gavgpool-cw-config.c",
+        "src/ibilinear-chw-config.c",
+        "src/ibilinear-config.c",
         "src/pavgpool-config.c",
         "src/transpose-config.c",
         "src/unary-elementwise-config.c",

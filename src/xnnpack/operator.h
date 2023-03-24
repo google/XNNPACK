@@ -280,6 +280,8 @@ struct xnn_operator {
   const struct xnn_pavgpool_config* pavgpool_config;
   const struct xnn_gavgpool_config* gavgpool_config;
   const struct xnn_gavgpool_cw_config* gavgpool_cw_config;
+  const struct xnn_ibilinear_config* ibilinear_config;
+  const struct xnn_ibilinear_chw_config* ibilinear_chw_config;
 
   struct compute_parameters compute;
   struct compute_parameters compute2;

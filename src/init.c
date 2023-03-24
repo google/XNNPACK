@@ -614,11 +614,6 @@ static void init(void) {
     #ifndef XNN_NO_S8_OPERATORS
       init_flags |= XNN_INIT_FLAG_S8;
 
-      xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
-        .ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__neon_c8,
-        .pixel_tile = 1,
-        .channel_tile = 8,
-      };
       xnn_params.s8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16,
         .init.s8 = xnn_init_s8_minmax_neon_params,
@@ -631,11 +626,6 @@ static void init(void) {
     #ifndef XNN_NO_U8_OPERATORS
       init_flags |= XNN_INIT_FLAG_U8;
 
-      xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
-        .ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__neon_c8,
-        .pixel_tile = 1,
-        .channel_tile = 8,
-      };
       xnn_params.u8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16,
         .init.u8 = xnn_init_u8_minmax_neon_params,
@@ -677,11 +667,6 @@ static void init(void) {
             .init.f16 = xnn_init_f16_minmax_fp16arith_params,
             .mr = 9,
             .qr = 8,
-          };
-          xnn_params.f16.ibilinear = (struct ibilinear_parameters) {
-            .ukernel = (xnn_ibilinear_ukernel_fn) xnn_f16_ibilinear_ukernel__neonfp16arith_c8,
-            .pixel_tile = 1,
-            .channel_tile = 8,
           };
 
           xnn_params.f16.prelu = (struct prelu_parameters) {
@@ -748,11 +733,6 @@ static void init(void) {
               .update.f16 = xnn_update_f16_chw_neonfp16arith_stride2_params,
               .output_height_tile = 1,
               .output_width_tile = 8,
-            };
-            xnn_params.f16.ibilinear_chw = (struct ibilinear_chw_parameters) {
-              .ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p8,
-              .channel_tile = 1,
-              .pixel_tile = 8,
             };
           #endif  // XNN_NO_NCHW_OPERATORS
         }
@@ -928,11 +908,6 @@ static void init(void) {
         .mr = 9,
         .qr = 8,
       };
-      xnn_params.f32.ibilinear = (struct ibilinear_parameters) {
-        .ukernel = (xnn_ibilinear_ukernel_fn) xnn_f32_ibilinear_ukernel__neon_c8,
-        .pixel_tile = 1,
-        .channel_tile = 8,
-      };
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__neon_2x8,
         .row_tile = 2,
@@ -994,11 +969,6 @@ static void init(void) {
           .update.f32 = xnn_update_f32_chw_neon_stride2_params,
           .output_height_tile = 1,
           .output_width_tile = 4,
-        };
-        xnn_params.f32.ibilinear_chw = (struct ibilinear_chw_parameters) {
-          .ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__neon_p8,
-          .channel_tile = 1,
-          .pixel_tile = 8,
         };
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_F32_OPERATORS
@@ -1069,11 +1039,6 @@ static void init(void) {
     #ifndef XNN_NO_S8_OPERATORS
       init_flags |= XNN_INIT_FLAG_S8;
 
-      xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
-        .ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__scalar_c1,
-        .pixel_tile = 1,
-        .channel_tile = 1,
-      };
       xnn_params.s8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1,
         .init.s8 = xnn_init_s8_minmax_scalar_params,
@@ -1086,11 +1051,6 @@ static void init(void) {
     #ifndef XNN_NO_U8_OPERATORS
       init_flags |= XNN_INIT_FLAG_U8;
 
-      xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
-        .ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__scalar_c1,
-        .pixel_tile = 1,
-        .channel_tile = 1,
-      };
       xnn_params.u8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
         .init.u8 = xnn_init_u8_minmax_scalar_params,
@@ -1159,11 +1119,6 @@ static void init(void) {
         .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1,
         .mr = 9,
         .qr = 8,
-      };
-      xnn_params.f32.ibilinear = (struct ibilinear_parameters) {
-        .ukernel = (xnn_ibilinear_ukernel_fn) xnn_f32_ibilinear_ukernel__scalar_c2,
-        .pixel_tile = 1,
-        .channel_tile = 2,
       };
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__scalar_2x4,
@@ -1234,11 +1189,6 @@ static void init(void) {
           .init.f32 = xnn_init_f32_chw_scalar_params,
           .output_height_tile = 2,
           .output_width_tile = 1,
-        };
-        xnn_params.f32.ibilinear_chw = (struct ibilinear_chw_parameters) {
-          .ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__scalar_p4,
-          .channel_tile = 1,
-          .pixel_tile = 4,
         };
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_F32_OPERATORS
@@ -1786,11 +1736,6 @@ static void init(void) {
   /**************************** S8 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_S8_OPERATORS
     init_flags |= XNN_INIT_FLAG_S8;
-    xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
-      .ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__neon_c16,
-      .pixel_tile = 1,
-      .channel_tile = 16,
-    };
     xnn_params.s8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16,
       .init.s8 = xnn_init_s8_minmax_neon_params,
@@ -1803,11 +1748,6 @@ static void init(void) {
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
-      .ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__neon_c16,
-      .pixel_tile = 1,
-      .channel_tile = 16,
-    };
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16,
       .init.u8 = xnn_init_u8_minmax_neon_params,
@@ -1976,11 +1916,6 @@ static void init(void) {
           .mr = 9,
           .qr = 8,
         };
-        xnn_params.f16.ibilinear = (struct ibilinear_parameters) {
-          .ukernel = (xnn_ibilinear_ukernel_fn) xnn_f16_ibilinear_ukernel__neonfp16arith_c8,
-          .pixel_tile = 1,
-          .channel_tile = 8,
-        };
 
         xnn_params.f16.prelu = (struct prelu_parameters) {
           .ukernel = (xnn_prelu_ukernel_fn) xnn_f16_prelu_ukernel__neonfp16arith_2x16,
@@ -2047,11 +1982,6 @@ static void init(void) {
             .update.f16 = xnn_update_f16_chw_neonfp16arith_stride2_params,
             .output_height_tile = 1,
             .output_width_tile = 8,
-          };
-          xnn_params.f16.ibilinear_chw = (struct ibilinear_chw_parameters) {
-            .ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p8,
-            .channel_tile = 1,
-            .pixel_tile = 8,
           };
         #endif  // XNN_NO_NCHW_OPERATORS
       }
@@ -2372,11 +2302,6 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
-    xnn_params.f32.ibilinear = (struct ibilinear_parameters) {
-      .ukernel = (xnn_ibilinear_ukernel_fn) xnn_f32_ibilinear_ukernel__neonfma_c8,
-      .pixel_tile = 1,
-      .channel_tile = 8,
-    };
     xnn_params.f32.prelu = (struct prelu_parameters) {
       .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__neon_2x8,
       .row_tile = 2,
@@ -2450,11 +2375,6 @@ static void init(void) {
         .update.f32 = xnn_update_f32_chw_neon_stride2_params,
         .output_height_tile = 1,
         .output_width_tile = 4,
-      };
-      xnn_params.f32.ibilinear_chw = (struct ibilinear_chw_parameters) {
-        .ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__neonfma_p8,
-        .channel_tile = 1,
-        .pixel_tile = 8,
       };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
@@ -2669,11 +2589,6 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_S8;
 
     if (hardware_config->use_x86_sse4_1) {
-      xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
-        .ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__sse41_c16,
-        .pixel_tile = 1,
-        .channel_tile = 16,
-      };
       xnn_params.s8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16,
         .init.s8 = xnn_init_s8_minmax_sse4_params,
@@ -2681,11 +2596,6 @@ static void init(void) {
         .qr = 8,
       };
     } else {
-      xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
-        .ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__sse2_c8,
-        .pixel_tile = 1,
-        .channel_tile = 8,
-      };
       xnn_params.s8.maxpool = (struct maxpool_parameters) {
         .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16,
         .init.s8 = xnn_init_s8_minmax_sse2_params,
@@ -2699,19 +2609,6 @@ static void init(void) {
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    if (hardware_config->use_x86_sse4_1) {
-      xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
-        .ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__sse41_c16,
-        .pixel_tile = 1,
-        .channel_tile = 16,
-      };
-    } else {
-      xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
-        .ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__sse2_c8,
-        .pixel_tile = 1,
-        .channel_tile = 8,
-      };
-    }
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16,
       .init.u8 = xnn_init_u8_minmax_sse2_params,
@@ -2752,11 +2649,6 @@ static void init(void) {
         .init.f16 = xnn_init_f16_minmax_avx_params,
         .mr = 9,
         .qr = 8,
-      };
-      xnn_params.f16.ibilinear = (struct ibilinear_parameters) {
-        .ukernel = (xnn_ibilinear_ukernel_fn) xnn_f16_ibilinear_ukernel__fma3_c8,
-        .pixel_tile = 1,
-        .channel_tile = 8,
       };
 
       xnn_params.f16.prelu = (struct prelu_parameters) {
@@ -2860,11 +2752,6 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
-    xnn_params.f32.ibilinear = (struct ibilinear_parameters) {
-      .ukernel = (xnn_ibilinear_ukernel_fn) xnn_f32_ibilinear_ukernel__sse_c8,
-      .pixel_tile = 1,
-      .channel_tile = 8,
-    };
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__avx512f_2x16,
@@ -2960,11 +2847,6 @@ static void init(void) {
         .update.f32 = xnn_update_f32_chw_sse_stride2_params,
         .output_height_tile = 2,
         .output_width_tile = 4,
-      };
-      xnn_params.f32.ibilinear_chw = (struct ibilinear_chw_parameters) {
-        .ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__sse_p8,
-        .channel_tile = 1,
-        .pixel_tile = 8,
       };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
@@ -3084,11 +2966,6 @@ static void init(void) {
   #ifndef XNN_NO_S8_OPERATORS
     init_flags |= XNN_INIT_FLAG_S8;
 
-    xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
-      .ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__wasmsimd_dot16x2_c8,
-      .pixel_tile = 1,
-      .channel_tile = 8,
-    };
     xnn_params.s8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16,
       .init.s8 = xnn_init_s8_minmax_wasmsimd_params,
@@ -3101,11 +2978,6 @@ static void init(void) {
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
-      .ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__wasmsimd_dot16x2_c8,
-      .pixel_tile = 1,
-      .channel_tile = 8,
-    };
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16,
       .init.u8 = xnn_init_u8_minmax_wasmsimd_params,
@@ -3260,19 +3132,6 @@ static void init(void) {
       .qr = 8,
     };
     #if XNN_ARCH_WASMRELAXEDSIMD
-      xnn_params.f32.ibilinear = (struct ibilinear_parameters) {
-        .ukernel = (xnn_ibilinear_ukernel_fn) xnn_f32_ibilinear_ukernel__wasmrelaxedsimd_c8,
-        .pixel_tile = 1,
-        .channel_tile = 8,
-      };
-    #else
-      xnn_params.f32.ibilinear = (struct ibilinear_parameters) {
-        .ukernel = (xnn_ibilinear_ukernel_fn) xnn_f32_ibilinear_ukernel__wasmsimd_c8,
-        .pixel_tile = 1,
-        .channel_tile = 8,
-      };
-    #endif
-    #if XNN_ARCH_WASMRELAXEDSIMD
       if (hardware_config->is_x86) {
         xnn_params.f32.prelu = (struct prelu_parameters) {
           .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__wasmrelaxedsimd_iminmax_2x4,
@@ -3425,11 +3284,6 @@ static void init(void) {
           .output_width_tile = 4,
         };
       }
-      xnn_params.f32.ibilinear_chw = (struct ibilinear_chw_parameters) {
-        .ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8,
-        .channel_tile = 1,
-        .pixel_tile = 8,
-      };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
@@ -3526,11 +3380,6 @@ static void init(void) {
   #ifndef XNN_NO_S8_OPERATORS
     init_flags |= XNN_INIT_FLAG_S8;
 
-    xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
-      .ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__scalar_c1,
-      .pixel_tile = 1,
-      .channel_tile = 1,
-    };
     xnn_params.s8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1,
       .init.s8 = xnn_init_s8_minmax_scalar_params,
@@ -3543,11 +3392,6 @@ static void init(void) {
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
-      .ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__scalar_c1,
-      .pixel_tile = 1,
-      .channel_tile = 1,
-    };
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
       .init.u8 = xnn_init_u8_minmax_scalar_params,
@@ -3634,11 +3478,6 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
-    xnn_params.f32.ibilinear = (struct ibilinear_parameters) {
-      .ukernel = (xnn_ibilinear_ukernel_fn) xnn_f32_ibilinear_ukernel__scalar_c2,
-      .pixel_tile = 1,
-      .channel_tile = 2,
-    };
     if (hardware_config->is_x86) {
       xnn_params.f32.prelu = (struct prelu_parameters) {
         .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__scalar_2x4,
@@ -3717,11 +3556,6 @@ static void init(void) {
         .output_height_tile = 1,
         .output_width_tile = 1,
       };
-      xnn_params.f32.ibilinear_chw = (struct ibilinear_chw_parameters) {
-        .ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__scalar_p4,
-        .channel_tile = 1,
-        .pixel_tile = 4,
-      };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
@@ -3788,11 +3622,6 @@ static void init(void) {
   #ifndef XNN_NO_S8_OPERATORS
     init_flags |= XNN_INIT_FLAG_S8;
 
-    xnn_params.s8.ibilinear = (struct ibilinear_parameters) {
-      .ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__scalar_c1,
-      .pixel_tile = 1,
-      .channel_tile = 1,
-    };
     xnn_params.s8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1,
       .init.s8 = xnn_init_s8_minmax_scalar_params,
@@ -3805,11 +3634,6 @@ static void init(void) {
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    xnn_params.u8.ibilinear = (struct ibilinear_parameters) {
-      .ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__scalar_c1,
-      .pixel_tile = 1,
-      .channel_tile = 1,
-    };
     xnn_params.u8.maxpool = (struct maxpool_parameters) {
       .ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
       .init.u8 = xnn_init_u8_minmax_scalar_params,
@@ -3878,11 +3702,6 @@ static void init(void) {
       .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1,
       .mr = 9,
       .qr = 8,
-    };
-    xnn_params.f32.ibilinear = (struct ibilinear_parameters) {
-      .ukernel = (xnn_ibilinear_ukernel_fn) xnn_f32_ibilinear_ukernel__scalar_c2,
-      .pixel_tile = 1,
-      .channel_tile = 2,
     };
     xnn_params.f32.prelu = (struct prelu_parameters) {
       .ukernel = (xnn_prelu_ukernel_fn) xnn_f32_prelu_ukernel__scalar_2x4,
@@ -3953,11 +3772,6 @@ static void init(void) {
         .init.f32 = xnn_init_f32_chw_scalar_params,
         .output_height_tile = 1,
         .output_width_tile = 1,
-      };
-      xnn_params.f32.ibilinear_chw = (struct ibilinear_chw_parameters) {
-        .ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__scalar_p4,
-        .channel_tile = 1,
-        .pixel_tile = 4,
       };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS

@@ -241,26 +241,6 @@ struct maxpool_parameters {
   uint8_t qr;
 };
 
-struct ibilinear_parameters {
-  xnn_ibilinear_ukernel_fn ukernel;
-  // Number of output pixels in a tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of pixels in each call.
-  uint8_t pixel_tile;
-  // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
-  uint8_t channel_tile;
-};
-
-struct ibilinear_chw_parameters {
-  xnn_ibilinear_chw_ukernel_fn ukernel;
-  // Number of output pixels in a tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of pixels in each call.
-  uint8_t pixel_tile;
-  // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
-  uint8_t channel_tile;
-};
-
 struct zip_parameters {
   xnn_zipc_ukernel_fn x2;
   xnn_zipc_ukernel_fn x3;
@@ -348,13 +328,9 @@ struct xnn_parameters {
     struct gemm_parameters gemm;
   } qu8;
   struct {
-    // Bilinear interpolation (2D).
-    struct ibilinear_parameters ibilinear;
     struct maxpool_parameters maxpool;
   } s8;
   struct {
-    // Bilinear interpolation (2D).
-    struct ibilinear_parameters ibilinear;
     struct maxpool_parameters maxpool;
     xnn_u8_lut32norm_ukernel_fn lut32norm;
     xnn_u8_rmax_ukernel_fn rmax;
@@ -366,8 +342,6 @@ struct xnn_parameters {
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
     struct maxpool_parameters maxpool;
-    // Bilinear interpolation (2D).
-    struct ibilinear_parameters ibilinear;
     struct prelu_parameters prelu;
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
@@ -384,16 +358,12 @@ struct xnn_parameters {
     struct dwconv2d_chw_parameters dwconv2d_chw_5x5;
     // Direct 5x5 stride-2 Convolution with padding 2 on left and right in CHW layout.
     struct dwconv2d_chw_parameters dwconv2d_chw_5x5s2;
-    // Bilinear interpolation (2D) in CHW layout.
-    struct ibilinear_chw_parameters ibilinear_chw;
   } f16;
   struct {
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
     struct maxpool_parameters maxpool;
     struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
-    // Bilinear interpolation (2D).
-    struct ibilinear_parameters ibilinear;
     struct prelu_parameters prelu;
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
@@ -414,8 +384,6 @@ struct xnn_parameters {
     struct dwconv2d_chw_parameters dwconv2d_chw_5x5;
     // Direct 5x5 stride-2 Convolution with padding 2 on left and right in CHW layout.
     struct dwconv2d_chw_parameters dwconv2d_chw_5x5s2;
-    // Bilinear interpolation (2D) in CHW layout.
-    struct ibilinear_chw_parameters ibilinear_chw;
   } f32;
   struct {
     xnn_unpool_ukernel_fn unpool;
