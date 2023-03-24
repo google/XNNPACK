@@ -365,6 +365,12 @@ struct xnn_dwconv_config {
   uint8_t last_tile;
 };
 
+#define XNN_MAX_F16_DWCONV_UKERNELS 4
+#define XNN_MAX_F32_DWCONV_UKERNELS 4
+#define XNN_MAX_QC8_DWCONV_UKERNELS 3
+#define XNN_MAX_QS8_DWCONV_UKERNELS 2
+#define XNN_MAX_QU8_DWCONV_UKERNELS 2
+
 XNN_INTERNAL struct xnn_dwconv_config* xnn_init_f16_dwconv_config();
 XNN_INTERNAL struct xnn_dwconv_config* xnn_init_f32_dwconv_config();
 XNN_INTERNAL struct xnn_dwconv_config* xnn_init_qc8_dwconv_config();

@@ -18,10 +18,10 @@
 #include "models/models.h"
 
 #include <xnnpack.h>
+#include <xnnpack/config.h>
 #include <xnnpack/dwconv.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
 
 
 static void DWConvEnd2EndBenchmark(
@@ -174,7 +174,6 @@ static void DWConvEnd2EndBenchmark(
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  // Restore xnn_params.f16.dwconv to original state as defined in init.c.
   memcpy(dwconv_config, saved_dwconv_params, sizeof(saved_dwconv_params));
 }
 

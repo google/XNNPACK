@@ -18,10 +18,10 @@
 #include "models/models.h"
 
 #include <xnnpack.h>
+#include <xnnpack/config.h>
 #include <xnnpack/dwconv.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
 
 
 static void DWConvEnd2EndBenchmark(
