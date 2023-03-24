@@ -83,49 +83,6 @@ tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=5 -D P=3
 tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=6 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=0 -o src/math/gen/f32-tanh-scalar-expm1minus-rr1-lut64-p3h1ts-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=6 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=0 -o src/math/gen/f32-tanh-scalar-expm1minus-rr2-lut64-p3h1ts-div.c &
 
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=4 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-p6h4ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=0 -D P=6 -D H=4 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-p6h4ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-p6h5ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-p6h5ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D PS=1 -D DIV=RCP -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-p6h5ps-rcp.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D DIV=RCP -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-p6h5ts-rcp.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=0 -D P=6 -D H=5 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-p6h5ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-p6h5ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=2 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut4-p4h2ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=2 -D PS=0 -D DIV=RCP -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut4-p4h2ts-rcp.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=2 -D P=4 -D H=2 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut4-p4h2ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=3 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut4-p4h3ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=3 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut4-p4h3ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=2 -D P=4 -D H=3 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut4-p4h3ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=2 -D P=4 -D H=3 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut4-p4h3ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut8-p3h1ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut8-p3h1ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=2 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut8-p4h2ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=2 -D PS=0 -D DIV=RCP -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut8-p4h2ts-rcp.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=2 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut8-p4h2ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=2 -D PS=0 -D DIV=RCP -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut8-p4h2ts-rcp.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut8-p4h3ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut8-p4h3ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D PS=1 -D DIV=RCP -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut8-p4h3ps-rcp.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D DIV=RCP -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut8-p4h3ts-rcp.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=3 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut8-p4h3ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut8-p4h3ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=3 -D PS=1 -D DIV=RCP -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut8-p4h3ps-rcp.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D DIV=RCP -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut8-p4h3ts-rcp.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=4 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut16-p3h1ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=4 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut16-p3h1ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=4 -D P=4 -D H=2 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut16-p4h2ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=4 -D P=4 -D H=2 -D PS=0 -D DIV=RCP -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut16-p4h2ts-rcp.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=4 -D P=4 -D H=2 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut16-p4h2ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=4 -D P=4 -D H=3 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut16-p4h3ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=4 -D P=4 -D H=3 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut16-p4h3ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=4 -D P=4 -D H=3 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut16-p4h3ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=4 -D P=4 -D H=3 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut16-p4h3ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=5 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut32-p3h1ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=5 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut32-p3h1ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=6 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut64-p3h1ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=6 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr2-lut64-p3h1ts-div.c &
-
 tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=4 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=0 -o src/math/gen/f32-tanh-scalar-expm1plus-rr1-p6h4ts-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=0 -D P=6 -D H=4 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=0 -o src/math/gen/f32-tanh-scalar-expm1plus-rr2-p6h4ts-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=0 -o src/math/gen/f32-tanh-scalar-expm1plus-rr1-p6h5ps-div.c &
@@ -158,39 +115,6 @@ tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=5 -D P=3 
 tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=5 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=0 -o src/math/gen/f32-tanh-scalar-expm1plus-rr2-lut32-p3h1ts-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=6 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=0 -o src/math/gen/f32-tanh-scalar-expm1plus-rr1-lut64-p3h1ts-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=6 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=0 -o src/math/gen/f32-tanh-scalar-expm1plus-rr2-lut64-p3h1ts-div.c &
-
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=4 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-p6h4ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=0 -D P=6 -D H=4 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-p6h4ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-p6h5ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-p6h5ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=0 -D P=6 -D H=5 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-p6h5ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-p6h5ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=2 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut4-p4h2ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=2 -D P=4 -D H=2 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut4-p4h2ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=3 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut4-p4h3ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=2 -D P=4 -D H=3 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut4-p4h3ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=2 -D P=4 -D H=3 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut4-p4h3ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=2 -D P=4 -D H=3 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut4-p4h3ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=3 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut8-p3h1ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=3 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut8-p3h1ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=2 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut8-p4h2ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=2 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut8-p4h2ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut8-p4h3ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut8-p4h3ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=3 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut8-p4h3ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=3 -D P=4 -D H=3 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut8-p4h3ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=4 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut16-p3h1ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=4 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut16-p3h1ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=4 -D P=4 -D H=2 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut16-p4h2ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=4 -D P=4 -D H=2 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut16-p4h2ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=4 -D P=4 -D H=3 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut16-p4h3ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=4 -D P=4 -D H=3 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut16-p4h3ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=4 -D P=4 -D H=3 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut16-p4h3ps-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=4 -D P=4 -D H=3 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut16-p4h3ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=5 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut32-p3h1ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=5 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut32-p3h1ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=6 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr1-lut64-p3h1ts-div.c &
-tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=6 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1plus-rr2-lut64-p3h1ts-div.c &
 
 tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=4 -D PS=0 -D DIV=DIV -D FMA=1 -D WASM=0 -o src/math/gen/f32-tanh-fma-expm1minus-rr1-p6h4ts-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=2 -D LOG2LUT=0 -D P=6 -D H=4 -D PS=0 -D DIV=DIV -D FMA=1 -D WASM=0 -o src/math/gen/f32-tanh-fma-expm1minus-rr2-p6h4ts-div.c &
@@ -267,6 +191,21 @@ tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=5 -D P=3 
 tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=5 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=1 -D WASM=0 -o src/math/gen/f32-tanh-fma-expm1plus-rr2-lut32-p3h1ts-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=1 -D LOG2LUT=6 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=1 -D WASM=0 -o src/math/gen/f32-tanh-fma-expm1plus-rr1-lut64-p3h1ts-div.c &
 tools/xngen src/math/f32-tanh-scalar-expm1plus.c.in -D RR=2 -D LOG2LUT=6 -D P=3 -D H=1 -D PS=0 -D DIV=DIV -D FMA=1 -D WASM=0 -o src/math/gen/f32-tanh-fma-expm1plus-rr2-lut64-p3h1ts-div.c &
+
+# Wasm
+tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D PS=0 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-p6h5ts-div.c &
+tools/xngen src/math/f32-tanh-scalar-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D PS=1 -D DIV=DIV -D FMA=0 -D WASM=1 -o src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut8-p4h3ps-div.c &
+
+# WAsm SIMD
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-min.c &
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-pmin.c &
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-max.c &
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-pmax.c &
+
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-abs-min.c &
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-abs-pmin.c &
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-nabs-max.c &
+tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-nabs-pmax.c &
 
 # NEON
 tools/xngen src/math/f32-tanh-neon-expm1minus.c.in -D RR=1 -D LOG2LUT=0 -D P=6 -D H=5 -D DIV=DIV             -D FMA=1 -o src/math/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div.c &
@@ -346,17 +285,6 @@ tools/xngen src/math/f32-tanh-avx512skx-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D 
 tools/xngen src/math/f32-tanh-avx512skx-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=DIV    -D PERM=0 -o src/math/gen/f32-tanh-avx512skx-expm1minus-rr1-lut8-p4h3ts-gather-div.c &
 tools/xngen src/math/f32-tanh-avx512skx-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR1    -D PERM=0 -o src/math/gen/f32-tanh-avx512skx-expm1minus-rr1-lut8-p4h3ts-gather-nr1.c &
 tools/xngen src/math/f32-tanh-avx512skx-expm1minus.c.in -D RR=1 -D LOG2LUT=3 -D P=4 -D H=3 -D DIV=NR1ADJ -D PERM=0 -o src/math/gen/f32-tanh-avx512skx-expm1minus-rr1-lut8-p4h3ts-gather-nr1adj.c &
-
-# WAsm SIMD
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-min.c &
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-pmin.c &
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-max.c &
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=0 -D P=6 -D H=5 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-pmax.c &
-
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-abs-min.c &
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-abs.c.in  -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-abs-pmin.c &
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=WASM   -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-nabs-max.c &
-tools/xngen src/math/f32-tanh-wasmsimd-expm1minus-nabs.c.in -D LOG2LUT=3 -D P=4 -D H=3 -D MINMAX=PSEUDO -o src/math/gen/f32-tanh-wasmsimd-expm1minus-rr1-lut8-p4h3ts-div-nabs-pmax.c &
 
 ############################### Evaluation tests ##############################
 tools/generate-tanh-eval.py --spec eval/f16-tanh.yaml --output eval/f16-tanh.cc &
