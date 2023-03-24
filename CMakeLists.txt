@@ -277,6 +277,8 @@ SET(XNNPACK_SRCS
   src/avgpool-config.c
   src/binary-elementwise-config.c
   src/init.c
+  src/gavgpool-config.c
+  src/gavgpool-cw-config.c
   src/params.c
   src/pavgpool-config.c
   src/transpose-config.c

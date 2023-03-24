@@ -291,6 +291,49 @@ struct xnn_pavgpool_config {
 XNN_INTERNAL const struct xnn_pavgpool_config* xnn_init_f16_pavgpool_config();
 XNN_INTERNAL const struct xnn_pavgpool_config* xnn_init_f32_pavgpool_config();
 
+struct xnn_gavgpool_config {
+  xnn_gavgpool_unipass_ukernel_fn unipass;
+  xnn_gavgpool_multipass_ukernel_fn multipass;
+  union {
+    xnn_init_f16_scaleminmax_params_fn f16;
+    xnn_init_f32_scaleminmax_params_fn f32;
+    xnn_init_qs8_avgpool_minmax_params_fn qs8;
+    xnn_init_qu8_avgpool_minmax_params_fn qu8;
+  } init;
+  union {
+    xnn_update_f16_scaleminmax_params_fn f16;
+    xnn_update_f32_scaleminmax_params_fn f32;
+    xnn_update_qs8_avgpool_minmax_params_fn qs8;
+    xnn_update_qu8_avgpool_minmax_params_fn qu8;
+  } update;
+  // Number of rows in a tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  uint16_t row_tile;
+  // Number of channels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  uint16_t channel_tile;
+};
+XNN_INTERNAL const struct xnn_gavgpool_config* xnn_init_f16_gavgpool_config();
+XNN_INTERNAL const struct xnn_gavgpool_config* xnn_init_f32_gavgpool_config();
+XNN_INTERNAL const struct xnn_gavgpool_config* xnn_init_qs8_gavgpool_config();
+XNN_INTERNAL const struct xnn_gavgpool_config* xnn_init_qu8_gavgpool_config();
+
+struct xnn_gavgpool_cw_config {
+  xnn_gavgpool_cw_ukernel_fn ukernel;
+  union {
+    xnn_init_f16_gavgpool_neonfp16arith_params_fn f16;
+  } init;
+  union {
+    xnn_update_f16_gavgpool_neonfp16arith_params_fn f16;
+  } update;
+
+  // Number of channels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  uint8_t channel_tile;
+};
+XNN_INTERNAL const struct xnn_gavgpool_cw_config* xnn_init_f16_gavgpool_cw_config();
+XNN_INTERNAL const struct xnn_gavgpool_cw_config* xnn_init_f32_gavgpool_cw_config();
+
 
 #ifdef __cplusplus
 }  // extern "C"

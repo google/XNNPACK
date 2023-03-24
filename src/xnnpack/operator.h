@@ -278,6 +278,8 @@ struct xnn_operator {
   struct xnn_ukernel ukernel;
   const struct xnn_avgpool_config* avgpool_config;
   const struct xnn_pavgpool_config* pavgpool_config;
+  const struct xnn_gavgpool_config* gavgpool_config;
+  const struct xnn_gavgpool_cw_config* gavgpool_cw_config;
 
   struct compute_parameters compute;
   struct compute_parameters compute2;

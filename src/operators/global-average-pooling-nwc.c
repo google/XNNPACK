@@ -16,8 +16,10 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/config.h>
 #include <xnnpack/log.h>
 #include <xnnpack/operator.h>
+#include <xnnpack/operator-type.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
 
@@ -33,6 +35,7 @@ static enum xnn_status create_global_average_pooling_nwc(
     size_t params_size,
     uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
+    const struct xnn_gavgpool_config* gavgpool_config,
     xnn_operator_t* global_average_pooling_op_out)
 {
   xnn_operator_t global_average_pooling_op = NULL;
@@ -104,6 +107,7 @@ static enum xnn_status create_global_average_pooling_nwc(
 
   global_average_pooling_op->type = operator_type;
   global_average_pooling_op->flags = flags;
+  global_average_pooling_op->gavgpool_config  = gavgpool_config;
 
   global_average_pooling_op->state = xnn_run_state_invalid;
 
@@ -157,10 +161,12 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qu8(
     return xnn_status_unsupported_parameter;
   }
 
+  const struct xnn_gavgpool_config* gavgpool_config = xnn_init_qu8_gavgpool_config();
+  assert(gavgpool_config != NULL);
+
   union xnn_qu8_avgpool_minmax_params params;
-  if (xnn_params.qu8.gavgpool.init.qu8 != NULL) {
-    xnn_params.qu8.gavgpool.init.qu8(&params,
-      0 /* bias */, 1.0f /* scale */, output_zero_point, output_min, output_max);
+  if (gavgpool_config->init.qu8 != NULL) {
+    gavgpool_config->init.qu8(&params, 0 /* bias */, 1.0f /* scale */, output_zero_point, output_min, output_max);
   }
   const enum xnn_status status = create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
@@ -169,6 +175,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qu8(
     &params, sizeof(params),
     XNN_INIT_FLAG_QU8,
     xnn_operator_type_global_average_pooling_nwc_qu8,
+    gavgpool_config,
     global_average_pooling_op_out);
   if (status == xnn_status_success) {
     xnn_operator_t global_average_pooling_op = *global_average_pooling_op_out;
@@ -221,10 +228,12 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qs8(
     return xnn_status_unsupported_parameter;
   }
 
+  const struct xnn_gavgpool_config* gavgpool_config = xnn_init_qs8_gavgpool_config();
+  assert(gavgpool_config != NULL);
+
   union xnn_qs8_avgpool_minmax_params params;
-  if (xnn_params.qs8.gavgpool.init.qs8 != NULL) {
-    xnn_params.qs8.gavgpool.init.qs8(&params,
-      0 /* bias */, 1.0f /* scale */, output_zero_point, output_min, output_max);
+  if (gavgpool_config->init.qs8 != NULL) {
+    gavgpool_config->init.qs8(&params, 0 /* bias */, 1.0f /* scale */, output_zero_point, output_min, output_max);
   }
   const enum xnn_status status = create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
@@ -233,6 +242,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_qs8(
     &params, sizeof(params),
     XNN_INIT_FLAG_QS8,
     xnn_operator_type_global_average_pooling_nwc_qs8,
+    gavgpool_config,
     global_average_pooling_op_out);
   if (status == xnn_status_success) {
     xnn_operator_t global_average_pooling_op = *global_average_pooling_op_out;
@@ -275,10 +285,17 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f16(
     return xnn_status_invalid_parameter;
   }
 
+  const struct xnn_gavgpool_config* gavgpool_config = xnn_init_f16_gavgpool_config();
+  if (gavgpool_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
   union xnn_f16_scaleminmax_params params;
-  if (xnn_params.f16.gavgpool.init.f16 != NULL) {
-    xnn_params.f16.gavgpool.init.f16(&params,
-      0 /* scale */, fp16_ieee_from_fp32_value(output_min), fp16_ieee_from_fp32_value(output_max));
+  if (gavgpool_config->init.f16 != NULL) {
+    gavgpool_config->init.f16(
+      &params, 0 /* scale */, fp16_ieee_from_fp32_value(output_min), fp16_ieee_from_fp32_value(output_max));
   }
   return create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
@@ -287,6 +304,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f16(
     &params, sizeof(params),
     XNN_INIT_FLAG_F16,
     xnn_operator_type_global_average_pooling_nwc_f16,
+    gavgpool_config,
     global_average_pooling_op_out);
 }
 
@@ -320,10 +338,16 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f32(
     return xnn_status_invalid_parameter;
   }
 
+  const struct xnn_gavgpool_config* gavgpool_config = xnn_init_f32_gavgpool_config();
+  if (gavgpool_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_global_average_pooling_nwc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
   union xnn_f32_scaleminmax_params params;
-  if (xnn_params.f32.gavgpool.init.f32 != NULL) {
-    xnn_params.f32.gavgpool.init.f32(&params,
-      0.0f /* scale */, output_min, output_max);
+  if (gavgpool_config->init.f32 != NULL) {
+    gavgpool_config->init.f32(&params, 0.0f /* scale */, output_min, output_max);
   }
   return create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
@@ -332,6 +356,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f32(
     &params, sizeof(params),
     XNN_INIT_FLAG_F32,
     xnn_operator_type_global_average_pooling_nwc_f32,
+    gavgpool_config,
     global_average_pooling_op_out);
 }
 
@@ -367,9 +392,16 @@ enum xnn_status xnn_create_global_sum_pooling_nwc_f16(
     return xnn_status_invalid_parameter;
   }
 
+  const struct xnn_gavgpool_config* gavgpool_config = xnn_init_f16_gavgpool_config();
+  if (gavgpool_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_global_sum_pooling_nwc_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
   union xnn_f16_scaleminmax_params params;
-  if (xnn_params.f16.gavgpool.init.f16 != NULL) {
-    xnn_params.f16.gavgpool.init.f16(
+  if (gavgpool_config->init.f16 != NULL) {
+    gavgpool_config->init.f16(
       &params,
       /*scale=*/UINT16_C(0x3C00) /* 1.0h */,
       fp16_ieee_from_fp32_value(output_min),
@@ -382,6 +414,7 @@ enum xnn_status xnn_create_global_sum_pooling_nwc_f16(
     &params, sizeof(params),
     XNN_INIT_FLAG_F16,
     xnn_operator_type_global_sum_pooling_nwc_f16,
+    gavgpool_config,
     global_sum_pooling_op_out);
 }
 
@@ -415,9 +448,16 @@ enum xnn_status xnn_create_global_sum_pooling_nwc_f32(
     return xnn_status_invalid_parameter;
   }
 
+  const struct xnn_gavgpool_config* gavgpool_config = xnn_init_f32_gavgpool_config();
+  if (gavgpool_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_global_sum_pooling_nwc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
   union xnn_f32_scaleminmax_params params;
-  if (xnn_params.f32.gavgpool.init.f32 != NULL) {
-    xnn_params.f32.gavgpool.init.f32(&params, /*scale=*/1.0f, output_min, output_max);
+  if (gavgpool_config->init.f32 != NULL) {
+    gavgpool_config->init.f32(&params, /*scale=*/1.0f, output_min, output_max);
   }
   return create_global_average_pooling_nwc(
     channels, input_stride, output_stride, flags,
@@ -426,6 +466,7 @@ enum xnn_status xnn_create_global_sum_pooling_nwc_f32(
     &params, sizeof(params),
     XNN_INIT_FLAG_F32,
     xnn_operator_type_global_sum_pooling_nwc_f32,
+    gavgpool_config,
     global_sum_pooling_op_out);
 }
 
@@ -437,7 +478,7 @@ static enum xnn_status setup_global_average_pooling_nwc(
     void* output,
     size_t log2_data_element_size,
     size_t log2_accumulator_element_size,
-    const struct gavgpool_parameters gavgpool[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_gavgpool_config gavgpool[restrict XNN_MIN_ELEMENTS(1)],
     uint32_t datatype_init_flags,
     enum xnn_operator_type expected_operator_type,
     const void* params,
@@ -523,7 +564,7 @@ static void update_params_qu8(
 {
   const int32_t bias = -((int32_t) width * global_average_pooling_op->input_zero_point);
   const float scale = global_average_pooling_op->input_scale / (global_average_pooling_op->output_scale * (float) width);
-  xnn_params.qu8.gavgpool.update.qu8(&global_average_pooling_op->params.qu8_gavgpool, bias, scale);
+  global_average_pooling_op->gavgpool_config->update.qu8(&global_average_pooling_op->params.qu8_gavgpool, bias, scale);
 }
 
 enum xnn_status xnn_setup_global_average_pooling_nwc_qu8(
@@ -540,7 +581,7 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_qu8(
     input, output,
     0 /* log2(sizeof(uint8_t)) */,
     2 /* log2(sizeof(int32_t)) */,
-    &xnn_params.qu8.gavgpool,
+    global_average_pooling_op->gavgpool_config,
     XNN_INIT_FLAG_QU8,
     xnn_operator_type_global_average_pooling_nwc_qu8,
     &global_average_pooling_op->params.qu8_gavgpool,
@@ -555,7 +596,7 @@ static void update_params_qs8(
 {
   const int32_t bias = -((int32_t) width * global_average_pooling_op->input_zero_point);
   const float scale = global_average_pooling_op->input_scale / (global_average_pooling_op->output_scale * (float) width);
-  xnn_params.qs8.gavgpool.update.qs8(&global_average_pooling_op->params.qs8_gavgpool, bias, scale);
+  global_average_pooling_op->gavgpool_config->update.qs8(&global_average_pooling_op->params.qs8_gavgpool, bias, scale);
 }
 
 enum xnn_status xnn_setup_global_average_pooling_nwc_qs8(
@@ -572,7 +613,7 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_qs8(
     input, output,
     0 /* log2(sizeof(int8_t)) */,
     2 /* log2(sizeof(int32_t)) */,
-    &xnn_params.qs8.gavgpool,
+    global_average_pooling_op->gavgpool_config,
     XNN_INIT_FLAG_QS8,
     xnn_operator_type_global_average_pooling_nwc_qs8,
     &global_average_pooling_op->params.qs8_gavgpool,
@@ -585,7 +626,7 @@ static void update_params_f16(
   xnn_operator_t global_average_pooling_op,
   size_t width)
 {
-  xnn_params.f16.gavgpool.update.f16(
+  global_average_pooling_op->gavgpool_config->update.f16(
     &global_average_pooling_op->params.f16_scaleminmax,
     fp16_ieee_from_fp32_value(1.0f / (float) width));
 }
@@ -604,7 +645,7 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_f16(
     input, output,
     1 /* log2(sizeof(uint16_t)) */,
     1 /* log2(sizeof(uint16_t)) */,
-    &xnn_params.f16.gavgpool,
+    global_average_pooling_op->gavgpool_config,
     XNN_INIT_FLAG_F16,
     xnn_operator_type_global_average_pooling_nwc_f16,
     &global_average_pooling_op->params.f16_scaleminmax,
@@ -617,7 +658,8 @@ static void update_params_f32(
   xnn_operator_t global_average_pooling_op,
   size_t width)
 {
-  xnn_params.f32.gavgpool.update.f32(&global_average_pooling_op->params.f32_scaleminmax, 1.0f / (float) width);
+  global_average_pooling_op->gavgpool_config->update.f32(
+    &global_average_pooling_op->params.f32_scaleminmax, 1.0f / (float) width);
 }
 
 enum xnn_status xnn_setup_global_average_pooling_nwc_f32(
@@ -634,7 +676,7 @@ enum xnn_status xnn_setup_global_average_pooling_nwc_f32(
     input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
-    &xnn_params.f32.gavgpool,
+    global_average_pooling_op->gavgpool_config,
     XNN_INIT_FLAG_F32,
     xnn_operator_type_global_average_pooling_nwc_f32,
     &global_average_pooling_op->params.f32_scaleminmax,
@@ -657,7 +699,7 @@ enum xnn_status xnn_setup_global_sum_pooling_nwc_f16(
     input, output,
     1 /* log2(sizeof(uint16_t)) */,
     1 /* log2(sizeof(uint16_t)) */,
-    &xnn_params.f16.gavgpool,
+    global_sum_pooling_op->gavgpool_config,
     XNN_INIT_FLAG_F16,
     xnn_operator_type_global_sum_pooling_nwc_f16,
     &global_sum_pooling_op->params.f16_scaleminmax,
@@ -680,7 +722,7 @@ enum xnn_status xnn_setup_global_sum_pooling_nwc_f32(
     input, output,
     2 /* log2(sizeof(float)) */,
     2 /* log2(sizeof(float)) */,
-    &xnn_params.f32.gavgpool,
+    global_sum_pooling_op->gavgpool_config,
     XNN_INIT_FLAG_F32,
     xnn_operator_type_global_sum_pooling_nwc_f32,
     &global_sum_pooling_op->params.f32_scaleminmax,

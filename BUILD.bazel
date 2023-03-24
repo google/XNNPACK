@@ -2411,6 +2411,8 @@ xnnpack_cc_library(
     srcs = [
         "src/avgpool-config.c",
         "src/binary-elementwise-config.c",
+        "src/gavgpool-config.c",
+        "src/gavgpool-cw-config.c",
         "src/pavgpool-config.c",
         "src/transpose-config.c",
         "src/unary-elementwise-config.c",
