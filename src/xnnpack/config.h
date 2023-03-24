@@ -232,7 +232,7 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_xx_copy_config(
 struct xnn_xx_fill_config {
   xnn_fill_ukernel_fn ukernel;
   // Number of rows of inputs processed in one tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of rows in each call.
   uint8_t row_tile;
 };
 XNN_INTERNAL const struct xnn_xx_fill_config* xnn_init_xx_fill_config();
@@ -240,7 +240,7 @@ XNN_INTERNAL const struct xnn_xx_fill_config* xnn_init_xx_fill_config();
 struct xnn_xx_pad_config {
   xnn_pad_ukernel_fn ukernel;
   // Number of rows of inputs processed in one tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of rows in each call.
   uint8_t row_tile;
 };
 XNN_INTERNAL const struct xnn_xx_pad_config* xnn_init_xx_pad_config();
@@ -307,7 +307,7 @@ struct xnn_gavgpool_config {
     xnn_update_qu8_avgpool_minmax_params_fn qu8;
   } update;
   // Number of rows in a tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of rows in each call.
   uint16_t row_tile;
   // Number of channels in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
@@ -380,7 +380,7 @@ XNN_INTERNAL struct xnn_dwconv_config* xnn_init_qu8_dwconv_config();
 struct xnn_ibilinear_config {
   xnn_ibilinear_ukernel_fn ukernel;
   // Number of output pixels in a tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of pixels in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of pixels in each call.
   uint8_t pixel_tile;
   // Number of channels in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
@@ -396,7 +396,7 @@ XNN_INTERNAL const struct xnn_ibilinear_config* xnn_init_u8_ibilinear_config();
 struct xnn_ibilinear_chw_config {
   xnn_ibilinear_chw_ukernel_fn ukernel;
   // Number of output pixels in a tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of pixels in each call.
+  // For best efficiency, micro-kernel must process a multiple of this number of pixels in each call.
   uint8_t pixel_tile;
   // Number of channels in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
