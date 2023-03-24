@@ -40,21 +40,26 @@ static void DWConvEnd2EndBenchmark(
     return;
   }
 
-  // Save xnn_params.qu8.dwconv so that we can modify it for the benchmark and later restore it.
-  struct dwconv_parameters saved_dwconv_params[XNN_MAX_QU8_DWCONV_UKERNELS];
-  static_assert(sizeof(saved_dwconv_params) == sizeof(xnn_params.qu8.dwconv), "size of dwconv params must match");
-  memcpy(saved_dwconv_params, xnn_params.qu8.dwconv, sizeof(saved_dwconv_params));
+  struct xnn_dwconv_config* dwconv_config = xnn_init_qu8_dwconv_config();
+  if (dwconv_config == nullptr) {
+    state.SkipWithError("failed to initialize QU8 DWCONV config");
+    return;
+  }
+
+  // Save dwconv_config so that we can modify it for the benchmark and later restore it.
+  struct xnn_dwconv_config saved_dwconv_params[XNN_MAX_QU8_DWCONV_UKERNELS];
+  memcpy(saved_dwconv_params, dwconv_config, sizeof(saved_dwconv_params));
 
   // Override microkernels chosen in xnn_initialize
   for (size_t i = 0; i < XNN_MAX_QU8_DWCONV_UKERNELS; i++) {
     // Replace only the microkernel the matching kernel size.
-    if (xnn_params.qu8.dwconv[i].primary_tile == primary_tile) {
-      // Note: do not directly assign to xnn_params.qu8.dwconv[i] because it breaks older gcc.
-      xnn_params.qu8.dwconv[i].minmax.unipass = xnn_dwconv_unipass_ukernel_fn(dwconv);
-      xnn_params.qu8.dwconv[i].channel_tile = channel_tile;
-      xnn_params.qu8.dwconv[i].primary_tile = primary_tile;
-      xnn_params.qu8.dwconv[i].last_tile = 0;
-      xnn_params.qu8.dwconv[i].init.qu8 = init_params;
+    if (dwconv_config[i].primary_tile == primary_tile) {
+      // Note: do not directly assign to dwconv_config[i] because it breaks older gcc.
+      dwconv_config[i].minmax.unipass = xnn_dwconv_unipass_ukernel_fn(dwconv);
+      dwconv_config[i].channel_tile = channel_tile;
+      dwconv_config[i].primary_tile = primary_tile;
+      dwconv_config[i].last_tile = 0;
+      dwconv_config[i].init.qu8 = init_params;
       break;
     }
   }
@@ -80,8 +85,8 @@ static void DWConvEnd2EndBenchmark(
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  // Restore xnn_params.qu8.dwconv to original state as defined in init.c.
-  memcpy(xnn_params.qu8.dwconv, saved_dwconv_params, sizeof(saved_dwconv_params));
+  // Restore dwconv_config to original state as defined in init.c.
+  memcpy(dwconv_config, saved_dwconv_params, sizeof(saved_dwconv_params));
 }
 
 static void DWConvEnd2EndBenchmark(
@@ -102,16 +107,21 @@ static void DWConvEnd2EndBenchmark(
     return;
   }
 
-  // Save xnn_params.qu8.dwconv so that we can modify it for the benchmark and later restore it.
-  struct dwconv_parameters saved_dwconv_params[XNN_MAX_QU8_DWCONV_UKERNELS];
-  static_assert(sizeof(saved_dwconv_params) == sizeof(xnn_params.qu8.dwconv), "size of dwconv params must match");
-  memcpy(saved_dwconv_params, xnn_params.qu8.dwconv, sizeof(saved_dwconv_params));
+  struct xnn_dwconv_config* dwconv_config = xnn_init_qu8_dwconv_config();
+  if (dwconv_config == nullptr) {
+    state.SkipWithError("failed to initialize qu8 DWCONV config");
+    return;
+  }
+
+  // Save dwconv_config so that we can modify it for the benchmark and later restore it.
+  struct xnn_dwconv_config saved_dwconv_params[XNN_MAX_QU8_DWCONV_UKERNELS];
+  memcpy(saved_dwconv_params, dwconv_config, sizeof(saved_dwconv_params));
 
   bool found = false;
   for (size_t i = 0; i < XNN_MAX_QU8_DWCONV_UKERNELS; i++) {
-    if (xnn_params.qu8.dwconv[i].primary_tile == primary_tile_to_replace) {
+    if (dwconv_config[i].primary_tile == primary_tile_to_replace) {
       found = true;
-    } else if (xnn_params.qu8.dwconv[i].last_tile != 0) {
+    } else if (dwconv_config[i].last_tile != 0) {
       // Found a multipass microkernel, replace it.
       found = true;
     }
@@ -125,22 +135,22 @@ static void DWConvEnd2EndBenchmark(
   // Override microkernels chosen in xnn_initialize
   for (size_t i = 0; i < XNN_MAX_QU8_DWCONV_UKERNELS; i++) {
     // Replace only the microkernel the matching kernel size.
-    if (xnn_params.qu8.dwconv[i].primary_tile == primary_tile_to_replace ||
-        xnn_params.qu8.dwconv[i].last_tile != 0) {
+    if (dwconv_config[i].primary_tile == primary_tile_to_replace ||
+        dwconv_config[i].last_tile != 0) {
       // Replace either when the primary_tile_to_replace matches, or replace the
       // first multipass dwconv microkernel we find.
       // TODO(zhin): support specifying target multipass dwconv to replace.
-      std::memset(&xnn_params.qu8.dwconv[i], 0, sizeof(xnn_params.qu8.dwconv[i]));
+      std::memset(&dwconv_config[i], 0, sizeof(dwconv_config[i]));
 
-      // Note: do not directly assign to xnn_params.qu8.dwconv[i] because it breaks older gcc.
-      xnn_params.qu8.dwconv[i].minmax.multipass = xnn_dwconv_multipass_ukernel_fn(dwconv);
-      xnn_params.qu8.dwconv[i].channel_tile = channel_tile;
-      xnn_params.qu8.dwconv[i].channel_subtile = channel_subtile;
-      xnn_params.qu8.dwconv[i].channel_round = channel_round;
-      xnn_params.qu8.dwconv[i].primary_tile = primary_tile;
-      xnn_params.qu8.dwconv[i].middle_tile = middle_tile;
-      xnn_params.qu8.dwconv[i].last_tile = last_tile;
-      xnn_params.qu8.dwconv[i].init.qu8 = init_params;
+      // Note: do not directly assign to dwconv_config[i] because it breaks older gcc.
+      dwconv_config[i].minmax.multipass = xnn_dwconv_multipass_ukernel_fn(dwconv);
+      dwconv_config[i].channel_tile = channel_tile;
+      dwconv_config[i].channel_subtile = channel_subtile;
+      dwconv_config[i].channel_round = channel_round;
+      dwconv_config[i].primary_tile = primary_tile;
+      dwconv_config[i].middle_tile = middle_tile;
+      dwconv_config[i].last_tile = last_tile;
+      dwconv_config[i].init.qu8 = init_params;
       break;
     }
   }
@@ -166,8 +176,8 @@ static void DWConvEnd2EndBenchmark(
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  // Restore xnn_params.qu8.dwconv to original state as defined in init.c.
-  memcpy(xnn_params.qu8.dwconv, saved_dwconv_params, sizeof(saved_dwconv_params));
+  // Restore dwconv_config to original state as defined in init.c.
+  memcpy(dwconv_config, saved_dwconv_params, sizeof(saved_dwconv_params));
 }
 
 

@@ -334,6 +334,43 @@ struct xnn_gavgpool_cw_config {
 XNN_INTERNAL const struct xnn_gavgpool_cw_config* xnn_init_f16_gavgpool_cw_config();
 XNN_INTERNAL const struct xnn_gavgpool_cw_config* xnn_init_f32_gavgpool_cw_config();
 
+union xnn_dwconv_ukernel {
+  xnn_dwconv_unipass_ukernel_fn unipass;
+  xnn_dwconv_multipass_ukernel_fn multipass;
+};
+
+struct xnn_dwconv_config {
+  union xnn_dwconv_ukernel minmax;
+  union xnn_dwconv_ukernel linear;
+  union {
+    xnn_init_qc8_conv_minmax_params_fn qc8;
+    xnn_init_qs8_conv_minmax_params_fn qs8;
+    xnn_init_qu8_conv_minmax_params_fn qu8;
+    xnn_init_f16_minmax_params_fn f16;
+    xnn_init_f32_minmax_params_fn f32;
+  } init;
+  // Number of channels in a tile.
+  uint8_t channel_tile;
+  // Number of channels in a subtile. This must be less-than-equal channel_tile. After processing channel_tile, the
+  // remainder is processed in tiles of channel_subtile.
+  uint8_t channel_subtile;
+  // How much to round channels by to get more optimal tiling.
+  uint8_t channel_round;
+  // Number of elements in the tile. For multipass, this is the tile size for first pass.
+  uint8_t primary_tile;
+  // Tile size for middle pass. Middle pass can be run multiple times. Will be zero for unipass, non-zero and not
+  // greater than last_tile for multipass.
+  uint8_t middle_tile;
+  // Tile size for last pass. Will be zero for unipass, non-zero for multipass.
+  uint8_t last_tile;
+};
+
+XNN_INTERNAL struct xnn_dwconv_config* xnn_init_f16_dwconv_config();
+XNN_INTERNAL struct xnn_dwconv_config* xnn_init_f32_dwconv_config();
+XNN_INTERNAL struct xnn_dwconv_config* xnn_init_qc8_dwconv_config();
+XNN_INTERNAL struct xnn_dwconv_config* xnn_init_qs8_dwconv_config();
+XNN_INTERNAL struct xnn_dwconv_config* xnn_init_qu8_dwconv_config();
+
 
 #ifdef __cplusplus
 }  // extern "C"

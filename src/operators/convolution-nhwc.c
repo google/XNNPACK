@@ -21,12 +21,14 @@
 #include <xnnpack/cache.h>
 #include <xnnpack/common.h>
 #include <xnnpack/compute.h>
+#include <xnnpack/config.h>
 #include <xnnpack/indirection.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
 #include <xnnpack/microkernel-utils.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/operator-utils.h>
+#include <xnnpack/operator-type.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/params.h>
 #include <xnnpack/post-operation.h>
@@ -43,12 +45,12 @@ static inline size_t compute_output_dimension_with_tf_same_padding(
   return divide_round_up(input_dimension, subsampling_dimension);
 }
 
-static inline const struct dwconv_parameters* find_dwconv_ukernel(
+static inline const struct xnn_dwconv_config* find_dwconv_ukernel(
     size_t kernel_size,
-    const struct dwconv_parameters* ukernel,
+    const struct xnn_dwconv_config* ukernel,
     size_t num_ukernels)
 {
-  const struct dwconv_parameters* best_ukernel = NULL;
+  const struct xnn_dwconv_config* best_ukernel = NULL;
   while (num_ukernels-- != 0) {
     // Find the smallest primary_tile that is at least as big as kernel_size.
     if (ukernel->primary_tile >= kernel_size) {
@@ -145,7 +147,7 @@ static enum xnn_status create_dwconv_path(
     const float* scale_params,
     const void* dwconv_params,
     size_t dwconv_params_size,
-    const struct dwconv_parameters* dwconv_ukernel,
+    const struct xnn_dwconv_config* dwconv_ukernel,
     bool linear_activation,
     enum xnn_operator_type operator_type,
     size_t* zero_size,
@@ -244,7 +246,7 @@ static enum xnn_status create_dwconv_path(
         convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
   }
 
-  const union dwconv_fused_ukernels* ukernels = &dwconv_ukernel->minmax;
+  const union xnn_dwconv_ukernel* ukernels = &dwconv_ukernel->minmax;
   if (linear_activation && dwconv_ukernel->linear.unipass != NULL) {
     ukernels = &dwconv_ukernel->linear;
   }
@@ -461,7 +463,7 @@ static enum xnn_status create_convolution2d_nhwc(
     const void* vmulcaddc_params,
     size_t vmulcaddc_params_size,
     const struct gemm_parameters* gemm_parameters,
-    const struct dwconv_parameters* dwconv_ukernel,
+    const struct xnn_dwconv_config* dwconv_ukernel,
     const struct vmulcaddc_parameters* vmulcaddc_parameters,
     struct jit_gemm_params* jit_gemm_params,
     bool linear_activation,
@@ -797,9 +799,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
       kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
   }
 
+  const struct xnn_dwconv_config* dwconv_config = xnn_init_qu8_dwconv_config();
+  assert(dwconv_config != NULL);
+
   union xnn_qu8_conv_minmax_params dwconv_params;
-  const struct dwconv_parameters* dwconv_ukernel =
-    find_dwconv_ukernel(kernel_height * kernel_width, xnn_params.qu8.dwconv, XNN_MAX_QU8_DWCONV_UKERNELS);
+  const struct xnn_dwconv_config* dwconv_ukernel =
+    find_dwconv_ukernel(kernel_height * kernel_width, dwconv_config, XNN_MAX_QU8_DWCONV_UKERNELS);
   if XNN_LIKELY(dwconv_ukernel != NULL) {
     dwconv_ukernel->init.qu8(&dwconv_params,
       kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
@@ -923,9 +928,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
       requantization_scale, output_zero_point, output_min, output_max);
   }
 
+  const struct xnn_dwconv_config* dwconv_config = xnn_init_qs8_dwconv_config();
+  assert(dwconv_config != NULL);
+
   union xnn_qs8_conv_minmax_params dwconv_params;
-  const struct dwconv_parameters* dwconv_ukernel =
-    find_dwconv_ukernel(kernel_height * kernel_width, xnn_params.qs8.dwconv, XNN_MAX_QS8_DWCONV_UKERNELS);
+  const struct xnn_dwconv_config* dwconv_ukernel =
+    find_dwconv_ukernel(kernel_height * kernel_width, dwconv_config, XNN_MAX_QS8_DWCONV_UKERNELS);
   if XNN_LIKELY(dwconv_ukernel != NULL) {
     dwconv_ukernel->init.qs8(&dwconv_params,
       requantization_scale, output_zero_point, output_min, output_max);
@@ -1057,9 +1065,12 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
       output_zero_point, output_min, output_max);
   }
 
+  const struct xnn_dwconv_config* dwconv_config = xnn_init_qc8_dwconv_config();
+  assert(dwconv_config != NULL);
+
   union xnn_qc8_conv_minmax_params dwconv_params;
-  const struct dwconv_parameters* dwconv_ukernel =
-    find_dwconv_ukernel(kernel_height * kernel_width, xnn_params.qc8.dwconv, XNN_MAX_QC8_DWCONV_UKERNELS);
+  const struct xnn_dwconv_config* dwconv_ukernel =
+    find_dwconv_ukernel(kernel_height * kernel_width, dwconv_config, XNN_MAX_QC8_DWCONV_UKERNELS);
   if XNN_LIKELY(dwconv_ukernel != NULL) {
     dwconv_ukernel->init.qc8(&dwconv_params,
       output_zero_point, output_min, output_max);
@@ -1163,9 +1174,16 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
       fp16_output_min, fp16_output_max);
   }
 
+  const struct xnn_dwconv_config* dwconv_config = xnn_init_f16_dwconv_config();
+  if (dwconv_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
   union xnn_f16_minmax_params dwconv_params;
-  const struct dwconv_parameters* dwconv_ukernel =
-    find_dwconv_ukernel(kernel_height * kernel_width, xnn_params.f16.dwconv, XNN_MAX_F16_DWCONV_UKERNELS);
+  const struct xnn_dwconv_config* dwconv_ukernel =
+    find_dwconv_ukernel(kernel_height * kernel_width, dwconv_config, XNN_MAX_F16_DWCONV_UKERNELS);
   if XNN_LIKELY(dwconv_ukernel != NULL) {
     dwconv_ukernel->init.f16(&dwconv_params, fp16_output_min, fp16_output_max);
   }
@@ -1309,9 +1327,16 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     }
   };
 
+  const struct xnn_dwconv_config* dwconv_config = xnn_init_f32_dwconv_config();
+  if (dwconv_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
   union xnn_f32_minmax_params dwconv_params;
-  const struct dwconv_parameters* dwconv_ukernel =
-    find_dwconv_ukernel(kernel_height * kernel_width, xnn_params.f32.dwconv, XNN_MAX_F32_DWCONV_UKERNELS);
+  const struct xnn_dwconv_config* dwconv_ukernel =
+    find_dwconv_ukernel(kernel_height * kernel_width, dwconv_config, XNN_MAX_F32_DWCONV_UKERNELS);
   if XNN_LIKELY(dwconv_ukernel != NULL) {
     dwconv_ukernel->init.f32(&dwconv_params, output_min, output_max);
   }
@@ -1415,9 +1440,16 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     xnn_params.f32.gemm.init.f32(&gemm_params, output_min, output_max);
   }
 
+  const struct xnn_dwconv_config* dwconv_config = xnn_init_f32_dwconv_config();
+  if (dwconv_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
   union xnn_f32_minmax_params dwconv_params;
-  const struct dwconv_parameters* dwconv_ukernel =
-    find_dwconv_ukernel(kernel_height * kernel_width, xnn_params.f32.dwconv, XNN_MAX_F32_DWCONV_UKERNELS);
+  const struct xnn_dwconv_config* dwconv_ukernel =
+    find_dwconv_ukernel(kernel_height * kernel_width, dwconv_config, XNN_MAX_F32_DWCONV_UKERNELS);
   if XNN_LIKELY(dwconv_ukernel != NULL) {
     dwconv_ukernel->init.f32(&dwconv_params, output_min, output_max);
   }

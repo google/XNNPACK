@@ -40,23 +40,28 @@ static void DWConvEnd2EndBenchmark(
     return;
   }
 
-  // Save xnn_params.f16.dwconv so that we can modify it for the benchmark and later restore it.
-  struct dwconv_parameters saved_dwconv_params[XNN_MAX_F16_DWCONV_UKERNELS];
-  static_assert(sizeof(saved_dwconv_params) == sizeof(xnn_params.f16.dwconv), "size of dwconv params must match");
-  memcpy(saved_dwconv_params, xnn_params.f16.dwconv, sizeof(saved_dwconv_params));
+  struct xnn_dwconv_config* dwconv_config = xnn_init_f16_dwconv_config();
+  if (dwconv_config == nullptr) {
+    state.SkipWithError("hardware does not support F16 DWCONV");
+    return;
+  }
+
+  // Save dwconv_config so that we can modify it for the benchmark and later restore it.
+  struct xnn_dwconv_config saved_dwconv_params[XNN_MAX_F16_DWCONV_UKERNELS];
+  memcpy(saved_dwconv_params, dwconv_config, sizeof(saved_dwconv_params));
 
   // Override microkernels chosen in xnn_initialize
   for (size_t i = 0; i < XNN_MAX_F16_DWCONV_UKERNELS; i++) {
     // Replace only the microkernel with the matching kernel size.
-    if (xnn_params.f16.dwconv[i].primary_tile == primary_tile) {
-      std::memset(&xnn_params.f16.dwconv[i], 0, sizeof(xnn_params.f16.dwconv[i]));
+    if (dwconv_config[i].primary_tile == primary_tile) {
+      std::memset(&dwconv_config[i], 0, sizeof(dwconv_config[i]));
 
-      // Note: do not directly assign to xnn_params.f16.dwconv[i] because it breaks older gcc.
-      xnn_params.f16.dwconv[i].minmax.unipass = xnn_dwconv_unipass_ukernel_fn(dwconv_minmax);
-      xnn_params.f16.dwconv[i].channel_tile = channel_tile;
-      xnn_params.f16.dwconv[i].primary_tile = primary_tile;
-      xnn_params.f16.dwconv[i].last_tile = 0;
-      xnn_params.f16.dwconv[i].init.f16 = init_params;
+      // Note: do not directly assign to dwconv_config[i] because it breaks older gcc.
+      dwconv_config[i].minmax.unipass = xnn_dwconv_unipass_ukernel_fn(dwconv_minmax);
+      dwconv_config[i].channel_tile = channel_tile;
+      dwconv_config[i].primary_tile = primary_tile;
+      dwconv_config[i].last_tile = 0;
+      dwconv_config[i].init.f16 = init_params;
       break;
     }
   }
@@ -82,8 +87,8 @@ static void DWConvEnd2EndBenchmark(
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  // Restore xnn_params.f16.dwconv to original state as defined in init.c.
-  memcpy(xnn_params.f16.dwconv, saved_dwconv_params, sizeof(saved_dwconv_params));
+  // Restore dwconv_config to original state as defined in init.c.
+  memcpy(dwconv_config, saved_dwconv_params, sizeof(saved_dwconv_params));
 }
 
 static void DWConvEnd2EndBenchmark(
@@ -99,21 +104,22 @@ static void DWConvEnd2EndBenchmark(
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
-  if (xnn_initialize(nullptr /* allocator */) != xnn_status_success) {
-    state.SkipWithError("failed to initialize XNNPACK");
+
+  struct xnn_dwconv_config* dwconv_config = xnn_init_f16_dwconv_config();
+  if (dwconv_config == nullptr) {
+    state.SkipWithError("failed to initialize f16 DWCONV config");
     return;
   }
 
-  // Save xnn_params.f16.dwconv so that we can modify it for the benchmark and later restore it.
-  struct dwconv_parameters saved_dwconv_params[XNN_MAX_F16_DWCONV_UKERNELS];
-  static_assert(sizeof(saved_dwconv_params) == sizeof(xnn_params.f16.dwconv), "size of dwconv params must match");
-  memcpy(saved_dwconv_params, xnn_params.f16.dwconv, sizeof(saved_dwconv_params));
+  // Save dwconv_convig so that we can modify it for the benchmark and later restore it.
+  struct xnn_dwconv_config saved_dwconv_params[XNN_MAX_F16_DWCONV_UKERNELS];
+  memcpy(saved_dwconv_params, dwconv_config, sizeof(saved_dwconv_params));
 
   bool found = false;
   for (size_t i = 0; i < XNN_MAX_F16_DWCONV_UKERNELS; i++) {
-    if (xnn_params.f16.dwconv[i].primary_tile == primary_tile_to_replace) {
+    if (dwconv_config[i].primary_tile == primary_tile_to_replace) {
       found = true;
-    } else if (xnn_params.f16.dwconv[i].last_tile != 0) {
+    } else if (dwconv_config[i].last_tile != 0) {
       // Found a multipass microkernel, replace it.
       found = true;
     }
@@ -127,22 +133,22 @@ static void DWConvEnd2EndBenchmark(
   // Override microkernels chosen in xnn_initialize
   for (size_t i = 0; i < XNN_MAX_F16_DWCONV_UKERNELS; i++) {
     // Replace only the microkernel with the matching kernel size.
-    if (xnn_params.f16.dwconv[i].primary_tile == primary_tile_to_replace ||
-        xnn_params.f16.dwconv[i].last_tile != 0) {
+    if (dwconv_config[i].primary_tile == primary_tile_to_replace ||
+        dwconv_config[i].last_tile != 0) {
       // Replace either when the primary_tile_to_replace matches, or replace the
       // first multipass dwconv microkernel we find.
       // TODO(zhin): support specifying target multipass dwconv to replace.
-      std::memset(&xnn_params.f16.dwconv[i], 0, sizeof(xnn_params.f16.dwconv[i]));
+      std::memset(&dwconv_config[i], 0, sizeof(dwconv_config[i]));
 
-      // Note: do not directly assign to xnn_params.f16.dwconv[i] because it breaks older gcc.
-      xnn_params.f16.dwconv[i].minmax.multipass = xnn_dwconv_multipass_ukernel_fn(dwconv_minmax);
-      xnn_params.f16.dwconv[i].channel_tile = channel_tile;
-      xnn_params.f16.dwconv[i].channel_subtile = channel_subtile;
-      xnn_params.f16.dwconv[i].channel_round = channel_round;
-      xnn_params.f16.dwconv[i].primary_tile = primary_tile;
-      xnn_params.f16.dwconv[i].middle_tile = middle_tile;
-      xnn_params.f16.dwconv[i].last_tile = last_tile;
-      xnn_params.f16.dwconv[i].init.f16 = init_params;
+      // Note: do not directly assign to dwconv_config[i] because it breaks older gcc.
+      dwconv_config[i].minmax.multipass = xnn_dwconv_multipass_ukernel_fn(dwconv_minmax);
+      dwconv_config[i].channel_tile = channel_tile;
+      dwconv_config[i].channel_subtile = channel_subtile;
+      dwconv_config[i].channel_round = channel_round;
+      dwconv_config[i].primary_tile = primary_tile;
+      dwconv_config[i].middle_tile = middle_tile;
+      dwconv_config[i].last_tile = last_tile;
+      dwconv_config[i].init.f16 = init_params;
       break;
     }
   }
@@ -169,7 +175,7 @@ static void DWConvEnd2EndBenchmark(
   }
 
   // Restore xnn_params.f16.dwconv to original state as defined in init.c.
-  memcpy(xnn_params.f16.dwconv, saved_dwconv_params, sizeof(saved_dwconv_params));
+  memcpy(dwconv_config, saved_dwconv_params, sizeof(saved_dwconv_params));
 }
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)

@@ -220,29 +220,6 @@ struct dwconv2d_chw_parameters {
   uint8_t output_height_tile;
 };
 
-union dwconv_fused_ukernels {
-  xnn_dwconv_unipass_ukernel_fn unipass;
-  xnn_dwconv_multipass_ukernel_fn multipass;
-};
-
-struct dwconv_parameters {
-  union dwconv_fused_ukernels minmax;
-  union dwconv_fused_ukernels linear;
-  union {
-    xnn_init_qc8_conv_minmax_params_fn qc8;
-    xnn_init_qs8_conv_minmax_params_fn qs8;
-    xnn_init_qu8_conv_minmax_params_fn qu8;
-    xnn_init_f16_minmax_params_fn f16;
-    xnn_init_f32_minmax_params_fn f32;
-  } init;
-  uint8_t channel_tile;
-  uint8_t channel_subtile;
-  uint8_t channel_round;
-  uint8_t primary_tile;  // First tile in multipass.
-  uint8_t middle_tile;
-  uint8_t last_tile;  // Will be zero for unipass, non-zero for multipass.
-};
-
 struct argmaxpool_parameters {
   union {
     xnn_argmaxpool_unipass_ukernel_fn up;
@@ -363,15 +340,12 @@ struct xnn_parameters {
   struct xnn_allocator allocator;
   struct {
     struct gemm_parameters gemm;
-    struct dwconv_parameters dwconv[XNN_MAX_QC8_DWCONV_UKERNELS];
   } qc8;
   struct {
     struct gemm_parameters gemm;
-    struct dwconv_parameters dwconv[XNN_MAX_QS8_DWCONV_UKERNELS];
   } qs8;
   struct {
     struct gemm_parameters gemm;
-    struct dwconv_parameters dwconv[XNN_MAX_QU8_DWCONV_UKERNELS];
   } qu8;
   struct {
     // Bilinear interpolation (2D).
@@ -391,7 +365,6 @@ struct xnn_parameters {
   struct {
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
-    struct dwconv_parameters dwconv[XNN_MAX_F16_DWCONV_UKERNELS];
     struct maxpool_parameters maxpool;
     // Bilinear interpolation (2D).
     struct ibilinear_parameters ibilinear;
@@ -417,7 +390,6 @@ struct xnn_parameters {
   struct {
     struct gemm_parameters gemm;
     struct gemm_parameters gemm2;
-    struct dwconv_parameters dwconv[XNN_MAX_F32_DWCONV_UKERNELS];
     struct maxpool_parameters maxpool;
     struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
     // Bilinear interpolation (2D).
