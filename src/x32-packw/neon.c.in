@@ -43,15 +43,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
   assert(sr == ${SR});
   assert(weights != NULL);
   assert(packed_weights != NULL);
-
   $for N in range(0, NR, 4):
     $for K in range(0, KUNROLL, 4):
       uint32x4x4_t vtmp${ABC[K:K+4]}x${ABC[N:N+4]};
       $for L in range(4):
         vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[${L}] = vdupq_n_u32(0);
-
-  $if SR == 4:
-    uint32x4_t vsrtmp;
 
   do {
     // NC main loop multiple of ${NR}
@@ -74,6 +70,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
       // KC main loop multiple of ${NR}x${KUNROLL}
       size_t k = kc;
       for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
+        $if SR == 4:
+          uint32x4_t vsrtmp;
         $for N in range(0, NR, 4):
           $for L in range(4):
             $for K in range(0, KUNROLL, 4):
@@ -182,7 +180,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
       }
 
       // NR remainder has less than ${NR} rows so last row is not loaded
-      // For SR=4 the
       $for N in range(1, NR-1):
         const uint32_t* w${N} = w${N-1} + kc;
         $if N % 2 == 0:
@@ -197,6 +194,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
       // KC main loop multiple of ${NR}x${KUNROLL}
       size_t k = kc;
       for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
+        $if SR == 4:
+          uint32x4_t vsrtmp;
         $for N in range(0, NR, 4):
           $for L in range(4):
             $for K in range(0, KUNROLL, 4):
