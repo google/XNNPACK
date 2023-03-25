@@ -22,7 +22,7 @@
 // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3ts_div(
+void xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h3ps_nr2(
     size_t n,
     const float* input,
     float* output)
@@ -38,7 +38,9 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3ts_div(
   const __m128 vmagic_bias = _mm_set1_ps(0x1.800000p+19f);
   // Mask for the lowest 3 bits
   const __m128i vindex_mask = _mm_set1_epi32(0x7);
-  const __m128 vminus_ln2 = _mm_set1_ps(-0x1.62E430p-1f);
+  // Last 7 bits are zeroes
+  const __m128 vminus_ln2_hi = _mm_set1_ps(-0x1.62E400p-1f);
+  const __m128 vminus_ln2_lo = _mm_set1_ps(-0x1.7F7D1Cp-20f);
   // Coefficients of polynomial approximation
   //   exp(2t) - 1 ~ t * (2 + t * (c2 + t * (c3 + t * c4)))
   // on [-log(2)/32, log(2)/32]
@@ -65,9 +67,9 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3ts_div(
     const __m128 vinvsignx = _mm_xor_ps(vx, vz);
 
     // The function saturates at -1 for large negative inputs: tanhf(z) == -1.0f for z <= sat_cutoff ~= -9.010913.
-    // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
-    // tanhf(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
-    vz = _mm_max_ps(vsat_cutoff, vz);
+    // To guarantee this behaviour, we compute the saturation mask here, and later use it to replace computed outputs
+    // with the saturation value (-1). Note that for NaN inputs the saturation mask is inactive.
+    const __m128 vm = _mm_cmple_ps(vz, vsat_cutoff);
 
     // Compute reduced argument n := round(z / log(2), 4).
     // We do it by adding a large number (magic bias), which cause rounding of the result to 4 fractional bits,
@@ -122,7 +124,9 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3ts_div(
     vn = _mm_sub_ps(vn, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2).
-    const __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2), vz);
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    __m128 vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_hi), vz);
+    vt = _mm_add_ps(_mm_mul_ps(vn, vminus_ln2_lo), vt);
 
     // Compute degree-4 polynomial approximation for exp(2t) - 1 on [-log(2)/32, log(2)/32].
     //   P(t) = t * (2 + t * (c2 + t * (c3 + t * c4)))
@@ -140,11 +144,20 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3ts_div(
     const __m128 vemo = _mm_add_ps(_mm_mul_ps(vp, vts), vsmo);
 
     // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
-    const __m128 vepo = _mm_sub_ps(vemo, vminus_two);
+    const __m128 vepo = _mm_sub_ps(vminus_two, vemo);
 
-    // Reconstruct tanh(z) = expm1(2z) / (expm1(2z) + 2)
-    __m128 vy = _mm_div_ps(vemo, vepo);
+    // Use Newton-Raphson method (2 iterations) to compute reciprocal of the denominator.
+    // Note: 2 < exp(2z) + 1 <= 3, because z <= 0 and 0 < exp(2z) <= 1.
+    // Thus the reciprocal of the denominator never overflows.
+    __m128 vrepo = _mm_rcp_ps(vepo);
+    vrepo = _mm_mul_ps(vrepo, _mm_add_ps(_mm_mul_ps(vrepo, vepo), vminus_two));
+    vrepo = _mm_mul_ps(vrepo, _mm_sub_ps(_mm_mul_ps(vrepo, vepo), vminus_two));
 
+    // Reconstruct tanh(z) := expm1(2z) / (2 + expm1(2z))
+    __m128 vy = _mm_mul_ps(vemo, vrepo);
+
+    // Saturate tanh(z) at -1 for large inputs.
+    vy = _mm_or_ps(_mm_andnot_ps(vm, vy), _mm_and_ps(vminus_one, vm));
 
     // Reconstruct tanh(x):
     //

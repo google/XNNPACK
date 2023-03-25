@@ -28,7 +28,9 @@
 # x86 SSE2
 - name: xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h2ts_nr1
 - name: xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h2ts_nr2
-- name: xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3ts_div
+- name: xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3ps_div
+- name: xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h3ps_nr1
+- name: xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h3ps_nr2
 - name: xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h3ts_nr1
 - name: xnn_math_f32_tanh__sse2_expm1minus_rr2_lut8_p4h3ts_nr2
 - name: xnn_math_f32_tanh__sse2_expm1minus_rr1_p6h5ts_div

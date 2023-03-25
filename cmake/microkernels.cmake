@@ -5797,12 +5797,14 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/math/f32-sigmoid-sse2-rr2-p5-div.c
   src/math/f32-sigmoid-sse2-rr2-p5-nr1.c
   src/math/f32-sigmoid-sse2-rr2-p5-nr2.c
-  src/math/gen/f32-tanh-sse2-expm1minus-rr1-lut8-p4h3ts-div.c
+  src/math/gen/f32-tanh-sse2-expm1minus-rr1-lut8-p4h3ps-div.c
   src/math/gen/f32-tanh-sse2-expm1minus-rr1-p6h5ts-div.c
   src/math/gen/f32-tanh-sse2-expm1minus-rr1-p6h5ts-nr1.c
   src/math/gen/f32-tanh-sse2-expm1minus-rr1-p6h5ts-nr2.c
   src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h2ts-nr1.c
   src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h2ts-nr2.c
+  src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h3ps-nr1.c
+  src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h3ps-nr2.c
   src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h3ts-nr1.c
   src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h3ts-nr2.c
   src/qc8-dwconv/gen/qc8-dwconv-3p8c-minmax-fp32-sse2-mul16.c
