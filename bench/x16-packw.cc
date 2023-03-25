@@ -123,9 +123,36 @@ static void x16_packw_x8__scalar_int_x4(benchmark::State& state, const char* net
     /*nr=*/8, /*kr=*/1, /*sr=*/1);
 }
 
-
 BENCHMARK_BGEMM(x16_packw_x16__scalar_int_x4)
 BENCHMARK_BGEMM(x16_packw_x8__scalar_int_x4)
+
+void x16_packw__reference(
+  size_t batch,
+  size_t dim_n,
+  size_t dim_k,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const uint16_t* weights,
+  const uint16_t* bias,
+  uint16_t* packed_weights,
+  size_t extra_bytes,
+  const void* params)
+{
+  xnn_pack_f16_gemm_goi_w(batch, dim_n, dim_k, nr, kr, sr,
+     weights,
+     bias,
+     packed_weights,
+     extra_bytes, params);
+}
+
+static void x16_packw_x8__reference(benchmark::State& state, const char* net) {
+  x16_packw(state,
+    x16_packw__reference,
+    /*nr=*/8, /*kr=*/1, /*sr=*/1);
+}
+BENCHMARK_BGEMM(x16_packw_x8__reference)
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

@@ -152,8 +152,15 @@ static void x32_packw(benchmark::State& state,
       /*nr=*/16, /*kr=*/1, /*sr=*/1);
   }
 
+  static void x32_packw_x2c4__sse2_x1(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1,
+      /*nr=*/2, /*kr=*/4, /*sr=*/1);
+  }
+
   BENCHMARK_BGEMM(x32_packw_x8__sse2_x4)
   BENCHMARK_BGEMM(x32_packw_x16__sse2_x4)
+  BENCHMARK_BGEMM(x32_packw_x2c4__sse2_x1)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 static void x32_packw_x2__scalar_float_x4(benchmark::State& state, const char* net) {
@@ -219,7 +226,13 @@ static void x32_packw_x8__reference(benchmark::State& state, const char* net) {
     x32_packw__reference,
     /*nr=*/8, /*kr=*/1, /*sr=*/1);
 }
+static void x32_packw_x2c4__reference(benchmark::State& state, const char* net) {
+  x32_packw(state,
+    x32_packw__reference,
+    /*nr=*/2, /*kr=*/4, /*sr=*/1);
+}
 BENCHMARK_BGEMM(x32_packw_x8__reference)
+BENCHMARK_BGEMM(x32_packw_x2c4__reference)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
