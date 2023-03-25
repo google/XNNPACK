@@ -5,6 +5,7 @@
 
 $assert NR >= 4
 $assert NR % 4 == 0
+$assert SR == 1 or SR == 4
 $assert KUNROLL >= 4
 $assert KUNROLL % 4 == 0
 $assert KUNROLL == 4
@@ -21,7 +22,7 @@ $if PREFETCH:
   #include <xnnpack/prefetch.h>
 
 
-void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH else ""}_x${KUNROLL}(
+void xnn_x16_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4lane${"_prfm" if PREFETCH else ""}_x${KUNROLL}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -39,7 +40,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
   assert(kc != 0);
   assert(nr == ${NR});   // This kernel is for NR=${NR}
   assert(kr == 1);
-  assert(sr == 1);
+  assert(sr == ${SR});
   assert(weights != NULL);
   assert(packed_weights != NULL);
 
@@ -48,6 +49,8 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
       uint16x4x4_t vtmp${ABC[K:K+4]}x${ABC[N:N+4]};
       $for L in range(4):
         vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[${L}] = vdup_n_u16(0);
+  $if SR == 4:
+    uint16x4_t vsrtmp;
 
   do {
     // NC main loop multiple of ${NR}
@@ -70,10 +73,16 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
       // KC main loop multiple of ${NR}x${KUNROLL}
       size_t k = kc;
       for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
-        $for L in range(4):
-          $for N in range(0, NR, 4):
+        $for N in range(0, NR, 4):
+          $for L in range(4):
             $for K in range(0, KUNROLL, 4):
               vtmp${ABC[K:K+4]}x${ABC[N:N+4]} = vld4_lane_u16(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}, ${L}); w${N+L} += 4;
+              $if SR == 4:
+                vsrtmp = vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[3];
+                vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[3] = vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[2];
+                vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[2] = vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[1];
+                vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0];
+                vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0] = vsrtmp;
         $if PREFETCH:
           $for N in range(0, NR):
             xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
@@ -100,17 +109,43 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
                     uint16x4x${K}_t vtmp${ABC[0:K]}x${ABC[N:N+4]};
                     $for L in range(0, K):
                       vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}] = vdup_n_u16(0);
-
+                $if SR == 4:
+                  uint16x4_t vsrtmp;
+                  $for N in range(0, NR, 4):
+                    $for L in range(K, 4):
+                      uint16x4_t vsrtmp${ABC[L]}x${ABC[N:N+4]} = vdup_n_u16(0);
                 $for L in range(4):
                   $for N in range(0, NR, 4):
                     vtmp${ABC[0:K]}x${ABC[N:N+4]} = vld${K}_lane_u16(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+4]}, ${L}); w${N+L} += ${K};
-
+                    $if SR == 4:
+                      $if K == 3:
+                        vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
+                        vsrtmp${ABC[3]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[2];
+                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[2] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1];
+                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0];
+                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0] = vsrtmp;
+                      $if K == 2:
+                        vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
+                        vsrtmp${ABC[3]}x${ABC[N:N+4]} = vsrtmp${ABC[2]}x${ABC[N:N+4]};
+                        vsrtmp${ABC[2]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1];
+                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0];
+                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0] = vsrtmp;
+                      $if K == 1:
+                        vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
+                        vsrtmp${ABC[3]}x${ABC[N:N+4]} = vsrtmp${ABC[2]}x${ABC[N:N+4]};
+                        vsrtmp${ABC[2]}x${ABC[N:N+4]} = vsrtmp${ABC[1]}x${ABC[N:N+4]};
+                        vsrtmp${ABC[1]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]};
+                        vtmp${ABC[0:K]}x${ABC[N:N+4]} = vsrtmp;
                 $for L in range(K):
                   $for N in range(0, NR, 4):
                     $if K == 1:
                       vst1_u16(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}); packed_weights += 4;
                     $else:
                       vst1_u16(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
+                $if SR == 4:
+                  $for L in range(K, 4):
+                    $for N in range(0, NR, 4):
+                      vst1_u16(packed_weights, vsrtmp${ABC[L]}x${ABC[N:N+4]}); packed_weights += 4;
                 break;
               }
             default:
@@ -160,11 +195,20 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
       // KC main loop multiple of ${NR}x${KUNROLL}
       size_t k = kc;
       for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
-        $for L in range(4):
-          $for N in range(0, NR, 4):
-            $if N+L != NR-1:
-              $for K in range(0, KUNROLL, 4):
+        $for N in range(0, NR, 4):
+          $for L in range(4):
+            $for K in range(0, KUNROLL, 4):
+              $if N+L != NR-1:
                 vtmp${ABC[K:K+4]}x${ABC[N:N+4]} = vld4_lane_u16(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}, ${L}); w${N+L} += 4;
+              $if SR == 4:
+                vsrtmp = vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[3];
+                vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[3] = vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[2];
+                vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[2] = vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[1];
+                vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0];
+                vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0] = vsrtmp;
+        $if PREFETCH:
+          $for N in range(0, NR-1):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
         $for K in range(0, KUNROLL, 4):
           $for L in range(4):
             $for N in range(0, NR, 4):
@@ -188,18 +232,44 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
                     uint16x4x${K}_t vtmp${ABC[0:K]}x${ABC[N:N+4]};
                     $for L in range(0, K):
                       vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}] = vdup_n_u16(0);
-
+                $if SR == 4:
+                  uint16x4_t vsrtmp;
+                  $for N in range(0, NR, 4):
+                    $for L in range(K, 4):
+                      uint16x4_t vsrtmp${ABC[L]}x${ABC[N:N+4]} = vdup_n_u16(0);
                 $for L in range(4):
                   $for N in range(0, NR, 4):
                     $if N+L != NR-1:
-                      vtmp${ABC[0:K]}x${ABC[N:N+4]} = vld${K}_lane_u16(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+4]}, ${L}); w${N+L} += ${K};
-
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]} = vld${K}_lane_u16(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+4]}, ${L});
+                    $if SR == 4:
+                      $if K == 3:
+                        vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
+                        vsrtmp${ABC[3]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[2];
+                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[2] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1];
+                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0];
+                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0] = vsrtmp;
+                      $if K == 2:
+                        vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
+                        vsrtmp${ABC[3]}x${ABC[N:N+4]} = vsrtmp${ABC[2]}x${ABC[N:N+4]};
+                        vsrtmp${ABC[2]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1];
+                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0];
+                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0] = vsrtmp;
+                      $if K == 1:
+                        vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
+                        vsrtmp${ABC[3]}x${ABC[N:N+4]} = vsrtmp${ABC[2]}x${ABC[N:N+4]};
+                        vsrtmp${ABC[2]}x${ABC[N:N+4]} = vsrtmp${ABC[1]}x${ABC[N:N+4]};
+                        vsrtmp${ABC[1]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]};
+                        vtmp${ABC[0:K]}x${ABC[N:N+4]} = vsrtmp;
                 $for L in range(K):
                   $for N in range(0, NR, 4):
                     $if K == 1:
                       vst1_u16(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}); packed_weights += 4;
                     $else:
                       vst1_u16(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
+                $if SR == 4:
+                  $for L in range(K, 4):
+                    $for N in range(0, NR, 4):
+                      vst1_u16(packed_weights, vsrtmp${ABC[L]}x${ABC[N:N+4]}); packed_weights += 4;
                 break;
               }
             default:

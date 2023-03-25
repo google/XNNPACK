@@ -51,7 +51,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
   vtmp0123x4567.val[2] = vdupq_n_u32(0);
   vtmp0123x4567.val[3] = vdupq_n_u32(0);
 
-
   do {
     // NC main loop multiple of 8
     const uint32_t* w0 = weights;
@@ -198,7 +197,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
       }
 
       // NR remainder has less than 8 rows so last row is not loaded
-      // For SR=4 the
       const uint32_t* w1 = w0 + kc;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
