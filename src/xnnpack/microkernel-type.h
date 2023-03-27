@@ -23,9 +23,11 @@ enum xnn_microkernel_type {
   xnn_microkernel_type_dwconv,
   xnn_microkernel_type_gemm,
   xnn_microkernel_type_igemm,
+  xnn_microkernel_type_maxpool,
   xnn_microkernel_type_pixelwise_average_pooling,
   xnn_microkernel_type_spmm,
   xnn_microkernel_type_subconv2d,
+  xnn_microkernel_type_unpool,
   xnn_microkernel_type_vmulcaddc,
 };
 

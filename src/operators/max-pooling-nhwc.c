@@ -183,11 +183,15 @@ static enum xnn_status create_max_pooling2d_nhwc(
   max_pooling_op->channels = channels;
   max_pooling_op->input_pixel_stride = input_pixel_stride;
   max_pooling_op->output_pixel_stride = output_pixel_stride;
+  max_pooling_op->ukernel.maxpool = (struct xnn_ukernel_maxpool) {
+    .function = maxpool_config->ukernel,
+    .first_pass_tile_size = maxpool_config->first_pass_tile_size,
+    .remainder_pass_tile_size = maxpool_config->remainder_pass_tile_size
+  };
 
   memcpy(&max_pooling_op->params, params, params_size);
   max_pooling_op->type = operator_type;
   max_pooling_op->flags = flags;
-  max_pooling_op->maxpool_config = maxpool_config;
 
   max_pooling_op->state = xnn_run_state_invalid;
 
@@ -209,7 +213,6 @@ static enum xnn_status setup_max_pooling2d_nhwc(
   void* output,
   uint32_t log2_input_element_size,
   uint32_t log2_output_element_size,
-  const struct xnn_maxpool_config maxpool[restrict XNN_MIN_ELEMENTS(1)],
   const void* params,
   size_t params_size,
   size_t num_threads)
@@ -279,7 +282,7 @@ static enum xnn_status setup_max_pooling2d_nhwc(
   const size_t pooling_size = pooling_height * pooling_width;
   const size_t output_height = max_pooling_op->output_height;
   const size_t output_width = max_pooling_op->output_width;
-  const uint32_t first_pass_tile_size = maxpool->first_pass_tile_size;
+  const uint32_t first_pass_tile_size = max_pooling_op->ukernel.maxpool.first_pass_tile_size;
 
   const size_t step_width =
     max_pooling_op->dilation_width > 1 ? pooling_width : min(max_pooling_op->stride_width, pooling_width);
@@ -308,7 +311,7 @@ static enum xnn_status setup_max_pooling2d_nhwc(
     max_pooling_op->last_input_width = input_width;
   }
 
-  const uint32_t remainder_pass_tile_size = maxpool->remainder_pass_tile_size;
+  const uint32_t remainder_pass_tile_size = max_pooling_op->ukernel.maxpool.remainder_pass_tile_size;
   const size_t channels = max_pooling_op->channels;
 
   const size_t indirect_input_height_stride = step_height * sizeof(void*);
@@ -329,7 +332,7 @@ static enum xnn_status setup_max_pooling2d_nhwc(
     .channels = channels,
     .input_increment = (pooling_height * step_width - multipass_adjustment) * sizeof(void*),
     .output_increment = output_width_stride - (channels << log2_output_element_size),
-    .ukernel = maxpool->ukernel,
+    .ukernel = max_pooling_op->ukernel.maxpool.function,
   };
   memcpy(&max_pooling_op->context.max_pooling.params, params, params_size);
 
@@ -568,7 +571,6 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_s8(
     input, output,
     0 /* log2(sizeof(input element)) = log2(sizeof(int8_t)) */,
     0 /* log2(sizeof(output element)) = log2(sizeof(int8_t)) */,
-    max_pooling_op->maxpool_config,
     &max_pooling_op->params.s8_minmax, sizeof(max_pooling_op->params.s8_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
@@ -588,7 +590,6 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_u8(
     input, output,
     0 /* log2(sizeof(input element)) = log2(sizeof(uint8_t)) */,
     0 /* log2(sizeof(output element)) = log2(sizeof(uint8_t)) */,
-    max_pooling_op->maxpool_config,
     &max_pooling_op->params.u8_minmax, sizeof(max_pooling_op->params.u8_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
@@ -608,7 +609,6 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_f16(
     input, output,
     1 /* log2(sizeof(input element)) = log2(sizeof(uint16_t)) */,
     1 /* log2(sizeof(output element)) = log2(sizeof(uint16_t)) */,
-    max_pooling_op->maxpool_config,
     &max_pooling_op->params.f16_minmax, sizeof(max_pooling_op->params.f16_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
@@ -628,7 +628,6 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_f32(
     input, output,
     2 /* log2(sizeof(input element)) = log2(sizeof(float)) */,
     2 /* log2(sizeof(output element)) = log2(sizeof(float)) */,
-    max_pooling_op->maxpool_config,
     &max_pooling_op->params.f32_minmax, sizeof(max_pooling_op->params.f32_minmax),
     pthreadpool_get_threads_count(threadpool));
 }

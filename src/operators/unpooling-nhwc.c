@@ -111,9 +111,12 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
   unpooling_op->input_pixel_stride = input_pixel_stride;
   unpooling_op->output_pixel_stride = output_pixel_stride;
 
+  unpooling_op->ukernel.unpool = (struct xnn_ukernel_unpool) {
+    .function = unpool_config->unpool,
+  };
+
   unpooling_op->type = xnn_operator_type_unpooling_nhwc_x32;
   unpooling_op->flags = flags;
-  unpooling_op->unpool_config = unpool_config;
 
   unpooling_op->state = xnn_run_state_invalid;
 
@@ -220,7 +223,7 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
     .pooling_size = pooling_size,
     .channels = channels,
     .fill_value = 0,
-    .ukernel = unpooling_op->unpool_config->unpool,
+    .ukernel = unpooling_op->ukernel.unpool.function,
   };
   unpooling_op->compute.type = xnn_parallelization_type_2d;
   unpooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_unpooling;
