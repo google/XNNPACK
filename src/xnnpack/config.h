@@ -581,6 +581,28 @@ XNN_INTERNAL struct xnn_gemm_config* xnn_init_qc8_gemm_config();
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_qs8_gemm_config();
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_qu8_gemm_config();
 
+struct xnn_maxpool_config {
+  xnn_maxpool_ukernel_fn ukernel;
+  union {
+    xnn_init_s8_minmax_params_fn s8;
+    xnn_init_u8_minmax_params_fn u8;
+    xnn_init_f32_minmax_params_fn f32;
+    xnn_init_f16_minmax_params_fn f16;
+  } init;
+  // Number of elements in a tile for the first pass.
+  uint8_t first_pass_tile_size;
+  // Number of elements in a tile for the remainder pass. If the pooling size is less than or equals to
+  // first_pass_tile_size, remainder passes are not run. We run as many remainder passes as required to cover the entire
+  // pooling window.
+  uint8_t remainder_pass_tile_size;
+};
+
+XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_f16_maxpool_config();
+XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_f32_maxpool_config();
+XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_s8_maxpool_config();
+XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_u8_maxpool_config();
+
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

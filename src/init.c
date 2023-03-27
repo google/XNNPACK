@@ -44,7 +44,6 @@
 #include <xnnpack/igemm.h>
 #include <xnnpack/log.h>
 #include <xnnpack/lut.h>
-#include <xnnpack/maxpool.h>
 #include <xnnpack/pad.h>
 #include <xnnpack/params.h>
 #include <xnnpack/microparams-init.h>
@@ -91,6 +90,7 @@ static void init(void) {
   if (hardware_config->use_arm_neon) {
     /**************************** QC8 AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_QC8_OPERATORS
+      // TODO(zhin): remove these init flags after removing checks in operators.
       init_flags |= XNN_INIT_FLAG_QC8;
 
     #endif  // XNN_NO_QC8_OPERATORS
@@ -111,24 +111,12 @@ static void init(void) {
     #ifndef XNN_NO_S8_OPERATORS
       init_flags |= XNN_INIT_FLAG_S8;
 
-      xnn_params.s8.maxpool = (struct maxpool_parameters) {
-        .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16,
-        .init.s8 = xnn_init_s8_minmax_neon_params,
-        .mr = 9,
-        .qr = 8,
-      };
     #endif  // XNN_NO_S8_OPERATORS
 
     /**************************** U8 AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_U8_OPERATORS
       init_flags |= XNN_INIT_FLAG_U8;
 
-      xnn_params.u8.maxpool = (struct maxpool_parameters) {
-        .ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16,
-        .init.u8 = xnn_init_u8_minmax_neon_params,
-        .mr = 9,
-        .qr = 8,
-      };
       xnn_params.u8.rmax = xnn_u8_rmax_ukernel__neon;
       xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
     #endif  // XNN_NO_U8_OPERATORS
@@ -150,13 +138,6 @@ static void init(void) {
       #if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
         if (hardware_config->use_arm_neon_fp16_arith) {
           init_flags |= XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE;
-
-          xnn_params.f16.maxpool = (struct maxpool_parameters) {
-            .ukernel = (xnn_maxpool_ukernel_fn) xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8,
-            .init.f16 = xnn_init_f16_minmax_fp16arith_params,
-            .mr = 9,
-            .qr = 8,
-          };
 
           xnn_params.f16.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
             .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x32,
@@ -227,12 +208,6 @@ static void init(void) {
       init_flags |= XNN_INIT_FLAG_F32;
 
 
-      xnn_params.f32.maxpool = (struct maxpool_parameters) {
-        .ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__neon_c4,
-        .init.f32 = xnn_init_f32_minmax_scalar_params,
-        .mr = 9,
-        .qr = 8,
-      };
       xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
         .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__neon_c4,
         .mr = 4,
@@ -348,24 +323,12 @@ static void init(void) {
     #ifndef XNN_NO_S8_OPERATORS
       init_flags |= XNN_INIT_FLAG_S8;
 
-      xnn_params.s8.maxpool = (struct maxpool_parameters) {
-        .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1,
-        .init.s8 = xnn_init_s8_minmax_scalar_params,
-        .mr = 9,
-        .qr = 8,
-      };
     #endif  // XNN_NO_S8_OPERATORS
 
     /**************************** U8 AArch32 Pre-NEON micro-kernels ****************************/
     #ifndef XNN_NO_U8_OPERATORS
       init_flags |= XNN_INIT_FLAG_U8;
 
-      xnn_params.u8.maxpool = (struct maxpool_parameters) {
-        .ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
-        .init.u8 = xnn_init_u8_minmax_scalar_params,
-        .mr = 9,
-        .qr = 8,
-      };
       xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
       xnn_params.u8.rmax = xnn_u8_rmax_ukernel__scalar;
     #endif  // XNN_NO_U8_OPERATORS
@@ -386,12 +349,6 @@ static void init(void) {
     #ifndef XNN_NO_F32_OPERATORS
       init_flags |= XNN_INIT_FLAG_F32;
 
-      xnn_params.f32.maxpool = (struct maxpool_parameters) {
-        .ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__scalar_c1,
-        .init.f32 = xnn_init_f32_minmax_scalar_params,
-        .mr = 9,
-        .qr = 8,
-      };
       xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
         .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__scalar_c1,
         .mr = 4,
@@ -519,24 +476,12 @@ static void init(void) {
   /**************************** S8 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_S8_OPERATORS
     init_flags |= XNN_INIT_FLAG_S8;
-    xnn_params.s8.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16,
-      .init.s8 = xnn_init_s8_minmax_neon_params,
-      .mr = 9,
-      .qr = 8,
-    };
   #endif  // XNN_NO_S8_OPERATORS
 
   /**************************** U8 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    xnn_params.u8.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16,
-      .init.u8 = xnn_init_u8_minmax_neon_params,
-      .mr = 9,
-      .qr = 8,
-    };
     xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
     xnn_params.u8.rmax = xnn_u8_rmax_ukernel__neon;
   #endif  // XNN_NO_U8_OPERATORS
@@ -558,13 +503,6 @@ static void init(void) {
     #if XNN_ENABLE_ARM_FP16_VECTOR
       if (hardware_config->use_arm_neon_fp16_arith) {
         init_flags |= XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE;
-
-        xnn_params.f16.maxpool = (struct maxpool_parameters) {
-          .ukernel = (xnn_maxpool_ukernel_fn) xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8,
-          .init.f16 = xnn_init_f16_minmax_fp16arith_params,
-          .mr = 9,
-          .qr = 8,
-        };
 
         xnn_params.f16.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
           .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x40,
@@ -635,12 +573,6 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
-    xnn_params.f32.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__neon_c4,
-      .init.f32 = xnn_init_f32_minmax_scalar_params,
-      .mr = 9,
-      .qr = 8,
-    };
     xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__neon_c4,
       .mr = 4,
@@ -769,33 +701,12 @@ static void init(void) {
   #ifndef XNN_NO_S8_OPERATORS
     init_flags |= XNN_INIT_FLAG_S8;
 
-    if (hardware_config->use_x86_sse4_1) {
-      xnn_params.s8.maxpool = (struct maxpool_parameters) {
-        .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16,
-        .init.s8 = xnn_init_s8_minmax_sse4_params,
-        .mr = 9,
-        .qr = 8,
-      };
-    } else {
-      xnn_params.s8.maxpool = (struct maxpool_parameters) {
-        .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16,
-        .init.s8 = xnn_init_s8_minmax_sse2_params,
-        .mr = 9,
-        .qr = 8,
-      };
-    }
   #endif  // XNN_NO_S8_OPERATORS
 
   /**************************** U8 x86 micro-kernels ****************************/
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    xnn_params.u8.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16,
-      .init.u8 = xnn_init_u8_minmax_sse2_params,
-      .mr = 9,
-      .qr = 8,
-    };
     xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
     xnn_params.u8.rmax = xnn_u8_rmax_ukernel__sse2;
   #endif  // XNN_NO_U8_OPERATORS
@@ -816,13 +727,6 @@ static void init(void) {
   #ifndef XNN_NO_F16_OPERATORS
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx2) {
       init_flags |= XNN_INIT_FLAG_F16;
-
-      xnn_params.f16.maxpool = (struct maxpool_parameters) {
-        .ukernel = (xnn_maxpool_ukernel_fn) xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8,
-        .init.f16 = xnn_init_f16_minmax_avx_params,
-        .mr = 9,
-        .qr = 8,
-      };
 
       xnn_params.f16.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
         .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_x40,
@@ -845,12 +749,6 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
-    xnn_params.f32.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__sse_c4,
-      .init.f32 = xnn_init_f32_minmax_sse_params,
-      .mr = 9,
-      .qr = 8,
-    };
     xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__sse2_c4,
       .mr = 4,
@@ -982,24 +880,12 @@ static void init(void) {
   #ifndef XNN_NO_S8_OPERATORS
     init_flags |= XNN_INIT_FLAG_S8;
 
-    xnn_params.s8.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16,
-      .init.s8 = xnn_init_s8_minmax_wasmsimd_params,
-      .mr = 9,
-      .qr = 8,
-    };
   #endif  // XNN_NO_S8_OPERATORS
 
   /**************************** U8 WAsm SIMD micro-kernels****************************/
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    xnn_params.u8.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16,
-      .init.u8 = xnn_init_u8_minmax_wasmsimd_params,
-      .mr = 9,
-      .qr = 8,
-    };
     xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
     xnn_params.u8.rmax = xnn_u8_rmax_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
@@ -1020,21 +906,6 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
-    if (hardware_config->is_x86) {
-      xnn_params.f32.maxpool = (struct maxpool_parameters) {
-        .ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__wasmsimd_x86_c4,
-        .init.f32 = xnn_init_f32_minmax_wasmsimd_params,
-        .mr = 9,
-        .qr = 8,
-      };
-    } else {
-      xnn_params.f32.maxpool = (struct maxpool_parameters) {
-        .ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__wasmsimd_arm_c4,
-        .init.f32 = xnn_init_f32_minmax_wasmsimd_params,
-        .mr = 9,
-        .qr = 8,
-      };
-    }
     xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__wasmsimd_c4,
       .mr = 4,
@@ -1219,24 +1090,12 @@ static void init(void) {
   #ifndef XNN_NO_S8_OPERATORS
     init_flags |= XNN_INIT_FLAG_S8;
 
-    xnn_params.s8.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1,
-      .init.s8 = xnn_init_s8_minmax_scalar_params,
-      .mr = 9,
-      .qr = 8,
-    };
   #endif  // XNN_NO_S8_OPERATORS
 
   /**************************** U8 WAsm micro-kernels****************************/
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    xnn_params.u8.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
-      .init.u8 = xnn_init_u8_minmax_scalar_params,
-      .mr = 9,
-      .qr = 8,
-    };
     xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
     xnn_params.u8.rmax = xnn_u8_rmax_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
@@ -1257,12 +1116,6 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
-    xnn_params.f32.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__wasm_c1,
-      .init.f32 = xnn_init_f32_minmax_scalar_params,
-      .mr = 9,
-      .qr = 8,
-    };
     xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__scalar_c1,
       .mr = 4,
@@ -1386,24 +1239,12 @@ static void init(void) {
   #ifndef XNN_NO_S8_OPERATORS
     init_flags |= XNN_INIT_FLAG_S8;
 
-    xnn_params.s8.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_fn) xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1,
-      .init.s8 = xnn_init_s8_minmax_scalar_params,
-      .mr = 9,
-      .qr = 8,
-    };
   #endif  // XNN_NO_S8_OPERATORS
 
   /************************** U8 RISC-V micro-kernels ***************************/
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    xnn_params.u8.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_fn) xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1,
-      .init.u8 = xnn_init_u8_minmax_scalar_params,
-      .mr = 9,
-      .qr = 8,
-    };
     xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
     xnn_params.u8.rmax = xnn_u8_rmax_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
@@ -1424,12 +1265,6 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
-    xnn_params.f32.maxpool = (struct maxpool_parameters) {
-      .ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__scalar_c1,
-      .init.f32 = xnn_init_f32_minmax_scalar_params,
-      .mr = 9,
-      .qr = 8,
-    };
     xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
       .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__scalar_c1,
       .mr = 4,

@@ -74,18 +74,6 @@ struct argmaxpool_parameters {
   uint8_t qr;
 };
 
-struct maxpool_parameters {
-  xnn_maxpool_ukernel_fn ukernel;
-  union {
-    xnn_init_s8_minmax_params_fn s8;
-    xnn_init_u8_minmax_params_fn u8;
-    xnn_init_f32_minmax_params_fn f32;
-    xnn_init_f16_minmax_params_fn f16;
-  } init;
-  uint8_t mr;
-  uint8_t qr;
-};
-
 struct zip_parameters {
   xnn_zipc_ukernel_fn x2;
   xnn_zipc_ukernel_fn x3;
@@ -153,10 +141,6 @@ struct xnn_parameters {
   uint32_t init_flags;
   struct xnn_allocator allocator;
   struct {
-    struct maxpool_parameters maxpool;
-  } s8;
-  struct {
-    struct maxpool_parameters maxpool;
     xnn_u8_lut32norm_ukernel_fn lut32norm;
     xnn_u8_rmax_ukernel_fn rmax;
   } u8;
@@ -164,7 +148,6 @@ struct xnn_parameters {
     struct zip_parameters zip;
   } x8;
   struct {
-    struct maxpool_parameters maxpool;
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
     xnn_rmax_ukernel_fn rmax;
@@ -182,7 +165,6 @@ struct xnn_parameters {
     struct dwconv2d_chw_parameters dwconv2d_chw_5x5s2;
   } f16;
   struct {
-    struct maxpool_parameters maxpool;
     struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
