@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/x32-packw/c4-sse.c.in
+//   Template: src/x32-packw/c4-sse2.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC

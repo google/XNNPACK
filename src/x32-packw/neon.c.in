@@ -6,8 +6,6 @@
 $assert NR >= 4
 $assert NR % 4 == 0
 $assert SR == 1 or SR == 4
-$assert KUNROLL >= 4
-$assert KUNROLL % 4 == 0
 $assert KUNROLL == 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -40,7 +38,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
   assert(kc != 0);
   assert(nr == ${NR});   // This kernel is for NR=${NR}
   assert(kr == 1);
-  assert(sr == ${SR});
+  assert(sr == ${SR});   // This kernel is for SR=${SR}
   assert(weights != NULL);
   assert(packed_weights != NULL);
   $for N in range(0, NR, 4):
