@@ -50,7 +50,6 @@
 #include <xnnpack/pavgpool.h>
 #include <xnnpack/prelu.h>
 #include <xnnpack/raddstoreexpminusmax.h>
-#include <xnnpack/rmax.h>
 #include <xnnpack/spmm.h>
 #include <xnnpack/unpool.h>
 #include <xnnpack/vadd.h>
@@ -116,7 +115,6 @@ static void init(void) {
     #ifndef XNN_NO_U8_OPERATORS
       init_flags |= XNN_INIT_FLAG_U8;
 
-      xnn_params.u8.rmax = xnn_u8_rmax_ukernel__neon;
       xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
     #endif  // XNN_NO_U8_OPERATORS
 
@@ -137,7 +135,6 @@ static void init(void) {
             .init.f16 = xnn_init_f16_expminus_fp16arith_rr2_p2_params,
             .element_tile = 32,
           };
-          xnn_params.f16.rmax = (xnn_rmax_ukernel_fn) xnn_f16_rmax_ukernel__neonfp16arith;
 
           xnn_params.f16.vmulcaddc = (struct vmulcaddc_parameters) {
             .ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x,
@@ -219,7 +216,6 @@ static void init(void) {
         .init.f32 = xnn_init_f32_expminus_neon_rr2_lut64_p2_params,
         .element_tile = 8,
       };
-      xnn_params.f32.rmax = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__neon;
       xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
         .ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f32_vmulcaddc_minmax_ukernel_c4__neon_2x,
         .init.f32 = xnn_init_f32_minmax_scalar_params,
@@ -317,7 +313,6 @@ static void init(void) {
       init_flags |= XNN_INIT_FLAG_U8;
 
       xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
-      xnn_params.u8.rmax = xnn_u8_rmax_ukernel__scalar;
     #endif  // XNN_NO_U8_OPERATORS
 
     /**************************** X8 AArch32 Pre-NEON micro-kernels ****************************/
@@ -348,7 +343,6 @@ static void init(void) {
         .init.f32 = xnn_init_f32_expminus_scalar_rr2_p5_params,
         .element_tile = 4,
       };
-      xnn_params.f32.rmax = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__scalar;
       xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
         .ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f32_vmulcaddc_minmax_ukernel_c1__scalar_2x,
         .init.f32 = xnn_init_f32_minmax_scalar_params,
@@ -458,7 +452,6 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_U8;
 
     xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
-    xnn_params.u8.rmax = xnn_u8_rmax_ukernel__neon;
   #endif  // XNN_NO_U8_OPERATORS
 
   /**************************** X8 AArch64 micro-kernels ****************************/
@@ -478,7 +471,6 @@ static void init(void) {
           .init.f16 = xnn_init_f16_expminus_fp16arith_rr2_p2_params,
           .element_tile = 40,
         };
-        xnn_params.f16.rmax = (xnn_rmax_ukernel_fn) xnn_f16_rmax_ukernel__neonfp16arith;
 
         xnn_params.f16.vmulcaddc = (struct vmulcaddc_parameters) {
           .ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x,
@@ -560,7 +552,6 @@ static void init(void) {
       .init.f32 = xnn_init_f32_expminus_neonfma_rr1_lut64_p2_params,
       .element_tile = 16,
     };
-    xnn_params.f32.rmax = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__neon;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
       .ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f32_vmulcaddc_minmax_ukernel_c4__neonfma_2x,
       .init.f32 = xnn_init_f32_minmax_scalar_params,
@@ -671,7 +662,6 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_U8;
 
     xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
-    xnn_params.u8.rmax = xnn_u8_rmax_ukernel__sse2;
   #endif  // XNN_NO_U8_OPERATORS
 
   /**************************** X8 x86 micro-kernels ****************************/
@@ -690,7 +680,6 @@ static void init(void) {
         .init.f16 = xnn_init_f16_expminus_avx2_rr1_p2_params,
         .element_tile = 40,
       };
-      xnn_params.f16.rmax = (xnn_rmax_ukernel_fn) xnn_f16_rmax_ukernel__f16c;
 
       xnn_params.f16.vmulcaddc = (struct vmulcaddc_parameters) {
         .ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f16_vmulcaddc_minmax_ukernel_c8__fma3_2x,
@@ -724,7 +713,6 @@ static void init(void) {
       .init.f32 = xnn_init_f32_expminus_sse2_rr2_p5_params,
       .element_tile = 20,
     };
-    xnn_params.f32.rmax = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__sse;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
       .ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f32_vmulcaddc_minmax_ukernel_c4__sse_2x,
       .init.f32 = xnn_init_f32_minmax_sse_params,
@@ -838,7 +826,6 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_U8;
 
     xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
-    xnn_params.u8.rmax = xnn_u8_rmax_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
 
   /**************************** X8 WAsm SIMD micro-kernels****************************/
@@ -877,11 +864,6 @@ static void init(void) {
         .element_tile = 16,
       };
     #endif
-    if (hardware_config->is_x86) {
-      xnn_params.f32.rmax = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__wasmsimd_x86;
-    } else {
-      xnn_params.f32.rmax = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__wasmsimd_arm;
-    }
     #if XNN_ARCH_WASMRELAXEDSIMD
       xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
         .ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmrelaxedsimd_fma_2x,
@@ -1036,7 +1018,6 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_U8;
 
     xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
-    xnn_params.u8.rmax = xnn_u8_rmax_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
 
   /**************************** X8 WAsm micro-kernels****************************/
@@ -1067,7 +1048,6 @@ static void init(void) {
       .init.f32 = xnn_init_f32_expminus_scalar_rr2_p5_params,
       .element_tile = 4,
     };
-    xnn_params.f32.rmax = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__scalar;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
       .ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f32_vmulcaddc_minmax_ukernel_c1__wasm_2x,
       .init.f32 = xnn_init_f32_minmax_scalar_params,
@@ -1173,7 +1153,6 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_U8;
 
     xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
-    xnn_params.u8.rmax = xnn_u8_rmax_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
 
   /************************** X8 RISC-V micro-kernels ***************************/
@@ -1204,7 +1183,6 @@ static void init(void) {
       .init.f32 = xnn_init_f32_expminus_scalar_rr2_p5_params,
       .element_tile = 4,
     };
-    xnn_params.f32.rmax = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__scalar;
     xnn_params.f32.vmulcaddc = (struct vmulcaddc_parameters) {
       .ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f32_vmulcaddc_minmax_ukernel_c1__scalar_2x,
       .init.f32 = xnn_init_f32_minmax_scalar_params,

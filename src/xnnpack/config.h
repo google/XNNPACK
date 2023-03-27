@@ -612,6 +612,18 @@ struct xnn_zip_config {
 XNN_INTERNAL const struct xnn_zip_config* xnn_init_x8_zip_config();
 XNN_INTERNAL const struct xnn_zip_config* xnn_init_x32_zip_config();
 
+struct xnn_rmax_config {
+  union {
+    xnn_rmax_ukernel_fn f16;
+    xnn_rmax_ukernel_fn f32;
+    xnn_u8_rmax_ukernel_fn u8;
+  } rmax;
+};
+
+XNN_INTERNAL const struct xnn_rmax_config* xnn_init_f16_rmax_config();
+XNN_INTERNAL const struct xnn_rmax_config* xnn_init_f32_rmax_config();
+XNN_INTERNAL const struct xnn_rmax_config* xnn_init_u8_rmax_config();
+
 
 #ifdef __cplusplus
 }  // extern "C"

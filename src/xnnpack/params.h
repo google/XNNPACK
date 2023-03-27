@@ -135,12 +135,10 @@ struct xnn_parameters {
   struct xnn_allocator allocator;
   struct {
     xnn_u8_lut32norm_ukernel_fn lut32norm;
-    xnn_u8_rmax_ukernel_fn rmax;
   } u8;
   struct {
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
-    xnn_rmax_ukernel_fn rmax;
     // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
     struct spmm_parameters spmm;
     // Direct 3x3 stride-2 Convolution with 3 input channels and HWC->CHW layout conversion.
@@ -158,7 +156,6 @@ struct xnn_parameters {
     struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
-    xnn_rmax_ukernel_fn rmax;
     // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
     struct spmm_parameters spmm;
     // Sparse Matrix-Dense Matrix Multiplication (NR=2 block).
