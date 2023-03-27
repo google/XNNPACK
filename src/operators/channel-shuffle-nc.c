@@ -14,7 +14,9 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/config.h>
 #include <xnnpack/operator.h>
+#include <xnnpack/operator-type.h>
 #include <xnnpack/log.h>
 #include <xnnpack/params.h>
 
@@ -25,6 +27,7 @@ static enum xnn_status create_channel_shuffle_nc(
   size_t input_stride,
   size_t output_stride,
   uint32_t flags,
+  const struct xnn_zip_config* zip_config,
   enum xnn_operator_type operator_type,
   xnn_operator_t* channel_shuffle_op_out)
 {
@@ -87,6 +90,7 @@ static enum xnn_status create_channel_shuffle_nc(
 
   channel_shuffle_op->type = operator_type;
   channel_shuffle_op->flags = flags;
+  channel_shuffle_op->zip_config = zip_config;
 
   channel_shuffle_op->state = xnn_run_state_invalid;
 
@@ -107,12 +111,15 @@ enum xnn_status xnn_create_channel_shuffle_nc_x8(
     uint32_t flags,
     xnn_operator_t* channel_shuffle_op_out)
 {
+  const struct xnn_zip_config* zip_config = xnn_init_x8_zip_config();
+  assert(zip_config != NULL);
   return create_channel_shuffle_nc(
     groups,
     group_channels,
     input_stride,
     output_stride,
     flags,
+    zip_config,
     xnn_operator_type_channel_shuffle_nc_x8,
     channel_shuffle_op_out);
 }
@@ -125,12 +132,15 @@ enum xnn_status xnn_create_channel_shuffle_nc_x32(
     uint32_t flags,
     xnn_operator_t* channel_shuffle_op_out)
 {
+  const struct xnn_zip_config* zip_config = xnn_init_x32_zip_config();
+  assert(zip_config != NULL);
   return create_channel_shuffle_nc(
     groups,
     group_channels,
     input_stride,
     output_stride,
     flags,
+    zip_config,
     xnn_operator_type_channel_shuffle_nc_x32,
     channel_shuffle_op_out);
 }
@@ -141,7 +151,7 @@ static enum xnn_status setup_channel_shuffle_nc(
     const void* input,
     void* output,
     uint32_t log2_element_size,
-    const struct zip_parameters zip[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_zip_config zip[restrict XNN_MIN_ELEMENTS(1)])
 {
   channel_shuffle_op->state = xnn_run_state_invalid;
 
@@ -217,7 +227,7 @@ enum xnn_status xnn_setup_channel_shuffle_nc_x8(
     input,
     output,
     0 /* log2(sizeof(element)) = log2(sizeof(uint8_t)) */,
-    &xnn_params.x8.zip);
+    channel_shuffle_op->zip_config);
 }
 
 enum xnn_status xnn_setup_channel_shuffle_nc_x32(
@@ -240,5 +250,5 @@ enum xnn_status xnn_setup_channel_shuffle_nc_x32(
     input,
     output,
     2 /* log2(sizeof(element)) = log2(sizeof(uint32_t)) */,
-    &xnn_params.x32.zip);
+    channel_shuffle_op->zip_config);
 }

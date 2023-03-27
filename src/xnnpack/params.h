@@ -74,13 +74,6 @@ struct argmaxpool_parameters {
   uint8_t qr;
 };
 
-struct zip_parameters {
-  xnn_zipc_ukernel_fn x2;
-  xnn_zipc_ukernel_fn x3;
-  xnn_zipc_ukernel_fn x4;
-  xnn_zipv_ukernel_fn xm;
-};
-
 struct raddstoreexpminusmax_parameters {
   xnn_raddstoreexpminusmax_ukernel_fn ukernel;
   union {
@@ -145,9 +138,6 @@ struct xnn_parameters {
     xnn_u8_rmax_ukernel_fn rmax;
   } u8;
   struct {
-    struct zip_parameters zip;
-  } x8;
-  struct {
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
     xnn_rmax_ukernel_fn rmax;
@@ -188,7 +178,6 @@ struct xnn_parameters {
   } f32;
   struct {
     xnn_unpool_ukernel_fn unpool;
-    struct zip_parameters zip;
   } x32;
 };
 

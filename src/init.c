@@ -60,7 +60,6 @@
 #include <xnnpack/vmul.h>
 #include <xnnpack/vmulcaddc.h>
 #include <xnnpack/vunary.h>
-#include <xnnpack/zip.h>
 
 
 #if XNN_PLATFORM_WINDOWS
@@ -125,12 +124,6 @@ static void init(void) {
     #ifndef XNN_NO_X8_OPERATORS
       init_flags |= XNN_INIT_FLAG_X8;
 
-      xnn_params.x8.zip = (struct zip_parameters) {
-        .x2 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x2_ukernel__neon,
-        .x3 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x3_ukernel__neon,
-        .x4 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x4_ukernel__neon,
-        .xm = (xnn_zipv_ukernel_fn) xnn_x8_zip_xm_ukernel__neon,
-      };
     #endif  // XNN_NO_X8_OPERATORS
 
     /**************************** F16 AArch32 micro-kernels ****************************/
@@ -291,12 +284,6 @@ static void init(void) {
       init_flags |= XNN_INIT_FLAG_X32;
 
       xnn_params.x32.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__neon;
-      xnn_params.x32.zip = (struct zip_parameters) {
-        .x2 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x2_ukernel__neon,
-        .x3 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x3_ukernel__neon,
-        .x4 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x4_ukernel__neon,
-        .xm = (xnn_zipv_ukernel_fn) xnn_x32_zip_xm_ukernel__neon,
-      };
     #endif  // XNN_NO_X32_OPERATORS
 
   } else if (!XNN_PLATFORM_MOBILE) {
@@ -337,12 +324,6 @@ static void init(void) {
     #ifndef XNN_NO_X8_OPERATORS
       init_flags |= XNN_INIT_FLAG_X8;
 
-      xnn_params.x8.zip = (struct zip_parameters) {
-        .x2 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x2_ukernel__scalar,
-        .x3 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x3_ukernel__scalar,
-        .x4 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x4_ukernel__scalar,
-        .xm = (xnn_zipv_ukernel_fn) xnn_x8_zip_xm_ukernel__scalar,
-      };
     #endif  // XNN_NO_X8_OPERATORS
 
     /**************************** F32 AArch32 Pre-NEON micro-kernels ****************************/
@@ -440,12 +421,6 @@ static void init(void) {
       init_flags |= XNN_INIT_FLAG_X32;
 
       xnn_params.x32.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__scalar;
-      xnn_params.x32.zip = (struct zip_parameters) {
-        .x2 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x2_ukernel__scalar,
-        .x3 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x3_ukernel__scalar,
-        .x4 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x4_ukernel__scalar,
-        .xm = (xnn_zipv_ukernel_fn) xnn_x32_zip_xm_ukernel__scalar,
-      };
     #endif  // XNN_NO_X32_OPERATORS
 
   }
@@ -490,12 +465,6 @@ static void init(void) {
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
-    xnn_params.x8.zip = (struct zip_parameters) {
-      .x2 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x2_ukernel__neon,
-      .x3 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x3_ukernel__neon,
-      .x4 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x4_ukernel__neon,
-      .xm = (xnn_zipv_ukernel_fn) xnn_x8_zip_xm_ukernel__neon,
-    };
   #endif  // XNN_NO_X8_OPERATORS
 
   /**************************** F16 AArch64 micro-kernels ****************************/
@@ -668,12 +637,6 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_X32;
 
     xnn_params.x32.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__neon;
-    xnn_params.x32.zip = (struct zip_parameters) {
-      .x2 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x2_ukernel__neon,
-      .x3 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x3_ukernel__neon,
-      .x4 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x4_ukernel__neon,
-      .xm = (xnn_zipv_ukernel_fn) xnn_x32_zip_xm_ukernel__neon,
-    };
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -715,12 +678,6 @@ static void init(void) {
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
-    xnn_params.x8.zip = (struct zip_parameters) {
-      .x2 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x2_ukernel__sse2,
-      .x3 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x3_ukernel__sse2,
-      .x4 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x4_ukernel__sse2,
-      .xm = (xnn_zipv_ukernel_fn) xnn_x8_zip_xm_ukernel__sse2,
-    };
   #endif  // XNN_NO_X8_OPERATORS
 
   /**************************** F16 x86 micro-kernels ****************************/
@@ -846,12 +803,6 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_X32;
 
     xnn_params.x32.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__sse2;
-    xnn_params.x32.zip = (struct zip_parameters) {
-      .x2 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x2_ukernel__sse2,
-      .x3 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x3_ukernel__sse2,
-      .x4 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x4_ukernel__sse2,
-      .xm = (xnn_zipv_ukernel_fn) xnn_x32_zip_xm_ukernel__sse2,
-    };
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -894,12 +845,6 @@ static void init(void) {
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
-    xnn_params.x8.zip = (struct zip_parameters) {
-      .x2 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x2_ukernel__scalar,
-      .x3 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x3_ukernel__scalar,
-      .x4 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x4_ukernel__scalar,
-      .xm = (xnn_zipv_ukernel_fn) xnn_x8_zip_xm_ukernel__scalar,
-    };
   #endif  // XNN_NO_X8_OPERATORS
 
   /**************************** F32 WAsm SIMD micro-kernels****************************/
@@ -1059,12 +1004,6 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_X32;
 
     xnn_params.x32.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__wasmsimd;
-    xnn_params.x32.zip = (struct zip_parameters) {
-      .x2 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x2_ukernel__wasmsimd,
-      .x3 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x3_ukernel__wasmsimd,
-      .x4 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x4_ukernel__wasmsimd,
-      .xm = (xnn_zipv_ukernel_fn) xnn_x32_zip_xm_ukernel__wasmsimd,
-    };
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_WASM
@@ -1104,12 +1043,6 @@ static void init(void) {
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
-    xnn_params.x8.zip = (struct zip_parameters) {
-      .x2 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x2_ukernel__scalar,
-      .x3 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x3_ukernel__scalar,
-      .x4 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x4_ukernel__scalar,
-      .xm = (xnn_zipv_ukernel_fn) xnn_x8_zip_xm_ukernel__scalar,
-    };
   #endif  // XNN_NO_X8_OPERATORS
 
   /**************************** F32 WAsm micro-kernels****************************/
@@ -1207,12 +1140,6 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_X32;
 
     xnn_params.x32.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__scalar;
-    xnn_params.x32.zip = (struct zip_parameters) {
-      .x2 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x2_ukernel__scalar,
-      .x3 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x3_ukernel__scalar,
-      .x4 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x4_ukernel__scalar,
-      .xm = (xnn_zipv_ukernel_fn) xnn_x32_zip_xm_ukernel__scalar,
-    };
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_RISCV
@@ -1253,12 +1180,6 @@ static void init(void) {
   #ifndef XNN_NO_X8_OPERATORS
     init_flags |= XNN_INIT_FLAG_X8;
 
-    xnn_params.x8.zip = (struct zip_parameters) {
-      .x2 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x2_ukernel__scalar,
-      .x3 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x3_ukernel__scalar,
-      .x4 = (xnn_zipc_ukernel_fn) xnn_x8_zip_x4_ukernel__scalar,
-      .xm = (xnn_zipv_ukernel_fn) xnn_x8_zip_xm_ukernel__scalar,
-    };
   #endif  // XNN_NO_X8_OPERATORS
 
   /************************** F32 RISC-V micro-kernels **************************/
@@ -1356,12 +1277,6 @@ static void init(void) {
     init_flags |= XNN_INIT_FLAG_X32;
 
     xnn_params.x32.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__scalar;
-    xnn_params.x32.zip = (struct zip_parameters) {
-      .x2 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x2_ukernel__scalar,
-      .x3 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x3_ukernel__scalar,
-      .x4 = (xnn_zipc_ukernel_fn) xnn_x32_zip_x4_ukernel__scalar,
-      .xm = (xnn_zipv_ukernel_fn) xnn_x32_zip_xm_ukernel__scalar,
-    };
   #endif  // XNN_NO_X32_OPERATORS
 
 #else

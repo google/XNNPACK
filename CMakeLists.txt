@@ -291,7 +291,8 @@ SET(XNNPACK_SRCS
   src/unary-elementwise-config.c
   src/x8-lut-config.c
   src/xx-fill-config.c
-  src/xx-pad-config.c)
+  src/xx-pad-config.c
+  src/zip-config.c)
 
 SET(TABLE_SRCS
   src/tables/exp2-k-over-64.c

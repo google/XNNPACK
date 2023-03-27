@@ -284,6 +284,7 @@ struct xnn_operator {
   const struct xnn_ibilinear_chw_config* ibilinear_chw_config;
   const struct xnn_maxpool_config* maxpool_config;
   const struct xnn_prelu_config* prelu_config;
+  const struct xnn_zip_config* zip_config;
 
   struct compute_parameters compute;
   struct compute_parameters compute2;

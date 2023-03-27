@@ -602,6 +602,16 @@ XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_f32_maxpool_config();
 XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_s8_maxpool_config();
 XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_u8_maxpool_config();
 
+struct xnn_zip_config {
+  xnn_zipc_ukernel_fn x2;
+  xnn_zipc_ukernel_fn x3;
+  xnn_zipc_ukernel_fn x4;
+  xnn_zipv_ukernel_fn xm;
+};
+
+XNN_INTERNAL const struct xnn_zip_config* xnn_init_x8_zip_config();
+XNN_INTERNAL const struct xnn_zip_config* xnn_init_x32_zip_config();
+
 
 #ifdef __cplusplus
 }  // extern "C"

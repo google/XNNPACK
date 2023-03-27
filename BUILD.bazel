@@ -2425,6 +2425,7 @@ xnnpack_cc_library(
         "src/x8-lut-config.c",
         "src/xx-fill-config.c",
         "src/xx-pad-config.c",
+        "src/zip-config.c",
     ],
     hdrs = [
         "src/xnnpack/config.h",
