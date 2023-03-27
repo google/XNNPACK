@@ -23,6 +23,8 @@
   string: "SPMM"
 - name: xnn_microkernel_type_subconv2d
   string: "Subconv2D"
+- name: xnn_microkernel_type_unpool
+  string: "Unpooling"
 - name: xnn_microkernel_type_vmulcaddc
   string: "VMulCAddC"
 

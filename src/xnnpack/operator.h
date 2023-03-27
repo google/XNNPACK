@@ -75,6 +75,10 @@ struct xnn_ukernel_spmm {
   uint8_t mr;
 };
 
+struct xnn_ukernel_unpool {
+  xnn_unpool_ukernel_fn function;
+};
+
 struct xnn_ukernel_vmulcaddc {
   xnn_vmulcaddc_ukernel_fn function;
   uint8_t mr;
@@ -99,6 +103,7 @@ struct xnn_ukernel {
     struct xnn_ukernel_gemm gemm;
     struct xnn_ukernel_igemm igemm;
     struct xnn_ukernel_spmm spmm;
+    struct xnn_ukernel_unpool unpool;
     struct xnn_ukernel_vmulcaddc vmulcaddc;
     struct xnn_ukernel_vbinary vbinary;
     struct xnn_ukernel_vunary vunary;
@@ -288,7 +293,6 @@ struct xnn_operator {
   const struct xnn_prelu_config* prelu_config;
   const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config;
   const struct xnn_rmax_config* rmax_config;
-  const struct xnn_unpool_config* unpool_config;
   const struct xnn_zip_config* zip_config;
 
   struct compute_parameters compute;
