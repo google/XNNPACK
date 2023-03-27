@@ -746,6 +746,12 @@ struct xnn_argmaxpool_config {
 
 XNN_INTERNAL const struct xnn_argmaxpool_config* xnn_init_f32_argmaxpool_config();
 
+struct xnn_lut32norm_config {
+  xnn_u8_lut32norm_ukernel_fn lut32norm;
+};
+
+XNN_INTERNAL const struct xnn_lut32norm_config* xnn_init_u8_lut32norm_config();
+
 
 #ifdef __cplusplus
 }  // extern "C"

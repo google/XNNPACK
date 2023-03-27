@@ -55,9 +55,6 @@ struct xnn_parameters {
   uint32_t init_flags;
   struct xnn_allocator allocator;
   struct {
-    xnn_u8_lut32norm_ukernel_fn lut32norm;
-  } u8;
-  struct {
     xnn_unpool_ukernel_fn unpool;
   } x32;
 };

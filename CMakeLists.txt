@@ -293,6 +293,7 @@ SET(XNNPACK_SRCS
   src/raddstoreexpminusmax-config.c
   src/rmax-config.c
   src/spmm-config.c
+  src/lut32norm-config.c
   src/transpose-config.c
   src/unary-elementwise-config.c
   src/vmulcaddc-config.c

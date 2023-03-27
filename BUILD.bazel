@@ -2420,6 +2420,7 @@ xnnpack_cc_library(
         "src/gemm-config.c",
         "src/ibilinear-chw-config.c",
         "src/ibilinear-config.c",
+        "src/lut32norm-config.c",
         "src/maxpool-config.c",
         "src/pavgpool-config.c",
         "src/prelu-config.c",

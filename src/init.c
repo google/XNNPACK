@@ -42,7 +42,6 @@
 #include <xnnpack/ibilinear.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/log.h>
-#include <xnnpack/lut.h>
 #include <xnnpack/pad.h>
 #include <xnnpack/params.h>
 #include <xnnpack/microparams-init.h>
@@ -113,7 +112,6 @@ static void init(void) {
     #ifndef XNN_NO_U8_OPERATORS
       init_flags |= XNN_INIT_FLAG_U8;
 
-      xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
     #endif  // XNN_NO_U8_OPERATORS
 
     /**************************** X8 AArch32 micro-kernels ****************************/
@@ -189,7 +187,6 @@ static void init(void) {
     #ifndef XNN_NO_U8_OPERATORS
       init_flags |= XNN_INIT_FLAG_U8;
 
-      xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
     #endif  // XNN_NO_U8_OPERATORS
 
     /**************************** X8 AArch32 Pre-NEON micro-kernels ****************************/
@@ -254,7 +251,6 @@ static void init(void) {
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
 
   /**************************** X8 AArch64 micro-kernels ****************************/
@@ -330,7 +326,6 @@ static void init(void) {
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
 
   /**************************** X8 x86 micro-kernels ****************************/
@@ -402,7 +397,6 @@ static void init(void) {
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
 
   /**************************** X8 WAsm SIMD micro-kernels****************************/
@@ -462,7 +456,6 @@ static void init(void) {
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
 
   /**************************** X8 WAsm micro-kernels****************************/
@@ -523,7 +516,6 @@ static void init(void) {
   #ifndef XNN_NO_U8_OPERATORS
     init_flags |= XNN_INIT_FLAG_U8;
 
-    xnn_params.u8.lut32norm = xnn_u8_lut32norm_ukernel__scalar;
   #endif  // XNN_NO_U8_OPERATORS
 
   /************************** X8 RISC-V micro-kernels ***************************/
