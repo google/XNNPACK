@@ -34,23 +34,6 @@ struct conv_hwc2chw_parameters {
   uint8_t output_width_tile;
 };
 
-struct dwconv2d_chw_parameters {
-  xnn_dwconv2d_chw_ukernel_fn ukernel;
-  union {
-    xnn_init_f16_chw_params_fn f16;
-    xnn_init_f32_chw_params_fn f32;
-  } init;
-  union {
-    xnn_update_f16_chw_params_fn f16;
-    xnn_update_f32_chw_params_fn f32;
-  } update;
-  // Number of output width pixels in a tile.
-  uint8_t output_width_tile;
-  // Number of output height pixels in a tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
-  uint8_t output_height_tile;
-};
-
 struct argmaxpool_parameters {
   union {
     xnn_argmaxpool_unipass_ukernel_fn up;
@@ -127,14 +110,6 @@ struct xnn_parameters {
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
     // Direct 3x3 stride-2 Convolution with 3 input channels and HWC->CHW layout conversion.
     struct conv_hwc2chw_parameters conv_hwc2chw_3x3c3s2;
-    // Direct 3x3 stride-1 Convolution with padding 1 on left and right in CHW layout.
-    struct dwconv2d_chw_parameters dwconv2d_chw_3x3;
-    // Direct 3x3 stride-2 Convolution with padding 1 on left and right in CHW layout.
-    struct dwconv2d_chw_parameters dwconv2d_chw_3x3s2;
-    // Direct 5x5 stride-1 Convolution with padding 2 on left and right in CHW layout.
-    struct dwconv2d_chw_parameters dwconv2d_chw_5x5;
-    // Direct 5x5 stride-2 Convolution with padding 2 on left and right in CHW layout.
-    struct dwconv2d_chw_parameters dwconv2d_chw_5x5s2;
   } f16;
   struct {
     struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
@@ -142,14 +117,6 @@ struct xnn_parameters {
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
     // Direct 3x3 stride-2 Convolution with 3 input channels and HWC->CHW layout conversion.
     struct conv_hwc2chw_parameters conv_hwc2chw_3x3c3s2;
-    // Direct 3x3 stride-1 Convolution with padding 1 on left and right in CHW layout.
-    struct dwconv2d_chw_parameters dwconv2d_chw_3x3;
-    // Direct 3x3 stride-2 Convolution with padding 1 on left and right in CHW layout.
-    struct dwconv2d_chw_parameters dwconv2d_chw_3x3s2;
-    // Direct 5x5 stride-1 Convolution with padding 2 on left and right in CHW layout.
-    struct dwconv2d_chw_parameters dwconv2d_chw_5x5;
-    // Direct 5x5 stride-2 Convolution with padding 2 on left and right in CHW layout.
-    struct dwconv2d_chw_parameters dwconv2d_chw_5x5s2;
   } f32;
   struct {
     xnn_unpool_ukernel_fn unpool;

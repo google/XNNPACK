@@ -408,8 +408,15 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
     goto error;
   }
 
+  const struct xnn_dwconv2d_chw_config* dwconv2d_chw_config = xnn_init_f16_dwconv2d_chw_config();
+  if (dwconv2d_chw_config == NULL) {
+    xnn_log_error("failed to create %s operator: operations on data type are not supported",
+      xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
   enum xnn_microkernel_type ukernel_type;
-  struct dwconv2d_chw_parameters* dwconv2d_parameters = NULL;
+  const struct xnn_dwconv2d_chw_parameters* dwconv2d_parameters = NULL;
   // Supported cases:
   // + 1x1 convolution (no groups)
   // + 3x3 stride-2 with 3 input channels and NHWC input layout
@@ -434,25 +441,25 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
     !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
   {
     ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &xnn_params.f16.dwconv2d_chw_3x3;
+    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_3x3;
   } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
     (input_padding_top == 0 || input_padding_top == 1) && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
     !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
   {
     ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &xnn_params.f16.dwconv2d_chw_3x3s2;
+    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_3x3s2;
   } else if (is_5x5 && subsampling_height == 1 && subsampling_width == 1 &&
     input_padding_top == 2 && input_padding_left == 2 && input_padding_bottom == 2 && input_padding_right == 2 &&
     !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
   {
     ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &xnn_params.f16.dwconv2d_chw_5x5;
+    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5;
   } else if (is_5x5 && subsampling_height == 2 && subsampling_width == 2 &&
     (input_padding_top == 1 || input_padding_top == 2) && input_padding_left == 2 && input_padding_bottom == 2 && input_padding_right == 2 &&
     !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
   {
     ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &xnn_params.f16.dwconv2d_chw_5x5s2;
+    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5s2;
   } else {
     xnn_log_error(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel, %"PRIu32 "x%" PRIu32 " subsampling, %"PRIu32 "x%" PRIu32 " dilation"
@@ -729,8 +736,11 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
 
   status = xnn_status_unsupported_parameter;
 
+  const struct xnn_dwconv2d_chw_config* dwconv2d_chw_config = xnn_init_f32_dwconv2d_chw_config();
+  assert(dwconv2d_chw_config != NULL);
+
   enum xnn_microkernel_type ukernel_type;
-  struct dwconv2d_chw_parameters* dwconv2d_parameters = NULL;
+  const struct xnn_dwconv2d_chw_parameters* dwconv2d_parameters = NULL;
   // Supported cases:
   // + 1x1 convolution (no groups)
   // + 3x3 stride-2 with 3 input channels and NHWC input layout
@@ -755,25 +765,25 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
   {
     ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &xnn_params.f32.dwconv2d_chw_3x3;
+    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_3x3;
   } else if (is_3x3 && subsampling_height == 2 && subsampling_width == 2 &&
     (input_padding_top == 0 || input_padding_top == 1) && input_padding_left == 1 && input_padding_bottom == 1 && input_padding_right == 1 &&
     !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
   {
     ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &xnn_params.f32.dwconv2d_chw_3x3s2;
+    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_3x3s2;
   } else if (is_5x5 && subsampling_height == 1 && subsampling_width == 1 &&
     input_padding_top == 2 && input_padding_left == 2 && input_padding_bottom == 2 && input_padding_right == 2 &&
     !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
   {
     ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &xnn_params.f32.dwconv2d_chw_5x5;
+    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5;
   } else if (is_5x5 && subsampling_height == 2 && subsampling_width == 2 &&
     (input_padding_top == 1 || input_padding_top == 2) && input_padding_left == 2 && input_padding_bottom == 2 && input_padding_right == 2 &&
     !nhwc_input && group_input_channels == 1 && group_output_channels == 1)
   {
     ukernel_type = xnn_microkernel_type_dwconv;
-    dwconv2d_parameters = &xnn_params.f32.dwconv2d_chw_5x5s2;
+    dwconv2d_parameters = &dwconv2d_chw_config->dwconv2d_chw_5x5s2;
   } else {
     xnn_log_error(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " kernel, %"PRIu32 "x%" PRIu32 " subsampling, %"PRIu32 "x%" PRIu32 " dilation"
