@@ -49,7 +49,6 @@
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/pavgpool.h>
 #include <xnnpack/prelu.h>
-#include <xnnpack/raddstoreexpminusmax.h>
 #include <xnnpack/spmm.h>
 #include <xnnpack/unpool.h>
 #include <xnnpack/vadd.h>
@@ -130,12 +129,6 @@ static void init(void) {
         if (hardware_config->use_arm_neon_fp16_arith) {
           init_flags |= XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE;
 
-          xnn_params.f16.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
-            .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x32,
-            .init.f16 = xnn_init_f16_expminus_fp16arith_rr2_p2_params,
-            .element_tile = 32,
-          };
-
           #ifndef XNN_NO_NCHW_OPERATORS
             init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
@@ -161,11 +154,6 @@ static void init(void) {
         .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__neon_c4,
         .mr = 9,
         .qr = 8,
-      };
-      xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
-        .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_lut64_p2_x8,
-        .init.f32 = xnn_init_f32_expminus_neon_rr2_lut64_p2_params,
-        .element_tile = 8,
       };
       #ifndef XNN_NO_NCHW_OPERATORS
         init_flags |= XNN_INIT_FLAG_CHW_OPT;
@@ -241,11 +229,6 @@ static void init(void) {
         .mr = 9,
         .qr = 8,
       };
-      xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
-        .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x4_acc2,
-        .init.f32 = xnn_init_f32_expminus_scalar_rr2_p5_params,
-        .element_tile = 4,
-      };
       #ifndef XNN_NO_NCHW_OPERATORS
         init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
@@ -313,13 +296,6 @@ static void init(void) {
       if (hardware_config->use_arm_neon_fp16_arith) {
         init_flags |= XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE;
 
-        xnn_params.f16.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
-          .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x40,
-          .init.f16 = xnn_init_f16_expminus_fp16arith_rr2_p2_params,
-          .element_tile = 40,
-        };
-
-
         #ifndef XNN_NO_NCHW_OPERATORS
           init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
@@ -344,11 +320,6 @@ static void init(void) {
       .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__neon_c4,
       .mr = 9,
       .qr = 8,
-    };
-    xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
-      .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__neonfma_rr1_lut64_p2_x16,
-      .init.f32 = xnn_init_f32_expminus_neonfma_rr1_lut64_p2_params,
-      .element_tile = 16,
     };
     #ifndef XNN_NO_NCHW_OPERATORS
       init_flags |= XNN_INIT_FLAG_CHW_OPT;
@@ -413,12 +384,6 @@ static void init(void) {
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx2) {
       init_flags |= XNN_INIT_FLAG_F16;
 
-      xnn_params.f16.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
-        .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_x40,
-        .init.f16 = xnn_init_f16_expminus_avx2_rr1_p2_params,
-        .element_tile = 40,
-      };
-
     }
   #endif  // XNN_NO_F16_OPERATORS
 
@@ -438,11 +403,6 @@ static void init(void) {
       .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__sse2_c4,
       .mr = 9,
       .qr = 8,
-    };
-    xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
-      .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20_acc2,
-      .init.f32 = xnn_init_f32_expminus_sse2_rr2_p5_params,
-      .element_tile = 20,
     };
     #ifndef XNN_NO_NCHW_OPERATORS
       // Sparse microkernels on x86 currently target only SSE, and on processors
@@ -521,19 +481,6 @@ static void init(void) {
       .mr = 9,
       .qr = 8,
     };
-    #if XNN_ARCH_WASMRELAXEDSIMD
-      xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
-        .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_x16_acc2,
-        .init.f32 = xnn_init_f32_expminus_wasmsimd_rr2_p5_params,
-        .element_tile = 16,
-      };
-    #else
-      xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
-        .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x16_acc2,
-        .init.f32 = xnn_init_f32_expminus_wasmsimd_rr2_p5_params,
-        .element_tile = 16,
-      };
-    #endif
     #ifndef XNN_NO_NCHW_OPERATORS
       init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
@@ -606,11 +553,6 @@ static void init(void) {
       .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1,
       .mr = 9,
       .qr = 8,
-    };
-    xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
-      .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x4_acc2,
-      .init.f32 = xnn_init_f32_expminus_scalar_rr2_p5_params,
-      .element_tile = 4,
     };
     #ifndef XNN_NO_NCHW_OPERATORS
       init_flags |= XNN_INIT_FLAG_CHW_OPT;
@@ -685,11 +627,6 @@ static void init(void) {
       .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1,
       .mr = 9,
       .qr = 8,
-    };
-    xnn_params.f32.raddstoreexpminusmax = (struct raddstoreexpminusmax_parameters) {
-      .ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x4_acc2,
-      .init.f32 = xnn_init_f32_expminus_scalar_rr2_p5_params,
-      .element_tile = 4,
     };
     #ifndef XNN_NO_NCHW_OPERATORS
       init_flags |= XNN_INIT_FLAG_CHW_OPT;

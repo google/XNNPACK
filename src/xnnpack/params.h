@@ -27,17 +27,6 @@ struct argmaxpool_parameters {
   uint8_t qr;
 };
 
-struct raddstoreexpminusmax_parameters {
-  xnn_raddstoreexpminusmax_ukernel_fn ukernel;
-  union {
-    xnn_init_f16_expminus_params_fn f16;
-    xnn_init_f32_expminus_params_fn f32;
-  } init;
-  // Number of elements in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
-  uint8_t element_tile;
-};
-
 #define XNN_MAX_F32_ARGMAXPOOL_UKERNELS 3
 
 // Indicates that XNNPACK as a whole has initialized.
@@ -80,11 +69,7 @@ struct xnn_parameters {
     xnn_u8_lut32norm_ukernel_fn lut32norm;
   } u8;
   struct {
-    struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
-  } f16;
-  struct {
     struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
-    struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
   } f32;
   struct {
     xnn_unpool_ukernel_fn unpool;
