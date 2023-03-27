@@ -42,7 +42,7 @@ static enum xnn_status create_fully_connected_nc(
     int packed_weights_padding_byte,
     const void* params,
     size_t params_size,
-    const struct gemm_parameters* gemm_parameters,
+    const struct xnn_gemm_config* gemm_parameters,
     const struct gemm_fused_ukernels* gemm_ukernels,
     uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
@@ -339,9 +339,16 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     return xnn_status_invalid_parameter;
   }
 
+  const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
   union xnn_f16_minmax_params params;
-  if XNN_LIKELY(xnn_params.f16.gemm.init.f16 != NULL) {
-    xnn_params.f16.gemm.init.f16(&params, fp16_output_min, fp16_output_max);
+  if XNN_LIKELY(gemm_config->init.f16 != NULL) {
+    gemm_config->init.f16(&params, fp16_output_min, fp16_output_max);
   }
   xnn_pack_gemm_io_w_fn pack_gemm_io_w = (xnn_pack_gemm_io_w_fn) xnn_pack_f16_gemm_io_w;
   xnn_pack_gemm_goi_w_fn pack_gemm_goi_w = (xnn_pack_gemm_goi_w_fn) xnn_pack_f16_gemm_goi_w;
@@ -359,7 +366,7 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     pack_gemm_goi_w,
     NULL /* packing params */, 0 /* packed weights padding byte */,
     &params, sizeof(params),
-    &xnn_params.f16.gemm, &xnn_params.f16.gemm.minmax,
+    gemm_config, &gemm_config->minmax,
     XNN_INIT_FLAG_F16,
     xnn_operator_type_fully_connected_nc_f16,
     caches,
@@ -400,15 +407,22 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     return xnn_status_invalid_parameter;
   }
 
-  const struct gemm_fused_ukernels* gemm_ukernels = &xnn_params.f32.gemm.minmax;
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
+  const struct gemm_fused_ukernels* gemm_ukernels = &gemm_config->minmax;
   const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
-  if (linear_activation && xnn_params.f32.gemm.linear.gemm[xnn_params.f32.gemm.mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
-    gemm_ukernels = &xnn_params.f32.gemm.linear;
+  if (linear_activation && gemm_config->linear.gemm[gemm_config->mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
+    gemm_ukernels = &gemm_config->linear;
   }
 
   union xnn_f32_minmax_params params;
-  if XNN_LIKELY(xnn_params.f32.gemm.init.f32 != NULL) {
-    xnn_params.f32.gemm.init.f32(&params, output_min, output_max);
+  if XNN_LIKELY(gemm_config->init.f32 != NULL) {
+    gemm_config->init.f32(&params, output_min, output_max);
   }
   return create_fully_connected_nc(
     input_channels, output_channels,
@@ -420,7 +434,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_gemm_goi_w,
     NULL /* packing params */, 0 /* packed weights padding byte */,
     &params, sizeof(params),
-    &xnn_params.f32.gemm, gemm_ukernels,
+    gemm_config, gemm_ukernels,
     XNN_INIT_FLAG_F32,
     xnn_operator_type_fully_connected_nc_f32,
     caches,
@@ -483,9 +497,12 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     return xnn_status_unsupported_parameter;
   }
 
+  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_gemm_config();
+  assert(gemm_config != NULL);
+
   union xnn_qs8_conv_minmax_params params;
-  if XNN_LIKELY(xnn_params.qs8.gemm.init.qs8 != NULL) {
-    xnn_params.qs8.gemm.init.qs8(&params, requantization_scale, output_zero_point, output_min, output_max);
+  if XNN_LIKELY(gemm_config->init.qs8 != NULL) {
+    gemm_config->init.qs8(&params, requantization_scale, output_zero_point, output_min, output_max);
   }
   const struct xnn_qs8_packing_params packing_params = {
     .input_zero_point = input_zero_point,
@@ -500,7 +517,7 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     (xnn_pack_gemm_goi_w_fn) xnn_pack_qs8_gemm_goi_w,
     &packing_params, 0 /* packed weights padding byte */,
     &params, sizeof(params),
-    &xnn_params.qs8.gemm, &xnn_params.qs8.gemm.minmax,
+    gemm_config, &gemm_config->minmax,
     XNN_INIT_FLAG_QS8,
     xnn_operator_type_fully_connected_nc_qs8,
     caches,
@@ -564,9 +581,12 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     return xnn_status_unsupported_parameter;
   }
 
+  const struct xnn_gemm_config* gemm_config = xnn_init_qu8_gemm_config();
+  assert(gemm_config != NULL);
+
   union xnn_qu8_conv_minmax_params params;
-  if XNN_LIKELY(xnn_params.qu8.gemm.init.qu8 != NULL) {
-    xnn_params.qu8.gemm.init.qu8(&params,
+  if XNN_LIKELY(gemm_config->init.qu8 != NULL) {
+    gemm_config->init.qu8(&params,
       kernel_zero_point, requantization_scale, output_zero_point, output_min, output_max);
   }
   const struct xnn_qu8_packing_params packing_params = {
@@ -583,7 +603,7 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     (xnn_pack_gemm_goi_w_fn) xnn_pack_qu8_gemm_goi_w,
     &packing_params, kernel_zero_point /* packed weights padding byte */,
     &params, sizeof(params),
-    &xnn_params.qu8.gemm, &xnn_params.qu8.gemm.minmax,
+    gemm_config, &gemm_config->minmax,
     XNN_INIT_FLAG_QU8,
     xnn_operator_type_fully_connected_nc_qu8,
     caches,

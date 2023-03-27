@@ -18,11 +18,11 @@
 #include "models/models.h"
 
 #include <xnnpack.h>
+#include <xnnpack/config.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
 
 
 static void GEMMEnd2EndBenchmark(
@@ -52,27 +52,38 @@ static void GEMMEnd2EndBenchmark(
     return;
   }
 
+  struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  if (gemm_config == nullptr) {
+    state.SkipWithError("hardware does not support F32 gemm");
+    return;
+  }
+
+  struct xnn_gemm_config* gemm2_config = xnn_init_f32_gemm2_config();
+  if (gemm2_config == nullptr) {
+    state.SkipWithError("hardware does not support F32 gemm");
+    return;
+  }
+
   // Override microkernels chosen in xnn_initialize
-  // Note: do not directly assign to xnn_params.f32.gemm because it breaks older gcc.
-  std::memset(&xnn_params.f32.gemm, 0, sizeof(xnn_params.f32.gemm));
-  std::memset(&xnn_params.f32.gemm2, 0, sizeof(xnn_params.f32.gemm2));
-  xnn_params.f32.gemm.minmax.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm_minmax));
-  xnn_params.f32.gemm.minmax.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm_minmax));
-  xnn_params.f32.gemm.minmax.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1_minmax));
-  xnn_params.f32.gemm.minmax.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm1_minmax));
-  xnn_params.f32.gemm.relu.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm_relu));
-  xnn_params.f32.gemm.relu.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm_relu));
-  xnn_params.f32.gemm.relu.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1_relu));
-  xnn_params.f32.gemm.relu.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm1_relu));
-  xnn_params.f32.gemm.linear.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm));
-  xnn_params.f32.gemm.linear.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm));
-  xnn_params.f32.gemm.linear.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1));
-  xnn_params.f32.gemm.linear.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm1));
-  xnn_params.f32.gemm.init.f32 = init_params;
-  xnn_params.f32.gemm.mr = mr;
-  xnn_params.f32.gemm.nr = nr;
-  xnn_params.f32.gemm.log2_kr = log2_kr;
-  xnn_params.f32.gemm.log2_sr = log2_sr;
+  std::memset(gemm_config, 0, sizeof(struct xnn_gemm_config));
+  std::memset(gemm2_config, 0, sizeof(struct xnn_gemm_config));
+  gemm_config->minmax.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm_minmax));
+  gemm_config->minmax.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm_minmax));
+  gemm_config->minmax.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1_minmax));
+  gemm_config->minmax.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm1_minmax));
+  gemm_config->relu.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm_relu));
+  gemm_config->relu.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm_relu));
+  gemm_config->relu.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1_relu));
+  gemm_config->relu.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm1_relu));
+  gemm_config->linear.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm));
+  gemm_config->linear.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm));
+  gemm_config->linear.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1));
+  gemm_config->linear.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm1));
+  gemm_config->init.f32 = init_params;
+  gemm_config->mr = mr;
+  gemm_config->nr = nr;
+  gemm_config->log2_kr = log2_kr;
+  gemm_config->log2_sr = log2_sr;
 
   auto execution_plan = model_factory(nullptr);
   if (execution_plan.empty()) {
@@ -116,21 +127,24 @@ static void GEMMEnd2EndBenchmark(
     return;
   }
 
-  // Set the microkernels to dummies to ensure we run JIT kernels.
-  for (size_t i = 0; i < XNN_MAX_MR; i++) {
-    xnn_params.f32.gemm.minmax.gemm[i] = xnn_init_hmp_gemm_ukernel(nullptr);
-    xnn_params.f32.gemm.minmax.igemm[i] = xnn_init_hmp_igemm_ukernel(nullptr);
+  struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  if (gemm_config == nullptr) {
+    state.SkipWithError("hardware does not support F32 gemm");
+    return;
   }
-  xnn_params.f32.gemm.init.f32 = init_params;
-  xnn_params.f32.gemm.mr = mr;
-  xnn_params.f32.gemm.nr = nr;
-  xnn_params.f32.gemm.log2_kr = log2_kr;
-  xnn_params.f32.gemm.log2_sr = log2_sr;
 
-  xnn_params.f32.gemm.generator.gemm[mr-1] = xnn_init_hmp_gemm_codegen(gemm_generator);
-  xnn_params.f32.gemm.generator.gemm[0] = xnn_init_hmp_gemm_codegen(gemm1_generator);
-  xnn_params.f32.gemm.generator.igemm[mr-1] = xnn_init_hmp_igemm_codegen(igemm_generator);
-  xnn_params.f32.gemm.generator.igemm[0] = xnn_init_hmp_igemm_codegen(igemm1_generator);
+  // Override microkernels chosen in xnn_initialize
+  std::memset(gemm_config, 0, sizeof(struct xnn_gemm_config));
+  gemm_config->init.f32 = init_params;
+  gemm_config->mr = mr;
+  gemm_config->nr = nr;
+  gemm_config->log2_kr = log2_kr;
+  gemm_config->log2_sr = log2_sr;
+
+  gemm_config->generator.gemm[mr-1] = xnn_init_hmp_gemm_codegen(gemm_generator);
+  gemm_config->generator.gemm[0] = xnn_init_hmp_gemm_codegen(gemm1_generator);
+  gemm_config->generator.igemm[mr-1] = xnn_init_hmp_igemm_codegen(igemm_generator);
+  gemm_config->generator.igemm[0] = xnn_init_hmp_igemm_codegen(igemm1_generator);
 
   auto execution_plan = model_factory(nullptr);
   if (execution_plan.empty()) {

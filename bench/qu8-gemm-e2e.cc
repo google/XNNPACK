@@ -18,11 +18,11 @@
 #include "models/models.h"
 
 #include <xnnpack.h>
+#include <xnnpack/config.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
 
 
 static void GEMMEnd2EndBenchmark(
@@ -44,18 +44,20 @@ static void GEMMEnd2EndBenchmark(
     return;
   }
 
+  struct xnn_gemm_config* gemm_config = xnn_init_qu8_gemm_config();
+  assert(gemm_config != nullptr);
+
   // Override microkernels chosen in xnn_initialize
-  // Note: do not directly assign to xnn_params.qu8.gemm because it breaks older gcc.
-  std::memset(&xnn_params.qu8.gemm, 0, sizeof(xnn_params.qu8.gemm));
-  xnn_params.qu8.gemm.minmax.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm));
-  xnn_params.qu8.gemm.minmax.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm));
-  xnn_params.qu8.gemm.minmax.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1));
-  xnn_params.qu8.gemm.minmax.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm1));
-  xnn_params.qu8.gemm.init.qu8 = init_params;
-  xnn_params.qu8.gemm.mr = mr;
-  xnn_params.qu8.gemm.nr = nr;
-  xnn_params.qu8.gemm.log2_kr = log2_kr;
-  xnn_params.qu8.gemm.log2_sr = log2_sr;
+  std::memset(gemm_config, 0, sizeof(struct xnn_gemm_config));
+  gemm_config->minmax.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm));
+  gemm_config->minmax.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm));
+  gemm_config->minmax.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1));
+  gemm_config->minmax.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm1));
+  gemm_config->init.qu8 = init_params;
+  gemm_config->mr = mr;
+  gemm_config->nr = nr;
+  gemm_config->log2_kr = log2_kr;
+  gemm_config->log2_sr = log2_sr;
 
   auto execution_plan = model_factory(nullptr);
   if (execution_plan.empty()) {

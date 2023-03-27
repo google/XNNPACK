@@ -2414,6 +2414,7 @@ xnnpack_cc_library(
         "src/dwconv-config.c",
         "src/gavgpool-config.c",
         "src/gavgpool-cw-config.c",
+        "src/gemm-config.c",
         "src/ibilinear-chw-config.c",
         "src/ibilinear-config.c",
         "src/pavgpool-config.c",
@@ -2434,6 +2435,8 @@ xnnpack_cc_library(
     deps = [
         ":amalgam_microkernels",
         ":common",
+        ":enable_assembly",
+        ":enable_jit",
         ":hardware_config",
         ":logging",
         ":microkernels_h",
@@ -2464,6 +2467,8 @@ xnnpack_cc_library(
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
+        ":enable_assembly",
+        ":enable_jit",
         ":hardware_config_test_mode",
         ":logging",
         ":microkernels_h",

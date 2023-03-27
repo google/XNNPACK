@@ -18,11 +18,11 @@
 #include "models/models.h"
 
 #include <xnnpack.h>
+#include <xnnpack/config.h>
 #include <xnnpack/gemm.h>
 #include <xnnpack/igemm.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
 
 
 static void GEMMEnd2EndBenchmark(
@@ -36,7 +36,7 @@ static void GEMMEnd2EndBenchmark(
   uint8_t mr, uint8_t nr, uint8_t log2_kr = 0, uint8_t log2_sr = 0,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
   if (xnn_initialize(nullptr /* allocator */) != xnn_status_success) {
@@ -44,19 +44,23 @@ static void GEMMEnd2EndBenchmark(
     return;
   }
 
+  struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
+  if (gemm_config == nullptr) {
+    state.SkipWithError("hardware does not support F16 gemm");
+    return;
+  }
+
   // Override microkernels chosen in xnn_initialize
-  // Note: do not directly assign to xnn_params.f32.gemm because it breaks older gcc.
-  std::memset(&xnn_params.f16.gemm, 0, sizeof(xnn_params.f16.gemm));
-  std::memset(&xnn_params.f16.gemm2, 0, sizeof(xnn_params.f16.gemm2));
-  xnn_params.f16.gemm.minmax.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm_minmax));
-  xnn_params.f16.gemm.minmax.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm_minmax));
-  xnn_params.f16.gemm.minmax.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1_minmax));
-  xnn_params.f16.gemm.minmax.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm1_minmax));
-  xnn_params.f16.gemm.init.f16 = init_params;
-  xnn_params.f16.gemm.mr = mr;
-  xnn_params.f16.gemm.nr = nr;
-  xnn_params.f16.gemm.log2_kr = log2_kr;
-  xnn_params.f16.gemm.log2_sr = log2_sr;
+  std::memset(gemm_config, 0, sizeof(struct xnn_gemm_config));
+  gemm_config->minmax.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm_minmax));
+  gemm_config->minmax.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm_minmax));
+  gemm_config->minmax.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1_minmax));
+  gemm_config->minmax.igemm[0] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm1_minmax));
+  gemm_config->init.f16 = init_params;
+  gemm_config->mr = mr;
+  gemm_config->nr = nr;
+  gemm_config->log2_kr = log2_kr;
+  gemm_config->log2_sr = log2_sr;
 
   auto execution_plan = model_factory(nullptr);
   if (execution_plan.empty()) {

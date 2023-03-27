@@ -282,6 +282,7 @@ SET(XNNPACK_SRCS
   src/init.c
   src/gavgpool-config.c
   src/gavgpool-cw-config.c
+  src/gemm-config.c
   src/params.c
   src/pavgpool-config.c
   src/prelu-config.c

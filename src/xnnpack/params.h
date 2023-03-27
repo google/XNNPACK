@@ -18,161 +18,6 @@
 #include <xnnpack/microparams.h>
 #include <xnnpack/config.h>
 
-struct xnn_hmp_gemm_ukernel {
-  xnn_gemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
-#if XNN_PLATFORM_JIT
-  size_t generated_code_offset[XNN_MAX_UARCH_TYPES];
-#endif  // XNN_PLATFORM_JIT
-};
-
-static inline struct xnn_hmp_gemm_ukernel xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn function) {
-  struct xnn_hmp_gemm_ukernel ukernel = {{ function }};
-#if XNN_PLATFORM_JIT
-  ukernel.generated_code_offset[0] = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    ukernel.function[i] = function;
-#if XNN_PLATFORM_JIT
-    ukernel.generated_code_offset[i] = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
-  }
-  return ukernel;
-}
-
-static inline bool xnn_is_hmp_gemm_ukernel(struct xnn_hmp_gemm_ukernel ukernel) {
-#if XNN_MAX_UARCH_TYPES == 1
-  return false;
-#else
-  uintptr_t default_fn = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
-  uintptr_t difference = 0;
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    difference |= (default_fn ^ (uintptr_t) ukernel.function[i]);
-  }
-  return difference != 0;
-#endif
-}
-
-struct xnn_hmp_igemm_ukernel {
-  xnn_igemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
-#if XNN_PLATFORM_JIT
-  size_t generated_code_offset[XNN_MAX_UARCH_TYPES];
-#endif  // XNN_PLATFORM_JIT
-};
-
-static inline struct xnn_hmp_igemm_ukernel xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn function) {
-  struct xnn_hmp_igemm_ukernel ukernel = {{ function }};
-#if XNN_PLATFORM_JIT
-  ukernel.generated_code_offset[0] = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    ukernel.function[i] = function;
-#if XNN_PLATFORM_JIT
-    ukernel.generated_code_offset[i] = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
-  }
-  return ukernel;
-}
-
-static inline bool xnn_is_hmp_igemm_ukernel(struct xnn_hmp_igemm_ukernel ukernel) {
-#if XNN_MAX_UARCH_TYPES == 1
-  return false;
-#else
-  uintptr_t default_fn = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
-  uintptr_t difference = 0;
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    difference |= (default_fn ^ (uintptr_t) ukernel.function[i]);
-  }
-  return difference != 0;
-#endif
-}
-
-// Largest GEMM/IGEMM MR used in init.c is 7 (x86 AVX512).
-// Largest GEMM/IGEMM MR is 8 in e2e benchmarks.
-#define XNN_MAX_MR 8
-
-struct gemm_fused_ukernels {
-  struct xnn_hmp_gemm_ukernel gemm[XNN_MAX_MR];
-  struct xnn_hmp_igemm_ukernel igemm[XNN_MAX_MR];
-};
-
-#if XNN_PLATFORM_JIT
-struct xnn_hmp_gemm_codegen {
-  xnn_jit_gemm_code_generator_fn function[XNN_MAX_UARCH_TYPES];
-};
-
-static inline struct xnn_hmp_gemm_codegen xnn_init_hmp_gemm_codegen(xnn_jit_gemm_code_generator_fn function) {
-  struct xnn_hmp_gemm_codegen ukernel = {{ function }};
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    ukernel.function[i] = function;
-  }
-  return ukernel;
-}
-
-static inline bool xnn_is_hmp_gemm_codegen(struct xnn_hmp_gemm_codegen ukernel) {
-#if XNN_MAX_UARCH_TYPES == 1
-  return false;
-#else
-  uintptr_t default_fn = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
-  uintptr_t difference = 0;
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    difference |= (default_fn ^ (uintptr_t) ukernel.function[i]);
-  }
-  return difference != 0;
-#endif
-}
-
-struct xnn_hmp_igemm_codegen {
-  xnn_jit_igemm_code_generator_fn function[XNN_MAX_UARCH_TYPES];
-};
-
-static inline struct xnn_hmp_igemm_codegen xnn_init_hmp_igemm_codegen(xnn_jit_igemm_code_generator_fn function) {
-  struct xnn_hmp_igemm_codegen ukernel = {{ function }};
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    ukernel.function[i] = function;
-  }
-  return ukernel;
-}
-
-static inline bool xnn_is_hmp_igemm_codegen(struct xnn_hmp_igemm_codegen ukernel) {
-#if XNN_MAX_UARCH_TYPES == 1
-  return false;
-#else
-  uintptr_t default_fn = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
-  uintptr_t difference = 0;
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    difference |= (default_fn ^ (uintptr_t) ukernel.function[i]);
-  }
-  return difference != 0;
-#endif
-}
-
-struct gemm_codegens {
-  struct xnn_hmp_gemm_codegen gemm[XNN_MAX_MR];
-  struct xnn_hmp_igemm_codegen igemm[XNN_MAX_MR];
-};
-#endif  // XNN_PLATFORM_JIT
-
-struct gemm_parameters {
-  struct gemm_fused_ukernels minmax;
-  struct gemm_fused_ukernels relu;
-  struct gemm_fused_ukernels linear;
-#if XNN_PLATFORM_JIT
-  struct gemm_codegens generator;
-#endif  // XNN_PLATFORM_JIT
-  union {
-    xnn_init_f16_minmax_params_fn f16;
-    xnn_init_f32_minmax_params_fn f32;
-    xnn_init_qc8_conv_minmax_params_fn qc8;
-    xnn_init_qs8_conv_minmax_params_fn qs8;
-    xnn_init_qu8_conv_minmax_params_fn qu8;
-  } init;
-  uint8_t mr;
-  uint8_t nr;
-  uint8_t log2_kr;
-  uint8_t log2_sr;
-};
-
-
 struct spmm_parameters {
   xnn_spmm_ukernel_fn ukernel;
   union {
@@ -308,15 +153,6 @@ struct xnn_parameters {
   uint32_t init_flags;
   struct xnn_allocator allocator;
   struct {
-    struct gemm_parameters gemm;
-  } qc8;
-  struct {
-    struct gemm_parameters gemm;
-  } qs8;
-  struct {
-    struct gemm_parameters gemm;
-  } qu8;
-  struct {
     struct maxpool_parameters maxpool;
   } s8;
   struct {
@@ -328,8 +164,6 @@ struct xnn_parameters {
     struct zip_parameters zip;
   } x8;
   struct {
-    struct gemm_parameters gemm;
-    struct gemm_parameters gemm2;
     struct maxpool_parameters maxpool;
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
@@ -348,8 +182,6 @@ struct xnn_parameters {
     struct dwconv2d_chw_parameters dwconv2d_chw_5x5s2;
   } f16;
   struct {
-    struct gemm_parameters gemm;
-    struct gemm_parameters gemm2;
     struct maxpool_parameters maxpool;
     struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
     struct vmulcaddc_parameters vmulcaddc;

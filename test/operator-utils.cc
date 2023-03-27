@@ -6,7 +6,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/operator-utils.h>
-#include <xnnpack/params.h>
+#include <xnnpack/config.h>
 #include <gtest/gtest.h>
 
 TEST(COMPUTE_CONVOLUTION_OUTPUT_DIMENSION, compute) {
@@ -31,7 +31,7 @@ xnn_hmp_igemm_ukernel dummy_igemm_ukernel = xnn_init_hmp_igemm_ukernel(dummy_ige
 } // namespace
 
 TEST(HEURISTIC_MR, batch_size_same_as_mr) {
-  gemm_parameters params = {};
+  xnn_gemm_config params = {};
   params.minmax.gemm[0] = dummy_gemm_ukernel;
   params.minmax.gemm[1] = dummy_gemm_ukernel;
   params.minmax.igemm[0] = dummy_igemm_ukernel;
@@ -59,7 +59,7 @@ TEST(HEURISTIC_MR, batch_size_same_as_mr) {
 }
 
 TEST(HEURISTIC_MR, batch_size_smaller_than_mr) {
-  gemm_parameters params = {};
+  xnn_gemm_config params = {};
   params.minmax.gemm[0] = dummy_gemm_ukernel;
   params.minmax.gemm[1] = dummy_gemm_ukernel;
   params.minmax.gemm[2] = dummy_gemm_ukernel;
@@ -120,7 +120,7 @@ TEST(HEURISTIC_MR, batch_size_smaller_than_mr) {
 }
 
 TEST(HEURISTIC_MR, batch_size_larger_than_mr) {
-  gemm_parameters params = {};
+  xnn_gemm_config params = {};
   params.minmax.gemm[0] = dummy_gemm_ukernel;
   params.minmax.gemm[1] = empty_gemm_ukernel;
   params.minmax.gemm[2] = dummy_gemm_ukernel;
@@ -173,7 +173,7 @@ TEST(HEURISTIC_MR, batch_size_larger_than_mr) {
 }
 
 TEST(HEURISTIC_MR, max_mr_without_mr1_kernel) {
-  gemm_parameters params = {};
+  xnn_gemm_config params = {};
   params.minmax.gemm[0] = empty_gemm_ukernel;
   params.minmax.gemm[1] = empty_gemm_ukernel;
   params.minmax.gemm[2] = empty_gemm_ukernel;
