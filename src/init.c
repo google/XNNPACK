@@ -83,12 +83,11 @@
 static const struct xnn_allocator* volatile init_allocator = NULL;
 
 static void init(void) {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  assert(hardware_config != NULL);
-
   uint32_t init_flags = XNN_INIT_FLAG_XNNPACK;
 
 #if XNN_ARCH_ARM
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
   if (hardware_config->use_arm_neon) {
     /**************************** QC8 AArch32 micro-kernels ****************************/
     #ifndef XNN_NO_QC8_OPERATORS
@@ -495,6 +494,8 @@ static void init(void) {
   }
 
 #elif XNN_ARCH_ARM64
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
 
   /**************************** QC8 AArch64 micro-kernels ****************************/
   #ifndef XNN_NO_QC8_OPERATORS
@@ -744,6 +745,8 @@ static void init(void) {
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
   /**************************** QC8 x86 micro-kernels ****************************/
   #ifndef XNN_NO_QC8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QC8;
@@ -954,6 +957,8 @@ static void init(void) {
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
 
   /**************************** QC8 WAsm SIMD micro-kernels****************************/
   #ifndef XNN_NO_QS8_OPERATORS
@@ -1192,7 +1197,6 @@ static void init(void) {
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_WASM
-
   /**************************** QC8 WAsm micro-kernels****************************/
   #ifndef XNN_NO_QC8_OPERATORS
     init_flags |= XNN_INIT_FLAG_QC8;
