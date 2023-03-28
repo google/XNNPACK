@@ -34,7 +34,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_x4(
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
-  assert(nr == 8);   // This kernel is for NR=8
+  assert(nr == 8);
   assert(kr == 1);
   assert(sr == 1);
   assert(weights != NULL);
@@ -263,8 +263,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_x4(
         packed_weights += 8;
       }
 
-      // NR remainder has less than 8 rows so last row is not loaded
-      // For SR=4 the
       const uint32_t* w1 = w0 + kc;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;

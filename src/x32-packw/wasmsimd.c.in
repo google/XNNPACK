@@ -34,7 +34,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_x${KUNROLL}(
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
-  assert(nr == ${NR});   // This kernel is for NR=${NR}
+  assert(nr == ${NR});
   assert(kr == 1);
   assert(sr == 1);
   assert(weights != NULL);
@@ -190,8 +190,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_x${KUNROLL}(
         packed_weights += ${NR};
       }
 
-      // NR remainder has less than ${NR} rows so last row is not loaded
-      // For SR=4 the
       $for N in range(1, NR-1):
         const uint32_t* w${ABC[N]} = w${ABC[N-1]} + kc;
         $if N % 2 == 0:
