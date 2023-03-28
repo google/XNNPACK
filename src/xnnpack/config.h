@@ -729,6 +729,24 @@ struct xnn_raddstoreexpminusmax_config {
 XNN_INTERNAL const struct xnn_raddstoreexpminusmax_config* xnn_init_f16_raddstoreexpminusmax_config();
 XNN_INTERNAL const struct xnn_raddstoreexpminusmax_config* xnn_init_f32_raddstoreexpminusmax_config();
 
+struct xnn_argmaxpool_config {
+  union {
+    xnn_argmaxpool_unipass_ukernel_fn up;
+    xnn_argmaxpool_multipass_ukernel_fn mp;
+  };
+  // // Number of elements in a tile for the first pass.
+  uint8_t first_pass_tile_size;
+  // Number of elements in a tile for the remainder pass. If the pooling size is less than or equals to
+  // first_pass_tile_size, remainder passes are not run. We run as many remainder passes as required to cover the entire
+  // pooling window.
+  uint8_t remainder_pass_tile_size;
+};
+
+#define XNN_MAX_F32_ARGMAXPOOL_UKERNELS 3
+
+XNN_INTERNAL const struct xnn_argmaxpool_config* xnn_init_f32_argmaxpool_config();
+
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

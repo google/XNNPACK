@@ -31,7 +31,6 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/argmaxpool.h>
 #include <xnnpack/avgpool.h>
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
@@ -142,19 +141,6 @@ static void init(void) {
       init_flags |= XNN_INIT_FLAG_F32;
 
 
-      xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
-        .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__neon_c4,
-        .mr = 4,
-      };
-      xnn_params.f32.argmaxpool[1] = (struct argmaxpool_parameters) {
-        .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__neon_c4,
-        .mr = 9,
-      };
-      xnn_params.f32.argmaxpool[2] = (struct argmaxpool_parameters) {
-        .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__neon_c4,
-        .mr = 9,
-        .qr = 8,
-      };
       #ifndef XNN_NO_NCHW_OPERATORS
         init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
@@ -216,19 +202,6 @@ static void init(void) {
     #ifndef XNN_NO_F32_OPERATORS
       init_flags |= XNN_INIT_FLAG_F32;
 
-      xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
-        .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__scalar_c1,
-        .mr = 4,
-      };
-      xnn_params.f32.argmaxpool[1] = (struct argmaxpool_parameters) {
-        .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__scalar_c1,
-        .mr = 9,
-      };
-      xnn_params.f32.argmaxpool[2] = (struct argmaxpool_parameters) {
-        .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1,
-        .mr = 9,
-        .qr = 8,
-      };
       #ifndef XNN_NO_NCHW_OPERATORS
         init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
@@ -308,19 +281,6 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
-    xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
-      .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__neon_c4,
-      .mr = 4,
-    };
-    xnn_params.f32.argmaxpool[1] = (struct argmaxpool_parameters) {
-      .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__neon_c4,
-      .mr = 9,
-    };
-    xnn_params.f32.argmaxpool[2] = (struct argmaxpool_parameters) {
-      .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__neon_c4,
-      .mr = 9,
-      .qr = 8,
-    };
     #ifndef XNN_NO_NCHW_OPERATORS
       init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
@@ -391,19 +351,6 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
-    xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
-      .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__sse2_c4,
-      .mr = 4,
-    };
-    xnn_params.f32.argmaxpool[1] = (struct argmaxpool_parameters) {
-      .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__sse2_c4,
-      .mr = 9,
-    };
-    xnn_params.f32.argmaxpool[2] = (struct argmaxpool_parameters) {
-      .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__sse2_c4,
-      .mr = 9,
-      .qr = 8,
-    };
     #ifndef XNN_NO_NCHW_OPERATORS
       // Sparse microkernels on x86 currently target only SSE, and on processors
       // with AVX ISA dense inference is expected to be faster than sparse.
@@ -468,19 +415,6 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
-    xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
-      .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__wasmsimd_c4,
-      .mr = 4,
-    };
-    xnn_params.f32.argmaxpool[1] = (struct argmaxpool_parameters) {
-      .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__wasmsimd_c4,
-      .mr = 9,
-    };
-    xnn_params.f32.argmaxpool[2] = (struct argmaxpool_parameters) {
-      .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4,
-      .mr = 9,
-      .qr = 8,
-    };
     #ifndef XNN_NO_NCHW_OPERATORS
       init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
@@ -541,19 +475,6 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
-    xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
-      .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__scalar_c1,
-      .mr = 4,
-    };
-    xnn_params.f32.argmaxpool[1] = (struct argmaxpool_parameters) {
-      .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__scalar_c1,
-      .mr = 9,
-    };
-    xnn_params.f32.argmaxpool[2] = (struct argmaxpool_parameters) {
-      .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1,
-      .mr = 9,
-      .qr = 8,
-    };
     #ifndef XNN_NO_NCHW_OPERATORS
       init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
@@ -615,19 +536,6 @@ static void init(void) {
   #ifndef XNN_NO_F32_OPERATORS
     init_flags |= XNN_INIT_FLAG_F32;
 
-    xnn_params.f32.argmaxpool[0] = (struct argmaxpool_parameters) {
-      .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_4x__scalar_c1,
-      .mr = 4,
-    };
-    xnn_params.f32.argmaxpool[1] = (struct argmaxpool_parameters) {
-      .up = (xnn_argmaxpool_unipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9x__scalar_c1,
-      .mr = 9,
-    };
-    xnn_params.f32.argmaxpool[2] = (struct argmaxpool_parameters) {
-      .mp = (xnn_argmaxpool_multipass_ukernel_fn) xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1,
-      .mr = 9,
-      .qr = 8,
-    };
     #ifndef XNN_NO_NCHW_OPERATORS
       init_flags |= XNN_INIT_FLAG_CHW_OPT;
 

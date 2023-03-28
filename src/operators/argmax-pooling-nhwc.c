@@ -13,7 +13,9 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/config.h>
 #include <xnnpack/operator.h>
+#include <xnnpack/operator-type.h>
 #include <xnnpack/common.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
@@ -29,11 +31,11 @@ static inline size_t compute_output_dimension(
   return padded_input_dimension / kernel_dimension;
 }
 
-static const struct argmaxpool_parameters* select_ukernel(
+static const struct xnn_argmaxpool_config* select_ukernel(
     size_t pooling_size,
-    const struct argmaxpool_parameters* ukernel)
+    const struct xnn_argmaxpool_config* ukernel)
 {
-  while (ukernel->qr == 0 && ukernel->mr < pooling_size) {
+  while (ukernel->remainder_pass_tile_size == 0 && ukernel->first_pass_tile_size < pooling_size) {
     ukernel++;
   }
   return ukernel;
@@ -218,8 +220,10 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   const size_t pooling_size = pooling_height * pooling_width;
   const size_t output_height = argmax_pooling_op->output_height;
   const size_t output_width = argmax_pooling_op->output_width;
-  const struct argmaxpool_parameters* ukernel = select_ukernel(pooling_size, xnn_params.f32.argmaxpool);
-  const uint32_t mr = ukernel->mr;
+  const struct xnn_argmaxpool_config* argmaxpool_config = xnn_init_f32_argmaxpool_config();
+  assert(argmaxpool_config != NULL);
+  const struct xnn_argmaxpool_config* ukernel = select_ukernel(pooling_size, argmaxpool_config);
+  const uint32_t first_pass_tile_size = ukernel->first_pass_tile_size;
 
   const size_t step_width = pooling_width;
   const size_t step_height = pooling_size + (output_width - 1) * step_width * pooling_height;
@@ -227,8 +231,8 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   if (input_height != argmax_pooling_op->last_input_height ||
       input_width != argmax_pooling_op->last_input_width)
   {
-    // Micro-kernel may read up to (mr - 1) elements after the end of indirection buffer.
-    const size_t indirection_buffer_size = sizeof(void*) * ((mr - 1) + output_height * step_height);
+    // Micro-kernel may read up to (first_pass_tile_size - 1) elements after the end of indirection buffer.
+    const size_t indirection_buffer_size = sizeof(void*) * ((first_pass_tile_size - 1) + output_height * step_height);
 
     const void** indirection_buffer =
       (const void**) xnn_reallocate_memory(argmax_pooling_op->indirection_buffer, indirection_buffer_size);
@@ -256,8 +260,8 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   const size_t output_height_stride = output_width * output_width_stride;
   const size_t index_height_stride = output_width * channels * sizeof(uint32_t);
 
-  const uint32_t qr = ukernel->qr;
-  const size_t multipass_adjustment = qr == 0 ? 0 : round_up(pooling_size - mr, qr) + mr - qr;
+  const uint32_t remainder_pass_tile_size = ukernel->remainder_pass_tile_size;
+  const size_t multipass_adjustment = remainder_pass_tile_size == 0 ? 0 : round_up(pooling_size - first_pass_tile_size, remainder_pass_tile_size) + first_pass_tile_size - remainder_pass_tile_size;
   argmax_pooling_op->context.argmax_pooling = (struct argmax_pooling_context) {
     .indirect_input = argmax_pooling_op->indirection_buffer,
     .indirect_input_height_stride = indirect_input_height_stride,
@@ -281,7 +285,7 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   argmax_pooling_op->compute.range[0] = batch_size;
   argmax_pooling_op->compute.range[1] = output_height;
 
-  if (pooling_size <= mr) {
+  if (pooling_size <= first_pass_tile_size) {
     argmax_pooling_op->context.argmax_pooling.unipass_ukernel = ukernel->up;
     argmax_pooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_argmax_pooling_unipass;
   } else {

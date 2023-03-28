@@ -18,17 +18,6 @@
 #include <xnnpack/microparams.h>
 #include <xnnpack/config.h>
 
-struct argmaxpool_parameters {
-  union {
-    xnn_argmaxpool_unipass_ukernel_fn up;
-    xnn_argmaxpool_multipass_ukernel_fn mp;
-  };
-  uint8_t mr;
-  uint8_t qr;
-};
-
-#define XNN_MAX_F32_ARGMAXPOOL_UKERNELS 3
-
 // Indicates that XNNPACK as a whole has initialized.
 // This does not guarantee that any particular microkernels are available.
 #define XNN_INIT_FLAG_XNNPACK    0x00000001
@@ -68,9 +57,6 @@ struct xnn_parameters {
   struct {
     xnn_u8_lut32norm_ukernel_fn lut32norm;
   } u8;
-  struct {
-    struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
-  } f32;
   struct {
     xnn_unpool_ukernel_fn unpool;
   } x32;

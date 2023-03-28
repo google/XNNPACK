@@ -2409,6 +2409,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "microkernel_configs",
     srcs = [
+        "src/argmaxpool-config.c",
         "src/avgpool-config.c",
         "src/binary-elementwise-config.c",
         "src/conv-hwc2chw-config.c",
