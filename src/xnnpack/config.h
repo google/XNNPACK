@@ -647,6 +647,36 @@ XNN_INTERNAL const struct xnn_spmm_config* xnn_init_f32_spmm2_config();
 // Sparse Matrix-Dense Matrix Multiplication (NR=4 block).
 XNN_INTERNAL const struct xnn_spmm_config* xnn_init_f32_spmm4_config();
 
+struct xnn_dwconv2d_chw_parameters {
+  xnn_dwconv2d_chw_ukernel_fn ukernel;
+  union {
+    xnn_init_f16_chw_params_fn f16;
+    xnn_init_f32_chw_params_fn f32;
+  } init;
+  union {
+    xnn_update_f16_chw_params_fn f16;
+    xnn_update_f32_chw_params_fn f32;
+  } update;
+  // Number of output width pixels in a tile.
+  uint8_t output_width_tile;
+  // Number of output height pixels in a tile.
+  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
+  uint8_t output_height_tile;
+};
+
+struct xnn_dwconv2d_chw_config {
+  // Direct 3x3 stride-1 Convolution with padding 1 on left and right in CHW layout.
+  struct xnn_dwconv2d_chw_parameters dwconv2d_chw_3x3;
+  // Direct 3x3 stride-2 Convolution with padding 1 on left and right in CHW layout.
+  struct xnn_dwconv2d_chw_parameters dwconv2d_chw_3x3s2;
+  // Direct 5x5 stride-1 Convolution with padding 2 on left and right in CHW layout.
+  struct xnn_dwconv2d_chw_parameters dwconv2d_chw_5x5;
+  // Direct 5x5 stride-2 Convolution with padding 2 on left and right in CHW layout.
+  struct xnn_dwconv2d_chw_parameters dwconv2d_chw_5x5s2;
+};
+
+XNN_INTERNAL const struct xnn_dwconv2d_chw_config* xnn_init_f16_dwconv2d_chw_config();
+XNN_INTERNAL const struct xnn_dwconv2d_chw_config* xnn_init_f32_dwconv2d_chw_config();
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -277,6 +277,7 @@ SET(XNNPACK_SRCS
   src/avgpool-config.c
   src/binary-elementwise-config.c
   src/dwconv-config.c
+  src/dwconv2d-chw-config.c
   src/gavgpool-config.c
   src/gavgpool-cw-config.c
   src/gemm-config.c
