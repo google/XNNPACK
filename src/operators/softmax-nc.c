@@ -123,6 +123,9 @@ enum xnn_status xnn_create_softmax_nc_qu8(
     lookup_table[(uint32_t) i] = (uint32_t) lrint(scaled_exp_xi);
   }
 
+  const struct xnn_lut32norm_config* lut32norm_config = xnn_init_u8_lut32norm_config();
+  assert(lut32norm_config != NULL);
+
   const struct xnn_rmax_config* rmax_config = xnn_init_u8_rmax_config();
   assert(rmax_config != NULL);
 
@@ -132,6 +135,7 @@ enum xnn_status xnn_create_softmax_nc_qu8(
 
   softmax_op->type = xnn_operator_type_softmax_nc_qu8;
   softmax_op->flags = flags;
+  softmax_op->lut32norm_config = lut32norm_config;
   softmax_op->rmax_config = rmax_config;
 
   softmax_op->state = xnn_run_state_invalid;
@@ -182,7 +186,7 @@ enum xnn_status xnn_setup_softmax_nc_qu8(
     .y = output,
     .y_stride = softmax_op->output_pixel_stride * sizeof(uint8_t),
     .rmax_ukernel = softmax_op->rmax_config->rmax.u8,
-    .lut_norm_ukernel = xnn_params.u8.lut32norm,
+    .lut_norm_ukernel = softmax_op->lut32norm_config->lut32norm,
   };
   softmax_op->compute.type = xnn_parallelization_type_1d;
   softmax_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_u8_softmax;

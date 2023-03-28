@@ -276,17 +276,19 @@ struct xnn_operator {
   void* post_operation_params;
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
+
   const struct xnn_avgpool_config* avgpool_config;
-  const struct xnn_pavgpool_config* pavgpool_config;
   const struct xnn_gavgpool_config* gavgpool_config;
   const struct xnn_gavgpool_cw_config* gavgpool_cw_config;
-  const struct xnn_ibilinear_config* ibilinear_config;
   const struct xnn_ibilinear_chw_config* ibilinear_chw_config;
+  const struct xnn_ibilinear_config* ibilinear_config;
+  const struct xnn_lut32norm_config* lut32norm_config;
   const struct xnn_maxpool_config* maxpool_config;
+  const struct xnn_pavgpool_config* pavgpool_config;
   const struct xnn_prelu_config* prelu_config;
-  const struct xnn_zip_config* zip_config;
-  const struct xnn_rmax_config* rmax_config;
   const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config;
+  const struct xnn_rmax_config* rmax_config;
+  const struct xnn_zip_config* zip_config;
 
   struct compute_parameters compute;
   struct compute_parameters compute2;
