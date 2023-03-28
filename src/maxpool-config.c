@@ -235,19 +235,9 @@ static void init_u8_maxpool_config(void) {
   }
 #endif
 
-static bool is_f16_compatible_config(const struct xnn_hardware_config hardware_config[restrict XNN_MIN_ELEMENTS(1)]) {
-  #if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR) || (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)
-    return hardware_config->use_arm_neon_fp16_arith;
-  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
-    return hardware_config->use_x86_avx2;
-  #else
-    return false;
-  #endif
-}
-
 const struct xnn_maxpool_config* xnn_init_f16_maxpool_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL || !is_f16_compatible_config(hardware_config)) {
+  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
   #if XNN_PLATFORM_WINDOWS
