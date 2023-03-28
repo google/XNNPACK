@@ -34,27 +34,9 @@
 #include <xnnpack/avgpool.h>
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
-#include <xnnpack/conv.h>
-#include <xnnpack/dwconv.h>
-#include <xnnpack/gavgpool.h>
-#include <xnnpack/gemm.h>
-#include <xnnpack/fill.h>
-#include <xnnpack/ibilinear.h>
-#include <xnnpack/igemm.h>
 #include <xnnpack/log.h>
-#include <xnnpack/pad.h>
 #include <xnnpack/params.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/pavgpool.h>
-#include <xnnpack/prelu.h>
-#include <xnnpack/spmm.h>
-#include <xnnpack/vadd.h>
-#include <xnnpack/vbinary.h>
-#include <xnnpack/vcvt.h>
-#include <xnnpack/vlrelu.h>
-#include <xnnpack/vmul.h>
-#include <xnnpack/vmulcaddc.h>
-#include <xnnpack/vunary.h>
 
 
 #if XNN_PLATFORM_WINDOWS
