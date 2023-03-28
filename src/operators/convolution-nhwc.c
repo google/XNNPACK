@@ -87,16 +87,16 @@ static enum xnn_status create_vmulcaddc_path(
     int packed_weights_padding_byte,
     const void* vmulcaddc_params,
     size_t vmulcaddc_params_size,
-    const struct vmulcaddc_parameters* vmulcaddc_parameters,
+    const struct xnn_vmulcaddc_config* vmulcaddc_config,
     enum xnn_operator_type operator_type,
     xnn_operator_t convolution_op)
 {
-  assert(vmulcaddc_parameters != NULL);
+  assert(vmulcaddc_config != NULL);
   assert(vmulcaddc_params != NULL);
 
   enum xnn_status status = xnn_status_out_of_memory;
 
-  const size_t c_stride = round_up_po2(groups, vmulcaddc_parameters->channel_tile);
+  const size_t c_stride = round_up_po2(groups, vmulcaddc_config->channel_tile);
   const size_t packed_weights_size = ((UINT32_C(1) << log2_filter_element_size) + bias_element_size) * c_stride;
   size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
   void* weights_ptr = xnn_get_pointer_to_write_weights(
@@ -109,7 +109,7 @@ static enum xnn_status create_vmulcaddc_path(
   xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
                 aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
 
-  pack_vmulcaddc_w(groups, vmulcaddc_parameters->channel_tile, kernel, bias, weights_ptr, packing_params);
+  pack_vmulcaddc_w(groups, vmulcaddc_config->channel_tile, kernel, bias, weights_ptr, packing_params);
 
   if (use_weights_cache(convolution_op)) {
     convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
@@ -119,8 +119,8 @@ static enum xnn_status create_vmulcaddc_path(
   memcpy(&convolution_op->params, vmulcaddc_params, vmulcaddc_params_size);
 
   convolution_op->ukernel.vmulcaddc = (struct xnn_ukernel_vmulcaddc) {
-    .function = vmulcaddc_parameters->ukernel,
-        .mr = vmulcaddc_parameters->row_tile,
+    .function = vmulcaddc_config->ukernel,
+    .mr = vmulcaddc_config->row_tile,
   };
   return xnn_status_success;
 
@@ -464,7 +464,7 @@ static enum xnn_status create_convolution2d_nhwc(
     size_t vmulcaddc_params_size,
     const struct xnn_gemm_config* gemm_config,
     const struct xnn_dwconv_config* dwconv_ukernel,
-    const struct vmulcaddc_parameters* vmulcaddc_parameters,
+    const struct xnn_vmulcaddc_config* vmulcaddc_config,
     struct jit_gemm_params* jit_gemm_params,
     bool linear_activation,
     bool relu_activation,
@@ -597,7 +597,7 @@ static enum xnn_status create_convolution2d_nhwc(
 
   enum xnn_microkernel_type ukernel_type = xnn_microkernel_type_default;
   const bool unit_subsampling = (subsampling_width | subsampling_height) == 1;
-  if (group_input_channels == 1 && group_output_channels == 1 && kernel_size == 1 && unit_subsampling && !any_padding && vmulcaddc_parameters != NULL) {
+  if (group_input_channels == 1 && group_output_channels == 1 && kernel_size == 1 && unit_subsampling && !any_padding && vmulcaddc_config != NULL) {
     ukernel_type = xnn_microkernel_type_vmulcaddc;
   } else if (group_input_channels == 1 && group_output_channels == 1 && dwconv_ukernel != NULL)
   {
@@ -624,7 +624,7 @@ static enum xnn_status create_convolution2d_nhwc(
       status = create_vmulcaddc_path(
           groups, kernel, bias, log2_filter_element_size, bias_element_size,
           pack_vmulcaddc_w, packing_params, packed_weights_padding_byte,
-          vmulcaddc_params, vmulcaddc_params_size, vmulcaddc_parameters,
+          vmulcaddc_params, vmulcaddc_params_size, vmulcaddc_config,
           operator_type, convolution_op);
       if (status != xnn_status_success) {
         goto error;
@@ -843,7 +843,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     /*vmulcaddc_params_size=*/0,
     /*gemm_config=*/gemm_config,
     /*dwconv_ukernel=*/dwconv_ukernel,
-    /*vmulcaddc_parameters=*/NULL,
+    /*vmulcaddc_config=*/NULL,
     /*jit_gemm_params=*/NULL,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
@@ -975,7 +975,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     /*vmulcaddc_params_size=*/0,
     /*gemm_config=*/gemm_config,
     /*dwconv_ukernel=*/dwconv_ukernel,
-    /*vmulcaddc_parameters=*/NULL,
+    /*vmulcaddc_config=*/NULL,
     /*jit_gemm_params=*/NULL,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
@@ -1115,7 +1115,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     /*vmulcaddc_params_size=*/0,
     /*gemm_config=*/gemm_config,
     /*dwconv_ukernel=*/dwconv_ukernel,
-    /*vmulcaddc_parameters=*/NULL,
+    /*vmulcaddc_config=*/NULL,
     /*jit_gemm_params=*/NULL,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
@@ -1202,9 +1202,16 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     dwconv_ukernel->init.f16(&dwconv_params, fp16_output_min, fp16_output_max);
   }
 
+  const struct xnn_vmulcaddc_config* vmulcaddc_config = xnn_init_f16_vmulcaddc_config();
+  if (vmulcaddc_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
   union xnn_f16_minmax_params vmulcaddc_params;
-  if XNN_LIKELY(xnn_params.f16.vmulcaddc.init.f16 != NULL) {
-    xnn_params.f16.vmulcaddc.init.f16(&vmulcaddc_params, fp16_output_min, fp16_output_max);
+  if XNN_LIKELY(vmulcaddc_config->init.f16 != NULL) {
+    vmulcaddc_config->init.f16(&vmulcaddc_params, fp16_output_min, fp16_output_max);
   }
 
   struct jit_gemm_params jit_gemm_params = {
@@ -1260,7 +1267,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     /*vmulcaddc_params_size=*/sizeof(vmulcaddc_params),
     /*gemm_config=*/gemm_config,
     /*dwconv_ukernel=*/dwconv_ukernel,
-    /*vmulcaddc_parameters=*/&xnn_params.f16.vmulcaddc,
+    /*vmulcaddc_config=*/vmulcaddc_config,
     /*jit_gemm_params=*/&jit_gemm_params,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
@@ -1368,9 +1375,16 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     dwconv_ukernel->init.f32(&dwconv_params, output_min, output_max);
   }
 
+  const struct xnn_vmulcaddc_config* vmulcaddc_config = xnn_init_f32_vmulcaddc_config();
+  if (vmulcaddc_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
   union xnn_f32_minmax_params vmulcaddc_params;
-  if XNN_LIKELY(xnn_params.f32.vmulcaddc.init.f32 != NULL) {
-    xnn_params.f32.vmulcaddc.init.f32(&vmulcaddc_params, output_min, output_max);
+  if XNN_LIKELY(vmulcaddc_config->init.f32 != NULL) {
+    vmulcaddc_config->init.f32(&vmulcaddc_params, output_min, output_max);
   }
 
   return create_convolution2d_nhwc(
@@ -1404,7 +1418,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     /*vmulcaddc_params_size=*/sizeof(vmulcaddc_params),
     /*gemm_config=*/gemm_config,
     /*dwconv_ukernel=*/dwconv_ukernel,
-    /*vmulcaddc_parameters=*/&xnn_params.f32.vmulcaddc,
+    /*vmulcaddc_config=*/vmulcaddc_config,
     /*jit_gemm_params=*/&jit_gemm_params,
     /*linear_activation=*/linear_activation,
     /*relu_activation=*/relu_activation,
@@ -1488,9 +1502,16 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     dwconv_ukernel->init.f32(&dwconv_params, output_min, output_max);
   }
 
+  const struct xnn_vmulcaddc_config* vmulcaddc_config = xnn_init_f32_vmulcaddc_config();
+  if (vmulcaddc_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
   union xnn_f32_minmax_params vmulcaddc_params;
-  if XNN_LIKELY(xnn_params.f32.vmulcaddc.init.f32 != NULL) {
-    xnn_params.f32.vmulcaddc.init.f32(&vmulcaddc_params, output_min, output_max);
+  if XNN_LIKELY(vmulcaddc_config->init.f32 != NULL) {
+    vmulcaddc_config->init.f32(&vmulcaddc_params, output_min, output_max);
   }
 
   return create_convolution2d_nhwc(
@@ -1524,7 +1545,7 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     /*vmulcaddc_params_size=*/sizeof(vmulcaddc_params),
     /*gemm_config=*/gemm_config,
     /*dwconv_ukernel=*/dwconv_ukernel,
-    /*vmulcaddc_parameters=*/&xnn_params.f32.vmulcaddc,
+    /*vmulcaddc_config=*/vmulcaddc_config,
     /*jit_gemm_params=*/&jit_gemm_params,
     /*linear_activation=*/true,
     /*relu_activation=*/false,

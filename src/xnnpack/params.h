@@ -38,16 +38,6 @@ struct raddstoreexpminusmax_parameters {
   uint8_t element_tile;
 };
 
-struct vmulcaddc_parameters {
-  xnn_vmulcaddc_ukernel_fn ukernel;
-  union {
-    xnn_init_f16_minmax_params_fn f16;
-    xnn_init_f32_minmax_params_fn f32;
-  } init;
-  uint8_t channel_tile;
-  uint8_t row_tile;
-};
-
 #define XNN_MAX_F32_ARGMAXPOOL_UKERNELS 3
 
 // Indicates that XNNPACK as a whole has initialized.
@@ -90,12 +80,10 @@ struct xnn_parameters {
     xnn_u8_lut32norm_ukernel_fn lut32norm;
   } u8;
   struct {
-    struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
   } f16;
   struct {
     struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
-    struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
   } f32;
   struct {

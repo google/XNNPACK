@@ -698,6 +698,23 @@ struct xnn_conv_hwc2chw_config {
 XNN_INTERNAL const struct xnn_conv_hwc2chw_config* xnn_init_f16_conv_hwc2chw_3x3c3s2_config();
 XNN_INTERNAL const struct xnn_conv_hwc2chw_config* xnn_init_f32_conv_hwc2chw_3x3c3s2_config();
 
+struct xnn_vmulcaddc_config {
+  xnn_vmulcaddc_ukernel_fn ukernel;
+  union {
+    xnn_init_f16_minmax_params_fn f16;
+    xnn_init_f32_minmax_params_fn f32;
+  } init;
+  // Number of channels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  uint8_t channel_tile;
+  // Number of rows of inputs processed in one tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of rows in each call.
+  uint8_t row_tile;
+};
+
+XNN_INTERNAL const struct xnn_vmulcaddc_config* xnn_init_f16_vmulcaddc_config();
+XNN_INTERNAL const struct xnn_vmulcaddc_config* xnn_init_f32_vmulcaddc_config();
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
