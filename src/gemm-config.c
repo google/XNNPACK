@@ -1973,9 +1973,9 @@ static void init_qs8_gemm_config(void) {
       qs8_gemm_config.log2_kr = 3;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
     #if XNN_ARCH_WASMRELAXEDSIMD
+      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      assert(hardware_config != NULL);
       if (hardware_config->use_wasm_sdot) {
         qs8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qs8_gemm_minmax_fp32_ukernel_4x4c16__wasmsdot);
         qs8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qs8_igemm_minmax_fp32_ukernel_4x4c16__wasmsdot);
