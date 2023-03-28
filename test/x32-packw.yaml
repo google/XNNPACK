@@ -12,6 +12,9 @@
 - name: xnn_x32_packw_gemm_goi_ukernel_x8__scalar_float_x4
 - name: xnn_x32_packw_gemm_goi_ukernel_x8__scalar_int_x4
 
+# Wasm SIMD
+- name: xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_x4
+
 # ARM NEON
 - name: xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_prfm_x2
 - name: xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_x2
@@ -28,3 +31,4 @@
 - name: xnn_x32_packw_gemm_goi_ukernel_x16__sse2_x4
 - name: xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_x4
 - name: xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x4
+

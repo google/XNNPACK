@@ -174,6 +174,16 @@ static void x32_packw(benchmark::State& state,
   BENCHMARK_BGEMM(x32_packw_x2c4__sse2_x1)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  static void x32_packw_x8__wasmsimd_x4(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_x4,
+      /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  }
+
+  BENCHMARK_BGEMM(x32_packw_x8__wasmsimd_x4)
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
 static void x32_packw_x2__scalar_float_x4(benchmark::State& state, const char* net) {
   x32_packw(state,
     xnn_x32_packw_gemm_goi_ukernel_x2__scalar_float_x4,

@@ -28,7 +28,7 @@ tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=4 -D PREFETCH=1 -D KUNROLL=4 
 tools/xngen src/x32-packw/NR2-neon.c.in -D NR=2 -D PREFETCH=0 -D KUNROLL=2 -o src/x32-packw/gen/x32-packw-x2-neon-ld2lane-x2.c &
 tools/xngen src/x32-packw/NR2-neon.c.in -D NR=2 -D PREFETCH=1 -D KUNROLL=2 -o src/x32-packw/gen/x32-packw-x2-neon-ld2lane-prfm-x2.c &
 
-################################## x86 SSE ##################################
+################################### x86 SSE ###################################
 ### NR multiple of 4
 tools/xngen src/x32-packw/sse2.c.in -D NR=8  -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8-sse2-x4.c &
 tools/xngen src/x32-packw/sse2.c.in -D NR=16 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x16-sse2-x4.c &
@@ -39,6 +39,10 @@ tools/xngen src/x32-packw/s4-sse2.c.in -D NR=16 -D SR=4 -D KUNROLL=4 -o src/x32-
 
 ### KR 4
 tools/xngen src/x32-packw/c4-sse2.c.in -D NR=2  -D KR=4 -o src/x32-packw/gen/x32-packw-x2c4-sse2-x1.c &
+
+################################## Wasm SIMD ##################################
+### NR multiple of 4
+tools/xngen src/x32-packw/wasmsimd.c.in -D NR=8  -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8-wasmsimd-x4.c &
 
 ################################## Unit tests #################################
 tools/generate-packw-test.py --spec test/x32-packw.yaml --output test/x32-packw.cc &
