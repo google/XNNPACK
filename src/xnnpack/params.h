@@ -54,9 +54,6 @@ struct xnn_parameters {
   // Bitwise combination of XNN_INIT_FLAG_* flags
   uint32_t init_flags;
   struct xnn_allocator allocator;
-  struct {
-    xnn_unpool_ukernel_fn unpool;
-  } x32;
 };
 
 #ifdef __cplusplus

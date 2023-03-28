@@ -296,6 +296,7 @@ SET(XNNPACK_SRCS
   src/lut32norm-config.c
   src/transpose-config.c
   src/unary-elementwise-config.c
+  src/unpool-config.c
   src/vmulcaddc-config.c
   src/x8-lut-config.c
   src/xx-fill-config.c

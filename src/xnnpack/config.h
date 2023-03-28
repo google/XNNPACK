@@ -752,6 +752,12 @@ struct xnn_lut32norm_config {
 
 XNN_INTERNAL const struct xnn_lut32norm_config* xnn_init_u8_lut32norm_config();
 
+struct xnn_unpool_config {
+  xnn_unpool_ukernel_fn unpool;
+};
+
+XNN_INTERNAL const struct xnn_unpool_config* xnn_init_x32_unpool_config();
+
 
 #ifdef __cplusplus
 }  // extern "C"

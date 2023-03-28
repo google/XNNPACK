@@ -13,8 +13,10 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/config.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/operator-utils.h>
+#include <xnnpack/operator-type.h>
 #include <xnnpack/log.h>
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
@@ -95,6 +97,9 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
     goto error;
   }
 
+  const struct xnn_unpool_config* unpool_config = xnn_init_x32_unpool_config();
+  assert(unpool_config != NULL);
+
   unpooling_op->padding_top = input_padding_top;
   unpooling_op->padding_right = input_padding_right;
   unpooling_op->padding_bottom = input_padding_bottom;
@@ -108,6 +113,7 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
 
   unpooling_op->type = xnn_operator_type_unpooling_nhwc_x32;
   unpooling_op->flags = flags;
+  unpooling_op->unpool_config = unpool_config;
 
   unpooling_op->state = xnn_run_state_invalid;
 
@@ -214,7 +220,7 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
     .pooling_size = pooling_size,
     .channels = channels,
     .fill_value = 0,
-    .ukernel = xnn_params.x32.unpool,
+    .ukernel = unpooling_op->unpool_config->unpool,
   };
   unpooling_op->compute.type = xnn_parallelization_type_2d;
   unpooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_unpooling;

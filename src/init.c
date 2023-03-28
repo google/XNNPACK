@@ -48,7 +48,6 @@
 #include <xnnpack/pavgpool.h>
 #include <xnnpack/prelu.h>
 #include <xnnpack/spmm.h>
-#include <xnnpack/unpool.h>
 #include <xnnpack/vadd.h>
 #include <xnnpack/vbinary.h>
 #include <xnnpack/vcvt.h>
@@ -154,7 +153,6 @@ static void init(void) {
     #ifndef XNN_NO_X32_OPERATORS
       init_flags |= XNN_INIT_FLAG_X32;
 
-      xnn_params.x32.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__neon;
     #endif  // XNN_NO_X32_OPERATORS
 
   } else if (!XNN_PLATFORM_MOBILE) {
@@ -214,7 +212,6 @@ static void init(void) {
     #ifndef XNN_NO_X32_OPERATORS
       init_flags |= XNN_INIT_FLAG_X32;
 
-      xnn_params.x32.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__scalar;
     #endif  // XNN_NO_X32_OPERATORS
 
   }
@@ -292,7 +289,6 @@ static void init(void) {
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
-    xnn_params.x32.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__neon;
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -365,7 +361,6 @@ static void init(void) {
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
-    xnn_params.x32.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__sse2;
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -424,7 +419,6 @@ static void init(void) {
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
-    xnn_params.x32.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__wasmsimd;
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_WASM
@@ -483,7 +477,6 @@ static void init(void) {
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
-    xnn_params.x32.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__scalar;
   #endif  // XNN_NO_X32_OPERATORS
 
 #elif XNN_ARCH_RISCV
@@ -543,7 +536,6 @@ static void init(void) {
   #ifndef XNN_NO_X32_OPERATORS
     init_flags |= XNN_INIT_FLAG_X32;
 
-    xnn_params.x32.unpool = (xnn_unpool_ukernel_fn) xnn_x32_unpool_ukernel__scalar;
   #endif  // XNN_NO_X32_OPERATORS
 
 #else
