@@ -17,11 +17,13 @@
 #include <xnnpack/allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/compute.h>
+#include <xnnpack/config.h>
 #include <xnnpack/indirection.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/operator-utils.h>
+#include <xnnpack/operator-type.h>
 #include <xnnpack/pack.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/params.h>
@@ -37,13 +39,13 @@ static enum xnn_status create_spmm_path(
     const uint32_t log2_filter_element_size,
     const xnn_analyze_spmm_w_fn xnn_analyze_spmm,
     const xnn_pack_spmm_w_fn xnn_pack_spmm,
-    const struct spmm_parameters* spmm_parameters,
-    const struct spmm_parameters* spmm_parameters2,
-    const struct spmm_parameters* spmm_parameters4,
+    const struct xnn_spmm_config* spmm_config,
+    const struct xnn_spmm_config* spmm2_config,
+    const struct xnn_spmm_config* spmm4_config,
     const enum xnn_operator_type operator_type,
     const xnn_operator_t convolution_op)
 {
-  assert(spmm_parameters != NULL);
+  assert(spmm_config != NULL);
   assert(kernel_height == 1);
   assert(kernel_width == 1);
   assert(groups == 1);
@@ -64,22 +66,22 @@ static enum xnn_status create_spmm_path(
   size_t num_output_channel_blocks = group_output_channels;
   size_t num_nonzero_values = num_nonzeroes;
   size_t num_nonzero_blocks = num_nonzeroes;
-  if (num_block4_nonzeroes * 5 >= num_nonzero_blocks4 * 18 && spmm_parameters4 != NULL && spmm_parameters4->ukernel != NULL) {
+  if (num_block4_nonzeroes * 5 >= num_nonzero_blocks4 * 18 && spmm4_config != NULL && spmm4_config->ukernel != NULL) {
     // 4-channel blocks have 90%+ non-zeroes
 
     output_channels_block_size = 4;
     num_output_channel_blocks = num_output_channel_blocks / 4 + num_output_channel_blocks % 4;
-    spmm_parameters = spmm_parameters4;
+    spmm_config = spmm4_config;
     // Non-zeroes which don't fit into whole 4-channel blocks, processed one-by-one
     const size_t num_remaining_nonzeroes = num_nonzeroes - num_block4_nonzeroes;
     num_nonzero_values = num_nonzero_blocks4 * 4 + num_remaining_nonzeroes;
     num_nonzero_blocks = num_nonzero_blocks4 + num_remaining_nonzeroes;
-  } else if (num_block2_nonzeroes * 5 >= num_nonzero_blocks2 * 9 && spmm_parameters2 != NULL && spmm_parameters2->ukernel != NULL) {
+  } else if (num_block2_nonzeroes * 5 >= num_nonzero_blocks2 * 9 && spmm2_config != NULL && spmm2_config->ukernel != NULL) {
     // 2-channel blocks have 90%+ non-zeroes
 
     output_channels_block_size = 2;
     num_output_channel_blocks = num_output_channel_blocks / 2 + num_output_channel_blocks % 2;
-    spmm_parameters = spmm_parameters2;
+    spmm_config = spmm2_config;
     // Non-zeroes which don't fit into whole 2-channel blocks, processed one-by-one
     const size_t num_remaining_nonzeroes = num_nonzeroes - num_block2_nonzeroes;
     num_nonzero_values = num_nonzero_blocks2 * 2 + num_remaining_nonzeroes;
@@ -139,8 +141,8 @@ static enum xnn_status create_spmm_path(
   convolution_op->first_input_channel = first_ic;
 
   convolution_op->ukernel.spmm = (struct xnn_ukernel_spmm) {
-    .function = spmm_parameters->ukernel,
-    .mr = spmm_parameters->mr,
+    .function = spmm_config->ukernel,
+    .mr = spmm_config->mr,
   };
   return xnn_status_success;
 
@@ -399,6 +401,13 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
 
   status = xnn_status_unsupported_parameter;
 
+  const struct xnn_spmm_config* spmm_config = xnn_init_f16_spmm_config();
+  if (spmm_config == NULL) {
+    xnn_log_error("failed to create %s operator: operations on data type are not supported",
+      xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
   enum xnn_microkernel_type ukernel_type;
   struct dwconv2d_chw_parameters* dwconv2d_parameters = NULL;
   // Supported cases:
@@ -482,16 +491,15 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
         xnn_analyze_spmm = (xnn_analyze_spmm_w_fn) xnn_analyze_f16_spmm_w;
         xnn_pack_spmm = (xnn_pack_spmm_w_fn) xnn_pack_f16_spmm_w;
       }
-      const struct spmm_parameters* spmm_parameters = &xnn_params.f16.spmm;
 
-      spmm_parameters->init.f16(&convolution_op->params.f16_minmax, fp16_output_min, fp16_output_max);
+      spmm_config->init.f16(&convolution_op->params.f16_minmax, fp16_output_min, fp16_output_max);
 
       status = create_spmm_path(
           kernel_height, kernel_width, groups,
           group_input_channels, group_output_channels,
           kernel, bias, log2_filter_element_size,
           xnn_analyze_spmm, xnn_pack_spmm,
-          &xnn_params.f16.spmm, NULL, NULL,
+          spmm_config, NULL, NULL,
           operator_type, convolution_op);
       if (status != xnn_status_success) {
         goto error;
@@ -792,22 +800,27 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     convolution_op->weights_cache = caches->weights_cache;
   }
 
+  const struct xnn_spmm_config* spmm_config = xnn_init_f32_spmm_config();
+  assert(spmm_config != NULL);
+  const struct xnn_spmm_config* spmm2_config = xnn_init_f32_spmm2_config();
+  assert(spmm2_config != NULL);
+  const struct xnn_spmm_config* spmm4_config = xnn_init_f32_spmm4_config();
+  assert(spmm4_config != NULL);
+
   switch (ukernel_type) {
     case xnn_microkernel_type_spmm:
     {
       const xnn_analyze_spmm_w_fn xnn_analyze_spmm = (xnn_analyze_spmm_w_fn) xnn_analyze_f32_spmm_w;
       const xnn_pack_spmm_w_fn xnn_pack_spmm = (xnn_pack_spmm_w_fn) xnn_pack_f32_spmm_w;
 
-      const struct spmm_parameters* spmm_parameters = &xnn_params.f32.spmm;
-
-      spmm_parameters->init.f32(&convolution_op->params.f32_minmax, output_min, output_max);
+      spmm_config->init.f32(&convolution_op->params.f32_minmax, output_min, output_max);
 
       status = create_spmm_path(
           kernel_height, kernel_width, groups,
           group_input_channels, group_output_channels,
           kernel, bias, log2_filter_element_size,
           xnn_analyze_spmm, xnn_pack_spmm,
-          &xnn_params.f32.spmm, &xnn_params.f32.spmm2, &xnn_params.f32.spmm4,
+          spmm_config, spmm2_config, spmm4_config,
           operator_type, convolution_op);
       if (status != xnn_status_success) {
         goto error;

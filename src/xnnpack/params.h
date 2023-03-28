@@ -18,20 +18,6 @@
 #include <xnnpack/microparams.h>
 #include <xnnpack/config.h>
 
-struct spmm_parameters {
-  xnn_spmm_ukernel_fn ukernel;
-  union {
-    xnn_init_f16_minmax_params_fn f16;
-    xnn_init_f32_minmax_params_fn f32;
-  } init;
-  // Number of M-dimension elements in a tile.
-  // Corresponds to a block of pixels in 1x1 Convolution and a block of batch size in Fully Connected operator.
-  uint8_t mr;
-  // Number of N-dimension elements in a tile.
-  // Corresponds to a block of output channels/features in 1x1 Convolution and Fully Connected operator.
-  uint8_t nr;
-};
-
 struct conv_hwc2chw_parameters {
   xnn_conv_hwc2chw_ukernel_fn ukernel_with_symm_padding;
   union {
@@ -139,8 +125,6 @@ struct xnn_parameters {
   struct {
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
-    // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
-    struct spmm_parameters spmm;
     // Direct 3x3 stride-2 Convolution with 3 input channels and HWC->CHW layout conversion.
     struct conv_hwc2chw_parameters conv_hwc2chw_3x3c3s2;
     // Direct 3x3 stride-1 Convolution with padding 1 on left and right in CHW layout.
@@ -156,12 +140,6 @@ struct xnn_parameters {
     struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
-    // Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
-    struct spmm_parameters spmm;
-    // Sparse Matrix-Dense Matrix Multiplication (NR=2 block).
-    struct spmm_parameters spmm2;
-    // Sparse Matrix-Dense Matrix Multiplication (NR=4 block).
-    struct spmm_parameters spmm4;
     // Direct 3x3 stride-2 Convolution with 3 input channels and HWC->CHW layout conversion.
     struct conv_hwc2chw_parameters conv_hwc2chw_3x3c3s2;
     // Direct 3x3 stride-1 Convolution with padding 1 on left and right in CHW layout.

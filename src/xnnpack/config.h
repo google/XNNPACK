@@ -624,6 +624,29 @@ XNN_INTERNAL const struct xnn_rmax_config* xnn_init_f16_rmax_config();
 XNN_INTERNAL const struct xnn_rmax_config* xnn_init_f32_rmax_config();
 XNN_INTERNAL const struct xnn_rmax_config* xnn_init_u8_rmax_config();
 
+struct xnn_spmm_config {
+  xnn_spmm_ukernel_fn ukernel;
+  union {
+    xnn_init_f16_minmax_params_fn f16;
+    xnn_init_f32_minmax_params_fn f32;
+  } init;
+  // Number of M-dimension elements in a tile.
+  // Corresponds to a block of pixels in 1x1 Convolution and a block of batch size in Fully Connected operator.
+  uint8_t mr;
+  // Number of N-dimension elements in a tile.
+  // Corresponds to a block of output channels/features in 1x1 Convolution and Fully Connected operator.
+  uint8_t nr;
+};
+
+
+// Sparse Matrix-Dense Matrix Multiplication (NR=1 block).
+XNN_INTERNAL const struct xnn_spmm_config* xnn_init_f16_spmm_config();
+XNN_INTERNAL const struct xnn_spmm_config* xnn_init_f32_spmm_config();
+// Sparse Matrix-Dense Matrix Multiplication (NR=2 block).
+XNN_INTERNAL const struct xnn_spmm_config* xnn_init_f32_spmm2_config();
+// Sparse Matrix-Dense Matrix Multiplication (NR=4 block).
+XNN_INTERNAL const struct xnn_spmm_config* xnn_init_f32_spmm4_config();
+
 
 #ifdef __cplusplus
 }  // extern "C"

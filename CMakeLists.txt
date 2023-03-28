@@ -288,6 +288,7 @@ SET(XNNPACK_SRCS
   src/pavgpool-config.c
   src/prelu-config.c
   src/rmax-config.c
+  src/spmm-config.c
   src/transpose-config.c
   src/unary-elementwise-config.c
   src/x8-lut-config.c
