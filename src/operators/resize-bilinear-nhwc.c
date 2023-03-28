@@ -28,7 +28,6 @@ static enum xnn_status create_resize_bilinear2d_nhwc(
     size_t input_pixel_stride,
     size_t output_pixel_stride,
     uint32_t flags,
-    uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
     const struct xnn_ibilinear_config* ibilinear_config,
     xnn_operator_t* resize_op_out)
@@ -38,14 +37,6 @@ static enum xnn_status create_resize_bilinear2d_nhwc(
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
-  status = xnn_status_unsupported_hardware;
-
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error("failed to create %s operator: operations on data type are not supported",
       xnn_operator_type_to_string(operator_type));
     goto error;
   }
@@ -122,7 +113,6 @@ enum xnn_status xnn_create_resize_bilinear2d_nhwc_f16(
     input_pixel_stride,
     output_pixel_stride,
     flags,
-    XNN_INIT_FLAG_F16,
     xnn_operator_type_resize_bilinear_nhwc_f16,
     ibilinear_config,
     resize_op_out);
@@ -147,7 +137,6 @@ enum xnn_status xnn_create_resize_bilinear2d_nhwc_f32(
     input_pixel_stride,
     output_pixel_stride,
     flags,
-    XNN_INIT_FLAG_F32,
     xnn_operator_type_resize_bilinear_nhwc_f32,
     ibilinear_config,
     resize_op_out);
@@ -168,7 +157,6 @@ enum xnn_status xnn_create_resize_bilinear2d_nhwc_s8(
     input_pixel_stride,
     output_pixel_stride,
     flags,
-    XNN_INIT_FLAG_S8,
     xnn_operator_type_resize_bilinear_nhwc_s8,
     ibilinear_config,
     resize_op_out);
@@ -189,7 +177,6 @@ enum xnn_status xnn_create_resize_bilinear2d_nhwc_u8(
     input_pixel_stride,
     output_pixel_stride,
     flags,
-    XNN_INIT_FLAG_U8,
     xnn_operator_type_resize_bilinear_nhwc_u8,
     ibilinear_config,
     resize_op_out);

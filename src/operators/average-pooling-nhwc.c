@@ -279,15 +279,6 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
     goto error;
   }
 
-  status = xnn_status_unsupported_hardware;
-
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_F16) != XNN_INIT_FLAG_F16) {
-    xnn_log_error(
-      "failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f16));
-    goto error;
-  }
-
   status = xnn_status_invalid_parameter;
 
   const uint32_t pooling_size = pooling_height * pooling_width;

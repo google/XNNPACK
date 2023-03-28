@@ -54,7 +54,6 @@ static enum xnn_status create_max_pooling2d_nhwc(
     uint32_t flags,
     const void* params,
     size_t params_size,
-    uint32_t datatype_init_flags,
     const struct xnn_maxpool_config* maxpool_config,
     enum xnn_operator_type operator_type,
     xnn_operator_t* max_pooling_op_out)
@@ -66,15 +65,6 @@ static enum xnn_status create_max_pooling2d_nhwc(
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(operator_type));
     return xnn_status_uninitialized;
-  }
-
-  status = xnn_status_unsupported_hardware;
-
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error(
-      "failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
   }
 
   status = xnn_status_invalid_parameter;
@@ -379,7 +369,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_s8(
     dilation_height, dilation_width,
     channels, input_pixel_stride, output_pixel_stride,
     flags,
-    &params, sizeof(params), XNN_INIT_FLAG_S8,
+    &params, sizeof(params),
     maxpool_config,
     xnn_operator_type_max_pooling_nhwc_s8,
     max_pooling_op_out);
@@ -422,7 +412,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
     dilation_height, dilation_width,
     channels, input_pixel_stride, output_pixel_stride,
     flags,
-    &params, sizeof(params), XNN_INIT_FLAG_U8,
+    &params, sizeof(params),
     maxpool_config,
     xnn_operator_type_max_pooling_nhwc_u8,
     max_pooling_op_out);
@@ -469,7 +459,12 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
   }
 
   const struct xnn_maxpool_config* maxpool_config = xnn_init_f32_maxpool_config();
-  assert(maxpool_config != NULL);
+  if (maxpool_config == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_max_pooling_nhwc_f32));
+    return xnn_status_unsupported_hardware;
+  }
   union xnn_f32_minmax_params params;
   maxpool_config->init.f32(&params, output_min, output_max);
   return create_max_pooling2d_nhwc(
@@ -479,7 +474,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
     dilation_height, dilation_width,
     channels, input_pixel_stride, output_pixel_stride,
     flags,
-    &params, sizeof(params), XNN_INIT_FLAG_F32,
+    &params, sizeof(params),
     maxpool_config,
     xnn_operator_type_max_pooling_nhwc_f32,
     max_pooling_op_out);
@@ -547,7 +542,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f16(
     dilation_height, dilation_width,
     channels, input_pixel_stride, output_pixel_stride,
     flags,
-    &params, sizeof(params), XNN_INIT_FLAG_F16,
+    &params, sizeof(params),
     maxpool_config,
     xnn_operator_type_max_pooling_nhwc_f16,
     max_pooling_op_out);

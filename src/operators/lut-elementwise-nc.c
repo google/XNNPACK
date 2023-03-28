@@ -90,6 +90,9 @@ static enum xnn_status create_lut_elementwise_nc(
     goto error;
   }
 
+  const struct xnn_x8_lut_config* lut_config = xnn_init_x8_lut_config();
+  assert(lut_config != NULL);
+
   status = xnn_status_out_of_memory;
 
   lut_elementwise_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
@@ -125,6 +128,7 @@ static enum xnn_status create_lut_elementwise_nc(
 
   lut_elementwise_op->type = operator_type;
   lut_elementwise_op->flags = flags;
+  lut_elementwise_op->lut_config = lut_config;
 
   lut_elementwise_op->state = xnn_run_state_invalid;
 
@@ -356,8 +360,7 @@ static enum xnn_status setup_lut_elementwise_nc(
     return xnn_status_success;
   }
 
-  const struct xnn_x8_lut_config* lut_config = xnn_init_x8_lut_config();
-  assert(lut_config != NULL);
+  const struct xnn_x8_lut_config* lut_config = lut_elementwise_op->lut_config;
 
   const size_t channels = lut_elementwise_op->channels;
   const size_t input_stride = lut_elementwise_op->input_pixel_stride;

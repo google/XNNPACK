@@ -293,15 +293,6 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
     goto error;
   }
 
-  status = xnn_status_unsupported_hardware;
-
-  const uint32_t datatype_init_flags = XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE;
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error("failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
   status = xnn_status_invalid_parameter;
 
   if (kernel_width == 0 || kernel_height == 0) {
@@ -399,7 +390,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
     goto error;
   }
 
-  status = xnn_status_unsupported_parameter;
+  status = xnn_status_unsupported_hardware;
 
   const struct xnn_spmm_config* spmm_config = xnn_init_f16_spmm_config();
   if (spmm_config == NULL) {
@@ -414,6 +405,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
       xnn_operator_type_to_string(operator_type));
     goto error;
   }
+
+  status = xnn_status_unsupported_parameter;
 
   enum xnn_microkernel_type ukernel_type;
   const struct xnn_dwconv2d_chw_parameters* dwconv2d_parameters = NULL;
@@ -641,15 +634,6 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     goto error;
   }
 
-  status = xnn_status_unsupported_hardware;
-
-  const uint32_t datatype_init_flags = XNN_INIT_FLAG_F32;
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error("failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
   status = xnn_status_invalid_parameter;
 
   if (kernel_width == 0 || kernel_height == 0) {
@@ -820,11 +804,26 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
   }
 
   const struct xnn_spmm_config* spmm_config = xnn_init_f32_spmm_config();
-  assert(spmm_config != NULL);
+  if (spmm_config == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
+    return xnn_status_unsupported_hardware;
+  }
   const struct xnn_spmm_config* spmm2_config = xnn_init_f32_spmm2_config();
-  assert(spmm2_config != NULL);
+  if (spmm2_config == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
+    return xnn_status_unsupported_hardware;
+  }
   const struct xnn_spmm_config* spmm4_config = xnn_init_f32_spmm4_config();
-  assert(spmm4_config != NULL);
+  if (spmm4_config == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nchw_f32));
+    return xnn_status_unsupported_hardware;
+  }
 
   switch (ukernel_type) {
     case xnn_microkernel_type_spmm:
@@ -934,7 +933,6 @@ static enum xnn_status setup_convolution2d_nchw(
   size_t input_width,
   const void* input,
   void* output,
-  uint32_t datatype_init_flags,
   uint32_t log2_input_element_size,
   uint32_t log2_filter_element_size,
   uint32_t bias_element_size,
@@ -955,13 +953,6 @@ static enum xnn_status setup_convolution2d_nchw(
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(convolution_op->type));
     return xnn_status_uninitialized;
-  }
-
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error(
-      "failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(convolution_op->type));
-    return xnn_status_unsupported_hardware;
   }
 
   if (input_width == 0 || input_height == 0) {
@@ -1185,7 +1176,6 @@ enum xnn_status xnn_setup_convolution2d_nchw_f32(
     xnn_operator_type_convolution_nchw_f32,
     batch_size, input_height, input_width,
     input, output,
-    XNN_INIT_FLAG_F32,
     2 /* log2(sizeof(input element)) = log2(sizeof(float)) */,
     2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
     sizeof(float) /* sizeof(bias element) */,
@@ -1209,7 +1199,6 @@ enum xnn_status xnn_setup_convolution2d_nchw_f16(
     xnn_operator_type_convolution_nchw_f16,
     batch_size, input_height, input_width,
     input, output,
-    XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE,
     1 /* log2(sizeof(input element)) = log2(sizeof(uint16_t)) */,
     1 /* log2(sizeof(filter element)) = log2(sizeof(uint16_t)) */,
     sizeof(uint16_t) /* sizeof(bias element) */,

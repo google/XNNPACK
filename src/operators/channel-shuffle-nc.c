@@ -133,7 +133,12 @@ enum xnn_status xnn_create_channel_shuffle_nc_x32(
     xnn_operator_t* channel_shuffle_op_out)
 {
   const struct xnn_zip_config* zip_config = xnn_init_x32_zip_config();
-  assert(zip_config != NULL);
+  if (zip_config == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_channel_shuffle_nc_x32));
+    return xnn_status_unsupported_hardware;
+  }
   return create_channel_shuffle_nc(
     groups,
     group_channels,

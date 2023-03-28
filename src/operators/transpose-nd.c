@@ -35,10 +35,12 @@ static void reorder_array(
 
 static void init_transpose_nd(
     uint32_t flags,
+    const struct xnn_transpose_config* transpose_config,
     enum xnn_operator_type operator_type,
     xnn_operator_t transpose_op)
 {
   transpose_op->flags = flags;
+  transpose_op->transpose_config = transpose_config;
   transpose_op->type = operator_type;
 }
 
@@ -56,6 +58,9 @@ static enum xnn_status create_transpose_nd(
     goto error;
   }
 
+  const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
+  assert(transpose_config != NULL);
+
   status = xnn_status_out_of_memory;
   transpose_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
   if (transpose_op == NULL) {
@@ -65,7 +70,7 @@ static enum xnn_status create_transpose_nd(
     goto error;
   }
 
-  init_transpose_nd(flags, operator_type, transpose_op);
+  init_transpose_nd(flags, transpose_config, operator_type, transpose_op);
   *transpose_op_out = transpose_op;
 
   return xnn_status_success;
@@ -214,8 +219,7 @@ static enum xnn_status setup_transpose_nd(
   reorder_array(normalized_dims, loop_order, context->input_stride);
   reorder_array(normalized_dims, loop_order, transpose_op->compute.range);
 
-  const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
-  assert(transpose_config != NULL);
+  const struct xnn_transpose_config* transpose_config = transpose_op->transpose_config;
 
   bool variable_size_ukernel = false;
   const size_t ukernel_selector = normalized_perm[normalized_dims-1] == normalized_dims-1 ? 0 : normalized_element_size;
@@ -442,7 +446,11 @@ enum xnn_status run_transpose_nd(
 
   struct xnn_operator transpose_op;
   memset(&transpose_op, 0, sizeof(transpose_op));
-  init_transpose_nd(flags, operator_type, &transpose_op);
+
+  const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
+  assert(transpose_config != NULL);
+
+  init_transpose_nd(flags, transpose_config, operator_type, &transpose_op);
 
   const enum xnn_status status = setup_transpose_nd(
     &transpose_op,
@@ -568,6 +576,9 @@ enum xnn_status create_depth_to_space_nchw2nhwc(
     goto error;
   }
 
+  const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
+  assert(transpose_config != NULL);
+
   depth_to_space_op->channels = output_channels;
   depth_to_space_op->input_pixel_stride = input_channel_stride;
   depth_to_space_op->output_pixel_stride = output_channel_stride;
@@ -575,6 +586,7 @@ enum xnn_status create_depth_to_space_nchw2nhwc(
 
   depth_to_space_op->type = operator_type;
   depth_to_space_op->flags = flags;
+  depth_to_space_op->transpose_config = transpose_config;
 
   depth_to_space_op->state = xnn_run_state_invalid;
 
@@ -784,6 +796,9 @@ static enum xnn_status create_depth_to_space_nhwc(
     goto error;
   }
 
+  const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
+  assert(transpose_config != NULL);
+
   depth_to_space_op->channels = output_channels;
   depth_to_space_op->input_pixel_stride = input_channel_stride;
   depth_to_space_op->output_pixel_stride = output_channel_stride;
@@ -791,6 +806,7 @@ static enum xnn_status create_depth_to_space_nhwc(
 
   depth_to_space_op->type = operator_type;
   depth_to_space_op->flags = flags;
+  depth_to_space_op->transpose_config = transpose_config;
 
   depth_to_space_op->state = xnn_run_state_invalid;
 
@@ -1031,6 +1047,9 @@ static enum xnn_status create_space_to_depth_nhwc(
     goto error;
   }
 
+  const struct xnn_transpose_config* transpose_config = xnn_init_transpose_config();
+  assert(transpose_config != NULL);
+
   space_to_depth_op->channels = input_channels;
   space_to_depth_op->input_pixel_stride = input_channel_stride;
   space_to_depth_op->output_pixel_stride = output_channel_stride;
@@ -1038,6 +1057,7 @@ static enum xnn_status create_space_to_depth_nhwc(
 
   space_to_depth_op->type = operator_type;
   space_to_depth_op->flags = flags;
+  space_to_depth_op->transpose_config = transpose_config;
 
   space_to_depth_op->state = xnn_run_state_invalid;
 

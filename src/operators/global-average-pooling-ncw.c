@@ -28,7 +28,6 @@ static enum xnn_status create_global_average_pooling_ncw(
     size_t params_offset,
     const void* params,
     size_t params_size,
-    uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
     const struct xnn_gavgpool_cw_config* gavgpool_cw_config,
     xnn_operator_t* global_average_pooling_op_out)
@@ -38,14 +37,6 @@ static enum xnn_status create_global_average_pooling_ncw(
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
-  status = xnn_status_unsupported_hardware;
-
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error("failed to create %s operator: operations on data type are not supported",
       xnn_operator_type_to_string(operator_type));
     goto error;
   }
@@ -134,7 +125,6 @@ enum xnn_status xnn_create_global_average_pooling_ncw_f16(
     1 /* log2(sizeof(uint16_t)) */,
     offsetof(struct xnn_operator, params.f16_gavgpool),
     &params, sizeof(params),
-    XNN_INIT_FLAG_F16 | XNN_INIT_FLAG_F16_NATIVE,
     xnn_operator_type_global_average_pooling_ncw_f16,
     gavgpool_cw_config,
     global_average_pooling_op_out);
@@ -183,7 +173,6 @@ enum xnn_status xnn_create_global_average_pooling_ncw_f32(
     2 /* log2(sizeof(float)) */,
     offsetof(struct xnn_operator, params.f32_gavgpool),
     &params, sizeof(params),
-    XNN_INIT_FLAG_F32,
     xnn_operator_type_global_average_pooling_ncw_f32,
     gavgpool_cw_config,
     global_average_pooling_op_out);

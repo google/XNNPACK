@@ -278,6 +278,7 @@ struct xnn_operator {
   struct xnn_ukernel ukernel;
 
   union {
+    const struct xnn_argmaxpool_config* argmaxpool_config;
     struct {
       const struct xnn_avgpool_config* avgpool_config;
       const struct xnn_gavgpool_config* gavgpool_config;
@@ -289,14 +290,26 @@ struct xnn_operator {
     struct {
       const struct xnn_rmax_config* rmax_config;
       union {
+        // For QU8.
         const struct xnn_lut32norm_config* lut32norm_config;
-        const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config;
+        // For F16 and F32.
+        struct {
+          const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config;
+          const struct xnn_binary_elementwise_config* vmul_config;
+        };
       };
     };  // For softmax operator.
     const struct xnn_maxpool_config* maxpool_config;
     const struct xnn_prelu_config* prelu_config;
     const struct xnn_unpool_config* unpool_config;
     const struct xnn_zip_config* zip_config;
+    struct {
+      const struct xnn_xx_fill_config* fill_config;
+      const struct xnn_xx_pad_config* pad_config;
+    };  // For constant pad operator.
+    const struct xnn_x8_lut_config* lut_config;
+    const struct xnn_unary_elementwise_config* copy_config;
+    const struct xnn_transpose_config* transpose_config;
   };
 
   struct compute_parameters compute;

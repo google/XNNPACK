@@ -468,7 +468,6 @@ static enum xnn_status create_convolution2d_nhwc(
     struct jit_gemm_params* jit_gemm_params,
     bool linear_activation,
     bool relu_activation,
-    uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
     size_t num_post_operations,
     void* post_operation_params,
@@ -481,15 +480,6 @@ static enum xnn_status create_convolution2d_nhwc(
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error(
       "failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
-  status = xnn_status_unsupported_hardware;
-
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error(
-      "failed to create %s operator: operations on data type are not supported",
       xnn_operator_type_to_string(operator_type));
     goto error;
   }
@@ -847,7 +837,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     /*jit_gemm_params=*/NULL,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
-    /*datatype_init_flags=*/XNN_INIT_FLAG_QU8,
     /*operator_type=*/xnn_operator_type_convolution_nhwc_qu8,
     /*num_post_operations=*/0,
     /*post_operation_params=*/NULL,
@@ -979,7 +968,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     /*jit_gemm_params=*/NULL,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
-    /*datatype_init_flags=*/XNN_INIT_FLAG_QS8,
     /*operator_type=*/xnn_operator_type_convolution_nhwc_qs8,
     /*num_post_operations=*/0,
     /*post_operation_params=*/NULL,
@@ -1119,7 +1107,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     /*jit_gemm_params=*/NULL,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
-    /*datatype_init_flags=*/XNN_INIT_FLAG_QC8,
     /*operator_type=*/xnn_operator_type_convolution_nhwc_qc8,
     /*num_post_operations=*/0,
     /*post_operation_params=*/NULL,
@@ -1271,7 +1258,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     /*jit_gemm_params=*/&jit_gemm_params,
     /*linear_activation=*/false,
     /*relu_activation=*/false,
-    /*datatype_init_flags=*/XNN_INIT_FLAG_F16,
     /*operator_type=*/xnn_operator_type_convolution_nhwc_f16,
     /*num_post_operations=*/0,
     /*post_operation_params=*/NULL,
@@ -1422,7 +1408,6 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     /*jit_gemm_params=*/&jit_gemm_params,
     /*linear_activation=*/linear_activation,
     /*relu_activation=*/relu_activation,
-    /*datatype_init_flags=*/XNN_INIT_FLAG_F32,
     /*operator_type=*/xnn_operator_type_convolution_nhwc_f32,
     /*num_post_operations=*/0,
     /*post_operation_params=*/NULL,
@@ -1549,7 +1534,6 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     /*jit_gemm_params=*/&jit_gemm_params,
     /*linear_activation=*/true,
     /*relu_activation=*/false,
-    /*datatype_init_flags=*/XNN_INIT_FLAG_F32,
     /*operator_type=*/xnn_operator_type_convolution_nhwc_f32,
     /*num_post_operations=*/num_post_operations,
     /*post_operation_params=*/post_operation_params,
@@ -1995,7 +1979,6 @@ static enum xnn_status setup_convolution2d_nhwc(
   size_t input_width,
   const void* input,
   void* output,
-  uint32_t datatype_init_flags,
   uint32_t log2_input_element_size,
   uint32_t log2_filter_element_size,
   uint32_t log2_accumulator_element_size,
@@ -2015,13 +1998,6 @@ static enum xnn_status setup_convolution2d_nhwc(
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(convolution_op->type));
     return xnn_status_uninitialized;
-  }
-
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error(
-      "failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(convolution_op->type));
-    return xnn_status_unsupported_hardware;
   }
 
   if (input_width == 0 || input_height == 0) {
@@ -2116,7 +2092,6 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qu8(
     convolution_op, xnn_operator_type_convolution_nhwc_qu8,
     batch_size, input_height, input_width,
     input, output,
-    XNN_INIT_FLAG_QU8,
     /*log2_input_element_size=*/0,  // log2(sizeof(uint8_t))
     /*log2_filter_element_size=*/0,  // log2(sizeof(uint8_t))
     /*log2_accumulator_element_size=*/2,  // log2(sizeof(int32_t))
@@ -2138,7 +2113,6 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qs8(
     convolution_op, xnn_operator_type_convolution_nhwc_qs8,
     batch_size, input_height, input_width,
     input, output,
-    XNN_INIT_FLAG_QS8,
     /*log2_input_element_size=*/0,  // log2(sizeof(int8_t))
     /*log2_filter_element_size=*/0,  // log2(sizeof(int8_t))
     /*log2_accumulator_element_size=*/2,  // log2(sizeof(int32_t))
@@ -2160,7 +2134,6 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qc8(
     convolution_op, xnn_operator_type_convolution_nhwc_qc8,
     batch_size, input_height, input_width,
     input, output,
-    XNN_INIT_FLAG_QC8,
     /*log2_input_element_size=*/0,  // log2(sizeof(int8_t))
     /*log2_filter_element_size=*/0,  // log2(sizeof(int8_t))
     /*log2_accumulator_element_size=*/2,  // log2(sizeof(int32_t))
@@ -2182,7 +2155,6 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f16(
     convolution_op, xnn_operator_type_convolution_nhwc_f16,
     batch_size, input_height, input_width,
     input, output,
-    XNN_INIT_FLAG_F16,
     /*log2_input_element_size=*/1,  // log2(sizeof(uint16_t))
     /*log2_filter_element_size=*/1,  // log2(sizeof(uint16_t))
     /*log2_accumulator_element_size=*/1,  // log2(sizeof(uint16_t))
@@ -2204,7 +2176,6 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f32(
     convolution_op, xnn_operator_type_convolution_nhwc_f32,
     batch_size, input_height, input_width,
     input, output,
-    XNN_INIT_FLAG_F32,
     /*log2_input_element_size=*/2,  // log2(sizeof(float))
     /*log2_filter_element_size=*/2,  // log2(sizeof(float))
     /*log2_accumulator_element_size=*/2,  // log2(sizeof(float))
