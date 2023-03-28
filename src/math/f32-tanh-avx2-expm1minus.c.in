@@ -7,6 +7,7 @@ $import math
 $assert RR == 1
 $assert LOG2LUT in [0, 2, 3]
 $assert P == H + 1 or P == H + 2
+$assert P == H + 1 or not PS
 $assert DIV in ["DIV", "NR1", "NR1ADJ"]
 $assert SAT in ["MINMAX", "SELECT"]
 $assert not PERM or LOG2LUT in [2, 3]
@@ -41,7 +42,7 @@ $if P == H + 1:
 $else:
   $COEFFS = [float.hex(0.5 * float.fromhex(c)).upper().replace("0X", "0x").replace("0000000P", "p") for c in COEFFS]
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
-$POLY_SUFFIX = "p%dh%dts_" % (P, H)
+$POLY_SUFFIX = "p%dh%d%s_" % (P, H, "ps" if PS else "ts")
 $GATHER_SUFFIX = "perm_" if PERM else "gather_" if LOG2LUT != 0 else ""
 $DIV_SUFFIX = DIV.lower()
 void xnn_math_f32_tanh__avx2_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${GATHER_SUFFIX}${DIV_SUFFIX}(
@@ -182,15 +183,24 @@ void xnn_math_f32_tanh__avx2_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${GAT
     $if P == H + 1:
       //   exp(2z) - 1 = s * (t * ${POLYNOMIAL} + 1) - 1
       //               = s * t * p + (s - 1)
-      //               = (s - 1) + (t * s) * p
+      $if PS:
+        //               = (s - 1) + (p * s) * t
+      $else:
+        //               = (s - 1) + (t * s) * p
     $else:
       //   exp(2z) - 1 = s * (2 * (t + t * (t * ${POLYNOMIAL})) + 1) - 1
       //               = s * (2 * (t + t * p) + 1) - 1
       //               = (s - 1) + 2 * ((t * s) + (t * s) * p)
-    const __m256 vts = _mm256_mul_ps(vt, vs);
+    $if PS:
+      const __m256 vps = _mm256_mul_ps(vp, vs);
+    $else:
+      const __m256 vts = _mm256_mul_ps(vt, vs);
     const __m256 vsmo = _mm256_add_ps(vs, vminus_one);
     $if P == H + 1:
-      const __m256 vemo = _mm256_fmadd_ps(vp, vts, vsmo);
+      $if PS:
+        const __m256 vemo = _mm256_fmadd_ps(vt, vps, vsmo);
+      $else:
+        const __m256 vemo = _mm256_fmadd_ps(vp, vts, vsmo);
     $else:
       vp = _mm256_fmadd_ps(vp, vts, vts);
       const __m256 vemo = _mm256_fmadd_ps(vp, vtwo, vsmo);

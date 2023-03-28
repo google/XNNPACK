@@ -19,10 +19,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-// Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
-extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
-
-void xnn_math_f32_tanh__avx512skx_expm1minus_rr1_lut8_p4h2ts_gather_nr1(
+void xnn_math_f32_tanh__avx512skx_expm1minus_rr1_lut8_p4h3ps_perm_nr1(
     size_t n,
     const float* input,
     float* output)
@@ -34,17 +31,19 @@ void xnn_math_f32_tanh__avx512skx_expm1minus_rr1_lut8_p4h2ts_gather_nr1(
   const __m512 vminus_log2e = _mm512_set1_ps(-0x1.715476p+0f);
   // Large number such that ulp(magic bias) == exp2(-4)
   const __m512 vmagic_bias = _mm512_set1_ps(0x1.800000p+19f);
-  // Mask for the lowest 3 bits
-  const __m512i vindex_mask = _mm512_set1_epi32(0x7);
+  // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
+  const __m512i vtable = _mm512_set_epi32(
+    0x3F7AC0C7, 0x3F7744FD, 0x3F75672A, 0x3F7504F3, 0x3F75FED7, 0x3F7837F0, 0x3F7B95C2, 0x3F800000,
+    0x3F7AC0C7, 0x3F7744FD, 0x3F75672A, 0x3F7504F3, 0x3F75FED7, 0x3F7837F0, 0x3F7B95C2, 0x3F800000);
   const __m512 vln2 = _mm512_set1_ps(0x1.62E430p-1f);
   // Coefficients of polynomial approximation
-  //   exp(2t) - 1 ~ -2 * (t + t * (t * (c2 + t * (c3 + t * c4))))
+  //   exp(2t) - 1 ~ t * (-2 + t * (c2 + t * (c3 + t * c4)))
   // on [-log(2)/32, log(2)/32]
-  const __m512 vc4 = _mm512_set1_ps(-0x1.5558ECp-2f);
-  const __m512 vc3 = _mm512_set1_ps(0x1.555C20p-1f);
-  const __m512 vc2 = _mm512_set1_ps(-0x1.000000p+0f);
-  const __m512 vone = _mm512_set1_ps(1.0f);
+  const __m512 vc4 = _mm512_set1_ps(0x1.5558ECp-1f);
+  const __m512 vc3 = _mm512_set1_ps(-0x1.555C20p+0f);
+  const __m512 vc2 = _mm512_set1_ps(0x1.000000p+1f);
   const __m512 vminus_two = _mm512_set1_ps(-2.0f);
+  const __m512 vone = _mm512_set1_ps(1.0f);
   // Mask for the sign bit.
   const __m512i vsign_mask = _mm512_set1_epi32(0x80000000);
 
@@ -86,8 +85,7 @@ void xnn_math_f32_tanh__avx512skx_expm1minus_rr1_lut8_p4h2ts_gather_nr1(
     const __m512i ve = _mm512_slli_epi32(_mm512_castps_si512(vn), 20);
 
     // Use bits 0:3 bits of n, as integer, as an index for table lookup of l := 2**frac(2n).
-    const __m512i vidx = _mm512_and_si512(_mm512_castps_si512(vn), vindex_mask);
-    const __m512i vl = _mm512_i32gather_epi32(vidx, xnn_table_exp2minus_k_over_8, sizeof(uint32_t));
+    const __m512i vl = _mm512_permutexvar_epi32(_mm512_castps_si512(vn), vtable);
 
     // Adjust exponent of the value l fetched from the table to get the final s value.
     const __m512 vs = _mm512_castsi512_ps(_mm512_add_epi32(vl, ve));
@@ -99,21 +97,20 @@ void xnn_math_f32_tanh__avx512skx_expm1minus_rr1_lut8_p4h2ts_gather_nr1(
     const __m512 vt = _mm512_fmadd_ps(vn, vln2, vz);
 
     // Compute degree-4 polynomial approximation for exp(-2t) - 1 on [-log(2)/32, log(2)/32].
-    //   P(t) = -2 * (t + t * (t * (c2 + t * (c3 + t * c4))))
-    //        = -2 * (t + t * p)
+    //   P(t) = t * (-2 + t * (c2 + t * (c3 + t * c4)))
+    //        = t * p
     __m512 vp = vc4;
     vp = _mm512_fmadd_ps(vp, vt, vc3);
     vp = _mm512_fmadd_ps(vp, vt, vc2);
-    vp = _mm512_mul_ps(vp, vt);
+    vp = _mm512_fmadd_ps(vp, vt, vminus_two);
 
     // Reconstruct the exp(-2z) - 1 value:
-    //   exp(-2z) - 1 = s * (-2 * (t + t * (t * (c2 + t * (c3 + t * c4)))) + 1) - 1
-    //                = s * (-2 * (t + t * p) + 1) - 1
-    //                = (s - 1) - 2 * ((t * s) + (t * s) * p)
-    const __m512 vts = _mm512_mul_ps(vt, vs);
+    //   exp(-2z) - 1 = s * (t * (-2 + t * (c2 + t * (c3 + t * c4))) + 1) - 1
+    //                = s * t * p + (s - 1)
+    //                = (s - 1) + (p * s) * t
+    const __m512 vps = _mm512_mul_ps(vp, vs);
     const __m512 vsmo = _mm512_sub_ps(vs, vone);
-    vp = _mm512_fmadd_ps(vp, vts, vts);
-    const __m512 vemo = _mm512_fmadd_ps(vp, vminus_two, vsmo);
+    const __m512 vemo = _mm512_fmadd_ps(vt, vps, vsmo);
 
     // Denominator of the tanh fraction: exp(-2z) + 1 = expm1(-2z) + 2
     const __m512 vepo = _mm512_sub_ps(vemo, vminus_two);

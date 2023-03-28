@@ -22,7 +22,7 @@
 // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h3ts_nr1(
+void xnn_math_f32_tanh__avx_expm1minus_rr2_lut8_p4h2ts_nr2(
     size_t n,
     const float* input,
     float* output)
@@ -38,15 +38,17 @@ void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h3ts_nr1(
   const __m256 vmagic_bias = _mm256_set1_ps(0x1.800000p+19f);
   // Mask for the lowest 3 bits
   const __m128i vindex_mask = _mm_set1_epi32(0x7);
-  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
+  // Last 7 bits are zeroes
+  const __m256 vminus_ln2_hi = _mm256_set1_ps(-0x1.62E400p-1f);
+  const __m256 vminus_ln2_lo = _mm256_set1_ps(-0x1.7F7D1Cp-20f);
   // Coefficients of polynomial approximation
-  //   exp(2t) - 1 ~ t * (2 + t * (c2 + t * (c3 + t * c4)))
+  //   exp(2t) - 1 ~ 2 * (t + t * (t * (c2 + t * (c3 + t * c4))))
   // on [-log(2)/32, log(2)/32]
-  const __m256 vc4 = _mm256_set1_ps(0x1.5558ECp-1f);
-  const __m256 vc3 = _mm256_set1_ps(0x1.555C20p+0f);
-  const __m256 vc2 = _mm256_set1_ps(0x1.000000p+1f);
-  const __m256 vtwo = _mm256_set1_ps(2.0f);
+  const __m256 vc4 = _mm256_set1_ps(0x1.5558ECp-2f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.555C20p-1f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.000000p+0f);
   const __m256 vminus_one = _mm256_set1_ps(-1.0f);
+  const __m256 vtwo = _mm256_set1_ps(2.0f);
 
   for (; n != 0; n -= sizeof(__m256)) {
     const __m256 vx = _mm256_load_ps(input);
@@ -75,7 +77,7 @@ void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h3ts_nr1(
     // (|z / log(2)| <= 2**18, i.e. |z| <= 0x1.62E43p+17 = 181704.375), but that is acceptable, because inputs x
     // outside of [-9.010913, 9.010913] (i.e. z outsize [-9.010913, 0]) saturate tanhf(x).
     // Note that addition-subtraction of the large number doesn't cause overflow for inputs in this range.
-    __m256 vn = _mm256_fmadd_ps(vz, vlog2e, vmagic_bias);
+    __m256 vn = _mm256_add_ps(_mm256_mul_ps(vz, vlog2e), vmagic_bias);
 
     // Create a floating-point number s (scale) such that s := 2**(2n) for valid inputs, i.e. -9.010913 <= z <= 0. As
     // n has 4 fractional bits, we split s == 2**(2n) = 2**int(2n) * 2**frac(2n). We create s in two steps:
@@ -134,33 +136,35 @@ void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h3ts_nr1(
     vn = _mm256_sub_ps(vn, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2).
-    const __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vz);
+    // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+    __m256 vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2_hi), vz);
+    vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2_lo), vt);
 
     // Compute degree-4 polynomial approximation for exp(2t) - 1 on [-log(2)/32, log(2)/32].
-    //   P(t) = t * (2 + t * (c2 + t * (c3 + t * c4)))
-    //        = t * p
-    __m256 vp = vc4;
-    vp = _mm256_fmadd_ps(vp, vt, vc3);
-    vp = _mm256_fmadd_ps(vp, vt, vc2);
-    vp = _mm256_fmadd_ps(vp, vt, vtwo);
+    //   P(t) = 2 * (t + t * (t * (c2 + t * (c3 + t * c4))))
+    //        = 2 * (t + t * p)
+    __m256 vp = _mm256_add_ps(_mm256_mul_ps(vc4, vt), vc3);
+    vp = _mm256_add_ps(_mm256_mul_ps(vp, vt), vc2);
+    vp = _mm256_mul_ps(vp, vt);
 
     // Reconstruct the exp(2z) - 1 value:
-    //   exp(2z) - 1 = s * (t * (2 + t * (c2 + t * (c3 + t * c4))) + 1) - 1
-    //               = s * t * p + (s - 1)
-    //               = (s - 1) + (t * s) * p
+    //   exp(2z) - 1 = s * (2 * (t + t * (t * (c2 + t * (c3 + t * c4)))) + 1) - 1
+    //               = s * (2 * (t + t * p) + 1) - 1
+    //               = (s - 1) + 2 * ((t * s) + (t * s) * p)
     const __m256 vts = _mm256_mul_ps(vt, vs);
     const __m256 vsmo = _mm256_add_ps(vs, vminus_one);
-    const __m256 vemo = _mm256_fmadd_ps(vp, vts, vsmo);
+    vp = _mm256_add_ps(_mm256_mul_ps(vp, vts), vts);
+    const __m256 vemo = _mm256_add_ps(_mm256_mul_ps(vp, vtwo), vsmo);
 
     // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
     const __m256 vepo = _mm256_add_ps(vemo, vtwo);
 
-    // Use Newton-Raphson method (1 iteration) to compute reciprocal of the denominator.
+    // Use Newton-Raphson method (2 iterations) to compute reciprocal of the denominator.
     // Note: 2 < exp(2z) + 1 <= 3, because z <= 0 and 0 < exp(2z) <= 1.
     // Thus the reciprocal of the denominator never overflows.
     __m256 vrepo = _mm256_rcp_ps(vepo);
-    const __m256 verepo = _mm256_fnmsub_ps(vrepo, vepo, vminus_one);
-    vrepo = _mm256_fmadd_ps(verepo, vrepo, vrepo);
+    vrepo = _mm256_mul_ps(vrepo, _mm256_sub_ps(vtwo, _mm256_mul_ps(vrepo, vepo)));
+    vrepo = _mm256_mul_ps(vrepo, _mm256_sub_ps(vtwo, _mm256_mul_ps(vrepo, vepo)));
 
     // Reconstruct tanh(z) := expm1(2z) / (2 + expm1(2z))
     __m256 vy = _mm256_mul_ps(vemo, vrepo);

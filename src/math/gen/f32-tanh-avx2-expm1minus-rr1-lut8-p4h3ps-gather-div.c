@@ -22,7 +22,7 @@
 // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_math_f32_tanh__avx2_expm1minus_rr1_lut8_p4h3ts_gather_div(
+void xnn_math_f32_tanh__avx2_expm1minus_rr1_lut8_p4h3ps_gather_div(
     size_t n,
     const float* input,
     float* output)
@@ -112,10 +112,10 @@ void xnn_math_f32_tanh__avx2_expm1minus_rr1_lut8_p4h3ts_gather_div(
     // Reconstruct the exp(2z) - 1 value:
     //   exp(2z) - 1 = s * (t * (2 + t * (c2 + t * (c3 + t * c4))) + 1) - 1
     //               = s * t * p + (s - 1)
-    //               = (s - 1) + (t * s) * p
-    const __m256 vts = _mm256_mul_ps(vt, vs);
+    //               = (s - 1) + (p * s) * t
+    const __m256 vps = _mm256_mul_ps(vp, vs);
     const __m256 vsmo = _mm256_add_ps(vs, vminus_one);
-    const __m256 vemo = _mm256_fmadd_ps(vp, vts, vsmo);
+    const __m256 vemo = _mm256_fmadd_ps(vt, vps, vsmo);
 
     // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
     const __m256 vepo = _mm256_add_ps(vemo, vtwo);

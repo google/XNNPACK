@@ -4,12 +4,14 @@
 // LICENSE file in the root directory of this source tree.
 
 $import math
-$assert RR == 1
+$assert RR == 1 or RR == 2
 $assert LOG2LUT in [0, 2, 3]
 $assert P == H + 1 or P == H + 2
+$assert P == H + 1 or not PS
 $assert DIV in ["DIV", "NR1", "NR2", "NR1ADJ"]
 $assert SAT in ["MINMAX", "SELECT"]
 $assert FMA in [0, 3]
+$assert FMA == 0 or RR == 1
 $assert not PERM or LOG2LUT == 2
 $LUT = 1 << LOG2LUT
 #include <assert.h>
@@ -30,10 +32,13 @@ $if LOG2LUT != 0 and not PERM:
 
 $if LOG2LUT == 0:
   $COEFFS = {6: ["0x1.FFFFFEp+0", "0x1.5554B0p+0", "0x1.555716p-1", "0x1.12278Ep-2", "0x1.6B7338p-4"]}[P]
+  $MINUS_LN2 = ("-0x1.62E420p-1", "-0x1.FDF474p-22")
 $elif LOG2LUT == 2:
   $COEFFS = {4: ["0x1.000002p+1", "0x1.557082p+0", "0x1.554F9Ap-1"]}[P]
+  $MINUS_LN2 = ("-0x1.62E400p-1", "-0x1.7F7D1Cp-20")
 $elif LOG2LUT == 3:
   $COEFFS = {4: ["0x1.000000p+1", "0x1.555C20p+0", "0x1.5558ECp-1"]}[P]
+  $MINUS_LN2 = ("-0x1.62E400p-1", "-0x1.7F7D1Cp-20")
 $POLYNOMIAL = "c%d" % P
 $for i in reversed(range(2, P)):
 $  POLYNOMIAL = "(c%d + t * %s)" % (i, POLYNOMIAL)
@@ -42,7 +47,7 @@ $if P == H + 1:
 $else:
   $COEFFS = [float.hex(0.5 * float.fromhex(c)).upper().replace("0X", "0x").replace("0000000P", "p") for c in COEFFS]
 $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
-$POLY_SUFFIX = "p%dh%dts_" % (P, H)
+$POLY_SUFFIX = "p%dh%d%s_" % (P, H, "ps" if PS else "ts")
 $PERM_SUFFIX = "perm_" if PERM else ""
 $DIV_SUFFIX = DIV.lower()
 $ISA = {0: "avx", 3: "fma3"}[FMA]
@@ -72,7 +77,12 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${P
     $else:
       // Mask for the lowest ${LOG2LUT} bits
       const __m128i vindex_mask = _mm_set1_epi32(0x${"%X" % (LUT-1)});
-  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
+  $if RR == 1:
+    const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
+  $else:
+    // Last ${4+LOG2LUT} bits are zeroes
+    const __m256 vminus_ln2_hi = _mm256_set1_ps(${MINUS_LN2[0]}f);
+    const __m256 vminus_ln2_lo = _mm256_set1_ps(${MINUS_LN2[1]}f);
   // Coefficients of polynomial approximation
   $if P == H + 1:
     //   exp(2t) - 1 ~ t * ${POLYNOMIAL}
@@ -214,10 +224,15 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${P
     vn = _mm256_sub_ps(vn, vmagic_bias);
 
     // Compute reduced argument t := z - n * log(2).
-    $if FMA == 3:
-      const __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vz);
+    $if RR == 1:
+      $if FMA == 3:
+        const __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vz);
+      $else:
+        const __m256 vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2), vz);
     $else:
-      const __m256 vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2), vz);
+      // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
+      __m256 vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2_hi), vz);
+      vt = _mm256_add_ps(_mm256_mul_ps(vn, vminus_ln2_lo), vt);
 
     // Compute degree-${P} polynomial approximation for exp(2t) - 1 on [-log(2)/${4*LUT}, log(2)/${4*LUT}].
     $if P == H + 1:
@@ -246,18 +261,30 @@ void xnn_math_f32_tanh__${ISA}_expm1minus_rr${RR}_${LUT_SUFFIX}${POLY_SUFFIX}${P
     $if P == H + 1:
       //   exp(2z) - 1 = s * (t * ${POLYNOMIAL} + 1) - 1
       //               = s * t * p + (s - 1)
-      //               = (s - 1) + (t * s) * p
+      $if PS:
+        //               = (s - 1) + (p * s) * t
+      $else:
+        //               = (s - 1) + (t * s) * p
     $else:
       //   exp(2z) - 1 = s * (2 * (t + t * (t * ${POLYNOMIAL})) + 1) - 1
       //               = s * (2 * (t + t * p) + 1) - 1
       //               = (s - 1) + 2 * ((t * s) + (t * s) * p)
-    const __m256 vts = _mm256_mul_ps(vt, vs);
+    $if PS:
+      const __m256 vps = _mm256_mul_ps(vp, vs);
+    $else:
+      const __m256 vts = _mm256_mul_ps(vt, vs);
     const __m256 vsmo = _mm256_add_ps(vs, vminus_one);
     $if P == H + 1:
-      $if FMA == 3:
-        const __m256 vemo = _mm256_fmadd_ps(vp, vts, vsmo);
+      $if PS:
+        $if FMA == 3:
+          const __m256 vemo = _mm256_fmadd_ps(vt, vps, vsmo);
+        $else:
+          const __m256 vemo = _mm256_add_ps(_mm256_mul_ps(vt, vps), vsmo);
       $else:
-        const __m256 vemo = _mm256_add_ps(_mm256_mul_ps(vp, vts), vsmo);
+        $if FMA == 3:
+          const __m256 vemo = _mm256_fmadd_ps(vp, vts, vsmo);
+        $else:
+          const __m256 vemo = _mm256_add_ps(_mm256_mul_ps(vp, vts), vsmo);
     $else:
       $if FMA == 3:
         vp = _mm256_fmadd_ps(vp, vts, vts);

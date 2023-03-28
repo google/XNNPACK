@@ -22,7 +22,7 @@
 // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h3ts_nr1adj(
+void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h3ps_nr1(
     size_t n,
     const float* input,
     float* output)
@@ -65,9 +65,9 @@ void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h3ts_nr1adj(
     const __m256 vinvsignx = _mm256_xor_ps(vx, vz);
 
     // The function saturates at -1 for large negative inputs: tanhf(z) == -1.0f for z <= sat_cutoff ~= -9.010913.
-    // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
-    // tanhf(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
-    vz = _mm256_max_ps(vsat_cutoff, vz);
+    // To guarantee this behaviour, we compute the saturation mask here, and later use it to replace computed outputs
+    // with the saturation value (-1). Note that for NaN inputs the saturation mask is inactive.
+    const __m256 vm = _mm256_cmp_ps(vz, vsat_cutoff, _CMP_LE_OS);
 
     // Compute reduced argument n := round(z / log(2), 4).
     // We do it by adding a large number (magic bias), which cause rounding of the result to 4 fractional bits,
@@ -147,10 +147,10 @@ void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h3ts_nr1adj(
     // Reconstruct the exp(2z) - 1 value:
     //   exp(2z) - 1 = s * (t * (2 + t * (c2 + t * (c3 + t * c4))) + 1) - 1
     //               = s * t * p + (s - 1)
-    //               = (s - 1) + (t * s) * p
-    const __m256 vts = _mm256_mul_ps(vt, vs);
+    //               = (s - 1) + (p * s) * t
+    const __m256 vps = _mm256_mul_ps(vp, vs);
     const __m256 vsmo = _mm256_add_ps(vs, vminus_one);
-    const __m256 vemo = _mm256_fmadd_ps(vp, vts, vsmo);
+    const __m256 vemo = _mm256_fmadd_ps(vt, vps, vsmo);
 
     // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
     const __m256 vepo = _mm256_add_ps(vemo, vtwo);
@@ -165,10 +165,9 @@ void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h3ts_nr1adj(
     // Reconstruct tanh(z) := expm1(2z) / (2 + expm1(2z))
     __m256 vy = _mm256_mul_ps(vemo, vrepo);
 
-    // Adjust reconstructred expm1(2z) / (2 + expm1(2z)) to match the correctly rounded division result
-    const __m256 vey = _mm256_fnmadd_ps(vy, vepo, vemo);
-    vy = _mm256_fmadd_ps(vey, vrepo, vy);
 
+    // Saturate tanh(z) at -1 for large inputs.
+    vy = _mm256_blendv_ps(vy, vminus_one, vm);
 
     // Reconstruct tanh(x):
     //

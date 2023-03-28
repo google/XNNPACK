@@ -19,7 +19,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__avx512skx_expm1minus_rr1_lut8_p4h3ts_perm_div(
+void xnn_math_f32_tanh__avx512skx_expm1minus_rr1_lut8_p4h3ps_perm_nr1adj(
     size_t n,
     const float* input,
     float* output)
@@ -107,16 +107,27 @@ void xnn_math_f32_tanh__avx512skx_expm1minus_rr1_lut8_p4h3ts_perm_div(
     // Reconstruct the exp(-2z) - 1 value:
     //   exp(-2z) - 1 = s * (t * (-2 + t * (c2 + t * (c3 + t * c4))) + 1) - 1
     //                = s * t * p + (s - 1)
-    //                = (s - 1) + (t * s) * p
-    const __m512 vts = _mm512_mul_ps(vt, vs);
+    //                = (s - 1) + (p * s) * t
+    const __m512 vps = _mm512_mul_ps(vp, vs);
     const __m512 vsmo = _mm512_sub_ps(vs, vone);
-    const __m512 vemo = _mm512_fmadd_ps(vp, vts, vsmo);
+    const __m512 vemo = _mm512_fmadd_ps(vt, vps, vsmo);
 
     // Denominator of the tanh fraction: exp(-2z) + 1 = expm1(-2z) + 2
     const __m512 vepo = _mm512_sub_ps(vemo, vminus_two);
 
+    // Use Newton-Raphson method (1 iteration) to compute reciprocal of the denominator.
+    // Note: 2 < exp(-2z) + 1 <= 3, because z <= 0 and 0 < exp(2z) <= 1.
+    // Thus the reciprocal of the denominator never overflows.
+    __m512 vrepo = _mm512_rcp14_ps(vepo);
+    const __m512 verepo = _mm512_fnmadd_ps(vrepo, vepo, vone);
+    vrepo = _mm512_fmadd_ps(verepo, vrepo, vrepo);
+
     // Reconstruct y = expm1(-2z) / (expm1(-2z) + 2)
-    __m512 vy = _mm512_div_ps(vemo, vepo);
+    __m512 vy = _mm512_mul_ps(vemo, vrepo);
+
+    // Adjust reconstructred expm1(-2z) / (2 + expm1(-2z)) to match the correctly rounded division result
+    const __m512 vey = _mm512_fnmadd_ps(vy, vepo, vemo);
+    vy = _mm512_fmadd_ps(vey, vrepo, vy);
 
     // Reconstruct tanh(x) = copysign(y, x)
     vy = _mm512_castsi512_ps(_mm512_ternarylogic_epi32(_mm512_castps_si512(vy), _mm512_castps_si512(vx), vsign_mask, 0xD8));

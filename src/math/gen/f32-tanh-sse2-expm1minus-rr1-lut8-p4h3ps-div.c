@@ -134,10 +134,10 @@ void xnn_math_f32_tanh__sse2_expm1minus_rr1_lut8_p4h3ps_div(
     // Reconstruct the exp(2z) - 1 value:
     //   exp(2z) - 1 = s * (t * (2 + t * (c2 + t * (c3 + t * c4))) + 1) - 1
     //               = s * t * p + (s - 1)
-    //               = (s - 1) + (t * s) * p
-    const __m128 vts = _mm_mul_ps(vt, vs);
+    //               = (s - 1) + (p * s) * t
+    const __m128 vps = _mm_mul_ps(vp, vs);
     const __m128 vsmo = _mm_add_ps(vs, vminus_one);
-    const __m128 vemo = _mm_add_ps(_mm_mul_ps(vp, vts), vsmo);
+    const __m128 vemo = _mm_add_ps(_mm_mul_ps(vt, vps), vsmo);
 
     // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
     const __m128 vepo = _mm_sub_ps(vemo, vminus_two);

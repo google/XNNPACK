@@ -19,7 +19,7 @@
 #include <xnnpack/math-stubs.h>
 
 
-void xnn_math_f32_tanh__avx2_expm1minus_rr1_lut8_p4h3ts_perm_nr1adj(
+void xnn_math_f32_tanh__avx2_expm1minus_rr1_lut8_p4h3ps_perm_div(
     size_t n,
     const float* input,
     float* output)
@@ -109,27 +109,16 @@ void xnn_math_f32_tanh__avx2_expm1minus_rr1_lut8_p4h3ts_perm_nr1adj(
     // Reconstruct the exp(2z) - 1 value:
     //   exp(2z) - 1 = s * (t * (2 + t * (c2 + t * (c3 + t * c4))) + 1) - 1
     //               = s * t * p + (s - 1)
-    //               = (s - 1) + (t * s) * p
-    const __m256 vts = _mm256_mul_ps(vt, vs);
+    //               = (s - 1) + (p * s) * t
+    const __m256 vps = _mm256_mul_ps(vp, vs);
     const __m256 vsmo = _mm256_add_ps(vs, vminus_one);
-    const __m256 vemo = _mm256_fmadd_ps(vp, vts, vsmo);
+    const __m256 vemo = _mm256_fmadd_ps(vt, vps, vsmo);
 
     // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
     const __m256 vepo = _mm256_add_ps(vemo, vtwo);
 
-    // Use Newton-Raphson method (1 iteration) to compute reciprocal of the denominator.
-    // Note: 2 < exp(2z) + 1 <= 3, because z <= 0 and 0 < exp(2z) <= 1.
-    // Thus the reciprocal of the denominator never overflows.
-    __m256 vrepo = _mm256_rcp_ps(vepo);
-    const __m256 verepo = _mm256_fnmsub_ps(vrepo, vepo, vminus_one);
-    vrepo = _mm256_fmadd_ps(verepo, vrepo, vrepo);
-
-    // Reconstruct tanh(z) := expm1(2z) / (2 + expm1(2z))
-    __m256 vy = _mm256_mul_ps(vemo, vrepo);
-
-    // Adjust reconstructred expm1(2z) / (2 + expm1(2z)) to match the correctly rounded division result
-    const __m256 vey = _mm256_fnmadd_ps(vy, vepo, vemo);
-    vy = _mm256_fmadd_ps(vey, vrepo, vy);
+    // Reconstruct tanh(z) = expm1(2z) / (expm1(2z) + 2)
+    __m256 vy = _mm256_div_ps(vemo, vepo);
 
 
     // Reconstruct tanh(x):

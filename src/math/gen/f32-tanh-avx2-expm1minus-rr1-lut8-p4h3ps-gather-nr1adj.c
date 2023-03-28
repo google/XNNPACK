@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/math/f32-tanh-avx-expm1minus.c.in
+//   Template: src/math/f32-tanh-avx2-expm1minus.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -22,7 +22,7 @@
 // Table of exp2(k / 8) values decremented (as integer) by (k << 20), k = 0..7
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h2ts_nr1(
+void xnn_math_f32_tanh__avx2_expm1minus_rr1_lut8_p4h3ps_gather_nr1adj(
     size_t n,
     const float* input,
     float* output)
@@ -37,16 +37,16 @@ void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h2ts_nr1(
   // Large number such that ulp(magic bias) == exp2(-4)
   const __m256 vmagic_bias = _mm256_set1_ps(0x1.800000p+19f);
   // Mask for the lowest 3 bits
-  const __m128i vindex_mask = _mm_set1_epi32(0x7);
+  const __m256i vindex_mask = _mm256_set1_epi32(0x7);
   const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
   // Coefficients of polynomial approximation
-  //   exp(2t) - 1 ~ 2 * (t + t * (t * (c2 + t * (c3 + t * c4))))
+  //   exp(2t) - 1 ~ t * (2 + t * (c2 + t * (c3 + t * c4)))
   // on [-log(2)/32, log(2)/32]
-  const __m256 vc4 = _mm256_set1_ps(0x1.5558ECp-2f);
-  const __m256 vc3 = _mm256_set1_ps(0x1.555C20p-1f);
-  const __m256 vc2 = _mm256_set1_ps(0x1.000000p+0f);
-  const __m256 vminus_one = _mm256_set1_ps(-1.0f);
+  const __m256 vc4 = _mm256_set1_ps(0x1.5558ECp-1f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.555C20p+0f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.000000p+1f);
   const __m256 vtwo = _mm256_set1_ps(2.0f);
+  const __m256 vminus_one = _mm256_set1_ps(-1.0f);
 
   for (; n != 0; n -= sizeof(__m256)) {
     const __m256 vx = _mm256_load_ps(input);
@@ -65,9 +65,9 @@ void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h2ts_nr1(
     const __m256 vinvsignx = _mm256_xor_ps(vx, vz);
 
     // The function saturates at -1 for large negative inputs: tanhf(z) == -1.0f for z <= sat_cutoff ~= -9.010913.
-    // To guarantee this behaviour, we compute the saturation mask here, and later use it to replace computed outputs
-    // with the saturation value (-1). Note that for NaN inputs the saturation mask is inactive.
-    const __m256 vm = _mm256_cmp_ps(vz, vsat_cutoff, _CMP_LE_OS);
+    // To guarantee this behaviour, we clip input z at sat_cutoff, and leverage the fact that for our implementation
+    // tanhf(sat_cutoff) == -1.0f. NaN inputs are passed unchanged.
+    vz = _mm256_max_ps(vsat_cutoff, vz);
 
     // Compute reduced argument n := round(z / log(2), 4).
     // We do it by adding a large number (magic bias), which cause rounding of the result to 4 fractional bits,
@@ -86,49 +86,14 @@ void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h2ts_nr1(
     //    lower than -13.
     //
     // Shift bits 3:11 into 23:31 (position of floating-point exponent).
-    const __m128 vn_hi = _mm256_extractf128_ps(vn, 1);
-    const __m128i ve_lo = _mm_slli_epi32(_mm_castps_si128(_mm256_castps256_ps128(vn)), 20);
-    const __m128i ve_hi = _mm_slli_epi32(_mm_castps_si128(vn_hi), 20);
+    const __m256i ve = _mm256_slli_epi32(_mm256_castps_si256(vn), 20);
 
-    // Use bits 0:3 bits of n, as integer, as an index for table lookup of l := 2**frac(n).
-    const __m128i vidx_lo = _mm_and_si128(_mm_castps_si128(_mm256_castps256_ps128(vn)), vindex_mask);
-    const __m128i vidx_hi = _mm_and_si128(_mm_castps_si128(vn_hi), vindex_mask);
-    #if XNN_ARCH_X86_64
-      const uint64_t vidx01 = (uint64_t) _mm_cvtsi128_si64(vidx_lo);
-      const uint64_t vidx45 = (uint64_t) _mm_cvtsi128_si64(vidx_hi);
-      __m128i vl_lo = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx01]);
-      __m128i vl_hi = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx45]);
-      vl_lo = _mm_insert_epi32(vl_lo, (int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidx01 >> 32)], 1);
-      vl_hi = _mm_insert_epi32(vl_hi, (int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidx45 >> 32)], 1);
-      const uint64_t vidx23 = (uint64_t) _mm_extract_epi64(vidx_lo, 1);
-      const uint64_t vidx67 = (uint64_t) _mm_extract_epi64(vidx_hi, 1);
-      vl_lo = _mm_insert_epi32(vl_lo, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx23], 2);
-      vl_hi = _mm_insert_epi32(vl_hi, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx67], 2);
-      vl_lo = _mm_insert_epi32(vl_lo, (int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidx23 >> 32)], 3);
-      vl_hi = _mm_insert_epi32(vl_hi, (int) xnn_table_exp2minus_k_over_8[(uint32_t) (vidx67 >> 32)], 3);
-    #else
-      const uint32_t vidx0 = (uint32_t) _mm_cvtsi128_si32(vidx_lo);
-      const uint32_t vidx4 = (uint32_t) _mm_cvtsi128_si32(vidx_hi);
-      __m128i vl_lo = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx0]);
-      __m128i vl_hi = _mm_cvtsi32_si128((int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx4]);
-      const uint32_t vidx1 = (uint32_t) _mm_extract_epi32(vidx_lo, 1);
-      const uint32_t vidx5 = (uint32_t) _mm_extract_epi32(vidx_hi, 1);
-      vl_lo = _mm_insert_epi32(vl_lo, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx1], 1);
-      vl_hi = _mm_insert_epi32(vl_hi, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx5], 1);
-      const uint32_t vidx2 = (uint32_t) _mm_extract_epi32(vidx_lo, 2);
-      const uint32_t vidx6 = (uint32_t) _mm_extract_epi32(vidx_hi, 2);
-      vl_lo = _mm_insert_epi32(vl_lo, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx2], 2);
-      vl_hi = _mm_insert_epi32(vl_hi, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx6], 2);
-      const uint32_t vidx3 = (uint32_t) _mm_extract_epi32(vidx_lo, 3);
-      const uint32_t vidx7 = (uint32_t) _mm_extract_epi32(vidx_hi, 3);
-      vl_lo = _mm_insert_epi32(vl_lo, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx3], 3);
-      vl_hi = _mm_insert_epi32(vl_hi, (int) xnn_table_exp2minus_k_over_8[(uint32_t) vidx7], 3);
-    #endif
+    // Use bits 0:3 bits of n, as integer, as an index for table lookup of l := 2**frac(2n).
+    const __m256i vidx = _mm256_and_si256(_mm256_castps_si256(vn), vindex_mask);
+    const __m256i vl = _mm256_i32gather_epi32((const int*) xnn_table_exp2minus_k_over_8, vidx, sizeof(uint32_t));
 
     // Adjust exponent of the value l fetched from the table to get the final s value.
-    const __m128 vs_lo = _mm_castsi128_ps(_mm_add_epi32(vl_lo, ve_lo));
-    const __m128 vs_hi = _mm_castsi128_ps(_mm_add_epi32(vl_hi, ve_hi));
-    const __m256 vs = _mm256_insertf128_ps(_mm256_castps128_ps256(vs_lo), vs_hi, 1);
+    const __m256 vs = _mm256_castsi256_ps(_mm256_add_epi32(vl, ve));
 
     // Subtract the large number back to get final n := round(z / log(2), 4) as a floating-point number.
     vn = _mm256_sub_ps(vn, vmagic_bias);
@@ -137,21 +102,20 @@ void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h2ts_nr1(
     const __m256 vt = _mm256_fmadd_ps(vn, vminus_ln2, vz);
 
     // Compute degree-4 polynomial approximation for exp(2t) - 1 on [-log(2)/32, log(2)/32].
-    //   P(t) = 2 * (t + t * (t * (c2 + t * (c3 + t * c4))))
-    //        = 2 * (t + t * p)
+    //   P(t) = t * (2 + t * (c2 + t * (c3 + t * c4)))
+    //        = t * p
     __m256 vp = vc4;
     vp = _mm256_fmadd_ps(vp, vt, vc3);
     vp = _mm256_fmadd_ps(vp, vt, vc2);
-    vp = _mm256_mul_ps(vp, vt);
+    vp = _mm256_fmadd_ps(vp, vt, vtwo);
 
     // Reconstruct the exp(2z) - 1 value:
-    //   exp(2z) - 1 = s * (2 * (t + t * (t * (c2 + t * (c3 + t * c4)))) + 1) - 1
-    //               = s * (2 * (t + t * p) + 1) - 1
-    //               = (s - 1) + 2 * ((t * s) + (t * s) * p)
-    const __m256 vts = _mm256_mul_ps(vt, vs);
+    //   exp(2z) - 1 = s * (t * (2 + t * (c2 + t * (c3 + t * c4))) + 1) - 1
+    //               = s * t * p + (s - 1)
+    //               = (s - 1) + (p * s) * t
+    const __m256 vps = _mm256_mul_ps(vp, vs);
     const __m256 vsmo = _mm256_add_ps(vs, vminus_one);
-    vp = _mm256_fmadd_ps(vp, vts, vts);
-    const __m256 vemo = _mm256_fmadd_ps(vp, vtwo, vsmo);
+    const __m256 vemo = _mm256_fmadd_ps(vt, vps, vsmo);
 
     // Denominator of the tanh fraction: exp(2z) + 1 = expm1(2z) + 2
     const __m256 vepo = _mm256_add_ps(vemo, vtwo);
@@ -166,9 +130,10 @@ void xnn_math_f32_tanh__fma3_expm1minus_rr1_lut8_p4h2ts_nr1(
     // Reconstruct tanh(z) := expm1(2z) / (2 + expm1(2z))
     __m256 vy = _mm256_mul_ps(vemo, vrepo);
 
+    // Adjust reconstructred expm1(2z) / (2 + expm1(2z)) to match the correctly rounded division result
+    const __m256 vey = _mm256_fnmadd_ps(vy, vepo, vemo);
+    vy = _mm256_fmadd_ps(vey, vrepo, vy);
 
-    // Saturate tanh(z) at -1 for large inputs.
-    vy = _mm256_blendv_ps(vy, vminus_one, vm);
 
     // Reconstruct tanh(x):
     //
