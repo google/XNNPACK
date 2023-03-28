@@ -286,6 +286,7 @@ struct xnn_operator {
   const struct xnn_prelu_config* prelu_config;
   const struct xnn_zip_config* zip_config;
   const struct xnn_rmax_config* rmax_config;
+  const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config;
 
   struct compute_parameters compute;
   struct compute_parameters compute2;

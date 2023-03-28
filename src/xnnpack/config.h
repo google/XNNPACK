@@ -715,6 +715,20 @@ struct xnn_vmulcaddc_config {
 XNN_INTERNAL const struct xnn_vmulcaddc_config* xnn_init_f16_vmulcaddc_config();
 XNN_INTERNAL const struct xnn_vmulcaddc_config* xnn_init_f32_vmulcaddc_config();
 
+struct xnn_raddstoreexpminusmax_config {
+  xnn_raddstoreexpminusmax_ukernel_fn ukernel;
+  union {
+    xnn_init_f16_expminus_params_fn f16;
+    xnn_init_f32_expminus_params_fn f32;
+  } init;
+  // Number of elements in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
+  uint8_t element_tile;
+};
+
+XNN_INTERNAL const struct xnn_raddstoreexpminusmax_config* xnn_init_f16_raddstoreexpminusmax_config();
+XNN_INTERNAL const struct xnn_raddstoreexpminusmax_config* xnn_init_f32_raddstoreexpminusmax_config();
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
