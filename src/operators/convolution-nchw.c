@@ -520,17 +520,26 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
       if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
         xnn_pack_dconv_oki_w = (xnn_pack_dconv_oki_w_fn) xnn_pack_f32_to_f16_dconv_oki_w;
       }
-      xnn_params.f16.conv_hwc2chw_3x3c3s2.init.f16(&convolution_op->params.f16_minmax, fp16_output_min, fp16_output_max);
+
+      const struct xnn_conv_hwc2chw_config* conv_hwc2chw_config = xnn_init_f16_conv_hwc2chw_3x3c3s2_config();
+      if (conv_hwc2chw_config == NULL) {
+        status = xnn_status_unsupported_hardware;
+        xnn_log_error("failed to create %s operator: operations on data type are not supported",
+                      xnn_operator_type_to_string(operator_type));
+        goto error;
+      }
+
+      conv_hwc2chw_config->init.f16(&convolution_op->params.f16_minmax, fp16_output_min, fp16_output_max);
 
       status = create_conv2d_hwc2chw_path(
           kernel_height, kernel_width, groups,
           group_input_channels,
           group_output_channels,
-          xnn_params.f16.conv_hwc2chw_3x3c3s2.output_height_tile,
-          xnn_params.f16.conv_hwc2chw_3x3c3s2.output_channel_tile,
+          conv_hwc2chw_config->output_height_tile,
+          conv_hwc2chw_config->output_channel_tile,
           kernel, bias, log2_filter_element_size,
           xnn_pack_dconv_oki_w,
-          xnn_params.f16.conv_hwc2chw_3x3c3s2.ukernel_with_symm_padding,
+          conv_hwc2chw_config->ukernel_with_symm_padding,
           operator_type, convolution_op);
       if (status != xnn_status_success) {
         goto error;
@@ -839,17 +848,25 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     }
     case xnn_microkernel_type_conv2d_hwc2chw:
     {
-      xnn_params.f32.conv_hwc2chw_3x3c3s2.init.f32(&convolution_op->params.f32_minmax, output_min, output_max);
+      const struct xnn_conv_hwc2chw_config* conv_hwc2chw_config = xnn_init_f32_conv_hwc2chw_3x3c3s2_config();
+      if (conv_hwc2chw_config == NULL) {
+        status = xnn_status_unsupported_hardware;
+        xnn_log_error("failed to create %s operator: operations on data type are not supported",
+                      xnn_operator_type_to_string(operator_type));
+        goto error;
+      }
+
+      conv_hwc2chw_config->init.f32(&convolution_op->params.f32_minmax, output_min, output_max);
 
       status = create_conv2d_hwc2chw_path(
           kernel_height, kernel_width, groups,
           group_input_channels,
           group_output_channels,
-          xnn_params.f32.conv_hwc2chw_3x3c3s2.output_height_tile,
-          xnn_params.f32.conv_hwc2chw_3x3c3s2.output_channel_tile,
+          conv_hwc2chw_config->output_height_tile,
+          conv_hwc2chw_config->output_channel_tile,
           kernel, bias, log2_filter_element_size,
           (xnn_pack_dconv_oki_w_fn) xnn_pack_f32_dconv_oki_w,
-          xnn_params.f32.conv_hwc2chw_3x3c3s2.ukernel_with_symm_padding,
+          conv_hwc2chw_config->ukernel_with_symm_padding,
           operator_type, convolution_op);
       if (status != xnn_status_success) {
         goto error;

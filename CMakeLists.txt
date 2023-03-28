@@ -276,6 +276,7 @@ SET(LOGGING_SRCS
 SET(XNNPACK_SRCS
   src/avgpool-config.c
   src/binary-elementwise-config.c
+  src/conv-hwc2chw-config.c
   src/dwconv-config.c
   src/dwconv2d-chw-config.c
   src/gavgpool-config.c

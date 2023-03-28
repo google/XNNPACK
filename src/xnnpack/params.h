@@ -18,22 +18,6 @@
 #include <xnnpack/microparams.h>
 #include <xnnpack/config.h>
 
-struct conv_hwc2chw_parameters {
-  xnn_conv_hwc2chw_ukernel_fn ukernel_with_symm_padding;
-  union {
-    xnn_init_f16_minmax_params_fn f16;
-    xnn_init_f32_minmax_params_fn f32;
-  } init;
-  // Number of output channels in a tile.
-  // This parameter must be passed as is to weight packing function.
-  uint8_t output_channel_tile;
-  // Number of output height pixels in a tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
-  uint8_t output_height_tile;
-  // Number of output width pixels in a tile.
-  uint8_t output_width_tile;
-};
-
 struct argmaxpool_parameters {
   union {
     xnn_argmaxpool_unipass_ukernel_fn up;
@@ -108,15 +92,11 @@ struct xnn_parameters {
   struct {
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
-    // Direct 3x3 stride-2 Convolution with 3 input channels and HWC->CHW layout conversion.
-    struct conv_hwc2chw_parameters conv_hwc2chw_3x3c3s2;
   } f16;
   struct {
     struct argmaxpool_parameters argmaxpool[XNN_MAX_F32_ARGMAXPOOL_UKERNELS];
     struct vmulcaddc_parameters vmulcaddc;
     struct raddstoreexpminusmax_parameters raddstoreexpminusmax;
-    // Direct 3x3 stride-2 Convolution with 3 input channels and HWC->CHW layout conversion.
-    struct conv_hwc2chw_parameters conv_hwc2chw_3x3c3s2;
   } f32;
   struct {
     xnn_unpool_ukernel_fn unpool;

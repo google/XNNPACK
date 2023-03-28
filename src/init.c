@@ -146,14 +146,6 @@ static void init(void) {
           #ifndef XNN_NO_NCHW_OPERATORS
             init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
-            xnn_params.f16.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
-              .ukernel_with_symm_padding =
-                (xnn_conv_hwc2chw_ukernel_fn) xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2,
-              .init.f16 = xnn_init_f16_minmax_fp16arith_params,
-              .output_channel_tile = 4,
-              .output_height_tile = 2,
-              .output_width_tile = 2,
-            };
           #endif  // XNN_NO_NCHW_OPERATORS
         }
       #endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
@@ -191,14 +183,6 @@ static void init(void) {
       #ifndef XNN_NO_NCHW_OPERATORS
         init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
-        xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
-          .ukernel_with_symm_padding =
-            (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__neon_2x2,
-          .init.f32 = xnn_init_f32_minmax_scalar_params,
-          .output_channel_tile = 4,
-          .output_height_tile = 2,
-          .output_width_tile = 2,
-        };
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_F32_OPERATORS
 
@@ -284,14 +268,6 @@ static void init(void) {
       #ifndef XNN_NO_NCHW_OPERATORS
         init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
-        xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
-          .ukernel_with_symm_padding =
-            (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1,
-          .init.f32 = xnn_init_f32_minmax_scalar_params,
-          .output_channel_tile = 4,
-          .output_height_tile = 1,
-          .output_width_tile = 1,
-        };
       #endif  // XNN_NO_NCHW_OPERATORS
     #endif  // XNN_NO_F32_OPERATORS
 
@@ -373,14 +349,6 @@ static void init(void) {
         #ifndef XNN_NO_NCHW_OPERATORS
           init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
-          xnn_params.f16.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
-            .ukernel_with_symm_padding =
-              (xnn_conv_hwc2chw_ukernel_fn) xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2,
-            .init.f16 = xnn_init_f16_minmax_fp16arith_params,
-            .output_channel_tile = 4,
-            .output_height_tile = 2,
-            .output_width_tile = 2,
-          };
         #endif  // XNN_NO_NCHW_OPERATORS
       }
     #endif  // XNN_ENABLE_ARM_FP16_VECTOR
@@ -417,14 +385,6 @@ static void init(void) {
     #ifndef XNN_NO_NCHW_OPERATORS
       init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
-      xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
-        .ukernel_with_symm_padding =
-          (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2,
-        .init.f32 = xnn_init_f32_minmax_scalar_params,
-        .output_channel_tile = 4,
-        .output_height_tile = 2,
-        .output_width_tile = 2,
-      };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
@@ -536,14 +496,6 @@ static void init(void) {
         init_flags |= XNN_INIT_FLAG_CHW_OPT;
       }
 
-      xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
-        .ukernel_with_symm_padding =
-          (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_2x2,
-        .init.f32 = xnn_init_f32_minmax_sse_params,
-        .output_channel_tile = 4,
-        .output_height_tile = 2,
-        .output_width_tile = 2,
-      };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
@@ -657,14 +609,6 @@ static void init(void) {
     #ifndef XNN_NO_NCHW_OPERATORS
       init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
-      xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
-        .ukernel_with_symm_padding =
-          (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2,
-        .init.f32 = xnn_init_f32_minmax_wasmsimd_params,
-        .output_channel_tile = 4,
-        .output_height_tile = 2,
-        .output_width_tile = 2,
-      };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
@@ -749,14 +693,6 @@ static void init(void) {
     #ifndef XNN_NO_NCHW_OPERATORS
       init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
-      xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
-        .ukernel_with_symm_padding =
-          (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1,
-        .init.f32 = xnn_init_f32_minmax_scalar_params,
-        .output_channel_tile = 4,
-        .output_height_tile = 1,
-        .output_width_tile = 1,
-      };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
@@ -842,14 +778,6 @@ static void init(void) {
     #ifndef XNN_NO_NCHW_OPERATORS
       init_flags |= XNN_INIT_FLAG_CHW_OPT;
 
-      xnn_params.f32.conv_hwc2chw_3x3c3s2 = (struct conv_hwc2chw_parameters) {
-        .ukernel_with_symm_padding =
-          (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1,
-        .init.f32 = xnn_init_f32_minmax_scalar_params,
-        .output_channel_tile = 4,
-        .output_height_tile = 1,
-        .output_width_tile = 1,
-      };
     #endif  // XNN_NO_NCHW_OPERATORS
   #endif  // XNN_NO_F32_OPERATORS
 
