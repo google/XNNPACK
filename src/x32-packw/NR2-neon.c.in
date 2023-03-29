@@ -33,7 +33,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane${"_prfm" if PREFETCH el
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
-  assert(nr == ${NR});   // This kernel is for NR=${NR}
+  assert(nr == ${NR});
   assert(kr == 1);
   assert(sr == 1);
   assert(weights != NULL);

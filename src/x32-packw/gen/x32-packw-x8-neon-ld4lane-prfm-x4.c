@@ -34,9 +34,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
-  assert(nr == 8);   // This kernel is for NR=8
+  assert(nr == 8);
   assert(kr == 1);
-  assert(sr == 1);   // This kernel is for SR=1
+  assert(sr == 1);
   assert(weights != NULL);
   assert(packed_weights != NULL);
   uint32x4x4_t vtmp0123x0123;

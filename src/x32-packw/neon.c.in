@@ -36,9 +36,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
-  assert(nr == ${NR});   // This kernel is for NR=${NR}
+  assert(nr == ${NR});
   assert(kr == 1);
-  assert(sr == ${SR});   // This kernel is for SR=${SR}
+  assert(sr == ${SR});
   assert(weights != NULL);
   assert(packed_weights != NULL);
   $for N in range(0, NR, 4):

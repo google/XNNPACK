@@ -39,7 +39,7 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}_x${KUNROL
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
-  assert(nr == ${NR});   // This kernel is for NR=${NR}
+  assert(nr == ${NR});
   assert(kr == 1);
   assert(sr == 1);
   assert(weights != NULL);

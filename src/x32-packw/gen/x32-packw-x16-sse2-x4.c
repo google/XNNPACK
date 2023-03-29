@@ -33,7 +33,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_x4(
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
-  assert(nr == 16);   // This kernel is for NR=16
+  assert(nr == 16);
   assert(kr == 1);
   assert(sr == 1);
   assert(weights != NULL);

@@ -31,8 +31,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_x1(
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
-  assert(nr == ${NR});   // This kernel is for NR=${NR}
-  assert(kr == ${KR});   // This kernel is for KR=${KR}
+  assert(nr == ${NR});
+  assert(kr == ${KR});
   assert(sr == 1);
   assert(weights != NULL);
   assert(packed_weights != NULL);

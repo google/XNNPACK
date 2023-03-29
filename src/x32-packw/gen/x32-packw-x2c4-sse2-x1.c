@@ -33,8 +33,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1(
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
-  assert(nr == 2);   // This kernel is for NR=2
-  assert(kr == 4);   // This kernel is for KR=4
+  assert(nr == 2);
+  assert(kr == 4);
   assert(sr == 1);
   assert(weights != NULL);
   assert(packed_weights != NULL);
