@@ -113,6 +113,26 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__sse2_x${KUNROLL}(
           __m128 v${N} =  _mm_undefined_ps();
 
         switch (k) {
+          case 1:
+            // Read blocks of 4x1
+            // a
+            // e
+            // i
+            // m
+            $for N in range(NR):
+              v${N} = _mm_load_ss(w${N});
+              w${N} += 1;
+            break;
+          case 2:
+            // Read blocks of 4x2
+            // a b
+            // e f
+            // i j
+            // m n
+            $for N in range(NR):
+              v${N} = _mm_castpd_ps(_mm_load_sd((const double*) w${N}));
+              w${N} += 2;
+            break;
           case 3:
           {
             // Read blocks of 4x3
@@ -127,26 +147,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__sse2_x${KUNROLL}(
               w${N} += 3;
             break;
           }
-          case 2:
-            // Read blocks of 4x2
-            // a b
-            // e f
-            // i j
-            // m n
-            $for N in range(NR):
-              v${N} = _mm_castpd_ps(_mm_load_sd((const double*) w${N}));
-              w${N} += 2;
-            break;
-          case 1:
-            // Read blocks of 4x1
-            // a
-            // e
-            // i
-            // m
-            $for N in range(NR):
-              v${N} = _mm_load_ss(w${N});
-              w${N} += 1;
-            break;
           default:
             XNN_UNREACHABLE;
         }
@@ -260,6 +260,26 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__sse2_x${KUNROLL}(
         __m128 v${NR-1} = _mm_setzero_ps();
 
         switch (k) {
+          case 1:
+            // Read blocks of 4x1
+            // a
+            // e
+            // i
+            // m
+            $for N in range(NR-1):
+              v${N} = _mm_load_ss(w${N});
+              w${N} += 1;
+            break;
+          case 2:
+            // Read blocks of 4x2
+            // a b
+            // e f
+            // i j
+            // m n
+            $for N in range(NR-1):
+              v${N} = _mm_castpd_ps(_mm_load_sd((const double*) w${N}));
+              w${N} += 2;
+            break;
           case 3:
           {
             // Read blocks of 4x3
@@ -274,26 +294,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__sse2_x${KUNROLL}(
               w${N} += 3;
             break;
           }
-          case 2:
-            // Read blocks of 4x2
-            // a b
-            // e f
-            // i j
-            // m n
-            $for N in range(NR-1):
-              v${N} = _mm_castpd_ps(_mm_load_sd((const double*) w${N}));
-              w${N} += 2;
-            break;
-          case 1:
-            // Read blocks of 4x1
-            // a
-            // e
-            // i
-            // m
-            $for N in range(NR-1):
-              v${N} = _mm_load_ss(w${N});
-              w${N} += 1;
-            break;
           default:
             XNN_UNREACHABLE;
         }

@@ -79,6 +79,24 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1(
         assert(k >= 1);
         assert(k <= 3);
         switch (k) {
+          case 1:
+            // Read blocks of 2x1
+            // a
+            // e
+            v0 = _mm_load_ss(w0);
+            w0 += 1;
+            v1 = _mm_load_ss(w1);
+            w1 += 1;
+            break;
+          case 2:
+            // Read blocks of 2x2
+            // a b
+            // e f
+            v0 = _mm_castpd_ps(_mm_load_sd((const double*) w0));
+            w0 += 2;
+            v1 = _mm_castpd_ps(_mm_load_sd((const double*) w1));
+            w1 += 2;
+            break;
           case 3:
           {
             // Read blocks of 2x3
@@ -94,24 +112,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1(
             w1 += 3;
             break;
           }
-          case 2:
-            // Read blocks of 2x2
-            // a b
-            // e f
-            v0 = _mm_castpd_ps(_mm_load_sd((const double*) w0));
-            w0 += 2;
-            v1 = _mm_castpd_ps(_mm_load_sd((const double*) w1));
-            w1 += 2;
-            break;
-          case 1:
-            // Read blocks of 2x1
-            // a
-            // e
-            v0 = _mm_load_ss(w0);
-            w0 += 1;
-            v1 = _mm_load_ss(w1);
-            w1 += 1;
-            break;
           default:
             XNN_UNREACHABLE;
         }
@@ -160,6 +160,18 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1(
         assert(k >= 1);
         assert(k <= 3);
         switch (k) {
+          case 1:
+            // Read blocks of 1x1
+            // a
+            v0 = _mm_load_ss(w0);
+            w0 += 1;
+            break;
+          case 2:
+            // Read blocks of 1x2
+            // a b
+            v0 = _mm_castpd_ps(_mm_load_sd((const double*) w0));
+            w0 += 2;
+            break;
           case 3:
           {
             // Read blocks of 1x3
@@ -170,18 +182,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1(
             w0 += 3;
             break;
           }
-          case 2:
-            // Read blocks of 1x2
-            // a b
-            v0 = _mm_castpd_ps(_mm_load_sd((const double*) w0));
-            w0 += 2;
-            break;
-          case 1:
-            // Read blocks of 1x1
-            // a
-            v0 = _mm_load_ss(w0);
-            w0 += 1;
-            break;
           default:
             XNN_UNREACHABLE;
         }

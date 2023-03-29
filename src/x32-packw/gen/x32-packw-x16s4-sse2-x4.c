@@ -207,6 +207,84 @@ void xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x4(
         __m128 v15 =  _mm_undefined_ps();
 
         switch (k) {
+          case 1:
+            // Read blocks of 4x1
+            // a
+            // e
+            // i
+            // m
+            v0 = _mm_load_ss(w0);
+            w0 += 1;
+            v1 = _mm_load_ss(w1);
+            w1 += 1;
+            v2 = _mm_load_ss(w2);
+            w2 += 1;
+            v3 = _mm_load_ss(w3);
+            w3 += 1;
+            v4 = _mm_load_ss(w4);
+            w4 += 1;
+            v5 = _mm_load_ss(w5);
+            w5 += 1;
+            v6 = _mm_load_ss(w6);
+            w6 += 1;
+            v7 = _mm_load_ss(w7);
+            w7 += 1;
+            v8 = _mm_load_ss(w8);
+            w8 += 1;
+            v9 = _mm_load_ss(w9);
+            w9 += 1;
+            v10 = _mm_load_ss(w10);
+            w10 += 1;
+            v11 = _mm_load_ss(w11);
+            w11 += 1;
+            v12 = _mm_load_ss(w12);
+            w12 += 1;
+            v13 = _mm_load_ss(w13);
+            w13 += 1;
+            v14 = _mm_load_ss(w14);
+            w14 += 1;
+            v15 = _mm_load_ss(w15);
+            w15 += 1;
+            break;
+          case 2:
+            // Read blocks of 4x2
+            // a b
+            // e f
+            // i j
+            // m n
+            v0 = _mm_castpd_ps(_mm_load_sd((const double*) w0));
+            w0 += 2;
+            v1 = _mm_castpd_ps(_mm_load_sd((const double*) w1));
+            w1 += 2;
+            v2 = _mm_castpd_ps(_mm_load_sd((const double*) w2));
+            w2 += 2;
+            v3 = _mm_castpd_ps(_mm_load_sd((const double*) w3));
+            w3 += 2;
+            v4 = _mm_castpd_ps(_mm_load_sd((const double*) w4));
+            w4 += 2;
+            v5 = _mm_castpd_ps(_mm_load_sd((const double*) w5));
+            w5 += 2;
+            v6 = _mm_castpd_ps(_mm_load_sd((const double*) w6));
+            w6 += 2;
+            v7 = _mm_castpd_ps(_mm_load_sd((const double*) w7));
+            w7 += 2;
+            v8 = _mm_castpd_ps(_mm_load_sd((const double*) w8));
+            w8 += 2;
+            v9 = _mm_castpd_ps(_mm_load_sd((const double*) w9));
+            w9 += 2;
+            v10 = _mm_castpd_ps(_mm_load_sd((const double*) w10));
+            w10 += 2;
+            v11 = _mm_castpd_ps(_mm_load_sd((const double*) w11));
+            w11 += 2;
+            v12 = _mm_castpd_ps(_mm_load_sd((const double*) w12));
+            w12 += 2;
+            v13 = _mm_castpd_ps(_mm_load_sd((const double*) w13));
+            w13 += 2;
+            v14 = _mm_castpd_ps(_mm_load_sd((const double*) w14));
+            w14 += 2;
+            v15 = _mm_castpd_ps(_mm_load_sd((const double*) w15));
+            w15 += 2;
+            break;
           case 3:
           {
             // Read blocks of 4x3
@@ -280,84 +358,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x4(
             w15 += 3;
             break;
           }
-          case 2:
-            // Read blocks of 4x2
-            // a b
-            // e f
-            // i j
-            // m n
-            v0 = _mm_castpd_ps(_mm_load_sd((const double*) w0));
-            w0 += 2;
-            v1 = _mm_castpd_ps(_mm_load_sd((const double*) w1));
-            w1 += 2;
-            v2 = _mm_castpd_ps(_mm_load_sd((const double*) w2));
-            w2 += 2;
-            v3 = _mm_castpd_ps(_mm_load_sd((const double*) w3));
-            w3 += 2;
-            v4 = _mm_castpd_ps(_mm_load_sd((const double*) w4));
-            w4 += 2;
-            v5 = _mm_castpd_ps(_mm_load_sd((const double*) w5));
-            w5 += 2;
-            v6 = _mm_castpd_ps(_mm_load_sd((const double*) w6));
-            w6 += 2;
-            v7 = _mm_castpd_ps(_mm_load_sd((const double*) w7));
-            w7 += 2;
-            v8 = _mm_castpd_ps(_mm_load_sd((const double*) w8));
-            w8 += 2;
-            v9 = _mm_castpd_ps(_mm_load_sd((const double*) w9));
-            w9 += 2;
-            v10 = _mm_castpd_ps(_mm_load_sd((const double*) w10));
-            w10 += 2;
-            v11 = _mm_castpd_ps(_mm_load_sd((const double*) w11));
-            w11 += 2;
-            v12 = _mm_castpd_ps(_mm_load_sd((const double*) w12));
-            w12 += 2;
-            v13 = _mm_castpd_ps(_mm_load_sd((const double*) w13));
-            w13 += 2;
-            v14 = _mm_castpd_ps(_mm_load_sd((const double*) w14));
-            w14 += 2;
-            v15 = _mm_castpd_ps(_mm_load_sd((const double*) w15));
-            w15 += 2;
-            break;
-          case 1:
-            // Read blocks of 4x1
-            // a
-            // e
-            // i
-            // m
-            v0 = _mm_load_ss(w0);
-            w0 += 1;
-            v1 = _mm_load_ss(w1);
-            w1 += 1;
-            v2 = _mm_load_ss(w2);
-            w2 += 1;
-            v3 = _mm_load_ss(w3);
-            w3 += 1;
-            v4 = _mm_load_ss(w4);
-            w4 += 1;
-            v5 = _mm_load_ss(w5);
-            w5 += 1;
-            v6 = _mm_load_ss(w6);
-            w6 += 1;
-            v7 = _mm_load_ss(w7);
-            w7 += 1;
-            v8 = _mm_load_ss(w8);
-            w8 += 1;
-            v9 = _mm_load_ss(w9);
-            w9 += 1;
-            v10 = _mm_load_ss(w10);
-            w10 += 1;
-            v11 = _mm_load_ss(w11);
-            w11 += 1;
-            v12 = _mm_load_ss(w12);
-            w12 += 1;
-            v13 = _mm_load_ss(w13);
-            w13 += 1;
-            v14 = _mm_load_ss(w14);
-            w14 += 1;
-            v15 = _mm_load_ss(w15);
-            w15 += 1;
-            break;
           default:
             XNN_UNREACHABLE;
         }
@@ -633,6 +633,80 @@ void xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x4(
         __m128 v15 = _mm_setzero_ps();
 
         switch (k) {
+          case 1:
+            // Read blocks of 4x1
+            // a
+            // e
+            // i
+            // m
+            v0 = _mm_load_ss(w0);
+            w0 += 1;
+            v1 = _mm_load_ss(w1);
+            w1 += 1;
+            v2 = _mm_load_ss(w2);
+            w2 += 1;
+            v3 = _mm_load_ss(w3);
+            w3 += 1;
+            v4 = _mm_load_ss(w4);
+            w4 += 1;
+            v5 = _mm_load_ss(w5);
+            w5 += 1;
+            v6 = _mm_load_ss(w6);
+            w6 += 1;
+            v7 = _mm_load_ss(w7);
+            w7 += 1;
+            v8 = _mm_load_ss(w8);
+            w8 += 1;
+            v9 = _mm_load_ss(w9);
+            w9 += 1;
+            v10 = _mm_load_ss(w10);
+            w10 += 1;
+            v11 = _mm_load_ss(w11);
+            w11 += 1;
+            v12 = _mm_load_ss(w12);
+            w12 += 1;
+            v13 = _mm_load_ss(w13);
+            w13 += 1;
+            v14 = _mm_load_ss(w14);
+            w14 += 1;
+            break;
+          case 2:
+            // Read blocks of 4x2
+            // a b
+            // e f
+            // i j
+            // m n
+            v0 = _mm_castpd_ps(_mm_load_sd((const double*) w0));
+            w0 += 2;
+            v1 = _mm_castpd_ps(_mm_load_sd((const double*) w1));
+            w1 += 2;
+            v2 = _mm_castpd_ps(_mm_load_sd((const double*) w2));
+            w2 += 2;
+            v3 = _mm_castpd_ps(_mm_load_sd((const double*) w3));
+            w3 += 2;
+            v4 = _mm_castpd_ps(_mm_load_sd((const double*) w4));
+            w4 += 2;
+            v5 = _mm_castpd_ps(_mm_load_sd((const double*) w5));
+            w5 += 2;
+            v6 = _mm_castpd_ps(_mm_load_sd((const double*) w6));
+            w6 += 2;
+            v7 = _mm_castpd_ps(_mm_load_sd((const double*) w7));
+            w7 += 2;
+            v8 = _mm_castpd_ps(_mm_load_sd((const double*) w8));
+            w8 += 2;
+            v9 = _mm_castpd_ps(_mm_load_sd((const double*) w9));
+            w9 += 2;
+            v10 = _mm_castpd_ps(_mm_load_sd((const double*) w10));
+            w10 += 2;
+            v11 = _mm_castpd_ps(_mm_load_sd((const double*) w11));
+            w11 += 2;
+            v12 = _mm_castpd_ps(_mm_load_sd((const double*) w12));
+            w12 += 2;
+            v13 = _mm_castpd_ps(_mm_load_sd((const double*) w13));
+            w13 += 2;
+            v14 = _mm_castpd_ps(_mm_load_sd((const double*) w14));
+            w14 += 2;
+            break;
           case 3:
           {
             // Read blocks of 4x3
@@ -702,80 +776,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x4(
             w14 += 3;
             break;
           }
-          case 2:
-            // Read blocks of 4x2
-            // a b
-            // e f
-            // i j
-            // m n
-            v0 = _mm_castpd_ps(_mm_load_sd((const double*) w0));
-            w0 += 2;
-            v1 = _mm_castpd_ps(_mm_load_sd((const double*) w1));
-            w1 += 2;
-            v2 = _mm_castpd_ps(_mm_load_sd((const double*) w2));
-            w2 += 2;
-            v3 = _mm_castpd_ps(_mm_load_sd((const double*) w3));
-            w3 += 2;
-            v4 = _mm_castpd_ps(_mm_load_sd((const double*) w4));
-            w4 += 2;
-            v5 = _mm_castpd_ps(_mm_load_sd((const double*) w5));
-            w5 += 2;
-            v6 = _mm_castpd_ps(_mm_load_sd((const double*) w6));
-            w6 += 2;
-            v7 = _mm_castpd_ps(_mm_load_sd((const double*) w7));
-            w7 += 2;
-            v8 = _mm_castpd_ps(_mm_load_sd((const double*) w8));
-            w8 += 2;
-            v9 = _mm_castpd_ps(_mm_load_sd((const double*) w9));
-            w9 += 2;
-            v10 = _mm_castpd_ps(_mm_load_sd((const double*) w10));
-            w10 += 2;
-            v11 = _mm_castpd_ps(_mm_load_sd((const double*) w11));
-            w11 += 2;
-            v12 = _mm_castpd_ps(_mm_load_sd((const double*) w12));
-            w12 += 2;
-            v13 = _mm_castpd_ps(_mm_load_sd((const double*) w13));
-            w13 += 2;
-            v14 = _mm_castpd_ps(_mm_load_sd((const double*) w14));
-            w14 += 2;
-            break;
-          case 1:
-            // Read blocks of 4x1
-            // a
-            // e
-            // i
-            // m
-            v0 = _mm_load_ss(w0);
-            w0 += 1;
-            v1 = _mm_load_ss(w1);
-            w1 += 1;
-            v2 = _mm_load_ss(w2);
-            w2 += 1;
-            v3 = _mm_load_ss(w3);
-            w3 += 1;
-            v4 = _mm_load_ss(w4);
-            w4 += 1;
-            v5 = _mm_load_ss(w5);
-            w5 += 1;
-            v6 = _mm_load_ss(w6);
-            w6 += 1;
-            v7 = _mm_load_ss(w7);
-            w7 += 1;
-            v8 = _mm_load_ss(w8);
-            w8 += 1;
-            v9 = _mm_load_ss(w9);
-            w9 += 1;
-            v10 = _mm_load_ss(w10);
-            w10 += 1;
-            v11 = _mm_load_ss(w11);
-            w11 += 1;
-            v12 = _mm_load_ss(w12);
-            w12 += 1;
-            v13 = _mm_load_ss(w13);
-            w13 += 1;
-            v14 = _mm_load_ss(w14);
-            w14 += 1;
-            break;
           default:
             XNN_UNREACHABLE;
         }

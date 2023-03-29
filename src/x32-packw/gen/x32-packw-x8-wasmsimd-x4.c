@@ -119,6 +119,67 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_x4(
         assert(k <= 3);
 
         switch (k) {
+          case 1:
+          {
+            v128_t v0123x0 = wasm_v128_load32_zero(w0);
+            w0 += 1;
+            v128_t v4567x0 = wasm_v128_load32_zero(w4);
+            w4 += 1;
+
+            v0123x0 = wasm_v128_load32_lane(w1, v0123x0, 1);
+            w1 += 1;
+            v4567x0 = wasm_v128_load32_lane(w5, v4567x0, 1);
+            w5 += 1;
+            v0123x0 = wasm_v128_load32_lane(w2, v0123x0, 2);
+            w2 += 1;
+            v4567x0 = wasm_v128_load32_lane(w6, v4567x0, 2);
+            w6 += 1;
+            v0123x0 = wasm_v128_load32_lane(w3, v0123x0, 3);
+            w3 += 1;
+            v4567x0 = wasm_v128_load32_lane(w7, v4567x0, 3);
+            w7 += 1;
+
+            wasm_v128_store(packed_weights, v0123x0);
+            wasm_v128_store(packed_weights + 4, v4567x0);
+            packed_weights += 8;
+            break;
+          }
+          case 2:
+          {
+            const v128_t v0x01 = wasm_v128_load64_zero(w0);
+            w0 += 2;
+            const v128_t v1x01 = wasm_v128_load64_zero(w1);
+            w1 += 2;
+            const v128_t v2x01 = wasm_v128_load64_zero(w2);
+            w2 += 2;
+            const v128_t v3x01 = wasm_v128_load64_zero(w3);
+            w3 += 2;
+            const v128_t v4x01 = wasm_v128_load64_zero(w4);
+            w4 += 2;
+            const v128_t v5x01 = wasm_v128_load64_zero(w5);
+            w5 += 2;
+            const v128_t v6x01 = wasm_v128_load64_zero(w6);
+            w6 += 2;
+            const v128_t v7x01 = wasm_v128_load64_zero(w7);
+            w7 += 2;
+
+            const v128_t v01x0_01x1 = wasm_v32x4_shuffle(v0x01, v1x01, 0, 4, 1, 5);
+            const v128_t v23x0_23x1 = wasm_v32x4_shuffle(v2x01, v3x01, 0, 4, 1, 5);
+            const v128_t v45x0_45x1 = wasm_v32x4_shuffle(v4x01, v5x01, 0, 4, 1, 5);
+            const v128_t v67x0_67x1 = wasm_v32x4_shuffle(v6x01, v7x01, 0, 4, 1, 5);
+
+            const v128_t v0123x0 = wasm_v64x2_shuffle(v01x0_01x1, v23x0_23x1, 0, 2);
+            const v128_t v0123x1 = wasm_v64x2_shuffle(v01x0_01x1, v23x0_23x1, 1, 3);
+            const v128_t v4567x0 = wasm_v64x2_shuffle(v45x0_45x1, v67x0_67x1, 0, 2);
+            const v128_t v4567x1 = wasm_v64x2_shuffle(v45x0_45x1, v67x0_67x1, 1, 3);
+
+            wasm_v128_store(packed_weights, v0123x0);
+            wasm_v128_store(packed_weights + 4, v4567x0);
+            wasm_v128_store(packed_weights + 8, v0123x1);
+            wasm_v128_store(packed_weights + 12, v4567x1);
+            packed_weights += 16;
+            break;
+          }
           case 3:
           {
             v128_t v0x012 = wasm_v128_load64_zero(w0);
@@ -178,67 +239,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_x4(
             wasm_v128_store(packed_weights + 16, v0123x2);
             wasm_v128_store(packed_weights + 20, v4567x2);
             packed_weights += 24;
-            break;
-          }
-          case 2:
-          {
-            const v128_t v0x01 = wasm_v128_load64_zero(w0);
-            w0 += 2;
-            const v128_t v1x01 = wasm_v128_load64_zero(w1);
-            w1 += 2;
-            const v128_t v2x01 = wasm_v128_load64_zero(w2);
-            w2 += 2;
-            const v128_t v3x01 = wasm_v128_load64_zero(w3);
-            w3 += 2;
-            const v128_t v4x01 = wasm_v128_load64_zero(w4);
-            w4 += 2;
-            const v128_t v5x01 = wasm_v128_load64_zero(w5);
-            w5 += 2;
-            const v128_t v6x01 = wasm_v128_load64_zero(w6);
-            w6 += 2;
-            const v128_t v7x01 = wasm_v128_load64_zero(w7);
-            w7 += 2;
-
-            const v128_t v01x0_01x1 = wasm_v32x4_shuffle(v0x01, v1x01, 0, 4, 1, 5);
-            const v128_t v23x0_23x1 = wasm_v32x4_shuffle(v2x01, v3x01, 0, 4, 1, 5);
-            const v128_t v45x0_45x1 = wasm_v32x4_shuffle(v4x01, v5x01, 0, 4, 1, 5);
-            const v128_t v67x0_67x1 = wasm_v32x4_shuffle(v6x01, v7x01, 0, 4, 1, 5);
-
-            const v128_t v0123x0 = wasm_v64x2_shuffle(v01x0_01x1, v23x0_23x1, 0, 2);
-            const v128_t v0123x1 = wasm_v64x2_shuffle(v01x0_01x1, v23x0_23x1, 1, 3);
-            const v128_t v4567x0 = wasm_v64x2_shuffle(v45x0_45x1, v67x0_67x1, 0, 2);
-            const v128_t v4567x1 = wasm_v64x2_shuffle(v45x0_45x1, v67x0_67x1, 1, 3);
-
-            wasm_v128_store(packed_weights, v0123x0);
-            wasm_v128_store(packed_weights + 4, v4567x0);
-            wasm_v128_store(packed_weights + 8, v0123x1);
-            wasm_v128_store(packed_weights + 12, v4567x1);
-            packed_weights += 16;
-            break;
-          }
-          case 1:
-          {
-            v128_t v0123x0 = wasm_v128_load32_zero(w0);
-            w0 += 1;
-            v128_t v4567x0 = wasm_v128_load32_zero(w4);
-            w4 += 1;
-
-            v0123x0 = wasm_v128_load32_lane(w1, v0123x0, 1);
-            w1 += 1;
-            v4567x0 = wasm_v128_load32_lane(w5, v4567x0, 1);
-            w5 += 1;
-            v0123x0 = wasm_v128_load32_lane(w2, v0123x0, 2);
-            w2 += 1;
-            v4567x0 = wasm_v128_load32_lane(w6, v4567x0, 2);
-            w6 += 1;
-            v0123x0 = wasm_v128_load32_lane(w3, v0123x0, 3);
-            w3 += 1;
-            v4567x0 = wasm_v128_load32_lane(w7, v4567x0, 3);
-            w7 += 1;
-
-            wasm_v128_store(packed_weights, v0123x0);
-            wasm_v128_store(packed_weights + 4, v4567x0);
-            packed_weights += 8;
             break;
           }
           default:
@@ -340,6 +340,63 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_x4(
         assert(k <= 3);
 
         switch (k) {
+          case 1:
+          {
+            v128_t v0123x0 = wasm_v128_load32_zero(w0);
+            w0 += 1;
+            v128_t v4567x0 = wasm_v128_load32_zero(w4);
+            w4 += 1;
+
+            v0123x0 = wasm_v128_load32_lane(w1, v0123x0, 1);
+            w1 += 1;
+            v4567x0 = wasm_v128_load32_lane(w5, v4567x0, 1);
+            w5 += 1;
+            v0123x0 = wasm_v128_load32_lane(w2, v0123x0, 2);
+            w2 += 1;
+            v4567x0 = wasm_v128_load32_lane(w6, v4567x0, 2);
+            w6 += 1;
+            v0123x0 = wasm_v128_load32_lane(w3, v0123x0, 3);
+            w3 += 1;
+
+            wasm_v128_store(packed_weights, v0123x0);
+            wasm_v128_store(packed_weights + 4, v4567x0);
+            packed_weights += 8;
+            break;
+          }
+          case 2:
+          {
+            const v128_t v0x01 = wasm_v128_load64_zero(w0);
+            w0 += 2;
+            const v128_t v1x01 = wasm_v128_load64_zero(w1);
+            w1 += 2;
+            const v128_t v2x01 = wasm_v128_load64_zero(w2);
+            w2 += 2;
+            const v128_t v3x01 = wasm_v128_load64_zero(w3);
+            w3 += 2;
+            const v128_t v4x01 = wasm_v128_load64_zero(w4);
+            w4 += 2;
+            const v128_t v5x01 = wasm_v128_load64_zero(w5);
+            w5 += 2;
+            const v128_t v6x01 = wasm_v128_load64_zero(w6);
+            w6 += 2;
+
+            const v128_t v01x0_01x1 = wasm_v32x4_shuffle(v0x01, v1x01, 0, 4, 1, 5);
+            const v128_t v23x0_23x1 = wasm_v32x4_shuffle(v2x01, v3x01, 0, 4, 1, 5);
+            const v128_t v45x0_45x1 = wasm_v32x4_shuffle(v4x01, v5x01, 0, 4, 1, 5);
+            const v128_t v67x0_67x1 = wasm_v32x4_shuffle(v6x01, v6x01, 0, 4, 1, 5);
+
+            const v128_t v0123x0 = wasm_v64x2_shuffle(v01x0_01x1, v23x0_23x1, 0, 2);
+            const v128_t v0123x1 = wasm_v64x2_shuffle(v01x0_01x1, v23x0_23x1, 1, 3);
+            const v128_t v4567x0 = wasm_v64x2_shuffle(v45x0_45x1, v67x0_67x1, 0, 2);
+            const v128_t v4567x1 = wasm_v64x2_shuffle(v45x0_45x1, v67x0_67x1, 1, 3);
+
+            wasm_v128_store(packed_weights, v0123x0);
+            wasm_v128_store(packed_weights + 4, v4567x0);
+            wasm_v128_store(packed_weights + 8, v0123x1);
+            wasm_v128_store(packed_weights + 12, v4567x1);
+            packed_weights += 16;
+            break;
+          }
           case 3:
           {
             v128_t v0x012 = wasm_v128_load64_zero(w0);
@@ -395,63 +452,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_x4(
             wasm_v128_store(packed_weights + 16, v0123x2);
             wasm_v128_store(packed_weights + 20, v4567x2);
             packed_weights += 24;
-            break;
-          }
-          case 2:
-          {
-            const v128_t v0x01 = wasm_v128_load64_zero(w0);
-            w0 += 2;
-            const v128_t v1x01 = wasm_v128_load64_zero(w1);
-            w1 += 2;
-            const v128_t v2x01 = wasm_v128_load64_zero(w2);
-            w2 += 2;
-            const v128_t v3x01 = wasm_v128_load64_zero(w3);
-            w3 += 2;
-            const v128_t v4x01 = wasm_v128_load64_zero(w4);
-            w4 += 2;
-            const v128_t v5x01 = wasm_v128_load64_zero(w5);
-            w5 += 2;
-            const v128_t v6x01 = wasm_v128_load64_zero(w6);
-            w6 += 2;
-
-            const v128_t v01x0_01x1 = wasm_v32x4_shuffle(v0x01, v1x01, 0, 4, 1, 5);
-            const v128_t v23x0_23x1 = wasm_v32x4_shuffle(v2x01, v3x01, 0, 4, 1, 5);
-            const v128_t v45x0_45x1 = wasm_v32x4_shuffle(v4x01, v5x01, 0, 4, 1, 5);
-            const v128_t v67x0_67x1 = wasm_v32x4_shuffle(v6x01, v6x01, 0, 4, 1, 5);
-
-            const v128_t v0123x0 = wasm_v64x2_shuffle(v01x0_01x1, v23x0_23x1, 0, 2);
-            const v128_t v0123x1 = wasm_v64x2_shuffle(v01x0_01x1, v23x0_23x1, 1, 3);
-            const v128_t v4567x0 = wasm_v64x2_shuffle(v45x0_45x1, v67x0_67x1, 0, 2);
-            const v128_t v4567x1 = wasm_v64x2_shuffle(v45x0_45x1, v67x0_67x1, 1, 3);
-
-            wasm_v128_store(packed_weights, v0123x0);
-            wasm_v128_store(packed_weights + 4, v4567x0);
-            wasm_v128_store(packed_weights + 8, v0123x1);
-            wasm_v128_store(packed_weights + 12, v4567x1);
-            packed_weights += 16;
-            break;
-          }
-          case 1:
-          {
-            v128_t v0123x0 = wasm_v128_load32_zero(w0);
-            w0 += 1;
-            v128_t v4567x0 = wasm_v128_load32_zero(w4);
-            w4 += 1;
-
-            v0123x0 = wasm_v128_load32_lane(w1, v0123x0, 1);
-            w1 += 1;
-            v4567x0 = wasm_v128_load32_lane(w5, v4567x0, 1);
-            w5 += 1;
-            v0123x0 = wasm_v128_load32_lane(w2, v0123x0, 2);
-            w2 += 1;
-            v4567x0 = wasm_v128_load32_lane(w6, v4567x0, 2);
-            w6 += 1;
-            v0123x0 = wasm_v128_load32_lane(w3, v0123x0, 3);
-            w3 += 1;
-
-            wasm_v128_store(packed_weights, v0123x0);
-            wasm_v128_store(packed_weights + 4, v4567x0);
-            packed_weights += 8;
             break;
           }
           default:

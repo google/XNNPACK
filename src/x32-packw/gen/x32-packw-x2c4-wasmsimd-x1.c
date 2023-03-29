@@ -75,17 +75,15 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1(
         assert(k >= 1);
         assert(k <= 3);
         switch (k) {
-          case 3:
+          case 1:
           {
-            // Read blocks of 2x3
-            // a b c
-            // e f g
-            v128_t v0 = wasm_v128_load64_zero(w0);
-            v0 = wasm_v128_load32_lane(w0 + 2, v0, 2);
-            w0 += 3;
-            v128_t v1 = wasm_v128_load64_zero(w1);
-            v1 = wasm_v128_load32_lane(w1 + 2, v1, 2);
-            w1 += 3;
+            // Read blocks of 2x1
+            // a
+            // e
+            const v128_t v0 = wasm_v128_load32_zero(w0);
+            ++w0;
+            const v128_t v1 = wasm_v128_load32_zero(w1);
+            ++w1;
             wasm_v128_store(packed_weights, v0);
             wasm_v128_store(packed_weights + 4, v1);
             packed_weights += 8;
@@ -105,15 +103,17 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1(
             packed_weights += 8;
             break;
           }
-          case 1:
+          case 3:
           {
-            // Read blocks of 2x1
-            // a
-            // e
-            const v128_t v0 = wasm_v128_load32_zero(w0);
-            ++w0;
-            const v128_t v1 = wasm_v128_load32_zero(w1);
-            ++w1;
+            // Read blocks of 2x3
+            // a b c
+            // e f g
+            v128_t v0 = wasm_v128_load64_zero(w0);
+            v0 = wasm_v128_load32_lane(w0 + 2, v0, 2);
+            w0 += 3;
+            v128_t v1 = wasm_v128_load64_zero(w1);
+            v1 = wasm_v128_load32_lane(w1 + 2, v1, 2);
+            w1 += 3;
             wasm_v128_store(packed_weights, v0);
             wasm_v128_store(packed_weights + 4, v1);
             packed_weights += 8;
@@ -164,13 +164,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1(
         assert(k >= 1);
         assert(k <= 3);
         switch (k) {
-          case 3:
+          case 1:
           {
-            // Read blocks of 1x3
-            // a b c
-            v128_t v0 = wasm_v128_load64_zero(w0);
-            v0 = wasm_v128_load32_lane(w0 + 2, v0, 2);
-            w0 += 3;
+            // Read blocks of 1x1
+            // a
+            const v128_t v0 = wasm_v128_load32_zero(w0);
+            ++w0;
             const v128_t v1 = wasm_i32x4_const_splat(0);
             wasm_v128_store(packed_weights, v0);
             wasm_v128_store(packed_weights + 4, v1);
@@ -189,12 +188,13 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1(
             packed_weights += 8;
             break;
           }
-          case 1:
+          case 3:
           {
-            // Read blocks of 1x1
-            // a
-            const v128_t v0 = wasm_v128_load32_zero(w0);
-            ++w0;
+            // Read blocks of 1x3
+            // a b c
+            v128_t v0 = wasm_v128_load64_zero(w0);
+            v0 = wasm_v128_load32_lane(w0 + 2, v0, 2);
+            w0 += 3;
             const v128_t v1 = wasm_i32x4_const_splat(0);
             wasm_v128_store(packed_weights, v0);
             wasm_v128_store(packed_weights + 4, v1);
