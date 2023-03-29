@@ -63,6 +63,16 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
     goto error;
   }
 
+  status = xnn_status_unsupported_hardware;
+
+  const struct xnn_argmaxpool_config* argmaxpool_config = xnn_init_f32_argmaxpool_config();
+  if (argmaxpool_config == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
+    goto error;
+  }
+
   status = xnn_status_invalid_parameter;
 
   const uint32_t pooling_size = pooling_height * pooling_width;
@@ -143,6 +153,7 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
 
   argmax_pooling_op->type = xnn_operator_type_argmax_pooling_nhwc_f32;
   argmax_pooling_op->flags = flags;
+  argmax_pooling_op->argmaxpool_config = argmaxpool_config;
 
   argmax_pooling_op->state = xnn_run_state_invalid;
 
@@ -220,8 +231,7 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   const size_t pooling_size = pooling_height * pooling_width;
   const size_t output_height = argmax_pooling_op->output_height;
   const size_t output_width = argmax_pooling_op->output_width;
-  const struct xnn_argmaxpool_config* argmaxpool_config = xnn_init_f32_argmaxpool_config();
-  assert(argmaxpool_config != NULL);
+  const struct xnn_argmaxpool_config* argmaxpool_config = argmax_pooling_op->argmaxpool_config;
   const struct xnn_argmaxpool_config* ukernel = select_ukernel(pooling_size, argmaxpool_config);
   const uint32_t first_pass_tile_size = ukernel->first_pass_tile_size;
 

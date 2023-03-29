@@ -20,10 +20,12 @@
 static void init_slice_nd(
     uint32_t flags,
     enum xnn_operator_type operator_type,
+    const struct xnn_unary_elementwise_config* copy_config,
     xnn_operator_t slice_op)
 {
   slice_op->type = operator_type;
   slice_op->flags = flags;
+  slice_op->copy_config = copy_config;
   slice_op->state = xnn_run_state_invalid;
 }
 
@@ -42,6 +44,16 @@ static enum xnn_status create_slice_nd(
     goto error;
   }
 
+  status = xnn_status_unsupported_hardware;
+
+  const struct xnn_unary_elementwise_config* copy_config = xnn_init_xx_copy_config();
+  if (copy_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
   status = xnn_status_out_of_memory;
 
   slice_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
@@ -55,6 +67,7 @@ static enum xnn_status create_slice_nd(
   init_slice_nd(
     flags,
     operator_type,
+    copy_config,
     slice_op);
 
   *slice_op_out = slice_op;
@@ -152,14 +165,7 @@ static enum xnn_status setup_slice_nd(
       return xnn_status_unsupported_parameter;
     }
   }
-  const struct xnn_unary_elementwise_config* xx_copy_config = xnn_init_xx_copy_config();
-  if (xx_copy_config == NULL) {
-    xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_operator_type_to_string(slice_op->type));
-    return xnn_status_unsupported_hardware;
-  }
-
+  const struct xnn_unary_elementwise_config* copy_config = slice_op->copy_config;
   size_t normalized_offsets[XNN_MAX_TENSOR_DIMS];
   size_t normalized_input_shape[XNN_MAX_TENSOR_DIMS];
   size_t normalized_output_shape[XNN_MAX_TENSOR_DIMS];
@@ -179,7 +185,7 @@ static enum xnn_status setup_slice_nd(
   slice_op->context.slice = (struct slice_context) {
     .input = input,
     .output = output,
-    .ukernel = xx_copy_config->ukernel,
+    .ukernel = copy_config->ukernel,
   };
 
   // TODO(b/246969669): move strides calculation into normalization to simplify code here.
@@ -319,9 +325,18 @@ static enum xnn_status xnn_run_slice_nd(
   struct xnn_operator slice_op;
   memset(&slice_op, 0, sizeof(slice_op));
 
+  const struct xnn_unary_elementwise_config* copy_config = xnn_init_xx_copy_config();
+  if (copy_config == NULL) {
+    xnn_log_error(
+        "failed to create %s operator: unsupported hardware configuration",
+        xnn_operator_type_to_string(operator_type));
+    return xnn_status_unsupported_hardware;
+  }
+
   init_slice_nd(
     flags,
     operator_type,
+    copy_config,
     &slice_op);
 
   const enum xnn_status status = setup_slice_nd(

@@ -31,7 +31,6 @@ static enum xnn_status create_prelu_nc(
     uint32_t flags,
     uint32_t log2_weights_element_size,
     xnn_pack_prelu_w_fn pack_prelu_w,
-    uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
     const struct xnn_prelu_config* prelu_config,
     xnn_caches_t caches,
@@ -44,15 +43,6 @@ static enum xnn_status create_prelu_nc(
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(operator_type));
     return xnn_status_uninitialized;
-  }
-
-  status = xnn_status_unsupported_hardware;
-
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error(
-      "failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
   }
 
   status = xnn_status_invalid_parameter;
@@ -152,7 +142,7 @@ enum xnn_status xnn_create_prelu_nc_f16(
     negative_slope, flags,
     1 /* log2(sizeof(uint16_t)) */,
     pack_prelu_w,
-    XNN_INIT_FLAG_F16, xnn_operator_type_prelu_nc_f16,
+    xnn_operator_type_prelu_nc_f16,
     prelu_config,
     caches,
     prelu_op_out);
@@ -179,7 +169,7 @@ enum xnn_status xnn_create_prelu_nc_f32(
     negative_slope, flags,
     2 /* log2(sizeof(float)) */,
     (xnn_pack_prelu_w_fn) xnn_pack_f32_prelu_w,
-    XNN_INIT_FLAG_F32, xnn_operator_type_prelu_nc_f32,
+    xnn_operator_type_prelu_nc_f32,
     prelu_config,
     caches,
     prelu_op_out);
@@ -191,7 +181,6 @@ static enum xnn_status setup_prelu_nc(
     size_t batch_size,
     const float* input,
     float* output,
-    uint32_t datatype_init_flags,
     uint32_t log2_element_size,
     size_t num_threads)
 {
@@ -207,12 +196,6 @@ static enum xnn_status setup_prelu_nc(
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_uninitialized;
-  }
-
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error("failed to setup %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(expected_operator_type));
-    return xnn_status_unsupported_hardware;
   }
 
   if (batch_size == 0) {
@@ -271,7 +254,6 @@ enum xnn_status xnn_setup_prelu_nc_f16(
   return setup_prelu_nc(
     prelu_op, xnn_operator_type_prelu_nc_f16,
     batch_size, input, output,
-    XNN_INIT_FLAG_F16,
     1 /* log2(sizeof(uint16_t)) */,
     pthreadpool_get_threads_count(threadpool));
 }
@@ -286,7 +268,6 @@ enum xnn_status xnn_setup_prelu_nc_f32(
   return setup_prelu_nc(
     prelu_op, xnn_operator_type_prelu_nc_f32,
     batch_size, input, output,
-    XNN_INIT_FLAG_F32,
     2 /* log2(sizeof(float)) */,
     pthreadpool_get_threads_count(threadpool));
 }

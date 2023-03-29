@@ -44,7 +44,6 @@ static enum xnn_status create_binary_elementwise_nd(
     uint32_t flags,
     const void* params,
     size_t params_size,
-    uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
     const struct xnn_binary_elementwise_subconfig* binary_elementwise_subconfig,
     xnn_operator_t* binary_elementwise_op_out)
@@ -59,12 +58,6 @@ static enum xnn_status create_binary_elementwise_nd(
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(operator_type));
     return xnn_status_uninitialized;
-  }
-
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error("failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(operator_type));
-    return xnn_status_unsupported_hardware;
   }
 
   xnn_operator_t binary_elementwise_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
@@ -133,7 +126,6 @@ static enum xnn_status create_binary_elementwise_nd_f16(
     flags,
     &params,
     sizeof(params),
-    XNN_INIT_FLAG_F16,
     operator_type,
     &config->minmax,
     binary_elementwise_op_out);
@@ -174,16 +166,16 @@ static enum xnn_status create_binary_elementwise_nd_f32(
     return xnn_status_invalid_parameter;
   }
 
-  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
-  const struct xnn_binary_elementwise_subconfig* binary_elementwise_subconfig = &config->minmax;
-  if (linear_activation && config->linear.op_ukernel != NULL) {
-    binary_elementwise_subconfig = &config->linear;
-  }
-
   if (config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
       xnn_operator_type_to_string(operator_type));
     return xnn_status_unsupported_hardware;
+  }
+
+  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
+  const struct xnn_binary_elementwise_subconfig* binary_elementwise_subconfig = &config->minmax;
+  if (linear_activation && config->linear.op_ukernel != NULL) {
+    binary_elementwise_subconfig = &config->linear;
   }
 
   union xnn_f32_minmax_params params;
@@ -194,7 +186,6 @@ static enum xnn_status create_binary_elementwise_nd_f32(
     flags,
     &params,
     sizeof(params),
-    XNN_INIT_FLAG_F32,
     operator_type,
     binary_elementwise_subconfig,
     binary_elementwise_op_out);
@@ -279,7 +270,6 @@ enum xnn_status xnn_create_add_nd_qs8(
     flags,
     &params,
     sizeof(params),
-    XNN_INIT_FLAG_QS8,
     xnn_operator_type_add_nd_qs8,
     &qs8_vadd_config->minmax,
     add_op_out);
@@ -364,7 +354,6 @@ enum xnn_status xnn_create_add_nd_qu8(
     flags,
     &params,
     sizeof(params),
-    XNN_INIT_FLAG_QU8,
     xnn_operator_type_add_nd_qu8,
     &qu8_vadd_config->minmax,
     add_op_out);
@@ -444,7 +433,6 @@ enum xnn_status xnn_create_maximum_nd_f16(
     flags,
     NULL,
     0,
-    XNN_INIT_FLAG_F16,
     xnn_operator_type_maximum_nd_f16,
     &f16_vmax_config->minmax,
     maximum_op_out);
@@ -469,7 +457,6 @@ enum xnn_status xnn_create_maximum_nd_f32(
     flags,
     &params,
     sizeof(params),
-    XNN_INIT_FLAG_F32,
     xnn_operator_type_maximum_nd_f32,
     &f32_vmax_config->minmax,
     maximum_op_out);
@@ -488,7 +475,6 @@ enum xnn_status xnn_create_minimum_nd_f16(
     flags,
     NULL,
     0,
-    XNN_INIT_FLAG_F16,
     xnn_operator_type_minimum_nd_f16,
     &f16_vmin_config->minmax,
     minimum_op_out);
@@ -513,7 +499,6 @@ enum xnn_status xnn_create_minimum_nd_f32(
     flags,
     &params,
     sizeof(params),
-    XNN_INIT_FLAG_F32,
     xnn_operator_type_minimum_nd_f32,
     &f32_vmin_config->minmax,
     minimum_op_out);
@@ -621,7 +606,6 @@ enum xnn_status xnn_create_multiply_nd_qs8(
     flags,
     &params,
     sizeof(params),
-    XNN_INIT_FLAG_QS8,
     xnn_operator_type_multiply_nd_qs8,
     &qs8_vmul_config->minmax,
     multiply_op_out);
@@ -698,7 +682,6 @@ enum xnn_status xnn_create_multiply_nd_qu8(
     flags,
     &params,
     sizeof(params),
-    XNN_INIT_FLAG_QU8,
     xnn_operator_type_multiply_nd_qu8,
     &qu8_vmul_config->minmax,
     multiply_op_out);
@@ -718,7 +701,6 @@ enum xnn_status xnn_create_squared_difference_nd_f16(
     flags,
     NULL,
     0,
-    XNN_INIT_FLAG_F16,
     xnn_operator_type_squared_difference_nd_f16,
     &f16_vqsrdiff_config->minmax,
     squared_difference_op_out);
@@ -743,7 +725,6 @@ enum xnn_status xnn_create_squared_difference_nd_f32(
     flags,
     &params,
     sizeof(params),
-    XNN_INIT_FLAG_F32,
     xnn_operator_type_squared_difference_nd_f32,
     &f32_vsqrdiff_config->minmax,
     squared_difference_op_out);
@@ -858,7 +839,6 @@ enum xnn_status xnn_create_subtract_nd_qs8(
     flags,
     &params,
     sizeof(params),
-    XNN_INIT_FLAG_QS8,
     xnn_operator_type_subtract_nd_qs8,
     &qs8_vadd_config->minmax,
     subtract_op_out);
@@ -943,7 +923,6 @@ enum xnn_status xnn_create_subtract_nd_qu8(
     flags,
     &params,
     sizeof(params),
-    XNN_INIT_FLAG_QU8,
     xnn_operator_type_subtract_nd_qu8,
     &qu8_vadd_config->minmax,
     subtract_op_out);

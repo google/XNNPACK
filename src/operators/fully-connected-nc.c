@@ -44,7 +44,6 @@ static enum xnn_status create_fully_connected_nc(
     size_t params_size,
     const struct xnn_gemm_config* gemm_parameters,
     const struct gemm_fused_ukernels* gemm_ukernels,
-    uint32_t datatype_init_flags,
     enum xnn_operator_type operator_type,
     xnn_caches_t caches,
     xnn_operator_t* fully_connected_op_out)
@@ -54,15 +53,6 @@ static enum xnn_status create_fully_connected_nc(
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
-  status = xnn_status_unsupported_hardware;
-
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error(
-      "failed to create %s operator: operations on data type are not supported",
       xnn_operator_type_to_string(operator_type));
     goto error;
   }
@@ -195,7 +185,6 @@ static enum xnn_status setup_fully_connected_nc(
   size_t batch_size,
   const void* input,
   void* output,
-  uint32_t datatype_init_flags,
   uint32_t log2_input_element_size,
   uint32_t log2_filter_element_size,
   uint32_t bias_element_size,
@@ -367,7 +356,6 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     NULL /* packing params */, 0 /* packed weights padding byte */,
     &params, sizeof(params),
     gemm_config, &gemm_config->minmax,
-    XNN_INIT_FLAG_F16,
     xnn_operator_type_fully_connected_nc_f16,
     caches,
     fully_connected_op_out);
@@ -435,7 +423,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     NULL /* packing params */, 0 /* packed weights padding byte */,
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
-    XNN_INIT_FLAG_F32,
     xnn_operator_type_fully_connected_nc_f32,
     caches,
     fully_connected_op_out);
@@ -518,7 +505,6 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     &packing_params, 0 /* packed weights padding byte */,
     &params, sizeof(params),
     gemm_config, &gemm_config->minmax,
-    XNN_INIT_FLAG_QS8,
     xnn_operator_type_fully_connected_nc_qs8,
     caches,
     fully_connected_op_out);
@@ -604,7 +590,6 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     &packing_params, kernel_zero_point /* packed weights padding byte */,
     &params, sizeof(params),
     gemm_config, &gemm_config->minmax,
-    XNN_INIT_FLAG_QU8,
     xnn_operator_type_fully_connected_nc_qu8,
     caches,
     fully_connected_op_out);
@@ -621,7 +606,6 @@ enum xnn_status xnn_setup_fully_connected_nc_f16(
     fully_connected_op, xnn_operator_type_fully_connected_nc_f16,
     batch_size,
     input, output,
-    XNN_INIT_FLAG_F32,
     1 /* log2(sizeof(input element)) = log2(sizeof(uint16_t)) */,
     1 /* log2(sizeof(filter element)) = log2(sizeof(uint16_t)) */,
     sizeof(uint16_t) /* sizeof(bias element) */,
@@ -642,7 +626,6 @@ enum xnn_status xnn_setup_fully_connected_nc_f32(
     fully_connected_op, xnn_operator_type_fully_connected_nc_f32,
     batch_size,
     input, output,
-    XNN_INIT_FLAG_F32,
     2 /* log2(sizeof(input element)) = log2(sizeof(float)) */,
     2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
     sizeof(float) /* sizeof(bias element) */,
@@ -663,7 +646,6 @@ enum xnn_status xnn_setup_fully_connected_nc_qs8(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qs8,
     batch_size,
     input, output,
-    XNN_INIT_FLAG_QS8,
     0 /* log2(sizeof(input element)) = log2(sizeof(int8_t)) */,
     0 /* log2(sizeof(filter element)) = log2(sizeof(int8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,
@@ -684,7 +666,6 @@ enum xnn_status xnn_setup_fully_connected_nc_qu8(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qu8,
     batch_size,
     input, output,
-    XNN_INIT_FLAG_QU8,
     0 /* log2(sizeof(input element)) = log2(sizeof(uint8_t)) */,
     0 /* log2(sizeof(filter element)) = log2(sizeof(uint8_t)) */,
     sizeof(int32_t) /* sizeof(bias element) */,

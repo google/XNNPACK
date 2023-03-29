@@ -12,6 +12,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/config.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
 #include <xnnpack/node-type.h>
@@ -1225,13 +1226,19 @@ enum xnn_status xnn_subgraph_optimize(
     xnn_subgraph_fusion(subgraph);
   }
 
-  if ((flags & XNN_FLAG_FORCE_FP16_INFERENCE) && !(xnn_params.init_flags & XNN_INIT_FLAG_F16)) {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    xnn_log_error("failed to get hardware config");
+    return xnn_status_unsupported_hardware;
+  }
+
+  if ((flags & XNN_FLAG_FORCE_FP16_INFERENCE) && (!xnn_is_f16_compatible_config(hardware_config))) {
     xnn_log_error("failed to force FP16 inference: hardware supports neither native nor emulated FP16 operators");
     return xnn_status_unsupported_hardware;
   }
   #ifndef XNN_NO_F16_OPERATORS
     const bool try_native_fp16 =
-      (flags & XNN_FLAG_HINT_FP16_INFERENCE) && (xnn_params.init_flags & XNN_INIT_FLAG_F16_NATIVE);
+      (flags & XNN_FLAG_HINT_FP16_INFERENCE) && xnn_is_f16_compatible_config(hardware_config);
     const bool force_fp16 = (flags & XNN_FLAG_FORCE_FP16_INFERENCE);
     if (try_native_fp16 || force_fp16) {
       const bool fp16_rewrite_succeeded = xnn_subgraph_rewrite_for_fp16(subgraph);
@@ -1243,7 +1250,7 @@ enum xnn_status xnn_subgraph_optimize(
   #endif  // XNN_NO_F16_OPERATORS
 
   #if XNN_ENABLE_SPARSE
-    if ((flags & XNN_FLAG_HINT_SPARSE_INFERENCE) && (xnn_params.init_flags & XNN_INIT_FLAG_CHW_OPT)) {
+    if ((flags & XNN_FLAG_HINT_SPARSE_INFERENCE) && (xnn_is_f16_chw_compatible_config(hardware_config))) {
       xnn_subgraph_rewrite_for_nchw(subgraph);
     }
   #endif

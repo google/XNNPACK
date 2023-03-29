@@ -11,6 +11,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
+#include <xnnpack/config.h>
 #include <xnnpack/log.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/microparams-init.h>
@@ -21,12 +22,16 @@ static void init_constant_pad_nd(
     uint32_t padding_value,
     uint32_t flags,
     enum xnn_operator_type operator_type,
+    const struct xnn_xx_fill_config* fill_config,
+    const struct xnn_xx_pad_config* pad_config,
     xnn_operator_t constant_pad_op)
 {
   constant_pad_op->pad_value = padding_value;
 
   constant_pad_op->type = operator_type;
   constant_pad_op->flags = flags;
+  constant_pad_op->fill_config = fill_config;
+  constant_pad_op->pad_config = pad_config;
 
   constant_pad_op->state = xnn_run_state_invalid;
 }
@@ -57,7 +62,23 @@ static enum xnn_status create_constant_pad_nd(
     goto error;
   }
 
-  init_constant_pad_nd(padding_value, flags, operator_type, constant_pad_op);
+  status = xnn_status_unsupported_hardware;
+
+  const struct xnn_xx_fill_config* fill_config = xnn_init_xx_fill_config();
+  if (fill_config == NULL) {
+    xnn_log_error(
+      "failed to create fill operator: unsupported hardware configuration");
+    goto error;
+  }
+
+  const struct xnn_xx_pad_config* pad_config = xnn_init_xx_pad_config();
+  if (pad_config == NULL) {
+    xnn_log_error(
+      "failed to create pad operator: unsupported hardware configuration");
+    goto error;
+  }
+
+  init_constant_pad_nd(padding_value, flags, operator_type, fill_config, pad_config, constant_pad_op);
   *constant_pad_op_out = constant_pad_op;
 
   return xnn_status_success;
@@ -168,19 +189,8 @@ static enum xnn_status setup_constant_pad_nd(
     }
   }
 
-  const struct xnn_xx_fill_config* xx_fill_config = xnn_init_xx_fill_config();
-  if (xx_fill_config == NULL) {
-    xnn_log_error(
-      "failed to create fill operator: unsupported hardware configuration");
-    return xnn_status_unsupported_hardware;
-  }
-
-  const struct xnn_xx_pad_config* xx_pad_config = xnn_init_xx_pad_config();
-  if (xx_pad_config == NULL) {
-    xnn_log_error(
-      "failed to create pad operator: unsupported hardware configuration");
-    return xnn_status_unsupported_hardware;
-  }
+  const struct xnn_xx_fill_config* xx_fill_config = constant_pad_op->fill_config;
+  const struct xnn_xx_pad_config* xx_pad_config = constant_pad_op->pad_config;
 
   constant_pad_op->context.pad = (struct pad_context) {
     .input = input,
@@ -289,10 +299,26 @@ enum xnn_status run_constant_pad_nd(
   struct xnn_operator constant_pad_op;
   memset(&constant_pad_op, 0, sizeof(constant_pad_op));
 
+  const struct xnn_xx_fill_config* fill_config = xnn_init_xx_fill_config();
+  if (fill_config == NULL) {
+    xnn_log_error(
+      "failed to create fill operator: unsupported hardware configuration");
+    return xnn_status_unsupported_hardware;
+  }
+
+  const struct xnn_xx_pad_config* pad_config = xnn_init_xx_pad_config();
+  if (pad_config == NULL) {
+    xnn_log_error(
+      "failed to create pad operator: unsupported hardware configuration");
+    return xnn_status_unsupported_hardware;
+  }
+
   init_constant_pad_nd(
       padding_value,
       flags,
       operator_type,
+      fill_config,
+      pad_config,
       &constant_pad_op);
 
   const enum xnn_status status = setup_constant_pad_nd(

@@ -21,7 +21,6 @@
 #include <xnnpack/operator-type.h>
 #include <xnnpack/log.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/config.h>
 
 
 enum xnn_status xnn_create_softmax_nc_qu8(
@@ -201,9 +200,9 @@ static enum xnn_status create_softmax_nc_floating_point(
     size_t input_stride,
     size_t output_stride,
     uint32_t flags,
-    uint32_t datatype_init_flags,
     const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config,
     const struct xnn_rmax_config* rmax_config,
+    const struct xnn_binary_elementwise_config* vmul_config,
     enum xnn_operator_type operator_type,
     xnn_operator_t* softmax_op_out)
 {
@@ -212,14 +211,6 @@ static enum xnn_status create_softmax_nc_floating_point(
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
-  status = xnn_status_unsupported_hardware;
-
-  if ((xnn_params.init_flags & datatype_init_flags) != datatype_init_flags) {
-    xnn_log_error("failed to create %s operator: operations on data type are not supported",
       xnn_operator_type_to_string(operator_type));
     goto error;
   }
@@ -267,6 +258,7 @@ static enum xnn_status create_softmax_nc_floating_point(
   softmax_op->flags = flags;
   softmax_op->raddstoreexpminusmax_config = raddstoreexpminusmax_config;
   softmax_op->rmax_config = rmax_config;
+  softmax_op->vmul_config = vmul_config;
 
   softmax_op->state = xnn_run_state_invalid;
 
@@ -299,12 +291,21 @@ enum xnn_status xnn_create_softmax_nc_f16(
                   xnn_operator_type_to_string(xnn_operator_type_softmax_nc_f16));
     return xnn_status_unsupported_hardware;
   }
+
+  const struct xnn_binary_elementwise_config* vmul_config = xnn_init_f16_vmul_config();
+  if (vmul_config == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
   return create_softmax_nc_floating_point(
     channels, input_stride, output_stride,
     flags,
-    XNN_INIT_FLAG_F16,
     raddstoreexpminusmax_config,
     rmax_config,
+    vmul_config,
     xnn_operator_type_softmax_nc_f16,
     softmax_op_out);
 }
@@ -318,15 +319,35 @@ enum xnn_status xnn_create_softmax_nc_f32(
 {
   const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config =
     xnn_init_f32_raddstoreexpminusmax_config();
-  assert(raddstoreexpminusmax_config != NULL);
+  if (raddstoreexpminusmax_config == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_softmax_nc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
   const struct xnn_rmax_config* rmax_config = xnn_init_f32_rmax_config();
-  assert(rmax_config != NULL);
+  if (rmax_config == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_softmax_nc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
+  const struct xnn_binary_elementwise_config* vmul_config = xnn_init_f32_vmul_config();
+  if (vmul_config == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
   return create_softmax_nc_floating_point(
     channels, input_stride, output_stride,
     flags,
-    XNN_INIT_FLAG_F32,
     raddstoreexpminusmax_config,
     rmax_config,
+    vmul_config,
     xnn_operator_type_softmax_nc_f32,
     softmax_op_out);
 }
@@ -415,10 +436,7 @@ enum xnn_status xnn_setup_softmax_nc_f16(
   if (softmax_op->raddstoreexpminusmax_config->init.f16 != NULL) {
     softmax_op->raddstoreexpminusmax_config->init.f16(&expminus_params);
   }
-  const struct xnn_binary_elementwise_config* f16_vmul_config = xnn_init_f16_vmul_config();
-  if (f16_vmul_config == NULL) {
-    return xnn_status_uninitialized;
-  }
+  const struct xnn_binary_elementwise_config* f16_vmul_config = softmax_op->vmul_config;
 
   union xnn_f16_minmax_params minmax_params;
   if (f16_vmul_config->init.f16_minmax != NULL) {
@@ -448,10 +466,7 @@ enum xnn_status xnn_setup_softmax_nc_f32(
     float* output,
     pthreadpool_t threadpool)
 {
-  const struct xnn_binary_elementwise_config* f32_vmul_config = xnn_init_f32_vmul_config();
-  if (f32_vmul_config == NULL) {
-    return xnn_status_uninitialized;
-  }
+  const struct xnn_binary_elementwise_config* f32_vmul_config = softmax_op->vmul_config;
 
   union xnn_f32_expminus_params expminus_params;
   if (softmax_op->raddstoreexpminusmax_config->init.f32 != NULL) {

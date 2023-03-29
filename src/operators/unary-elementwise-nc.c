@@ -212,12 +212,6 @@ enum xnn_status xnn_create_clamp_nc_f16(
     return xnn_status_uninitialized;
   }
 
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_F16) != XNN_INIT_FLAG_F16) {
-    xnn_log_error("failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(xnn_operator_type_clamp_nc_f16));
-    return xnn_status_unsupported_hardware;
-  }
-
   if (isnan(output_min)) {
     xnn_log_error(
       "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
@@ -1355,12 +1349,6 @@ enum xnn_status xnn_create_sigmoid_nc_f16(
     uint32_t flags,
     xnn_operator_t* sigmoid_op_out)
 {
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_F16) != XNN_INIT_FLAG_F16) {
-    xnn_log_error("failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(xnn_operator_type_sigmoid_nc_f16));
-    return xnn_status_unsupported_hardware;
-  }
-
   const struct xnn_unary_elementwise_config* f16_sigmoid_config = xnn_init_f16_sigmoid_config();
   if (f16_sigmoid_config == NULL) {
     xnn_log_error(
@@ -1495,12 +1483,6 @@ enum xnn_status xnn_create_tanh_nc_f16(
     uint32_t flags,
     xnn_operator_t* tanh_op_out)
 {
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_F16) != XNN_INIT_FLAG_F16) {
-    xnn_log_error("failed to create %s operator: operations on data type are not supported",
-      xnn_operator_type_to_string(xnn_operator_type_tanh_nc_f16));
-    return xnn_status_unsupported_hardware;
-  }
-
   const struct xnn_unary_elementwise_config* f16_tanh_config = xnn_init_f16_tanh_config();
   if (f16_tanh_config == NULL) {
     xnn_log_error(

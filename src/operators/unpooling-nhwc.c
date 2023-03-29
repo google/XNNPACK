@@ -98,7 +98,12 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
   }
 
   const struct xnn_unpool_config* unpool_config = xnn_init_x32_unpool_config();
-  assert(unpool_config != NULL);
+  if (unpool_config == NULL) {
+    xnn_log_error(
+      "failed to create %s operator: unsupported hardware configuration",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
+    return xnn_status_unsupported_hardware;
+  }
 
   unpooling_op->padding_top = input_padding_top;
   unpooling_op->padding_right = input_padding_right;
