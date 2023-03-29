@@ -47,14 +47,6 @@
 
 #define XNN_MR_TO_INDEX(MR) (MR-1)
 
-#ifndef XNN_ENABLE_ASSEMBLY
-  #error "XNN_ENABLE_ASSEMBLY is not defined"
-#endif
-
-#ifndef XNN_ENABLE_GEMM_M_SPECIALIZATION
-  #error "XNN_ENABLE_GEMM_M_SPECIALIZATION is not defined"
-#endif
-
 static const struct xnn_allocator* volatile init_allocator = NULL;
 
 static void init(void) {
