@@ -114,7 +114,7 @@ class PackWMicrokernelTester {
     std::fill(padded_weights.begin(), padded_weights.end(), 0);
     for (size_t gid = 0; gid < g(); gid++) {
       for (size_t i = 0; i < n(); i++) {
-        for (size_t j = 0; j < packed_k(); j++) {
+        for (size_t j = 0; j < k(); j++) {
           padded_weights[(gid * n() + i) * packed_k() + j] = weights[(gid * n() + i) * k() + j];
         }
       }
@@ -162,7 +162,7 @@ class PackWMicrokernelTester {
     std::fill(padded_weights.begin(), padded_weights.end(), 0);
     for (size_t gid = 0; gid < g(); gid++) {
       for (size_t i = 0; i < n(); i++) {
-        for (size_t j = 0; j < packed_k(); j++) {
+        for (size_t j = 0; j < k(); j++) {
           padded_weights[(gid * n() + i) * packed_k() + j] = weights[(gid * n() + i) * k() + j];
         }
       }
