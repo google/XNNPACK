@@ -99,28 +99,46 @@ class PackWMicrokernelTester {
 
   void Test(xnn_x16_packw_gemm_goi_ukernel_fn packw) const {
     std::vector<uint16_t> weights(g() * n() * k());
+    std::vector<uint16_t> padded_weights(g() * n() * packed_k());
     std::vector<uint16_t> bias(g() * n());
     std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(g() * (packed_n() * packed_k() + packed_n()));
     std::vector<uint16_t> packed_w_ref(g() * (packed_n() * packed_k() + packed_n()));
 
-    std::iota(weights.begin(), weights.end(), 0);
+    const uint16_t pad_value = std::max(sr(), kr()) == 1 ? UINT16_C(0xDEAD) : 0;
+    std::iota(weights.begin(), weights.end(), UINT16_C(0x0001));
     std::iota(bias.begin(), bias.end(), UINT16_C(0x8000));
     std::fill(packed_w.begin(), packed_w.end(), UINT16_C(0xBEEF));
-    std::fill(packed_w_ref.begin(), packed_w_ref.end(), UINT16_C(0xDEAD));
+    std::fill(packed_w_ref.begin(), packed_w_ref.end(), pad_value);
+
+    // Mandate zero-padding of weights to packed_k() in K dimension.
+    std::fill(padded_weights.begin(), padded_weights.end(), 0);
+    for (size_t gid = 0; gid < g(); gid++) {
+      for (size_t i = 0; i < n(); i++) {
+        for (size_t j = 0; j < packed_k(); j++) {
+          padded_weights[(gid * n() + i) * packed_k() + j] = weights[(gid * n() + i) * k() + j];
+        }
+      }
+    }
 
     const uint16_t* bias_data = nullbias() ? nullptr : bias.data();
 
     // Compute reference results.
-    xnn_pack_f16_gemm_goi_w(g(), n(), k(), nr(), kr(), sr(),
-      reinterpret_cast<const uint16_t *>(weights.data()), reinterpret_cast<const uint16_t *>(bias_data), reinterpret_cast<uint16_t *>(packed_w_ref.data()), 0, nullptr);
+    xnn_pack_f16_gemm_goi_w(g(), n(), packed_k(), nr(), kr(), sr(),
+      reinterpret_cast<const uint16_t*>(padded_weights.data()),
+      reinterpret_cast<const uint16_t*>(bias_data),
+      reinterpret_cast<uint16_t*>(packed_w_ref.data()),
+      /*extra_bytes=*/0, /*params=*/nullptr);
 
     // Call optimized micro-kernel.
-    packw(g(), n(), k(), nr(), kr(), sr(), weights.data(), bias_data, packed_w.data(), 0, nullptr);
+    packw(g(), n(), k(), nr(), kr(), sr(),
+      weights.data(), bias_data, packed_w.data(),
+      /*extra_bytes=*/0, /*params=*/nullptr);
 
     // Verify results.
     for (size_t i = 0; i < packed_w.size(); i++) {
-      if (packed_w_ref[i] != UINT16_C(0xDEAD)) {  // Allow pad to differ
-        EXPECT_EQ(packed_w[i], packed_w_ref[i])
+      // Ignore padding in N dimension.
+      if (packed_w_ref[i] != pad_value) {
+        ASSERT_EQ(packed_w[i], packed_w_ref[i])
             << "at position " << i << " / " << packed_w.size()
             << ", n " << n() << ", k " << k();
       }
@@ -129,28 +147,46 @@ class PackWMicrokernelTester {
 
   void Test(xnn_x32_packw_gemm_goi_ukernel_fn packw) const {
     std::vector<uint32_t> weights(g() * n() * k());
+    std::vector<uint32_t> padded_weights(g() * n() * packed_k());
     std::vector<uint32_t> bias(g() * n());
     std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> packed_w(g() * (packed_n() * packed_k() + packed_n()));
     std::vector<uint32_t> packed_w_ref(g() * (packed_n() * packed_k() + packed_n()));
 
-    std::iota(weights.begin(), weights.end(), 0);
+    const uint32_t pad_value = UINT32_C(0xDEADBEEF);
+    std::iota(weights.begin(), weights.end(), UINT32_C(0x00000001));
     std::iota(bias.begin(), bias.end(), UINT32_C(0x80000000));
     std::fill(packed_w.begin(), packed_w.end(), UINT32_C(0x12345678));
-    std::fill(packed_w_ref.begin(), packed_w_ref.end(), UINT32_C(0xDEADBEEF));
+    std::fill(packed_w_ref.begin(), packed_w_ref.end(), pad_value);
+
+    // Mandate zero-padding of weights to packed_k() in K dimension.
+    std::fill(padded_weights.begin(), padded_weights.end(), 0);
+    for (size_t gid = 0; gid < g(); gid++) {
+      for (size_t i = 0; i < n(); i++) {
+        for (size_t j = 0; j < packed_k(); j++) {
+          padded_weights[(gid * n() + i) * packed_k() + j] = weights[(gid * n() + i) * k() + j];
+        }
+      }
+    }
 
     const uint32_t* bias_data = nullbias() ? nullptr : bias.data();
 
     // Compute reference results.
-    xnn_pack_f32_gemm_goi_w(g(), n(), k(), nr(), kr(), sr(),
-      reinterpret_cast<const float *>(weights.data()), reinterpret_cast<const float *>(bias_data), reinterpret_cast<float *>(packed_w_ref.data()), 0, nullptr);
+    xnn_pack_f32_gemm_goi_w(g(), n(), packed_k(), nr(), kr(), sr(),
+      reinterpret_cast<const float*>(padded_weights.data()),
+      reinterpret_cast<const float*>(bias_data),
+      reinterpret_cast<float*>(packed_w_ref.data()),
+      /*extra_bytes=*/0, /*params=*/nullptr);
 
     // Call optimized micro-kernel.
-    packw(g(), n(), k(), nr(), kr(), sr(), weights.data(), bias_data, packed_w.data(), 0, nullptr);
+    packw(g(), n(), k(), nr(), kr(), sr(),
+      weights.data(), bias_data, packed_w.data(),
+      /*extra_bytes=*/0, /*params=*/nullptr);
 
     // Verify results.
     for (size_t i = 0; i < packed_w.size(); i++) {
-      if (packed_w_ref[i] != UINT32_C(0xDEADBEEF)) {  // Allow pad to differ
-        EXPECT_EQ(packed_w[i], packed_w_ref[i])
+      // Ignore padding in N dimension.
+      if (packed_w_ref[i] != pad_value) {
+        ASSERT_EQ(packed_w[i], packed_w_ref[i])
             << "at position " << i << " / " << packed_w.size()
             << ", n " << n() << ", k " << k();
       }
