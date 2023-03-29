@@ -9124,8 +9124,8 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -9488,17 +9488,6 @@ xnnpack_unit_test(
         "test/zip-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "x8_packw_test",
-    srcs = [
-        "test/packw-microkernel-tester.h",
-        "test/x8-packw.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
-    ],
 )
 
 xnnpack_unit_test(

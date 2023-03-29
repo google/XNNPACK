@@ -165,7 +165,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_x${KUNROLL}(
             $for N in range(0, NR, 4):
               $if N != 0:
                 wasm_v128_store(packed_weights + ${N}, v${ABC[N:N+4]}x0);
-            packed_weights += ${NR*2};
+            packed_weights += ${NR};
             break;
           }
           default:
@@ -305,7 +305,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_x${KUNROLL}(
             $for N in range(0, NR, 4):
               $if N != 0:
                 wasm_v128_store(packed_weights + ${N}, v${ABC[N:N+4]}x0);
-            packed_weights += ${NR*2};
+            packed_weights += ${NR};
             break;
           }
           default:

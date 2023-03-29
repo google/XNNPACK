@@ -238,7 +238,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_x4(
 
             wasm_v128_store(packed_weights, v0123x0);
             wasm_v128_store(packed_weights + 4, v4567x0);
-            packed_weights += 16;
+            packed_weights += 8;
             break;
           }
           default:
@@ -451,7 +451,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_x4(
 
             wasm_v128_store(packed_weights, v0123x0);
             wasm_v128_store(packed_weights + 4, v4567x0);
-            packed_weights += 16;
+            packed_weights += 8;
             break;
           }
           default:

@@ -43,59 +43,6 @@ def split_ukernel_name(name):
 
 
 PACKW_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, n_eq_${NR}) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  PackWMicrokernelTester()
-    .n(${NR})
-    .k(${K_UNROLL})
-    .nr(${NR})
-    .kr(${KR})
-    .sr(${SR})
-    .Test(${", ".join(TEST_ARGS)});
-}
-
-$if NR > 1:
-  TEST(${TEST_NAME}, n_div_${NR}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    PackWMicrokernelTester()
-      .n(${NR*2})
-      .k(${K_UNROLL})
-      .nr(${NR})
-      .kr(${KR})
-      .sr(${SR})
-      .Test(${", ".join(TEST_ARGS)});
-  }
-
-  TEST(${TEST_NAME}, n_lt_${NR}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t n = 1; n < ${NR}; n++) {
-      PackWMicrokernelTester()
-        .n(n)
-        .k(${K_UNROLL})
-        .nr(${NR})
-        .kr(${KR})
-        .sr(${SR})
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-TEST(${TEST_NAME}, n_gt_${NR}) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t n = ${NR+1}; n < ${10 if NR == 1 else NR*2}; n++) {
-    PackWMicrokernelTester()
-      .n(n)
-      .k(${K_UNROLL})
-      .nr(${NR})
-      .kr(${KR})
-      .sr(${SR})
-      .Test(${", ".join(TEST_ARGS)});
-  }
-}
-
 TEST(${TEST_NAME}, k_eq_${K_UNROLL}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
@@ -138,7 +85,7 @@ $if K_UNROLL > 1:
 TEST(${TEST_NAME}, k_gt_${K_UNROLL}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t k = ${K_UNROLL+1}; k < ${10 if K_UNROLL == 1 else K_UNROLL*2}; k++) {
+  for (size_t k = ${K_UNROLL+1}; k < ${4 if K_UNROLL == 1 else K_UNROLL*2}; k++) {
     PackWMicrokernelTester()
       .n(${NR})
       .k(k)
@@ -149,31 +96,103 @@ TEST(${TEST_NAME}, k_gt_${K_UNROLL}) {
   }
 }
 
-TEST(${TEST_NAME}, g_eq_2) {
+TEST(${TEST_NAME}, n_eq_${NR}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  PackWMicrokernelTester()
-    .g(2)
-    .n(${NR})
-    .k(${K_UNROLL})
-    .nr(${NR})
-    .kr(${KR})
-    .sr(${SR})
-    .Test(${", ".join(TEST_ARGS)});
+  for (size_t k = 1; k < ${4 if K_UNROLL == 1 else K_UNROLL*2}; k++) {
+    PackWMicrokernelTester()
+      .n(${NR})
+      .k(k)
+      .nr(${NR})
+      .kr(${KR})
+      .sr(${SR})
+      .Test(${", ".join(TEST_ARGS)});
+  }
+}
+
+$if NR > 1:
+  TEST(${TEST_NAME}, n_div_${NR}) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t k = 1; k < ${4 if K_UNROLL == 1 else K_UNROLL*2}; k++) {
+      PackWMicrokernelTester()
+        .n(${NR*2})
+        .k(k)
+        .nr(${NR})
+        .kr(${KR})
+        .sr(${SR})
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+
+  TEST(${TEST_NAME}, n_lt_${NR}) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t k = 1; k < ${4 if K_UNROLL == 1 else K_UNROLL*2}; k++) {
+      for (size_t n = 1; n < ${NR}; n++) {
+        PackWMicrokernelTester()
+          .n(n)
+          .k(k)
+          .nr(${NR})
+          .kr(${KR})
+          .sr(${SR})
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
+TEST(${TEST_NAME}, n_gt_${NR}) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t k = 1; k < ${4 if K_UNROLL == 1 else K_UNROLL*2}; k++) {
+    for (size_t n = ${NR+1}; n < ${4 if NR == 1 else NR*2}; n++) {
+      PackWMicrokernelTester()
+        .n(n)
+        .k(k)
+        .nr(${NR})
+        .kr(${KR})
+        .sr(${SR})
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+}
+
+TEST(${TEST_NAME}, g_gt_1) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  for (size_t g = 2; g <= 3; g++) {
+    for (size_t k = 1; k < ${4 if K_UNROLL == 1 else K_UNROLL*2}; k++) {
+      for (size_t n = ${NR+1}; n < ${4 if NR == 1 else NR*2}; n++) {
+        PackWMicrokernelTester()
+          .g(2)
+          .n(n)
+          .k(k)
+          .nr(${NR})
+          .kr(${KR})
+          .sr(${SR})
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
 }
 
 TEST(${TEST_NAME}, null_bias) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t n = 1; n < ${10 if NR == 1 else NR*2}; n++) {
-    PackWMicrokernelTester()
-      .nullbias(true)
-      .n(n)
-      .k(${K_UNROLL})
-      .nr(${NR})
-      .kr(${KR})
-      .sr(${SR})
-      .Test(${", ".join(TEST_ARGS)});
+  for (size_t g = 2; g <= 3; g++) {
+    for (size_t k = 1; k < ${4 if K_UNROLL == 1 else K_UNROLL*2}; k++) {
+      for (size_t n = ${NR+1}; n < ${4 if NR == 1 else NR*2}; n++) {
+        PackWMicrokernelTester()
+          .nullbias(true)
+          .g(2)
+          .n(n)
+          .k(k)
+          .nr(${NR})
+          .kr(${KR})
+          .sr(${SR})
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
   }
 }
 
