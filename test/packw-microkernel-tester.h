@@ -118,10 +118,11 @@ class PackWMicrokernelTester {
     packw(g(), n(), k(), nr(), kr(), sr(), weights.data(), bias_data, packed_w.data(), 0, nullptr);
 
     // Verify results.
-    for (size_t i = 0; i < g() * (packed_n() * packed_k() + packed_n()); i++) {
-      if (packed_w_ref[i] !=  UINT16_C(0xDEAD)) {  // Allow pad to differ
+    for (size_t i = 0; i < packed_w.size(); i++) {
+      if (packed_w_ref[i] != UINT16_C(0xDEAD)) {  // Allow pad to differ
         EXPECT_EQ(packed_w[i], packed_w_ref[i])
-            << "at n " << i << " of " << (g() * (packed_n() * packed_k() + packed_n()));
+            << "at position " << i << " / " << packed_w.size()
+            << ", n " << n() << ", k " << k();
       }
     }
   }
@@ -147,10 +148,11 @@ class PackWMicrokernelTester {
     packw(g(), n(), k(), nr(), kr(), sr(), weights.data(), bias_data, packed_w.data(), 0, nullptr);
 
     // Verify results.
-    for (size_t i = 0; i < g() * (packed_n() * packed_k() + packed_n()); i++) {
-      if (packed_w_ref[i] !=  UINT32_C(0xDEADBEEF)) {  // Allow pad to differ
+    for (size_t i = 0; i < packed_w.size(); i++) {
+      if (packed_w_ref[i] != UINT32_C(0xDEADBEEF)) {  // Allow pad to differ
         EXPECT_EQ(packed_w[i], packed_w_ref[i])
-            << "at n " << i << " of " << (g() * (packed_n() * packed_k() + packed_n()));
+            << "at position " << i << " / " << packed_w.size()
+            << ", n " << n() << ", k " << k();
       }
     }
   }
