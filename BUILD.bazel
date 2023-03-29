@@ -4775,11 +4775,11 @@ xnnpack_cc_library(
         ":xnn_log_level_explicit_debug": [],
         "//conditions:default": [":log_level_default"],
     }) + [
-        ":operator_type",
+        ":common",
         ":microkernel_type",
         ":node_type",
+        ":operator_type",
         ":xnnpack_h",
-        ":common",
     ],
 )
 
@@ -5616,17 +5616,17 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":enable_assembly",
+        ":enable_dwconv_multipass",
         ":enable_gemm_m_specialization",
         ":enable_jit",
-        ":enable_dwconv_multipass",
         ":hardware_config",
         ":logging",
         ":math",
         ":microkernels_h",
-        ":operators",
-        ":normalization",
         ":microparams",
         ":microparams_init",
+        ":normalization",
+        ":operators",
         ":params",
         ":prod_microkernels",
         ":subgraph",
@@ -5659,16 +5659,16 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":enable_assembly",
-        ":enable_gemm_m_specialization",
         ":enable_dwconv_multipass",
+        ":enable_gemm_m_specialization",
         ":enable_jit",
         ":hardware_config_test_mode",
         ":logging",
         ":math",
         ":microkernels_h",
-        ":operators_test_mode",
         ":microparams",
         ":microparams_init",
+        ":operators_test_mode",
         ":params",
         ":subgraph_test_mode",
         ":test_microkernels",
@@ -5713,18 +5713,18 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
+        ":amalgam_microkernels",
         ":common",
         ":enable_assembly",
+        ":enable_dwconv_multipass",
         ":enable_gemm_m_specialization",
         ":enable_jit",
         ":logging",
         ":math",
-        ":enable_dwconv_multipass",
         ":microkernels_h",
-        ":operators",
-        ":amalgam_microkernels",
         ":microparams",
         ":microparams_init",
+        ":operators",
         ":params",
         ":subgraph",
     ] + select({
@@ -5766,15 +5766,15 @@ xnnpack_cc_library(
         ":allocator",
         ":common",
         ":enable_assembly",
-        ":enable_gemm_m_specialization",
         ":enable_dwconv_multipass",
+        ":enable_gemm_m_specialization",
         ":enable_jit",
         ":logging",
         ":math",
         ":microkernels_h",
-        ":operators",
         ":microparams",
         ":microparams_init",
+        ":operators",
         ":params",
         ":prod_microkernels",
     ] + select({
@@ -5806,9 +5806,9 @@ xnnpack_benchmark(
         "bench/qs8-dwconv.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":operators",
         ":indirection",
         ":microkernel_utils",
+        ":operators",
         ":packing",
     ],
 )
@@ -5995,8 +5995,8 @@ xnnpack_benchmark(
         "bench/f16-f32acc-igemm.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":operators",
         ":indirection",
+        ":operators",
         ":packing",
     ],
 )
@@ -6008,8 +6008,8 @@ xnnpack_benchmark(
         "bench/f16-igemm.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":operators",
         ":indirection",
+        ":operators",
         ":packing",
     ],
 )
@@ -6148,9 +6148,9 @@ xnnpack_benchmark(
         "bench/f16-dwconv.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":operators",
         ":indirection",
         ":microkernel_utils",
+        ":operators",
         ":packing",
     ],
 )
@@ -6162,9 +6162,9 @@ xnnpack_benchmark(
         "bench/f32-dwconv.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":operators",
-        ":microkernel_utils",
         ":indirection",
+        ":microkernel_utils",
+        ":operators",
         ":packing",
     ],
 )
@@ -6176,8 +6176,8 @@ xnnpack_benchmark(
         "bench/f32-dwconv2d-chw.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":operators",
         ":indirection",
+        ":operators",
         ":packing",
     ],
 )
@@ -6189,8 +6189,8 @@ xnnpack_benchmark(
         "bench/f16-dwconv2d-chw.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":operators",
         ":indirection",
+        ":operators",
         ":packing",
     ],
 )
@@ -6440,8 +6440,8 @@ xnnpack_benchmark(
         "bench/f32-im2col-gemm.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
-        ":math",
         ":im2col",
+        ":math",
         ":packing",
     ],
 )
@@ -7496,8 +7496,8 @@ xnnpack_unit_test(
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -7509,8 +7509,8 @@ xnnpack_unit_test(
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -8046,8 +8046,8 @@ xnnpack_unit_test(
         "test/f32-dwconv-unipass.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -8059,8 +8059,8 @@ xnnpack_unit_test(
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -8072,8 +8072,8 @@ xnnpack_unit_test(
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -8085,8 +8085,8 @@ xnnpack_unit_test(
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -8790,8 +8790,8 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -8804,8 +8804,8 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -8840,8 +8840,8 @@ xnnpack_unit_test(
         "test/qc8-igemm-jit-fp32.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
-        ":jit_test_mode",
         ":gemm_microkernel_tester",
+        ":jit_test_mode",
     ],
 )
 
@@ -8867,8 +8867,8 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -8880,8 +8880,8 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -8893,8 +8893,8 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -8905,8 +8905,8 @@ xnnpack_unit_test(
         "test/qs8-dwconv-minmax-unipass-rndnu.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -9123,8 +9123,8 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -9149,8 +9149,8 @@ xnnpack_unit_test(
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -9161,8 +9161,8 @@ xnnpack_unit_test(
         "test/qu8-dwconv-minmax-unipass-rndnu.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing",
         ":microkernel_utils",
+        ":packing",
     ],
 )
 
@@ -11247,9 +11247,9 @@ xnnpack_unit_test(
         "test/packing.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
-        ":packing_test_mode",
-        ":operator_utils",
         ":microkernel_utils",
+        ":operator_utils",
+        ":packing_test_mode",
     ],
 )
 
