@@ -32,3 +32,5 @@
 - name: xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_x4
 - name: xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x4
 
+# WAsmSIMD
+- name: xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1

@@ -175,12 +175,18 @@ static void x32_packw(benchmark::State& state,
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  static void x32_packw_x2c4__wasmsimd_x1(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1,
+      /*nr=*/2, /*kr=*/4, /*sr=*/1);
+  }
   static void x32_packw_x8__wasmsimd_x4(benchmark::State& state, const char* net) {
     x32_packw(state,
       xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_x4,
       /*nr=*/8, /*kr=*/1, /*sr=*/1);
   }
 
+  BENCHMARK_BGEMM(x32_packw_x2c4__wasmsimd_x1)
   BENCHMARK_BGEMM(x32_packw_x8__wasmsimd_x4)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 

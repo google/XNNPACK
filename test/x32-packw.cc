@@ -2409,3 +2409,96 @@ TEST(X32_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, null_bias) {
     }
   }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  TEST(X32_PACKW_GEMM_GOI_X2C4__WASMSIMD_X1, n_eq_2) {
+    PackWMicrokernelTester()
+      .n(2)
+      .k(1)
+      .nr(2)
+      .kr(4)
+      .sr(1)
+      .Test(xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1);
+  }
+
+  TEST(X32_PACKW_GEMM_GOI_X2C4__WASMSIMD_X1, n_div_2) {
+    PackWMicrokernelTester()
+      .n(4)
+      .k(1)
+      .nr(2)
+      .kr(4)
+      .sr(1)
+      .Test(xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1);
+  }
+
+  TEST(X32_PACKW_GEMM_GOI_X2C4__WASMSIMD_X1, n_lt_2) {
+    for (size_t n = 1; n < 2; n++) {
+      PackWMicrokernelTester()
+        .n(n)
+        .k(1)
+        .nr(2)
+        .kr(4)
+        .sr(1)
+        .Test(xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1);
+    }
+  }
+
+  TEST(X32_PACKW_GEMM_GOI_X2C4__WASMSIMD_X1, n_gt_2) {
+    for (size_t n = 3; n < 4; n++) {
+      PackWMicrokernelTester()
+        .n(n)
+        .k(1)
+        .nr(2)
+        .kr(4)
+        .sr(1)
+        .Test(xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1);
+    }
+  }
+
+  TEST(X32_PACKW_GEMM_GOI_X2C4__WASMSIMD_X1, k_eq_1) {
+    PackWMicrokernelTester()
+      .n(2)
+      .k(1)
+      .nr(2)
+      .kr(4)
+      .sr(1)
+      .Test(xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1);
+  }
+
+  TEST(X32_PACKW_GEMM_GOI_X2C4__WASMSIMD_X1, k_gt_1) {
+    for (size_t k = 2; k < 10; k++) {
+      PackWMicrokernelTester()
+        .n(2)
+        .k(k)
+        .nr(2)
+        .kr(4)
+        .sr(1)
+        .Test(xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1);
+    }
+  }
+
+  TEST(X32_PACKW_GEMM_GOI_X2C4__WASMSIMD_X1, g_eq_2) {
+    PackWMicrokernelTester()
+      .g(2)
+      .n(2)
+      .k(1)
+      .nr(2)
+      .kr(4)
+      .sr(1)
+      .Test(xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1);
+  }
+
+  TEST(X32_PACKW_GEMM_GOI_X2C4__WASMSIMD_X1, null_bias) {
+    for (size_t n = 1; n < 4; n++) {
+      PackWMicrokernelTester()
+        .nullbias(true)
+        .n(n)
+        .k(1)
+        .nr(2)
+        .kr(4)
+        .sr(1)
+        .Test(xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1);
+    }
+  }
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

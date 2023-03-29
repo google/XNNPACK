@@ -8243,6 +8243,7 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/x16-transposec/gen/x16-transposec-8x8-reuse-mov-wasmsimd.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-multi-wasmsimd.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-switch-wasmsimd.c
+  src/x32-packw/gen/x32-packw-x2c4-wasmsimd-x1.c
   src/x32-packw/gen/x32-packw-x8-wasmsimd-x4.c
   src/x32-packx/x32-packx-x4-wasmsimd.c
   src/x32-transposec/gen/x32-transposec-4x4-multi-mov-wasmsimd.c
