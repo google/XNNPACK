@@ -6,7 +6,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -25,18 +24,12 @@
   #include <intrin.h>
 #endif
 
-#ifndef __EMSCRIPTEN__
-  #include <cpuinfo.h>
-#endif
-
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
-#include <xnnpack/avgpool.h>
 #include <xnnpack/common.h>
 #include <xnnpack/config.h>
 #include <xnnpack/log.h>
 #include <xnnpack/params.h>
-#include <xnnpack/microparams-init.h>
 
 
 #if XNN_PLATFORM_WINDOWS
