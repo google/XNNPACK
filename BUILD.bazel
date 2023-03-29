@@ -2447,6 +2447,8 @@ xnnpack_cc_library(
         ":amalgam_microkernels",
         ":common",
         ":enable_assembly",
+        ":enable_dwconv_multipass",
+        ":enable_gemm_m_specialization",
         ":enable_jit",
         ":hardware_config",
         ":logging",
@@ -2479,6 +2481,8 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":enable_assembly",
+        ":enable_dwconv_multipass",
+        ":enable_gemm_m_specialization",
         ":enable_jit",
         ":hardware_config_test_mode",
         ":logging",
