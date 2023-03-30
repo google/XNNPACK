@@ -585,6 +585,7 @@ struct xnn_gemm_config {
     xnn_init_qs8_conv_minmax_params_fn qs8;
     xnn_init_qu8_conv_minmax_params_fn qu8;
   } init;
+  xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi;
   uint8_t mr;
   uint8_t nr;
   uint8_t log2_kr;

@@ -281,7 +281,7 @@ static enum xnn_status create_gemm_or_igemm(
     uint32_t log2_input_element_size,
     uint32_t log2_filter_element_size,
     uint32_t bias_element_size,
-    xnn_pack_gemm_goi_w_fn pack_gemm_goi_w,
+    xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi_w,
     xnn_pack_conv_kgo_w_fn pack_conv_kgo_w,
     xnn_pack_conv_goki_w_fn pack_conv_goki_w,
     const void* packing_params,
@@ -447,7 +447,7 @@ static enum xnn_status create_convolution2d_nhwc(
     xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w,
     xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w,
     xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w,
-    xnn_pack_gemm_goi_w_fn pack_gemm_goi_w,
+    xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi_w,
     xnn_pack_conv_kgo_w_fn pack_conv_kgo_w,
     xnn_pack_conv_goki_w_fn pack_conv_goki_w,
     const void* packing_params,
@@ -816,7 +816,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qu8_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qu8_dwconv_ghw_w,
-    (xnn_pack_gemm_goi_w_fn) xnn_pack_qu8_gemm_goi_w,
+    (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_qu8_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_qu8_conv_goki_w,
     /*packing_params=*/&packing_params,
@@ -947,7 +947,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qs8_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qs8_dwconv_ghw_w,
-    (xnn_pack_gemm_goi_w_fn) xnn_pack_qs8_gemm_goi_w,
+    (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_qs8_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_conv_goki_w,
     /*packing_params=*/&packing_params,
@@ -1086,7 +1086,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qs8_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_qs8_dwconv_ghw_w,
-    (xnn_pack_gemm_goi_w_fn) xnn_pack_qs8_gemm_goi_w,
+    (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_qs8_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_conv_goki_w,
     /*packing_params=*/&packing_params,
@@ -1211,14 +1211,14 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
   xnn_pack_vmulcaddc_w_fn pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_fn) xnn_pack_f16_vmulcaddc_w;
   xnn_pack_dwconv_hwg_w_fn pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f16_dwconv_hwg_w;
   xnn_pack_dwconv_ghw_w_fn pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f16_dwconv_ghw_w;
-  xnn_pack_gemm_goi_w_fn pack_gemm_goi_w = (xnn_pack_gemm_goi_w_fn) xnn_pack_f16_gemm_goi_w;
+  xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi_w = (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi;
   xnn_pack_conv_kgo_w_fn pack_conv_kgo_w = (xnn_pack_conv_kgo_w_fn) xnn_pack_f16_conv_kgo_w;
   xnn_pack_conv_goki_w_fn pack_conv_goki_w = (xnn_pack_conv_goki_w_fn) xnn_pack_f16_conv_goki_w;
   if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
     pack_vmulcaddc_w = (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_to_f16_vmulcaddc_w;
     pack_dwconv_hwg_w = (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_to_f16_dwconv_hwg_w;
     pack_dwconv_ghw_w = (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_to_f16_dwconv_ghw_w;
-    pack_gemm_goi_w = (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_to_f16_gemm_goi_w;
+    pack_gemm_goi_w = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_f32_to_f16_gemm_goi_w;
     pack_conv_kgo_w = (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_to_f16_conv_kgo_w;
     pack_conv_goki_w = (xnn_pack_conv_goki_w_fn) xnn_pack_f32_to_f16_conv_goki_w;
   }
@@ -1387,7 +1387,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_vmulcaddc_w,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_dwconv_ghw_w,
-    (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_gemm_goi_w,
+    (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_f32_conv_goki_w,
     /*packing_params=*/NULL,
@@ -1513,7 +1513,7 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_vmulcaddc_w,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_dwconv_hwg_w,
     (xnn_pack_dwconv_ghw_w_fn) xnn_pack_f32_dwconv_ghw_w,
-    (xnn_pack_gemm_goi_w_fn) xnn_pack_f32_gemm_goi_w,
+    (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     (xnn_pack_conv_kgo_w_fn) xnn_pack_f32_conv_kgo_w,
     (xnn_pack_conv_goki_w_fn) xnn_pack_f32_conv_goki_w,
     /*packing_params=*/NULL,
