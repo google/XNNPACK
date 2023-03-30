@@ -757,16 +757,16 @@ static enum xnn_status setup_average_pooling2d(
         .output_batch_stride = average_pooling_op->output_pixel_stride << log2_data_element_size,
     };
     memcpy(&average_pooling_op->context.global_average_pooling_nwc.params, global_params, global_params_size);
-    average_pooling_op->compute.type = xnn_parallelization_type_1d;
-    average_pooling_op->compute.range[0] = batch_size;
+    average_pooling_op->compute[0].type = xnn_parallelization_type_1d;
+    average_pooling_op->compute[0].range[0] = batch_size;
 
     if (input_elements <= gavgpool->row_tile) {
-      average_pooling_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_unipass;
+      average_pooling_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_unipass;
       average_pooling_op->context.global_average_pooling_nwc.unipass_ukernel = gavgpool->unipass;
     } else {
       average_pooling_op->context.global_average_pooling_nwc.buffer_size =
         (channels + (XNN_MAX_SIMD_SIZE >> log2_data_element_size)) << log2_accumulator_element_size;
-      average_pooling_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_multipass;
+      average_pooling_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_multipass;
       average_pooling_op->context.global_average_pooling_nwc.multipass_ukernel = gavgpool->multipass;
     }
   } else {
@@ -857,12 +857,12 @@ static enum xnn_status setup_average_pooling2d(
       memcpy(&average_pooling_op->context.pixelwise_average_pooling.params, params, params_size);
       if (pooling_size <= primary_tile) {
         average_pooling_op->context.pixelwise_average_pooling.unipass_ukernel = pavgpool->unipass;
-        average_pooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_pixelwise_average_pooling_unipass;
+        average_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_pixelwise_average_pooling_unipass;
       } else {
         average_pooling_op->context.pixelwise_average_pooling.buffer_size =
           (channels + (XNN_MAX_SIMD_SIZE >> log2_data_element_size)) << log2_accumulator_element_size;
         average_pooling_op->context.pixelwise_average_pooling.multipass_ukernel = pavgpool->multipass;
-        average_pooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_pixelwise_average_pooling_multipass;
+        average_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_pixelwise_average_pooling_multipass;
       }
     } else {
       const uint32_t incremental_tile = avgpool->incremental_tile;
@@ -887,17 +887,17 @@ static enum xnn_status setup_average_pooling2d(
       memcpy(&average_pooling_op->context.average_pooling.params, params, params_size);
       if (pooling_size <= primary_tile) {
         average_pooling_op->context.average_pooling.unipass_ukernel = avgpool->unipass;
-        average_pooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_average_pooling_unipass;
+        average_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_average_pooling_unipass;
       } else {
         average_pooling_op->context.average_pooling.buffer_size =
           (channels + (XNN_MAX_SIMD_SIZE >> log2_data_element_size)) << log2_accumulator_element_size;
         average_pooling_op->context.average_pooling.multipass_ukernel = avgpool->multipass;
-        average_pooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_average_pooling_multipass;
+        average_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_average_pooling_multipass;
       }
     }
-    average_pooling_op->compute.type = xnn_parallelization_type_2d;
-    average_pooling_op->compute.range[0] = batch_size;
-    average_pooling_op->compute.range[1] = output_height;
+    average_pooling_op->compute[0].type = xnn_parallelization_type_2d;
+    average_pooling_op->compute[0].range[0] = batch_size;
+    average_pooling_op->compute[0].range[1] = output_height;
   }
   average_pooling_op->state = xnn_run_state_ready;
 

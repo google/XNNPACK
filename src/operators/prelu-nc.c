@@ -235,10 +235,10 @@ static enum xnn_status setup_prelu_nc(
       }
     }
   #endif
-  prelu_op->compute.type = xnn_parallelization_type_1d_tile_1d;
-  prelu_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_prelu;
-  prelu_op->compute.range[0] = batch_size;
-  prelu_op->compute.tile[0] = batch_tile;
+  prelu_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
+  prelu_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_prelu;
+  prelu_op->compute[0].range[0] = batch_size;
+  prelu_op->compute[0].tile[0] = batch_tile;
   prelu_op->state = xnn_run_state_ready;
 
   return xnn_status_success;

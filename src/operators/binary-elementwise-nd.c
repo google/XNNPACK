@@ -1093,38 +1093,38 @@ static enum xnn_status setup_binary_elementwise_nd(
     if (compressed_output_shape[4] == 1) {
       if (compressed_output_shape[3] == 1) {
         if (compressed_output_shape[2] == 1) {
-          binary_elementwise_op->compute.type = xnn_parallelization_type_1d;
-          binary_elementwise_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_elementwise_binary_1d;
-          binary_elementwise_op->compute.range[0] = compressed_output_shape[1];
+          binary_elementwise_op->compute[0].type = xnn_parallelization_type_1d;
+          binary_elementwise_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_elementwise_binary_1d;
+          binary_elementwise_op->compute[0].range[0] = compressed_output_shape[1];
         } else {
-          binary_elementwise_op->compute.type = xnn_parallelization_type_2d;
-          binary_elementwise_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_elementwise_binary_2d;
-          binary_elementwise_op->compute.range[0] = compressed_output_shape[2];
-          binary_elementwise_op->compute.range[1] = compressed_output_shape[1];
+          binary_elementwise_op->compute[0].type = xnn_parallelization_type_2d;
+          binary_elementwise_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_elementwise_binary_2d;
+          binary_elementwise_op->compute[0].range[0] = compressed_output_shape[2];
+          binary_elementwise_op->compute[0].range[1] = compressed_output_shape[1];
         }
       } else {
-        binary_elementwise_op->compute.type = xnn_parallelization_type_3d;
-        binary_elementwise_op->compute.task_3d = (pthreadpool_task_3d_t) xnn_compute_elementwise_binary_3d;
-        binary_elementwise_op->compute.range[0] = compressed_output_shape[3];
-        binary_elementwise_op->compute.range[1] = compressed_output_shape[2];
-        binary_elementwise_op->compute.range[2] = compressed_output_shape[1];
+        binary_elementwise_op->compute[0].type = xnn_parallelization_type_3d;
+        binary_elementwise_op->compute[0].task_3d = (pthreadpool_task_3d_t) xnn_compute_elementwise_binary_3d;
+        binary_elementwise_op->compute[0].range[0] = compressed_output_shape[3];
+        binary_elementwise_op->compute[0].range[1] = compressed_output_shape[2];
+        binary_elementwise_op->compute[0].range[2] = compressed_output_shape[1];
       }
     } else {
-      binary_elementwise_op->compute.type = xnn_parallelization_type_4d;
-      binary_elementwise_op->compute.task_4d = (pthreadpool_task_4d_t) xnn_compute_elementwise_binary_4d;
-      binary_elementwise_op->compute.range[0] = compressed_output_shape[4];
-      binary_elementwise_op->compute.range[1] = compressed_output_shape[3];
-      binary_elementwise_op->compute.range[2] = compressed_output_shape[2];
-      binary_elementwise_op->compute.range[3] = compressed_output_shape[1];
+      binary_elementwise_op->compute[0].type = xnn_parallelization_type_4d;
+      binary_elementwise_op->compute[0].task_4d = (pthreadpool_task_4d_t) xnn_compute_elementwise_binary_4d;
+      binary_elementwise_op->compute[0].range[0] = compressed_output_shape[4];
+      binary_elementwise_op->compute[0].range[1] = compressed_output_shape[3];
+      binary_elementwise_op->compute[0].range[2] = compressed_output_shape[2];
+      binary_elementwise_op->compute[0].range[3] = compressed_output_shape[1];
     }
   } else {
-    binary_elementwise_op->compute.type = xnn_parallelization_type_5d;
-    binary_elementwise_op->compute.task_5d = (pthreadpool_task_5d_t) xnn_compute_elementwise_binary_5d;
-    binary_elementwise_op->compute.range[0] = compressed_output_shape[5];
-    binary_elementwise_op->compute.range[1] = compressed_output_shape[4];
-    binary_elementwise_op->compute.range[2] = compressed_output_shape[3];
-    binary_elementwise_op->compute.range[3] = compressed_output_shape[2];
-    binary_elementwise_op->compute.range[4] = compressed_output_shape[1];
+    binary_elementwise_op->compute[0].type = xnn_parallelization_type_5d;
+    binary_elementwise_op->compute[0].task_5d = (pthreadpool_task_5d_t) xnn_compute_elementwise_binary_5d;
+    binary_elementwise_op->compute[0].range[0] = compressed_output_shape[5];
+    binary_elementwise_op->compute[0].range[1] = compressed_output_shape[4];
+    binary_elementwise_op->compute[0].range[2] = compressed_output_shape[3];
+    binary_elementwise_op->compute[0].range[3] = compressed_output_shape[2];
+    binary_elementwise_op->compute[0].range[4] = compressed_output_shape[1];
   }
   binary_elementwise_op->state = xnn_run_state_ready;
 

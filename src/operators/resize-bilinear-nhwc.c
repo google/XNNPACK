@@ -325,11 +325,11 @@ static enum xnn_status setup_resize_bilinear2d_nhwc(
       }
     }
   #endif
-  resize_op->compute.type = xnn_parallelization_type_2d_tile_1d;
-  resize_op->compute.task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_resize_bilinear;
-  resize_op->compute.range[0] = batch_size;
-  resize_op->compute.range[1] = output_size;
-  resize_op->compute.tile[0] = output_size_tile;
+  resize_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
+  resize_op->compute[0].task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_resize_bilinear;
+  resize_op->compute[0].range[0] = batch_size;
+  resize_op->compute[0].range[1] = output_size;
+  resize_op->compute[0].tile[0] = output_size_tile;
   resize_op->state = xnn_run_state_ready;
 
   return xnn_status_success;

@@ -171,10 +171,10 @@ static enum xnn_status setup_unary_elementwise_nc(
     }
 
     const size_t range = (batch_size * channels) << log2_input_size;
-    unary_elementwise_op->compute.type = xnn_parallelization_type_1d_tile_1d;
-    unary_elementwise_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
-    unary_elementwise_op->compute.range[0] = range;
-    unary_elementwise_op->compute.tile[0] = (num_threads == 1) ? range : block_size;
+    unary_elementwise_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
+    unary_elementwise_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
+    unary_elementwise_op->compute[0].range[0] = range;
+    unary_elementwise_op->compute[0].tile[0] = (num_threads == 1) ? range : block_size;
   } else {
     unary_elementwise_op->context.univector_strided = (struct univector_strided_context) {
       .n = channels << log2_input_size,
@@ -187,10 +187,10 @@ static enum xnn_status setup_unary_elementwise_nc(
     if (params_size != 0) {
       memcpy(&unary_elementwise_op->context.univector_strided.params, params, params_size);
     }
-    unary_elementwise_op->compute.type = xnn_parallelization_type_1d_tile_1d;
-    unary_elementwise_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_strided;
-    unary_elementwise_op->compute.range[0] = batch_size;
-    unary_elementwise_op->compute.tile[0] = (num_threads == 1) ? batch_size : 1;
+    unary_elementwise_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
+    unary_elementwise_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_strided;
+    unary_elementwise_op->compute[0].range[0] = batch_size;
+    unary_elementwise_op->compute[0].tile[0] = (num_threads == 1) ? batch_size : 1;
   }
   unary_elementwise_op->state = xnn_run_state_ready;
 

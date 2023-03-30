@@ -519,16 +519,16 @@ static enum xnn_status setup_global_average_pooling_nwc(
       .output_batch_stride = (global_average_pooling_op->output_pixel_stride << log2_data_element_size),
   };
   memcpy(&global_average_pooling_op->context.global_average_pooling_nwc.params, params, params_size);
-  global_average_pooling_op->compute.type = xnn_parallelization_type_1d;
-  global_average_pooling_op->compute.range[0] = batch_size;
+  global_average_pooling_op->compute[0].type = xnn_parallelization_type_1d;
+  global_average_pooling_op->compute[0].range[0] = batch_size;
 
   if (width <= gavgpool->row_tile) {
-    global_average_pooling_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_unipass;
+    global_average_pooling_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_unipass;
     global_average_pooling_op->context.global_average_pooling_nwc.unipass_ukernel = gavgpool->unipass;
   } else {
     global_average_pooling_op->context.global_average_pooling_nwc.buffer_size =
       (channels + (XNN_MAX_SIMD_SIZE >> log2_data_element_size)) << log2_accumulator_element_size;
-    global_average_pooling_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_multipass;
+    global_average_pooling_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_multipass;
     global_average_pooling_op->context.global_average_pooling_nwc.multipass_ukernel = gavgpool->multipass;
   }
   global_average_pooling_op->state = xnn_run_state_ready;

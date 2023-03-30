@@ -227,12 +227,12 @@ enum xnn_status xnn_setup_global_average_pooling_ncw_f32(
     .params.f32 = global_average_pooling_op->params.f32_gavgpool,
   };
 
-  global_average_pooling_op->compute.type = xnn_parallelization_type_2d_tile_1d;
-  global_average_pooling_op->compute.task_2d_tile_1d =
+  global_average_pooling_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
+  global_average_pooling_op->compute[0].task_2d_tile_1d =
     (pthreadpool_task_2d_tile_1d_t) xnn_compute_global_average_pooling_ncw;
-  global_average_pooling_op->compute.range[0] = batch_size;
-  global_average_pooling_op->compute.range[1] = global_average_pooling_op->channels;
-  global_average_pooling_op->compute.tile[0] = global_average_pooling_op->channels; //xnn_params.f32.gavgpool_cw.channel_tile;
+  global_average_pooling_op->compute[0].range[0] = batch_size;
+  global_average_pooling_op->compute[0].range[1] = global_average_pooling_op->channels;
+  global_average_pooling_op->compute[0].tile[0] = global_average_pooling_op->channels; //xnn_params.f32.gavgpool_cw.channel_tile;
 
   global_average_pooling_op->state = xnn_run_state_ready;
 
@@ -290,12 +290,12 @@ enum xnn_status xnn_setup_global_average_pooling_ncw_f16(
     .params.f16 = global_average_pooling_op->params.f16_gavgpool,
   };
 
-  global_average_pooling_op->compute.type = xnn_parallelization_type_2d_tile_1d;
-  global_average_pooling_op->compute.task_2d_tile_1d =
+  global_average_pooling_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
+  global_average_pooling_op->compute[0].task_2d_tile_1d =
     (pthreadpool_task_2d_tile_1d_t) xnn_compute_global_average_pooling_ncw;
-  global_average_pooling_op->compute.range[0] = batch_size;
-  global_average_pooling_op->compute.range[1] = global_average_pooling_op->channels;
-  global_average_pooling_op->compute.tile[0] = global_average_pooling_op->channels; //xnn_params.f16.gavgpool_cw.channel_tile;
+  global_average_pooling_op->compute[0].range[0] = batch_size;
+  global_average_pooling_op->compute[0].range[1] = global_average_pooling_op->channels;
+  global_average_pooling_op->compute[0].tile[0] = global_average_pooling_op->channels; //xnn_params.f16.gavgpool_cw.channel_tile;
 
   global_average_pooling_op->state = xnn_run_state_ready;
 

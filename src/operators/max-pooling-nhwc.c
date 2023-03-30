@@ -323,10 +323,10 @@ static enum xnn_status setup_max_pooling2d_nhwc(
   };
   memcpy(&max_pooling_op->context.max_pooling.params, params, params_size);
 
-  max_pooling_op->compute.type = xnn_parallelization_type_2d;
-  max_pooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_max_pooling;
-  max_pooling_op->compute.range[0] = batch_size;
-  max_pooling_op->compute.range[1] = output_height;
+  max_pooling_op->compute[0].type = xnn_parallelization_type_2d;
+  max_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_max_pooling;
+  max_pooling_op->compute[0].range[0] = batch_size;
+  max_pooling_op->compute[0].range[1] = output_height;
   max_pooling_op->state = xnn_run_state_ready;
 
   return xnn_status_success;

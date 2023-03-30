@@ -186,7 +186,7 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
   {
     valid_batch_size = unpooling_op->valid_batch_size;
     if (batch_size <= valid_batch_size) {
-      unpooling_op->compute.range[0] = batch_size * input_height;
+      unpooling_op->compute[0].range[0] = batch_size * input_height;
       unpooling_op->state = xnn_run_state_ready;
       return xnn_status_success;
     }
@@ -227,10 +227,10 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
     .fill_value = 0,
     .ukernel = unpooling_op->unpool_config->unpool,
   };
-  unpooling_op->compute.type = xnn_parallelization_type_2d;
-  unpooling_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_unpooling;
-  unpooling_op->compute.range[0] = batch_size * input_height;
-  unpooling_op->compute.range[1] = input_width;
+  unpooling_op->compute[0].type = xnn_parallelization_type_2d;
+  unpooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_unpooling;
+  unpooling_op->compute[0].range[0] = batch_size * input_height;
+  unpooling_op->compute[0].range[1] = input_width;
   unpooling_op->state = xnn_run_state_ready;
 
   unpooling_op->last_output = output;

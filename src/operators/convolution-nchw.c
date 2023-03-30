@@ -1049,11 +1049,11 @@ static enum xnn_status setup_convolution2d_nchw(
           }
         }
       #endif
-      convolution_op->compute.type = xnn_parallelization_type_2d_tile_1d;
-      convolution_op->compute.task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_spmm;
-      convolution_op->compute.range[0] = batch_size;
-      convolution_op->compute.range[1] = input_size << log2_input_element_size;
-      convolution_op->compute.tile[0] = mc << log2_input_element_size;
+      convolution_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
+      convolution_op->compute[0].task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_spmm;
+      convolution_op->compute[0].range[0] = batch_size;
+      convolution_op->compute[0].range[1] = input_size << log2_input_element_size;
+      convolution_op->compute[0].tile[0] = mc << log2_input_element_size;
       convolution_op->state = xnn_run_state_ready;
 
       return xnn_status_success;
@@ -1104,11 +1104,11 @@ static enum xnn_status setup_convolution2d_nchw(
           }
         }
       #endif
-      convolution_op->compute.type = xnn_parallelization_type_2d_tile_1d;
-      convolution_op->compute.task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_conv2d_hwc2chw;
-      convolution_op->compute.range[0] = batch_size;
-      convolution_op->compute.range[1] = output_height;
-      convolution_op->compute.tile[0] = output_height_slice;
+      convolution_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
+      convolution_op->compute[0].task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_conv2d_hwc2chw;
+      convolution_op->compute[0].range[0] = batch_size;
+      convolution_op->compute[0].range[1] = output_height;
+      convolution_op->compute[0].tile[0] = output_height_slice;
       convolution_op->state = xnn_run_state_ready;
 
       return xnn_status_success;
@@ -1149,10 +1149,10 @@ static enum xnn_status setup_convolution2d_nchw(
       };
       memcpy(&convolution_op->context.dwconv2d.params, chw_params, sizeof(convolution_op->context.dwconv2d.params));
 
-      convolution_op->compute.type = xnn_parallelization_type_2d;
-      convolution_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv2d_chw;
-      convolution_op->compute.range[0] = batch_size;
-      convolution_op->compute.range[1] = convolution_op->groups;
+      convolution_op->compute[0].type = xnn_parallelization_type_2d;
+      convolution_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv2d_chw;
+      convolution_op->compute[0].range[0] = batch_size;
+      convolution_op->compute[0].range[1] = convolution_op->groups;
       convolution_op->state = xnn_run_state_ready;
 
       return xnn_status_success;

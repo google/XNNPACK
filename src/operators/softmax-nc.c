@@ -187,9 +187,9 @@ enum xnn_status xnn_setup_softmax_nc_qu8(
     .rmax_ukernel = softmax_op->rmax_config->rmax.u8,
     .lut_norm_ukernel = softmax_op->lut32norm_config->lut32norm,
   };
-  softmax_op->compute.type = xnn_parallelization_type_1d;
-  softmax_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_u8_softmax;
-  softmax_op->compute.range[0] = batch_size;
+  softmax_op->compute[0].type = xnn_parallelization_type_1d;
+  softmax_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_u8_softmax;
+  softmax_op->compute[0].range[0] = batch_size;
   softmax_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
@@ -410,9 +410,9 @@ static enum xnn_status setup_softmax_nc_floating_point(
   };
   memcpy(&softmax_op->context.floating_point_softmax.expminus_params, expminus_params, expminus_params_size);
   memcpy(&softmax_op->context.floating_point_softmax.minmax_params, minmax_params, minmax_params_size);
-  softmax_op->compute.type = xnn_parallelization_type_1d;
-  softmax_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_floating_point_softmax;
-  softmax_op->compute.range[0] = batch_size;
+  softmax_op->compute[0].type = xnn_parallelization_type_1d;
+  softmax_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_floating_point_softmax;
+  softmax_op->compute[0].range[0] = batch_size;
   softmax_op->state = xnn_run_state_ready;
 
   return xnn_status_success;

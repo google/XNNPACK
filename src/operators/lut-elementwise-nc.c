@@ -377,10 +377,10 @@ static enum xnn_status setup_lut_elementwise_nc(
     };
 
     const size_t range = batch_size * channels * sizeof(uint8_t);
-    lut_elementwise_op->compute.type = xnn_parallelization_type_1d_tile_1d;
-    lut_elementwise_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_lut_contiguous;
-    lut_elementwise_op->compute.range[0] = range;
-    lut_elementwise_op->compute.tile[0] = (num_threads == 1) ? range : block_size * sizeof(uint8_t);
+    lut_elementwise_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
+    lut_elementwise_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_lut_contiguous;
+    lut_elementwise_op->compute[0].range[0] = range;
+    lut_elementwise_op->compute[0].tile[0] = (num_threads == 1) ? range : block_size * sizeof(uint8_t);
   } else {
     lut_elementwise_op->context.lut_strided = (struct lut_strided_context) {
       .n = channels * sizeof(uint8_t),
@@ -391,9 +391,9 @@ static enum xnn_status setup_lut_elementwise_nc(
       .y_stride = output_stride * sizeof(uint8_t),
       .ukernel = lut_config->microkernel,
     };
-    lut_elementwise_op->compute.type = xnn_parallelization_type_1d;
-    lut_elementwise_op->compute.task_1d = (pthreadpool_task_1d_t) xnn_compute_lut_strided;
-    lut_elementwise_op->compute.range[0] = batch_size;
+    lut_elementwise_op->compute[0].type = xnn_parallelization_type_1d;
+    lut_elementwise_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_lut_strided;
+    lut_elementwise_op->compute[0].range[0] = batch_size;
   }
   lut_elementwise_op->state = xnn_run_state_ready;
 

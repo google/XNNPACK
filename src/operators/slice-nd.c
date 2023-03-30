@@ -216,40 +216,40 @@ static enum xnn_status setup_slice_nd(
   switch (num_normalized_dims) {
     case 1:
     case 2:
-      slice_op->compute.type = xnn_parallelization_type_1d;
-      slice_op->compute.task_1d = (pthreadpool_task_1d_t)xnn_compute_slice_1d;
-      slice_op->compute.range[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 2];
+      slice_op->compute[0].type = xnn_parallelization_type_1d;
+      slice_op->compute[0].task_1d = (pthreadpool_task_1d_t)xnn_compute_slice_1d;
+      slice_op->compute[0].range[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 2];
       break;
     case 3:
-      slice_op->compute.type = xnn_parallelization_type_2d;
-      slice_op->compute.task_2d = (pthreadpool_task_2d_t) xnn_compute_slice_2d;
-      slice_op->compute.range[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 3];
-      slice_op->compute.range[1] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 2];
+      slice_op->compute[0].type = xnn_parallelization_type_2d;
+      slice_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_slice_2d;
+      slice_op->compute[0].range[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 3];
+      slice_op->compute[0].range[1] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 2];
       break;
     case 4:
-      slice_op->compute.type = xnn_parallelization_type_3d;
-      slice_op->compute.task_3d = (pthreadpool_task_3d_t) xnn_compute_slice_3d;
-      slice_op->compute.range[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 4];
-      slice_op->compute.range[1] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 3];
-      slice_op->compute.range[2] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 2];
+      slice_op->compute[0].type = xnn_parallelization_type_3d;
+      slice_op->compute[0].task_3d = (pthreadpool_task_3d_t) xnn_compute_slice_3d;
+      slice_op->compute[0].range[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 4];
+      slice_op->compute[0].range[1] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 3];
+      slice_op->compute[0].range[2] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 2];
       break;
     case 5:
-      slice_op->compute.type = xnn_parallelization_type_4d;
-      slice_op->compute.task_4d = (pthreadpool_task_4d_t) xnn_compute_slice_4d;
-      slice_op->compute.range[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 5];
-      slice_op->compute.range[1] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 4];
-      slice_op->compute.range[2] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 3];
-      slice_op->compute.range[3] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 2];
+      slice_op->compute[0].type = xnn_parallelization_type_4d;
+      slice_op->compute[0].task_4d = (pthreadpool_task_4d_t) xnn_compute_slice_4d;
+      slice_op->compute[0].range[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 5];
+      slice_op->compute[0].range[1] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 4];
+      slice_op->compute[0].range[2] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 3];
+      slice_op->compute[0].range[3] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 2];
       break;
     case 6:
       // TODO(b/246969669): write normalized_output_shape in reverse order to simplify code here.
-      slice_op->compute.type = xnn_parallelization_type_5d;
-      slice_op->compute.task_5d = (pthreadpool_task_5d_t) xnn_compute_slice_5d;
-      slice_op->compute.range[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 6];
-      slice_op->compute.range[1] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 5];
-      slice_op->compute.range[2] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 4];
-      slice_op->compute.range[3] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 3];
-      slice_op->compute.range[4] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 2];
+      slice_op->compute[0].type = xnn_parallelization_type_5d;
+      slice_op->compute[0].task_5d = (pthreadpool_task_5d_t) xnn_compute_slice_5d;
+      slice_op->compute[0].range[0] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 6];
+      slice_op->compute[0].range[1] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 5];
+      slice_op->compute[0].range[2] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 4];
+      slice_op->compute[0].range[3] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 3];
+      slice_op->compute[0].range[4] = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 2];
       break;
     default:
       XNN_UNREACHABLE;

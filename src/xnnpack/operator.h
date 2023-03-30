@@ -22,6 +22,9 @@
 #include <xnnpack/params.h>
 
 
+// Maximum number of pthreadpool parallelization invocations per operator.
+#define XNN_MAX_COMPUTE_INVOCATIONS 1
+
 struct xnn_ukernel_conv2d {
   union {
     xnn_conv_hwc2chw_ukernel_fn hwc2chw_fn;
@@ -312,8 +315,7 @@ struct xnn_operator {
     const struct xnn_transpose_config* transpose_config;
   };
 
-  struct compute_parameters compute;
-  struct compute_parameters compute2;
+  struct compute_parameters compute[XNN_MAX_COMPUTE_INVOCATIONS];
   union {
     struct argmax_pooling_context argmax_pooling;
     struct average_pooling_context average_pooling;

@@ -214,10 +214,10 @@ static enum xnn_status setup_transpose_nd(
   }
 
   for (size_t i = 0; i < normalized_dims; ++i) {
-    transpose_op->compute.range[i] = normalized_shape[i];
+    transpose_op->compute[0].range[i] = normalized_shape[i];
   }
   reorder_array(normalized_dims, loop_order, context->input_stride);
-  reorder_array(normalized_dims, loop_order, transpose_op->compute.range);
+  reorder_array(normalized_dims, loop_order, transpose_op->compute[0].range);
 
   const struct xnn_transpose_config* transpose_config = transpose_op->transpose_config;
 
@@ -226,39 +226,39 @@ static enum xnn_status setup_transpose_nd(
   switch (ukernel_selector) {
     case 1:
       context->const_size_ukernel = transpose_config->x8.const_size_ukernel;
-      transpose_op->compute.tile[0] = transpose_config->x8.tile_size;
-      transpose_op->compute.tile[1] = transpose_config->x8.tile_size;
+      transpose_op->compute[0].tile[0] = transpose_config->x8.tile_size;
+      transpose_op->compute[0].tile[1] = transpose_config->x8.tile_size;
       if (transpose_config->x8.init.x16 != NULL) {
         transpose_config->x8.init.x8(&context->params.x8_params);
       }
       break;
     case 2:
-      transpose_op->compute.tile[0] = transpose_config->x16.tile_size;
-      transpose_op->compute.tile[1] = transpose_config->x16.tile_size;
+      transpose_op->compute[0].tile[0] = transpose_config->x16.tile_size;
+      transpose_op->compute[0].tile[1] = transpose_config->x16.tile_size;
       context->const_size_ukernel = transpose_config->x16.const_size_ukernel;
       if (transpose_config->x16.init.x16 != NULL) {
         transpose_config->x16.init.x16(&context->params.x16_params);
       }
       break;
     case 3:
-      transpose_op->compute.tile[0] = transpose_config->x24.tile_size;
-      transpose_op->compute.tile[1] = transpose_config->x24.tile_size;
+      transpose_op->compute[0].tile[0] = transpose_config->x24.tile_size;
+      transpose_op->compute[0].tile[1] = transpose_config->x24.tile_size;
       context->const_size_ukernel = transpose_config->x24.const_size_ukernel;
       if (transpose_config->x24.init.x24 != NULL) {
         transpose_config->x24.init.x24(&context->params.x24_params);
       }
       break;
     case 4:
-      transpose_op->compute.tile[0] = transpose_config->x32.tile_size;
-      transpose_op->compute.tile[1] = transpose_config->x32.tile_size;
+      transpose_op->compute[0].tile[0] = transpose_config->x32.tile_size;
+      transpose_op->compute[0].tile[1] = transpose_config->x32.tile_size;
       context->const_size_ukernel = transpose_config->x32.const_size_ukernel;
       if (transpose_config->x32.init.x32 != NULL) {
         transpose_config->x32.init.x32(&context->params.x32_params);
       }
       break;
     default:
-      transpose_op->compute.tile[0] = transpose_config->xx.tile_size;
-      transpose_op->compute.tile[1] = transpose_config->xx.tile_size;
+      transpose_op->compute[0].tile[0] = transpose_config->xx.tile_size;
+      transpose_op->compute[0].tile[1] = transpose_config->xx.tile_size;
       context->variable_size_ukernel = transpose_config->xx.variable_size_ukernel;
       variable_size_ukernel = true;
   }
@@ -266,52 +266,52 @@ static enum xnn_status setup_transpose_nd(
   struct univector_contiguous_context* univector_context = &transpose_op->context.univector_contiguous;
   switch (normalized_dims) {
     case 1:
-      transpose_op->compute.type = xnn_parallelization_type_1d_tile_1d;
-      transpose_op->compute.task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
-      transpose_op->compute.range[0] = normalized_element_size;
-      transpose_op->compute.tile[0] = normalized_element_size;
+      transpose_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
+      transpose_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
+      transpose_op->compute[0].range[0] = normalized_element_size;
+      transpose_op->compute[0].tile[0] = normalized_element_size;
       univector_context->ukernel = transpose_config->copy;
       univector_context->log2_xsize = 0;
       univector_context->log2_ysize = 0;
       break;
     case 2:
-      transpose_op->compute.type = xnn_parallelization_type_2d_tile_2d;
+      transpose_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
       if (variable_size_ukernel) {
-        transpose_op->compute.task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_transposev_2d;
+        transpose_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_transposev_2d;
       } else {
-        transpose_op->compute.task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_transposec_2d;
+        transpose_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_transposec_2d;
       }
       break;
     case 3:
-      transpose_op->compute.type = xnn_parallelization_type_3d_tile_2d;
+      transpose_op->compute[0].type = xnn_parallelization_type_3d_tile_2d;
       if (variable_size_ukernel) {
-        transpose_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_transposev_3d;
+        transpose_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_transposev_3d;
       } else {
-        transpose_op->compute.task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_transposec_3d;
+        transpose_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_transposec_3d;
       }
       break;
     case 4:
-      transpose_op->compute.type = xnn_parallelization_type_4d_tile_2d;
+      transpose_op->compute[0].type = xnn_parallelization_type_4d_tile_2d;
       if (variable_size_ukernel) {
-        transpose_op->compute.task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_transposev_4d;
+        transpose_op->compute[0].task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_transposev_4d;
       } else {
-        transpose_op->compute.task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_transposec_4d;
+        transpose_op->compute[0].task_4d_tile_2d = (pthreadpool_task_4d_tile_2d_t) xnn_compute_transposec_4d;
       }
       break;
     case 5:
-      transpose_op->compute.type = xnn_parallelization_type_5d_tile_2d;
+      transpose_op->compute[0].type = xnn_parallelization_type_5d_tile_2d;
       if (variable_size_ukernel) {
-        transpose_op->compute.task_5d_tile_2d = (pthreadpool_task_5d_tile_2d_t) xnn_compute_transposev_5d;
+        transpose_op->compute[0].task_5d_tile_2d = (pthreadpool_task_5d_tile_2d_t) xnn_compute_transposev_5d;
       } else {
-        transpose_op->compute.task_5d_tile_2d = (pthreadpool_task_5d_tile_2d_t) xnn_compute_transposec_5d;
+        transpose_op->compute[0].task_5d_tile_2d = (pthreadpool_task_5d_tile_2d_t) xnn_compute_transposec_5d;
       }
       break;
     case 6:
-      transpose_op->compute.type = xnn_parallelization_type_6d_tile_2d;
+      transpose_op->compute[0].type = xnn_parallelization_type_6d_tile_2d;
       if (variable_size_ukernel) {
-        transpose_op->compute.task_6d_tile_2d = (pthreadpool_task_6d_tile_2d_t) xnn_compute_transposev_6d;
+        transpose_op->compute[0].task_6d_tile_2d = (pthreadpool_task_6d_tile_2d_t) xnn_compute_transposev_6d;
       } else {
-        transpose_op->compute.task_6d_tile_2d = (pthreadpool_task_6d_tile_2d_t) xnn_compute_transposec_6d;
+        transpose_op->compute[0].task_6d_tile_2d = (pthreadpool_task_6d_tile_2d_t) xnn_compute_transposec_6d;
       }
       break;
     default:
