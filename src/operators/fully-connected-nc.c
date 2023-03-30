@@ -34,6 +34,7 @@ static enum xnn_status create_fully_connected_nc(
     const void* kernel,
     const void* bias,
     uint32_t flags,
+    uint32_t log2_input_element_size,
     uint32_t log2_filter_element_size,
     uint32_t bias_element_size,
     xnn_pack_gemm_io_w_fn pack_gemm_io_w,
@@ -44,6 +45,7 @@ static enum xnn_status create_fully_connected_nc(
     size_t params_size,
     const struct xnn_gemm_config* gemm_parameters,
     const struct gemm_fused_ukernels* gemm_ukernels,
+    const struct jit_gemm_params *jit_gemm_params,
     enum xnn_operator_type operator_type,
     xnn_caches_t caches,
     xnn_operator_t* fully_connected_op_out)
@@ -101,6 +103,7 @@ static enum xnn_status create_fully_connected_nc(
 
   if (caches != NULL) {
     fully_connected_op->weights_cache = caches->weights_cache;
+    fully_connected_op->code_cache = caches->code_cache;
   }
 
   const uint32_t nr = gemm_parameters->nr;
@@ -164,10 +167,15 @@ static enum xnn_status create_fully_connected_nc(
   };
 
   assert(XNN_MAX_MR >= mr);
-  fully_connected_op->ukernel.gemm.gemm_cases[0] = gemm_ukernels->gemm[0];
-  for (size_t i = 1; i < mr; i++) {
-    fully_connected_op->ukernel.gemm.gemm_cases[i] = gemm_ukernels->gemm[mr-1];
+  for (size_t i = 0; i < mr; i++) {
+    fully_connected_op->ukernel.gemm.gemm_cases[i] = gemm_ukernels->gemm[i];
   }
+
+  #if XNN_PLATFORM_JIT
+    xnn_generate_gemms_up_to_max_mr(
+      mr, gemm_parameters->generator, jit_gemm_params, output_channels, nr,
+      input_channels << log2_input_element_size, fully_connected_op);
+  #endif  // XNN_PLATFORM_JIT
 
   fully_connected_op->state = xnn_run_state_invalid;
 
@@ -233,12 +241,18 @@ static enum xnn_status setup_fully_connected_nc(
 
   uint32_t mr = fully_connected_op->ukernel.gemm.mr;
   const uint32_t nr = fully_connected_op->ukernel.gemm.nr;
+  struct xnn_hmp_gemm_ukernel *gemm_cases = fully_connected_op->ukernel.gemm.gemm_cases;
 
-  struct xnn_hmp_gemm_ukernel gemm_ukernel = fully_connected_op->ukernel.gemm.gemm_cases[mr-1];
   if (batch_size == 1 && fully_connected_op->ukernel.gemm.gemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
-    gemm_ukernel = fully_connected_op->ukernel.gemm.gemm_cases[0];
     mr = 1;
   }
+
+  #if XNN_PLATFORM_JIT
+    xnn_overwrite_gemm_cases_with_generated_code(fully_connected_op, gemm_cases, mr);
+  #endif  // XNN_PLATFORM_JIT
+
+  assert(mr > 0 && mr <= XNN_MAX_MR);
+  struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr-1];
 
   fully_connected_op->context.gemm = (struct gemm_context) {
     .k_scaled = input_channels << log2_input_element_size,
@@ -349,6 +363,7 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     input_channels, output_channels,
     input_stride, output_stride,
     kernel, bias, flags,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
     sizeof(uint16_t) /* sizeof(bias element) */,
     pack_gemm_io_w,
@@ -356,6 +371,7 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     NULL /* packing params */, 0 /* packed weights padding byte */,
     &params, sizeof(params),
     gemm_config, &gemm_config->minmax,
+    /*jit_gemm_params=*/NULL,
     xnn_operator_type_fully_connected_nc_f16,
     caches,
     fully_connected_op_out);
@@ -412,10 +428,19 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
   if XNN_LIKELY(gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&params, output_min, output_max);
   }
+
+  struct jit_gemm_params jit_gemm_params = {
+    .f32_minmax = {
+      .min = output_min,
+      .max = output_max
+    }
+  };
+
   return create_fully_connected_nc(
     input_channels, output_channels,
     input_stride, output_stride,
     kernel, bias, flags,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     sizeof(float) /* sizeof(bias element) */,
     (xnn_pack_gemm_io_w_fn) xnn_pack_f32_gemm_io_w,
@@ -423,6 +448,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     NULL /* packing params */, 0 /* packed weights padding byte */,
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
+    &jit_gemm_params,
     xnn_operator_type_fully_connected_nc_f32,
     caches,
     fully_connected_op_out);
@@ -498,6 +524,7 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     input_channels, output_channels,
     input_stride, output_stride,
     kernel, bias, flags,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     sizeof(int32_t) /* sizeof(bias element) */,
     (xnn_pack_gemm_io_w_fn) xnn_pack_qs8_gemm_io_w,
@@ -505,6 +532,7 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     &packing_params, 0 /* packed weights padding byte */,
     &params, sizeof(params),
     gemm_config, &gemm_config->minmax,
+    /*jit_gemm_params=*/NULL,
     xnn_operator_type_fully_connected_nc_qs8,
     caches,
     fully_connected_op_out);
@@ -583,6 +611,7 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     input_channels, output_channels,
     input_stride, output_stride,
     kernel, bias, flags,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     sizeof(int32_t) /* sizeof(bias element) */,
     (xnn_pack_gemm_io_w_fn) xnn_pack_qu8_gemm_io_w,
@@ -590,6 +619,7 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     &packing_params, kernel_zero_point /* packed weights padding byte */,
     &params, sizeof(params),
     gemm_config, &gemm_config->minmax,
+    /*jit_gemm_params=*/NULL,
     xnn_operator_type_fully_connected_nc_qu8,
     caches,
     fully_connected_op_out);

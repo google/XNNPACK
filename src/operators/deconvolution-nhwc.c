@@ -281,10 +281,10 @@ static enum xnn_status create_deconvolution2d_nhwc(
   #if XNN_PLATFORM_JIT
     xnn_generate_gemms_up_to_max_mr(
       mr, gemm_config->generator, jit_gemm_params, group_output_channels, nr,
-      group_input_channels, log2_input_element_size, deconvolution_op);
+      group_input_channels << log2_input_element_size, deconvolution_op);
     xnn_generate_igemms_up_to_max_mr(
       mr, gemm_config->generator, jit_gemm_params, group_output_channels, nr,
-      group_input_channels, log2_input_element_size, kernel_size, deconvolution_op);
+      group_input_channels << log2_input_element_size, kernel_size, deconvolution_op);
   #endif  // XNN_PLATFORM_JIT
 
   deconvolution_op->state = xnn_run_state_invalid;

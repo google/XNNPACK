@@ -21,8 +21,7 @@ XNN_INTERNAL void xnn_generate_gemms_up_to_max_mr(
     const struct jit_gemm_params *jit_gemm_params,
     size_t group_output_channels,
     size_t nr,
-    size_t group_input_channels,
-    size_t log2_input_element_size,
+    size_t group_input_channels_in_bytes,
     xnn_operator_t convolution_op);
 XNN_INTERNAL void xnn_generate_igemms_up_to_max_mr(
   size_t max_mr,
@@ -30,8 +29,7 @@ XNN_INTERNAL void xnn_generate_igemms_up_to_max_mr(
   const struct jit_gemm_params *jit_gemm_params,
   size_t group_output_channels,
   size_t nr,
-  size_t group_input_channels,
-  size_t log2_input_element_size,
+  size_t group_input_channels_in_bytes,
   size_t kernel_size,
   xnn_operator_t convolution_op);
 

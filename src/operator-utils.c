@@ -24,8 +24,7 @@ static size_t get_generated_gemm(
     size_t mr,
     size_t group_output_channels,
     size_t nr,
-    size_t group_input_channels,
-    size_t log2_input_element_size,
+    size_t group_input_channels_in_bytes,
     struct xnn_code_cache* code_cache)
 {
   assert(code_cache != NULL);
@@ -45,8 +44,7 @@ static size_t get_generated_gemm(
   const size_t old_size = code_cache->cache.code.size;
   void* old_code = (uint8_t*) code_cache->cache.code.start + old_size;
   status = generator(&code_cache->cache.code, mr, group_output_channels % nr,
-                     group_input_channels << log2_input_element_size,
-                     jit_gemm_params);
+                     group_input_channels_in_bytes, jit_gemm_params);
 
   if (xnn_status_success != status) {
     xnn_log_error("failed to generate GEMM microkernel");
@@ -66,8 +64,7 @@ void xnn_generate_gemms_up_to_max_mr(
   const struct jit_gemm_params *jit_gemm_params,
   size_t group_output_channels,
   size_t nr,
-  size_t group_input_channels,
-  size_t log2_input_element_size,
+  size_t group_input_channels_in_bytes,
   xnn_operator_t op)
 {
   assert(XNN_MAX_MR >= max_mr);
@@ -85,7 +82,7 @@ void xnn_generate_gemms_up_to_max_mr(
       xnn_log_debug("using generator for mr %zu to generate gemm of mr %zu and uarch %zu", smallest_mr, mr, i);
       op->ukernel.gemm.gemm_cases[mr - 1].generated_code_offset[i] =
           get_generated_gemm(generators.gemm[smallest_mr - 1].function[i], jit_gemm_params, mr,
-                             group_output_channels, nr, group_input_channels, log2_input_element_size, op->code_cache);
+                             group_output_channels, nr, group_input_channels_in_bytes, op->code_cache);
     }
   }
 }
@@ -95,8 +92,7 @@ static size_t get_generated_igemm(
   const struct jit_gemm_params *jit_gemm_params,
   size_t group_output_channels,
   size_t nr,
-  size_t group_input_channels,
-  size_t log2_input_element_size,
+  size_t group_input_channels_in_bytes,
   size_t kernel_size,
   size_t mr,
   struct xnn_code_cache* code_cache)
@@ -116,7 +112,7 @@ static size_t get_generated_igemm(
   const size_t old_size = code_cache->cache.code.size;
   void* old_code = (uint8_t*) code_cache->cache.code.start + old_size;
   status = generator(&code_cache->cache.code, mr, group_output_channels % nr,
-                     group_input_channels << log2_input_element_size,
+                     group_input_channels_in_bytes,
                      kernel_size * mr * sizeof(void*), jit_gemm_params);
   if (status != xnn_status_success) {
     xnn_log_error("failed to generate IGEMM microkernel");
@@ -136,8 +132,7 @@ void xnn_generate_igemms_up_to_max_mr(
   const struct jit_gemm_params *jit_gemm_params,
   size_t group_output_channels,
   size_t nr,
-  size_t group_input_channels,
-  size_t log2_input_element_size,
+  size_t group_input_channels_in_bytes,
   size_t kernel_size,
   xnn_operator_t op)
 {
@@ -156,7 +151,7 @@ void xnn_generate_igemms_up_to_max_mr(
       xnn_log_debug("using generator for mr %zu to generate igemm of mr %zu and uarch %zu", smallest_mr, mr, i);
       op->ukernel.igemm.igemm_cases[mr - 1].generated_code_offset[i] =
         get_generated_igemm(generators.igemm[smallest_mr - 1].function[i], jit_gemm_params,
-                            group_output_channels, nr, group_input_channels, log2_input_element_size, kernel_size, mr,
+                            group_output_channels, nr, group_input_channels_in_bytes, kernel_size, mr,
                             op->code_cache);
     }
   }
