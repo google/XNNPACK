@@ -34,7 +34,7 @@ void xnn_f32_vhswish_ukernel__rvv_x8v(
   assert(vthree == 3.0f);
   assert(vsix == 6.0f);
 
-  batch >>= 2;  // log2(sizeof(float))
+  batch >>= XNN_LOG2_SIZEOF_FLOAT;
   do {
     const size_t n = __riscv_vsetvl_e32m8(batch);
     vfloat32m8_t vx = __riscv_vle32_v_f32m8(input, n);

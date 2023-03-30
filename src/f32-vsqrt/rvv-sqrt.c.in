@@ -24,7 +24,7 @@ void xnn_f32_vsqrt_ukernel__rvv_sqrt_x${LMUL}v(
   assert(input != NULL);
   assert(output != NULL);
 
-  batch >>= 2;  // log2(sizeof(float))
+  batch >>= XNN_LOG2_SIZEOF_FLOAT;
   do {
     const size_t n = __riscv_vsetvl_e32m${LMUL}(batch);
     vfloat32m${LMUL}_t vx = __riscv_vle32_v_f32m${LMUL}(input, n);

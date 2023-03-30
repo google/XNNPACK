@@ -445,7 +445,7 @@ enum xnn_status xnn_setup_softmax_nc_f16(
   return setup_softmax_nc_floating_point(
     softmax_op, xnn_operator_type_softmax_nc_f16,
     batch_size, input, output,
-    1 /* log2(sizeof(uint16_t)) */,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
     softmax_op->rmax_config->rmax.f16, softmax_op->raddstoreexpminusmax_config, f16_vmul_config,
     (xnn_compute_reciprocal_fn) compute_reciprocal_f16,
     &expminus_params, sizeof(expminus_params),
@@ -479,7 +479,7 @@ enum xnn_status xnn_setup_softmax_nc_f32(
   return setup_softmax_nc_floating_point(
     softmax_op, xnn_operator_type_softmax_nc_f32,
     batch_size, input, output,
-    2 /* log2(sizeof(float)) */,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     softmax_op->rmax_config->rmax.f16, softmax_op->raddstoreexpminusmax_config, f32_vmul_config,
     (xnn_compute_reciprocal_fn) compute_reciprocal_f32,
     &expminus_params, sizeof(expminus_params),

@@ -140,7 +140,7 @@ enum xnn_status xnn_create_prelu_nc_f16(
   return create_prelu_nc(
     channels, input_stride, output_stride,
     negative_slope, flags,
-    1 /* log2(sizeof(uint16_t)) */,
+    /*log2_weights_element_size=*/XNN_LOG2_SIZEOF_HALF,
     pack_prelu_w,
     xnn_operator_type_prelu_nc_f16,
     prelu_config,
@@ -167,7 +167,7 @@ enum xnn_status xnn_create_prelu_nc_f32(
   return create_prelu_nc(
     channels, input_stride, output_stride,
     negative_slope, flags,
-    2 /* log2(sizeof(float)) */,
+    /*log2_weights_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     (xnn_pack_prelu_w_fn) xnn_pack_f32_prelu_w,
     xnn_operator_type_prelu_nc_f32,
     prelu_config,
@@ -254,7 +254,7 @@ enum xnn_status xnn_setup_prelu_nc_f16(
   return setup_prelu_nc(
     prelu_op, xnn_operator_type_prelu_nc_f16,
     batch_size, input, output,
-    1 /* log2(sizeof(uint16_t)) */,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
     pthreadpool_get_threads_count(threadpool));
 }
 
@@ -268,6 +268,6 @@ enum xnn_status xnn_setup_prelu_nc_f32(
   return setup_prelu_nc(
     prelu_op, xnn_operator_type_prelu_nc_f32,
     batch_size, input, output,
-    2 /* log2(sizeof(float)) */,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     pthreadpool_get_threads_count(threadpool));
 }

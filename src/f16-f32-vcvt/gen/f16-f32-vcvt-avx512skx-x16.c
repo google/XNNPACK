@@ -40,7 +40,7 @@ void xnn_f16_f32_vcvt_ukernel__avx512skx_x16(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid 32-bit elements (depends on batch).
-    batch >>= 1 /* log2(sizeof(uint16_t)) */;
+    batch >>= XNN_LOG2_SIZEOF_HALF;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
     const __m512 vacc = _mm512_cvtph_ps(_mm256_maskz_loadu_epi16(vmask, i));

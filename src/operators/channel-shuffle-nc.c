@@ -231,7 +231,7 @@ enum xnn_status xnn_setup_channel_shuffle_nc_x8(
     batch_size,
     input,
     output,
-    0 /* log2(sizeof(element)) = log2(sizeof(uint8_t)) */,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     channel_shuffle_op->zip_config);
 }
 
@@ -254,6 +254,6 @@ enum xnn_status xnn_setup_channel_shuffle_nc_x32(
     batch_size,
     input,
     output,
-    2 /* log2(sizeof(element)) = log2(sizeof(uint32_t)) */,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT32_T,
     channel_shuffle_op->zip_config);
 }

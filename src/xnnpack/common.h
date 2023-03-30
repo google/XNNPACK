@@ -344,3 +344,13 @@
   // XNN_ARCH_ARM, XNN_ARCH_ARM64, XNN_ARCH_WASMSIMD, XNN_ARCH_WASMRELAXEDSIMD.
   #define XNN_MAX_SIMD_SIZE 16
 #endif
+
+
+#define XNN_LOG2_SIZEOF_INT8_T   0  // log2(sizeof(int8_t))
+#define XNN_LOG2_SIZEOF_UINT8_T  0  // log2(sizeof(uint8_t))
+#define XNN_LOG2_SIZEOF_INT16_T  1  // log2(sizeof(int16_t))
+#define XNN_LOG2_SIZEOF_UINT16_T 1  // log2(sizeof(uint16_t))
+#define XNN_LOG2_SIZEOF_HALF     1  // log2(sizeof(half))
+#define XNN_LOG2_SIZEOF_FLOAT    2  // log2(sizeof(float))
+#define XNN_LOG2_SIZEOF_INT32_T  2  // log2(sizeof(int32_t))
+#define XNN_LOG2_SIZEOF_UINT32_T 2  // log2(sizeof(uint32_t))

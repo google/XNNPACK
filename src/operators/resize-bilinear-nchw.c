@@ -153,7 +153,7 @@ static enum xnn_status setup_resize_bilinear2d_nchw(
     size_t output_width,
     const void* input,
     void* output,
-    uint32_t log2_element_size,
+    uint32_t log2_data_element_size,
     uint32_t log2_weight_element_size,
     xnn_indirection_init_resize_bilinear2d_chw_fn indirection_init,
     size_t num_threads)
@@ -231,7 +231,7 @@ static enum xnn_status setup_resize_bilinear2d_nchw(
     }
   }
 
-  const size_t input_pixel_stride_in_bytes = 1 << log2_element_size; // Since the layout in CHW the pixels
+  const size_t input_pixel_stride_in_bytes = 1 << log2_data_element_size; // Since the layout in CHW the pixels
   if (input_height != resize_op->last_input_height ||
       input_width != resize_op->last_input_width ||
       output_height != resize_op->last_output_height ||
@@ -259,14 +259,14 @@ static enum xnn_status setup_resize_bilinear2d_nchw(
   resize_op->context.resize_bilinear_chw = (struct resize_bilinear_chw_context) {
     .output_pixels = output_height * output_width,
     .channels = resize_op->channels,
-    .input_channel_stride = (input_height * input_width) << log2_element_size,
+    .input_channel_stride = (input_height * input_width) << log2_data_element_size,
     .indirect_input = resize_op->indirection_buffer,
     .input_offset = (size_t) ((uintptr_t) input - (uintptr_t) resize_op->last_input),
-    .input_batch_stride = (resize_op->input_pixel_stride * input_height * input_width) << log2_element_size,
+    .input_batch_stride = (resize_op->input_pixel_stride * input_height * input_width) << log2_data_element_size,
     .packed_weights = resize_op->packed_weights.pointer,
     .output = output,
-    .output_batch_stride = (resize_op->output_pixel_stride * output_height * output_width) << log2_element_size,
-    .output_channel_stride = (output_height * output_width) << log2_element_size,
+    .output_batch_stride = (resize_op->output_pixel_stride * output_height * output_width) << log2_data_element_size,
+    .output_channel_stride = (output_height * output_width) << log2_data_element_size,
     .ukernel = ibilinear_chw->ukernel,
   };
 
@@ -316,8 +316,8 @@ enum xnn_status xnn_setup_resize_bilinear2d_nchw_f16(
     output_width,
     input,
     output,
-    1 /* log2(element size) == log2(sizeof(uint16_t)) */,
-    1 /* log2(weight element size) == log2(sizeof(int16_t)) */,
+    /*log2_data_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_HALF,
     (xnn_indirection_init_resize_bilinear2d_chw_fn) xnn_indirection_init_resize_bilinear2d_chw_f16,
     pthreadpool_get_threads_count(threadpool));
 }
@@ -343,8 +343,8 @@ enum xnn_status xnn_setup_resize_bilinear2d_nchw_f32(
     output_width,
     input,
     output,
-    2 /* log2(element size) == log2(sizeof(float)) */,
-    2 /* log2(weight element size) == log2(sizeof(float)) */,
+    /*log2_data_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     (xnn_indirection_init_resize_bilinear2d_chw_fn) xnn_indirection_init_resize_bilinear2d_chw_f32,
     pthreadpool_get_threads_count(threadpool));
 }

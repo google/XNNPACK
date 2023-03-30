@@ -284,7 +284,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
   xnn_operator_t convolution_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
-  const size_t log2_filter_element_size = 1;  /* log2(sizeof(uint16_t)) */
+  const size_t log2_filter_element_size = XNN_LOG2_SIZEOF_HALF;
   const enum xnn_operator_type operator_type = xnn_operator_type_convolution_nchw_f16;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -625,7 +625,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
 {
   xnn_operator_t convolution_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
-  const size_t log2_filter_element_size = 2;  /* log2(sizeof(float)) */
+  const size_t log2_filter_element_size = XNN_LOG2_SIZEOF_FLOAT;
   const enum xnn_operator_type operator_type = xnn_operator_type_convolution_nchw_f32;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
@@ -1162,29 +1162,6 @@ static enum xnn_status setup_convolution2d_nchw(
   }
 }
 
-enum xnn_status xnn_setup_convolution2d_nchw_f32(
-    xnn_operator_t convolution_op,
-    size_t batch_size,
-    size_t input_height,
-    size_t input_width,
-    const float* input,
-    float* output,
-    pthreadpool_t threadpool)
-{
-  return setup_convolution2d_nchw(
-    convolution_op,
-    xnn_operator_type_convolution_nchw_f32,
-    batch_size, input_height, input_width,
-    input, output,
-    2 /* log2(sizeof(input element)) = log2(sizeof(float)) */,
-    2 /* log2(sizeof(filter element)) = log2(sizeof(float)) */,
-    sizeof(float) /* sizeof(bias element) */,
-    2 /* log2(sizeof(output element)) = log2(sizeof(float)) */,
-    &convolution_op->params.f32_minmax,
-    &convolution_op->params.f32_chw,
-    pthreadpool_get_threads_count(threadpool));
-}
-
 enum xnn_status xnn_setup_convolution2d_nchw_f16(
     xnn_operator_t convolution_op,
     size_t batch_size,
@@ -1199,11 +1176,34 @@ enum xnn_status xnn_setup_convolution2d_nchw_f16(
     xnn_operator_type_convolution_nchw_f16,
     batch_size, input_height, input_width,
     input, output,
-    1 /* log2(sizeof(input element)) = log2(sizeof(uint16_t)) */,
-    1 /* log2(sizeof(filter element)) = log2(sizeof(uint16_t)) */,
-    sizeof(uint16_t) /* sizeof(bias element) */,
-    1 /* log2(sizeof(output element)) = log2(sizeof(uint16_t)) */,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*bias_element_size=*/sizeof(uint16_t),
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
     &convolution_op->params.f16_minmax,
     &convolution_op->params.f16_chw,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_convolution2d_nchw_f32(
+    xnn_operator_t convolution_op,
+    size_t batch_size,
+    size_t input_height,
+    size_t input_width,
+    const float* input,
+    float* output,
+    pthreadpool_t threadpool)
+{
+  return setup_convolution2d_nchw(
+    convolution_op,
+    xnn_operator_type_convolution_nchw_f32,
+    batch_size, input_height, input_width,
+    input, output,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*bias_element_size=*/sizeof(float),
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    &convolution_op->params.f32_minmax,
+    &convolution_op->params.f32_chw,
     pthreadpool_get_threads_count(threadpool));
 }

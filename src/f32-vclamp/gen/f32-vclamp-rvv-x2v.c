@@ -30,7 +30,7 @@ void xnn_f32_vclamp_ukernel__rvv_x2v(
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
 
-  batch >>= 2;  // log2(sizeof(float))
+  batch >>= XNN_LOG2_SIZEOF_FLOAT;
   do {
     const size_t n = __riscv_vsetvl_e32m2(batch);
     vfloat32m2_t vacc = __riscv_vle32_v_f32m2(input, n);

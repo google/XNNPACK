@@ -26,7 +26,7 @@ void xnn_f32_vabs_ukernel__rvv_x1v(
   assert(input != NULL);
   assert(output != NULL);
 
-  batch >>= 2;  // log2(sizeof(float))
+  batch >>= XNN_LOG2_SIZEOF_FLOAT;
   do {
     const size_t n = __riscv_vsetvl_e32m1(batch);
     const vfloat32m1_t vi = __riscv_vle32_v_f32m1(input, n);

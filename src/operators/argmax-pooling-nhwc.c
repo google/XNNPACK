@@ -256,7 +256,7 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
     xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
       indirection_buffer_size, xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
 
-    xnn_indirection_init_maxpool2d(argmax_pooling_op, step_height, step_width, 2 /* log2(sizeof(float)) */);
+    xnn_indirection_init_maxpool2d(argmax_pooling_op, step_height, step_width, /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT);
 
     argmax_pooling_op->last_input = input;
     argmax_pooling_op->last_input_height = input_height;

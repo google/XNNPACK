@@ -561,8 +561,8 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_s8(
     max_pooling_op, xnn_operator_type_max_pooling_nhwc_s8,
     batch_size, input_height, input_width,
     input, output,
-    0 /* log2(sizeof(input element)) = log2(sizeof(int8_t)) */,
-    0 /* log2(sizeof(output element)) = log2(sizeof(int8_t)) */,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     max_pooling_op->maxpool_config,
     &max_pooling_op->params.s8_minmax, sizeof(max_pooling_op->params.s8_minmax),
     pthreadpool_get_threads_count(threadpool));
@@ -581,8 +581,8 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_u8(
     max_pooling_op, xnn_operator_type_max_pooling_nhwc_u8,
     batch_size, input_height, input_width,
     input, output,
-    0 /* log2(sizeof(input element)) = log2(sizeof(uint8_t)) */,
-    0 /* log2(sizeof(output element)) = log2(sizeof(uint8_t)) */,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     max_pooling_op->maxpool_config,
     &max_pooling_op->params.u8_minmax, sizeof(max_pooling_op->params.u8_minmax),
     pthreadpool_get_threads_count(threadpool));
@@ -601,8 +601,8 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_f16(
     max_pooling_op, xnn_operator_type_max_pooling_nhwc_f16,
     batch_size, input_height, input_width,
     input, output,
-    1 /* log2(sizeof(input element)) = log2(sizeof(uint16_t)) */,
-    1 /* log2(sizeof(output element)) = log2(sizeof(uint16_t)) */,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
     max_pooling_op->maxpool_config,
     &max_pooling_op->params.f16_minmax, sizeof(max_pooling_op->params.f16_minmax),
     pthreadpool_get_threads_count(threadpool));
@@ -621,10 +621,9 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_f32(
     max_pooling_op, xnn_operator_type_max_pooling_nhwc_f32,
     batch_size, input_height, input_width,
     input, output,
-    2 /* log2(sizeof(input element)) = log2(sizeof(float)) */,
-    2 /* log2(sizeof(output element)) = log2(sizeof(float)) */,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     max_pooling_op->maxpool_config,
     &max_pooling_op->params.f32_minmax, sizeof(max_pooling_op->params.f32_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
-

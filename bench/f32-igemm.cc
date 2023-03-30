@@ -111,7 +111,7 @@ static void f32_igemm(benchmark::State& state,
   convolution_op.dilation_width       = dilation;
   convolution_op.padding_top          = padding_top;
   convolution_op.padding_left         = padding_left;
-  xnn_indirection_init_conv2d(&convolution_op, mr, 2 /* log2(sizeof(float)) */);
+  xnn_indirection_init_conv2d(&convolution_op, mr, XNN_LOG2_SIZEOF_FLOAT);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
   }
@@ -241,7 +241,7 @@ static void f32_igemm(benchmark::State& state,
   convolution_op.dilation_width       = dilation;
   convolution_op.padding_top          = padding_top;
   convolution_op.padding_left         = padding_left;
-  xnn_indirection_init_conv2d(&convolution_op, mr, 2 /* log2(sizeof(float)) */);
+  xnn_indirection_init_conv2d(&convolution_op, mr, XNN_LOG2_SIZEOF_FLOAT);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
   }

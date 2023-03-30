@@ -114,7 +114,7 @@ static void f32_dwconv(benchmark::State& state,
   convolution_op.padding_top        = padding_top;
   convolution_op.padding_left       = padding_left;
 
-  xnn_indirection_init_dwconv2d(&convolution_op, step_height, step_width, primary_tile, 2 /* log2(sizeof(float)) */);
+  xnn_indirection_init_dwconv2d(&convolution_op, step_height, step_width, primary_tile, XNN_LOG2_SIZEOF_FLOAT);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
   }
@@ -257,7 +257,7 @@ static void f32_dwconv(
   convolution_op.padding_top        = padding_top;
   convolution_op.padding_left       = padding_left;
 
-  xnn_indirection_init_dwconv2d(&convolution_op, step_height, step_width, tile_size, 2 /* log2(sizeof(float)) */);
+  xnn_indirection_init_dwconv2d(&convolution_op, step_height, step_width, tile_size, XNN_LOG2_SIZEOF_FLOAT);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
   }

@@ -122,7 +122,7 @@ enum xnn_status xnn_create_global_average_pooling_ncw_f16(
 
   return create_global_average_pooling_ncw(
     channels, flags,
-    1 /* log2(sizeof(uint16_t)) */,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
     offsetof(struct xnn_operator, params.f16_gavgpool),
     &params, sizeof(params),
     xnn_operator_type_global_average_pooling_ncw_f16,
@@ -170,7 +170,7 @@ enum xnn_status xnn_create_global_average_pooling_ncw_f32(
 
   return create_global_average_pooling_ncw(
     channels, flags,
-    2 /* log2(sizeof(float)) */,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     offsetof(struct xnn_operator, params.f32_gavgpool),
     &params, sizeof(params),
     xnn_operator_type_global_average_pooling_ncw_f32,

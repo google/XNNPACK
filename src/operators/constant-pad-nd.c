@@ -245,7 +245,7 @@ enum xnn_status xnn_setup_constant_pad_nd_x8(
   return setup_constant_pad_nd(
     constant_pad_op, xnn_operator_type_constant_pad_nd_x8,
     num_dims, input_shape, pre_padding, post_padding,
-    input, output, 0 /* log2(element size) */,
+    input, output, /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     pthreadpool_get_threads_count(threadpool));
 }
 
@@ -262,7 +262,7 @@ enum xnn_status xnn_setup_constant_pad_nd_x16(
   return setup_constant_pad_nd(
     constant_pad_op, xnn_operator_type_constant_pad_nd_x16,
     num_dims, input_shape, pre_padding, post_padding,
-    input, output, 1 /* log2(element size) */,
+    input, output, /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT16_T,
     pthreadpool_get_threads_count(threadpool));
 }
 
@@ -279,7 +279,7 @@ enum xnn_status xnn_setup_constant_pad_nd_x32(
   return setup_constant_pad_nd(
     constant_pad_op, xnn_operator_type_constant_pad_nd_x32,
     num_dims, input_shape, pre_padding, post_padding,
-    input, output, 2 /* log2(element size) */,
+    input, output, /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT32_T,
     pthreadpool_get_threads_count(threadpool));
 }
 
@@ -349,7 +349,7 @@ enum xnn_status xnn_run_constant_pad_nd_x8(
   return run_constant_pad_nd(
     flags,
     num_dims, input_shape, pre_paddings, post_paddings,
-    input, output, 0 /* log2(sizeof(float)) */,
+    input, output, /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     padding_pattern * UINT32_C(0x01010101),
     xnn_operator_type_constant_pad_nd_x32,
     threadpool);
@@ -370,7 +370,7 @@ enum xnn_status xnn_run_constant_pad_nd_x16(
   return run_constant_pad_nd(
     flags,
     num_dims, input_shape, pre_paddings, post_paddings,
-    input, output, 1 /* log2(sizeof(float)) */,
+    input, output, /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT16_T,
     padding_pattern * UINT32_C(0x00010001),
     xnn_operator_type_constant_pad_nd_x32,
     threadpool);
@@ -391,7 +391,7 @@ enum xnn_status xnn_run_constant_pad_nd_x32(
   return run_constant_pad_nd(
     flags,
     num_dims, input_shape, pre_paddings, post_paddings,
-    input, output, 2 /* log2(sizeof(float)) */,
+    input, output, /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT32_T,
     padding_pattern,
     xnn_operator_type_constant_pad_nd_x32,
     threadpool);

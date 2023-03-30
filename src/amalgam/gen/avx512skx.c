@@ -46,7 +46,7 @@ void xnn_f16_f32_vcvt_ukernel__avx512skx_x16(
     assert(batch <= 15 * sizeof(uint16_t));
 
     // Prepare mask for valid 32-bit elements (depends on batch).
-    batch >>= 1 /* log2(sizeof(uint16_t)) */;
+    batch >>= XNN_LOG2_SIZEOF_HALF;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
     const __m512 vacc = _mm512_cvtph_ps(_mm256_maskz_loadu_epi16(vmask, i));
@@ -79,7 +79,7 @@ void xnn_f32_f16_vcvt_ukernel__avx512skx_x16(
     assert(batch <= 15 * sizeof(float));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= 2 /* log2(sizeof(float)) */;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
     const __m512 vf = _mm512_maskz_loadu_ps(vmask, input);
@@ -187,7 +187,7 @@ void xnn_f32_qs8_vcvt_ukernel__avx512skx_x128(
     assert(batch <= 15 * sizeof(float));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= 2 /* log2(sizeof(float)) */;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
     __m512 vx0123 = _mm512_maskz_loadu_ps(vmask, input);
@@ -305,7 +305,7 @@ void xnn_f32_qu8_vcvt_ukernel__avx512skx_x128(
     assert(batch <= 15 * sizeof(float));
 
     // Prepare mask for valid elements (depends on batch).
-    batch >>= 2 /* log2(sizeof(float)) */;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
     __m512 vx0123 = _mm512_maskz_loadu_ps(vmask, input);
@@ -474,7 +474,7 @@ void xnn_f32_vtanh_ukernel__avx512skx_expm1minus_rr1_lut4_p4h3ts_perm_div_x64(
     assert(batch <= 15 * sizeof(float));
 
     // Prepare mask for valid 32-bit elements (depends on batch).
-    batch >>= 2 /* log2(sizeof(float)) */;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
     const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);

@@ -160,7 +160,7 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_nr1fma_x64(
     assert(batch <= 15 * sizeof(float));
 
     // Prepare mask for valid 32-bit elements (depends on batch).
-    batch >>= 2 /* log2(sizeof(float)) */;
+    batch >>= XNN_LOG2_SIZEOF_FLOAT;
     const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << batch) - UINT32_C(1)));
 
     const __m512 vx = _mm512_maskz_loadu_ps(vmask, input);

@@ -810,8 +810,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     groups, group_input_channels, group_output_channels,
     input_channel_stride, output_channel_stride,
     kernel, bias, flags,
-    /*log2_input_element_size=*/0,  // log2(sizeof(uint8_t))
-    /*log2_filter_element_size=*/0,  // log2(sizeof(uint8_t))
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*bias_element_size=*/sizeof(int32_t),
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qu8_dwconv_hwg_w,
@@ -941,8 +941,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     groups, group_input_channels, group_output_channels,
     input_channel_stride, output_channel_stride,
     kernel, bias, flags,
-    /*log2_input_element_size=*/0,  // log2(sizeof(int8_t))
-    /*log2_filter_element_size=*/0,  // log2(sizeof(int8_t))
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*bias_element_size=*/sizeof(int32_t),
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qs8_dwconv_hwg_w,
@@ -1080,8 +1080,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     groups, group_input_channels, group_output_channels,
     input_channel_stride, output_channel_stride,
     kernel, bias, flags,
-    /*log2_input_element_size=*/0,  // log2(sizeof(int8_t))
-    /*log2_filter_element_size=*/0,  // log2(sizeof(int8_t))
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*bias_element_size=*/sizeof(int32_t),
     (xnn_pack_vmulcaddc_w_fn) NULL,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_qs8_dwconv_hwg_w,
@@ -1231,8 +1231,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     groups, group_input_channels, group_output_channels,
     input_channel_stride, output_channel_stride,
     kernel, bias, flags,
-    /*log2_input_element_size=*/1,  // log2(sizeof(uint16_t))
-    /*log2_filter_element_size=*/1,  // log2(sizeof(uint16_t))
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*bias_element_size=*/sizeof(uint16_t),
     pack_vmulcaddc_w,
     pack_dwconv_hwg_w,
@@ -1381,8 +1381,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     groups, group_input_channels, group_output_channels,
     input_channel_stride, output_channel_stride,
     kernel, bias, flags,
-    /*log2_input_element_size=*/2,  // log2(sizeof(float))
-    /*log2_filter_element_size=*/2,  // log2(sizeof(float))
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*bias_element_size=*/sizeof(float),
     (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_vmulcaddc_w,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_dwconv_hwg_w,
@@ -1507,8 +1507,8 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     groups, group_input_channels, group_output_channels,
     input_channel_stride, output_channel_stride,
     kernel, bias, flags,
-    /*log2_input_element_size=*/2,  // log2(sizeof(float))
-    /*log2_filter_element_size=*/2,  // log2(sizeof(float))
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*bias_element_size=*/sizeof(float),
     (xnn_pack_vmulcaddc_w_fn) xnn_pack_f32_vmulcaddc_w,
     (xnn_pack_dwconv_hwg_w_fn) xnn_pack_f32_dwconv_hwg_w,
@@ -2092,11 +2092,11 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qu8(
     convolution_op, xnn_operator_type_convolution_nhwc_qu8,
     batch_size, input_height, input_width,
     input, output,
-    /*log2_input_element_size=*/0,  // log2(sizeof(uint8_t))
-    /*log2_filter_element_size=*/0,  // log2(sizeof(uint8_t))
-    /*log2_accumulator_element_size=*/2,  // log2(sizeof(int32_t))
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+    /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_INT32_T,
     /*extra_weights_elements_size=*/sizeof(int32_t),
-    /*log2_output_element_size=*/0,  // log2(sizeof(uint8_t))
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*num_threads=*/pthreadpool_get_threads_count(threadpool));
 }
 
@@ -2113,11 +2113,11 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qs8(
     convolution_op, xnn_operator_type_convolution_nhwc_qs8,
     batch_size, input_height, input_width,
     input, output,
-    /*log2_input_element_size=*/0,  // log2(sizeof(int8_t))
-    /*log2_filter_element_size=*/0,  // log2(sizeof(int8_t))
-    /*log2_accumulator_element_size=*/2,  // log2(sizeof(int32_t))
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_INT32_T,
     /*extra_weights_elements_size=*/sizeof(int32_t),
-    /*log2_output_element_size=*/0,  // log2(sizeof(int8_t))
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*num_threads=*/pthreadpool_get_threads_count(threadpool));
 }
 
@@ -2134,11 +2134,11 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qc8(
     convolution_op, xnn_operator_type_convolution_nhwc_qc8,
     batch_size, input_height, input_width,
     input, output,
-    /*log2_input_element_size=*/0,  // log2(sizeof(int8_t))
-    /*log2_filter_element_size=*/0,  // log2(sizeof(int8_t))
-    /*log2_accumulator_element_size=*/2,  // log2(sizeof(int32_t))
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_INT32_T,
     /*extra_weights_elements_size=*/sizeof(int32_t) + sizeof(float),
-    /*log2_output_element_size=*/0,  // log2(sizeof(int8_t))
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*num_threads=*/pthreadpool_get_threads_count(threadpool));
 }
 
@@ -2155,11 +2155,11 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f16(
     convolution_op, xnn_operator_type_convolution_nhwc_f16,
     batch_size, input_height, input_width,
     input, output,
-    /*log2_input_element_size=*/1,  // log2(sizeof(uint16_t))
-    /*log2_filter_element_size=*/1,  // log2(sizeof(uint16_t))
-    /*log2_accumulator_element_size=*/1,  // log2(sizeof(uint16_t))
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*extra_weights_elements_size=*/sizeof(uint16_t),
-    /*log2_output_element_size=*/1,  // log2(sizeof(uint16_t))
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*num_threads=*/pthreadpool_get_threads_count(threadpool));
 }
 
@@ -2176,10 +2176,10 @@ enum xnn_status xnn_setup_convolution2d_nhwc_f32(
     convolution_op, xnn_operator_type_convolution_nhwc_f32,
     batch_size, input_height, input_width,
     input, output,
-    /*log2_input_element_size=*/2,  // log2(sizeof(float))
-    /*log2_filter_element_size=*/2,  // log2(sizeof(float))
-    /*log2_accumulator_element_size=*/2,  // log2(sizeof(float))
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*extra_weights_elements_size=*/sizeof(float),
-    /*log2_output_element_size=*/2,  // log2(sizeof(float))
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*num_threads=*/pthreadpool_get_threads_count(threadpool));
 }
