@@ -227,15 +227,6 @@ static enum xnn_status setup_fully_connected_nc(
     return xnn_status_invalid_state;
   }
 
-  fully_connected_op->batch_size = 1;
-  fully_connected_op->input_height = batch_size;
-  fully_connected_op->input_width = 1;
-  fully_connected_op->input = input;
-
-  fully_connected_op->output_height = batch_size;
-  fully_connected_op->output_width = 1;
-  fully_connected_op->output = output;
-
   const size_t input_channels = fully_connected_op->group_input_channels;
   const size_t output_channels = fully_connected_op->group_output_channels;
 
