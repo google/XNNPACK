@@ -40,6 +40,11 @@ tools/xngen src/x32-packw/s4-sse2.c.in -D NR=16 -D SR=4 -D KUNROLL=4 -o src/x32-
 ### KR 4
 tools/xngen src/x32-packw/c4-sse2.c.in -D NR=2  -D KR=4 -o src/x32-packw/gen/x32-packw-x2c4-sse2-x1.c &
 
+################################### x86 AVX ###################################
+### NR multiple of 4
+tools/xngen src/x32-packw/avx2.c.in -D NR=8  -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8-avx2-x4.c &
+tools/xngen src/x32-packw/avx2.c.in -D NR=16 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x16-avx2-x4.c &
+
 ################################## Wasm SIMD ##################################
 ### NR multiple of 4
 tools/xngen src/x32-packw/wasmsimd.c.in -D NR=8 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8-wasmsimd-x4.c &

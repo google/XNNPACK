@@ -141,6 +141,16 @@ static void x32_packw(benchmark::State& state,
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  static void x32_packw_x8__avx2_x4(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x8__avx2_x4,
+      /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  }
+  static void x32_packw_x16__avx2_x4(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x16__avx2_x4,
+      /*nr=*/16, /*kr=*/1, /*sr=*/1);
+  }
   static void x32_packw_x8__sse2_x4(benchmark::State& state, const char* net) {
     x32_packw(state,
       xnn_x32_packw_gemm_goi_ukernel_x8__sse2_x4,
@@ -167,6 +177,8 @@ static void x32_packw(benchmark::State& state,
       /*nr=*/2, /*kr=*/4, /*sr=*/1);
   }
 
+  BENCHMARK_BGEMM(x32_packw_x8__avx2_x4)
+  BENCHMARK_BGEMM(x32_packw_x16__avx2_x4)
   BENCHMARK_BGEMM(x32_packw_x8__sse2_x4)
   BENCHMARK_BGEMM(x32_packw_x16__sse2_x4)
   BENCHMARK_BGEMM(x32_packw_x8s4__sse2_x4)
