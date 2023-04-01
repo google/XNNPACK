@@ -16,7 +16,7 @@
 
 #include <xnnpack/packw.h>
 
-void xnn_x32_packw_gemm_goi_ukernel_x8__sse2_x4(
+void xnn_x32_packw_gemm_goi_ukernel_x8__avx_x4(
   size_t g,
   size_t nc,
   size_t kc,
