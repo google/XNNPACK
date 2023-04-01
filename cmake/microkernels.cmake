@@ -1351,7 +1351,8 @@ SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/math/f32-sigmoid-avx512f-rr2-p5-scalef-nr1fma.c
   src/math/f32-sqrt-avx512f-nr1fma1adj.c
   src/math/f32-sqrt-avx512f-nr1fma.c
-  src/math/f32-sqrt-avx512f-nr2fma.c)
+  src/math/f32-sqrt-avx512f-nr2fma.c
+  src/x32-packw/gen/x32-packw-x16-avx512f-x4.c)
 
 SET(ALL_AVX512SKX_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-x16.c
