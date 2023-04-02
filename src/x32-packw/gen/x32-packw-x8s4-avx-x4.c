@@ -53,6 +53,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__avx_x4(
         _mm_store_ps(packed_w, vb0);
         _mm_store_ps(packed_w + 4, vb4);
         b += 8;
+      } else {
+        const __m128 vzero = _mm_setzero_ps();
+        _mm_store_ps(packed_w, vzero);
+        _mm_store_ps(packed_w + 4, vzero);
       }
       packed_w += 8;
 
@@ -282,6 +286,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__avx_x4(
         } while (--nb != 0);
         packed_w += (8 - n);
       } else {
+        const __m128 vzero = _mm_setzero_ps();
+        _mm_store_ps(packed_w, vzero);
+        _mm_store_ps(packed_w + 4, vzero);
         packed_w += 8;
       }
 

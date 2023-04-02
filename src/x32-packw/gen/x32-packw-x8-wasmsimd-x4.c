@@ -53,6 +53,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_x4(
 
         wasm_v128_store(packed_weights, vb0123);
         wasm_v128_store(packed_weights + 4, vb4567);
+      } else {
+        const v128_t vzero = wasm_i32x4_const_splat(0);
+        wasm_v128_store(packed_weights, vzero);
+        wasm_v128_store(packed_weights + 4, vzero);
       }
       packed_weights += 8;
 
@@ -260,6 +264,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__wasmsimd_x4(
         } while (--nb != 0);
         packed_weights += (8 - n);
       } else {
+        const v128_t vzero = wasm_i32x4_const_splat(0);
+        wasm_v128_store(packed_weights, vzero);
+        wasm_v128_store(packed_weights + 4, vzero);
         packed_weights += 8;
       }
 

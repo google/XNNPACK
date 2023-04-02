@@ -57,6 +57,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane${"_prfm" if PREFETCH el
           $for N in range(0,NR,2):
             vst1_u32(packed_weights + ${N}, vb${N});
           bias += ${NR};
+        } else {
+          const uint32x2_t vzero = vmov_n_u32(0);
+          $for N in range(0,NR,2):
+            vst1_u32(packed_weights + ${N}, vzero);
         }
         packed_weights += ${NR};
         const uint32_t* w0 = w;
@@ -104,6 +108,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane${"_prfm" if PREFETCH el
         // NC remainder of 1
         if XNN_LIKELY(bias != NULL) {
           *packed_weights = *bias++;
+        } else {
+          const uint32x2_t vzero = vmov_n_u32(0);
+          $for N in range(0,NR,2):
+            vst1_u32(packed_weights + ${N}, vzero);
         }
         packed_weights += ${NR};
         size_t k = kc;

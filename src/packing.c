@@ -45,6 +45,10 @@ void xnn_pack_f32_gemm_goi_w(
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = b[nr_block_start + nr_block_offset];
         }
+      } else {
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          packed_weights[nr_block_offset] = 0;
+        }
       }
       packed_weights += nr;
 
@@ -95,6 +99,10 @@ void xnn_pack_f16_gemm_goi_w(
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = b[nr_block_start + nr_block_offset];
         }
+      } else {
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          packed_weights[nr_block_offset] = 0;
+        }
       }
       packed_weights += nr;
 
@@ -144,6 +152,10 @@ void xnn_pack_f32_to_f16_gemm_goi_w(
       if XNN_LIKELY(b != NULL) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
+        }
+      } else {
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          packed_weights[nr_block_offset] = 0;
         }
       }
       packed_weights += nr;

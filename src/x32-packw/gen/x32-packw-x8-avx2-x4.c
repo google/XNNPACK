@@ -52,6 +52,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__avx2_x4(
         const __m256 vb0 = _mm256_loadu_ps(b);
         _mm256_store_ps(packed_w, vb0);
         b += 8;
+      } else {
+        const __m256 vzero = _mm256_setzero_ps();
+        _mm256_store_ps(packed_w, vzero);
       }
       packed_w += 8;
 
@@ -200,6 +203,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__avx2_x4(
         } while (--nb != 0);
         packed_w += (8 - n);
       } else {
+        const __m256 vzero = _mm256_setzero_ps();
+        _mm256_store_ps(packed_w, vzero);
         packed_w += 8;
       }
 

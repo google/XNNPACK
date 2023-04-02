@@ -55,6 +55,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_x${KUNROLL}(
         wasm_v128_store(packed_weights, vb${ABC[0:4]});
         $for N in range(4, NR, 4):
           wasm_v128_store(packed_weights + ${N}, vb${ABC[N:N+4]});
+      } else {
+        const v128_t vzero = wasm_i32x4_const_splat(0);
+        wasm_v128_store(packed_weights, vzero);
+        $for N in range(4, NR, 4):
+          wasm_v128_store(packed_weights + ${N}, vzero);
       }
       packed_weights += ${NR};
 
@@ -187,6 +192,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__wasmsimd_x${KUNROLL}(
         } while (--nb != 0);
         packed_weights += (${NR} - n);
       } else {
+        const v128_t vzero = wasm_i32x4_const_splat(0);
+        wasm_v128_store(packed_weights, vzero);
+        $for N in range(4, NR, 4):
+          wasm_v128_store(packed_weights + ${N}, vzero);
         packed_weights += ${NR};
       }
 

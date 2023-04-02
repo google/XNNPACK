@@ -51,6 +51,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2_x1(
         $for N in range(NR):
           packed_w[${N}] = b[${N}];
         b += ${NR};
+      } else {
+        $for N in range(NR):
+          packed_w[${N}] = 0.0f;
       }
       packed_w += ${NR};
 
@@ -129,6 +132,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2_x1(
         } while (--nb != 0);
         packed_w += (${NR} - n);
       } else {
+        $for N in range(NR):
+          packed_w[${N}] = 0.0f;
         packed_w += ${NR};
       }
 

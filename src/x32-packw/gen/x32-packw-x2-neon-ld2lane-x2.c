@@ -53,6 +53,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_x2(
           uint32x2_t vb0 = vld1_u32(bias + 0);
           vst1_u32(packed_weights + 0, vb0);
           bias += 2;
+        } else {
+          const uint32x2_t vzero = vmov_n_u32(0);
+          vst1_u32(packed_weights + 0, vzero);
         }
         packed_weights += 2;
         const uint32_t* w0 = w;
@@ -89,6 +92,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_x2(
       // NC remainder of 1
       if XNN_LIKELY(bias != NULL) {
         *packed_weights = *bias++;
+      } else {
+        const uint32x2_t vzero = vmov_n_u32(0);
+        vst1_u32(packed_weights + 0, vzero);
       }
       packed_weights += 2;
       size_t k = kc;

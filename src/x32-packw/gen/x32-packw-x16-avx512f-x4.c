@@ -52,6 +52,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_x4(
         const __m512 vb0 = _mm512_loadu_ps(b);
         _mm512_store_ps(packed_w, vb0);
         b += 16;
+      } else {
+        const __m512 vzero = _mm512_setzero_ps();
+        _mm512_store_ps(packed_w, vzero);
       }
       packed_w += 16;
 
@@ -292,6 +295,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_x4(
         } while (--nb != 0);
         packed_w += (16 - n);
       } else {
+        const __m512 vzero = _mm512_setzero_ps();
+        _mm512_store_ps(packed_w, vzero);
         packed_w += 16;
       }
 

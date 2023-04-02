@@ -56,6 +56,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx512f_x${KUNROLL}(
         $for N in range(16,NR,16):
           _mm512_store_ps(packed_w + ${N}, vb${N});
         b += ${NR};
+      } else {
+        const __m512 vzero = _mm512_setzero_ps();
+        _mm512_store_ps(packed_w, vzero);
+        $for N in range(16,NR,16):
+          _mm512_store_ps(packed_w + ${N}, vzero);
       }
       packed_w += ${NR};
 
@@ -177,6 +182,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx512f_x${KUNROLL}(
         } while (--nb != 0);
         packed_w += (${NR} - n);
       } else {
+        const __m512 vzero = _mm512_setzero_ps();
+        _mm512_store_ps(packed_w, vzero);
+        $for N in range(16,NR,16):
+          _mm512_store_ps(packed_w + ${N}, vzero);
         packed_w += ${NR};
       }
 

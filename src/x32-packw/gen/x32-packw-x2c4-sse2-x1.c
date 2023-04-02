@@ -53,6 +53,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1(
         packed_w[0] = b[0];
         packed_w[1] = b[1];
         b += 2;
+      } else {
+        packed_w[0] = 0.0f;
+        packed_w[1] = 0.0f;
       }
       packed_w += 2;
 
@@ -134,6 +137,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1(
         } while (--nb != 0);
         packed_w += (2 - n);
       } else {
+        packed_w[0] = 0.0f;
+        packed_w[1] = 0.0f;
         packed_w += 2;
       }
 

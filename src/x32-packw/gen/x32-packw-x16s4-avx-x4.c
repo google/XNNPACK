@@ -57,6 +57,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x16s4__avx_x4(
         _mm_store_ps(packed_w + 8, vb8);
         _mm_store_ps(packed_w + 12, vb12);
         b += 16;
+      } else {
+        const __m128 vzero = _mm_setzero_ps();
+        _mm_store_ps(packed_w, vzero);
+        _mm_store_ps(packed_w + 4, vzero);
+        _mm_store_ps(packed_w + 8, vzero);
+        _mm_store_ps(packed_w + 12, vzero);
       }
       packed_w += 16;
 
@@ -442,6 +448,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x16s4__avx_x4(
         } while (--nb != 0);
         packed_w += (16 - n);
       } else {
+        const __m128 vzero = _mm_setzero_ps();
+        _mm_store_ps(packed_w, vzero);
+        _mm_store_ps(packed_w + 4, vzero);
+        _mm_store_ps(packed_w + 8, vzero);
+        _mm_store_ps(packed_w + 12, vzero);
         packed_w += 16;
       }
 

@@ -47,6 +47,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_x1(
         $for N in range(NR):
           packed_weights[${N}] = bias[${N}];
         bias += ${NR};
+      } else {
+        $for N in range(NR):
+          packed_weights[${N}] = 0;
       }
       packed_weights += ${NR};
 
@@ -136,6 +139,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_x1(
         } while (--nb != 0);
         packed_weights += (${NR} - n);
       } else {
+        $for N in range(NR):
+          packed_weights[${N}] = 0;
         packed_weights += ${NR};
       }
 

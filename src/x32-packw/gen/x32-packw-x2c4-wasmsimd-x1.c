@@ -49,6 +49,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1(
         packed_weights[0] = bias[0];
         packed_weights[1] = bias[1];
         bias += 2;
+      } else {
+        packed_weights[0] = 0;
+        packed_weights[1] = 0;
       }
       packed_weights += 2;
 
@@ -138,6 +141,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1(
         } while (--nb != 0);
         packed_weights += (2 - n);
       } else {
+        packed_weights[0] = 0;
+        packed_weights[1] = 0;
         packed_weights += 2;
       }
 
