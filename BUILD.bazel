@@ -90,6 +90,7 @@ OPERATOR_SRCS = [
     "src/operators/convolution-nchw.c",
     "src/operators/convolution-nhwc.c",
     "src/operators/deconvolution-nhwc.c",
+    "src/operators/dynamic-fully-connected-nc.c",
     "src/operators/fully-connected-nc.c",
     "src/operators/global-average-pooling-ncw.c",
     "src/operators/global-average-pooling-nwc.c",
@@ -9891,6 +9892,15 @@ xnnpack_unit_test(
     srcs = [
         "test/binary-elementwise-operator-tester.h",
         "test/divide-nd-eager.cc",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "dynamic_fully_connected_nc_test",
+    srcs = [
+        "test/dynamic-fully-connected-nc.cc",
+        "test/dynamic-fully-connected-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
 )

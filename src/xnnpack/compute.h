@@ -57,6 +57,9 @@ struct compute_parameters {
     pthreadpool_task_4d_tile_2d_with_id_t task_4d_tile_2d_with_id;
 #endif  // XNN_MAX_UARCH_TYPES > 1
   };
+  // Offset of the invocation context w.r.t. xnn_operator.context
+  // Typically 0, but can be non-zero when an operator does multiple invocations.
+  size_t context_offset;
   size_t range[6];
   size_t tile[2];
 };
@@ -167,6 +170,27 @@ XNN_PRIVATE void xnn_compute_transposev_6d(
     size_t n,
     size_t tile_m,
     size_t tile_n);
+
+struct packw_gemm_goi_context {
+  size_t k;
+  size_t nr;
+  size_t kr;
+  size_t sr;
+  const void* kernel;
+  size_t k_stride;
+  const void* bias;
+  size_t b_stride;
+  void* packed_weights;
+  size_t w_stride;
+  xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
+};
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_packw_gemm_goi(
+      const struct packw_gemm_goi_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t n_block_start,
+      size_t n_block_size);
+#endif
 
 struct gemm_context {
   size_t k_scaled;

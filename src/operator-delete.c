@@ -37,6 +37,7 @@ enum xnn_status xnn_delete_operator(xnn_operator_t op)
   xnn_release_memory(op->pixelwise_buffer);
   xnn_release_memory(op->subconvolution_buffer);
   xnn_release_simd_memory(op->lookup_table);
+  xnn_release_simd_memory(op->workspace);
   xnn_release_simd_memory(op);
   return xnn_status_success;
 }

@@ -242,7 +242,7 @@ static enum xnn_status setup_fully_connected_nc(
     xnn_overwrite_gemm_cases_with_generated_code(fully_connected_op, gemm_cases, mr);
   #endif  // XNN_PLATFORM_JIT
 
-  assert(mr > 0 && mr <= XNN_MAX_MR);
+  assert(mr != 0 && mr <= XNN_MAX_MR);
   struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr-1];
 
   fully_connected_op->context.gemm = (struct gemm_context) {

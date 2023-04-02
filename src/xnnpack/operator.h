@@ -23,7 +23,7 @@
 
 
 // Maximum number of pthreadpool parallelization invocations per operator.
-#define XNN_MAX_COMPUTE_INVOCATIONS 1
+#define XNN_MAX_COMPUTE_INVOCATIONS 2
 
 struct xnn_ukernel_conv2d {
   union {
@@ -58,6 +58,7 @@ struct xnn_ukernel_dwconv2d {
 
 struct xnn_ukernel_gemm {
   struct xnn_hmp_gemm_ukernel gemm_cases[XNN_MAX_MR];
+  xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;
@@ -193,6 +194,8 @@ struct xnn_operator {
   void* lookup_table;
   void* pixelwise_buffer;
   struct subconvolution_params* subconvolution_buffer;
+  void* workspace;
+  size_t workspace_size;
   uint32_t flags;
 
   union {
@@ -324,7 +327,11 @@ struct xnn_operator {
     struct dwconv2d_context dwconv2d;
     struct dwconv_context dwconv;
     struct elementwise_binary_context elementwise_binary;
-    struct gemm_context gemm;
+    // PACKW GEMM GOI + GEMM are used together in Dynamic Fully Connected.
+    struct {
+      struct gemm_context gemm;
+      struct packw_gemm_goi_context packw_gemm_goi;
+    };
     struct global_average_pooling_nwc_context global_average_pooling_nwc;
     struct global_average_pooling_ncw_context global_average_pooling_ncw;
     struct igemm_context igemm;
