@@ -14,12 +14,13 @@
 
 #include <xnnpack/cache.h>
 #include <xnnpack/common.h>
+#include <xnnpack/memory.h>
 
 #include "models/models.h"
 
 namespace models {
 
-ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
+ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
   alignas(16) static std::array<float, 150528 + XNN_EXTRA_BYTES / sizeof(float)> v0;
   alignas(16) static std::array<float, 200704 + XNN_EXTRA_BYTES / sizeof(float)> v1;
   alignas(16) static std::array<float, 200704 + XNN_EXTRA_BYTES / sizeof(float)> v2;
@@ -512,11 +513,17 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   ExecutionPlan operators;
   xnn_status status;
   xnn_caches caches = {};
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#if XNN_PLATFORM_JIT
   xnn_code_cache code_cache;
-  xnn_init_code_cache(&code_cache);
-  caches.code_cache = &code_cache;
-#endif
+  if (use_jit) {
+    status = xnn_init_code_cache(&code_cache);
+    if (status != xnn_status_success) {
+      std::cerr << "failed to initailize code cache" << std::endl;
+      return ExecutionPlan();
+    }
+    caches.code_cache = &code_cache;
+  }
+#endif  // XNN_PLATFORM_JIT
 
   xnn_operator_t op0 = nullptr;
   status = xnn_create_convolution2d_nhwc_f32(
@@ -2581,9 +2588,11 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   }
   operators.emplace_back(op112, xnn_delete_operator);
 
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
-  xnn_finalize_code_memory(&code_cache.cache.code);
-#endif
+#if XNN_PLATFORM_JIT
+  if (use_jit) {
+    xnn_finalize_code_memory(&code_cache.cache.code);
+  }
+#endif  // XNN_PLATFORM_JIT
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op0,
@@ -3791,6 +3800,14 @@ ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
   XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wpessimizing-move\"")
   return operators;
   XNN_PRAGMA_CLANG("clang diagnostic pop")
+}
+
+ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool) {
+  return FP32MobileNetV3Large(/*use_jit=*/false, threadpool);
+}
+
+ExecutionPlan FP32MobileNetV3LargeJit(pthreadpool_t threadpool) {
+  return FP32MobileNetV3Large(/*use_jit=*/true, threadpool);
 }
 
 }  // namespace models

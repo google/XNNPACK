@@ -19,6 +19,11 @@ ExecutionPlan FP32MobileNetV1(pthreadpool_t threadpool);
 ExecutionPlan FP32MobileNetV2(pthreadpool_t threadpool);
 ExecutionPlan FP32MobileNetV3Large(pthreadpool_t threadpool);
 ExecutionPlan FP32MobileNetV3Small(pthreadpool_t threadpool);
+
+ExecutionPlan FP32MobileNetV1Jit(pthreadpool_t threadpool);
+ExecutionPlan FP32MobileNetV2Jit(pthreadpool_t threadpool);
+ExecutionPlan FP32MobileNetV3LargeJit(pthreadpool_t threadpool);
+ExecutionPlan FP32MobileNetV3SmallJit(pthreadpool_t threadpool);
 ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool);
 
 ExecutionPlan FP32SparseMobileNetV1(float sparsity, pthreadpool_t threadpool);
