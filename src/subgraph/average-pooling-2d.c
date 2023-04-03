@@ -37,7 +37,6 @@ static enum xnn_status create_average_pooling_operator(
 
   enum xnn_status status;
   switch (node->compute_type) {
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_compute_type_fp16:
       status = xnn_create_average_pooling2d_nhwc_f16(
         node->params.pooling_2d.padding_top,
@@ -54,7 +53,6 @@ static enum xnn_status create_average_pooling_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_compute_type_fp32:
       status = xnn_create_average_pooling2d_nhwc_f32(
         node->params.pooling_2d.padding_top,
@@ -107,7 +105,6 @@ static enum xnn_status setup_average_pooling_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_average_pooling_nhwc_f16:
       return xnn_setup_average_pooling2d_nhwc_f16(
         opdata->operator_objects[0],
@@ -117,7 +114,6 @@ static enum xnn_status setup_average_pooling_operator(
         input_data,
         output_data,
         threadpool);
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_average_pooling_nhwc_f32:
       return xnn_setup_average_pooling2d_nhwc_f32(
         opdata->operator_objects[0],

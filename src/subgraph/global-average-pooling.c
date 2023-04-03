@@ -50,7 +50,6 @@ static enum xnn_status create_global_average_pooling_operator(
           node->flags,
           &opdata->operator_objects[0]);
         break;
-#ifndef XNN_NO_F16_OPERATORS
       case xnn_compute_type_fp16:
         status = xnn_create_global_average_pooling_ncw_f16(
           channel_dim /* channels */,
@@ -59,7 +58,6 @@ static enum xnn_status create_global_average_pooling_operator(
           node->flags,
           &opdata->operator_objects[0]);
         break;
-#endif  // !defined(XNN_NO_F16_OPERATORS)
       default:
         XNN_UNREACHABLE;
     }
@@ -75,7 +73,6 @@ static enum xnn_status create_global_average_pooling_operator(
           node->flags,
           &opdata->operator_objects[0]);
         break;
-#ifndef XNN_NO_F16_OPERATORS
       case xnn_compute_type_fp16:
         status = xnn_create_global_average_pooling_nwc_f16(
           channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
@@ -84,8 +81,6 @@ static enum xnn_status create_global_average_pooling_operator(
           node->flags,
           &opdata->operator_objects[0]);
         break;
-#endif  // !defined(XNN_NO_F16_OPERATORS)
-#ifndef XNN_NO_QS8_OPERATORS
       case xnn_compute_type_qs8:
       {
         const float output_scale = values[output_id].quantization.scale;
@@ -102,8 +97,6 @@ static enum xnn_status create_global_average_pooling_operator(
           &opdata->operator_objects[0]);
         break;
       }
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
       case xnn_compute_type_qu8:
       {
         const float output_scale = values[output_id].quantization.scale;
@@ -120,7 +113,6 @@ static enum xnn_status create_global_average_pooling_operator(
           &opdata->operator_objects[0]);
         break;
       }
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
       default:
         XNN_UNREACHABLE;
     }
@@ -176,7 +168,6 @@ static enum xnn_status setup_global_average_pooling_operator(
         output_data,
         threadpool);
       break;
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_global_average_pooling_ncw_f16:
       return xnn_setup_global_average_pooling_ncw_f16(
         opdata->operator_objects[0],
@@ -186,7 +177,6 @@ static enum xnn_status setup_global_average_pooling_operator(
         output_data,
         threadpool);
       break;
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_global_average_pooling_nwc_f32:
       return xnn_setup_global_average_pooling_nwc_f32(
         opdata->operator_objects[0],
@@ -196,7 +186,6 @@ static enum xnn_status setup_global_average_pooling_operator(
         output_data,
         threadpool);
       break;
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_global_average_pooling_nwc_f16:
       return xnn_setup_global_average_pooling_nwc_f16(
         opdata->operator_objects[0],
@@ -206,8 +195,6 @@ static enum xnn_status setup_global_average_pooling_operator(
         output_data,
         threadpool);
       break;
-#endif  // !defined(XNN_NO_F16_OPERATORS)
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_operator_type_global_average_pooling_nwc_qs8:
       return xnn_setup_global_average_pooling_nwc_qs8(
         opdata->operator_objects[0],
@@ -217,8 +204,6 @@ static enum xnn_status setup_global_average_pooling_operator(
         output_data,
         threadpool);
       break;
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_operator_type_global_average_pooling_nwc_qu8:
       return xnn_setup_global_average_pooling_nwc_qu8(
         opdata->operator_objects[0],
@@ -228,7 +213,6 @@ static enum xnn_status setup_global_average_pooling_operator(
         output_data,
         threadpool);
       break;
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -266,12 +250,8 @@ static enum xnn_status define_global_average_pooling_nd(
 
   switch (input_value->datatype) {
     case xnn_datatype_fp32:
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -297,16 +277,12 @@ static enum xnn_status define_global_average_pooling_nd(
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
       break;
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
       compute_type = xnn_compute_type_qs8;
       break;
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
       compute_type = xnn_compute_type_qu8;
       break;
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",

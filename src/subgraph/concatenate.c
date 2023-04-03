@@ -22,25 +22,13 @@ static enum xnn_status create_concatenate_operator_helper(
   size_t index)
 {
   switch (node->compute_type) {
-#ifndef XNN_NO_F16_OPERATORS
-    case xnn_compute_type_fp16: {
+    case xnn_compute_type_fp16:
       return xnn_create_copy_nc_x16(channels, input_stride, output_stride, node->flags, &opdata->operator_objects[index]);
-    }
-#endif  // !defined(XNN_NO_F16_OPERATORS)
-    case xnn_compute_type_fp32: {
+    case xnn_compute_type_fp32:
       return xnn_create_copy_nc_x32(channels, input_stride, output_stride, node->flags, &opdata->operator_objects[index]);
-    }
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_compute_type_qs8:
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_compute_type_qu8:
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
-#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
-    {
       return xnn_create_copy_nc_x8(channels, input_stride, output_stride, node->flags, &opdata->operator_objects[index]);
-    }
-#endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -237,34 +225,27 @@ static enum xnn_status setup_concatenate_operator_helper(
   }
 
   switch (opdata->operator_objects[index]->type) {
-#ifndef XNN_NO_F16_OPERATORS
-    case xnn_operator_type_copy_nc_x16: {
+    case xnn_operator_type_copy_nc_x16:
       return xnn_setup_copy_nc_x16(
         opdata->operator_objects[index],
         opdata->batch_size,
         input_data,
         (uint16_t*) output_data + channels,
         threadpool);
-    }
-#endif  // !defined(XNN_NO_F16_OPERATORS)
-    case xnn_operator_type_copy_nc_x32: {
+    case xnn_operator_type_copy_nc_x32:
       return xnn_setup_copy_nc_x32(
         opdata->operator_objects[index],
         opdata->batch_size,
         input_data,
         (uint32_t*) output_data + channels,
         threadpool);
-    }
-#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
-    case xnn_operator_type_copy_nc_x8: {
+    case xnn_operator_type_copy_nc_x8:
       return xnn_setup_copy_nc_x8(
         opdata->operator_objects[index],
         opdata->batch_size,
         input_data,
         (uint8_t*) output_data + channels,
         threadpool);
-    }
-#endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -471,7 +452,6 @@ enum xnn_status check_input_value(
   return xnn_status_success;
 }
 
-#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
 enum xnn_status check_input_compute_type(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
@@ -499,7 +479,6 @@ enum xnn_status check_input_compute_type(
   }
   return xnn_status_success;
 }
-#endif  // !defined( XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
 
 enum xnn_status xnn_define_concatenate_n(
   enum xnn_node_type node_type,
@@ -561,24 +540,18 @@ enum xnn_status xnn_define_concatenate_n(
 
   enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_datatype_fp16:
       compute_type = xnn_compute_type_fp16;
       break;
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
       break;
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
       compute_type = xnn_compute_type_qs8;
       break;
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
       compute_type = xnn_compute_type_qu8;
       break;
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -587,30 +560,28 @@ enum xnn_status xnn_define_concatenate_n(
       return xnn_status_invalid_parameter;
   }
 
-  #if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
-    if (compute_type == xnn_compute_type_qs8 || compute_type == xnn_compute_type_qu8) {
-      status = check_input_compute_type(subgraph, input_ids[0], output_id, "first", node_type);
-      if (status != xnn_status_success) {
-        return status;
-      }
-      status = check_input_compute_type(subgraph, input_ids[1], output_id, "second", node_type);
-      if (status != xnn_status_success) {
-        return status;
-      }
+  if (compute_type == xnn_compute_type_qs8 || compute_type == xnn_compute_type_qu8) {
+    status = check_input_compute_type(subgraph, input_ids[0], output_id, "first", node_type);
+    if (status != xnn_status_success) {
+      return status;
     }
-    if (num_inputs > 2) {
-      status = check_input_compute_type(subgraph, input_ids[2], output_id, "third", node_type);
-      if (status != xnn_status_success) {
-        return status;
-      }
+    status = check_input_compute_type(subgraph, input_ids[1], output_id, "second", node_type);
+    if (status != xnn_status_success) {
+      return status;
     }
-    if (num_inputs > 3) {
-      status = check_input_compute_type(subgraph, input_ids[3], output_id, "fourth", node_type);
-      if (status !=  xnn_status_success) {
-        return status;
-      }
+  }
+  if (num_inputs > 2) {
+    status = check_input_compute_type(subgraph, input_ids[2], output_id, "third", node_type);
+    if (status != xnn_status_success) {
+      return status;
     }
-  #endif  // !defined( XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
+  }
+  if (num_inputs > 3) {
+    status = check_input_compute_type(subgraph, input_ids[3], output_id, "fourth", node_type);
+    if (status !=  xnn_status_success) {
+      return status;
+    }
+  }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {

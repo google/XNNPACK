@@ -39,33 +39,25 @@ static enum xnn_status create_constant_pad_operator(
 
   enum xnn_status status;
   switch (node->compute_type) {
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_compute_type_fp16:
       status = xnn_create_constant_pad_nd_x16(
         &node->params.static_pad.padding_value,
         node->flags,
         &opdata->operator_objects[0]);
       break;
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_compute_type_fp32:
       status = xnn_create_constant_pad_nd_x32(
         &node->params.static_pad.padding_value,
         node->flags,
         &opdata->operator_objects[0]);
       break;
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_compute_type_qs8:
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_compute_type_qu8:
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
-#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
       status = xnn_create_constant_pad_nd_x8(
         &node->params.static_pad.padding_value,
         node->flags,
         &opdata->operator_objects[0]);
       break;
-#endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -102,7 +94,6 @@ static enum xnn_status setup_constant_pad_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
-#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
     case xnn_operator_type_constant_pad_nd_x8:
       return xnn_setup_constant_pad_nd_x8(
         opdata->operator_objects[0],
@@ -114,8 +105,6 @@ static enum xnn_status setup_constant_pad_operator(
         output_data,
         threadpool);
       break;
-#endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_constant_pad_nd_x16:
       return xnn_setup_constant_pad_nd_x16(
         opdata->operator_objects[0],
@@ -127,7 +116,6 @@ static enum xnn_status setup_constant_pad_operator(
         output_data,
         threadpool);
       break;
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_constant_pad_nd_x32:
       return xnn_setup_constant_pad_nd_x32(
         opdata->operator_objects[0],
@@ -173,12 +161,8 @@ enum xnn_status xnn_define_static_constant_pad(
 
   switch (input_value->datatype) {
     case xnn_datatype_fp32:
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -204,16 +188,12 @@ enum xnn_status xnn_define_static_constant_pad(
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
       break;
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
       compute_type = xnn_compute_type_qs8;
       break;
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
       compute_type = xnn_compute_type_qu8;
       break;
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -228,13 +208,11 @@ enum xnn_status xnn_define_static_constant_pad(
     return status;
   }
 
-#if !defined(XNN_NO_QU8_OPERATORS) || !defined(XNN_NO_QS8_OPERATORS)
   status = xnn_subgraph_check_quantization_parameter_matches(
       xnn_node_type_static_constant_pad, input_id, input_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
-#endif  // !defined(XNN_NO_QU8_OPERATORS) || !defined(XNN_NO_QS8_OPERATORS)
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {
@@ -248,7 +226,6 @@ enum xnn_status xnn_define_static_constant_pad(
     case xnn_datatype_fp32:
       node->params.static_pad.padding_value = float_as_uint32(padding_value);
       break;
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
     {
       const float output_scale = output_value->quantization.scale;
@@ -256,8 +233,6 @@ enum xnn_status xnn_define_static_constant_pad(
       node->params.static_pad.padding_value = xnn_qs8_quantize(padding_value, output_scale, output_zero_point);
       break;
     }
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
     {
       const float output_scale = output_value->quantization.scale;
@@ -265,7 +240,6 @@ enum xnn_status xnn_define_static_constant_pad(
       node->params.static_pad.padding_value = xnn_qu8_quantize(padding_value, output_scale, output_zero_point);
       break;
     }
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }

@@ -23,7 +23,6 @@
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-#ifndef XNN_NO_QU8_OPERATORS
 static void xnnpack_softmax_qu8(benchmark::State& state) {
   const size_t batch_size = static_cast<size_t>(state.range(0));
   const size_t channels = static_cast<size_t>(state.range(1));
@@ -91,7 +90,6 @@ static void xnnpack_softmax_qu8(benchmark::State& state) {
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
-#endif  // XNN_NO_QU8_OPERATORS
 
 static void xnnpack_softmax_f32(benchmark::State& state) {
   const size_t batch_size = static_cast<size_t>(state.range(0));
@@ -296,13 +294,11 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b)
   b->Args({257 * 257, 151});
 }
 
-#ifndef XNN_NO_QU8_OPERATORS
 BENCHMARK(xnnpack_softmax_qu8)->Apply(CharacteristicArguments)->UseRealTime();
-#endif  // XNN_NO_QU8_OPERATORS
-
 BENCHMARK(xnnpack_softmax_f32)->Apply(CharacteristicArguments)->UseRealTime();
+
 #ifdef BENCHMARK_TENSORFLOW_LITE
-BENCHMARK(tflite_softmax_f32)->Apply(CharacteristicArguments)->UseRealTime();
+  BENCHMARK(tflite_softmax_f32)->Apply(CharacteristicArguments)->UseRealTime();
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

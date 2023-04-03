@@ -44,14 +44,12 @@ static enum xnn_status create_negate_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_compute_type_fp16:
       status = xnn_create_negate_nc_f16(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->flags,
         &opdata->operator_objects[0]);
       break;
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -93,7 +91,6 @@ static enum xnn_status setup_negate_operator(
         input_data,
         output_data,
         threadpool);
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_negate_nc_f16:
       return xnn_setup_negate_nc_f16(
         opdata->operator_objects[0],
@@ -101,7 +98,6 @@ static enum xnn_status setup_negate_operator(
         input_data,
         output_data,
         threadpool);
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }

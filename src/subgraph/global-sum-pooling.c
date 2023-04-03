@@ -50,7 +50,6 @@ static enum xnn_status create_global_sum_pooling_operator(
           node->flags,
           &opdata->operator_objects[0]);
       break;
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_compute_type_fp16:
       status = xnn_create_global_sum_pooling_nwc_f16(
           channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
@@ -59,7 +58,6 @@ static enum xnn_status create_global_sum_pooling_operator(
           node->flags,
           &opdata->operator_objects[0]);
       break;
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -114,7 +112,6 @@ static enum xnn_status setup_global_sum_pooling_operator(
         output_data,
         threadpool);
       break;
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_global_sum_pooling_nwc_f16:
       return xnn_setup_global_sum_pooling_nwc_f16(
         opdata->operator_objects[0],
@@ -124,7 +121,6 @@ static enum xnn_status setup_global_sum_pooling_operator(
         output_data,
         threadpool);
       break;
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }

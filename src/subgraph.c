@@ -1236,18 +1236,16 @@ enum xnn_status xnn_subgraph_optimize(
     xnn_log_error("failed to force FP16 inference: hardware supports neither native nor emulated FP16 operators");
     return xnn_status_unsupported_hardware;
   }
-  #ifndef XNN_NO_F16_OPERATORS
-    const bool try_native_fp16 =
-      (flags & XNN_FLAG_HINT_FP16_INFERENCE) && xnn_is_f16_supported_natively(hardware_config);
-    const bool force_fp16 = (flags & XNN_FLAG_FORCE_FP16_INFERENCE);
-    if (try_native_fp16 || force_fp16) {
-      const bool fp16_rewrite_succeeded = xnn_subgraph_rewrite_for_fp16(subgraph);
-      if (force_fp16 && !fp16_rewrite_succeeded) {
-        xnn_log_error("failed to force FP16 inference: subgraph is incompatible with FP16 operators");
-        return xnn_status_unsupported_parameter;
-      }
+  const bool try_native_fp16 =
+    (flags & XNN_FLAG_HINT_FP16_INFERENCE) && xnn_is_f16_supported_natively(hardware_config);
+  const bool force_fp16 = (flags & XNN_FLAG_FORCE_FP16_INFERENCE);
+  if (try_native_fp16 || force_fp16) {
+    const bool fp16_rewrite_succeeded = xnn_subgraph_rewrite_for_fp16(subgraph);
+    if (force_fp16 && !fp16_rewrite_succeeded) {
+      xnn_log_error("failed to force FP16 inference: subgraph is incompatible with FP16 operators");
+      return xnn_status_unsupported_parameter;
     }
-  #endif  // XNN_NO_F16_OPERATORS
+  }
 
   #if XNN_ENABLE_SPARSE
     if ((flags & XNN_FLAG_HINT_SPARSE_INFERENCE) && (xnn_is_f16_chw_compatible_config(hardware_config))) {
@@ -1268,18 +1266,16 @@ enum xnn_status xnn_delete_subgraph(
     }
 
     if (subgraph->values != NULL) {
-      #ifndef XNN_NO_F16_OPERATORS
-        // Release the dynamic allocations created during FP16 rewrite, if the subgraph still has ownership of them.
-        for (uint32_t i = 0; i < subgraph->num_values; i++) {
-          struct xnn_value* value = &subgraph->values[i];
-          if (value->fp16_compatible && value->data != NULL) {
-            XNN_PRAGMA_CLANG("clang diagnostic push")
-            XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wcast-qual\"")
-            xnn_release_memory((void*)value->data);
-            XNN_PRAGMA_CLANG("clang diagnostic pop")
-          }
+      // Release the dynamic allocations created during FP16 rewrite, if the subgraph still has ownership of them.
+      for (uint32_t i = 0; i < subgraph->num_values; i++) {
+        struct xnn_value* value = &subgraph->values[i];
+        if (value->fp16_compatible && value->data != NULL) {
+          XNN_PRAGMA_CLANG("clang diagnostic push")
+          XNN_PRAGMA_CLANG("clang diagnostic ignored \"-Wcast-qual\"")
+          xnn_release_memory((void*)value->data);
+          XNN_PRAGMA_CLANG("clang diagnostic pop")
         }
-      #endif  // XNN_NO_F16_OPERATORS
+      }
 
       memset(subgraph->values, 0, sizeof(struct xnn_value) * subgraph->num_values);
       xnn_release_memory(subgraph->values);

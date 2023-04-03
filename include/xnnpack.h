@@ -1614,8 +1614,6 @@ enum xnn_status xnn_run_operator(
 enum xnn_status xnn_delete_operator(
   xnn_operator_t op);
 
-#ifndef XNN_NO_F32_OPERATORS
-
 enum xnn_status xnn_create_abs_nc_f32(
   size_t channels,
   size_t input_stride,
@@ -2458,8 +2456,6 @@ enum xnn_status xnn_run_truncation_nc_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
-#ifndef XNN_NO_NCHW_OPERATORS
-
 enum xnn_status xnn_create_depth_to_space_nchw2nhwc_x32(
   size_t output_channels,
   size_t input_channel_stride,
@@ -2542,12 +2538,6 @@ enum xnn_status xnn_setup_resize_bilinear2d_nchw_f32(
   const float* input,
   float* output,
   pthreadpool_t threadpool);
-
-#endif  // XNN_NO_NCHW_OPERATORS
-
-#endif  // XNN_NO_F32_OPERATORS
-
-#ifndef XNN_NO_X32_OPERATORS
 
 enum xnn_status xnn_create_channel_shuffle_nc_x32(
   size_t groups,
@@ -2716,10 +2706,6 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
   const uint32_t* index,
   void* output,
   pthreadpool_t threadpool);
-
-#endif  // XNN_NO_X32_OPERATORS
-
-#ifndef XNN_NO_F16_OPERATORS
 
 enum xnn_status xnn_create_abs_nc_f16(
   size_t channels,
@@ -3258,8 +3244,6 @@ enum xnn_status xnn_setup_truncation_nc_f16(
   void* output,
   pthreadpool_t threadpool);
 
-#ifndef XNN_NO_NCHW_OPERATORS
-
 enum xnn_status xnn_create_convolution2d_nchw_f16(
   uint32_t input_padding_top,
   uint32_t input_padding_right,
@@ -3342,12 +3326,6 @@ enum xnn_status xnn_setup_resize_bilinear2d_nchw_f16(
   const void* input,
   void* output,
   pthreadpool_t threadpool);
-
-#endif  // XNN_NO_NCHW_OPERATORS
-
-#endif  // XNN_NO_F16_OPERATORS
-
-#ifndef XNN_NO_X16_OPERATORS
 
 enum xnn_status xnn_create_constant_pad_nd_x16(
   const void* padding_value,
@@ -3459,10 +3437,6 @@ enum xnn_status xnn_run_transpose_nd_x16(
     uint32_t flags,
     pthreadpool_t threadpool);
 
-#endif  // XNN_NO_X16_OPERATORS
-
-#ifndef XNN_NO_QC8_OPERATORS
-
 enum xnn_status xnn_create_convolution2d_nhwc_qc8(
   uint32_t input_padding_top,
   uint32_t input_padding_right,
@@ -3500,10 +3474,6 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qc8(
   const int8_t* input,
   int8_t* output,
   pthreadpool_t threadpool);
-
-#endif  // XNN_NO_QC8_OPERATORS
-
-#ifndef XNN_NO_QS8_OPERATORS
 
 enum xnn_status xnn_create_add_nd_qs8(
   int8_t input1_zero_point,
@@ -3834,10 +3804,6 @@ enum xnn_status xnn_setup_tanh_nc_qs8(
   const int8_t* input,
   int8_t* output,
   pthreadpool_t threadpool);
-
-#endif  // XNN_NO_QS8_OPERATORS
-
-#ifndef XNN_NO_QU8_OPERATORS
 
 enum xnn_status xnn_create_add_nd_qu8(
   uint8_t input1_zero_point,
@@ -4198,10 +4164,6 @@ enum xnn_status xnn_setup_tanh_nc_qu8(
   uint8_t* output,
   pthreadpool_t threadpool);
 
-#endif  // XNN_NO_QU8_OPERATORS
-
-#ifndef XNN_NO_S8_OPERATORS
-
 enum xnn_status xnn_create_clamp_nc_s8(
   size_t channels,
   size_t input_stride,
@@ -4264,10 +4226,6 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_s8(
   int8_t* output,
   pthreadpool_t threadpool);
 
-#endif  // XNN_NO_S8_OPERATORS
-
-#ifndef XNN_NO_U8_OPERATORS
-
 enum xnn_status xnn_create_clamp_nc_u8(
   size_t channels,
   size_t input_stride,
@@ -4329,10 +4287,6 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_u8(
   const uint8_t* input,
   uint8_t* output,
   pthreadpool_t threadpool);
-
-#endif  // XNN_NO_U8_OPERATORS
-
-#ifndef XNN_NO_X8_OPERATORS
 
 enum xnn_status xnn_create_copy_nc_x8(
   size_t channels,
@@ -4458,10 +4412,6 @@ enum xnn_status xnn_run_transpose_nd_x8(
     const size_t* output_perm,
     uint32_t flags,
     pthreadpool_t threadpool);
-
-#endif  // XNN_NO_X8_OPERATORS
-
-#ifndef XNN_NO_CVT_OPERATORS
 
 enum xnn_status xnn_create_convert_nc_f16_f32(
   size_t channels,
@@ -4692,8 +4642,6 @@ enum xnn_status xnn_run_convert_nc_qu8_f32(
   uint8_t input_zero_point,
   uint32_t flags,
   pthreadpool_t threadpool);
-
-#endif  // XNN_NO_CVT_OPERATORS
 
 #ifdef __cplusplus
 }  // extern "C"

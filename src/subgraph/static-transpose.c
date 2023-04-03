@@ -37,17 +37,13 @@ static enum xnn_status create_transpose_operator(
     case xnn_compute_type_fp32:
       status = xnn_create_transpose_nd_x32(node->flags, &opdata->operator_objects[0]);
       break;
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_compute_type_fp16:
       status = xnn_create_transpose_nd_x16(node->flags, &opdata->operator_objects[0]);
       break;
-#endif
-#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
     case xnn_compute_type_qs8:
     case xnn_compute_type_qu8:
       status = xnn_create_transpose_nd_x8(node->flags, &opdata->operator_objects[0]);
       break;
-#endif
     default:
       XNN_UNREACHABLE;
   }
@@ -88,7 +84,6 @@ static enum xnn_status setup_transpose_operator(
 
   enum xnn_status status;
    switch (opdata->operator_objects[0]->type) {
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_transpose_nd_x16: {
       status = xnn_setup_transpose_nd_x16(
         opdata->operator_objects[0],
@@ -100,7 +95,6 @@ static enum xnn_status setup_transpose_operator(
         threadpool);
       break;
     }
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_transpose_nd_x32: {
       status = xnn_setup_transpose_nd_x32(
         opdata->operator_objects[0],
@@ -112,7 +106,6 @@ static enum xnn_status setup_transpose_operator(
         threadpool);
       break;
     }
-#if !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
     case xnn_operator_type_transpose_nd_x8: {
       status = xnn_setup_transpose_nd_x8(
         opdata->operator_objects[0],
@@ -124,7 +117,6 @@ static enum xnn_status setup_transpose_operator(
         threadpool);
       break;
     }
-#endif  // !defined(XNN_NO_QS8_OPERATORS) || !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -206,16 +198,12 @@ enum xnn_status xnn_define_static_transpose(
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
       break;
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
       compute_type = xnn_compute_type_qs8;
       break;
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
       compute_type = xnn_compute_type_qu8;
       break;
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -226,12 +214,8 @@ enum xnn_status xnn_define_static_transpose(
 
   switch (input_value->datatype) {
     case xnn_datatype_fp32:
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
       break;
     default:
       xnn_log_error(

@@ -30,7 +30,6 @@
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 
-#ifndef XNN_NO_F16_OPERATORS
 static void xnnpack_sigmoid_f16(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
@@ -94,7 +93,6 @@ static void xnnpack_sigmoid_f16(benchmark::State& state) {
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
-#endif  // XNN_NO_F16_OPERATORS
 
 static void xnnpack_sigmoid_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
@@ -159,7 +157,6 @@ static void xnnpack_sigmoid_f32(benchmark::State& state) {
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-#ifndef XNN_NO_QS8_OPERATORS
 static void xnnpack_sigmoid_qs8(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
@@ -227,9 +224,7 @@ static void xnnpack_sigmoid_qs8(benchmark::State& state) {
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
-#endif  // XNN_NO_QS8_OPERATORS
 
-#ifndef XNN_NO_QU8_OPERATORS
 static void xnnpack_sigmoid_qu8(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
@@ -296,7 +291,6 @@ static void xnnpack_sigmoid_qu8(benchmark::State& state) {
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
-#endif  // XNN_NO_QU8_OPERATORS
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
 static void tflite_sigmoid_f32(benchmark::State& state) {
@@ -608,24 +602,18 @@ static void tflite_sigmoid_qu8(benchmark::State& state) {
 }
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-#ifndef XNN_NO_F16_OPERATORS
-  BENCHMARK(xnnpack_sigmoid_f16)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
-    ->UseRealTime();
-#endif  // XNN_NO_F16_OPERATORS
+BENCHMARK(xnnpack_sigmoid_f16)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+  ->UseRealTime();
 BENCHMARK(xnnpack_sigmoid_f32)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
-#ifndef XNN_NO_QS8_OPERATORS
-  BENCHMARK(xnnpack_sigmoid_qs8)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
-    ->UseRealTime();
-#endif  // XNN_NO_QS8_OPERATORS
-#ifndef XNN_NO_QU8_OPERATORS
-  BENCHMARK(xnnpack_sigmoid_qu8)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
-    ->UseRealTime();
-#endif  // XNN_NO_QU8_OPERATORS
+BENCHMARK(xnnpack_sigmoid_qs8)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
+  ->UseRealTime();
+BENCHMARK(xnnpack_sigmoid_qu8)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
+  ->UseRealTime();
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
   BENCHMARK(tflite_sigmoid_f32)

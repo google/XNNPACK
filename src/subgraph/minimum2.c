@@ -39,13 +39,11 @@ static enum xnn_status create_minimum_operator(
 
   enum xnn_status status;
   switch (node->compute_type) {
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_compute_type_fp16:
       status = xnn_create_minimum_nd_f16(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_compute_type_fp32:
       status = xnn_create_minimum_nd_f32(
         node->flags,
@@ -115,7 +113,6 @@ static enum xnn_status setup_minimum_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_minimum_nd_f16:
       return xnn_setup_minimum_nd_f16(
         opdata->operator_objects[0],
@@ -125,7 +122,6 @@ static enum xnn_status setup_minimum_operator(
         opdata->shape2.dim,
         input1_data, input2_data, output_data,
         threadpool);
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_minimum_nd_f32:
       return xnn_setup_minimum_nd_f32(
         opdata->operator_objects[0],

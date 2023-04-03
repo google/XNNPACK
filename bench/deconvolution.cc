@@ -25,7 +25,6 @@
 #endif  // BENCHMARK_TENSORFLOW_LITE */
 #include "bench/utils.h"
 
-#ifndef XNN_NO_QU8_OPERATORS
 void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
   const size_t input_height = state.range(1);
@@ -145,7 +144,6 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
     kernel_height * kernel_width,
   benchmark::Counter::kIsRate);
 }
-#endif  // XNN_NO_QU8_OPERATORS
 
 void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
@@ -515,23 +513,21 @@ BENCHMARK_CAPTURE(xnnpack_deconvolution_f32, espnet, "ESPNet")
   ->Apply(ESPNet)
   ->UseRealTime();
 
-#ifndef XNN_NO_QU8_OPERATORS
-  BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, fcn32, "FCN-32")
-    ->Apply(FCN32)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, fcn16, "FCN-16")
-    ->Apply(FCN16)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, fcn8, "FCN-8")
-    ->Apply(FCN8)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, enet, "ENet")
-    ->Apply(ENet)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, espnet, "ESPNet")
-    ->Apply(ESPNet)
-    ->UseRealTime();
-#endif  // XNN_NO_QU8_OPERATORS
+BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, fcn32, "FCN-32")
+  ->Apply(FCN32)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, fcn16, "FCN-16")
+  ->Apply(FCN16)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, fcn8, "FCN-8")
+  ->Apply(FCN8)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, enet, "ENet")
+  ->Apply(ENet)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, espnet, "ESPNet")
+  ->Apply(ESPNet)
+  ->UseRealTime();
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
   BENCHMARK_CAPTURE(tflite_deconvolution_f32, fcn32, "FCN-32")

@@ -38,7 +38,6 @@ static enum xnn_status create_elu_operator(
 
   enum xnn_status status;
   switch (node->compute_type) {
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_compute_type_fp16:
       status = xnn_create_elu_nc_f16(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
@@ -46,7 +45,6 @@ static enum xnn_status create_elu_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-#endif  // XNN_NO_F16_OPERATORS
     case xnn_compute_type_fp32:
       status = xnn_create_elu_nc_f32(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
@@ -54,7 +52,6 @@ static enum xnn_status create_elu_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_compute_type_qs8:
       status = xnn_create_elu_nc_qs8(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
@@ -67,7 +64,6 @@ static enum xnn_status create_elu_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-#endif  // XNN_NO_QS8_OPERATORS
     default:
       XNN_UNREACHABLE;
   }
@@ -102,7 +98,6 @@ static enum xnn_status setup_elu_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_elu_nc_f16:
       return xnn_setup_elu_nc_f16(
         opdata->operator_objects[0],
@@ -110,7 +105,6 @@ static enum xnn_status setup_elu_operator(
         input_data,
         output_data,
         threadpool);
-#endif  // XNN_NO_F16_OPERATORS
     case xnn_operator_type_elu_nc_f32:
       return xnn_setup_elu_nc_f32(
         opdata->operator_objects[0],
@@ -118,7 +112,6 @@ static enum xnn_status setup_elu_operator(
         input_data,
         output_data,
         threadpool);
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_operator_type_elu_nc_qs8:
       return xnn_setup_elu_nc_qs8(
         opdata->operator_objects[0],
@@ -126,7 +119,6 @@ static enum xnn_status setup_elu_operator(
         input_data,
         output_data,
         threadpool);
-#endif  // XNN_NO_QS8_OPERATORS
     default:
       XNN_UNREACHABLE;
   }
@@ -163,9 +155,7 @@ enum xnn_status xnn_define_elu(
 
   switch (input_value->datatype) {
     case xnn_datatype_fp32:
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -196,11 +186,9 @@ enum xnn_status xnn_define_elu(
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
       break;
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
       compute_type = xnn_compute_type_qs8;
       break;
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",

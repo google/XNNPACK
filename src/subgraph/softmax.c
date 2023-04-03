@@ -45,14 +45,12 @@ static enum xnn_status create_softmax_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_datatype_fp16:
       status = xnn_create_softmax_nc_f16(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         node->flags,
         &opdata->operator_objects[0]);
       break;
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -94,7 +92,6 @@ static enum xnn_status setup_softmax_operator(
         input_data,
         output_data,
         threadpool);
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_softmax_nc_f16:
       return xnn_setup_softmax_nc_f16(
         opdata->operator_objects[0],
@@ -102,7 +99,6 @@ static enum xnn_status setup_softmax_operator(
         input_data,
         output_data,
         threadpool);
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }

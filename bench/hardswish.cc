@@ -90,7 +90,6 @@ static void xnnpack_hardswish_f32(benchmark::State& state) {
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-#ifndef XNN_NO_F16_OPERATORS
 static void xnnpack_hardswish_f16(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
@@ -154,7 +153,6 @@ static void xnnpack_hardswish_f16(benchmark::State& state) {
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
-#endif  // XNN_NO_F16_OPERATORS
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
 static void tflite_hardswish_f32(benchmark::State& state) {
@@ -257,11 +255,9 @@ static void tflite_hardswish_f32(benchmark::State& state) {
 BENCHMARK(xnnpack_hardswish_f32)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
-#ifndef XNN_NO_F16_OPERATORS
-  BENCHMARK(xnnpack_hardswish_f16)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
-    ->UseRealTime();
-#endif  // XNN_NO_F16_OPERATORS
+BENCHMARK(xnnpack_hardswish_f16)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+  ->UseRealTime();
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
   BENCHMARK(tflite_hardswish_f32)

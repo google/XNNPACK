@@ -39,7 +39,6 @@ static enum xnn_status create_depth_to_space_operator(
   if (values[input_id].layout == xnn_layout_type_nchw) {
     assert(values[output_id].layout == xnn_layout_type_nhwc);
     switch (node->compute_type) {
-#ifndef XNN_NO_F16_OPERATORS
       case xnn_compute_type_fp16:
         status = xnn_create_depth_to_space_nchw2nhwc_x16(
             output_channel_dim /* output channels */,
@@ -49,7 +48,6 @@ static enum xnn_status create_depth_to_space_operator(
             node->flags,
             &opdata->operator_objects[0]);
         break;
-#endif  // XNN_NO_F16_OPERATORS
       case xnn_compute_type_fp32:
         status = xnn_create_depth_to_space_nchw2nhwc_x32(
             output_channel_dim /* output channels */,
@@ -66,7 +64,6 @@ static enum xnn_status create_depth_to_space_operator(
     assert(values[input_id].layout == xnn_layout_type_nhwc);
     assert(values[output_id].layout == xnn_layout_type_nhwc);
     switch (node->compute_type) {
-#ifndef XNN_NO_F16_OPERATORS
       case xnn_compute_type_fp16:
         status = xnn_create_depth_to_space_nhwc_x16(
             output_channel_dim /* output channels */,
@@ -76,7 +73,6 @@ static enum xnn_status create_depth_to_space_operator(
             node->flags,
             &opdata->operator_objects[0]);
         break;
-#endif  // XNN_NO_F16_OPERATORS
       case xnn_compute_type_fp32:
         status = xnn_create_depth_to_space_nhwc_x32(
             output_channel_dim /* output channels */,
@@ -86,7 +82,6 @@ static enum xnn_status create_depth_to_space_operator(
             node->flags,
             &opdata->operator_objects[0]);
         break;
-#if !defined(XNN_NO_S8_OPERATORS) && !defined(XNN_NO_U8_OPERATORS)
       case xnn_compute_type_qs8:
       case xnn_compute_type_qu8:
         status = xnn_create_depth_to_space_nhwc_x8(
@@ -97,7 +92,6 @@ static enum xnn_status create_depth_to_space_operator(
             node->flags,
             &opdata->operator_objects[0]);
         break;
-#endif  // !defined(XNN_NO_S8_OPERATORS) && !defined(XNN_NO_U8_OPERATORS)
       default:
         XNN_UNREACHABLE;
     }
@@ -137,7 +131,6 @@ static enum xnn_status setup_depth_to_space_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_depth_to_space_nchw2nhwc_x16:
       return xnn_setup_depth_to_space_nchw2nhwc_x16(
           opdata->operator_objects[0],
@@ -147,7 +140,6 @@ static enum xnn_status setup_depth_to_space_operator(
           input_data,
           output_data,
           threadpool);
-#endif  // XNN_NO_F16_OPERATORS
     case xnn_operator_type_depth_to_space_nchw2nhwc_x32:
       return xnn_setup_depth_to_space_nchw2nhwc_x32(
           opdata->operator_objects[0],
@@ -157,7 +149,6 @@ static enum xnn_status setup_depth_to_space_operator(
           input_data,
           output_data,
           threadpool);
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_depth_to_space_nhwc_x16:
       return xnn_setup_depth_to_space_nhwc_x16(
           opdata->operator_objects[0],
@@ -167,7 +158,6 @@ static enum xnn_status setup_depth_to_space_operator(
           input_data,
           output_data,
           threadpool);
-#endif  // XNN_NO_F16_OPERATORS
     case xnn_operator_type_depth_to_space_nhwc_x32:
       return xnn_setup_depth_to_space_nhwc_x32(
           opdata->operator_objects[0],
@@ -177,7 +167,6 @@ static enum xnn_status setup_depth_to_space_operator(
           input_data,
           output_data,
           threadpool);
-#if !defined(XNN_NO_S8_OPERATORS) && !defined(XNN_NO_U8_OPERATORS)
     case xnn_operator_type_depth_to_space_nhwc_x8:
       return xnn_setup_depth_to_space_nhwc_x8(
           opdata->operator_objects[0],
@@ -187,7 +176,6 @@ static enum xnn_status setup_depth_to_space_operator(
           input_data,
           output_data,
           threadpool);
-#endif  // !defined(XNN_NO_S8_OPERATORS) && !defined(XNN_NO_U8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -218,12 +206,8 @@ enum xnn_status xnn_define_depth_to_space(
 
   switch (input_value->datatype) {
     case xnn_datatype_fp32:
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -249,16 +233,12 @@ enum xnn_status xnn_define_depth_to_space(
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
       break;
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
       compute_type = xnn_compute_type_qs8;
       break;
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
       compute_type = xnn_compute_type_qu8;
       break;
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
@@ -274,13 +254,11 @@ enum xnn_status xnn_define_depth_to_space(
     return status;
   }
 
-#if !defined(XNN_NO_QU8_OPERATORS) || !defined(XNN_NO_QS8_OPERATORS)
   status = xnn_subgraph_check_quantization_parameter_matches(
       xnn_node_type_depth_to_space, input_id, input_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
-#endif  // !defined(XNN_NO_QU8_OPERATORS) || !defined(XNN_NO_QS8_OPERATORS)
 
   if (block_size < 2) {
     xnn_log_error(

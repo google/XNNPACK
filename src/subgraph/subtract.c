@@ -40,7 +40,6 @@ static enum xnn_status create_subtract_operator(
 
   enum xnn_status status;
   switch (node->compute_type) {
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_compute_type_fp16:
       status = xnn_create_subtract_nd_f16(
         node->activation.output_min,
@@ -48,7 +47,6 @@ static enum xnn_status create_subtract_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_compute_type_fp32:
       status = xnn_create_subtract_nd_f32(
         node->activation.output_min,
@@ -56,7 +54,6 @@ static enum xnn_status create_subtract_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_compute_type_qs8:
     {
       const float output_scale = values[output_id].quantization.scale;
@@ -73,8 +70,6 @@ static enum xnn_status create_subtract_operator(
         &opdata->operator_objects[0]);
       break;
     }
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_compute_type_qu8:
     {
       const float output_scale = values[output_id].quantization.scale;
@@ -91,7 +86,6 @@ static enum xnn_status create_subtract_operator(
         &opdata->operator_objects[0]);
       break;
     }
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -156,7 +150,6 @@ static enum xnn_status setup_subtract_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
-#ifndef XNN_NO_F16_OPERATORS
     case xnn_operator_type_subtract_nd_f16:
       return xnn_setup_subtract_nd_f16(
         opdata->operator_objects[0],
@@ -166,7 +159,6 @@ static enum xnn_status setup_subtract_operator(
         opdata->shape2.dim,
         input1_data, input2_data, output_data,
         threadpool);
-#endif  // !defined(XNN_NO_F16_OPERATORS)
     case xnn_operator_type_subtract_nd_f32:
       return xnn_setup_subtract_nd_f32(
         opdata->operator_objects[0],
@@ -176,7 +168,6 @@ static enum xnn_status setup_subtract_operator(
         opdata->shape2.dim,
         input1_data, input2_data, output_data,
         threadpool);
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_operator_type_subtract_nd_qs8:
       return xnn_setup_subtract_nd_qs8(
         opdata->operator_objects[0],
@@ -186,8 +177,6 @@ static enum xnn_status setup_subtract_operator(
         opdata->shape2.dim,
         input1_data, input2_data, output_data,
         threadpool);
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_operator_type_subtract_nd_qu8:
       return xnn_setup_subtract_nd_qu8(
         opdata->operator_objects[0],
@@ -197,7 +186,6 @@ static enum xnn_status setup_subtract_operator(
         opdata->shape2.dim,
         input1_data, input2_data, output_data,
         threadpool);
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       XNN_UNREACHABLE;
   }
@@ -235,12 +223,8 @@ enum xnn_status xnn_define_subtract(
 
   switch (input1_value->datatype) {
     case xnn_datatype_fp32:
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -263,12 +247,8 @@ enum xnn_status xnn_define_subtract(
 
   switch (input2_value->datatype) {
     case xnn_datatype_fp32:
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
       break;
     default:
       xnn_log_error(
@@ -294,16 +274,12 @@ enum xnn_status xnn_define_subtract(
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
       break;
-#ifndef XNN_NO_QS8_OPERATORS
     case xnn_datatype_qint8:
       compute_type = xnn_compute_type_qs8;
       break;
-#endif  // !defined(XNN_NO_QS8_OPERATORS)
-#ifndef XNN_NO_QU8_OPERATORS
     case xnn_datatype_quint8:
       compute_type = xnn_compute_type_qu8;
       break;
-#endif  // !defined(XNN_NO_QU8_OPERATORS)
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",

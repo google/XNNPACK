@@ -27,7 +27,6 @@
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 
-#ifndef XNN_NO_F16_OPERATORS
 static void xnnpack_leaky_relu_f16(benchmark::State& state) {
   const size_t batch_size = state.range(0);
 
@@ -92,7 +91,6 @@ static void xnnpack_leaky_relu_f16(benchmark::State& state) {
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
-#endif  // XNN_NO_F16_OPERATORS
 
 static void xnnpack_leaky_relu_f32(benchmark::State& state) {
   const size_t batch_size = state.range(0);
@@ -607,11 +605,9 @@ static void tflite_leaky_relu_qu8(benchmark::State& state) {
 }
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-#ifndef XNN_NO_F16_OPERATORS
-  BENCHMARK(xnnpack_leaky_relu_f16)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
-    ->UseRealTime();
-#endif  // XNN_NO_F16_OPERATORS
+BENCHMARK(xnnpack_leaky_relu_f16)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+  ->UseRealTime();
 BENCHMARK(xnnpack_leaky_relu_f32)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
