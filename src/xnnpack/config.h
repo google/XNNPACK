@@ -79,6 +79,14 @@ static inline bool xnn_is_f16_chw_compatible_config(const struct xnn_hardware_co
   #endif
 }
 
+static inline bool xnn_is_f16_supported_natively(const struct xnn_hardware_config hardware_config[XNN_MIN_ELEMENTS(1)]) {
+  #if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR) || (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)
+    return hardware_config->use_arm_neon_fp16_arith;
+  #else
+    return false;
+  #endif
+}
+
 struct xnn_x8_lut_config {
   xnn_x8_lut_ukernel_fn microkernel;
   // Number of elements in a tile.

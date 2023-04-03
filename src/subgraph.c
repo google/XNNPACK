@@ -1238,7 +1238,7 @@ enum xnn_status xnn_subgraph_optimize(
   }
   #ifndef XNN_NO_F16_OPERATORS
     const bool try_native_fp16 =
-      (flags & XNN_FLAG_HINT_FP16_INFERENCE) && xnn_is_f16_compatible_config(hardware_config);
+      (flags & XNN_FLAG_HINT_FP16_INFERENCE) && xnn_is_f16_supported_natively(hardware_config);
     const bool force_fp16 = (flags & XNN_FLAG_FORCE_FP16_INFERENCE);
     if (try_native_fp16 || force_fp16) {
       const bool fp16_rewrite_succeeded = xnn_subgraph_rewrite_for_fp16(subgraph);
