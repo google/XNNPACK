@@ -13397,6 +13397,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_x4(
         _mm_store_ps(packed_w + 4, vb4567);
         _mm_store_ps(packed_w + 8, vb89AB);
         _mm_store_ps(packed_w + 12, vbCDEF);
+      } else {
+        const __m128 vzero = _mm_setzero_ps();
+        _mm_store_ps(packed_w, vzero);
+        _mm_store_ps(packed_w + 4, vzero);
+        _mm_store_ps(packed_w + 8, vzero);
+        _mm_store_ps(packed_w + 12, vzero);
       }
       packed_w += 16;
 
@@ -13764,6 +13770,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_x4(
         } while (--nb != 0);
         packed_w += (16 - n);
       } else {
+        const __m128 vzero = _mm_setzero_ps();
+        _mm_store_ps(packed_w, vzero);
+        _mm_store_ps(packed_w + 4, vzero);
+        _mm_store_ps(packed_w + 8, vzero);
+        _mm_store_ps(packed_w + 12, vzero);
         packed_w += 16;
       }
 
@@ -14148,6 +14159,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x4(
         _mm_store_ps(packed_w + 8, vb8);
         _mm_store_ps(packed_w + 12, vb12);
         b += 16;
+      } else {
+        const __m128 vzero = _mm_setzero_ps();
+        _mm_store_ps(packed_w, vzero);
+        _mm_store_ps(packed_w + 4, vzero);
+        _mm_store_ps(packed_w + 8, vzero);
+        _mm_store_ps(packed_w + 12, vzero);
       }
       packed_w += 16;
 
@@ -14533,6 +14550,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x4(
         } while (--nb != 0);
         packed_w += (16 - n);
       } else {
+        const __m128 vzero = _mm_setzero_ps();
+        _mm_store_ps(packed_w, vzero);
+        _mm_store_ps(packed_w + 4, vzero);
+        _mm_store_ps(packed_w + 8, vzero);
+        _mm_store_ps(packed_w + 12, vzero);
         packed_w += 16;
       }
 
@@ -14977,6 +14999,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1(
         packed_w[0] = b[0];
         packed_w[1] = b[1];
         b += 2;
+      } else {
+        packed_w[0] = 0.0f;
+        packed_w[1] = 0.0f;
       }
       packed_w += 2;
 
@@ -15058,6 +15083,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1(
         } while (--nb != 0);
         packed_w += (2 - n);
       } else {
+        packed_w[0] = 0.0f;
+        packed_w[1] = 0.0f;
         packed_w += 2;
       }
 
@@ -15157,6 +15184,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__sse2_x4(
 
         _mm_store_ps(packed_w, vb0123);
         _mm_store_ps(packed_w + 4, vb4567);
+      } else {
+        const __m128 vzero = _mm_setzero_ps();
+        _mm_store_ps(packed_w, vzero);
+        _mm_store_ps(packed_w + 4, vzero);
       }
       packed_w += 8;
 
@@ -15372,6 +15403,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__sse2_x4(
         } while (--nb != 0);
         packed_w += (8 - n);
       } else {
+        const __m128 vzero = _mm_setzero_ps();
+        _mm_store_ps(packed_w, vzero);
+        _mm_store_ps(packed_w + 4, vzero);
         packed_w += 8;
       }
 

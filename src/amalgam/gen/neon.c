@@ -24952,7 +24952,11 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x4(
         vst1_u16(packed_weights, vb8); packed_weights += 4;
         vst1_u16(packed_weights, vb12); packed_weights += 4;
       } else {
-        packed_weights += 16;
+        const uint16x4_t vzero = vmov_n_u16(0);
+        vst1_u16(packed_weights, vzero); packed_weights += 4;
+        vst1_u16(packed_weights, vzero); packed_weights += 4;
+        vst1_u16(packed_weights, vzero); packed_weights += 4;
+        vst1_u16(packed_weights, vzero); packed_weights += 4;
       }
 
       const uint16_t* w1 = w0 + kc;
@@ -25172,7 +25176,11 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x4(
         } while (--nb != 0);
         packed_weights += (16 - n);
       } else {
-        packed_weights += 16;
+        const uint16x4_t vzero = vmov_n_u16(0);
+        vst1_u16(packed_weights, vzero); packed_weights += 4;
+        vst1_u16(packed_weights, vzero); packed_weights += 4;
+        vst1_u16(packed_weights, vzero); packed_weights += 4;
+        vst1_u16(packed_weights, vzero); packed_weights += 4;
       }
 
       // NR remainder has less than 16 rows so last row is not loaded
@@ -25451,7 +25459,9 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
         vst1_u16(packed_weights, vb0); packed_weights += 4;
         vst1_u16(packed_weights, vb4); packed_weights += 4;
       } else {
-        packed_weights += 8;
+        const uint16x4_t vzero = vmov_n_u16(0);
+        vst1_u16(packed_weights, vzero); packed_weights += 4;
+        vst1_u16(packed_weights, vzero); packed_weights += 4;
       }
 
       const uint16_t* w1 = w0 + kc;
@@ -25587,7 +25597,9 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
         } while (--nb != 0);
         packed_weights += (8 - n);
       } else {
-        packed_weights += 8;
+        const uint16x4_t vzero = vmov_n_u16(0);
+        vst1_u16(packed_weights, vzero); packed_weights += 4;
+        vst1_u16(packed_weights, vzero); packed_weights += 4;
       }
 
       // NR remainder has less than 8 rows so last row is not loaded
@@ -26092,6 +26104,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_prfm_x2(
           uint32x2_t vb0 = vld1_u32(bias + 0);
           vst1_u32(packed_weights + 0, vb0);
           bias += 2;
+        } else {
+          const uint32x2_t vzero = vmov_n_u32(0);
+          vst1_u32(packed_weights + 0, vzero);
         }
         packed_weights += 2;
         const uint32_t* w0 = w;
@@ -26130,6 +26145,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_prfm_x2(
       // NC remainder of 1
       if XNN_LIKELY(bias != NULL) {
         *packed_weights = *bias++;
+      } else {
+        const uint32x2_t vzero = vmov_n_u32(0);
+        vst1_u32(packed_weights + 0, vzero);
       }
       packed_weights += 2;
       size_t k = kc;
@@ -26187,7 +26205,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
         vst1q_u32(packed_weights, vb0); packed_weights += 4;
         vst1q_u32(packed_weights, vb4); packed_weights += 4;
       } else {
-        packed_weights += 8;
+        const uint32x4_t vzero = vmovq_n_u32(0);
+        vst1q_u32(packed_weights, vzero); packed_weights += 4;
+        vst1q_u32(packed_weights, vzero); packed_weights += 4;
       }
 
       const uint32_t* w1 = w0 + kc;
@@ -26317,7 +26337,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
         } while (--nb != 0);
         packed_weights += (8 - n);
       } else {
-        packed_weights += 8;
+        const uint32x4_t vzero = vmovq_n_u32(0);
+        vst1q_u32(packed_weights, vzero); packed_weights += 4;
+        vst1q_u32(packed_weights, vzero); packed_weights += 4;
       }
 
       // NR remainder has less than 8 rows so last row is not loaded
@@ -26496,7 +26518,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
         vst1q_u32(packed_weights, vb0); packed_weights += 4;
         vst1q_u32(packed_weights, vb4); packed_weights += 4;
       } else {
-        packed_weights += 8;
+        const uint32x4_t vzero = vmovq_n_u32(0);
+        vst1q_u32(packed_weights, vzero); packed_weights += 4;
+        vst1q_u32(packed_weights, vzero); packed_weights += 4;
       }
 
       const uint32_t* w1 = w0 + kc;
@@ -26814,7 +26838,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
         } while (--nb != 0);
         packed_weights += (8 - n);
       } else {
-        packed_weights += 8;
+        const uint32x4_t vzero = vmovq_n_u32(0);
+        vst1q_u32(packed_weights, vzero); packed_weights += 4;
+        vst1q_u32(packed_weights, vzero); packed_weights += 4;
       }
 
       // NR remainder has less than 8 rows so last row is not loaded
