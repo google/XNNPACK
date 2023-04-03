@@ -12,3 +12,10 @@
 - name: xnn_x32_zerob_gemm_ukernel_4c1s1r__scalar_int
 - name: xnn_x32_zerob_gemm_ukernel_4c4s1r__scalar_float
 - name: xnn_x32_zerob_gemm_ukernel_4c4s1r__scalar_int
+
+# x86 SSE
+- name: xnn_x32_zerob_gemm_ukernel_4c4s4r__sse2
+- name: xnn_x32_zerob_gemm_ukernel_8c4s4r__sse2
+- name: xnn_x32_zerob_gemm_ukernel_8c8s4r__sse2
+- name: xnn_x32_zerob_gemm_ukernel_16c4s4r__sse2
+- name: xnn_x32_zerob_gemm_ukernel_16c16s4r__sse2

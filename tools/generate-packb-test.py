@@ -31,7 +31,7 @@ def split_ukernel_name(name):
   channel_tile = int(match.group(3))
   channel_subtile = int(match.group(4))
   channel_round = int(match.group(5))
-  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(4))
+  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(6))
   return channel_tile, channel_subtile, channel_round, arch, isa
 
 

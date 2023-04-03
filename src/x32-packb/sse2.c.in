@@ -1,0 +1,169 @@
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+#include <stddef.h>
+#include <xmmintrin.h>
+
+#include <xnnpack/math.h>
+#include <xnnpack/packb.h>
+
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert CHANNEL_TILE >= 4
+$assert CHANNEL_SUBTILE >= 4
+$assert CHANNEL_TILE % CHANNEL_SUBTILE == 0
+$CHANNEL_ROUND = 4
+$assert BIAS in [0, 1]
+$NAME = "packb" if BIAS else "zerob"
+void xnn_x32_${NAME}_gemm_ukernel_${CHANNEL_TILE}c${CHANNEL_SUBTILE}s${CHANNEL_ROUND}r__sse2(
+  size_t groups,
+  size_t channels,
+  $if BIAS:
+    const uint32_t* bias,
+  uint32_t* packed_weights,
+  size_t channel_tile_stride,
+  size_t channel_subtile_stride,
+  const union xnn_x32_packb_params* params)
+{
+  assert(groups != 0);
+  assert(channels != 0);
+  assert(packed_weights != NULL);
+
+  float* w = (float*) packed_weights;
+  $if BIAS:
+    const float* b = (const float*) bias;
+  $else:
+    __m128 vzero = _mm_setzero_ps();
+
+  do {
+    size_t c = channels;
+
+    // Channel tile loop.
+    for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+      $if BIAS:
+        const __m128 vb${ABC[0:4]} = _mm_loadu_ps(b);
+        $for N in range(4, CHANNEL_TILE, 4):
+          const __m128 vb${ABC[N:N+4]} = _mm_loadu_ps(b + ${N});
+        b += ${CHANNEL_TILE};
+
+        _mm_store_ps(w, vb${ABC[0:4]});
+        $for N in range(4, CHANNEL_TILE, 4):
+          _mm_store_ps(w + ${N}, vb${ABC[N:N+4]});
+      $else:
+        _mm_store_ps(w, vzero);
+        $for N in range(4, CHANNEL_TILE, 4):
+          _mm_store_ps(w + ${N}, vzero);
+      w = (float*) ((uintptr_t) w + channel_tile_stride);
+    }
+
+    $if CHANNEL_TILE == CHANNEL_SUBTILE:
+      float* prev_w = w;
+      for (; c >= 4; c -= 4) {
+        $if BIAS:
+          const __m128 vb${ABC[0:4]} = _mm_loadu_ps(b);
+          b += ${4};
+          _mm_store_ps(w, vb${ABC[0:4]});
+        $else:
+          _mm_store_ps(w, vzero);
+        w += 4;
+      }
+
+      $if BIAS:
+        if (c & 2) {
+          __m128 vb0123 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) b));
+          b += 2;
+          _mm_storel_pi((__m64*) w, vb0123);
+          w += 2;
+        }
+
+        if (c & 1) {
+          __m128 vb0123 = _mm_load_ss(b);
+          b++;
+          _mm_store_ss(w, vb0123);
+          w++;
+        }
+      $else:
+        if (c != 0) {
+          _mm_store_ps(w, vzero);
+        }
+
+      w = (float*) ((uintptr_t) prev_w + channel_tile_stride);
+    $else:
+      if (round_up_po2(c, ${CHANNEL_ROUND}) == ${CHANNEL_TILE}) {
+        // Extra channel tile due to rounding.
+        float* prev_w = w;
+        for (; c >= 4; c -= 4) {
+          $if BIAS:
+            const __m128 vb${ABC[0:4]} = _mm_loadu_ps(b);
+            b += ${4};
+            _mm_store_ps(w, vb${ABC[0:4]});
+          $else:
+            _mm_store_ps(w, vzero);
+          w += 4;
+        }
+
+        $if BIAS:
+          if (c & 2) {
+            __m128 vb0123 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) b));
+            b += 2;
+            _mm_storel_pi((__m64*) w, vb0123);
+            w += 2;
+          }
+
+          if (c & 1) {
+            __m128 vb0123 = _mm_load_ss(b);
+            b++;
+            _mm_store_ss(w, vb0123);
+            w++;
+          }
+        $else:
+          if (c != 0) {
+            _mm_store_ps(w, vzero);
+          }
+
+        w = (float*) ((uintptr_t) prev_w + channel_tile_stride);
+      } else {
+        // Channel subtile loop.
+        for (; c >= ${CHANNEL_SUBTILE}; c -= ${CHANNEL_SUBTILE}) {
+          $if BIAS:
+            const __m128 vb${ABC[0:4]} = _mm_loadu_ps(b);
+            $for N in range(4, CHANNEL_SUBTILE, 4):
+              const __m128 vb${ABC[N:N+4]} = _mm_loadu_ps(b + ${N});
+            b += ${CHANNEL_SUBTILE};
+
+            _mm_store_ps(w, vb${ABC[0:4]});
+            $for N in range(4, CHANNEL_SUBTILE, 4):
+              _mm_store_ps(w + ${N}, vb${ABC[N:N+4]});
+          $else:
+            _mm_store_ps(w, vzero);
+            $for N in range(4, CHANNEL_SUBTILE, 4):
+              _mm_store_ps(w + ${N}, vzero);
+          w = (float*) ((uintptr_t) w + channel_subtile_stride);
+        }
+
+        if (c != 0) {
+          $if BIAS:
+            float* prev_w = w;
+            if (c & 2) {
+              __m128 vb0123 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) b));
+              b += 2;
+              _mm_storel_pi((__m64*) w, vb0123);
+              w += 2;
+            }
+
+            if (c & 1) {
+              __m128 vb0123 = _mm_load_ss(b);
+              b++;
+              _mm_store_ss(w, vb0123);
+              w++;
+            }
+          $else:
+            _mm_store_ps(w, vzero);
+
+          w = (float*) ((uintptr_t) ${"prev_w" if BIAS else "w"} + channel_subtile_stride);
+        }
+      }
+  } while (--groups != 0);
+}
