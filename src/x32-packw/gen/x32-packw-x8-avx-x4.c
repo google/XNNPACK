@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/x32-packw/sse2.c.in
+//   Template: src/x32-packw/avx.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -12,9 +12,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <emmintrin.h>
+#include <immintrin.h>
+#include <xmmintrin.h>
 
 #include <xnnpack/packw.h>
+
 
 void xnn_x32_packw_gemm_goi_ukernel_x8__avx_x4(
   size_t g,
@@ -32,7 +34,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__avx_x4(
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
-  assert(nr == 8);
+  assert(nr == 8);   // This kernel is for NR=8
   assert(kr == 1);
   assert(sr == 1);
   assert(weights != NULL);
@@ -47,16 +49,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__avx_x4(
 
     for (; n >= 8; n -= 8) {
       if XNN_LIKELY(b != NULL) {
-        const __m128 vb0123 = _mm_loadu_ps(b);
-        const __m128 vb4567 = _mm_loadu_ps(b + 4);
+        const __m256 vb0 = _mm256_loadu_ps(b);
+        _mm256_store_ps(packed_w, vb0);
         b += 8;
-
-        _mm_store_ps(packed_w, vb0123);
-        _mm_store_ps(packed_w + 4, vb4567);
       } else {
-        const __m128 vzero = _mm_setzero_ps();
-        _mm_store_ps(packed_w, vzero);
-        _mm_store_ps(packed_w + 4, vzero);
+        const __m256 vzero = _mm256_setzero_ps();
+        _mm256_store_ps(packed_w, vzero);
       }
       packed_w += 8;
 
@@ -71,190 +69,123 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__avx_x4(
       // KC main loop multiple of 8x4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
-        const __m128 v0x0123 = _mm_loadu_ps(w0);
+        // Read blocks of 4x4
+        // a b c d
+        // e f g h
+        // i j k l
+        // m n o p
+        // Load first 4 rows of N into low part of each register
+        __m256 v0x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w0));
         w0 += 4;
-        const __m128 v1x0123 = _mm_loadu_ps(w1);
+        __m256 v1x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w1));
         w1 += 4;
-        const __m128 v2x0123 = _mm_loadu_ps(w2);
+        __m256 v2x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w2));
         w2 += 4;
-        const __m128 v3x0123 = _mm_loadu_ps(w3);
+        __m256 v3x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w3));
         w3 += 4;
-        const __m128 v4x0123 = _mm_loadu_ps(w4);
+        // Load next 4 rows of N into the high part of each register
+        v0x0123 = _mm256_insertf128_ps(v0x0123, _mm_loadu_ps(w4), 1);
         w4 += 4;
-        const __m128 v5x0123 = _mm_loadu_ps(w5);
+        v1x0123 = _mm256_insertf128_ps(v1x0123, _mm_loadu_ps(w5), 1);
         w5 += 4;
-        const __m128 v6x0123 = _mm_loadu_ps(w6);
+        v2x0123 = _mm256_insertf128_ps(v2x0123, _mm_loadu_ps(w6), 1);
         w6 += 4;
-        const __m128 v7x0123 = _mm_loadu_ps(w7);
+        v3x0123 = _mm256_insertf128_ps(v3x0123, _mm_loadu_ps(w7), 1);
         w7 += 4;
 
-        const __m128 v01x0_01x1 = _mm_unpacklo_ps(v0x0123, v1x0123);
-        const __m128 v23x0_23x1 = _mm_unpacklo_ps(v2x0123, v3x0123);
-        const __m128 v01x2_01x3 = _mm_unpackhi_ps(v0x0123, v1x0123);
-        const __m128 v23x2_23x3 = _mm_unpackhi_ps(v2x0123, v3x0123);
-        const __m128 v45x0_45x1 = _mm_unpacklo_ps(v4x0123, v5x0123);
-        const __m128 v67x0_67x1 = _mm_unpacklo_ps(v6x0123, v7x0123);
-        const __m128 v45x2_45x3 = _mm_unpackhi_ps(v4x0123, v5x0123);
-        const __m128 v67x2_67x3 = _mm_unpackhi_ps(v6x0123, v7x0123);
+        // Transpose 2x2
+        const __m256 vtmp0x0123 = _mm256_unpacklo_ps(v0x0123, v1x0123);  // a e b f   from row 0, 1
+        const __m256 vtmp1x0123 = _mm256_unpacklo_ps(v2x0123, v3x0123);  // i m j n   from row 2, 3
+        const __m256 vtmp2x0123 = _mm256_unpackhi_ps(v0x0123, v1x0123);  // c g d h   from row 0, 1
+        const __m256 vtmp3x0123 = _mm256_unpackhi_ps(v2x0123, v3x0123);  // k o l p   from row 2, 3
+         // Transpose 4x4
+        v0x0123 = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(vtmp0x0123), _mm256_castps_pd(vtmp1x0123)));  // a e i m   from row 0, 1
+        v1x0123 = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(vtmp0x0123), _mm256_castps_pd(vtmp1x0123)));  // b f j n   from row 0, 1
+        v2x0123 = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(vtmp2x0123), _mm256_castps_pd(vtmp3x0123)));  // c g k o   from row 2, 3
+        v3x0123 = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(vtmp2x0123), _mm256_castps_pd(vtmp3x0123)));  // d h l p   from row 2, 3
 
-        const __m128 v0123x0 = _mm_movelh_ps(v01x0_01x1, v23x0_23x1);
-        const __m128 v0123x1 = _mm_movehl_ps(v23x0_23x1, v01x0_01x1);
-        const __m128 v0123x2 = _mm_movelh_ps(v01x2_01x3, v23x2_23x3);
-        const __m128 v0123x3 = _mm_movehl_ps(v23x2_23x3, v01x2_01x3);
-        const __m128 v4567x0 = _mm_movelh_ps(v45x0_45x1, v67x0_67x1);
-        const __m128 v4567x1 = _mm_movehl_ps(v67x0_67x1, v45x0_45x1);
-        const __m128 v4567x2 = _mm_movelh_ps(v45x2_45x3, v67x2_67x3);
-        const __m128 v4567x3 = _mm_movehl_ps(v67x2_67x3, v45x2_45x3);
-
-        _mm_store_ps(packed_w, v0123x0);
-        _mm_store_ps(packed_w + 4, v4567x0);
-        _mm_store_ps(packed_w + 8, v0123x1);
-        _mm_store_ps(packed_w + 12, v4567x1);
-        _mm_store_ps(packed_w + 16, v0123x2);
-        _mm_store_ps(packed_w + 20, v4567x2);
-        _mm_store_ps(packed_w + 24, v0123x3);
-        _mm_store_ps(packed_w + 28, v4567x3);
+        _mm256_store_ps(packed_w, v0x0123);
+        _mm256_store_ps(packed_w + 8, v1x0123);
+        _mm256_store_ps(packed_w + 16, v2x0123);
+        _mm256_store_ps(packed_w + 24, v3x0123);
         packed_w += 32;
       }
 
-      // KC remainder (1..3)
+      // KC remainder
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
         assert(k <= 3);
+        if (k & 2) {
+          // Read blocks of 4x2
+          // a b
+          // c d
+          // e f
+          // g h
+          __m128 v0 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w0));
+          w0 += 2;
+          __m128 v1 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w1));
+          w1 += 2;
+          __m128 v2 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w2));
+          w2 += 2;
+          __m128 v3 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w3));
+          w3 += 2;
+          __m128 v4 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w4));
+          w4 += 2;
+          __m128 v5 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w5));
+          w5 += 2;
+          __m128 v6 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w6));
+          w6 += 2;
+          __m128 v7 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w7));
+          w7 += 2;
 
-        switch (k) {
-          case 1:
-          {
-            const __m128 v0x0 = _mm_load_ss(w0);
-            w0 += 1;
-            const __m128 v1x0 = _mm_load_ss(w1);
-            w1 += 1;
-            const __m128 v2x0 = _mm_load_ss(w2);
-            w2 += 1;
-            const __m128 v3x0 = _mm_load_ss(w3);
-            w3 += 1;
-            const __m128 v4x0 = _mm_load_ss(w4);
-            w4 += 1;
-            const __m128 v5x0 = _mm_load_ss(w5);
-            w5 += 1;
-            const __m128 v6x0 = _mm_load_ss(w6);
-            w6 += 1;
-            const __m128 v7x0 = _mm_load_ss(w7);
-            w7 += 1;
+          // Transpose 2x2
+          const __m128 vtmp0 = _mm_unpacklo_ps(v0, v1);  // a c b d   from row 0, 1
+          const __m128 vtmp1 = _mm_unpacklo_ps(v2, v3);  // e g f h   from row 2, 3
+          // Transpose 4x4
+          v0 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp0), _mm_castps_pd(vtmp1)));  // a c e g   from row 0, 1
+          v1 = _mm_castpd_ps(_mm_unpackhi_pd(_mm_castps_pd(vtmp0), _mm_castps_pd(vtmp1)));  // b d f h   from row 0, 1
+          // Transpose 2x2
+          const __m128 vtmp4 = _mm_unpacklo_ps(v4, v5);  // a c b d   from row 0, 1
+          const __m128 vtmp5 = _mm_unpacklo_ps(v6, v7);  // e g f h   from row 2, 3
+          // Transpose 4x4
+          v4 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp4), _mm_castps_pd(vtmp5)));  // a c e g   from row 0, 1
+          v5 = _mm_castpd_ps(_mm_unpackhi_pd(_mm_castps_pd(vtmp4), _mm_castps_pd(vtmp5)));  // b d f h   from row 0, 1
 
-            const __m128 v01x0 = _mm_unpacklo_ps(v0x0, v1x0);
-            const __m128 v23x0 = _mm_unpacklo_ps(v2x0, v3x0);
-            const __m128 v45x0 = _mm_unpacklo_ps(v4x0, v5x0);
-            const __m128 v67x0 = _mm_unpacklo_ps(v6x0, v7x0);
+          _mm_store_ps(packed_w, v0);
+          _mm_store_ps(packed_w + 4, v4);
+          _mm_store_ps(packed_w + 8, v1);
+          _mm_store_ps(packed_w + 12, v5);
+          packed_w += 16;
+        }
+        if (k & 1) {
+          // Read blocks of 4x1
+          // a
+          // b
+          // c
+          // d
+          __m128 v0 = _mm_load_ss(w0);  w0 += 1;
+          __m128 v1 = _mm_load_ss(w1);  w1 += 1;
+          __m128 v2 = _mm_load_ss(w2);  w2 += 1;
+          __m128 v3 = _mm_load_ss(w3);  w3 += 1;
+          __m128 v4 = _mm_load_ss(w4);  w4 += 1;
+          __m128 v5 = _mm_load_ss(w5);  w5 += 1;
+          __m128 v6 = _mm_load_ss(w6);  w6 += 1;
+          __m128 v7 = _mm_load_ss(w7);  w7 += 1;
 
-            const __m128 v0123x0 = _mm_movelh_ps(v01x0, v23x0);
-            const __m128 v4567x0 = _mm_movelh_ps(v45x0, v67x0);
+          // Transpose 2x2
+          const __m128 vtmp0 = _mm_unpacklo_ps(v0, v1);  // a b  from row 0, 1
+          const __m128 vtmp1 = _mm_unpacklo_ps(v2, v3);  // c d  from row 2, 3
+          // Transpose 4x4
+          v0 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp0), _mm_castps_pd(vtmp1)));  // a b c d   from row 0, 1
+          // Transpose 2x2
+          const __m128 vtmp4 = _mm_unpacklo_ps(v4, v5);  // a b  from row 0, 1
+          const __m128 vtmp5 = _mm_unpacklo_ps(v6, v7);  // c d  from row 2, 3
+          // Transpose 4x4
+          v4 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp4), _mm_castps_pd(vtmp5)));  // a b c d   from row 0, 1
 
-            _mm_store_ps(packed_w, v0123x0);
-            _mm_store_ps(packed_w + 4, v4567x0);
-            packed_w += 8;
-            break;
-          }
-          case 2:
-          {
-            const __m128 v0x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w0));
-            w0 += 2;
-            const __m128 v1x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w1));
-            w1 += 2;
-            const __m128 v2x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w2));
-            w2 += 2;
-            const __m128 v3x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w3));
-            w3 += 2;
-            const __m128 v4x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w4));
-            w4 += 2;
-            const __m128 v5x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w5));
-            w5 += 2;
-            const __m128 v6x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w6));
-            w6 += 2;
-            const __m128 v7x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w7));
-            w7 += 2;
-
-            const __m128 v01x0_01x1 = _mm_unpacklo_ps(v0x01, v1x01);
-            const __m128 v23x0_23x1 = _mm_unpacklo_ps(v2x01, v3x01);
-            const __m128 v45x0_45x1 = _mm_unpacklo_ps(v4x01, v5x01);
-            const __m128 v67x0_67x1 = _mm_unpacklo_ps(v6x01, v7x01);
-
-            const __m128 v0123x0 = _mm_movelh_ps(v01x0_01x1, v23x0_23x1);
-            const __m128 v0123x1 = _mm_movehl_ps(v23x0_23x1, v01x0_01x1);
-            const __m128 v4567x0 = _mm_movelh_ps(v45x0_45x1, v67x0_67x1);
-            const __m128 v4567x1 = _mm_movehl_ps(v67x0_67x1, v45x0_45x1);
-
-            _mm_store_ps(packed_w, v0123x0);
-            _mm_store_ps(packed_w + 4, v4567x0);
-            _mm_store_ps(packed_w + 8, v0123x1);
-            _mm_store_ps(packed_w + 12, v4567x1);
-            packed_w += 16;
-            break;
-          }
-          case 3:
-          {
-            __m128 v0x012 = _mm_load_ss(w0 + 2);
-            __m128 v1x012 = _mm_load_ss(w1 + 2);
-            __m128 v2x012 = _mm_load_ss(w2 + 2);
-            __m128 v3x012 = _mm_load_ss(w3 + 2);
-            __m128 v4x012 = _mm_load_ss(w4 + 2);
-            __m128 v5x012 = _mm_load_ss(w5 + 2);
-            __m128 v6x012 = _mm_load_ss(w6 + 2);
-            __m128 v7x012 = _mm_load_ss(w7 + 2);
-
-            v0x012 = _mm_movelh_ps(v0x012, v0x012);
-            v1x012 = _mm_movelh_ps(v1x012, v1x012);
-            v2x012 = _mm_movelh_ps(v2x012, v2x012);
-            v3x012 = _mm_movelh_ps(v3x012, v3x012);
-            v4x012 = _mm_movelh_ps(v4x012, v4x012);
-            v5x012 = _mm_movelh_ps(v5x012, v5x012);
-            v6x012 = _mm_movelh_ps(v6x012, v6x012);
-            v7x012 = _mm_movelh_ps(v7x012, v7x012);
-
-            v0x012 = _mm_loadl_pi(v0x012, (const __m64*) w0);
-            w0 += 3;
-            v1x012 = _mm_loadl_pi(v1x012, (const __m64*) w1);
-            w1 += 3;
-            v2x012 = _mm_loadl_pi(v2x012, (const __m64*) w2);
-            w2 += 3;
-            v3x012 = _mm_loadl_pi(v3x012, (const __m64*) w3);
-            w3 += 3;
-            v4x012 = _mm_loadl_pi(v4x012, (const __m64*) w4);
-            w4 += 3;
-            v5x012 = _mm_loadl_pi(v5x012, (const __m64*) w5);
-            w5 += 3;
-            v6x012 = _mm_loadl_pi(v6x012, (const __m64*) w6);
-            w6 += 3;
-            v7x012 = _mm_loadl_pi(v7x012, (const __m64*) w7);
-            w7 += 3;
-
-            const __m128 v01x0_01x1 = _mm_unpacklo_ps(v0x012, v1x012);
-            const __m128 v23x0_23x1 = _mm_unpacklo_ps(v2x012, v3x012);
-            const __m128 v01x2 = _mm_unpackhi_ps(v0x012, v1x012);
-            const __m128 v23x2 = _mm_unpackhi_ps(v2x012, v3x012);
-            const __m128 v45x0_45x1 = _mm_unpacklo_ps(v4x012, v5x012);
-            const __m128 v67x0_67x1 = _mm_unpacklo_ps(v6x012, v7x012);
-            const __m128 v45x2 = _mm_unpackhi_ps(v4x012, v5x012);
-            const __m128 v67x2 = _mm_unpackhi_ps(v6x012, v7x012);
-
-            const __m128 v0123x0 = _mm_movelh_ps(v01x0_01x1, v23x0_23x1);
-            const __m128 v0123x1 = _mm_movehl_ps(v23x0_23x1, v01x0_01x1);
-            const __m128 v0123x2 = _mm_movelh_ps(v01x2, v23x2);
-            const __m128 v4567x0 = _mm_movelh_ps(v45x0_45x1, v67x0_67x1);
-            const __m128 v4567x1 = _mm_movehl_ps(v67x0_67x1, v45x0_45x1);
-            const __m128 v4567x2 = _mm_movelh_ps(v45x2, v67x2);
-
-            _mm_store_ps(packed_w, v0123x0);
-            _mm_store_ps(packed_w + 4, v4567x0);
-            _mm_store_ps(packed_w + 8, v0123x1);
-            _mm_store_ps(packed_w + 12, v4567x1);
-            _mm_store_ps(packed_w + 16, v0123x2);
-            _mm_store_ps(packed_w + 20, v4567x2);
-            packed_w += 24;
-            break;
-          }
-          default:
-            XNN_UNREACHABLE;
+          _mm_store_ps(packed_w, v0);
+          _mm_store_ps(packed_w + 4, v4);
+          packed_w += 8;
         }
       }
       packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
@@ -272,12 +203,13 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__avx_x4(
         } while (--nb != 0);
         packed_w += (8 - n);
       } else {
-        const __m128 vzero = _mm_setzero_ps();
-        _mm_store_ps(packed_w, vzero);
-        _mm_store_ps(packed_w + 4, vzero);
+        const __m256 vzero = _mm256_setzero_ps();
+        _mm256_store_ps(packed_w, vzero);
         packed_w += 8;
       }
 
+      // NR remainder has less than 8 rows so last row is not loaded
+      // For SR=4 the
       const float* w1 = w0 + kc;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
@@ -306,162 +238,120 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__avx_x4(
       // KC main loop multiple of 8x4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
-        const __m128 v0x0123 = _mm_loadu_ps(w0);
+        // Read blocks of 4x4
+        // a b c d
+        // e f g h
+        // i j k l
+        // m n o p
+        // Load first 4 rows of N into low part of each register
+        __m256 v0x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w0));
         w0 += 4;
-        const __m128 v1x0123 = _mm_loadu_ps(w1);
+        __m256 v1x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w1));
         w1 += 4;
-        const __m128 v2x0123 = _mm_loadu_ps(w2);
+        __m256 v2x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w2));
         w2 += 4;
-        const __m128 v3x0123 = _mm_loadu_ps(w3);
+        __m256 v3x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w3));
         w3 += 4;
-        const __m128 v4x0123 = _mm_loadu_ps(w4);
+        // Load next 4 rows of N into the high part of each register
+        v0x0123 = _mm256_insertf128_ps(v0x0123, _mm_loadu_ps(w4), 1);
         w4 += 4;
-        const __m128 v5x0123 = _mm_loadu_ps(w5);
+        v1x0123 = _mm256_insertf128_ps(v1x0123, _mm_loadu_ps(w5), 1);
         w5 += 4;
-        const __m128 v6x0123 = _mm_loadu_ps(w6);
+        v2x0123 = _mm256_insertf128_ps(v2x0123, _mm_loadu_ps(w6), 1);
         w6 += 4;
 
-        const __m128 v01x0_01x1 = _mm_unpacklo_ps(v0x0123, v1x0123);
-        const __m128 v23x0_23x1 = _mm_unpacklo_ps(v2x0123, v3x0123);
-        const __m128 v01x2_01x3 = _mm_unpackhi_ps(v0x0123, v1x0123);
-        const __m128 v23x2_23x3 = _mm_unpackhi_ps(v2x0123, v3x0123);
-        const __m128 v45x0_45x1 = _mm_unpacklo_ps(v4x0123, v5x0123);
-        const __m128 v67x0_67x1 = _mm_unpacklo_ps(v6x0123, v6x0123);
-        const __m128 v45x2_45x3 = _mm_unpackhi_ps(v4x0123, v5x0123);
-        const __m128 v67x2_67x3 = _mm_unpackhi_ps(v6x0123, v6x0123);
+        // Transpose 2x2
+        const __m256 vtmp0x0123 = _mm256_unpacklo_ps(v0x0123, v1x0123);  // a e b f   from row 0, 1
+        const __m256 vtmp1x0123 = _mm256_unpacklo_ps(v2x0123, v3x0123);  // i m j n   from row 2, 3
+        const __m256 vtmp2x0123 = _mm256_unpackhi_ps(v0x0123, v1x0123);  // c g d h   from row 0, 1
+        const __m256 vtmp3x0123 = _mm256_unpackhi_ps(v2x0123, v3x0123);  // k o l p   from row 2, 3
+         // Transpose 4x4
+        v0x0123 = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(vtmp0x0123), _mm256_castps_pd(vtmp1x0123)));  // a e i m   from row 0, 1
+        v1x0123 = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(vtmp0x0123), _mm256_castps_pd(vtmp1x0123)));  // b f j n   from row 0, 1
+        v2x0123 = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(vtmp2x0123), _mm256_castps_pd(vtmp3x0123)));  // c g k o   from row 2, 3
+        v3x0123 = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(vtmp2x0123), _mm256_castps_pd(vtmp3x0123)));  // d h l p   from row 2, 3
 
-        const __m128 v0123x0 = _mm_movelh_ps(v01x0_01x1, v23x0_23x1);
-        const __m128 v0123x1 = _mm_movehl_ps(v23x0_23x1, v01x0_01x1);
-        const __m128 v0123x2 = _mm_movelh_ps(v01x2_01x3, v23x2_23x3);
-        const __m128 v0123x3 = _mm_movehl_ps(v23x2_23x3, v01x2_01x3);
-        const __m128 v4567x0 = _mm_movelh_ps(v45x0_45x1, v67x0_67x1);
-        const __m128 v4567x1 = _mm_movehl_ps(v67x0_67x1, v45x0_45x1);
-        const __m128 v4567x2 = _mm_movelh_ps(v45x2_45x3, v67x2_67x3);
-        const __m128 v4567x3 = _mm_movehl_ps(v67x2_67x3, v45x2_45x3);
-
-        _mm_store_ps(packed_w, v0123x0);
-        _mm_store_ps(packed_w + 4, v4567x0);
-        _mm_store_ps(packed_w + 8, v0123x1);
-        _mm_store_ps(packed_w + 12, v4567x1);
-        _mm_store_ps(packed_w + 16, v0123x2);
-        _mm_store_ps(packed_w + 20, v4567x2);
-        _mm_store_ps(packed_w + 24, v0123x3);
-        _mm_store_ps(packed_w + 28, v4567x3);
+        _mm256_store_ps(packed_w, v0x0123);
+        _mm256_store_ps(packed_w + 8, v1x0123);
+        _mm256_store_ps(packed_w + 16, v2x0123);
+        _mm256_store_ps(packed_w + 24, v3x0123);
         packed_w += 32;
       }
 
-      // KC remainder (1..3)
+      // KC remainder
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
         assert(k <= 3);
+        if (k & 2) {
+          // Read blocks of 4x2
+          // a b
+          // c d
+          // e f
+          // g h
+          __m128 v0 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w0));
+          w0 += 2;
+          __m128 v1 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w1));
+          w1 += 2;
+          __m128 v2 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w2));
+          w2 += 2;
+          __m128 v3 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w3));
+          w3 += 2;
+          __m128 v4 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w4));
+          w4 += 2;
+          __m128 v5 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w5));
+          w5 += 2;
+          __m128 v6 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w6));
+          w6 += 2;
 
-        switch (k) {
-          case 1:
-          {
-            const __m128 v0x0 = _mm_load_ss(w0);
-            const __m128 v1x0 = _mm_load_ss(w1);
-            const __m128 v2x0 = _mm_load_ss(w2);
-            const __m128 v3x0 = _mm_load_ss(w3);
-            const __m128 v4x0 = _mm_load_ss(w4);
-            const __m128 v5x0 = _mm_load_ss(w5);
-            const __m128 v6x0 = _mm_load_ss(w6);
+          // Transpose 2x2
+          const __m128 vtmp0 = _mm_unpacklo_ps(v0, v1);  // a c b d   from row 0, 1
+          const __m128 vtmp1 = _mm_unpacklo_ps(v2, v3);  // e g f h   from row 2, 3
+          // Transpose 4x4
+          v0 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp0), _mm_castps_pd(vtmp1)));  // a c e g   from row 0, 1
+          v1 = _mm_castpd_ps(_mm_unpackhi_pd(_mm_castps_pd(vtmp0), _mm_castps_pd(vtmp1)));  // b d f h   from row 0, 1
+          // Transpose 2x2
+          const __m128 vtmp4 = _mm_unpacklo_ps(v4, v5);  // a c b d   from row 0, 1
+          const __m128 vtmp5 = _mm_unpacklo_ps(v6, v6);  // e g f h   from row 2, 3
+          // Transpose 4x4
+          v4 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp4), _mm_castps_pd(vtmp5)));  // a c e g   from row 0, 1
+          v5 = _mm_castpd_ps(_mm_unpackhi_pd(_mm_castps_pd(vtmp4), _mm_castps_pd(vtmp5)));  // b d f h   from row 0, 1
 
-            const __m128 v01x0 = _mm_unpacklo_ps(v0x0, v1x0);
-            const __m128 v23x0 = _mm_unpacklo_ps(v2x0, v3x0);
-            const __m128 v45x0 = _mm_unpacklo_ps(v4x0, v5x0);
-            const __m128 v67x0 = _mm_unpacklo_ps(v6x0, v6x0);
+          _mm_store_ps(packed_w, v0);
+          _mm_store_ps(packed_w + 4, v4);
+          _mm_store_ps(packed_w + 8, v1);
+          _mm_store_ps(packed_w + 12, v5);
+          packed_w += 16;
+        }
+        if (k & 1) {
+          // Read blocks of 4x1
+          // a
+          // b
+          // c
+          // d
+          __m128 v0 = _mm_load_ss(w0);  w0 += 1;
+          __m128 v1 = _mm_load_ss(w1);  w1 += 1;
+          __m128 v2 = _mm_load_ss(w2);  w2 += 1;
+          __m128 v3 = _mm_load_ss(w3);  w3 += 1;
+          __m128 v4 = _mm_load_ss(w4);  w4 += 1;
+          __m128 v5 = _mm_load_ss(w5);  w5 += 1;
+          __m128 v6 = _mm_load_ss(w6);  w6 += 1;
 
-            const __m128 v0123x0 = _mm_movelh_ps(v01x0, v23x0);
-            const __m128 v4567x0 = _mm_movelh_ps(v45x0, v67x0);
+          // Transpose 2x2
+          const __m128 vtmp0 = _mm_unpacklo_ps(v0, v1);  // a b  from row 0, 1
+          const __m128 vtmp1 = _mm_unpacklo_ps(v2, v3);  // c d  from row 2, 3
+          // Transpose 4x4
+          v0 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp0), _mm_castps_pd(vtmp1)));  // a b c d   from row 0, 1
+          // Transpose 2x2
+          const __m128 vtmp4 = _mm_unpacklo_ps(v4, v5);  // a b  from row 0, 1
+          const __m128 vtmp5 = _mm_unpacklo_ps(v6, v6);  // c d  from row 2, 3
+          // Transpose 4x4
+          v4 = _mm_castpd_ps(_mm_unpacklo_pd(_mm_castps_pd(vtmp4), _mm_castps_pd(vtmp5)));  // a b c d   from row 0, 1
 
-            _mm_store_ps(packed_w, v0123x0);
-            _mm_store_ps(packed_w + 4, v4567x0);
-            packed_w += 8;
-            break;
-          }
-          case 2:
-          {
-            const __m128 v0x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w0));
-            const __m128 v1x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w1));
-            const __m128 v2x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w2));
-            const __m128 v3x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w3));
-            const __m128 v4x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w4));
-            const __m128 v5x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w5));
-            const __m128 v6x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w6));
-
-            const __m128 v01x0_01x1 = _mm_unpacklo_ps(v0x01, v1x01);
-            const __m128 v23x0_23x1 = _mm_unpacklo_ps(v2x01, v3x01);
-            const __m128 v45x0_45x1 = _mm_unpacklo_ps(v4x01, v5x01);
-            const __m128 v67x0_67x1 = _mm_unpacklo_ps(v6x01, v6x01);
-
-            const __m128 v0123x0 = _mm_movelh_ps(v01x0_01x1, v23x0_23x1);
-            const __m128 v0123x1 = _mm_movehl_ps(v23x0_23x1, v01x0_01x1);
-            const __m128 v4567x0 = _mm_movelh_ps(v45x0_45x1, v67x0_67x1);
-            const __m128 v4567x1 = _mm_movehl_ps(v67x0_67x1, v45x0_45x1);
-
-            _mm_store_ps(packed_w, v0123x0);
-            _mm_store_ps(packed_w + 4, v4567x0);
-            _mm_store_ps(packed_w + 8, v0123x1);
-            _mm_store_ps(packed_w + 12, v4567x1);
-            packed_w += 16;
-            break;
-          }
-          case 3:
-          {
-            __m128 v0x012 = _mm_load_ss(w0 + 2);
-            __m128 v1x012 = _mm_load_ss(w1 + 2);
-            __m128 v2x012 = _mm_load_ss(w2 + 2);
-            __m128 v3x012 = _mm_load_ss(w3 + 2);
-            __m128 v4x012 = _mm_load_ss(w4 + 2);
-            __m128 v5x012 = _mm_load_ss(w5 + 2);
-            __m128 v6x012 = _mm_load_ss(w6 + 2);
-
-            v0x012 = _mm_movelh_ps(v0x012, v0x012);
-            v1x012 = _mm_movelh_ps(v1x012, v1x012);
-            v2x012 = _mm_movelh_ps(v2x012, v2x012);
-            v3x012 = _mm_movelh_ps(v3x012, v3x012);
-            v4x012 = _mm_movelh_ps(v4x012, v4x012);
-            v5x012 = _mm_movelh_ps(v5x012, v5x012);
-            v6x012 = _mm_movelh_ps(v6x012, v6x012);
-
-            v0x012 = _mm_loadl_pi(v0x012, (const __m64*) w0);
-            v1x012 = _mm_loadl_pi(v1x012, (const __m64*) w1);
-            v2x012 = _mm_loadl_pi(v2x012, (const __m64*) w2);
-            v3x012 = _mm_loadl_pi(v3x012, (const __m64*) w3);
-            v4x012 = _mm_loadl_pi(v4x012, (const __m64*) w4);
-            v5x012 = _mm_loadl_pi(v5x012, (const __m64*) w5);
-            v6x012 = _mm_loadl_pi(v6x012, (const __m64*) w6);
-
-            const __m128 v01x0_01x1 = _mm_unpacklo_ps(v0x012, v1x012);
-            const __m128 v23x0_23x1 = _mm_unpacklo_ps(v2x012, v3x012);
-            const __m128 v01x2 = _mm_unpackhi_ps(v0x012, v1x012);
-            const __m128 v23x2 = _mm_unpackhi_ps(v2x012, v3x012);
-            const __m128 v45x0_45x1 = _mm_unpacklo_ps(v4x012, v5x012);
-            const __m128 v67x0_67x1 = _mm_unpacklo_ps(v6x012, v6x012);
-            const __m128 v45x2 = _mm_unpackhi_ps(v4x012, v5x012);
-            const __m128 v67x2 = _mm_unpackhi_ps(v6x012, v6x012);
-
-            const __m128 v0123x0 = _mm_movelh_ps(v01x0_01x1, v23x0_23x1);
-            const __m128 v0123x1 = _mm_movehl_ps(v23x0_23x1, v01x0_01x1);
-            const __m128 v0123x2 = _mm_movelh_ps(v01x2, v23x2);
-            const __m128 v4567x0 = _mm_movelh_ps(v45x0_45x1, v67x0_67x1);
-            const __m128 v4567x1 = _mm_movehl_ps(v67x0_67x1, v45x0_45x1);
-            const __m128 v4567x2 = _mm_movelh_ps(v45x2, v67x2);
-
-            _mm_store_ps(packed_w, v0123x0);
-            _mm_store_ps(packed_w + 4, v4567x0);
-            _mm_store_ps(packed_w + 8, v0123x1);
-            _mm_store_ps(packed_w + 12, v4567x1);
-            _mm_store_ps(packed_w + 16, v0123x2);
-            _mm_store_ps(packed_w + 20, v4567x2);
-            packed_w += 24;
-            break;
-          }
-          default:
-            XNN_UNREACHABLE;
+          _mm_store_ps(packed_w, v0);
+          _mm_store_ps(packed_w + 4, v4);
+          packed_w += 8;
         }
       }
-      packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
     }
     weights += nc * kc;
   } while (--g != 0);

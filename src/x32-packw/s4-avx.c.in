@@ -19,7 +19,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/packw.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__avx2_x${KUNROLL}(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__avx_x${KUNROLL}(
   size_t g,
   size_t nc,
   size_t kc,

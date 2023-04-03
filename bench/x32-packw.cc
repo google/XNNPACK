@@ -147,30 +147,6 @@ static void x32_packw(benchmark::State& state,
       /*nr=*/16, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512F);
   }
-  static void x32_packw_x8__avx2_x4(benchmark::State& state, const char* net) {
-    x32_packw(state,
-      xnn_x32_packw_gemm_goi_ukernel_x8__avx2_x4,
-      /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckAVX2);
-  }
-  static void x32_packw_x16__avx2_x4(benchmark::State& state, const char* net) {
-    x32_packw(state,
-      xnn_x32_packw_gemm_goi_ukernel_x16__avx2_x4,
-      /*nr=*/16, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckAVX2);
-  }
-  static void x32_packw_x8s4__avx2_x4(benchmark::State& state, const char* net) {
-    x32_packw(state,
-      xnn_x32_packw_gemm_goi_ukernel_x8s4__avx2_x4,
-      /*nr=*/8, /*kr=*/1, /*sr=*/4,
-      benchmark::utils::CheckAVX2);
-  }
-  static void x32_packw_x16s4__avx2_x4(benchmark::State& state, const char* net) {
-    x32_packw(state,
-      xnn_x32_packw_gemm_goi_ukernel_x16s4__avx2_x4,
-      /*nr=*/16, /*kr=*/1, /*sr=*/4,
-      benchmark::utils::CheckAVX2);
-  }
   static void x32_packw_x8__avx_x4(benchmark::State& state, const char* net) {
     x32_packw(state,
       xnn_x32_packw_gemm_goi_ukernel_x8__avx_x4,
@@ -222,10 +198,6 @@ static void x32_packw(benchmark::State& state,
   }
 
   BENCHMARK_BGEMM(x32_packw_x16__avx512f_x4)
-  BENCHMARK_BGEMM(x32_packw_x8__avx2_x4)
-  BENCHMARK_BGEMM(x32_packw_x16__avx2_x4)
-  BENCHMARK_BGEMM(x32_packw_x8s4__avx2_x4)
-  BENCHMARK_BGEMM(x32_packw_x16s4__avx2_x4)
   BENCHMARK_BGEMM(x32_packw_x8__avx_x4)
   BENCHMARK_BGEMM(x32_packw_x16__avx_x4)
   BENCHMARK_BGEMM(x32_packw_x8s4__avx_x4)

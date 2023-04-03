@@ -32,16 +32,10 @@ tools/xngen src/x32-packw/NR2-neon.c.in -D NR=2 -D PREFETCH=1 -D KUNROLL=2 -o sr
 ### NR multiple of 4
 tools/xngen src/x32-packw/sse2.c.in -D NR=8  -D KUNROLL=4 -D AVX=0 -o src/x32-packw/gen/x32-packw-x8-sse2-x4.c &
 tools/xngen src/x32-packw/sse2.c.in -D NR=16 -D KUNROLL=4 -D AVX=0 -o src/x32-packw/gen/x32-packw-x16-sse2-x4.c &
-tools/xngen src/x32-packw/sse2.c.in -D NR=8  -D KUNROLL=4 -D AVX=1 -o src/x32-packw/gen/x32-packw-x8-avx-x4.c &
-tools/xngen src/x32-packw/sse2.c.in -D NR=16 -D KUNROLL=4 -D AVX=1 -o src/x32-packw/gen/x32-packw-x16-avx-x4.c &
 
 ### SR 4
 tools/xngen src/x32-packw/s4-sse2.c.in -D NR=8  -D SR=4 -D KUNROLL=4 -D AVX=0 -o src/x32-packw/gen/x32-packw-x8s4-sse2-x4.c &
 tools/xngen src/x32-packw/s4-sse2.c.in -D NR=16 -D SR=4 -D KUNROLL=4 -D AVX=0 -o src/x32-packw/gen/x32-packw-x16s4-sse2-x4.c &
-tools/xngen src/x32-packw/s4-sse2.c.in -D NR=8  -D SR=4 -D KUNROLL=4 -D AVX=1 -o src/x32-packw/gen/x32-packw-x8s4-avx-x4.c &
-tools/xngen src/x32-packw/s4-sse2.c.in -D NR=16 -D SR=4 -D KUNROLL=4 -D AVX=1 -o src/x32-packw/gen/x32-packw-x16s4-avx-x4.c &
-tools/xngen src/x32-packw/s4-avx2.c.in -D NR=8  -D SR=4 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8s4-avx2-x4.c &
-tools/xngen src/x32-packw/s4-avx2.c.in -D NR=16 -D SR=4 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x16s4-avx2-x4.c &
 
 ### KR 4
 tools/xngen src/x32-packw/c4-sse2.c.in -D NR=2  -D KR=4 -o src/x32-packw/gen/x32-packw-x2c4-sse2-x1.c &
@@ -49,8 +43,12 @@ tools/xngen src/x32-packw/c4-sse2.c.in -D NR=2  -D KR=4 -o src/x32-packw/gen/x32
 
 ################################### x86 AVX ###################################
 ### NR multiple of 8
-tools/xngen src/x32-packw/avx2.c.in -D NR=8  -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8-avx2-x4.c &
-tools/xngen src/x32-packw/avx2.c.in -D NR=16 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x16-avx2-x4.c &
+tools/xngen src/x32-packw/avx.c.in -D NR=8  -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8-avx-x4.c &
+tools/xngen src/x32-packw/avx.c.in -D NR=16 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x16-avx-x4.c &
+
+### SR 4
+tools/xngen src/x32-packw/s4-avx.c.in -D NR=8  -D SR=4 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8s4-avx-x4.c &
+tools/xngen src/x32-packw/s4-avx.c.in -D NR=16 -D SR=4 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x16s4-avx-x4.c &
 
 ################################### x86 AVX512 ##################################
 ### NR multiple of 16
