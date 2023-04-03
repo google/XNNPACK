@@ -5,7 +5,8 @@
 
 $assert NR >= 4
 $assert NR % 4 == 0
-$assert KUNROLL == 4
+$assert KUNROLL >= 4
+$assert KUNROLL % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <assert.h>
@@ -67,35 +68,62 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
       $for N in range(1, NR):
         const float* w${ABC[N]} = w${ABC[N-1]} + kc;
 
-      // KC main loop multiple of ${NR}x${KUNROLL}
       size_t k = kc;
-      for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
+      $if KUNROLL > 4:
+        // KC main loop multiple of ${KUNROLL}
+        for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
+          $for N in range(NR):
+            const __m128 v${ABC[N]}x${ABC[0:4]} = _mm_loadu_ps(w${ABC[N]});
+            $for K in range(4, KUNROLL, 4):
+              const __m128 v${ABC[N]}x${ABC[K:K+4]} = _mm_loadu_ps(w${ABC[N]} + ${K});
+            w${ABC[N]} += ${KUNROLL};
+
+          $for N in range(0, NR, 4):
+            $for K in range(0, KUNROLL, 4):
+              const __m128 v${ABC[N:N+2]}x${ABC[K]}_${ABC[N:N+2]}x${ABC[K+1]} = _mm_unpacklo_ps(v${ABC[N]}x${ABC[K:K+4]}, v${ABC[N+1]}x${ABC[K:K+4]});
+              const __m128 v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]} = _mm_unpacklo_ps(v${ABC[N+2]}x${ABC[K:K+4]}, v${ABC[N+3]}x${ABC[K:K+4]});
+              const __m128 v${ABC[N:N+2]}x${ABC[K+2]}_${ABC[N:N+2]}x${ABC[K+3]} = _mm_unpackhi_ps(v${ABC[N]}x${ABC[K:K+4]}, v${ABC[N+1]}x${ABC[K:K+4]});
+              const __m128 v${ABC[N+2:N+4]}x${ABC[K+2]}_${ABC[N+2:N+4]}x${ABC[K+3]} = _mm_unpackhi_ps(v${ABC[N+2]}x${ABC[K:K+4]}, v${ABC[N+3]}x${ABC[K:K+4]});
+
+          $for N in range(0, NR, 4):
+            $for K in range(0, KUNROLL, 4):
+              const __m128 v${ABC[N:N+4]}x${ABC[K]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[K]}_${ABC[N:N+2]}x${ABC[K+1]}, v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]});
+              const __m128 v${ABC[N:N+4]}x${ABC[K+1]} = _mm_movehl_ps(v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]}, v${ABC[N:N+2]}x${ABC[K]}_${ABC[N:N+2]}x${ABC[K+1]});
+              const __m128 v${ABC[N:N+4]}x${ABC[K+2]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[K+2]}_${ABC[N:N+2]}x${ABC[K+3]}, v${ABC[N+2:N+4]}x${ABC[K+2]}_${ABC[N+2:N+4]}x${ABC[K+3]});
+              const __m128 v${ABC[N:N+4]}x${ABC[K+3]} = _mm_movehl_ps(v${ABC[N+2:N+4]}x${ABC[K+2]}_${ABC[N+2:N+4]}x${ABC[K+3]}, v${ABC[N:N+2]}x${ABC[K+2]}_${ABC[N:N+2]}x${ABC[K+3]});
+
+          _mm_store_ps(packed_w, v${ABC[0:4]}x${ABC[0]});
+          $for K in range(KUNROLL):
+            $for N in range(0, NR, 4):
+              $if N != 0 or K != 0:
+                _mm_store_ps(packed_w + ${N+K*NR}, v${ABC[N:N+4]}x${ABC[K]});
+          packed_w += ${NR*KUNROLL};
+        }
+
+      // KC multiple of 4
+      for (; k >= 4; k -= 4) {
         $for N in range(NR):
           const __m128 v${ABC[N]}x${ABC[0:4]} = _mm_loadu_ps(w${ABC[N]});
-          $for K in range(4, KUNROLL, 4):
-            const __m128 v${ABC[N]}x${ABC[K:K+4]} = _mm_loadu_ps(w${ABC[N]} + ${K});
-          w${ABC[N]} += ${KUNROLL};
+          w${ABC[N]} += 4;
 
         $for N in range(0, NR, 4):
-          $for K in range(0, KUNROLL, 4):
-            const __m128 v${ABC[N:N+2]}x${ABC[K]}_${ABC[N:N+2]}x${ABC[K+1]} = _mm_unpacklo_ps(v${ABC[N]}x${ABC[K:K+4]}, v${ABC[N+1]}x${ABC[K:K+4]});
-            const __m128 v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]} = _mm_unpacklo_ps(v${ABC[N+2]}x${ABC[K:K+4]}, v${ABC[N+3]}x${ABC[K:K+4]});
-            const __m128 v${ABC[N:N+2]}x${ABC[K+2]}_${ABC[N:N+2]}x${ABC[K+3]} = _mm_unpackhi_ps(v${ABC[N]}x${ABC[K:K+4]}, v${ABC[N+1]}x${ABC[K:K+4]});
-            const __m128 v${ABC[N+2:N+4]}x${ABC[K+2]}_${ABC[N+2:N+4]}x${ABC[K+3]} = _mm_unpackhi_ps(v${ABC[N+2]}x${ABC[K:K+4]}, v${ABC[N+3]}x${ABC[K:K+4]});
+          const __m128 v${ABC[N:N+2]}x${ABC[0]}_${ABC[N:N+2]}x${ABC[1]} = _mm_unpacklo_ps(v${ABC[N]}x${ABC[0:4]}, v${ABC[N+1]}x${ABC[0:4]});
+          const __m128 v${ABC[N+2:N+4]}x${ABC[0]}_${ABC[N+2:N+4]}x${ABC[1]} = _mm_unpacklo_ps(v${ABC[N+2]}x${ABC[0:4]}, v${ABC[N+3]}x${ABC[0:4]});
+          const __m128 v${ABC[N:N+2]}x${ABC[2]}_${ABC[N:N+2]}x${ABC[3]} = _mm_unpackhi_ps(v${ABC[N]}x${ABC[0:4]}, v${ABC[N+1]}x${ABC[0:4]});
+          const __m128 v${ABC[N+2:N+4]}x${ABC[2]}_${ABC[N+2:N+4]}x${ABC[3]} = _mm_unpackhi_ps(v${ABC[N+2]}x${ABC[0:4]}, v${ABC[N+3]}x${ABC[0:4]});
 
         $for N in range(0, NR, 4):
-          $for K in range(0, KUNROLL, 4):
-            const __m128 v${ABC[N:N+4]}x${ABC[K]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[K]}_${ABC[N:N+2]}x${ABC[K+1]}, v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]});
-            const __m128 v${ABC[N:N+4]}x${ABC[K+1]} = _mm_movehl_ps(v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]}, v${ABC[N:N+2]}x${ABC[K]}_${ABC[N:N+2]}x${ABC[K+1]});
-            const __m128 v${ABC[N:N+4]}x${ABC[K+2]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[K+2]}_${ABC[N:N+2]}x${ABC[K+3]}, v${ABC[N+2:N+4]}x${ABC[K+2]}_${ABC[N+2:N+4]}x${ABC[K+3]});
-            const __m128 v${ABC[N:N+4]}x${ABC[K+3]} = _mm_movehl_ps(v${ABC[N+2:N+4]}x${ABC[K+2]}_${ABC[N+2:N+4]}x${ABC[K+3]}, v${ABC[N:N+2]}x${ABC[K+2]}_${ABC[N:N+2]}x${ABC[K+3]});
+          const __m128 v${ABC[N:N+4]}x${ABC[0]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[0]}_${ABC[N:N+2]}x${ABC[1]}, v${ABC[N+2:N+4]}x${ABC[0]}_${ABC[N+2:N+4]}x${ABC[1]});
+          const __m128 v${ABC[N:N+4]}x${ABC[1]} = _mm_movehl_ps(v${ABC[N+2:N+4]}x${ABC[0]}_${ABC[N+2:N+4]}x${ABC[1]}, v${ABC[N:N+2]}x${ABC[0]}_${ABC[N:N+2]}x${ABC[1]});
+          const __m128 v${ABC[N:N+4]}x${ABC[2]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[2]}_${ABC[N:N+2]}x${ABC[3]}, v${ABC[N+2:N+4]}x${ABC[2]}_${ABC[N+2:N+4]}x${ABC[3]});
+          const __m128 v${ABC[N:N+4]}x${ABC[3]} = _mm_movehl_ps(v${ABC[N+2:N+4]}x${ABC[2]}_${ABC[N+2:N+4]}x${ABC[3]}, v${ABC[N:N+2]}x${ABC[2]}_${ABC[N:N+2]}x${ABC[3]});
 
         _mm_store_ps(packed_w, v${ABC[0:4]}x${ABC[0]});
-        $for K in range(KUNROLL):
+        $for K in range(4):
           $for N in range(0, NR, 4):
             $if N != 0 or K != 0:
               _mm_store_ps(packed_w + ${N+K*NR}, v${ABC[N:N+4]}x${ABC[K]});
-        packed_w += ${NR*KUNROLL};
+        packed_w += ${NR*4};
       }
 
       // KC remainder (1..3)
@@ -129,9 +157,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
               w${ABC[N]} += 2;
 
             $for N in range(0, NR, 4):
-              $for K in range(0, KUNROLL, 4):
-                const __m128 v${ABC[N:N+2]}x0_${ABC[N:N+2]}x1 = _mm_unpacklo_ps(v${ABC[N]}x01, v${ABC[N+1]}x01);
-                const __m128 v${ABC[N+2:N+4]}x0_${ABC[N+2:N+4]}x1 = _mm_unpacklo_ps(v${ABC[N+2]}x01, v${ABC[N+3]}x01);
+              const __m128 v${ABC[N:N+2]}x0_${ABC[N:N+2]}x1 = _mm_unpacklo_ps(v${ABC[N]}x01, v${ABC[N+1]}x01);
+              const __m128 v${ABC[N+2:N+4]}x0_${ABC[N+2:N+4]}x1 = _mm_unpacklo_ps(v${ABC[N+2]}x01, v${ABC[N+3]}x01);
 
             $for N in range(0, NR, 4):
               const __m128 v${ABC[N:N+4]}x0 = _mm_movelh_ps(v${ABC[N:N+2]}x0_${ABC[N:N+2]}x1, v${ABC[N+2:N+4]}x0_${ABC[N+2:N+4]}x1);
@@ -213,41 +240,68 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
             w${ABC[N]} = w${ABC[N-1]};
           }
 
-      // KC main loop multiple of ${NR}x${KUNROLL}
       size_t k = kc;
-      for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
+      $if KUNROLL > 4:
+        // KC main loop multiple of ${KUNROLL}
+        for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
+          $for N in range(NR-1):
+            const __m128 v${ABC[N]}x${ABC[0:4]} = _mm_loadu_ps(w${ABC[N]});
+            $for K in range(4, KUNROLL, 4):
+              const __m128 v${ABC[N]}x${ABC[K:K+4]} = _mm_loadu_ps(w${ABC[N]} + ${K});
+            w${ABC[N]} += ${KUNROLL};
+
+          $for N in range(0, NR, 4):
+            $for K in range(0, KUNROLL, 4):
+              const __m128 v${ABC[N:N+2]}x${ABC[K]}_${ABC[N:N+2]}x${ABC[K+1]} = _mm_unpacklo_ps(v${ABC[N]}x${ABC[K:K+4]}, v${ABC[N+1]}x${ABC[K:K+4]});
+              const __m128 v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]} = _mm_unpacklo_ps(v${ABC[N+2]}x${ABC[K:K+4]}, v${ABC[min(N+3, NR-2)]}x${ABC[K:K+4]});
+              const __m128 v${ABC[N:N+2]}x${ABC[K+2]}_${ABC[N:N+2]}x${ABC[K+3]} = _mm_unpackhi_ps(v${ABC[N]}x${ABC[K:K+4]}, v${ABC[N+1]}x${ABC[K:K+4]});
+              const __m128 v${ABC[N+2:N+4]}x${ABC[K+2]}_${ABC[N+2:N+4]}x${ABC[K+3]} = _mm_unpackhi_ps(v${ABC[N+2]}x${ABC[K:K+4]}, v${ABC[min(N+3, NR-2)]}x${ABC[K:K+4]});
+
+          $for N in range(0, NR, 4):
+            $for K in range(0, KUNROLL, 4):
+              const __m128 v${ABC[N:N+4]}x${ABC[K]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[K]}_${ABC[N:N+2]}x${ABC[K+1]}, v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]});
+              const __m128 v${ABC[N:N+4]}x${ABC[K+1]} = _mm_movehl_ps(v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]}, v${ABC[N:N+2]}x${ABC[K]}_${ABC[N:N+2]}x${ABC[K+1]});
+              const __m128 v${ABC[N:N+4]}x${ABC[K+2]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[K+2]}_${ABC[N:N+2]}x${ABC[K+3]}, v${ABC[N+2:N+4]}x${ABC[K+2]}_${ABC[N+2:N+4]}x${ABC[K+3]});
+              const __m128 v${ABC[N:N+4]}x${ABC[K+3]} = _mm_movehl_ps(v${ABC[N+2:N+4]}x${ABC[K+2]}_${ABC[N+2:N+4]}x${ABC[K+3]}, v${ABC[N:N+2]}x${ABC[K+2]}_${ABC[N:N+2]}x${ABC[K+3]});
+
+          _mm_store_ps(packed_w, v${ABC[0:4]}x${ABC[0]});
+          $for K in range(KUNROLL):
+            $for N in range(0, NR, 4):
+              $if N != 0 or K != 0:
+                _mm_store_ps(packed_w + ${N+K*NR}, v${ABC[N:N+4]}x${ABC[K]});
+          packed_w += ${NR*KUNROLL};
+        }
+
+      // KC multiple of 4
+      for (; k >= 4; k -= 4) {
         $for N in range(NR-1):
           const __m128 v${ABC[N]}x${ABC[0:4]} = _mm_loadu_ps(w${ABC[N]});
-          $for K in range(4, KUNROLL, 4):
-            const __m128 v${ABC[N]}x${ABC[K:K+4]} = _mm_loadu_ps(w${ABC[N]} + ${K});
-          w${ABC[N]} += ${KUNROLL};
+          w${ABC[N]} += 4;
 
         $for N in range(0, NR, 4):
-          $for K in range(0, KUNROLL, 4):
-            const __m128 v${ABC[N:N+2]}x${ABC[K]}_${ABC[N:N+2]}x${ABC[K+1]} = _mm_unpacklo_ps(v${ABC[N]}x${ABC[K:K+4]}, v${ABC[N+1]}x${ABC[K:K+4]});
-            const __m128 v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]} = _mm_unpacklo_ps(v${ABC[N+2]}x${ABC[K:K+4]}, v${ABC[min(N+3, NR-2)]}x${ABC[K:K+4]});
-            const __m128 v${ABC[N:N+2]}x${ABC[K+2]}_${ABC[N:N+2]}x${ABC[K+3]} = _mm_unpackhi_ps(v${ABC[N]}x${ABC[K:K+4]}, v${ABC[N+1]}x${ABC[K:K+4]});
-            const __m128 v${ABC[N+2:N+4]}x${ABC[K+2]}_${ABC[N+2:N+4]}x${ABC[K+3]} = _mm_unpackhi_ps(v${ABC[N+2]}x${ABC[K:K+4]}, v${ABC[min(N+3, NR-2)]}x${ABC[K:K+4]});
+          const __m128 v${ABC[N:N+2]}x${ABC[0]}_${ABC[N:N+2]}x${ABC[1]} = _mm_unpacklo_ps(v${ABC[N]}x${ABC[0:4]}, v${ABC[N+1]}x${ABC[0:4]});
+          const __m128 v${ABC[N+2:N+4]}x${ABC[0]}_${ABC[N+2:N+4]}x${ABC[1]} = _mm_unpacklo_ps(v${ABC[N+2]}x${ABC[0:4]}, v${ABC[min(N+3, NR-2)]}x${ABC[0:4]});
+          const __m128 v${ABC[N:N+2]}x${ABC[2]}_${ABC[N:N+2]}x${ABC[3]} = _mm_unpackhi_ps(v${ABC[N]}x${ABC[0:4]}, v${ABC[N+1]}x${ABC[0:4]});
+          const __m128 v${ABC[N+2:N+4]}x${ABC[2]}_${ABC[N+2:N+4]}x${ABC[3]} = _mm_unpackhi_ps(v${ABC[N+2]}x${ABC[0:4]}, v${ABC[min(N+3, NR-2)]}x${ABC[0:4]});
 
         $for N in range(0, NR, 4):
-          $for K in range(0, KUNROLL, 4):
-            const __m128 v${ABC[N:N+4]}x${ABC[K]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[K]}_${ABC[N:N+2]}x${ABC[K+1]}, v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]});
-            const __m128 v${ABC[N:N+4]}x${ABC[K+1]} = _mm_movehl_ps(v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]}, v${ABC[N:N+2]}x${ABC[K]}_${ABC[N:N+2]}x${ABC[K+1]});
-            const __m128 v${ABC[N:N+4]}x${ABC[K+2]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[K+2]}_${ABC[N:N+2]}x${ABC[K+3]}, v${ABC[N+2:N+4]}x${ABC[K+2]}_${ABC[N+2:N+4]}x${ABC[K+3]});
-            const __m128 v${ABC[N:N+4]}x${ABC[K+3]} = _mm_movehl_ps(v${ABC[N+2:N+4]}x${ABC[K+2]}_${ABC[N+2:N+4]}x${ABC[K+3]}, v${ABC[N:N+2]}x${ABC[K+2]}_${ABC[N:N+2]}x${ABC[K+3]});
+          const __m128 v${ABC[N:N+4]}x${ABC[0]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[0]}_${ABC[N:N+2]}x${ABC[1]}, v${ABC[N+2:N+4]}x${ABC[0]}_${ABC[N+2:N+4]}x${ABC[1]});
+          const __m128 v${ABC[N:N+4]}x${ABC[1]} = _mm_movehl_ps(v${ABC[N+2:N+4]}x${ABC[0]}_${ABC[N+2:N+4]}x${ABC[1]}, v${ABC[N:N+2]}x${ABC[0]}_${ABC[N:N+2]}x${ABC[1]});
+          const __m128 v${ABC[N:N+4]}x${ABC[2]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[2]}_${ABC[N:N+2]}x${ABC[3]}, v${ABC[N+2:N+4]}x${ABC[2]}_${ABC[N+2:N+4]}x${ABC[3]});
+          const __m128 v${ABC[N:N+4]}x${ABC[3]} = _mm_movehl_ps(v${ABC[N+2:N+4]}x${ABC[2]}_${ABC[N+2:N+4]}x${ABC[3]}, v${ABC[N:N+2]}x${ABC[2]}_${ABC[N:N+2]}x${ABC[3]});
 
         _mm_store_ps(packed_w, v${ABC[0:4]}x${ABC[0]});
-        $for K in range(KUNROLL):
+        $for K in range(4):
           $for N in range(0, NR, 4):
             $if N != 0 or K != 0:
               _mm_store_ps(packed_w + ${N+K*NR}, v${ABC[N:N+4]}x${ABC[K]});
-        packed_w += ${NR*KUNROLL};
+        packed_w += ${NR*4};
       }
 
       // KC remainder (1..3)
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
-        assert(k <= ${KUNROLL-1});
+        assert(k <= 3);
 
         switch (k) {
           case 1:
@@ -273,9 +327,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
               const __m128 v${ABC[N]}x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w${ABC[N]}));
 
             $for N in range(0, NR, 4):
-              $for K in range(0, KUNROLL, 4):
-                const __m128 v${ABC[N:N+2]}x0_${ABC[N:N+2]}x1 = _mm_unpacklo_ps(v${ABC[N]}x01, v${ABC[N+1]}x01);
-                const __m128 v${ABC[N+2:N+4]}x0_${ABC[N+2:N+4]}x1 = _mm_unpacklo_ps(v${ABC[N+2]}x01, v${ABC[min(N+3, NR-2)]}x01);
+              const __m128 v${ABC[N:N+2]}x0_${ABC[N:N+2]}x1 = _mm_unpacklo_ps(v${ABC[N]}x01, v${ABC[N+1]}x01);
+              const __m128 v${ABC[N+2:N+4]}x0_${ABC[N+2:N+4]}x1 = _mm_unpacklo_ps(v${ABC[N+2]}x01, v${ABC[min(N+3, NR-2)]}x01);
 
             $for N in range(0, NR, 4):
               const __m128 v${ABC[N:N+4]}x0 = _mm_movelh_ps(v${ABC[N:N+2]}x0_${ABC[N:N+2]}x1, v${ABC[N+2:N+4]}x0_${ABC[N+2:N+4]}x1);

@@ -176,9 +176,19 @@ static void x32_packw(benchmark::State& state,
       xnn_x32_packw_gemm_goi_ukernel_x8__sse2_x4,
       /*nr=*/8, /*kr=*/1, /*sr=*/1);
   }
+  static void x32_packw_x8__sse2_x8(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x8__sse2_x8,
+      /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  }
   static void x32_packw_x16__sse2_x4(benchmark::State& state, const char* net) {
     x32_packw(state,
       xnn_x32_packw_gemm_goi_ukernel_x16__sse2_x4,
+      /*nr=*/16, /*kr=*/1, /*sr=*/1);
+  }
+  static void x32_packw_x16__sse2_x8(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x16__sse2_x8,
       /*nr=*/16, /*kr=*/1, /*sr=*/1);
   }
   static void x32_packw_x8s4__sse2_x4(benchmark::State& state, const char* net) {
@@ -186,9 +196,19 @@ static void x32_packw(benchmark::State& state,
       xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_x4,
       /*nr=*/8, /*kr=*/1, /*sr=*/4);
   }
+  static void x32_packw_x8s4__sse2_x8(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_x8,
+      /*nr=*/8, /*kr=*/1, /*sr=*/4);
+  }
   static void x32_packw_x16s4__sse2_x4(benchmark::State& state, const char* net) {
     x32_packw(state,
       xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x4,
+      /*nr=*/16, /*kr=*/1, /*sr=*/4);
+  }
+  static void x32_packw_x16s4__sse2_x8(benchmark::State& state, const char* net) {
+    x32_packw(state,
+      xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x8,
       /*nr=*/16, /*kr=*/1, /*sr=*/4);
   }
   static void x32_packw_x2c4__sse2_x1(benchmark::State& state, const char* net) {
@@ -203,9 +223,13 @@ static void x32_packw(benchmark::State& state,
   BENCHMARK_BGEMM(x32_packw_x8s4__avx_x4)
   BENCHMARK_BGEMM(x32_packw_x16s4__avx_x4)
   BENCHMARK_BGEMM(x32_packw_x8__sse2_x4)
+  BENCHMARK_BGEMM(x32_packw_x8__sse2_x8)
   BENCHMARK_BGEMM(x32_packw_x16__sse2_x4)
+  BENCHMARK_BGEMM(x32_packw_x16__sse2_x8)
   BENCHMARK_BGEMM(x32_packw_x8s4__sse2_x4)
+  BENCHMARK_BGEMM(x32_packw_x8s4__sse2_x8)
   BENCHMARK_BGEMM(x32_packw_x16s4__sse2_x4)
+  BENCHMARK_BGEMM(x32_packw_x16s4__sse2_x8)
   BENCHMARK_BGEMM(x32_packw_x2c4__sse2_x1)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 

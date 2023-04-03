@@ -13422,8 +13422,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_x4(
       const float* wE = wD + kc;
       const float* wF = wE + kc;
 
-      // KC main loop multiple of 16x4
       size_t k = kc;
+
+      // KC multiple of 4
       for (; k >= 4; k -= 4) {
         const __m128 v0x0123 = _mm_loadu_ps(w0);
         w0 += 4;
@@ -13835,8 +13836,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_x4(
         wE = wD;
       }
 
-      // KC main loop multiple of 16x4
       size_t k = kc;
+
+      // KC multiple of 4
       for (; k >= 4; k -= 4) {
         const __m128 v0x0123 = _mm_loadu_ps(w0);
         w0 += 4;
@@ -14184,8 +14186,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x4(
       const float* w14 = w13 + kc;
       const float* w15 = w14 + kc;
 
-      // KC main loop multiple of 16x4
       size_t k = kc;
+
+      // KC multiple of 4
       for (; k >= 4; k -= 4) {
         // Read blocks of 4x4
         // a b c d
@@ -14616,8 +14619,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x4(
         w14 = w13;
       }
 
-      // KC main loop multiple of 16x4
       size_t k = kc;
+
+      // KC multiple of 4
       for (; k >= 4; k -= 4) {
         // Read blocks of 4x4
         // a b c d
@@ -14654,7 +14658,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x4(
         w13 += 4;
         __m128 v14x0123 = _mm_loadu_ps(w14);
         w14 += 4;
-
         __m128 v15x0123  = _mm_undefined_ps();
 
         // Apply SR4 shuffle
@@ -15199,8 +15202,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__sse2_x4(
       const float* w6 = w5 + kc;
       const float* w7 = w6 + kc;
 
-      // KC main loop multiple of 8x4
       size_t k = kc;
+
+      // KC multiple of 4
       for (; k >= 4; k -= 4) {
         const __m128 v0x0123 = _mm_loadu_ps(w0);
         w0 += 4;
@@ -15434,8 +15438,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__sse2_x4(
         w6 = w5;
       }
 
-      // KC main loop multiple of 8x4
       size_t k = kc;
+
+      // KC multiple of 4
       for (; k >= 4; k -= 4) {
         const __m128 v0x0123 = _mm_loadu_ps(w0);
         w0 += 4;
