@@ -774,7 +774,7 @@ static void init_f32_gemm_config(void) {
     f32_gemm2_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x2c4__sse);
     f32_gemm2_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x2c4__sse);
     f32_gemm2_config.init.f32 = xnn_init_f32_minmax_sse_params;
-    f32_gemm2_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1;
+    f32_gemm2_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x4;
     f32_gemm2_config.mr = 4;
     f32_gemm2_config.nr = 2;
     f32_gemm2_config.log2_kr = 2;
@@ -826,7 +826,7 @@ static void init_f32_gemm_config(void) {
       f32_gemm_config.nr = 8;
 
       f32_gemm2_config.init.f32 = xnn_init_f32_minmax_wasmsimd_params;
-      f32_gemm2_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1;
+      f32_gemm2_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x4;
       f32_gemm2_config.mr = 4;
       f32_gemm2_config.nr = 2;
       f32_gemm2_config.log2_kr = 2;
@@ -878,7 +878,7 @@ static void init_f32_gemm_config(void) {
       #endif
 
       f32_gemm2_config.init.f32 = xnn_init_f32_minmax_wasmsimd_params;
-      f32_gemm2_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1;
+      f32_gemm2_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x4;
       f32_gemm2_config.mr = 4;
       f32_gemm2_config.nr = 2;
       f32_gemm2_config.log2_kr = 2;
@@ -1009,7 +1009,7 @@ static void init_f32_gemm2_config(void) {
     f32_gemm2_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x2c4__sse);
     f32_gemm2_config.minmax.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_f32_igemm_minmax_ukernel_4x2c4__sse);
     f32_gemm2_config.init.f32 = xnn_init_f32_minmax_sse_params;
-    f32_gemm2_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1;
+    f32_gemm2_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x4;
     f32_gemm2_config.mr = 4;
     f32_gemm2_config.nr = 2;
     f32_gemm2_config.log2_kr = 2;
@@ -1030,7 +1030,7 @@ static void init_f32_gemm2_config(void) {
       #endif
 
       f32_gemm2_config.init.f32 = xnn_init_f32_minmax_wasmsimd_params;
-      f32_gemm2_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1;
+      f32_gemm2_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x4;
       f32_gemm2_config.mr = 4;
       f32_gemm2_config.nr = 2;
       f32_gemm2_config.log2_kr = 2;
@@ -1048,7 +1048,7 @@ static void init_f32_gemm2_config(void) {
       #endif
 
       f32_gemm2_config.init.f32 = xnn_init_f32_minmax_wasmsimd_params;
-      f32_gemm2_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x1;
+      f32_gemm2_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_x32_packw_gemm_goi_ukernel_x2c4__wasmsimd_x4;
       f32_gemm2_config.mr = 4;
       f32_gemm2_config.nr = 2;
       f32_gemm2_config.log2_kr = 2;

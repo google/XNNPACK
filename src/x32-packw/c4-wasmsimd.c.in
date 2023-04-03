@@ -15,7 +15,7 @@ $assert KR == 4
 #include <xnnpack/packw.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_x1(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_x4(
   size_t g,
   size_t nc,
   size_t kc,
@@ -166,11 +166,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_x1(
         $for N in range(NR-1):
           const v128_t v${N} = wasm_v128_load(w${N});
           w${N} += ${KR};
-        const v128_t v${NR-1} = wasm_i32x4_const_splat(0);
 
         wasm_v128_store(packed_weights, v0);
         $for N in range(1,NR):
-          wasm_v128_store(packed_weights + ${N*KR}, v${N});
+          wasm_v128_store(packed_weights + ${N*KR}, v${min(N,NR-2)});
         packed_weights += ${NR*KR};
       }
 
@@ -186,10 +185,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_x1(
             $for N in range(NR-1):
               const v128_t v${N} = wasm_v128_load32_zero(w${N});
               ++w${N};
-            const v128_t v${NR-1} = wasm_i32x4_const_splat(0);
             wasm_v128_store(packed_weights, v0);
             $for N in range(1,NR):
-              wasm_v128_store(packed_weights + ${N*KR}, v${N});
+              wasm_v128_store(packed_weights + ${N*KR}, v${min(N,NR-2)});
             packed_weights += ${NR*KR};
             break;
           }
@@ -200,10 +198,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_x1(
             $for N in range(NR-1):
               const v128_t v${N} = wasm_v128_load64_zero(w${N});
               w${N} += 2;
-            const v128_t v${NR-1} = wasm_i32x4_const_splat(0);
             wasm_v128_store(packed_weights, v0);
             $for N in range(1,NR):
-              wasm_v128_store(packed_weights + ${N*KR}, v${N});
+              wasm_v128_store(packed_weights + ${N*KR}, v${min(N,NR-2)});
             packed_weights += ${NR*KR};
             break;
           }
@@ -215,10 +212,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_x1(
               v128_t v${N} = wasm_v128_load64_zero(w${N});
               v${N} = wasm_v128_load32_lane(w${N} + 2, v${N}, 2);
               w${N} += 3;
-            const v128_t v${NR-1} = wasm_i32x4_const_splat(0);
             wasm_v128_store(packed_weights, v0);
             $for N in range(1,NR):
-              wasm_v128_store(packed_weights + ${N*KR}, v${N});
+              wasm_v128_store(packed_weights + ${N*KR}, v${min(N,NR-2)});
             packed_weights += ${NR*KR};
             break;
           }

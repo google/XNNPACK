@@ -15,7 +15,7 @@ $assert KR == 4
 #include <xnnpack/packw.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2_x1(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2_x4(
   size_t g,
   size_t nc,
   size_t kc,
@@ -159,11 +159,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2_x1(
         $for N in range(NR-1):
           v${N} = _mm_loadu_ps(w${N});
           w${N} += ${KR};
-        v${NR-1} = _mm_setzero_ps();
 
         _mm_storeu_ps(packed_w, v0);
         $for N in range(1,NR):
-          _mm_storeu_ps(packed_w + ${N*KR}, v${N});
+          _mm_storeu_ps(packed_w + ${N*KR}, v${min(N,NR-2)});
         packed_w += ${NR*KR};
       }
 
@@ -200,10 +199,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2_x1(
           default:
             XNN_UNREACHABLE;
         }
-        v${NR-1} = _mm_setzero_ps();
         _mm_storeu_ps(packed_w, v0);
         $for N in range(1,NR):
-          _mm_storeu_ps(packed_w + ${N*KR}, v${N});
+          _mm_storeu_ps(packed_w + ${N*KR}, v${min(N,NR-2)});
         packed_w += ${NR*KR};
       }
       packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
