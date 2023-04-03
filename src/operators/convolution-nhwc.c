@@ -57,9 +57,11 @@ static inline const struct xnn_dwconv_config* find_dwconv_ukernel(
       if (best_ukernel == NULL || ukernel->primary_tile < best_ukernel->primary_tile) {
         best_ukernel = ukernel;
       }
-    } else if (ukernel->last_tile != 0 && kernel_size >= 25) {
-      // Use multi-pass for large kernel sizes.
-      best_ukernel = ukernel;
+    } else if (ukernel->last_tile != 0) {
+      // Use multi-pass if it fits the kernel size nicely, or if kernel_size is large.
+      if (ukernel->primary_tile + ukernel->middle_tile + ukernel->last_tile == kernel_size || kernel_size >= 25) {
+        best_ukernel = ukernel;
+      }
     }
     ukernel++;
   }
