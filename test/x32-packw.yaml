@@ -29,7 +29,9 @@
 
 # x86 AVX2
 - name: xnn_x32_packw_gemm_goi_ukernel_x8__avx2_x4
+- name: xnn_x32_packw_gemm_goi_ukernel_x8s4__avx2_x4
 - name: xnn_x32_packw_gemm_goi_ukernel_x16__avx2_x4
+- name: xnn_x32_packw_gemm_goi_ukernel_x16s4__avx2_x4
 
 # x86 AVX512
 - name: xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_x4

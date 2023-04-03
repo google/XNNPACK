@@ -243,12 +243,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__avx2_x4(
         // e f g h
         // i j k l
         // m n o p
-
-        // Read blocks of 4x4
-        // a b c d
-        // e f g h
-        // i j k l
-        // m n o p
         // Load first 4 rows of N into low part of each register
         __m256 v0x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w0));
         w0 += 4;

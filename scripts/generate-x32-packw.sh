@@ -40,6 +40,8 @@ tools/xngen src/x32-packw/s4-sse2.c.in -D NR=8  -D SR=4 -D KUNROLL=4 -D AVX=0 -o
 tools/xngen src/x32-packw/s4-sse2.c.in -D NR=16 -D SR=4 -D KUNROLL=4 -D AVX=0 -o src/x32-packw/gen/x32-packw-x16s4-sse2-x4.c &
 tools/xngen src/x32-packw/s4-sse2.c.in -D NR=8  -D SR=4 -D KUNROLL=4 -D AVX=1 -o src/x32-packw/gen/x32-packw-x8s4-avx-x4.c &
 tools/xngen src/x32-packw/s4-sse2.c.in -D NR=16 -D SR=4 -D KUNROLL=4 -D AVX=1 -o src/x32-packw/gen/x32-packw-x16s4-avx-x4.c &
+tools/xngen src/x32-packw/s4-avx2.c.in -D NR=8  -D SR=4 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8s4-avx2-x4.c &
+tools/xngen src/x32-packw/s4-avx2.c.in -D NR=16 -D SR=4 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x16s4-avx2-x4.c &
 
 ### KR 4
 tools/xngen src/x32-packw/c4-sse2.c.in -D NR=2  -D KR=4 -o src/x32-packw/gen/x32-packw-x2c4-sse2-x1.c &

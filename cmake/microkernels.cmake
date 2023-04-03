@@ -1090,7 +1090,9 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/x16-transposec/gen/x16-transposec-16x16-reuse-mov-avx2.c
   src/x16-transposec/gen/x16-transposec-16x16-reuse-switch-avx2.c
   src/x32-packw/gen/x32-packw-x8-avx2-x4.c
-  src/x32-packw/gen/x32-packw-x16-avx2-x4.c)
+  src/x32-packw/gen/x32-packw-x8s4-avx2-x4.c
+  src/x32-packw/gen/x32-packw-x16-avx2-x4.c
+  src/x32-packw/gen/x32-packw-x16s4-avx2-x4.c)
 
 SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx512f-acc2.c
