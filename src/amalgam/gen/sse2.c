@@ -13356,7 +13356,7 @@ void xnn_x16_transposec_ukernel__8x8_reuse_multi_sse2(
   } while (block_width != 0);
 }
 
-void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1(
+void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x4(
   size_t g,
   size_t nc,
   size_t kc,
@@ -13492,10 +13492,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1(
         // e f g h
         v0 = _mm_loadu_ps(w0);
         w0 += 4;
-        v1 = _mm_setzero_ps();
 
         _mm_storeu_ps(packed_w, v0);
-        _mm_storeu_ps(packed_w + 4, v1);
+        _mm_storeu_ps(packed_w + 4, v0);
         packed_w += 8;
       }
 
@@ -13529,9 +13528,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x1(
           default:
             XNN_UNREACHABLE;
         }
-        v1 = _mm_setzero_ps();
         _mm_storeu_ps(packed_w, v0);
-        _mm_storeu_ps(packed_w + 4, v1);
+        _mm_storeu_ps(packed_w + 4, v0);
         packed_w += 8;
       }
       packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);

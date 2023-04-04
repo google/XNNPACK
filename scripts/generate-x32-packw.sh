@@ -42,7 +42,7 @@ tools/xngen src/x32-packw/s4-sse2.c.in -D NR=8  -D SR=4 -D KUNROLL=8  -D AVX=0 -
 tools/xngen src/x32-packw/s4-sse2.c.in -D NR=16 -D SR=4 -D KUNROLL=8  -D AVX=0 -o src/x32-packw/gen/x32-packw-x16s4-sse2-x8.c &
 
 ### KR 4
-tools/xngen src/x32-packw/c4-sse2.c.in -D NR=2  -D KR=4 -o src/x32-packw/gen/x32-packw-x2c4-sse2-x1.c &
+tools/xngen src/x32-packw/c4-sse2.c.in -D NR=2  -D KR=4 -o src/x32-packw/gen/x32-packw-x2c4-sse2-x4.c &
 
 
 ################################### x86 AVX ###################################
@@ -66,7 +66,7 @@ tools/xngen src/x32-packw/wasmsimd.c.in -D NR=8 -D KUNROLL=4 -o src/x32-packw/ge
 tools/xngen src/x32-packw/s4-wasmsimd.c.in -D NR=8 -D KUNROLL=4 -o src/x32-packw/gen/x32-packw-x8s4-wasmsimd-x1.c &
 
 ### KR 4
-tools/xngen src/x32-packw/c4-wasmsimd.c.in -D NR=2 -D KR=4 -o src/x32-packw/gen/x32-packw-x2c4-wasmsimd-x1.c &
+tools/xngen src/x32-packw/c4-wasmsimd.c.in -D NR=2 -D KR=4 -o src/x32-packw/gen/x32-packw-x2c4-wasmsimd-x4.c &
 
 ################################## Unit tests #################################
 tools/generate-packw-test.py --spec test/x32-packw.yaml --output test/x32-packw.cc &
