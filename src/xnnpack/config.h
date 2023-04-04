@@ -54,6 +54,7 @@ struct xnn_hardware_config {
   bool is_x86;
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 #if XNN_ARCH_WASMRELAXEDSIMD
+  bool use_wasm_blendvps;
   bool use_wasm_pshufb;
   bool use_wasm_sdot;
 #endif  // XNN_ARCH_WASMRELAXEDSIMD

@@ -146,6 +146,19 @@ static void init_hardware_config(void) {
         wasm_v128_xor(xint8_output, wasm_i32x4_const_splat(-128)),
         wasm_v128_xor(overflow_output, wasm_i32x4_const(65536, 33024, 33024, 512))));
     }
+    {
+      const v128_t input1 = wasm_i32x4_const(0xF0F0F0F0, 0xAAAAAAAA, 0xCCCCCCCC, 0x99999999);
+      const v128_t input2 = wasm_i32x4_const(0x0F0F0F0F, 0x55555555, 0x33333333, 0x66666666);
+      v128_t diff = wasm_i8x16_const_splat(0);
+      for (uint32_t shift = 0; shift < 32; ++shift) {
+        const uint32_t mask = UINT32_C(1) << shift;
+        const volatile v128_t vmask = wasm_u32x4_splat(mask);
+        const v128_t blendvps_result = wasm_v128_bitselect(input1, input2, wasm_i32x4_shr(vmask, 31));
+        const v128_t relaxed_result = __builtin_wasm_laneselect_i32x4(input1, input2, vmask);
+        diff = wasm_v128_or(diff, wasm_v128_xor(blendvps_result, relaxed_result));
+      }
+      hardware_config.use_wasm_blendvps = !wasm_v128_any_true(diff);
+    }
   #endif  // XNN_ARCH_WASMRELAXEDSIMD
 }
 
