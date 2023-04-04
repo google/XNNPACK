@@ -1140,8 +1140,6 @@ PROD_SSE2_MICROKERNEL_SRCS = [
     "src/x16-transposec/gen/x16-transposec-8x8-reuse-multi-sse2.c",
     "src/x32-packw/gen/x32-packw-x2c4-sse2-x1.c",
     "src/x32-packw/gen/x32-packw-x8-sse2-x4.c",
-    "src/x32-packw/gen/x32-packw-x16-sse2-x4.c",
-    "src/x32-packw/gen/x32-packw-x16s4-sse2-x4.c",
     "src/x32-unpool/x32-unpool-sse2.c",
     "src/x32-zip/x32-zip-xm-sse2.c",
     "src/x32-zip/x32-zip-x2-sse2.c",
@@ -1295,6 +1293,8 @@ PROD_AVX_MICROKERNEL_SRCS = [
     "src/qu8-vmul/gen/qu8-vmul-minmax-fp32-avx-mul16-ld64-x16.c",
     "src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-avx-mul16-ld64-x16.c",
     "src/x8-lut/gen/x8-lut-avx-x64.c",
+    "src/x32-packw/gen/x32-packw-x16-avx-x4.c",
+    "src/x32-packw/gen/x32-packw-x16s4-avx-x4.c",
     "src/x32-transposec/gen/x32-transposec-8x8-reuse-multi-avx.c",
 ]
 
@@ -1475,6 +1475,7 @@ PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-vunary/gen/f32-vabs-avx512f-x16.c",
     "src/f32-vunary/gen/f32-vneg-avx512f-x16.c",
     "src/f32-vunary/gen/f32-vsqr-avx512f-x16.c",
+    "src/x32-packw/gen/x32-packw-x16-avx512f-x4.c",
 ]
 
 PROD_AVX512SKX_MICROKERNEL_SRCS = [
