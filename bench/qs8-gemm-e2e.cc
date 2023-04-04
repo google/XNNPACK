@@ -23,6 +23,7 @@
 #include <xnnpack/igemm.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
+#include <xnnpack/pack.h>
 
 
 static void GEMMEnd2EndBenchmark(
@@ -58,6 +59,7 @@ static void GEMMEnd2EndBenchmark(
   gemm_config->nr = nr;
   gemm_config->log2_kr = log2_kr;
   gemm_config->log2_sr = log2_sr;
+  gemm_config->pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
 
   auto execution_plan = model_factory(nullptr);
   if (execution_plan.empty()) {
