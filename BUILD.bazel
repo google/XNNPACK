@@ -11120,11 +11120,13 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "subgraph_fp16_test",
     srcs = [
+        "test/mock-allocator.h",
         "test/subgraph-fp16.cc",
         "test/subgraph-tester.h",
     ],
     deps = [
         ":XNNPACK",
+        ":allocator",
         ":node_type",
         ":subgraph_test_mode",
         "@FP16",

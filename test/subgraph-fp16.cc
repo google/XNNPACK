@@ -6,14 +6,20 @@
 #include <array>
 
 #include <fp16.h>
+#include "mock-allocator.h"
 
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 
 #include "subgraph-tester.h"
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 namespace xnnpack {
+
+using ::testing::_;
+using ::testing::AnyNumber;
+using ::testing::Return;
 
 TEST(SUBGRAPH_FP16, value_both_external_output_and_input) {
   auto tester = SubgraphTester(4);
@@ -141,6 +147,51 @@ TEST(SUBGRAPH_FP16, with_static_value) {
   ASSERT_EQ(static_cast<const uint16_t*>(static_value->data)[0], fp16_ieee_from_fp32_value(1.0f));
   ASSERT_EQ(static_cast<const uint16_t*>(static_value->data)[1], fp16_ieee_from_fp32_value(2.0f));
   ASSERT_EQ(static_cast<const uint16_t*>(static_value->data)[2], fp16_ieee_from_fp32_value(3.0f));
+}
+
+TEST(SUBGRAPH_FP16, static_buffer_allocation_failure) {
+  auto tester = SubgraphTester(3);
+  tester
+      .AddInputTensorF32({1, 2, 2, 3}, 0)
+      .AddStaticTensorF32({1, 1, 1, 3}, TensorType::kDense, 1,
+                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT)
+      .AddOutputTensorF32({1, 4, 2, 3}, 2)
+      .AddAddition(0, 1, 2)
+      .Optimize();
+
+  MockAllocator mock_allocator;
+  std::unique_ptr<MockAllocator, decltype(&RestoreDefaultAllocator)>
+      auto_mock_allocator(&mock_allocator, &RestoreDefaultAllocator);
+  SetUpMockAllocator(&mock_allocator);
+
+  // Make the allocation of the static fp16 tensor buffer
+  // (of size 22 = 3 * 16bits + XNN_EXTRA_BYTES) fail.
+  EXPECT_CALL(mock_allocator, allocate(_, _)).Times(AnyNumber());
+  EXPECT_CALL(mock_allocator, allocate(_, 22)).WillOnce(Return(nullptr));
+
+  tester.RewriteForFp16WithFailure();
+}
+
+TEST(SUBGRAPH_FP16, external_value_allocation_failure) {
+  auto tester = SubgraphTester(3);
+  tester
+      .AddInputTensorF32({1, 2, 2, 3}, 0)
+      .AddStaticTensorF32({1, 1, 1, 3}, TensorType::kDense, 1,
+                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT)
+      .AddOutputTensorF32({1, 4, 2, 3}, 2)
+      .AddAddition(0, 1, 2)
+      .Optimize();
+
+  MockAllocator mock_allocator;
+  std::unique_ptr<MockAllocator, decltype(&RestoreDefaultAllocator)>
+      auto_mock_allocator(&mock_allocator, &RestoreDefaultAllocator);
+  SetUpMockAllocator(&mock_allocator);
+
+  // Make the allocation of the external values fail.
+  EXPECT_CALL(mock_allocator, reallocate(_, tester.Subgraph()->values, _))
+    .WillOnce(Return(nullptr));
+
+  tester.RewriteForFp16WithFailure();
 }
 
 TEST(SUBGRAPH_FP16, convolution_weights_used_by_another_node) {
