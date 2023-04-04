@@ -52,20 +52,21 @@ class MockAllocator : public xnn_allocator {
 static MockAllocator* mock_allocator_;
 
 const struct xnn_allocator mock_allocator_wrapper_ = {
-    .allocate = [](void* context, size_t size) -> void* {
+    /*context=*/nullptr,
+    /*allocate=*/[](void* context, size_t size) -> void* {
       return mock_allocator_->allocate(context, size);
     },
-    .reallocate = [](void* context, void* pointer, size_t size) -> void* {
+    /*reallocate=*/[](void* context, void* pointer, size_t size) -> void* {
       return mock_allocator_->reallocate(context, pointer, size);
     },
-    .deallocate = [](void* context, void* pointer) -> void {
+    /*deallocate=*/[](void* context, void* pointer) -> void {
       return mock_allocator_->deallocate(context, pointer);
     },
-    .aligned_allocate = [](void* context, size_t alignment,
+    /*aligned_allocate=*/[](void* context, size_t alignment,
                            size_t size) -> void* {
       return mock_allocator_->aligned_allocate(context, alignment, size);
     },
-    .aligned_deallocate = [](void* context, void* pointer) -> void {
+    /*aligned_deallocate=*/[](void* context, void* pointer) -> void {
       return xnn_default_allocator.aligned_deallocate(context, pointer);
     },
 };
