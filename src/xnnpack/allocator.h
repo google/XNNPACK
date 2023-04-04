@@ -20,6 +20,9 @@
 #include <xnnpack/common.h>
 #include <xnnpack/params.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 XNN_INTERNAL extern const struct xnn_allocator xnn_default_allocator;
 
@@ -76,3 +79,8 @@ inline static void xnn_release_simd_memory(void* memory_pointer) {
   #define XNN_SIMD_ALLOCA(size) \
     ((void*) ((((uintptr_t) alloca((size) + XNN_ALLOCATION_ALIGNMENT)) | (XNN_ALLOCATION_ALIGNMENT - 1)) + 1))
 #endif
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
