@@ -5440,6 +5440,14 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x24-transposec/gen/x24-transposec-4x1-scalar.c
   src/x24-transposec/gen/x24-transposec-4x2-scalar.c
   src/x24-transposec/gen/x24-transposec-4x4-scalar.c
+  src/x32-packb/gen/x32-packb-2c1s1r-scalar-float.c
+  src/x32-packb/gen/x32-packb-2c1s1r-scalar-int.c
+  src/x32-packb/gen/x32-packb-2c2s1r-scalar-float.c
+  src/x32-packb/gen/x32-packb-2c2s1r-scalar-int.c
+  src/x32-packb/gen/x32-packb-4c1s1r-scalar-float.c
+  src/x32-packb/gen/x32-packb-4c1s1r-scalar-int.c
+  src/x32-packb/gen/x32-packb-4c4s1r-scalar-float.c
+  src/x32-packb/gen/x32-packb-4c4s1r-scalar-int.c
   src/x32-packw/gen/x32-packw-x2-scalar-float-x4.c
   src/x32-packw/gen/x32-packw-x2-scalar-int-x4.c
   src/x32-packw/gen/x32-packw-x4-scalar-float-x4.c
@@ -5466,6 +5474,14 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/x32-transposec/gen/x32-transposec-4x4-scalar-float.c
   src/x32-transposec/gen/x32-transposec-4x4-scalar-int.c
   src/x32-unpool/x32-unpool-scalar.c
+  src/x32-zerob/gen/x32-zerob-2c1s1r-scalar-float.c
+  src/x32-zerob/gen/x32-zerob-2c1s1r-scalar-int.c
+  src/x32-zerob/gen/x32-zerob-2c2s1r-scalar-float.c
+  src/x32-zerob/gen/x32-zerob-2c2s1r-scalar-int.c
+  src/x32-zerob/gen/x32-zerob-4c1s1r-scalar-float.c
+  src/x32-zerob/gen/x32-zerob-4c1s1r-scalar-int.c
+  src/x32-zerob/gen/x32-zerob-4c4s1r-scalar-float.c
+  src/x32-zerob/gen/x32-zerob-4c4s1r-scalar-int.c
   src/x32-zip/x32-zip-x2-scalar.c
   src/x32-zip/x32-zip-x3-scalar.c
   src/x32-zip/x32-zip-x4-scalar.c

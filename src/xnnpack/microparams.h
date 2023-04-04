@@ -2910,3 +2910,7 @@ union xnn_x64_transpose_params {
   } avx;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
+
+union xnn_x32_packb_params {
+  char _; // Dummy member variable to comply with the C standard
+};
