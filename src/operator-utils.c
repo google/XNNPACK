@@ -68,7 +68,7 @@ void xnn_generate_gemms_up_to_max_mr(
   xnn_operator_t op)
 {
   assert(XNN_MAX_MR >= max_mr);
-  if (op->code_cache == NULL) {
+  if (op->code_cache == NULL || !xnn_code_cache_valid(op->code_cache)) {
     return;
   }
   for (size_t mr = 1; mr <= max_mr; mr++) {
@@ -137,7 +137,7 @@ void xnn_generate_igemms_up_to_max_mr(
   xnn_operator_t op)
 {
   assert(XNN_MAX_MR >= max_mr);
-  if (op->code_cache == NULL) {
+  if (op->code_cache == NULL || !xnn_code_cache_valid(op->code_cache)) {
     return;
   }
   for (size_t mr = 1; mr <= max_mr; mr++) {

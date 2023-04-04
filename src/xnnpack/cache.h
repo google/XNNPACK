@@ -8,6 +8,7 @@
 #include <stddef.h>            // For size_t.
 #include <stdint.h>            // For uint32_t.
 #include <xnnpack.h>           // For xnn_status.
+#include <xnnpack/common.h>    // For XNN_INLINE.
 #include <xnnpack/memory.h>    // For xnn_code_buffer.
 #include <xnnpack/mutex.h>     // For xnn_mutex.
 
@@ -69,6 +70,10 @@ enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache);
 // If it already exists within the cache, the buffer will be rewound, so we can
 // reuse the same section of the buffer.
 size_t xnn_get_or_insert_code_cache(struct xnn_code_cache* cache, void* ptr, size_t size);
+
+XNN_INLINE static bool xnn_code_cache_valid(struct xnn_code_cache* code_cache) {
+  return code_cache != NULL && code_cache->cache.type == xnn_cache_type_code;
+}
 
 // The state of weights cache finalization.
 enum xnn_cache_state {

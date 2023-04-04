@@ -375,13 +375,20 @@ enum xnn_status xnn_create_runtime_v4(
   }
 
   struct xnn_code_cache* code_cache = NULL;
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
-  code_cache = &runtime->code_cache;
-  status = xnn_init_code_cache(code_cache);
-  if (status != xnn_status_success) {
-    goto error;
-  }
-#endif
+  #if XNN_PLATFORM_JIT
+    if (flags & XNN_FLAG_JIT) {
+      #if !XNN_ENABLE_JIT
+        // Warn and continue without JIT enabled.
+        xnn_log_warning("unable to enable JIT: not compiled with JIT enabled");
+      #else
+        code_cache = &runtime->code_cache;
+        status = xnn_init_code_cache(code_cache);
+        if (status != xnn_status_success) {
+          goto error;
+        }
+      #endif
+    }
+  #endif
   const struct xnn_caches caches = {
     .code_cache = code_cache,
     .weights_cache = weights_cache,
@@ -402,9 +409,11 @@ enum xnn_status xnn_create_runtime_v4(
     }
   }
 
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
-  xnn_finalize_code_memory(&code_cache->cache.code);
-#endif
+  #if XNN_PLATFORM_JIT
+    if (code_cache != NULL) {
+      xnn_finalize_code_memory(&code_cache->cache.code);
+    }
+  #endif
 
   runtime->blobs = xnn_allocate_zero_memory(sizeof(struct xnn_blob) * subgraph->num_values);
   if (runtime->blobs == NULL) {
@@ -741,8 +750,10 @@ enum xnn_status xnn_delete_runtime(
         xnn_release_workspace(runtime->workspace);
       }
     }
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
-    xnn_release_code_cache(&runtime->code_cache);
+#if XNN_PLATFORM_JIT
+    if (xnn_code_cache_valid(&runtime->code_cache)) {
+      xnn_release_code_cache(&runtime->code_cache);
+    }
 #endif
     xnn_release_memory(runtime);
   }

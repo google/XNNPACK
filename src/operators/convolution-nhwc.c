@@ -1441,12 +1441,12 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     xnn_caches_t caches,
     xnn_operator_t* convolution_op_out)
 {
-  #if !XNN_ENABLE_JIT
+  if (caches != NULL && caches->code_cache == NULL) {
     xnn_log_error(
       "failed to create %s operator: convolution with post operations available only if JIT is enabled",
       xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
     return xnn_status_invalid_parameter;
-  #endif
+  }
 
   // Convolution is specified with linear activation, any clamping should be specified as a post operator.
   const float output_max = INFINITY;
