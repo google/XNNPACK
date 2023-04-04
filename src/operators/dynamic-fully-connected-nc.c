@@ -82,6 +82,59 @@ error:
   return status;
 }
 
+enum xnn_status xnn_create_dynamic_fully_connected_nc_f16(
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* dynamic_fully_connected_op_out)
+{
+  if (isnan(output_min)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_dynamic_fully_connected_nc_f16));
+    return xnn_status_invalid_parameter;
+  }
+
+  if (isnan(output_max)) {
+    xnn_log_error(
+      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
+      xnn_operator_type_to_string(xnn_operator_type_dynamic_fully_connected_nc_f16));
+    return xnn_status_invalid_parameter;
+  }
+
+  const uint16_t fp16_output_min = fp16_ieee_from_fp32_value(output_min);
+  const uint16_t fp16_output_max = fp16_ieee_from_fp32_value(output_max);
+  const float rounded_output_min = fp16_ieee_to_fp32_value(fp16_output_min);
+  const float rounded_output_max = fp16_ieee_to_fp32_value(fp16_output_max);
+  if (rounded_output_min >= rounded_output_max) {
+    xnn_log_error(
+      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
+      xnn_operator_type_to_string(xnn_operator_type_dynamic_fully_connected_nc_f16), rounded_output_min,
+      rounded_output_max);
+    return xnn_status_invalid_parameter;
+  }
+
+  const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_dynamic_fully_connected_nc_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
+  union xnn_f16_minmax_params params;
+  if XNN_LIKELY(gemm_config->init.f16 != NULL) {
+    gemm_config->init.f16(&params, fp16_output_min, fp16_output_max);
+  }
+
+  return create_dynamic_fully_connected_nc(
+    flags,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    &params, sizeof(params),
+    gemm_config, &gemm_config->minmax,
+    xnn_operator_type_dynamic_fully_connected_nc_f16,
+    dynamic_fully_connected_op_out);
+}
+
 enum xnn_status xnn_create_dynamic_fully_connected_nc_f32(
   float output_min,
   float output_max,
@@ -281,6 +334,32 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
   dynamic_fully_connected_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_dynamic_fully_connected_nc_f16(
+    xnn_operator_t dynamic_fully_connected_op,
+    size_t batch_size,
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    const void* input,
+    const void* kernel,
+    const void* bias,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_dynamic_fully_connected_nc(
+    dynamic_fully_connected_op, xnn_operator_type_dynamic_fully_connected_nc_f16,
+    batch_size, input_channels, output_channels, input_stride, output_stride,
+    input, kernel, bias, output,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*bias_element_size=*/sizeof(uint16_t),
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    &dynamic_fully_connected_op->params.f16_minmax,
+    sizeof(dynamic_fully_connected_op->params.f16_minmax),
+    pthreadpool_get_threads_count(threadpool));
 }
 
 enum xnn_status xnn_setup_dynamic_fully_connected_nc_f32(
