@@ -19,7 +19,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 parser = argparse.ArgumentParser(
   description='Amalgamation utility for microkernels')
 parser.add_argument("-s", "--set", metavar="SET", required=True,
-                    help="List of microkernel filenames in the BUILD file")
+                    help="List of microkernel filenames in the BUILD.bazel file")
 parser.add_argument("-i", "--include", metavar="INCLUDE",
                     help="Header file to include (e.g. immintrin.h, arm_neon.h)")
 parser.add_argument("-o", "--output", metavar="FILE", required=True,
@@ -29,7 +29,7 @@ parser.add_argument("-o", "--output", metavar="FILE", required=True,
 def main(args):
   options = parser.parse_args(args)
 
-  build_path = os.path.join(ROOT_DIR, "..", "BUILD")
+  build_path = os.path.join(ROOT_DIR, "..", "BUILD.bazel")
 
   with codecs.open(build_path, "r", encoding="utf-8") as build_file:
     build_text = build_file.read()
@@ -38,7 +38,7 @@ def main(args):
   match = re.search(pattern, build_text)
   if not match:
     raise ValueError(
-      "Failed to find file set %s (regex \"%s\") inside the BUILD file" %
+      "Failed to find file set %s (regex \"%s\") inside the BUILD.bazel file" %
         (options.set, pattern))
 
   start_pos = match.end()
