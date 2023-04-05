@@ -13,9 +13,11 @@ $assert KR == 4
 #include <emmintrin.h>
 
 #include <xnnpack/packw.h>
+$if PREFETCH:
+  #include <xnnpack/prefetch.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2_x4(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2${"_prfm" if PREFETCH else ""}_x4(
   size_t g,
   size_t nc,
   size_t kc,
@@ -69,7 +71,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2_x4(
         $for N in range(NR):
           v${N} = _mm_loadu_ps(w${N});
           w${N} += ${KR};
-
+        $if PREFETCH:
+          $for N in range(0, NR):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
         _mm_storeu_ps(packed_w, v0);
         $for N in range(1,NR):
           _mm_storeu_ps(packed_w + ${N*KR}, v${N});
@@ -149,7 +153,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2_x4(
             w${N} = w${N-1};
           }
 
-
       // KC main loop multiple of ${NR}x${KR}
       size_t k = kc;
       for (; k >= ${KR}; k -= ${KR}) {
@@ -159,7 +162,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2_x4(
         $for N in range(NR-1):
           v${N} = _mm_loadu_ps(w${N});
           w${N} += ${KR};
-
+        $if PREFETCH:
+          $for N in range(0, NR-1):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
         _mm_storeu_ps(packed_w, v0);
         $for N in range(1,NR):
           _mm_storeu_ps(packed_w + ${N*KR}, v${min(N,NR-2)});

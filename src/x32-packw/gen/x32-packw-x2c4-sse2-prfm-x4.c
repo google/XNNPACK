@@ -15,9 +15,10 @@
 #include <emmintrin.h>
 
 #include <xnnpack/packw.h>
+#include <xnnpack/prefetch.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x4(
+void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_prfm_x4(
   size_t g,
   size_t nc,
   size_t kc,
@@ -71,6 +72,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x4(
         w0 += 4;
         v1 = _mm_loadu_ps(w1);
         w1 += 4;
+        xnn_prefetch_to_l1((const int8_t*) w0 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w1 + 128);
         _mm_storeu_ps(packed_w, v0);
         _mm_storeu_ps(packed_w + 4, v1);
         packed_w += 8;
@@ -151,6 +154,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x4(
         // e f g h
         v0 = _mm_loadu_ps(w0);
         w0 += 4;
+        xnn_prefetch_to_l1((const int8_t*) w0 + 128);
         _mm_storeu_ps(packed_w, v0);
         _mm_storeu_ps(packed_w + 4, v0);
         packed_w += 8;

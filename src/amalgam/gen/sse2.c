@@ -13410,7 +13410,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x4(
         w0 += 4;
         v1 = _mm_loadu_ps(w1);
         w1 += 4;
-
         _mm_storeu_ps(packed_w, v0);
         _mm_storeu_ps(packed_w + 4, v1);
         packed_w += 8;
@@ -13483,7 +13482,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x4(
 
       // NR remainder has less than 2 rows so last row is not loaded
 
-
       // KC main loop multiple of 2x4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
@@ -13492,7 +13490,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x4(
         // e f g h
         v0 = _mm_loadu_ps(w0);
         w0 += 4;
-
         _mm_storeu_ps(packed_w, v0);
         _mm_storeu_ps(packed_w + 4, v0);
         packed_w += 8;
@@ -13852,7 +13849,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__sse2_x4(
         const __m128 v67x0_67x1 = _mm_unpacklo_ps(v6x0123, v6x0123);
         const __m128 v45x2_45x3 = _mm_unpackhi_ps(v4x0123, v5x0123);
         const __m128 v67x2_67x3 = _mm_unpackhi_ps(v6x0123, v6x0123);
-
         const __m128 v0123x0 = _mm_movelh_ps(v01x0_01x1, v23x0_23x1);
         const __m128 v0123x1 = _mm_movehl_ps(v23x0_23x1, v01x0_01x1);
         const __m128 v0123x2 = _mm_movelh_ps(v01x2_01x3, v23x2_23x3);

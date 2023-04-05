@@ -262,7 +262,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}${"_prfm" if PREFETCH else ""}
               const __m128 v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]} = _mm_unpacklo_ps(v${ABC[N+2]}x${ABC[K:K+4]}, v${ABC[min(N+3, NR-2)]}x${ABC[K:K+4]});
               const __m128 v${ABC[N:N+2]}x${ABC[K+2]}_${ABC[N:N+2]}x${ABC[K+3]} = _mm_unpackhi_ps(v${ABC[N]}x${ABC[K:K+4]}, v${ABC[N+1]}x${ABC[K:K+4]});
               const __m128 v${ABC[N+2:N+4]}x${ABC[K+2]}_${ABC[N+2:N+4]}x${ABC[K+3]} = _mm_unpackhi_ps(v${ABC[N+2]}x${ABC[K:K+4]}, v${ABC[min(N+3, NR-2)]}x${ABC[K:K+4]});
-
+          $if PREFETCH:
+            $for N in range(0, NR-1):
+              xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
           $for N in range(0, NR, 4):
             $for K in range(0, KUNROLL, 4):
               const __m128 v${ABC[N:N+4]}x${ABC[K]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[K]}_${ABC[N:N+2]}x${ABC[K+1]}, v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]});
@@ -289,7 +291,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}${"_prfm" if PREFETCH else ""}
           const __m128 v${ABC[N+2:N+4]}x${ABC[0]}_${ABC[N+2:N+4]}x${ABC[1]} = _mm_unpacklo_ps(v${ABC[N+2]}x${ABC[0:4]}, v${ABC[min(N+3, NR-2)]}x${ABC[0:4]});
           const __m128 v${ABC[N:N+2]}x${ABC[2]}_${ABC[N:N+2]}x${ABC[3]} = _mm_unpackhi_ps(v${ABC[N]}x${ABC[0:4]}, v${ABC[N+1]}x${ABC[0:4]});
           const __m128 v${ABC[N+2:N+4]}x${ABC[2]}_${ABC[N+2:N+4]}x${ABC[3]} = _mm_unpackhi_ps(v${ABC[N+2]}x${ABC[0:4]}, v${ABC[min(N+3, NR-2)]}x${ABC[0:4]});
-
+        $if PREFETCH:
+          $for N in range(0, NR-1):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
         $for N in range(0, NR, 4):
           const __m128 v${ABC[N:N+4]}x${ABC[0]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[0]}_${ABC[N:N+2]}x${ABC[1]}, v${ABC[N+2:N+4]}x${ABC[0]}_${ABC[N+2:N+4]}x${ABC[1]});
           const __m128 v${ABC[N:N+4]}x${ABC[1]} = _mm_movehl_ps(v${ABC[N+2:N+4]}x${ABC[0]}_${ABC[N+2:N+4]}x${ABC[1]}, v${ABC[N:N+2]}x${ABC[0]}_${ABC[N:N+2]}x${ABC[1]});

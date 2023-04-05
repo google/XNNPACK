@@ -532,9 +532,13 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/x8-lut/gen/x8-lut-avx-x32.c
   src/x8-lut/gen/x8-lut-avx-x48.c
   src/x8-lut/gen/x8-lut-avx-x64.c
+  src/x32-packw/gen/x32-packw-x8-avx-prfm-x4.c
   src/x32-packw/gen/x32-packw-x8-avx-x4.c
+  src/x32-packw/gen/x32-packw-x8s4-avx-prfm-x4.c
   src/x32-packw/gen/x32-packw-x8s4-avx-x4.c
+  src/x32-packw/gen/x32-packw-x16-avx-prfm-x4.c
   src/x32-packw/gen/x32-packw-x16-avx-x4.c
+  src/x32-packw/gen/x32-packw-x16s4-avx-prfm-x4.c
   src/x32-packw/gen/x32-packw-x16s4-avx-x4.c
   src/x32-transposec/gen/x32-transposec-8x8-multi-mov-avx.c
   src/x32-transposec/gen/x32-transposec-8x8-multi-switch-avx.c
@@ -1354,6 +1358,7 @@ SET(ALL_AVX512F_MICROKERNEL_SRCS
   src/math/f32-sqrt-avx512f-nr1fma1adj.c
   src/math/f32-sqrt-avx512f-nr1fma.c
   src/math/f32-sqrt-avx512f-nr2fma.c
+  src/x32-packw/gen/x32-packw-x16-avx512f-prfm-x4.c
   src/x32-packw/gen/x32-packw-x16-avx512f-x4.c)
 
 SET(ALL_AVX512SKX_MICROKERNEL_SRCS
@@ -6105,6 +6110,7 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/x16-transposec/gen/x16-transposec-8x8-reuse-multi-sse2.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-switch-sse2.c
   src/x16-transposec/x16-transposec-4x8-sse2.c
+  src/x32-packw/gen/x32-packw-x2c4-sse2-prfm-x4.c
   src/x32-packw/gen/x32-packw-x2c4-sse2-x4.c
   src/x32-packw/gen/x32-packw-x8-sse2-prfm-x4.c
   src/x32-packw/gen/x32-packw-x8-sse2-prfm-x8.c

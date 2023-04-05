@@ -66,7 +66,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__avx_x4(
       const float* w6 = w5 + kc;
       const float* w7 = w6 + kc;
 
-      // KC main loop multiple of 8x4
+      // KC main loop multiple of 4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
         // Read blocks of 4x4
@@ -103,7 +103,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__avx_x4(
         const __m256 vtmp1x0123 = _mm256_unpacklo_ps(v2x0123, v3x0123);  // i m j n   from row 2, 3
         const __m256 vtmp2x0123 = _mm256_unpackhi_ps(v0x0123, v1x0123);  // c g d h   from row 0, 1
         const __m256 vtmp3x0123 = _mm256_unpackhi_ps(v2x0123, v3x0123);  // k o l p   from row 2, 3
-         // Transpose 4x4
+        // Transpose 4x4
         v0x0123 = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(vtmp0x0123), _mm256_castps_pd(vtmp1x0123)));  // a e i m   from row 0, 1
         v1x0123 = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(vtmp0x0123), _mm256_castps_pd(vtmp1x0123)));  // b f j n   from row 0, 1
         v2x0123 = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(vtmp2x0123), _mm256_castps_pd(vtmp3x0123)));  // c g k o   from row 2, 3
@@ -303,7 +303,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__avx_x4(
         w6 = w5;
       }
 
-      // KC main loop multiple of 8x4
+      // KC main loop multiple of 4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
         // Read blocks of 4x4
@@ -336,7 +336,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__avx_x4(
         const __m256 vtmp1x0123 = _mm256_unpacklo_ps(v2x0123, v3x0123);  // i m j n   from row 2, 3
         const __m256 vtmp2x0123 = _mm256_unpackhi_ps(v0x0123, v1x0123);  // c g d h   from row 0, 1
         const __m256 vtmp3x0123 = _mm256_unpackhi_ps(v2x0123, v3x0123);  // k o l p   from row 2, 3
-         // Transpose 4x4
+        // Transpose 4x4
         v0x0123 = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(vtmp0x0123), _mm256_castps_pd(vtmp1x0123)));  // a e i m   from row 0, 1
         v1x0123 = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(vtmp0x0123), _mm256_castps_pd(vtmp1x0123)));  // b f j n   from row 0, 1
         v2x0123 = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(vtmp2x0123), _mm256_castps_pd(vtmp3x0123)));  // c g k o   from row 2, 3

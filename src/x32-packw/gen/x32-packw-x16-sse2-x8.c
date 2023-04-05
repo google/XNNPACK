@@ -726,7 +726,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_x8(
         const __m128 vEFx4_EFx5 = _mm_unpacklo_ps(vEx4567, vEx4567);
         const __m128 vCDx6_CDx7 = _mm_unpackhi_ps(vCx4567, vDx4567);
         const __m128 vEFx6_EFx7 = _mm_unpackhi_ps(vEx4567, vEx4567);
-
         const __m128 v0123x0 = _mm_movelh_ps(v01x0_01x1, v23x0_23x1);
         const __m128 v0123x1 = _mm_movehl_ps(v23x0_23x1, v01x0_01x1);
         const __m128 v0123x2 = _mm_movelh_ps(v01x2_01x3, v23x2_23x3);
@@ -844,7 +843,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_x8(
         const __m128 vEFx0_EFx1 = _mm_unpacklo_ps(vEx0123, vEx0123);
         const __m128 vCDx2_CDx3 = _mm_unpackhi_ps(vCx0123, vDx0123);
         const __m128 vEFx2_EFx3 = _mm_unpackhi_ps(vEx0123, vEx0123);
-
         const __m128 v0123x0 = _mm_movelh_ps(v01x0_01x1, v23x0_23x1);
         const __m128 v0123x1 = _mm_movehl_ps(v23x0_23x1, v01x0_01x1);
         const __m128 v0123x2 = _mm_movelh_ps(v01x2_01x3, v23x2_23x3);
