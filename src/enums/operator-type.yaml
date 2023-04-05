@@ -113,6 +113,8 @@
   string: "Divide (ND, F16)"
 - name: xnn_operator_type_divide_nd_f32
   string: "Divide (ND, F32)"
+- name: xnn_operator_type_dynamic_fully_connected_nc_f16
+  string: "Dynamic Fully Connected (NC, F16)"
 - name: xnn_operator_type_dynamic_fully_connected_nc_f32
   string: "Dynamic Fully Connected (NC, F32)"
 - name: xnn_operator_type_elu_nc_f16

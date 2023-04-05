@@ -2896,6 +2896,25 @@ enum xnn_status xnn_setup_divide_nd_f16(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_dynamic_fully_connected_nc_f16(
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_operator_t* dynamic_fully_connected_op_out);
+
+enum xnn_status xnn_setup_dynamic_fully_connected_nc_f16(
+  xnn_operator_t dynamic_fully_connected_op,
+  size_t batch_size,
+  size_t input_channels,
+  size_t output_channels,
+  size_t input_stride,
+  size_t output_stride,
+  const void* input,
+  const void* kernel,
+  const void* bias,
+  void* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_elu_nc_f16(
   size_t channels,
   size_t input_stride,
