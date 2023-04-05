@@ -15,9 +15,10 @@
 #include <immintrin.h>
 
 #include <xnnpack/packw.h>
+#include <xnnpack/prefetch.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_x8(
+void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_prfm_x8(
   size_t g,
   size_t nc,
   size_t kc,
@@ -131,6 +132,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_x8(
         const __m128 vtmp5x4567 = _mm_unpacklo_ps(v6x4567, v7x4567);  // i m j n   from row 2, 3
         const __m128 vtmp6x4567 = _mm_unpackhi_ps(v4x4567, v5x4567);  // c g d h   from row 0, 1
         const __m128 vtmp7x4567 = _mm_unpackhi_ps(v6x4567, v7x4567);  // k o l p   from row 2, 3
+        xnn_prefetch_to_l1((const int8_t*) w0 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w1 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w2 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w3 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w4 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w5 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w6 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w7 + 128);
         // Transpose 4x4
         v0x0123 = _mm_movelh_ps(vtmp0x0123, vtmp1x0123);  // a e i m   from row 0, 1
         v1x0123 = _mm_movehl_ps(vtmp1x0123, vtmp0x0123);  // b f j n   from row 0, 1
@@ -209,6 +218,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__sse2_x8(
         const __m128 vtmp5x0123 = _mm_unpacklo_ps(v6x0123, v7x0123);  // i m j n   from row 2, 3
         const __m128 vtmp6x0123 = _mm_unpackhi_ps(v4x0123, v5x0123);  // c g d h   from row 0, 1
         const __m128 vtmp7x0123 = _mm_unpackhi_ps(v6x0123, v7x0123);  // k o l p   from row 2, 3
+        xnn_prefetch_to_l1((const int8_t*) w0 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w1 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w2 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w3 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w4 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w5 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w6 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w7 + 128);
         // Transpose 4x4
         v0x0123 = _mm_movelh_ps(vtmp0x0123, vtmp1x0123);  // a e i m   from row 0, 1
         v1x0123 = _mm_movehl_ps(vtmp1x0123, vtmp0x0123);  // b f j n   from row 0, 1

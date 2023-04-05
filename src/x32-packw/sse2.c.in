@@ -16,9 +16,11 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <emmintrin.h>
 
 #include <xnnpack/packw.h>
+$if PREFETCH:
+  #include <xnnpack/prefetch.h>
 
 $ISA = "avx" if AVX else "sse2"
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}${"_prfm" if PREFETCH else ""}_x${KUNROLL}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -66,17 +68,17 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
       packed_w += ${NR};
 
       $for N in range(1, NR):
-        const float* w${ABC[N]} = w${ABC[N-1]} + kc;
+        const float* w${N} = w${N-1} + kc;
 
       size_t k = kc;
       $if KUNROLL > 4:
         // KC main loop multiple of ${KUNROLL}
         for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
           $for N in range(NR):
-            const __m128 v${ABC[N]}x${ABC[0:4]} = _mm_loadu_ps(w${ABC[N]});
+            const __m128 v${ABC[N]}x${ABC[0:4]} = _mm_loadu_ps(w${N});
             $for K in range(4, KUNROLL, 4):
-              const __m128 v${ABC[N]}x${ABC[K:K+4]} = _mm_loadu_ps(w${ABC[N]} + ${K});
-            w${ABC[N]} += ${KUNROLL};
+              const __m128 v${ABC[N]}x${ABC[K:K+4]} = _mm_loadu_ps(w${N} + ${K});
+            w${N} += ${KUNROLL};
 
           $for N in range(0, NR, 4):
             $for K in range(0, KUNROLL, 4):
@@ -84,7 +86,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
               const __m128 v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]} = _mm_unpacklo_ps(v${ABC[N+2]}x${ABC[K:K+4]}, v${ABC[N+3]}x${ABC[K:K+4]});
               const __m128 v${ABC[N:N+2]}x${ABC[K+2]}_${ABC[N:N+2]}x${ABC[K+3]} = _mm_unpackhi_ps(v${ABC[N]}x${ABC[K:K+4]}, v${ABC[N+1]}x${ABC[K:K+4]});
               const __m128 v${ABC[N+2:N+4]}x${ABC[K+2]}_${ABC[N+2:N+4]}x${ABC[K+3]} = _mm_unpackhi_ps(v${ABC[N+2]}x${ABC[K:K+4]}, v${ABC[N+3]}x${ABC[K:K+4]});
-
+          $if PREFETCH:
+            $for N in range(0, NR):
+              xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
           $for N in range(0, NR, 4):
             $for K in range(0, KUNROLL, 4):
               const __m128 v${ABC[N:N+4]}x${ABC[K]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[K]}_${ABC[N:N+2]}x${ABC[K+1]}, v${ABC[N+2:N+4]}x${ABC[K]}_${ABC[N+2:N+4]}x${ABC[K+1]});
@@ -103,15 +107,17 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
       // KC multiple of 4
       for (; k >= 4; k -= 4) {
         $for N in range(NR):
-          const __m128 v${ABC[N]}x${ABC[0:4]} = _mm_loadu_ps(w${ABC[N]});
-          w${ABC[N]} += 4;
+          const __m128 v${ABC[N]}x${ABC[0:4]} = _mm_loadu_ps(w${N});
+          w${N} += 4;
 
         $for N in range(0, NR, 4):
           const __m128 v${ABC[N:N+2]}x${ABC[0]}_${ABC[N:N+2]}x${ABC[1]} = _mm_unpacklo_ps(v${ABC[N]}x${ABC[0:4]}, v${ABC[N+1]}x${ABC[0:4]});
           const __m128 v${ABC[N+2:N+4]}x${ABC[0]}_${ABC[N+2:N+4]}x${ABC[1]} = _mm_unpacklo_ps(v${ABC[N+2]}x${ABC[0:4]}, v${ABC[N+3]}x${ABC[0:4]});
           const __m128 v${ABC[N:N+2]}x${ABC[2]}_${ABC[N:N+2]}x${ABC[3]} = _mm_unpackhi_ps(v${ABC[N]}x${ABC[0:4]}, v${ABC[N+1]}x${ABC[0:4]});
           const __m128 v${ABC[N+2:N+4]}x${ABC[2]}_${ABC[N+2:N+4]}x${ABC[3]} = _mm_unpackhi_ps(v${ABC[N+2]}x${ABC[0:4]}, v${ABC[N+3]}x${ABC[0:4]});
-
+        $if PREFETCH:
+          $for N in range(0, NR):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
         $for N in range(0, NR, 4):
           const __m128 v${ABC[N:N+4]}x${ABC[0]} = _mm_movelh_ps(v${ABC[N:N+2]}x${ABC[0]}_${ABC[N:N+2]}x${ABC[1]}, v${ABC[N+2:N+4]}x${ABC[0]}_${ABC[N+2:N+4]}x${ABC[1]});
           const __m128 v${ABC[N:N+4]}x${ABC[1]} = _mm_movehl_ps(v${ABC[N+2:N+4]}x${ABC[0]}_${ABC[N+2:N+4]}x${ABC[1]}, v${ABC[N:N+2]}x${ABC[0]}_${ABC[N:N+2]}x${ABC[1]});
@@ -135,8 +141,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
           case 1:
           {
             $for N in range(NR):
-              const __m128 v${ABC[N]}x0 = _mm_load_ss(w${ABC[N]});
-              w${ABC[N]} += 1;
+              const __m128 v${ABC[N]}x0 = _mm_load_ss(w${N});
+              w${N} += 1;
 
             $for N in range(0, NR, 2):
               const __m128 v${ABC[N:N+2]}x0 = _mm_unpacklo_ps(v${ABC[N]}x0, v${ABC[N+1]}x0);
@@ -153,8 +159,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
           case 2:
           {
             $for N in range(NR):
-              const __m128 v${ABC[N]}x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w${ABC[N]}));
-              w${ABC[N]} += 2;
+              const __m128 v${ABC[N]}x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w${N}));
+              w${N} += 2;
 
             $for N in range(0, NR, 4):
               const __m128 v${ABC[N:N+2]}x0_${ABC[N:N+2]}x1 = _mm_unpacklo_ps(v${ABC[N]}x01, v${ABC[N+1]}x01);
@@ -175,14 +181,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
           case 3:
           {
             $for N in range(NR):
-              __m128 v${ABC[N]}x012 = _mm_load_ss(w${ABC[N]} + 2);
+              __m128 v${ABC[N]}x012 = _mm_load_ss(w${N} + 2);
 
             $for N in range(NR):
               v${ABC[N]}x012 = _mm_movelh_ps(v${ABC[N]}x012, v${ABC[N]}x012);
 
             $for N in range(NR):
-              v${ABC[N]}x012 = _mm_loadl_pi(v${ABC[N]}x012, (const __m64*) w${ABC[N]});
-              w${ABC[N]} += 3;
+              v${ABC[N]}x012 = _mm_loadl_pi(v${ABC[N]}x012, (const __m64*) w${N});
+              w${N} += 3;
 
             $for N in range(0, NR, 4):
               const __m128 v${ABC[N:N+2]}x0_${ABC[N:N+2]}x1 = _mm_unpacklo_ps(v${ABC[N]}x012, v${ABC[N+1]}x012);
@@ -208,7 +214,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
         }
       }
       packed_w = (float*) ((uintptr_t) packed_w + extra_bytes);
-      w0 = w${ABC[NR-1]};
+      w0 = w${NR-1};
     }
 
     // NC remainder (1..${NR-1})
@@ -230,14 +236,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
       }
 
       $for N in range(1, NR-1):
-        const float* w${ABC[N]} = w${ABC[N-1]} + kc;
+        const float* w${N} = w${N-1} + kc;
         $if N % 2 == 0:
           if XNN_UNPREDICTABLE(n <= ${N}) {
-            w${ABC[N]} = w${ABC[N-1]};
+            w${N} = w${N-1};
           }
         $else:
           if XNN_UNPREDICTABLE(n < ${N+1}) {
-            w${ABC[N]} = w${ABC[N-1]};
+            w${N} = w${N-1};
           }
 
       size_t k = kc;
@@ -245,10 +251,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
         // KC main loop multiple of ${KUNROLL}
         for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
           $for N in range(NR-1):
-            const __m128 v${ABC[N]}x${ABC[0:4]} = _mm_loadu_ps(w${ABC[N]});
+            const __m128 v${ABC[N]}x${ABC[0:4]} = _mm_loadu_ps(w${N});
             $for K in range(4, KUNROLL, 4):
-              const __m128 v${ABC[N]}x${ABC[K:K+4]} = _mm_loadu_ps(w${ABC[N]} + ${K});
-            w${ABC[N]} += ${KUNROLL};
+              const __m128 v${ABC[N]}x${ABC[K:K+4]} = _mm_loadu_ps(w${N} + ${K});
+            w${N} += ${KUNROLL};
 
           $for N in range(0, NR, 4):
             $for K in range(0, KUNROLL, 4):
@@ -275,8 +281,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
       // KC multiple of 4
       for (; k >= 4; k -= 4) {
         $for N in range(NR-1):
-          const __m128 v${ABC[N]}x${ABC[0:4]} = _mm_loadu_ps(w${ABC[N]});
-          w${ABC[N]} += 4;
+          const __m128 v${ABC[N]}x${ABC[0:4]} = _mm_loadu_ps(w${N});
+          w${N} += 4;
 
         $for N in range(0, NR, 4):
           const __m128 v${ABC[N:N+2]}x${ABC[0]}_${ABC[N:N+2]}x${ABC[1]} = _mm_unpacklo_ps(v${ABC[N]}x${ABC[0:4]}, v${ABC[N+1]}x${ABC[0:4]});
@@ -307,7 +313,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
           case 1:
           {
             $for N in range(NR-1):
-              const __m128 v${ABC[N]}x0 = _mm_load_ss(w${ABC[N]});
+              const __m128 v${ABC[N]}x0 = _mm_load_ss(w${N});
 
             $for N in range(0, NR, 2):
               const __m128 v${ABC[N:N+2]}x0 = _mm_unpacklo_ps(v${ABC[N]}x0, v${ABC[min(N+1, NR-2)]}x0);
@@ -324,7 +330,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
           case 2:
           {
             $for N in range(NR-1):
-              const __m128 v${ABC[N]}x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w${ABC[N]}));
+              const __m128 v${ABC[N]}x01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w${N}));
 
             $for N in range(0, NR, 4):
               const __m128 v${ABC[N:N+2]}x0_${ABC[N:N+2]}x1 = _mm_unpacklo_ps(v${ABC[N]}x01, v${ABC[N+1]}x01);
@@ -345,13 +351,13 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__${ISA}_x${KUNROLL}(
           case 3:
           {
             $for N in range(NR-1):
-              __m128 v${ABC[N]}x012 = _mm_load_ss(w${ABC[N]} + 2);
+              __m128 v${ABC[N]}x012 = _mm_load_ss(w${N} + 2);
 
             $for N in range(NR-1):
               v${ABC[N]}x012 = _mm_movelh_ps(v${ABC[N]}x012, v${ABC[N]}x012);
 
             $for N in range(NR-1):
-              v${ABC[N]}x012 = _mm_loadl_pi(v${ABC[N]}x012, (const __m64*) w${ABC[N]});
+              v${ABC[N]}x012 = _mm_loadl_pi(v${ABC[N]}x012, (const __m64*) w${N});
 
             $for N in range(0, NR, 4):
               const __m128 v${ABC[N:N+2]}x0_${ABC[N:N+2]}x1 = _mm_unpacklo_ps(v${ABC[N]}x012, v${ABC[N+1]}x012);
