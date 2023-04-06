@@ -223,6 +223,36 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
     return xnn_status_uninitialized;
   }
 
+  if (input_channels == 0) {
+    xnn_log_error(
+      "failed to create %s operator with %zu input channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(dynamic_fully_connected_op->type), input_channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_channels == 0) {
+    xnn_log_error(
+      "failed to create %s operator with %zu output channels: number of channels must be non-zero",
+      xnn_operator_type_to_string(dynamic_fully_connected_op->type), output_channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (input_stride < input_channels) {
+    xnn_log_error(
+      "failed to create %s operator with input element stride of %zu: "
+      "stride must be at least as large as the number of input channels (%zu)",
+      xnn_operator_type_to_string(dynamic_fully_connected_op->type), input_stride, input_channels);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (output_stride < output_channels) {
+    xnn_log_error(
+      "failed to create %s operator with output element stride of %zu: "
+      "stride must be at least as large as the number of output channels (%zu)",
+      xnn_operator_type_to_string(dynamic_fully_connected_op->type), output_stride, output_channels);
+    return xnn_status_invalid_parameter;
+  }
+
   if (batch_size == 0) {
     dynamic_fully_connected_op->state = xnn_run_state_skip;
     return xnn_status_success;
