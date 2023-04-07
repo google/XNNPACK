@@ -41,11 +41,11 @@ void xnn_f32_vmul_minmax_ukernel__avx_x16(
     input_b += 16;
 
 
-    vacc0 = _mm256_max_ps(vacc0, voutput_min);
-    vacc1 = _mm256_max_ps(vacc1, voutput_min);
+    vacc0 = _mm256_max_ps(voutput_min, vacc0);
+    vacc1 = _mm256_max_ps(voutput_min, vacc1);
 
-    vacc0 = _mm256_min_ps(vacc0, voutput_max);
-    vacc1 = _mm256_min_ps(vacc1, voutput_max);
+    vacc0 = _mm256_min_ps(voutput_max, vacc0);
+    vacc1 = _mm256_min_ps(voutput_max, vacc1);
 
     _mm256_storeu_ps(output, vacc0);
     _mm256_storeu_ps(output + 8, vacc1);
@@ -57,8 +57,8 @@ void xnn_f32_vmul_minmax_ukernel__avx_x16(
 
     vacc = _mm256_mul_ps(vacc, _mm256_loadu_ps(input_b));
     input_b += 8;
-    vacc = _mm256_max_ps(vacc, voutput_min);
-    vacc = _mm256_min_ps(vacc, voutput_max);
+    vacc = _mm256_max_ps(voutput_min, vacc);
+    vacc = _mm256_min_ps(voutput_max, vacc);
     _mm256_storeu_ps(output, vacc);
     output += 8;
   }
@@ -71,8 +71,8 @@ void xnn_f32_vmul_minmax_ukernel__avx_x16(
     const __m256 vb = _mm256_maskload_ps(input_b, vmask);
 
     vacc = _mm256_mul_ps(vacc, vb);
-    vacc = _mm256_max_ps(vacc, voutput_min);
-    vacc = _mm256_min_ps(vacc, voutput_max);
+    vacc = _mm256_max_ps(voutput_min, vacc);
+    vacc = _mm256_min_ps(voutput_max, vacc);
 
     __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {

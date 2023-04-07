@@ -42,11 +42,11 @@ void xnn_f32_vrsubc_minmax_ukernel__avx512f_x32(
     vacc1 = _mm512_sub_ps(vb, vacc1);
 
 
-    vacc0 = _mm512_max_ps(vacc0, voutput_min);
-    vacc1 = _mm512_max_ps(vacc1, voutput_min);
+    vacc0 = _mm512_max_ps(voutput_min, vacc0);
+    vacc1 = _mm512_max_ps(voutput_min, vacc1);
 
-    vacc0 = _mm512_min_ps(vacc0, voutput_max);
-    vacc1 = _mm512_min_ps(vacc1, voutput_max);
+    vacc0 = _mm512_min_ps(voutput_max, vacc0);
+    vacc1 = _mm512_min_ps(voutput_max, vacc1);
 
     _mm512_storeu_ps(output, vacc0);
     _mm512_storeu_ps(output + 16, vacc1);
@@ -57,8 +57,8 @@ void xnn_f32_vrsubc_minmax_ukernel__avx512f_x32(
     input_a += 16;
 
     vacc = _mm512_sub_ps(vb, vacc);
-    vacc = _mm512_max_ps(vacc, voutput_min);
-    vacc = _mm512_min_ps(vacc, voutput_max);
+    vacc = _mm512_max_ps(voutput_min, vacc);
+    vacc = _mm512_min_ps(voutput_max, vacc);
 
     _mm512_storeu_ps(output, vacc);
     output += 16;
@@ -72,8 +72,8 @@ void xnn_f32_vrsubc_minmax_ukernel__avx512f_x32(
 
     __m512 vacc = _mm512_maskz_loadu_ps(vmask, input_a);
     vacc = _mm512_maskz_sub_ps(vmask, vb, vacc);
-    vacc = _mm512_maskz_max_ps(vmask, vacc, voutput_min);
-    vacc = _mm512_maskz_min_ps(vmask, vacc, voutput_max);
+    vacc = _mm512_maskz_max_ps(vmask, voutput_min, vacc);
+    vacc = _mm512_maskz_min_ps(vmask, voutput_max, vacc);
     _mm512_mask_storeu_ps(output, vmask, vacc);
   }
 }

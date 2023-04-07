@@ -34,8 +34,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f(
   assert(output_width != 0);
   assert(kernel_size > 5);
 
-  const __m512 vmax = _mm512_set1_ps(params->scalar.max);
   const __m512 vmin = _mm512_set1_ps(params->scalar.min);
+  const __m512 vmax = _mm512_set1_ps(params->scalar.max);
   do {
     const float* w = weights;
 
@@ -467,11 +467,11 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f(
         w += 160;
 
 
-        __m512 vacc0 = _mm512_max_ps(vacc0p0, vmin);
-        __m512 vacc1 = _mm512_max_ps(vacc1p0, vmin);
+        __m512 vacc0 = _mm512_max_ps(vmin, vacc0p0);
+        __m512 vacc1 = _mm512_max_ps(vmin, vacc1p0);
 
-        vacc0 = _mm512_min_ps(vacc0, vmax);
-        vacc1 = _mm512_min_ps(vacc1, vmax);
+        vacc0 = _mm512_min_ps(vmax, vacc0);
+        vacc1 = _mm512_min_ps(vmax, vacc1);
 
         _mm512_storeu_ps(output, vacc0);
         _mm512_storeu_ps(output + 16, vacc1);
@@ -523,9 +523,9 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f(
 
 
 
-        __m512 vacc = _mm512_max_ps(vaccp0, vmin);
+        __m512 vacc = _mm512_max_ps(vmin, vaccp0);
 
-        vacc = _mm512_min_ps(vacc, vmax);
+        vacc = _mm512_min_ps(vmax, vacc);
 
         _mm512_storeu_ps(output, vacc);
         output += 16;
@@ -558,8 +558,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f(
         vaccp0 = _mm512_fmadd_ps(vi4x0, vk4x0, vaccp0);
 
 
-        __m512 vacc = _mm512_max_ps(vaccp0, vmin);
-        vacc = _mm512_min_ps(vacc, vmax);
+        __m512 vacc = _mm512_max_ps(vmin, vaccp0);
+        vacc = _mm512_min_ps(vmax, vacc);
 
         _mm512_mask_storeu_ps(output, vmask, vacc);
         output += c;

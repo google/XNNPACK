@@ -25029,11 +25029,10 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x4(
       }
 
       // KC remainder of 1..3
+      // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
         assert(k <= 3);
-
-        // Same as main loop but ld1, ld2 or ld3
         switch (k) {
           // KC remainder of 1
           case 1:
@@ -25295,12 +25294,12 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x4(
         vst1_u16(packed_weights, vtmp0123xCDEF.val[3]); packed_weights += 4;
       }
 
+
       // KC remainder of 1..3
+      // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
         assert(k <= 3);
-
-        // Same as main loop but ld1, ld2 or ld3
         switch (k) {
           // KC remainder of 1
           case 1:
@@ -25523,11 +25522,10 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
       }
 
       // KC remainder of 1..3
+      // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
         assert(k <= 3);
-
-        // Same as main loop but ld1, ld2 or ld3
         switch (k) {
           // KC remainder of 1
           case 1:
@@ -25679,12 +25677,12 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
         vst1_u16(packed_weights, vtmp0123x4567.val[3]); packed_weights += 4;
       }
 
+
       // KC remainder of 1..3
+      // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
         assert(k <= 3);
-
-        // Same as main loop but ld1, ld2 or ld3
         switch (k) {
           // KC remainder of 1
           case 1:

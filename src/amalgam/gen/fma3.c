@@ -1528,8 +1528,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__fma3(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
   const __m256 vmin = _mm256_load_ps(params->avx.min);
+  const __m256 vmax = _mm256_load_ps(params->avx.max);
   do {
     const float* i0 = input[0];
     assert(i0 != NULL);
@@ -1817,8 +1817,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__fma3(
       w += 208;
 
 
-      __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-      vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+      __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+      vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
       _mm256_storeu_ps(output, vacc01234567);
       output += 8;
@@ -1931,8 +1931,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__fma3(
       vacc01234567p0 = _mm256_fmadd_ps(vi24x01234567, vk24x01234567, vacc01234567p0);
 
 
-      __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-      vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+      __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+      vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
       __m128 vacc0123 = _mm256_castps256_ps128(vacc01234567);
       if (c & 4) {
@@ -1970,8 +1970,8 @@ void xnn_f32_dwconv_minmax_ukernel_3p16c__fma3(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
   const __m256 vmin = _mm256_load_ps(params->avx.min);
+  const __m256 vmax = _mm256_load_ps(params->avx.max);
   do {
     const float* i0 = input[0];
     assert(i0 != NULL);
@@ -2027,10 +2027,10 @@ void xnn_f32_dwconv_minmax_ukernel_3p16c__fma3(
       w += 64;
 
 
-      __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-      __m256 vacc89ABCDEF = _mm256_max_ps(vacc89ABCDEFp0, vmin);
-      vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
-      vacc89ABCDEF = _mm256_min_ps(vacc89ABCDEF, vmax);
+      __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+      __m256 vacc89ABCDEF = _mm256_max_ps(vmin, vacc89ABCDEFp0);
+      vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
+      vacc89ABCDEF = _mm256_min_ps(vmax, vacc89ABCDEF);
 
       _mm256_storeu_ps(output, vacc01234567);
       _mm256_storeu_ps(output + 8, vacc89ABCDEF);
@@ -2060,8 +2060,8 @@ void xnn_f32_dwconv_minmax_ukernel_3p16c__fma3(
       w += 8;
 
 
-      __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-      vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+      __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+      vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
       _mm256_storeu_ps(output, vacc01234567);
       output += 8;
@@ -2086,8 +2086,8 @@ void xnn_f32_dwconv_minmax_ukernel_3p16c__fma3(
       vacc01234567p0 = _mm256_fmadd_ps(vi2x01234567, vk2x01234567, vacc01234567p0);
 
 
-      __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-      vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+      __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+      vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
       __m128 vacc0123 = _mm256_castps256_ps128(vacc01234567);
       if (c & 4) {
@@ -2125,8 +2125,8 @@ void xnn_f32_dwconv_minmax_ukernel_4p16c__fma3(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
   const __m256 vmin = _mm256_load_ps(params->avx.min);
+  const __m256 vmax = _mm256_load_ps(params->avx.max);
   do {
     const float* i0 = input[0];
     assert(i0 != NULL);
@@ -2196,10 +2196,10 @@ void xnn_f32_dwconv_minmax_ukernel_4p16c__fma3(
       w += 80;
 
 
-      __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-      __m256 vacc89ABCDEF = _mm256_max_ps(vacc89ABCDEFp0, vmin);
-      vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
-      vacc89ABCDEF = _mm256_min_ps(vacc89ABCDEF, vmax);
+      __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+      __m256 vacc89ABCDEF = _mm256_max_ps(vmin, vacc89ABCDEFp0);
+      vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
+      vacc89ABCDEF = _mm256_min_ps(vmax, vacc89ABCDEF);
 
       _mm256_storeu_ps(output, vacc01234567);
       _mm256_storeu_ps(output + 8, vacc89ABCDEF);
@@ -2235,8 +2235,8 @@ void xnn_f32_dwconv_minmax_ukernel_4p16c__fma3(
       w += 8;
 
 
-      __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-      vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+      __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+      vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
       _mm256_storeu_ps(output, vacc01234567);
       output += 8;
@@ -2265,8 +2265,8 @@ void xnn_f32_dwconv_minmax_ukernel_4p16c__fma3(
       vacc01234567p0 = _mm256_fmadd_ps(vi3x01234567, vk3x01234567, vacc01234567p0);
 
 
-      __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-      vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+      __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+      vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
       __m128 vacc0123 = _mm256_castps256_ps128(vacc01234567);
       if (c & 4) {
@@ -2307,8 +2307,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__fma3(
   assert(output_width != 0);
   assert(kernel_size > 5);
 
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
   const __m256 vmin = _mm256_load_ps(params->avx.min);
+  const __m256 vmax = _mm256_load_ps(params->avx.max);
   do {
     const float* w = weights;
 
@@ -2613,9 +2613,9 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__fma3(
 
 
 
-        __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
+        __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
 
-        vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+        vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
         _mm256_storeu_ps(output, vacc01234567);
         output += 8;
@@ -2648,8 +2648,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__fma3(
         vacc01234567p0 = _mm256_fmadd_ps(vi4x01234567, vk4x01234567, vacc01234567p0);
 
 
-        __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-        vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+        __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+        vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
         __m128 vacc0123 = _mm256_castps256_ps128(vacc01234567);
         if (c & 4) {
@@ -2689,8 +2689,8 @@ void xnn_f32_dwconv_minmax_ukernel_9p16c__fma3(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
   const __m256 vmin = _mm256_load_ps(params->avx.min);
+  const __m256 vmax = _mm256_load_ps(params->avx.max);
   do {
     const float* i0 = input[0];
     assert(i0 != NULL);
@@ -2830,10 +2830,10 @@ void xnn_f32_dwconv_minmax_ukernel_9p16c__fma3(
       w += 160;
 
 
-      __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-      __m256 vacc89ABCDEF = _mm256_max_ps(vacc89ABCDEFp0, vmin);
-      vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
-      vacc89ABCDEF = _mm256_min_ps(vacc89ABCDEF, vmax);
+      __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+      __m256 vacc89ABCDEF = _mm256_max_ps(vmin, vacc89ABCDEFp0);
+      vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
+      vacc89ABCDEF = _mm256_min_ps(vmax, vacc89ABCDEF);
 
       _mm256_storeu_ps(output, vacc01234567);
       _mm256_storeu_ps(output + 8, vacc89ABCDEF);
@@ -2899,8 +2899,8 @@ void xnn_f32_dwconv_minmax_ukernel_9p16c__fma3(
       w += 8;
 
 
-      __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-      vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+      __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+      vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
       _mm256_storeu_ps(output, vacc01234567);
       output += 8;
@@ -2949,8 +2949,8 @@ void xnn_f32_dwconv_minmax_ukernel_9p16c__fma3(
       vacc01234567p0 = _mm256_fmadd_ps(vi8x01234567, vk8x01234567, vacc01234567p0);
 
 
-      __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-      vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+      __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+      vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
       __m128 vacc0123 = _mm256_castps256_ps128(vacc01234567);
       if (c & 4) {
@@ -3018,12 +3018,12 @@ void xnn_f32_gemm_minmax_ukernel_1x16__fma3_broadcast(
     } while (k != 0);
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);
-    vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);
-    vacc0x89ABCDEF = _mm256_max_ps(vacc0x89ABCDEF, vmin);
+    vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
+    vacc0x89ABCDEF = _mm256_max_ps(vmin, vacc0x89ABCDEF);
 
     const __m256 vmax = _mm256_load_ps(params->avx.max);
-    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
-    vacc0x89ABCDEF = _mm256_min_ps(vacc0x89ABCDEF, vmax);
+    vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
+    vacc0x89ABCDEF = _mm256_min_ps(vmax, vacc0x89ABCDEF);
 
     if XNN_LIKELY(nc >= 16) {
       _mm256_storeu_ps(c0, vacc0x01234567);
@@ -3175,12 +3175,12 @@ void xnn_f32_gemm_minmax_ukernel_1x16s4__fma3_broadcast(
     }
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);
-    vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);
-    vacc0x89ABCDEF = _mm256_max_ps(vacc0x89ABCDEF, vmin);
+    vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
+    vacc0x89ABCDEF = _mm256_max_ps(vmin, vacc0x89ABCDEF);
 
     const __m256 vmax = _mm256_load_ps(params->avx.max);
-    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
-    vacc0x89ABCDEF = _mm256_min_ps(vacc0x89ABCDEF, vmax);
+    vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
+    vacc0x89ABCDEF = _mm256_min_ps(vmax, vacc0x89ABCDEF);
 
     if XNN_LIKELY(nc >= 16) {
       _mm256_storeu_ps(c0, vacc0x01234567);
@@ -3434,24 +3434,24 @@ void xnn_f32_gemm_minmax_ukernel_4x16s4__fma3_broadcast(
     }
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);
-    vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);
-    vacc1x01234567 = _mm256_max_ps(vacc1x01234567, vmin);
-    vacc2x01234567 = _mm256_max_ps(vacc2x01234567, vmin);
-    vacc3x01234567 = _mm256_max_ps(vacc3x01234567, vmin);
-    vacc0x89ABCDEF = _mm256_max_ps(vacc0x89ABCDEF, vmin);
-    vacc1x89ABCDEF = _mm256_max_ps(vacc1x89ABCDEF, vmin);
-    vacc2x89ABCDEF = _mm256_max_ps(vacc2x89ABCDEF, vmin);
-    vacc3x89ABCDEF = _mm256_max_ps(vacc3x89ABCDEF, vmin);
+    vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
+    vacc1x01234567 = _mm256_max_ps(vmin, vacc1x01234567);
+    vacc2x01234567 = _mm256_max_ps(vmin, vacc2x01234567);
+    vacc3x01234567 = _mm256_max_ps(vmin, vacc3x01234567);
+    vacc0x89ABCDEF = _mm256_max_ps(vmin, vacc0x89ABCDEF);
+    vacc1x89ABCDEF = _mm256_max_ps(vmin, vacc1x89ABCDEF);
+    vacc2x89ABCDEF = _mm256_max_ps(vmin, vacc2x89ABCDEF);
+    vacc3x89ABCDEF = _mm256_max_ps(vmin, vacc3x89ABCDEF);
 
     const __m256 vmax = _mm256_load_ps(params->avx.max);
-    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
-    vacc1x01234567 = _mm256_min_ps(vacc1x01234567, vmax);
-    vacc2x01234567 = _mm256_min_ps(vacc2x01234567, vmax);
-    vacc3x01234567 = _mm256_min_ps(vacc3x01234567, vmax);
-    vacc0x89ABCDEF = _mm256_min_ps(vacc0x89ABCDEF, vmax);
-    vacc1x89ABCDEF = _mm256_min_ps(vacc1x89ABCDEF, vmax);
-    vacc2x89ABCDEF = _mm256_min_ps(vacc2x89ABCDEF, vmax);
-    vacc3x89ABCDEF = _mm256_min_ps(vacc3x89ABCDEF, vmax);
+    vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
+    vacc1x01234567 = _mm256_min_ps(vmax, vacc1x01234567);
+    vacc2x01234567 = _mm256_min_ps(vmax, vacc2x01234567);
+    vacc3x01234567 = _mm256_min_ps(vmax, vacc3x01234567);
+    vacc0x89ABCDEF = _mm256_min_ps(vmax, vacc0x89ABCDEF);
+    vacc1x89ABCDEF = _mm256_min_ps(vmax, vacc1x89ABCDEF);
+    vacc2x89ABCDEF = _mm256_min_ps(vmax, vacc2x89ABCDEF);
+    vacc3x89ABCDEF = _mm256_min_ps(vmax, vacc3x89ABCDEF);
 
     if XNN_LIKELY(nc >= 16) {
       _mm256_storeu_ps(c3, vacc3x01234567);
@@ -3631,28 +3631,28 @@ void xnn_f32_gemm_minmax_ukernel_5x16__fma3_broadcast(
     } while (k != 0);
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);
-    vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);
-    vacc1x01234567 = _mm256_max_ps(vacc1x01234567, vmin);
-    vacc2x01234567 = _mm256_max_ps(vacc2x01234567, vmin);
-    vacc3x01234567 = _mm256_max_ps(vacc3x01234567, vmin);
-    vacc4x01234567 = _mm256_max_ps(vacc4x01234567, vmin);
-    vacc0x89ABCDEF = _mm256_max_ps(vacc0x89ABCDEF, vmin);
-    vacc1x89ABCDEF = _mm256_max_ps(vacc1x89ABCDEF, vmin);
-    vacc2x89ABCDEF = _mm256_max_ps(vacc2x89ABCDEF, vmin);
-    vacc3x89ABCDEF = _mm256_max_ps(vacc3x89ABCDEF, vmin);
-    vacc4x89ABCDEF = _mm256_max_ps(vacc4x89ABCDEF, vmin);
+    vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
+    vacc1x01234567 = _mm256_max_ps(vmin, vacc1x01234567);
+    vacc2x01234567 = _mm256_max_ps(vmin, vacc2x01234567);
+    vacc3x01234567 = _mm256_max_ps(vmin, vacc3x01234567);
+    vacc4x01234567 = _mm256_max_ps(vmin, vacc4x01234567);
+    vacc0x89ABCDEF = _mm256_max_ps(vmin, vacc0x89ABCDEF);
+    vacc1x89ABCDEF = _mm256_max_ps(vmin, vacc1x89ABCDEF);
+    vacc2x89ABCDEF = _mm256_max_ps(vmin, vacc2x89ABCDEF);
+    vacc3x89ABCDEF = _mm256_max_ps(vmin, vacc3x89ABCDEF);
+    vacc4x89ABCDEF = _mm256_max_ps(vmin, vacc4x89ABCDEF);
 
     const __m256 vmax = _mm256_load_ps(params->avx.max);
-    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
-    vacc1x01234567 = _mm256_min_ps(vacc1x01234567, vmax);
-    vacc2x01234567 = _mm256_min_ps(vacc2x01234567, vmax);
-    vacc3x01234567 = _mm256_min_ps(vacc3x01234567, vmax);
-    vacc4x01234567 = _mm256_min_ps(vacc4x01234567, vmax);
-    vacc0x89ABCDEF = _mm256_min_ps(vacc0x89ABCDEF, vmax);
-    vacc1x89ABCDEF = _mm256_min_ps(vacc1x89ABCDEF, vmax);
-    vacc2x89ABCDEF = _mm256_min_ps(vacc2x89ABCDEF, vmax);
-    vacc3x89ABCDEF = _mm256_min_ps(vacc3x89ABCDEF, vmax);
-    vacc4x89ABCDEF = _mm256_min_ps(vacc4x89ABCDEF, vmax);
+    vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
+    vacc1x01234567 = _mm256_min_ps(vmax, vacc1x01234567);
+    vacc2x01234567 = _mm256_min_ps(vmax, vacc2x01234567);
+    vacc3x01234567 = _mm256_min_ps(vmax, vacc3x01234567);
+    vacc4x01234567 = _mm256_min_ps(vmax, vacc4x01234567);
+    vacc0x89ABCDEF = _mm256_min_ps(vmax, vacc0x89ABCDEF);
+    vacc1x89ABCDEF = _mm256_min_ps(vmax, vacc1x89ABCDEF);
+    vacc2x89ABCDEF = _mm256_min_ps(vmax, vacc2x89ABCDEF);
+    vacc3x89ABCDEF = _mm256_min_ps(vmax, vacc3x89ABCDEF);
+    vacc4x89ABCDEF = _mm256_min_ps(vmax, vacc4x89ABCDEF);
 
     if XNN_LIKELY(nc >= 16) {
       _mm256_storeu_ps(c4, vacc4x01234567);
@@ -3813,12 +3813,12 @@ void xnn_f32_igemm_minmax_ukernel_1x16__fma3_broadcast(
     } while (p != 0);
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);
-    vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);
-    vacc0x89ABCDEF = _mm256_max_ps(vacc0x89ABCDEF, vmin);
+    vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
+    vacc0x89ABCDEF = _mm256_max_ps(vmin, vacc0x89ABCDEF);
 
     const __m256 vmax = _mm256_load_ps(params->avx.max);
-    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
-    vacc0x89ABCDEF = _mm256_min_ps(vacc0x89ABCDEF, vmax);
+    vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
+    vacc0x89ABCDEF = _mm256_min_ps(vmax, vacc0x89ABCDEF);
 
     if XNN_LIKELY(nc >= 16) {
       _mm256_storeu_ps(c0, vacc0x01234567);
@@ -3984,12 +3984,12 @@ void xnn_f32_igemm_minmax_ukernel_1x16s4__fma3_broadcast(
     } while (p != 0);
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);
-    vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);
-    vacc0x89ABCDEF = _mm256_max_ps(vacc0x89ABCDEF, vmin);
+    vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
+    vacc0x89ABCDEF = _mm256_max_ps(vmin, vacc0x89ABCDEF);
 
     const __m256 vmax = _mm256_load_ps(params->avx.max);
-    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
-    vacc0x89ABCDEF = _mm256_min_ps(vacc0x89ABCDEF, vmax);
+    vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
+    vacc0x89ABCDEF = _mm256_min_ps(vmax, vacc0x89ABCDEF);
 
     if XNN_LIKELY(nc >= 16) {
       _mm256_storeu_ps(c0, vacc0x01234567);
@@ -4266,24 +4266,24 @@ void xnn_f32_igemm_minmax_ukernel_4x16s4__fma3_broadcast(
     } while (p != 0);
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);
-    vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);
-    vacc1x01234567 = _mm256_max_ps(vacc1x01234567, vmin);
-    vacc2x01234567 = _mm256_max_ps(vacc2x01234567, vmin);
-    vacc3x01234567 = _mm256_max_ps(vacc3x01234567, vmin);
-    vacc0x89ABCDEF = _mm256_max_ps(vacc0x89ABCDEF, vmin);
-    vacc1x89ABCDEF = _mm256_max_ps(vacc1x89ABCDEF, vmin);
-    vacc2x89ABCDEF = _mm256_max_ps(vacc2x89ABCDEF, vmin);
-    vacc3x89ABCDEF = _mm256_max_ps(vacc3x89ABCDEF, vmin);
+    vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
+    vacc1x01234567 = _mm256_max_ps(vmin, vacc1x01234567);
+    vacc2x01234567 = _mm256_max_ps(vmin, vacc2x01234567);
+    vacc3x01234567 = _mm256_max_ps(vmin, vacc3x01234567);
+    vacc0x89ABCDEF = _mm256_max_ps(vmin, vacc0x89ABCDEF);
+    vacc1x89ABCDEF = _mm256_max_ps(vmin, vacc1x89ABCDEF);
+    vacc2x89ABCDEF = _mm256_max_ps(vmin, vacc2x89ABCDEF);
+    vacc3x89ABCDEF = _mm256_max_ps(vmin, vacc3x89ABCDEF);
 
     const __m256 vmax = _mm256_load_ps(params->avx.max);
-    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
-    vacc1x01234567 = _mm256_min_ps(vacc1x01234567, vmax);
-    vacc2x01234567 = _mm256_min_ps(vacc2x01234567, vmax);
-    vacc3x01234567 = _mm256_min_ps(vacc3x01234567, vmax);
-    vacc0x89ABCDEF = _mm256_min_ps(vacc0x89ABCDEF, vmax);
-    vacc1x89ABCDEF = _mm256_min_ps(vacc1x89ABCDEF, vmax);
-    vacc2x89ABCDEF = _mm256_min_ps(vacc2x89ABCDEF, vmax);
-    vacc3x89ABCDEF = _mm256_min_ps(vacc3x89ABCDEF, vmax);
+    vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
+    vacc1x01234567 = _mm256_min_ps(vmax, vacc1x01234567);
+    vacc2x01234567 = _mm256_min_ps(vmax, vacc2x01234567);
+    vacc3x01234567 = _mm256_min_ps(vmax, vacc3x01234567);
+    vacc0x89ABCDEF = _mm256_min_ps(vmax, vacc0x89ABCDEF);
+    vacc1x89ABCDEF = _mm256_min_ps(vmax, vacc1x89ABCDEF);
+    vacc2x89ABCDEF = _mm256_min_ps(vmax, vacc2x89ABCDEF);
+    vacc3x89ABCDEF = _mm256_min_ps(vmax, vacc3x89ABCDEF);
 
     if XNN_LIKELY(nc >= 16) {
       _mm256_storeu_ps(c3, vacc3x01234567);
@@ -4485,28 +4485,28 @@ void xnn_f32_igemm_minmax_ukernel_5x16__fma3_broadcast(
     } while (p != 0);
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);
-    vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);
-    vacc1x01234567 = _mm256_max_ps(vacc1x01234567, vmin);
-    vacc2x01234567 = _mm256_max_ps(vacc2x01234567, vmin);
-    vacc3x01234567 = _mm256_max_ps(vacc3x01234567, vmin);
-    vacc4x01234567 = _mm256_max_ps(vacc4x01234567, vmin);
-    vacc0x89ABCDEF = _mm256_max_ps(vacc0x89ABCDEF, vmin);
-    vacc1x89ABCDEF = _mm256_max_ps(vacc1x89ABCDEF, vmin);
-    vacc2x89ABCDEF = _mm256_max_ps(vacc2x89ABCDEF, vmin);
-    vacc3x89ABCDEF = _mm256_max_ps(vacc3x89ABCDEF, vmin);
-    vacc4x89ABCDEF = _mm256_max_ps(vacc4x89ABCDEF, vmin);
+    vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
+    vacc1x01234567 = _mm256_max_ps(vmin, vacc1x01234567);
+    vacc2x01234567 = _mm256_max_ps(vmin, vacc2x01234567);
+    vacc3x01234567 = _mm256_max_ps(vmin, vacc3x01234567);
+    vacc4x01234567 = _mm256_max_ps(vmin, vacc4x01234567);
+    vacc0x89ABCDEF = _mm256_max_ps(vmin, vacc0x89ABCDEF);
+    vacc1x89ABCDEF = _mm256_max_ps(vmin, vacc1x89ABCDEF);
+    vacc2x89ABCDEF = _mm256_max_ps(vmin, vacc2x89ABCDEF);
+    vacc3x89ABCDEF = _mm256_max_ps(vmin, vacc3x89ABCDEF);
+    vacc4x89ABCDEF = _mm256_max_ps(vmin, vacc4x89ABCDEF);
 
     const __m256 vmax = _mm256_load_ps(params->avx.max);
-    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
-    vacc1x01234567 = _mm256_min_ps(vacc1x01234567, vmax);
-    vacc2x01234567 = _mm256_min_ps(vacc2x01234567, vmax);
-    vacc3x01234567 = _mm256_min_ps(vacc3x01234567, vmax);
-    vacc4x01234567 = _mm256_min_ps(vacc4x01234567, vmax);
-    vacc0x89ABCDEF = _mm256_min_ps(vacc0x89ABCDEF, vmax);
-    vacc1x89ABCDEF = _mm256_min_ps(vacc1x89ABCDEF, vmax);
-    vacc2x89ABCDEF = _mm256_min_ps(vacc2x89ABCDEF, vmax);
-    vacc3x89ABCDEF = _mm256_min_ps(vacc3x89ABCDEF, vmax);
-    vacc4x89ABCDEF = _mm256_min_ps(vacc4x89ABCDEF, vmax);
+    vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
+    vacc1x01234567 = _mm256_min_ps(vmax, vacc1x01234567);
+    vacc2x01234567 = _mm256_min_ps(vmax, vacc2x01234567);
+    vacc3x01234567 = _mm256_min_ps(vmax, vacc3x01234567);
+    vacc4x01234567 = _mm256_min_ps(vmax, vacc4x01234567);
+    vacc0x89ABCDEF = _mm256_min_ps(vmax, vacc0x89ABCDEF);
+    vacc1x89ABCDEF = _mm256_min_ps(vmax, vacc1x89ABCDEF);
+    vacc2x89ABCDEF = _mm256_min_ps(vmax, vacc2x89ABCDEF);
+    vacc3x89ABCDEF = _mm256_min_ps(vmax, vacc3x89ABCDEF);
+    vacc4x89ABCDEF = _mm256_min_ps(vmax, vacc4x89ABCDEF);
 
     if XNN_LIKELY(nc >= 16) {
       _mm256_storeu_ps(c4, vacc4x01234567);

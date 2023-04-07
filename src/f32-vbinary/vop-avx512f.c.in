@@ -73,10 +73,10 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__avx512f_x${BATCH_TILE}(
 
       $if ACTIVATION == "MINMAX":
         $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = _mm512_max_ps(vacc${ABC[N]}, voutput_min);
+          vacc${ABC[N]} = _mm512_max_ps(voutput_min, vacc${ABC[N]});
 
         $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = _mm512_min_ps(vacc${ABC[N]}, voutput_max);
+          vacc${ABC[N]} = _mm512_min_ps(voutput_max, vacc${ABC[N]});
 
       _mm512_storeu_ps(output, vacc${ABC[0]});
       $for N in range(1, SIMD_TILE):
@@ -93,8 +93,8 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__avx512f_x${BATCH_TILE}(
     $if OP == "SQRDIFF":
       vacc = _mm512_mul_ps(vacc, vacc);
     $if ACTIVATION == "MINMAX":
-      vacc = _mm512_max_ps(vacc, voutput_min);
-      vacc = _mm512_min_ps(vacc, voutput_max);
+      vacc = _mm512_max_ps(voutput_min, vacc);
+      vacc = _mm512_min_ps(voutput_max, vacc);
 
     _mm512_storeu_ps(output, vacc);
     output += 16;
@@ -111,8 +111,8 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__avx512f_x${BATCH_TILE}(
     $if OP == "SQRDIFF":
       vacc = _mm512_maskz_mul_ps(vmask, vacc, vacc);
     $if ACTIVATION == "MINMAX":
-      vacc = _mm512_maskz_max_ps(vmask, vacc, voutput_min);
-      vacc = _mm512_maskz_min_ps(vmask, vacc, voutput_max);
+      vacc = _mm512_maskz_max_ps(vmask, voutput_min, vacc);
+      vacc = _mm512_maskz_min_ps(vmask, voutput_max, vacc);
     _mm512_mask_storeu_ps(output, vmask, vacc);
   }
 }

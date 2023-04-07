@@ -26,16 +26,16 @@ void xnn_f32_vclamp_ukernel__avx_x8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 vmin = _mm256_load_ps(params->avx.min);
+  const __m256 vmax = _mm256_load_ps(params->avx.max);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     __m256 vacc01234567 = _mm256_loadu_ps(input);
     input += 8;
 
-    vacc01234567 = _mm256_max_ps(vacc01234567, vy_min);
+    vacc01234567 = _mm256_max_ps(vmin, vacc01234567);
 
-    vacc01234567 = _mm256_min_ps(vacc01234567, vy_max);
+    vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
     _mm256_storeu_ps(output, vacc01234567);
     output += 8;
@@ -46,8 +46,8 @@ void xnn_f32_vclamp_ukernel__avx_x8(
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
 
     __m256 vacc = _mm256_maskload_ps(input, vmask);
-    vacc = _mm256_max_ps(vacc, vy_min);
-    vacc = _mm256_min_ps(vacc, vy_max);
+    vacc = _mm256_max_ps(vmin, vacc);
+    vacc = _mm256_min_ps(vmax, vacc);
 
     __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {

@@ -64,10 +64,10 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__avx_x${BATCH_TILE}(
 
       $if ACTIVATION == "MINMAX":
         $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = _mm256_max_ps(vacc${ABC[N]}, voutput_min);
+          vacc${ABC[N]} = _mm256_max_ps(voutput_min, vacc${ABC[N]});
 
         $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = _mm256_min_ps(vacc${ABC[N]}, voutput_max);
+          vacc${ABC[N]} = _mm256_min_ps(voutput_max, vacc${ABC[N]});
 
       _mm256_storeu_ps(output, vacc${ABC[0]});
       $for N in range(1, SIMD_TILE):
@@ -82,8 +82,8 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__avx_x${BATCH_TILE}(
     $if OP == "SQRDIFF":
       vacc = _mm256_mul_ps(vacc, vacc);
     $if ACTIVATION == "MINMAX":
-      vacc = _mm256_max_ps(vacc, voutput_min);
-      vacc = _mm256_min_ps(vacc, voutput_max);
+      vacc = _mm256_max_ps(voutput_min, vacc);
+      vacc = _mm256_min_ps(voutput_max, vacc);
     _mm256_storeu_ps(output, vacc);
     output += 8;
   }
@@ -98,8 +98,8 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__avx_x${BATCH_TILE}(
     $if OP == "SQRDIFF":
       vacc = _mm256_mul_ps(vacc, vacc);
     $if ACTIVATION == "MINMAX":
-      vacc = _mm256_max_ps(vacc, voutput_min);
-      vacc = _mm256_min_ps(vacc, voutput_max);
+      vacc = _mm256_max_ps(voutput_min, vacc);
+      vacc = _mm256_min_ps(voutput_max, vacc);
 
     __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {

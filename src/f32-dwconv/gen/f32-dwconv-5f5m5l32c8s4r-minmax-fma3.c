@@ -35,8 +35,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l32c8s4r__fma3(
   assert(output_width != 0);
   assert(kernel_size > 5);
 
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
   const __m256 vmin = _mm256_load_ps(params->avx.min);
+  const __m256 vmax = _mm256_load_ps(params->avx.max);
   do {
     const float* w = weights;
 
@@ -568,15 +568,15 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l32c8s4r__fma3(
         w += 160;
 
 
-        __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-        __m256 vacc89ABCDEF = _mm256_max_ps(vacc89ABCDEFp0, vmin);
-        __m256 vaccGHIJKLMN = _mm256_max_ps(vaccGHIJKLMNp0, vmin);
-        __m256 vaccOPQRSTUV = _mm256_max_ps(vaccOPQRSTUVp0, vmin);
+        __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+        __m256 vacc89ABCDEF = _mm256_max_ps(vmin, vacc89ABCDEFp0);
+        __m256 vaccGHIJKLMN = _mm256_max_ps(vmin, vaccGHIJKLMNp0);
+        __m256 vaccOPQRSTUV = _mm256_max_ps(vmin, vaccOPQRSTUVp0);
 
-        vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
-        vacc89ABCDEF = _mm256_min_ps(vacc89ABCDEF, vmax);
-        vaccGHIJKLMN = _mm256_min_ps(vaccGHIJKLMN, vmax);
-        vaccOPQRSTUV = _mm256_min_ps(vaccOPQRSTUV, vmax);
+        vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
+        vacc89ABCDEF = _mm256_min_ps(vmax, vacc89ABCDEF);
+        vaccGHIJKLMN = _mm256_min_ps(vmax, vaccGHIJKLMN);
+        vaccOPQRSTUV = _mm256_min_ps(vmax, vaccOPQRSTUV);
 
         _mm256_storeu_ps(output, vacc01234567);
         _mm256_storeu_ps(output + 8, vacc89ABCDEF);
@@ -630,9 +630,9 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l32c8s4r__fma3(
 
 
 
-        __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
+        __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
 
-        vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+        vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
         _mm256_storeu_ps(output, vacc01234567);
         output += 8;
@@ -665,8 +665,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l32c8s4r__fma3(
         vacc01234567p0 = _mm256_fmadd_ps(vi4x01234567, vk4x01234567, vacc01234567p0);
 
 
-        __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-        vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+        __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+        vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
         __m128 vacc0123 = _mm256_castps256_ps128(vacc01234567);
         if (c & 4) {

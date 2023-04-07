@@ -39,8 +39,8 @@ void xnn_f32_vadd_minmax_ukernel__avx512f_x16(
     vacc = _mm512_add_ps(vacc, _mm512_loadu_ps(input_b));
     input_b += 16;
 
-    vacc = _mm512_max_ps(vacc, voutput_min);
-    vacc = _mm512_min_ps(vacc, voutput_max);
+    vacc = _mm512_max_ps(voutput_min, vacc);
+    vacc = _mm512_min_ps(voutput_max, vacc);
 
     _mm512_storeu_ps(output, vacc);
     output += 16;
@@ -54,8 +54,8 @@ void xnn_f32_vadd_minmax_ukernel__avx512f_x16(
 
     __m512 vacc = _mm512_maskz_loadu_ps(vmask, input_a);
     vacc = _mm512_maskz_add_ps(vmask, vacc, _mm512_maskz_loadu_ps(vmask, input_b));
-    vacc = _mm512_maskz_max_ps(vmask, vacc, voutput_min);
-    vacc = _mm512_maskz_min_ps(vmask, vacc, voutput_max);
+    vacc = _mm512_maskz_max_ps(vmask, voutput_min, vacc);
+    vacc = _mm512_maskz_min_ps(vmask, voutput_max, vacc);
     _mm512_mask_storeu_ps(output, vmask, vacc);
   }
 }

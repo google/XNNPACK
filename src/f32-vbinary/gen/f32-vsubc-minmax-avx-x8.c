@@ -37,8 +37,8 @@ void xnn_f32_vsubc_minmax_ukernel__avx_x8(
     input_a += 8;
 
     vacc = _mm256_sub_ps(vacc, vb);
-    vacc = _mm256_max_ps(vacc, voutput_min);
-    vacc = _mm256_min_ps(vacc, voutput_max);
+    vacc = _mm256_max_ps(voutput_min, vacc);
+    vacc = _mm256_min_ps(voutput_max, vacc);
     _mm256_storeu_ps(output, vacc);
     output += 8;
   }
@@ -50,8 +50,8 @@ void xnn_f32_vsubc_minmax_ukernel__avx_x8(
     __m256 vacc = _mm256_maskload_ps(input_a, vmask);
 
     vacc = _mm256_sub_ps(vacc, vb);
-    vacc = _mm256_max_ps(vacc, voutput_min);
-    vacc = _mm256_min_ps(vacc, voutput_max);
+    vacc = _mm256_max_ps(voutput_min, vacc);
+    vacc = _mm256_min_ps(voutput_max, vacc);
 
     __m128 vacc_lo = _mm256_castps256_ps128(vacc);
     if (batch & (4 * sizeof(float))) {

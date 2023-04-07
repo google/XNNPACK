@@ -30,8 +30,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p32c__avx512f_acc2(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const __m512 vmax = _mm512_set1_ps(params->scalar.max);
   const __m512 vmin = _mm512_set1_ps(params->scalar.min);
+  const __m512 vmax = _mm512_set1_ps(params->scalar.max);
   do {
     const float* i0 = input[0];
     assert(i0 != NULL);
@@ -398,10 +398,10 @@ void xnn_f32_dwconv_minmax_ukernel_25p32c__avx512f_acc2(
       vacc0123456789ABCDEFp0 = _mm512_add_ps(vacc0123456789ABCDEFp0, vacc0123456789ABCDEFp1);
       vaccGHIJKLMNOPQRSTUVp0 = _mm512_add_ps(vaccGHIJKLMNOPQRSTUVp0, vaccGHIJKLMNOPQRSTUVp1);
 
-      __m512 vacc0123456789ABCDEF = _mm512_max_ps(vacc0123456789ABCDEFp0, vmin);
-      __m512 vaccGHIJKLMNOPQRSTUV = _mm512_max_ps(vaccGHIJKLMNOPQRSTUVp0, vmin);
-      vacc0123456789ABCDEF = _mm512_min_ps(vacc0123456789ABCDEF, vmax);
-      vaccGHIJKLMNOPQRSTUV = _mm512_min_ps(vaccGHIJKLMNOPQRSTUV, vmax);
+      __m512 vacc0123456789ABCDEF = _mm512_max_ps(vmin, vacc0123456789ABCDEFp0);
+      __m512 vaccGHIJKLMNOPQRSTUV = _mm512_max_ps(vmin, vaccGHIJKLMNOPQRSTUVp0);
+      vacc0123456789ABCDEF = _mm512_min_ps(vmax, vacc0123456789ABCDEF);
+      vaccGHIJKLMNOPQRSTUV = _mm512_min_ps(vmax, vaccGHIJKLMNOPQRSTUV);
 
       _mm512_storeu_ps(output, vacc0123456789ABCDEF);
       _mm512_storeu_ps(output + 16, vaccGHIJKLMNOPQRSTUV);
@@ -565,8 +565,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p32c__avx512f_acc2(
       // Add up all accumulators to vacc0123456789ABCDEFp0
       vacc0123456789ABCDEFp0 = _mm512_add_ps(vacc0123456789ABCDEFp0, vacc0123456789ABCDEFp1);
 
-      __m512 vacc0123456789ABCDEF = _mm512_max_ps(vacc0123456789ABCDEFp0, vmin);
-      vacc0123456789ABCDEF = _mm512_min_ps(vacc0123456789ABCDEF, vmax);
+      __m512 vacc0123456789ABCDEF = _mm512_max_ps(vmin, vacc0123456789ABCDEFp0);
+      vacc0123456789ABCDEF = _mm512_min_ps(vmax, vacc0123456789ABCDEF);
 
       _mm512_storeu_ps(output, vacc0123456789ABCDEF);
       output += 16;
@@ -682,8 +682,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p32c__avx512f_acc2(
       // Add up all accumulators to vacc0123456789ABCDEFp0
       vacc0123456789ABCDEFp0 = _mm512_add_ps(vacc0123456789ABCDEFp0, vacc0123456789ABCDEFp1);
 
-      __m512 vacc0123456789ABCDEF = _mm512_max_ps(vacc0123456789ABCDEFp0, vmin);
-      vacc0123456789ABCDEF = _mm512_min_ps(vacc0123456789ABCDEF, vmax);
+      __m512 vacc0123456789ABCDEF = _mm512_max_ps(vmin, vacc0123456789ABCDEFp0);
+      vacc0123456789ABCDEF = _mm512_min_ps(vmax, vacc0123456789ABCDEF);
 
       _mm512_mask_storeu_ps(output, vmask, vacc0123456789ABCDEF);
       output += c;

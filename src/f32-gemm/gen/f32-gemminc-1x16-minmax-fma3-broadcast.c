@@ -61,12 +61,12 @@ void xnn_f32_gemminc_minmax_ukernel_1x16__fma3_broadcast(
     } while (k != 0);
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);
-    vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);
-    vacc0x89ABCDEF = _mm256_max_ps(vacc0x89ABCDEF, vmin);
+    vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
+    vacc0x89ABCDEF = _mm256_max_ps(vmin, vacc0x89ABCDEF);
 
     const __m256 vmax = _mm256_load_ps(params->avx.max);
-    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
-    vacc0x89ABCDEF = _mm256_min_ps(vacc0x89ABCDEF, vmax);
+    vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
+    vacc0x89ABCDEF = _mm256_min_ps(vmax, vacc0x89ABCDEF);
 
     if XNN_LIKELY(nc >= 16) {
       _mm256_storeu_ps(c0, vacc0x01234567);

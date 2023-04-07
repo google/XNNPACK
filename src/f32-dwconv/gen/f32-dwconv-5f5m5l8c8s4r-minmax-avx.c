@@ -35,8 +35,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__avx(
   assert(output_width != 0);
   assert(kernel_size > 5);
 
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
   const __m256 vmin = _mm256_load_ps(params->avx.min);
+  const __m256 vmax = _mm256_load_ps(params->avx.max);
   do {
     const float* w = weights;
 
@@ -341,9 +341,9 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__avx(
 
 
 
-        __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
+        __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
 
-        vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+        vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
         _mm256_storeu_ps(output, vacc01234567);
         output += 8;
@@ -376,8 +376,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l8c8s4r__avx(
         vacc01234567p0 = _mm256_add_ps(vacc01234567p0, _mm256_mul_ps(vi4x01234567, vk4x01234567));
 
 
-        __m256 vacc01234567 = _mm256_max_ps(vacc01234567p0, vmin);
-        vacc01234567 = _mm256_min_ps(vacc01234567, vmax);
+        __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
+        vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
         __m128 vacc0123 = _mm256_castps256_ps128(vacc01234567);
         if (c & 4) {

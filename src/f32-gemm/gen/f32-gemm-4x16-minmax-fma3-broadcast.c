@@ -95,24 +95,24 @@ void xnn_f32_gemm_minmax_ukernel_4x16__fma3_broadcast(
     } while (k != 0);
 
     const __m256 vmin = _mm256_load_ps(params->avx.min);
-    vacc0x01234567 = _mm256_max_ps(vacc0x01234567, vmin);
-    vacc1x01234567 = _mm256_max_ps(vacc1x01234567, vmin);
-    vacc2x01234567 = _mm256_max_ps(vacc2x01234567, vmin);
-    vacc3x01234567 = _mm256_max_ps(vacc3x01234567, vmin);
-    vacc0x89ABCDEF = _mm256_max_ps(vacc0x89ABCDEF, vmin);
-    vacc1x89ABCDEF = _mm256_max_ps(vacc1x89ABCDEF, vmin);
-    vacc2x89ABCDEF = _mm256_max_ps(vacc2x89ABCDEF, vmin);
-    vacc3x89ABCDEF = _mm256_max_ps(vacc3x89ABCDEF, vmin);
+    vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
+    vacc1x01234567 = _mm256_max_ps(vmin, vacc1x01234567);
+    vacc2x01234567 = _mm256_max_ps(vmin, vacc2x01234567);
+    vacc3x01234567 = _mm256_max_ps(vmin, vacc3x01234567);
+    vacc0x89ABCDEF = _mm256_max_ps(vmin, vacc0x89ABCDEF);
+    vacc1x89ABCDEF = _mm256_max_ps(vmin, vacc1x89ABCDEF);
+    vacc2x89ABCDEF = _mm256_max_ps(vmin, vacc2x89ABCDEF);
+    vacc3x89ABCDEF = _mm256_max_ps(vmin, vacc3x89ABCDEF);
 
     const __m256 vmax = _mm256_load_ps(params->avx.max);
-    vacc0x01234567 = _mm256_min_ps(vacc0x01234567, vmax);
-    vacc1x01234567 = _mm256_min_ps(vacc1x01234567, vmax);
-    vacc2x01234567 = _mm256_min_ps(vacc2x01234567, vmax);
-    vacc3x01234567 = _mm256_min_ps(vacc3x01234567, vmax);
-    vacc0x89ABCDEF = _mm256_min_ps(vacc0x89ABCDEF, vmax);
-    vacc1x89ABCDEF = _mm256_min_ps(vacc1x89ABCDEF, vmax);
-    vacc2x89ABCDEF = _mm256_min_ps(vacc2x89ABCDEF, vmax);
-    vacc3x89ABCDEF = _mm256_min_ps(vacc3x89ABCDEF, vmax);
+    vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
+    vacc1x01234567 = _mm256_min_ps(vmax, vacc1x01234567);
+    vacc2x01234567 = _mm256_min_ps(vmax, vacc2x01234567);
+    vacc3x01234567 = _mm256_min_ps(vmax, vacc3x01234567);
+    vacc0x89ABCDEF = _mm256_min_ps(vmax, vacc0x89ABCDEF);
+    vacc1x89ABCDEF = _mm256_min_ps(vmax, vacc1x89ABCDEF);
+    vacc2x89ABCDEF = _mm256_min_ps(vmax, vacc2x89ABCDEF);
+    vacc3x89ABCDEF = _mm256_min_ps(vmax, vacc3x89ABCDEF);
 
     if XNN_LIKELY(nc >= 16) {
       _mm256_storeu_ps(c3, vacc3x01234567);
