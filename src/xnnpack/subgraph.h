@@ -350,6 +350,8 @@ struct xnn_operator_data {
   size_t input_width;
   size_t output_height;
   size_t output_width;
+  size_t input_channels;
+  size_t output_channels;
   struct xnn_shape shape1;
   struct xnn_shape shape2;
   size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
