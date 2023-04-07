@@ -122,7 +122,8 @@ XNN_INTERNAL void xnn_pack_qs8_gemm_xw_goi_w(
   const struct xnn_qs8_packing_params* params);
 
 
-typedef void (*xnn_pack_gemm_io_w_fn)(
+typedef void (*xnn_pack_gemm_gio_w_fn)(
+  size_t g,
   size_t nc,
   size_t kc,
   size_t nr,
@@ -131,9 +132,11 @@ typedef void (*xnn_pack_gemm_io_w_fn)(
   const void* k,
   const void* b,
   void* packed_weights,
+  size_t extra_bytes,
   const void* params);
 
-XNN_INTERNAL void xnn_pack_f32_gemm_io_w(
+XNN_INTERNAL void xnn_pack_f32_gemm_gio_w(
+  size_t g,
   size_t nc,
   size_t kc,
   size_t nr,
@@ -142,9 +145,11 @@ XNN_INTERNAL void xnn_pack_f32_gemm_io_w(
   const float* k,
   const float* b,
   float* packed_weights,
+  size_t extra_bytes,
   const void* params);
 
-XNN_INTERNAL void xnn_pack_f16_gemm_io_w(
+XNN_INTERNAL void xnn_pack_f16_gemm_gio_w(
+  size_t g,
   size_t nc,
   size_t kc,
   size_t nr,
@@ -153,9 +158,11 @@ XNN_INTERNAL void xnn_pack_f16_gemm_io_w(
   const uint16_t* k,
   const uint16_t* b,
   uint16_t* packed_weights,
+  size_t extra_bytes,
   const void* params);
 
-XNN_INTERNAL void xnn_pack_f32_to_f16_gemm_io_w(
+XNN_INTERNAL void xnn_pack_f32_to_f16_gemm_gio_w(
+  size_t g,
   size_t nc,
   size_t kc,
   size_t nr,
@@ -164,9 +171,11 @@ XNN_INTERNAL void xnn_pack_f32_to_f16_gemm_io_w(
   const float* k,
   const float* b,
   uint16_t* packed_weights,
+  size_t extra_bytes,
   const void* params);
 
-XNN_INTERNAL void xnn_pack_qu8_gemm_io_w(
+XNN_INTERNAL void xnn_pack_qu8_gemm_gio_w(
+  size_t g,
   size_t nc,
   size_t kc,
   size_t nr,
@@ -175,9 +184,11 @@ XNN_INTERNAL void xnn_pack_qu8_gemm_io_w(
   const uint8_t* k,
   const int32_t* b,
   void* packed_weights,
+  size_t extra_bytes,
   const struct xnn_qu8_packing_params* params);
 
-XNN_INTERNAL void xnn_pack_qs8_gemm_io_w(
+XNN_INTERNAL void xnn_pack_qs8_gemm_gio_w(
+  size_t g,
   size_t nc,
   size_t kc,
   size_t nr,
@@ -186,6 +197,7 @@ XNN_INTERNAL void xnn_pack_qs8_gemm_io_w(
   const int8_t* k,
   const int32_t* b,
   void* packed_weights,
+  size_t extra_bytes,
   const struct xnn_qs8_packing_params* params);
 
 

@@ -15,6 +15,141 @@
 #include <gmock/gmock.h>
 #include <fp16.h>
 
+// GEMM GIO packing tests
+
+TEST(PACK_F32_GEMM_GIO_W, g_eq_1) {
+  size_t g = 1;
+  size_t nc = 2;
+  size_t kc = 2;
+  size_t nr = 1;
+  size_t kr = 1;
+  size_t sr = 1;
+
+  std::vector<float> b(g * nc);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1]
+  std::vector<float> k(g * nc * kc);
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size())); // k = [2, 3, 4, 5]
+  std::vector<float> packed_weights(g * round_up(nc, nr) * (1 + round_up_po2(kc, kr * sr)));
+  xnn_pack_f32_gemm_gio_w(
+      g, nc, kc, nr, kr, sr, k.data(), b.data(), packed_weights.data(), /*extra_bytes=*/0, nullptr);
+
+  const std::vector<float> expected = {
+    0.0f,
+    2.0f, 4.f,
+    1.0f,
+    3.0f, 5.0f,
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F32_GEMM_GIO_W, g_eq_1_nr_gt_1_kr_gt_1) {
+  size_t g = 1;
+  size_t nc = 3;
+  size_t kc = 3;
+  size_t nr = 2;
+  size_t kr = 2;
+  size_t sr = 1;
+
+  std::vector<float> b(g * nc);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2]
+  std::vector<float> k(g * nc * kc);
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size())); // k = [3, 4, 5, 6, 7, 8, 9, 10, 11]
+  std::vector<float> packed_weights(g * round_up(nc, nr) * (1 + round_up_po2(kc, kr * sr)));
+  xnn_pack_f32_gemm_gio_w(
+      g, nc, kc, nr, kr, sr, k.data(), b.data(), packed_weights.data(), /*extra_bytes=*/0, nullptr);
+
+  const std::vector<float> expected = {
+    0.0f, 1.0f,
+    3.0f, 6.0f, 4.0f, 7.0f,
+    9.0f, 0.0f, 10.0f, 0.0f,
+    2.0f, 0.0f,
+    5.0f, 8.0f, 0.0f, 0.0f,
+    11.0f, 0.0f, 0.0f, 0.0f,
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F32_GEMM_GIO_W, g_gt_1) {
+  size_t g = 3;
+  size_t nc = 2;
+  size_t kc = 2;
+  size_t nr = 1;
+  size_t kr = 1;
+  size_t sr = 1;
+
+  std::vector<float> b(g * nc);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4, 5]
+  std::vector<float> k(g * nc * kc);
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size())); // k = [6,7,8,9,10,11,12,13,14,15,16,17]
+  std::vector<float> packed_weights(g * round_up(nc, nr) * (1 + round_up_po2(kc, kr * sr)));
+  xnn_pack_f32_gemm_gio_w(
+      g, nc, kc, nr, kr, sr, k.data(), b.data(), packed_weights.data(), /*extra_bytes=*/0, nullptr);
+
+  const std::vector<float> expected = {
+    0.0f,
+    6.0f, 8.f,
+    1.0f,
+    7.0f, 9.0f,
+    2.0f,
+    10.0f, 12.0f,
+    3.0f,
+    11.0f, 13.0f,
+    4.0f,
+    14.0f, 16.0f,
+    5.0f,
+    15.0f, 17.0f,
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+TEST(PACK_F32_GEMM_GIO_W, g_gt_1_nr_gt_1_kr_gt_1) {
+  size_t g = 3;
+  size_t nc = 3;
+  size_t kc = 3;
+  size_t nr = 2;
+  size_t kr = 2;
+  size_t sr = 1;
+
+  std::vector<float> b(g * nc);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+  std::vector<float> k(g * nc * kc);
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size())); // k = [
+                                                               //   9,10,11,12,13,14,15,16,17,
+                                                               //   18,19,20,21,22,23,24,25,26,
+                                                               //   27,28,29,30,31,32,33,34,35
+                                                               // ]
+  std::vector<float> packed_weights(g * round_up(nc, nr) * (1 + round_up_po2(kc, kr * sr)));
+  xnn_pack_f32_gemm_gio_w(
+      g, nc, kc, nr, kr, sr, k.data(), b.data(), packed_weights.data(), /*extra_bytes=*/0, nullptr);
+
+  const std::vector<float> expected = {
+    // Group 1.
+    0.0f, 1.0f,
+    9.0f, 12.0f, 10.0f, 13.0f,
+    15.0f, 0.0f, 16.0f, 0.0f,
+    2.0f, 0.0f,
+    11.0f, 14.0f, 0.0f, 0.0f,
+    17.0f, 0.0f, 0.0f, 0.0f,
+    // Group 2.
+    3.0f, 4.0f,
+    18.0f, 21.0f, 19.0f, 22.0f,
+    24.0f, 0.0f, 25.0f, 0.0f,
+    5.0f, 0.0f,
+    20.0f, 23.0f, 0.0f, 0.0f,
+    26.0f, 0.0f, 0.0f, 0.0f,
+    // Group 3.
+    6.0f, 7.0f,
+    27.0f, 30.0f, 28.0f, 31.0f,
+    33.0f, 0.0f, 34.0f, 0.0f,
+    8.0f, 0.0f,
+    29.0f, 32.0f, 0.0f, 0.0f,
+    35.0f, 0.0f, 0.0f, 0.0f,
+  };
+  EXPECT_EQ(expected, packed_weights);
+}
+
+// DWCONV packing tests.
+
 // Calculates the size (number of elements) of packed weights required for a multi-pass dwconv.
 // Assume that bias and filter elements are of the same size, and extra_weights_byte is 0.
 static size_t multipass_weights_count(
