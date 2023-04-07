@@ -24975,7 +24975,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x4(
       const uint16_t* w14 = w13 + kc;
       const uint16_t* w15 = w14 + kc;
 
-      // KC main loop multiple of 16x4
+      // KC main loop multiple of 4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
         vtmp0123x0123 = vld4_lane_u16(w0, vtmp0123x0123, 0); w0 += 4;
@@ -25029,10 +25029,13 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x4(
       }
 
       // KC remainder of 1..3
-      // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
+        assert(k >= 1);
+        assert(k <= 3);
+
+        // Same as main loop but ld1, ld2 or ld3
         switch (k) {
-          // KC remainder of 16x1
+          // KC remainder of 1
           case 1:
           {
             uint16x4_t vtmp0x0123 = vdup_n_u16(0);
@@ -25063,7 +25066,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x4(
             vst1_u16(packed_weights, vtmp0xCDEF); packed_weights += 4;
             break;
           }
-          // KC remainder of 16x2
+          // KC remainder of 2
           case 2:
           {
             uint16x4x2_t vtmp01x0123;
@@ -25106,7 +25109,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x4(
             vst1_u16(packed_weights, vtmp01xCDEF.val[1]); packed_weights += 4;
             break;
           }
-          // KC remainder of 16x3
+          // KC remainder of 3
           case 3:
           {
             uint16x4x3_t vtmp012x0123;
@@ -25241,7 +25244,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x4(
         w14 = w13;
       }
 
-      // KC main loop multiple of 16x4
+      // KC main loop multiple of 4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
         vtmp0123x0123 = vld4_lane_u16(w0, vtmp0123x0123, 0); w0 += 4;
@@ -25259,6 +25262,21 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x4(
         vtmp0123x0123 = vld4_lane_u16(w3, vtmp0123x0123, 3); w3 += 4;
         vtmp0123x4567 = vld4_lane_u16(w7, vtmp0123x4567, 3); w7 += 4;
         vtmp0123x89AB = vld4_lane_u16(w11, vtmp0123x89AB, 3); w11 += 4;
+        xnn_prefetch_to_l1((const int8_t*) w0 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w1 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w2 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w3 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w4 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w5 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w6 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w7 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w8 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w9 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w10 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w11 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w12 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w13 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w14 + 128);
         vst1_u16(packed_weights, vtmp0123x0123.val[0]); packed_weights += 4;
         vst1_u16(packed_weights, vtmp0123x4567.val[0]); packed_weights += 4;
         vst1_u16(packed_weights, vtmp0123x89AB.val[0]); packed_weights += 4;
@@ -25278,10 +25296,13 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x4(
       }
 
       // KC remainder of 1..3
-      // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
+        assert(k >= 1);
+        assert(k <= 3);
+
+        // Same as main loop but ld1, ld2 or ld3
         switch (k) {
-          // KC remainder of 16x1
+          // KC remainder of 1
           case 1:
           {
             uint16x4_t vtmp0x0123 = vdup_n_u16(0);
@@ -25311,7 +25332,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x4(
             vst1_u16(packed_weights, vtmp0xCDEF); packed_weights += 4;
             break;
           }
-          // KC remainder of 16x2
+          // KC remainder of 2
           case 2:
           {
             uint16x4x2_t vtmp01x0123;
@@ -25353,7 +25374,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x4(
             vst1_u16(packed_weights, vtmp01xCDEF.val[1]); packed_weights += 4;
             break;
           }
-          // KC remainder of 16x3
+          // KC remainder of 3
           case 3:
           {
             uint16x4x3_t vtmp012x0123;
@@ -25472,7 +25493,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
       const uint16_t* w6 = w5 + kc;
       const uint16_t* w7 = w6 + kc;
 
-      // KC main loop multiple of 8x4
+      // KC main loop multiple of 4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
         vtmp0123x0123 = vld4_lane_u16(w0, vtmp0123x0123, 0); w0 += 4;
@@ -25502,10 +25523,13 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
       }
 
       // KC remainder of 1..3
-      // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
+        assert(k >= 1);
+        assert(k <= 3);
+
+        // Same as main loop but ld1, ld2 or ld3
         switch (k) {
-          // KC remainder of 8x1
+          // KC remainder of 1
           case 1:
           {
             uint16x4_t vtmp0x0123 = vdup_n_u16(0);
@@ -25524,7 +25548,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
             vst1_u16(packed_weights, vtmp0x4567); packed_weights += 4;
             break;
           }
-          // KC remainder of 8x2
+          // KC remainder of 2
           case 2:
           {
             uint16x4x2_t vtmp01x0123;
@@ -25549,7 +25573,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
             vst1_u16(packed_weights, vtmp01x4567.val[1]); packed_weights += 4;
             break;
           }
-          // KC remainder of 8x3
+          // KC remainder of 3
           case 3:
           {
             uint16x4x3_t vtmp012x0123;
@@ -25628,7 +25652,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
         w6 = w5;
       }
 
-      // KC main loop multiple of 8x4
+      // KC main loop multiple of 4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
         vtmp0123x0123 = vld4_lane_u16(w0, vtmp0123x0123, 0); w0 += 4;
@@ -25638,6 +25662,13 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
         vtmp0123x0123 = vld4_lane_u16(w2, vtmp0123x0123, 2); w2 += 4;
         vtmp0123x4567 = vld4_lane_u16(w6, vtmp0123x4567, 2); w6 += 4;
         vtmp0123x0123 = vld4_lane_u16(w3, vtmp0123x0123, 3); w3 += 4;
+        xnn_prefetch_to_l1((const int8_t*) w0 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w1 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w2 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w3 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w4 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w5 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w6 + 128);
         vst1_u16(packed_weights, vtmp0123x0123.val[0]); packed_weights += 4;
         vst1_u16(packed_weights, vtmp0123x4567.val[0]); packed_weights += 4;
         vst1_u16(packed_weights, vtmp0123x0123.val[1]); packed_weights += 4;
@@ -25649,10 +25680,13 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
       }
 
       // KC remainder of 1..3
-      // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
+        assert(k >= 1);
+        assert(k <= 3);
+
+        // Same as main loop but ld1, ld2 or ld3
         switch (k) {
-          // KC remainder of 8x1
+          // KC remainder of 1
           case 1:
           {
             uint16x4_t vtmp0x0123 = vdup_n_u16(0);
@@ -25670,7 +25704,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
             vst1_u16(packed_weights, vtmp0x4567); packed_weights += 4;
             break;
           }
-          // KC remainder of 8x2
+          // KC remainder of 2
           case 2:
           {
             uint16x4x2_t vtmp01x0123;
@@ -25694,7 +25728,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
             vst1_u16(packed_weights, vtmp01x4567.val[1]); packed_weights += 4;
             break;
           }
-          // KC remainder of 8x3
+          // KC remainder of 3
           case 3:
           {
             uint16x4x3_t vtmp012x0123;

@@ -99,7 +99,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4(
       const uint16_t* w14 = w13 + kc;
       const uint16_t* w15 = w14 + kc;
 
-      // KC main loop multiple of 16x4
+      // KC main loop multiple of 4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
         vtmp0123x0123 = vld4_lane_u16(w0, vtmp0123x0123, 0); w0 += 4;
@@ -139,8 +139,10 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4(
       // KC remainder of 1..3
       // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
+        assert(k >= 1);
+        assert(k <= 3);
         switch (k) {
-          // KC remainder of 16x1
+          // KC remainder of 1
           case 1:
           {
             uint16x4_t vtmp0x0123 = vdup_n_u16(0);
@@ -171,7 +173,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4(
             vst1_u16(packed_weights, vtmp0xCDEF); packed_weights += 4;
             break;
           }
-          // KC remainder of 16x2
+          // KC remainder of 2
           case 2:
           {
             uint16x4x2_t vtmp01x0123;
@@ -214,7 +216,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4(
             vst1_u16(packed_weights, vtmp01xCDEF.val[1]); packed_weights += 4;
             break;
           }
-          // KC remainder of 16x3
+          // KC remainder of 3
           case 3:
           {
             uint16x4x3_t vtmp012x0123;
@@ -349,7 +351,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4(
         w14 = w13;
       }
 
-      // KC main loop multiple of 16x4
+      // KC main loop multiple of 4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
         vtmp0123x0123 = vld4_lane_u16(w0, vtmp0123x0123, 0); w0 += 4;
@@ -385,11 +387,14 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4(
         vst1_u16(packed_weights, vtmp0123xCDEF.val[3]); packed_weights += 4;
       }
 
+
       // KC remainder of 1..3
       // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
+        assert(k >= 1);
+        assert(k <= 3);
         switch (k) {
-          // KC remainder of 16x1
+          // KC remainder of 1
           case 1:
           {
             uint16x4_t vtmp0x0123 = vdup_n_u16(0);
@@ -419,7 +424,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4(
             vst1_u16(packed_weights, vtmp0xCDEF); packed_weights += 4;
             break;
           }
-          // KC remainder of 16x2
+          // KC remainder of 2
           case 2:
           {
             uint16x4x2_t vtmp01x0123;
@@ -461,7 +466,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4(
             vst1_u16(packed_weights, vtmp01xCDEF.val[1]); packed_weights += 4;
             break;
           }
-          // KC remainder of 16x3
+          // KC remainder of 3
           case 3:
           {
             uint16x4x3_t vtmp012x0123;

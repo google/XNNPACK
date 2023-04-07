@@ -81,6 +81,30 @@ static void x16_packw(benchmark::State& state,
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  static void x16_packw_x16__neon_ld4lane_x8(benchmark::State& state, const char* net) {
+    x16_packw(state,
+      xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8,
+      /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckNEON);
+  }
+  static void x16_packw_x16__neon_ld4lane_prfm_x8(benchmark::State& state, const char* net) {
+    x16_packw(state,
+      xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x8,
+      /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckNEON);
+  }
+  static void x16_packw_x8__neon_ld4lane_x8(benchmark::State& state, const char* net) {
+    x16_packw(state,
+      xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8,
+      /*nr=*/8, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckNEON);
+  }
+  static void x16_packw_x8__neon_ld4lane_prfm_x8(benchmark::State& state, const char* net) {
+    x16_packw(state,
+      xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x8,
+      /*nr=*/8, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckNEON);
+  }
   static void x16_packw_x16__neon_ld4lane_x4(benchmark::State& state, const char* net) {
     x16_packw(state,
       xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4,
@@ -108,8 +132,12 @@ static void x16_packw(benchmark::State& state,
 
   BENCHMARK_BGEMM(x16_packw_x16__neon_ld4lane_x4)
   BENCHMARK_BGEMM(x16_packw_x16__neon_ld4lane_prfm_x4)
+  BENCHMARK_BGEMM(x16_packw_x16__neon_ld4lane_x8)
+  BENCHMARK_BGEMM(x16_packw_x16__neon_ld4lane_prfm_x8)
   BENCHMARK_BGEMM(x16_packw_x8__neon_ld4lane_x4)
   BENCHMARK_BGEMM(x16_packw_x8__neon_ld4lane_prfm_x4)
+  BENCHMARK_BGEMM(x16_packw_x8__neon_ld4lane_x8)
+  BENCHMARK_BGEMM(x16_packw_x8__neon_ld4lane_prfm_x8)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 static void x16_packw_x16__scalar_int_x4(benchmark::State& state, const char* net) {
