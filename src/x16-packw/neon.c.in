@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert NR >= 4
-$assert NR % 4 == 0
+$assert NR >= 8
+$assert NR % 8 == 0
 $assert KUNROLL >= 4
 $assert KUNROLL % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -43,11 +43,11 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
   assert(weights != NULL);
   assert(packed_weights != NULL);
 
-  $for N in range(0, NR, 4):
+  $for N in range(0, NR, 8):
     $for K in range(0, KUNROLL, 4):
-      uint16x4x4_t vtmp${ABC[K:K+4]}x${ABC[N:N+4]};
+      uint16x8x4_t vtmp${ABC[K:K+4]}x${ABC[N:N+8]};
       $for L in range(4):
-        vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[${L}] = vdup_n_u16(0);
+        vtmp${ABC[K:K+4]}x${ABC[N:N+8]}.val[${L}] = vdupq_n_u16(0);
 
   do {
     // NC main loop multiple of ${NR}
@@ -56,14 +56,14 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
 
     for (; n >= ${NR}; n -= ${NR}) {
       if XNN_LIKELY(bias != NULL) {
-        $for N in range(0, NR, 4):
-          uint16x4_t vb${N} = vld1_u16(bias); bias += 4;
-        $for N in range(0, NR, 4):
-          vst1_u16(packed_weights, vb${N}); packed_weights += 4;
+        $for N in range(0, NR, 8):
+          uint16x8_t vb${N} = vld1q_u16(bias); bias += 8;
+        $for N in range(0, NR, 8):
+          vst1q_u16(packed_weights, vb${N}); packed_weights += 8;
       } else {
-        const uint16x4_t vzero = vmov_n_u16(0);
-        $for N in range(0, NR, 4):
-          vst1_u16(packed_weights, vzero); packed_weights += 4;
+        const uint16x8_t vzero = vmovq_n_u16(0);
+        $for N in range(0, NR, 8):
+          vst1q_u16(packed_weights, vzero); packed_weights += 8;
       }
 
       $for N in range(1, NR):
@@ -73,29 +73,29 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
       size_t k = kc;
       for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
         $for K in range(0, KUNROLL, 4):
-          $for N in range(0, NR, 4):
-            $for L in range(4):
-              vtmp${ABC[K:K+4]}x${ABC[N:N+4]} = vld4_lane_u16(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}, ${L}); w${N+L} += 4;
+          $for N in range(0, NR, 8):
+            $for L in range(8):
+              vtmp${ABC[K:K+4]}x${ABC[N:N+8]} = vld4q_lane_u16(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+8]}, ${L}); w${N+L} += 4;
         $if PREFETCH:
           $for N in range(0, NR):
             xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
         $for K in range(0, KUNROLL, 4):
           $for L in range(4):
-            $for N in range(0, NR, 4):
-              vst1_u16(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
+            $for N in range(0, NR, 8):
+              vst1q_u16(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+8]}.val[${L}]); packed_weights += 8;
       }
-
       $if KUNROLL > 4:
         // KC remainder multiple of 4
         ${IFWHILE} (k >= 4) {
-          $for N in range(0, NR, 4):
-            $for L in range(4):
-              vtmp${ABC[0:4]}x${ABC[N:N+4]} = vld4_lane_u16(w${N+L}, vtmp${ABC[0:4]}x${ABC[N:N+4]}, ${L}); w${N+L} += 4;
+          $for N in range(0, NR, 8):
+            $for L in range(8):
+              vtmp${ABC[0:4]}x${ABC[N:N+8]} = vld4q_lane_u16(w${N+L}, vtmp${ABC[0:4]}x${ABC[N:N+8]}, ${L}); w${N+L} += 4;
           $for L in range(4):
-            $for N in range(0, NR, 4):
-              vst1_u16(packed_weights, vtmp${ABC[0:4]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
+            $for N in range(0, NR, 8):
+              vst1q_u16(packed_weights, vtmp${ABC[0:4]}x${ABC[N:N+8]}.val[${L}]); packed_weights += 8;
           k -= 4;
         }
+
       // KC remainder of 1..3
       // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
@@ -103,7 +103,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
         assert(k <= 3);
         switch (k) {
           $for K in range(1, 4):
-            // KC remainder of ${K}
+            // KC remainder of ${NR}x${K}
             case ${K}:
             {
               $if K == 1:
@@ -146,9 +146,9 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
         } while (--nb != 0);
         packed_weights += (${NR} - n);
       } else {
-        const uint16x4_t vzero = vmov_n_u16(0);
-        $for N in range(0, NR, 4):
-          vst1_u16(packed_weights, vzero); packed_weights += 4;
+        const uint16x8_t vzero = vmovq_n_u16(0);
+        $for N in range(0, NR, 8):
+          vst1q_u16(packed_weights, vzero); packed_weights += 8;
       }
 
       // NR remainder has less than ${NR} rows so last row is not loaded
@@ -167,29 +167,29 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
       size_t k = kc;
       for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
         $for K in range(0, KUNROLL, 4):
-          $for N in range(0, NR, 4):
-            $for L in range(4):
+          $for N in range(0, NR, 8):
+            $for L in range(8):
               $if N+L != NR-1:
-                vtmp${ABC[K:K+4]}x${ABC[N:N+4]} = vld4_lane_u16(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}, ${L}); w${N+L} += 4;
+                vtmp${ABC[K:K+4]}x${ABC[N:N+8]} = vld4q_lane_u16(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+8]}, ${L}); w${N+L} += 4;
         $if PREFETCH:
           $for N in range(0, NR-1):
             xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
         $for K in range(0, KUNROLL, 4):
           $for L in range(4):
-            $for N in range(0, NR, 4):
-              vst1_u16(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
+            $for N in range(0, NR, 8):
+              vst1q_u16(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+8]}.val[${L}]); packed_weights += 8;
       }
 
       $if KUNROLL > 4:
         // KC remainder multiple of 4
         ${IFWHILE} (k >= 4) {
-          $for N in range(0, NR, 4):
-            $for L in range(4):
+          $for N in range(0, NR, 8):
+            $for L in range(8):
               $if N+L != NR-1:
-                vtmp${ABC[0:4]}x${ABC[N:N+4]} = vld4_lane_u16(w${N+L}, vtmp${ABC[0:4]}x${ABC[N:N+4]}, ${L}); w${N+L} += 4;
+                vtmp${ABC[0:4]}x${ABC[N:N+8]} = vld4q_lane_u16(w${N+L}, vtmp${ABC[0:4]}x${ABC[N:N+8]}, ${L}); w${N+L} += 4;
           $for L in range(4):
-            $for N in range(0, NR, 4):
-              vst1_u16(packed_weights, vtmp${ABC[0:4]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
+            $for N in range(0, NR, 8):
+              vst1q_u16(packed_weights, vtmp${ABC[0:4]}x${ABC[N:N+8]}.val[${L}]); packed_weights += 8;
           k -= 4;
         }
 
@@ -200,7 +200,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
         assert(k <= 3);
         switch (k) {
           $for K in range(1, 4):
-            // KC remainder of ${K}
+            // KC remainder of ${NR}x${K}
             case ${K}:
             {
               $if K == 1:
