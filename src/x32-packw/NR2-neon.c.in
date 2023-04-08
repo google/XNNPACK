@@ -42,65 +42,59 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane${"_prfm" if PREFETCH el
   $for N in range(0,NR,2):
     $for K in range(0,KUNROLL,2):
       uint32x2x2_t v${N}${K};
-      $for NN in range(0,2):
-        v${N}${K}.val[${NN}] = vdup_n_u32(0);
+      $for L in range(0,2):
+        v${N}${K}.val[${L}] = vdup_n_u32(0);
 
   do {
     // NC main loop multiple of ${NR}
     const uint32_t* w = weights;
     size_t n = nc;
-    if XNN_LIKELY(n >= ${NR}) {
-      do {
-        if XNN_LIKELY(bias != NULL) {
-          $for N in range(0,NR,2):
-            uint32x2_t vb${N} = vld1_u32(bias + ${N});
-          $for N in range(0,NR,2):
-            vst1_u32(packed_weights + ${N}, vb${N});
-          bias += ${NR};
-        } else {
-          const uint32x2_t vzero = vmov_n_u32(0);
-          $for N in range(0,NR,2):
-            vst1_u32(packed_weights + ${N}, vzero);
-        }
-        packed_weights += ${NR};
-        const uint32_t* w0 = w;
-        $for N in range(1, NR):
-          const uint32_t* w${N} = w${N-1} + kc;
-        // KC main loop multiple of ${NR}x${KUNROLL}
-        size_t k = kc;
-        for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
-          $for N in range(0,NR,2):
-            $for NN in range(0,2):
-              $for K in range(0,KUNROLL,2):
-                v${N}${K} = vld2_lane_u32(w${N+NN} + ${K}, v${N}${K}, ${NN});
-              w${N+NN} += ${KUNROLL};
-          $if PREFETCH:
-            $for N in range(0, NR):
-              xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
 
-          $for K in range(0,KUNROLL,2):
-            $for NN in range(0,2):
-              $for N in range(0,NR,2):
-                vst1_u32(packed_weights + ${N+NN*NR+K*KUNROLL}, v${N}${K}.val[${NN}]);
-          packed_weights += ${NR*KUNROLL};
-        }
+    for (; n >= ${NR}; n -= ${NR}) {
+      if XNN_LIKELY(bias != NULL) {
+        $for N in range(0,NR,2):
+          uint32x2_t vb${N} = vld1_u32(bias); bias += 2;
+        $for N in range(0,NR,2):
+          vst1_u32(packed_weights, vb${N}); packed_weights += 2;
+      } else {
+        const uint32x2_t vzero = vmov_n_u32(0);
+        $for N in range(0,NR,2):
+          vst1_u32(packed_weights, vzero); packed_weights += 2;
+      }
 
-        // KC remainder
-        for (; k != 0; --k) {
+      const uint32_t* w0 = w;
+      $for N in range(1, NR):
+        const uint32_t* w${N} = w${N-1} + kc;
+      // KC main loop multiple of ${KUNROLL}
+      size_t k = kc;
+      for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
+        $for K in range(0,KUNROLL,2):
           $for N in range(0,NR,2):
-            $for NN in range(0,2):
-              $for K in range(0,KUNROLL,2):
-                v${N}${K}.val[0] = vld1_lane_u32(w${N+NN} + ${K}, v${N}${K}.val[0], ${NN});
-              w${N+NN} += ${KUNROLL//2};
-          $for K in range(0,KUNROLL,2):
+            $for L in range(0,2):
+              v${N}${K} = vld2_lane_u32(w${N+L}, v${N}${K}, ${L}); w${N+L} += 2;
+        $if PREFETCH:
+          $for N in range(0, NR):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
+        $for K in range(0,KUNROLL,2):
+          $for L in range(0,2):
             $for N in range(0,NR,2):
-              vst1_u32(packed_weights + ${N+K*KUNROLL}, v${N}${K}.val[0]);
-          packed_weights += ${NR*KUNROLL//2};
-        }
-        packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
-        w = w${NR-1};
-        n -= ${NR};
-      } while (n >= ${NR});
+              vst1_u32(packed_weights + ${N+L*NR+K*KUNROLL}, v${N}${K}.val[${L}]);
+        packed_weights += ${NR*KUNROLL};
+      }
+
+      // KC remainder
+      for (; k != 0; --k) {
+        $for K in range(0,KUNROLL,2):
+          $for N in range(0,NR,2):
+            $for L in range(0,2):
+              v${N}${K}.val[0] = vld1_lane_u32(w${N+L}, v${N}${K}.val[0], ${L});  w${N+L} += 1;
+        $for K in range(0,KUNROLL,2):
+          $for N in range(0,NR,2):
+            vst1_u32(packed_weights + ${N+K*KUNROLL}, v${N}${K}.val[0]);
+        packed_weights += ${NR*KUNROLL//2};
+      }
+      packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
+      w = w${NR-1};
     }
 
     if XNN_UNLIKELY(n != 0) {

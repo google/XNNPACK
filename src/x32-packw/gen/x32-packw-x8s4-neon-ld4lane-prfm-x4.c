@@ -75,7 +75,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
       const uint32_t* w6 = w5 + kc;
       const uint32_t* w7 = w6 + kc;
 
-      // KC main loop multiple of 8x4
+      // KC main loop multiple of 4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
         uint32x4_t vsrtmp;
@@ -149,7 +149,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
       // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
         switch (k) {
-          // KC remainder of 8x1
+          // KC remainder of 1
           case 1:
           {
             uint32x4_t vtmp0x0123 = vdupq_n_u32(0);
@@ -167,42 +167,42 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
             vsrtmp2x0123 = vsrtmp1x0123;
             vsrtmp1x0123 = vtmp0x0123;
             vtmp0x0123 = vsrtmp;
-            vtmp0x4567 = vld1q_lane_u32(w4, vtmp0x4567, 0); w4 += 1;
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vsrtmp2x4567;
-            vsrtmp2x4567 = vsrtmp1x4567;
-            vsrtmp1x4567 = vtmp0x4567;
-            vtmp0x4567 = vsrtmp;
             vtmp0x0123 = vld1q_lane_u32(w1, vtmp0x0123, 1); w1 += 1;
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vsrtmp2x0123;
             vsrtmp2x0123 = vsrtmp1x0123;
             vsrtmp1x0123 = vtmp0x0123;
             vtmp0x0123 = vsrtmp;
-            vtmp0x4567 = vld1q_lane_u32(w5, vtmp0x4567, 1); w5 += 1;
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vsrtmp2x4567;
-            vsrtmp2x4567 = vsrtmp1x4567;
-            vsrtmp1x4567 = vtmp0x4567;
-            vtmp0x4567 = vsrtmp;
             vtmp0x0123 = vld1q_lane_u32(w2, vtmp0x0123, 2); w2 += 1;
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vsrtmp2x0123;
             vsrtmp2x0123 = vsrtmp1x0123;
             vsrtmp1x0123 = vtmp0x0123;
             vtmp0x0123 = vsrtmp;
-            vtmp0x4567 = vld1q_lane_u32(w6, vtmp0x4567, 2); w6 += 1;
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vsrtmp2x4567;
-            vsrtmp2x4567 = vsrtmp1x4567;
-            vsrtmp1x4567 = vtmp0x4567;
-            vtmp0x4567 = vsrtmp;
             vtmp0x0123 = vld1q_lane_u32(w3, vtmp0x0123, 3); w3 += 1;
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vsrtmp2x0123;
             vsrtmp2x0123 = vsrtmp1x0123;
             vsrtmp1x0123 = vtmp0x0123;
             vtmp0x0123 = vsrtmp;
+            vtmp0x4567 = vld1q_lane_u32(w4, vtmp0x4567, 0); w4 += 1;
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vsrtmp2x4567;
+            vsrtmp2x4567 = vsrtmp1x4567;
+            vsrtmp1x4567 = vtmp0x4567;
+            vtmp0x4567 = vsrtmp;
+            vtmp0x4567 = vld1q_lane_u32(w5, vtmp0x4567, 1); w5 += 1;
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vsrtmp2x4567;
+            vsrtmp2x4567 = vsrtmp1x4567;
+            vsrtmp1x4567 = vtmp0x4567;
+            vtmp0x4567 = vsrtmp;
+            vtmp0x4567 = vld1q_lane_u32(w6, vtmp0x4567, 2); w6 += 1;
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vsrtmp2x4567;
+            vsrtmp2x4567 = vsrtmp1x4567;
+            vsrtmp1x4567 = vtmp0x4567;
+            vtmp0x4567 = vsrtmp;
             vtmp0x4567 = vld1q_lane_u32(w7, vtmp0x4567, 3); w7 += 1;
             vsrtmp = vsrtmp3x4567;
             vsrtmp3x4567 = vsrtmp2x4567;
@@ -219,7 +219,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
             vst1q_u32(packed_weights, vsrtmp3x4567); packed_weights += 4;
             break;
           }
-          // KC remainder of 8x2
+          // KC remainder of 2
           case 2:
           {
             uint32x4x2_t vtmp01x0123;
@@ -239,42 +239,42 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
             vsrtmp2x0123 = vtmp01x0123.val[1];
             vtmp01x0123.val[1] = vtmp01x0123.val[0];
             vtmp01x0123.val[0] = vsrtmp;
-            vtmp01x4567 = vld2q_lane_u32(w4, vtmp01x4567, 0); w4 += 2;
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vsrtmp2x4567;
-            vsrtmp2x4567 = vtmp01x4567.val[1];
-            vtmp01x4567.val[1] = vtmp01x4567.val[0];
-            vtmp01x4567.val[0] = vsrtmp;
             vtmp01x0123 = vld2q_lane_u32(w1, vtmp01x0123, 1); w1 += 2;
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vsrtmp2x0123;
             vsrtmp2x0123 = vtmp01x0123.val[1];
             vtmp01x0123.val[1] = vtmp01x0123.val[0];
             vtmp01x0123.val[0] = vsrtmp;
-            vtmp01x4567 = vld2q_lane_u32(w5, vtmp01x4567, 1); w5 += 2;
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vsrtmp2x4567;
-            vsrtmp2x4567 = vtmp01x4567.val[1];
-            vtmp01x4567.val[1] = vtmp01x4567.val[0];
-            vtmp01x4567.val[0] = vsrtmp;
             vtmp01x0123 = vld2q_lane_u32(w2, vtmp01x0123, 2); w2 += 2;
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vsrtmp2x0123;
             vsrtmp2x0123 = vtmp01x0123.val[1];
             vtmp01x0123.val[1] = vtmp01x0123.val[0];
             vtmp01x0123.val[0] = vsrtmp;
-            vtmp01x4567 = vld2q_lane_u32(w6, vtmp01x4567, 2); w6 += 2;
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vsrtmp2x4567;
-            vsrtmp2x4567 = vtmp01x4567.val[1];
-            vtmp01x4567.val[1] = vtmp01x4567.val[0];
-            vtmp01x4567.val[0] = vsrtmp;
             vtmp01x0123 = vld2q_lane_u32(w3, vtmp01x0123, 3); w3 += 2;
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vsrtmp2x0123;
             vsrtmp2x0123 = vtmp01x0123.val[1];
             vtmp01x0123.val[1] = vtmp01x0123.val[0];
             vtmp01x0123.val[0] = vsrtmp;
+            vtmp01x4567 = vld2q_lane_u32(w4, vtmp01x4567, 0); w4 += 2;
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vsrtmp2x4567;
+            vsrtmp2x4567 = vtmp01x4567.val[1];
+            vtmp01x4567.val[1] = vtmp01x4567.val[0];
+            vtmp01x4567.val[0] = vsrtmp;
+            vtmp01x4567 = vld2q_lane_u32(w5, vtmp01x4567, 1); w5 += 2;
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vsrtmp2x4567;
+            vsrtmp2x4567 = vtmp01x4567.val[1];
+            vtmp01x4567.val[1] = vtmp01x4567.val[0];
+            vtmp01x4567.val[0] = vsrtmp;
+            vtmp01x4567 = vld2q_lane_u32(w6, vtmp01x4567, 2); w6 += 2;
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vsrtmp2x4567;
+            vsrtmp2x4567 = vtmp01x4567.val[1];
+            vtmp01x4567.val[1] = vtmp01x4567.val[0];
+            vtmp01x4567.val[0] = vsrtmp;
             vtmp01x4567 = vld2q_lane_u32(w7, vtmp01x4567, 3); w7 += 2;
             vsrtmp = vsrtmp3x4567;
             vsrtmp3x4567 = vsrtmp2x4567;
@@ -291,7 +291,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
             vst1q_u32(packed_weights, vsrtmp3x4567); packed_weights += 4;
             break;
           }
-          // KC remainder of 8x3
+          // KC remainder of 3
           case 3:
           {
             uint32x4x3_t vtmp012x0123;
@@ -311,42 +311,42 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
             vtmp012x0123.val[2] = vtmp012x0123.val[1];
             vtmp012x0123.val[1] = vtmp012x0123.val[0];
             vtmp012x0123.val[0] = vsrtmp;
-            vtmp012x4567 = vld3q_lane_u32(w4, vtmp012x4567, 0); w4 += 3;
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vtmp012x4567.val[2];
-            vtmp012x4567.val[2] = vtmp012x4567.val[1];
-            vtmp012x4567.val[1] = vtmp012x4567.val[0];
-            vtmp012x4567.val[0] = vsrtmp;
             vtmp012x0123 = vld3q_lane_u32(w1, vtmp012x0123, 1); w1 += 3;
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vtmp012x0123.val[2];
             vtmp012x0123.val[2] = vtmp012x0123.val[1];
             vtmp012x0123.val[1] = vtmp012x0123.val[0];
             vtmp012x0123.val[0] = vsrtmp;
-            vtmp012x4567 = vld3q_lane_u32(w5, vtmp012x4567, 1); w5 += 3;
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vtmp012x4567.val[2];
-            vtmp012x4567.val[2] = vtmp012x4567.val[1];
-            vtmp012x4567.val[1] = vtmp012x4567.val[0];
-            vtmp012x4567.val[0] = vsrtmp;
             vtmp012x0123 = vld3q_lane_u32(w2, vtmp012x0123, 2); w2 += 3;
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vtmp012x0123.val[2];
             vtmp012x0123.val[2] = vtmp012x0123.val[1];
             vtmp012x0123.val[1] = vtmp012x0123.val[0];
             vtmp012x0123.val[0] = vsrtmp;
-            vtmp012x4567 = vld3q_lane_u32(w6, vtmp012x4567, 2); w6 += 3;
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vtmp012x4567.val[2];
-            vtmp012x4567.val[2] = vtmp012x4567.val[1];
-            vtmp012x4567.val[1] = vtmp012x4567.val[0];
-            vtmp012x4567.val[0] = vsrtmp;
             vtmp012x0123 = vld3q_lane_u32(w3, vtmp012x0123, 3); w3 += 3;
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vtmp012x0123.val[2];
             vtmp012x0123.val[2] = vtmp012x0123.val[1];
             vtmp012x0123.val[1] = vtmp012x0123.val[0];
             vtmp012x0123.val[0] = vsrtmp;
+            vtmp012x4567 = vld3q_lane_u32(w4, vtmp012x4567, 0); w4 += 3;
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vtmp012x4567.val[2];
+            vtmp012x4567.val[2] = vtmp012x4567.val[1];
+            vtmp012x4567.val[1] = vtmp012x4567.val[0];
+            vtmp012x4567.val[0] = vsrtmp;
+            vtmp012x4567 = vld3q_lane_u32(w5, vtmp012x4567, 1); w5 += 3;
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vtmp012x4567.val[2];
+            vtmp012x4567.val[2] = vtmp012x4567.val[1];
+            vtmp012x4567.val[1] = vtmp012x4567.val[0];
+            vtmp012x4567.val[0] = vsrtmp;
+            vtmp012x4567 = vld3q_lane_u32(w6, vtmp012x4567, 2); w6 += 3;
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vtmp012x4567.val[2];
+            vtmp012x4567.val[2] = vtmp012x4567.val[1];
+            vtmp012x4567.val[1] = vtmp012x4567.val[0];
+            vtmp012x4567.val[0] = vsrtmp;
             vtmp012x4567 = vld3q_lane_u32(w7, vtmp012x4567, 3); w7 += 3;
             vsrtmp = vsrtmp3x4567;
             vsrtmp3x4567 = vtmp012x4567.val[2];
@@ -413,7 +413,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
         w6 = w5;
       }
 
-      // KC main loop multiple of 8x4
+      // KC main loop multiple of 4
       size_t k = kc;
       for (; k >= 4; k -= 4) {
         uint32x4_t vsrtmp;
@@ -484,8 +484,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
       // KC remainder of 1..3
       // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
+        assert(k >= 1);
+        assert(k <= 3);
         switch (k) {
-          // KC remainder of 8x1
+          // KC remainder of 1
           case 1:
           {
             uint32x4_t vtmp0x0123 = vdupq_n_u32(0);
@@ -503,42 +505,42 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
             vsrtmp2x0123 = vsrtmp1x0123;
             vsrtmp1x0123 = vtmp0x0123;
             vtmp0x0123 = vsrtmp;
-            vtmp0x4567 = vld1q_lane_u32(w4, vtmp0x4567, 0);
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vsrtmp2x4567;
-            vsrtmp2x4567 = vsrtmp1x4567;
-            vsrtmp1x4567 = vtmp0x4567;
-            vtmp0x4567 = vsrtmp;
             vtmp0x0123 = vld1q_lane_u32(w1, vtmp0x0123, 1);
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vsrtmp2x0123;
             vsrtmp2x0123 = vsrtmp1x0123;
             vsrtmp1x0123 = vtmp0x0123;
             vtmp0x0123 = vsrtmp;
-            vtmp0x4567 = vld1q_lane_u32(w5, vtmp0x4567, 1);
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vsrtmp2x4567;
-            vsrtmp2x4567 = vsrtmp1x4567;
-            vsrtmp1x4567 = vtmp0x4567;
-            vtmp0x4567 = vsrtmp;
             vtmp0x0123 = vld1q_lane_u32(w2, vtmp0x0123, 2);
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vsrtmp2x0123;
             vsrtmp2x0123 = vsrtmp1x0123;
             vsrtmp1x0123 = vtmp0x0123;
             vtmp0x0123 = vsrtmp;
-            vtmp0x4567 = vld1q_lane_u32(w6, vtmp0x4567, 2);
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vsrtmp2x4567;
-            vsrtmp2x4567 = vsrtmp1x4567;
-            vsrtmp1x4567 = vtmp0x4567;
-            vtmp0x4567 = vsrtmp;
             vtmp0x0123 = vld1q_lane_u32(w3, vtmp0x0123, 3);
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vsrtmp2x0123;
             vsrtmp2x0123 = vsrtmp1x0123;
             vsrtmp1x0123 = vtmp0x0123;
             vtmp0x0123 = vsrtmp;
+            vtmp0x4567 = vld1q_lane_u32(w4, vtmp0x4567, 0);
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vsrtmp2x4567;
+            vsrtmp2x4567 = vsrtmp1x4567;
+            vsrtmp1x4567 = vtmp0x4567;
+            vtmp0x4567 = vsrtmp;
+            vtmp0x4567 = vld1q_lane_u32(w5, vtmp0x4567, 1);
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vsrtmp2x4567;
+            vsrtmp2x4567 = vsrtmp1x4567;
+            vsrtmp1x4567 = vtmp0x4567;
+            vtmp0x4567 = vsrtmp;
+            vtmp0x4567 = vld1q_lane_u32(w6, vtmp0x4567, 2);
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vsrtmp2x4567;
+            vsrtmp2x4567 = vsrtmp1x4567;
+            vsrtmp1x4567 = vtmp0x4567;
+            vtmp0x4567 = vsrtmp;
             vsrtmp = vsrtmp3x4567;
             vsrtmp3x4567 = vsrtmp2x4567;
             vsrtmp2x4567 = vsrtmp1x4567;
@@ -554,7 +556,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
             vst1q_u32(packed_weights, vsrtmp3x4567); packed_weights += 4;
             break;
           }
-          // KC remainder of 8x2
+          // KC remainder of 2
           case 2:
           {
             uint32x4x2_t vtmp01x0123;
@@ -574,42 +576,42 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
             vsrtmp2x0123 = vtmp01x0123.val[1];
             vtmp01x0123.val[1] = vtmp01x0123.val[0];
             vtmp01x0123.val[0] = vsrtmp;
-            vtmp01x4567 = vld2q_lane_u32(w4, vtmp01x4567, 0);
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vsrtmp2x4567;
-            vsrtmp2x4567 = vtmp01x4567.val[1];
-            vtmp01x4567.val[1] = vtmp01x4567.val[0];
-            vtmp01x4567.val[0] = vsrtmp;
             vtmp01x0123 = vld2q_lane_u32(w1, vtmp01x0123, 1);
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vsrtmp2x0123;
             vsrtmp2x0123 = vtmp01x0123.val[1];
             vtmp01x0123.val[1] = vtmp01x0123.val[0];
             vtmp01x0123.val[0] = vsrtmp;
-            vtmp01x4567 = vld2q_lane_u32(w5, vtmp01x4567, 1);
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vsrtmp2x4567;
-            vsrtmp2x4567 = vtmp01x4567.val[1];
-            vtmp01x4567.val[1] = vtmp01x4567.val[0];
-            vtmp01x4567.val[0] = vsrtmp;
             vtmp01x0123 = vld2q_lane_u32(w2, vtmp01x0123, 2);
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vsrtmp2x0123;
             vsrtmp2x0123 = vtmp01x0123.val[1];
             vtmp01x0123.val[1] = vtmp01x0123.val[0];
             vtmp01x0123.val[0] = vsrtmp;
-            vtmp01x4567 = vld2q_lane_u32(w6, vtmp01x4567, 2);
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vsrtmp2x4567;
-            vsrtmp2x4567 = vtmp01x4567.val[1];
-            vtmp01x4567.val[1] = vtmp01x4567.val[0];
-            vtmp01x4567.val[0] = vsrtmp;
             vtmp01x0123 = vld2q_lane_u32(w3, vtmp01x0123, 3);
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vsrtmp2x0123;
             vsrtmp2x0123 = vtmp01x0123.val[1];
             vtmp01x0123.val[1] = vtmp01x0123.val[0];
             vtmp01x0123.val[0] = vsrtmp;
+            vtmp01x4567 = vld2q_lane_u32(w4, vtmp01x4567, 0);
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vsrtmp2x4567;
+            vsrtmp2x4567 = vtmp01x4567.val[1];
+            vtmp01x4567.val[1] = vtmp01x4567.val[0];
+            vtmp01x4567.val[0] = vsrtmp;
+            vtmp01x4567 = vld2q_lane_u32(w5, vtmp01x4567, 1);
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vsrtmp2x4567;
+            vsrtmp2x4567 = vtmp01x4567.val[1];
+            vtmp01x4567.val[1] = vtmp01x4567.val[0];
+            vtmp01x4567.val[0] = vsrtmp;
+            vtmp01x4567 = vld2q_lane_u32(w6, vtmp01x4567, 2);
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vsrtmp2x4567;
+            vsrtmp2x4567 = vtmp01x4567.val[1];
+            vtmp01x4567.val[1] = vtmp01x4567.val[0];
+            vtmp01x4567.val[0] = vsrtmp;
             vsrtmp = vsrtmp3x4567;
             vsrtmp3x4567 = vsrtmp2x4567;
             vsrtmp2x4567 = vtmp01x4567.val[1];
@@ -625,7 +627,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
             vst1q_u32(packed_weights, vsrtmp3x4567); packed_weights += 4;
             break;
           }
-          // KC remainder of 8x3
+          // KC remainder of 3
           case 3:
           {
             uint32x4x3_t vtmp012x0123;
@@ -645,42 +647,42 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
             vtmp012x0123.val[2] = vtmp012x0123.val[1];
             vtmp012x0123.val[1] = vtmp012x0123.val[0];
             vtmp012x0123.val[0] = vsrtmp;
-            vtmp012x4567 = vld3q_lane_u32(w4, vtmp012x4567, 0);
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vtmp012x4567.val[2];
-            vtmp012x4567.val[2] = vtmp012x4567.val[1];
-            vtmp012x4567.val[1] = vtmp012x4567.val[0];
-            vtmp012x4567.val[0] = vsrtmp;
             vtmp012x0123 = vld3q_lane_u32(w1, vtmp012x0123, 1);
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vtmp012x0123.val[2];
             vtmp012x0123.val[2] = vtmp012x0123.val[1];
             vtmp012x0123.val[1] = vtmp012x0123.val[0];
             vtmp012x0123.val[0] = vsrtmp;
-            vtmp012x4567 = vld3q_lane_u32(w5, vtmp012x4567, 1);
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vtmp012x4567.val[2];
-            vtmp012x4567.val[2] = vtmp012x4567.val[1];
-            vtmp012x4567.val[1] = vtmp012x4567.val[0];
-            vtmp012x4567.val[0] = vsrtmp;
             vtmp012x0123 = vld3q_lane_u32(w2, vtmp012x0123, 2);
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vtmp012x0123.val[2];
             vtmp012x0123.val[2] = vtmp012x0123.val[1];
             vtmp012x0123.val[1] = vtmp012x0123.val[0];
             vtmp012x0123.val[0] = vsrtmp;
-            vtmp012x4567 = vld3q_lane_u32(w6, vtmp012x4567, 2);
-            vsrtmp = vsrtmp3x4567;
-            vsrtmp3x4567 = vtmp012x4567.val[2];
-            vtmp012x4567.val[2] = vtmp012x4567.val[1];
-            vtmp012x4567.val[1] = vtmp012x4567.val[0];
-            vtmp012x4567.val[0] = vsrtmp;
             vtmp012x0123 = vld3q_lane_u32(w3, vtmp012x0123, 3);
             vsrtmp = vsrtmp3x0123;
             vsrtmp3x0123 = vtmp012x0123.val[2];
             vtmp012x0123.val[2] = vtmp012x0123.val[1];
             vtmp012x0123.val[1] = vtmp012x0123.val[0];
             vtmp012x0123.val[0] = vsrtmp;
+            vtmp012x4567 = vld3q_lane_u32(w4, vtmp012x4567, 0);
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vtmp012x4567.val[2];
+            vtmp012x4567.val[2] = vtmp012x4567.val[1];
+            vtmp012x4567.val[1] = vtmp012x4567.val[0];
+            vtmp012x4567.val[0] = vsrtmp;
+            vtmp012x4567 = vld3q_lane_u32(w5, vtmp012x4567, 1);
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vtmp012x4567.val[2];
+            vtmp012x4567.val[2] = vtmp012x4567.val[1];
+            vtmp012x4567.val[1] = vtmp012x4567.val[0];
+            vtmp012x4567.val[0] = vsrtmp;
+            vtmp012x4567 = vld3q_lane_u32(w6, vtmp012x4567, 2);
+            vsrtmp = vsrtmp3x4567;
+            vsrtmp3x4567 = vtmp012x4567.val[2];
+            vtmp012x4567.val[2] = vtmp012x4567.val[1];
+            vtmp012x4567.val[1] = vtmp012x4567.val[0];
+            vtmp012x4567.val[0] = vsrtmp;
             vsrtmp = vsrtmp3x4567;
             vsrtmp3x4567 = vtmp012x4567.val[2];
             vtmp012x4567.val[2] = vtmp012x4567.val[1];

@@ -67,14 +67,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
       $for N in range(1, NR):
         const uint32_t* w${N} = w${N-1} + kc;
 
-      // KC main loop multiple of ${NR}x${KUNROLL}
+      // KC main loop multiple of ${KUNROLL}
       size_t k = kc;
       for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
         $if SR == 4:
           uint32x4_t vsrtmp;
-        $for N in range(0, NR, 4):
-          $for L in range(4):
-            $for K in range(0, KUNROLL, 4):
+        $for K in range(0, KUNROLL, 4):
+          $for N in range(0, NR, 4):
+            $for L in range(4):
               vtmp${ABC[K:K+4]}x${ABC[N:N+4]} = vld4q_lane_u32(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}, ${L}); w${N+L} += 4;
               $if SR == 4:
                 vsrtmp = vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[3];
@@ -94,72 +94,61 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
       // KC remainder of 1..${KUNROLL-1}
       // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
-        $if KUNROLL == 4:
-          switch (k) {
-            $for K in range(1, 4):
-              // KC remainder of ${NR}x${K}
-              case ${K}:
-              {
-                $if K == 1:
-                  $for N in range(0, NR, 4):
-                    uint32x4_t vtmp${ABC[0:K]}x${ABC[N:N+4]} = vdupq_n_u32(0);
-                $else:
-                  $for N in range(0, NR, 4):
-                    uint32x4x${K}_t vtmp${ABC[0:K]}x${ABC[N:N+4]};
-                    $for L in range(0, K):
-                      vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}] = vdupq_n_u32(0);
-                $if SR == 4:
-                  uint32x4_t vsrtmp;
-                  $for N in range(0, NR, 4):
-                    $for L in range(K, 4):
-                      uint32x4_t vsrtmp${ABC[L]}x${ABC[N:N+4]} = vdupq_n_u32(0);
-                $for L in range(4):
-                  $for N in range(0, NR, 4):
-                    vtmp${ABC[0:K]}x${ABC[N:N+4]} = vld${K}q_lane_u32(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+4]}, ${L}); w${N+L} += ${K};
-                    $if SR == 4:
-                      $if K == 3:
-                        vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
-                        vsrtmp${ABC[3]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[2];
-                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[2] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1];
-                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0];
-                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0] = vsrtmp;
-                      $if K == 2:
-                        vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
-                        vsrtmp${ABC[3]}x${ABC[N:N+4]} = vsrtmp${ABC[2]}x${ABC[N:N+4]};
-                        vsrtmp${ABC[2]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1];
-                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0];
-                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0] = vsrtmp;
-                      $if K == 1:
-                        vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
-                        vsrtmp${ABC[3]}x${ABC[N:N+4]} = vsrtmp${ABC[2]}x${ABC[N:N+4]};
-                        vsrtmp${ABC[2]}x${ABC[N:N+4]} = vsrtmp${ABC[1]}x${ABC[N:N+4]};
-                        vsrtmp${ABC[1]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]};
-                        vtmp${ABC[0:K]}x${ABC[N:N+4]} = vsrtmp;
-                $for L in range(K):
-                  $for N in range(0, NR, 4):
-                    $if K == 1:
-                      vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}); packed_weights += 4;
-                    $else:
-                      vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
-                $if SR == 4:
+        switch (k) {
+          $for K in range(1, 4):
+            // KC remainder of ${K}
+            case ${K}:
+            {
+              $if K == 1:
+                $for N in range(0, NR, 4):
+                  uint32x4_t vtmp${ABC[0:K]}x${ABC[N:N+4]} = vdupq_n_u32(0);
+              $else:
+                $for N in range(0, NR, 4):
+                  uint32x4x${K}_t vtmp${ABC[0:K]}x${ABC[N:N+4]};
+                  $for L in range(0, K):
+                    vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}] = vdupq_n_u32(0);
+              $if SR == 4:
+                uint32x4_t vsrtmp;
+                $for N in range(0, NR, 4):
                   $for L in range(K, 4):
-                    $for N in range(0, NR, 4):
-                      vst1q_u32(packed_weights, vsrtmp${ABC[L]}x${ABC[N:N+4]}); packed_weights += 4;
-                break;
-              }
-            default:
-              XNN_UNREACHABLE;
-          }
-        $else:
-          do {
-            $for L in range(4):
+                    uint32x4_t vsrtmp${ABC[L]}x${ABC[N:N+4]} = vdupq_n_u32(0);
               $for N in range(0, NR, 4):
-                $for K in range(0, KUNROLL, 4):
-                  vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0] = vld1q_lane_u32(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0], ${L}); w${N+L} += 4;
-            $for K in range(0, KUNROLL, 4):
-              $for N in range(0, NR, 4):
-                vst1q_u32(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0]); packed_weights += 4;
-          } while (--k != 0);
+                $for L in range(4):
+                  vtmp${ABC[0:K]}x${ABC[N:N+4]} = vld${K}q_lane_u32(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+4]}, ${L}); w${N+L} += ${K};
+                  $if SR == 4:
+                    $if K == 3:
+                      vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
+                      vsrtmp${ABC[3]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[2];
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[2] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1];
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0];
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0] = vsrtmp;
+                    $if K == 2:
+                      vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
+                      vsrtmp${ABC[3]}x${ABC[N:N+4]} = vsrtmp${ABC[2]}x${ABC[N:N+4]};
+                      vsrtmp${ABC[2]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1];
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0];
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0] = vsrtmp;
+                    $if K == 1:
+                      vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
+                      vsrtmp${ABC[3]}x${ABC[N:N+4]} = vsrtmp${ABC[2]}x${ABC[N:N+4]};
+                      vsrtmp${ABC[2]}x${ABC[N:N+4]} = vsrtmp${ABC[1]}x${ABC[N:N+4]};
+                      vsrtmp${ABC[1]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]};
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]} = vsrtmp;
+              $for L in range(K):
+                $for N in range(0, NR, 4):
+                  $if K == 1:
+                    vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}); packed_weights += 4;
+                  $else:
+                    vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
+              $if SR == 4:
+                $for L in range(K, 4):
+                  $for N in range(0, NR, 4):
+                    vst1q_u32(packed_weights, vsrtmp${ABC[L]}x${ABC[N:N+4]}); packed_weights += 4;
+              break;
+            }
+          default:
+            XNN_UNREACHABLE;
+        }
       }
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
       w0 = w${NR-1};
@@ -193,14 +182,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
             w${N} = w${N-1};
           }
 
-      // KC main loop multiple of ${NR}x${KUNROLL}
+      // KC main loop multiple of ${KUNROLL}
       size_t k = kc;
       for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
         $if SR == 4:
           uint32x4_t vsrtmp;
-        $for N in range(0, NR, 4):
-          $for L in range(4):
-            $for K in range(0, KUNROLL, 4):
+        $for K in range(0, KUNROLL, 4):
+          $for N in range(0, NR, 4):
+            $for L in range(4):
               $if N+L != NR-1:
                 vtmp${ABC[K:K+4]}x${ABC[N:N+4]} = vld4q_lane_u32(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}, ${L}); w${N+L} += 4;
               $if SR == 4:
@@ -221,74 +210,64 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
       // KC remainder of 1..${KUNROLL-1}
       // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
-        $if KUNROLL == 4:
-          switch (k) {
-            $for K in range(1, 4):
-              // KC remainder of ${NR}x${K}
-              case ${K}:
-              {
-                $if K == 1:
-                  $for N in range(0, NR, 4):
-                    uint32x4_t vtmp${ABC[0:K]}x${ABC[N:N+4]} = vdupq_n_u32(0);
-                $else:
-                  $for N in range(0, NR, 4):
-                    uint32x4x${K}_t vtmp${ABC[0:K]}x${ABC[N:N+4]};
-                    $for L in range(0, K):
-                      vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}] = vdupq_n_u32(0);
-                $if SR == 4:
-                  uint32x4_t vsrtmp;
-                  $for N in range(0, NR, 4):
-                    $for L in range(K, 4):
-                      uint32x4_t vsrtmp${ABC[L]}x${ABC[N:N+4]} = vdupq_n_u32(0);
-                $for L in range(4):
-                  $for N in range(0, NR, 4):
-                    $if N+L != NR-1:
-                      vtmp${ABC[0:K]}x${ABC[N:N+4]} = vld${K}q_lane_u32(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+4]}, ${L});
-                    $if SR == 4:
-                      $if K == 3:
-                        vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
-                        vsrtmp${ABC[3]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[2];
-                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[2] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1];
-                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0];
-                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0] = vsrtmp;
-                      $if K == 2:
-                        vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
-                        vsrtmp${ABC[3]}x${ABC[N:N+4]} = vsrtmp${ABC[2]}x${ABC[N:N+4]};
-                        vsrtmp${ABC[2]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1];
-                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0];
-                        vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0] = vsrtmp;
-                      $if K == 1:
-                        vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
-                        vsrtmp${ABC[3]}x${ABC[N:N+4]} = vsrtmp${ABC[2]}x${ABC[N:N+4]};
-                        vsrtmp${ABC[2]}x${ABC[N:N+4]} = vsrtmp${ABC[1]}x${ABC[N:N+4]};
-                        vsrtmp${ABC[1]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]};
-                        vtmp${ABC[0:K]}x${ABC[N:N+4]} = vsrtmp;
-                $for L in range(K):
-                  $for N in range(0, NR, 4):
-                    $if K == 1:
-                      vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}); packed_weights += 4;
-                    $else:
-                      vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
-                $if SR == 4:
+        assert(k >= 1);
+        assert(k <= 3);
+        switch (k) {
+          $for K in range(1, 4):
+            // KC remainder of ${K}
+            case ${K}:
+            {
+              $if K == 1:
+                $for N in range(0, NR, 4):
+                  uint32x4_t vtmp${ABC[0:K]}x${ABC[N:N+4]} = vdupq_n_u32(0);
+              $else:
+                $for N in range(0, NR, 4):
+                  uint32x4x${K}_t vtmp${ABC[0:K]}x${ABC[N:N+4]};
+                  $for L in range(0, K):
+                    vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}] = vdupq_n_u32(0);
+              $if SR == 4:
+                uint32x4_t vsrtmp;
+                $for N in range(0, NR, 4):
                   $for L in range(K, 4):
-                    $for N in range(0, NR, 4):
-                      vst1q_u32(packed_weights, vsrtmp${ABC[L]}x${ABC[N:N+4]}); packed_weights += 4;
-                break;
-              }
-            default:
-              XNN_UNREACHABLE;
-          }
-        $else:
-          do {
-            $for N in range(0, NR, 4):
-              $for L in range(4):
-                $if N+L != NR-1:
-                  $for K in range(0, KUNROLL, 4):
-                    vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0] = vld1q_lane_u32(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0], ${L}); w${N+L} += 4;
-            $for K in range(0, KUNROLL, 4):
+                    uint32x4_t vsrtmp${ABC[L]}x${ABC[N:N+4]} = vdupq_n_u32(0);
               $for N in range(0, NR, 4):
-                vst1q_u32(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[0]); packed_weights += 4;
-          } while (--k != 0);
+                $for L in range(4):
+                  $if N+L != NR-1:
+                    vtmp${ABC[0:K]}x${ABC[N:N+4]} = vld${K}q_lane_u32(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+4]}, ${L});
+                  $if SR == 4:
+                    $if K == 3:
+                      vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
+                      vsrtmp${ABC[3]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[2];
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[2] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1];
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0];
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0] = vsrtmp;
+                    $if K == 2:
+                      vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
+                      vsrtmp${ABC[3]}x${ABC[N:N+4]} = vsrtmp${ABC[2]}x${ABC[N:N+4]};
+                      vsrtmp${ABC[2]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1];
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[1] = vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0];
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[0] = vsrtmp;
+                    $if K == 1:
+                      vsrtmp = vsrtmp${ABC[3]}x${ABC[N:N+4]};
+                      vsrtmp${ABC[3]}x${ABC[N:N+4]} = vsrtmp${ABC[2]}x${ABC[N:N+4]};
+                      vsrtmp${ABC[2]}x${ABC[N:N+4]} = vsrtmp${ABC[1]}x${ABC[N:N+4]};
+                      vsrtmp${ABC[1]}x${ABC[N:N+4]} = vtmp${ABC[0:K]}x${ABC[N:N+4]};
+                      vtmp${ABC[0:K]}x${ABC[N:N+4]} = vsrtmp;
+              $for L in range(K):
+                $for N in range(0, NR, 4):
+                  $if K == 1:
+                    vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}); packed_weights += 4;
+                  $else:
+                    vst1q_u32(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
+              $if SR == 4:
+                $for L in range(K, 4):
+                  $for N in range(0, NR, 4):
+                    vst1q_u32(packed_weights, vsrtmp${ABC[L]}x${ABC[N:N+4]}); packed_weights += 4;
+              break;
+            }
+          default:
+            XNN_UNREACHABLE;
+        }
       }
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
     }
