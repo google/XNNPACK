@@ -41,12 +41,10 @@ static void OddAlbertBgemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({12, 384,  61, 384});  // odd N values
   b->Args({12, 384,  62, 384});
   b->Args({12, 384,  63, 384});
-  b->Args({12, 384,  64, 384});
   b->Args({12, 384,  65, 384});
   b->Args({12, 384, 381,  64});
   b->Args({12, 384, 382,  64});
   b->Args({12, 384, 383,  64});
-  b->Args({12, 384, 384,  64});
   b->Args({12, 384, 385,  64});
 }
 

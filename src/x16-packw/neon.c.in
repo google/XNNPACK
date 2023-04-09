@@ -107,24 +107,24 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
             case ${K}:
             {
               $if K == 1:
-                $for N in range(0, NR, 4):
-                  uint16x4_t vtmp${ABC[0:K]}x${ABC[N:N+4]} = vdup_n_u16(0);
+                $for N in range(0, NR, 8):
+                  uint16x8_t vtmp${ABC[0:K]}x${ABC[N:N+8]} = vdupq_n_u16(0);
               $else:
-                $for N in range(0, NR, 4):
-                  uint16x4x${K}_t vtmp${ABC[0:K]}x${ABC[N:N+4]};
+                $for N in range(0, NR, 8):
+                  uint16x8x${K}_t vtmp${ABC[0:K]}x${ABC[N:N+8]};
                   $for L in range(0, K):
-                    vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}] = vdup_n_u16(0);
+                    vtmp${ABC[0:K]}x${ABC[N:N+8]}.val[${L}] = vdupq_n_u16(0);
 
-              $for N in range(0, NR, 4):
-                $for L in range(4):
-                  vtmp${ABC[0:K]}x${ABC[N:N+4]} = vld${K}_lane_u16(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+4]}, ${L}); w${N+L} += ${K};
+              $for N in range(0, NR, 8):
+                $for L in range(8):
+                  vtmp${ABC[0:K]}x${ABC[N:N+8]} = vld${K}q_lane_u16(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+8]}, ${L}); w${N+L} += ${K};
 
               $for L in range(K):
-                $for N in range(0, NR, 4):
+                $for N in range(0, NR, 8):
                   $if K == 1:
-                    vst1_u16(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}); packed_weights += 4;
+                    vst1q_u16(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+8]}); packed_weights += 8;
                   $else:
-                    vst1_u16(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
+                    vst1q_u16(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+8]}.val[${L}]); packed_weights += 8;
               break;
             }
           default:
@@ -204,25 +204,25 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
             case ${K}:
             {
               $if K == 1:
-                $for N in range(0, NR, 4):
-                  uint16x4_t vtmp${ABC[0:K]}x${ABC[N:N+4]} = vdup_n_u16(0);
+                $for N in range(0, NR, 8):
+                  uint16x8_t vtmp${ABC[0:K]}x${ABC[N:N+8]} = vdupq_n_u16(0);
               $else:
-                $for N in range(0, NR, 4):
-                  uint16x4x${K}_t vtmp${ABC[0:K]}x${ABC[N:N+4]};
+                $for N in range(0, NR, 8):
+                  uint16x8x${K}_t vtmp${ABC[0:K]}x${ABC[N:N+8]};
                   $for L in range(0, K):
-                    vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}] = vdup_n_u16(0);
+                    vtmp${ABC[0:K]}x${ABC[N:N+8]}.val[${L}] = vdupq_n_u16(0);
 
-              $for N in range(0, NR, 4):
-                $for L in range(4):
+              $for N in range(0, NR, 8):
+                $for L in range(8):
                   $if N+L != NR-1:
-                    vtmp${ABC[0:K]}x${ABC[N:N+4]} = vld${K}_lane_u16(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+4]}, ${L}); w${N+L} += ${K};
+                    vtmp${ABC[0:K]}x${ABC[N:N+8]} = vld${K}q_lane_u16(w${N+L}, vtmp${ABC[0:K]}x${ABC[N:N+8]}, ${L}); w${N+L} += ${K};
 
               $for L in range(K):
-                $for N in range(0, NR, 4):
+                $for N in range(0, NR, 8):
                   $if K == 1:
-                    vst1_u16(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}); packed_weights += 4;
+                    vst1q_u16(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+8]}); packed_weights += 8;
                   $else:
-                    vst1_u16(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
+                    vst1q_u16(packed_weights, vtmp${ABC[0:K]}x${ABC[N:N+8]}.val[${L}]); packed_weights += 8;
               break;
             }
           default:

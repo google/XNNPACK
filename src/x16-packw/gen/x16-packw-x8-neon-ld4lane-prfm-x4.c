@@ -102,74 +102,60 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
           // KC remainder of 8x1
           case 1:
           {
-            uint16x4_t vtmp0x0123 = vdup_n_u16(0);
-            uint16x4_t vtmp0x4567 = vdup_n_u16(0);
+            uint16x8_t vtmp0x01234567 = vdupq_n_u16(0);
 
-            vtmp0x0123 = vld1_lane_u16(w0, vtmp0x0123, 0); w0 += 1;
-            vtmp0x0123 = vld1_lane_u16(w1, vtmp0x0123, 1); w1 += 1;
-            vtmp0x0123 = vld1_lane_u16(w2, vtmp0x0123, 2); w2 += 1;
-            vtmp0x0123 = vld1_lane_u16(w3, vtmp0x0123, 3); w3 += 1;
-            vtmp0x4567 = vld1_lane_u16(w4, vtmp0x4567, 0); w4 += 1;
-            vtmp0x4567 = vld1_lane_u16(w5, vtmp0x4567, 1); w5 += 1;
-            vtmp0x4567 = vld1_lane_u16(w6, vtmp0x4567, 2); w6 += 1;
-            vtmp0x4567 = vld1_lane_u16(w7, vtmp0x4567, 3); w7 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w0, vtmp0x01234567, 0); w0 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w1, vtmp0x01234567, 1); w1 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w2, vtmp0x01234567, 2); w2 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w3, vtmp0x01234567, 3); w3 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w4, vtmp0x01234567, 4); w4 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w5, vtmp0x01234567, 5); w5 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w6, vtmp0x01234567, 6); w6 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w7, vtmp0x01234567, 7); w7 += 1;
 
-            vst1_u16(packed_weights, vtmp0x0123); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp0x4567); packed_weights += 4;
+            vst1q_u16(packed_weights, vtmp0x01234567); packed_weights += 8;
             break;
           }
           // KC remainder of 8x2
           case 2:
           {
-            uint16x4x2_t vtmp01x0123;
-            vtmp01x0123.val[0] = vdup_n_u16(0);
-            vtmp01x0123.val[1] = vdup_n_u16(0);
-            uint16x4x2_t vtmp01x4567;
-            vtmp01x4567.val[0] = vdup_n_u16(0);
-            vtmp01x4567.val[1] = vdup_n_u16(0);
+            uint16x8x2_t vtmp01x01234567;
+            vtmp01x01234567.val[0] = vdupq_n_u16(0);
+            vtmp01x01234567.val[1] = vdupq_n_u16(0);
 
-            vtmp01x0123 = vld2_lane_u16(w0, vtmp01x0123, 0); w0 += 2;
-            vtmp01x0123 = vld2_lane_u16(w1, vtmp01x0123, 1); w1 += 2;
-            vtmp01x0123 = vld2_lane_u16(w2, vtmp01x0123, 2); w2 += 2;
-            vtmp01x0123 = vld2_lane_u16(w3, vtmp01x0123, 3); w3 += 2;
-            vtmp01x4567 = vld2_lane_u16(w4, vtmp01x4567, 0); w4 += 2;
-            vtmp01x4567 = vld2_lane_u16(w5, vtmp01x4567, 1); w5 += 2;
-            vtmp01x4567 = vld2_lane_u16(w6, vtmp01x4567, 2); w6 += 2;
-            vtmp01x4567 = vld2_lane_u16(w7, vtmp01x4567, 3); w7 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w0, vtmp01x01234567, 0); w0 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w1, vtmp01x01234567, 1); w1 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w2, vtmp01x01234567, 2); w2 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w3, vtmp01x01234567, 3); w3 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w4, vtmp01x01234567, 4); w4 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w5, vtmp01x01234567, 5); w5 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w6, vtmp01x01234567, 6); w6 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w7, vtmp01x01234567, 7); w7 += 2;
 
-            vst1_u16(packed_weights, vtmp01x0123.val[0]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp01x4567.val[0]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp01x0123.val[1]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp01x4567.val[1]); packed_weights += 4;
+            vst1q_u16(packed_weights, vtmp01x01234567.val[0]); packed_weights += 8;
+            vst1q_u16(packed_weights, vtmp01x01234567.val[1]); packed_weights += 8;
             break;
           }
           // KC remainder of 8x3
           case 3:
           {
-            uint16x4x3_t vtmp012x0123;
-            vtmp012x0123.val[0] = vdup_n_u16(0);
-            vtmp012x0123.val[1] = vdup_n_u16(0);
-            vtmp012x0123.val[2] = vdup_n_u16(0);
-            uint16x4x3_t vtmp012x4567;
-            vtmp012x4567.val[0] = vdup_n_u16(0);
-            vtmp012x4567.val[1] = vdup_n_u16(0);
-            vtmp012x4567.val[2] = vdup_n_u16(0);
+            uint16x8x3_t vtmp012x01234567;
+            vtmp012x01234567.val[0] = vdupq_n_u16(0);
+            vtmp012x01234567.val[1] = vdupq_n_u16(0);
+            vtmp012x01234567.val[2] = vdupq_n_u16(0);
 
-            vtmp012x0123 = vld3_lane_u16(w0, vtmp012x0123, 0); w0 += 3;
-            vtmp012x0123 = vld3_lane_u16(w1, vtmp012x0123, 1); w1 += 3;
-            vtmp012x0123 = vld3_lane_u16(w2, vtmp012x0123, 2); w2 += 3;
-            vtmp012x0123 = vld3_lane_u16(w3, vtmp012x0123, 3); w3 += 3;
-            vtmp012x4567 = vld3_lane_u16(w4, vtmp012x4567, 0); w4 += 3;
-            vtmp012x4567 = vld3_lane_u16(w5, vtmp012x4567, 1); w5 += 3;
-            vtmp012x4567 = vld3_lane_u16(w6, vtmp012x4567, 2); w6 += 3;
-            vtmp012x4567 = vld3_lane_u16(w7, vtmp012x4567, 3); w7 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w0, vtmp012x01234567, 0); w0 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w1, vtmp012x01234567, 1); w1 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w2, vtmp012x01234567, 2); w2 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w3, vtmp012x01234567, 3); w3 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w4, vtmp012x01234567, 4); w4 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w5, vtmp012x01234567, 5); w5 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w6, vtmp012x01234567, 6); w6 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w7, vtmp012x01234567, 7); w7 += 3;
 
-            vst1_u16(packed_weights, vtmp012x0123.val[0]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp012x4567.val[0]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp012x0123.val[1]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp012x4567.val[1]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp012x0123.val[2]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp012x4567.val[2]); packed_weights += 4;
+            vst1q_u16(packed_weights, vtmp012x01234567.val[0]); packed_weights += 8;
+            vst1q_u16(packed_weights, vtmp012x01234567.val[1]); packed_weights += 8;
+            vst1q_u16(packed_weights, vtmp012x01234567.val[2]); packed_weights += 8;
             break;
           }
           default:
@@ -254,71 +240,57 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
           // KC remainder of 8x1
           case 1:
           {
-            uint16x4_t vtmp0x0123 = vdup_n_u16(0);
-            uint16x4_t vtmp0x4567 = vdup_n_u16(0);
+            uint16x8_t vtmp0x01234567 = vdupq_n_u16(0);
 
-            vtmp0x0123 = vld1_lane_u16(w0, vtmp0x0123, 0); w0 += 1;
-            vtmp0x0123 = vld1_lane_u16(w1, vtmp0x0123, 1); w1 += 1;
-            vtmp0x0123 = vld1_lane_u16(w2, vtmp0x0123, 2); w2 += 1;
-            vtmp0x0123 = vld1_lane_u16(w3, vtmp0x0123, 3); w3 += 1;
-            vtmp0x4567 = vld1_lane_u16(w4, vtmp0x4567, 0); w4 += 1;
-            vtmp0x4567 = vld1_lane_u16(w5, vtmp0x4567, 1); w5 += 1;
-            vtmp0x4567 = vld1_lane_u16(w6, vtmp0x4567, 2); w6 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w0, vtmp0x01234567, 0); w0 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w1, vtmp0x01234567, 1); w1 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w2, vtmp0x01234567, 2); w2 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w3, vtmp0x01234567, 3); w3 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w4, vtmp0x01234567, 4); w4 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w5, vtmp0x01234567, 5); w5 += 1;
+            vtmp0x01234567 = vld1q_lane_u16(w6, vtmp0x01234567, 6); w6 += 1;
 
-            vst1_u16(packed_weights, vtmp0x0123); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp0x4567); packed_weights += 4;
+            vst1q_u16(packed_weights, vtmp0x01234567); packed_weights += 8;
             break;
           }
           // KC remainder of 8x2
           case 2:
           {
-            uint16x4x2_t vtmp01x0123;
-            vtmp01x0123.val[0] = vdup_n_u16(0);
-            vtmp01x0123.val[1] = vdup_n_u16(0);
-            uint16x4x2_t vtmp01x4567;
-            vtmp01x4567.val[0] = vdup_n_u16(0);
-            vtmp01x4567.val[1] = vdup_n_u16(0);
+            uint16x8x2_t vtmp01x01234567;
+            vtmp01x01234567.val[0] = vdupq_n_u16(0);
+            vtmp01x01234567.val[1] = vdupq_n_u16(0);
 
-            vtmp01x0123 = vld2_lane_u16(w0, vtmp01x0123, 0); w0 += 2;
-            vtmp01x0123 = vld2_lane_u16(w1, vtmp01x0123, 1); w1 += 2;
-            vtmp01x0123 = vld2_lane_u16(w2, vtmp01x0123, 2); w2 += 2;
-            vtmp01x0123 = vld2_lane_u16(w3, vtmp01x0123, 3); w3 += 2;
-            vtmp01x4567 = vld2_lane_u16(w4, vtmp01x4567, 0); w4 += 2;
-            vtmp01x4567 = vld2_lane_u16(w5, vtmp01x4567, 1); w5 += 2;
-            vtmp01x4567 = vld2_lane_u16(w6, vtmp01x4567, 2); w6 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w0, vtmp01x01234567, 0); w0 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w1, vtmp01x01234567, 1); w1 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w2, vtmp01x01234567, 2); w2 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w3, vtmp01x01234567, 3); w3 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w4, vtmp01x01234567, 4); w4 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w5, vtmp01x01234567, 5); w5 += 2;
+            vtmp01x01234567 = vld2q_lane_u16(w6, vtmp01x01234567, 6); w6 += 2;
 
-            vst1_u16(packed_weights, vtmp01x0123.val[0]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp01x4567.val[0]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp01x0123.val[1]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp01x4567.val[1]); packed_weights += 4;
+            vst1q_u16(packed_weights, vtmp01x01234567.val[0]); packed_weights += 8;
+            vst1q_u16(packed_weights, vtmp01x01234567.val[1]); packed_weights += 8;
             break;
           }
           // KC remainder of 8x3
           case 3:
           {
-            uint16x4x3_t vtmp012x0123;
-            vtmp012x0123.val[0] = vdup_n_u16(0);
-            vtmp012x0123.val[1] = vdup_n_u16(0);
-            vtmp012x0123.val[2] = vdup_n_u16(0);
-            uint16x4x3_t vtmp012x4567;
-            vtmp012x4567.val[0] = vdup_n_u16(0);
-            vtmp012x4567.val[1] = vdup_n_u16(0);
-            vtmp012x4567.val[2] = vdup_n_u16(0);
+            uint16x8x3_t vtmp012x01234567;
+            vtmp012x01234567.val[0] = vdupq_n_u16(0);
+            vtmp012x01234567.val[1] = vdupq_n_u16(0);
+            vtmp012x01234567.val[2] = vdupq_n_u16(0);
 
-            vtmp012x0123 = vld3_lane_u16(w0, vtmp012x0123, 0); w0 += 3;
-            vtmp012x0123 = vld3_lane_u16(w1, vtmp012x0123, 1); w1 += 3;
-            vtmp012x0123 = vld3_lane_u16(w2, vtmp012x0123, 2); w2 += 3;
-            vtmp012x0123 = vld3_lane_u16(w3, vtmp012x0123, 3); w3 += 3;
-            vtmp012x4567 = vld3_lane_u16(w4, vtmp012x4567, 0); w4 += 3;
-            vtmp012x4567 = vld3_lane_u16(w5, vtmp012x4567, 1); w5 += 3;
-            vtmp012x4567 = vld3_lane_u16(w6, vtmp012x4567, 2); w6 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w0, vtmp012x01234567, 0); w0 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w1, vtmp012x01234567, 1); w1 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w2, vtmp012x01234567, 2); w2 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w3, vtmp012x01234567, 3); w3 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w4, vtmp012x01234567, 4); w4 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w5, vtmp012x01234567, 5); w5 += 3;
+            vtmp012x01234567 = vld3q_lane_u16(w6, vtmp012x01234567, 6); w6 += 3;
 
-            vst1_u16(packed_weights, vtmp012x0123.val[0]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp012x4567.val[0]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp012x0123.val[1]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp012x4567.val[1]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp012x0123.val[2]); packed_weights += 4;
-            vst1_u16(packed_weights, vtmp012x4567.val[2]); packed_weights += 4;
+            vst1q_u16(packed_weights, vtmp012x01234567.val[0]); packed_weights += 8;
+            vst1q_u16(packed_weights, vtmp012x01234567.val[1]); packed_weights += 8;
+            vst1q_u16(packed_weights, vtmp012x01234567.val[2]); packed_weights += 8;
             break;
           }
           default:
