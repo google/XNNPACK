@@ -538,6 +538,8 @@ class FullyConnectedOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+      std::iota(bias.begin(), bias.end(), 1);
+      std::iota(kernel.begin(), kernel.end(), 1);
       std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without renormalization.

@@ -116,6 +116,10 @@ static enum xnn_status create_vmulcaddc_path(
   if (use_weights_cache(convolution_op)) {
     convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
         convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
+    if (convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
+      status = xnn_status_out_of_memory;
+      goto error;
+    }
   }
 
   memcpy(&convolution_op->params, vmulcaddc_params, vmulcaddc_params_size);
@@ -246,6 +250,10 @@ static enum xnn_status create_dwconv_path(
   if (use_weights_cache(convolution_op)) {
     convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
         convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
+    if (convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
+      status = xnn_status_out_of_memory;
+      goto error;
+    }
   }
 
   const union xnn_dwconv_ukernel* ukernels = &dwconv_ukernel->minmax;
@@ -415,6 +423,10 @@ static enum xnn_status create_gemm_or_igemm(
   if (use_weights_cache(convolution_op)) {
     convolution_op->packed_weights.offset = xnn_get_or_insert_weights_cache(
         convolution_op->weights_cache, weights_ptr, aligned_total_weights_size);
+    if (convolution_op->packed_weights.offset == XNN_CACHE_NOT_FOUND) {
+      status = xnn_status_out_of_memory;
+      goto error;
+    }
   }
 
   *zero_size = XNN_EXTRA_BYTES + (k_stride << log2_input_element_size);

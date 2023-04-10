@@ -211,6 +211,7 @@ static bool lookup(struct xnn_cache* cache, void* ptr, size_t size, uint32_t has
 static bool insert(struct xnn_cache* cache, void* ptr, size_t size)
 {
   const uint32_t hash = murmur_hash3(ptr, size, /*seed=*/XNN_CACHE_HASH_SEED);
+  xnn_log_error("inserting hash %x ptr %p size %zu", hash, ptr, size);
   size_t idx;
   const bool found = lookup(cache, ptr, size, hash, &idx);
   if (found) {
@@ -254,11 +255,17 @@ static bool insert(struct xnn_cache* cache, void* ptr, size_t size)
 static size_t lookup_cache(struct xnn_cache* cache, void* ptr, size_t size)
 {
   const uint32_t hash = murmur_hash3(ptr, size, /*seed=*/XNN_CACHE_HASH_SEED);
+  for (size_t i = 0; i < size / sizeof(uint32_t); i++) {
+    xnn_log_error("lookup_cache ptr (%p) [%zu/%zu] (uint32_t) = %x", ptr, i, size / sizeof(uint32_t), *((uint32_t*)ptr + i));
+  }
+  xnn_log_error("lookup hash %x ptr %p size %zu", hash, ptr, size);
   size_t bucket_idx;
   if (lookup(cache, ptr, size, hash, &bucket_idx)) {
+    xnn_log_error("look up cache hit");
     cache->hits++;
     return cache->buckets[bucket_idx].offset;
   } else {
+    xnn_log_error("look up cache miss");
     cache->misses++;
     return XNN_CACHE_NOT_FOUND;
   }
@@ -268,6 +275,7 @@ size_t xnn_get_or_insert_cache(struct xnn_cache* cache, void* ptr, size_t size)
 {
   const size_t found_offset = lookup_cache(cache, ptr, size);
   if (found_offset != XNN_CACHE_NOT_FOUND) {
+    xnn_log_error("get or insert cache found");
     if (cache->type == xnn_cache_type_code) {
       // Found in the cache, rewind the buffer because code generators update buffer size.
       cache->code.size -= size;
@@ -276,12 +284,14 @@ size_t xnn_get_or_insert_cache(struct xnn_cache* cache, void* ptr, size_t size)
   }
 
   if (cache->type == xnn_cache_type_weights) {
+    xnn_log_error("weights cache miss (not found, increment size)");
     // Cache miss, weights packing functions don't update buffer size, update it here.
     cache->weights.size += size;
   }
 
   const size_t offset = (uintptr_t) ptr - (uintptr_t) cache_start(cache);
   if (!insert(cache, ptr, size)) {
+    xnn_log_error("fail to insert into cache in get_or_insert_cache, return XNN_CACHE_NOT_FOUND");
     return XNN_CACHE_NOT_FOUND;
   }
   return offset;
@@ -459,6 +469,9 @@ size_t xnn_get_or_insert_weights_cache(struct xnn_weights_cache* cache, void* pt
 
       // We need to release the mutex from this point onwards, because xnn_reserve_space_in_weights would have returned
       // non-NULL (which means that it locked the mutex).
+      for (size_t i = 0; i < size / sizeof(uint32_t); i++) {
+        xnn_log_error("get_or_insert_weights_cache ptr (%p) [%zu/%zu] (uint32_t) = %x", ptr, i, size / sizeof(uint32_t), *((uint32_t*)ptr + i));
+      }
       const size_t found_offset = lookup_cache(&cache->cache, ptr, size);
       if (found_offset == XNN_CACHE_NOT_FOUND) {
         xnn_log_error("packed weights not found in finalized weights cache");

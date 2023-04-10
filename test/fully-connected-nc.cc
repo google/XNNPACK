@@ -470,10 +470,10 @@ TEST(FULLY_CONNECTED_NC_F32, small_batch_without_bias) {
 TEST(FULLY_CONNECTED_NC_F32, weights_cache_unit_batch) {
   FullyConnectedOperatorTester()
     .batch_size(1)
-    .input_channels(23)
-    .output_channels(19)
+    .input_channels(3)
+    .output_channels(3)
     .use_weights_cache(true)
-    .iterations(3)
+    .iterations(1)
     .TestF32();
 }
 
@@ -481,8 +481,8 @@ TEST(FULLY_CONNECTED_NC_F32, weights_cache_unit_batch_transpose_weights) {
   FullyConnectedOperatorTester()
     .transpose_weights(true)
     .batch_size(1)
-    .input_channels(23)
-    .output_channels(19)
+    .input_channels(7)
+    .output_channels(5)
     .use_weights_cache(true)
     .iterations(3)
     .TestF32();

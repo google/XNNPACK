@@ -1126,7 +1126,7 @@ IF(XNNPACK_BUILD_TESTS)
 
     ADD_EXECUTABLE(dynamic-fully-connected-nc-test test/dynamic-fully-connected-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(dynamic-fully-connected-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(dynamic-fully-connected-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    TARGET_LINK_LIBRARIES(dynamic-fully-connected-nc-test PRIVATE XNNPACK fp16 gtest gtest_main logging)
     ADD_TEST(NAME dynamic-fully-connected-nc-test COMMAND dynamic-fully-connected-nc-test)
 
     ADD_EXECUTABLE(elu-nc-test test/elu-nc.cc)
