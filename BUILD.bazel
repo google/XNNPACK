@@ -1476,7 +1476,7 @@ PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-vunary/gen/f32-vabs-avx512f-x16.c",
     "src/f32-vunary/gen/f32-vneg-avx512f-x16.c",
     "src/f32-vunary/gen/f32-vsqr-avx512f-x16.c",
-    "src/x32-packw/gen/x32-packw-x16-avx512f-x4.c",
+    "src/x32-packw/gen/x32-packw-x16-avx512f-prfm-x4.c",
 ]
 
 PROD_AVX512SKX_MICROKERNEL_SRCS = [

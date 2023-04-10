@@ -16,6 +16,7 @@
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/packw.h>
+#include <xnnpack/prefetch.h>
 #include <xnnpack/prelu.h>
 #include <xnnpack/vbinary.h>
 #include <xnnpack/vunary.h>
@@ -3642,7 +3643,7 @@ void xnn_f32_vsqr_ukernel__avx512f_x16(
   }
 }
 
-void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_x4(
+void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_prfm_x4(
   size_t g,
   size_t nc,
   size_t kc,
@@ -3746,6 +3747,22 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_x4(
         const __m512 vtmp1x0123 = _mm512_unpacklo_ps(v2x0123, v3x0123);  // i m j n   from row 2, 3
         const __m512 vtmp2x0123 = _mm512_unpackhi_ps(v0x0123, v1x0123);  // c g d h   from row 0, 1
         const __m512 vtmp3x0123 = _mm512_unpackhi_ps(v2x0123, v3x0123);  // k o l p   from row 2, 3
+        xnn_prefetch_to_l1((const int8_t*) w0 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w1 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w2 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w3 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w4 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w5 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w6 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w7 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w8 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w9 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w10 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w11 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w12 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w13 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w14 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w15 + 128);
          // Transpose 4x4
         v0x0123 = _mm512_castpd_ps(_mm512_unpacklo_pd(_mm512_castps_pd(vtmp0x0123), _mm512_castps_pd(vtmp1x0123)));  // a e i m   from row 0, 1
         v1x0123 = _mm512_castpd_ps(_mm512_unpackhi_pd(_mm512_castps_pd(vtmp0x0123), _mm512_castps_pd(vtmp1x0123)));  // b f j n   from row 0, 1
@@ -4029,6 +4046,21 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_x4(
         const __m512 vtmp1x0123 = _mm512_unpacklo_ps(v2x0123, v3x0123);  // i m j n   from row 2, 3
         const __m512 vtmp2x0123 = _mm512_unpackhi_ps(v0x0123, v1x0123);  // c g d h   from row 0, 1
         const __m512 vtmp3x0123 = _mm512_unpackhi_ps(v2x0123, v3x0123);  // k o l p   from row 2, 3
+        xnn_prefetch_to_l1((const int8_t*) w0 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w1 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w2 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w3 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w4 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w5 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w6 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w7 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w8 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w9 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w10 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w11 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w12 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w13 + 128);
+        xnn_prefetch_to_l1((const int8_t*) w14 + 128);
         // Transpose 4x4
         v0x0123 = _mm512_castpd_ps(_mm512_unpacklo_pd(_mm512_castps_pd(vtmp0x0123), _mm512_castps_pd(vtmp1x0123)));  // a e i m   from row 0, 1
         v1x0123 = _mm512_castpd_ps(_mm512_unpackhi_pd(_mm512_castps_pd(vtmp0x0123), _mm512_castps_pd(vtmp1x0123)));  // b f j n   from row 0, 1
