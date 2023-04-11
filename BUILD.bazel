@@ -7241,6 +7241,18 @@ xnnpack_benchmark(
     deps = ACCURACY_EVAL_DEPS,
 )
 
+############################### Other benchmarks ###############################
+
+xnnpack_benchmark(
+    name = "jit_bench",
+    srcs = ["bench/jit.cc"],
+    deps = OPERATOR_BENCHMARK_DEPS + [
+        ":memory",
+        ":microkernels_h",
+        ":microparams",
+    ],
+)
+
 ################### Accuracy verification for math functions ##################
 
 xnnpack_cc_library(

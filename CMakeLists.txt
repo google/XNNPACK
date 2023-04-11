@@ -3804,4 +3804,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(x64-transpose-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(x64-transpose-bench PRIVATE benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(x64-transpose-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
+  # ---[ Other microbenchmarks
+  ADD_EXECUTABLE(jit-bench bench/jit.cc)
+  TARGET_INCLUDE_DIRECTORIES(jit-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(jit-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(jit-bench PRIVATE jit memory microkernels-all)
 ENDIF()
