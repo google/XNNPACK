@@ -26,7 +26,7 @@ template <typename T> class BinaryTest : public ::testing::Test {
 protected:
   BinaryTest()
   {
-    random_device = std::unique_ptr<std::random_device>(new std::random_device());
+    random_device = std::make_unique<std::random_device>();
     rng = std::mt19937((*random_device)());
     shape_dist = std::uniform_int_distribution<size_t>(0, XNN_MAX_TENSOR_DIMS);
     dim_dist = std::uniform_int_distribution<size_t>(1, 9);

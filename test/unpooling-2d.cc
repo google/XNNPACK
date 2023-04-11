@@ -25,7 +25,7 @@ template <class T, class BiasType = T> class Unpooling2DTestBase : public ::test
 protected:
   Unpooling2DTestBase()
   {
-    random_device = std::unique_ptr<std::random_device>(new std::random_device());
+    random_device = std::make_unique<std::random_device>();
     rng = std::mt19937((*random_device)());
     input_size_dist = std::uniform_int_distribution<uint32_t>(10, 15);
     kernel_size_dist = std::uniform_int_distribution<uint32_t>(1, 5);
