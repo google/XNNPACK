@@ -519,7 +519,7 @@ TEST_F(DepthwiseConvolutionTestQC8, matches_operator_api)
     /*group_output_channels=*/depth_multiplier, input_channels, input_channels * depth_multiplier, input_zero_point,
     input_scale, requantization_scales.data(), filter.data(), bias.data(), output_zero_point, output_scale,
     quantized_output_min, quantized_output_max,
-    /*flags=*/XNN_FLAG_DEPTHWISE_CONVOLUTION, nullptr, nullptr, &op);
+    /*flags=*/XNN_FLAG_DEPTHWISE_CONVOLUTION, nullptr, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -649,7 +649,7 @@ TEST_F(DepthwiseConvolutionTestQS8, matches_operator_api)
     /*group_output_channels=*/depth_multiplier, input_channels, input_channels * depth_multiplier, input_zero_point,
     input_scale, kernel_scale, filter.data(), bias.data(), output_zero_point, output_scale, quantized_output_min,
     quantized_output_max,
-    /*flags=*/XNN_FLAG_DEPTHWISE_CONVOLUTION, nullptr, nullptr, &op);
+    /*flags=*/XNN_FLAG_DEPTHWISE_CONVOLUTION, nullptr, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -781,7 +781,7 @@ TEST_F(DepthwiseConvolutionTestQU8, matches_operator_api)
     /*group_output_channels=*/depth_multiplier, input_channels, input_channels * depth_multiplier, input_zero_point,
     input_scale, kernel_zero_point, kernel_scale, filter.data(), bias.data(), output_zero_point, output_scale,
     quantized_output_min, quantized_output_max,
-    /*flags=*/XNN_FLAG_DEPTHWISE_CONVOLUTION, nullptr, nullptr, &op);
+    /*flags=*/XNN_FLAG_DEPTHWISE_CONVOLUTION, nullptr, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -871,7 +871,7 @@ TEST_F(DepthwiseConvolutionTestF32, matches_operator_api)
     /*groups=*/input_channels, /*group_input_channels=*/1,
     /*group_output_channels=*/depth_multiplier, input_channels, input_channels * depth_multiplier, filter.data(),
     bias.data(), output_min, output_max,
-    /*flags=*/XNN_FLAG_DEPTHWISE_CONVOLUTION, nullptr, nullptr, &op);
+    /*flags=*/XNN_FLAG_DEPTHWISE_CONVOLUTION, nullptr, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {

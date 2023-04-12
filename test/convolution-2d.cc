@@ -491,7 +491,7 @@ TEST_F(ConvolutionTestQC8, matches_operator_api)
     subsampling_height, subsampling_width, dilation_height, dilation_width, groups, group_input_channels,
     group_output_channels, groups * group_input_channels, groups * group_output_channels, input_zero_point, input_scale,
     requantization_scales.data(), filter.data(), bias.data(), output_zero_point, output_scale, quantized_output_min,
-    quantized_output_max, /*flags=*/0, nullptr, nullptr, &op);
+    quantized_output_max, /*flags=*/0, nullptr, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -620,7 +620,7 @@ TEST_F(ConvolutionTestQS8, matches_operator_api)
     subsampling_height, subsampling_width, dilation_height, dilation_width, groups, group_input_channels,
     group_output_channels, groups * group_input_channels, groups * group_output_channels, input_zero_point, input_scale,
     kernel_scale, filter.data(), bias.data(), output_zero_point, output_scale, quantized_output_min,
-    quantized_output_max, /*flags=*/0, nullptr, nullptr, &op);
+    quantized_output_max, /*flags=*/0, nullptr, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -752,7 +752,7 @@ TEST_F(ConvolutionTestQU8, matches_operator_api)
     subsampling_height, subsampling_width, dilation_height, dilation_width, groups, group_input_channels,
     group_output_channels, groups * group_input_channels, groups * group_output_channels, input_zero_point, input_scale,
     kernel_zero_point, kernel_scale, filter.data(), bias.data(), output_zero_point, output_scale, quantized_output_min,
-    quantized_output_max, /*flags=*/0, nullptr, nullptr, &op);
+    quantized_output_max, /*flags=*/0, nullptr, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -839,7 +839,7 @@ TEST_F(ConvolutionTestF32, matches_operator_api)
     subsampling_height, subsampling_width, dilation_height, dilation_width, groups, group_input_channels,
     group_output_channels, groups * group_input_channels, groups * group_output_channels, filter.data(), bias.data(),
     output_min, output_max,
-    /*flags=*/0, nullptr, nullptr, &op);
+    /*flags=*/0, nullptr, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {

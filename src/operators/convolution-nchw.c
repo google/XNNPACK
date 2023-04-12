@@ -278,8 +278,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
-    xnn_weights_cache_t weights_cache,
+    xnn_caches_t caches,
     xnn_operator_t* convolution_op_out)
 {
   xnn_operator_t convolution_op = NULL;
@@ -476,8 +475,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f16(
     goto error;
   }
 
-  if (ukernel_type != xnn_microkernel_type_spmm) {
-    convolution_op->weights_cache = weights_cache;
+  if (caches != NULL && ukernel_type != xnn_microkernel_type_spmm) {
+    convolution_op->weights_cache = caches->weights_cache;
   }
 
   switch (ukernel_type) {
@@ -621,8 +620,7 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
-    xnn_weights_cache_t weights_cache,
+    xnn_caches_t caches,
     xnn_operator_t* convolution_op_out)
 {
   xnn_operator_t convolution_op = NULL;
@@ -801,8 +799,8 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     goto error;
   }
 
-  if (ukernel_type != xnn_microkernel_type_spmm) {
-    convolution_op->weights_cache = weights_cache;
+  if (caches != NULL && ukernel_type != xnn_microkernel_type_spmm) {
+    convolution_op->weights_cache = caches->weights_cache;
   }
 
   const struct xnn_spmm_config* spmm_config = xnn_init_f32_spmm_config();

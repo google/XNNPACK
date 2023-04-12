@@ -21,8 +21,7 @@ static enum xnn_status create_prelu_operator(
   const struct xnn_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
-  struct xnn_weights_cache* weights_cache)
+  const struct xnn_caches* caches)
 {
   assert(node->num_inputs == 2);
   const uint32_t input_id = node->inputs[0];
@@ -50,8 +49,7 @@ static enum xnn_status create_prelu_operator(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         slope_data /* negative slope */,
         node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS,
-        code_cache,
-        weights_cache,
+        caches,
         &opdata->operator_objects[0]);
       break;
     case xnn_compute_type_fp32:
@@ -59,8 +57,7 @@ static enum xnn_status create_prelu_operator(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
         slope_data /* negative slope */,
         node->flags,
-        code_cache,
-        weights_cache,
+        caches,
         &opdata->operator_objects[0]);
       break;
     default:

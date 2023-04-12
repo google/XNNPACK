@@ -64,8 +64,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
     const struct xnn_gemm_config* gemm_config,
     const struct gemm_fused_ukernels* gemm_ukernels,
     enum xnn_operator_type operator_type,
-    xnn_code_cache_t code_cache,
-    xnn_weights_cache_t weights_cache,
+    xnn_caches_t caches,
     xnn_operator_t* deconvolution_op_out)
 {
   xnn_operator_t deconvolution_op = NULL;
@@ -151,8 +150,10 @@ static enum xnn_status create_deconvolution2d_nhwc(
     goto error;
   }
 
-  deconvolution_op->code_cache = code_cache;
-  deconvolution_op->weights_cache = weights_cache;
+  if (caches != NULL) {
+    deconvolution_op->code_cache = caches->code_cache;
+    deconvolution_op->weights_cache = caches->weights_cache;
+  }
 
   const uint32_t mr = gemm_config->mr;
   const uint32_t nr = gemm_config->nr;
@@ -322,8 +323,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
     int8_t output_min,
     int8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
-    xnn_weights_cache_t weights_cache,
+    xnn_caches_t caches,
     xnn_operator_t* deconvolution_op_out)
 {
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
@@ -393,8 +393,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
     /*jit_gemm_params=*/NULL,
     gemm_config, &gemm_config->minmax,
     xnn_operator_type_deconvolution_nhwc_qs8,
-    /*code_cache=*/code_cache,
-    /*weights_cache=*/weights_cache,
+    caches,
     deconvolution_op_out);
 }
 
@@ -425,8 +424,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
     uint8_t output_min,
     uint8_t output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
-    xnn_weights_cache_t weights_cache,
+    xnn_caches_t caches,
     xnn_operator_t* deconvolution_op_out)
 {
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
@@ -497,8 +495,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
     /*jit_gemm_params=*/NULL,
     gemm_config, &gemm_config->minmax,
     xnn_operator_type_deconvolution_nhwc_qu8,
-    /*code_cache=*/code_cache,
-    /*weights_cache=*/weights_cache,
+    caches,
     deconvolution_op_out);
 }
 
@@ -523,8 +520,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f16(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
-    xnn_weights_cache_t weights_cache,
+    xnn_caches_t caches,
     xnn_operator_t* deconvolution_op_out)
 {
   if (isnan(output_min)) {
@@ -602,8 +598,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f16(
     /*jit_gemm_params=*/&jit_gemm_params,
     gemm_config, gemm_ukernels,
     xnn_operator_type_deconvolution_nhwc_f16,
-    /*code_cache=*/code_cache,
-    /*weights_cache=*/weights_cache,
+    caches,
     deconvolution_op_out);
 }
 
@@ -628,8 +623,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_code_cache_t code_cache,
-    xnn_weights_cache_t weights_cache,
+    xnn_caches_t caches,
     xnn_operator_t* deconvolution_op_out)
 {
   if (isnan(output_min)) {
@@ -710,8 +704,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     /*jit_gemm_params=*/&jit_gemm_params,
     gemm_config, gemm_ukernels,
     xnn_operator_type_deconvolution_nhwc_f32,
-    /*code_cache=*/code_cache,
-    /*weights_cache=*/weights_cache,
+    caches,
     deconvolution_op_out);
 }
 

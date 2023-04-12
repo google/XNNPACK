@@ -383,7 +383,7 @@ TEST_F(FullyConnectedTestQS8, matches_operator_api)
   const xnn_status status = xnn_create_fully_connected_nc_qs8(
     input_channels, output_channels, input_channels, output_channels, input_zero_point, input_scale, kernel_scale,
     kernel.data(), bias.data(), output_zero_point, output_scale, quantized_output_min, quantized_output_max,
-    /*flags=*/0, nullptr, nullptr, &op);
+    /*flags=*/0, nullptr, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -493,7 +493,7 @@ TEST_F(FullyConnectedTestQU8, matches_operator_api)
   const xnn_status status = xnn_create_fully_connected_nc_qu8(
     input_channels, output_channels, input_channels, output_channels, input_zero_point, input_scale, kernel_zero_point,
     kernel_scale, kernel.data(), bias.data(), output_zero_point, output_scale, quantized_output_min,
-    quantized_output_max, /*flags=*/0, nullptr, nullptr, &op);
+    quantized_output_max, /*flags=*/0, nullptr, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -574,7 +574,7 @@ TEST_F(FullyConnectedTestF32, matches_operator_api)
   const xnn_status status = xnn_create_fully_connected_nc_f32(
     input_channels, output_channels, input_channels, output_channels, kernel.data(), bias.data(), output_min,
     output_max,
-    /*flags=*/0, nullptr, nullptr, &op);
+    /*flags=*/0, nullptr, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {

@@ -39,8 +39,7 @@ static enum xnn_status create_concatenate2_operator(
   const struct xnn_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
-  struct xnn_weights_cache* weights_cache)
+  const struct xnn_caches* caches)
 {
   assert(node->num_inputs == 2);
   const uint32_t input1_id = node->inputs[0];
@@ -90,8 +89,7 @@ static enum xnn_status create_concatenate3_operator(
   const struct xnn_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
-  struct xnn_weights_cache* weights_cache)
+  const struct xnn_caches* caches)
 {
   assert(node->num_inputs == 3);
   const uint32_t input1_id = node->inputs[0];
@@ -150,8 +148,7 @@ static enum xnn_status create_concatenate4_operator(
   const struct xnn_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
-  struct xnn_weights_cache* weights_cache)
+  const struct xnn_caches* caches)
 {
   assert(node->num_inputs == 4);
   const uint32_t input1_id = node->inputs[0];

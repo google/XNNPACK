@@ -22,8 +22,7 @@ static enum xnn_status create_fully_connected_operator(
   const struct xnn_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
-  struct xnn_weights_cache* weights_cache)
+  const struct xnn_caches* caches)
 {
   assert(node->num_inputs >= 2);
   assert(node->num_inputs <= 3);
@@ -77,8 +76,7 @@ static enum xnn_status create_fully_connected_operator(
         node->activation.output_min,
         node->activation.output_max,
         node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS,
-        code_cache,
-        weights_cache,
+        caches,
         &opdata->operator_objects[0]);
       break;
     case xnn_compute_type_fp32:
@@ -99,8 +97,7 @@ static enum xnn_status create_fully_connected_operator(
           node->activation.output_min,
           node->activation.output_max,
           node->flags /* flags */,
-          code_cache,
-          weights_cache,
+          caches,
           &opdata->operator_objects[0]);
       }
       break;
@@ -125,8 +122,7 @@ static enum xnn_status create_fully_connected_operator(
         (int8_t) output_zero_point,
         output_scale, output_min, output_max,
         node->flags /* flags */,
-        code_cache,
-        weights_cache,
+        caches,
         &opdata->operator_objects[0]);
       break;
     }
@@ -152,8 +148,7 @@ static enum xnn_status create_fully_connected_operator(
         (uint8_t) output_zero_point,
         output_scale, output_min, output_max,
         node->flags /* flags */,
-        code_cache,
-        weights_cache,
+        caches,
         &opdata->operator_objects[0]);
       break;
     }
