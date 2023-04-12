@@ -244,14 +244,12 @@ class FullyConnectedOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t fully_connected_op = nullptr;
 
-      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       const xnn_status status = xnn_create_fully_connected_nc_qs8(
@@ -262,7 +260,7 @@ class FullyConnectedOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
-          &caches,
+          nullptr, auto_weights_cache.get(),
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -304,7 +302,7 @@ class FullyConnectedOperatorTester {
                       output_scale, int8_t(qmin() - 0x80),
                       int8_t(qmax() - 0x80),
                       transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
-                      &caches, &fully_connected_op2));
+                      nullptr, auto_weights_cache.get(), &fully_connected_op2));
         ASSERT_NE(nullptr, fully_connected_op2);
 
         // Smart pointer to automatically delete fully_connected_op.
@@ -424,14 +422,12 @@ class FullyConnectedOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t fully_connected_op = nullptr;
 
-      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       const xnn_status status = xnn_create_fully_connected_nc_qu8(
@@ -442,7 +438,7 @@ class FullyConnectedOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, qmin(), qmax(),
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
-          &caches,
+          nullptr, auto_weights_cache.get(),
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -482,7 +478,7 @@ class FullyConnectedOperatorTester {
                       has_bias() ? bias.data() : nullptr, output_zero_point,
                       output_scale, qmin(), qmax(),
                       transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
-                      &caches, &fully_connected_op2));
+                      nullptr, auto_weights_cache.get(), &fully_connected_op2));
         ASSERT_NE(nullptr, fully_connected_op2);
 
         // Smart pointer to automatically delete fully_connected_op.
@@ -592,12 +588,13 @@ class FullyConnectedOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t fully_connected_op = nullptr;
 
-      xnn_caches caches = {};
+      std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_code_cache(
+          nullptr, xnn_release_code_cache);
       #if XNN_PLATFORM_JIT
         xnn_code_cache code_cache;
         if (use_jit()) {
           xnn_init_code_cache(&code_cache);
-          caches.code_cache = &code_cache;
+          auto_code_cache.reset(&code_cache);
         }
       #endif
       xnn_weights_cache weights_cache;
@@ -606,7 +603,6 @@ class FullyConnectedOperatorTester {
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       const xnn_status status = xnn_create_fully_connected_nc_f32(
@@ -615,7 +611,7 @@ class FullyConnectedOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
-          &caches,
+          auto_code_cache.get(), auto_weights_cache.get(),
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -652,11 +648,13 @@ class FullyConnectedOperatorTester {
 
       if (use_weights_cache()) {
         // We already finalized the code cache, so create a new code cache if we are testing JIT.
+        std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_inner_code_cache(
+            nullptr, xnn_release_code_cache);
         #if XNN_PLATFORM_JIT
           xnn_code_cache inner_code_cache;
           if (use_jit()) {
             xnn_init_code_cache(&inner_code_cache);
-            caches.code_cache = &inner_code_cache;
+            auto_inner_code_cache.reset(&inner_code_cache);
           }
         #endif
         // Create another operator with the same weights cache.
@@ -669,7 +667,8 @@ class FullyConnectedOperatorTester {
                       has_bias() ? bias.data() : nullptr, output_min,
                       output_max,
                       transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
-                      &caches, &fully_connected_op2));
+                      auto_inner_code_cache.get(), auto_weights_cache.get(),
+                      &fully_connected_op2));
         ASSERT_NE(nullptr, fully_connected_op2);
 
         #if XNN_PLATFORM_JIT
@@ -695,18 +694,7 @@ class FullyConnectedOperatorTester {
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
 
         VerifyF32(output, output_ref, output_max, output_min);
-        #if XNN_PLATFORM_JIT
-          if (use_jit()) {
-            xnn_release_code_cache(&inner_code_cache);
-          }
-        #endif
       }
-
-      #if XNN_PLATFORM_JIT
-        if (use_jit()) {
-          xnn_release_code_cache(&code_cache);
-        }
-      #endif
     }
   }
 
@@ -808,14 +796,12 @@ class FullyConnectedOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t fully_connected_op = nullptr;
 
-      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       const void* kernel_data = kernel.data();
@@ -837,7 +823,7 @@ class FullyConnectedOperatorTester {
           kernel_data, has_bias() ? bias_data : nullptr,
           output_min, output_max,
           flags,
-          &caches,
+          nullptr, auto_weights_cache.get(),
           &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -873,7 +859,7 @@ class FullyConnectedOperatorTester {
                       input_channels(), output_channels(), input_stride(),
                       output_stride(), kernel_data,
                       has_bias() ? bias_data : nullptr, output_min, output_max,
-                      flags, &caches, &fully_connected_op2));
+                      flags, nullptr, auto_weights_cache.get(), &fully_connected_op2));
         if (status == xnn_status_unsupported_hardware) {
           GTEST_SKIP();
         }

@@ -111,11 +111,6 @@ void* xnn_reserve_space_in_weights_cache(struct xnn_weights_cache* cache, size_t
 size_t xnn_get_or_insert_weights_cache(struct xnn_weights_cache* cache, void* ptr, size_t size);
 bool xnn_weights_cache_is_finalized(struct xnn_weights_cache* cache);
 
-struct xnn_caches {
-  struct xnn_code_cache *code_cache;
-  struct xnn_weights_cache *weights_cache;
-};
-
 #ifdef __cplusplus
 } // extern "C"
 #endif

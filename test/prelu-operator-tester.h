@@ -144,14 +144,12 @@ class PReLUOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t prelu_op = nullptr;
 
-      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       const void* negative_slope_data = w.data();
@@ -166,7 +164,7 @@ class PReLUOperatorTester {
         xnn_create_prelu_nc_f16(
           channels(), x_stride(), y_stride(),
           negative_slope_data,
-          flags, &caches, &prelu_op));
+          flags, /*code_cache=*/nullptr, auto_weights_cache.get(), &prelu_op));
       ASSERT_NE(nullptr, prelu_op);
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
@@ -196,7 +194,7 @@ class PReLUOperatorTester {
                   xnn_create_prelu_nc_f16(
                       channels(), x_stride(), y_stride(),
                       negative_slope_data,
-                      flags, &caches, &prelu_op2));
+                      flags, /*code_cache=*/nullptr, auto_weights_cache.get(), &prelu_op2));
         ASSERT_NE(nullptr, prelu_op2);
 
         // Smart pointer to automatically delete prelu_op2.
@@ -259,21 +257,19 @@ class PReLUOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t prelu_op = nullptr;
 
-      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_prelu_nc_f32(
           channels(), x_stride(), y_stride(),
           w.data(),
-          0, &caches, &prelu_op));
+          0, /*code_cache=*/nullptr, auto_weights_cache.get(), &prelu_op));
       ASSERT_NE(nullptr, prelu_op);
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
@@ -303,7 +299,7 @@ class PReLUOperatorTester {
                   xnn_create_prelu_nc_f32(
                       channels(), x_stride(), y_stride(),
                       w.data(),
-                      0, &caches, &prelu_op2));
+                      0, /*code_cache=*/nullptr, auto_weights_cache.get(), &prelu_op2));
         ASSERT_NE(nullptr, prelu_op2);
 
         // Smart pointer to automatically delete prelu_op2.

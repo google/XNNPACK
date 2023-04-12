@@ -473,7 +473,8 @@ static enum xnn_status create_convolution2d_nhwc(
     enum xnn_operator_type operator_type,
     size_t num_post_operations,
     void* post_operation_params,
-    xnn_caches_t caches,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
   xnn_operator_t convolution_op = NULL;
@@ -580,10 +581,8 @@ static enum xnn_status create_convolution2d_nhwc(
     goto error;
   }
 
-  if (caches != NULL) {
-    convolution_op->weights_cache = caches->weights_cache;
-    convolution_op->code_cache = caches->code_cache;
-  }
+  convolution_op->weights_cache = weights_cache;
+  convolution_op->code_cache = code_cache;
 
   const size_t kernel_size = kernel_height * kernel_width;
 
@@ -738,7 +737,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     uint8_t output_min,
     uint8_t output_max,
     uint32_t flags,
-    xnn_caches_t caches,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
@@ -842,7 +842,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qu8(
     /*operator_type=*/xnn_operator_type_convolution_nhwc_qu8,
     /*num_post_operations=*/0,
     /*post_operation_params=*/NULL,
-    /*caches=*/caches,
+    /*code_cache=*/code_cache,
+    /*weights_cache=*/weights_cache,
     convolution_op_out);
 }
 
@@ -872,7 +873,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     int8_t output_min,
     int8_t output_max,
     uint32_t flags,
-    xnn_caches_t caches,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
@@ -973,7 +975,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     /*operator_type=*/xnn_operator_type_convolution_nhwc_qs8,
     /*num_post_operations=*/0,
     /*post_operation_params=*/NULL,
-    /*caches=*/caches,
+    /*code_cache=*/code_cache,
+    /*weights_cache=*/weights_cache,
     convolution_op_out);
 }
 
@@ -1003,7 +1006,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     int8_t output_min,
     int8_t output_max,
     uint32_t flags,
-    xnn_caches_t caches,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
   if (input_scale <= 0.0f || !isnormal(input_scale)) {
@@ -1112,7 +1116,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     /*operator_type=*/xnn_operator_type_convolution_nhwc_qc8,
     /*num_post_operations=*/0,
     /*post_operation_params=*/NULL,
-    /*caches=*/caches,
+    /*code_cache=*/code_cache,
+    /*weights_cache=*/weights_cache,
     convolution_op_out);
 }
 
@@ -1137,7 +1142,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_caches_t caches,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
   if (isnan(output_min)) {
@@ -1263,7 +1269,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     /*operator_type=*/xnn_operator_type_convolution_nhwc_f16,
     /*num_post_operations=*/0,
     /*post_operation_params=*/NULL,
-    /*caches=*/caches,
+    /*code_cache=*/code_cache,
+    /*weights_cache=*/weights_cache,
     convolution_op_out);
 }
 
@@ -1288,7 +1295,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     float output_min,
     float output_max,
     uint32_t flags,
-    xnn_caches_t caches,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
   if (isnan(output_min)) {
@@ -1413,7 +1421,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
     /*operator_type=*/xnn_operator_type_convolution_nhwc_f32,
     /*num_post_operations=*/0,
     /*post_operation_params=*/NULL,
-    /*caches=*/caches,
+    /*code_cache=*/code_cache,
+    /*weights_cache=*/weights_cache,
     convolution_op_out);
 }
 
@@ -1438,10 +1447,11 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     size_t num_post_operations,
     struct xnn_post_operation* post_operations,
     uint32_t flags,
-    xnn_caches_t caches,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
-  if (caches != NULL && caches->code_cache == NULL) {
+  if (code_cache == NULL) {
     xnn_log_error(
       "failed to create %s operator: convolution with post operations available only if JIT is enabled",
       xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
@@ -1539,7 +1549,8 @@ enum xnn_status xnn_create_fused_convolution2d_nhwc_f32(
     /*operator_type=*/xnn_operator_type_convolution_nhwc_f32,
     /*num_post_operations=*/num_post_operations,
     /*post_operation_params=*/post_operation_params,
-    /*caches=*/caches,
+    /*code_cache=*/code_cache,
+    /*weights_cache=*/weights_cache,
     convolution_op_out);
 }
 

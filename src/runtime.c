@@ -389,10 +389,6 @@ enum xnn_status xnn_create_runtime_v4(
       #endif
     }
   #endif
-  const struct xnn_caches caches = {
-    .code_cache = code_cache,
-    .weights_cache = weights_cache,
-  };
 
   struct xnn_value* values = subgraph->values;
   for (size_t i = 0; i < subgraph->num_nodes; i++) {
@@ -401,7 +397,7 @@ enum xnn_status xnn_create_runtime_v4(
     // Ignore fused nodes
     if (node->type != xnn_node_type_invalid) {
       assert(node->create != NULL);
-      status = node->create(node, values, subgraph->num_values, runtime->opdata + i, &caches);
+      status = node->create(node, values, subgraph->num_values, runtime->opdata + i, code_cache, weights_cache);
       if (status != xnn_status_success) {
         goto error;
       }

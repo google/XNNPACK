@@ -92,7 +92,7 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
       127, 0.5f,
       kernel.data(), bias.data(),
       127, 0.5f, 0, 255,
-      0 /* flags */, nullptr, &convolution_op);
+      0 /* flags */, nullptr, nullptr, &convolution_op);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to create QUINT8 Convolution operator");
       return;
@@ -210,7 +210,7 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
       127, 0.5f, 0.5f,
       kernel.data(), bias.data(),
       127, 0.5f, -128, 127,
-      0 /* flags */, nullptr, &convolution_op);
+      0 /* flags */, nullptr, nullptr, &convolution_op);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to create QINT8 Convolution operator");
       return;
@@ -326,7 +326,7 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
       input_pixel_stride, output_pixel_stride,
       kernel.data(), bias.data(),
       -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity(),
-      0 /* flags */, nullptr, &convolution_op);
+      0 /* flags */, nullptr, nullptr, &convolution_op);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to create FP16 Convolution operator");
       return;
@@ -440,7 +440,7 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
       input_pixel_stride, output_pixel_stride,
       kernel.data(), bias.data(),
       -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity(),
-      0 /* flags */, nullptr, &convolution_op);
+      0 /* flags */, nullptr, nullptr, &convolution_op);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to create FP32 Convolution operator");
       return;

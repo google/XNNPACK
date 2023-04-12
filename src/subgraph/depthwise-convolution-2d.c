@@ -22,7 +22,8 @@ static enum xnn_status create_convolution_operator(
   const struct xnn_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  const struct xnn_caches* caches)
+  struct xnn_code_cache* code_cache,
+  struct xnn_weights_cache* weights_cache)
 {
   assert(node->num_inputs >= 2);
   assert(node->num_inputs <= 3);
@@ -77,7 +78,8 @@ static enum xnn_status create_convolution_operator(
           node->activation.output_min,
           node->activation.output_max,
           node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
-          caches,
+          code_cache,
+          weights_cache,
           &opdata->operator_objects[0]);
         break;
       case xnn_compute_type_fp16:
@@ -102,7 +104,8 @@ static enum xnn_status create_convolution_operator(
           node->activation.output_min,
           node->activation.output_max,
           node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
-          caches,
+          code_cache,
+          weights_cache,
           &opdata->operator_objects[0]);
         break;
       default:
@@ -135,6 +138,7 @@ static enum xnn_status create_convolution_operator(
           node->activation.output_max,
           node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
           NULL,
+          NULL,
           &opdata->operator_objects[0]);
         break;
 
@@ -160,6 +164,7 @@ static enum xnn_status create_convolution_operator(
           node->activation.output_min,
           node->activation.output_max,
           node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION | XNN_FLAG_FP32_STATIC_WEIGHTS,
+          NULL,
           NULL,
           &opdata->operator_objects[0]);
         break;
@@ -193,6 +198,7 @@ static enum xnn_status create_convolution_operator(
           (int8_t) output_zero_point,
           output_scale, output_min, output_max,
           node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
+          NULL,
           NULL,
           &opdata->operator_objects[0]);
         break;
@@ -228,6 +234,7 @@ static enum xnn_status create_convolution_operator(
           output_scale, output_min, output_max,
           node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
           NULL,
+          NULL,
           &opdata->operator_objects[0]);
         break;
       }
@@ -262,6 +269,7 @@ static enum xnn_status create_convolution_operator(
           (uint8_t) output_zero_point,
           output_scale, output_min, output_max,
           node->flags | XNN_FLAG_DEPTHWISE_CONVOLUTION,
+          NULL,
           NULL,
           &opdata->operator_objects[0]);
         break;

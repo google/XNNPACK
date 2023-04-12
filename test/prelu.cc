@@ -121,7 +121,7 @@ TEST_F(PreluTestF32, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status =
-    xnn_create_prelu_nc_f32(channels, channels, channels, slope.data(), /*flags=*/0, nullptr, &op);
+    xnn_create_prelu_nc_f32(channels, channels, channels, slope.data(), /*flags=*/0, nullptr, nullptr, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }

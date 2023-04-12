@@ -666,14 +666,12 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
-      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       xnn_status status = xnn_create_convolution2d_nhwc_qc8(
@@ -688,7 +686,8 @@ class ConvolutionOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, 1.0f /* output scale */, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
           (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
-          &caches,
+          /*code_cache=*/nullptr,
+          auto_weights_cache.get(),
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -732,7 +731,8 @@ class ConvolutionOperatorTester {
             kernel.data(), has_bias() ? bias.data() : nullptr,
             output_zero_point, 1.0f /* output scale */, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
             (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
-            &caches,
+            /*code_cache=*/nullptr,
+            auto_weights_cache.get(),
             &convolution_op2);
         (void) status;
         ASSERT_NE(nullptr, convolution_op2);
@@ -881,14 +881,12 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
-      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       xnn_status status = xnn_create_convolution2d_nhwc_qs8(
@@ -903,7 +901,8 @@ class ConvolutionOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
           (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
-          &caches,
+          /*code_cache=*/nullptr,
+          auto_weights_cache.get(),
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -951,7 +950,8 @@ class ConvolutionOperatorTester {
                 output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
                 (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) |
                     (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
-                &caches, &convolution_op2));
+                /*code_cache=*/nullptr, auto_weights_cache.get(),
+                &convolution_op2));
         ASSERT_NE(nullptr, convolution_op2);
 
         // Smart pointer to automatically delete convolution_op.
@@ -1118,14 +1118,12 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
-      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       xnn_status status = xnn_create_convolution2d_nhwc_qu8(
@@ -1141,7 +1139,8 @@ class ConvolutionOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, qmin(), qmax(),
           (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
-          &caches,
+          /*code_cache=*/nullptr,
+          auto_weights_cache.get(),
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -1190,7 +1189,8 @@ class ConvolutionOperatorTester {
                 output_scale, qmin(), qmax(),
                 (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) |
                     (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
-                &caches, &convolution_op2));
+                /*code_cache=*/nullptr, auto_weights_cache.get(),
+                &convolution_op2));
         ASSERT_NE(nullptr, convolution_op2);
 
         // Smart pointer to automatically delete convolution_op2.
@@ -1345,12 +1345,14 @@ class ConvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
 
-      xnn_caches caches = {};
+      std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_code_cache(
+          nullptr, xnn_release_code_cache);
+
       #if XNN_PLATFORM_JIT
         xnn_code_cache code_cache;
         if (use_jit()) {
           xnn_init_code_cache(&code_cache);
-          caches.code_cache = &code_cache;
+          auto_code_cache.reset(&code_cache);
         }
       #endif
       xnn_weights_cache weights_cache;
@@ -1359,7 +1361,6 @@ class ConvolutionOperatorTester {
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       xnn_status status = xnn_create_convolution2d_nhwc_f32(
@@ -1373,7 +1374,8 @@ class ConvolutionOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
           (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
-          &caches,
+          auto_code_cache.get(),
+          auto_weights_cache.get(),
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -1410,11 +1412,13 @@ class ConvolutionOperatorTester {
 
       if (use_weights_cache()) {
         // We already finalized the code cache, so create a new code cache if we are testing JIT.
+        std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_inner_code_cache(
+            nullptr, xnn_release_code_cache);
         #if XNN_PLATFORM_JIT
           xnn_code_cache inner_code_cache;
           if (use_jit()) {
             xnn_init_code_cache(&inner_code_cache);
-            caches.code_cache = &inner_code_cache;
+            auto_inner_code_cache.reset(&inner_code_cache);
           }
         #endif
         // To test weights cache, we create the operator with the same parameters, and setup with a different output.
@@ -1432,7 +1436,7 @@ class ConvolutionOperatorTester {
             kernel.data(), has_bias() ? bias.data() : nullptr,
             output_min, output_max,
             (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (padding_tf_same() ? XNN_FLAG_TENSORFLOW_SAME_PADDING : 0),
-            &caches,
+            auto_inner_code_cache.get(), auto_weights_cache.get(),
             &convolution_op2));
 
         ASSERT_NE(nullptr, convolution_op2);
@@ -1461,18 +1465,7 @@ class ConvolutionOperatorTester {
         ASSERT_EQ(old_weights_cache_size, weights_cache.cache.weights.size);
 
         VerifyNHWCxF32(output2, output_ref, output_min, output_max);
-        #if XNN_PLATFORM_JIT
-          if (use_jit()) {
-            xnn_release_code_cache(&inner_code_cache);
-          }
-        #endif
       }
-
-      #if XNN_PLATFORM_JIT
-        if (use_jit()) {
-          xnn_release_code_cache(&code_cache);
-        }
-      #endif
     }
   }
 
@@ -1618,12 +1611,13 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
-      xnn_caches caches = {};
+      std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_code_cache(
+          nullptr, xnn_release_code_cache);
       #if XNN_PLATFORM_JIT
         xnn_code_cache code_cache;
         if (use_jit()) {
           xnn_init_code_cache(&code_cache);
-          caches.code_cache = &code_cache;
+          auto_code_cache.reset(&code_cache);
         }
       #endif
       xnn_weights_cache weights_cache;
@@ -1632,7 +1626,6 @@ class ConvolutionOperatorTester {
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       const void* kernel_data = kernel.data();
@@ -1662,7 +1655,8 @@ class ConvolutionOperatorTester {
           kernel_data, has_bias() ? bias_data : nullptr,
           output_min, output_max,
           flags,
-          &caches,
+          auto_code_cache.get(),
+          auto_weights_cache.get(),
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -1699,11 +1693,13 @@ class ConvolutionOperatorTester {
 
       if (use_weights_cache()) {
         // We already finalized the code cache, so create a new code cache if we are testing JIT.
+        std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_inner_code_cache(
+            nullptr, xnn_release_code_cache);
         #if XNN_PLATFORM_JIT
           xnn_code_cache inner_code_cache;
           if (use_jit()) {
             xnn_init_code_cache(&inner_code_cache);
-            caches.code_cache = &inner_code_cache;
+            auto_inner_code_cache.reset(&inner_code_cache);
           }
         #endif
         xnn_operator_t convolution_op2 = nullptr;
@@ -1719,7 +1715,7 @@ class ConvolutionOperatorTester {
             kernel_data, has_bias() ? bias_data : nullptr,
             output_min, output_max,
             flags,
-            &caches,
+            auto_inner_code_cache.get(), auto_weights_cache.get(),
             &convolution_op2));
         ASSERT_NE(nullptr, convolution_op2);
 
@@ -1746,18 +1742,8 @@ class ConvolutionOperatorTester {
                   xnn_run_operator(convolution_op2, nullptr /* thread pool */));
 
         VerifyNHWCxF16(output2, output_ref, output_min, output_max);
-        #if XNN_PLATFORM_JIT
-          if (use_jit()) {
-            xnn_release_code_cache(&inner_code_cache);
-          }
-        #endif
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
       }
-      #if XNN_PLATFORM_JIT
-        if (use_jit()) {
-          xnn_release_code_cache(&code_cache);
-        }
-      #endif
     }
   }
 
@@ -1924,14 +1910,12 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
-      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       xnn_status status = xnn_create_convolution2d_nchw_f32(
@@ -1944,7 +1928,7 @@ class ConvolutionOperatorTester {
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
           (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) | (force_nhwc_input() ? XNN_FLAG_INPUT_NHWC : 0),
-          &caches,
+          nullptr, auto_weights_cache.get(),
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -1986,7 +1970,8 @@ class ConvolutionOperatorTester {
                 has_bias() ? bias.data() : nullptr, output_min, output_max,
                 (depthwise_layout() ? XNN_FLAG_DEPTHWISE_CONVOLUTION : 0) |
                     (force_nhwc_input() ? XNN_FLAG_INPUT_NHWC : 0),
-                &caches, &convolution_op2));
+                /*code_cache=*/nullptr, auto_weights_cache.get(),
+                &convolution_op2));
         ASSERT_NE(nullptr, convolution_op2);
 
         // Smart pointer to automatically delete convolution_op2.
@@ -2190,14 +2175,12 @@ class ConvolutionOperatorTester {
       // Create, setup, run, and destroy Convolution operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t convolution_op = nullptr;
-      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       const void* kernel_data = kernel.data();
@@ -2226,7 +2209,7 @@ class ConvolutionOperatorTester {
           kernel_data, has_bias() ? bias_data : nullptr,
           output_min, output_max,
           flags,
-          &caches,
+          /*code_cache=*/nullptr, auto_weights_cache.get(),
           &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -2269,7 +2252,7 @@ class ConvolutionOperatorTester {
                 kernel_data, has_bias() ? bias_data : nullptr,
                 output_min, output_max,
                 flags,
-                &caches,
+                /*code_cache=*/nullptr, auto_weights_cache.get(),
                 &convolution_op2));
 
         ASSERT_NE(nullptr, convolution_op2);
@@ -2448,7 +2431,7 @@ class ConvolutionOperatorTester {
           input_zero_point, 1.0f /* input scale */, requantization_scales.data(),
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, 1.0f /* output scale */, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
-          0, NULL, &convolution_op);
+          0, nullptr, nullptr, &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -2686,7 +2669,7 @@ class ConvolutionOperatorTester {
           input_zero_point, 1.0f /* input scale */, 1.0f /* kernel scale */,
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
-          0, NULL, &convolution_op);
+          0, nullptr, nullptr, &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -2918,7 +2901,7 @@ class ConvolutionOperatorTester {
           kernel_zero_point, 1.0f /* kernel scale */,
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, qmin(), qmax(),
-          0, NULL, &convolution_op);
+          0, nullptr, nullptr, &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -3139,7 +3122,7 @@ class ConvolutionOperatorTester {
           input_channel_stride(), output_channel_stride(),
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
-          0, NULL, &convolution_op);
+          0, nullptr, nullptr, &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -3352,7 +3335,7 @@ class ConvolutionOperatorTester {
           input_channel_stride(), output_channel_stride(),
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
-          0, NULL, &convolution_op);
+          0, nullptr, nullptr, &convolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }

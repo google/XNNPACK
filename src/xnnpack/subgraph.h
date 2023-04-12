@@ -180,7 +180,8 @@ typedef enum xnn_status (*xnn_create_operator_fn)(
   const struct xnn_value* values,
   size_t num_values,
   struct xnn_operator_data* opdata,
-  const struct xnn_caches* caches);
+  struct xnn_code_cache* code_cache,
+  struct xnn_weights_cache* weights_cache);
 
 typedef enum xnn_status (*xnn_setup_operator_fn)(
   const struct xnn_operator_data* opdata,

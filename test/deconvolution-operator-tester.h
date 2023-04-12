@@ -554,14 +554,12 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
-      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       ASSERT_EQ(
@@ -575,7 +573,7 @@ class DeconvolutionOperatorTester {
               1.0f /* input scale */, 1.0f /* kernel scale */, kernel.data(),
               has_bias() ? bias.data() : nullptr, output_zero_point,
               output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
-              /*flags=*/0, &caches, &deconvolution_op));
+              /*flags=*/0, /*code_cache=*/nullptr, auto_weights_cache.get(), &deconvolution_op));
 
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
@@ -612,7 +610,7 @@ class DeconvolutionOperatorTester {
                 1.0f /* input scale */, 1.0f /* kernel scale */, kernel.data(),
                 has_bias() ? bias.data() : nullptr, output_zero_point,
                 output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
-                /*flags=*/0, &caches, &deconvolution_op2));
+                /*flags=*/0, /*code_cache=*/nullptr, auto_weights_cache.get(), &deconvolution_op2));
 
         // Smart pointer to automatically delete deconvolution_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op2, xnn_delete_operator);
@@ -756,14 +754,12 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
-      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       ASSERT_EQ(
@@ -778,7 +774,7 @@ class DeconvolutionOperatorTester {
               1.0f /* kernel scale */, kernel.data(),
               has_bias() ? bias.data() : nullptr, output_zero_point,
               output_scale, qmin(), qmax(),
-              /*flags=*/0, &caches, &deconvolution_op));
+              /*flags=*/0, /*code_cache=*/nullptr, auto_weights_cache.get(), &deconvolution_op));
 
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
@@ -818,7 +814,7 @@ class DeconvolutionOperatorTester {
                 1.0f /* kernel scale */, kernel.data(),
                 has_bias() ? bias.data() : nullptr, output_zero_point,
                 output_scale, qmin(), qmax(),
-                /*flags=*/0, &caches, &deconvolution_op2));
+                /*flags=*/0, /*code_cache=*/nullptr, auto_weights_cache.get(), &deconvolution_op2));
 
         // Smart pointer to automatically delete deconvolution_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op2, xnn_delete_operator);
@@ -968,14 +964,12 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
-      xnn_caches caches = {};
       xnn_weights_cache weights_cache;
       std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
         nullptr, xnn_release_weights_cache);
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       const void* kernel_data = kernel.data();
@@ -996,7 +990,7 @@ class DeconvolutionOperatorTester {
         input_pixel_stride(), output_pixel_stride(),
         kernel_data, has_bias() ? bias_data : nullptr,
         output_min, output_max,
-        flags, &caches, &deconvolution_op);
+        flags, /*code_cache=*/nullptr, auto_weights_cache.get(), &deconvolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -1036,7 +1030,7 @@ class DeconvolutionOperatorTester {
                       input_pixel_stride(), output_pixel_stride(),
                       kernel_data, has_bias() ? bias_data : nullptr,
                       output_min, output_max,
-                      flags, &caches, &deconvolution_op2));
+                      flags, /*code_cache=*/nullptr, auto_weights_cache.get(), &deconvolution_op2));
         ASSERT_NE(nullptr, deconvolution_op2);
 
         // Smart pointer to automatically delete deconvolution_op2.
@@ -1202,12 +1196,13 @@ class DeconvolutionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t deconvolution_op = nullptr;
 
-      xnn_caches caches = {};
+      std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_code_cache(
+          nullptr, xnn_release_code_cache);
       #if XNN_PLATFORM_JIT
         xnn_code_cache code_cache;
         if (use_jit()) {
           xnn_init_code_cache(&code_cache);
-          caches.code_cache = &code_cache;
+          auto_code_cache.reset(&code_cache);
         }
       #endif
       xnn_weights_cache weights_cache;
@@ -1216,7 +1211,6 @@ class DeconvolutionOperatorTester {
       if (use_weights_cache()) {
         xnn_init_weights_cache(&weights_cache);
         auto_weights_cache.reset(&weights_cache);
-        caches.weights_cache = &weights_cache;
       }
 
       ASSERT_EQ(
@@ -1228,7 +1222,7 @@ class DeconvolutionOperatorTester {
               group_input_channels(), group_output_channels(),
               input_pixel_stride(), output_pixel_stride(), kernel.data(),
               has_bias() ? bias.data() : nullptr, output_min, output_max,
-              /*flags=*/0, &caches, &deconvolution_op));
+              /*flags=*/0, auto_code_cache.get(), auto_weights_cache.get(), &deconvolution_op));
       if (use_weights_cache()) {
         ASSERT_EQ(xnn_status_success,
                   xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
@@ -1260,11 +1254,13 @@ class DeconvolutionOperatorTester {
 
       if (use_weights_cache()) {
         // We already finalized the code cache, so create a new code cache if we are testing JIT.
+        std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_inner_code_cache(
+            nullptr, xnn_release_code_cache);
         #if XNN_PLATFORM_JIT
           xnn_code_cache inner_code_cache;
           if (use_jit()) {
             xnn_init_code_cache(&inner_code_cache);
-            caches.code_cache = &inner_code_cache;
+            auto_inner_code_cache.reset(&inner_code_cache);
           }
         #endif
 
@@ -1280,7 +1276,7 @@ class DeconvolutionOperatorTester {
                 group_input_channels(), group_output_channels(),
                 input_pixel_stride(), output_pixel_stride(), kernel.data(),
                 has_bias() ? bias.data() : nullptr, output_min, output_max,
-                /*flags=*/0, &caches, &deconvolution_op2));
+                /*flags=*/0, auto_inner_code_cache.get(), auto_weights_cache.get(), &deconvolution_op2));
 
         // Smart pointer to automatically delete deconvolution_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op2, xnn_delete_operator);
@@ -1307,19 +1303,7 @@ class DeconvolutionOperatorTester {
 
         VerifyWeightsCache(&weights_cache, old_weights_cache_size);
         VerifyF32(output2, output_ref, output_max, output_min);
-
-        #if XNN_PLATFORM_JIT
-          if (use_jit()) {
-            xnn_release_code_cache(&inner_code_cache);
-          }
-        #endif
       }
-
-      #if XNN_PLATFORM_JIT
-        if (use_jit()) {
-          xnn_release_code_cache(&code_cache);
-        }
-      #endif
     }
   }
 
@@ -1332,10 +1316,8 @@ class DeconvolutionOperatorTester {
     auto rng = std::mt19937(random_device());
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
-    xnn_caches caches = {};
     xnn_weights_cache weights_cache;
     xnn_init_weights_cache(&weights_cache);
-    caches.weights_cache = &weights_cache;
     size_t old_weights_cache_size = weights_cache.cache.weights.size;
 
     std::vector<xnn_operator_t> operators;
@@ -1438,7 +1420,7 @@ class DeconvolutionOperatorTester {
               group_input_channels(), group_output_channels(),
               input_pixel_stride(), output_pixel_stride(), kernel.data(),
               has_bias() ? bias.data() : nullptr, output_min, output_max,
-              /*flags=*/0, &caches, &deconvolution_op));
+              /*flags=*/0, /*code_cache=*/nullptr, &weights_cache, &deconvolution_op));
 
       operators.push_back(std::move(deconvolution_op));
       inputs.push_back(std::move(input));
@@ -1613,7 +1595,7 @@ class DeconvolutionOperatorTester {
           1.0f /* kernel scale */,
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80),
-          0, NULL, &deconvolution_op));
+          0, nullptr, nullptr, &deconvolution_op));
 
       // Smart pointer to automatically delete deconvolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
@@ -1845,7 +1827,7 @@ class DeconvolutionOperatorTester {
           kernel_zero_point, 1.0f /* kernel scale */,
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_zero_point, output_scale, qmin(), qmax(),
-          0, NULL, &deconvolution_op));
+          0, nullptr, nullptr, &deconvolution_op));
 
       // Smart pointer to automatically delete deconvolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
@@ -2076,7 +2058,7 @@ class DeconvolutionOperatorTester {
         input_pixel_stride(), output_pixel_stride(),
         kernel.data(), has_bias() ? bias.data() : nullptr,
         output_min, output_max,
-        0, NULL, &deconvolution_op);
+        0, nullptr, nullptr, &deconvolution_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -2300,7 +2282,7 @@ class DeconvolutionOperatorTester {
           input_pixel_stride(), output_pixel_stride(),
           kernel.data(), has_bias() ? bias.data() : nullptr,
           output_min, output_max,
-          0, NULL, &deconvolution_op));
+          0, nullptr, nullptr, &deconvolution_op));
 
       // Smart pointer to automatically delete deconvolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);

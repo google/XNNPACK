@@ -5,9 +5,9 @@
 
 #include <assert.h>
 
-#include <xnnpack.h>           // For xnn_caches_t, xnn_operator_t.
+#include <xnnpack.h>           // For xnn_operator_t.
 #include <xnnpack/common.h>    // For XNN_ALLOCATION_ALIGNMENT.
-#include <xnnpack/cache.h>     // For xnn_caches.
+#include <xnnpack/cache.h>     // For xnn_code_cache.
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
 #include <xnnpack/operator.h>  // For xnn_operator definition.

@@ -525,7 +525,6 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
 
   ExecutionPlan operators;
   xnn_status status;
-  xnn_caches caches = {};
 
   xnn_operator_t op0 = nullptr;
   status = xnn_create_convolution2d_nchw_f32(
@@ -542,7 +541,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w100.data(), w101.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     XNN_FLAG_INPUT_NHWC /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #0" << std::endl;
@@ -578,7 +578,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w102.data(), w103.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op2);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #2" << std::endl;
@@ -613,7 +614,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w104.data(), w105.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op4);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #4" << std::endl;
@@ -636,7 +638,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w106.data(), w107.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op5);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #5" << std::endl;
@@ -670,7 +673,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w108.data(), w109.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op7);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #7" << std::endl;
@@ -693,7 +697,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w110.data(), w111.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op8);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #8" << std::endl;
@@ -716,7 +721,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w112.data(), w113.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op9);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #9" << std::endl;
@@ -739,7 +745,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w114.data(), w115.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op10);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #10" << std::endl;
@@ -762,7 +769,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w116.data(), w117.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op11);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #11" << std::endl;
@@ -785,7 +793,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w118.data(), w119.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op12);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #12" << std::endl;
@@ -808,7 +817,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w120.data(), w121.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op13);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #13" << std::endl;
@@ -842,7 +852,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w122.data(), w123.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op15);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #15" << std::endl;
@@ -878,7 +889,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w124.data(), w125.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op17);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #17" << std::endl;
@@ -926,7 +938,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w126.data(), w127.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op20);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #20" << std::endl;
@@ -949,7 +962,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w128.data(), w129.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op21);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #21" << std::endl;
@@ -983,7 +997,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w130.data(), w131.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op23);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #23" << std::endl;
@@ -1006,7 +1021,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w132.data(), w133.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op24);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #24" << std::endl;
@@ -1042,7 +1058,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w134.data(), w135.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op26);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #26" << std::endl;
@@ -1090,7 +1107,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w136.data(), w137.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op29);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #29" << std::endl;
@@ -1113,7 +1131,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w138.data(), w139.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op30);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #30" << std::endl;
@@ -1147,7 +1166,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w140.data(), w141.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op32);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #32" << std::endl;
@@ -1181,7 +1201,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w142.data(), w143.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op34);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #34" << std::endl;
@@ -1217,7 +1238,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w144.data(), w145.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op36);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #36" << std::endl;
@@ -1265,7 +1287,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w146.data(), w147.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op39);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #39" << std::endl;
@@ -1288,7 +1311,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w148.data(), w149.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op40);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #40" << std::endl;
@@ -1322,7 +1346,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w150.data(), w151.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op42);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #42" << std::endl;
@@ -1356,7 +1381,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w152.data(), w153.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op44);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #44" << std::endl;
@@ -1392,7 +1418,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w154.data(), w155.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op46);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #46" << std::endl;
@@ -1440,7 +1467,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w156.data(), w157.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op49);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #49" << std::endl;
@@ -1463,7 +1491,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w158.data(), w159.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op50);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #50" << std::endl;
@@ -1497,7 +1526,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w160.data(), w161.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op52);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #52" << std::endl;
@@ -1520,7 +1550,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w162.data(), w163.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op53);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #53" << std::endl;
@@ -1556,7 +1587,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w164.data(), w165.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op55);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #55" << std::endl;
@@ -1604,7 +1636,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w166.data(), w167.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op58);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #58" << std::endl;
@@ -1627,7 +1660,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w168.data(), w169.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op59);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #59" << std::endl;
@@ -1661,7 +1695,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w170.data(), w171.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op61);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #61" << std::endl;
@@ -1695,7 +1730,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w172.data(), w173.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op63);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #63" << std::endl;
@@ -1731,7 +1767,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w174.data(), w175.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op65);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #65" << std::endl;
@@ -1779,7 +1816,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w176.data(), w177.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op68);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #68" << std::endl;
@@ -1802,7 +1840,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w178.data(), w179.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op69);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #69" << std::endl;
@@ -1836,7 +1875,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w180.data(), w181.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op71);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #71" << std::endl;
@@ -1859,7 +1899,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w182.data(), w183.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op72);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #72" << std::endl;
@@ -1895,7 +1936,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w184.data(), w185.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op74);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #74" << std::endl;
@@ -1943,7 +1985,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w186.data(), w187.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op77);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #77" << std::endl;
@@ -1966,7 +2009,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w188.data(), w189.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op78);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #78" << std::endl;
@@ -2000,7 +2044,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w190.data(), w191.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op80);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #80" << std::endl;
@@ -2034,7 +2079,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w192.data(), w193.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op82);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #82" << std::endl;
@@ -2070,7 +2116,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w194.data(), w195.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op84);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #84" << std::endl;
@@ -2118,7 +2165,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w196.data(), w197.data(),
     0.0f /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op87);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #87" << std::endl;
@@ -2141,7 +2189,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w198.data(), w199.data(),
     0.0f /* output min */, +0x1.00014Fp+0 /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op88);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #88" << std::endl;
@@ -2175,7 +2224,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w200.data(), w201.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op90);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #90" << std::endl;
@@ -2209,7 +2259,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w202.data(), w203.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op92);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #92" << std::endl;
@@ -2257,7 +2308,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w204.data(), w205.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op95);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #95" << std::endl;
@@ -2305,7 +2357,8 @@ ExecutionPlan FP32SparseMobileNetV3Small(float sparsity, pthreadpool_t threadpoo
     w206.data(), w207.data(),
     -std::numeric_limits<float>::infinity() /* output min */, std::numeric_limits<float>::infinity() /* output max */,
     0 /* flags */,
-    &caches,
+    nullptr,
+    nullptr,
     &op98);
   if (status != xnn_status_success) {
     std::cerr << "failed to create operation #98" << std::endl;
