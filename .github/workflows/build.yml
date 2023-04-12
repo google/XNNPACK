@@ -178,7 +178,7 @@ jobs:
         run: cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=arm64 -DXNNPACK_BUILD_BENCHMARKS=OFF -DXNNPACK_BUILD_TESTS=OFF ../../..
         working-directory: ${{ github.workspace }}/build/ios/arm64
       - name: Build with Xcode
-        run: cmake --build build/ios/arm64 --parallel $(sysctl -n hw.ncpu)
+        run: cmake --build build/ios/arm64 --parallel $(sysctl -n hw.ncpu) -- -quiet
         working-directory: ${{ github.workspace }}
   cmake-ios-x86_64:
     runs-on: macos-latest
@@ -192,6 +192,6 @@ jobs:
         run: cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_ARCHITECTURES=x86_64 -DXNNPACK_BUILD_BENCHMARKS=OFF -DXNNPACK_BUILD_TESTS=OFF ../../..
         working-directory: ${{ github.workspace }}/build/ios/x86_64
       - name: Build with Xcode
-        run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator
+        run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator -quiet
         working-directory: ${{ github.workspace }}
 
