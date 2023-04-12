@@ -31,6 +31,8 @@ tools/xngen src/x16-packw/neon.c.in -D NR=16 -D PREFETCH=1 -D KUNROLL=16 -o src/
 ################################### X86 AVX2 ##################################
 tools/xngen src/x16-packw/avx.c.in -D NR=8 -D PREFETCH=0 -D KUNROLL=16 -o src/x16-packw/gen/x16-packw-x8-avx2-x16.c &
 tools/xngen src/x16-packw/avx.c.in -D NR=8 -D PREFETCH=1 -D KUNROLL=16 -o src/x16-packw/gen/x16-packw-x8-avx2-prfm-x16.c &
+tools/xngen src/x16-packw/avx.c.in -D NR=16 -D PREFETCH=0 -D KUNROLL=16 -o src/x16-packw/gen/x16-packw-x16-avx2-x16.c &
+tools/xngen src/x16-packw/avx.c.in -D NR=16 -D PREFETCH=1 -D KUNROLL=16 -o src/x16-packw/gen/x16-packw-x16-avx2-prfm-x16.c &
 
 ################################## Unit tests #################################
 tools/generate-packw-test.py --spec test/x16-packw.yaml --output test/x16-packw.cc &

@@ -1093,6 +1093,8 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/x8-transposec/gen/x8-transposec-32x32-reuse-switch-avx2.c
   src/x16-packw/gen/x16-packw-x8-avx2-prfm-x16.c
   src/x16-packw/gen/x16-packw-x8-avx2-x16.c
+  src/x16-packw/gen/x16-packw-x16-avx2-prfm-x16.c
+  src/x16-packw/gen/x16-packw-x16-avx2-x16.c
   src/x16-transposec/gen/x16-transposec-16x16-reuse-mov-avx2.c
   src/x16-transposec/gen/x16-transposec-16x16-reuse-switch-avx2.c)
 

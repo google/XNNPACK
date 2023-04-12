@@ -202,13 +202,25 @@ static void x16_packw(benchmark::State& state,
     x16_packw(state, xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16,
               /*nr=*/8, /*kr=*/1, /*sr=*/1, benchmark::utils::CheckAVX2);
   }
-  static void x16_packw_x8__avx2_int_prmf_x16(benchmark::State& state,
+  static void x16_packw_x8__avx2_int_prfm_x16(benchmark::State& state,
                                                const char* net) {
     x16_packw(state, xnn_x16_packw_gemm_goi_ukernel_x8__avx2_prfm_x16,
               /*nr=*/8, /*kr=*/1, /*sr=*/1, benchmark::utils::CheckAVX2);
   }
+  static void x16_packw_x16__avx2_int_x16(benchmark::State& state,
+                                          const char* net) {
+    x16_packw(state, xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16,
+              /*nr=*/16, /*kr=*/1, /*sr=*/1, benchmark::utils::CheckAVX2);
+  }
+  static void x16_packw_x16__avx2_int_prfm_x16(benchmark::State& state,
+                                               const char* net) {
+    x16_packw(state, xnn_x16_packw_gemm_goi_ukernel_x16__avx2_prfm_x16,
+              /*nr=*/16, /*kr=*/1, /*sr=*/1, benchmark::utils::CheckAVX2);
+  }
   BENCHMARK_BGEMM(x16_packw_x8__avx2_int_x16)
-  BENCHMARK_BGEMM(x16_packw_x8__avx2_int_prmf_x16)
+  BENCHMARK_BGEMM(x16_packw_x8__avx2_int_prfm_x16)
+  BENCHMARK_BGEMM(x16_packw_x16__avx2_int_x16)
+  BENCHMARK_BGEMM(x16_packw_x16__avx2_int_prfm_x16)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
   static void x16_packw_x16__scalar_int_x4(benchmark::State& state,

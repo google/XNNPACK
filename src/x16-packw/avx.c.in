@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 
-$assert NR == 8
+$assert NR == 8 or NR == 16
 $assert KUNROLL == 16
 #include <assert.h>
 #include <stdint.h>
@@ -77,6 +77,12 @@ $def LOAD_ROWS_TO_REGISTERS(IS_N_REMAINDER):
   $else:
     ${_}__m256i v${N};
 $#
+$def PLUS_8_ELEMENT_WISE(ARR):
+  $return [X + 8 for X in ARR]
+$#
+$def DOUBLE_FOR_NR_16_IF_NEEDED(ARR):
+  $return ARR if NR == 8 else ARR + PLUS_8_ELEMENT_WISE(ARR)
+$#
 $def TRANSPOSE(IS_N_REMAINDER):
     $IND = list(range(0, NR))
     $if IS_N_REMAINDER:
@@ -91,7 +97,7 @@ $def TRANSPOSE(IS_N_REMAINDER):
 
     ${_}// Interleave 32-bit lanes
     $OUT_INDEX = 0
-    $for FIRST in [0, 1, 4, 5]:
+    $for FIRST in DOUBLE_FOR_NR_16_IF_NEEDED([0, 1, 4, 5]):
       $SECOND = FIRST + 2
       ${_}v${OUT_INDEX} = _mm256_unpacklo_epi32(vt${FIRST}, vt${SECOND});
       ${_}v${OUT_INDEX + 1} = _mm256_unpackhi_epi32(vt${FIRST}, vt${SECOND});
@@ -99,21 +105,31 @@ $def TRANSPOSE(IS_N_REMAINDER):
 
     ${_}// Interleave 64-bit lanes
     $OUT_INDEX = 0
-    $for FIRST in range(NR//2):
+    $for FIRST in DOUBLE_FOR_NR_16_IF_NEEDED([0, 1, 2, 3]):
       $SECOND = FIRST + 4
       ${_}vt${OUT_INDEX} = _mm256_unpacklo_epi64(v${FIRST}, v${SECOND});
       ${_}vt${OUT_INDEX + 1} = _mm256_unpackhi_epi64(v${FIRST}, v${SECOND});
       $OUT_INDEX += 2
 
-    $for PAIR_INDEX in range(NR//2):
-      $FIRST = PAIR_INDEX * 2
-      $SECOND = FIRST + 1
+    $if NR == 8:
+      $FIRSTS = list(range(0, 8, 2))
+      $SKIP = 1
+    $else:
+      $FIRSTS = list(range(8))
+      $SKIP = 8
+    $for FIRST in FIRSTS:
+      $SECOND = FIRST + SKIP
       ${_}v${FIRST} = _mm256_inserti128_si256(vt${FIRST}, _mm256_castsi256_si128(vt${SECOND}), 1);
       ${_}v${SECOND} = _mm256_permute2x128_si256(vt${FIRST}, vt${SECOND}, 0x31);
 $#
+$def STORE_REGISTER(N):
+  $ALIGNED_SUFFIX = "" if NR == 16 else "u"
+  $FUN = f'_mm256_store{ALIGNED_SUFFIX}_si256'
+  ${_}${FUN}((__m256i*) packed_weights + ${N}, v${ORDER[N]});
+$#
 $def STORE_REGISTERS_FULLY(NUM=NR):
     $for N in range(NUM):
-       ${_}_mm256_storeu_si256((__m256i*) packed_weights + ${N}, v${ORDER[N]});
+      $STORE_REGISTER(N)
     ${_}packed_weights += ${16 * NUM};
 $#
 $def STORE_LOW_FIRST_REGISTER():
@@ -122,24 +138,32 @@ $def STORE_LOW_FIRST_REGISTER():
 $#
 $def STORE_REGISTERS_WITH_K_REMAINDER():
   ${_}if (k & 8) ${BEGIN()}
-    $STORE_REGISTERS_FULLY(4)
-    $MOVE_BOTTOM_HALF_REGISTERS(8)
+    $STORE_REGISTERS_FULLY(NR // 2)
+    $MOVE_BOTTOM_HALF_REGISTERS(NR)
   ${END()}
   ${_}if (k & 4) ${BEGIN()}
-    $STORE_REGISTERS_FULLY(2)
-    $MOVE_BOTTOM_HALF_REGISTERS(4)
+    $STORE_REGISTERS_FULLY(NR // 4)
+    $MOVE_BOTTOM_HALF_REGISTERS(NR // 2)
   ${END()}
   ${_}if (k & 2) ${BEGIN()}
-    $STORE_REGISTERS_FULLY(1)
-    $MOVE_BOTTOM_HALF_REGISTERS(2)
+    $STORE_REGISTERS_FULLY(NR // 8)
+    $MOVE_BOTTOM_HALF_REGISTERS(NR // 4)
   ${END()}
   ${_}if (k & 1) ${BEGIN()}
-    $STORE_LOW_FIRST_REGISTER()
+    $if NR == 8:
+      $STORE_LOW_FIRST_REGISTER()
+    $else:
+      $STORE_REGISTERS_FULLY(1)
   ${END()}
 $#
 $def MOVE_BOTTOM_HALF_REGISTERS(N):
   $for I in range(N//2):
     ${_}v${ORDER[I]} = v${ORDER[N//2 + I]};
+$#
+$if NR == 8:
+  $ORDER = [0, 2, 4, 6, 1, 3, 5, 7]
+$else:
+  $ORDER = list(range(NR))
 $#
 $def PREFETCH_ROWS(NUM):
   $if PREFETCH:
@@ -182,9 +206,11 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2${"_prfm" if PREFETCH else ""}_x
       $if NR == 8:
         $PREFIX = ""
         $TYPE_SIZE = "128"
+        $U = "u"
       $else:
         $PREFIX = "256"
         $TYPE_SIZE = "256"
+        $U = ""
       $TYPE = "__m" + TYPE_SIZE + "i"
       {
         ${TYPE} vtmp;
@@ -192,14 +218,13 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2${"_prfm" if PREFETCH else ""}_x
           vtmp = _mm${PREFIX}_loadu_si${TYPE_SIZE}((const ${TYPE}*) bias);
           bias += ${NR};
         } else {
-          vtmp = _mm${PREFIX}_setzero_si128();
+          vtmp = _mm${PREFIX}_setzero_si${TYPE_SIZE}();
         }
-        _mm${PREFIX}_storeu_si${TYPE_SIZE}((${TYPE}*) packed_weights, vtmp);
+        _mm${PREFIX}_store${U}_si${TYPE_SIZE}((${TYPE}*) packed_weights, vtmp);
         packed_weights += ${NR};
       }
       $for N in range(1, NR):
         const uint16_t* w${N} = w${N-1} + kc;
-      $ORDER = [0, 2, 4, 6, 1, 3, 5, 7]
       size_t k = kc;
       for (; k >= 16; k -= 16) {
         $SET_INDENT(4)

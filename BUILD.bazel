@@ -1391,6 +1391,8 @@ PROD_FMA3_MICROKERNEL_SRCS = [
 PROD_AVX2_MICROKERNEL_SRCS = [
     "src/x16-packw/gen/x16-packw-x8-avx2-x16.c",
     "src/x16-packw/gen/x16-packw-x8-avx2-prfm-x16.c",
+    "src/x16-packw/gen/x16-packw-x16-avx2-x16.c",
+    "src/x16-packw/gen/x16-packw-x16-avx2-prfm-x16.c",
     "src/f16-gemm/gen/f16-gemm-1x16-minmax-avx2-broadcast.c",
     "src/f16-gemm/gen/f16-gemm-4x16-minmax-avx2-broadcast.c",
     "src/f16-igemm/gen/f16-igemm-1x16-minmax-avx2-broadcast.c",
