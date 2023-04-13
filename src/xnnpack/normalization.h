@@ -22,7 +22,7 @@ extern "C" {
 // full slice, and so can be merged with its outer dimension, to give normalized input shape of { 4, 15 },
 // output shape { 4, 3 } with offsets { 0, 6 }.
 void xnn_normalize_slice(
-    const size_t num_dims,
+    size_t num_dims,
     const size_t offsets[XNN_MIN_ELEMENTS(1)],
     const size_t sizes[XNN_MIN_ELEMENTS(1)],
     const size_t input_shape[XNN_MIN_ELEMENTS(1)],
@@ -32,8 +32,8 @@ void xnn_normalize_slice(
     size_t* num_normalized_dims);
 
 void xnn_normalize_transpose_permutation(
-    const size_t num_dims,
-    const size_t element_size,
+    size_t num_dims,
+    size_t element_size,
     const size_t* perm,
     const size_t* shape,
     const size_t* input_stride,
