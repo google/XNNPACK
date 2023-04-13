@@ -28,7 +28,7 @@
 static void f32_dwconv2d_chw(benchmark::State& state,
   xnn_f32_dwconv2d_chw_ukernel_fn dwconv,
   xnn_init_f32_chw_params_fn init_params,
-  uint32_t kh, uint32_t kw, uint32_t pw, uint32_t s,
+  uint32_t kernel_height, uint32_t kernel_width, uint32_t padding_width, uint32_t stride,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check != nullptr && !isa_check(state)) {
@@ -37,30 +37,30 @@ static void f32_dwconv2d_chw(benchmark::State& state,
 
   const size_t input_height = state.range(0);
   const size_t input_width = state.range(1);
-  const size_t kernel_height = state.range(2);
-  const size_t kernel_width = state.range(3);
+  const size_t kernel_height_arg = state.range(2);
+  const size_t kernel_width_arg = state.range(3);
   const size_t padding_height = state.range(4);
-  const size_t padding_width = state.range(5);
+  const size_t padding_width_left_plus_right = state.range(5);
   const size_t subsampling = state.range(6);
   const size_t dilation = state.range(7);
   const size_t channels = state.range(8);
 
-  if (kernel_height != kh) {
+  if (kernel_height != kernel_height_arg) {
     state.SkipWithError("kernel height mismatch");
     return;
   }
 
-  if (kernel_width != kw) {
+  if (kernel_width != kernel_width_arg) {
     state.SkipWithError("kernel width mismatch");
     return;
   }
 
-  if (subsampling != s) {
+  if (subsampling != stride) {
     state.SkipWithError("subsampling mismatch");
     return;
   }
 
-  if (padding_width % 2 != 0 || padding_width / 2 != pw) {
+  if (padding_width_left_plus_right % 2 != 0 || padding_width_left_plus_right / 2 != padding_width) {
     state.SkipWithError("padding width mismatch");
     return;
   }
@@ -77,7 +77,7 @@ static void f32_dwconv2d_chw(benchmark::State& state,
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
   const size_t effective_kernel_width = (kernel_width - 1) * dilation + 1;
   const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
-  const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
+  const size_t output_width = (input_width + padding_width_left_plus_right - effective_kernel_width) / subsampling + 1;
 
   const size_t inputSize = (input_height + padding_height) * input_width;
   const size_t kernel_size = kernel_height * kernel_width;
@@ -89,7 +89,7 @@ static void f32_dwconv2d_chw(benchmark::State& state,
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
   std::vector<float> kernel(channels * kernel_size);
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
-  std::vector<float> zero(input_width + padding_width);
+  std::vector<float> zero(input_width + padding_width_left_plus_right);
 
   const size_t w_elements = (kernel_size + 1) * channels;
   const size_t o_elements = output_size * channels;
