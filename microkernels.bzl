@@ -5496,6 +5496,8 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/x32-packb/gen/x32-packb-4c4s1r-scalar-int.c",
     "src/x32-packw/gen/x32-packw-x2-scalar-float-x4.c",
     "src/x32-packw/gen/x32-packw-x2-scalar-int-x4.c",
+    "src/x32-packw/gen/x32-packw-x3-scalar-float-x4.c",
+    "src/x32-packw/gen/x32-packw-x3-scalar-int-x4.c",
     "src/x32-packw/gen/x32-packw-x4-scalar-float-x4.c",
     "src/x32-packw/gen/x32-packw-x4-scalar-int-x4.c",
     "src/x32-packw/gen/x32-packw-x8-scalar-float-x4.c",

@@ -62,6 +62,8 @@
 # Scalar
 - name: xnn_x32_packw_gemm_goi_ukernel_x2__scalar_float_x4
 - name: xnn_x32_packw_gemm_goi_ukernel_x2__scalar_int_x4
+- name: xnn_x32_packw_gemm_goi_ukernel_x3__scalar_float_x4
+- name: xnn_x32_packw_gemm_goi_ukernel_x3__scalar_int_x4
 - name: xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float_x4
 - name: xnn_x32_packw_gemm_goi_ukernel_x4__scalar_int_x4
 - name: xnn_x32_packw_gemm_goi_ukernel_x8__scalar_float_x4
