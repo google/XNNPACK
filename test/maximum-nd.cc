@@ -24,7 +24,7 @@ TEST(MAXIMUM_ND_F16, 0d_x_0d) {
 
 TEST(MAXIMUM_ND_F16, 1d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
-    const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
+    const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Maximum)
@@ -35,7 +35,7 @@ TEST(MAXIMUM_ND_F16, 1d_x_0d) {
 
 TEST(MAXIMUM_ND_F16, 0d_x_1d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
-    const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
+    const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Maximum)
@@ -47,8 +47,8 @@ TEST(MAXIMUM_ND_F16, 0d_x_1d) {
 TEST(MAXIMUM_ND_F16, 1d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       BinaryElementwiseOperatorTester()
@@ -62,8 +62,8 @@ TEST(MAXIMUM_ND_F16, 1d_x_1d) {
 
 TEST(MAXIMUM_ND_F16, 0d_x_2d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
-    const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-    const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
+    const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+    const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
     const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
     BinaryElementwiseOperatorTester()
@@ -76,9 +76,9 @@ TEST(MAXIMUM_ND_F16, 0d_x_2d) {
 TEST(MAXIMUM_ND_F16, 1d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
@@ -93,8 +93,8 @@ TEST(MAXIMUM_ND_F16, 1d_x_2d) {
 
 TEST(MAXIMUM_ND_F16, 2d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
-    const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-    const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
+    const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+    const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
     const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
     BinaryElementwiseOperatorTester()
@@ -107,9 +107,9 @@ TEST(MAXIMUM_ND_F16, 2d_x_0d) {
 TEST(MAXIMUM_ND_F16, 2d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
@@ -125,10 +125,10 @@ TEST(MAXIMUM_ND_F16, 2d_x_1d) {
 TEST(MAXIMUM_ND_F16, 2d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
@@ -144,9 +144,9 @@ TEST(MAXIMUM_ND_F16, 2d_x_2d) {
 
 TEST(MAXIMUM_ND_F16, 0d_x_3d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
-    const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-    const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-    const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
+    const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+    const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+    const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
     const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
     const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
@@ -160,10 +160,10 @@ TEST(MAXIMUM_ND_F16, 0d_x_3d) {
 TEST(MAXIMUM_ND_F16, 1d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
@@ -180,11 +180,11 @@ TEST(MAXIMUM_ND_F16, 1d_x_3d) {
 TEST(MAXIMUM_ND_F16, 2d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
@@ -201,9 +201,9 @@ TEST(MAXIMUM_ND_F16, 2d_x_3d) {
 
 TEST(MAXIMUM_ND_F16, 3d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
-    const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-    const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-    const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
+    const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+    const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+    const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
     const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
     const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -217,10 +217,10 @@ TEST(MAXIMUM_ND_F16, 3d_x_0d) {
 TEST(MAXIMUM_ND_F16, 3d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -237,11 +237,11 @@ TEST(MAXIMUM_ND_F16, 3d_x_1d) {
 TEST(MAXIMUM_ND_F16, 3d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -259,12 +259,12 @@ TEST(MAXIMUM_ND_F16, 3d_x_2d) {
 TEST(MAXIMUM_ND_F16, 3d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -282,10 +282,10 @@ TEST(MAXIMUM_ND_F16, 3d_x_3d) {
 
 TEST(MAXIMUM_ND_F16, 0d_x_4d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
-    const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-    const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-    const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-    const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
+    const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+    const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+    const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+    const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
     const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
     const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
@@ -300,11 +300,11 @@ TEST(MAXIMUM_ND_F16, 0d_x_4d) {
 TEST(MAXIMUM_ND_F16, 1d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
@@ -322,12 +322,12 @@ TEST(MAXIMUM_ND_F16, 1d_x_4d) {
 TEST(MAXIMUM_ND_F16, 2d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
@@ -346,13 +346,13 @@ TEST(MAXIMUM_ND_F16, 2d_x_4d) {
 TEST(MAXIMUM_ND_F16, 3d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -371,10 +371,10 @@ TEST(MAXIMUM_ND_F16, 3d_x_4d) {
 
 TEST(MAXIMUM_ND_F16, 4d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
-    const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-    const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-    const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-    const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
+    const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+    const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+    const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+    const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
     const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
     const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -389,11 +389,11 @@ TEST(MAXIMUM_ND_F16, 4d_x_0d) {
 TEST(MAXIMUM_ND_F16, 4d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -411,12 +411,12 @@ TEST(MAXIMUM_ND_F16, 4d_x_1d) {
 TEST(MAXIMUM_ND_F16, 4d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -435,13 +435,13 @@ TEST(MAXIMUM_ND_F16, 4d_x_2d) {
 TEST(MAXIMUM_ND_F16, 4d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -461,14 +461,14 @@ TEST(MAXIMUM_ND_F16, 4d_x_3d) {
 TEST(MAXIMUM_ND_F16, 4d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -488,11 +488,11 @@ TEST(MAXIMUM_ND_F16, 4d_x_4d) {
 
 TEST(MAXIMUM_ND_F16, 0d_x_5d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
-    const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-    const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-    const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-    const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-    const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
+    const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+    const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+    const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+    const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+    const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
     const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
     const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
@@ -508,12 +508,12 @@ TEST(MAXIMUM_ND_F16, 0d_x_5d) {
 TEST(MAXIMUM_ND_F16, 1d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
@@ -532,13 +532,13 @@ TEST(MAXIMUM_ND_F16, 1d_x_5d) {
 TEST(MAXIMUM_ND_F16, 2d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
@@ -558,14 +558,14 @@ TEST(MAXIMUM_ND_F16, 2d_x_5d) {
 TEST(MAXIMUM_ND_F16, 3d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -586,15 +586,15 @@ TEST(MAXIMUM_ND_F16, 3d_x_5d) {
 TEST(MAXIMUM_ND_F16, 4d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -615,11 +615,11 @@ TEST(MAXIMUM_ND_F16, 4d_x_5d) {
 
 TEST(MAXIMUM_ND_F16, 5d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
-    const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-    const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-    const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-    const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-    const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
+    const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+    const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+    const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+    const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+    const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
     const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
     const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -635,12 +635,12 @@ TEST(MAXIMUM_ND_F16, 5d_x_0d) {
 TEST(MAXIMUM_ND_F16, 5d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -659,13 +659,13 @@ TEST(MAXIMUM_ND_F16, 5d_x_1d) {
 TEST(MAXIMUM_ND_F16, 5d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -685,14 +685,14 @@ TEST(MAXIMUM_ND_F16, 5d_x_2d) {
 TEST(MAXIMUM_ND_F16, 5d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -713,15 +713,15 @@ TEST(MAXIMUM_ND_F16, 5d_x_3d) {
 TEST(MAXIMUM_ND_F16, 5d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -743,16 +743,16 @@ TEST(MAXIMUM_ND_F16, 5d_x_4d) {
 TEST(MAXIMUM_ND_F16, 5d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -775,12 +775,12 @@ TEST(MAXIMUM_ND_F16, 5d_x_5d) {
 
 TEST(MAXIMUM_ND_F16, 0d_x_6d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
-    const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-    const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-    const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-    const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-    const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
-    const bool input2_broadcast_dim6 = bm2 & (uint32_t(1) << 5);
+    const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+    const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+    const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+    const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+    const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
+    const bool input2_broadcast_dim6 = (bm2 & (uint32_t(1) << 5)) != 0;
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
     const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
     const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
@@ -797,13 +797,13 @@ TEST(MAXIMUM_ND_F16, 0d_x_6d) {
 TEST(MAXIMUM_ND_F16, 1d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim6 = bm2 & (uint32_t(1) << 5);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim6 = (bm2 & (uint32_t(1) << 5)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
@@ -823,14 +823,14 @@ TEST(MAXIMUM_ND_F16, 1d_x_6d) {
 TEST(MAXIMUM_ND_F16, 2d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim6 = bm2 & (uint32_t(1) << 5);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim6 = (bm2 & (uint32_t(1) << 5)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
@@ -851,15 +851,15 @@ TEST(MAXIMUM_ND_F16, 2d_x_6d) {
 TEST(MAXIMUM_ND_F16, 3d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim6 = bm2 & (uint32_t(1) << 5);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim6 = (bm2 & (uint32_t(1) << 5)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -881,16 +881,16 @@ TEST(MAXIMUM_ND_F16, 3d_x_6d) {
 TEST(MAXIMUM_ND_F16, 4d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim6 = bm2 & (uint32_t(1) << 5);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim6 = (bm2 & (uint32_t(1) << 5)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -913,17 +913,17 @@ TEST(MAXIMUM_ND_F16, 4d_x_6d) {
 TEST(MAXIMUM_ND_F16, 5d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim6 = bm2 & (uint32_t(1) << 5);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim6 = (bm2 & (uint32_t(1) << 5)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -947,12 +947,12 @@ TEST(MAXIMUM_ND_F16, 5d_x_6d) {
 
 TEST(MAXIMUM_ND_F16, 6d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
-    const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-    const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-    const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-    const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-    const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-    const bool input1_broadcast_dim6 = bm1 & (uint32_t(1) << 5);
+    const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+    const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+    const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+    const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+    const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+    const bool input1_broadcast_dim6 = (bm1 & (uint32_t(1) << 5)) != 0;
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
     const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
     const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -969,13 +969,13 @@ TEST(MAXIMUM_ND_F16, 6d_x_0d) {
 TEST(MAXIMUM_ND_F16, 6d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input1_broadcast_dim6 = bm1 & (uint32_t(1) << 5);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input1_broadcast_dim6 = (bm1 & (uint32_t(1) << 5)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -995,14 +995,14 @@ TEST(MAXIMUM_ND_F16, 6d_x_1d) {
 TEST(MAXIMUM_ND_F16, 6d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input1_broadcast_dim6 = bm1 & (uint32_t(1) << 5);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input1_broadcast_dim6 = (bm1 & (uint32_t(1) << 5)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1023,15 +1023,15 @@ TEST(MAXIMUM_ND_F16, 6d_x_2d) {
 TEST(MAXIMUM_ND_F16, 6d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input1_broadcast_dim6 = bm1 & (uint32_t(1) << 5);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input1_broadcast_dim6 = (bm1 & (uint32_t(1) << 5)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1053,16 +1053,16 @@ TEST(MAXIMUM_ND_F16, 6d_x_3d) {
 TEST(MAXIMUM_ND_F16, 6d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input1_broadcast_dim6 = bm1 & (uint32_t(1) << 5);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input1_broadcast_dim6 = (bm1 & (uint32_t(1) << 5)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1085,17 +1085,17 @@ TEST(MAXIMUM_ND_F16, 6d_x_4d) {
 TEST(MAXIMUM_ND_F16, 6d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input1_broadcast_dim6 = bm1 & (uint32_t(1) << 5);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input1_broadcast_dim6 = (bm1 & (uint32_t(1) << 5)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1120,18 +1120,18 @@ TEST(MAXIMUM_ND_F16, 6d_x_5d) {
 TEST(MAXIMUM_ND_F16, 6d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input1_broadcast_dim6 = bm1 & (uint32_t(1) << 5);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim6 = bm2 & (uint32_t(1) << 5);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input1_broadcast_dim6 = (bm1 & (uint32_t(1) << 5)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim6 = (bm2 & (uint32_t(1) << 5)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1163,7 +1163,7 @@ TEST(MAXIMUM_ND_F32, 0d_x_0d) {
 
 TEST(MAXIMUM_ND_F32, 1d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
-    const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
+    const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Maximum)
@@ -1174,7 +1174,7 @@ TEST(MAXIMUM_ND_F32, 1d_x_0d) {
 
 TEST(MAXIMUM_ND_F32, 0d_x_1d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
-    const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
+    const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
     BinaryElementwiseOperatorTester()
       .operation_type(BinaryElementwiseOperatorTester::OperationType::Maximum)
@@ -1186,8 +1186,8 @@ TEST(MAXIMUM_ND_F32, 0d_x_1d) {
 TEST(MAXIMUM_ND_F32, 1d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       BinaryElementwiseOperatorTester()
@@ -1201,8 +1201,8 @@ TEST(MAXIMUM_ND_F32, 1d_x_1d) {
 
 TEST(MAXIMUM_ND_F32, 0d_x_2d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
-    const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-    const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
+    const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+    const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
     const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
     BinaryElementwiseOperatorTester()
@@ -1215,9 +1215,9 @@ TEST(MAXIMUM_ND_F32, 0d_x_2d) {
 TEST(MAXIMUM_ND_F32, 1d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
@@ -1232,8 +1232,8 @@ TEST(MAXIMUM_ND_F32, 1d_x_2d) {
 
 TEST(MAXIMUM_ND_F32, 2d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
-    const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-    const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
+    const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+    const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
     const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
     BinaryElementwiseOperatorTester()
@@ -1246,9 +1246,9 @@ TEST(MAXIMUM_ND_F32, 2d_x_0d) {
 TEST(MAXIMUM_ND_F32, 2d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
@@ -1264,10 +1264,10 @@ TEST(MAXIMUM_ND_F32, 2d_x_1d) {
 TEST(MAXIMUM_ND_F32, 2d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
@@ -1283,9 +1283,9 @@ TEST(MAXIMUM_ND_F32, 2d_x_2d) {
 
 TEST(MAXIMUM_ND_F32, 0d_x_3d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
-    const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-    const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-    const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
+    const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+    const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+    const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
     const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
     const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
@@ -1299,10 +1299,10 @@ TEST(MAXIMUM_ND_F32, 0d_x_3d) {
 TEST(MAXIMUM_ND_F32, 1d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
@@ -1319,11 +1319,11 @@ TEST(MAXIMUM_ND_F32, 1d_x_3d) {
 TEST(MAXIMUM_ND_F32, 2d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
@@ -1340,9 +1340,9 @@ TEST(MAXIMUM_ND_F32, 2d_x_3d) {
 
 TEST(MAXIMUM_ND_F32, 3d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
-    const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-    const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-    const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
+    const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+    const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+    const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
     const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
     const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1356,10 +1356,10 @@ TEST(MAXIMUM_ND_F32, 3d_x_0d) {
 TEST(MAXIMUM_ND_F32, 3d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1376,11 +1376,11 @@ TEST(MAXIMUM_ND_F32, 3d_x_1d) {
 TEST(MAXIMUM_ND_F32, 3d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1398,12 +1398,12 @@ TEST(MAXIMUM_ND_F32, 3d_x_2d) {
 TEST(MAXIMUM_ND_F32, 3d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1421,10 +1421,10 @@ TEST(MAXIMUM_ND_F32, 3d_x_3d) {
 
 TEST(MAXIMUM_ND_F32, 0d_x_4d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
-    const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-    const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-    const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-    const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
+    const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+    const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+    const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+    const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
     const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
     const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
@@ -1439,11 +1439,11 @@ TEST(MAXIMUM_ND_F32, 0d_x_4d) {
 TEST(MAXIMUM_ND_F32, 1d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
@@ -1461,12 +1461,12 @@ TEST(MAXIMUM_ND_F32, 1d_x_4d) {
 TEST(MAXIMUM_ND_F32, 2d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
@@ -1485,13 +1485,13 @@ TEST(MAXIMUM_ND_F32, 2d_x_4d) {
 TEST(MAXIMUM_ND_F32, 3d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1510,10 +1510,10 @@ TEST(MAXIMUM_ND_F32, 3d_x_4d) {
 
 TEST(MAXIMUM_ND_F32, 4d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
-    const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-    const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-    const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-    const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
+    const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+    const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+    const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+    const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
     const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
     const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1528,11 +1528,11 @@ TEST(MAXIMUM_ND_F32, 4d_x_0d) {
 TEST(MAXIMUM_ND_F32, 4d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1550,12 +1550,12 @@ TEST(MAXIMUM_ND_F32, 4d_x_1d) {
 TEST(MAXIMUM_ND_F32, 4d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1574,13 +1574,13 @@ TEST(MAXIMUM_ND_F32, 4d_x_2d) {
 TEST(MAXIMUM_ND_F32, 4d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1600,14 +1600,14 @@ TEST(MAXIMUM_ND_F32, 4d_x_3d) {
 TEST(MAXIMUM_ND_F32, 4d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1627,11 +1627,11 @@ TEST(MAXIMUM_ND_F32, 4d_x_4d) {
 
 TEST(MAXIMUM_ND_F32, 0d_x_5d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
-    const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-    const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-    const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-    const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-    const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
+    const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+    const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+    const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+    const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+    const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
     const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
     const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
@@ -1647,12 +1647,12 @@ TEST(MAXIMUM_ND_F32, 0d_x_5d) {
 TEST(MAXIMUM_ND_F32, 1d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
@@ -1671,13 +1671,13 @@ TEST(MAXIMUM_ND_F32, 1d_x_5d) {
 TEST(MAXIMUM_ND_F32, 2d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
@@ -1697,14 +1697,14 @@ TEST(MAXIMUM_ND_F32, 2d_x_5d) {
 TEST(MAXIMUM_ND_F32, 3d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1725,15 +1725,15 @@ TEST(MAXIMUM_ND_F32, 3d_x_5d) {
 TEST(MAXIMUM_ND_F32, 4d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1754,11 +1754,11 @@ TEST(MAXIMUM_ND_F32, 4d_x_5d) {
 
 TEST(MAXIMUM_ND_F32, 5d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
-    const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-    const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-    const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-    const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-    const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
+    const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+    const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+    const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+    const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+    const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
     const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
     const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1774,12 +1774,12 @@ TEST(MAXIMUM_ND_F32, 5d_x_0d) {
 TEST(MAXIMUM_ND_F32, 5d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1798,13 +1798,13 @@ TEST(MAXIMUM_ND_F32, 5d_x_1d) {
 TEST(MAXIMUM_ND_F32, 5d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1824,14 +1824,14 @@ TEST(MAXIMUM_ND_F32, 5d_x_2d) {
 TEST(MAXIMUM_ND_F32, 5d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1852,15 +1852,15 @@ TEST(MAXIMUM_ND_F32, 5d_x_3d) {
 TEST(MAXIMUM_ND_F32, 5d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1882,16 +1882,16 @@ TEST(MAXIMUM_ND_F32, 5d_x_4d) {
 TEST(MAXIMUM_ND_F32, 5d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -1914,12 +1914,12 @@ TEST(MAXIMUM_ND_F32, 5d_x_5d) {
 
 TEST(MAXIMUM_ND_F32, 0d_x_6d) {
   for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
-    const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-    const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-    const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-    const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-    const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
-    const bool input2_broadcast_dim6 = bm2 & (uint32_t(1) << 5);
+    const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+    const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+    const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+    const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+    const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
+    const bool input2_broadcast_dim6 = (bm2 & (uint32_t(1) << 5)) != 0;
     const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
     const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
     const size_t input2_dim3 = input2_broadcast_dim3 ? 1 : kDim3;
@@ -1936,13 +1936,13 @@ TEST(MAXIMUM_ND_F32, 0d_x_6d) {
 TEST(MAXIMUM_ND_F32, 1d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 1); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim6 = bm2 & (uint32_t(1) << 5);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim6 = (bm2 & (uint32_t(1) << 5)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
       const size_t input2_dim2 = input2_broadcast_dim2 ? 1 : kDim2;
@@ -1962,14 +1962,14 @@ TEST(MAXIMUM_ND_F32, 1d_x_6d) {
 TEST(MAXIMUM_ND_F32, 2d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 2); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim6 = bm2 & (uint32_t(1) << 5);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim6 = (bm2 & (uint32_t(1) << 5)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input2_dim1 = input2_broadcast_dim1 ? 1 : kDim1;
@@ -1990,15 +1990,15 @@ TEST(MAXIMUM_ND_F32, 2d_x_6d) {
 TEST(MAXIMUM_ND_F32, 3d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 3); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim6 = bm2 & (uint32_t(1) << 5);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim6 = (bm2 & (uint32_t(1) << 5)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -2020,16 +2020,16 @@ TEST(MAXIMUM_ND_F32, 3d_x_6d) {
 TEST(MAXIMUM_ND_F32, 4d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 4); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim6 = bm2 & (uint32_t(1) << 5);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim6 = (bm2 & (uint32_t(1) << 5)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -2052,17 +2052,17 @@ TEST(MAXIMUM_ND_F32, 4d_x_6d) {
 TEST(MAXIMUM_ND_F32, 5d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 5); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim6 = bm2 & (uint32_t(1) << 5);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim6 = (bm2 & (uint32_t(1) << 5)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -2086,12 +2086,12 @@ TEST(MAXIMUM_ND_F32, 5d_x_6d) {
 
 TEST(MAXIMUM_ND_F32, 6d_x_0d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
-    const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-    const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-    const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-    const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-    const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-    const bool input1_broadcast_dim6 = bm1 & (uint32_t(1) << 5);
+    const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+    const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+    const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+    const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+    const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+    const bool input1_broadcast_dim6 = (bm1 & (uint32_t(1) << 5)) != 0;
     const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
     const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
     const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -2108,13 +2108,13 @@ TEST(MAXIMUM_ND_F32, 6d_x_0d) {
 TEST(MAXIMUM_ND_F32, 6d_x_1d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 1); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input1_broadcast_dim6 = bm1 & (uint32_t(1) << 5);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input1_broadcast_dim6 = (bm1 & (uint32_t(1) << 5)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -2134,14 +2134,14 @@ TEST(MAXIMUM_ND_F32, 6d_x_1d) {
 TEST(MAXIMUM_ND_F32, 6d_x_2d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 2); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input1_broadcast_dim6 = bm1 & (uint32_t(1) << 5);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input1_broadcast_dim6 = (bm1 & (uint32_t(1) << 5)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -2162,15 +2162,15 @@ TEST(MAXIMUM_ND_F32, 6d_x_2d) {
 TEST(MAXIMUM_ND_F32, 6d_x_3d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 3); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input1_broadcast_dim6 = bm1 & (uint32_t(1) << 5);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input1_broadcast_dim6 = (bm1 & (uint32_t(1) << 5)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -2192,16 +2192,16 @@ TEST(MAXIMUM_ND_F32, 6d_x_3d) {
 TEST(MAXIMUM_ND_F32, 6d_x_4d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 4); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input1_broadcast_dim6 = bm1 & (uint32_t(1) << 5);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input1_broadcast_dim6 = (bm1 & (uint32_t(1) << 5)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -2224,17 +2224,17 @@ TEST(MAXIMUM_ND_F32, 6d_x_4d) {
 TEST(MAXIMUM_ND_F32, 6d_x_5d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 5); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input1_broadcast_dim6 = bm1 & (uint32_t(1) << 5);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input1_broadcast_dim6 = (bm1 & (uint32_t(1) << 5)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
@@ -2259,18 +2259,18 @@ TEST(MAXIMUM_ND_F32, 6d_x_5d) {
 TEST(MAXIMUM_ND_F32, 6d_x_6d) {
   for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << 6); bm1++) {
     for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << 6); bm2++) {
-      const bool input1_broadcast_dim1 = bm1 & (uint32_t(1) << 0);
-      const bool input1_broadcast_dim2 = bm1 & (uint32_t(1) << 1);
-      const bool input1_broadcast_dim3 = bm1 & (uint32_t(1) << 2);
-      const bool input1_broadcast_dim4 = bm1 & (uint32_t(1) << 3);
-      const bool input1_broadcast_dim5 = bm1 & (uint32_t(1) << 4);
-      const bool input1_broadcast_dim6 = bm1 & (uint32_t(1) << 5);
-      const bool input2_broadcast_dim1 = bm2 & (uint32_t(1) << 0);
-      const bool input2_broadcast_dim2 = bm2 & (uint32_t(1) << 1);
-      const bool input2_broadcast_dim3 = bm2 & (uint32_t(1) << 2);
-      const bool input2_broadcast_dim4 = bm2 & (uint32_t(1) << 3);
-      const bool input2_broadcast_dim5 = bm2 & (uint32_t(1) << 4);
-      const bool input2_broadcast_dim6 = bm2 & (uint32_t(1) << 5);
+      const bool input1_broadcast_dim1 = (bm1 & (uint32_t(1) << 0)) != 0;
+      const bool input1_broadcast_dim2 = (bm1 & (uint32_t(1) << 1)) != 0;
+      const bool input1_broadcast_dim3 = (bm1 & (uint32_t(1) << 2)) != 0;
+      const bool input1_broadcast_dim4 = (bm1 & (uint32_t(1) << 3)) != 0;
+      const bool input1_broadcast_dim5 = (bm1 & (uint32_t(1) << 4)) != 0;
+      const bool input1_broadcast_dim6 = (bm1 & (uint32_t(1) << 5)) != 0;
+      const bool input2_broadcast_dim1 = (bm2 & (uint32_t(1) << 0)) != 0;
+      const bool input2_broadcast_dim2 = (bm2 & (uint32_t(1) << 1)) != 0;
+      const bool input2_broadcast_dim3 = (bm2 & (uint32_t(1) << 2)) != 0;
+      const bool input2_broadcast_dim4 = (bm2 & (uint32_t(1) << 3)) != 0;
+      const bool input2_broadcast_dim5 = (bm2 & (uint32_t(1) << 4)) != 0;
+      const bool input2_broadcast_dim6 = (bm2 & (uint32_t(1) << 5)) != 0;
       const size_t input1_dim1 = input1_broadcast_dim1 ? 1 : kDim1;
       const size_t input1_dim2 = input1_broadcast_dim2 ? 1 : kDim2;
       const size_t input1_dim3 = input1_broadcast_dim3 ? 1 : kDim3;
