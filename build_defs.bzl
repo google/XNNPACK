@@ -405,5 +405,5 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = []):
             ":emscripten": xnnpack_emscripten_deps(),
             "//conditions:default": [],
         }),
-	tags = tags,
+        tags = tags,
     )
