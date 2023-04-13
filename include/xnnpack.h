@@ -2680,7 +2680,7 @@ enum xnn_status xnn_setup_transpose_nd_x32(
     xnn_operator_t transpose_op,
     const void* input,
     void* output,
-    const size_t num_dims,
+    size_t num_dims,
     const size_t* input_shape,
     const size_t* output_perm,
     pthreadpool_t threadpool);
@@ -2688,7 +2688,7 @@ enum xnn_status xnn_setup_transpose_nd_x32(
 enum xnn_status xnn_run_transpose_nd_x32(
     const void* input,
     void* output,
-    const size_t num_dims,
+    size_t num_dims,
     const size_t* input_shape,
     const size_t* output_perm,
     uint32_t flags,
@@ -3457,7 +3457,7 @@ enum xnn_status xnn_setup_transpose_nd_x16(
     xnn_operator_t transpose_op,
     const void* input,
     void* output,
-    const size_t num_dims,
+    size_t num_dims,
     const size_t* input_shape,
     const size_t* output_perm,
     pthreadpool_t threadpool);
@@ -3465,7 +3465,7 @@ enum xnn_status xnn_setup_transpose_nd_x16(
 enum xnn_status xnn_run_transpose_nd_x16(
     const void* input,
     void* output,
-    const size_t num_dims,
+    size_t num_dims,
     const size_t* input_shape,
     const size_t* output_perm,
     uint32_t flags,
@@ -4440,7 +4440,7 @@ enum xnn_status xnn_setup_transpose_nd_x8(
     xnn_operator_t transpose_op,
     const void* input,
     void* output,
-    const size_t num_dims,
+    size_t num_dims,
     const size_t* input_shape,
     const size_t* output_perm,
     pthreadpool_t threadpool);
@@ -4448,7 +4448,7 @@ enum xnn_status xnn_setup_transpose_nd_x8(
 enum xnn_status xnn_run_transpose_nd_x8(
     const void* input,
     void* output,
-    const size_t num_dims,
+    size_t num_dims,
     const size_t* input_shape,
     const size_t* output_perm,
     uint32_t flags,
