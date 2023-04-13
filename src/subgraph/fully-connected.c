@@ -30,9 +30,9 @@ static enum xnn_status create_fully_connected_operator(
   const uint32_t input_id = node->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
-  const uint32_t kernel_id = node->inputs[1];
-  assert(kernel_id != XNN_INVALID_VALUE_ID);
-  assert(kernel_id < num_values);
+  const uint32_t filter_id = node->inputs[1];
+  assert(filter_id != XNN_INVALID_VALUE_ID);
+  assert(filter_id < num_values);
 
   assert(node->num_outputs == 1);
   const uint32_t output_id = node->outputs[0];
@@ -49,7 +49,7 @@ static enum xnn_status create_fully_connected_operator(
     input_channels = values[node->inputs[1]].shape.dim[1];
   }
 
-  const void* kernel_data = values[kernel_id].fp32_data != NULL ? values[kernel_id].fp32_data : values[kernel_id].data;
+  const void* kernel_data = values[filter_id].fp32_data != NULL ? values[filter_id].fp32_data : values[filter_id].data;
   bool has_non_static_weights = (kernel_data == NULL);
 
   const void* bias_data = NULL;
@@ -119,7 +119,7 @@ static enum xnn_status create_fully_connected_operator(
         output_channels /* output stride */,
         (int8_t) values[input_id].quantization.zero_point,
         values[input_id].quantization.scale,
-        values[kernel_id].quantization.scale,
+        values[filter_id].quantization.scale,
         kernel_data,
         bias_data,
         (int8_t) output_zero_point,
@@ -145,8 +145,8 @@ static enum xnn_status create_fully_connected_operator(
         output_channels /* output stride */,
         (uint8_t) values[input_id].quantization.zero_point,
         values[input_id].quantization.scale,
-        (uint8_t) values[kernel_id].quantization.zero_point,
-        values[kernel_id].quantization.scale,
+        (uint8_t) values[filter_id].quantization.zero_point,
+        values[filter_id].quantization.scale,
         kernel_data,
         bias_data,
         (uint8_t) output_zero_point,
@@ -165,7 +165,7 @@ static enum xnn_status create_fully_connected_operator(
     opdata->input_channels = input_channels;
     opdata->output_channels = output_channels;
     opdata->inputs[0] = input_id;
-    opdata->inputs[1] = has_non_static_weights ? kernel_id : XNN_INVALID_VALUE_ID;
+    opdata->inputs[1] = has_non_static_weights ? filter_id : XNN_INVALID_VALUE_ID;
     opdata->inputs[2] = has_non_static_weights && node->num_inputs == 3 ? node->inputs[2] : XNN_INVALID_VALUE_ID;
     opdata->outputs[0] = output_id;
   }
@@ -182,7 +182,7 @@ static enum xnn_status setup_fully_connected_operator(
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_blobs);
 
-  const uint32_t kernel_id = opdata->inputs[1];
+  const uint32_t filter_id = opdata->inputs[1];
   const uint32_t bias_id = opdata->inputs[2];
 
   const uint32_t output_id = opdata->outputs[0];
@@ -194,9 +194,9 @@ static enum xnn_status setup_fully_connected_operator(
   assert(input_data != NULL);
 
   const void* kernel_data = NULL;
-  if (kernel_id != XNN_INVALID_VALUE_ID) {
-    assert(kernel_id < num_blobs);
-    const struct xnn_blob* kernel_blob = blobs + kernel_id;
+  if (filter_id != XNN_INVALID_VALUE_ID) {
+    assert(filter_id < num_blobs);
+    const struct xnn_blob* kernel_blob = blobs + filter_id;
     kernel_data = kernel_blob->data;
     assert(kernel_data != NULL);
   }
@@ -333,7 +333,7 @@ enum xnn_status xnn_define_fully_connected(
   float output_min,
   float output_max,
   uint32_t input_id,
-  uint32_t kernel_id,
+  uint32_t filter_id,
   uint32_t bias_id,
   uint32_t output_id,
   uint32_t flags)
@@ -372,18 +372,18 @@ enum xnn_status xnn_define_fully_connected(
       return xnn_status_invalid_parameter;
   }
 
-  if (kernel_id >= subgraph->num_values) {
+  if (filter_id >= subgraph->num_values) {
     xnn_log_error(
       "failed to define %s operator with filter ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_fully_connected), kernel_id);
+      xnn_node_type_to_string(xnn_node_type_fully_connected), filter_id);
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_value* kernel_value = &subgraph->values[kernel_id];
+  const struct xnn_value* kernel_value = &subgraph->values[filter_id];
   if (kernel_value->type != xnn_value_type_dense_tensor) {
     xnn_log_error(
       "failed to define %s operator with filter ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(xnn_node_type_fully_connected), kernel_id, kernel_value->type);
+      xnn_node_type_to_string(xnn_node_type_fully_connected), filter_id, kernel_value->type);
     return xnn_status_invalid_parameter;
   }
 
@@ -395,7 +395,7 @@ enum xnn_status xnn_define_fully_connected(
       if (kernel_value->data == NULL) {
         xnn_log_error(
           "failed to define %s operator with filter ID #%" PRIu32 ": non-static Value",
-          xnn_node_type_to_string(xnn_node_type_fully_connected), kernel_id);
+          xnn_node_type_to_string(xnn_node_type_fully_connected), filter_id);
         return xnn_status_invalid_parameter;
       }
       break;
@@ -408,7 +408,7 @@ enum xnn_status xnn_define_fully_connected(
       if (kernel_value->quantization.zero_point != 0) {
         xnn_log_error(
           "failed to define %s operator with filter ID #%" PRIu32 ": unsupported quantization zero point %" PRId32 " for datatype %s",
-          xnn_node_type_to_string(xnn_node_type_convolution_2d), kernel_id,
+          xnn_node_type_to_string(xnn_node_type_convolution_2d), filter_id,
           kernel_value->quantization.zero_point, xnn_datatype_to_string(kernel_value->datatype));
       }
       break;
@@ -417,7 +417,7 @@ enum xnn_status xnn_define_fully_connected(
     default:
       xnn_log_error(
         "failed to define %s operator with filter ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_fully_connected), kernel_id,
+        xnn_node_type_to_string(xnn_node_type_fully_connected), filter_id,
         xnn_datatype_to_string(kernel_value->datatype), kernel_value->datatype);
       return xnn_status_invalid_parameter;
   }
@@ -498,7 +498,7 @@ enum xnn_status xnn_define_fully_connected(
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", bias ID #%" PRIu32 ", and output ID #%" PRIu32
         ": mismatching datatypes across input (%s), filter (%s), bias (%s), and output (%s)",
-        xnn_node_type_to_string(xnn_node_type_fully_connected), input_id, kernel_id, bias_id, output_id,
+        xnn_node_type_to_string(xnn_node_type_fully_connected), input_id, filter_id, bias_id, output_id,
         xnn_datatype_to_string(input_value->datatype),
         xnn_datatype_to_string(kernel_value->datatype),
         xnn_datatype_to_string(bias_value->datatype),
@@ -512,7 +512,7 @@ enum xnn_status xnn_define_fully_connected(
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
         ": mismatching datatypes across input (%s), filter (%s), and output (%s)",
-        xnn_node_type_to_string(xnn_node_type_fully_connected), input_id, kernel_id, output_id,
+        xnn_node_type_to_string(xnn_node_type_fully_connected), input_id, filter_id, output_id,
         xnn_datatype_to_string(input_value->datatype),
         xnn_datatype_to_string(kernel_value->datatype),
         xnn_datatype_to_string(output_value->datatype));
@@ -531,7 +531,7 @@ enum xnn_status xnn_define_fully_connected(
   node->activation.output_max = output_max;
   node->num_inputs = 2 + (size_t) (bias_id != XNN_INVALID_VALUE_ID);
   node->inputs[0] = input_id;
-  node->inputs[1] = kernel_id;
+  node->inputs[1] = filter_id;
   node->inputs[2] = bias_id;
   node->num_outputs = 1;
   node->outputs[0] = output_id;
