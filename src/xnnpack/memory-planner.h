@@ -34,7 +34,6 @@ struct xnn_value_usage {
 
 // Track the memory allocation in a memory arena for a subgraph.
 struct xnn_value_allocation_tracker {
-  xnn_subgraph_t subgraph;
   size_t mem_arena_size;
   // Representing the lifecycle of xnn_values in the 'subgraph', and the array size is 'subgraph->num_values'.
   struct xnn_value_usage* usage;

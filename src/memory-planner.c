@@ -129,11 +129,10 @@ static size_t find_value_alloc_offset(struct memory_block* live_mem_blocks,
 }
 
 void xnn_init_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker, const xnn_subgraph_t subgraph) {
-  tracker->subgraph = subgraph;
   tracker->mem_arena_size = 0;
   tracker->usage = xnn_allocate_zero_memory(sizeof(struct xnn_value_usage) * subgraph->num_values);
 #if XNN_ENABLE_MEMOPT
-  populate_value_lifecycle(tracker->subgraph, tracker->usage);
+  populate_value_lifecycle(subgraph, tracker->usage);
 #endif
   tracker->min_value_id = XNN_INVALID_VALUE_ID;
   tracker->max_value_id = XNN_INVALID_VALUE_ID;
