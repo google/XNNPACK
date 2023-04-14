@@ -604,7 +604,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   static void f32_ppmm_8x8_unipass__neonfma(benchmark::State& state, const char* net) {
     f32_ppmm1p(state,
       xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4,
-      xnn_x32_packx_ukernel_4x__neon_st4,
+      xnn_x32_packx_ukernel_8x__neon_st4,
       xnn_f32_ppmm_minmax_ukernel_8x8__neonfma,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/8, /*nr=*/8, /*kr=*/1, /*sr=*/1);
@@ -612,7 +612,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   static void f32_ppmm_8x8_twopass__neonfma(benchmark::State& state, const char* net) {
     f32_ppmm2p(state,
       xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4,
-      xnn_x32_packx_ukernel_4x__neon_st4,
+      xnn_x32_packx_ukernel_8x__neon_st4,
       xnn_f32_ppmm_minmax_ukernel_8x8__neonfma,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/8, /*nr=*/8, /*kr=*/1, /*sr=*/1);
@@ -756,7 +756,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   static void f32_ppmm_8x8_unipass__neon(benchmark::State& state, const char* net) {
     f32_ppmm1p(state,
       xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4,
-      xnn_x32_packx_ukernel_4x__neon_st4,
+      xnn_x32_packx_ukernel_8x__neon_st4,
       xnn_f32_ppmm_minmax_ukernel_8x8__neon,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/8, /*nr=*/8, /*kr=*/1, /*sr=*/1,
@@ -765,7 +765,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   static void f32_ppmm_8x8_twopass__neon(benchmark::State& state, const char* net) {
     f32_ppmm2p(state,
       xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4,
-      xnn_x32_packx_ukernel_4x__neon_st4,
+      xnn_x32_packx_ukernel_8x__neon_st4,
       xnn_f32_ppmm_minmax_ukernel_8x8__neon,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/8, /*nr=*/8, /*kr=*/1, /*sr=*/1,

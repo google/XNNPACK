@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 
-#define DECLARE_X32_PACKX_UKERNEL_FUNCTION(fn_name) \
+#define DECLARE_X32_PACKX_UKERNEL_FUNCTION(fn_name)  \
   XNN_INTERNAL void fn_name(                         \
       size_t m,                                      \
       size_t k,                                      \
@@ -26,9 +26,12 @@ extern "C" {
 DECLARE_X32_PACKX_UKERNEL_FUNCTION(xnn_x32_packx_ukernel_2x__scalar)
 DECLARE_X32_PACKX_UKERNEL_FUNCTION(xnn_x32_packx_ukernel_3x__scalar)
 DECLARE_X32_PACKX_UKERNEL_FUNCTION(xnn_x32_packx_ukernel_4x__neon_st4)
+DECLARE_X32_PACKX_UKERNEL_FUNCTION(xnn_x32_packx_ukernel_4x__neon_st4_prfm)
 DECLARE_X32_PACKX_UKERNEL_FUNCTION(xnn_x32_packx_ukernel_4x__scalar)
 DECLARE_X32_PACKX_UKERNEL_FUNCTION(xnn_x32_packx_ukernel_4x__sse)
 DECLARE_X32_PACKX_UKERNEL_FUNCTION(xnn_x32_packx_ukernel_4x__wasmsimd)
+DECLARE_X32_PACKX_UKERNEL_FUNCTION(xnn_x32_packx_ukernel_8x__neon_st4)
+DECLARE_X32_PACKX_UKERNEL_FUNCTION(xnn_x32_packx_ukernel_8x__neon_st4_prfm)
 
 
 #ifdef __cplusplus

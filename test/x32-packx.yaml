@@ -6,6 +6,12 @@
 # ARM NEON
 - name: xnn_x32_packx_ukernel_4x__neon_st4
   k-block: 4
+- name: xnn_x32_packx_ukernel_4x__neon_st4_prfm
+  k-block: 4
+- name: xnn_x32_packx_ukernel_8x__neon_st4
+  k-block: 4
+- name: xnn_x32_packx_ukernel_8x__neon_st4_prfm
+  k-block: 4
 # x86 SSE
 - name: xnn_x32_packx_ukernel_4x__sse
   k-block: 4
