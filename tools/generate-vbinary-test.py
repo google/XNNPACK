@@ -21,6 +21,7 @@ parser = argparse.ArgumentParser(
   description='Vector binary operation microkernel test generator')
 parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
                     choices=["VAddMicrokernelTester", "VAddCMicrokernelTester",
+                    "VCMulMicrokernelTester",
                     "VMulMicrokernelTester", "VMulCMicrokernelTester",
                     "VBinaryMicrokernelTester", "VBinaryCMicrokernelTester"],
                     help="Tester class to be used in the generated test")
@@ -32,11 +33,12 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(qu8|qs8|f16|f32)_v(add|div|max|min|mul|sqrdiff|sub|addc|divc|rdivc|maxc|minc|mulc|sqrdiffc|subc|rsubc)(_(minmax|relu)(_(fp32|rndnu))?)?_ukernel__(.+)_x(\d+)", name)
+  match = re.fullmatch(r"xnn_(qu8|qs8|f16|f32)_v(add|cmul|div|max|min|mul|sqrdiff|sub|addc|divc|rdivc|maxc|minc|mulc|sqrdiffc|subc|rsubc)(_(minmax|relu)(_(fp32|rndnu))?)?_ukernel__(.+)_x(\d+)", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
     "add": "Add",
+    "cmul": "CMul",
     "div": "Div",
     "max": "Max",
     "min": "Min",
@@ -316,6 +318,7 @@ def main(args):
       "VAddCMicrokernelTester": "xnnpack/vadd.h",
       "VMulMicrokernelTester": "xnnpack/vmul.h",
       "VMulCMicrokernelTester": "xnnpack/vmul.h",
+      "VCMulMicrokernelTester": "xnnpack/vbinary.h",
       "VBinaryMicrokernelTester": "xnnpack/vbinary.h",
       "VBinaryCMicrokernelTester": "xnnpack/vbinary.h",
     }[options.tester]
@@ -324,6 +327,7 @@ def main(args):
       "VAddCMicrokernelTester": "vaddc-microkernel-tester.h",
       "VMulMicrokernelTester": "vmul-microkernel-tester.h",
       "VMulCMicrokernelTester": "vmulc-microkernel-tester.h",
+      "VCMulMicrokernelTester": "vcmul-microkernel-tester.h",
       "VBinaryMicrokernelTester": "vbinary-microkernel-tester.h",
       "VBinaryCMicrokernelTester": "vbinaryc-microkernel-tester.h",
     }[options.tester]

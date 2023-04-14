@@ -5792,6 +5792,14 @@ xnnpack_cc_library(
 ######################### Benchmarks for micro-kernels #########################
 
 xnnpack_benchmark(
+    name = "f32_vcmul_bench",
+    srcs = [
+        "bench/f32-vcmul.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "qs8_dwconv_bench",
     srcs = [
         "bench/dwconv.h",
@@ -8353,6 +8361,15 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-vclamp.cc",
         "test/vunary-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_vcmul_test",
+    srcs = [
+        "test/f32-vcmul.cc",
+        "test/vcmul-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

@@ -2295,6 +2295,10 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsubc-minmax-neon-x8.c
   src/f32-vclamp/gen/f32-vclamp-neon-x4.c
   src/f32-vclamp/gen/f32-vclamp-neon-x8.c
+  src/f32-vcmul/gen/f32-vcmul-neon-x4.c
+  src/f32-vcmul/gen/f32-vcmul-neon-x8.c
+  src/f32-vcmul/gen/f32-vcmul-neon-x12.c
+  src/f32-vcmul/gen/f32-vcmul-neon-x16.c
   src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-x4.c
   src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-x8.c
   src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-x12.c
@@ -4801,6 +4805,10 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-vclamp/gen/f32-vclamp-scalar-x1.c
   src/f32-vclamp/gen/f32-vclamp-scalar-x2.c
   src/f32-vclamp/gen/f32-vclamp-scalar-x4.c
+  src/f32-vcmul/gen/f32-vcmul-scalar-x1.c
+  src/f32-vcmul/gen/f32-vcmul-scalar-x2.c
+  src/f32-vcmul/gen/f32-vcmul-scalar-x4.c
+  src/f32-vcmul/gen/f32-vcmul-scalar-x8.c
   src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-x1.c
   src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-x2.c
   src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-x3.c
@@ -5705,6 +5713,10 @@ SET(ALL_SSE_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsubc-minmax-sse-x8.c
   src/f32-vclamp/gen/f32-vclamp-sse-x4.c
   src/f32-vclamp/gen/f32-vclamp-sse-x8.c
+  src/f32-vcmul/gen/f32-vcmul-sse-x4.c
+  src/f32-vcmul/gen/f32-vcmul-sse-x8.c
+  src/f32-vcmul/gen/f32-vcmul-sse-x12.c
+  src/f32-vcmul/gen/f32-vcmul-sse-x16.c
   src/f32-vhswish/gen/f32-vhswish-sse-x4.c
   src/f32-vhswish/gen/f32-vhswish-sse-x8.c
   src/f32-vlrelu/gen/f32-vlrelu-sse-x4.c
@@ -7902,6 +7914,10 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vclamp/gen/f32-vclamp-wasmsimd-arm-x8.c
   src/f32-vclamp/gen/f32-vclamp-wasmsimd-x86-x4.c
   src/f32-vclamp/gen/f32-vclamp-wasmsimd-x86-x8.c
+  src/f32-vcmul/gen/f32-vcmul-wasmsimd-x4.c
+  src/f32-vcmul/gen/f32-vcmul-wasmsimd-x8.c
+  src/f32-vcmul/gen/f32-vcmul-wasmsimd-x12.c
+  src/f32-vcmul/gen/f32-vcmul-wasmsimd-x16.c
   src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x4.c
   src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x8.c
   src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-lut16-p3-x12.c
