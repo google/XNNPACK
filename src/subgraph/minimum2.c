@@ -85,32 +85,32 @@ static enum xnn_status create_minimum_operator(
 
 static enum xnn_status setup_minimum_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_blob* blobs,
-  size_t num_blobs,
+  const struct xnn_value* values,
+  size_t num_values,
   pthreadpool_t threadpool)
 {
   const uint32_t input1_id = opdata->inputs[0];
   assert(input1_id != XNN_INVALID_VALUE_ID);
-  assert(input1_id < num_blobs);
+  assert(input1_id < num_values);
 
   const uint32_t input2_id = opdata->inputs[1];
   assert(input2_id != XNN_INVALID_VALUE_ID);
-  assert(input2_id < num_blobs);
+  assert(input2_id < num_values);
 
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_blobs);
+  assert(output_id < num_values);
 
-  const struct xnn_blob* input1_blob = blobs + input1_id;
-  const void* input1_data = input1_blob->data;
+  const struct xnn_value* input1_value = values + input1_id;
+  const void* input1_data = input1_value->data;
   assert(input1_data != NULL);
 
-  const struct xnn_blob* input2_blob = blobs + input2_id;
-  const void* input2_data = input2_blob->data;
+  const struct xnn_value* input2_value = values + input2_id;
+  const void* input2_data = input2_value->data;
   assert(input2_data != NULL);
 
-  const struct xnn_blob* output_blob = blobs + output_id;
-  void* output_data = output_blob->data;
+  const struct xnn_value* output_value = values + output_id;
+  void* output_data = output_value->data;
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {

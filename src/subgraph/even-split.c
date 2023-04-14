@@ -237,8 +237,8 @@ static enum xnn_status create_even_split4_operator(
 }
 
 static enum xnn_status setup_even_split_operator_helper(
-  const struct xnn_blob* blobs,
-  const uint32_t num_blobs,
+  const struct xnn_value* values,
+  const uint32_t num_values,
   const struct xnn_operator_data* opdata,
   size_t index,
   const void* input_data,
@@ -253,9 +253,9 @@ static enum xnn_status setup_even_split_operator_helper(
 
   const size_t channels = opdata->operator_objects[index]->channels;
 
-  assert(output_id < num_blobs);
-  const struct xnn_blob* output_blob = blobs + output_id;
-  void* output_data = output_blob->data;
+  assert(output_id < num_values);
+  const struct xnn_value* output_value = values + output_id;
+  void* output_data = output_value->data;
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[index]->type) {
@@ -278,25 +278,25 @@ static enum xnn_status setup_even_split_operator_helper(
 
 static enum xnn_status setup_even_split2_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_blob* blobs,
-  size_t num_blobs,
+  const struct xnn_value* values,
+  size_t num_values,
   pthreadpool_t threadpool)
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_blobs);
+  assert(input_id < num_values);
 
-  const struct xnn_blob* input_blob = blobs + input_id;
-  const void* input_data = input_blob->data;
+  const struct xnn_value* input_value = values + input_id;
+  const void* input_data = input_value->data;
   assert(input_data != NULL);
 
   enum xnn_status status = xnn_status_success;
 
-  status = setup_even_split_operator_helper(blobs, num_blobs, opdata, 0, input_data, threadpool);
+  status = setup_even_split_operator_helper(values, num_values, opdata, 0, input_data, threadpool);
   if (status != xnn_status_success) {
     return status;
   }
-  status = setup_even_split_operator_helper(blobs, num_blobs, opdata, 1, input_data, threadpool);
+  status = setup_even_split_operator_helper(values, num_values, opdata, 1, input_data, threadpool);
   if (status != xnn_status_success) {
     return status;
   }
@@ -306,30 +306,30 @@ static enum xnn_status setup_even_split2_operator(
 
 static enum xnn_status setup_even_split3_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_blob* blobs,
-  size_t num_blobs,
+  const struct xnn_value* values,
+  size_t num_values,
   pthreadpool_t
   threadpool)
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_blobs);
+  assert(input_id < num_values);
 
-  const struct xnn_blob* input_blob = blobs + input_id;
-  const void* input_data = input_blob->data;
+  const struct xnn_value* input_value = values + input_id;
+  const void* input_data = input_value->data;
   assert(input_data != NULL);
 
   enum xnn_status status = xnn_status_success;
 
-  status = setup_even_split_operator_helper(blobs, num_blobs, opdata, 0, input_data, threadpool);
+  status = setup_even_split_operator_helper(values, num_values, opdata, 0, input_data, threadpool);
   if (status != xnn_status_success) {
     return status;
   }
-  status = setup_even_split_operator_helper(blobs, num_blobs, opdata, 1, input_data, threadpool);
+  status = setup_even_split_operator_helper(values, num_values, opdata, 1, input_data, threadpool);
   if (status != xnn_status_success) {
     return status;
   }
-  status = setup_even_split_operator_helper(blobs, num_blobs, opdata, 2, input_data, threadpool);
+  status = setup_even_split_operator_helper(values, num_values, opdata, 2, input_data, threadpool);
   if (status != xnn_status_success) {
     return status;
   }
@@ -339,34 +339,34 @@ static enum xnn_status setup_even_split3_operator(
 
 static enum xnn_status setup_even_split4_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_blob* blobs,
-  size_t num_blobs,
+  const struct xnn_value* values,
+  size_t num_values,
   pthreadpool_t
   threadpool)
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_blobs);
+  assert(input_id < num_values);
 
-  const struct xnn_blob* input_blob = blobs + input_id;
-  const void* input_data = input_blob->data;
+  const struct xnn_value* input_value = values + input_id;
+  const void* input_data = input_value->data;
   assert(input_data != NULL);
 
   enum xnn_status status = xnn_status_success;
 
-  status = setup_even_split_operator_helper(blobs, num_blobs, opdata, 0, input_data, threadpool);
+  status = setup_even_split_operator_helper(values, num_values, opdata, 0, input_data, threadpool);
   if (status != xnn_status_success) {
     return status;
   }
-  status = setup_even_split_operator_helper(blobs, num_blobs, opdata, 1, input_data, threadpool);
+  status = setup_even_split_operator_helper(values, num_values, opdata, 1, input_data, threadpool);
   if (status != xnn_status_success) {
     return status;
   }
-  status = setup_even_split_operator_helper(blobs, num_blobs, opdata, 2, input_data, threadpool);
+  status = setup_even_split_operator_helper(values, num_values, opdata, 2, input_data, threadpool);
   if (status != xnn_status_success) {
     return status;
   }
-  status = setup_even_split_operator_helper(blobs, num_blobs, opdata, 3, input_data, threadpool);
+  status = setup_even_split_operator_helper(values, num_values, opdata, 3, input_data, threadpool);
   if (status != xnn_status_success) {
     return status;
   }

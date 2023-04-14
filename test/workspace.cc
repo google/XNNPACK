@@ -123,14 +123,14 @@ void DefineGraphWithPersistentTensors(xnn_subgraph_t* subgraph, std::array<size_
   ASSERT_EQ(xnn_status_success, xnn_define_hardswish(*subgraph, intermediate_id2, output_id, /*flags=*/0));
 }
 
-testing::AssertionResult BlobInWorkspace(xnn_blob* blob, xnn_workspace_t workspace) {
-  if ((blob->data >= workspace->data) &&
-         ((uintptr_t) blob->data + blob->size) <= ((uintptr_t) workspace->data + workspace->size)) {
+testing::AssertionResult ValueInWorkspace(xnn_value* value, xnn_workspace_t workspace) {
+  if ((value->data >= workspace->data) &&
+         ((uintptr_t) value->data + value->size) <= ((uintptr_t) workspace->data + workspace->size)) {
     return testing::AssertionSuccess();
   } else {
     return testing::AssertionFailure()
-        << "blob at " << blob->data << " of size " << blob->size
-        << "is outside of workspace at " << workspace->data << " of size " << workspace->size;
+        << "value at " << value->data << " of size " << value->size
+        << " is outside of workspace at " << workspace->data << " of size " << workspace->size;
   }
 }
 
@@ -145,7 +145,7 @@ testing::AssertionResult Contains(std::vector<xnn_runtime_t> workspace_users, xn
 std::vector<xnn_runtime_t> workspace_user_to_list(xnn_workspace_t workspace)
 {
   std::vector<xnn_runtime_t> users;
-  for (xnn_runtime_t rt = workspace->first_user; rt != NULL; rt = rt->next_workspace_user) {
+  for (xnn_runtime_t rt = workspace->first_user; rt != nullptr; rt = rt->next_workspace_user) {
     users.push_back(rt);
   }
   return users;
@@ -189,24 +189,24 @@ TEST(WORKSPACE, static_data_not_moved_does_not_segv)
   ASSERT_GE(workspace->size, num_elements * sizeof(float));
   ASSERT_NE(runtime2->workspace->data, nullptr);
 
-  // Try to access all the blobs and ensure that we don't segfault.
-  for (size_t i = 0; i < runtime1->num_blobs; i++) {
-    xnn_blob* blob = &runtime1->blobs[i];
-    if (blob->allocation_type == xnn_allocation_type_external) {
+  // Try to access all the values and ensure that we don't segfault.
+  for (size_t i = 0; i < runtime1->num_values; i++) {
+    xnn_value* value = &runtime1->values[i];
+    if (value->allocation_type == xnn_allocation_type_external) {
       continue;
     }
-    ASSERT_GT(blob->size, 0);
-    char access = *((char *)blob->data);
+    ASSERT_GT(value->size, 0);
+    char access = *((char *)value->data);
     (void) access;
   }
 
-  for (size_t i = 0; i < runtime2->num_blobs; i++) {
-    xnn_blob* blob = &runtime2->blobs[i];
-    if (blob->allocation_type == xnn_allocation_type_external) {
+  for (size_t i = 0; i < runtime2->num_values; i++) {
+    xnn_value* value = &runtime2->values[i];
+    if (value->allocation_type == xnn_allocation_type_external) {
       continue;
     }
-    ASSERT_GT(blob->size, 0);
-    char access = *((char *)blob->data);
+    ASSERT_GT(value->size, 0);
+    char access = *((char *)value->data);
     (void) access;
   }
 }
@@ -247,15 +247,15 @@ TEST(WORKSPACE, workspace_no_growth)
   // Check that runtime 2 uses the same workspace.
   ASSERT_EQ(runtime2->workspace->data, old_runtime_workspace);
 
-  ASSERT_EQ(runtime1->num_blobs, runtime2->num_blobs);
-  for (size_t i = 0; i < runtime1->num_blobs; i++) {
-    xnn_blob* blob1 = &runtime1->blobs[i];
-    if (blob1->allocation_type != xnn_allocation_type_workspace) {
+  ASSERT_EQ(runtime1->num_values, runtime2->num_values);
+  for (size_t i = 0; i < runtime1->num_values; i++) {
+    xnn_value* value1 = &runtime1->values[i];
+    if (value1->allocation_type != xnn_allocation_type_workspace) {
       continue;
     }
-    ASSERT_TRUE(BlobInWorkspace(blob1, runtime1->workspace));
-    xnn_blob* blob2 = &runtime2->blobs[i];
-    ASSERT_TRUE(BlobInWorkspace(blob2, runtime2->workspace));
+    ASSERT_TRUE(ValueInWorkspace(value1, runtime1->workspace));
+    xnn_value* value2 = &runtime2->values[i];
+    ASSERT_TRUE(ValueInWorkspace(value2, runtime2->workspace));
   }
 
   std::vector<xnn_runtime_t> workspace_users = workspace_user_to_list(workspace);
@@ -306,20 +306,20 @@ TEST(WORKSPACE, workspace_grow)
   ASSERT_EQ(runtime1->workspace->data, runtime2->workspace->data);
   ASSERT_EQ(runtime1->workspace->size, runtime2->workspace->size);
 
-  // Check that both runtime's blob pointers are within range.
-  for (size_t i = 0; i < runtime1->num_blobs; i++) {
-    xnn_blob* blob = &runtime1->blobs[i];
-    if (blob->allocation_type != xnn_allocation_type_workspace) {
+  // Check that both runtime's value pointers are within range.
+  for (size_t i = 0; i < runtime1->num_values; i++) {
+    xnn_value* value = &runtime1->values[i];
+    if (value->allocation_type != xnn_allocation_type_workspace) {
       continue;
     }
-    ASSERT_TRUE(BlobInWorkspace(blob, runtime1->workspace));
+    ASSERT_TRUE(ValueInWorkspace(value, runtime1->workspace));
   }
-  for (size_t i = 0; i < runtime2->num_blobs; i++) {
-    xnn_blob* blob = &runtime2->blobs[i];
-    if (blob->allocation_type != xnn_allocation_type_workspace) {
+  for (size_t i = 0; i < runtime2->num_values; i++) {
+    xnn_value* value = &runtime2->values[i];
+    if (value->allocation_type != xnn_allocation_type_workspace) {
       continue;
     }
-    ASSERT_TRUE(BlobInWorkspace(blob, runtime2->workspace));
+    ASSERT_TRUE(ValueInWorkspace(value, runtime2->workspace));
   }
 
   std::vector<xnn_runtime_t> workspace_users = workspace_user_to_list(workspace);
@@ -514,11 +514,11 @@ TEST(WORKSPACE, persistent_tensors_allocated_at_start_of_workspace)
   ASSERT_NE(old_runtime_workspace, nullptr);
 
   size_t persistent_size = 0;
-  for (size_t i = 0; i < runtime->num_blobs; i++) {
-    const xnn_blob* blob = &runtime->blobs[i];
-    if (blob->allocation_type == xnn_allocation_type_persistent) {
-      ASSERT_EQ((uintptr_t) blob->data, (uintptr_t) workspace->data + persistent_size);
-      persistent_size += round_up_po2(blob->size, XNN_EXTRA_BYTES);
+  for (size_t i = 0; i < runtime->num_values; i++) {
+    const xnn_value* value = &runtime->values[i];
+    if (value->allocation_type == xnn_allocation_type_persistent) {
+      ASSERT_EQ((uintptr_t) value->data, (uintptr_t) workspace->data + persistent_size);
+      persistent_size += round_up_po2(value->size, XNN_EXTRA_BYTES);
     }
   }
 }
@@ -564,20 +564,20 @@ TEST(WORKSPACE, persistent_tensors_updated_correct_when_workspace_grows)
   ASSERT_EQ(runtime1->workspace->size, runtime2->workspace->size);
 
   size_t persistent_size = 0;
-  for (size_t i = 0; i < runtime1->num_blobs; i++) {
-    const xnn_blob* blob = &runtime1->blobs[i];
-    if (blob->allocation_type == xnn_allocation_type_persistent) {
-      ASSERT_EQ((uintptr_t) blob->data, (uintptr_t) workspace->data + persistent_size);
-      persistent_size += round_up_po2(blob->size, XNN_EXTRA_BYTES);
+  for (size_t i = 0; i < runtime1->num_values; i++) {
+    const xnn_value* value = &runtime1->values[i];
+    if (value->allocation_type == xnn_allocation_type_persistent) {
+      ASSERT_EQ((uintptr_t) value->data, (uintptr_t) workspace->data + persistent_size);
+      persistent_size += round_up_po2(value->size, XNN_EXTRA_BYTES);
     }
   }
 
   persistent_size = 0;
-  for (size_t i = 0; i < runtime2->num_blobs; i++) {
-    const xnn_blob* blob = &runtime2->blobs[i];
-    if (blob->allocation_type == xnn_allocation_type_persistent) {
-      ASSERT_EQ((uintptr_t) blob->data, (uintptr_t) workspace->data + persistent_size);
-      persistent_size += round_up_po2(blob->size, XNN_EXTRA_BYTES);
+  for (size_t i = 0; i < runtime2->num_values; i++) {
+    const xnn_value* value = &runtime2->values[i];
+    if (value->allocation_type == xnn_allocation_type_persistent) {
+      ASSERT_EQ((uintptr_t) value->data, (uintptr_t) workspace->data + persistent_size);
+      persistent_size += round_up_po2(value->size, XNN_EXTRA_BYTES);
     }
   }
 }

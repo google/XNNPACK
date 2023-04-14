@@ -65,32 +65,32 @@ static enum xnn_status create_unpooling_operator(
 
 static enum xnn_status setup_unpooling_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_blob* blobs,
-  size_t num_blobs,
+  const struct xnn_value* values,
+  size_t num_values,
   pthreadpool_t threadpool)
 {
   const uint32_t input_value_id = opdata->inputs[0];
   assert(input_value_id != XNN_INVALID_VALUE_ID);
-  assert(input_value_id < num_blobs);
+  assert(input_value_id < num_values);
 
   const uint32_t input_index_id = opdata->inputs[1];
   assert(input_index_id != XNN_INVALID_VALUE_ID);
-  assert(input_index_id < num_blobs);
+  assert(input_index_id < num_values);
 
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_blobs);
+  assert(output_id < num_values);
 
-  const struct xnn_blob* input_value_blob = blobs + input_value_id;
-  const void* input_value_data = input_value_blob->data;
+  const struct xnn_value* input_value_value = values + input_value_id;
+  const void* input_value_data = input_value_value->data;
   assert(input_value_data != NULL);
 
-  const struct xnn_blob* input_index_blob = blobs + input_index_id;
-  const void* input_index_data = input_index_blob->data;
+  const struct xnn_value* input_index_value = values + input_index_id;
+  const void* input_index_data = input_index_value->data;
   assert(input_index_data != NULL);
 
-  const struct xnn_blob* output_blob = blobs + output_id;
-  void* output_data = output_blob->data;
+  const struct xnn_value* output_value = values + output_id;
+  void* output_data = output_value->data;
   assert(output_data != NULL);
 
   return xnn_setup_unpooling2d_nhwc_x32(

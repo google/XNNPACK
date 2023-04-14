@@ -66,8 +66,9 @@ enum xnn_status xnn_define_tensor_value(
   value->datatype = datatype;
   value->shape.num_dims = num_dims;
   memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+  value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
   value->flags = flags;
-  value->data = data;
+  value->data = (void*) (uintptr_t) data;
 
   *id_out = value->id;
   return xnn_status_success;
@@ -156,8 +157,9 @@ enum xnn_status xnn_define_quantized_tensor_value(
   value->quantization.scale = scale;
   value->shape.num_dims = num_dims;
   memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+  value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
   value->flags = flags;
-  value->data = data;
+  value->data = (void*) (uintptr_t) data;
 
   *id_out = value->id;
   return xnn_status_success;
@@ -244,8 +246,9 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value(
   value->quantization.channel_dimension = channel_dim;
   value->shape.num_dims = num_dims;
   memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+  value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
   value->flags = flags;
-  value->data = data;
+  value->data = (void*) (uintptr_t) data;
 
   *id_out = value->id;
   return xnn_status_success;
@@ -282,13 +285,8 @@ size_t xnn_shape_multiply_non_channel_dims(
   return batch_size;
 }
 
-size_t xnn_tensor_get_size(
-  xnn_subgraph_t subgraph,
-  uint32_t value_id)
+size_t xnn_tensor_get_size(const struct xnn_value* value)
 {
-  assert(value_id < subgraph->num_values);
-
-  const struct xnn_value* value = subgraph->values + value_id;
   assert(value->type == xnn_value_type_dense_tensor);
   assert(value->datatype != xnn_datatype_invalid);
 
@@ -314,4 +312,12 @@ size_t xnn_tensor_get_size(
   }
 
   return size * xnn_shape_multiply_all_dims(&value->shape);
+}
+
+size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id)
+{
+  assert(value_id < subgraph->num_values);
+
+  const struct xnn_value* value = subgraph->values + value_id;
+  return xnn_tensor_get_size(value);
 }

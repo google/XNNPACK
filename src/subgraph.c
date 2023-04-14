@@ -113,11 +113,20 @@ void xnn_value_copy(
   dst_value->datatype = src_value->datatype;
   dst_value->quantization = src_value->quantization;
   dst_value->shape = src_value->shape;
+  dst_value->size = src_value->size;
+  dst_value->allocation_type = src_value->allocation_type;
   dst_value->flags = src_value->flags;
   dst_value->data = src_value->data;
   dst_value->producer = src_value->producer;
   dst_value->first_consumer = src_value->first_consumer;
   dst_value->num_consumers = src_value->num_consumers;
+  dst_value->num_nchw_compatible_consumers = src_value->num_nchw_compatible_consumers;
+  dst_value->layout = src_value->layout;
+  dst_value->fp16_compatible = src_value->fp16_compatible;
+  dst_value->fp16_id = src_value->fp16_id;
+  dst_value->fp32_id = src_value->fp32_id;
+  dst_value->fp16_temp_data = src_value->fp16_temp_data;
+  dst_value->fp32_data = src_value->fp32_data;
 }
 
 struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
@@ -806,7 +815,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       assert(value->datatype == xnn_datatype_fp32);
       if (xnn_value_is_static(value)) {
         assert(value->producer == XNN_INVALID_NODE_ID);
-        const size_t fp16_size = xnn_tensor_get_size(subgraph, n) / 2 + XNN_EXTRA_BYTES;
+        const size_t fp16_size = xnn_tensor_get_size_by_id(subgraph, n) / 2 + XNN_EXTRA_BYTES;
         value->fp16_temp_data = xnn_allocate_zero_memory(fp16_size);
         if (value->fp16_temp_data == NULL) {
           xnn_log_error("failed to allocate %zu bytes for fp16 tensor data", (size_t)fp16_size);

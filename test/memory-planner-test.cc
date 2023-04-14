@@ -216,7 +216,7 @@ TEST(MemoryPlanner, LeakyReluInPlaceAfterConv) {
   // Should only need space for conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
             round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
-  ASSERT_EQ(runtime->blobs[conv_out].data, runtime->blobs[leaky_relu_out].data);
+  ASSERT_EQ(runtime->values[conv_out].data, runtime->values[leaky_relu_out].data);
 }
 
 TEST(MemoryPlanner, LeakyReluWithTwoConsumersCannotBeInPlace) {
@@ -260,7 +260,7 @@ TEST(MemoryPlanner, LeakyReluWithTwoConsumersCannotBeInPlace) {
   // value without traversing the graph. This limitation can be lifted in the future.
   ASSERT_EQ(runtime->workspace->size,
             round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 2 + MEMORY_ARENA_EXTRA_BYTES);
-  ASSERT_NE(runtime->blobs[conv_out].data, runtime->blobs[leaky_relu_out].data);
+  ASSERT_NE(runtime->values[conv_out].data, runtime->values[leaky_relu_out].data);
 }
 
 TEST(MemoryPlanner, HardSwishAndLeakyReluInPlaceAfterConv) {
@@ -302,8 +302,8 @@ TEST(MemoryPlanner, HardSwishAndLeakyReluInPlaceAfterConv) {
   // Should only need space for conv_out tensor, leaky relu and hard swish can be in place.
   ASSERT_EQ(runtime->workspace->size,
             round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
-  ASSERT_EQ(runtime->blobs[conv_out].data, runtime->blobs[leaky_relu_out].data);
-  ASSERT_EQ(runtime->blobs[leaky_relu_out].data, runtime->blobs[hard_swish_out].data);
+  ASSERT_EQ(runtime->values[conv_out].data, runtime->values[leaky_relu_out].data);
+  ASSERT_EQ(runtime->values[leaky_relu_out].data, runtime->values[hard_swish_out].data);
 }
 
 TEST(MemoryPlanner, ExternalInputsCannotBeInPlace) {
@@ -413,7 +413,7 @@ TEST(MemoryPlanner, Add2WithLHSConstant) {
   // Should only need space for conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
             round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
-  ASSERT_EQ(runtime->blobs[conv_out].data, runtime->blobs[add_out_id].data);
+  ASSERT_EQ(runtime->values[conv_out].data, runtime->values[add_out_id].data);
 }
 
 TEST(MemoryPlanner, Add2WithRHSConstant) {
@@ -453,7 +453,7 @@ TEST(MemoryPlanner, Add2WithRHSConstant) {
   // Should only need space for conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
             round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
-  ASSERT_EQ(runtime->blobs[conv_out].data, runtime->blobs[add_out_id].data);
+  ASSERT_EQ(runtime->values[conv_out].data, runtime->values[add_out_id].data);
 }
 
 TEST(MemoryPlanner, Mul2WithLHSConstant) {
@@ -493,7 +493,7 @@ TEST(MemoryPlanner, Mul2WithLHSConstant) {
   // Should only need space for conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
             round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
-  ASSERT_EQ(runtime->blobs[conv_out].data, runtime->blobs[mul_out_id].data);
+  ASSERT_EQ(runtime->values[conv_out].data, runtime->values[mul_out_id].data);
 }
 
 TEST(MemoryPlanner, Mul2WithRHSConstant) {
@@ -533,7 +533,7 @@ TEST(MemoryPlanner, Mul2WithRHSConstant) {
   // Should only need space for conv_out tensor.
   ASSERT_EQ(runtime->workspace->size,
             round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES) * 1 + MEMORY_ARENA_EXTRA_BYTES);
-  ASSERT_EQ(runtime->blobs[conv_out].data, runtime->blobs[mul_out_id].data);
+  ASSERT_EQ(runtime->values[conv_out].data, runtime->values[mul_out_id].data);
 }
 
 // check a case where input is reused, different size.
@@ -588,7 +588,7 @@ TEST(MemoryPlanner, Add2WithImplicitBroadcast) {
             + round_up_po2(1 * 1 * 1 * 3 * sizeof(float), XNN_EXTRA_BYTES)
             + MEMORY_ARENA_EXTRA_BYTES);
   // add_out should reuse conv_out, hard_swish_out is too small.
-  ASSERT_EQ(runtime->blobs[conv_out].data, runtime->blobs[add_out].data);
+  ASSERT_EQ(runtime->values[conv_out].data, runtime->values[add_out].data);
 }
 
 TEST(MemoryPlanner, Add2WithInputMultipleConsumers) {
@@ -656,8 +656,8 @@ TEST(MemoryPlanner, Add2WithInputMultipleConsumers) {
             + round_up_po2(1 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES)  // for add_out
             + MEMORY_ARENA_EXTRA_BYTES);
   // add_out should reuse conv_out, hard_swish_out is too small.
-  ASSERT_NE(runtime->blobs[conv_out].data, runtime->blobs[max_pooling_2d_out].data);
-  ASSERT_NE(runtime->blobs[max_pooling_2d_out].data, runtime->blobs[add_out].data);
+  ASSERT_NE(runtime->values[conv_out].data, runtime->values[max_pooling_2d_out].data);
+  ASSERT_NE(runtime->values[max_pooling_2d_out].data, runtime->values[add_out].data);
 }
 
 } // namespace xnnpack

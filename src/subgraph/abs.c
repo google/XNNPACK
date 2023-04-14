@@ -63,24 +63,24 @@ static enum xnn_status create_abs_operator(
 
 static enum xnn_status setup_abs_operator(
   const struct xnn_operator_data* opdata,
-  const struct xnn_blob* blobs,
-  size_t num_blobs,
+  const struct xnn_value* values,
+  size_t num_values,
   pthreadpool_t threadpool)
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_blobs);
+  assert(input_id < num_values);
 
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_blobs);
+  assert(output_id < num_values);
 
-  const struct xnn_blob* input_blob = blobs + input_id;
-  const void* input_data = input_blob->data;
+  const struct xnn_value* input_value = values + input_id;
+  const void* input_data = input_value->data;
   assert(input_data != NULL);
 
-  const struct xnn_blob* output_blob = blobs + output_id;
-  void* output_data = output_blob->data;
+  const struct xnn_value* output_value = values + output_id;
+  void* output_data = output_value->data;
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {

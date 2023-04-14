@@ -53,6 +53,20 @@ enum xnn_layout_type {
   xnn_layout_type_nchw = 1,
 };
 
+enum xnn_allocation_type {
+  xnn_allocation_type_invalid = 0,
+  /// Static data that is provided by caller, needs to outlive the xnn_runtime.
+  xnn_allocation_type_static,
+  /// Lives in XNNPACK-managed internal workspace.
+  xnn_allocation_type_workspace,
+  /// Non-static data that is external to the runtime, provided by caller, specified in xnn_setup_runtime.
+  xnn_allocation_type_external,
+  // Persistent data is internal to XNNPACK-managed workspace, but shared by multiple runtime/subgraph.
+  xnn_allocation_type_persistent,
+  /// Data allocated dynamically and managed by XNNPACK, not part of workspace.
+  xnn_allocation_type_dynamic,
+};
+
 /// Abstraction for a collections of elements produced and consumed by nodes.
 struct xnn_value {
   /// Unique ID for the value.
@@ -81,13 +95,17 @@ struct xnn_value {
   } quantization;
   /// Tensor shape.
   struct xnn_shape shape;
+  /// Size of tensor.
+  size_t size;
+  /// Type of allocation for this tensors' data.
+  enum xnn_allocation_type allocation_type;
   /// Binary features of the tensor. Supported values are any combination of:
   /// - XNN_VALUE_FLAG_EXTERNAL_INPUT
   /// - XNN_VALUE_FLAG_EXTERNAL_OUTPUT
   /// - XNN_VALUE_FLAG_PERSISTENT
   uint32_t flags;
   /// Static initialization data. Must be null for non-static values.
-  const void* data;
+  void* data;
   /// Index of the Subgraph node that produced the value, or XNN_INVALID_NODE_ID is the Value is an external input.
   uint32_t producer;
   /// Index of the first Node that consume the value, or XNN_INVALID_NODE_ID if the Value has no consumers within the
@@ -150,28 +168,6 @@ XNN_INLINE bool xnn_value_is_static(const struct xnn_value* value) {
   return value->data != NULL;
 }
 
-enum xnn_allocation_type {
-  xnn_allocation_type_invalid = 0,
-  /// Static data that is provided by caller, needs to outlive the xnn_runtime.
-  xnn_allocation_type_static,
-  /// Lives in XNNPACK-managed internal workspace.
-  xnn_allocation_type_workspace,
-  /// Non-static data that is external to the runtime, provided by caller, specified in xnn_setup_runtime.
-  xnn_allocation_type_external,
-  // Persistent data is internal to XNNPACK-managed workspace, but shared by multiple runtime/subgraph.
-  xnn_allocation_type_persistent,
-  /// Data allocated and managed by XNNPACK.
-  xnn_allocation_type_dynamic,
-};
-
-struct xnn_blob {
-  /// Size in bytes.
-  size_t size;
-  /// Data pointer.
-  void* data;
-  enum xnn_allocation_type allocation_type;
-};
-
 struct xnn_node;
 struct xnn_operator_data;
 
@@ -185,8 +181,8 @@ typedef enum xnn_status (*xnn_create_operator_fn)(
 
 typedef enum xnn_status (*xnn_setup_operator_fn)(
   const struct xnn_operator_data* opdata,
-  const struct xnn_blob* blobs,
-  size_t num_blobs,
+  const struct xnn_value* values,
+  size_t num_values,
   pthreadpool_t threadpool);
 
 enum xnn_compute_type {
@@ -390,8 +386,8 @@ struct xnn_runtime {
   /// Number of operators in the execution plan.
   size_t num_ops;
 
-  struct xnn_blob* blobs;
-  size_t num_blobs;
+  struct xnn_value* values;
+  size_t num_values;
 
   struct xnn_workspace* workspace;
   struct xnn_runtime* next_workspace_user;
@@ -413,9 +409,9 @@ struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph);
 
 enum xnn_status xnn_subgraph_add_nodes(xnn_subgraph_t subgraph, size_t num_nodes);
 
-size_t xnn_tensor_get_size(
-  xnn_subgraph_t subgraph,
-  uint32_t value_id);
+size_t xnn_tensor_get_size(const struct xnn_value* value);
+
+size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id);
 
 // Product of all shape dimensions
 size_t xnn_shape_multiply_all_dims(
