@@ -47,7 +47,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane${"_prfm" if PREFETCH el
 
   do {
     // NC main loop multiple of ${NR}
-    const uint32_t* w = weights;
+    const uint32_t* w0 = weights;
     size_t n = nc;
 
     for (; n >= ${NR}; n -= ${NR}) {
@@ -62,9 +62,13 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane${"_prfm" if PREFETCH el
           vst1_u32(packed_weights, vzero); packed_weights += 2;
       }
 
-      const uint32_t* w0 = w;
       $for N in range(1, NR):
         const uint32_t* w${N} = w${N-1} + kc;
+      $if PREFETCH:
+        $for N in range(0, NR):
+          xnn_prefetch_to_l1((const int8_t*) w${N});
+          xnn_prefetch_to_l1((const int8_t*) w${N} + 64);
+
       // KC main loop multiple of ${KUNROLL}
       size_t k = kc;
       for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
@@ -94,7 +98,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane${"_prfm" if PREFETCH el
         packed_weights += ${NR*KUNROLL//2};
       }
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
-      w = w${NR-1};
+      w0 = w${NR-1};
     }
 
     if XNN_UNLIKELY(n != 0) {
@@ -110,7 +114,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane${"_prfm" if PREFETCH el
         packed_weights += ${NR};
         size_t k = kc;
         do {
-          *packed_weights = *w++;
+          *packed_weights = *w0++;
           packed_weights += ${NR};
         } while (--k);
         packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
@@ -128,13 +132,13 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane${"_prfm" if PREFETCH el
 
         size_t k = kc;
         do {
-          const uint32_t* wn = w;
+          const uint32_t* wn = w0;
           size_t nw = n;
           do {
             *packed_weights++ = wn[0];
             wn += kc;
           } while (--nw != 0);
-          ++w;
+          ++w0;
           packed_weights += (${NR} - n);
         } while (--k);
         packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);

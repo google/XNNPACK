@@ -225,6 +225,11 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2${"_prfm" if PREFETCH else ""}_x
       }
       $for N in range(1, NR):
         const uint16_t* w${N} = w${N-1} + kc;
+      $if PREFETCH:
+        $for N in range(0, NR):
+          xnn_prefetch_to_l1((const int8_t*) w${N});
+          xnn_prefetch_to_l1((const int8_t*) w${N} + 64);
+
       size_t k = kc;
       for (; k >= 16; k -= 16) {
         $SET_INDENT(4)

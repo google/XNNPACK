@@ -61,6 +61,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_prfm_x4(
       packed_w += 2;
 
       const float* w1 = w0 + kc;
+      xnn_prefetch_to_l1((const int8_t*) w0);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w1);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 64);
 
       // KC main loop multiple of 2x4
       size_t k = kc;

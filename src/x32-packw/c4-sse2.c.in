@@ -61,6 +61,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2${"_prfm" if PREFETCH else
 
       $for N in range(1, NR):
         const float* w${N} = w${N-1} + kc;
+      $if PREFETCH:
+        $for N in range(0, NR):
+          xnn_prefetch_to_l1((const int8_t*) w${N});
+          xnn_prefetch_to_l1((const int8_t*) w${N} + 64);
 
       // KC main loop multiple of ${NR}x${KR}
       size_t k = kc;

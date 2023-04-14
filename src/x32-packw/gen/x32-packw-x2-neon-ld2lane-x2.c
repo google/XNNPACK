@@ -45,7 +45,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_x2(
 
   do {
     // NC main loop multiple of 2
-    const uint32_t* w = weights;
+    const uint32_t* w0 = weights;
     size_t n = nc;
 
     for (; n >= 2; n -= 2) {
@@ -57,8 +57,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_x2(
         vst1_u32(packed_weights, vzero); packed_weights += 2;
       }
 
-      const uint32_t* w0 = w;
       const uint32_t* w1 = w0 + kc;
+
       // KC main loop multiple of 2
       size_t k = kc;
       for (; k >= 2; k -= 2) {
@@ -77,7 +77,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_x2(
         packed_weights += 2;
       }
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
-      w = w1;
+      w0 = w1;
     }
 
     if XNN_UNLIKELY(n != 0) {
@@ -91,7 +91,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_x2(
       packed_weights += 2;
       size_t k = kc;
       do {
-        *packed_weights = *w++;
+        *packed_weights = *w0++;
         packed_weights += 2;
       } while (--k);
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);

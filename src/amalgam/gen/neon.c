@@ -24968,6 +24968,38 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x8(
       const uint16_t* w13 = w12 + kc;
       const uint16_t* w14 = w13 + kc;
       const uint16_t* w15 = w14 + kc;
+      xnn_prefetch_to_l1((const int8_t*) w0);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w1);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w2);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w3);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w4);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w5);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w6);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w7);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w8);
+      xnn_prefetch_to_l1((const int8_t*) w8 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w9);
+      xnn_prefetch_to_l1((const int8_t*) w9 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w10);
+      xnn_prefetch_to_l1((const int8_t*) w10 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w11);
+      xnn_prefetch_to_l1((const int8_t*) w11 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w12);
+      xnn_prefetch_to_l1((const int8_t*) w12 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w13);
+      xnn_prefetch_to_l1((const int8_t*) w13 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w14);
+      xnn_prefetch_to_l1((const int8_t*) w14 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w15);
+      xnn_prefetch_to_l1((const int8_t*) w15 + 64);
 
       // KC main loop multiple of 8
       size_t k = kc;
@@ -25510,6 +25542,22 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x8(
       const uint16_t* w5 = w4 + kc;
       const uint16_t* w6 = w5 + kc;
       const uint16_t* w7 = w6 + kc;
+      xnn_prefetch_to_l1((const int8_t*) w0);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w1);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w2);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w3);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w4);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w5);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w6);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w7);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 64);
 
       // KC main loop multiple of 8
       size_t k = kc;
@@ -26164,7 +26212,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_prfm_x2(
 
   do {
     // NC main loop multiple of 2
-    const uint32_t* w = weights;
+    const uint32_t* w0 = weights;
     size_t n = nc;
 
     for (; n >= 2; n -= 2) {
@@ -26176,8 +26224,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_prfm_x2(
         vst1_u32(packed_weights, vzero); packed_weights += 2;
       }
 
-      const uint32_t* w0 = w;
       const uint32_t* w1 = w0 + kc;
+      xnn_prefetch_to_l1((const int8_t*) w0);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w1);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 64);
+
       // KC main loop multiple of 2
       size_t k = kc;
       for (; k >= 2; k -= 2) {
@@ -26198,7 +26250,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_prfm_x2(
         packed_weights += 2;
       }
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
-      w = w1;
+      w0 = w1;
     }
 
     if XNN_UNLIKELY(n != 0) {
@@ -26212,7 +26264,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_prfm_x2(
       packed_weights += 2;
       size_t k = kc;
       do {
-        *packed_weights = *w++;
+        *packed_weights = *w0++;
         packed_weights += 2;
       } while (--k);
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
@@ -26277,6 +26329,22 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
       const uint32_t* w5 = w4 + kc;
       const uint32_t* w6 = w5 + kc;
       const uint32_t* w7 = w6 + kc;
+      xnn_prefetch_to_l1((const int8_t*) w0);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w1);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w2);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w3);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w4);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w5);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w6);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w7);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 64);
 
       // KC main loop multiple of 4
       size_t k = kc;
@@ -26592,6 +26660,22 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
       const uint32_t* w5 = w4 + kc;
       const uint32_t* w6 = w5 + kc;
       const uint32_t* w7 = w6 + kc;
+      xnn_prefetch_to_l1((const int8_t*) w0);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w1);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w2);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w3);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w4);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w5);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w6);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w7);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 64);
 
       // KC main loop multiple of 4
       size_t k = kc;
