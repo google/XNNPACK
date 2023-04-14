@@ -273,6 +273,9 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
     if (workspace_size > dynamic_fully_connected_op->workspace_size) {
       // Note: packed weights must be SIMD-aligned, so we can't use xnn_reallocate_memory
       xnn_release_simd_memory(dynamic_fully_connected_op->workspace);
+      xnn_log_debug(
+        "released %zu bytes for %s operator workspace", dynamic_fully_connected_op->workspace_size,
+        xnn_operator_type_to_string(dynamic_fully_connected_op->type));
       dynamic_fully_connected_op->workspace = xnn_allocate_simd_memory(workspace_size);
       if (dynamic_fully_connected_op->workspace == NULL) {
         xnn_log_error(
@@ -281,6 +284,9 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
         return xnn_status_out_of_memory;
       }
       dynamic_fully_connected_op->workspace_size = workspace_size;
+      xnn_log_debug(
+        "allocated %zu bytes for %s operator workspace", dynamic_fully_connected_op->workspace_size,
+        xnn_operator_type_to_string(dynamic_fully_connected_op->type));
     }
     dynamic_fully_connected_op->group_input_channels = input_channels;
     dynamic_fully_connected_op->group_output_channels = output_channels;
