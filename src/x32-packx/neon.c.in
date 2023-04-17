@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert MR == 4 or MR == 8
-$assert VARIANT == "ST4"
-$assert KBLOCK == 4
+$assert KBLOCK >= 4
+$assert KBLOCK % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <assert.h>
@@ -16,7 +16,9 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $if PREFETCH:
   #include <xnnpack/prefetch.h>
 
-void xnn_x32_packx_ukernel_${MR}x__neon_st4${"_prfm" if PREFETCH else ""}(
+
+$IFWHILE = "if" if KBLOCK==8 else "while"
+void xnn_x32_packx_ukernel_${MR}x__neon_st4${"_prfm" if PREFETCH else ""}_x${KBLOCK}(
     size_t m,
     size_t k,
     const uint32_t* x,
@@ -47,31 +49,38 @@ void xnn_x32_packx_ukernel_${MR}x__neon_st4${"_prfm" if PREFETCH else ""}(
 
   $if MR == 4:
     for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
-      $for M in range(MR):
-        const uint32x4_t vx${M} = vld1q_u32(x${M}); x${M} += 4;
+      $for K in range(0, KBLOCK, 4):
+        $for M in range(0, MR, 4):
+          uint32x4x4_t vx${ABC[K:K+4]}x${ABC[M:M+4]};
+      $for K in range(0, KBLOCK, 4):
+        $for M in range(0, MR, 4):
+          $for L in range(4):
+            vx${ABC[K:K+4]}x${ABC[M:M+4]}.val[${L}] = vld1q_u32(x${M+L}); x${M+L} += 4;
       $if PREFETCH:
         $for M in range(MR):
           xnn_prefetch_to_l1((const int8_t*) x${M} + 128);
-      $for M in range(0, MR, 4):
-        const uint32x4x4_t vy${M} = { vx${M}, vx${M+1}, vx${M+2}, vx${M+3} };
-      $for M in range(0, MR, 4):
-        vst4q_u32(y, vy${M}); y += 16;
+      $for K in range(0, KBLOCK, 4):
+        $for M in range(0, MR, 4):
+          vst4q_u32(y, vx${ABC[K:K+4]}x${ABC[M:M+4]}); y += 16;
     }
   $if MR == 8:
     for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
-      $for M in range(MR):
-        const uint32x4_t vx${M} = vld1q_u32(x${M}); x${M} += 4;
+      $for K in range(0, KBLOCK, 4):
+        $for M in range(MR):
+          const uint32x4_t vx${ABC[K:K+4]}x${M} = vld1q_u32(x${M}); x${M} += 4;
       $if PREFETCH:
         $for M in range(MR):
           xnn_prefetch_to_l1((const int8_t*) x${M} + 128);
+      $for K in range(0, KBLOCK, 4):
+        $for M in range(0, MR // 2):
+          const uint32x4x2_t vz${ABC[K:K+4]}x${M} = vzipq_u32(vx${ABC[K:K+4]}x${M}, vx${ABC[K:K+4]}x${M+4});
 
-      $for M in range(0, MR // 2):
-        const uint32x4x2_t vz${M} = vzipq_u32(vx${M}, vx${M+4});
-
-      $for L in range(0, 2):
-        const uint32x4x4_t vy${L} = { vz0.val[${L}], vz1.val[${L}], vz2.val[${L}], vz3.val[${L}] };
-      $for L in range(0, 2):
-        vst4q_u32(y, vy${L}); y += 16;
+      $for K in range(0, KBLOCK, 4):
+        $for L in range(0, 2):
+          const uint32x4x4_t vy${ABC[K:K+4]}x${L} = { vz${ABC[K:K+4]}x0.val[${L}], vz${ABC[K:K+4]}x1.val[${L}], vz${ABC[K:K+4]}x2.val[${L}], vz${ABC[K:K+4]}x3.val[${L}] };
+      $for K in range(0, KBLOCK, 4):
+        $for L in range(0, 2):
+          vst4q_u32(y, vy${ABC[K:K+4]}x${L}); y += 16;
     }
 
   if XNN_UNLIKELY(k != 0) {

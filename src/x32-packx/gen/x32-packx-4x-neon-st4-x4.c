@@ -14,7 +14,8 @@
 
 #include <xnnpack/packx.h>
 
-void xnn_x32_packx_ukernel_4x__neon_st4(
+
+void xnn_x32_packx_ukernel_4x__neon_st4_x4(
     size_t m,
     size_t k,
     const uint32_t* x,
@@ -42,12 +43,12 @@ void xnn_x32_packx_ukernel_4x__neon_st4(
   }
 
   for (; k >= 4; k -= 4) {
-    const uint32x4_t vx0 = vld1q_u32(x0); x0 += 4;
-    const uint32x4_t vx1 = vld1q_u32(x1); x1 += 4;
-    const uint32x4_t vx2 = vld1q_u32(x2); x2 += 4;
-    const uint32x4_t vx3 = vld1q_u32(x3); x3 += 4;
-    const uint32x4x4_t vy0 = { vx0, vx1, vx2, vx3 };
-    vst4q_u32(y, vy0); y += 16;
+    uint32x4x4_t vx0123x0123;
+    vx0123x0123.val[0] = vld1q_u32(x0); x0 += 4;
+    vx0123x0123.val[1] = vld1q_u32(x1); x1 += 4;
+    vx0123x0123.val[2] = vld1q_u32(x2); x2 += 4;
+    vx0123x0123.val[3] = vld1q_u32(x3); x3 += 4;
+    vst4q_u32(y, vx0123x0123); y += 16;
   }
 
   if XNN_UNLIKELY(k != 0) {

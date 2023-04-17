@@ -14,7 +14,8 @@
 
 #include <xnnpack/packx.h>
 
-void xnn_x32_packx_ukernel_8x__neon_st4(
+
+void xnn_x32_packx_ukernel_8x__neon_st4_x8(
     size_t m,
     size_t k,
     const uint32_t* x,
@@ -57,25 +58,40 @@ void xnn_x32_packx_ukernel_8x__neon_st4(
     x7 = x6;
   }
 
-  for (; k >= 4; k -= 4) {
-    const uint32x4_t vx0 = vld1q_u32(x0); x0 += 4;
-    const uint32x4_t vx1 = vld1q_u32(x1); x1 += 4;
-    const uint32x4_t vx2 = vld1q_u32(x2); x2 += 4;
-    const uint32x4_t vx3 = vld1q_u32(x3); x3 += 4;
-    const uint32x4_t vx4 = vld1q_u32(x4); x4 += 4;
-    const uint32x4_t vx5 = vld1q_u32(x5); x5 += 4;
-    const uint32x4_t vx6 = vld1q_u32(x6); x6 += 4;
-    const uint32x4_t vx7 = vld1q_u32(x7); x7 += 4;
+  for (; k >= 8; k -= 8) {
+    const uint32x4_t vx0123x0 = vld1q_u32(x0); x0 += 4;
+    const uint32x4_t vx0123x1 = vld1q_u32(x1); x1 += 4;
+    const uint32x4_t vx0123x2 = vld1q_u32(x2); x2 += 4;
+    const uint32x4_t vx0123x3 = vld1q_u32(x3); x3 += 4;
+    const uint32x4_t vx0123x4 = vld1q_u32(x4); x4 += 4;
+    const uint32x4_t vx0123x5 = vld1q_u32(x5); x5 += 4;
+    const uint32x4_t vx0123x6 = vld1q_u32(x6); x6 += 4;
+    const uint32x4_t vx0123x7 = vld1q_u32(x7); x7 += 4;
+    const uint32x4_t vx4567x0 = vld1q_u32(x0); x0 += 4;
+    const uint32x4_t vx4567x1 = vld1q_u32(x1); x1 += 4;
+    const uint32x4_t vx4567x2 = vld1q_u32(x2); x2 += 4;
+    const uint32x4_t vx4567x3 = vld1q_u32(x3); x3 += 4;
+    const uint32x4_t vx4567x4 = vld1q_u32(x4); x4 += 4;
+    const uint32x4_t vx4567x5 = vld1q_u32(x5); x5 += 4;
+    const uint32x4_t vx4567x6 = vld1q_u32(x6); x6 += 4;
+    const uint32x4_t vx4567x7 = vld1q_u32(x7); x7 += 4;
+    const uint32x4x2_t vz0123x0 = vzipq_u32(vx0123x0, vx0123x4);
+    const uint32x4x2_t vz0123x1 = vzipq_u32(vx0123x1, vx0123x5);
+    const uint32x4x2_t vz0123x2 = vzipq_u32(vx0123x2, vx0123x6);
+    const uint32x4x2_t vz0123x3 = vzipq_u32(vx0123x3, vx0123x7);
+    const uint32x4x2_t vz4567x0 = vzipq_u32(vx4567x0, vx4567x4);
+    const uint32x4x2_t vz4567x1 = vzipq_u32(vx4567x1, vx4567x5);
+    const uint32x4x2_t vz4567x2 = vzipq_u32(vx4567x2, vx4567x6);
+    const uint32x4x2_t vz4567x3 = vzipq_u32(vx4567x3, vx4567x7);
 
-    const uint32x4x2_t vz0 = vzipq_u32(vx0, vx4);
-    const uint32x4x2_t vz1 = vzipq_u32(vx1, vx5);
-    const uint32x4x2_t vz2 = vzipq_u32(vx2, vx6);
-    const uint32x4x2_t vz3 = vzipq_u32(vx3, vx7);
-
-    const uint32x4x4_t vy0 = { vz0.val[0], vz1.val[0], vz2.val[0], vz3.val[0] };
-    const uint32x4x4_t vy1 = { vz0.val[1], vz1.val[1], vz2.val[1], vz3.val[1] };
-    vst4q_u32(y, vy0); y += 16;
-    vst4q_u32(y, vy1); y += 16;
+    const uint32x4x4_t vy0123x0 = { vz0123x0.val[0], vz0123x1.val[0], vz0123x2.val[0], vz0123x3.val[0] };
+    const uint32x4x4_t vy0123x1 = { vz0123x0.val[1], vz0123x1.val[1], vz0123x2.val[1], vz0123x3.val[1] };
+    const uint32x4x4_t vy4567x0 = { vz4567x0.val[0], vz4567x1.val[0], vz4567x2.val[0], vz4567x3.val[0] };
+    const uint32x4x4_t vy4567x1 = { vz4567x0.val[1], vz4567x1.val[1], vz4567x2.val[1], vz4567x3.val[1] };
+    vst4q_u32(y, vy0123x0); y += 16;
+    vst4q_u32(y, vy0123x1); y += 16;
+    vst4q_u32(y, vy4567x0); y += 16;
+    vst4q_u32(y, vy4567x1); y += 16;
   }
 
   if XNN_UNLIKELY(k != 0) {

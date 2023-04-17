@@ -13,9 +13,9 @@
 #include <arm_neon.h>
 
 #include <xnnpack/packx.h>
-#include <xnnpack/prefetch.h>
 
-void xnn_x32_packx_ukernel_4x__neon_st4_prfm(
+
+void xnn_x32_packx_ukernel_4x__neon_st4_x8(
     size_t m,
     size_t k,
     const uint32_t* x,
@@ -42,17 +42,19 @@ void xnn_x32_packx_ukernel_4x__neon_st4_prfm(
     x3 = x2;
   }
 
-  for (; k >= 4; k -= 4) {
-    const uint32x4_t vx0 = vld1q_u32(x0); x0 += 4;
-    const uint32x4_t vx1 = vld1q_u32(x1); x1 += 4;
-    const uint32x4_t vx2 = vld1q_u32(x2); x2 += 4;
-    const uint32x4_t vx3 = vld1q_u32(x3); x3 += 4;
-    xnn_prefetch_to_l1((const int8_t*) x0 + 128);
-    xnn_prefetch_to_l1((const int8_t*) x1 + 128);
-    xnn_prefetch_to_l1((const int8_t*) x2 + 128);
-    xnn_prefetch_to_l1((const int8_t*) x3 + 128);
-    const uint32x4x4_t vy0 = { vx0, vx1, vx2, vx3 };
-    vst4q_u32(y, vy0); y += 16;
+  for (; k >= 8; k -= 8) {
+    uint32x4x4_t vx0123x0123;
+    uint32x4x4_t vx4567x0123;
+    vx0123x0123.val[0] = vld1q_u32(x0); x0 += 4;
+    vx0123x0123.val[1] = vld1q_u32(x1); x1 += 4;
+    vx0123x0123.val[2] = vld1q_u32(x2); x2 += 4;
+    vx0123x0123.val[3] = vld1q_u32(x3); x3 += 4;
+    vx4567x0123.val[0] = vld1q_u32(x0); x0 += 4;
+    vx4567x0123.val[1] = vld1q_u32(x1); x1 += 4;
+    vx4567x0123.val[2] = vld1q_u32(x2); x2 += 4;
+    vx4567x0123.val[3] = vld1q_u32(x3); x3 += 4;
+    vst4q_u32(y, vx0123x0123); y += 16;
+    vst4q_u32(y, vx4567x0123); y += 16;
   }
 
   if XNN_UNLIKELY(k != 0) {
@@ -62,10 +64,6 @@ void xnn_x32_packx_ukernel_4x__neon_st4_prfm(
       vt0123 = vld1q_lane_u32(x1, vt0123, 1); x1 += 1;
       vt0123 = vld1q_lane_u32(x2, vt0123, 2); x2 += 1;
       vt0123 = vld1q_lane_u32(x3, vt0123, 3); x3 += 1;
-      xnn_prefetch_to_l1((const int8_t*) x0 + 128);
-      xnn_prefetch_to_l1((const int8_t*) x1 + 128);
-      xnn_prefetch_to_l1((const int8_t*) x2 + 128);
-      xnn_prefetch_to_l1((const int8_t*) x3 + 128);
       vst1q_u32(y, vt0123); y += 4;
     } while (--k != 0);
   }
