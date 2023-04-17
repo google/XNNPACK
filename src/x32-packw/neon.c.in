@@ -5,8 +5,8 @@
 
 $assert NR >= 4
 $assert NR % 4 == 0
-$assert KUNROLL >= 4
-$assert KUNROLL % 4 == 0
+$assert KBLOCK >= 4
+$assert KBLOCK % 4 == 0
 $assert SR == 1 or SR == 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -21,8 +21,8 @@ $if PREFETCH:
   #include <xnnpack/prefetch.h>
 
 
-$IFWHILE = "if" if KUNROLL==8 else "while"
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4lane${"_prfm" if PREFETCH else ""}_x${KUNROLL}(
+$IFWHILE = "if" if KBLOCK==8 else "while"
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4lane${"_prfm" if PREFETCH else ""}_x${KBLOCK}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -44,7 +44,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
   assert(weights != NULL);
   assert(packed_weights != NULL);
   $for N in range(0, NR, 4):
-    $for K in range(0, KUNROLL, 4):
+    $for K in range(0, KBLOCK, 4):
       uint32x4x4_t vtmp${ABC[K:K+4]}x${ABC[N:N+4]};
       $for L in range(4):
         vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[${L}] = vdupq_n_u32(0);
@@ -73,12 +73,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
           xnn_prefetch_to_l1((const int8_t*) w${N});
           xnn_prefetch_to_l1((const int8_t*) w${N} + 64);
 
-      // KC main loop multiple of ${KUNROLL}
+      // KC main loop multiple of ${KBLOCK}
       size_t k = kc;
-      for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
+      for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
         $if SR == 4:
           uint32x4_t vsrtmp;
-        $for K in range(0, KUNROLL, 4):
+        $for K in range(0, KBLOCK, 4):
           $for N in range(0, NR, 4):
             $for L in range(4):
               vtmp${ABC[K:K+4]}x${ABC[N:N+4]} = vld4q_lane_u32(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}, ${L}); w${N+L} += 4;
@@ -91,12 +91,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
         $if PREFETCH:
           $for N in range(0, NR):
             xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
-        $for K in range(0, KUNROLL, 4):
+        $for K in range(0, KBLOCK, 4):
           $for L in range(4):
             $for N in range(0, NR, 4):
               vst1q_u32(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
       }
-      $if KUNROLL > 4:
+      $if KBLOCK > 4:
         // KC remainder multiple of 4
         ${IFWHILE} (k >= 4) {
           $if SR == 4:
@@ -122,6 +122,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
       // KC remainder of 1..3
       // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
+        assert(k >= 1);
+        assert(k <= 3);
         switch (k) {
           $for K in range(1, 4):
             // KC remainder of ${K}
@@ -210,12 +212,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
             w${N} = w${N-1};
           }
 
-      // KC main loop multiple of ${KUNROLL}
+      // KC main loop multiple of ${KBLOCK}
       size_t k = kc;
-      for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
+      for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
         $if SR == 4:
           uint32x4_t vsrtmp;
-        $for K in range(0, KUNROLL, 4):
+        $for K in range(0, KBLOCK, 4):
           $for N in range(0, NR, 4):
             $for L in range(4):
               $if N+L != NR-1:
@@ -229,12 +231,12 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
         $if PREFETCH:
           $for N in range(0, NR-1):
             xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
-        $for K in range(0, KUNROLL, 4):
+        $for K in range(0, KBLOCK, 4):
           $for L in range(4):
             $for N in range(0, NR, 4):
               vst1q_u32(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[${L}]); packed_weights += 4;
       }
-      $if KUNROLL > 4:
+      $if KBLOCK > 4:
         // KC remainder multiple of 4
         ${IFWHILE} (k >= 4) {
           $if SR == 4:

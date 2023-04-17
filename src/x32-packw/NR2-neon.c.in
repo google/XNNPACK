@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert NR >= 2
-$assert KUNROLL >= 2
+$assert KBLOCK >= 2
 
 #include <assert.h>
 #include <stddef.h>
@@ -17,7 +17,7 @@ $if PREFETCH:
   #include <xnnpack/prefetch.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane${"_prfm" if PREFETCH else ""}_x${KUNROLL}(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane${"_prfm" if PREFETCH else ""}_x${KBLOCK}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -40,7 +40,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane${"_prfm" if PREFETCH el
   assert(packed_weights != NULL);
 
   $for N in range(0,NR,2):
-    $for K in range(0,KUNROLL,2):
+    $for K in range(0,KBLOCK,2):
       uint32x2x2_t v${N}${K};
       $for L in range(0,2):
         v${N}${K}.val[${L}] = vdup_n_u32(0);
@@ -69,33 +69,33 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane${"_prfm" if PREFETCH el
           xnn_prefetch_to_l1((const int8_t*) w${N});
           xnn_prefetch_to_l1((const int8_t*) w${N} + 64);
 
-      // KC main loop multiple of ${KUNROLL}
+      // KC main loop multiple of ${KBLOCK}
       size_t k = kc;
-      for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
-        $for K in range(0,KUNROLL,2):
+      for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
+        $for K in range(0,KBLOCK,2):
           $for N in range(0,NR,2):
             $for L in range(0,2):
               v${N}${K} = vld2_lane_u32(w${N+L}, v${N}${K}, ${L}); w${N+L} += 2;
         $if PREFETCH:
           $for N in range(0, NR):
             xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
-        $for K in range(0,KUNROLL,2):
+        $for K in range(0,KBLOCK,2):
           $for L in range(0,2):
             $for N in range(0,NR,2):
-              vst1_u32(packed_weights + ${N+L*NR+K*KUNROLL}, v${N}${K}.val[${L}]);
-        packed_weights += ${NR*KUNROLL};
+              vst1_u32(packed_weights + ${N+L*NR+K*KBLOCK}, v${N}${K}.val[${L}]);
+        packed_weights += ${NR*KBLOCK};
       }
 
       // KC remainder
       for (; k != 0; --k) {
-        $for K in range(0,KUNROLL,2):
+        $for K in range(0,KBLOCK,2):
           $for N in range(0,NR,2):
             $for L in range(0,2):
               v${N}${K}.val[0] = vld1_lane_u32(w${N+L}, v${N}${K}.val[0], ${L});  w${N+L} += 1;
-        $for K in range(0,KUNROLL,2):
+        $for K in range(0,KBLOCK,2):
           $for N in range(0,NR,2):
-            vst1_u32(packed_weights + ${N+K*KUNROLL}, v${N}${K}.val[0]);
-        packed_weights += ${NR*KUNROLL//2};
+            vst1_u32(packed_weights + ${N+K*KBLOCK}, v${N}${K}.val[0]);
+        packed_weights += ${NR*KBLOCK//2};
       }
       packed_weights = (uint32_t*) ((uintptr_t) packed_weights + extra_bytes);
       w0 = w${NR-1};

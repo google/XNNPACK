@@ -177,6 +177,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x8(
       // KC remainder of 1..3
       // Same as main loop but ld1, ld2 or ld3
       if XNN_UNLIKELY(k != 0) {
+        assert(k >= 1);
+        assert(k <= 3);
         switch (k) {
           // KC remainder of 1
           case 1:

@@ -377,7 +377,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x8(
       // KC remainder (1..3)
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
-        assert(k <= 7);
+        assert(k <= 3);
         __m128 v0 = _mm_undefined_ps();
         __m128 v1 = _mm_undefined_ps();
         __m128 v2 = _mm_undefined_ps();
@@ -698,7 +698,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16s4__sse2_x8(
       }
 
       size_t k = kc;
-      // KC main loop multiple of {KUNROLL}
+      // KC main loop multiple of 8
       for (; k >= 8; k -= 8) {
         // Read blocks of 4x4
         // a b c d

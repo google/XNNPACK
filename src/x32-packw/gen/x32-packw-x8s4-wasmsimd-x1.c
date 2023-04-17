@@ -124,11 +124,10 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__wasmsimd_x4(
         packed_weights += 32;
       }
 
+      // KC remainder (1..3)
       if XNN_UNLIKELY(k != 0) {
-        // KC remainder (1..3)
         assert(k >= 1);
         assert(k <= 3);
-
         v128_t v0x0123 = wasm_i32x4_const_splat(0);
         v128_t v1x0123 = wasm_i32x4_const_splat(0);
         v128_t v2x0123 = wasm_i32x4_const_splat(0);
@@ -351,7 +350,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__wasmsimd_x4(
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
         assert(k <= 3);
-
         v128_t v0x0123 = wasm_i32x4_const_splat(0);
         v128_t v1x0123 = wasm_i32x4_const_splat(0);
         v128_t v2x0123 = wasm_i32x4_const_splat(0);

@@ -5,7 +5,7 @@
 
 $assert MR == 4 or MR == 8
 $assert VARIANT == "ST4"
-$assert KUNROLL == 4
+$assert KBLOCK == 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <assert.h>
@@ -46,7 +46,7 @@ void xnn_x32_packx_ukernel_${MR}x__neon_st4${"_prfm" if PREFETCH else ""}(
       }
 
   $if MR == 4:
-    for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
+    for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
       $for M in range(MR):
         const uint32x4_t vx${M} = vld1q_u32(x${M}); x${M} += 4;
       $if PREFETCH:
@@ -58,7 +58,7 @@ void xnn_x32_packx_ukernel_${MR}x__neon_st4${"_prfm" if PREFETCH else ""}(
         vst4q_u32(y, vy${M}); y += 16;
     }
   $if MR == 8:
-    for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
+    for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
       $for M in range(MR):
         const uint32x4_t vx${M} = vld1q_u32(x${M}); x${M} += 4;
       $if PREFETCH:

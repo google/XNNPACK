@@ -5,7 +5,7 @@
 
 
 $assert NR == 8 or NR == 16
-$assert KUNROLL == 16
+$assert KBLOCK == 16
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
@@ -36,7 +36,7 @@ $#
 $def LOAD_TO_REGISTER(REGISTER, ROW, SIZE):
   ${_}__m256i ${REGISTER} = _mm256_maskload_epi32((const int*) ${ROW}, _mm256_loadu_si256((const __m256i*) (mask + (8 - ${SIZE} / 2))));
   ${_}switch (${SIZE}) {
-    $for N in range(1, KUNROLL, 2):
+    $for N in range(1, KBLOCK, 2):
       ${_}case ${N}: ${REGISTER} = _mm256_insert_epi16(${REGISTER}, (int16_t) ${ROW}[${N-1}], ${N-1}); break;
   ${_}  default:;
   ${_}}
@@ -49,7 +49,7 @@ $def LOAD_ROWS_TO_REGISTER_K_REMAINDER(IS_N_REMAINDER):
     ${_}__m256i v${N};
   ${_}__m256i vmask;
   ${_}switch(k) {
-    $for K in range(1, KUNROLL):
+    $for K in range(1, KBLOCK):
         ${_}case ${K}:
           $ARGS = ', '.join(list(reversed(MASKS[(8 - K // 2) : (16 - K // 2)])))
           $if K > 1:
@@ -175,7 +175,7 @@ $def ASSERT_K_REMAINDER_VALUE():
   ${_}assert(k < 16);
 
 
-void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2${"_prfm" if PREFETCH else ""}_x${KUNROLL}(
+void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2${"_prfm" if PREFETCH else ""}_x${KBLOCK}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -249,7 +249,6 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2${"_prfm" if PREFETCH else ""}_x
       w0 = w${NR-1};
     }
 
-
     // NC remainder (1..${NR-1})
     if XNN_UNLIKELY(n != 0) {
       assert(n >= 1);
@@ -274,7 +273,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__avx2${"_prfm" if PREFETCH else ""}_x
           }
 
       size_t k = kc;
-      for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
+      for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
         $SET_INDENT(4)
         $LOAD_ROWS_TO_REGISTERS(True)
         $TRANSPOSE(True)

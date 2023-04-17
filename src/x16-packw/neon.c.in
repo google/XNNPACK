@@ -5,8 +5,8 @@
 
 $assert NR >= 8
 $assert NR % 8 == 0
-$assert KUNROLL >= 4
-$assert KUNROLL % 4 == 0
+$assert KBLOCK >= 4
+$assert KBLOCK % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <assert.h>
@@ -20,8 +20,8 @@ $if PREFETCH:
   #include <xnnpack/prefetch.h>
 
 
-$IFWHILE = "if" if KUNROLL==8 else "while"
-void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH else ""}_x${KUNROLL}(
+$IFWHILE = "if" if KBLOCK==8 else "while"
+void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH else ""}_x${KBLOCK}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -44,7 +44,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
   assert(packed_weights != NULL);
 
   $for N in range(0, NR, 8):
-    $for K in range(0, KUNROLL, 4):
+    $for K in range(0, KBLOCK, 4):
       uint16x8x4_t vtmp${ABC[K:K+4]}x${ABC[N:N+8]};
       $for L in range(4):
         vtmp${ABC[K:K+4]}x${ABC[N:N+8]}.val[${L}] = vdupq_n_u16(0);
@@ -73,22 +73,22 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
           xnn_prefetch_to_l1((const int8_t*) w${N});
           xnn_prefetch_to_l1((const int8_t*) w${N} + 64);
 
-      // KC main loop multiple of ${KUNROLL}
+      // KC main loop multiple of ${KBLOCK}
       size_t k = kc;
-      for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
-        $for K in range(0, KUNROLL, 4):
+      for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
+        $for K in range(0, KBLOCK, 4):
           $for N in range(0, NR, 8):
             $for L in range(8):
               vtmp${ABC[K:K+4]}x${ABC[N:N+8]} = vld4q_lane_u16(w${N+L}, vtmp${ABC[K:K+4]}x${ABC[N:N+8]}, ${L}); w${N+L} += 4;
         $if PREFETCH:
           $for N in range(0, NR):
             xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
-        $for K in range(0, KUNROLL, 4):
+        $for K in range(0, KBLOCK, 4):
           $for L in range(4):
             $for N in range(0, NR, 8):
               vst1q_u16(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+8]}.val[${L}]); packed_weights += 8;
       }
-      $if KUNROLL > 4:
+      $if KBLOCK > 4:
         // KC remainder multiple of 4
         ${IFWHILE} (k >= 4) {
           $for N in range(0, NR, 8):
@@ -167,10 +167,10 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
             w${N} = w${N-1};
           }
 
-      // KC main loop multiple of ${KUNROLL}
+      // KC main loop multiple of ${KBLOCK}
       size_t k = kc;
-      for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
-        $for K in range(0, KUNROLL, 4):
+      for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
+        $for K in range(0, KBLOCK, 4):
           $for N in range(0, NR, 8):
             $for L in range(8):
               $if N+L != NR-1:
@@ -178,13 +178,13 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane${"_prfm" if PREFETCH el
         $if PREFETCH:
           $for N in range(0, NR-1):
             xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
-        $for K in range(0, KUNROLL, 4):
+        $for K in range(0, KBLOCK, 4):
           $for L in range(4):
             $for N in range(0, NR, 8):
               vst1q_u16(packed_weights, vtmp${ABC[K:K+4]}x${ABC[N:N+8]}.val[${L}]); packed_weights += 8;
       }
 
-      $if KUNROLL > 4:
+      $if KBLOCK > 4:
         // KC remainder multiple of 4
         ${IFWHILE} (k >= 4) {
           $for N in range(0, NR, 8):

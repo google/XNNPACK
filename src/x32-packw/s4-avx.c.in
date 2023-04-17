@@ -6,7 +6,7 @@
 $assert NR >= 4
 $assert NR % 4 == 0
 $assert SR == 4
-$assert KUNROLL == 4
+$assert KBLOCK == 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <assert.h>
@@ -21,7 +21,7 @@ $if PREFETCH:
   #include <xnnpack/prefetch.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__avx${"_prfm" if PREFETCH else ""}_x${KUNROLL}(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__avx${"_prfm" if PREFETCH else ""}_x${KBLOCK}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -74,9 +74,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__avx${"_prfm" if PREFETCH else ""}_
           xnn_prefetch_to_l1((const int8_t*) w${N});
           xnn_prefetch_to_l1((const int8_t*) w${N} + 64);
 
-      // KC main loop multiple of ${KUNROLL}
+      // KC main loop multiple of ${KBLOCK}
       size_t k = kc;
-      for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
+      for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
         // Read blocks of 4x4
         // a b c d
         // e f g h
@@ -86,26 +86,26 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__avx${"_prfm" if PREFETCH else ""}_
         $for N in range(0,NR,8):
           $for L in range(4):
             __m256 v${N+L}x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w${N+L}));
-            $for K in range(4,KUNROLL,4):
+            $for K in range(4,KBLOCK,4):
               __m256 v${N+L}x${ABC[K:K+4]} = _mm256_castps128_ps256(_mm_loadu_ps(w${N+L} + ${K}));
-            w${N+L} += ${KUNROLL};
+            w${N+L} += ${KBLOCK};
         // Load next 4 rows of N into the high part of each register
         $for N in range(0,NR,8):
           $for L in range(4):
             v${N+L}x0123 = _mm256_insertf128_ps(v${N+L}x0123, _mm_loadu_ps(w${N+L+4}), 1);
-            $for K in range(4,KUNROLL,4):
+            $for K in range(4,KBLOCK,4):
               v${N+L}x${ABC[K:K+4]} = _mm256_insertf128_ps(v${N+L}x${ABC[K:K+4]}, _mm_loadu_ps(w${N+L+4} + ${K})), 1);
-            w${N+L+4} += ${KUNROLL};
+            w${N+L+4} += ${KBLOCK};
 
         // Apply SR4 shuffle
         $for N in range(0,NR,8):
           $for L in range(1,4):
-            $for K in range(0,KUNROLL,4):
+            $for K in range(0,KBLOCK,4):
               v${N+L}x${ABC[K:K+4]} = _mm256_permute_ps(v${N+L}x${ABC[K:K+4]}, _MM_SHUFFLE(${(L+3)&3}, ${(L+2)&3}, ${(L+1)&3}, ${L}));
 
         // Transpose 2x2
         $for N in range(0,NR,8):
-          $for K in range(0,KUNROLL,4):
+          $for K in range(0,KBLOCK,4):
             const __m256 vtmp${N+0}x${ABC[K:K+4]} = _mm256_unpacklo_ps(v${N+0}x${ABC[K:K+4]}, v${N+1}x${ABC[K:K+4]});  // a e b f   from row 0, 1
             const __m256 vtmp${N+1}x${ABC[K:K+4]} = _mm256_unpacklo_ps(v${N+2}x${ABC[K:K+4]}, v${N+3}x${ABC[K:K+4]});  // i m j n   from row 2, 3
             const __m256 vtmp${N+2}x${ABC[K:K+4]} = _mm256_unpackhi_ps(v${N+0}x${ABC[K:K+4]}, v${N+1}x${ABC[K:K+4]});  // c g d h   from row 0, 1
@@ -115,24 +115,24 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__avx${"_prfm" if PREFETCH else ""}_
             xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
         // Transpose 4x4
         $for N in range(0,NR,8):
-          $for K in range(0,KUNROLL,4):
+          $for K in range(0,KBLOCK,4):
             v${N+0}x${ABC[K:K+4]} = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(vtmp${N+0}x${ABC[K:K+4]}), _mm256_castps_pd(vtmp${N+1}x${ABC[K:K+4]})));  // a e i m   from row 0, 1
             v${N+1}x${ABC[K:K+4]} = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(vtmp${N+0}x${ABC[K:K+4]}), _mm256_castps_pd(vtmp${N+1}x${ABC[K:K+4]})));  // b f j n   from row 0, 1
             v${N+2}x${ABC[K:K+4]} = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(vtmp${N+2}x${ABC[K:K+4]}), _mm256_castps_pd(vtmp${N+3}x${ABC[K:K+4]})));  // c g k o   from row 2, 3
             v${N+3}x${ABC[K:K+4]} = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(vtmp${N+2}x${ABC[K:K+4]}), _mm256_castps_pd(vtmp${N+3}x${ABC[K:K+4]})));  // d h l p   from row 2, 3
 
         _mm256_store_ps(packed_w, v0x0123);
-        $for K in range(KUNROLL):
+        $for K in range(KBLOCK):
           $for N in range(0,NR,8):
             $if N != 0 or K != 0:
               _mm256_store_ps(packed_w + ${N+K*NR}, v${N+K}x${ABC[K//4*4:K//4*4+4]});
-        packed_w += ${NR*KUNROLL};
+        packed_w += ${NR*KBLOCK};
       }
 
-      // KC remainder (1..${KUNROLL-1})
+      // KC remainder (1..3)
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
-        assert(k <= ${KUNROLL-1});
+        assert(k <= 3);
         $for N in range(NR):
           __m128 v${N} = _mm_undefined_ps();
 
@@ -232,9 +232,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__avx${"_prfm" if PREFETCH else ""}_
             w${N} = w${N-1};
           }
 
-      // KC main loop multiple of ${KUNROLL}
+      // KC main loop multiple of ${KBLOCK}
       size_t k = kc;
-      for (; k >= ${KUNROLL}; k -= ${KUNROLL}) {
+      for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
         // Read blocks of 4x4
         // a b c d
         // e f g h
@@ -244,25 +244,25 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__avx${"_prfm" if PREFETCH else ""}_
         $for N in range(0,NR,8):
           $for L in range(4):
             __m256 v${N+L}x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w${N+L}));
-            $for K in range(4,KUNROLL,4):
+            $for K in range(4,KBLOCK,4):
               __m256 v${N+L}x${ABC[K:K+4]} = _mm256_castps128_ps256(_mm_loadu_ps(w${N+L} + ${K}));
-            w${N+L} += ${KUNROLL};
+            w${N+L} += ${KBLOCK};
         // Load next 4 rows of N into the high part of each register
         $for N in range(0,NR,8):
           $for L in range(4):
             $if (N+L+4)<(NR-1):
               v${N+L}x0123 = _mm256_insertf128_ps(v${N+L}x0123, _mm_loadu_ps(w${N+L+4}), 1);
-              $for K in range(4,KUNROLL,4):
+              $for K in range(4,KBLOCK,4):
                 v${N+L}x${ABC[K:K+4]} = _mm256_insertf128_ps(v${N+L}x${ABC[K:K+4]}, _mm_loadu_ps(w${N+L+4} + ${K})), 1);
-              w${N+L+4} += ${KUNROLL};
+              w${N+L+4} += ${KBLOCK};
         // Apply SR4 shuffle
         $for N in range(0,NR,8):
           $for L in range(1,4):
-            $for K in range(0,KUNROLL,4):
+            $for K in range(0,KBLOCK,4):
               v${N+L}x${ABC[K:K+4]} = _mm256_permute_ps(v${N+L}x${ABC[K:K+4]}, _MM_SHUFFLE(${(L+3)&3}, ${(L+2)&3}, ${(L+1)&3}, ${L}));
         // Transpose 2x2
         $for N in range(0,NR,8):
-          $for K in range(0,KUNROLL,4):
+          $for K in range(0,KBLOCK,4):
             const __m256 vtmp${N+0}x${ABC[K:K+4]} = _mm256_unpacklo_ps(v${N+0}x${ABC[K:K+4]}, v${N+1}x${ABC[K:K+4]});  // a e b f   from row 0, 1
             const __m256 vtmp${N+1}x${ABC[K:K+4]} = _mm256_unpacklo_ps(v${N+2}x${ABC[K:K+4]}, v${N+3}x${ABC[K:K+4]});  // i m j n   from row 2, 3
             const __m256 vtmp${N+2}x${ABC[K:K+4]} = _mm256_unpackhi_ps(v${N+0}x${ABC[K:K+4]}, v${N+1}x${ABC[K:K+4]});  // c g d h   from row 0, 1
@@ -272,24 +272,24 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__avx${"_prfm" if PREFETCH else ""}_
             xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
         // Transpose 4x4
         $for N in range(0,NR,8):
-          $for K in range(0,KUNROLL,4):
+          $for K in range(0,KBLOCK,4):
             v${N+0}x${ABC[K:K+4]} = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(vtmp${N+0}x${ABC[K:K+4]}), _mm256_castps_pd(vtmp${N+1}x${ABC[K:K+4]})));  // a e i m   from row 0, 1
             v${N+1}x${ABC[K:K+4]} = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(vtmp${N+0}x${ABC[K:K+4]}), _mm256_castps_pd(vtmp${N+1}x${ABC[K:K+4]})));  // b f j n   from row 0, 1
             v${N+2}x${ABC[K:K+4]} = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(vtmp${N+2}x${ABC[K:K+4]}), _mm256_castps_pd(vtmp${N+3}x${ABC[K:K+4]})));  // c g k o   from row 2, 3
             v${N+3}x${ABC[K:K+4]} = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(vtmp${N+2}x${ABC[K:K+4]}), _mm256_castps_pd(vtmp${N+3}x${ABC[K:K+4]})));  // d h l p   from row 2, 3
 
         _mm256_store_ps(packed_w, v0x0123);
-        $for K in range(KUNROLL):
+        $for K in range(KBLOCK):
           $for N in range(0,NR,8):
             $if N != 0 or K != 0:
               _mm256_store_ps(packed_w + ${N+K*NR}, v${N+K}x${ABC[K//4*4:K//4*4+4]});
-        packed_w += ${NR*KUNROLL};
+        packed_w += ${NR*KBLOCK};
       }
 
-      // KC remainder (1..${KUNROLL-1})
+      // KC remainder (1..3)
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
-        assert(k <= ${KUNROLL-1});
+        assert(k <= 3);
         $for N in range(NR):
           __m128 v${N} = _mm_undefined_ps();
 
@@ -339,14 +339,14 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__avx${"_prfm" if PREFETCH else ""}_
               v${N+L} = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v${N+L}), _MM_SHUFFLE(${(L+3)&3}, ${(L+2)&3}, ${(L+1)&3}, ${L})));
         // Transpose 2x2
         $for N in range(0,NR,4):
-          $for K in range(0,KUNROLL,4):
+          $for K in range(0,KBLOCK,4):
             const __m128 vtmp${N+0} = _mm_unpacklo_ps(v${N+0}, v${N+1});  // a e b f   from row 0, 1
             const __m128 vtmp${N+1} = _mm_unpacklo_ps(v${N+2}, v${min(N+3, NR-2)});  // i m j n   from row 2, 3
             const __m128 vtmp${N+2} = _mm_unpackhi_ps(v${N+0}, v${N+1});  // c g d h   from row 0, 1
             const __m128 vtmp${N+3} = _mm_unpackhi_ps(v${N+2}, v${min(N+3, NR-2)});  // k o l p   from row 2, 3
         // Transpose 4x4
         $for N in range(0,NR,4):
-          $for K in range(0,KUNROLL,4):
+          $for K in range(0,KBLOCK,4):
             v${N+0} = _mm_movelh_ps(vtmp${N+0}, vtmp${N+1});  // a e i m   from row 0, 1
             v${N+1} = _mm_movehl_ps(vtmp${N+1}, vtmp${N+0});  // b f j n   from row 0, 1
             v${N+2} = _mm_movelh_ps(vtmp${N+2}, vtmp${N+3});  // c g k o   from row 2, 3

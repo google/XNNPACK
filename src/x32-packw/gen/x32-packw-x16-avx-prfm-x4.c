@@ -199,7 +199,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx_prfm_x4(
         packed_w += 64;
       }
 
-      // KC remainder
+      // KC remainder (1..3)
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
         assert(k <= 3);
@@ -494,7 +494,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx_prfm_x4(
         packed_w += 64;
       }
 
-      // KC remainder
+      // KC remainder (1..3)
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
         assert(k <= 3);

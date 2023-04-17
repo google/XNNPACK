@@ -175,7 +175,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_x4(
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
         assert(k <= 3);
-
         switch (k) {
           case 1:
           {
@@ -586,7 +585,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__sse2_x4(
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
         assert(k <= 3);
-
         switch (k) {
           case 1:
           {

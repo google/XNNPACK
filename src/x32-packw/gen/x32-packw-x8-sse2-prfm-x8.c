@@ -232,7 +232,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__sse2_prfm_x8(
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
         assert(k <= 3);
-
         switch (k) {
           case 1:
           {
@@ -554,7 +553,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__sse2_prfm_x8(
       if XNN_UNLIKELY(k != 0) {
         assert(k >= 1);
         assert(k <= 3);
-
         switch (k) {
           case 1:
           {
