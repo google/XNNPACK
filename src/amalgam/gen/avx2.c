@@ -9067,7 +9067,6 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_prfm_x16(
       w0 = w15;
     }
 
-
     // NC remainder (1..15)
     if XNN_UNLIKELY(n != 0) {
       assert(n >= 1);
@@ -10582,7 +10581,6 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16(
       w0 = w15;
     }
 
-
     // NC remainder (1..15)
     if XNN_UNLIKELY(n != 0) {
       assert(n >= 1);
@@ -11789,7 +11787,6 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_prfm_x16(
       w0 = w7;
     }
 
-
     // NC remainder (1..7)
     if XNN_UNLIKELY(n != 0) {
       assert(n >= 1);
@@ -12643,7 +12640,6 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16(
       packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
       w0 = w7;
     }
-
 
     // NC remainder (1..7)
     if XNN_UNLIKELY(n != 0) {

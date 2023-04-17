@@ -453,7 +453,6 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16(
       w0 = w7;
     }
 
-
     // NC remainder (1..7)
     if XNN_UNLIKELY(n != 0) {
       assert(n >= 1);

@@ -24916,25 +24916,9 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x8(
   assert(packed_weights != NULL);
 
   uint16x8x4_t vtmp0123x01234567;
-  vtmp0123x01234567.val[0] = vdupq_n_u16(0);
-  vtmp0123x01234567.val[1] = vdupq_n_u16(0);
-  vtmp0123x01234567.val[2] = vdupq_n_u16(0);
-  vtmp0123x01234567.val[3] = vdupq_n_u16(0);
   uint16x8x4_t vtmp4567x01234567;
-  vtmp4567x01234567.val[0] = vdupq_n_u16(0);
-  vtmp4567x01234567.val[1] = vdupq_n_u16(0);
-  vtmp4567x01234567.val[2] = vdupq_n_u16(0);
-  vtmp4567x01234567.val[3] = vdupq_n_u16(0);
   uint16x8x4_t vtmp0123x89ABCDEF;
-  vtmp0123x89ABCDEF.val[0] = vdupq_n_u16(0);
-  vtmp0123x89ABCDEF.val[1] = vdupq_n_u16(0);
-  vtmp0123x89ABCDEF.val[2] = vdupq_n_u16(0);
-  vtmp0123x89ABCDEF.val[3] = vdupq_n_u16(0);
   uint16x8x4_t vtmp4567x89ABCDEF;
-  vtmp4567x89ABCDEF.val[0] = vdupq_n_u16(0);
-  vtmp4567x89ABCDEF.val[1] = vdupq_n_u16(0);
-  vtmp4567x89ABCDEF.val[2] = vdupq_n_u16(0);
-  vtmp4567x89ABCDEF.val[3] = vdupq_n_u16(0);
 
   do {
     // NC main loop multiple of 16
@@ -25511,15 +25495,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x8(
   assert(packed_weights != NULL);
 
   uint16x8x4_t vtmp0123x01234567;
-  vtmp0123x01234567.val[0] = vdupq_n_u16(0);
-  vtmp0123x01234567.val[1] = vdupq_n_u16(0);
-  vtmp0123x01234567.val[2] = vdupq_n_u16(0);
-  vtmp0123x01234567.val[3] = vdupq_n_u16(0);
   uint16x8x4_t vtmp4567x01234567;
-  vtmp4567x01234567.val[0] = vdupq_n_u16(0);
-  vtmp4567x01234567.val[1] = vdupq_n_u16(0);
-  vtmp4567x01234567.val[2] = vdupq_n_u16(0);
-  vtmp4567x01234567.val[3] = vdupq_n_u16(0);
 
   do {
     // NC main loop multiple of 8
@@ -26207,8 +26183,6 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_prfm_x2(
   assert(packed_weights != NULL);
 
   uint32x2x2_t v00;
-  v00.val[0] = vdup_n_u32(0);
-  v00.val[1] = vdup_n_u32(0);
 
   do {
     // NC main loop multiple of 2
@@ -26295,15 +26269,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
   assert(weights != NULL);
   assert(packed_weights != NULL);
   uint32x4x4_t vtmp0123x0123;
-  vtmp0123x0123.val[0] = vdupq_n_u32(0);
-  vtmp0123x0123.val[1] = vdupq_n_u32(0);
-  vtmp0123x0123.val[2] = vdupq_n_u32(0);
-  vtmp0123x0123.val[3] = vdupq_n_u32(0);
   uint32x4x4_t vtmp0123x4567;
-  vtmp0123x4567.val[0] = vdupq_n_u32(0);
-  vtmp0123x4567.val[1] = vdupq_n_u32(0);
-  vtmp0123x4567.val[2] = vdupq_n_u32(0);
-  vtmp0123x4567.val[3] = vdupq_n_u32(0);
 
   do {
     // NC main loop multiple of 8
@@ -26628,15 +26594,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
   assert(weights != NULL);
   assert(packed_weights != NULL);
   uint32x4x4_t vtmp0123x0123;
-  vtmp0123x0123.val[0] = vdupq_n_u32(0);
-  vtmp0123x0123.val[1] = vdupq_n_u32(0);
-  vtmp0123x0123.val[2] = vdupq_n_u32(0);
-  vtmp0123x0123.val[3] = vdupq_n_u32(0);
   uint32x4x4_t vtmp0123x4567;
-  vtmp0123x4567.val[0] = vdupq_n_u32(0);
-  vtmp0123x4567.val[1] = vdupq_n_u32(0);
-  vtmp0123x4567.val[2] = vdupq_n_u32(0);
-  vtmp0123x4567.val[3] = vdupq_n_u32(0);
 
   do {
     // NC main loop multiple of 8
