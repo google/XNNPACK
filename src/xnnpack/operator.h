@@ -145,6 +145,7 @@ struct xnn_operator {
   size_t group_input_channels;
   size_t group_output_channels;
   size_t channels;
+  size_t max_sequence_size;
 
   uint32_t pad_value;
 
@@ -314,6 +315,7 @@ struct xnn_operator {
       const struct xnn_xx_pad_config* pad_config;
     };  // For constant pad operator.
     const struct xnn_x8_lut_config* lut_config;
+    const struct xnn_cmul_config* cmul_config;
     const struct xnn_unary_elementwise_config* copy_config;
     const struct xnn_transpose_config* transpose_config;
   };
@@ -354,6 +356,7 @@ struct xnn_operator {
     struct univector_strided_context univector_strided;
     struct unpooling_context unpooling;
     struct vmulcaddc_context vmulcaddc;
+    struct rope_context rope;
   } context;
 
   struct xnn_code_cache* code_cache;

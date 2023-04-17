@@ -2275,6 +2275,22 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_rope_nthc_f32(
+  size_t max_sequence_size,
+  size_t channels,
+  const float* weights,
+  uint32_t flags,
+  xnn_operator_t* rope_op_out);
+
+enum xnn_status xnn_setup_rope_nthc_f32(
+  xnn_operator_t rope_op,
+  size_t batch_size,
+  size_t sequence_size,
+  size_t heads,
+  const float* input,
+  float* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_sigmoid_nc_f32(
   size_t channels,
   size_t input_stride,
