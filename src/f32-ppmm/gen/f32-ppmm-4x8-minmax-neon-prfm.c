@@ -13,9 +13,10 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/ppmm.h>
+#include <xnnpack/prefetch.h>
 
 
-void xnn_f32_ppmm_minmax_ukernel_4x8__neonfma(
+void xnn_f32_ppmm_minmax_ukernel_4x8__neon_prfm(
   size_t mr,
   size_t nc,
   size_t kc,
@@ -48,6 +49,10 @@ void xnn_f32_ppmm_minmax_ukernel_4x8__neonfma(
     c3 = c2;
   }
 
+  xnn_prefetch_to_l1((const int8_t*) w + 0);
+  xnn_prefetch_to_l1((const int8_t*) w + 64);
+  xnn_prefetch_to_l1((const int8_t*) w + 128);
+  xnn_prefetch_to_l1((const int8_t*) w + 192);
 
   do {
     float32x4_t vacc0x0123 = vld1q_f32(w); w += 4;
@@ -66,30 +71,15 @@ void xnn_f32_ppmm_minmax_ukernel_4x8__neonfma(
       const float32x4_t vb0123 = vld1q_f32(w); w += 4;
       const float32x4_t vb4567 = vld1q_f32(w); w += 4;
 
-      #if XNN_ARCH_ARM64
-        vacc0x0123 = vfmaq_laneq_f32(vacc0x0123, vb0123, va0123, 0);
-        vacc1x0123 = vfmaq_laneq_f32(vacc1x0123, vb0123, va0123, 1);
-        vacc2x0123 = vfmaq_laneq_f32(vacc2x0123, vb0123, va0123, 2);
-        vacc3x0123 = vfmaq_laneq_f32(vacc3x0123, vb0123, va0123, 3);
-        vacc0x4567 = vfmaq_laneq_f32(vacc0x4567, vb4567, va0123, 0);
-        vacc1x4567 = vfmaq_laneq_f32(vacc1x4567, vb4567, va0123, 1);
-        vacc2x4567 = vfmaq_laneq_f32(vacc2x4567, vb4567, va0123, 2);
-        vacc3x4567 = vfmaq_laneq_f32(vacc3x4567, vb4567, va0123, 3);
-      #else
-        const float32x4_t va0000 = vdupq_lane_f32(vget_low_f32(va0123), 0);
-        const float32x4_t va1111 = vdupq_lane_f32(vget_low_f32(va0123), 1);
-        const float32x4_t va2222 = vdupq_lane_f32(vget_high_f32(va0123), 0);
-        const float32x4_t va3333 = vdupq_lane_f32(vget_high_f32(va0123), 1);
-
-        vacc0x0123 = vfmaq_f32(vacc0x0123, va0000, vb0123);
-        vacc1x0123 = vfmaq_f32(vacc1x0123, va1111, vb0123);
-        vacc2x0123 = vfmaq_f32(vacc2x0123, va2222, vb0123);
-        vacc3x0123 = vfmaq_f32(vacc3x0123, va3333, vb0123);
-        vacc0x4567 = vfmaq_f32(vacc0x4567, va0000, vb4567);
-        vacc1x4567 = vfmaq_f32(vacc1x4567, va1111, vb4567);
-        vacc2x4567 = vfmaq_f32(vacc2x4567, va2222, vb4567);
-        vacc3x4567 = vfmaq_f32(vacc3x4567, va3333, vb4567);
-      #endif
+      vacc0x0123 = vmlaq_lane_f32(vacc0x0123, vb0123, vget_low_f32(va0123), 0);
+      vacc1x0123 = vmlaq_lane_f32(vacc1x0123, vb0123, vget_low_f32(va0123), 1);
+      vacc2x0123 = vmlaq_lane_f32(vacc2x0123, vb0123, vget_high_f32(va0123), 0);
+      vacc3x0123 = vmlaq_lane_f32(vacc3x0123, vb0123, vget_high_f32(va0123), 1);
+      xnn_prefetch_to_l1((const int8_t*) w + 192);
+      vacc0x4567 = vmlaq_lane_f32(vacc0x4567, vb4567, vget_low_f32(va0123), 0);
+      vacc1x4567 = vmlaq_lane_f32(vacc1x4567, vb4567, vget_low_f32(va0123), 1);
+      vacc2x4567 = vmlaq_lane_f32(vacc2x4567, vb4567, vget_high_f32(va0123), 0);
+      vacc3x4567 = vmlaq_lane_f32(vacc3x4567, vb4567, vget_high_f32(va0123), 1);
 
       k -= sizeof(float);
     } while (k != 0);

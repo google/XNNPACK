@@ -2210,7 +2210,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-maxpool/f32-maxpool-9p8x-minmax-neon-c4.c
   src/f32-pavgpool/f32-pavgpool-9p8x-minmax-neon-c4.c
   src/f32-pavgpool/f32-pavgpool-9x-minmax-neon-c4.c
+  src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neon-prfm.c
   src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neon.c
+  src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neon-prfm.c
   src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neon.c
   src/f32-prelu/gen/f32-prelu-neon-1x4.c
   src/f32-prelu/gen/f32-prelu-neon-1x8.c
@@ -3514,7 +3516,9 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-6x8-minmax-neonfma-dup-ld128.c
   src/f32-igemm/gen/f32-igemm-6x8s4-minmax-neonfma.c
   src/f32-igemm/gen/f32-igemm-8x8s4-minmax-neonfma.c
+  src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neonfma-prfm.c
   src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neonfma.c
+  src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neonfma-prfm.c
   src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neonfma.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-lut64-p2-x4.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-lut64-p2-x8-acc2.c

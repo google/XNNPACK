@@ -15,10 +15,14 @@ tools/xngen src/f32-ppmm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D MINMAX=MINMAX  -
 tools/xngen src/f32-ppmm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D MINMAX=PMINMAX -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-wasmsimd-x86-splat.c &
 
 ################################### ARM NEON ##################################
-tools/xngen src/f32-ppmm/neon.c.in -D MR=4 -D NR=8 -D FMA=0 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neon.c &
-tools/xngen src/f32-ppmm/neon.c.in -D MR=4 -D NR=8 -D FMA=1 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neonfma.c &
-tools/xngen src/f32-ppmm/neon.c.in -D MR=8 -D NR=8 -D FMA=0 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neon.c &
-tools/xngen src/f32-ppmm/neon.c.in -D MR=8 -D NR=8 -D FMA=1 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neonfma.c &
+tools/xngen src/f32-ppmm/neon.c.in -D MR=4 -D NR=8 -D FMA=0 -D PREFETCH=0 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neon.c &
+tools/xngen src/f32-ppmm/neon.c.in -D MR=4 -D NR=8 -D FMA=1 -D PREFETCH=0 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neonfma.c &
+tools/xngen src/f32-ppmm/neon.c.in -D MR=8 -D NR=8 -D FMA=0 -D PREFETCH=0 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neon.c &
+tools/xngen src/f32-ppmm/neon.c.in -D MR=8 -D NR=8 -D FMA=1 -D PREFETCH=0 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neonfma.c &
+tools/xngen src/f32-ppmm/neon.c.in -D MR=4 -D NR=8 -D FMA=0 -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neon-prfm.c &
+tools/xngen src/f32-ppmm/neon.c.in -D MR=4 -D NR=8 -D FMA=1 -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neonfma-prfm.c &
+tools/xngen src/f32-ppmm/neon.c.in -D MR=8 -D NR=8 -D FMA=0 -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neon-prfm.c &
+tools/xngen src/f32-ppmm/neon.c.in -D MR=8 -D NR=8 -D FMA=1 -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neonfma-prfm.c &
 
 ################################### x86 SSE ###################################
 tools/xngen src/f32-ppmm/sse.c.in -D MR=4 -D NR=8 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-sse.c &

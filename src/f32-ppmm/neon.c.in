@@ -12,9 +12,11 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <xnnpack/common.h>
 #include <xnnpack/ppmm.h>
+$if PREFETCH:
+  #include <xnnpack/prefetch.h>
 
 
-void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
+void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}${"_prfm" if PREFETCH else ""}(
   size_t mr,
   size_t nc,
   size_t kc,
@@ -30,6 +32,8 @@ void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
   assert(nc != 0);
   assert(kc != 0);
   assert(kc % sizeof(float) == 0);
+  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
 
   float* c0 = c;
   $for M in range(1, MR):
@@ -46,6 +50,10 @@ void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
       if XNN_UNPREDICTABLE(mr < ${M+1}) {
         c${M} = c${M-1};
       }
+
+  $if PREFETCH:
+    $for L in range(0, 256, 64):
+      xnn_prefetch_to_l1((const int8_t*) w + ${L});
 
   do {
     $for N in range(0, NR, 4):
@@ -67,6 +75,8 @@ void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
           $for N in range(0, NR, 4):
             $for M in range(MR):
               vacc${M}x${ABC[N:N+4]} = vfmaq_laneq_f32(vacc${M}x${ABC[N:N+4]}, vb${ABC[N:N+4]}, va${ABC[M&-4:4+M&-4]}, ${M % 4});
+            $if PREFETCH and N == 0:
+              xnn_prefetch_to_l1((const int8_t*) w + 192);
         #else
           $for M in range(MR):
             $VGET_PART_F32 = "vget_low_f32" if M % 4 < 2 else "vget_high_f32"
@@ -77,22 +87,24 @@ void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}(
             $for M in range(MR):
               $MMMM = str(M) * 4
               vacc${M}x${ABC[N:N+4]} = vfmaq_f32(vacc${M}x${ABC[N:N+4]}, va${MMMM}, vb${ABC[N:N+4]});
+            $if PREFETCH and N == 0:
+              xnn_prefetch_to_l1((const int8_t*) w + 192);
         #endif
       $else:
         $for N in range(0, NR, 4):
           $for M in range(MR):
             $VGET_PART_F32 = "vget_low_f32" if M % 4 < 2 else "vget_high_f32"
             vacc${M}x${ABC[N:N+4]} = vmlaq_lane_f32(vacc${M}x${ABC[N:N+4]}, vb${ABC[N:N+4]}, ${VGET_PART_F32}(va${ABC[M&-4:4+M&-4]}), ${M % 2});
+          $if PREFETCH and N == 0:
+            xnn_prefetch_to_l1((const int8_t*) w + 192);
 
       k -= sizeof(float);
     } while (k != 0);
 
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
     $for N in range(0, NR, 4):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+4]} = vminq_f32(vacc${M}x${ABC[N:N+4]}, vmax);
 
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
     $for N in range(0, NR, 4):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+4]} = vmaxq_f32(vacc${M}x${ABC[N:N+4]}, vmin);

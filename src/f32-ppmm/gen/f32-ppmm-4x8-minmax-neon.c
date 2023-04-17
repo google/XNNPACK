@@ -31,6 +31,8 @@ void xnn_f32_ppmm_minmax_ukernel_4x8__neon(
   assert(nc != 0);
   assert(kc != 0);
   assert(kc % sizeof(float) == 0);
+  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
 
   float* c0 = c;
   float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
@@ -45,6 +47,7 @@ void xnn_f32_ppmm_minmax_ukernel_4x8__neon(
   if XNN_UNPREDICTABLE(mr != 4) {
     c3 = c2;
   }
+
 
   do {
     float32x4_t vacc0x0123 = vld1q_f32(w); w += 4;
@@ -75,7 +78,6 @@ void xnn_f32_ppmm_minmax_ukernel_4x8__neon(
       k -= sizeof(float);
     } while (k != 0);
 
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
     vacc0x0123 = vminq_f32(vacc0x0123, vmax);
     vacc1x0123 = vminq_f32(vacc1x0123, vmax);
     vacc2x0123 = vminq_f32(vacc2x0123, vmax);
@@ -85,7 +87,6 @@ void xnn_f32_ppmm_minmax_ukernel_4x8__neon(
     vacc2x4567 = vminq_f32(vacc2x4567, vmax);
     vacc3x4567 = vminq_f32(vacc3x4567, vmax);
 
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
     vacc0x0123 = vmaxq_f32(vacc0x0123, vmin);
     vacc1x0123 = vmaxq_f32(vacc1x0123, vmin);
     vacc2x0123 = vmaxq_f32(vacc2x0123, vmin);
