@@ -567,7 +567,7 @@ class GlobalAveragePoolingOperatorTester {
       xnn_status status = xnn_create_global_average_pooling_ncw_f32(
         channels(), output_min, output_max,
         0, &global_average_pooling_op);
-      if (status == xnn_status_unsupported_parameter) {
+      if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
       ASSERT_EQ(xnn_status_success, status);

@@ -200,7 +200,7 @@ const struct xnn_spmm_config* xnn_init_f16_spmm_config() {
 
 const struct xnn_spmm_config* xnn_init_f32_spmm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL) {
+  if (hardware_config == NULL || !xnn_is_chw_compatible_config(hardware_config)) {
     return NULL;
   }
   #if XNN_PLATFORM_WINDOWS
@@ -213,7 +213,7 @@ const struct xnn_spmm_config* xnn_init_f32_spmm_config() {
 
 const struct xnn_spmm_config* xnn_init_f32_spmm2_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL) {
+  if (hardware_config == NULL || !xnn_is_chw_compatible_config(hardware_config)) {
     return NULL;
   }
   #if XNN_PLATFORM_WINDOWS
@@ -226,7 +226,7 @@ const struct xnn_spmm_config* xnn_init_f32_spmm2_config() {
 
 const struct xnn_spmm_config* xnn_init_f32_spmm4_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL) {
+  if (hardware_config == NULL || !xnn_is_chw_compatible_config(hardware_config)) {
     return NULL;
   }
   #if XNN_PLATFORM_WINDOWS

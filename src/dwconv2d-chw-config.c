@@ -318,7 +318,7 @@ const struct xnn_dwconv2d_chw_config* xnn_init_f16_dwconv2d_chw_config() {
 
 const struct xnn_dwconv2d_chw_config* xnn_init_f32_dwconv2d_chw_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL) {
+  if (hardware_config == NULL || !xnn_is_chw_compatible_config(hardware_config)) {
     return NULL;
   }
   #if XNN_PLATFORM_WINDOWS

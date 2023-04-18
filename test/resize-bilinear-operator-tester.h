@@ -691,11 +691,14 @@ class ResizeBilinearOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t resize_bilinear_op = nullptr;
 
-      ASSERT_EQ(xnn_status_success,
+      const xnn_status status =
         xnn_create_resize_bilinear2d_nchw_f32(
           channels(), input_pixel_stride(), output_pixel_stride(),
           (align_corners() ? XNN_FLAG_ALIGN_CORNERS : 0) | (tf_legacy_mode() ? XNN_FLAG_TENSORFLOW_LEGACY_MODE : 0),
-          &resize_bilinear_op));
+          &resize_bilinear_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
       ASSERT_NE(nullptr, resize_bilinear_op);
 
       // Smart pointer to automatically delete resize_bilinear_op.

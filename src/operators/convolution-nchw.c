@@ -729,10 +729,16 @@ enum xnn_status xnn_create_convolution2d_nchw_f32(
     goto error;
   }
 
-  status = xnn_status_unsupported_parameter;
+  status = xnn_status_unsupported_hardware;
 
   const struct xnn_dwconv2d_chw_config* dwconv2d_chw_config = xnn_init_f32_dwconv2d_chw_config();
-  assert(dwconv2d_chw_config != NULL);
+  if (dwconv2d_chw_config == NULL) {
+    xnn_log_error("failed to create %s operator: operations on data type are not supported",
+      xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
+  status = xnn_status_unsupported_parameter;
 
   enum xnn_microkernel_type ukernel_type;
   const struct xnn_dwconv2d_chw_parameters* dwconv2d_parameters = NULL;
