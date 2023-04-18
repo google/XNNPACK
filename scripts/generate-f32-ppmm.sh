@@ -24,21 +24,12 @@ tools/xngen src/f32-ppmm/neon.c.in -D MR=4 -D NR=8 -D FMA=1 -D PREFETCH=1 -o src
 tools/xngen src/f32-ppmm/neon.c.in -D MR=8 -D NR=8 -D FMA=0 -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neon-prfm.c &
 tools/xngen src/f32-ppmm/neon.c.in -D MR=8 -D NR=8 -D FMA=1 -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neonfma-prfm.c &
 
-################################### ARM NEON ##################################
-tools/xngen src/f32-ppmm/neon.c.in -D MR=4 -D NR=8 -D FMA=0 -D PREFETCH=0 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neon.c &
-tools/xngen src/f32-ppmm/neon.c.in -D MR=4 -D NR=8 -D FMA=1 -D PREFETCH=0 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neonfma.c &
-tools/xngen src/f32-ppmm/neon.c.in -D MR=8 -D NR=8 -D FMA=0 -D PREFETCH=0 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neon.c &
-tools/xngen src/f32-ppmm/neon.c.in -D MR=8 -D NR=8 -D FMA=1 -D PREFETCH=0 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neonfma.c &
-tools/xngen src/f32-ppmm/neon.c.in -D MR=4 -D NR=8 -D FMA=0 -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neon-prfm.c &
-tools/xngen src/f32-ppmm/neon.c.in -D MR=4 -D NR=8 -D FMA=1 -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neonfma-prfm.c &
-tools/xngen src/f32-ppmm/neon.c.in -D MR=8 -D NR=8 -D FMA=0 -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neon-prfm.c &
-tools/xngen src/f32-ppmm/neon.c.in -D MR=8 -D NR=8 -D FMA=1 -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neonfma-prfm.c &
-
 ############################### AArch64 assembly ##############################
-
 ### LD128 micro-kernels
 tools/xngen src/f32-ppmm/4x8-aarch64-neonfma-ld128.S.in -D PREFETCH=0 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-asm-aarch64-neonfma-ld128.S &
 tools/xngen src/f32-ppmm/4x8-aarch64-neonfma-ld128.S.in -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-asm-aarch64-neonfma-ld128-prfm.S &
+tools/xngen src/f32-ppmm/8x8-aarch64-neonfma-ld128.S.in -D PREFETCH=0 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-asm-aarch64-neonfma-ld128.S &
+tools/xngen src/f32-ppmm/8x8-aarch64-neonfma-ld128.S.in -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-asm-aarch64-neonfma-ld128-prfm.S &
 
 ################################### x86 SSE ###################################
 tools/xngen src/f32-ppmm/sse.c.in -D MR=4 -D NR=8 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-sse.c &
