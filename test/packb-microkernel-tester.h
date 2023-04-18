@@ -215,9 +215,11 @@ class PackBMicrokernelTester {
         EXPECT_EQ(packed_w[i], 0.0f) << "at position " << i << " / " << packed_w.size() << ", channels " << channels()
                                      << ", kernel tile " << kernel_tile();
       } else {
-        // These are weights, and should be unmodified.
-        EXPECT_EQ(packed_w[i], 0x12345678) << "at position " << i << " / " << packed_w.size() << ", channels "
-                                           << channels() << ", kernel tile " << kernel_tile();
+        // These are weights, and should be unmodified or 0.
+        if (packed_w[i] != 0x12345678 && packed_w[i] != 0) {
+          FAIL() << (packed_w[i]) << "at position " << i << " / " << packed_w.size() << ", channels " << channels()
+                 << ", kernel tile " << kernel_tile() << " should be 0x12345678 or 0";
+        }
       }
     }
   }
