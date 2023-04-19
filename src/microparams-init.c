@@ -1564,6 +1564,30 @@ void xnn_update_qu8_avgpool_minmax_fp32_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+size_t xnn_init_f32_scale_scalar_params(
+  union xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
+  float scale)
+{
+  params->scalar.scale = scale;
+  return sizeof(params->scalar);
+}
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+size_t xnn_init_f32_scale_avx_params(
+  union xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
+  float scale)
+{
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx.mask_table[i] = 0;
+  }
+  params->avx.scale = scale;
+  return sizeof(params->avx);
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 void xnn_update_f32_scaleminmax_scalar_params(
   union xnn_f32_scaleminmax_params* params,
   float scale)

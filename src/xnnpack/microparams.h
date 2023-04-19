@@ -34,6 +34,21 @@ union xnn_f32_relu_params {
 };
 
 
+// Scale: used by RSUM microkernels
+
+union xnn_f32_scale_params {
+  struct {
+    float scale;
+  } scalar;
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  struct {
+    int32_t mask_table[14];
+    float scale;
+  } avx;
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+};
+
+
 // Scale+Min+Max: used by AVGPOOL/GAVGPOOL microkernels.
 
 union xnn_f16_scaleminmax_params {

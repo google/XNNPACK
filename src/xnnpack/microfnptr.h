@@ -1257,6 +1257,34 @@ typedef void (*xnn_pad_ukernel_fn)(
     size_t output_stride,
     const uint32_t fill_value);
 
+// REDUCE: Reduce
+
+typedef void (*xnn_reduce_ukernel_fn)(
+    size_t batch,
+    const void* input,
+    void* output,
+    const void* params);
+
+typedef void (*xnn_f32_reduce_ukernel_fn)(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_default_params* params);
+
+// RSUM: Reduce-Sum
+
+typedef void (*xnn_rsum_ukernel_fn)(
+    size_t batch,
+    const void* input,
+    void* output,
+    const void* params);
+
+typedef void (*xnn_f32_rsum_ukernel_fn)(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_scale_params* params);
+
 // RMAX: Reduce-MAX
 
 typedef void (*xnn_rmax_ukernel_fn)(
@@ -2207,6 +2235,10 @@ typedef size_t (*xnn_init_f16_rnd_params_fn)(
 
 typedef size_t (*xnn_init_f32_rnd_params_fn)(
   union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef size_t (*xnn_init_f32_scale_params_fn)(
+  union xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
+  float scale);
 
 typedef size_t (*xnn_init_f16_scaleminmax_params_fn)(
   union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],

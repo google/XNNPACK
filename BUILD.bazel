@@ -2315,6 +2315,7 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/raddexpminusmax.h",
     "src/xnnpack/raddextexp.h",
     "src/xnnpack/raddstoreexpminusmax.h",
+    "src/xnnpack/reduce.h",
     "src/xnnpack/rmax.h",
     "src/xnnpack/rmaxabs.h",
     "src/xnnpack/spmm.h",
@@ -6316,6 +6317,22 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_rmin_bench",
+    srcs = [
+        "bench/f32-rmin.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_rsum_bench",
+    srcs = [
+        "bench/f32-rsum.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_spmm_bench",
     srcs = [
         "bench/f32-spmm.cc",
@@ -8285,7 +8302,25 @@ xnnpack_unit_test(
     name = "f32_rmax_test",
     srcs = [
         "test/f32-rmax.cc",
-        "test/rmax-microkernel-tester.h",
+        "test/reduce-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_rmin_test",
+    srcs = [
+        "test/f32-rmin.cc",
+        "test/reduce-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_rsum_test",
+    srcs = [
+        "test/f32-rsum.cc",
+        "test/rsum-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

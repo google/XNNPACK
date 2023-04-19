@@ -1,0 +1,64 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# ARM NEON
+- name: xnn_f32_rsum_ukernel__neon_x4
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__neon_x8_acc2
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__neon_x12_acc3
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__neon_x16_acc2
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__neon_x16_acc4
+  init: xnn_init_f32_scale_scalar_params
+
+# x86 SSE
+- name: xnn_f32_rsum_ukernel__sse_x4
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__sse_x8_acc2
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__sse_x12_acc3
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__sse_x16_acc2
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__sse_x16_acc4
+  init: xnn_init_f32_scale_scalar_params
+
+# x86 AVX
+- name: xnn_f32_rsum_ukernel__avx_x8
+  init: xnn_init_f32_scale_avx_params
+- name: xnn_f32_rsum_ukernel__avx_x16_acc2
+  init: xnn_init_f32_scale_avx_params
+- name: xnn_f32_rsum_ukernel__avx_x24_acc3
+  init: xnn_init_f32_scale_avx_params
+- name: xnn_f32_rsum_ukernel__avx_x32_acc2
+  init: xnn_init_f32_scale_avx_params
+- name: xnn_f32_rsum_ukernel__avx_x32_acc4
+  init: xnn_init_f32_scale_avx_params
+
+# Wasm SIMD
+- name: xnn_f32_rsum_ukernel__wasmsimd_x4
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__wasmsimd_x8_acc2
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__wasmsimd_x12_acc3
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__wasmsimd_x16_acc2
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__wasmsimd_x16_acc4
+  init: xnn_init_f32_scale_scalar_params
+
+# Scalar
+- name: xnn_f32_rsum_ukernel__scalar_x1
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__scalar_x2_acc2
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__scalar_x3_acc3
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__scalar_x4_acc2
+  init: xnn_init_f32_scale_scalar_params
+- name: xnn_f32_rsum_ukernel__scalar_x4_acc4
+  init: xnn_init_f32_scale_scalar_params
