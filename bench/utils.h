@@ -169,6 +169,10 @@ bool CheckWAsmPSHUFB(benchmark::State& state);
 // If WAsm SDOT is unsupported, report error in benchmark state, and return false.
 bool CheckWAsmSDOT(benchmark::State& state);
 
+// Check if BLENDVPS instruction is available in WAsm Relaxed SIMD as Relaxed Lane Select.
+// If WAsm BLENDVPS is unsupported, report error in benchmark state, and return false.
+bool CheckWAsmBLENDVPS(benchmark::State& state);
+
 template <class T>
 inline T DivideRoundUp(T x, T q) {
   return x / q + T(x % q != 0);

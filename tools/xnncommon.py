@@ -71,6 +71,7 @@ _ISA_TO_ARCH_MAP = {
   "wasmrelaxedsimd": ["wasmrelaxedsimd"],
   "wasmpshufb": ["wasmrelaxedsimd"],
   "wasmsdot": ["wasmrelaxedsimd"],
+  "wasmblendvps": ["wasmrelaxedsimd"],
 }
 
 _ISA_TO_CHECK_MAP = {
@@ -98,6 +99,7 @@ _ISA_TO_CHECK_MAP = {
   "rvv": "TEST_REQUIRES_RISCV_VECTOR",
   "wasmpshufb": "TEST_REQUIRES_WASM_PSHUFB",
   "wasmsdot": "TEST_REQUIRES_WASM_SDOT",
+  "wasmblendvps": "TEST_REQUIRES_WASM_BLENDVPS",
 }
 
 

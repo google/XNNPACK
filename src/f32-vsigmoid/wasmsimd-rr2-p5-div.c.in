@@ -6,6 +6,7 @@
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $assert not FMA or RELAXED
+$assert not BLENDVPS or RELAXED
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
@@ -16,7 +17,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 $WASM_V32X4_LANESELECT = "__builtin_wasm_laneselect_i32x4" if RELAXED else "wasm_v128_bitselect"
-$ISA = "wasmrelaxedsimd" if RELAXED else "wasmsimd"
+$ISA = "wasmblendvps" if BLENDVPS else "wasmrelaxedsimd" if RELAXED else "wasmsimd"
 $ARCH_SUFFIX = "_fma" if FMA else ""
 void xnn_f32_vsigmoid_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p5_div_x${BATCH_TILE}(
     size_t batch,
@@ -121,7 +122,10 @@ void xnn_f32_vsigmoid_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p5_div_x${BATCH_TILE}(
         const v128_t vcf${ABC[N:N+4]} = wasm_f32x4_sub(vone, vf${ABC[N:N+4]});
 
       $for N in range(0, BATCH_TILE, 4):
-        vf${ABC[N:N+4]} = ${WASM_V32X4_LANESELECT}(vf${ABC[N:N+4]}, vcf${ABC[N:N+4]}, wasm_i32x4_shr(vx${ABC[N:N+4]}, 31));
+        $if BLENDVPS:
+          vf${ABC[N:N+4]} = ${WASM_V32X4_LANESELECT}(vf${ABC[N:N+4]}, vcf${ABC[N:N+4]}, vx${ABC[N:N+4]});
+        $else:
+          vf${ABC[N:N+4]} = ${WASM_V32X4_LANESELECT}(vf${ABC[N:N+4]}, vcf${ABC[N:N+4]}, wasm_i32x4_shr(vx${ABC[N:N+4]}, 31));
 
       wasm_v128_store(output, vf${ABC[0:4]});
       $for N in range(4, BATCH_TILE, 4):
@@ -169,7 +173,10 @@ void xnn_f32_vsigmoid_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p5_div_x${BATCH_TILE}(
     v128_t vf = wasm_f32x4_div(ve, vd);
     vf = wasm_v128_andnot(vf, wasm_f32x4_gt(vz, vdenorm_cutoff));
     const v128_t vcf = wasm_f32x4_sub(vone, vf);
-    vf = ${WASM_V32X4_LANESELECT}(vf, vcf, wasm_i32x4_shr(vx, 31));
+    $if BLENDVPS:
+      vf = ${WASM_V32X4_LANESELECT}(vf, vcf, vx);
+    $else:
+      vf = ${WASM_V32X4_LANESELECT}(vf, vcf, wasm_i32x4_shr(vx, 31));
 
     wasm_v128_store(output, vf);
     output += 4;
@@ -214,7 +221,10 @@ void xnn_f32_vsigmoid_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p5_div_x${BATCH_TILE}(
     v128_t vf = wasm_f32x4_div(ve, vd);
     vf = wasm_v128_andnot(vf, wasm_f32x4_gt(vz, vdenorm_cutoff));
     const v128_t vcf = wasm_f32x4_sub(vone, vf);
-    vf = ${WASM_V32X4_LANESELECT}(vf, vcf, wasm_i32x4_shr(vx, 31));
+    $if BLENDVPS:
+      vf = ${WASM_V32X4_LANESELECT}(vf, vcf, vx);
+    $else:
+      vf = ${WASM_V32X4_LANESELECT}(vf, vcf, wasm_i32x4_shr(vx, 31));
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vf, 0);

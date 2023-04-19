@@ -1370,6 +1370,43 @@ static void f32_vsigmoid(
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmblendvps_fma_rr2_p5_div_x4,
+                    xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x4,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params,
+                    benchmark::utils::CheckWAsmBLENDVPS)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmblendvps_fma_rr2_p5_div_x8,
+                    xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x8,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params,
+                    benchmark::utils::CheckWAsmBLENDVPS)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmblendvps_fma_rr2_p5_div_x12,
+                    xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x12,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params,
+                    benchmark::utils::CheckWAsmBLENDVPS)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmblendvps_fma_rr2_p5_div_x16,
+                    xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x16,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params,
+                    benchmark::utils::CheckWAsmBLENDVPS)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmblendvps_fma_rr2_p5_div_x20,
+                    xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x20,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params,
+                    benchmark::utils::CheckWAsmBLENDVPS)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmblendvps_fma_rr2_p5_div_x24,
+                    xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x24,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params,
+                    benchmark::utils::CheckWAsmBLENDVPS)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
   BENCHMARK_CAPTURE(f32_vsigmoid, wasmrelaxedsimd_fma_rr2_p5_div_x4,
                     xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_p5_div_x4,
                     xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params)
@@ -1460,6 +1497,43 @@ static void f32_vsigmoid(
   BENCHMARK_CAPTURE(f32_vsigmoid, wasmrelaxedsimd_rr2_p5_div_x24,
                     xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_x24,
                     xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmblendvps_rr2_p5_div_x4,
+                    xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x4,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params,
+                    benchmark::utils::CheckWAsmBLENDVPS)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmblendvps_rr2_p5_div_x8,
+                    xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x8,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params,
+                    benchmark::utils::CheckWAsmBLENDVPS)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmblendvps_rr2_p5_div_x12,
+                    xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x12,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params,
+                    benchmark::utils::CheckWAsmBLENDVPS)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmblendvps_rr2_p5_div_x16,
+                    xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x16,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params,
+                    benchmark::utils::CheckWAsmBLENDVPS)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmblendvps_rr2_p5_div_x20,
+                    xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x20,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params,
+                    benchmark::utils::CheckWAsmBLENDVPS)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vsigmoid, wasmblendvps_rr2_p5_div_x24,
+                    xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x24,
+                    xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params,
+                    benchmark::utils::CheckWAsmBLENDVPS)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
