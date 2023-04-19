@@ -30,6 +30,9 @@ tools/xngen src/f32-ppmm/4x8-aarch64-neonfma-ld128.S.in -D PREFETCH=0 -o src/f32
 tools/xngen src/f32-ppmm/4x8-aarch64-neonfma-ld128.S.in -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-asm-aarch64-neonfma-ld128-prfm.S &
 tools/xngen src/f32-ppmm/8x8-aarch64-neonfma-ld128.S.in -D PREFETCH=0 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-asm-aarch64-neonfma-ld128.S &
 tools/xngen src/f32-ppmm/8x8-aarch64-neonfma-ld128.S.in -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-asm-aarch64-neonfma-ld128-prfm.S &
+### Cortex A75 micro-kernels
+tools/xngen src/f32-ppmm/8x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=0 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-asm-aarch64-neonfma-cortex-a75.S &
+tools/xngen src/f32-ppmm/8x8-aarch64-neonfma-cortex-a75.S.in -D PREFETCH=1 -o src/f32-ppmm/gen/f32-ppmm-8x8-minmax-asm-aarch64-neonfma-cortex-a75-prfm.S &
 
 ################################### x86 SSE ###################################
 tools/xngen src/f32-ppmm/sse.c.in -D MR=4 -D NR=8 -o src/f32-ppmm/gen/f32-ppmm-4x8-minmax-sse.c &

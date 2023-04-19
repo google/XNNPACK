@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-ppmm/8x8-aarch64-neonfma-ld128.S.in
+//   Template: src/f32-ppmm/8x8-aarch64-neonfma-cortex-a75.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128(
+# void xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_cortex_a75_prfm(
 #     size_t mr,                x0
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -35,7 +35,7 @@
 # C7   x6  v30 v31
 # Clamp    v6 v7
 
-BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128
+BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_cortex_a75_prfm
 
         # Load params pointer
         LDR     x8, [sp]
@@ -67,34 +67,63 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128
         ADD     x6, x17, x6             // c7 = c6 + cm_stride
         CSEL    x6, x17, x6, LO         //   c7 = c6
 
-
 0:
         # Load initial bias from w into accumulators
         LDR     q16, [x4], 16
         LDR     q17, [x4], 16
-        SUB     x0, x2, 4               // k = kc - 4
         MOV     v18.16b, v16.16b
         MOV     v20.16b, v16.16b
+        LDR     q0, [x3], 16            // Prologue - loads for main loop
         MOV     v22.16b, v16.16b
         MOV     v24.16b, v16.16b
+        LDR     q4, [x4], 16
         MOV     v26.16b, v16.16b
         MOV     v28.16b, v16.16b
+        PRFM    PLDL1KEEP, [x4, 64]     // Prefetch B
         MOV     v30.16b, v16.16b
         MOV     v19.16b, v17.16b
         MOV     v21.16b, v17.16b
         MOV     v23.16b, v17.16b
+        SUBS    x0, x2, 8               // k = kc - 8
         MOV     v25.16b, v17.16b
         MOV     v27.16b, v17.16b
         MOV     v29.16b, v17.16b
         MOV     v31.16b, v17.16b
 
-        # Main loop - 1 float of A (4 bytes)
+        # Is there at least 2 floats (8 bytes) for mainloop + epilogue?
+        B.LO    2f
+
+        # Main loop - 2 float of A (8 bytes)
 1:
-        LDR     q0, [x3], 16
-        LDR     q4, [x4], 16
         LDR     q1, [x3], 16
-        LDR     q5, [x4], 16
         FMLA    v16.4s, v4.4s, v0.s[0]
+        LDR     q5, [x4], 16
+        FMLA    v18.4s, v4.4s, v0.s[1]
+        FMLA    v20.4s, v4.4s, v0.s[2]
+        PRFM    PLDL1KEEP, [x4, 128]    // Prefetch B
+        FMLA    v22.4s, v4.4s, v0.s[3]
+        FMLA    v24.4s, v4.4s, v1.s[0]
+        FMLA    v26.4s, v4.4s, v1.s[1]
+        FMLA    v28.4s, v4.4s, v1.s[2]
+        FMLA    v30.4s, v4.4s, v1.s[3]
+        FMLA    v17.4s, v5.4s, v0.s[0]
+        LDR     q4, [x4], 16
+        FMLA    v19.4s, v5.4s, v0.s[1]
+        FMLA    v21.4s, v5.4s, v0.s[2]
+        FMLA    v23.4s, v5.4s, v0.s[3]
+        FMLA    v25.4s, v5.4s, v1.s[0]
+        LDR     q0, [x3], 16
+        FMLA    v27.4s, v5.4s, v1.s[1]
+        SUBS    x0, x0, 4
+        FMLA    v29.4s, v5.4s, v1.s[2]
+        FMLA    v31.4s, v5.4s, v1.s[3]
+        B.HS    1b
+
+        # Epilogue
+2:
+        LDR     q1, [x3], 16
+        FMLA    v16.4s, v4.4s, v0.s[0]
+        LDR     q5, [x4], 16
         FMLA    v18.4s, v4.4s, v0.s[1]
         FMLA    v20.4s, v4.4s, v0.s[2]
         FMLA    v22.4s, v4.4s, v0.s[3]
@@ -106,14 +135,11 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128
         FMLA    v19.4s, v5.4s, v0.s[1]
         FMLA    v21.4s, v5.4s, v0.s[2]
         FMLA    v23.4s, v5.4s, v0.s[3]
-        SUBS    x0, x0, 4
         FMLA    v25.4s, v5.4s, v1.s[0]
         FMLA    v27.4s, v5.4s, v1.s[1]
         FMLA    v29.4s, v5.4s, v1.s[2]
         FMLA    v31.4s, v5.4s, v1.s[3]
-        B.HS    1b
 
-2:
         # Clamp
         FMAX    v16.4s, v16.4s, v6.4s
         FMAX    v17.4s, v17.4s, v6.4s
@@ -150,7 +176,7 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128
         FMIN    v31.4s, v31.4s, v7.4s
 
         # Store full 8 x 8
-        B.LO    2f
+        B.LO    3f
 
         ST1     {v16.16b, v17.16b},  [x5], x7
         ST1     {v18.16b, v19.16b}, [x12], x7
@@ -165,8 +191,8 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128
         RET
 
         # Store odd width
-2:
-        TBZ     x1, 2, 3f
+3:
+        TBZ     x1, 2, 4f
         STR     q16,  [x5], 16
         STR     q18, [x12], 16
         MOV     v16.16b, v17.16b
@@ -183,8 +209,8 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128
         STR     q30,  [x6], 16
         MOV     v28.16b, v29.16b
         MOV     v30.16b, v31.16b
-3:
-        TBZ     x1, 1, 4f
+4:
+        TBZ     x1, 1, 5f
         STR     d16,  [x5], 8
         STR     d18, [x12], 8
         DUP     d16, v16.d[1]
@@ -202,8 +228,8 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128
         DUP     d28, v28.d[1]
         DUP     d30, v30.d[1]
 
-4:
-        TBZ     x1, 0, 5f
+5:
+        TBZ     x1, 0, 6f
         STR     s16,  [x5]
         STR     s18, [x12]
         STR     s20, [x13]
@@ -213,10 +239,10 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128
         STR     s28, [x17]
         STR     s30,  [x6]
 
-5:
+6:
         RET
 
-END_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128
+END_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_cortex_a75_prfm
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

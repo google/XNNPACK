@@ -61,8 +61,10 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128_prfm
         SUBS    x0, x2, 16              // k = kc - 16
         MOV     v18.16b, v16.16b
         MOV     v28.16b, v16.16b
+        PRFM    PLDL1KEEP, [x4, 0]      // Prefetch B
         MOV     v30.16b, v16.16b
         MOV     v19.16b, v17.16b
+        PRFM    PLDL1KEEP, [x4, 64]
         MOV     v29.16b, v17.16b
         MOV     v31.16b, v17.16b
 

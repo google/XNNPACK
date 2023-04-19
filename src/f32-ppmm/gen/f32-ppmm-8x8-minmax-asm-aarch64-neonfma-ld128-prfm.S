@@ -75,8 +75,10 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128_prfm
         SUB     x0, x2, 4               // k = kc - 4
         MOV     v18.16b, v16.16b
         MOV     v20.16b, v16.16b
+        PRFM    PLDL1KEEP, [x4, 0]      // Prefetch B
         MOV     v22.16b, v16.16b
         MOV     v24.16b, v16.16b
+        PRFM    PLDL1KEEP, [x4, 64]
         MOV     v26.16b, v16.16b
         MOV     v28.16b, v16.16b
         MOV     v30.16b, v16.16b
@@ -98,6 +100,7 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128_prfm
         FMLA    v18.4s, v4.4s, v0.s[1]
         FMLA    v20.4s, v4.4s, v0.s[2]
         FMLA    v22.4s, v4.4s, v0.s[3]
+        PRFM    PLDL1KEEP, [x4, 128]      // Prefetch B0
         FMLA    v24.4s, v4.4s, v1.s[0]
         FMLA    v26.4s, v4.4s, v1.s[1]
         FMLA    v28.4s, v4.4s, v1.s[2]
@@ -150,7 +153,7 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128_prfm
         FMIN    v31.4s, v31.4s, v7.4s
 
         # Store full 8 x 8
-        B.LO    5f
+        B.LO    2f
 
         ST1     {v16.16b, v17.16b},  [x5], x7
         ST1     {v18.16b, v19.16b}, [x12], x7
@@ -165,8 +168,8 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128_prfm
         RET
 
         # Store odd width
-5:
-        TBZ     x1, 2, 6f
+2:
+        TBZ     x1, 2, 3f
         STR     q16,  [x5], 16
         STR     q18, [x12], 16
         MOV     v16.16b, v17.16b
@@ -183,8 +186,8 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128_prfm
         STR     q30,  [x6], 16
         MOV     v28.16b, v29.16b
         MOV     v30.16b, v31.16b
-6:
-        TBZ     x1, 1, 7f
+3:
+        TBZ     x1, 1, 4f
         STR     d16,  [x5], 8
         STR     d18, [x12], 8
         DUP     d16, v16.d[1]
@@ -202,8 +205,8 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128_prfm
         DUP     d28, v28.d[1]
         DUP     d30, v30.d[1]
 
-7:
-        TBZ     x1, 0, 8f
+4:
+        TBZ     x1, 0, 5f
         STR     s16,  [x5]
         STR     s18, [x12]
         STR     s20, [x13]
@@ -213,7 +216,7 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128_prfm
         STR     s28, [x17]
         STR     s30,  [x6]
 
-8:
+5:
         RET
 
 END_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128_prfm
