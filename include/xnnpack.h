@@ -3080,6 +3080,20 @@ enum xnn_status xnn_setup_maximum_nd_f16(
   void* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_mean_nd_f32(
+  uint32_t flags,
+  xnn_operator_t* mean_op_out);
+
+enum xnn_status xnn_setup_mean_nd_f32(
+  xnn_operator_t mean_op,
+  size_t num_input_dims,
+  const size_t* input_shape,
+  size_t num_reduction_axes,
+  const size_t* reduction_axes,
+  const float* input,
+  float* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_minimum_nd_f16(
   uint32_t flags,
   xnn_operator_t* minimum_op_out);

@@ -1047,6 +1047,26 @@ struct univector_contiguous_context {
       size_t size);
 #endif
 
+struct reduce_context {
+  const void* input;
+  void* output;
+  size_t input_stride;
+  size_t output_stride;
+  size_t scaled_elements;
+  xnn_reduce_ukernel_fn ukernel;
+  union {
+    union xnn_f32_default_params f32_default;
+    union xnn_f32_scale_params f32_scale;
+  } params;
+};
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_reduce(
+      const struct reduce_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
+      size_t batch_range);
+#endif
+
 struct prelu_context {
   size_t n;
   const void* x;

@@ -210,6 +210,7 @@ SET(OPERATOR_SRCS
   src/operators/lut-elementwise-nc.c
   src/operators/max-pooling-nhwc.c
   src/operators/prelu-nc.c
+  src/operators/reduce-nd.c
   src/operators/resize-bilinear-nchw.c
   src/operators/resize-bilinear-nhwc.c
   src/operators/slice-nd.c
@@ -293,6 +294,7 @@ SET(XNNPACK_SRCS
   src/pavgpool-config.c
   src/prelu-config.c
   src/raddstoreexpminusmax-config.c
+  src/reduce-config.c
   src/rmax-config.c
   src/spmm-config.c
   src/lut32norm-config.c
@@ -1203,6 +1205,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(maximum-nd-eager-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(maximum-nd-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME maximum-nd-eager-test COMMAND maximum-nd-eager-test)
+
+    ADD_EXECUTABLE(mean-nd-test test/mean-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(mean-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(mean-nd-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME mean-nd-test COMMAND mean-nd-test)
 
     ADD_EXECUTABLE(minimum-nd-test test/minimum-nd.cc)
     TARGET_INCLUDE_DIRECTORIES(minimum-nd-test PRIVATE src test)

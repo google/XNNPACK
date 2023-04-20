@@ -265,6 +265,19 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_s8_clamp_config
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_u8_clamp_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_xx_copy_config();
 
+struct xnn_reduce_config {
+  xnn_reduce_ukernel_fn ukernel;
+  union {
+    xnn_init_f32_default_params_fn f32_default;
+    xnn_init_f32_scale_params_fn f32_scale;
+  } init;
+  // Number of elements in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of
+  // elements in each call.
+  size_t element_tile;
+};
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rsum_config();
+
 struct xnn_xx_fill_config {
   xnn_fill_ukernel_fn ukernel;
   // Number of rows of inputs processed in one tile.

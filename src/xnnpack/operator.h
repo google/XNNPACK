@@ -232,6 +232,11 @@ struct xnn_operator {
       union xnn_f32_minmax_params f32_minmax;
       union xnn_f32_scaleminmax_params f32_scaleminmax;
     };
+    // Mean can use either f32_scale, or f32_scale_minmax
+    struct {
+      union xnn_f32_scale_params f32_scale;
+      union xnn_f32_scaleminmax_params f32_scale_minmax;
+    };
     union xnn_f16_chw_params f16_chw;
     union xnn_f32_chw_params f32_chw;
     union xnn_f32_f16_cvt_params f32_f16_cvt;
@@ -289,6 +294,7 @@ struct xnn_operator {
       const struct xnn_avgpool_config* avgpool_config;
       const struct xnn_gavgpool_config* gavgpool_config;
       const struct xnn_pavgpool_config* pavgpool_config;
+      const struct xnn_reduce_config* reduce_config;
     };
     const struct xnn_gavgpool_cw_config* gavgpool_cw_config;
     const struct xnn_ibilinear_chw_config* ibilinear_chw_config;
@@ -341,6 +347,7 @@ struct xnn_operator {
     struct pad_context pad;
     struct pixelwise_average_pooling_context pixelwise_average_pooling;
     struct prelu_context prelu;
+    struct reduce_context reduce;
     struct resize_bilinear_context resize_bilinear;
     struct resize_bilinear_chw_context resize_bilinear_chw;
     struct slice_context slice;
