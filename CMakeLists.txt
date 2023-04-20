@@ -1645,6 +1645,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(slice-normalization-test PRIVATE normalization)
   ADD_TEST(NAME slice-normalization-test COMMAND slice-normalization-test)
 
+  ADD_EXECUTABLE(reduce-normalization-test test/reduce-normalization.cc)
+  TARGET_INCLUDE_DIRECTORIES(reduce-normalization-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(reduce-normalization-test PRIVATE gtest gtest_main pthreadpool)
+  TARGET_LINK_LIBRARIES(reduce-normalization-test PRIVATE normalization)
+  ADD_TEST(NAME reduce-normalization-test COMMAND reduce-normalization-test)
+
   ADD_EXECUTABLE(transpose-normalization-test test/transpose-normalization.cc)
   TARGET_INCLUDE_DIRECTORIES(transpose-normalization-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(transpose-normalization-test PRIVATE gtest gtest_main pthreadpool)

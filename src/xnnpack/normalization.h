@@ -45,6 +45,12 @@ void xnn_normalize_transpose_permutation(
     size_t* normalized_input_stride,
     size_t* normalized_output_stride);
 
+void xnn_normalize_reduction(
+    size_t* num_input_dims_ptr,
+    size_t* input_dims,
+    size_t* num_reduction_axes_ptr,
+    size_t* reduction_axes);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

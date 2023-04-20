@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <xnnpack.h>
@@ -275,4 +276,104 @@ void xnn_normalize_transpose_permutation(
   }
   *normalized_element_size_out = normalized_element_size;
   *normalized_num_dims = output_dims;
+}
+
+static int cmp_value_size_t(const void* a_ptr, const void* b_ptr) {
+  const size_t a = *((const size_t*) a_ptr);
+  const size_t b = *((const size_t*) b_ptr);
+  return (b < a) - (b > a);
+}
+
+void xnn_normalize_reduction(
+    size_t* num_input_dims_ptr,
+    size_t* input_dims,
+    size_t* num_reduction_axes_ptr,
+    size_t* reduction_axes)
+{
+  size_t num_reduction_axes = *num_reduction_axes_ptr;
+  qsort(reduction_axes, num_reduction_axes, sizeof(size_t), cmp_value_size_t);
+
+  // The original number of input dimensions.
+  const size_t num_input_dims = *num_input_dims_ptr;
+
+  // Running variables for tracking sequences of adjacent axes, e.g. 1, 2, 3
+  size_t axes_sequence_start = SIZE_MAX;
+  size_t axes_sequence_length = 0;
+  // Running product of input dimensions for a sequence of adjacent axes, e.g. input_dims[1] * input_dims[2] * ...
+  size_t num_reduction_elements = 0;
+
+  // Tracking variables for consumed and produced input dimensions.
+  // Each consumed/produced input dimension is read/written only once.
+  // Invariant num_consumed_input_dims <= num_produced_input_dims holds at each iteration.
+  size_t num_consumed_input_dims = 0;
+  size_t num_produced_input_dims = 0;
+
+  // Tracking variables for consumed and produced reduction axes.
+  // Each consumed/produced reduction axis is read/written only once.
+  // Invariant consumed_reduction_axes <= &reduction_axes[num_produced_reduction_axes] holds at each iteration.
+  const size_t* consumed_reduction_axes = reduction_axes;
+  size_t num_produced_reduction_axes = 0;
+  for (; num_reduction_axes != 0; num_reduction_axes -= 1) {
+    const size_t axis = *consumed_reduction_axes++;
+    if (axis == axes_sequence_start + axes_sequence_length) {
+      // Continue a sequence of adjacent reduction axes.
+      axes_sequence_length += 1;
+
+      assert(axis == num_consumed_input_dims);
+      num_reduction_elements *= input_dims[num_consumed_input_dims++];
+      assert(num_consumed_input_dims <= num_input_dims);
+    } else {
+      if (axes_sequence_length != 0) {
+        // Write out merged input dimensions of the last axes sequence.
+        input_dims[num_produced_input_dims++] = num_reduction_elements;
+      }
+
+      // Start tracking a new sequence of adjacent reduction axes.
+      axes_sequence_start = axis;
+      axes_sequence_length = 1;
+
+      assert(num_consumed_input_dims <= axis);
+      if (num_consumed_input_dims != axis) {
+        // Merge input dimensions in the [num_consumed_input_dims:axis] range.
+        size_t normalized_dim = input_dims[num_consumed_input_dims++];
+        while (num_consumed_input_dims != axis) {
+          normalized_dim *= input_dims[num_consumed_input_dims++];
+        }
+        input_dims[num_produced_input_dims++] = normalized_dim;
+        assert(num_produced_input_dims <= num_consumed_input_dims);
+      }
+      assert(num_consumed_input_dims == axis);
+
+      // Adjust and write out the reduction axis.
+      const size_t num_eliminated_input_dims = num_consumed_input_dims - num_produced_input_dims;
+      reduction_axes[num_produced_reduction_axes++] = axis - num_eliminated_input_dims;
+
+      // Reinitialize the running product of input dimensions.
+      num_reduction_elements = input_dims[num_consumed_input_dims++];
+      assert(num_consumed_input_dims <= num_input_dims);
+    }
+  }
+
+  // If we're tracking a sequence of adjacent reduction axes, terminate it.
+  if (num_consumed_input_dims == axes_sequence_start + axes_sequence_length) {
+    input_dims[num_produced_input_dims++] = num_reduction_elements;
+  }
+  assert(num_produced_input_dims <= num_consumed_input_dims);
+  assert(num_consumed_input_dims <= num_input_dims);
+
+  // If there're input dims after the last reduction axis, normalize them.
+  if (num_consumed_input_dims != num_input_dims) {
+    // Merge input dimensions in the [num_consumed_input_dims:num_input_dims] range.
+    size_t normalized_dim = input_dims[num_consumed_input_dims++];
+    while (num_consumed_input_dims != num_input_dims) {
+      normalized_dim *= input_dims[num_consumed_input_dims++];
+    }
+    input_dims[num_produced_input_dims++] = normalized_dim;
+    assert(num_produced_input_dims <= num_consumed_input_dims);
+  }
+  assert(num_produced_input_dims <= num_consumed_input_dims);
+  assert(num_consumed_input_dims == num_input_dims);
+
+  *num_input_dims_ptr = num_produced_input_dims;
+  *num_reduction_axes_ptr = num_produced_reduction_axes;
 }
