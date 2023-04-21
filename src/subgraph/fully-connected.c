@@ -65,21 +65,27 @@ static enum xnn_status create_fully_connected_operator(
   enum xnn_status status;
   switch (node->compute_type) {
     case xnn_compute_type_fp16:
-      assert(kernel_data != NULL);
-      assert(!has_non_static_weights);
-      status = xnn_create_fully_connected_nc_f16(
-        input_channels,
-        output_channels,
-        input_channels /* input stride */,
-        output_channels /* output stride */,
-        kernel_data,
-        bias_data,
-        node->activation.output_min,
-        node->activation.output_max,
-        node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS,
-        code_cache,
-        weights_cache,
-        &opdata->operator_objects[0]);
+      if (has_non_static_weights) {
+        status = xnn_create_dynamic_fully_connected_nc_f16(
+          node->activation.output_min,
+          node->activation.output_max,
+          node->flags /* flags */,
+          &opdata->operator_objects[0]);
+      } else {
+        status = xnn_create_fully_connected_nc_f16(
+          input_channels,
+          output_channels,
+          input_channels /* input stride */,
+          output_channels /* output stride */,
+          kernel_data,
+          bias_data,
+          node->activation.output_min,
+          node->activation.output_max,
+          node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS,
+          code_cache,
+          weights_cache,
+          &opdata->operator_objects[0]);
+      }
       break;
     case xnn_compute_type_fp32:
       if (has_non_static_weights) {
@@ -214,6 +220,15 @@ static enum xnn_status setup_fully_connected_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_dynamic_fully_connected_nc_f16:
+      assert(kernel_data != NULL);
+      return xnn_setup_dynamic_fully_connected_nc_f16(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_channels, opdata->output_channels,
+        opdata->input_channels, opdata->output_channels,
+        input_data, kernel_data, bias_data, output_data,
+        threadpool);
     case xnn_operator_type_dynamic_fully_connected_nc_f32:
       assert(kernel_data != NULL);
       return xnn_setup_dynamic_fully_connected_nc_f32(

@@ -4,11 +4,14 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <array>
+#include <cstddef>
+#include <cstdint>
 
 #include <fp16.h>
 #include "mock-allocator.h"
 
 #include <xnnpack.h>
+#include <xnnpack/subgraph.h>
 #include <xnnpack/node-type.h>
 
 #include "subgraph-tester.h"
@@ -531,6 +534,141 @@ TEST(SUBGRAPH_FP16, prelu_slope_used_by_another_node) {
   // But original fp32 weights kept around.
   ASSERT_EQ(static_cast<const float*>(static_value->fp32_data)[0], 1.0f);
   ASSERT_EQ(static_cast<const float*>(static_value->fp32_data)[1], 2.0f);
+}
+
+TEST(SUBGRAPH_FP16_DYNAMIC_FULLY_CONNECTED, dynamic_weights_no_bias_weights_converted_to_fp16) {
+  auto tester = SubgraphTester(5);
+
+  // external input[0]   external input [1]
+  //              \       /
+  //               \   [constant pad]
+  //                \   /
+  //                [fully connected]
+  //                  |
+  //                fully connected out [2]
+  const uint32_t input_id = 0;
+  const uint32_t input2_id = 1;
+  const uint32_t weights_id = 3;
+  const uint32_t fully_connected_out_id = 2;
+  std::array<size_t, 4> pre_paddings = {1, 0, 0, 0};
+  std::array<size_t, 4> post_paddings = {0, 0, 0, 0};
+  tester
+      .AddInputTensorF32({1, 5, 5, 3}, input_id)
+      .AddInputTensorF32({1, 1, 1, 3}, input2_id)
+      .AddOutputTensorF32({1, 5, 5, 2}, fully_connected_out_id)
+      .AddDynamicTensorF32({2, 1, 1, 3}, weights_id)
+      .AddConstantPad(pre_paddings.data(), post_paddings.data(), 0.0f, input2_id, weights_id)
+      .AddFullyConnected(input_id, weights_id, /*bias_id=*/XNN_INVALID_VALUE_ID, fully_connected_out_id)
+      .Optimize()
+      .RewriteForFp16();
+
+  const xnn_value* weights_value = tester.Value(weights_id);
+  ASSERT_EQ(weights_value->datatype, xnn_datatype_fp16);
+}
+
+TEST(SUBGRAPH_FP16_DYNAMIC_FULLY_CONNECTED, dynamic_weights_static_bias_weights_converted_to_fp16) {
+  auto tester = SubgraphTester(5);
+
+  // external input[0]   external input [1]
+  //              \       /            static bias [4]
+  //               \   [constant pad]   /
+  //                \   /              /
+  //                [fully connected]
+  //                  |
+  //                fully connected out [2]
+  const uint32_t input_id = 0;
+  const uint32_t input2_id = 1;
+  const uint32_t weights_id = 3;
+  const uint32_t bias_id = 4;
+  const uint32_t fully_connected_out_id = 2;
+  std::array<size_t, 4> pre_paddings = {1,0,0,0};
+  std::array<size_t, 4> post_paddings = {0,0,0,0};
+  tester
+      .AddInputTensorF32({1, 5, 5, 3}, input_id)
+      .AddInputTensorF32({1, 1, 1, 3}, input2_id)
+      .AddOutputTensorF32({1, 5, 5, 2}, fully_connected_out_id)
+      .AddDynamicTensorF32({2, 1, 1, 3}, weights_id)
+      .AddStaticTensorF32({2}, TensorType::kDense, bias_id)
+      .AddConstantPad(pre_paddings.data(), post_paddings.data(), 0.0f, input2_id, weights_id)
+      .AddFullyConnected(input_id, weights_id, bias_id, fully_connected_out_id)
+      .Optimize()
+      .RewriteForFp16();
+
+  const xnn_value* weights_value = tester.Value(weights_id);
+  ASSERT_EQ(weights_value->datatype, xnn_datatype_fp16);
+}
+
+TEST(SUBGRAPH_FP16_DYNAMIC_FULLY_CONNECTED, static_weights_dynamic_bias_bias_converted_to_fp16) {
+  auto tester = SubgraphTester(5);
+
+  // external input[0] static weights [4] external input [1]
+  //              \         |              /
+  //               \        |        [constant pad]
+  //                \       |           /
+  //                [fully connected]
+  //                  |
+  //                fully connected out [2]
+  const uint32_t input_id = 0;
+  const uint32_t input2_id = 1;
+  const uint32_t weights_id = 3;
+  const uint32_t bias_id = 4;
+  const uint32_t fully_connected_out_id = 2;
+  std::array<size_t, 4> pre_paddings = {1};
+  std::array<size_t, 4> post_paddings = {0};
+  tester
+      .AddInputTensorF32({1, 5, 5, 3}, input_id)
+      .AddInputTensorF32({1}, input2_id)
+      .AddOutputTensorF32({1, 5, 5, 2}, fully_connected_out_id)
+      .AddStaticTensorF32({2, 1, 1, 3}, TensorType::kDense, weights_id)
+      .AddDynamicTensorF32({2}, bias_id)
+      .AddConstantPad(pre_paddings.data(), post_paddings.data(), 0.0f, input2_id, bias_id)
+      .AddFullyConnected(input_id, weights_id, bias_id, fully_connected_out_id)
+      .Optimize()
+      .RewriteForFp16();
+
+  const xnn_value* bias_value = tester.Value(bias_id);
+  ASSERT_EQ(bias_value->datatype, xnn_datatype_fp16);
+}
+
+TEST(SUBGRAPH_FP16_DYNAMIC_FULLY_CONNECTED, dynamic_weights_dynamic_bias_weights_and_bias_converted_to_fp16) {
+  auto tester = SubgraphTester(6);
+
+  // external input[0]   external input [1]  external input [2]
+  //              \       /                  /
+  //               \   [constant pad] [constant pad]
+  //                \   /                /
+  //                [fully connected]
+  //                  |
+  //                fully connected out [5]
+  const uint32_t input_id = 0;
+  const uint32_t input2_id = 1;
+  const uint32_t input3_id = 2;
+  const uint32_t weights_id = 3;
+  const uint32_t bias_id = 4;
+  const uint32_t fully_connected_out_id = 5;
+
+  std::array<size_t, 4> weights_pre_paddings = {1, 0, 0, 0};
+  std::array<size_t, 4> weights_post_paddings = {0, 0, 0, 0};
+  std::array<size_t, 4> bias_pre_paddings = {1};
+  std::array<size_t, 4> bias_post_paddings = {0};
+
+  tester
+      .AddInputTensorF32({1, 5, 5, 3}, input_id)
+      .AddInputTensorF32({1, 1, 1, 3}, input2_id)
+      .AddInputTensorF32({1}, input3_id)
+      .AddOutputTensorF32({1, 5, 5, 2}, fully_connected_out_id)
+      .AddDynamicTensorF32({2, 1, 1, 3}, weights_id)
+      .AddDynamicTensorF32({2}, bias_id)
+      .AddConstantPad(weights_pre_paddings.data(), weights_post_paddings.data(), 0.0f, input2_id, weights_id)
+      .AddConstantPad(bias_pre_paddings.data(), bias_post_paddings.data(), 0.0f, input3_id, bias_id)
+      .AddFullyConnected(input_id, weights_id, bias_id, fully_connected_out_id)
+      .Optimize()
+      .RewriteForFp16();
+
+  const xnn_value* weights_value = tester.Value(weights_id);
+  ASSERT_EQ(weights_value->datatype, xnn_datatype_fp16);
+  const xnn_value* bias_value = tester.Value(bias_id);
+  ASSERT_EQ(bias_value->datatype, xnn_datatype_fp16);
 }
 
 }  // namespace xnnpack
