@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
@@ -42,6 +43,11 @@ enum xnn_status xnn_define_tensor_value(
   if (num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error("failed to create Dense Tensor value: num of dimensions exceeds XNNPACK limit (%d)",
       XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
+
+  if ((flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) != 0 && data != NULL) {
+    xnn_log_error("External input/output cannot have static data, provide data when setting up runtime.");
     return xnn_status_unsupported_parameter;
   }
 

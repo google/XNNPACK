@@ -110,9 +110,7 @@ TEST(SUBGRAPH_FP16, with_static_value) {
   tester
       .AddInputTensorF32({1, 2, 2, 3}, 0)
       // Tensor #1 is both static and external
-      .AddStaticTensorF32({1, 1, 1, 3}, TensorType::kDense, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
-                          static_tensor_data)
+      .AddStaticTensorF32({1, 1, 1, 3}, TensorType::kDense, 1, /*flags=*/0, static_tensor_data)
       .AddOutputTensorF32({1, 4, 2, 3}, 2)
       .AddAddition(0, 1, 2)
       .Optimize()
@@ -153,8 +151,7 @@ TEST(SUBGRAPH_FP16, static_buffer_allocation_failure) {
   auto tester = SubgraphTester(3);
   tester
       .AddInputTensorF32({1, 2, 2, 3}, 0)
-      .AddStaticTensorF32({1, 1, 1, 3}, TensorType::kDense, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT)
+      .AddStaticTensorF32({1, 1, 1, 3}, TensorType::kDense, 1, /*flags=*/0)
       .AddOutputTensorF32({1, 4, 2, 3}, 2)
       .AddAddition(0, 1, 2)
       .Optimize();
@@ -176,8 +173,7 @@ TEST(SUBGRAPH_FP16, external_value_allocation_failure) {
   auto tester = SubgraphTester(3);
   tester
       .AddInputTensorF32({1, 2, 2, 3}, 0)
-      .AddStaticTensorF32({1, 1, 1, 3}, TensorType::kDense, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT)
+      .AddStaticTensorF32({1, 1, 1, 3}, TensorType::kDense, 1, /*flags=*/0)
       .AddOutputTensorF32({1, 4, 2, 3}, 2)
       .AddAddition(0, 1, 2)
       .Optimize();
