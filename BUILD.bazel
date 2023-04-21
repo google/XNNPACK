@@ -10735,6 +10735,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK_test_mode",
+        ":node_type",
         ":operators_test_mode",
         ":subgraph_test_mode",
     ],

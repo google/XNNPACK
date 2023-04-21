@@ -8,12 +8,14 @@
 #include <cmath>      // For std::lrintf.
 #include <cstddef>    // For size_t.
 #include <cstdint>    // For uint32_t.
-#include <limits>     // For std::numeric_limits.
+#include <functional> // For std::multiplies.
 #include <memory>     // For std::unique_ptr.
+#include <numeric>    // For std::accumulate.
 #include <random>     // For std::random_device, std::mt19937, std::uniform_real_distribution.
 #include <vector>     // For std::vector.
 
 #include <xnnpack.h>
+#include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
 
