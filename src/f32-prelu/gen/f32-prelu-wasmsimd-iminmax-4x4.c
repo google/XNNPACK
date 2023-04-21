@@ -79,10 +79,10 @@ void xnn_f32_prelu_ukernel__wasmsimd_iminmax_4x4(
       v128_t vacc3x0123 = wasm_i32x4_max(vi3x0123, vzero);
       vi3x0123 = wasm_i32x4_min(vi3x0123, vzero);
 
-      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(vi0x0123, vw0123));
-      vacc1x0123 = wasm_f32x4_add(vacc1x0123, wasm_f32x4_mul(vi1x0123, vw0123));
-      vacc2x0123 = wasm_f32x4_add(vacc2x0123, wasm_f32x4_mul(vi2x0123, vw0123));
-      vacc3x0123 = wasm_f32x4_add(vacc3x0123, wasm_f32x4_mul(vi3x0123, vw0123));
+      vacc0x0123 = wasm_f32x4_add(wasm_f32x4_mul(vi0x0123, vw0123), vacc0x0123);
+      vacc1x0123 = wasm_f32x4_add(wasm_f32x4_mul(vi1x0123, vw0123), vacc1x0123);
+      vacc2x0123 = wasm_f32x4_add(wasm_f32x4_mul(vi2x0123, vw0123), vacc2x0123);
+      vacc3x0123 = wasm_f32x4_add(wasm_f32x4_mul(vi3x0123, vw0123), vacc3x0123);
 
       wasm_v128_store(o0, vacc0x0123);
       o0 += 4;
@@ -115,10 +115,10 @@ void xnn_f32_prelu_ukernel__wasmsimd_iminmax_4x4(
       v128_t vacc3x0123 = wasm_i32x4_max(vi3x0123, vzero);
       vi3x0123 = wasm_i32x4_min(vi3x0123, vzero);
 
-      vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(vi0x0123, vw0123));
-      vacc1x0123 = wasm_f32x4_add(vacc1x0123, wasm_f32x4_mul(vi1x0123, vw0123));
-      vacc2x0123 = wasm_f32x4_add(vacc2x0123, wasm_f32x4_mul(vi2x0123, vw0123));
-      vacc3x0123 = wasm_f32x4_add(vacc3x0123, wasm_f32x4_mul(vi3x0123, vw0123));
+      vacc0x0123 = wasm_f32x4_add(wasm_f32x4_mul(vi0x0123, vw0123), vacc0x0123);
+      vacc1x0123 = wasm_f32x4_add(wasm_f32x4_mul(vi1x0123, vw0123), vacc1x0123);
+      vacc2x0123 = wasm_f32x4_add(wasm_f32x4_mul(vi2x0123, vw0123), vacc2x0123);
+      vacc3x0123 = wasm_f32x4_add(wasm_f32x4_mul(vi3x0123, vw0123), vacc3x0123);
 
       if (c & (2 * sizeof(float))) {
         wasm_v128_store64_lane(o0, vacc0x0123, 0);

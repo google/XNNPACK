@@ -38,8 +38,8 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_x8(
     v128_t vacc4567 = wasm_i32x4_max(vx4567, vzero);
     vx4567 = wasm_i32x4_min(vx4567, vzero);
 
-    vacc0123 = wasm_f32x4_add(vacc0123, wasm_f32x4_mul(vx0123, vslope));
-    vacc4567 = wasm_f32x4_add(vacc4567, wasm_f32x4_mul(vx4567, vslope));
+    vacc0123 = wasm_f32x4_add(wasm_f32x4_mul(vx0123, vslope), vacc0123);
+    vacc4567 = wasm_f32x4_add(wasm_f32x4_mul(vx4567, vslope), vacc4567);
 
     wasm_v128_store(output, vacc0123);
     wasm_v128_store(output + 4, vacc4567);
@@ -50,7 +50,7 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_x8(
     input += 4;
     v128_t vacc = wasm_i32x4_max(vx, vzero);
     vx = wasm_i32x4_min(vx, vzero);
-    vacc = wasm_f32x4_add(vacc, wasm_f32x4_mul(vx, vslope));
+    vacc = wasm_f32x4_add(wasm_f32x4_mul(vx, vslope), vacc);
     wasm_v128_store(output, vacc);
     output += 4;
   }
@@ -58,7 +58,7 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_x8(
     v128_t vx = wasm_v128_load(input);
     v128_t vacc = wasm_i32x4_max(vx, vzero);
     vx = wasm_i32x4_min(vx, vzero);
-    vacc = wasm_f32x4_add(vacc, wasm_f32x4_mul(vx, vslope));
+    vacc = wasm_f32x4_add(wasm_f32x4_mul(vx, vslope), vacc);
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vacc, 0);

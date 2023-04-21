@@ -14,7 +14,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/vmulcaddc.h>
 
-
 void xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmrelaxedsimd_2x(
     size_t rows,
     size_t channels,
@@ -61,10 +60,10 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmrelaxedsimd_2x(
       const v128_t vbias0123 = wasm_v128_load(w + 8);
       const v128_t vbias4567 = wasm_v128_load(w + 12);
 
-      vacc0x0123 = wasm_f32x4_add(vbias0123, wasm_f32x4_mul(vscale0123, vacc0x0123));
-      vacc0x4567 = wasm_f32x4_add(vbias4567, wasm_f32x4_mul(vscale4567, vacc0x4567));
-      vacc1x0123 = wasm_f32x4_add(vbias0123, wasm_f32x4_mul(vscale0123, vacc1x0123));
-      vacc1x4567 = wasm_f32x4_add(vbias4567, wasm_f32x4_mul(vscale4567, vacc1x4567));
+      vacc0x0123 = wasm_f32x4_add(wasm_f32x4_mul(vacc0x0123, vscale0123), vbias0123);
+      vacc0x4567 = wasm_f32x4_add(wasm_f32x4_mul(vacc0x4567, vscale4567), vbias4567);
+      vacc1x0123 = wasm_f32x4_add(wasm_f32x4_mul(vacc1x0123, vscale0123), vbias0123);
+      vacc1x4567 = wasm_f32x4_add(wasm_f32x4_mul(vacc1x4567, vscale4567), vbias4567);
 
       vacc0x0123 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc0x0123);
       vacc0x4567 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc0x4567);
@@ -95,8 +94,8 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmrelaxedsimd_2x(
 
       const v128_t vbias = wasm_v128_load(w + 8);
 
-      vacc0 = wasm_f32x4_add(vbias, wasm_f32x4_mul(vscale, vacc0));
-      vacc1 = wasm_f32x4_add(vbias, wasm_f32x4_mul(vscale, vacc1));
+      vacc0 = wasm_f32x4_add(wasm_f32x4_mul(vacc0, vscale), vbias);
+      vacc1 = wasm_f32x4_add(wasm_f32x4_mul(vacc1, vscale), vbias);
 
       vacc0 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc0);
       vacc1 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc1);
@@ -121,8 +120,8 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c8__wasmrelaxedsimd_2x(
 
       const v128_t vbias = wasm_v128_load(w + 8);
 
-      vacc0 = wasm_f32x4_add(vbias, wasm_f32x4_mul(vscale, vacc0));
-      vacc1 = wasm_f32x4_add(vbias, wasm_f32x4_mul(vscale, vacc1));
+      vacc0 = wasm_f32x4_add(wasm_f32x4_mul(vacc0, vscale), vbias);
+      vacc1 = wasm_f32x4_add(wasm_f32x4_mul(vacc1, vscale), vbias);
 
       vacc0 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc0);
       vacc1 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc1);
