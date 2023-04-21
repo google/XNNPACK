@@ -1072,14 +1072,13 @@ static enum xnn_status setup_convolution2d_nchw(
 
       // Note: zero buffer must be SIMD-aligned, so we can't use xnn_reallocate_memory
       xnn_release_simd_memory(convolution_op->zero_buffer);
-      convolution_op->zero_buffer = xnn_allocate_simd_memory(zero_size);
+      convolution_op->zero_buffer = xnn_allocate_zero_simd_memory(zero_size);
       if (convolution_op->zero_buffer == NULL) {
         xnn_log_error(
           "failed to allocate %zu bytes for %s operator zero padding",
           sizeof(struct xnn_operator), xnn_operator_type_to_string(convolution_op->type));
         return xnn_status_out_of_memory;
       }
-      memset(convolution_op->zero_buffer, 0, zero_size);
 
       convolution_op->context.conv2d = (struct conv2d_context) {
         .input_height = input_height,
@@ -1127,14 +1126,13 @@ static enum xnn_status setup_convolution2d_nchw(
 
       // Note: zero buffer must be SIMD-aligned, so we can't use xnn_reallocate_memory
       xnn_release_simd_memory(convolution_op->zero_buffer);
-      convolution_op->zero_buffer = xnn_allocate_simd_memory(zero_size);
+      convolution_op->zero_buffer = xnn_allocate_zero_simd_memory(zero_size);
       if (convolution_op->zero_buffer == NULL) {
         xnn_log_error(
           "failed to allocate %zu bytes for %s operator zero padding",
           sizeof(struct xnn_operator), xnn_operator_type_to_string(convolution_op->type));
         return xnn_status_out_of_memory;
       }
-      memset(convolution_op->zero_buffer, 0, zero_size);
 
       if (convolution_op->ukernel.dwconv2d.update_params != NULL) {
         convolution_op->ukernel.dwconv2d.update_params(chw_params, (uint32_t) input_width);
