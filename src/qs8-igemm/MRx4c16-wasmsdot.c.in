@@ -88,7 +88,7 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_fp32_ukernel_${MR}x4c16__wasmsdot(
             const v128_t vb${N} = wasm_v128_load((const int8_t*) w + ${N * 16});
 
           $for M in range(MR):
-            vacc${M}x${N} = __builtin_wasm_dot_i8x16_i7x16_add_s_i32x4(va${M}, vb${N}, vacc${M}x${N});
+            vacc${M}x${N} = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va${M}, vb${N}, vacc${M}x${N});
 
         w = (const void*) ((const int8_t*) w + 64);
         k -= 16 * sizeof(int8_t);

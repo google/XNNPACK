@@ -148,9 +148,9 @@ void xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_x24(
     const v128_t vnonsignh1 = wasm_i16x8_narrow_i32x4(vnonsignw2, vnonsignw3);
     const v128_t vnonsignh2 = wasm_i16x8_narrow_i32x4(vnonsignw4, vnonsignw5);
 
-    const v128_t vabsh0 = __builtin_wasm_laneselect_i16x8(vnanh, vnonsignh0, vnanmaskh0);
-    const v128_t vabsh1 = __builtin_wasm_laneselect_i16x8(vnanh, vnonsignh1, vnanmaskh1);
-    const v128_t vabsh2 = __builtin_wasm_laneselect_i16x8(vnanh, vnonsignh2, vnanmaskh2);
+    const v128_t vabsh0 = __builtin_wasm_relaxed_laneselect_i16x8(vnanh, vnonsignh0, vnanmaskh0);
+    const v128_t vabsh1 = __builtin_wasm_relaxed_laneselect_i16x8(vnanh, vnonsignh1, vnanmaskh1);
+    const v128_t vabsh2 = __builtin_wasm_relaxed_laneselect_i16x8(vnanh, vnonsignh2, vnanmaskh2);
 
     const v128_t vh0 = wasm_v128_or(vabsh0, vsignh0);
     const v128_t vh1 = wasm_v128_or(vabsh1, vsignh1);
@@ -204,7 +204,7 @@ void xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_x24(
 
     const v128_t vnonsignh = wasm_i16x8_narrow_i32x4(vnonsignw_lo, vnonsignw_hi);
 
-    const v128_t vabsh = __builtin_wasm_laneselect_i16x8(vnanh, vnonsignh, vnanmaskh);
+    const v128_t vabsh = __builtin_wasm_relaxed_laneselect_i16x8(vnanh, vnonsignh, vnanmaskh);
 
     const v128_t vh = wasm_v128_or(vabsh, vsignh);
 
@@ -254,7 +254,7 @@ void xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_x24(
 
     const v128_t vnonsignh = wasm_i16x8_narrow_i32x4(vnonsignw_lo, vnonsignw_hi);
 
-    const v128_t vabsh = __builtin_wasm_laneselect_i16x8(vnanh, vnonsignh, vnanmaskh);
+    const v128_t vabsh = __builtin_wasm_relaxed_laneselect_i16x8(vnanh, vnonsignh, vnanmaskh);
 
     v128_t vh = wasm_v128_or(vabsh, vsignh);
 

@@ -79,7 +79,7 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x4(
 
     const v128_t vsignm = wasm_i32x4_shr(vx, 31);
     vx = wasm_f32x4_mul(vx, vbeta);
-    const v128_t vy = __builtin_wasm_laneselect_i32x4(ve, vx, vsignm);
+    const v128_t vy = __builtin_wasm_relaxed_laneselect_i32x4(ve, vx, vsignm);
 
     wasm_v128_store(output, vy);
     output += 4;
@@ -121,7 +121,7 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x4(
 
     const v128_t vsignm = wasm_i32x4_shr(vx, 31);
     vx = wasm_f32x4_mul(vx, vbeta);
-    v128_t vy = __builtin_wasm_laneselect_i32x4(ve, vx, vsignm);
+    v128_t vy = __builtin_wasm_relaxed_laneselect_i32x4(ve, vx, vsignm);
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vy, 0);

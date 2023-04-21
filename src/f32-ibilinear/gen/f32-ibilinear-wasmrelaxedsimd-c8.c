@@ -58,16 +58,16 @@ void xnn_f32_ibilinear_ukernel__wasmrelaxedsimd_c8(
       const v128_t vtd4567 = wasm_f32x4_sub(vtr4567, vtl4567);
       const v128_t vbd4567 = wasm_f32x4_sub(vbr4567, vbl4567);
 
-      const v128_t vt0123 = __builtin_wasm_fma_f32x4(vtl0123, vtd0123, valphah);
-      const v128_t vb0123 = __builtin_wasm_fma_f32x4(vbl0123, vbd0123, valphah);
-      const v128_t vt4567 = __builtin_wasm_fma_f32x4(vtl4567, vtd4567, valphah);
-      const v128_t vb4567 = __builtin_wasm_fma_f32x4(vbl4567, vbd4567, valphah);
+      const v128_t vt0123 = __builtin_wasm_relaxed_madd_f32x4(vtl0123, vtd0123, valphah);
+      const v128_t vb0123 = __builtin_wasm_relaxed_madd_f32x4(vbl0123, vbd0123, valphah);
+      const v128_t vt4567 = __builtin_wasm_relaxed_madd_f32x4(vtl4567, vtd4567, valphah);
+      const v128_t vb4567 = __builtin_wasm_relaxed_madd_f32x4(vbl4567, vbd4567, valphah);
 
       const v128_t vd0123 = wasm_f32x4_sub(vb0123, vt0123);
       const v128_t vd4567 = wasm_f32x4_sub(vb4567, vt4567);
 
-      const v128_t vo0123 = __builtin_wasm_fma_f32x4(vt0123, vd0123, valphav);
-      const v128_t vo4567 = __builtin_wasm_fma_f32x4(vt4567, vd4567, valphav);
+      const v128_t vo0123 = __builtin_wasm_relaxed_madd_f32x4(vt0123, vd0123, valphav);
+      const v128_t vo4567 = __builtin_wasm_relaxed_madd_f32x4(vt4567, vd4567, valphav);
 
       wasm_v128_store(output, vo0123);
       wasm_v128_store(output + 4, vo4567);
@@ -85,10 +85,10 @@ void xnn_f32_ibilinear_ukernel__wasmrelaxedsimd_c8(
 
       const v128_t vtd = wasm_f32x4_sub(vtr, vtl);
       const v128_t vbd = wasm_f32x4_sub(vbr, vbl);
-      const v128_t vt = __builtin_wasm_fma_f32x4(vtl, vtd, valphah);
-      const v128_t vb = __builtin_wasm_fma_f32x4(vbl, vbd, valphah);
+      const v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vtl, vtd, valphah);
+      const v128_t vb = __builtin_wasm_relaxed_madd_f32x4(vbl, vbd, valphah);
       const v128_t vd = wasm_f32x4_sub(vb, vt);
-      const v128_t vo = __builtin_wasm_fma_f32x4(vt, vd, valphav);
+      const v128_t vo = __builtin_wasm_relaxed_madd_f32x4(vt, vd, valphav);
 
       wasm_v128_store(output, vo);
       output += 4;
@@ -101,10 +101,10 @@ void xnn_f32_ibilinear_ukernel__wasmrelaxedsimd_c8(
 
       const v128_t vtd = wasm_f32x4_sub(vtr, vtl);
       const v128_t vbd = wasm_f32x4_sub(vbr, vbl);
-      const v128_t vt = __builtin_wasm_fma_f32x4(vtl, vtd, valphah);
-      const v128_t vb = __builtin_wasm_fma_f32x4(vbl, vbd, valphah);
+      const v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vtl, vtd, valphah);
+      const v128_t vb = __builtin_wasm_relaxed_madd_f32x4(vbl, vbd, valphah);
       const v128_t vd = wasm_f32x4_sub(vb, vt);
-      v128_t vo = __builtin_wasm_fma_f32x4(vt, vd, valphav);
+      v128_t vo = __builtin_wasm_relaxed_madd_f32x4(vt, vd, valphav);
 
       if (c & (2 * sizeof(float))) {
         wasm_v128_store64_lane(output, vo, 0);

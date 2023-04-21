@@ -62,8 +62,8 @@ void xnn_f32_ibilinear_ukernel__${ISA}_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 e
 
         $for C in range(0, CHANNEL_TILE, 4):
           $if FMA:
-            const v128_t vt${ABC[C:C+4]} = __builtin_wasm_fma_f32x4(vtl${ABC[C:C+4]}, vtd${ABC[C:C+4]}, valphah);
-            const v128_t vb${ABC[C:C+4]} = __builtin_wasm_fma_f32x4(vbl${ABC[C:C+4]}, vbd${ABC[C:C+4]}, valphah);
+            const v128_t vt${ABC[C:C+4]} = __builtin_wasm_relaxed_madd_f32x4(vtl${ABC[C:C+4]}, vtd${ABC[C:C+4]}, valphah);
+            const v128_t vb${ABC[C:C+4]} = __builtin_wasm_relaxed_madd_f32x4(vbl${ABC[C:C+4]}, vbd${ABC[C:C+4]}, valphah);
           $else:
             const v128_t vt${ABC[C:C+4]} = wasm_f32x4_add(vtl${ABC[C:C+4]}, wasm_f32x4_mul(vtd${ABC[C:C+4]}, valphah));
             const v128_t vb${ABC[C:C+4]} = wasm_f32x4_add(vbl${ABC[C:C+4]}, wasm_f32x4_mul(vbd${ABC[C:C+4]}, valphah));
@@ -73,7 +73,7 @@ void xnn_f32_ibilinear_ukernel__${ISA}_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 e
 
         $for C in range(0, CHANNEL_TILE, 4):
           $if FMA:
-            const v128_t vo${ABC[C:C+4]} = __builtin_wasm_fma_f32x4(vt${ABC[C:C+4]}, vd${ABC[C:C+4]}, valphav);
+            const v128_t vo${ABC[C:C+4]} = __builtin_wasm_relaxed_madd_f32x4(vt${ABC[C:C+4]}, vd${ABC[C:C+4]}, valphav);
           $else:
             const v128_t vo${ABC[C:C+4]} = wasm_f32x4_add(vt${ABC[C:C+4]}, wasm_f32x4_mul(vd${ABC[C:C+4]}, valphav));
 
@@ -95,14 +95,14 @@ void xnn_f32_ibilinear_ukernel__${ISA}_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 e
       const v128_t vtd = wasm_f32x4_sub(vtr, vtl);
       const v128_t vbd = wasm_f32x4_sub(vbr, vbl);
       $if FMA:
-        const v128_t vt = __builtin_wasm_fma_f32x4(vtl, vtd, valphah);
-        const v128_t vb = __builtin_wasm_fma_f32x4(vbl, vbd, valphah);
+        const v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vtl, vtd, valphah);
+        const v128_t vb = __builtin_wasm_relaxed_madd_f32x4(vbl, vbd, valphah);
       $else:
         const v128_t vt = wasm_f32x4_add(vtl, wasm_f32x4_mul(vtd, valphah));
         const v128_t vb = wasm_f32x4_add(vbl, wasm_f32x4_mul(vbd, valphah));
       const v128_t vd = wasm_f32x4_sub(vb, vt);
       $if FMA:
-        const v128_t vo = __builtin_wasm_fma_f32x4(vt, vd, valphav);
+        const v128_t vo = __builtin_wasm_relaxed_madd_f32x4(vt, vd, valphav);
       $else:
         const v128_t vo = wasm_f32x4_add(vt, wasm_f32x4_mul(vd, valphav));
 
@@ -118,14 +118,14 @@ void xnn_f32_ibilinear_ukernel__${ISA}_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 e
       const v128_t vtd = wasm_f32x4_sub(vtr, vtl);
       const v128_t vbd = wasm_f32x4_sub(vbr, vbl);
       $if FMA:
-        const v128_t vt = __builtin_wasm_fma_f32x4(vtl, vtd, valphah);
-        const v128_t vb = __builtin_wasm_fma_f32x4(vbl, vbd, valphah);
+        const v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vtl, vtd, valphah);
+        const v128_t vb = __builtin_wasm_relaxed_madd_f32x4(vbl, vbd, valphah);
       $else:
         const v128_t vt = wasm_f32x4_add(vtl, wasm_f32x4_mul(vtd, valphah));
         const v128_t vb = wasm_f32x4_add(vbl, wasm_f32x4_mul(vbd, valphah));
       const v128_t vd = wasm_f32x4_sub(vb, vt);
       $if FMA:
-        v128_t vo = __builtin_wasm_fma_f32x4(vt, vd, valphav);
+        v128_t vo = __builtin_wasm_relaxed_madd_f32x4(vt, vd, valphav);
       $else:
         v128_t vo = wasm_f32x4_add(vt, wasm_f32x4_mul(vd, valphav));
 

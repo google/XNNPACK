@@ -65,10 +65,10 @@ void xnn_f32_prelu_ukernel__wasmrelaxedsimd_laneselect_2x8(
       v128_t vacc1x4567 = wasm_f32x4_mul(vi1x4567, vw4567);
       const v128_t vmask1x4567 = wasm_i32x4_shr(vi1x4567, 31);
 
-      vacc0x0123 = __builtin_wasm_laneselect_i32x4(vacc0x0123, vi0x0123, vmask0x0123);
-      vacc0x4567 = __builtin_wasm_laneselect_i32x4(vacc0x4567, vi0x4567, vmask0x4567);
-      vacc1x0123 = __builtin_wasm_laneselect_i32x4(vacc1x0123, vi1x0123, vmask1x0123);
-      vacc1x4567 = __builtin_wasm_laneselect_i32x4(vacc1x4567, vi1x4567, vmask1x4567);
+      vacc0x0123 = __builtin_wasm_relaxed_laneselect_i32x4(vacc0x0123, vi0x0123, vmask0x0123);
+      vacc0x4567 = __builtin_wasm_relaxed_laneselect_i32x4(vacc0x4567, vi0x4567, vmask0x4567);
+      vacc1x0123 = __builtin_wasm_relaxed_laneselect_i32x4(vacc1x0123, vi1x0123, vmask1x0123);
+      vacc1x4567 = __builtin_wasm_relaxed_laneselect_i32x4(vacc1x4567, vi1x4567, vmask1x4567);
 
       wasm_v128_store(o0, vacc0x0123);
       wasm_v128_store(o0 + 4, vacc0x4567);
@@ -91,8 +91,8 @@ void xnn_f32_prelu_ukernel__wasmrelaxedsimd_laneselect_2x8(
       v128_t vacc1x0123 = wasm_f32x4_mul(vi1x0123, vw0123);
       const v128_t vmask1x0123 = wasm_i32x4_shr(vi1x0123, 31);
 
-      vacc0x0123 = __builtin_wasm_laneselect_i32x4(vacc0x0123, vi0x0123, vmask0x0123);
-      vacc1x0123 = __builtin_wasm_laneselect_i32x4(vacc1x0123, vi1x0123, vmask1x0123);
+      vacc0x0123 = __builtin_wasm_relaxed_laneselect_i32x4(vacc0x0123, vi0x0123, vmask0x0123);
+      vacc1x0123 = __builtin_wasm_relaxed_laneselect_i32x4(vacc1x0123, vi1x0123, vmask1x0123);
 
       wasm_v128_store(o0, vacc0x0123);
       o0 += 4;
@@ -113,8 +113,8 @@ void xnn_f32_prelu_ukernel__wasmrelaxedsimd_laneselect_2x8(
       v128_t vacc1x0123 = wasm_f32x4_mul(vi1x0123, vw0123);
       const v128_t vmask1x0123 = wasm_i32x4_shr(vi1x0123, 31);
 
-      vacc0x0123 = __builtin_wasm_laneselect_i32x4(vacc0x0123, vi0x0123, vmask0x0123);
-      vacc1x0123 = __builtin_wasm_laneselect_i32x4(vacc1x0123, vi1x0123, vmask1x0123);
+      vacc0x0123 = __builtin_wasm_relaxed_laneselect_i32x4(vacc0x0123, vi0x0123, vmask0x0123);
+      vacc1x0123 = __builtin_wasm_relaxed_laneselect_i32x4(vacc1x0123, vi1x0123, vmask1x0123);
 
       if (c & (2 * sizeof(float))) {
         wasm_v128_store64_lane(o0, vacc0x0123, 0);

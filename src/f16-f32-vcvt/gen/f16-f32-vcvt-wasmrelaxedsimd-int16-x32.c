@@ -93,21 +93,21 @@ void xnn_f16_f32_vcvt_ukernel__wasmrelaxedsimd_int16_x32(
     const v128_t vxmask6 = wasm_i32x4_extend_low_i16x8(vmask3);
     const v128_t vxmask7 = wasm_i32x4_extend_high_i16x8(vmask3);
 
-    const v128_t vabsf0 = __builtin_wasm_laneselect_i32x4(vnorm0, vdenorm0, vxmask0);
+    const v128_t vabsf0 = __builtin_wasm_relaxed_laneselect_i32x4(vnorm0, vdenorm0, vxmask0);
     const v128_t vsignf0 = wasm_v16x8_shuffle(vzero, vsign0, 0,  8, 1,  9, 2, 10, 3, 11);
-    const v128_t vabsf1 = __builtin_wasm_laneselect_i32x4(vnorm1, vdenorm1, vxmask1);
+    const v128_t vabsf1 = __builtin_wasm_relaxed_laneselect_i32x4(vnorm1, vdenorm1, vxmask1);
     const v128_t vsignf1 = wasm_v16x8_shuffle(vzero, vsign0, 4, 12, 5, 13, 6, 14, 7, 15);
-    const v128_t vabsf2 = __builtin_wasm_laneselect_i32x4(vnorm2, vdenorm2, vxmask2);
+    const v128_t vabsf2 = __builtin_wasm_relaxed_laneselect_i32x4(vnorm2, vdenorm2, vxmask2);
     const v128_t vsignf2 = wasm_v16x8_shuffle(vzero, vsign1, 0,  8, 1,  9, 2, 10, 3, 11);
-    const v128_t vabsf3 = __builtin_wasm_laneselect_i32x4(vnorm3, vdenorm3, vxmask3);
+    const v128_t vabsf3 = __builtin_wasm_relaxed_laneselect_i32x4(vnorm3, vdenorm3, vxmask3);
     const v128_t vsignf3 = wasm_v16x8_shuffle(vzero, vsign1, 4, 12, 5, 13, 6, 14, 7, 15);
-    const v128_t vabsf4 = __builtin_wasm_laneselect_i32x4(vnorm4, vdenorm4, vxmask4);
+    const v128_t vabsf4 = __builtin_wasm_relaxed_laneselect_i32x4(vnorm4, vdenorm4, vxmask4);
     const v128_t vsignf4 = wasm_v16x8_shuffle(vzero, vsign2, 0,  8, 1,  9, 2, 10, 3, 11);
-    const v128_t vabsf5 = __builtin_wasm_laneselect_i32x4(vnorm5, vdenorm5, vxmask5);
+    const v128_t vabsf5 = __builtin_wasm_relaxed_laneselect_i32x4(vnorm5, vdenorm5, vxmask5);
     const v128_t vsignf5 = wasm_v16x8_shuffle(vzero, vsign2, 4, 12, 5, 13, 6, 14, 7, 15);
-    const v128_t vabsf6 = __builtin_wasm_laneselect_i32x4(vnorm6, vdenorm6, vxmask6);
+    const v128_t vabsf6 = __builtin_wasm_relaxed_laneselect_i32x4(vnorm6, vdenorm6, vxmask6);
     const v128_t vsignf6 = wasm_v16x8_shuffle(vzero, vsign3, 0,  8, 1,  9, 2, 10, 3, 11);
-    const v128_t vabsf7 = __builtin_wasm_laneselect_i32x4(vnorm7, vdenorm7, vxmask7);
+    const v128_t vabsf7 = __builtin_wasm_relaxed_laneselect_i32x4(vnorm7, vdenorm7, vxmask7);
     const v128_t vsignf7 = wasm_v16x8_shuffle(vzero, vsign3, 4, 12, 5, 13, 6, 14, 7, 15);
 
     const v128_t vf0 = wasm_v128_or(vsignf0, vabsf0);
@@ -152,9 +152,9 @@ void xnn_f16_f32_vcvt_ukernel__wasmrelaxedsimd_int16_x32(
     const v128_t vxmask_lo = wasm_i32x4_extend_low_i16x8(vmask);
     const v128_t vxmask_hi = wasm_i32x4_extend_high_i16x8(vmask);
 
-    const v128_t vabsf_lo = __builtin_wasm_laneselect_i32x4(vnorm_lo, vdenorm_lo, vxmask_lo);
+    const v128_t vabsf_lo = __builtin_wasm_relaxed_laneselect_i32x4(vnorm_lo, vdenorm_lo, vxmask_lo);
     const v128_t vsignf_lo = wasm_v16x8_shuffle(vzero, vsign, 0,  8, 1,  9, 2, 10, 3, 11);
-    const v128_t vabsf_hi = __builtin_wasm_laneselect_i32x4(vnorm_hi, vdenorm_hi, vxmask_hi);
+    const v128_t vabsf_hi = __builtin_wasm_relaxed_laneselect_i32x4(vnorm_hi, vdenorm_hi, vxmask_hi);
     const v128_t vsignf_hi = wasm_v16x8_shuffle(vzero, vsign, 4, 12, 5, 13, 6, 14, 7, 15);
 
     const v128_t vf_lo = wasm_v128_or(vsignf_lo, vabsf_lo);
@@ -188,9 +188,9 @@ void xnn_f16_f32_vcvt_ukernel__wasmrelaxedsimd_int16_x32(
     const v128_t vxmask_lo = wasm_i32x4_extend_low_i16x8(vmask);
     const v128_t vxmask_hi = wasm_i32x4_extend_high_i16x8(vmask);
 
-    const v128_t vabsf_lo = __builtin_wasm_laneselect_i32x4(vnorm_lo, vdenorm_lo, vxmask_lo);
+    const v128_t vabsf_lo = __builtin_wasm_relaxed_laneselect_i32x4(vnorm_lo, vdenorm_lo, vxmask_lo);
     const v128_t vsignf_lo = wasm_v16x8_shuffle(vzero, vsign, 0,  8, 1,  9, 2, 10, 3, 11);
-    const v128_t vabsf_hi = __builtin_wasm_laneselect_i32x4(vnorm_hi, vdenorm_hi, vxmask_hi);
+    const v128_t vabsf_hi = __builtin_wasm_relaxed_laneselect_i32x4(vnorm_hi, vdenorm_hi, vxmask_hi);
     const v128_t vsignf_hi = wasm_v16x8_shuffle(vzero, vsign, 4, 12, 5, 13, 6, 14, 7, 15);
 
     v128_t vf = wasm_v128_or(vsignf_lo, vabsf_lo);

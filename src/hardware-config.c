@@ -138,10 +138,10 @@ static void init_hardware_config(void) {
       // Check out-of-bounds behaviour of Relaxed Integer Dot Product with Accumulation.
       const v128_t int8_input = wasm_i8x16_const(0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0);
       const volatile v128_t xint8_input = wasm_i8x16_const(0, 0, 0, -128, 0, 0, -128, 0, 0, -128, 0, 0, -128, 0, 0, 0);  // volatile to confuse Clang which otherwise ICE's
-      const v128_t xint8_output = __builtin_wasm_dot_i8x16_i7x16_add_s_i32x4(int8_input, xint8_input, wasm_i8x16_const_splat(0));
+      const v128_t xint8_output = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(int8_input, xint8_input, wasm_i8x16_const_splat(0));
 
       const volatile v128_t overflow_input = wasm_i8x16_const(-128, -128, -128, -128, -128, -128, -1, -1, -1, -1, -128, -128, -1, -1, -1, -1);  // volatile to confuse Clang which otherwise ICE's
-      const v128_t overflow_output = __builtin_wasm_dot_i8x16_i7x16_add_s_i32x4(wasm_i8x16_const_splat(-128), overflow_input, wasm_i8x16_const_splat(0));
+      const v128_t overflow_output = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(wasm_i8x16_const_splat(-128), overflow_input, wasm_i8x16_const_splat(0));
       hardware_config.use_wasm_sdot = !wasm_v128_any_true(wasm_v128_or(
         wasm_v128_xor(xint8_output, wasm_i32x4_const_splat(-128)),
         wasm_v128_xor(overflow_output, wasm_i32x4_const(65536, 33024, 33024, 512))));
@@ -154,7 +154,7 @@ static void init_hardware_config(void) {
         const uint32_t mask = UINT32_C(1) << shift;
         const volatile v128_t vmask = wasm_u32x4_splat(mask);
         const v128_t blendvps_result = wasm_v128_bitselect(input1, input2, wasm_i32x4_shr(vmask, 31));
-        const v128_t relaxed_result = __builtin_wasm_laneselect_i32x4(input1, input2, vmask);
+        const v128_t relaxed_result = __builtin_wasm_relaxed_laneselect_i32x4(input1, input2, vmask);
         diff = wasm_v128_or(diff, wasm_v128_xor(blendvps_result, relaxed_result));
       }
       hardware_config.use_wasm_blendvps = !wasm_v128_any_true(diff);

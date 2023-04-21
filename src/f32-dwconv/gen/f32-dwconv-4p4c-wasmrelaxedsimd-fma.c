@@ -62,25 +62,25 @@ void xnn_f32_dwconv_ukernel_4p4c__wasmrelaxedsimd_fma(
       i0 += 4;
 
       const v128_t vk0x0123 = wasm_v128_load(w + 4);
-      vacc0123p0 = __builtin_wasm_fma_f32x4(vacc0123p0, vi0x0123, vk0x0123);
+      vacc0123p0 = __builtin_wasm_relaxed_madd_f32x4(vacc0123p0, vi0x0123, vk0x0123);
 
       const v128_t vi1x0123 = wasm_v128_load(i1);
       i1 += 4;
 
       const v128_t vk1x0123 = wasm_v128_load(w + 8);
-      vacc0123p0 = __builtin_wasm_fma_f32x4(vacc0123p0, vi1x0123, vk1x0123);
+      vacc0123p0 = __builtin_wasm_relaxed_madd_f32x4(vacc0123p0, vi1x0123, vk1x0123);
 
       const v128_t vi2x0123 = wasm_v128_load(i2);
       i2 += 4;
 
       const v128_t vk2x0123 = wasm_v128_load(w + 12);
-      vacc0123p0 = __builtin_wasm_fma_f32x4(vacc0123p0, vi2x0123, vk2x0123);
+      vacc0123p0 = __builtin_wasm_relaxed_madd_f32x4(vacc0123p0, vi2x0123, vk2x0123);
 
       const v128_t vi3x0123 = wasm_v128_load(i3);
       i3 += 4;
 
       const v128_t vk3x0123 = wasm_v128_load(w + 16);
-      vacc0123p0 = __builtin_wasm_fma_f32x4(vacc0123p0, vi3x0123, vk3x0123);
+      vacc0123p0 = __builtin_wasm_relaxed_madd_f32x4(vacc0123p0, vi3x0123, vk3x0123);
 
       w += 20;
 
@@ -95,19 +95,19 @@ void xnn_f32_dwconv_ukernel_4p4c__wasmrelaxedsimd_fma(
 
       const v128_t vi0x0123 = wasm_v128_load(i0);
       const v128_t vk0x0123 = wasm_v128_load(w + 4);
-      vacc0123p0 = __builtin_wasm_fma_f32x4(vacc0123p0, vi0x0123, vk0x0123);
+      vacc0123p0 = __builtin_wasm_relaxed_madd_f32x4(vacc0123p0, vi0x0123, vk0x0123);
 
       const v128_t vi1x0123 = wasm_v128_load(i1);
       const v128_t vk1x0123 = wasm_v128_load(w + 8);
-      vacc0123p0 = __builtin_wasm_fma_f32x4(vacc0123p0, vi1x0123, vk1x0123);
+      vacc0123p0 = __builtin_wasm_relaxed_madd_f32x4(vacc0123p0, vi1x0123, vk1x0123);
 
       const v128_t vi2x0123 = wasm_v128_load(i2);
       const v128_t vk2x0123 = wasm_v128_load(w + 12);
-      vacc0123p0 = __builtin_wasm_fma_f32x4(vacc0123p0, vi2x0123, vk2x0123);
+      vacc0123p0 = __builtin_wasm_relaxed_madd_f32x4(vacc0123p0, vi2x0123, vk2x0123);
 
       const v128_t vi3x0123 = wasm_v128_load(i3);
       const v128_t vk3x0123 = wasm_v128_load(w + 16);
-      vacc0123p0 = __builtin_wasm_fma_f32x4(vacc0123p0, vi3x0123, vk3x0123);
+      vacc0123p0 = __builtin_wasm_relaxed_madd_f32x4(vacc0123p0, vi3x0123, vk3x0123);
 
 
       v128_t vacc0123 = vacc0123p0;

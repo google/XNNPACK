@@ -167,12 +167,12 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_x24(
     const v128_t vsignmKLMN = wasm_i32x4_shr(vxKLMN, 31);
     vxKLMN = wasm_f32x4_mul(vxKLMN, vbeta);
 
-    const v128_t vy0123 = __builtin_wasm_laneselect_i32x4(ve0123, vx0123, vsignm0123);
-    const v128_t vy4567 = __builtin_wasm_laneselect_i32x4(ve4567, vx4567, vsignm4567);
-    const v128_t vy89AB = __builtin_wasm_laneselect_i32x4(ve89AB, vx89AB, vsignm89AB);
-    const v128_t vyCDEF = __builtin_wasm_laneselect_i32x4(veCDEF, vxCDEF, vsignmCDEF);
-    const v128_t vyGHIJ = __builtin_wasm_laneselect_i32x4(veGHIJ, vxGHIJ, vsignmGHIJ);
-    const v128_t vyKLMN = __builtin_wasm_laneselect_i32x4(veKLMN, vxKLMN, vsignmKLMN);
+    const v128_t vy0123 = __builtin_wasm_relaxed_laneselect_i32x4(ve0123, vx0123, vsignm0123);
+    const v128_t vy4567 = __builtin_wasm_relaxed_laneselect_i32x4(ve4567, vx4567, vsignm4567);
+    const v128_t vy89AB = __builtin_wasm_relaxed_laneselect_i32x4(ve89AB, vx89AB, vsignm89AB);
+    const v128_t vyCDEF = __builtin_wasm_relaxed_laneselect_i32x4(veCDEF, vxCDEF, vsignmCDEF);
+    const v128_t vyGHIJ = __builtin_wasm_relaxed_laneselect_i32x4(veGHIJ, vxGHIJ, vsignmGHIJ);
+    const v128_t vyKLMN = __builtin_wasm_relaxed_laneselect_i32x4(veKLMN, vxKLMN, vsignmKLMN);
 
     wasm_v128_store(output, vy0123);
     wasm_v128_store(output + 4, vy4567);
@@ -208,7 +208,7 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_x24(
 
     const v128_t vsignm = wasm_i32x4_shr(vx, 31);
     vx = wasm_f32x4_mul(vx, vbeta);
-    const v128_t vy = __builtin_wasm_laneselect_i32x4(ve, vx, vsignm);
+    const v128_t vy = __builtin_wasm_relaxed_laneselect_i32x4(ve, vx, vsignm);
 
     wasm_v128_store(output, vy);
     output += 4;
@@ -238,7 +238,7 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_x24(
 
     const v128_t vsignm = wasm_i32x4_shr(vx, 31);
     vx = wasm_f32x4_mul(vx, vbeta);
-    v128_t vy = __builtin_wasm_laneselect_i32x4(ve, vx, vsignm);
+    v128_t vy = __builtin_wasm_relaxed_laneselect_i32x4(ve, vx, vsignm);
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vy, 0);

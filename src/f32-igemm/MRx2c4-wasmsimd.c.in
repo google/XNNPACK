@@ -100,7 +100,7 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__${ISA}${ARCH_SUFFI
         $for M in range(MR):
           $for N in range(NR):
             $if FMA:
-              vacc${M}x${N}c4 = __builtin_wasm_fma_f32x4(vacc${M}x${N}c4, va${M}, vb${N});
+              vacc${M}x${N}c4 = __builtin_wasm_relaxed_madd_f32x4(vacc${M}x${N}c4, va${M}, vb${N});
             $else:
               vacc${M}x${N}c4 = wasm_f32x4_add(vacc${M}x${N}c4, wasm_f32x4_mul(va${M}, vb${N}));
       }
@@ -120,7 +120,7 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__${ISA}${ARCH_SUFFI
         $for M in range(MR):
           $for N in range(NR):
             $if FMA:
-              vacc${M}x${N}c4 = __builtin_wasm_fma_f32x4(vacc${M}x${N}c4, wasm_v128_andnot(va${M}, vmask${N}), vb${N});
+              vacc${M}x${N}c4 = __builtin_wasm_relaxed_madd_f32x4(vacc${M}x${N}c4, wasm_v128_andnot(va${M}, vmask${N}), vb${N});
             $else:
               vacc${M}x${N}c4 = wasm_f32x4_add(vacc${M}x${N}c4, wasm_f32x4_mul(wasm_v128_andnot(va${M}, vmask${N}), vb${N}));
       }

@@ -74,7 +74,7 @@ void xnn_f32_prelu_ukernel__${ISA}_iminmax_${ROW_TILE}x${CHANNEL_TILE}(
       $for M in range(ROW_TILE):
         $for C in range(0, CHANNEL_TILE, 4):
           $if RELAXED:
-            vacc${M}x${ABC[C:C+4]} = __builtin_wasm_fma_f32x4(vacc${M}x${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]}, vw${ABC[C:C+4]});
+            vacc${M}x${ABC[C:C+4]} = __builtin_wasm_relaxed_madd_f32x4(vacc${M}x${ABC[C:C+4]}, vi${M}x${ABC[C:C+4]}, vw${ABC[C:C+4]});
           $else:
             vacc${M}x${ABC[C:C+4]} = wasm_f32x4_add(vacc${M}x${ABC[C:C+4]}, wasm_f32x4_mul(vi${M}x${ABC[C:C+4]}, vw${ABC[C:C+4]}));
 
@@ -99,7 +99,7 @@ void xnn_f32_prelu_ukernel__${ISA}_iminmax_${ROW_TILE}x${CHANNEL_TILE}(
 
         $for M in range(ROW_TILE):
           $if RELAXED:
-            vacc${M}x0123 = __builtin_wasm_fma_f32x4(vacc${M}x0123, vi${M}x0123, vw0123);
+            vacc${M}x0123 = __builtin_wasm_relaxed_madd_f32x4(vacc${M}x0123, vi${M}x0123, vw0123);
           $else:
             vacc${M}x0123 = wasm_f32x4_add(vacc${M}x0123, wasm_f32x4_mul(vi${M}x0123, vw0123));
 
@@ -121,7 +121,7 @@ void xnn_f32_prelu_ukernel__${ISA}_iminmax_${ROW_TILE}x${CHANNEL_TILE}(
 
       $for M in range(ROW_TILE):
         $if RELAXED:
-          vacc${M}x0123 = __builtin_wasm_fma_f32x4(vacc${M}x0123, vi${M}x0123, vw0123);
+          vacc${M}x0123 = __builtin_wasm_relaxed_madd_f32x4(vacc${M}x0123, vi${M}x0123, vw0123);
         $else:
           vacc${M}x0123 = wasm_f32x4_add(vacc${M}x0123, wasm_f32x4_mul(vi${M}x0123, vw0123));
 

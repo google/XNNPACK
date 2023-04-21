@@ -19,7 +19,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_16[16];
 
 $WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "__builtin_wasm_relaxed_max_f32x4"}[ARCH]
-$WASM_V32X4_LANESELECT="__builtin_wasm_laneselect_i32x4" if ARCH == "RELAXED" else "wasm_v128_bitselect"
+$WASM_V32X4_LANESELECT="__builtin_wasm_relaxed_laneselect_i32x4" if ARCH == "RELAXED" else "wasm_v128_bitselect"
 $ISA = "wasmsimd" if ARCH != "RELAXED" else "wasmrelaxedsimd"
 $ARCH_SUFFIX = "" if ARCH == "RELAXED" and not FMA else "_" + ("fma" if FMA else ARCH.lower())
 void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_lut16_p3_x${BATCH_TILE}(

@@ -15,7 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/vcvt.h>
 
 
-$WASM_V32X4_LANESELECT = "__builtin_wasm_laneselect_i32x4" if RELAXED else "wasm_v128_bitselect"
+$WASM_V32X4_LANESELECT = "__builtin_wasm_relaxed_laneselect_i32x4" if RELAXED else "wasm_v128_bitselect"
 $ISA = "wasmrelaxedsimd" if RELAXED else "wasmsimd"
 void xnn_f16_f32_vcvt_ukernel__${ISA}_int16_x${BATCH_TILE}(
     size_t batch,

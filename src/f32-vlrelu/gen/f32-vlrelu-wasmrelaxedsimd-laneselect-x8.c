@@ -37,8 +37,8 @@ void xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_laneselect_x8(
     v128_t vacc4567 = wasm_f32x4_mul(vx4567, vslope);
     const v128_t vmask4567 = wasm_i32x4_shr(vx4567, 31);
 
-    vacc0123 = __builtin_wasm_laneselect_i32x4(vacc0123, vx0123, vmask0123);
-    vacc4567 = __builtin_wasm_laneselect_i32x4(vacc4567, vx4567, vmask4567);
+    vacc0123 = __builtin_wasm_relaxed_laneselect_i32x4(vacc0123, vx0123, vmask0123);
+    vacc4567 = __builtin_wasm_relaxed_laneselect_i32x4(vacc4567, vx4567, vmask4567);
 
     wasm_v128_store(output, vacc0123);
     wasm_v128_store(output + 4, vacc4567);
@@ -49,7 +49,7 @@ void xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_laneselect_x8(
     input += 4;
     v128_t vacc = wasm_f32x4_mul(vx, vslope);
     const v128_t vmask = wasm_i32x4_shr(vx, 31);
-    vacc = __builtin_wasm_laneselect_i32x4(vacc, vx, vmask);
+    vacc = __builtin_wasm_relaxed_laneselect_i32x4(vacc, vx, vmask);
     wasm_v128_store(output, vacc);
     output += 4;
   }
@@ -57,7 +57,7 @@ void xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_laneselect_x8(
     const v128_t vx = wasm_v128_load(input);
     v128_t vacc = wasm_f32x4_mul(vx, vslope);
     const v128_t vmask = wasm_i32x4_shr(vx, 31);
-    vacc = __builtin_wasm_laneselect_i32x4(vacc, vx, vmask);
+    vacc = __builtin_wasm_relaxed_laneselect_i32x4(vacc, vx, vmask);
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vacc, 0);

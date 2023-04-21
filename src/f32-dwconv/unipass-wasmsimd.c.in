@@ -74,7 +74,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c_
             v128_t vacc${ABC[C:C+4]}p${K} = wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]});
           $else:
             $if FMA:
-              vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = __builtin_wasm_fma_f32x4(vacc${ABC[C:C+4]}p${K % ACCUMULATORS}, vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]});
+              vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = __builtin_wasm_relaxed_madd_f32x4(vacc${ABC[C:C+4]}p${K % ACCUMULATORS}, vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]});
             $else:
               vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = wasm_f32x4_add(vacc${ABC[C:C+4]}p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}));
 
@@ -121,7 +121,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c_
             v128_t vacc0123p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
           $else:
             $if FMA:
-              vacc0123p${K % ACCUMULATORS} = __builtin_wasm_fma_f32x4(vacc0123p${K % ACCUMULATORS}, vi${K}x0123, vk${K}x0123);
+              vacc0123p${K % ACCUMULATORS} = __builtin_wasm_relaxed_madd_f32x4(vacc0123p${K % ACCUMULATORS}, vi${K}x0123, vk${K}x0123);
             $else:
               vacc0123p${K % ACCUMULATORS} = wasm_f32x4_add(vacc0123p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${K}x0123, vk${K}x0123));
 
@@ -157,7 +157,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c_
           v128_t vacc0123p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
         $else:
           $if FMA:
-            vacc0123p${K % ACCUMULATORS} = __builtin_wasm_fma_f32x4(vacc0123p${K % ACCUMULATORS}, vi${K}x0123, vk${K}x0123);
+            vacc0123p${K % ACCUMULATORS} = __builtin_wasm_relaxed_madd_f32x4(vacc0123p${K % ACCUMULATORS}, vi${K}x0123, vk${K}x0123);
           $else:
             vacc0123p${K % ACCUMULATORS} = wasm_f32x4_add(vacc0123p${K % ACCUMULATORS}, wasm_f32x4_mul(vi${K}x0123, vk${K}x0123));
 

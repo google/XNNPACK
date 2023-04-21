@@ -78,7 +78,7 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__${ISA}${ARCH_SUFFIX}_${R
       $for M in range(ROW_TILE):
         $for C in range(0, CHANNEL_TILE, 4):
           $if FMA:
-            vacc${M}x${ABC[C:C+4]} = __builtin_wasm_fma_f32x4(vbias${ABC[C:C+4]}, vscale${ABC[C:C+4]}, vacc${M}x${ABC[C:C+4]});
+            vacc${M}x${ABC[C:C+4]} = __builtin_wasm_relaxed_madd_f32x4(vbias${ABC[C:C+4]}, vscale${ABC[C:C+4]}, vacc${M}x${ABC[C:C+4]});
           $else:
             vacc${M}x${ABC[C:C+4]} = wasm_f32x4_add(vbias${ABC[C:C+4]}, wasm_f32x4_mul(vscale${ABC[C:C+4]}, vacc${M}x${ABC[C:C+4]}));
 
@@ -110,7 +110,7 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__${ISA}${ARCH_SUFFIX}_${R
 
         $for M in range(ROW_TILE):
           $if FMA:
-            vacc${M} = __builtin_wasm_fma_f32x4(vbias, vscale, vacc${M});
+            vacc${M} = __builtin_wasm_relaxed_madd_f32x4(vbias, vscale, vacc${M});
           $else:
             vacc${M} = wasm_f32x4_add(vbias, wasm_f32x4_mul(vscale, vacc${M}));
 
@@ -137,7 +137,7 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__${ISA}${ARCH_SUFFIX}_${R
 
       $for M in range(ROW_TILE):
         $if FMA:
-          vacc${M} = __builtin_wasm_fma_f32x4(vbias, vscale, vacc${M});
+          vacc${M} = __builtin_wasm_relaxed_madd_f32x4(vbias, vscale, vacc${M});
         $else:
           vacc${M} = wasm_f32x4_add(vbias, wasm_f32x4_mul(vscale, vacc${M}));
 

@@ -59,10 +59,10 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_x16_acc4(
     const v128_t vx89AB = wasm_f32x4_sub(vi89AB, vi_max);
     const v128_t vxCDEF = wasm_f32x4_sub(viCDEF, vi_max);
 
-    v128_t vn0123 = __builtin_wasm_fma_f32x4(vmagic_bias, vx0123, vlog2e);
-    v128_t vn4567 = __builtin_wasm_fma_f32x4(vmagic_bias, vx4567, vlog2e);
-    v128_t vn89AB = __builtin_wasm_fma_f32x4(vmagic_bias, vx89AB, vlog2e);
-    v128_t vnCDEF = __builtin_wasm_fma_f32x4(vmagic_bias, vxCDEF, vlog2e);
+    v128_t vn0123 = __builtin_wasm_relaxed_madd_f32x4(vmagic_bias, vx0123, vlog2e);
+    v128_t vn4567 = __builtin_wasm_relaxed_madd_f32x4(vmagic_bias, vx4567, vlog2e);
+    v128_t vn89AB = __builtin_wasm_relaxed_madd_f32x4(vmagic_bias, vx89AB, vlog2e);
+    v128_t vnCDEF = __builtin_wasm_relaxed_madd_f32x4(vmagic_bias, vxCDEF, vlog2e);
 
     const v128_t vs0123 = wasm_i32x4_shl(vn0123, 23);
     const v128_t vs4567 = wasm_i32x4_shl(vn4567, 23);
@@ -74,45 +74,45 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_x16_acc4(
     vn89AB = wasm_f32x4_sub(vn89AB, vmagic_bias);
     vnCDEF = wasm_f32x4_sub(vnCDEF, vmagic_bias);
 
-    v128_t vt0123 = __builtin_wasm_fma_f32x4(vx0123, vn0123, vminus_ln2_hi);
-    v128_t vt4567 = __builtin_wasm_fma_f32x4(vx4567, vn4567, vminus_ln2_hi);
-    v128_t vt89AB = __builtin_wasm_fma_f32x4(vx89AB, vn89AB, vminus_ln2_hi);
-    v128_t vtCDEF = __builtin_wasm_fma_f32x4(vxCDEF, vnCDEF, vminus_ln2_hi);
+    v128_t vt0123 = __builtin_wasm_relaxed_madd_f32x4(vx0123, vn0123, vminus_ln2_hi);
+    v128_t vt4567 = __builtin_wasm_relaxed_madd_f32x4(vx4567, vn4567, vminus_ln2_hi);
+    v128_t vt89AB = __builtin_wasm_relaxed_madd_f32x4(vx89AB, vn89AB, vminus_ln2_hi);
+    v128_t vtCDEF = __builtin_wasm_relaxed_madd_f32x4(vxCDEF, vnCDEF, vminus_ln2_hi);
 
-    vt0123 = __builtin_wasm_fma_f32x4(vt0123, vn0123, vminus_ln2_lo);
-    vt4567 = __builtin_wasm_fma_f32x4(vt4567, vn4567, vminus_ln2_lo);
-    vt89AB = __builtin_wasm_fma_f32x4(vt89AB, vn89AB, vminus_ln2_lo);
-    vtCDEF = __builtin_wasm_fma_f32x4(vtCDEF, vnCDEF, vminus_ln2_lo);
+    vt0123 = __builtin_wasm_relaxed_madd_f32x4(vt0123, vn0123, vminus_ln2_lo);
+    vt4567 = __builtin_wasm_relaxed_madd_f32x4(vt4567, vn4567, vminus_ln2_lo);
+    vt89AB = __builtin_wasm_relaxed_madd_f32x4(vt89AB, vn89AB, vminus_ln2_lo);
+    vtCDEF = __builtin_wasm_relaxed_madd_f32x4(vtCDEF, vnCDEF, vminus_ln2_lo);
 
-    v128_t vp0123 = __builtin_wasm_fma_f32x4(vc4, vc5, vt0123);
-    v128_t vp4567 = __builtin_wasm_fma_f32x4(vc4, vc5, vt4567);
-    v128_t vp89AB = __builtin_wasm_fma_f32x4(vc4, vc5, vt89AB);
-    v128_t vpCDEF = __builtin_wasm_fma_f32x4(vc4, vc5, vtCDEF);
+    v128_t vp0123 = __builtin_wasm_relaxed_madd_f32x4(vc4, vc5, vt0123);
+    v128_t vp4567 = __builtin_wasm_relaxed_madd_f32x4(vc4, vc5, vt4567);
+    v128_t vp89AB = __builtin_wasm_relaxed_madd_f32x4(vc4, vc5, vt89AB);
+    v128_t vpCDEF = __builtin_wasm_relaxed_madd_f32x4(vc4, vc5, vtCDEF);
 
-    vp0123 = __builtin_wasm_fma_f32x4(vc3, vp0123, vt0123);
-    vp4567 = __builtin_wasm_fma_f32x4(vc3, vp4567, vt4567);
-    vp89AB = __builtin_wasm_fma_f32x4(vc3, vp89AB, vt89AB);
-    vpCDEF = __builtin_wasm_fma_f32x4(vc3, vpCDEF, vtCDEF);
+    vp0123 = __builtin_wasm_relaxed_madd_f32x4(vc3, vp0123, vt0123);
+    vp4567 = __builtin_wasm_relaxed_madd_f32x4(vc3, vp4567, vt4567);
+    vp89AB = __builtin_wasm_relaxed_madd_f32x4(vc3, vp89AB, vt89AB);
+    vpCDEF = __builtin_wasm_relaxed_madd_f32x4(vc3, vpCDEF, vtCDEF);
 
-    vp0123 = __builtin_wasm_fma_f32x4(vc2, vp0123, vt0123);
-    vp4567 = __builtin_wasm_fma_f32x4(vc2, vp4567, vt4567);
-    vp89AB = __builtin_wasm_fma_f32x4(vc2, vp89AB, vt89AB);
-    vpCDEF = __builtin_wasm_fma_f32x4(vc2, vpCDEF, vtCDEF);
+    vp0123 = __builtin_wasm_relaxed_madd_f32x4(vc2, vp0123, vt0123);
+    vp4567 = __builtin_wasm_relaxed_madd_f32x4(vc2, vp4567, vt4567);
+    vp89AB = __builtin_wasm_relaxed_madd_f32x4(vc2, vp89AB, vt89AB);
+    vpCDEF = __builtin_wasm_relaxed_madd_f32x4(vc2, vpCDEF, vtCDEF);
 
-    vp0123 = __builtin_wasm_fma_f32x4(vc1, vp0123, vt0123);
-    vp4567 = __builtin_wasm_fma_f32x4(vc1, vp4567, vt4567);
-    vp89AB = __builtin_wasm_fma_f32x4(vc1, vp89AB, vt89AB);
-    vpCDEF = __builtin_wasm_fma_f32x4(vc1, vpCDEF, vtCDEF);
+    vp0123 = __builtin_wasm_relaxed_madd_f32x4(vc1, vp0123, vt0123);
+    vp4567 = __builtin_wasm_relaxed_madd_f32x4(vc1, vp4567, vt4567);
+    vp89AB = __builtin_wasm_relaxed_madd_f32x4(vc1, vp89AB, vt89AB);
+    vpCDEF = __builtin_wasm_relaxed_madd_f32x4(vc1, vpCDEF, vtCDEF);
 
     vt0123 = wasm_f32x4_mul(vt0123, vs0123);
     vt4567 = wasm_f32x4_mul(vt4567, vs4567);
     vt89AB = wasm_f32x4_mul(vt89AB, vs89AB);
     vtCDEF = wasm_f32x4_mul(vtCDEF, vsCDEF);
 
-    v128_t vf0123 = __builtin_wasm_fma_f32x4(vs0123, vt0123, vp0123);
-    v128_t vf4567 = __builtin_wasm_fma_f32x4(vs4567, vt4567, vp4567);
-    v128_t vf89AB = __builtin_wasm_fma_f32x4(vs89AB, vt89AB, vp89AB);
-    v128_t vfCDEF = __builtin_wasm_fma_f32x4(vsCDEF, vtCDEF, vpCDEF);
+    v128_t vf0123 = __builtin_wasm_relaxed_madd_f32x4(vs0123, vt0123, vp0123);
+    v128_t vf4567 = __builtin_wasm_relaxed_madd_f32x4(vs4567, vt4567, vp4567);
+    v128_t vf89AB = __builtin_wasm_relaxed_madd_f32x4(vs89AB, vt89AB, vp89AB);
+    v128_t vfCDEF = __builtin_wasm_relaxed_madd_f32x4(vsCDEF, vtCDEF, vpCDEF);
 
     vf0123 = wasm_v128_andnot(vf0123, wasm_f32x4_lt(vx0123, vdenorm_cutoff));
     vf4567 = wasm_v128_andnot(vf4567, wasm_f32x4_lt(vx4567, vdenorm_cutoff));
@@ -142,22 +142,22 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_x16_acc4(
 
     const v128_t vx = wasm_f32x4_sub(vi, vi_max);
 
-    v128_t vn = __builtin_wasm_fma_f32x4(vmagic_bias, vx, vlog2e);
+    v128_t vn = __builtin_wasm_relaxed_madd_f32x4(vmagic_bias, vx, vlog2e);
 
     const v128_t vs = wasm_i32x4_shl(vn, 23);
 
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
-    v128_t vt = __builtin_wasm_fma_f32x4(vx, vn, vminus_ln2_hi);
-    vt = __builtin_wasm_fma_f32x4(vt, vn, vminus_ln2_lo);
+    v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vx, vn, vminus_ln2_hi);
+    vt = __builtin_wasm_relaxed_madd_f32x4(vt, vn, vminus_ln2_lo);
 
-    v128_t vp = __builtin_wasm_fma_f32x4(vc4, vc5, vt);
-    vp = __builtin_wasm_fma_f32x4(vc3, vp, vt);
-    vp = __builtin_wasm_fma_f32x4(vc2, vp, vt);
-    vp = __builtin_wasm_fma_f32x4(vc1, vp, vt);
+    v128_t vp = __builtin_wasm_relaxed_madd_f32x4(vc4, vc5, vt);
+    vp = __builtin_wasm_relaxed_madd_f32x4(vc3, vp, vt);
+    vp = __builtin_wasm_relaxed_madd_f32x4(vc2, vp, vt);
+    vp = __builtin_wasm_relaxed_madd_f32x4(vc1, vp, vt);
 
     vt = wasm_f32x4_mul(vt, vs);
-    v128_t vf = __builtin_wasm_fma_f32x4(vs, vt, vp);
+    v128_t vf = __builtin_wasm_relaxed_madd_f32x4(vs, vt, vp);
 
     vf = wasm_v128_andnot(vf, wasm_f32x4_lt(vx, vdenorm_cutoff));
 
@@ -176,22 +176,22 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_x16_acc4(
 
     const v128_t vx = wasm_f32x4_sub(vi, vi_max);
 
-    v128_t vn = __builtin_wasm_fma_f32x4(vmagic_bias, vx, vlog2e);
+    v128_t vn = __builtin_wasm_relaxed_madd_f32x4(vmagic_bias, vx, vlog2e);
 
     const v128_t vs = wasm_i32x4_shl(vn, 23);
 
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
-    v128_t vt = __builtin_wasm_fma_f32x4(vx, vn, vminus_ln2_hi);
-    vt = __builtin_wasm_fma_f32x4(vt, vn, vminus_ln2_lo);
+    v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vx, vn, vminus_ln2_hi);
+    vt = __builtin_wasm_relaxed_madd_f32x4(vt, vn, vminus_ln2_lo);
 
-    v128_t vp = __builtin_wasm_fma_f32x4(vc4, vc5, vt);
-    vp = __builtin_wasm_fma_f32x4(vc3, vp, vt);
-    vp = __builtin_wasm_fma_f32x4(vc2, vp, vt);
-    vp = __builtin_wasm_fma_f32x4(vc1, vp, vt);
+    v128_t vp = __builtin_wasm_relaxed_madd_f32x4(vc4, vc5, vt);
+    vp = __builtin_wasm_relaxed_madd_f32x4(vc3, vp, vt);
+    vp = __builtin_wasm_relaxed_madd_f32x4(vc2, vp, vt);
+    vp = __builtin_wasm_relaxed_madd_f32x4(vc1, vp, vt);
 
     vt = wasm_f32x4_mul(vt, vs);
-    v128_t vf = __builtin_wasm_fma_f32x4(vs, vt, vp);
+    v128_t vf = __builtin_wasm_relaxed_madd_f32x4(vs, vt, vp);
 
     vf = wasm_v128_andnot(vf, wasm_f32x4_lt(vx, vdenorm_cutoff));
 

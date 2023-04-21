@@ -100,7 +100,7 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__${ISA}${ARCH_SUFFIX}
         $for M in range(MR):
           $for N in range(0, NR, 4):
             $if FMA:
-              vacc${M}x${ABC[N:N+4]} = __builtin_wasm_fma_f32x4(vacc${M}x${ABC[N:N+4]}, va${M}, vb${ABC[N:N+4]});
+              vacc${M}x${ABC[N:N+4]} = __builtin_wasm_relaxed_madd_f32x4(vacc${M}x${ABC[N:N+4]}, va${M}, vb${ABC[N:N+4]});
             $else:
               vacc${M}x${ABC[N:N+4]} = wasm_f32x4_add(vacc${M}x${ABC[N:N+4]}, wasm_f32x4_mul(va${M}, vb${ABC[N:N+4]}));
         k -= sizeof(float);

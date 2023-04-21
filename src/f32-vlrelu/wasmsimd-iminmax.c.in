@@ -41,7 +41,7 @@ void xnn_f32_vlrelu_ukernel__${ISA}_iminmax_x${BATCH_TILE}(
 
       $for N in range(0, BATCH_TILE, 4):
         $if RELAXED:
-          vacc${ABC[N:N+4]} = __builtin_wasm_fma_f32x4(vacc${ABC[N:N+4]}, vx${ABC[N:N+4]}, vslope);
+          vacc${ABC[N:N+4]} = __builtin_wasm_relaxed_madd_f32x4(vacc${ABC[N:N+4]}, vx${ABC[N:N+4]}, vslope);
         $else:
           vacc${ABC[N:N+4]} = wasm_f32x4_add(vacc${ABC[N:N+4]}, wasm_f32x4_mul(vx${ABC[N:N+4]}, vslope));
 
@@ -56,7 +56,7 @@ void xnn_f32_vlrelu_ukernel__${ISA}_iminmax_x${BATCH_TILE}(
     v128_t vacc = wasm_i32x4_max(vx, vzero);
     vx = wasm_i32x4_min(vx, vzero);
     $if RELAXED:
-      vacc = __builtin_wasm_fma_f32x4(vacc, vx, vslope);
+      vacc = __builtin_wasm_relaxed_madd_f32x4(vacc, vx, vslope);
     $else:
       vacc = wasm_f32x4_add(vacc, wasm_f32x4_mul(vx, vslope));
     wasm_v128_store(output, vacc);
@@ -67,7 +67,7 @@ void xnn_f32_vlrelu_ukernel__${ISA}_iminmax_x${BATCH_TILE}(
     v128_t vacc = wasm_i32x4_max(vx, vzero);
     vx = wasm_i32x4_min(vx, vzero);
     $if RELAXED:
-      vacc = __builtin_wasm_fma_f32x4(vacc, vx, vslope);
+      vacc = __builtin_wasm_relaxed_madd_f32x4(vacc, vx, vslope);
     $else:
       vacc = wasm_f32x4_add(vacc, wasm_f32x4_mul(vx, vslope));
 

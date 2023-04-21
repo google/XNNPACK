@@ -14,7 +14,7 @@ $SIMD_TILE = BATCH_TILE // 8
 #include <xnnpack/vcvt.h>
 
 
-$WASM_V16X8_LANESELECT = "__builtin_wasm_laneselect_i16x8" if RELAXED else "wasm_v128_bitselect"
+$WASM_V16X8_LANESELECT = "__builtin_wasm_relaxed_laneselect_i16x8" if RELAXED else "wasm_v128_bitselect"
 $ISA = "wasmrelaxedsimd" if RELAXED else "wasmsimd"
 void xnn_f32_f16_vcvt_ukernel__${ISA}_x${BATCH_TILE}(
     size_t batch,
