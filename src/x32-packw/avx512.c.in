@@ -222,7 +222,11 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}__avx512f${"_prfm" if PREFETCH else ""
         // Load first 4 rows of N into low part of each register
         $for N in range(0,NR,16):
           $for L in range(4):
-            __m512 v${N+L}x0123 = _mm512_castps128_ps512(_mm_loadu_ps(w${N+L}));
+            $if (N+L+12)==(NR-1):
+              // castps leaves upper 128 bits undefined, so zero them.
+              __m512 v${N+L}x0123 = _mm512_zextps128_ps512(_mm_loadu_ps(w${N+L}));
+            $else:
+              __m512 v${N+L}x0123 = _mm512_castps128_ps512(_mm_loadu_ps(w${N+L}));
             w${N+L} += ${KBLOCK};
         // Load next 4 rows of N into the high part of each register
         $for N in range(0,NR,16):

@@ -4047,7 +4047,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_prfm_x4(
         w1 += 4;
         __m512 v2x0123 = _mm512_castps128_ps512(_mm_loadu_ps(w2));
         w2 += 4;
-        __m512 v3x0123 = _mm512_castps128_ps512(_mm_loadu_ps(w3));
+        // castps leaves upper 128 bits undefined, so zero them.
+        __m512 v3x0123 = _mm512_zextps128_ps512(_mm_loadu_ps(w3));
         w3 += 4;
         // Load next 4 rows of N into the high part of each register
         v0x0123 = _mm512_insertf32x4(v0x0123, _mm_loadu_ps(w4), 1);
