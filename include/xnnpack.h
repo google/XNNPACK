@@ -970,6 +970,24 @@ enum xnn_status xnn_define_static_constant_pad(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Mean Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param num_reduction_axes - number of axes along which mean is computed.
+/// @param reduction_axes - axes along which mean is computed.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a dense tensor with at least
+///                   @a num_reduction_axes dimensions defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor defined in the
+///                    @a subgraph with @a num_reduction_axes fewer dimensions than the input tensor.
+/// @param flags - binary features of the Mean Node. No supported flags are currently defined.
+enum xnn_status xnn_define_static_mean(
+  xnn_subgraph_t subgraph,
+  size_t num_reduction_axes,
+  const size_t* reduction_axes,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a 2-Input Concatenate Node and add it to a Subgraph.
 ///
 /// The 2-Input Concatenate Node concatenates two tensors along a specified axis.
@@ -3086,10 +3104,10 @@ enum xnn_status xnn_create_mean_nd_f32(
 
 enum xnn_status xnn_setup_mean_nd_f32(
   xnn_operator_t mean_op,
-  size_t num_input_dims,
-  const size_t* input_shape,
   size_t num_reduction_axes,
   const size_t* reduction_axes,
+  size_t num_input_dims,
+  const size_t* input_shape,
   const float* input,
   float* output,
   pthreadpool_t threadpool);

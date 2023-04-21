@@ -303,6 +303,10 @@ struct xnn_node {
     struct {
       uint32_t block_size;
     } space_to_depth_2d;
+    struct {
+      size_t num_reduction_axes;
+      size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+    } reduce;
   } params;
   struct {
     float output_min;
@@ -351,6 +355,8 @@ struct xnn_operator_data {
   size_t output_channels;
   struct xnn_shape shape1;
   struct xnn_shape shape2;
+  size_t num_reduction_axes;
+  size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
   size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
   size_t post_paddings[XNN_MAX_TENSOR_DIMS];
   // TODO(zhin): merge this with pre_paddings/post_paddings to reduce size of this struct.

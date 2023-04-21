@@ -259,6 +259,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/square.c
   src/subgraph/squared-difference.c
   src/subgraph/static-constant-pad.c
+  src/subgraph/static-mean.c
   src/subgraph/static-reshape.c
   src/subgraph/static-resize-bilinear-2d.c
   src/subgraph/static-slice.c
@@ -1612,6 +1613,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(static-constant-pad-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(static-constant-pad-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
     ADD_TEST(NAME static-constant-pad-test COMMAND static-constant-pad-test)
+
+    ADD_EXECUTABLE(static-mean-test test/static-mean.cc)
+    TARGET_INCLUDE_DIRECTORIES(static-mean-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(static-mean-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+    ADD_TEST(NAME static-mean-test COMMAND static-mean-test)
 
     ADD_EXECUTABLE(static-reshape-test test/static-reshape.cc)
     TARGET_INCLUDE_DIRECTORIES(static-reshape-test PRIVATE src test)

@@ -102,6 +102,8 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Squared Difference";
     case xnn_node_type_static_constant_pad:
       return "Static Constant Pad";
+    case xnn_node_type_static_mean:
+      return "Static Mean";
     case xnn_node_type_static_reshape:
       return "Static Reshape";
     case xnn_node_type_static_resize_bilinear_2d:

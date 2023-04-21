@@ -285,10 +285,10 @@ static int cmp_value_size_t(const void* a_ptr, const void* b_ptr) {
 }
 
 void xnn_normalize_reduction(
-    size_t* num_input_dims_ptr,
-    size_t* input_dims,
     size_t* num_reduction_axes_ptr,
-    size_t* reduction_axes)
+    size_t* reduction_axes,
+    size_t* num_input_dims_ptr,
+    size_t* input_dims)
 {
   size_t num_reduction_axes = *num_reduction_axes_ptr;
   qsort(reduction_axes, num_reduction_axes, sizeof(size_t), cmp_value_size_t);

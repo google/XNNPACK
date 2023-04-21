@@ -148,6 +148,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/square.c",
     "src/subgraph/squared-difference.c",
     "src/subgraph/static-constant-pad.c",
+    "src/subgraph/static-mean.c",
     "src/subgraph/static-reshape.c",
     "src/subgraph/static-resize-bilinear-2d.c",
     "src/subgraph/static-slice.c",
@@ -10724,6 +10725,18 @@ xnnpack_unit_test(
         ":subgraph_test_mode",
         ":subgraph_unary_tester",
         "@FP16",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "static_mean_test",
+    srcs = [
+        "test/static-mean.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
     ],
 )
 

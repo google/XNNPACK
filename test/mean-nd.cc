@@ -84,8 +84,8 @@ TEST(MEAN_ND_F32, 3d) {
     std::array<size_t, XNN_MAX_TENSOR_DIMS> normalized_reduction_axes;
     std::copy(reduction_axes.cbegin(), reduction_axes.cend(), normalized_reduction_axes.begin());
     xnn_normalize_reduction(
-      &num_normalized_input_dims, normalized_input_shape.data(),
-      &num_normalized_reduction_axes, normalized_reduction_axes.data());
+      &num_normalized_reduction_axes, normalized_reduction_axes.data(),
+      &num_normalized_input_dims, normalized_input_shape.data());
     if (num_normalized_reduction_axes != 1) {
       continue;  // unsupported reduction configuration, will fail if we proceed
     }
@@ -127,8 +127,8 @@ TEST(MEAN_ND_F32, 4d) {
     std::array<size_t, XNN_MAX_TENSOR_DIMS> normalized_reduction_axes;
     std::copy(reduction_axes.cbegin(), reduction_axes.cend(), normalized_reduction_axes.begin());
     xnn_normalize_reduction(
-      &num_normalized_input_dims, normalized_input_shape.data(),
-      &num_normalized_reduction_axes, normalized_reduction_axes.data());
+      &num_normalized_reduction_axes, normalized_reduction_axes.data(),
+      &num_normalized_input_dims, normalized_input_shape.data());
     if (num_normalized_reduction_axes != 1) {
       continue;  // unsupported reduction configuration, will fail if we proceed
     }
@@ -174,8 +174,8 @@ TEST(MEAN_ND_F32, 5d) {
     std::array<size_t, XNN_MAX_TENSOR_DIMS> normalized_reduction_axes;
     std::copy(reduction_axes.cbegin(), reduction_axes.cend(), normalized_reduction_axes.begin());
     xnn_normalize_reduction(
-      &num_normalized_input_dims, normalized_input_shape.data(),
-      &num_normalized_reduction_axes, normalized_reduction_axes.data());
+      &num_normalized_reduction_axes, normalized_reduction_axes.data(),
+      &num_normalized_input_dims, normalized_input_shape.data());
     if (num_normalized_reduction_axes != 1) {
       continue;  // unsupported reduction configuration, will fail if we proceed
     }
@@ -225,8 +225,8 @@ TEST(MEAN_ND_F32, 6d) {
     std::array<size_t, XNN_MAX_TENSOR_DIMS> normalized_reduction_axes;
     std::copy(reduction_axes.cbegin(), reduction_axes.cend(), normalized_reduction_axes.begin());
     xnn_normalize_reduction(
-      &num_normalized_input_dims, normalized_input_shape.data(),
-      &num_normalized_reduction_axes, normalized_reduction_axes.data());
+      &num_normalized_reduction_axes, normalized_reduction_axes.data(),
+      &num_normalized_input_dims, normalized_input_shape.data());
     if (num_normalized_reduction_axes != 1) {
       continue;  // unsupported reduction configuration, will fail if we proceed
     }

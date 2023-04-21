@@ -151,10 +151,10 @@ class MeanOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_setup_mean_nd_f32(
           mean_op,
-          num_input_dims(),
-          input_shape().data(),
           num_reduction_axes(),
           reduction_axes().data(),
+          num_input_dims(),
+          input_shape().data(),
           input.data(), output.data(),
           nullptr /* thread pool */));
 
