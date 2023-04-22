@@ -16,6 +16,8 @@
 #include <random>
 #include <vector>
 
+#include <fp16.h>
+
 #include <xnnpack.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
@@ -49,6 +51,36 @@ class RSumMicrokernelTester {
 
   inline size_t iterations() const {
     return this->iterations_;
+  }
+
+  void Test(xnn_f16_rsum_ukernel_fn rsum, xnn_init_f16_scale_params_fn init_params) const {
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
+
+    std::vector<uint16_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+
+      // Compute reference results.
+      float output_ref = 0.0f;
+      for (size_t i = 0; i < batch_size(); i++) {
+        output_ref += fp16_ieee_to_fp32_value(input[i]);
+      }
+      output_ref *= scale();
+
+      // Prepare parameters.
+      xnn_f16_scale_params params;
+      init_params(&params, fp16_ieee_from_fp32_value(scale()));
+
+      // Call optimized micro-kernel.
+      uint16_t output = UINT16_C(0x7E00);  /* NaN */
+      rsum(batch_size() * sizeof(uint16_t), input.data(), &output, &params);
+
+      // Verify results.
+      EXPECT_NEAR(fp16_ieee_to_fp32_value(output), output_ref, std::abs(output_ref) * 2.0e-3f)
+        << "with batch " << batch_size() << ", scale " << scale();
+    }
   }
 
   void Test(xnn_f32_rsum_ukernel_fn rsum, xnn_init_f32_scale_params_fn init_params) const {

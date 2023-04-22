@@ -1273,11 +1273,11 @@ typedef void (*xnn_f32_reduce_ukernel_fn)(
 
 // RSUM: Reduce-Sum
 
-typedef void (*xnn_rsum_ukernel_fn)(
+typedef void (*xnn_f16_rsum_ukernel_fn)(
     size_t batch,
     const void* input,
     void* output,
-    const void* params);
+    const union xnn_f16_scale_params* params);
 
 typedef void (*xnn_f32_rsum_ukernel_fn)(
     size_t batch,
@@ -2235,6 +2235,10 @@ typedef size_t (*xnn_init_f16_rnd_params_fn)(
 
 typedef size_t (*xnn_init_f32_rnd_params_fn)(
   union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef size_t (*xnn_init_f16_scale_params_fn)(
+  union xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
+  uint16_t scale);
 
 typedef size_t (*xnn_init_f32_scale_params_fn)(
   union xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],

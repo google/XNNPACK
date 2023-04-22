@@ -15,6 +15,24 @@
 extern "C" {
 #endif
 
+#define DECLARE_F16_RSUM_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                       \
+      size_t batch,                                \
+      const void* input,                           \
+      void* output,                                \
+      const union xnn_f16_scale_params* params);
+
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__f16c_x8)
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__f16c_x16_acc2)
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__f16c_x24_acc3)
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__f16c_x32_acc2)
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__f16c_x32_acc4)
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__neonfp16arith_x8)
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__neonfp16arith_x16_acc2)
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__neonfp16arith_x24_acc3)
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__neonfp16arith_x32_acc2)
+DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__neonfp16arith_x32_acc4)
+
 #define DECLARE_F32_REDUCE_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                         \
       size_t batch,                                  \

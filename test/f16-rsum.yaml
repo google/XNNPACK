@@ -1,0 +1,28 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# ARM NEON+FP16ARITH
+- name: xnn_f16_rsum_ukernel__neonfp16arith_x8
+  init: xnn_init_f16_scale_fp16arith_params
+- name: xnn_f16_rsum_ukernel__neonfp16arith_x16_acc2
+  init: xnn_init_f16_scale_fp16arith_params
+- name: xnn_f16_rsum_ukernel__neonfp16arith_x24_acc3
+  init: xnn_init_f16_scale_fp16arith_params
+- name: xnn_f16_rsum_ukernel__neonfp16arith_x32_acc2
+  init: xnn_init_f16_scale_fp16arith_params
+- name: xnn_f16_rsum_ukernel__neonfp16arith_x32_acc4
+  init: xnn_init_f16_scale_fp16arith_params
+
+# x86 F16C
+- name: xnn_f16_rsum_ukernel__f16c_x8
+  init: xnn_init_f16_scale_avx_params
+- name: xnn_f16_rsum_ukernel__f16c_x16_acc2
+  init: xnn_init_f16_scale_avx_params
+- name: xnn_f16_rsum_ukernel__f16c_x24_acc3
+  init: xnn_init_f16_scale_avx_params
+- name: xnn_f16_rsum_ukernel__f16c_x32_acc2
+  init: xnn_init_f16_scale_avx_params
+- name: xnn_f16_rsum_ukernel__f16c_x32_acc4
+  init: xnn_init_f16_scale_avx_params

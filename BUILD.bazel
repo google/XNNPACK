@@ -5712,6 +5712,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f16_rsum_bench",
+    srcs = [
+        "bench/f16-rsum.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f16_spmm_bench",
     srcs = [
         "bench/f16-spmm.cc",
@@ -7552,6 +7560,15 @@ xnnpack_unit_test(
     srcs = [
         "test/f16-rmax.cc",
         "test/rmax-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f16_rsum_test",
+    srcs = [
+        "test/f16-rsum.cc",
+        "test/rsum-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
