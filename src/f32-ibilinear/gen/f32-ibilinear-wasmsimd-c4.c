@@ -51,10 +51,10 @@ void xnn_f32_ibilinear_ukernel__wasmsimd_c4(
 
       const v128_t vtd = wasm_f32x4_sub(vtr, vtl);
       const v128_t vbd = wasm_f32x4_sub(vbr, vbl);
-      const v128_t vt = wasm_f32x4_add(vtl, wasm_f32x4_mul(vtd, valphah));
-      const v128_t vb = wasm_f32x4_add(vbl, wasm_f32x4_mul(vbd, valphah));
+      const v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vtd, valphah), vtl);
+      const v128_t vb = wasm_f32x4_add(wasm_f32x4_mul(vbd, valphah), vbl);
       const v128_t vd = wasm_f32x4_sub(vb, vt);
-      const v128_t vo = wasm_f32x4_add(vt, wasm_f32x4_mul(vd, valphav));
+      const v128_t vo = wasm_f32x4_add(wasm_f32x4_mul(vd, valphav), vt);
 
       wasm_v128_store(output, vo);
       output += 4;
@@ -67,10 +67,10 @@ void xnn_f32_ibilinear_ukernel__wasmsimd_c4(
 
       const v128_t vtd = wasm_f32x4_sub(vtr, vtl);
       const v128_t vbd = wasm_f32x4_sub(vbr, vbl);
-      const v128_t vt = wasm_f32x4_add(vtl, wasm_f32x4_mul(vtd, valphah));
-      const v128_t vb = wasm_f32x4_add(vbl, wasm_f32x4_mul(vbd, valphah));
+      const v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vtd, valphah), vtl);
+      const v128_t vb = wasm_f32x4_add(wasm_f32x4_mul(vbd, valphah), vbl);
       const v128_t vd = wasm_f32x4_sub(vb, vt);
-      v128_t vo = wasm_f32x4_add(vt, wasm_f32x4_mul(vd, valphav));
+      v128_t vo = wasm_f32x4_add(wasm_f32x4_mul(vd, valphav), vt);
 
       if (c & (2 * sizeof(float))) {
         wasm_v128_store64_lane(output, vo, 0);
