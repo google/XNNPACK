@@ -1794,7 +1794,7 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_EXECUTABLE(f16-rsum-test test/f16-rsum.cc)
   TARGET_INCLUDE_DIRECTORIES(f16-rsum-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f16-rsum-test PRIVATE fp16 pthreadpool gtest gtest_main)
-  TARGET_LINK_LIBRARIES(f16-rsum-test PRIVATE hardware-config logging microkernels-all)
+  TARGET_LINK_LIBRARIES(f16-rsum-test PRIVATE hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME f16-rsum-test COMMAND f16-rsum-test)
 
   ADD_EXECUTABLE(f16-vabs-test test/f16-vabs.cc)
