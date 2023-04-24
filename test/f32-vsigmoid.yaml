@@ -457,6 +457,30 @@
 - name: xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_x24
   init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
 # WAsm Relaxed SIMD
+- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x4
+  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
+- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x8
+  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
+- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x12
+  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
+- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x16
+  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
+- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x20
+  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
+- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x24
+  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
+- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x4
+  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
+- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x8
+  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
+- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x12
+  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
+- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x16
+  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
+- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x20
+  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
+- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x24
+  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
 - name: xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_lut64_p2_div_x4
   init: xnn_init_f32_sigmoid_wasmsimd_rr2_lut64_p2_params
 - name: xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_lut64_p2_div_x8
@@ -481,18 +505,6 @@
   init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
 - name: xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_p5_div_x24
   init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
-- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x4
-  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
-- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x8
-  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
-- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x12
-  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
-- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x16
-  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
-- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x20
-  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
-- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_fma_rr2_p5_div_x24
-  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
 - name: xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_lut64_p2_div_x4
   init: xnn_init_f32_sigmoid_wasmsimd_rr2_lut64_p2_params
 - name: xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_lut64_p2_div_x8
@@ -516,18 +528,6 @@
 - name: xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_x20
   init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
 - name: xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_rr2_p5_div_x24
-  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
-- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x4
-  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
-- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x8
-  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
-- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x12
-  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
-- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x16
-  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
-- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x20
-  init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
-- name: xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x24
   init: xnn_init_f32_sigmoid_wasmsimd_rr2_p5_params
 # Scalar
 - name: xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_x1
