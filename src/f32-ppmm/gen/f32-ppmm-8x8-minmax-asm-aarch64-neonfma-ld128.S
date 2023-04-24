@@ -113,7 +113,6 @@ BEGIN_FUNCTION xnn_f32_ppmm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld128
         FMLA    v31.4s, v5.4s, v1.s[3]
         B.HS    1b
 
-2:
         # Clamp
         FMAX    v16.4s, v16.4s, v6.4s
         FMAX    v17.4s, v17.4s, v6.4s
