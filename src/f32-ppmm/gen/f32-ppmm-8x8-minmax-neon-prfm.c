@@ -32,8 +32,16 @@ void xnn_f32_ppmm_minmax_ukernel_8x8__neon_prfm(
   assert(nc != 0);
   assert(kc != 0);
   assert(kc % sizeof(float) == 0);
-  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
-  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+
+  #if XNN_ARCH_ARM64
+    const float32x4x2_t vminmax = vld2q_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vminmax.val[0];
+    const float32x4_t vmax = vminmax.val[1];
+  #else
+    const float32x2x2_t vminmax = vld2_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vcombine_f32(vminmax.val[0], vminmax.val[0]);
+    const float32x4_t vmax = vcombine_f32(vminmax.val[1], vminmax.val[1]);
+  #endif
 
   float* c0 = c;
   float* c1 = (float*) ((uintptr_t) c0 + cm_stride);

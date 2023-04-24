@@ -38,8 +38,8 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc4(
   #else
     // vld2_dup is to work around aarch32 clang bug with vld1q_dup
     const uint16x4x2_t vminmax = vld2_dup_u16(&params->neonfp16arith_stride1.min);
-    const float16x8_t vmin = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[0],vminmax.val[0]));
-    const float16x8_t vmax = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[1],vminmax.val[1]));
+    const float16x8_t vmin = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[0], vminmax.val[0]));
+    const float16x8_t vmax = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[1], vminmax.val[1]));
   #endif
   const uint16x8_t vmask = vld1q_u16(params->neonfp16arith_stride1.mask);
 
