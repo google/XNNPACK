@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <limits>
 #include <memory>
+#include <vector>
 
 #include <xnnpack.h>
 #include <xnnpack/math.h>
@@ -288,7 +289,7 @@ TEST(WORKSPACE, workspace_no_growth)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime2));
 }
 
-TEST(DISABLED_WORKSPACE, workspace_grow)
+TEST(WORKSPACE, workspace_grow)
 {
   xnn_initialize(/*allocator=*/nullptr);
   xnn_workspace_t workspace = nullptr;
@@ -335,8 +336,90 @@ TEST(DISABLED_WORKSPACE, workspace_grow)
 
   // Check that the workspace grew.
   ASSERT_GT(workspace->size, old_workspace_size);
-  // Check that the workspace is different.
-  ASSERT_NE(runtime2->workspace->data, old_runtime_workspace);
+  // We free first, then allocate memory, so whether the workspace data changes depends on the system. Asserting that
+  // the data pointers are different will result in a flaky test.
+  // Check that runtime1's workspace has been updated as well.
+  ASSERT_EQ(runtime1->workspace->data, runtime2->workspace->data);
+  ASSERT_EQ(runtime1->workspace->size, runtime2->workspace->size);
+
+  // Check that both runtime's value pointers are within range.
+  for (size_t i = 0; i < runtime1->num_values; i++) {
+    xnn_value* value = &runtime1->values[i];
+    if (value->allocation_type != xnn_allocation_type_workspace) {
+      continue;
+    }
+    ASSERT_TRUE(ValueInWorkspace(value, runtime1->workspace));
+  }
+  for (size_t i = 0; i < runtime2->num_values; i++) {
+    xnn_value* value = &runtime2->values[i];
+    if (value->allocation_type != xnn_allocation_type_workspace) {
+      continue;
+    }
+    ASSERT_TRUE(ValueInWorkspace(value, runtime2->workspace));
+  }
+
+  std::vector<xnn_runtime_t> workspace_users = workspace_user_to_list(workspace);
+  ASSERT_EQ(workspace_users.size(), 2);
+  ASSERT_TRUE(Contains(workspace_users, runtime1));
+  ASSERT_TRUE(Contains(workspace_users, runtime2));
+  ASSERT_EQ(workspace->ref_count, 3);
+
+  xnn_invoke_runtime(runtime1);
+  xnn_invoke_runtime(runtime2);
+}
+
+TEST(WORKSPACE, workspace_grow_create_all_then_setup)
+{
+  xnn_initialize(/*allocator=*/nullptr);
+  xnn_workspace_t workspace = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_workspace(&workspace));
+  std::unique_ptr<xnn_workspace, decltype(&xnn_release_workspace)> auto_workspace(workspace, xnn_release_workspace);
+
+  std::array<size_t, 4> dims1 = {2, 20, 20, 3};
+  std::vector<float> dummy_data(2 * 20 * 20 * 3 + XNN_EXTRA_BYTES / sizeof(float));
+  const std::array<xnn_external_value, 2> external_values = {
+    xnn_external_value{0, dummy_data.data()},
+    xnn_external_value{2, dummy_data.data()},
+  };
+  std::vector<float> dummy_data2(2 * 20 * 20 * 3 * 16 + XNN_EXTRA_BYTES / sizeof(float));
+  const std::array<xnn_external_value, 2> external_values2 = {
+    xnn_external_value{0, dummy_data2.data()},
+    xnn_external_value{2, dummy_data2.data()},
+  };
+
+  xnn_subgraph_t subgraph1 = nullptr;
+  DefineGraph(&subgraph1, dims1);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph1(subgraph1, xnn_delete_subgraph);
+
+  std::array<size_t, 4> dims2 = dims1;
+  // Create the same graph but with larger tensors, this will require a larger workspace.
+  std::transform(dims2.begin(), dims2.end(), dims2.begin(), [](size_t i) { return i * 2; });
+  xnn_subgraph_t subgraph2 = nullptr;
+  DefineGraph(&subgraph2, dims2);
+
+  // Create both runtimes first.
+  xnn_runtime_t runtime1 = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v4(subgraph1, nullptr, workspace, nullptr, 0, &runtime1));
+
+  size_t old_workspace_size = workspace->size;
+  ASSERT_GE(old_workspace_size, 0);
+  void* old_runtime_workspace = runtime1->workspace->data;
+  ASSERT_NE(old_runtime_workspace, nullptr);
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph2(subgraph2, xnn_delete_subgraph);
+
+  xnn_runtime_t runtime2 = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v4(subgraph2, nullptr, workspace, nullptr, 0, &runtime2));
+
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime1, 2, external_values.data()));
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime1(runtime1, xnn_delete_runtime);
+
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime2, 2, external_values2.data()));
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime2(runtime2, xnn_delete_runtime);
+
+  // Check that the workspace grew.
+  ASSERT_GT(workspace->size, old_workspace_size);
+  // We free first, then allocate memory, so whether the workspace data changes depends on the system. Asserting that
+  // the data pointers are different will result in a flaky test.
   // Check that runtime1's workspace has been updated as well.
   ASSERT_EQ(runtime1->workspace->data, runtime2->workspace->data);
   ASSERT_EQ(runtime1->workspace->size, runtime2->workspace->size);
@@ -618,7 +701,7 @@ TEST(WORKSPACE, persistent_tensors_allocated_at_start_of_workspace)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 }
 
-TEST(DISABLED_WORKSPACE, persistent_tensors_updated_correct_when_workspace_grows)
+TEST(WORKSPACE, persistent_tensors_updated_correct_when_workspace_grows)
 {
   // Persistent tensors allocated at the start.
   xnn_initialize(/*allocator=*/nullptr);
