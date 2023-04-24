@@ -172,8 +172,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk0x0123 = wasm_v128_load(w + 8);
       const v128_t vk0x4567 = wasm_v128_load(w + 12);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi0x0123, vk0x0123));
-      vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi0x4567, vk0x4567));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi0x0123, vk0x0123), vacc0123p0);
+      vacc4567p0 = wasm_f32x4_add(wasm_f32x4_mul(vi0x4567, vk0x4567), vacc4567p0);
 
       const v128_t vi1x0123 = wasm_v128_load(i1);
       const v128_t vi1x4567 = wasm_v128_load(i1 + 4);
@@ -190,8 +190,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk2x0123 = wasm_v128_load(w + 24);
       const v128_t vk2x4567 = wasm_v128_load(w + 28);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi2x0123, vk2x0123));
-      vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi2x4567, vk2x4567));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi2x0123, vk2x0123), vacc0123p0);
+      vacc4567p0 = wasm_f32x4_add(wasm_f32x4_mul(vi2x4567, vk2x4567), vacc4567p0);
 
       const v128_t vi3x0123 = wasm_v128_load(i3);
       const v128_t vi3x4567 = wasm_v128_load(i3 + 4);
@@ -199,8 +199,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk3x0123 = wasm_v128_load(w + 32);
       const v128_t vk3x4567 = wasm_v128_load(w + 36);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi3x0123, vk3x0123));
-      vacc4567p1 = wasm_f32x4_add(vacc4567p1, wasm_f32x4_mul(vi3x4567, vk3x4567));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi3x0123, vk3x0123), vacc0123p1);
+      vacc4567p1 = wasm_f32x4_add(wasm_f32x4_mul(vi3x4567, vk3x4567), vacc4567p1);
 
       const v128_t vi4x0123 = wasm_v128_load(i4);
       const v128_t vi4x4567 = wasm_v128_load(i4 + 4);
@@ -208,8 +208,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk4x0123 = wasm_v128_load(w + 40);
       const v128_t vk4x4567 = wasm_v128_load(w + 44);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi4x0123, vk4x0123));
-      vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi4x4567, vk4x4567));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi4x0123, vk4x0123), vacc0123p0);
+      vacc4567p0 = wasm_f32x4_add(wasm_f32x4_mul(vi4x4567, vk4x4567), vacc4567p0);
 
       const v128_t vi5x0123 = wasm_v128_load(i5);
       const v128_t vi5x4567 = wasm_v128_load(i5 + 4);
@@ -217,8 +217,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk5x0123 = wasm_v128_load(w + 48);
       const v128_t vk5x4567 = wasm_v128_load(w + 52);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi5x0123, vk5x0123));
-      vacc4567p1 = wasm_f32x4_add(vacc4567p1, wasm_f32x4_mul(vi5x4567, vk5x4567));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi5x0123, vk5x0123), vacc0123p1);
+      vacc4567p1 = wasm_f32x4_add(wasm_f32x4_mul(vi5x4567, vk5x4567), vacc4567p1);
 
       const v128_t vi6x0123 = wasm_v128_load(i6);
       const v128_t vi6x4567 = wasm_v128_load(i6 + 4);
@@ -226,8 +226,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk6x0123 = wasm_v128_load(w + 56);
       const v128_t vk6x4567 = wasm_v128_load(w + 60);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi6x0123, vk6x0123));
-      vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi6x4567, vk6x4567));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi6x0123, vk6x0123), vacc0123p0);
+      vacc4567p0 = wasm_f32x4_add(wasm_f32x4_mul(vi6x4567, vk6x4567), vacc4567p0);
 
       const v128_t vi7x0123 = wasm_v128_load(i7);
       const v128_t vi7x4567 = wasm_v128_load(i7 + 4);
@@ -235,8 +235,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk7x0123 = wasm_v128_load(w + 64);
       const v128_t vk7x4567 = wasm_v128_load(w + 68);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi7x0123, vk7x0123));
-      vacc4567p1 = wasm_f32x4_add(vacc4567p1, wasm_f32x4_mul(vi7x4567, vk7x4567));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi7x0123, vk7x0123), vacc0123p1);
+      vacc4567p1 = wasm_f32x4_add(wasm_f32x4_mul(vi7x4567, vk7x4567), vacc4567p1);
 
       const v128_t vi8x0123 = wasm_v128_load(i8);
       const v128_t vi8x4567 = wasm_v128_load(i8 + 4);
@@ -244,8 +244,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk8x0123 = wasm_v128_load(w + 72);
       const v128_t vk8x4567 = wasm_v128_load(w + 76);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi8x0123, vk8x0123));
-      vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi8x4567, vk8x4567));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi8x0123, vk8x0123), vacc0123p0);
+      vacc4567p0 = wasm_f32x4_add(wasm_f32x4_mul(vi8x4567, vk8x4567), vacc4567p0);
 
       const v128_t vi9x0123 = wasm_v128_load(i9);
       const v128_t vi9x4567 = wasm_v128_load(i9 + 4);
@@ -253,8 +253,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk9x0123 = wasm_v128_load(w + 80);
       const v128_t vk9x4567 = wasm_v128_load(w + 84);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi9x0123, vk9x0123));
-      vacc4567p1 = wasm_f32x4_add(vacc4567p1, wasm_f32x4_mul(vi9x4567, vk9x4567));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi9x0123, vk9x0123), vacc0123p1);
+      vacc4567p1 = wasm_f32x4_add(wasm_f32x4_mul(vi9x4567, vk9x4567), vacc4567p1);
 
       const v128_t vi10x0123 = wasm_v128_load(i10);
       const v128_t vi10x4567 = wasm_v128_load(i10 + 4);
@@ -262,8 +262,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk10x0123 = wasm_v128_load(w + 88);
       const v128_t vk10x4567 = wasm_v128_load(w + 92);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi10x0123, vk10x0123));
-      vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi10x4567, vk10x4567));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi10x0123, vk10x0123), vacc0123p0);
+      vacc4567p0 = wasm_f32x4_add(wasm_f32x4_mul(vi10x4567, vk10x4567), vacc4567p0);
 
       const v128_t vi11x0123 = wasm_v128_load(i11);
       const v128_t vi11x4567 = wasm_v128_load(i11 + 4);
@@ -271,8 +271,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk11x0123 = wasm_v128_load(w + 96);
       const v128_t vk11x4567 = wasm_v128_load(w + 100);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi11x0123, vk11x0123));
-      vacc4567p1 = wasm_f32x4_add(vacc4567p1, wasm_f32x4_mul(vi11x4567, vk11x4567));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi11x0123, vk11x0123), vacc0123p1);
+      vacc4567p1 = wasm_f32x4_add(wasm_f32x4_mul(vi11x4567, vk11x4567), vacc4567p1);
 
       const v128_t vi12x0123 = wasm_v128_load(i12);
       const v128_t vi12x4567 = wasm_v128_load(i12 + 4);
@@ -280,8 +280,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk12x0123 = wasm_v128_load(w + 104);
       const v128_t vk12x4567 = wasm_v128_load(w + 108);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi12x0123, vk12x0123));
-      vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi12x4567, vk12x4567));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi12x0123, vk12x0123), vacc0123p0);
+      vacc4567p0 = wasm_f32x4_add(wasm_f32x4_mul(vi12x4567, vk12x4567), vacc4567p0);
 
       const v128_t vi13x0123 = wasm_v128_load(i13);
       const v128_t vi13x4567 = wasm_v128_load(i13 + 4);
@@ -289,8 +289,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk13x0123 = wasm_v128_load(w + 112);
       const v128_t vk13x4567 = wasm_v128_load(w + 116);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi13x0123, vk13x0123));
-      vacc4567p1 = wasm_f32x4_add(vacc4567p1, wasm_f32x4_mul(vi13x4567, vk13x4567));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi13x0123, vk13x0123), vacc0123p1);
+      vacc4567p1 = wasm_f32x4_add(wasm_f32x4_mul(vi13x4567, vk13x4567), vacc4567p1);
 
       const v128_t vi14x0123 = wasm_v128_load(i14);
       const v128_t vi14x4567 = wasm_v128_load(i14 + 4);
@@ -298,8 +298,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk14x0123 = wasm_v128_load(w + 120);
       const v128_t vk14x4567 = wasm_v128_load(w + 124);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi14x0123, vk14x0123));
-      vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi14x4567, vk14x4567));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi14x0123, vk14x0123), vacc0123p0);
+      vacc4567p0 = wasm_f32x4_add(wasm_f32x4_mul(vi14x4567, vk14x4567), vacc4567p0);
 
       const v128_t vi15x0123 = wasm_v128_load(i15);
       const v128_t vi15x4567 = wasm_v128_load(i15 + 4);
@@ -307,8 +307,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk15x0123 = wasm_v128_load(w + 128);
       const v128_t vk15x4567 = wasm_v128_load(w + 132);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi15x0123, vk15x0123));
-      vacc4567p1 = wasm_f32x4_add(vacc4567p1, wasm_f32x4_mul(vi15x4567, vk15x4567));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi15x0123, vk15x0123), vacc0123p1);
+      vacc4567p1 = wasm_f32x4_add(wasm_f32x4_mul(vi15x4567, vk15x4567), vacc4567p1);
 
       const v128_t vi16x0123 = wasm_v128_load(i16);
       const v128_t vi16x4567 = wasm_v128_load(i16 + 4);
@@ -316,8 +316,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk16x0123 = wasm_v128_load(w + 136);
       const v128_t vk16x4567 = wasm_v128_load(w + 140);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi16x0123, vk16x0123));
-      vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi16x4567, vk16x4567));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi16x0123, vk16x0123), vacc0123p0);
+      vacc4567p0 = wasm_f32x4_add(wasm_f32x4_mul(vi16x4567, vk16x4567), vacc4567p0);
 
       const v128_t vi17x0123 = wasm_v128_load(i17);
       const v128_t vi17x4567 = wasm_v128_load(i17 + 4);
@@ -325,8 +325,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk17x0123 = wasm_v128_load(w + 144);
       const v128_t vk17x4567 = wasm_v128_load(w + 148);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi17x0123, vk17x0123));
-      vacc4567p1 = wasm_f32x4_add(vacc4567p1, wasm_f32x4_mul(vi17x4567, vk17x4567));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi17x0123, vk17x0123), vacc0123p1);
+      vacc4567p1 = wasm_f32x4_add(wasm_f32x4_mul(vi17x4567, vk17x4567), vacc4567p1);
 
       const v128_t vi18x0123 = wasm_v128_load(i18);
       const v128_t vi18x4567 = wasm_v128_load(i18 + 4);
@@ -334,8 +334,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk18x0123 = wasm_v128_load(w + 152);
       const v128_t vk18x4567 = wasm_v128_load(w + 156);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi18x0123, vk18x0123));
-      vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi18x4567, vk18x4567));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi18x0123, vk18x0123), vacc0123p0);
+      vacc4567p0 = wasm_f32x4_add(wasm_f32x4_mul(vi18x4567, vk18x4567), vacc4567p0);
 
       const v128_t vi19x0123 = wasm_v128_load(i19);
       const v128_t vi19x4567 = wasm_v128_load(i19 + 4);
@@ -343,8 +343,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk19x0123 = wasm_v128_load(w + 160);
       const v128_t vk19x4567 = wasm_v128_load(w + 164);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi19x0123, vk19x0123));
-      vacc4567p1 = wasm_f32x4_add(vacc4567p1, wasm_f32x4_mul(vi19x4567, vk19x4567));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi19x0123, vk19x0123), vacc0123p1);
+      vacc4567p1 = wasm_f32x4_add(wasm_f32x4_mul(vi19x4567, vk19x4567), vacc4567p1);
 
       const v128_t vi20x0123 = wasm_v128_load(i20);
       const v128_t vi20x4567 = wasm_v128_load(i20 + 4);
@@ -352,8 +352,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk20x0123 = wasm_v128_load(w + 168);
       const v128_t vk20x4567 = wasm_v128_load(w + 172);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi20x0123, vk20x0123));
-      vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi20x4567, vk20x4567));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi20x0123, vk20x0123), vacc0123p0);
+      vacc4567p0 = wasm_f32x4_add(wasm_f32x4_mul(vi20x4567, vk20x4567), vacc4567p0);
 
       const v128_t vi21x0123 = wasm_v128_load(i21);
       const v128_t vi21x4567 = wasm_v128_load(i21 + 4);
@@ -361,8 +361,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk21x0123 = wasm_v128_load(w + 176);
       const v128_t vk21x4567 = wasm_v128_load(w + 180);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi21x0123, vk21x0123));
-      vacc4567p1 = wasm_f32x4_add(vacc4567p1, wasm_f32x4_mul(vi21x4567, vk21x4567));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi21x0123, vk21x0123), vacc0123p1);
+      vacc4567p1 = wasm_f32x4_add(wasm_f32x4_mul(vi21x4567, vk21x4567), vacc4567p1);
 
       const v128_t vi22x0123 = wasm_v128_load(i22);
       const v128_t vi22x4567 = wasm_v128_load(i22 + 4);
@@ -370,8 +370,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk22x0123 = wasm_v128_load(w + 184);
       const v128_t vk22x4567 = wasm_v128_load(w + 188);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi22x0123, vk22x0123));
-      vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi22x4567, vk22x4567));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi22x0123, vk22x0123), vacc0123p0);
+      vacc4567p0 = wasm_f32x4_add(wasm_f32x4_mul(vi22x4567, vk22x4567), vacc4567p0);
 
       const v128_t vi23x0123 = wasm_v128_load(i23);
       const v128_t vi23x4567 = wasm_v128_load(i23 + 4);
@@ -379,8 +379,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk23x0123 = wasm_v128_load(w + 192);
       const v128_t vk23x4567 = wasm_v128_load(w + 196);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi23x0123, vk23x0123));
-      vacc4567p1 = wasm_f32x4_add(vacc4567p1, wasm_f32x4_mul(vi23x4567, vk23x4567));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi23x0123, vk23x0123), vacc0123p1);
+      vacc4567p1 = wasm_f32x4_add(wasm_f32x4_mul(vi23x4567, vk23x4567), vacc4567p1);
 
       const v128_t vi24x0123 = wasm_v128_load(i24);
       const v128_t vi24x4567 = wasm_v128_load(i24 + 4);
@@ -388,8 +388,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vk24x0123 = wasm_v128_load(w + 200);
       const v128_t vk24x4567 = wasm_v128_load(w + 204);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi24x0123, vk24x0123));
-      vacc4567p0 = wasm_f32x4_add(vacc4567p0, wasm_f32x4_mul(vi24x4567, vk24x4567));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi24x0123, vk24x0123), vacc0123p0);
+      vacc4567p0 = wasm_f32x4_add(wasm_f32x4_mul(vi24x4567, vk24x4567), vacc4567p0);
 
       w += 208;
 
@@ -414,7 +414,7 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
       i0 += 4;
 
       const v128_t vk0x0123 = wasm_v128_load(w + 8);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi0x0123, vk0x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi0x0123, vk0x0123), vacc0123p0);
 
       const v128_t vi1x0123 = wasm_v128_load(i1);
       i1 += 4;
@@ -426,139 +426,139 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
       i2 += 4;
 
       const v128_t vk2x0123 = wasm_v128_load(w + 24);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi2x0123, vk2x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi2x0123, vk2x0123), vacc0123p0);
 
       const v128_t vi3x0123 = wasm_v128_load(i3);
       i3 += 4;
 
       const v128_t vk3x0123 = wasm_v128_load(w + 32);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi3x0123, vk3x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi3x0123, vk3x0123), vacc0123p1);
 
       const v128_t vi4x0123 = wasm_v128_load(i4);
       i4 += 4;
 
       const v128_t vk4x0123 = wasm_v128_load(w + 40);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi4x0123, vk4x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi4x0123, vk4x0123), vacc0123p0);
 
       const v128_t vi5x0123 = wasm_v128_load(i5);
       i5 += 4;
 
       const v128_t vk5x0123 = wasm_v128_load(w + 48);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi5x0123, vk5x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi5x0123, vk5x0123), vacc0123p1);
 
       const v128_t vi6x0123 = wasm_v128_load(i6);
       i6 += 4;
 
       const v128_t vk6x0123 = wasm_v128_load(w + 56);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi6x0123, vk6x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi6x0123, vk6x0123), vacc0123p0);
 
       const v128_t vi7x0123 = wasm_v128_load(i7);
       i7 += 4;
 
       const v128_t vk7x0123 = wasm_v128_load(w + 64);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi7x0123, vk7x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi7x0123, vk7x0123), vacc0123p1);
 
       const v128_t vi8x0123 = wasm_v128_load(i8);
       i8 += 4;
 
       const v128_t vk8x0123 = wasm_v128_load(w + 72);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi8x0123, vk8x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi8x0123, vk8x0123), vacc0123p0);
 
       const v128_t vi9x0123 = wasm_v128_load(i9);
       i9 += 4;
 
       const v128_t vk9x0123 = wasm_v128_load(w + 80);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi9x0123, vk9x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi9x0123, vk9x0123), vacc0123p1);
 
       const v128_t vi10x0123 = wasm_v128_load(i10);
       i10 += 4;
 
       const v128_t vk10x0123 = wasm_v128_load(w + 88);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi10x0123, vk10x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi10x0123, vk10x0123), vacc0123p0);
 
       const v128_t vi11x0123 = wasm_v128_load(i11);
       i11 += 4;
 
       const v128_t vk11x0123 = wasm_v128_load(w + 96);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi11x0123, vk11x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi11x0123, vk11x0123), vacc0123p1);
 
       const v128_t vi12x0123 = wasm_v128_load(i12);
       i12 += 4;
 
       const v128_t vk12x0123 = wasm_v128_load(w + 104);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi12x0123, vk12x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi12x0123, vk12x0123), vacc0123p0);
 
       const v128_t vi13x0123 = wasm_v128_load(i13);
       i13 += 4;
 
       const v128_t vk13x0123 = wasm_v128_load(w + 112);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi13x0123, vk13x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi13x0123, vk13x0123), vacc0123p1);
 
       const v128_t vi14x0123 = wasm_v128_load(i14);
       i14 += 4;
 
       const v128_t vk14x0123 = wasm_v128_load(w + 120);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi14x0123, vk14x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi14x0123, vk14x0123), vacc0123p0);
 
       const v128_t vi15x0123 = wasm_v128_load(i15);
       i15 += 4;
 
       const v128_t vk15x0123 = wasm_v128_load(w + 128);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi15x0123, vk15x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi15x0123, vk15x0123), vacc0123p1);
 
       const v128_t vi16x0123 = wasm_v128_load(i16);
       i16 += 4;
 
       const v128_t vk16x0123 = wasm_v128_load(w + 136);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi16x0123, vk16x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi16x0123, vk16x0123), vacc0123p0);
 
       const v128_t vi17x0123 = wasm_v128_load(i17);
       i17 += 4;
 
       const v128_t vk17x0123 = wasm_v128_load(w + 144);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi17x0123, vk17x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi17x0123, vk17x0123), vacc0123p1);
 
       const v128_t vi18x0123 = wasm_v128_load(i18);
       i18 += 4;
 
       const v128_t vk18x0123 = wasm_v128_load(w + 152);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi18x0123, vk18x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi18x0123, vk18x0123), vacc0123p0);
 
       const v128_t vi19x0123 = wasm_v128_load(i19);
       i19 += 4;
 
       const v128_t vk19x0123 = wasm_v128_load(w + 160);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi19x0123, vk19x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi19x0123, vk19x0123), vacc0123p1);
 
       const v128_t vi20x0123 = wasm_v128_load(i20);
       i20 += 4;
 
       const v128_t vk20x0123 = wasm_v128_load(w + 168);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi20x0123, vk20x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi20x0123, vk20x0123), vacc0123p0);
 
       const v128_t vi21x0123 = wasm_v128_load(i21);
       i21 += 4;
 
       const v128_t vk21x0123 = wasm_v128_load(w + 176);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi21x0123, vk21x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi21x0123, vk21x0123), vacc0123p1);
 
       const v128_t vi22x0123 = wasm_v128_load(i22);
       i22 += 4;
 
       const v128_t vk22x0123 = wasm_v128_load(w + 184);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi22x0123, vk22x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi22x0123, vk22x0123), vacc0123p0);
 
       const v128_t vi23x0123 = wasm_v128_load(i23);
       i23 += 4;
 
       const v128_t vk23x0123 = wasm_v128_load(w + 192);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi23x0123, vk23x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi23x0123, vk23x0123), vacc0123p1);
 
       const v128_t vi24x0123 = wasm_v128_load(i24);
       i24 += 4;
 
       const v128_t vk24x0123 = wasm_v128_load(w + 200);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi24x0123, vk24x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi24x0123, vk24x0123), vacc0123p0);
 
       w += 4;
 
@@ -576,7 +576,7 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vi0x0123 = wasm_v128_load(i0);
       const v128_t vk0x0123 = wasm_v128_load(w + 8);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi0x0123, vk0x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi0x0123, vk0x0123), vacc0123p0);
 
       const v128_t vi1x0123 = wasm_v128_load(i1);
       const v128_t vk1x0123 = wasm_v128_load(w + 16);
@@ -584,95 +584,95 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2(
 
       const v128_t vi2x0123 = wasm_v128_load(i2);
       const v128_t vk2x0123 = wasm_v128_load(w + 24);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi2x0123, vk2x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi2x0123, vk2x0123), vacc0123p0);
 
       const v128_t vi3x0123 = wasm_v128_load(i3);
       const v128_t vk3x0123 = wasm_v128_load(w + 32);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi3x0123, vk3x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi3x0123, vk3x0123), vacc0123p1);
 
       const v128_t vi4x0123 = wasm_v128_load(i4);
       const v128_t vk4x0123 = wasm_v128_load(w + 40);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi4x0123, vk4x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi4x0123, vk4x0123), vacc0123p0);
 
       const v128_t vi5x0123 = wasm_v128_load(i5);
       const v128_t vk5x0123 = wasm_v128_load(w + 48);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi5x0123, vk5x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi5x0123, vk5x0123), vacc0123p1);
 
       const v128_t vi6x0123 = wasm_v128_load(i6);
       const v128_t vk6x0123 = wasm_v128_load(w + 56);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi6x0123, vk6x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi6x0123, vk6x0123), vacc0123p0);
 
       const v128_t vi7x0123 = wasm_v128_load(i7);
       const v128_t vk7x0123 = wasm_v128_load(w + 64);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi7x0123, vk7x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi7x0123, vk7x0123), vacc0123p1);
 
       const v128_t vi8x0123 = wasm_v128_load(i8);
       const v128_t vk8x0123 = wasm_v128_load(w + 72);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi8x0123, vk8x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi8x0123, vk8x0123), vacc0123p0);
 
       const v128_t vi9x0123 = wasm_v128_load(i9);
       const v128_t vk9x0123 = wasm_v128_load(w + 80);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi9x0123, vk9x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi9x0123, vk9x0123), vacc0123p1);
 
       const v128_t vi10x0123 = wasm_v128_load(i10);
       const v128_t vk10x0123 = wasm_v128_load(w + 88);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi10x0123, vk10x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi10x0123, vk10x0123), vacc0123p0);
 
       const v128_t vi11x0123 = wasm_v128_load(i11);
       const v128_t vk11x0123 = wasm_v128_load(w + 96);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi11x0123, vk11x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi11x0123, vk11x0123), vacc0123p1);
 
       const v128_t vi12x0123 = wasm_v128_load(i12);
       const v128_t vk12x0123 = wasm_v128_load(w + 104);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi12x0123, vk12x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi12x0123, vk12x0123), vacc0123p0);
 
       const v128_t vi13x0123 = wasm_v128_load(i13);
       const v128_t vk13x0123 = wasm_v128_load(w + 112);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi13x0123, vk13x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi13x0123, vk13x0123), vacc0123p1);
 
       const v128_t vi14x0123 = wasm_v128_load(i14);
       const v128_t vk14x0123 = wasm_v128_load(w + 120);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi14x0123, vk14x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi14x0123, vk14x0123), vacc0123p0);
 
       const v128_t vi15x0123 = wasm_v128_load(i15);
       const v128_t vk15x0123 = wasm_v128_load(w + 128);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi15x0123, vk15x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi15x0123, vk15x0123), vacc0123p1);
 
       const v128_t vi16x0123 = wasm_v128_load(i16);
       const v128_t vk16x0123 = wasm_v128_load(w + 136);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi16x0123, vk16x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi16x0123, vk16x0123), vacc0123p0);
 
       const v128_t vi17x0123 = wasm_v128_load(i17);
       const v128_t vk17x0123 = wasm_v128_load(w + 144);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi17x0123, vk17x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi17x0123, vk17x0123), vacc0123p1);
 
       const v128_t vi18x0123 = wasm_v128_load(i18);
       const v128_t vk18x0123 = wasm_v128_load(w + 152);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi18x0123, vk18x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi18x0123, vk18x0123), vacc0123p0);
 
       const v128_t vi19x0123 = wasm_v128_load(i19);
       const v128_t vk19x0123 = wasm_v128_load(w + 160);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi19x0123, vk19x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi19x0123, vk19x0123), vacc0123p1);
 
       const v128_t vi20x0123 = wasm_v128_load(i20);
       const v128_t vk20x0123 = wasm_v128_load(w + 168);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi20x0123, vk20x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi20x0123, vk20x0123), vacc0123p0);
 
       const v128_t vi21x0123 = wasm_v128_load(i21);
       const v128_t vk21x0123 = wasm_v128_load(w + 176);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi21x0123, vk21x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi21x0123, vk21x0123), vacc0123p1);
 
       const v128_t vi22x0123 = wasm_v128_load(i22);
       const v128_t vk22x0123 = wasm_v128_load(w + 184);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi22x0123, vk22x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi22x0123, vk22x0123), vacc0123p0);
 
       const v128_t vi23x0123 = wasm_v128_load(i23);
       const v128_t vk23x0123 = wasm_v128_load(w + 192);
-      vacc0123p1 = wasm_f32x4_add(vacc0123p1, wasm_f32x4_mul(vi23x0123, vk23x0123));
+      vacc0123p1 = wasm_f32x4_add(wasm_f32x4_mul(vi23x0123, vk23x0123), vacc0123p1);
 
       const v128_t vi24x0123 = wasm_v128_load(i24);
       const v128_t vk24x0123 = wasm_v128_load(w + 200);
-      vacc0123p0 = wasm_f32x4_add(vacc0123p0, wasm_f32x4_mul(vi24x0123, vk24x0123));
+      vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi24x0123, vk24x0123), vacc0123p0);
 
       // Add up all accumulators to vacc01234567p0
       vacc0123p0 = wasm_f32x4_add(vacc0123p0, vacc0123p1);
