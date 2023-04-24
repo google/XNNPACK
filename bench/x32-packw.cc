@@ -418,12 +418,12 @@ static void x32_packw_x8__scalar_int_x4(benchmark::State& state, const char* net
 static void x32_packw_x16__scalar_float_x4(benchmark::State& state, const char* net) {
   x32_packw(state,
     xnn_x32_packw_gemm_goi_ukernel_x16__scalar_float_x4,
-    /*nr=*/8, /*kr=*/1, /*sr=*/1);
+    /*nr=*/16, /*kr=*/1, /*sr=*/1);
 }
 static void x32_packw_x16__scalar_int_x4(benchmark::State& state, const char* net) {
   x32_packw(state,
     xnn_x32_packw_gemm_goi_ukernel_x16__scalar_int_x4,
-    /*nr=*/8, /*kr=*/1, /*sr=*/1);
+    /*nr=*/16, /*kr=*/1, /*sr=*/1);
 }
 
 BENCHMARK_BGEMM(x32_packw_x2__scalar_float_x4)
