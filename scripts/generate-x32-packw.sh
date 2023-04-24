@@ -21,12 +21,16 @@ tools/xngen src/x32-packw/scalar.c.in -D NR=16 -D KBLOCK=4 -D TYPE=float    -o s
 ### NR multiple of 4
 tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=1 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8-neon-ld4lane-x4.c &
 tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=1 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8-neon-ld4lane-prfm-x4.c &
-tools/xngen src/x32-packw/neon.c.in -D NR=12 -D SR=1 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane-x4.c &
-tools/xngen src/x32-packw/neon.c.in -D NR=12 -D SR=1 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane-prfm-x4.c &
 tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=1 -D PREFETCH=0 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x8-neon-ld4lane-x8.c &
 tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=1 -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x8-neon-ld4lane-prfm-x8.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=12 -D SR=1 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane-x4.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=12 -D SR=1 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane-prfm-x4.c &
 tools/xngen src/x32-packw/neon.c.in -D NR=12 -D SR=1 -D PREFETCH=0 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane-x8.c &
 tools/xngen src/x32-packw/neon.c.in -D NR=12 -D SR=1 -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane-prfm-x8.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=16 -D SR=1 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-neon-ld4lane-x4.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=16 -D SR=1 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-neon-ld4lane-prfm-x4.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=16 -D SR=1 -D PREFETCH=0 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x16-neon-ld4lane-x8.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=16 -D SR=1 -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x16-neon-ld4lane-prfm-x8.c &
 
 ### SR 4
 tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=4 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8s4-neon-ld4lane-x4.c &

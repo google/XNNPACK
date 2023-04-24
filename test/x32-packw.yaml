@@ -19,6 +19,10 @@
 - name: xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm_x8
 - name: xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_x4
 - name: xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_x8
+- name: xnn_x32_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x4
+- name: xnn_x32_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x8
+- name: xnn_x32_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4
+- name: xnn_x32_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8
 
 # x86 SSE2
 - name: xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_prfm_x4
