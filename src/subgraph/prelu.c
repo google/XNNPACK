@@ -165,6 +165,13 @@ enum xnn_status xnn_define_prelu(
     return xnn_status_invalid_parameter;
   }
 
+  if (slope_value->data == NULL) {
+    xnn_log_error(
+      "failed to define %s operator with slope ID #%" PRIu32 ": non-static Value",
+      xnn_node_type_to_string(xnn_node_type_prelu), slope_id);
+    return xnn_status_invalid_parameter;
+  }
+
   switch (slope_value->datatype) {
     case xnn_datatype_fp32:
       break;
