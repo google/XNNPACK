@@ -15,7 +15,7 @@
 #include <xnnpack/ppmm.h>
 
 
-void xnn_f32_ppmm_minmax_ukernel_4x8__neonfma(
+void xnn_f32_ppmm_minmax_ukernel_4x8__aarch64_neonfma(
   size_t mr,
   size_t nc,
   size_t kc,

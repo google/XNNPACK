@@ -16,7 +16,7 @@ $if PREFETCH:
   #include <xnnpack/prefetch.h>
 
 
-void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__${"neonfma" if FMA else "neon"}${"_prfm" if PREFETCH else ""}(
+void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__${"aarch64_neonfma" if FMA else "neon"}${"_prfm" if PREFETCH else ""}(
   size_t mr,
   size_t nc,
   size_t kc,

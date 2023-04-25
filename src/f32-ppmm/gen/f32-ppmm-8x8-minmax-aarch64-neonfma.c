@@ -13,10 +13,9 @@
 
 #include <xnnpack/common.h>
 #include <xnnpack/ppmm.h>
-#include <xnnpack/prefetch.h>
 
 
-void xnn_f32_ppmm_minmax_ukernel_8x8__neonfma_prfm(
+void xnn_f32_ppmm_minmax_ukernel_8x8__aarch64_neonfma(
   size_t mr,
   size_t nc,
   size_t kc,
@@ -73,10 +72,6 @@ void xnn_f32_ppmm_minmax_ukernel_8x8__neonfma_prfm(
     c7 = c6;
   }
 
-  xnn_prefetch_to_l1((const int8_t*) w + 0);
-  xnn_prefetch_to_l1((const int8_t*) w + 64);
-  xnn_prefetch_to_l1((const int8_t*) w + 128);
-  xnn_prefetch_to_l1((const int8_t*) w + 192);
 
   do {
     float32x4_t vacc0x0123 = vld1q_f32(w); w += 4;
@@ -113,7 +108,6 @@ void xnn_f32_ppmm_minmax_ukernel_8x8__neonfma_prfm(
         vacc5x0123 = vfmaq_laneq_f32(vacc5x0123, vb0123, va4567, 1);
         vacc6x0123 = vfmaq_laneq_f32(vacc6x0123, vb0123, va4567, 2);
         vacc7x0123 = vfmaq_laneq_f32(vacc7x0123, vb0123, va4567, 3);
-        xnn_prefetch_to_l1((const int8_t*) w + 192);
         vacc0x4567 = vfmaq_laneq_f32(vacc0x4567, vb4567, va0123, 0);
         vacc1x4567 = vfmaq_laneq_f32(vacc1x4567, vb4567, va0123, 1);
         vacc2x4567 = vfmaq_laneq_f32(vacc2x4567, vb4567, va0123, 2);
@@ -140,7 +134,6 @@ void xnn_f32_ppmm_minmax_ukernel_8x8__neonfma_prfm(
         vacc5x0123 = vfmaq_f32(vacc5x0123, va5555, vb0123);
         vacc6x0123 = vfmaq_f32(vacc6x0123, va6666, vb0123);
         vacc7x0123 = vfmaq_f32(vacc7x0123, va7777, vb0123);
-        xnn_prefetch_to_l1((const int8_t*) w + 192);
         vacc0x4567 = vfmaq_f32(vacc0x4567, va0000, vb4567);
         vacc1x4567 = vfmaq_f32(vacc1x4567, va1111, vb4567);
         vacc2x4567 = vfmaq_f32(vacc2x4567, va2222, vb4567);
