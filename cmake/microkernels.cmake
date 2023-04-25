@@ -2222,6 +2222,8 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/f32-pavgpool/f32-pavgpool-9x-minmax-neon-c4.c
   src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neon-prfm.c
   src/f32-ppmm/gen/f32-ppmm-4x8-minmax-neon.c
+  src/f32-ppmm/gen/f32-ppmm-4x16-minmax-neon-prfm.c
+  src/f32-ppmm/gen/f32-ppmm-4x16-minmax-neon.c
   src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neon-prfm.c
   src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neon.c
   src/f32-prelu/gen/f32-prelu-neon-1x4.c
@@ -3811,6 +3813,8 @@ SET(ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-6x8-minmax-aarch64-neonfma-lane-ld128.c
   src/f32-ppmm/gen/f32-ppmm-4x8-minmax-aarch64-neonfma-prfm.c
   src/f32-ppmm/gen/f32-ppmm-4x8-minmax-aarch64-neonfma.c
+  src/f32-ppmm/gen/f32-ppmm-4x16-minmax-aarch64-neonfma-prfm.c
+  src/f32-ppmm/gen/f32-ppmm-4x16-minmax-aarch64-neonfma.c
   src/f32-ppmm/gen/f32-ppmm-8x8-minmax-aarch64-neonfma-prfm.c
   src/f32-ppmm/gen/f32-ppmm-8x8-minmax-aarch64-neonfma.c
   src/f32-spmm/gen/f32-spmm-4x2-minmax-aarch64-neonfma.c

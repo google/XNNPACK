@@ -793,6 +793,38 @@ static void ruy_st(benchmark::State& state, const char* net)
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/8, /*nr=*/8, /*kr=*/1, /*sr=*/1);
   }
+  static void f32_ppmm_4x16_unipass__aarch64_neonfma(benchmark::State& state, const char* net) {
+    f32_ppmm1p(state,
+      xnn_x32_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x8,
+      xnn_x32_packx_ukernel_4x__neon_st4_x8,
+      xnn_f32_ppmm_minmax_ukernel_4x16__aarch64_neonfma,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1);
+  }
+  static void f32_ppmm_4x16_twopass__aarch64_neonfma(benchmark::State& state, const char* net) {
+    f32_ppmm2p(state,
+      xnn_x32_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x8,
+      xnn_x32_packx_ukernel_4x__neon_st4_x8,
+      xnn_f32_ppmm_minmax_ukernel_4x16__aarch64_neonfma,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1);
+  }
+  static void f32_ppmm_4x16_unipass__aarch64_neonfma_prfm(benchmark::State& state, const char* net) {
+    f32_ppmm1p(state,
+      xnn_x32_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x8,
+      xnn_x32_packx_ukernel_4x__neon_st4_prfm_x8,
+      xnn_f32_ppmm_minmax_ukernel_4x16__aarch64_neonfma,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1);
+  }
+  static void f32_ppmm_4x16_twopass__aarch64_neonfma_prfm(benchmark::State& state, const char* net) {
+    f32_ppmm2p(state,
+      xnn_x32_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x8,
+      xnn_x32_packx_ukernel_4x__neon_st4_prfm_x8,
+      xnn_f32_ppmm_minmax_ukernel_4x16__aarch64_neonfma,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1);
+  }
 
   BENCHMARK_BGEMM(f32_gemm_4x8__aarch64_neonfma_lane_ld64)
   BENCHMARK_BGEMM(f32_gemm_4x8__aarch64_neonfma_lane_ld128)
@@ -807,6 +839,10 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_BGEMM(f32_ppmm_8x8_twopass__aarch64_neonfma_prfm)
   BENCHMARK_BGEMM(f32_ppmm_8x8_unipass__aarch64_neonfma)
   BENCHMARK_BGEMM(f32_ppmm_8x8_unipass__aarch64_neonfma_prfm)
+  BENCHMARK_BGEMM(f32_ppmm_4x16_twopass__aarch64_neonfma)
+  BENCHMARK_BGEMM(f32_ppmm_4x16_twopass__aarch64_neonfma_prfm)
+  BENCHMARK_BGEMM(f32_ppmm_4x16_unipass__aarch64_neonfma)
+  BENCHMARK_BGEMM(f32_ppmm_4x16_unipass__aarch64_neonfma_prfm)
 #endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_ARM
@@ -882,6 +918,38 @@ static void ruy_st(benchmark::State& state, const char* net)
       /*mr=*/8, /*nr=*/8, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckNEON);
   }
+  static void f32_ppmm_4x16_unipass__neon(benchmark::State& state, const char* net) {
+    f32_ppmm1p(state,
+      xnn_x32_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x8,
+      xnn_x32_packx_ukernel_4x__neon_st4_x8,
+      xnn_f32_ppmm_minmax_ukernel_4x16__neon,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1);
+  }
+  static void f32_ppmm_4x16_twopass__neon(benchmark::State& state, const char* net) {
+    f32_ppmm2p(state,
+      xnn_x32_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x8,
+      xnn_x32_packx_ukernel_4x__neon_st4_x8,
+      xnn_f32_ppmm_minmax_ukernel_4x16__neon,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1);
+  }
+  static void f32_ppmm_4x16_unipass__neon_prfm(benchmark::State& state, const char* net) {
+    f32_ppmm1p(state,
+      xnn_x32_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x8,
+      xnn_x32_packx_ukernel_4x__neon_st4_prfm_x8,
+      xnn_f32_ppmm_minmax_ukernel_4x16__neon,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1);
+  }
+  static void f32_ppmm_4x16_twopass__neon_prfm(benchmark::State& state, const char* net) {
+    f32_ppmm2p(state,
+      xnn_x32_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x8,
+      xnn_x32_packx_ukernel_4x__neon_st4_prfm_x8,
+      xnn_f32_ppmm_minmax_ukernel_4x16__neon,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1);
+  }
 
   BENCHMARK_BGEMM(f32_ppmm_4x8_twopass__neon)
   BENCHMARK_BGEMM(f32_ppmm_4x8_twopass__neon_prfm)
@@ -891,6 +959,10 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_BGEMM(f32_ppmm_8x8_twopass__neon_prfm)
   BENCHMARK_BGEMM(f32_ppmm_8x8_unipass__neon)
   BENCHMARK_BGEMM(f32_ppmm_8x8_unipass__neon_prfm)
+  BENCHMARK_BGEMM(f32_ppmm_4x16_twopass__neon)
+  BENCHMARK_BGEMM(f32_ppmm_4x16_twopass__neon_prfm)
+  BENCHMARK_BGEMM(f32_ppmm_4x16_unipass__neon)
+  BENCHMARK_BGEMM(f32_ppmm_4x16_unipass__neon_prfm)
 #endif  // XNN_ARCH_ARM
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
