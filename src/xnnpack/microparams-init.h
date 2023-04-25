@@ -225,8 +225,15 @@ DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_fp32_sc
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_F16_SCALE_PARAMS_FUNCTION(xnn_init_f16_scale_fp16arith_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+
+#define DECLARE_INIT_F16_F32ACC_SCALE_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL size_t fn_name(                                     \
+    union xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)], \
+    float scale);
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F16_SCALE_PARAMS_FUNCTION(xnn_init_f16_scale_avx_params)
+  DECLARE_INIT_F16_F32ACC_SCALE_PARAMS_FUNCTION(xnn_init_f16_f32acc_scale_avx_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 

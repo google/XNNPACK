@@ -1575,9 +1575,9 @@ size_t xnn_init_f16_scale_fp16arith_params(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_scale_avx_params(
-  union xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t scale)
+size_t xnn_init_f16_f32acc_scale_avx_params(
+  union xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)],
+  float scale)
 {
   for (uint32_t i = 0; i < 7; i++) {
     params->avx.mask_table[i] = -1;
@@ -1585,7 +1585,7 @@ size_t xnn_init_f16_scale_avx_params(
   for (uint32_t i = 7; i < 14; i++) {
     params->avx.mask_table[i] = 0;
   }
-  params->avx.scale = fp16_ieee_to_fp32_value(scale);
+  params->avx.scale = scale;
   return sizeof(params->avx);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

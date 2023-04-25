@@ -1561,6 +1561,11 @@ SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-avgpool/f16-avgpool-9x-minmax-f16c-c8.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-f16c-x8.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-f16c-x16.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-x8.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-x16-acc2.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-x24-acc3.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-x32-acc2.c
+  src/f16-f32acc-rsum/gen/f16-f32acc-rsum-f16c-x32-acc4.c
   src/f16-gavgpool/gen/f16-gavgpool-7p7x-minmax-f16c-c8.c
   src/f16-gavgpool/gen/f16-gavgpool-7p7x-minmax-f16c-c16.c
   src/f16-gavgpool/gen/f16-gavgpool-7p7x-minmax-f16c-c24.c
@@ -1573,11 +1578,6 @@ SET(ALL_F16C_MICROKERNEL_SRCS
   src/f16-prelu/gen/f16-prelu-f16c-2x8.c
   src/f16-prelu/gen/f16-prelu-f16c-2x16.c
   src/f16-rmax/f16-rmax-f16c.c
-  src/f16-rsum/gen/f16-rsum-f16c-x8.c
-  src/f16-rsum/gen/f16-rsum-f16c-x16-acc2.c
-  src/f16-rsum/gen/f16-rsum-f16c-x24-acc3.c
-  src/f16-rsum/gen/f16-rsum-f16c-x32-acc2.c
-  src/f16-rsum/gen/f16-rsum-f16c-x32-acc4.c
   src/f16-vbinary/gen/f16-vadd-minmax-f16c-x8.c
   src/f16-vbinary/gen/f16-vadd-minmax-f16c-x16.c
   src/f16-vbinary/gen/f16-vaddc-minmax-f16c-x8.c

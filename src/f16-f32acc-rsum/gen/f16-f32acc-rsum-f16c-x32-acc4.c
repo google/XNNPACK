@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f16-rsum/f16c.c.in
+//   Template: src/f16-f32acc-rsum/f16c.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -16,11 +16,11 @@
 #include <xnnpack/unaligned.h>
 
 
-void xnn_f16_rsum_ukernel__f16c_x8(
+void xnn_f16_f32acc_rsum_ukernel__f16c_x32_acc4(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
@@ -29,6 +29,24 @@ void xnn_f16_rsum_ukernel__f16c_x8(
 
   const uint16_t* i = (const uint16_t*) input;
   __m256 vacc0 = _mm256_setzero_ps();
+  __m256 vacc1 = _mm256_setzero_ps();
+  __m256 vacc2 = _mm256_setzero_ps();
+  __m256 vacc3 = _mm256_setzero_ps();
+  for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
+    const __m256 vt0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
+    const __m256 vt1 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + 8)));
+    const __m256 vt2 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + 16)));
+    const __m256 vt3 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + 24)));
+    i += 32;
+
+    vacc0 = _mm256_add_ps(vacc0, vt0);
+    vacc1 = _mm256_add_ps(vacc1, vt1);
+    vacc2 = _mm256_add_ps(vacc2, vt2);
+    vacc3 = _mm256_add_ps(vacc3, vt3);
+  }
+  vacc0 = _mm256_add_ps(vacc0, vacc1);
+  vacc2 = _mm256_add_ps(vacc2, vacc3);
+  vacc0 = _mm256_add_ps(vacc0, vacc2);
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const __m256 vt = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
     i += 8;

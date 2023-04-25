@@ -1,13 +1,12 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f16-f32acc-rsum/f16c.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert BATCH_TILE % 8 == 0
-$assert BATCH_TILE >= 8
-$SIMD_TILE = BATCH_TILE // 8
-$assert ACCUMULATORS <= SIMD_TILE
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <immintrin.h>
@@ -17,12 +16,11 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/unaligned.h>
 
 
-$ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
-void xnn_f16_rsum_ukernel__f16c_x${BATCH_TILE}${ACC_SUFFIX}(
+void xnn_f16_f32acc_rsum_ukernel__f16c_x24_acc3(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
@@ -30,25 +28,21 @@ void xnn_f16_rsum_ukernel__f16c_x${BATCH_TILE}${ACC_SUFFIX}(
   assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
-  $for A in range(ACCUMULATORS):
-    __m256 vacc${A} = _mm256_setzero_ps();
-  $if BATCH_TILE > 8:
-    for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
-      const __m256 vt0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
-      $for N in range(1, SIMD_TILE):
-        const __m256 vt${N} = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + ${N * 8})));
-      i += ${BATCH_TILE};
+  __m256 vacc0 = _mm256_setzero_ps();
+  __m256 vacc1 = _mm256_setzero_ps();
+  __m256 vacc2 = _mm256_setzero_ps();
+  for (; batch >= 24 * sizeof(uint16_t); batch -= 24 * sizeof(uint16_t)) {
+    const __m256 vt0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
+    const __m256 vt1 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + 8)));
+    const __m256 vt2 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) (i + 16)));
+    i += 24;
 
-      $for N in range(SIMD_TILE):
-        vacc${N % ACCUMULATORS} = _mm256_add_ps(vacc${N % ACCUMULATORS}, vt${N});
-    }
-    $if ACCUMULATORS > 1:
-      $ACC_SLICE = 1
-      $while ACC_SLICE < ACCUMULATORS:
-        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-          $if A + ACC_SLICE < ACCUMULATORS:
-            vacc${A} = _mm256_add_ps(vacc${A}, vacc${A + ACC_SLICE});
-        $ACC_SLICE *= 2
+    vacc0 = _mm256_add_ps(vacc0, vt0);
+    vacc1 = _mm256_add_ps(vacc1, vt1);
+    vacc2 = _mm256_add_ps(vacc2, vt2);
+  }
+  vacc0 = _mm256_add_ps(vacc0, vacc1);
+  vacc0 = _mm256_add_ps(vacc0, vacc2);
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const __m256 vt = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
     i += 8;

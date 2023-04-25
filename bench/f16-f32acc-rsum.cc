@@ -21,10 +21,10 @@
 #include <xnnpack/reduce.h>
 
 
-static void f16_rsum(
+static void f16_f32acc_rsum(
   benchmark::State& state,
-  xnn_f16_rsum_ukernel_fn rsum,
-  xnn_init_f16_scale_params_fn init_params,
+  xnn_f16_f32acc_rsum_ukernel_fn rsum,
+  xnn_init_f16_f32acc_scale_params_fn init_params,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
   if (isa_check != nullptr && !isa_check(state)) {
@@ -41,8 +41,8 @@ static void f16_rsum(
   std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> input(elements);
   std::generate(input.begin(), input.end(), std::ref(f16rng));
 
-  xnn_f16_scale_params params;
-  init_params(&params, /*scale=*/fp16_ieee_from_fp32_value(0.1f));
+  xnn_f16_f32acc_scale_params params;
+  init_params(&params, /*scale=*/0.1f);
 
   uint16_t output = UINT16_C(0x7E00);  /* NaN */
   for (auto _ : state) {
@@ -63,38 +63,38 @@ static void f16_rsum(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_x8,
-                    xnn_f16_rsum_ukernel__neonfp16arith_x8,
-                    xnn_init_f16_scale_fp16arith_params,
-                    benchmark::utils::CheckNEONFP16ARITH)
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f16_f32acc_rsum, f16c_x8,
+                    xnn_f16_f32acc_rsum_ukernel__f16c_x8,
+                    xnn_init_f16_f32acc_scale_avx_params,
+                    benchmark::utils::CheckF16C)
     ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_x16_acc2,
-                    xnn_f16_rsum_ukernel__neonfp16arith_x16_acc2,
-                    xnn_init_f16_scale_fp16arith_params,
-                    benchmark::utils::CheckNEONFP16ARITH)
+  BENCHMARK_CAPTURE(f16_f32acc_rsum, f16c_x16_acc2,
+                    xnn_f16_f32acc_rsum_ukernel__f16c_x16_acc2,
+                    xnn_init_f16_f32acc_scale_avx_params,
+                    benchmark::utils::CheckF16C)
     ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_x24_acc3,
-                    xnn_f16_rsum_ukernel__neonfp16arith_x24_acc3,
-                    xnn_init_f16_scale_fp16arith_params,
-                    benchmark::utils::CheckNEONFP16ARITH)
+  BENCHMARK_CAPTURE(f16_f32acc_rsum, f16c_x24_acc3,
+                    xnn_f16_f32acc_rsum_ukernel__f16c_x24_acc3,
+                    xnn_init_f16_f32acc_scale_avx_params,
+                    benchmark::utils::CheckF16C)
     ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_x32_acc2,
-                    xnn_f16_rsum_ukernel__neonfp16arith_x32_acc2,
-                    xnn_init_f16_scale_fp16arith_params,
-                    benchmark::utils::CheckNEONFP16ARITH)
+  BENCHMARK_CAPTURE(f16_f32acc_rsum, f16c_x32_acc2,
+                    xnn_f16_f32acc_rsum_ukernel__f16c_x32_acc2,
+                    xnn_init_f16_f32acc_scale_avx_params,
+                    benchmark::utils::CheckF16C)
     ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_x32_acc4,
-                    xnn_f16_rsum_ukernel__neonfp16arith_x32_acc4,
-                    xnn_init_f16_scale_fp16arith_params,
-                    benchmark::utils::CheckNEONFP16ARITH)
+  BENCHMARK_CAPTURE(f16_f32acc_rsum, f16c_x32_acc4,
+                    xnn_f16_f32acc_rsum_ukernel__f16c_x32_acc4,
+                    xnn_init_f16_f32acc_scale_avx_params,
+                    benchmark::utils::CheckF16C)
     ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
     ->UseRealTime();
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

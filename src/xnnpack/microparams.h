@@ -43,6 +43,10 @@ union xnn_f16_scale_params {
     uint16_t scale;
   } fp16arith;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+};
+
+union xnn_f16_f32acc_scale_params {
+  char _; // Dummy member variable to comply with the C standard
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     int16_t mask_table[14];

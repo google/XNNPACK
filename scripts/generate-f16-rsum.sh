@@ -11,13 +11,6 @@ tools/xngen src/f16-rsum/neonfp16arith.c.in -D BATCH_TILE=24 -D ACCUMULATORS=3 -
 tools/xngen src/f16-rsum/neonfp16arith.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -o src/f16-rsum/gen/f16-rsum-neonfp16arith-x32-acc2.c &
 tools/xngen src/f16-rsum/neonfp16arith.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -o src/f16-rsum/gen/f16-rsum-neonfp16arith-x32-acc4.c &
 
-################################### x86 F16C ##################################
-tools/xngen src/f16-rsum/f16c.c.in -D BATCH_TILE=8  -D ACCUMULATORS=1 -o src/f16-rsum/gen/f16-rsum-f16c-x8.c &
-tools/xngen src/f16-rsum/f16c.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -o src/f16-rsum/gen/f16-rsum-f16c-x16-acc2.c &
-tools/xngen src/f16-rsum/f16c.c.in -D BATCH_TILE=24 -D ACCUMULATORS=3 -o src/f16-rsum/gen/f16-rsum-f16c-x24-acc3.c &
-tools/xngen src/f16-rsum/f16c.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -o src/f16-rsum/gen/f16-rsum-f16c-x32-acc2.c &
-tools/xngen src/f16-rsum/f16c.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -o src/f16-rsum/gen/f16-rsum-f16c-x32-acc4.c &
-
 ################################## Unit tests #################################
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/f16-rsum.yaml --output test/f16-rsum.cc &
 
