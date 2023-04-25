@@ -3875,6 +3875,12 @@ ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
 ALL_NEONFP16_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-neonfp16-x8.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-neonfp16-x16.c",
+    "src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16-x4.c",
+    "src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16-x8.c",
+    "src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16-x16-acc2.c",
+    "src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16-x24-acc3.c",
+    "src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16-x32-acc2.c",
+    "src/f16-f32acc-rsum/gen/f16-f32acc-rsum-neonfp16-x32-acc4.c",
     "src/f32-f16-vcvt/gen/f32-f16-vcvt-neonfp16-x8.c",
     "src/f32-f16-vcvt/gen/f32-f16-vcvt-neonfp16-x16.c",
     "src/math/f16-f32-cvt-neonfp16.c",
