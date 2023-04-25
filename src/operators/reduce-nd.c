@@ -73,6 +73,37 @@ error:
   return status;
 }
 
+enum xnn_status xnn_create_mean_nd_f16(
+  uint32_t flags,
+  xnn_operator_t* mean_op_out)
+{
+  const struct xnn_gavgpool_config* gavgpool_config = xnn_init_f16_gavgpool_config();
+  const struct xnn_reduce_config* rsum_config = xnn_init_f16_f32acc_rsum_config();
+  if (gavgpool_config == NULL || rsum_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_mean_nd_f16));
+    return xnn_status_unsupported_hardware;
+  }
+
+  struct {
+    union xnn_f16_f32acc_scale_params scale;
+    union xnn_f16_scaleminmax_params scaleminmax;
+  } params;
+  gavgpool_config->init.f16(&params.scaleminmax,
+    /*scale=*/UINT16_C(0x3C00)  /* 1.0h */,
+    /*output_min=*/UINT16_C(0xFC00)  /* -inf */,
+    /*output_max=*/UINT16_C(0x7C00)  /* +inf */);
+  rsum_config->init.f16_f32acc_scale(&params.scale,
+    /*scale=*/1.0f);
+  return create_mean_nd(
+    flags,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    xnn_operator_type_mean_nd_f16,
+    gavgpool_config, rsum_config,
+    &params, sizeof(params),
+    mean_op_out);
+}
+
 enum xnn_status xnn_create_mean_nd_f32(
   uint32_t flags,
   xnn_operator_t* mean_op_out)
@@ -113,6 +144,10 @@ static enum xnn_status setup_mean_nd(
     size_t log2_data_element_size,
     size_t log2_accumulator_element_size,
     enum xnn_operator_type expected_operator_type,
+    const void* scaleminmax_params,
+    size_t scaleminmax_params_size,
+    const void* scale_params,
+    size_t scale_params_size,
     void (*update_params)(xnn_operator_t, size_t),
     pthreadpool_t threadpool)
 {
@@ -210,7 +245,7 @@ static enum xnn_status setup_mean_nd(
         .scaled_elements = axis_dim << log2_data_element_size,
         .ukernel = mean_op->reduce_config->ukernel,
     };
-    memcpy(&mean_op->context.reduce.params, &mean_op->params.f32_scale, sizeof(mean_op->params.f32_scale));
+    memcpy(&mean_op->context.reduce.params, scale_params, scale_params_size);
 
     mean_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_reduce;
     mean_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
@@ -244,7 +279,7 @@ static enum xnn_status setup_mean_nd(
         .output = output,
         .output_batch_stride = channel_like_dim << log2_data_element_size,
     };
-    memcpy(&mean_op->context.global_average_pooling_nwc.params, &mean_op->params.f32_scale_minmax, sizeof(mean_op->params.f32_scale_minmax));
+    memcpy(&mean_op->context.global_average_pooling_nwc.params, scaleminmax_params, scaleminmax_params_size);
 
     mean_op->compute[0].type = xnn_parallelization_type_1d;
     mean_op->compute[0].range[0] = batch_like_dim;
@@ -261,6 +296,41 @@ static enum xnn_status setup_mean_nd(
   mean_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
+}
+
+static void update_params_mean_f16(
+  xnn_operator_t mean_op,
+  size_t num_elements)
+{
+  const float scale = 1.0f / (float) (double) num_elements;
+  mean_op->reduce_config->init.f16_f32acc_scale(&mean_op->params.f16_f32acc_scale, scale);
+  mean_op->gavgpool_config->update.f16(&mean_op->params.f16_scale_minmax, fp16_ieee_from_fp32_value(scale));
+}
+
+enum xnn_status xnn_setup_mean_nd_f16(
+    xnn_operator_t mean_op,
+    size_t num_reduction_axes,
+    const size_t* reduction_axes,
+    size_t num_input_dims,
+    const size_t* input_shape,
+    const void* input,
+    void* output,
+    pthreadpool_t threadpool)
+{
+  return setup_mean_nd(
+    mean_op,
+    num_reduction_axes, reduction_axes,
+    num_input_dims, input_shape,
+    input, output,
+    /*log2_data_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    xnn_operator_type_mean_nd_f16,
+    /*scaleminmax_params=*/&mean_op->params.f16_scale_minmax,
+    /*scaleminmax_params_size=*/sizeof(mean_op->params.f16_scale_minmax),
+    /*scale_params=*/&mean_op->params.f16_f32acc_scale,
+    /*scale_params_size=*/sizeof(mean_op->params.f16_f32acc_scale),
+    update_params_mean_f16,
+    threadpool);
 }
 
 static void update_params_mean_f32(
@@ -290,6 +360,10 @@ enum xnn_status xnn_setup_mean_nd_f32(
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     xnn_operator_type_mean_nd_f32,
+    /*scaleminmax_params=*/&mean_op->params.f32_scale_minmax,
+    /*scaleminmax_params_size=*/sizeof(mean_op->params.f32_scale_minmax),
+    /*scale_params=*/&mean_op->params.f32_scale,
+    /*scale_params_size=*/sizeof(mean_op->params.f32_scale),
     update_params_mean_f32,
     threadpool);
 }

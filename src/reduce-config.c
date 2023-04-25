@@ -18,13 +18,50 @@
 #include <xnnpack/reduce.h>
 
 
+static struct xnn_reduce_config f16_f32acc_rsum_config = {0};
 static struct xnn_reduce_config f32_rsum_config = {0};
 
 #if XNN_PLATFORM_WINDOWS
+  static INIT_ONCE init_guard_f16_f32acc_rsum = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_rsum = INIT_ONCE_STATIC_INIT;
 #else
+  static pthread_once_t init_guard_f16_f32acc_rsum = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_rsum = PTHREAD_ONCE_INIT;
 #endif
+
+static void init_f16_f32acc_rsum_config(void) {
+  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon_fp16_arith) {
+      f16_f32acc_rsum_config = (struct xnn_reduce_config) {
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__neonfp16_x32_acc4,
+        .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_scalar_params,
+        .element_tile = 32,
+      };
+    }
+  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon_fp16_arith) {
+      f16_f32acc_rsum_config = (struct xnn_reduce_config) {
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__neonfp16_x32_acc4,
+        .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_scalar_params,
+        .element_tile = 32,
+      };
+    }
+  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_x86_f16c) {
+      f16_f32acc_rsum_config = (struct xnn_reduce_config) {
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__f16c_x32_acc4,
+        .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_avx_params,
+        .element_tile = 32,
+      };
+    }
+  #endif
+}
 
 static void init_f32_rsum_config(void) {
   #if XNN_ARCH_ARM
@@ -87,11 +124,29 @@ static void init_f32_rsum_config(void) {
 }
 
 #if XNN_PLATFORM_WINDOWS
+  static BOOL CALLBACK init_f16_f32acc_rsum_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
+    init_f16_f32acc_rsum_config();
+    return TRUE;
+  }
+
   static BOOL CALLBACK init_f32_rsum_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
     init_f32_rsum_config();
     return TRUE;
   }
 #endif
+
+const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
+    return NULL;
+  }
+  #if XNN_PLATFORM_WINDOWS
+    InitOnceExecuteOnce(&init_guard_f16_f32acc_rsum, &init_f16_f32acc_rsum_config_windows, NULL, NULL);
+  #else
+    pthread_once(&init_guard_f16_f32acc_rsum, &init_f16_f32acc_rsum_config);
+  #endif
+  return &f16_f32acc_rsum_config;
+}
 
 const struct xnn_reduce_config* xnn_init_f32_rsum_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();

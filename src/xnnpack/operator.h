@@ -226,6 +226,11 @@ struct xnn_operator {
       union xnn_f16_minmax_params f16_minmax;
       union xnn_f16_scaleminmax_params f16_scaleminmax;
     };
+    // Mean can use either f16_f32acc_scale, or f16_scale_minmax
+    struct {
+      union xnn_f16_f32acc_scale_params f16_f32acc_scale;
+      union xnn_f16_scaleminmax_params f16_scale_minmax;
+    };
     // Pixelwise Average Pooling normally use f32_minmax_params, but also initialize
     // f32_scaleminmax_params in case it needs to switch to Global Average Pooling operation.
     struct {

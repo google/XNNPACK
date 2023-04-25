@@ -268,6 +268,7 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_xx_copy_config(
 struct xnn_reduce_config {
   xnn_reduce_ukernel_fn ukernel;
   union {
+    xnn_init_f16_f32acc_scale_params_fn f16_f32acc_scale;
     xnn_init_f32_default_params_fn f32_default;
     xnn_init_f32_scale_params_fn f32_scale;
   } init;
@@ -276,6 +277,7 @@ struct xnn_reduce_config {
   // elements in each call.
   size_t element_tile;
 };
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rsum_config();
 
 struct xnn_xx_fill_config {
