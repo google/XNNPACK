@@ -43,7 +43,7 @@ void xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_lut64_p2_div_x4(
 
     const v128_t vz = wasm_f32x4_abs(vx);
 
-    v128_t vn = __builtin_wasm_relaxed_madd_f32x4(vmagic_bias, vz, vminus_log2e);
+    v128_t vn = __builtin_wasm_relaxed_madd_f32x4(vz, vminus_log2e, vmagic_bias);
     const v128_t ve = wasm_i32x4_shl(vn, 17);
 
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
@@ -63,13 +63,13 @@ void xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_lut64_p2_div_x4(
     const v128_t vs = wasm_i32x4_add(vl, ve);
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
-    v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vz, vn, vln2_hi);
-    vt = __builtin_wasm_relaxed_madd_f32x4(vt, vn, vln2_lo);
+    v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vn, vln2_hi, vz);
+    vt = __builtin_wasm_relaxed_madd_f32x4(vn, vln2_lo, vt);
 
     v128_t vp = wasm_f32x4_mul(vt, vc2);
-    vp = __builtin_wasm_relaxed_nmadd_f32x4(vt, vp, vt);
+    vp = __builtin_wasm_relaxed_nmadd_f32x4(vp, vt, vt);
 
-    const v128_t vy = __builtin_wasm_relaxed_nmadd_f32x4(vs, vs, vp);
+    const v128_t vy = __builtin_wasm_relaxed_nmadd_f32x4(vs, vp, vs);
     const v128_t vd = wasm_f32x4_add(vy, vone);
 
     v128_t vf = wasm_f32x4_div(vy, vd);
@@ -85,7 +85,7 @@ void xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_lut64_p2_div_x4(
 
     const v128_t vz = wasm_f32x4_abs(vx);
 
-    v128_t vn = __builtin_wasm_relaxed_madd_f32x4(vmagic_bias, vz, vminus_log2e);
+    v128_t vn = __builtin_wasm_relaxed_madd_f32x4(vz, vminus_log2e, vmagic_bias);
     const v128_t ve = wasm_i32x4_shl(vn, 17);
 
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
@@ -105,13 +105,13 @@ void xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_lut64_p2_div_x4(
     const v128_t vs = wasm_i32x4_add(vl, ve);
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
-    v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vz, vn, vln2_hi);
-    vt = __builtin_wasm_relaxed_madd_f32x4(vt, vn, vln2_lo);
+    v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vn, vln2_hi, vz);
+    vt = __builtin_wasm_relaxed_madd_f32x4(vn, vln2_lo, vt);
 
     v128_t vp = wasm_f32x4_mul(vt, vc2);
-    vp = __builtin_wasm_relaxed_nmadd_f32x4(vt, vp, vt);
+    vp = __builtin_wasm_relaxed_nmadd_f32x4(vp, vt, vt);
 
-    const v128_t vy = __builtin_wasm_relaxed_nmadd_f32x4(vs, vs, vp);
+    const v128_t vy = __builtin_wasm_relaxed_nmadd_f32x4(vs, vp, vs);
     const v128_t vd = wasm_f32x4_add(vy, vone);
 
     v128_t vf = wasm_f32x4_div(vy, vd);
