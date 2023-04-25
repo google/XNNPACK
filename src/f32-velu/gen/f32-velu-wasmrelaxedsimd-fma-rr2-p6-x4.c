@@ -47,22 +47,22 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_x4(
 
     const v128_t vz = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
 
-    v128_t vn = __builtin_wasm_relaxed_madd_f32x4(vmagic_bias, vz, vlog2e);
+    v128_t vn = __builtin_wasm_relaxed_madd_f32x4(vz, vlog2e, vmagic_bias);
     v128_t vs = wasm_i32x4_shl(vn, 23);
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
-    v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vz, vn, vminus_ln2_hi);
-    vt = __builtin_wasm_relaxed_madd_f32x4(vt, vn, vminus_ln2_lo);
+    v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vn, vminus_ln2_hi, vz);
+    vt = __builtin_wasm_relaxed_madd_f32x4(vn, vminus_ln2_lo, vt);
 
-    v128_t vp = __builtin_wasm_relaxed_madd_f32x4(vc5, vc6, vt);
-    vp = __builtin_wasm_relaxed_madd_f32x4(vc4, vp, vt);
-    vp = __builtin_wasm_relaxed_madd_f32x4(vc3, vp, vt);
-    vp = __builtin_wasm_relaxed_madd_f32x4(vc2, vp, vt);
+    v128_t vp = __builtin_wasm_relaxed_madd_f32x4(vc6, vt, vc5);
+    vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vc4);
+    vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vc3);
+    vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vc2);
     vp = wasm_f32x4_mul(vp, vt);
 
     vt = wasm_f32x4_mul(vt, vs);
     vs = wasm_f32x4_sub(vs, vone);
-    vp = __builtin_wasm_relaxed_madd_f32x4(vt, vp, vt);
+    vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vt);
     const v128_t ve = wasm_f32x4_mul(wasm_f32x4_add(vp, vs), valpha);
 
     const v128_t vsignm = wasm_i32x4_shr(vx, 31);
@@ -77,22 +77,22 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_x4(
 
     const v128_t vz = __builtin_wasm_relaxed_max_f32x4(wasm_f32x4_mul(vx, vprescale), vsat_cutoff);
 
-    v128_t vn = __builtin_wasm_relaxed_madd_f32x4(vmagic_bias, vz, vlog2e);
+    v128_t vn = __builtin_wasm_relaxed_madd_f32x4(vz, vlog2e, vmagic_bias);
     v128_t vs = wasm_i32x4_shl(vn, 23);
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
-    v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vz, vn, vminus_ln2_hi);
-    vt = __builtin_wasm_relaxed_madd_f32x4(vt, vn, vminus_ln2_lo);
+    v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vn, vminus_ln2_hi, vz);
+    vt = __builtin_wasm_relaxed_madd_f32x4(vn, vminus_ln2_lo, vt);
 
-    v128_t vp = __builtin_wasm_relaxed_madd_f32x4(vc5, vc6, vt);
-    vp = __builtin_wasm_relaxed_madd_f32x4(vc4, vp, vt);
-    vp = __builtin_wasm_relaxed_madd_f32x4(vc3, vp, vt);
-    vp = __builtin_wasm_relaxed_madd_f32x4(vc2, vp, vt);
+    v128_t vp = __builtin_wasm_relaxed_madd_f32x4(vc6, vt, vc5);
+    vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vc4);
+    vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vc3);
+    vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vc2);
     vp = wasm_f32x4_mul(vp, vt);
 
     vt = wasm_f32x4_mul(vt, vs);
     vs = wasm_f32x4_sub(vs, vone);
-    vp = __builtin_wasm_relaxed_madd_f32x4(vt, vp, vt);
+    vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vt);
     const v128_t ve = wasm_f32x4_mul(wasm_f32x4_add(vp, vs), valpha);
 
     const v128_t vsignm = wasm_i32x4_shr(vx, 31);
