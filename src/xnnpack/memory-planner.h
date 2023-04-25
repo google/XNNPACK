@@ -18,7 +18,7 @@ extern "C" {
 #endif
 
 struct xnn_value_usage {
-  // The index (to xnn_subgraph_t->nodes) of the first xnn_node that uses this xnn_value.
+  // The index (to xnn_runtime_t->opdata) of the first xnn_node that uses this xnn_value.
   uint32_t first_node;
   // The index of the last xnn_node that uses this xnn_value.
   uint32_t last_node;
@@ -32,19 +32,19 @@ struct xnn_value_usage {
   uint32_t reuse_value_id;
 };
 
-// Track the memory allocation in a memory arena for a subgraph.
+// Track the memory allocation in a memory arena for a runtime.
 struct xnn_value_allocation_tracker {
   size_t mem_arena_size;
-  // Representing the lifecycle of xnn_values in the 'subgraph', and the array size is 'subgraph->num_values'.
+  // Representing the lifecycle of xnn_values in the 'runtime', and the array size is 'runtime->num_values'.
   struct xnn_value_usage* usage;
-  // The range of value ids (i.e. the index to subgraph->values) whose memory might need to be allocated.
+  // The range of value ids (i.e. the index to runtime->values) whose memory might need to be allocated.
   size_t min_value_id;
   size_t max_value_id;
 };
 
 // Initialize the memory allocation tracker for xnn_values.
 XNN_INTERNAL void xnn_init_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker,
-                                                    const xnn_subgraph_t subgraph);
+                                                    const struct xnn_runtime* runtime);
 
 inline static void xnn_release_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker) {
   xnn_release_memory(tracker->usage);
@@ -52,7 +52,7 @@ inline static void xnn_release_value_allocation_tracker(struct xnn_value_allocat
 
 // Add a to-be-allocated xnn_value (referred by 'value_id') of size 'tensor_size' to the allocation tracker.
 // Note: this function assumes 'value_id's added in increasing order for simplicity as it's called inside a loop
-// iterating over 'subgraph->values'.
+// iterating over 'runtime->values'.
 XNN_INTERNAL void xnn_add_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker,
                                                    uint32_t value_id, size_t tensor_size);
 

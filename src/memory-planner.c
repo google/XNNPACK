@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <xnnpack.h>
+#include <xnnpack/allocator.h>
 #include <xnnpack/memory-planner.h>
 #include <xnnpack/subgraph.h>
 
@@ -30,38 +32,50 @@ static inline int cmp_value_usage_tensor_size(const void* a, const void* b) {
   return (tensor_size_b > tensor_size_a) - (tensor_size_b < tensor_size_a);
 }
 
-static void populate_value_lifecycle(const xnn_subgraph_t subgraph, struct xnn_value_usage* usage) {
-  assert(subgraph != NULL);
-  if (subgraph->num_nodes == 0) {
+static void populate_value_lifecycle(const struct xnn_runtime* runtime, struct xnn_value_usage* usage) {
+  assert(runtime != NULL);
+  if (runtime->num_ops == 0) {
     return;
   }
   // As we initialized first/last_node in each xnn_value_usage to 0 as in 'xnn_init_value_mem_allocation_tracker',
   // we start with the second node to tell whether first/last_node have been set or not, and check the first node last.
-  for (uint32_t nid = 1; nid < subgraph->num_nodes; ++nid) {
-    const struct xnn_node* node = subgraph->nodes + nid;
-    for (uint32_t i = 0; i < node->num_inputs; ++i) {
-      if (usage[node->inputs[i]].first_node == 0) {
-        usage[node->inputs[i]].first_node = nid;
+  for (uint32_t nid = 1; nid < runtime->num_ops; ++nid) {
+    const struct xnn_operator_data* opdata = runtime->opdata + nid;
+    for (uint32_t i = 0; i < opdata->num_inputs; ++i) {
+      if (opdata->inputs[i] == XNN_INVALID_VALUE_ID) {
+        continue;  // Optimized away.
       }
-      usage[node->inputs[i]].last_node = nid;
+      if (usage[opdata->inputs[i]].first_node == 0) {
+        usage[opdata->inputs[i]].first_node = nid;
+      }
+      usage[opdata->inputs[i]].last_node = nid;
     }
-    for (uint32_t i = 0; i < node->num_outputs; ++i) {
-      if (usage[node->outputs[i]].first_node == 0) {
-        usage[node->outputs[i]].first_node = nid;
+    for (uint32_t i = 0; i < opdata->num_outputs; ++i) {
+      if (opdata->outputs[i] == XNN_INVALID_VALUE_ID) {
+        continue;  // Optimized away.
       }
-      usage[node->outputs[i]].last_node = nid;
+      if (usage[opdata->outputs[i]].first_node == 0) {
+        usage[opdata->outputs[i]].first_node = nid;
+      }
+      usage[opdata->outputs[i]].last_node = nid;
     }
   }
-  const struct xnn_node* first_node = subgraph->nodes;
+  const struct xnn_operator_data* first_node = runtime->opdata;
   for (uint32_t i = 0; i < first_node->num_inputs; ++i) {
+    if (first_node->inputs[i] == XNN_INVALID_VALUE_ID) {
+      continue;  // Optimized away.
+    }
     usage[first_node->inputs[i]].first_node = 0;
   }
   for (uint32_t i = 0; i < first_node->num_outputs; ++i) {
+    if (first_node->outputs[i] == XNN_INVALID_VALUE_ID) {
+      continue;  // Optimized away.
+    }
     usage[first_node->outputs[i]].first_node = 0;
   }
   // Separate loop over all values to make sure we have usage records properly initialized with invalid reuse_value_id.
   // Some usage records are not associated with any nodes, and they will not be visited by the loops over nodes above.
-  for (uint32_t i = 0; i < subgraph->num_values; i++) {
+  for (uint32_t i = 0; i < runtime->num_values; i++) {
     usage[i].reuse_value_id = XNN_INVALID_VALUE_ID;
     usage[i].alloc_offset = SIZE_MAX;
   }
@@ -128,11 +142,11 @@ static size_t find_value_alloc_offset(struct memory_block* live_mem_blocks,
   return live_mem_blocks[smallest_gap_index].end;
 }
 
-void xnn_init_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker, const xnn_subgraph_t subgraph) {
+void xnn_init_value_allocation_tracker(struct xnn_value_allocation_tracker* tracker, const struct xnn_runtime* runtime) {
   tracker->mem_arena_size = 0;
-  tracker->usage = xnn_allocate_zero_memory(sizeof(struct xnn_value_usage) * subgraph->num_values);
+  tracker->usage = xnn_allocate_zero_memory(sizeof(struct xnn_value_usage) * runtime->num_values);
 #if XNN_ENABLE_MEMOPT
-  populate_value_lifecycle(subgraph, tracker->usage);
+  populate_value_lifecycle(runtime, tracker->usage);
 #endif
   tracker->min_value_id = XNN_INVALID_VALUE_ID;
   tracker->max_value_id = XNN_INVALID_VALUE_ID;

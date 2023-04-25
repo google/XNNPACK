@@ -15,13 +15,13 @@ namespace xnnpack {
 
 TEST(MemoryPlanner, ValueLiveInfo) {
   EXPECT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  // Create simple subgraph where it has 2 nodes and 4 tensors as illustrated below:
+  // Create simple runtime where it has 2 nodes and 4 tensors as illustrated below:
   // T0 ----> N0 ----> T2  and T2 ----> N1 ----> T3
   // T1 ----/                  T1 ----/
-  struct xnn_subgraph subgraph;
-  subgraph.num_values = 4;
-  subgraph.num_nodes = 2;
-  struct xnn_node nodes[2];
+  struct xnn_runtime runtime;
+  runtime.num_values = 4;
+  runtime.num_ops = 2;
+  struct xnn_operator_data nodes[2];
   nodes[0].num_inputs = 2;
   nodes[0].inputs[0] = 0;
   nodes[0].inputs[1] = 1;
@@ -33,10 +33,10 @@ TEST(MemoryPlanner, ValueLiveInfo) {
   nodes[1].inputs[1] = 2;
   nodes[1].num_outputs = 1;
   nodes[1].outputs[0] = 3;
-  subgraph.nodes = nodes;
+  runtime.opdata = nodes;
 
   struct xnn_value_allocation_tracker tracker;
-  xnn_init_value_allocation_tracker(&tracker, &subgraph);
+  xnn_init_value_allocation_tracker(&tracker, &runtime);
 
   EXPECT_EQ(0, tracker.usage[0].first_node);
   EXPECT_EQ(0, tracker.usage[0].last_node);
@@ -55,12 +55,12 @@ TEST(MemoryPlanner, ValueLiveInfo) {
 
 TEST(MemoryPlanner, MemoryBlocksCoalescing) {
   EXPECT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  struct xnn_subgraph subgraph;
-  subgraph.num_nodes = 0;
-  subgraph.num_values = 5;
+  struct xnn_runtime runtime;
+  runtime.num_ops = 0;
+  runtime.num_values = 5;
   struct xnn_value_allocation_tracker tracker;
-  xnn_init_value_allocation_tracker(&tracker, &subgraph);
-  // As this is an empty subgraph, we create the following xnn_value_usage stub.
+  xnn_init_value_allocation_tracker(&tracker, &runtime);
+  // As this is an empty runtime, we create the following xnn_value_usage stub.
   tracker.usage[0].first_node = 1,
   tracker.usage[0].last_node = 1,
   xnn_add_value_allocation_tracker(&tracker, 0, 56);
@@ -81,7 +81,7 @@ TEST(MemoryPlanner, MemoryBlocksCoalescing) {
   tracker.usage[4].last_node = 1,
   xnn_add_value_allocation_tracker(&tracker, 4, 20);
 
-  for (size_t i = 0; i < subgraph.num_values; i++) {
+  for (size_t i = 0; i < runtime.num_values; i++) {
     tracker.usage[i].reuse_value_id = XNN_INVALID_VALUE_ID;
   }
   xnn_plan_value_allocation_tracker(&tracker);
@@ -107,12 +107,12 @@ TEST(MemoryPlanner, MemoryBlocksCoalescing) {
 
 TEST(MemoryPlanner, GeneralPlanning) {
   EXPECT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
-  struct xnn_subgraph subgraph;
-  subgraph.num_nodes = 0;
-  subgraph.num_values = 8;
+  struct xnn_runtime runtime;
+  runtime.num_ops = 0;
+  runtime.num_values = 8;
   struct xnn_value_allocation_tracker tracker;
-  xnn_init_value_allocation_tracker(&tracker, &subgraph);
-  // As this is an empty subgraph, we create the following xnn_value_usage stub.
+  xnn_init_value_allocation_tracker(&tracker, &runtime);
+  // As this is an empty runtime, we create the following xnn_value_usage stub.
   tracker.usage[0].first_node = 0,
   tracker.usage[0].last_node = 1,
   xnn_add_value_allocation_tracker(&tracker, 0, 32);
@@ -145,7 +145,7 @@ TEST(MemoryPlanner, GeneralPlanning) {
   tracker.usage[7].last_node = 8,
   xnn_add_value_allocation_tracker(&tracker, 7, 40);
 
-  for (size_t i = 0; i < subgraph.num_values; i++) {
+  for (size_t i = 0; i < runtime.num_values; i++) {
     tracker.usage[i].reuse_value_id = XNN_INVALID_VALUE_ID;
   }
   xnn_plan_value_allocation_tracker(&tracker);
@@ -210,6 +210,7 @@ TEST(MemoryPlanner, LeakyReluInPlaceAfterConv) {
     .AddLeakyRelu(1.0f, conv_out, leaky_relu_out)
     .AddClamp(0.0f, 1.0f, leaky_relu_out, output_id);
   tester.CreateRuntime();
+  tester.SetupRuntime();
 
   xnn_runtime_t runtime = tester.Runtime();
 
@@ -253,6 +254,7 @@ TEST(MemoryPlanner, LeakyReluWithTwoConsumersCannotBeInPlace) {
     .AddClamp(0.0f, 1.0f, leaky_relu_out, output_id)
     .AddClamp(1.0f, 2.0f, leaky_relu_out, output_id2);
   tester.CreateRuntime();
+  tester.SetupRuntime();
 
   xnn_runtime_t runtime = tester.Runtime();
 
@@ -296,6 +298,7 @@ TEST(MemoryPlanner, HardSwishAndLeakyReluInPlaceAfterConv) {
     .AddHardSwish(leaky_relu_out, hard_swish_out)
     .AddClamp(0.0f, 1.0f, hard_swish_out, output_id);
   tester.CreateRuntime();
+  tester.SetupRuntime();
 
   xnn_runtime_t runtime = tester.Runtime();
 
@@ -320,6 +323,7 @@ TEST(MemoryPlanner, ExternalInputsCannotBeInPlace) {
       .AddLeakyRelu(1.0f, input_id, leaky_relu_out)
       .AddClamp(0.0f, 1.0f, leaky_relu_out, output_id);
   tester.CreateRuntime();
+  tester.SetupRuntime();
 
   xnn_runtime_t runtime = tester.Runtime();
 
@@ -345,6 +349,7 @@ TEST(MemoryPlanner, PersistentValuesCannotReuseInternalValues) {
       .AddLeakyRelu(1.0f, clamp_out_id, leaky_relu_out_id)
       .AddClamp(0.0f, 1.0f, leaky_relu_out_id, output_id);
   tester.CreateRuntime();
+  tester.SetupRuntime();
 
   xnn_runtime_t runtime = tester.Runtime();
 
@@ -368,6 +373,7 @@ TEST(MemoryPlanner, CannotReuseStaticValues) {
       .AddClamp(0.0f, 1.0f, static_id, clamp_out_id)
       .AddLeakyRelu(1.0f, clamp_out_id, output_id);
   tester.CreateRuntime();
+  tester.SetupRuntime();
 
   xnn_runtime_t runtime = tester.Runtime();
 
@@ -408,6 +414,7 @@ TEST(MemoryPlanner, Add2WithLHSConstant) {
     .AddAddition(add_constant_input_id, conv_out, add_out_id)
     .AddLeakyRelu(1.0f, add_out_id, output_id);
   tester.CreateRuntime();
+  tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
   // Should only need space for conv_out tensor.
@@ -448,6 +455,7 @@ TEST(MemoryPlanner, Add2WithRHSConstant) {
     .AddAddition(conv_out, add_constant_input_id, add_out_id)
     .AddLeakyRelu(1.0f, add_out_id, output_id);
   tester.CreateRuntime();
+  tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
   // Should only need space for conv_out tensor.
@@ -488,6 +496,7 @@ TEST(MemoryPlanner, Mul2WithLHSConstant) {
     .AddMultiply(mul_constant_input_id, conv_out, mul_out_id)
     .AddLeakyRelu(1.0f, mul_out_id, output_id);
   tester.CreateRuntime();
+  tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
   // Should only need space for conv_out tensor.
@@ -528,6 +537,7 @@ TEST(MemoryPlanner, Mul2WithRHSConstant) {
     .AddMultiply(conv_out, mul_constant_input_id, mul_out_id)
     .AddLeakyRelu(1.0f, mul_out_id, output_id);
   tester.CreateRuntime();
+  tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
   // Should only need space for conv_out tensor.
@@ -580,6 +590,7 @@ TEST(MemoryPlanner, Add2WithImplicitBroadcast) {
     .AddAddition(hard_swish_out, conv_out, add_out)
     .AddLeakyRelu(1.0f, add_out, output_id);
   tester.CreateRuntime();
+  tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
   // Need space for hard_wish_out conv_out tensor.
@@ -647,6 +658,7 @@ TEST(MemoryPlanner, Add2WithInputMultipleConsumers) {
     .AddAddition(conv_out, max_pooling_2d_out, add_out)
     .AddLeakyRelu(1.0f, add_out, output_id);
   tester.CreateRuntime();
+  tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
   // Need space for conv_out, add cannot reuse conv_out, max_pooling_2d_out is also too small, so it needs allocation.
