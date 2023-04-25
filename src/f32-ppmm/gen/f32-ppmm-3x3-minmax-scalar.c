@@ -126,9 +126,6 @@ void xnn_f32_ppmm_minmax_ukernel_3x3__scalar(
         c0[0] = vacc0x0;
         c0[1] = vacc0x1;
 
-        vacc2x0 = vacc2x2;
-        vacc1x0 = vacc1x2;
-        vacc0x0 = vacc0x2;
 
         c2 += 2;
         c1 += 2;
