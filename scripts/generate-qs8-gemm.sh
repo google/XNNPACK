@@ -1337,10 +1337,10 @@ tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=3 -D VARIANT=LD256 -D DATA
 tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D DATATYPE=QU8 -D REQUANTIZATION=FP32     -o src/qu8-gemm/gen/qu8-gemm-4x16c8-minmax-fp32-avx512skx.c &
 
 ################################## Unit tests #################################
-tools/generate-gemm-test.py --spec test/qc8-gemm-minmax-fp32.yaml --output test/qc8-gemm-minmax-fp32.cc --output test/qc8-gemm-minmax-fp32-2.cc --output test/qc8-gemm-minmax-fp32-3.cc &
+tools/generate-gemm-test.py --spec test/qs8-qc8w-gemm-minmax-fp32.yaml --output test/qs8-qc8w-gemm-minmax-fp32.cc --output test/qs8-qc8w-gemm-minmax-fp32-2.cc --output test/qs8-qc8w-gemm-minmax-fp32-3.cc &
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-fp32.yaml --output test/qs8-gemm-minmax-fp32.cc --output test/qs8-gemm-minmax-fp32-2.cc &
 tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-fp32.yaml --output test/qu8-gemm-minmax-fp32.cc --output test/qu8-gemm-minmax-fp32-2.cc &
-tools/generate-gemm-test.py --spec test/qc8-gemm-jit-fp32.yaml --output test/qc8-gemm-jit-fp32.cc &
+tools/generate-gemm-test.py --spec test/qs8-qc8w-gemm-jit-fp32.yaml --output test/qs8-qc8w-gemm-jit-fp32.cc &
 
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-rndnu.yaml --output test/qs8-gemm-minmax-rndnu.cc --output test/qs8-gemm-minmax-rndnu-2.cc --output test/qs8-gemm-minmax-rndnu-3.cc --output test/qs8-gemm-minmax-rndnu-4.cc --output test/qs8-gemm-minmax-rndnu-5.cc &
 tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-rndnu.yaml --output test/qu8-gemm-minmax-rndnu.cc --output test/qu8-gemm-minmax-rndnu-2.cc &

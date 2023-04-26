@@ -6478,8 +6478,8 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "qc8_mobilenet_v1",
-    srcs = ["models/qc8-mobilenet-v1.cc"],
+    name = "qs8_qc8w_mobilenet_v1",
+    srcs = ["models/qs8-qc8w-mobilenet-v1.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
@@ -6490,8 +6490,8 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "qc8_mobilenet_v2",
-    srcs = ["models/qc8-mobilenet-v2.cc"],
+    name = "qs8_qc8w_mobilenet_v2",
+    srcs = ["models/qs8-qc8w-mobilenet-v2.cc"],
     hdrs = ["models/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
@@ -6844,10 +6844,10 @@ xnnpack_benchmark(
         ":fp32_sparse_mobilenet_v2",
         ":fp32_sparse_mobilenet_v3_large",
         ":fp32_sparse_mobilenet_v3_small",
-        ":qc8_mobilenet_v1",
-        ":qc8_mobilenet_v2",
         ":qs8_mobilenet_v1",
         ":qs8_mobilenet_v2",
+        ":qs8_qc8w_mobilenet_v1",
+        ":qs8_qc8w_mobilenet_v2",
         ":qu8_mobilenet_v1",
         ":qu8_mobilenet_v2",
         "@pthreadpool",
@@ -8525,11 +8525,11 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qc8_dwconv_minmax_multipass_fp32_test",
+    name = "qs8_qc8w_dwconv_minmax_multipass_fp32_test",
     timeout = "moderate",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/qc8-dwconv-minmax-multipass-fp32.cc",
+        "test/qs8-qc8w-dwconv-minmax-multipass-fp32.cc",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -8539,11 +8539,11 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qc8_dwconv_minmax_unipass_fp32_test",
+    name = "qs8_qc8w_dwconv_minmax_unipass_fp32_test",
     timeout = "moderate",
     srcs = [
         "test/dwconv-microkernel-tester.h",
-        "test/qc8-dwconv-minmax-unipass-fp32.cc",
+        "test/qs8-qc8w-dwconv-minmax-unipass-fp32.cc",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -8553,9 +8553,9 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qc8_gemm_jit_fp32_test",
+    name = "qs8_qc8w_gemm_jit_fp32_test",
     srcs = [
-        "test/qc8-gemm-jit-fp32.cc",
+        "test/qs8-qc8w-gemm-jit-fp32.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -8564,12 +8564,12 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qc8_gemm_minmax_fp32_test",
+    name = "qs8_qc8w_gemm_minmax_fp32_test",
     timeout = "moderate",
     srcs = [
-        "test/qc8-gemm-minmax-fp32.cc",
-        "test/qc8-gemm-minmax-fp32-2.cc",
-        "test/qc8-gemm-minmax-fp32-3.cc",
+        "test/qs8-qc8w-gemm-minmax-fp32.cc",
+        "test/qs8-qc8w-gemm-minmax-fp32-2.cc",
+        "test/qs8-qc8w-gemm-minmax-fp32-3.cc",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
@@ -8578,9 +8578,9 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qc8_igemm_jit_fp32_test",
+    name = "qs8_qc8w_igemm_jit_fp32_test",
     srcs = [
-        "test/qc8-igemm-jit-fp32.cc",
+        "test/qs8-qc8w-igemm-jit-fp32.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
@@ -8589,12 +8589,12 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qc8_igemm_minmax_fp32_test",
+    name = "qs8_qc8w_igemm_minmax_fp32_test",
     timeout = "moderate",
     srcs = [
-        "test/qc8-igemm-minmax-fp32.cc",
-        "test/qc8-igemm-minmax-fp32-2.cc",
-        "test/qc8-igemm-minmax-fp32-3.cc",
+        "test/qs8-qc8w-igemm-minmax-fp32.cc",
+        "test/qs8-qc8w-igemm-minmax-fp32-2.cc",
+        "test/qs8-qc8w-igemm-minmax-fp32-3.cc",
     ],
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
