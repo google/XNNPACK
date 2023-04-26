@@ -364,7 +364,9 @@ struct xnn_operator_data {
   size_t sizes[XNN_MAX_TENSOR_DIMS];
   uint32_t adjustment_height;
   uint32_t adjustment_width;
+  uint32_t num_inputs;
   uint32_t inputs[XNN_MAX_RUNTIME_INPUTS];
+  uint32_t num_outputs;
   uint32_t outputs[XNN_MAX_RUNTIME_OUTPUTS];
   xnn_timestamp end_ts[XNN_MAX_OPERATOR_OBJECTS];
 };

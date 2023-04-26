@@ -414,6 +414,15 @@ enum xnn_status xnn_create_runtime_v4(
   for (size_t i = 0; i < subgraph->num_nodes; i++) {
     const struct xnn_node* node = subgraph->nodes + i;
 
+    runtime->opdata[i].num_inputs = node->num_inputs;
+    runtime->opdata[i].num_outputs = node->num_outputs;
+    for (size_t j = 0; j < XNN_MAX_RUNTIME_INPUTS; j++) {
+      runtime->opdata[i].inputs[j] = XNN_INVALID_VALUE_ID;
+    }
+    for (size_t j = 0; j < XNN_MAX_RUNTIME_OUTPUTS; j++) {
+      runtime->opdata[i].outputs[j] = XNN_INVALID_VALUE_ID;
+    }
+
     // Ignore fused nodes
     if (node->type != xnn_node_type_invalid) {
       assert(node->create != NULL);
@@ -432,7 +441,7 @@ enum xnn_status xnn_create_runtime_v4(
   #endif
 
   struct xnn_value_allocation_tracker mem_alloc_tracker;
-  xnn_init_value_allocation_tracker(&mem_alloc_tracker, subgraph);
+  xnn_init_value_allocation_tracker(&mem_alloc_tracker, runtime);
 
   size_t persistent_size = 0;
   for (uint32_t i = 0; i < runtime->num_values; i++) {
