@@ -239,7 +239,7 @@ void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR
             $for N in range(1 << LOG2N):
               c${M}[${N}] = (${XINT8_T}) vout${M}x${N};
             $if LOG2N != 0:
-              $for N in range(1 << (LOG2N - 1)):
+              $for N in range(NR - (1 << LOG2N) - 1):
                 vout${M}x${N} = vout${M}x${N + (1 << LOG2N)};
               c${M} += ${1 << LOG2N};
         }

@@ -143,7 +143,7 @@ void xnn_f16_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__neonfp16ari
                   vst1q_u16(c${M}, vreinterpretq_u16_f16(vacc${M}x${ABC[N:N+8]})); c${M} += 8;
 
               $for M in range(MR):
-                $for N in range(0, 1 << (LOG2N - 1), 8):
+                $for N in range(0, NR - (1 << LOG2N), 8):
                   vacc${M}x${ABC[N:N+8]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+8]};
             $elif LOG2N == 2:
               $for M in range(MR):

@@ -124,7 +124,7 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__avx512f_broadcast(
                   _mm512_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+16]});
 
               $for M in reversed(range(MR)):
-                $for N in range(0, 1 << (LOG2N - 1), 16):
+                $for N in range(0, NR - (1 << LOG2N), 16):
                   vacc${M}x${ABC[N:N+16]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+16]};
 
               $for M in reversed(range(MR)):

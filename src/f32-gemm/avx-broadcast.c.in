@@ -126,7 +126,7 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_broa
                   _mm256_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+8]});
 
               $for M in reversed(range(MR)):
-                $for N in range(0, 1 << (LOG2N - 1), 8):
+                $for N in range(0, NR - (1 << LOG2N), 8):
                   vacc${M}x${ABC[N:N+8]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+8]};
 
               $for M in reversed(range(MR)):

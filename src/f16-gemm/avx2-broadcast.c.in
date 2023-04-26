@@ -122,7 +122,7 @@ void xnn_f16${ACC_SUFFIX}_gemm_minmax_ukernel_${MR}x${NR}__avx2_broadcast(
                   _mm_storeu_si128((__m128i*) (c${M} + ${N}), _mm256_cvtps_ph(vacc${M}x${ABC[N:N+8]}, _MM_FROUND_TO_NEAREST_INT));
 
               $for M in range(MR):
-                $for N in range(0, 1 << (LOG2N - 1), 8):
+                $for N in range(0, NR - (1 << LOG2N), 8):
                   vacc${M}x${ABC[N:N+8]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+8]};
 
               $for M in range(MR):

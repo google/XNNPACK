@@ -158,7 +158,7 @@ void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c8__neonbf16_${BFOPT.lower()}(
                   vst1_bf16(c${M}, vout${M}x${ABC[N:N+4]}); c${M} += 4;
 
               $for M in range(MR):
-                $for N in range(0, 1 << (LOG2N - 1), 4):
+                $for N in range(0, NR - (1 << LOG2N), 4):
                   vout${M}x${ABC[N:N+4]} = vout${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+4]};
             $elif LOG2N == 1:
               $for M in range(MR):

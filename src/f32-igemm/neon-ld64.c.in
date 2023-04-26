@@ -142,7 +142,7 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__${ISA}_${"dup" if DUP else "lane"
                   vst1q_f32(c${M}, vacc${M}x${ABC[N:N+4]}); c${M} += 4;
 
               $for M in reversed(range(MR)):
-                $for N in range(0, 1 << (LOG2N - 1), 4):
+                $for N in range(0, NR - (1 << LOG2N), 4):
                   vacc${M}x${ABC[N:N+4]} = vacc${M}x${ABC[N + (1 << LOG2N):N + (1 << LOG2N)+4]};
             $elif LOG2N == 1:
               $for M in reversed(range(MR)):
