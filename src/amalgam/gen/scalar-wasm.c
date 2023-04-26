@@ -13116,7 +13116,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_2x2__scalar_imagic(
   } while (nc != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_25p1c__scalar_imagic(
+void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p1c__scalar_imagic(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -13363,7 +13363,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_25p1c__scalar_imagic(
   } while (--output_width != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_3p2c__scalar_imagic(
+void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p2c__scalar_imagic(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -13497,7 +13497,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_3p2c__scalar_imagic(
   } while (--output_width != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_9p2c__scalar_imagic(
+void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p2c__scalar_imagic(
     size_t channels,
     size_t output_width,
     const int8_t** input,

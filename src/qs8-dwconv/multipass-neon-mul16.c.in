@@ -27,6 +27,7 @@ $if REQUANTIZATION == "FP32" and ARMV8:
 #include <xnnpack/math.h>
 
 
+$DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w", "QU8": "qu8"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if ARMV8 else "neon")
 $PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
@@ -49,7 +50,7 @@ $VEXT_X8 = "vext_u8" if DATATYPE == "QU8" else "vext_s8"
 $VQMOVXN_S16 = "vqmovun_s16" if DATATYPE == "QU8" else "vqmovn_s16"
 $VQMOVXN_HIGH_S16 = "vqmovun_high_s16" if DATATYPE == "QU8" else "vqmovn_high_s16"
 $ISA = "neonv8" if ARMV8 else "neon"
-void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST_PASS_TILE}l${CHANNEL_TILE}c${CHANNEL_SUBTILE}s${CHANNEL_ROUND}r__${ISA}_mul16(
+void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST_PASS_TILE}l${CHANNEL_TILE}c${CHANNEL_SUBTILE}s${CHANNEL_ROUND}r__${ISA}_mul16(
     size_t channels,
     size_t output_width,
     const ${XINT8_T}** input,

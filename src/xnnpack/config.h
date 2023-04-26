@@ -424,7 +424,7 @@ struct xnn_dwconv_config {
 
 XNN_INTERNAL struct xnn_dwconv_config* xnn_init_f16_dwconv_config();
 XNN_INTERNAL struct xnn_dwconv_config* xnn_init_f32_dwconv_config();
-XNN_INTERNAL struct xnn_dwconv_config* xnn_init_qc8_dwconv_config();
+XNN_INTERNAL struct xnn_dwconv_config* xnn_init_qs8_qc8w_dwconv_config();
 XNN_INTERNAL struct xnn_dwconv_config* xnn_init_qs8_dwconv_config();
 XNN_INTERNAL struct xnn_dwconv_config* xnn_init_qu8_dwconv_config();
 

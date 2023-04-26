@@ -1903,7 +1903,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_2x4c8__xop_ld64(
   } while (nc != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_25p16c__xop_mul16_add16(
+void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p16c__xop_mul16_add16(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -2861,7 +2861,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_25p16c__xop_mul16_add16(
   } while (--output_width != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__xop_mul16_add16(
+void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__xop_mul16_add16(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -3093,7 +3093,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__xop_mul16_add16(
   } while (--output_width != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_9p16c__xop_mul16_add16(
+void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p16c__xop_mul16_add16(
     size_t channels,
     size_t output_width,
     const int8_t** input,

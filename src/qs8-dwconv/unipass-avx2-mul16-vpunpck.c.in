@@ -17,9 +17,10 @@ $assert KERNEL_TILE >= 2
 #include <xnnpack/unaligned.h>
 
 
+$DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx2"
 $PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
-void xnn_${DATATYPE.lower()}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__avx2_mul16${"_add16" if ADD16 else ""}_vpunpck(
+void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__avx2_mul16${"_add16" if ADD16 else ""}_vpunpck(
     size_t channels,
     size_t output_width,
     const int8_t** input,

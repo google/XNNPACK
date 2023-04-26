@@ -7,7 +7,7 @@
 
 .syntax unified
 
-// void xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35(
+// void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35(
 //   size_t channels,                          r0, r11
 //   size_t output_width,                      r1
 //   const int8_t** input,                     r2
@@ -37,7 +37,7 @@
 //   } xnn_qs8_minmax_params.neonv8;
 // unused q4 q5 q6 q7 q11
 
-BEGIN_FUNCTION xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35
+BEGIN_FUNCTION xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35
         // 40 bytes of stack.  36 + 4 pad
         PUSH    {r4, r5, r6, r7, r8, r9, r10, r11, lr}  // 40
         SUB     sp, sp, 4
@@ -160,7 +160,7 @@ BEGIN_FUNCTION xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_
         B       2b
 
 
-END_FUNCTION xnn_qc8_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35
+END_FUNCTION xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
 #endif

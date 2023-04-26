@@ -14052,7 +14052,7 @@ void xnn_qs8_igemm_minmax_rndnu_ukernel_2x8c2s4__neon_mlal(
   } while (nc != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_25p16c__neon_mla8_ld64(
+void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p16c__neon_mla8_ld64(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -14711,7 +14711,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_25p16c__neon_mla8_ld64(
   } while (--output_width != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_25p8c__neon_mla8_ld64(
+void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p8c__neon_mla8_ld64(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -15248,7 +15248,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_25p8c__neon_mla8_ld64(
   } while (--output_width != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__neon_mla8_ld128(
+void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__neon_mla8_ld128(
     size_t channels,
     size_t output_width,
     const int8_t** input,
@@ -15439,7 +15439,7 @@ void xnn_qc8_dwconv_minmax_fp32_ukernel_3p16c__neon_mla8_ld128(
   } while (--output_width != 0);
 }
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_9p16c__neon_mla8_ld64(
+void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p16c__neon_mla8_ld64(
     size_t channels,
     size_t output_width,
     const int8_t** input,

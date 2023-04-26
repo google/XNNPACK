@@ -1067,7 +1067,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
       output_zero_point, output_min, output_max);
   }
 
-  const struct xnn_dwconv_config* dwconv_config = xnn_init_qc8_dwconv_config();
+  const struct xnn_dwconv_config* dwconv_config = xnn_init_qs8_qc8w_dwconv_config();
   assert(dwconv_config != NULL);
 
   union xnn_qc8_conv_minmax_params dwconv_params;

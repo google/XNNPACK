@@ -16,7 +16,7 @@
 #include <xnnpack/unaligned.h>
 
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_8f8m9l16c8s8r__avx2_mul32(
+void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_8f8m9l16c8s8r__avx2_mul32(
     size_t channels,
     size_t output_width,
     const int8_t** input,

@@ -14,7 +14,7 @@
 #include <xnnpack/unaligned.h>
 
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_6f6m7l4c1s1r__scalar_fmagic(
+void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l4c1s1r__scalar_fmagic(
     size_t channels,
     size_t output_width,
     const int8_t** input,

@@ -15,7 +15,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_qc8_dwconv_minmax_fp32_ukernel_6f6m7l16c8s8r__wasmsimd_mul16_add16(
+void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l16c8s8r__wasmsimd_mul16_add16(
     size_t channels,
     size_t output_width,
     const int8_t** input,
