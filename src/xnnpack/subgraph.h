@@ -344,8 +344,6 @@ typedef struct timespec xnn_timestamp;
 #endif
 
 struct xnn_operator_data {
-  enum xnn_node_type type;
-  uint32_t id;
   xnn_operator_t operator_objects[XNN_MAX_OPERATOR_OBJECTS];
   xnn_setup_operator_fn setup;
   size_t batch_size;
@@ -366,9 +364,7 @@ struct xnn_operator_data {
   size_t sizes[XNN_MAX_TENSOR_DIMS];
   uint32_t adjustment_height;
   uint32_t adjustment_width;
-  uint32_t num_inputs;
   uint32_t inputs[XNN_MAX_RUNTIME_INPUTS];
-  uint32_t num_outputs;
   uint32_t outputs[XNN_MAX_RUNTIME_OUTPUTS];
   xnn_timestamp end_ts[XNN_MAX_OPERATOR_OBJECTS];
 };
@@ -401,7 +397,6 @@ struct xnn_runtime {
 
   struct xnn_workspace* workspace;
   struct xnn_runtime* next_workspace_user;
-  bool setup_workspace;
 
 #if XNN_PLATFORM_JIT
   struct xnn_code_cache code_cache;
@@ -465,6 +460,8 @@ struct xnn_workspace {
   // Workspace will be destroyed in xnn_delete_runtime or xnn_delete_workspace if num_users reaches 0.
   size_t ref_count;
   size_t persistent_size;
+  // Set to true if workspace has moved and all users should be updated.
+  bool update_users;
 };
 
 void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph);
