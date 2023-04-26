@@ -344,6 +344,8 @@ typedef struct timespec xnn_timestamp;
 #endif
 
 struct xnn_operator_data {
+  enum xnn_node_type type;
+  uint32_t id;
   xnn_operator_t operator_objects[XNN_MAX_OPERATOR_OBJECTS];
   xnn_setup_operator_fn setup;
   size_t batch_size;

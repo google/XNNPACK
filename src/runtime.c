@@ -234,6 +234,9 @@ static enum xnn_status initialize_workspace_values(
 // Output memory fits in input memory. One of the inputs to a binary node could be implicitly broadcasted.
 static bool input_memory_can_be_reused(const xnn_runtime_t runtime, size_t input_id, size_t output_id)
 {
+  if (input_id == XNN_INVALID_VALUE_ID || output_id == XNN_INVALID_VALUE_ID) {
+    return false;
+  }
   const struct xnn_value* input = &runtime->values[input_id];
   const struct xnn_value* output = &runtime->values[output_id];
   const bool output_memory_fits = xnn_tensor_get_size(input) == xnn_tensor_get_size(output);
@@ -251,11 +254,10 @@ static bool input_memory_can_be_reused(const xnn_runtime_t runtime, size_t input
 // - remember the id of the tensor which we will reuse the alloc_offset to set onto the output tensor
 static void optimize_tensor_allocation_for_in_place_operations(
   struct xnn_value_allocation_tracker* tracker,
-  const xnn_subgraph_t subgraph,
   const xnn_runtime_t runtime)
 {
-  for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
-    struct xnn_node* node = &subgraph->nodes[n];
+  for (uint32_t n = 0; n < runtime->num_ops; n++) {
+    const struct xnn_operator_data* node = &runtime->opdata[n];
     switch (node->type) {
       case xnn_node_type_abs:
       case xnn_node_type_add2:
@@ -414,6 +416,9 @@ enum xnn_status xnn_create_runtime_v4(
   for (size_t i = 0; i < subgraph->num_nodes; i++) {
     const struct xnn_node* node = subgraph->nodes + i;
 
+    // Initialize common fields we need for analysis.
+    runtime->opdata[i].type = node->type;
+    runtime->opdata[i].id = node->id;
     runtime->opdata[i].num_inputs = node->num_inputs;
     runtime->opdata[i].num_outputs = node->num_outputs;
     for (size_t j = 0; j < XNN_MAX_RUNTIME_INPUTS; j++) {
@@ -473,7 +478,7 @@ enum xnn_status xnn_create_runtime_v4(
       value->allocation_type = xnn_allocation_type_static;
     }
   }
-  optimize_tensor_allocation_for_in_place_operations(&mem_alloc_tracker, subgraph, runtime);
+  optimize_tensor_allocation_for_in_place_operations(&mem_alloc_tracker, runtime);
 
 
   xnn_plan_value_allocation_tracker(&mem_alloc_tracker);
