@@ -108,7 +108,7 @@ XNN_INTERNAL void xnn_pack_qs8_gemm_goi_w(
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params);
 
-XNN_INTERNAL void xnn_pack_f32_qs8w_gemm_goi_w(
+XNN_INTERNAL void xnn_pack_f32_qc8w_gemm_goi_w(
   size_t g,
   size_t nc,
   size_t kc,

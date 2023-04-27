@@ -308,7 +308,7 @@ void xnn_pack_qs8_gemm_goi_w(
   } while (--g != 0);
 }
 
-void xnn_pack_f32_qs8w_gemm_goi_w(
+void xnn_pack_f32_qc8w_gemm_goi_w(
   size_t g,
   size_t nc,
   size_t kc,
