@@ -15,7 +15,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_qc8_igemm_minmax_fp32_ukernel_2x4c16__wasmsdot(
+void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x4c16__wasmsdot(
     size_t mr,
     size_t nc,
     size_t kc,

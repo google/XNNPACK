@@ -10,7 +10,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128(
+# void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -43,7 +43,7 @@
 // C3  x7 v19 v23 v27 v31
 // unused v8 v9 v10 v11 v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128
+BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -417,7 +417,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld12
 9:
         RET
 
-END_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128
+END_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

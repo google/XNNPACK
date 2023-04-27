@@ -12,7 +12,7 @@
 
 .syntax unified
 
-// void xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_ld64(
+// void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_ld64(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5
@@ -48,7 +48,7 @@
 // iOS does not support 32 bit ARM with Neon DotProduct.
 #ifndef __APPLE__
 
-BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_ld64
+BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_ld64
         # Push 80 bytes
         PUSH    {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
         VPUSH   {d8-d13}                            // +48 = 80
@@ -267,7 +267,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_ld64
         POP     {r4, r5, r6, r7, r8, r9, r10, r11}
         BX      lr
 
-END_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_ld64
+END_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_ld64
 #endif  // __APPLE__
 
 #ifdef __ELF__

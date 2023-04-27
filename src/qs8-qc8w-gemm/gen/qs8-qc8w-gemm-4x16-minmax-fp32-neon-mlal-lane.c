@@ -15,7 +15,7 @@
 #include <xnnpack/gemm.h>
 
 
-void xnn_qc8_gemm_minmax_fp32_ukernel_4x16__neon_mlal_lane(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16__neon_mlal_lane(
     size_t mr,
     size_t nc,
     size_t kc,

@@ -12,7 +12,7 @@
 
 .syntax unified
 
-// void xnn_qc8_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal_lane_prfm_cortex_a53(
+// void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal_lane_prfm_cortex_a53(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            (r2) -> sp + 56 -> r5
@@ -48,7 +48,7 @@
 //   int8_t output_max;                          d13[7]
 // } xnn_qs8_minmax_params.neon;
 
-BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal_lane_prfm_cortex_a53
+BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal_lane_prfm_cortex_a53
         # Push 96 bytes
         PUSH    {r2, r4, r5, r6, r7, r8, r9, r10, r11, lr}  // 40
         SUB     sp, sp, 8                           // +8
@@ -575,7 +575,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal_lane_
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
 
-END_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal_lane_prfm_cortex_a53
+END_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal_lane_prfm_cortex_a53
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

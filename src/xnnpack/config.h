@@ -629,7 +629,7 @@ struct xnn_gemm_config {
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_f16_gemm_config();
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_f32_gemm_config();
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_f32_gemm2_config();
-XNN_INTERNAL struct xnn_gemm_config* xnn_init_qc8_gemm_config();
+XNN_INTERNAL struct xnn_gemm_config* xnn_init_qs8_qc8w_gemm_config();
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_qs8_gemm_config();
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_qu8_gemm_config();
 

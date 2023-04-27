@@ -10,7 +10,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__asm_aarch64_neon_mlal_prfm(
+# void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c8__asm_aarch64_neon_mlal_prfm(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -32,7 +32,7 @@
 // C0  x6 v16 v18 v20 v22 v24 v26 v28 v30
 // temp0  v17 v19 v21 v23
 
-BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__asm_aarch64_neon_mlal_prfm
+BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c8__asm_aarch64_neon_mlal_prfm
         # Clamp C pointers
         LDP     x10, x8, [sp]           // Load cn_stride, a_offset
         ADD     x2, x2, 7               // kc = (kc + 7) & ~7
@@ -264,7 +264,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__asm_aarch64_neon_mlal_pr
 9:
         RET
 
-END_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_1x8c8__asm_aarch64_neon_mlal_prfm
+END_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c8__asm_aarch64_neon_mlal_prfm
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

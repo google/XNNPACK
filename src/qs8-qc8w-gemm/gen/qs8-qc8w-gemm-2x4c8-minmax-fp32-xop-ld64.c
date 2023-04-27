@@ -20,7 +20,7 @@
 #include <xnnpack/unaligned.h>
 
 
-void xnn_qc8_gemm_minmax_fp32_ukernel_2x4c8__xop_ld64(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x4c8__xop_ld64(
     size_t mr,
     size_t nc,
     size_t kc,

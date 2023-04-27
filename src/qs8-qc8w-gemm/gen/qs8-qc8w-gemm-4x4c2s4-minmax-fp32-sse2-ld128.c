@@ -17,7 +17,7 @@
 
 
 
-void xnn_qc8_gemm_minmax_fp32_ukernel_4x4c2s4__sse2_ld128(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c2s4__sse2_ld128(
     size_t mr,
     size_t nc,
     size_t kc,

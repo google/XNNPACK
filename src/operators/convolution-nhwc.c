@@ -1058,7 +1058,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
 
   const struct xnn_qs8_packing_params packing_params = { .input_zero_point = input_zero_point, };
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_qc8_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
   assert(gemm_config != NULL);
 
   union xnn_qc8_conv_minmax_params gemm_params;

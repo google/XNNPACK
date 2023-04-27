@@ -9,9 +9,10 @@ $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 
 #include <xnnpack/assembly.h>
 
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8"}[DATATYPE]
 $PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_qs8_conv_minmax_params"
 $REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
-# void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__asm_aarch64_neon_mlal(
+# void xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__asm_aarch64_neon_mlal(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -37,7 +38,7 @@ $REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANT
 // temp1   v3 v11 v13 v15
 // unused  v8 v9
 
-BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__asm_aarch64_neon_mlal
+BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__asm_aarch64_neon_mlal
 
         # Clamp C pointers
         LDP     x10, x8, [sp]           // Load cn_stride, a_offset
@@ -266,7 +267,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         LDP     d10, d11, [sp], 48
         RET
 
-END_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__asm_aarch64_neon_mlal
+END_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_2x8c16__asm_aarch64_neon_mlal
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

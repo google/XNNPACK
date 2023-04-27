@@ -16,7 +16,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_qc8_gemm_minmax_fp32_ukernel_1x8c2s4__neonv8_mlal(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c2s4__neonv8_mlal(
     size_t mr,
     size_t nc,
     size_t kc,

@@ -14,7 +14,7 @@
 #include <xnnpack/gemm.h>
 
 
-void xnn_qc8_igemm_minmax_fp32_ukernel_4x4__scalar_lrintf(
+void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4__scalar_lrintf(
     size_t mr,
     size_t nc,
     size_t kc,

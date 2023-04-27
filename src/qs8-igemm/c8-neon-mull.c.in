@@ -7,6 +7,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert NR % 8 == 0
 $assert 8 <= NR <= 16
 $assert REQUANTIZATION in ["FP32", "RNDNU"]
+$assert DATATYPE in ["QC8", "QS8"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 #include <assert.h>
 
@@ -18,10 +19,11 @@ $if REQUANTIZATION == "FP32" and ARMV8:
 #include <xnnpack/math.h>
 
 
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if REQUANTIZATION == "FP32" and ARMV8 else "neon")
 $PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $ISA = "neonv8" if ARMV8 else "neon"
-void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c8__${ISA}_${"mlal" if MLA else "mull"}(
+void xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c8__${ISA}_${"mlal" if MLA else "mull"}(
     size_t mr,
     size_t nc,
     size_t kc,

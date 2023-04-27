@@ -10,7 +10,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qc8_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32(
+# void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -30,7 +30,7 @@
 // C0  x6 v28 v29 v30 v31
 // unused v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32
+BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32
 0:
         # Load initial bias from w into accumulators
         ADD     x2, x2, 3               // kc = (kc + 3) & ~3
@@ -117,7 +117,7 @@ BEGIN_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32
 6:
         RET
 
-END_FUNCTION xnn_qc8_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32
+END_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__asm_aarch64_neondot_ld32
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

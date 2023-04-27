@@ -3097,7 +3097,7 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32(
   } while (--output_width != 0);
 }
 
-void xnn_qc8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c8__avx512skx(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -3196,7 +3196,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx(
   } while (nc != 0);
 }
 
-void xnn_qc8_gemm_minmax_fp32_ukernel_4x16c8__avx512skx(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c8__avx512skx(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -3381,7 +3381,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_4x16c8__avx512skx(
   } while (nc != 0);
 }
 
-void xnn_qc8_igemm_minmax_fp32_ukernel_1x16c8__avx512skx(
+void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16c8__avx512skx(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -3491,7 +3491,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x16c8__avx512skx(
   } while (nc != 0);
 }
 
-void xnn_qc8_igemm_minmax_fp32_ukernel_4x16c8__avx512skx(
+void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c8__avx512skx(
     size_t mr,
     size_t nc,
     size_t kc,

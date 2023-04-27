@@ -12,7 +12,7 @@
 
 .syntax unified
 
-// void xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55(
+// void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55(
 //     size_t mr,                                      r0
 //     size_t nc,                                      r1
 //     size_t kc,                                      r2 -> r5 -> sp + 52
@@ -50,7 +50,7 @@
 // iOS does not support 32 bit ARM with Neon DotProduct.
 #ifndef __APPLE__
 
-BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55
+BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55
         ADD     r2, r2, 3               // kc = (kc + 3) & ~3
         BIC     r2, r2, 3
         # Push 96 bytes
@@ -338,7 +338,7 @@ BEGIN_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_cort
         ADD     sp, sp, 12              // skip pad, r2, r3
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
-END_FUNCTION xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55
+END_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55
 #endif  // __APPLE__
 
 #ifdef __ELF__

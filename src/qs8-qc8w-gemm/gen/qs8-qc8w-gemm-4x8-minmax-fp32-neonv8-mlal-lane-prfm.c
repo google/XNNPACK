@@ -17,7 +17,7 @@
 #include <xnnpack/prefetch.h>
 
 
-void xnn_qc8_gemm_minmax_fp32_ukernel_4x8__neonv8_mlal_lane_prfm(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8__neonv8_mlal_lane_prfm(
     size_t mr,
     size_t nc,
     size_t kc,

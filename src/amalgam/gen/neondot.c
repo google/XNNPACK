@@ -1669,7 +1669,7 @@ void xnn_qs8_igemm_minmax_rndnu_ukernel_4x8c4__neondot(
   } while (nc != 0);
 }
 
-void xnn_qc8_gemm_minmax_fp32_ukernel_1x16c4__neondot(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16c4__neondot(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -1822,7 +1822,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x16c4__neondot(
   } while (nc != 0);
 }
 
-void xnn_qc8_gemm_minmax_fp32_ukernel_1x8c4__neondot(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c4__neondot(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -1946,7 +1946,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_1x8c4__neondot(
   } while (nc != 0);
 }
 
-void xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__neondot(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__neondot(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -2256,7 +2256,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_4x16c4__neondot(
   } while (nc != 0);
 }
 
-void xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__neondot(
+void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c4__neondot(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -2476,7 +2476,7 @@ void xnn_qc8_gemm_minmax_fp32_ukernel_4x8c4__neondot(
   } while (nc != 0);
 }
 
-void xnn_qc8_igemm_minmax_fp32_ukernel_1x16c4__neondot(
+void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16c4__neondot(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -2636,7 +2636,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x16c4__neondot(
   } while (nc != 0);
 }
 
-void xnn_qc8_igemm_minmax_fp32_ukernel_1x8c4__neondot(
+void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c4__neondot(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -2767,7 +2767,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_1x8c4__neondot(
   } while (nc != 0);
 }
 
-void xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__neondot(
+void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__neondot(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -3087,7 +3087,7 @@ void xnn_qc8_igemm_minmax_fp32_ukernel_4x16c4__neondot(
   } while (nc != 0);
 }
 
-void xnn_qc8_igemm_minmax_fp32_ukernel_4x8c4__neondot(
+void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8c4__neondot(
     size_t mr,
     size_t nc,
     size_t kc,

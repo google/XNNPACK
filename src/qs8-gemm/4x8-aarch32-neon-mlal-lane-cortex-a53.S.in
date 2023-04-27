@@ -11,6 +11,7 @@ $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 
 .syntax unified
 
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8"}[DATATYPE]
 $PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_qs8_conv_minmax_params"
 $ISA = "neonv8" if ARMV8 else "neon"
 $XMIN = "VMIN.U8" if DATATYPE == "QU8" else "VMIN.S8"
@@ -18,7 +19,7 @@ $XMAX = "VMAX.U8" if DATATYPE == "QU8" else "VMAX.S8"
 $XXTL = "VMOVL.U8" if DATATYPE == "QU8" else "VMOVL.S8"
 $SQXTXN = "VQMOVUN.S16" if DATATYPE == "QU8" else "VQMOVN.S16"
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-// void xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__asm_aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53(
+// void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__asm_aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            (r2) -> sp + 56 -> r5
@@ -83,7 +84,7 @@ $else:
   //    int8_t output_max;          d13[7]
   //  } xnn_qs8_minmax_params.neonv8;
 
-BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__asm_aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53
+BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__asm_aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53
         # Push 96 bytes
         PUSH    {r2, r4, r5, r6, r7, r8, r9, r10, r11, lr}  // 40
         $if DATATYPE == "QU8":
@@ -781,7 +782,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_uke
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
 
-END_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__asm_aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53
+END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__asm_aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_a53
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
