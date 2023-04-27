@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert REQUANTIZATION in ["FP32", "RNDNU"]
-$assert not CHANNELWISE or REQUANTIZATION == "FP32"
 $assert DATATYPE in ["QC8", "QS8", "QU8"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 
@@ -12,7 +11,7 @@ $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 
 .syntax unified
 
-$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_qs8_conv_minmax_params"
 $ISA = "neonv8" if ARMV8 else "neon"
 $CPU = "a35" if ARMV8 else "a7"
 $XMIN = "VMIN.U8" if DATATYPE == "QU8" else "VMIN.S8"

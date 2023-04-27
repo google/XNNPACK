@@ -4,14 +4,14 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert REQUANTIZATION in ["FP32", "RNDNU"]
-$assert not CHANNELWISE or REQUANTIZATION == "FP32"
+$assert DATATYPE in ["QC8", "QS8"]
+$assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 
 #include <xnnpack/assembly.h>
 
-$DATATYPE = "qc8" if CHANNELWISE else "qs8"
-$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-$REWIND_DECREMENT = 3 if CHANNELWISE else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
-# void xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__asm_aarch64_neondot_ld32(
+$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_qs8_conv_minmax_params"
+$REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
+# void xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__asm_aarch64_neondot_ld32(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -37,7 +37,7 @@ $REWIND_DECREMENT = 3 if CHANNELWISE else {"RNDNU": 15, "FP32": 7}[REQUANTIZATIO
 // C3  x7 v19 v23 v27 v31
 // unused v8 v9 v10 v11 v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__asm_aarch64_neondot_ld32
+BEGIN_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__asm_aarch64_neondot_ld32
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -167,7 +167,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
         $elif REQUANTIZATION == "FP32":
           SCVTF   v16.4s, v16.4s
           SCVTF   v17.4s, v17.4s
-          $if not CHANNELWISE:
+          $if DATATYPE != "QC8":
             # Apply params - scale, bias and clamp
             LD1R    {v4.4s}, [x11], 4
             SCVTF   v18.4s, v18.4s
@@ -191,7 +191,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
           SCVTF   v30.4s, v30.4s
           SCVTF   v31.4s, v31.4s
 
-          $if CHANNELWISE:
+          $if DATATYPE == "QC8":
             LDR     q6, [x5], 16
             FMUL    v16.4s, v16.4s, v4.4s
             FMUL    v17.4s, v17.4s, v4.4s
@@ -349,7 +349,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x1
 6:
         RET
 
-END_FUNCTION xnn_${DATATYPE}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__asm_aarch64_neondot_ld32
+END_FUNCTION xnn_${DATATYPE.lower()}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__asm_aarch64_neondot_ld32
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

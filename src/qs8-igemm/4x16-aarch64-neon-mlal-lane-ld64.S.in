@@ -4,18 +4,16 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert REQUANTIZATION in ["FP32", "RNDNU"]
-$assert not CHANNELWISE or REQUANTIZATION == "FP32"
 $assert DATATYPE in ["QC8", "QS8", "QU8"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
-$assert DATATYPE != "QU8" or REQUANTIZATION == "RNDNU"
 
 #include <xnnpack/assembly.h>
 
-$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
+$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_qs8_conv_minmax_params"
 $if DATATYPE == "QU8":
   $REWIND_DECREMENT = 19
 $else:
-  $REWIND_DECREMENT = 3 if CHANNELWISE else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
+  $REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
 $XMIN = "UMIN" if DATATYPE == "QU8" else "SMIN"
 $XMAX = "UMAX" if DATATYPE == "QU8" else "SMAX"
 $XXTL = "UXTL" if DATATYPE == "QU8" else "SXTL"
@@ -430,7 +428,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
         $elif REQUANTIZATION == "FP32":
           SCVTF   v16.4s, v16.4s
           SCVTF   v17.4s, v17.4s
-          $if not CHANNELWISE:
+          $if DATATYPE != "QC8":
             # Apply params - scale, bias and clamp
             LD1R    {v4.4s}, [x11], 4
             SCVTF   v18.4s, v18.4s
@@ -454,7 +452,7 @@ BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_uk
           SCVTF   v30.4s, v30.4s
           SCVTF   v31.4s, v31.4s
 
-          $if CHANNELWISE:
+          $if DATATYPE == "QC8":
             LDR     q6, [x5], 16
             FMUL    v16.4s, v16.4s, v4.4s
             FMUL    v17.4s, v17.4s, v4.4s

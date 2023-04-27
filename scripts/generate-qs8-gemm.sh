@@ -369,324 +369,324 @@ tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D R
 tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=1 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QU8 -D ARMV8=1 -o src/qu8-gemm/gen/qu8-gemm-1x16-minmax-fp32-neonv8-mlal-lane.c &
 tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=4 -D NR=16 -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QU8 -D ARMV8=1 -o src/qu8-gemm/gen/qu8-gemm-4x16-minmax-fp32-neonv8-mlal-lane.c &
 
-tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=1 -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x8-minmax-rndnu-neon-mull-addw-dup.c &
-tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=2 -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-2x8-minmax-rndnu-neon-mull-addw-dup.c &
-tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=3 -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-3x8-minmax-rndnu-neon-mull-addw-dup.c &
-tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=4 -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-neon-mull-addw-dup.c &
-tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=1 -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x16-minmax-rndnu-neon-mull-addw-dup.c &
-tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=2 -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-2x16-minmax-rndnu-neon-mull-addw-dup.c &
-tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=3 -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-3x16-minmax-rndnu-neon-mull-addw-dup.c &
-tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=4 -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-rndnu-neon-mull-addw-dup.c &
+tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=1 -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x8-minmax-rndnu-neon-mull-addw-dup.c &
+tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=2 -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x8-minmax-rndnu-neon-mull-addw-dup.c &
+tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=3 -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-3x8-minmax-rndnu-neon-mull-addw-dup.c &
+tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=4 -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-neon-mull-addw-dup.c &
+tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=1 -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x16-minmax-rndnu-neon-mull-addw-dup.c &
+tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=2 -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x16-minmax-rndnu-neon-mull-addw-dup.c &
+tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=3 -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-3x16-minmax-rndnu-neon-mull-addw-dup.c &
+tools/xngen src/qs8-gemm/neon-mull-addw-dup.c.in -D MR=4 -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-rndnu-neon-mull-addw-dup.c &
 
 ### C2 micro-kernels
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mull-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mull-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mull-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mull-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mull-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mull-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mull-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mull-dup.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mlal-dup.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neon-mlal-dup.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neon-mlal-dup.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neonv8-mlal-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neonv8-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neonv8-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neonv8-mlal-dup.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neonv8-mlal-dup.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neonv8-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neonv8-mlal-dup.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neonv8-mlal-dup.c &
 
 ### C2 LD1R micro-kernels
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mull-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mull-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mull-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mull-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mull-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mull-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mull-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mull-ld1r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mlal-ld1r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neon-mlal-ld1r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neon-mlal-ld1r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neonv8-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neonv8-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neonv8-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neonv8-mlal-ld1r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neonv8-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neonv8-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neonv8-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neonv8-mlal-ld1r.c &
 
 ### C2 LD2R micro-kernels
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mull-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mull-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mull-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mull-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mull-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mull-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mull-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mull-ld2r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mlal-ld2r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neon-mlal-ld2r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neon-mlal-ld2r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neonv8-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neonv8-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neonv8-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neonv8-mlal-ld2r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neonv8-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neonv8-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neonv8-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neonv8-mlal-ld2r.c &
 
 ### C2 LD4R micro-kernels
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mull-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mull-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mull-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mull-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mull-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mull-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mull-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mull-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mull-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mull-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mull-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mull-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mull-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mull-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mull-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mull-ld4r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mlal-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mlal-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mlal-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mlal-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mlal-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mlal-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mlal-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-rndnu-neon-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-rndnu-neon-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-3x8c2-minmax-rndnu-neon-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-4x8c2-minmax-rndnu-neon-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-1x16c2-minmax-rndnu-neon-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-2x16c2-minmax-rndnu-neon-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-3x16c2-minmax-rndnu-neon-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-4x16c2-minmax-rndnu-neon-mlal-ld4r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neon-mlal-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neon-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neon-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neon-mlal-ld4r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -D DUP=LD4R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neon-mlal-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -D DUP=LD4R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neon-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neon-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD4R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neon-mlal-ld4r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neonv8-mlal-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neonv8-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-1x8c2-minmax-fp32-neonv8-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -D DUP=LD4R -o src/qs8-gemm/gen/qs8-gemm-2x8c2-minmax-fp32-neonv8-mlal-ld4r.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -D DUP=LD4R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neonv8-mlal-ld4r.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -D DUP=LD4R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neonv8-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=LD4R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2-minmax-fp32-neonv8-mlal-ld4r.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=LD4R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2-minmax-fp32-neonv8-mlal-ld4r.c &
 
 ### C2S4 micro-kernels
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c2s4-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c2s4-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x8c2s4-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8c2s4-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c2s4-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x16c2s4-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x16c2s4-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c2s4-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c2s4-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c2s4-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x8c2s4-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8c2s4-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c2s4-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x16c2s4-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x16c2s4-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c2s4-minmax-rndnu-neon-mull.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c2s4-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c2s4-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x8c2s4-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8c2s4-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c2s4-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x16c2s4-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x16c2s4-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c2s4-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c2s4-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c2s4-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x8c2s4-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8c2s4-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c2s4-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x16c2s4-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x16c2s4-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c2s4-minmax-rndnu-neon-mlal.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c2s4-minmax-fp32-neon-mlal.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c2s4-minmax-fp32-neon-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c2s4-minmax-fp32-neon-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c2s4-minmax-fp32-neon-mlal.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2s4-minmax-fp32-neon-mlal.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2s4-minmax-fp32-neon-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2s4-minmax-fp32-neon-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2s4-minmax-fp32-neon-mlal.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -o src/qs8-gemm/gen/qs8-gemm-1x8c2s4-minmax-fp32-neonv8-mlal.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -o src/qs8-gemm/gen/qs8-gemm-2x8c2s4-minmax-fp32-neonv8-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -o src/qs8-gemm/gen/qs8-gemm-1x8c2s4-minmax-fp32-neonv8-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -o src/qs8-gemm/gen/qs8-gemm-2x8c2s4-minmax-fp32-neonv8-mlal.c &
 
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2s4-minmax-fp32-neonv8-mlal.c &
-tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2s4-minmax-fp32-neonv8-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c2s4-minmax-fp32-neonv8-mlal.c &
+tools/xngen src/qs8-gemm/c2-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2s4-minmax-fp32-neonv8-mlal.c &
 
 ### C4 micro-kernels
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neon-mull-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-rndnu-neon-mull-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x8c4-minmax-rndnu-neon-mull-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-neon-mull-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neon-mull-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x16c4-minmax-rndnu-neon-mull-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x16c4-minmax-rndnu-neon-mull-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x8c4-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x16c4-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x16c4-minmax-rndnu-neon-mull-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-neon-mull-dup.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-rndnu-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x8c4-minmax-rndnu-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x16c4-minmax-rndnu-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x16c4-minmax-rndnu-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x8c4-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x16c4-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-3x16c4-minmax-rndnu-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-neon-mlal-dup.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-fp32-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-fp32-neon-mlal-dup.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neon-mlal-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4-minmax-fp32-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neon-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4-minmax-fp32-neon-mlal-dup.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neonv8-mlal-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-fp32-neonv8-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neonv8-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -D DUP=DUP  -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-fp32-neonv8-mlal-dup.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neonv8-mlal-dup.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4-minmax-fp32-neonv8-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neonv8-mlal-dup.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=DUP  -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4-minmax-fp32-neonv8-mlal-dup.c &
 
 ### C4 LD1R micro-kernels
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neon-mull-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-rndnu-neon-mull-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x8c4-minmax-rndnu-neon-mull-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-neon-mull-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neon-mull-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x16c4-minmax-rndnu-neon-mull-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x16c4-minmax-rndnu-neon-mull-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x8c4-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x16c4-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x16c4-minmax-rndnu-neon-mull-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-neon-mull-ld1r.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-rndnu-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x8c4-minmax-rndnu-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x16c4-minmax-rndnu-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x16c4-minmax-rndnu-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x8c4-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x16c4-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-3x16c4-minmax-rndnu-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-neon-mlal-ld1r.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-fp32-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-fp32-neon-mlal-ld1r.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neon-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4-minmax-fp32-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neon-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4-minmax-fp32-neon-mlal-ld1r.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neonv8-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-fp32-neonv8-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neonv8-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -D DUP=LD1R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-fp32-neonv8-mlal-ld1r.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neonv8-mlal-ld1r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4-minmax-fp32-neonv8-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neonv8-mlal-ld1r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=LD1R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4-minmax-fp32-neonv8-mlal-ld1r.c &
 
 ### C4 LD2R micro-kernels
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neon-mull-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-rndnu-neon-mull-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x8c4-minmax-rndnu-neon-mull-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-neon-mull-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neon-mull-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x16c4-minmax-rndnu-neon-mull-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x16c4-minmax-rndnu-neon-mull-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x8c4-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x16c4-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x16c4-minmax-rndnu-neon-mull-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-neon-mull-ld2r.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-rndnu-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x8c4-minmax-rndnu-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x16c4-minmax-rndnu-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x16c4-minmax-rndnu-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x8c4-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x16c4-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-3x16c4-minmax-rndnu-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-neon-mlal-ld2r.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-fp32-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-fp32-neon-mlal-ld2r.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neon-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4-minmax-fp32-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neon-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4-minmax-fp32-neon-mlal-ld2r.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neonv8-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-fp32-neonv8-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neonv8-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -D DUP=LD2R -o src/qs8-gemm/gen/qs8-gemm-2x8c4-minmax-fp32-neonv8-mlal-ld2r.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neonv8-mlal-ld2r.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4-minmax-fp32-neonv8-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neonv8-mlal-ld2r.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-dup.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -D DUP=LD2R -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4-minmax-fp32-neonv8-mlal-ld2r.c &
 
 ### C4S2 micro-kernels
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c4s2-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c4s2-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x8c4s2-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8c4s2-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c4s2-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x16c4s2-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x16c4s2-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c4s2-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c4s2-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c4s2-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x8c4s2-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8c4s2-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c4s2-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x16c4s2-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x16c4s2-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c4s2-minmax-rndnu-neon-mull.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c4s2-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c4s2-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x8c4s2-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8c4s2-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c4s2-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x16c4s2-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x16c4s2-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c4s2-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c4s2-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c4s2-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x8c4s2-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8c4s2-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c4s2-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x16c4s2-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x16c4s2-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c4s2-minmax-rndnu-neon-mlal.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c4s2-minmax-fp32-neon-mlal.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c4s2-minmax-fp32-neon-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c4s2-minmax-fp32-neon-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c4s2-minmax-fp32-neon-mlal.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4s2-minmax-fp32-neon-mlal.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4s2-minmax-fp32-neon-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4s2-minmax-fp32-neon-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4s2-minmax-fp32-neon-mlal.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -o src/qs8-gemm/gen/qs8-gemm-1x8c4s2-minmax-fp32-neonv8-mlal.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -o src/qs8-gemm/gen/qs8-gemm-2x8c4s2-minmax-fp32-neonv8-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -o src/qs8-gemm/gen/qs8-gemm-1x8c4s2-minmax-fp32-neonv8-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -o src/qs8-gemm/gen/qs8-gemm-2x8c4s2-minmax-fp32-neonv8-mlal.c &
 
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4s2-minmax-fp32-neonv8-mlal.c &
-tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4s2-minmax-fp32-neonv8-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4s2-minmax-fp32-neonv8-mlal.c &
+tools/xngen src/qs8-gemm/c4-neon-mull-shuffle.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c4s2-minmax-fp32-neonv8-mlal.c &
 
 ### C8 micro-kernels
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x8c8-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8c8-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c8-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x16c8-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x16c8-minmax-rndnu-neon-mull.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c8-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=3 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x8c8-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=4 -D NR=8  -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8c8-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c8-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x16c8-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=3 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x16c8-minmax-rndnu-neon-mull.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=4 -D NR=16 -D MLA=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c8-minmax-rndnu-neon-mull.c &
 
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x8c8-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8c8-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c8-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x16c8-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x16c8-minmax-rndnu-neon-mlal.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c8-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=3 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x8c8-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=4 -D NR=8  -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8c8-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c8-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x16c8-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=3 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-3x16c8-minmax-rndnu-neon-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=4 -D NR=16 -D MLA=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c8-minmax-rndnu-neon-mlal.c &
 
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-neon-mlal.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-neon-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-neon-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-neon-mlal.c &
 
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-neon-mlal.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-neon-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-neon-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-neon-mlal.c &
 
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-neonv8-mlal.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D ARMV8=1 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-neonv8-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-neonv8-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -D ARMV8=1 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-neonv8-mlal.c &
 
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-neonv8-mlal.c &
-tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-neonv8-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=1 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-neonv8-mlal.c &
+tools/xngen src/qs8-gemm/c8-neon-mull.c.in -D MR=2 -D NR=8  -D MLA=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-neonv8-mlal.c &
 
 ### C16 micro-kernels
 tools/xngen src/qs8-gemm/c16-neon-mlal.c.in -D MR=1 -D NR=8  -D REQUANTIZATION=RNDNU -o src/qs8-gemm/gen/qs8-gemm-1x8c16-minmax-rndnu-neon-mlal.c &
@@ -699,155 +699,155 @@ tools/xngen src/qs8-gemm/c16-neon-mlal.c.in -D MR=3 -D NR=16 -D REQUANTIZATION=R
 tools/xngen src/qs8-gemm/c16-neon-mlal.c.in -D MR=4 -D NR=16 -D REQUANTIZATION=RNDNU -o src/qs8-gemm/gen/qs8-gemm-4x16c16-minmax-rndnu-neon-mlal.c &
 
 ### C4 micro-kernels
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neondot.c &
 
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neondot.c &
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4  -D NR=8  -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c4-minmax-fp32-neondot.c &
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=6  -D NR=8  -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x8c4-minmax-fp32-neondot.c &
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=8  -D NR=8  -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x8c4-minmax-fp32-neondot.c &
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c4-minmax-fp32-neondot.c &
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c4-minmax-fp32-neondot.c &
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=6  -D NR=16 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x16c4-minmax-fp32-neondot.c &
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=8  -D NR=16 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x16c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=6  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x8c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=8  -D NR=8  -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x8c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=6  -D NR=16 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x16c4-minmax-fp32-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=8  -D NR=16 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x16c4-minmax-fp32-neondot.c &
 
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neondot.c &
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4  -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-neondot.c &
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=6  -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-6x8c4-minmax-rndnu-neondot.c &
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=8  -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-8x8c4-minmax-rndnu-neondot.c &
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neondot.c &
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-neondot.c &
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=6  -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-6x16c4-minmax-rndnu-neondot.c &
-tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=8  -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-8x16c4-minmax-rndnu-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4  -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=6  -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-6x8c4-minmax-rndnu-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=8  -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-8x8c4-minmax-rndnu-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=6  -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-6x16c4-minmax-rndnu-neondot.c &
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=8  -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-8x16c4-minmax-rndnu-neondot.c &
 
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-1x8c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=2  -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-2x8c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=3  -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-3x8c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=4  -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-4x8c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=5  -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-5x8c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=6  -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-6x8c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=8  -D NR=8  -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-8x8c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-1x16c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=2  -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-2x16c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=3  -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-3x16c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-4x16c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=5  -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-5x16c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=6  -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-6x16c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=8  -D NR=16 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-8x16c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=1  -D NR=32 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-1x32c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=2  -D NR=32 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-2x32c4-minmax-rndnu-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=3  -D NR=32 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-3x32c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=1  -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-1x8c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=2  -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-2x8c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=3  -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-3x8c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=4  -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-4x8c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=5  -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-5x8c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=6  -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-6x8c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=8  -D NR=8  -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-8x8c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-1x16c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=2  -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-2x16c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=3  -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-3x16c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-4x16c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=5  -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-5x16c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=6  -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-6x16c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=8  -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-8x16c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=1  -D NR=32 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-1x32c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=2  -D NR=32 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-2x32c4-minmax-rndnu-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=3  -D NR=32 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-3x32c4-minmax-rndnu-neondot.c &
 
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-1x16c4-minmax-fp32-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=2  -D NR=16 -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-2x16c4-minmax-fp32-neondot.c &
-tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qu8-gemm/gen/qu8-gemm-4x16c4-minmax-fp32-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=1  -D NR=16 -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-1x16c4-minmax-fp32-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=2  -D NR=16 -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-2x16c4-minmax-fp32-neondot.c &
+tools/xngen src/qu8-gemm/c4-neondot.c.in -D MR=4  -D NR=16 -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -o src/qu8-gemm/gen/qu8-gemm-4x16c4-minmax-fp32-neondot.c &
 
 ############################### AArch32 assembly ##############################
 ### Cortex-A53 lane micro-kernels
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-ld64.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-ld64.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=0 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neon-mlal-lane-ld64.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neon-mlal-lane-prfm-ld64.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=0 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-ld64.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-prfm-ld64.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-ld64.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-ld64.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neon-mlal-lane-ld64.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neon-mlal-lane-prfm-ld64.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-ld64.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-prfm-ld64.S &
 
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-cortex-a53.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-cortex-a53.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=0 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neon-mlal-lane-cortex-a53.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neon-mlal-lane-prfm-cortex-a53.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=0 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-cortex-a53.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-prfm-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neon-mlal-lane-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neon-mlal-lane-prfm-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-prfm-cortex-a53.S &
 
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-cortex-a7.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-cortex-a7.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neon-mlal-lane-cortex-a7.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neon-mlal-lane-prfm-cortex-a7.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-cortex-a35.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-prfm-cortex-a35.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-cortex-a7.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-cortex-a7.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neon-mlal-lane-cortex-a7.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neon-mlal-lane-prfm-cortex-a7.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-cortex-a35.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-prfm-cortex-a35.S &
 
-tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-cortex-a7.S &
-tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-cortex-a7.S &
-tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8-minmax-fp32-asm-aarch32-neon-mlal-lane-cortex-a7.S &
-tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8-minmax-fp32-asm-aarch32-neon-mlal-lane-prfm-cortex-a7.S &
-tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-cortex-a35.S &
-tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-prfm-cortex-a35.S &
+tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-cortex-a7.S &
+tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -D ARMV8=0 -o src/qs8-gemm/gen/qs8-gemm-1x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-cortex-a7.S &
+tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8-minmax-fp32-asm-aarch32-neon-mlal-lane-cortex-a7.S &
+tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8-minmax-fp32-asm-aarch32-neon-mlal-lane-prfm-cortex-a7.S &
+tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-cortex-a35.S &
+tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -D ARMV8=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-prfm-cortex-a35.S &
 
 ### QU8 micro-kernels
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-ld64.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-ld64.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-ld64.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-ld64.S.in        -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-ld64.S &
 
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-cortex-a53.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a53.S.in  -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-cortex-a53.S &
 
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-cortex-a7.S &
-tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-cortex-a7.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-cortex-a7.S &
+tools/xngen src/qs8-gemm/4x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-4x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-cortex-a7.S &
 
-tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-1x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-cortex-a7.S &
-tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-1x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-cortex-a7.S &
+tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-1x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-cortex-a7.S &
+tools/xngen src/qs8-gemm/1x8-aarch32-neon-mlal-lane-cortex-a7.S.in   -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -D ARMV8=0 -o src/qu8-gemm/gen/qu8-gemm-1x8-minmax-rndnu-asm-aarch32-neon-mlal-lane-prfm-cortex-a7.S &
 
 ### C4 micro-kernels
-tools/xngen src/qs8-gemm/4x8c4-aarch32-neondot-ld64.S.in                           -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-asm-aarch32-neondot-ld64.S &
-tools/xngen src/qs8-gemm/4x8c4-aarch32-neondot-ld64.S.in                           -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c4-minmax-fp32-asm-aarch32-neondot-ld64.S &
-tools/xngen src/qs8-gemm/4x8c4-aarch32-neondot-cortex-a55.S.in                     -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-asm-aarch32-neondot-cortex-a55.S &
-tools/xngen src/qs8-gemm/4x8c4-aarch32-neondot-cortex-a55.S.in                     -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c4-minmax-fp32-asm-aarch32-neondot-cortex-a55.S &
+tools/xngen src/qs8-gemm/4x8c4-aarch32-neondot-ld64.S.in                           -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-asm-aarch32-neondot-ld64.S &
+tools/xngen src/qs8-gemm/4x8c4-aarch32-neondot-ld64.S.in                           -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c4-minmax-fp32-asm-aarch32-neondot-ld64.S &
+tools/xngen src/qs8-gemm/4x8c4-aarch32-neondot-cortex-a55.S.in                     -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x8c4-minmax-rndnu-asm-aarch32-neondot-cortex-a55.S &
+tools/xngen src/qs8-gemm/4x8c4-aarch32-neondot-cortex-a55.S.in                     -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c4-minmax-fp32-asm-aarch32-neondot-cortex-a55.S &
 
 ############################### AArch64 assembly ##############################
 ### Cortex-A53 lane micro-kernels
-tools/xngen src/qs8-gemm/4x8-aarch64-neon-mlal-lane-ld64.S.in        -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch64-neon-mlal-lane-ld64.S &
-tools/xngen src/qs8-gemm/4x8-aarch64-neon-mlal-lane-ld64.S.in        -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch64-neon-mlal-lane-prfm-ld64.S &
+tools/xngen src/qs8-gemm/4x8-aarch64-neon-mlal-lane-ld64.S.in        -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch64-neon-mlal-lane-ld64.S &
+tools/xngen src/qs8-gemm/4x8-aarch64-neon-mlal-lane-ld64.S.in        -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x8-minmax-rndnu-asm-aarch64-neon-mlal-lane-prfm-ld64.S &
 
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a53.S &
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-prfm-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-prfm-cortex-a53.S &
 
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-cortex-a53.S &
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-prfm-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-prfm-cortex-a53.S &
 
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-cortex-a53.S &
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-prfm-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-prfm-cortex-a53.S &
 
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-ld64.S &
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-prfm-ld64.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-ld64.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-prfm-ld64.S &
 
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=0 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-ld64.S &
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=0 -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-prfm-ld64.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-ld64.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-prfm-ld64.S &
 
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=0 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-ld64.S &
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=1 -D REQUANTIZATION=FP32  -D CHANNELWISE=1 -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-prfm-ld64.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-ld64.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16-minmax-fp32-asm-aarch64-neon-mlal-lane-prfm-ld64.S &
 
 ### QU8 micro-kernels
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a53.S &
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-prfm-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a53.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-prfm-cortex-a53.S &
 
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-ld64.S &
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-prfm-ld64.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-ld64.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-ld64.S.in       -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-prfm-ld64.S &
 
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a75.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a75.S &
-tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a75.S.in -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D CHANNELWISE=0 -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-prfm-cortex-a75.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a75.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a75.S &
+tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a75.S.in -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-prfm-cortex-a75.S &
 
 ### C4 micro-kernels
-tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-asm-aarch64-neondot-ld32.S &
-tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-asm-aarch64-neondot-ld64.S &
-tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-asm-aarch64-neondot-cortex-a55.S &
-tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-asm-aarch64-neondot-ld32.S &
-tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-asm-aarch64-neondot-ld64.S &
-tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-asm-aarch64-neondot-ld128.S &
+tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=RNDNU    -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-asm-aarch64-neondot-ld32.S &
+tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=RNDNU    -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-asm-aarch64-neondot-ld64.S &
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=RNDNU    -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-asm-aarch64-neondot-cortex-a55.S &
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=RNDNU    -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-asm-aarch64-neondot-ld32.S &
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=RNDNU    -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-asm-aarch64-neondot-ld64.S &
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=RNDNU    -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-asm-aarch64-neondot-ld128.S &
 
-tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-fp32-asm-aarch64-neondot-ld32.S &
-tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-fp32-asm-aarch64-neondot-ld64.S &
-tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-cortex-a55.S &
-tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld32.S &
-tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld64.S &
-tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=FP32     -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld128.S &
+tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-fp32-asm-aarch64-neondot-ld32.S &
+tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-fp32-asm-aarch64-neondot-ld64.S &
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-cortex-a55.S &
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld32.S &
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld64.S &
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=FP32     -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld128.S &
 
-tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=FP32     -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c4-minmax-fp32-asm-aarch64-neondot-ld32.S &
-tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=FP32     -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c4-minmax-fp32-asm-aarch64-neondot-ld64.S &
-tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=FP32     -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-cortex-a55.S &
-tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=FP32     -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld32.S &
-tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=FP32     -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld64.S &
-tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=FP32     -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld128.S &
+tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c4-minmax-fp32-asm-aarch64-neondot-ld32.S &
+tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c4-minmax-fp32-asm-aarch64-neondot-ld64.S &
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-cortex-a55.S &
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld32.S &
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld64.S &
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=FP32     -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld128.S &
 
 ### C4 QU8 micro-kernels
 tools/xngen src/qu8-gemm/4x8c4-aarch64-neondot-cortex-a55.S.in  -D REQUANTIZATION=RNDNU -o src/qu8-gemm/gen/qu8-gemm-4x8c4-minmax-rndnu-asm-aarch64-neondot-cortex-a55.S &
-tools/xngen src/qu8-gemm/4x8c4-aarch64-neondot-ld128.S.in        -D REQUANTIZATION=RNDNU -o src/qu8-gemm/gen/qu8-gemm-4x8c4-minmax-rndnu-asm-aarch64-neondot-ld128.S &
+tools/xngen src/qu8-gemm/4x8c4-aarch64-neondot-ld128.S.in       -D REQUANTIZATION=RNDNU -o src/qu8-gemm/gen/qu8-gemm-4x8c4-minmax-rndnu-asm-aarch64-neondot-ld128.S &
 tools/xngen src/qu8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=RNDNU -o src/qu8-gemm/gen/qu8-gemm-4x16c4-minmax-rndnu-asm-aarch64-neondot-cortex-a55.S &
 tools/xngen src/qu8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=RNDNU -o src/qu8-gemm/gen/qu8-gemm-4x16c4-minmax-rndnu-asm-aarch64-neondot-ld128.S &
 
@@ -855,38 +855,38 @@ tools/xngen src/qu8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATIO
 tools/xngen src/qu8-gemm/4x16c4-aarch64-neondot-ld128.S.in      -D REQUANTIZATION=FP32 -o src/qu8-gemm/gen/qu8-gemm-4x16c4-minmax-fp32-asm-aarch64-neondot-ld128.S &
 
 ### C8 / C16 micro-kernels
-tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-rndnu-asm-aarch64-neon-mlal-cortex-a53.S &
-tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-rndnu-asm-aarch64-neon-mlal-prfm-cortex-a53.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-asm-aarch64-neon-mlal-cortex-a53.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-asm-aarch64-neon-mlal-prfm-cortex-a53.S &
-tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-rndnu-asm-aarch64-neon-mlal.S &
-tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-rndnu-asm-aarch64-neon-mlal-prfm.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=0 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-asm-aarch64-neon-mlal.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=1 -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-asm-aarch64-neon-mlal-prfm.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mull.S.in                          -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-asm-aarch64-neon-mull.S &
-tools/xngen src/qs8-gemm/2x8c16-aarch64-neon-mlal.S.in                         -D REQUANTIZATION=RNDNU    -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c16-minmax-rndnu-asm-aarch64-neon-mlal.S &
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-rndnu-asm-aarch64-neon-mlal-cortex-a53.S &
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-rndnu-asm-aarch64-neon-mlal-prfm-cortex-a53.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-asm-aarch64-neon-mlal-cortex-a53.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-asm-aarch64-neon-mlal-prfm-cortex-a53.S &
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-rndnu-asm-aarch64-neon-mlal.S &
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-rndnu-asm-aarch64-neon-mlal-prfm.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=0 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-asm-aarch64-neon-mlal.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-asm-aarch64-neon-mlal-prfm.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mull.S.in                          -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-asm-aarch64-neon-mull.S &
+tools/xngen src/qs8-gemm/2x8c16-aarch64-neon-mlal.S.in                         -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x8c16-minmax-rndnu-asm-aarch64-neon-mlal.S &
 
-tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32 -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-cortex-a53.S &
-tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32 -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm-cortex-a53.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32 -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal-cortex-a53.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32 -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm-cortex-a53.S &
-tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=0 -D REQUANTIZATION=FP32 -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal.S &
-tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=1 -D REQUANTIZATION=FP32 -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=0 -D REQUANTIZATION=FP32 -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=1 -D REQUANTIZATION=FP32 -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mull.S.in                          -D REQUANTIZATION=FP32 -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mull.S &
-tools/xngen src/qs8-gemm/2x8c16-aarch64-neon-mlal.S.in                         -D REQUANTIZATION=FP32 -D CHANNELWISE=0 -o src/qs8-gemm/gen/qs8-gemm-2x8c16-minmax-fp32-asm-aarch64-neon-mlal.S &
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-cortex-a53.S &
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm-cortex-a53.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal-cortex-a53.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm-cortex-a53.S &
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal.S &
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mull.S.in                          -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mull.S &
+tools/xngen src/qs8-gemm/2x8c16-aarch64-neon-mlal.S.in                         -D REQUANTIZATION=FP32  -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-2x8c16-minmax-fp32-asm-aarch64-neon-mlal.S &
 
-tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32 -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-cortex-a53.S &
-tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32 -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm-cortex-a53.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32 -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal-cortex-a53.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32 -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm-cortex-a53.S &
-tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=0 -D REQUANTIZATION=FP32 -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal.S &
-tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=1 -D REQUANTIZATION=FP32 -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=0 -D REQUANTIZATION=FP32 -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=1 -D REQUANTIZATION=FP32 -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm.S &
-tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mull.S.in                          -D REQUANTIZATION=FP32 -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mull.S &
-tools/xngen src/qs8-gemm/2x8c16-aarch64-neon-mlal.S.in                         -D REQUANTIZATION=FP32 -D CHANNELWISE=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c16-minmax-fp32-asm-aarch64-neon-mlal.S &
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-cortex-a53.S &
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm-cortex-a53.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal-cortex-a53.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal-cortex-a53.S.in -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm-cortex-a53.S &
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal.S &
+tools/xngen src/qs8-gemm/1x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=0 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=1 -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm.S &
+tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mull.S.in                          -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mull.S &
+tools/xngen src/qs8-gemm/2x8c16-aarch64-neon-mlal.S.in                         -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c16-minmax-fp32-asm-aarch64-neon-mlal.S &
 
 ################################### x86 SSE ###################################
 ### C2 micro-kernels

@@ -4,14 +4,14 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert REQUANTIZATION in ["FP32", "RNDNU"]
-$assert not CHANNELWISE or REQUANTIZATION == "FP32"
+$assert DATATYPE in ["QC8", "QS8"]
+$assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 
 #include <xnnpack/assembly.h>
 
-$DATATYPE = "qc8" if CHANNELWISE else "qs8"
-$PARAMS_UNION = "xnn_qs8_minmax_params" if CHANNELWISE else "xnn_qs8_conv_minmax_params"
-$REWIND_DECREMENT = 3 if CHANNELWISE else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
-# void xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__asm_aarch64_neon_mlal${"_prfm" if PREFETCH else ""}_cortex_a53(
+$PARAMS_UNION = "xnn_qs8_minmax_params" if DATATYPE == "QC8" else "xnn_qs8_conv_minmax_params"
+$REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
+# void xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__asm_aarch64_neon_mlal${"_prfm" if PREFETCH else ""}_cortex_a53(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -34,7 +34,7 @@ $REWIND_DECREMENT = 3 if CHANNELWISE else {"RNDNU": 15, "FP32": 7}[REQUANTIZATIO
 // temp0  v17 v19 v21 v23
 // x16, x17, x7 tenporary a53 gpr load data
 
-BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__asm_aarch64_neon_mlal${"_prfm" if PREFETCH else ""}_cortex_a53
+BEGIN_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__asm_aarch64_neon_mlal${"_prfm" if PREFETCH else ""}_cortex_a53
 
         # Clamp C pointers
         LDP     x10, x8, [sp]           // Load cn_stride, a_offset
@@ -232,7 +232,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x
           SRSHL   v0.4s, v0.4s, v5.4s     // signed rounding shift left
           SRSHL   v1.4s, v1.4s, v5.4s
         $elif REQUANTIZATION == "FP32":
-          $if not CHANNELWISE:
+          $if DATATYPE != "QC8":
             # Apply params - scale, bias and clamp
             SCVTF   v0.4s, v0.4s
             LD1R    {v4.4s}, [x11], 4
@@ -319,7 +319,7 @@ BEGIN_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x
 9:
         RET
 
-END_FUNCTION xnn_${DATATYPE}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__asm_aarch64_neon_mlal${"_prfm" if PREFETCH else ""}_cortex_a53
+END_FUNCTION xnn_${DATATYPE.lower()}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__asm_aarch64_neon_mlal${"_prfm" if PREFETCH else ""}_cortex_a53
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
