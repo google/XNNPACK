@@ -15,6 +15,25 @@
 extern "C" {
 #endif
 
+#define DECLARE_X8_PACKW_GEMM_GOI_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                                \
+      size_t g,                                             \
+      size_t nc,                                            \
+      size_t kc,                                            \
+      size_t nr,                                            \
+      size_t kr,                                            \
+      size_t sr,                                            \
+      const int8_t* k,                                      \
+      const uint32_t* b,                                    \
+      int8_t* packed_weights,                               \
+      size_t extra_bytes,                                   \
+      const void* params);                                  \
+
+DECLARE_X8_PACKW_GEMM_GOI_UKERNEL_FUNCTION(xnn_x8_packw_gemm_goi_ukernel_x2__scalar_int_x4)
+DECLARE_X8_PACKW_GEMM_GOI_UKERNEL_FUNCTION(xnn_x8_packw_gemm_goi_ukernel_x4__scalar_int_x4)
+DECLARE_X8_PACKW_GEMM_GOI_UKERNEL_FUNCTION(xnn_x8_packw_gemm_goi_ukernel_x8__scalar_int_x4)
+DECLARE_X8_PACKW_GEMM_GOI_UKERNEL_FUNCTION(xnn_x8_packw_gemm_goi_ukernel_x16__scalar_int_x4)
+
 #define DECLARE_X16_PACKW_GEMM_GOI_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                 \
       size_t g,                                              \

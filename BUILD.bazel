@@ -6231,10 +6231,10 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "x32_packw_bench",
+    name = "x8_packw_bench",
     srcs = [
         "bench/bgemm.h",
-        "bench/x32-packw.cc",
+        "bench/x8-packw.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":allocator",
@@ -6247,6 +6247,18 @@ xnnpack_benchmark(
     srcs = [
         "bench/bgemm.h",
         "bench/x16-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":allocator",
+        ":math",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "x32_packw_bench",
+    srcs = [
+        "bench/bgemm.h",
+        "bench/x32-packw.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":allocator",
@@ -9250,6 +9262,17 @@ xnnpack_unit_test(
     srcs = [
         "test/packb-microkernel-tester.h",
         "test/x32-packb.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":packing",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "x8_packw_test",
+    srcs = [
+        "test/packw-microkernel-tester.h",
+        "test/x8-packw.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS + [
         ":packing",
