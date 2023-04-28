@@ -243,6 +243,8 @@ class GemmMicrokernelTester {
 
   void Test(xnn_f32_gemm_minmax_ukernel_fn gemm_minmax, xnn_init_f32_minmax_params_fn init_params) const;
 
+  void Test(xnn_f32_qc8w_gemm_minmax_ukernel_fn gemm_minmax, xnn_init_f32_minmax_params_fn init_params) const;
+
   void Test(xnn_f32_gemminc_minmax_ukernel_fn gemminc, xnn_init_f32_minmax_params_fn init_params) const;
 
   void Test(xnn_f32_igemm_ukernel_fn igemm) const;

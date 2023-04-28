@@ -2097,6 +2097,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME f32-gemm-minmax-test COMMAND f32-gemm-minmax-test)
 
+  ADD_EXECUTABLE(f32-qc8w-gemm-minmax-test test/f32-qc8w-gemm-minmax.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-qc8w-gemm-minmax-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-qc8w-gemm-minmax-test PRIVATE pthreadpool gtest gtest_main)
+  TARGET_LINK_LIBRARIES(f32-qc8w-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME f32-qc8w-gemm-minmax-test COMMAND f32-qc8w-gemm-minmax-test)
+
   ADD_EXECUTABLE(f32-gemm-jit-test test/f32-gemm-jit.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-gemm-jit-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(f32-gemm-jit-test PRIVATE pthreadpool gtest gtest_main)

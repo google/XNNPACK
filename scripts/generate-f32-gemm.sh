@@ -6,39 +6,39 @@
 
 #################################### Scalar ###################################
 ### Generic C micro-kernels
-tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR  -o src/f32-gemm/gen/f32-gemm-1x4-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=RELU    -o src/f32-gemm/gen/f32-gemm-1x4-relu-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=MINMAX  -o src/f32-gemm/gen/f32-gemm-1x4-minmax-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=1 -D ACTIVATION=MINMAX  -o src/f32-gemm/gen/f32-gemminc-1x4-minmax-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x4-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x4-relu-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x4-minmax-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=0 -D INC=1 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-1x4-minmax-scalar.c &
 
-tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR -o src/f32-gemm/gen/f32-gemm-2x4-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=RELU   -o src/f32-gemm/gen/f32-gemm-2x4-relu-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=MINMAX -o src/f32-gemm/gen/f32-gemm-2x4-minmax-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D INC=1 -D ACTIVATION=MINMAX -o src/f32-gemm/gen/f32-gemminc-2x4-minmax-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-2x4-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-2x4-relu-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-2x4-minmax-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=0 -D INC=1 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-2x4-minmax-scalar.c &
 
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR -o src/f32-gemm/gen/f32-gemm-4x2-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D INC=0 -D ACTIVATION=RELU   -o src/f32-gemm/gen/f32-gemm-4x2-relu-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D INC=0 -D ACTIVATION=MINMAX -o src/f32-gemm/gen/f32-gemm-4x2-minmax-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D INC=0 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2-relu-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=0 -D INC=0 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2-minmax-scalar.c &
 
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR -o src/f32-gemm/gen/f32-gemm-4x4-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=RELU   -o src/f32-gemm/gen/f32-gemm-4x4-relu-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=MINMAX -o src/f32-gemm/gen/f32-gemm-4x4-minmax-scalar.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D INC=1 -D ACTIVATION=MINMAX -o src/f32-gemm/gen/f32-gemminc-4x4-minmax-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=LINEAR -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x4-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x4-relu-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D INC=0 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x4-minmax-scalar.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=0 -D INC=1 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-4x4-minmax-scalar.c &
 
 ### WAsm-specific micro-kernels
-tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=1 -D INC=0 -D ACTIVATION=RELU   -o src/f32-gemm/gen/f32-gemm-1x4-relu-wasm.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=1 -D INC=0 -D ACTIVATION=RELU   -o src/f32-gemm/gen/f32-gemm-2x4-relu-wasm.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=1 -D INC=0 -D ACTIVATION=RELU   -o src/f32-gemm/gen/f32-gemm-4x2-relu-wasm.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=1 -D INC=0 -D ACTIVATION=RELU   -o src/f32-gemm/gen/f32-gemm-4x4-relu-wasm.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=1 -D INC=0 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x4-relu-wasm.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=1 -D INC=0 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-2x4-relu-wasm.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=1 -D INC=0 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2-relu-wasm.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=1 -D INC=0 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x4-relu-wasm.c &
 
-tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=1 -D INC=0 -D ACTIVATION=MINMAX -o src/f32-gemm/gen/f32-gemm-1x4-minmax-wasm.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=1 -D INC=0 -D ACTIVATION=MINMAX -o src/f32-gemm/gen/f32-gemm-2x4-minmax-wasm.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=1 -D INC=0 -D ACTIVATION=MINMAX -o src/f32-gemm/gen/f32-gemm-4x2-minmax-wasm.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=1 -D INC=0 -D ACTIVATION=MINMAX -o src/f32-gemm/gen/f32-gemm-4x4-minmax-wasm.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=1 -D INC=0 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x4-minmax-wasm.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=1 -D INC=0 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-2x4-minmax-wasm.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=2 -D WASM=1 -D INC=0 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2-minmax-wasm.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=1 -D INC=0 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x4-minmax-wasm.c &
 
-tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=1 -D INC=1 -D ACTIVATION=MINMAX -o src/f32-gemm/gen/f32-gemminc-1x4-minmax-wasm.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=1 -D INC=1 -D ACTIVATION=MINMAX -o src/f32-gemm/gen/f32-gemminc-2x4-minmax-wasm.c &
-tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=1 -D INC=1 -D ACTIVATION=MINMAX -o src/f32-gemm/gen/f32-gemminc-4x4-minmax-wasm.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=1 -D NR=4 -D WASM=1 -D INC=1 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-1x4-minmax-wasm.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=2 -D NR=4 -D WASM=1 -D INC=1 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-2x4-minmax-wasm.c &
+tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=1 -D INC=1 -D ACTIVATION=MINMAX -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-4x4-minmax-wasm.c &
 
 ############################### AArch64 assembly ##############################
 

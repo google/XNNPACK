@@ -4663,6 +4663,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-ppmm/gen/f32-ppmm-4x4-minmax-scalar.c
   src/f32-prelu/gen/f32-prelu-scalar-2x1.c
   src/f32-prelu/gen/f32-prelu-scalar-2x4.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x4-minmax-scalar.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-2x4-minmax-scalar.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x4-minmax-scalar.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-fmagic-x1.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-fmagic-x2.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-fmagic-x3.c
