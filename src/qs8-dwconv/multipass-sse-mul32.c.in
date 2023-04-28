@@ -37,7 +37,7 @@ $else:
 
 $DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w", "QU8": "qu8"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("sse2" if DATATYPE == "QU8" else "sse4")
-$PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
+$PARAMS_UNION = "xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $ISA = "xop" if XOP else "avx" if AVX else {4: "sse41"}[SSE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $_MM_CVTEPX8_EPI32 = "_mm_cvtepu8_epi32" if DATATYPE == "QU8" else "_mm_cvtepi8_epi32"

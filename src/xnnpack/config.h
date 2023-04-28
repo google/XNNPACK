@@ -394,8 +394,8 @@ struct xnn_dwconv_config {
   union xnn_dwconv_ukernel minmax;
   union xnn_dwconv_ukernel linear;
   union {
-    xnn_init_qc8_conv_minmax_params_fn qc8;
     xnn_init_qs8_conv_minmax_params_fn qs8;
+    xnn_init_qs8_qc8w_conv_minmax_params_fn qs8_qc8w;
     xnn_init_qu8_conv_minmax_params_fn qu8;
     xnn_init_f16_minmax_params_fn f16;
     xnn_init_f32_minmax_params_fn f32;
@@ -615,8 +615,8 @@ struct xnn_gemm_config {
   union {
     xnn_init_f16_minmax_params_fn f16;
     xnn_init_f32_minmax_params_fn f32;
-    xnn_init_qc8_conv_minmax_params_fn qc8;
     xnn_init_qs8_conv_minmax_params_fn qs8;
+    xnn_init_qs8_qc8w_conv_minmax_params_fn qs8_qc8w;
     xnn_init_qu8_conv_minmax_params_fn qu8;
   } init;
   xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi;

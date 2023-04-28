@@ -26,7 +26,7 @@ $assert LAST_PASS_TILE >= 1
 
 $DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w", "QU8": "qu8"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_wasmsimd"
-$PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
+$PARAMS_UNION = "xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $WASM_X16X8_LOAD8X8 = "wasm_u16x8_load8x8" if DATATYPE == "QU8" else "wasm_i16x8_load8x8"
 $WASM_X32X4_EXTEND_LOW_X16X8 = "wasm_u32x4_extend_low_u16x8" if DATATYPE == "QU8" else "wasm_i32x4_extend_low_i16x8"

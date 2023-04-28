@@ -22,7 +22,7 @@
 //     int8_t*restrict c,         sp + 96 -> r11
 //     size_t cm_stride,          sp + 100 -> (r6)
 //     size_t cn_stride,          sp + 104 -> r7
-//     xnn_qs8_minmax_params params)  sp + 108 -> (r5)
+//     xnn_qs8_qc8w_conv_minmax_params params)  sp + 108 -> (r5)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 

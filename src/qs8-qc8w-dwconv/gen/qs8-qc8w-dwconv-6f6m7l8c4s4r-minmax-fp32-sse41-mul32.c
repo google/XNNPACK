@@ -29,7 +29,7 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l8c4s4r__sse41_mul32(
     const int8_t* zero,
     size_t kernel_size,
     int32_t* buffer,
-    const union xnn_qc8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_qs8_qc8w_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);

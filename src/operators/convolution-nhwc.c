@@ -145,7 +145,7 @@ static enum xnn_status create_dwconv_path(
     const void* packing_params,
     int packed_weights_padding_byte,
     size_t extra_weights_bytes,
-    xnn_init_qc8_scale_params_fn init_scale_params,
+    xnn_init_qs8_qc8w_scale_params_fn init_scale_params,
     const float* scale_params,
     const void* dwconv_params,
     size_t dwconv_params_size,
@@ -289,7 +289,7 @@ static enum xnn_status create_gemm_or_igemm(
     const void* packing_params,
     int packed_weights_padding_byte,
     size_t extra_weights_bytes,
-    xnn_init_qc8_scale_params_fn init_scale_params,
+    xnn_init_qs8_qc8w_scale_params_fn init_scale_params,
     const float* scale_params,
     const void* gemm_params,
     size_t gemm_params_size,
@@ -456,7 +456,7 @@ static enum xnn_status create_convolution2d_nhwc(
     int input_padding_byte,
     int packed_weights_padding_byte,
     size_t extra_weights_bytes,
-    xnn_init_qc8_scale_params_fn init_scale_params,
+    xnn_init_qs8_qc8w_scale_params_fn init_scale_params,
     const float* scale_params,
     const void* gemm_params,
     size_t gemm_params_size,
@@ -1061,20 +1061,20 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
   const struct xnn_gemm_config* gemm_config = xnn_init_qs8_qc8w_gemm_config();
   assert(gemm_config != NULL);
 
-  union xnn_qc8_conv_minmax_params gemm_params;
-  if XNN_LIKELY(gemm_config->init.qc8 != NULL) {
-    gemm_config->init.qc8(&gemm_params,
+  union xnn_qs8_qc8w_conv_minmax_params gemm_params;
+  if XNN_LIKELY(gemm_config->init.qs8_qc8w != NULL) {
+    gemm_config->init.qs8_qc8w(&gemm_params,
       output_zero_point, output_min, output_max);
   }
 
   const struct xnn_dwconv_config* dwconv_config = xnn_init_qs8_qc8w_dwconv_config();
   assert(dwconv_config != NULL);
 
-  union xnn_qc8_conv_minmax_params dwconv_params;
+  union xnn_qs8_qc8w_conv_minmax_params dwconv_params;
   const struct xnn_dwconv_config* dwconv_ukernel =
     find_dwconv_ukernel(kernel_height * kernel_width, dwconv_config, XNN_MAX_QC8_DWCONV_UKERNELS);
   if XNN_LIKELY(dwconv_ukernel != NULL) {
-    dwconv_ukernel->init.qc8(&dwconv_params,
+    dwconv_ukernel->init.qs8_qc8w(&dwconv_params,
       output_zero_point, output_min, output_max);
   }
 
@@ -1099,7 +1099,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     /*input_padding_byte=*/input_zero_point,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float),
-    /*init_scale_params=*/xnn_init_qc8_scale_fp32_params,
+    /*init_scale_params=*/xnn_init_qs8_qc8w_scale_fp32_params,
     /*scale_params=*/requantization_scale,
     /*gemm_params=*/&gemm_params,
     /*gemm_params_size=*/sizeof(gemm_params),

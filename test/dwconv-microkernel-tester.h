@@ -456,8 +456,8 @@ class DWConvMicrokernelTester {
   }
 
   void Test(
-    xnn_qc8_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
-    xnn_init_qc8_conv_minmax_params_fn init_params,
+    xnn_qs8_qc8w_dwconv_minmax_unipass_ukernel_fn dwconv_minmax,
+    xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const
   {
     std::random_device random_device;
@@ -537,7 +537,7 @@ class DWConvMicrokernelTester {
         const float output_scale = accumulated_range >= 256 ? double(accumulated_range) / 255.0 : 1.00001;
         scale[c] = 1.0f / output_scale;
       }
-      xnn_init_qc8_scale_fp32_params(
+      xnn_init_qs8_qc8w_scale_fp32_params(
         channels(), channel_tile(), channel_tile(),
         channel_tile() * (kernel_tile() * sizeof(int8_t) + sizeof(int32_t) + sizeof(float)),
         channel_tile() * (kernel_tile() * sizeof(int8_t) + sizeof(int32_t) + sizeof(float)),
@@ -546,7 +546,7 @@ class DWConvMicrokernelTester {
         (void*) ((uintptr_t) packed_weights.data() + channel_tile() * (kernel_tile() * sizeof(int8_t) + sizeof(int32_t))));
 
       // Prepare parameters.
-      union xnn_qc8_conv_minmax_params minmax_params;
+      union xnn_qs8_qc8w_conv_minmax_params minmax_params;
       init_params(&minmax_params,
         output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 
@@ -582,8 +582,8 @@ class DWConvMicrokernelTester {
   }
 
   void Test(
-    xnn_qc8_dwconv_minmax_multipass_ukernel_fn dwconv_minmax,
-    xnn_init_qc8_conv_minmax_params_fn init_params,
+    xnn_qs8_qc8w_dwconv_minmax_multipass_ukernel_fn dwconv_minmax,
+    xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
     xnn_qs8_requantize_fn requantize) const
   {
     std::random_device random_device;
@@ -678,7 +678,7 @@ class DWConvMicrokernelTester {
           num_middle_pass * middle_pass_tile() * rounded_c * sizeof(int8_t) +
           last_pass_tile() * channel_tile();
 
-      xnn_init_qc8_scale_fp32_params(
+      xnn_init_qs8_qc8w_scale_fp32_params(
         channels(), channel_tile(), channel_subtile(),
         channel_tile() * (last_pass_tile() * sizeof(int8_t) + sizeof(int32_t)),
         channel_subtile() * (last_pass_tile() * sizeof(int8_t) + sizeof(int32_t)),
@@ -687,7 +687,7 @@ class DWConvMicrokernelTester {
         (void*) ((uintptr_t) packed_weights.data() + packed_weights_offset_to_last_tile));
 
       // Prepare parameters.
-      union xnn_qc8_conv_minmax_params minmax_params;
+      union xnn_qs8_qc8w_conv_minmax_params minmax_params;
       init_params(&minmax_params,
         output_zero_point, int8_t(qmin() - 0x80), int8_t(qmax() - 0x80));
 

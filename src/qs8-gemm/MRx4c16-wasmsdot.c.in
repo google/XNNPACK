@@ -15,7 +15,7 @@ $assert MR <= 4
 
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8"}[DATATYPE]
-$PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
+$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params"}[DATATYPE]
 void xnn_${DATATYPE_SPEC}_gemm_minmax_fp32_ukernel_${MR}x4c16__wasmsdot(
     size_t mr,
     size_t nc,

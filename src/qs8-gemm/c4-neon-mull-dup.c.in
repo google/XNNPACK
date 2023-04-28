@@ -22,7 +22,7 @@ $if REQUANTIZATION == "FP32" and ARMV8:
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if REQUANTIZATION == "FP32" and ARMV8 else "neon")
-$PARAMS_UNION = "xnn_%s_conv_minmax_params" % DATATYPE.lower()
+$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params"}[DATATYPE]
 $ISA = "neonv8" if ARMV8 else "neon"
 void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}c4__${ISA}_${"mlal" if MLA else "mull"}_${DUP.lower()}(
     size_t mr,

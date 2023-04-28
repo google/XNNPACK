@@ -1341,7 +1341,7 @@ DECLARE_QS8_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_fp32_
     size_t output_increment,                                             \
     size_t input_offset,                                                 \
     const int8_t* zero,                                                  \
-    const union xnn_qc8_conv_minmax_params* params);
+    const union xnn_qs8_qc8w_conv_minmax_params* params);
 
 #define DECLARE_QS8_QC8W_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                               \
@@ -1356,7 +1356,7 @@ DECLARE_QS8_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_qs8_dwconv_minmax_fp32_
     const int8_t* zero,                                                    \
     size_t kernel_size,                                                    \
     int32_t* buffer,                                                       \
-    const union xnn_qc8_conv_minmax_params* params);
+    const union xnn_qs8_qc8w_conv_minmax_params* params);
 
 DECLARE_QS8_QC8W_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p8c__asm_aarch32_neonv8_mla8_cortex_a35)
 DECLARE_QS8_QC8W_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__asm_aarch32_neonv8_mla8_cortex_a35)

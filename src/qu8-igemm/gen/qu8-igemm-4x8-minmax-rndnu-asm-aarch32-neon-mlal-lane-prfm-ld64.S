@@ -24,7 +24,7 @@
 //     size_t cn_stride,                   sp + 104  -> (r7)
 //     size_t a_offset,                    sp + 108 -> (r5)
 //     const uint8_t* zero,                  sp + 112 -> (r7)
-//     xnn_qs8_conv_minmax_params*params); sp + 116 -> (r5)
+//     xnn_qu8_conv_minmax_params*params); sp + 116 -> (r5)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 

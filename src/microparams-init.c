@@ -16,8 +16,8 @@
 #include <xnnpack/unaligned.h>
 
 
-size_t xnn_init_qc8_conv_minmax_fp32_scalar_fmagic_params(
-  union xnn_qc8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_fmagic_params(
+  union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
@@ -29,8 +29,8 @@ size_t xnn_init_qc8_conv_minmax_fp32_scalar_fmagic_params(
   return sizeof(params->fp32_scalar_fmagic);
 }
 
-size_t xnn_init_qc8_conv_minmax_fp32_scalar_imagic_params(
-  union xnn_qc8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_imagic_params(
+  union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
@@ -44,8 +44,8 @@ size_t xnn_init_qc8_conv_minmax_fp32_scalar_imagic_params(
   return sizeof(params->fp32_scalar_imagic);
 }
 
-size_t xnn_init_qc8_conv_minmax_fp32_scalar_lrintf_params(
-  union xnn_qc8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_lrintf_params(
+  union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
@@ -57,8 +57,8 @@ size_t xnn_init_qc8_conv_minmax_fp32_scalar_lrintf_params(
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_qc8_conv_minmax_fp32_sse2_params(
-  union xnn_qc8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qs8_qc8w_conv_minmax_fp32_sse2_params(
+  union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
@@ -74,8 +74,8 @@ size_t xnn_init_qc8_conv_minmax_fp32_sse2_params(
   return sizeof(params->fp32_sse2);
 }
 
-size_t xnn_init_qc8_conv_minmax_fp32_sse4_params(
-  union xnn_qc8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qs8_qc8w_conv_minmax_fp32_sse4_params(
+  union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
@@ -93,8 +93,8 @@ size_t xnn_init_qc8_conv_minmax_fp32_sse4_params(
   return sizeof(params->fp32_sse4);
 }
 
-size_t xnn_init_qc8_conv_minmax_fp32_avx2_params(
-  union xnn_qc8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qs8_qc8w_conv_minmax_fp32_avx2_params(
+  union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
@@ -112,8 +112,8 @@ size_t xnn_init_qc8_conv_minmax_fp32_avx2_params(
   return sizeof(params->fp32_avx2);
 }
 
-size_t xnn_init_qc8_conv_minmax_fp32_avx512_params(
-  union xnn_qc8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qs8_qc8w_conv_minmax_fp32_avx512_params(
+  union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
@@ -133,8 +133,8 @@ size_t xnn_init_qc8_conv_minmax_fp32_avx512_params(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM
-size_t xnn_init_qc8_conv_minmax_fp32_armsimd32_params(
-  union xnn_qc8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qs8_qc8w_conv_minmax_fp32_armsimd32_params(
+  union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
@@ -148,8 +148,8 @@ size_t xnn_init_qc8_conv_minmax_fp32_armsimd32_params(
 #endif  // XNN_ARCH_ARM
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qc8_conv_minmax_fp32_neon_params(
-  union xnn_qc8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qs8_qc8w_conv_minmax_fp32_neon_params(
+  union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
@@ -161,8 +161,8 @@ size_t xnn_init_qc8_conv_minmax_fp32_neon_params(
   return sizeof(params->fp32_neon);
 }
 
-size_t xnn_init_qc8_conv_minmax_fp32_neonv8_params(
-  union xnn_qc8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params(
+  union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
@@ -175,8 +175,8 @@ size_t xnn_init_qc8_conv_minmax_fp32_neonv8_params(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_qc8_conv_minmax_fp32_wasmsimd_params(
-  union xnn_qc8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qs8_qc8w_conv_minmax_fp32_wasmsimd_params(
+  union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
@@ -823,7 +823,7 @@ size_t xnn_init_qu8_conv_minmax_fp32_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-void xnn_init_qc8_scale_fp32_params(
+void xnn_init_qs8_qc8w_scale_fp32_params(
   size_t channels,
   size_t channels_tile,
   size_t channels_subtile,
