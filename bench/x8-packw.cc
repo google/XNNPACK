@@ -7,6 +7,7 @@
 #include <chrono>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <mutex>
 #include <random>
 #include <vector>
@@ -39,7 +40,9 @@ static void x8_packw(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto s8rng = std::bind(std::uniform_real_distribution<int8_t>(), std::ref(rng));
+  auto i8rng = std::bind(
+    std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+    std::ref(rng));
 
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers = 1 +
@@ -47,7 +50,7 @@ static void x8_packw(benchmark::State& state,
       sizeof(int8_t) * batch * (dim_n * dim_k + rounded_n * rounded_k + rounded_n));
 
   std::vector<int8_t, AlignedAllocator<int8_t, 64>> weights(num_buffers * batch * dim_n * dim_k);
-  std::generate(weights.begin(), weights.end(), std::ref(s8rng));
+  std::generate(weights.begin(), weights.end(), std::ref(i8rng));
   std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_weights(num_buffers * batch * (rounded_n * rounded_k + rounded_n * sizeof(uint32_t)));
   std::fill(packed_weights.begin(), packed_weights.end(), 0);
 
