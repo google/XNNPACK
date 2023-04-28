@@ -464,8 +464,6 @@ struct xnn_workspace {
   // Workspace will be destroyed in xnn_delete_runtime or xnn_delete_workspace if num_users reaches 0.
   size_t ref_count;
   size_t persistent_size;
-  // Set to true if workspace has moved and all users should be updated.
-  bool update_users;
 };
 
 void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph);

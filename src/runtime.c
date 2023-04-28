@@ -151,7 +151,8 @@ enum xnn_status xnn_create_runtime_v3(
 
 static enum xnn_status initialize_workspace_values(
     xnn_runtime_t runtime,
-    struct xnn_value_allocation_tracker* mem_alloc_tracker)
+    struct xnn_value_allocation_tracker* mem_alloc_tracker,
+    size_t old_persistent_size)
 {
   assert(runtime->workspace != NULL);
   const size_t persistent_size = runtime->workspace->persistent_size;
@@ -167,10 +168,6 @@ static enum xnn_status initialize_workspace_values(
   // Allocates larger workspace here if needed.
   if (runtime->workspace->size < mem_arena_size) {
     void* old_workspace_data = runtime->workspace->data;
-    if (runtime->workspace->size != 0) {
-      // Free up the workspace's current data. Free first then allocate to keep peak memory usage low.
-      xnn_release_simd_memory(runtime->workspace->data);
-    }
     void* new_workspace_data = xnn_allocate_simd_memory(mem_arena_size);
     if (new_workspace_data == NULL) {
       xnn_log_error("failed to allocate %zu bytes for runtime workspace", mem_arena_size);
@@ -181,6 +178,9 @@ static enum xnn_status initialize_workspace_values(
     // Keep track of how much the workspace data moved.
     if (old_workspace_data != NULL) {
       workspace_data_delta = (uintptr_t) new_workspace_data - (uintptr_t) old_workspace_data;
+      // Persistent data needs to be copied if workspace grew.
+      memcpy(new_workspace_data, old_workspace_data, old_persistent_size);
+      xnn_release_simd_memory(old_workspace_data);
     }
     xnn_log_debug("created workspace of size %zu, old workspace %p, new workspace %p, delta %td",
                   mem_arena_size, old_workspace_data, new_workspace_data, workspace_data_delta);
@@ -209,18 +209,45 @@ static enum xnn_status initialize_workspace_values(
 
   // Adjust the value pointers of all runtimes that share this workspace.
   if (workspace_data_delta != 0) {
-    runtime->workspace->update_users = true;
     for (struct xnn_runtime* rt = runtime->workspace->first_user; rt != NULL; rt = rt->next_workspace_user) {
       // The current runtime already has the correct offset.
       if (rt == runtime) {
         continue;
       }
+      // This runtime has not ever been setup yet, so it doesn't have any pointers into workspace, so does not need to
+      // be updated.
+      if (!rt->has_been_setup) {
+        continue;
+      }
+
+      // Adjust offsets of values in workspace.
       for (size_t i = 0; i < rt->num_values; i++) {
         struct xnn_value* value = &rt->values[i];
         if (value->allocation_type == xnn_allocation_type_workspace ||
             value->allocation_type == xnn_allocation_type_persistent) {
-          assert(value->data != NULL);
-          value->data = (void*) ((uintptr_t) value->data + workspace_data_delta);
+          if (value->data != NULL) {
+            // Data can be null as the runtime using this workspace might not have been set up.
+            value->data = (void*) ((uintptr_t) value->data + workspace_data_delta);
+          }
+        }
+      }
+
+      // Re-setup all the nodes to adjust input/output pointers.
+      for (size_t i = 0; i < rt->num_ops; i++) {
+        const struct xnn_operator_data* opdata = &rt->opdata[i];
+        for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
+          if (opdata->operator_objects[j] == NULL) {
+            // Operator was removed during optimization
+            continue;
+          }
+
+          assert(opdata->setup != NULL);
+          // TODO(zhin): come up with another API to only setup input/output pointers.
+          const enum xnn_status status = opdata->setup(opdata, rt->values, rt->num_values, rt->threadpool);
+          if (status != xnn_status_success) {
+            xnn_log_error("failed to setup runtime: error in operator #%zu", i);
+            return status;
+          }
         }
       }
     }
@@ -445,10 +472,6 @@ enum xnn_status xnn_create_runtime_v4(
     }
   #endif
 
-  struct xnn_value_allocation_tracker mem_alloc_tracker;
-  xnn_init_value_allocation_tracker(&mem_alloc_tracker, runtime);
-
-  size_t persistent_size = 0;
   for (uint32_t i = 0; i < runtime->num_values; i++) {
     struct xnn_value* value = &runtime->values[i];
     if (!xnn_value_is_valid(value)) {
@@ -462,10 +485,8 @@ enum xnn_status xnn_create_runtime_v4(
       } else if (xnn_value_is_persistent(value)) {
         // Persistent values are allocated in the front of the workspace without overlaps.
         value->allocation_type = xnn_allocation_type_persistent;
-        persistent_size += round_up_po2(value->size, XNN_EXTRA_BYTES);
       } else {
         // Value is purely internal to the runtime, and must be allocated in its workspace.
-        xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, round_up_po2(value->size, XNN_EXTRA_BYTES));
         value->allocation_type = xnn_allocation_type_workspace;
       }
     } else if (value->fp16_compatible) {
@@ -478,28 +499,15 @@ enum xnn_status xnn_create_runtime_v4(
       value->allocation_type = xnn_allocation_type_static;
     }
   }
-  optimize_tensor_allocation_for_in_place_operations(&mem_alloc_tracker, runtime);
-
-
-  xnn_plan_value_allocation_tracker(&mem_alloc_tracker);
 
   xnn_retain_workspace(workspace);
   runtime->workspace = workspace;
   runtime->next_workspace_user = runtime->workspace->first_user;
   runtime->workspace->first_user = runtime;
-  runtime->workspace->persistent_size = persistent_size;
-
-  status = initialize_workspace_values(runtime, &mem_alloc_tracker);
-  if (status != xnn_status_success) {
-    xnn_release_value_allocation_tracker(&mem_alloc_tracker);
-    goto error;
-  }
 
   if (flags & XNN_FLAG_BASIC_PROFILING) {
     runtime->profiling = true;
   }
-
-  xnn_release_value_allocation_tracker(&mem_alloc_tracker);
 
   runtime->threadpool = threadpool;
 
@@ -516,6 +524,37 @@ enum xnn_status xnn_setup_runtime(
   size_t num_external_values,
   const struct xnn_external_value* external_values)
 {
+  size_t persistent_size = 0;
+  struct xnn_value_allocation_tracker mem_alloc_tracker;
+  xnn_init_value_allocation_tracker(&mem_alloc_tracker, runtime);
+
+  for (uint32_t i = 0; i < runtime->num_values; i++) {
+    const struct xnn_value* value = &runtime->values[i];
+    if (!xnn_value_is_valid(value)) {
+      continue;
+    }
+
+    if (value->allocation_type == xnn_allocation_type_workspace) {
+      // Value is purely internal to the runtime, and must be allocated in its workspace.
+      xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, round_up_po2(value->size, XNN_EXTRA_BYTES));
+    } else if (value->allocation_type == xnn_allocation_type_persistent) {
+      persistent_size += round_up_po2(value->size, XNN_EXTRA_BYTES);
+    }
+  }
+  size_t old_persistent_size = runtime->workspace->persistent_size;
+  runtime->workspace->persistent_size = persistent_size;
+  optimize_tensor_allocation_for_in_place_operations(&mem_alloc_tracker, runtime);
+
+  xnn_plan_value_allocation_tracker(&mem_alloc_tracker);
+
+  const enum xnn_status status = initialize_workspace_values(runtime, &mem_alloc_tracker, old_persistent_size);
+  if (status != xnn_status_success) {
+    xnn_release_value_allocation_tracker(&mem_alloc_tracker);
+    return status;
+  }
+
+  xnn_release_value_allocation_tracker(&mem_alloc_tracker);
+
   // Validate inputs without changing internal state.
   // This ensures that runtime stays in consistent state in case validation fails midway.
   for (size_t i = 0; i < num_external_values; i++) {
@@ -560,42 +599,6 @@ enum xnn_status xnn_setup_runtime(
   }
 
   runtime->has_been_setup = true;
-
-  if (runtime->workspace->update_users) {
-    // Workspace has changed, data pointers are invalid, so Setup all runtime that share this workspace.
-    for (struct xnn_runtime* rt = runtime->workspace->first_user; rt != NULL; rt = rt->next_workspace_user) {
-      // The current runtime already has already been set up.
-      if (rt == runtime) {
-        continue;
-      }
-
-      if (!rt->has_been_setup) {
-        // This runtime has not ever been setup yet, so it doesn't have any pointers into workspace, so does not need to
-        // be update.
-        continue;
-      }
-
-      for (size_t i = 0; i < rt->num_ops; i++) {
-        const struct xnn_operator_data* opdata = &rt->opdata[i];
-        for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
-          if (opdata->operator_objects[j] == NULL) {
-            // Operator was removed during optimization
-            continue;
-          }
-
-          assert(opdata->setup != NULL);
-          // TODO(zhin): come up with another API to only setup input/output pointers.
-          const enum xnn_status status = opdata->setup(opdata, rt->values, rt->num_values, rt->threadpool);
-          if (status != xnn_status_success) {
-            xnn_log_error("failed to setup runtime: error in operator #%zu", i);
-            return status;
-          }
-        }
-      }
-    }
-
-    runtime->workspace->update_users = false;
-  }
 
   return xnn_status_success;
 }
