@@ -610,10 +610,11 @@ TEST(MovTest, Mov) {
   assm.bx(lr);
 
   MovFn mov_fn = reinterpret_cast<MovFn>(assm.finalize());
+  xnn_finalize_code_memory(&buffer);
+
   uint32_t out = 0;
   mov_fn(&out);
 
-  xnn_finalize_code_memory(&buffer);
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&buffer));
 
   EXPECT_EQ(expected, out);

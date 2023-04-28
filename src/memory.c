@@ -255,18 +255,6 @@ enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buffer) {
   #endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
 
   // Set permissions to RX (no write).
-  #if XNN_PLATFORM_WINDOWS
-    DWORD old = 0;
-    if (!VirtualProtect(buffer->start, buffer->size, PAGE_EXECUTE_READ, &old)) {
-      xnn_log_error("failed to make code buffer read+execute, error code: %" PRIu32, (uint32_t) GetLastError());
-      return xnn_status_invalid_state;
-    }
-  #else
-    if (mprotect(buffer->start, buffer->size, PROT_READ | PROT_EXEC) == -1) {
-      xnn_log_error("failed to make code buffer read+execute, error code: %d", errno);
-      return xnn_status_invalid_state;
-    }
-  #endif
   return set_memory_permission(buffer->start, buffer->size, xnn_memory_permission_read_execute);
 }
 #endif  // XNN_PLATFORM_JIT
