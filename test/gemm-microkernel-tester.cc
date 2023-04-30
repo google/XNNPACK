@@ -1296,8 +1296,8 @@ void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_minmax_ukernel_fn gemm_minmax
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  std::uniform_real_distribution<float> f32dist;
-  std::uniform_real_distribution<int8_t> s8dist;
+  std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
+  std::uniform_int_distribution<int32_t> i8dist(-1, std::numeric_limits<int8_t>::max());
 
   std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<int8_t> b(n() * k());
@@ -1305,11 +1305,11 @@ void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_minmax_ukernel_fn gemm_minmax
   std::vector<float> scale(n());
   std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(float) * 2);
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
-  std::vector<float> c_ref(m() * n());
+  std::vector<double> c_ref(m() * n());
 
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
-    std::generate(b.begin(), b.end(), [&]() { return s8dist(rng); });
+    std::generate(b.begin(), b.end(), [&]() { return i8dist(rng); });
     std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
     std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });
     std::fill(c.begin(), c.end(), nanf(""));
@@ -1318,24 +1318,25 @@ void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_minmax_ukernel_fn gemm_minmax
     xnn_pack_f32_qs8w_gemm_goi_w(1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(), packed_w.data(), nr() * sizeof(float), nullptr);
 
     // Fill in packed scale
-    for (size_t ni = 0; ni < n(); ni += nr()) {
-      const size_t nsize = nr() * 2 * sizeof(float) + nr() * packed_k();
-      const size_t scaleoffset = nsize * (ni / nr()) +  (nr() * sizeof(float) + nr() * packed_k());
-      float* packed_scale = (float*) ((uintptr_t) packed_w.data() + scaleoffset);
-      memcpy(packed_scale, scale.data() + ni, nr() * sizeof(float));
-    }
+    xnn_init_qs8_qc8w_scale_fp32_params(
+      n(), nr(), nr(),
+      nr() * (ks() * packed_k() * sizeof(int8_t) + (sizeof(float) + sizeof(float))),
+      nr() * (ks() * packed_k() * sizeof(int8_t) + (sizeof(float) + sizeof(float))),
+      0,
+      scale.data(),
+      (void*) ((uintptr_t) packed_w.data() + nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(float))));
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
+        c_ref[m_index * n() + n_index] = double(bias[n_index]);
         for (size_t k_index = 0; k_index < k(); k_index++) {
           ASSERT_LE(n(), packed_n());
           ASSERT_LT(m_index * n() + n_index, c_ref.size());
           c_ref[m_index * n() + n_index] +=
-            a[m_index * a_stride() + k_index] *
-            (float) b[n_index * k() + k_index];
+            double(a[m_index * a_stride() + k_index]) *
+            double(b[n_index * k() + k_index]);
         }
-        c_ref[m_index * n() + n_index] += bias[n_index];
-        c_ref[m_index * n() + n_index] *= scale[n_index];
+        c_ref[m_index * n() + n_index] *= double(scale[n_index]);
       }
     }
 
@@ -1354,7 +1355,7 @@ void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_minmax_ukernel_fn gemm_minmax
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
-        c_ref[m_index * n() + n_index] = std::max(std::min(c_ref[m_index * n() + n_index], c_max), c_min);
+        c_ref[m_index * n() + n_index] = std::max(std::min(c_ref[m_index * n() + n_index], double(c_max)), double(c_min));
       }
     }
 
@@ -1378,7 +1379,7 @@ void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_minmax_ukernel_fn gemm_minmax
         EXPECT_NEAR(
             c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
             c_ref[i * n() + j],
-            std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
+            std::max(1.0e-5, std::abs(c_ref[i * n() + j]) * 1.0e-6))
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
