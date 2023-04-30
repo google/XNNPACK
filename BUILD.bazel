@@ -5953,6 +5953,18 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_qc8w_gemm_bench",
+    srcs = [
+        "bench/f32-qc8w-gemm.cc",
+        "bench/gemm.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":allocator",
+        ":math",
+    ],
+)
+
+xnnpack_benchmark(
     name = "f32_qs8_vcvt_bench",
     srcs = [
         "bench/f32-qs8-vcvt.cc",
