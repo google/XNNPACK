@@ -126,8 +126,8 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
 
   bind(l3);
   // Remainder- 1 float of A (4 bytes)
-  ldp(q20, q21, mem[x5], 32);
   ldr(s0, mem[x3], 4);
+  ldp(q20, q21, mem[x5], 32);
   fmla(v16.v4s(), v20.v4s(), v0.s()[0]);
   fmla(v17.v4s(), v21.v4s(), v0.s()[0]);
   b(l2);

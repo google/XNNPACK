@@ -88,8 +88,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
 
 3:
         # Remainder- 1 float of A (4 bytes)
-        LDP     q20, q21, [x5], 32
         LDR     s0, [x3], 4
+        LDP     q20, q21, [x5], 32
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v21.4s, v0.s[0]
         B       2b
