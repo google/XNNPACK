@@ -70,7 +70,9 @@ void xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_lane_ld64(
       const float32x2_t va2 = vld1_f32(a2); a2 += 2;
       const float32x2_t va3 = vld1_f32(a3); a3 += 2;
 
-      const float32x2_t vb01c0 = vld1_f32(w); w += 2;
+      const uint64x1x2_t vb01c01 = vld2_u64((const uint64_t*) w); w += 4;
+      const float32x2_t vb01c0 = vreinterpret_f32_u64(vb01c01.val[0]);
+      const float32x2_t vb01c1 = vreinterpret_f32_u64(vb01c01.val[1]);
 
       #if XNN_ARCH_ARM64
         vacc0x01 = vfma_lane_f32(vacc0x01, vb01c0, va0, 0);
@@ -87,8 +89,6 @@ void xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_lane_ld64(
         vacc2x01 = vfma_f32(vacc2x01, va2c0, vb01c0);
         vacc3x01 = vfma_f32(vacc3x01, va3c0, vb01c0);
       #endif
-      const float32x2_t vb01c1 = vld1_f32(w); w += 2;
-
       #if XNN_ARCH_ARM64
         vacc0x01 = vfma_lane_f32(vacc0x01, vb01c1, va0, 1);
         vacc1x01 = vfma_lane_f32(vacc1x01, vb01c1, va1, 1);

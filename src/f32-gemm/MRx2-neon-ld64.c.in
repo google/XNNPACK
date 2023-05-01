@@ -72,9 +72,11 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${"aarch64_
       $for M in range(MR):
         const float32x2_t va${M} = vld1_f32(a${M}); a${M} += 2;
 
-      $for L in range(2):
-        const float32x2_t vb01c${L} = vld1_f32(w); w += 2;
+      const uint64x1x2_t vb01c01 = vld2_u64((const uint64_t*) w); w += 4;
+      const float32x2_t vb01c0 = vreinterpret_f32_u64(vb01c01.val[0]);
+      const float32x2_t vb01c1 = vreinterpret_f32_u64(vb01c01.val[1]);
 
+      $for L in range(2):
         $if FMA:
           #if XNN_ARCH_ARM64
             $for M in range(MR):
@@ -103,14 +105,12 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${"aarch64_
     }
 
     const float32x2_t vmax = vld1_dup_f32(&params->scalar.max);
-    $for N in range(0, NR, 4):
-      $for M in range(MR):
-        vacc${M}x01 = vmin_f32(vacc${M}x01, vmax);
+    $for M in range(MR):
+      vacc${M}x01 = vmin_f32(vacc${M}x01, vmax);
 
     const float32x2_t vmin = vld1_dup_f32(&params->scalar.min);
-    $for N in range(0, NR, 4):
-      $for M in range(MR):
-        vacc${M}x01 = vmax_f32(vacc${M}x01, vmin);
+    $for M in range(MR):
+      vacc${M}x01 = vmax_f32(vacc${M}x01, vmin);
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in range(MR):

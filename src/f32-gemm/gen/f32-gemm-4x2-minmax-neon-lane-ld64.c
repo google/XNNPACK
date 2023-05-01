@@ -70,14 +70,14 @@ void xnn_f32_gemm_minmax_ukernel_4x2__neon_lane_ld64(
       const float32x2_t va2 = vld1_f32(a2); a2 += 2;
       const float32x2_t va3 = vld1_f32(a3); a3 += 2;
 
-      const float32x2_t vb01c0 = vld1_f32(w); w += 2;
+      const uint64x1x2_t vb01c01 = vld2_u64((const uint64_t*) w); w += 4;
+      const float32x2_t vb01c0 = vreinterpret_f32_u64(vb01c01.val[0]);
+      const float32x2_t vb01c1 = vreinterpret_f32_u64(vb01c01.val[1]);
 
       vacc0x01 = vmla_lane_f32(vacc0x01, vb01c0, va0, 0);
       vacc1x01 = vmla_lane_f32(vacc1x01, vb01c0, va1, 0);
       vacc2x01 = vmla_lane_f32(vacc2x01, vb01c0, va2, 0);
       vacc3x01 = vmla_lane_f32(vacc3x01, vb01c0, va3, 0);
-      const float32x2_t vb01c1 = vld1_f32(w); w += 2;
-
       vacc0x01 = vmla_lane_f32(vacc0x01, vb01c1, va0, 1);
       vacc1x01 = vmla_lane_f32(vacc1x01, vb01c1, va1, 1);
       vacc2x01 = vmla_lane_f32(vacc2x01, vb01c1, va2, 1);
