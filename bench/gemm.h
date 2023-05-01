@@ -11,7 +11,6 @@
 #include <benchmark/benchmark.h>
 
 #define BENCHMARK_GEMM(gemm_fn) \
-  BENCHMARK_CAPTURE(gemm_fn, ulm, "ULM 1x32000x1536")->Apply(ULMGemmArguments)->UseRealTime(); \
   BENCHMARK_CAPTURE(gemm_fn, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1GemmArguments)->UseRealTime(); \
   BENCHMARK_CAPTURE(gemm_fn, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2GemmArguments)->UseRealTime(); \
   BENCHMARK_CAPTURE(gemm_fn, mobilenet_v3_small, "MobileNet v3 Small")->Apply(MobileNetV3SmallGemmArguments)->UseRealTime(); \
@@ -685,11 +684,3 @@ static void SRCNN955GemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({372 * 372, 32, 64 * 5 * 5});
   b->Args({368 * 368,  1, 32 * 5 * 5});
 }
-
-static void ULMGemmArguments(benchmark::internal::Benchmark* b) {
-  b->ArgNames({"M", "N", "K"});
-
-  /*           M       N       K    */
-  b->Args({    1,  32000,   1536});
-}
-
