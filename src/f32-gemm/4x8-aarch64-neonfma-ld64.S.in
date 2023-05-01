@@ -202,8 +202,8 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
         $if DATATYPE == "F32":
           LDP     q20, q21, [x5], 32
         $else:
-          LDR     d22, [x5], 8
-          SXTL    v21.8h, v22.8b
+          LDR     d21, [x5], 8
+          SXTL    v21.8h, v21.8b
           SXTL    v20.4s, v21.4h
           SXTL2   v21.4s, v21.8h
           SCVTF   v20.4s, v20.4s

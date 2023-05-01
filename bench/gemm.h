@@ -11,6 +11,7 @@
 #include <benchmark/benchmark.h>
 
 #define BENCHMARK_GEMM(gemm_fn) \
+  BENCHMARK_CAPTURE(gemm_fn, ulm, "ULM 1x32000x1536")->Apply(ULMGemmArguments)->UseRealTime(); \
   BENCHMARK_CAPTURE(gemm_fn, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1GemmArguments)->UseRealTime(); \
   BENCHMARK_CAPTURE(gemm_fn, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2GemmArguments)->UseRealTime(); \
   BENCHMARK_CAPTURE(gemm_fn, mobilenet_v3_small, "MobileNet v3 Small")->Apply(MobileNetV3SmallGemmArguments)->UseRealTime(); \
@@ -32,6 +33,7 @@
   BENCHMARK_CAPTURE(gemm_fn, vgg, "VGG")->Apply(VGGGemmArguments)->UseRealTime(); \
   BENCHMARK_CAPTURE(gemm_fn, srcnn915, "SRCNN (9-1-5)")->Apply(SRCNN915GemmArguments)->UseRealTime(); \
   BENCHMARK_CAPTURE(gemm_fn, srcnn935, "SRCNN (9-3-5)")->Apply(SRCNN935GemmArguments)->UseRealTime();
+
 
 // Removed due to OOM SEGFAULT on 32 bit ARM.
 //  BENCHMARK_CAPTURE(gemm_fn, srcnn955, "SRCNN (9-5-5)")->Apply(SRCNN955GemmArguments)->UseRealTime();
@@ -683,3 +685,11 @@ static void SRCNN955GemmArguments(benchmark::internal::Benchmark* b) {
   b->Args({372 * 372, 32, 64 * 5 * 5});
   b->Args({368 * 368,  1, 32 * 5 * 5});
 }
+
+static void ULMGemmArguments(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"M", "N", "K"});
+
+  /*           M       N       K    */
+  b->Args({    1,  32000,   1536});
+}
+
