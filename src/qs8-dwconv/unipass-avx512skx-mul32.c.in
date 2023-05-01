@@ -38,7 +38,7 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
     size_t output_increment,
     size_t input_offset,
     const ${XINT8_T}* zero,
-    const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_MSAN
+    const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);

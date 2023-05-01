@@ -25,7 +25,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__avx512skx_mul32(
     size_t output_increment,
     size_t input_offset,
     const uint8_t* zero,
-    const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_DISABLE_MSAN
+    const union xnn_qu8_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);
