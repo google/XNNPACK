@@ -58,11 +58,11 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x4__scalar(
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
   do {
-    float vacc00 = ((const float*) w)[0];
-    float vacc01 = ((const float*) w)[1];
-    float vacc02 = ((const float*) w)[2];
-    float vacc03 = ((const float*) w)[3];
-    w = (const void*) ((uintptr_t) w + 4 * sizeof(float));
+    float vacc00 = ((const float*)w)[0];
+    float vacc01 = ((const float*)w)[1];
+    float vacc02 = ((const float*)w)[2];
+    float vacc03 = ((const float*)w)[3];
+    w = (const float*) w + 4;
     float vacc10 = vacc00;
     float vacc11 = vacc01;
     float vacc12 = vacc02;
@@ -87,7 +87,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x4__scalar(
       const float vb1 = (float) ((const int8_t*) w)[1];
       const float vb2 = (float) ((const int8_t*) w)[2];
       const float vb3 = (float) ((const int8_t*) w)[3];
-      w = (const void*) ((uintptr_t) w + 4 * sizeof(int8_t));
+      w = (const int8_t*) w + 4;
 
       vacc00 = math_muladd_f32(va0, vb0, vacc00);
       vacc01 = math_muladd_f32(va0, vb1, vacc01);
@@ -109,11 +109,11 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x4__scalar(
       k -= sizeof(float);
     } while (k != 0);
 
-    const float vscale0 = ((const float*) w)[0];
-    const float vscale1 = ((const float*) w)[1];
-    const float vscale2 = ((const float*) w)[2];
-    const float vscale3 = ((const float*) w)[3];
-    w = (const void*) ((uintptr_t) w + 4 * sizeof(float));
+    const float vscale0 = ((const float*)w)[0];
+    const float vscale1 = ((const float*)w)[1];
+    const float vscale2 = ((const float*)w)[2];
+    const float vscale3 = ((const float*)w)[3];
+    w = (const float*) w + 4;
     vacc00 *= vscale0;
     vacc10 *= vscale0;
     vacc20 *= vscale0;

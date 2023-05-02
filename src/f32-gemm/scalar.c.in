@@ -3,13 +3,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert DATATYPE in ["F32", "QC8"]
 $assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
 $assert ACTIVATION != "LINEAR" or not WASM
-$assert DATATYPE in ["F32", "QC8"]
 #include <assert.h>
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
+$if DATATYPE == "QC8" and not NR % 4 == 0:
+  #include <xnnpack/unaligned.h>
 
 
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
@@ -83,8 +85,11 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
         w += ${NR};
       $else:
         $for N in range(NR):
-          float vacc0${N} = ((const float*) w)[${N}];
-        w = (const void*) ((uintptr_t) w + ${NR} * sizeof(float));
+          $if NR % 4 == 0:
+            float vacc0${N} = ((const float*)w)[${N}];
+          $else:
+            float vacc0${N} = unaligned_indexed_load_f32(w, ${N});
+        w = (const float*) w + ${NR};
       $for M in range(1, MR):
         $for N in range(NR):
           float vacc${M}${N} = vacc0${N};
@@ -101,7 +106,7 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
       $elif DATATYPE == "QC8":
         $for N in range(NR):
           const float vb${N} = (float) ((const int8_t*) w)[${N}];
-        w = (const void*) ((uintptr_t) w + ${NR} * sizeof(int8_t));
+        w = (const int8_t*) w + ${NR};
 
       $for M in range(MR):
         $for N in range(NR):
@@ -112,8 +117,11 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
 
     $if DATATYPE == "QC8":
       $for N in range(NR):
-        const float vscale${N} = ((const float*) w)[${N}];
-      w = (const void*) ((uintptr_t) w + ${NR} * sizeof(float));
+        $if NR % 4 == 0:
+          const float vscale${N} = ((const float*)w)[${N}];
+        $else:
+          const float vscale${N} = unaligned_indexed_load_f32(w, ${N});
+      w = (const float*) w + ${NR};
       $for N in range(NR):
         $for M in range(MR):
           vacc${M}${N} *= vscale${N};
