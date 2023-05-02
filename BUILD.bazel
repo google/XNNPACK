@@ -9710,7 +9710,7 @@ xnnpack_unit_test(
         "test/dynamic-fully-connected-nc.cc",
         "test/dynamic-fully-connected-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + [":aligned_allocator"],
 )
 
 xnnpack_unit_test(
@@ -10539,6 +10539,8 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK_test_mode",
+        ":aligned_allocator",
+        ":common",
         ":operators_test_mode",
         ":requantization",
         ":subgraph_test_mode",
@@ -10959,7 +10961,9 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK",
+        ":common",
         ":math",
+        ":node_type",
         ":subgraph_test_mode",
     ],
 )

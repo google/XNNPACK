@@ -343,6 +343,35 @@ static inline enum xnn_compute_type validate_datatypes_without_bias(
   return xnn_compute_type_invalid;
 }
 
+static void setup_fully_connected_operator_workspace(
+  struct xnn_operator_data* opdata,
+  size_t* workspace_size,
+  void* workspace,
+  size_t* alignment_out)
+{
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_dynamic_fully_connected_nc_f16:
+      xnn_setup_dynamic_fully_connected_nc_f16_workspace(
+        opdata->operator_objects[0],
+        opdata->input_channels,
+        opdata->output_channels,
+        workspace_size,
+        workspace,
+        alignment_out);
+      break;
+    case xnn_operator_type_dynamic_fully_connected_nc_f32:
+      xnn_setup_dynamic_fully_connected_nc_f32_workspace(
+        opdata->operator_objects[0],
+        opdata->input_channels, opdata->output_channels,
+        workspace_size,
+        workspace,
+        alignment_out);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 enum xnn_status xnn_define_fully_connected(
   xnn_subgraph_t subgraph,
   float output_min,
@@ -554,6 +583,12 @@ enum xnn_status xnn_define_fully_connected(
 
   node->create = create_fully_connected_operator;
   node->setup = setup_fully_connected_operator;
+  // Only set this pointer if this is dynamic.
+  if (subgraph->values[filter_id].data == NULL ||
+      (bias_id != XNN_INVALID_VALUE_ID && subgraph->values[bias_id].data == NULL)) {
+    // TODO(zhin): we cannot yet check allocation type here because that is only set after runtime create.
+    node->setup_workspace = setup_fully_connected_operator_workspace;
+  }
 
   return xnn_status_success;
 }

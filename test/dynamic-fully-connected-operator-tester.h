@@ -19,6 +19,8 @@
 #include <fp16.h>
 
 #include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
+#include <xnnpack/common.h>
 
 
 class DynamicFullyConnectedOperatorTester {
@@ -190,6 +192,15 @@ class DynamicFullyConnectedOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_dynamic_fully_connected_op(
         dynamic_fully_connected_op, xnn_delete_operator);
 
+      size_t workspace_size = 0;
+      size_t alignment = 0;
+      xnn_setup_dynamic_fully_connected_nc_f16_workspace(
+        dynamic_fully_connected_op, input_channels(), output_channels(), &workspace_size, nullptr, &alignment);
+      ASSERT_GT(workspace_size, 0);
+      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnn_setup_dynamic_fully_connected_nc_f16_workspace(
+        dynamic_fully_connected_op, input_channels(), output_channels(), &workspace_size, workspace.data(), nullptr);
+
       ASSERT_EQ(xnn_status_success,
         xnn_setup_dynamic_fully_connected_nc_f16(
           dynamic_fully_connected_op,
@@ -289,6 +300,15 @@ class DynamicFullyConnectedOperatorTester {
       // Smart pointer to automatically delete dynamic_fully_connected_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_dynamic_fully_connected_op(
         dynamic_fully_connected_op, xnn_delete_operator);
+
+      size_t workspace_size = 0;
+      size_t alignment = 0;
+      xnn_setup_dynamic_fully_connected_nc_f32_workspace(
+        dynamic_fully_connected_op, input_channels(), output_channels(), &workspace_size, nullptr, &alignment);
+      ASSERT_GT(workspace_size, 0);
+      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnn_setup_dynamic_fully_connected_nc_f32_workspace(
+        dynamic_fully_connected_op, input_channels(), output_channels(), &workspace_size, workspace.data(), nullptr);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_dynamic_fully_connected_nc_f32(

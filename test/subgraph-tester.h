@@ -176,6 +176,20 @@ class SubgraphTester {
     return *this;
   }
 
+  inline SubgraphTester& AddConstantPad(
+    const std::vector<size_t>& pre_paddings,
+    const std::vector<size_t>& post_paddings,
+    float padding_value,
+    uint32_t input_id,
+    uint32_t output_id)
+  {
+    const xnn_status status = xnn_define_static_constant_pad(
+        subgraph_.get(), pre_paddings.data(), post_paddings.data(), padding_value, input_id,
+        output_id, /*flags=*/0);
+    EXPECT_EQ(status, xnn_status_success);
+    return *this;
+  }
+
   inline SubgraphTester& AddConvolution2D(
       ConvolutionParams params,
       uint32_t input_id, uint32_t filter_id, uint32_t bias_id,

@@ -1956,6 +1956,14 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_f32(
   uint32_t flags,
   xnn_operator_t* dynamic_fully_connected_op_out);
 
+void xnn_setup_dynamic_fully_connected_nc_f32_workspace(
+    xnn_operator_t dynamic_fully_connected_op,
+    size_t input_channels,
+    size_t output_channels,
+    size_t* workspace_size_out,
+    void* workspace,
+    size_t* alignment_out);
+
 enum xnn_status xnn_setup_dynamic_fully_connected_nc_f32(
   xnn_operator_t dynamic_fully_connected_op,
   size_t batch_size,
@@ -2942,6 +2950,14 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_f16(
   float output_max,
   uint32_t flags,
   xnn_operator_t* dynamic_fully_connected_op_out);
+
+void xnn_setup_dynamic_fully_connected_nc_f16_workspace(
+    xnn_operator_t dynamic_fully_connected_op,
+    size_t input_channels,
+    size_t output_channels,
+    size_t* workspace_size_out,
+    void* workspace,
+    size_t* alignment_out);
 
 enum xnn_status xnn_setup_dynamic_fully_connected_nc_f16(
   xnn_operator_t dynamic_fully_connected_op,

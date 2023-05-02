@@ -185,6 +185,12 @@ typedef enum xnn_status (*xnn_setup_operator_fn)(
   size_t num_values,
   pthreadpool_t threadpool);
 
+typedef void (*xnn_setup_operator_workspace_fn)(
+  struct xnn_operator_data* opdata,
+  size_t* workspace_size,
+  void* workspace,
+  size_t* alignment_out);
+
 enum xnn_compute_type {
   xnn_compute_type_invalid = 0,
   xnn_compute_type_fp32,
@@ -331,6 +337,8 @@ struct xnn_node {
   xnn_create_operator_fn create;
   // Function to setup an operator using opdata.
   xnn_setup_operator_fn setup;
+  // Function to setup an operator workspace using opdata.
+  xnn_setup_operator_workspace_fn setup_workspace;
 };
 
 #ifdef __MACH__
@@ -348,6 +356,7 @@ struct xnn_operator_data {
   uint32_t id;
   xnn_operator_t operator_objects[XNN_MAX_OPERATOR_OBJECTS];
   xnn_setup_operator_fn setup;
+  xnn_setup_operator_workspace_fn setup_workspace;
   size_t batch_size;
   size_t input_height;
   size_t input_width;
@@ -371,6 +380,9 @@ struct xnn_operator_data {
   uint32_t num_outputs;
   uint32_t outputs[XNN_MAX_RUNTIME_OUTPUTS];
   xnn_timestamp end_ts[XNN_MAX_OPERATOR_OBJECTS];
+  void* workspace;
+  size_t workspace_size;
+  size_t workspace_alignment;
 };
 
 struct xnn_subgraph {
