@@ -72,6 +72,18 @@ typedef void (*xnn_f32_gemm_ukernel_fn)(
     size_t cn_stride,
     const union xnn_f32_default_params* params);
 
+typedef void (*xnn_f32_qc8w_gemm_ukernel_fn)(
+    size_t mr,
+    size_t nr,
+    size_t k,
+    const float* a,
+    size_t a_stride,
+    const void* w,
+    float* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_f32_default_params* params);
+
 // GEMM: GEneral Matrix Multiplication with ReLU activation
 
 typedef void (*xnn_f32_gemm_relu_ukernel_fn)(
@@ -81,6 +93,18 @@ typedef void (*xnn_f32_gemm_relu_ukernel_fn)(
     const float* a,
     size_t a_stride,
     const float* w,
+    float* c,
+    size_t cm_stride,
+    size_t cn_stride,
+    const union xnn_f32_relu_params* params);
+
+typedef void (*xnn_f32_qc8w_gemm_relu_ukernel_fn)(
+    size_t mr,
+    size_t nr,
+    size_t k,
+    const float* a,
+    size_t a_stride,
+    const void* w,
     float* c,
     size_t cm_stride,
     size_t cn_stride,

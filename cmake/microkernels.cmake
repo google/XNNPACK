@@ -4664,8 +4664,17 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/f32-prelu/gen/f32-prelu-scalar-2x1.c
   src/f32-prelu/gen/f32-prelu-scalar-2x4.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x4-minmax-scalar.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x4-relu-scalar.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x4-scalar.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-2x4-minmax-scalar.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-2x4-relu-scalar.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-2x4-scalar.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2-minmax-scalar.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2-relu-scalar.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2-scalar.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x4-minmax-scalar.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x4-relu-scalar.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x4-scalar.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-fmagic-x1.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-fmagic-x2.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-scalar-fmagic-x3.c
@@ -6763,6 +6772,14 @@ SET(ALL_WASM_MICROKERNEL_SRCS
   src/f32-pavgpool/f32-pavgpool-9x-minmax-wasm-c1.c
   src/f32-prelu/gen/f32-prelu-wasm-2x1.c
   src/f32-prelu/gen/f32-prelu-wasm-2x4.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x4-minmax-wasm.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x4-relu-wasm.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-2x4-minmax-wasm.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-2x4-relu-wasm.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2-minmax-wasm.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2-relu-wasm.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x4-minmax-wasm.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x4-relu-wasm.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-wasm-fmagic-x1.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-wasm-fmagic-x2.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-wasm-fmagic-x3.c

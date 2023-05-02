@@ -1289,6 +1289,163 @@ void GemmMicrokernelTester::Test(xnn_f32_gemm_minmax_ukernel_fn gemm_minmax, xnn
   }
 }
 
+void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_ukernel_fn gemm) const {
+  ASSERT_LE(m(), mr());
+  ASSERT_GE(a_stride(), k());
+  ASSERT_GE(cm_stride(), n());
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  std::uniform_real_distribution<float> f32dist;
+  std::uniform_int_distribution<int32_t> i8dist(-1, std::numeric_limits<int8_t>::max());
+
+  std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<int8_t> b(n() * k());
+  std::vector<float> bias(n());
+  std::vector<float> scale(n());
+  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(float) * 2);
+  std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+  std::vector<float> c_ref(m() * n());
+
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+    std::generate(b.begin(), b.end(), [&]() { return i8dist(rng); });
+    std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+    std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });
+    std::fill(c.begin(), c.end(), nanf(""));
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+    std::fill(packed_w.begin(), packed_w.end(), 0);
+
+    xnn_pack_f32_qs8w_gemm_goi_w(1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(), packed_w.data(), nr() * sizeof(float), nullptr);
+
+    // Fill in packed scale
+    for (size_t ni = 0; ni < n(); ni += nr()) {
+      const size_t nsize = nr() * 2 * sizeof(float) + nr() * packed_k();
+      const size_t scaleoffset = nsize * (ni / nr()) +  (nr() * sizeof(float) + nr() * packed_k());
+      float* packed_scale = (float*) ((uintptr_t) packed_w.data() + scaleoffset);
+      memcpy(packed_scale, scale.data() + ni, nr() * sizeof(float));
+    }
+
+    for (size_t m_index = 0; m_index < m(); m_index++) {
+      for (size_t n_index = 0; n_index < n(); n_index++) {
+        for (size_t k_index = 0; k_index < k(); k_index++) {
+          ASSERT_LE(n(), packed_n());
+          ASSERT_LT(m_index * n() + n_index, c_ref.size());
+          c_ref[m_index * n() + n_index] +=
+            a[m_index * a_stride() + k_index] *
+            (float) b[n_index * k() + k_index];
+        }
+        c_ref[m_index * n() + n_index] += bias[n_index];
+        c_ref[m_index * n() + n_index] *= scale[n_index];
+      }
+    }
+
+    gemm(m(), n(), k() * sizeof(float),  // Note KC measured in bytes of input
+      a.data(), a_stride() * sizeof(float),
+      packed_w.data(),
+      c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
+       nullptr);
+
+    // Validate micro-kernel outputs.
+    for (size_t i = 0; i < m(); i++) {
+      for (size_t j = 0; j < n(); j++) {
+        EXPECT_NEAR(
+            c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
+            c_ref[i * n() + j],
+            0.1f);
+      }
+    }
+
+    // Validate micro-kernel outputs.
+    for (size_t i = 0; i < m(); i++) {
+      for (size_t j = 0; j < n(); j++) {
+        EXPECT_NEAR(
+            c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
+            c_ref[i * n() + j],
+            std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
+            << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
+      }
+    }
+  }
+}
+
+void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_relu_ukernel_fn gemm_relu) const {
+  ASSERT_LE(m(), mr());
+  ASSERT_GE(a_stride(), k());
+  ASSERT_GE(cm_stride(), n());
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  std::uniform_real_distribution<float> f32dist;
+  std::uniform_int_distribution<int32_t> i8dist(-1, std::numeric_limits<int8_t>::max());
+
+  std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<int8_t> b(n() * k());
+  std::vector<float> bias(n());
+  std::vector<float> scale(n());
+  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(float) * 2);
+  std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+  std::vector<float> c_ref(m() * n());
+
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+    std::generate(b.begin(), b.end(), [&]() { return i8dist(rng); });
+    std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+    std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });
+    std::fill(c.begin(), c.end(), nanf(""));
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+    std::fill(packed_w.begin(), packed_w.end(), 0);
+    xnn_pack_f32_qs8w_gemm_goi_w(1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(), packed_w.data(), nr() * sizeof(float), nullptr);
+
+    // Fill in packed scale
+    for (size_t ni = 0; ni < n(); ni += nr()) {
+      const size_t nsize = nr() * 2 * sizeof(float) + nr() * packed_k();
+      const size_t scaleoffset = nsize * (ni / nr()) +  (nr() * sizeof(float) + nr() * packed_k());
+      float* packed_scale = (float*) ((uintptr_t) packed_w.data() + scaleoffset);
+      memcpy(packed_scale, scale.data() + ni, nr() * sizeof(float));
+    }
+
+    for (size_t m_index = 0; m_index < m(); m_index++) {
+      for (size_t n_index = 0; n_index < n(); n_index++) {
+        for (size_t k_index = 0; k_index < k(); k_index++) {
+          ASSERT_LE(n(), packed_n());
+          ASSERT_LT(m_index * n() + n_index, c_ref.size());
+          c_ref[m_index * n() + n_index] +=
+            a[m_index * a_stride() + k_index] *
+            (float) b[n_index * k() + k_index];
+        }
+        c_ref[m_index * n() + n_index] = std::max(0.0f, c_ref[m_index * n() + n_index] + bias[n_index]);
+        c_ref[m_index * n() + n_index] *= scale[n_index];
+      }
+    }
+
+    gemm_relu(m(), n(), k() * sizeof(float),  // Note KC measured in bytes of input
+      a.data(), a_stride() * sizeof(float),
+      packed_w.data(),
+      c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
+       nullptr);
+
+    // Validate micro-kernel outputs.
+    for (size_t i = 0; i < m(); i++) {
+      for (size_t j = 0; j < n(); j++) {
+        EXPECT_GE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], 0.0f)
+            << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
+        EXPECT_NEAR(
+            c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
+            c_ref[i * n() + j],
+            std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
+            << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
+      }
+    }
+  }
+}
+
 void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_minmax_ukernel_fn gemm_minmax, xnn_init_f32_minmax_params_fn init_params) const {
   ASSERT_LE(m(), mr());
   ASSERT_GE(a_stride(), k());
@@ -1314,7 +1471,7 @@ void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_minmax_ukernel_fn gemm_minmax
     std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });
     std::fill(c.begin(), c.end(), nanf(""));
     std::fill(c_ref.begin(), c_ref.end(), 0.0f);
-    std::fill(packed_w.begin(), packed_w.end(), 0.0f);
+    std::fill(packed_w.begin(), packed_w.end(), 0);
     xnn_pack_f32_qs8w_gemm_goi_w(1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(), packed_w.data(), nr() * sizeof(float), nullptr);
 
     // Fill in packed scale
