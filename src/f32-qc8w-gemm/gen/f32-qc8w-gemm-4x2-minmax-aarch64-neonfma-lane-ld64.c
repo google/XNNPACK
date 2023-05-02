@@ -15,13 +15,13 @@
 #include <xnnpack/gemm.h>
 
 
-void xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_lane_ld64(
+void xnn_f32_qc8w_gemm_minmax_ukernel_4x2__aarch64_neonfma_lane_ld64(
     size_t mr,
     size_t nc,
     size_t kc,
     const float* restrict a,
     size_t a_stride,
-    const float* restrict w,
+    const void* restrict w,
     float*restrict c,
     size_t cm_stride,
     size_t cn_stride,
@@ -58,7 +58,7 @@ void xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_lane_ld64(
   }
 
   do {
-    float32x2_t vacc0x01 = vld1_f32(w); w += 2;
+    float32x2_t vacc0x01 = vreinterpret_f32_u8(vld1_u8(w)); w = (const float*) w + 2;
     float32x2_t vacc1x01 = vacc0x01;
     float32x2_t vacc2x01 = vacc0x01;
     float32x2_t vacc3x01 = vacc0x01;
@@ -70,7 +70,9 @@ void xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_lane_ld64(
       const float32x2_t va2 = vld1_f32(a2); a2 += 2;
       const float32x2_t va3 = vld1_f32(a3); a3 += 2;
 
-      const float32x4_t vb01c01 = vld1q_f32(w); w += 4;
+      const uint32x2_t vtmpb = vld1_dup_u32(w); w = (const int8_t*) w + 4;
+      const int32x4_t vtmpi = vmovl_s16(vget_low_s16(vmovl_s8(vreinterpret_s8_u32(vtmpb))));
+      const float32x4_t vb01c01 = vcvtq_f32_s32(vtmpi);
       const float32x2_t vb01c0 = vget_low_f32(vb01c01);
       const float32x2_t vb01c1 = vget_high_f32(vb01c01);
       #if XNN_ARCH_ARM64
@@ -110,7 +112,9 @@ void xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_lane_ld64(
       const float32x2_t va2 = vld1_dup_f32(a2); a2 += 1;
       const float32x2_t va3 = vld1_dup_f32(a3); a3 += 1;
 
-      const float32x2_t vb01 = vld1_f32(w); w += 2;
+      const uint16x4_t vtmpb = vld1_dup_u16(w); w = (const int8_t*) w + 2;
+      const int32x2_t vtmpi = vget_low_s32(vmovl_s16(vget_low_s16(vmovl_s8(vreinterpret_s8_u16(vtmpb)))));
+      const float32x2_t vb01 = vcvt_f32_s32(vtmpi);
 
       vacc0x01 = vfma_f32(vacc0x01, va0, vb01);
       vacc1x01 = vfma_f32(vacc1x01, va1, vb01);
@@ -118,6 +122,11 @@ void xnn_f32_gemm_minmax_ukernel_4x2__aarch64_neonfma_lane_ld64(
       vacc3x01 = vfma_f32(vacc3x01, va3, vb01);
     }
 
+    const float32x2_t vscale = vreinterpret_f32_u8(vld1_u8(w)); w = (const float*) w + 2;
+    vacc0x01 = vmul_f32(vacc0x01, vscale);
+    vacc1x01 = vmul_f32(vacc1x01, vscale);
+    vacc2x01 = vmul_f32(vacc2x01, vscale);
+    vacc3x01 = vmul_f32(vacc3x01, vscale);
     const float32x2_t vmax = vld1_dup_f32(&params->scalar.max);
     vacc0x01 = vmin_f32(vacc0x01, vmax);
     vacc1x01 = vmin_f32(vacc1x01, vmax);

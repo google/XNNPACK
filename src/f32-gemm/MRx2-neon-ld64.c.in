@@ -3,6 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert DATATYPE in ["F32", "QC8"]
 $assert NR == 2
 #include <assert.h>
 
@@ -12,13 +13,17 @@ $assert NR == 2
 #include <xnnpack/gemm.h>
 
 
-void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${"aarch64_neonfma" if FMA else "neon"}_lane_ld64(
+$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
+void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${"aarch64_neonfma" if FMA else "neon"}_lane_ld64(
     size_t mr,
     size_t nc,
     size_t kc,
     const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
+    $if DATATYPE == "F32":
+      const float* restrict w,
+    $else:
+      const void* restrict w,
     float*restrict c,
     size_t cm_stride,
     size_t cn_stride,
@@ -63,7 +68,10 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${"aarch64_
       $for M in range(0, MR):
         float32x2_t vacc${M}x01 = vld1_f32(w); w += 2;
     $else:
-      float32x2_t vacc0x01 = vld1_f32(w); w += 2;
+      $if DATATYPE == "F32":
+        float32x2_t vacc0x01 = vld1_f32(w); w += 2;
+      $else:
+        float32x2_t vacc0x01 = vreinterpret_f32_u8(vld1_u8(w)); w = (const float*) w + 2;
       $for M in range(1, MR):
         float32x2_t vacc${M}x01 = vacc0x01;
 
@@ -72,10 +80,14 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${"aarch64_
       $for M in range(MR):
         const float32x2_t va${M} = vld1_f32(a${M}); a${M} += 2;
 
-      const uint64x1x2_t vb01c01 = vld2_u64((const uint64_t*) w); w += 4;
-      const float32x2_t vb01c0 = vreinterpret_f32_u64(vb01c01.val[0]);
-      const float32x2_t vb01c1 = vreinterpret_f32_u64(vb01c01.val[1]);
-
+      $if DATATYPE == "F32":
+        const float32x4_t vb01c01 = vld1q_f32(w); w += 4;
+      $elif DATATYPE == "QC8":
+        const uint32x2_t vtmpb = vld1_dup_u32(w); w = (const int8_t*) w + 4;
+        const int32x4_t vtmpi = vmovl_s16(vget_low_s16(vmovl_s8(vreinterpret_s8_u32(vtmpb))));
+        const float32x4_t vb01c01 = vcvtq_f32_s32(vtmpi);
+      const float32x2_t vb01c0 = vget_low_f32(vb01c01);
+      const float32x2_t vb01c1 = vget_high_f32(vb01c01);
       $for L in range(2):
         $if FMA:
           #if XNN_ARCH_ARM64
@@ -95,7 +107,12 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${"aarch64_
       $for M in range(MR):
         const float32x2_t va${M} = vld1_dup_f32(a${M}); a${M} += 1;
 
-      const float32x2_t vb01 = vld1_f32(w); w += 2;
+      $if DATATYPE == "F32":
+        const float32x2_t vb01 = vld1_f32(w); w += 2;
+      $elif DATATYPE == "QC8":
+        const uint16x4_t vtmpb = vld1_dup_u16(w); w = (const int8_t*) w + 2;
+        const int32x2_t vtmpi = vget_low_s32(vmovl_s16(vget_low_s16(vmovl_s8(vreinterpret_s8_u16(vtmpb)))));
+        const float32x2_t vb01 = vcvt_f32_s32(vtmpi);
 
       $for M in range(MR):
         $if FMA:
@@ -104,10 +121,13 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${"aarch64_
           vacc${M}x01 = vmla_f32(vacc${M}x01, va${M}, vb01);
     }
 
+    $if DATATYPE == "QC8":
+      const float32x2_t vscale = vreinterpret_f32_u8(vld1_u8(w)); w = (const float*) w + 2;
+      $for M in range(MR):
+        vacc${M}x01 = vmul_f32(vacc${M}x01, vscale);
     const float32x2_t vmax = vld1_dup_f32(&params->scalar.max);
     $for M in range(MR):
       vacc${M}x01 = vmin_f32(vacc${M}x01, vmax);
-
     const float32x2_t vmin = vld1_dup_f32(&params->scalar.min);
     $for M in range(MR):
       vacc${M}x01 = vmax_f32(vacc${M}x01, vmin);

@@ -144,10 +144,10 @@ tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=6 -D NR=8  -D FMA=0 -D INC=1 
 tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=6 -D NR=8  -D FMA=1 -D INC=0 -D DUP=0 -o src/f32-gemm/gen/f32-gemm-6x8-minmax-aarch64-neonfma-lane-ld128.c &
 tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=6 -D NR=8  -D FMA=1 -D INC=1 -D DUP=0 -o src/f32-gemm/gen/f32-gemminc-6x8-minmax-aarch64-neonfma-lane-ld128.c &
 ### MRx2 micro-kernels
-tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2  -D FMA=0 -D INC=0 -D DUP=0 -o src/f32-gemm/gen/f32-gemm-4x2-minmax-neon-lane-ld64.c &
-tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2  -D FMA=1 -D INC=0 -D DUP=0 -o src/f32-gemm/gen/f32-gemm-4x2-minmax-aarch64-neonfma-lane-ld64.c &
-tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=6 -D NR=2  -D FMA=0 -D INC=0 -D DUP=0 -o src/f32-gemm/gen/f32-gemm-6x2-minmax-neon-lane-ld64.c &
-tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=6 -D NR=2  -D FMA=1 -D INC=0 -D DUP=0 -o src/f32-gemm/gen/f32-gemm-6x2-minmax-aarch64-neonfma-lane-ld64.c &
+tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2  -D FMA=0 -D INC=0 -D DUP=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2-minmax-neon-lane-ld64.c &
+tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=4 -D NR=2  -D FMA=1 -D INC=0 -D DUP=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2-minmax-aarch64-neonfma-lane-ld64.c &
+tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=6 -D NR=2  -D FMA=0 -D INC=0 -D DUP=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x2-minmax-neon-lane-ld64.c &
+tools/xngen src/f32-gemm/MRx2-neon-ld64.c.in -D MR=6 -D NR=2  -D FMA=1 -D INC=0 -D DUP=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x2-minmax-aarch64-neonfma-lane-ld64.c &
 ### DUP LD64 micro-kernels
 tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=1 -D NR=8  -D FMA=0 -D INC=0 -D DUP=1 -o src/f32-gemm/gen/f32-gemm-1x8-minmax-neon-dup-ld64.c &
 tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=1 -D NR=8  -D FMA=0 -D INC=1 -D DUP=1 -o src/f32-gemm/gen/f32-gemminc-1x8-minmax-neon-dup-ld64.c &
