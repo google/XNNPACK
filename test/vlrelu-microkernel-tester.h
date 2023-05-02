@@ -111,7 +111,7 @@ class VLReLUMicrokernelTester {
       const int32_t positive_multiplier = (int32_t) lrintf(-256.0f * positive_scale());
       const int32_t negative_multiplier = (int32_t) lrintf(-256.0f * negative_scale());
       for (size_t i = 0; i < batch_size(); i++) {
-        const int32_t input_value = (input_zero_point() - input[i]) << 7;
+        const int32_t input_value = (input_zero_point() - input[i]) * 128;
         const int32_t multiplier = input_value <= 0 ? positive_multiplier : negative_multiplier;
         int32_t output_value = math_asr_s32(input_value * multiplier + INT32_C(0x4000), 15) + output_zero_point();
         output_value = std::min<int32_t>(output_value, std::numeric_limits<int8_t>::max());
@@ -156,7 +156,7 @@ class VLReLUMicrokernelTester {
       const int32_t positive_multiplier = (int32_t) lrintf(-256.0f * positive_scale());
       const int32_t negative_multiplier = (int32_t) lrintf(-256.0f * negative_scale());
       for (size_t i = 0; i < batch_size(); i++) {
-        const int32_t input_value = (input_zero_point() - input[i]) << 7;
+        const int32_t input_value = (input_zero_point() - input[i]) * 128;
         const int32_t multiplier = input_value <= 0 ? positive_multiplier : negative_multiplier;
         int32_t output_value = math_asr_s32(input_value * multiplier + INT32_C(0x4000), 15) + output_zero_point();
         output_value = std::min<int32_t>(output_value, std::numeric_limits<uint8_t>::max());
