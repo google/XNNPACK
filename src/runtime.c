@@ -499,25 +499,12 @@ enum xnn_status xnn_create_runtime_v4(
       continue;
     }
 
-    if (value->data == NULL) {
-      if (xnn_value_is_external(value)) {
-        // Value is non-static and external to the runtime: must be specified via a call to xnn_setup_runtime.
-        value->allocation_type = xnn_allocation_type_external;
-      } else if (xnn_value_is_persistent(value)) {
-        // Persistent values are allocated in the front of the workspace without overlaps.
-        value->allocation_type = xnn_allocation_type_persistent;
-      } else {
-        // Value is purely internal to the runtime, and must be allocated in its workspace.
-        value->allocation_type = xnn_allocation_type_workspace;
-      }
-    } else if (value->fp16_compatible) {
+    if (value->fp16_compatible) {
       // Value is static and has been converted to FP16 in a new buffer.
       value->allocation_type = xnn_allocation_type_dynamic;
       // Runtime takes ownership of the data from subgraph.
       value->data = subgraph->values[i].data;
       subgraph->values[i].data = NULL;
-    } else {
-      value->allocation_type = xnn_allocation_type_static;
     }
   }
 

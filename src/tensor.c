@@ -15,6 +15,18 @@
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
 
+static void set_allocation_type(struct xnn_value* value)
+{
+  if (value->data != NULL) {
+    value->allocation_type = xnn_allocation_type_static;
+  } else if ((value->flags & (XNN_VALUE_FLAG_EXTERNAL_INPUT | XNN_VALUE_FLAG_EXTERNAL_OUTPUT)) != 0) {
+    value->allocation_type = xnn_allocation_type_external;
+  } else if ((value->flags & XNN_VALUE_FLAG_PERSISTENT) != 0) {
+    value->allocation_type = xnn_allocation_type_persistent;
+  } else {
+    value->allocation_type = xnn_allocation_type_workspace;
+  }
+}
 
 enum xnn_status xnn_define_tensor_value(
     xnn_subgraph_t subgraph,
@@ -69,6 +81,7 @@ enum xnn_status xnn_define_tensor_value(
   value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
   value->flags = flags;
   value->data = (void*) (uintptr_t) data;
+  set_allocation_type(value);
 
   *id_out = value->id;
   return xnn_status_success;
@@ -160,6 +173,7 @@ enum xnn_status xnn_define_quantized_tensor_value(
   value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
   value->flags = flags;
   value->data = (void*) (uintptr_t) data;
+  set_allocation_type(value);
 
   *id_out = value->id;
   return xnn_status_success;
@@ -249,6 +263,7 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value(
   value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
   value->flags = flags;
   value->data = (void*) (uintptr_t) data;
+  set_allocation_type(value);
 
   *id_out = value->id;
   return xnn_status_success;
