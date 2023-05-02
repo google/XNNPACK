@@ -29,12 +29,9 @@ static enum xnn_status create_average_pooling_operator(
   assert(input_id < num_values);
 
   assert(node->num_outputs == 1);
-  const uint32_t output_id = node->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
 
   const size_t channel_dim = values[input_id].shape.dim[3];
-  assert(channel_dim == values[output_id].shape.dim[3]);
+  assert(channel_dim == values[node->outputs[0]].shape.dim[3]);
 
   enum xnn_status status;
   switch (node->compute_type) {
@@ -77,8 +74,6 @@ static enum xnn_status create_average_pooling_operator(
     opdata->batch_size = values[input_id].shape.dim[0];
     opdata->input_height = values[input_id].shape.dim[1];
     opdata->input_width = values[input_id].shape.dim[2];
-    opdata->inputs[0] = input_id;
-    opdata->outputs[0] = output_id;
   }
   return status;
 }

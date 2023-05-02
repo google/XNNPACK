@@ -26,9 +26,6 @@ static enum xnn_status create_copy_operator(
   assert(input_id < num_values);
 
   assert(node->num_outputs == 1);
-  const uint32_t output_id = node->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
 
   enum xnn_status status;
   switch (node->compute_type) {
@@ -56,8 +53,6 @@ static enum xnn_status create_copy_operator(
   }
   if (status == xnn_status_success) {
     opdata->batch_size = xnn_shape_multiply_all_dims(&values[input_id].shape);
-    opdata->inputs[0] = input_id;
-    opdata->outputs[0] = output_id;
   }
   return status;
 }

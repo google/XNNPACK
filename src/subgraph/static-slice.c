@@ -26,9 +26,6 @@ static enum xnn_status create_slice_operator(
   assert(input_id < num_values);
 
   assert(node->num_outputs == 1);
-  const uint32_t output_id = node->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
 
   enum xnn_status status;
   switch (node->compute_type) {
@@ -47,8 +44,6 @@ static enum xnn_status create_slice_operator(
   }
 
   if (status == xnn_status_success) {
-    opdata->inputs[0] = input_id;
-    opdata->outputs[0] = output_id;
     memcpy(opdata->offsets, node->params.slice.offsets, sizeof(opdata->offsets));
     memcpy(opdata->sizes, node->params.slice.sizes, sizeof(opdata->sizes));
     opdata->shape1 = values[input_id].shape;

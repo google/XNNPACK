@@ -105,9 +105,6 @@ static enum xnn_status create_even_split2_operator(
     return status;
   }
 
-  opdata->inputs[0] = input_id;
-  opdata->outputs[0] = output1_id;
-  opdata->outputs[1] = output2_id;
   opdata->batch_size = batch_size;
 
   return status;
@@ -161,10 +158,6 @@ static enum xnn_status create_even_split3_operator(
     return status;
   }
 
-  opdata->inputs[0] = input_id;
-  opdata->outputs[0] = output1_id;
-  opdata->outputs[1] = output2_id;
-  opdata->outputs[2] = output3_id;
   opdata->batch_size = batch_size;
 
   return status;
@@ -226,11 +219,6 @@ static enum xnn_status create_even_split4_operator(
     return status;
   }
 
-  opdata->inputs[0] = input_id;
-  opdata->outputs[0] = output1_id;
-  opdata->outputs[1] = output2_id;
-  opdata->outputs[2] = output3_id;
-  opdata->outputs[3] = output4_id;
   opdata->batch_size = batch_size;
 
   return status;
@@ -245,7 +233,9 @@ static enum xnn_status setup_even_split_operator_helper(
   pthreadpool_t threadpool)
 {
   const uint32_t output_id = opdata->outputs[index];
-  if (output_id == XNN_INVALID_VALUE_ID) {
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
+  if (values[output_id].allocation_type == xnn_allocation_type_invalid) {
     assert(opdata->operator_objects[index] == NULL);
     // output_id was removed during optimization.
     return xnn_status_success;

@@ -131,8 +131,6 @@ static enum xnn_status create_global_average_pooling_operator(
       default:
         XNN_UNREACHABLE;
     }
-    opdata->inputs[0] = input_id;
-    opdata->outputs[0] = output_id;
   }
   return status;
 }

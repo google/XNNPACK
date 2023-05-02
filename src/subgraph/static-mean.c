@@ -25,14 +25,7 @@ static enum xnn_status create_mean_operator(
   struct xnn_weights_cache* weights_cache)
 {
   assert(node->num_inputs == 1);
-  const uint32_t input_id = node->inputs[0];
-  assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_values);
-
   assert(node->num_outputs == 1);
-  const uint32_t output_id = node->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
 
   enum xnn_status status;
   switch (node->compute_type) {
@@ -53,8 +46,6 @@ static enum xnn_status create_mean_operator(
     const size_t num_reduction_axes = node->params.reduce.num_reduction_axes;
     opdata->num_reduction_axes = num_reduction_axes;
     memcpy(opdata->reduction_axes, node->params.reduce.reduction_axes, num_reduction_axes * sizeof(size_t));
-    opdata->inputs[0] = input_id;
-    opdata->outputs[0] = output_id;
   }
   return status;
 }

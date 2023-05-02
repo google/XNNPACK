@@ -35,7 +35,7 @@ static enum xnn_status create_resize_bilinear_operator(
   assert(output_id < num_values);
 
   const size_t channel_dim = values[input_id].shape.dim[3];
-  assert(channel_dim == values[output_id].shape.dim[3]);
+  assert(channel_dim == values[node->outputs[0]].shape.dim[3]);
 
   enum xnn_status status;
   if (values[input_id].layout == xnn_layout_type_nchw) {
@@ -93,8 +93,6 @@ static enum xnn_status create_resize_bilinear_operator(
     opdata->input_width = values[input_id].shape.dim[2];
     opdata->output_height = values[output_id].shape.dim[1];
     opdata->output_width = values[output_id].shape.dim[2];
-    opdata->inputs[0] = input_id;
-    opdata->outputs[0] = output_id;
   }
   return status;
 }

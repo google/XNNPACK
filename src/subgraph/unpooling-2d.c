@@ -29,18 +29,12 @@ static enum xnn_status create_unpooling_operator(
   const uint32_t input_value_id = node->inputs[0];
   assert(input_value_id != XNN_INVALID_VALUE_ID);
   assert(input_value_id < num_values);
-  const uint32_t input_index_id = node->inputs[1];
-  assert(input_index_id != XNN_INVALID_VALUE_ID);
-  assert(input_index_id < num_values);
 
   assert(node->num_outputs == 1);
-  const uint32_t output_id = node->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
 
   const size_t channel_dim = values[input_value_id].shape.dim[3];
-  assert(channel_dim == values[input_index_id].shape.dim[3]);
-  assert(channel_dim == values[output_id].shape.dim[3]);
+  assert(channel_dim == values[node->inputs[1]].shape.dim[3]);
+  assert(channel_dim == values[node->outputs[0]].shape.dim[3]);
 
   const enum xnn_status status = xnn_create_unpooling2d_nhwc_x32(
     node->params.pooling_2d.padding_top,
@@ -56,9 +50,6 @@ static enum xnn_status create_unpooling_operator(
     opdata->batch_size = values[input_value_id].shape.dim[0];
     opdata->input_height = values[input_value_id].shape.dim[1];
     opdata->input_width = values[input_value_id].shape.dim[2];
-    opdata->inputs[0] = input_value_id;
-    opdata->inputs[1] = input_index_id;
-    opdata->outputs[0] = output_id;
   }
   return status;
 }

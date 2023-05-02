@@ -31,9 +31,6 @@ static enum xnn_status create_global_sum_pooling_operator(
   assert(input_id < num_values);
 
   assert(node->num_outputs == 1);
-  const uint32_t output_id = node->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
 
   const size_t num_input_dims = values[input_id].shape.num_dims;
   assert(num_input_dims >= 1);
@@ -75,8 +72,6 @@ static enum xnn_status create_global_sum_pooling_operator(
       default:
         XNN_UNREACHABLE;
     }
-    opdata->inputs[0] = input_id;
-    opdata->outputs[0] = output_id;
   }
   return status;
 }

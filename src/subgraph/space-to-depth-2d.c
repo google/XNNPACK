@@ -78,8 +78,6 @@ static enum xnn_status create_space_to_depth_operator(
     opdata->input_width = values[input_id].shape.dim[2];
     opdata->output_height = values[output_id].shape.dim[1];
     opdata->output_width = values[output_id].shape.dim[2];
-    opdata->inputs[0] = input_id;
-    opdata->outputs[0] = output_id;
   }
   return status;
 }

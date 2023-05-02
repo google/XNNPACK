@@ -77,9 +77,6 @@ static enum xnn_status create_concatenate2_operator(
     return status;
   }
 
-  opdata->inputs[0] = input1_id;
-  opdata->inputs[1] = input2_id;
-  opdata->outputs[0] = output_id;
   opdata->batch_size = batch_size;
 
   return status;
@@ -136,10 +133,6 @@ static enum xnn_status create_concatenate3_operator(
     return status;
   }
 
-  opdata->inputs[0] = input1_id;
-  opdata->inputs[1] = input2_id;
-  opdata->inputs[2] = input3_id;
-  opdata->outputs[0] = output_id;
   opdata->batch_size = batch_size;
 
   return status;
@@ -204,11 +197,6 @@ static enum xnn_status create_concatenate4_operator(
     return status;
   }
 
-  opdata->inputs[0] = input1_id;
-  opdata->inputs[1] = input2_id;
-  opdata->inputs[2] = input3_id;
-  opdata->inputs[3] = input4_id;
-  opdata->outputs[0] = output_id;
   opdata->batch_size = batch_size;
 
   return status;

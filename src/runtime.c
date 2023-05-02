@@ -468,11 +468,12 @@ enum xnn_status xnn_create_runtime_v4(
     runtime->opdata[i].id = node->id;
     runtime->opdata[i].num_inputs = node->num_inputs;
     runtime->opdata[i].num_outputs = node->num_outputs;
-    for (size_t j = 0; j < XNN_MAX_RUNTIME_INPUTS; j++) {
-      runtime->opdata[i].inputs[j] = XNN_INVALID_VALUE_ID;
+    // Copy all inputs (not just num_inputs) to get all invalid ID (e.g. no bias).
+    for (size_t input_i = 0; input_i < node->num_inputs; input_i++) {
+      runtime->opdata[i].inputs[input_i] = node->inputs[input_i];
     }
-    for (size_t j = 0; j < XNN_MAX_RUNTIME_OUTPUTS; j++) {
-      runtime->opdata[i].outputs[j] = XNN_INVALID_VALUE_ID;
+    for (size_t output_i = 0; output_i < node->num_outputs; output_i++) {
+      runtime->opdata[i].outputs[output_i] = node->outputs[output_i];
     }
 
     // Ignore fused nodes

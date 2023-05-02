@@ -192,8 +192,6 @@ static enum xnn_status create_deconvolution_operator(
     opdata->input_width = values[input_id].shape.dim[2];
     opdata->adjustment_height = node->params.deconvolution_2d.adjustment_height;
     opdata->adjustment_width = node->params.deconvolution_2d.adjustment_width;
-    opdata->inputs[0] = input_id;
-    opdata->outputs[0] = output_id;
   }
   return status;
 }

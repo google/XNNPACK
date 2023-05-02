@@ -70,8 +70,6 @@ static enum xnn_status create_elu_operator(
   }
   if (status == xnn_status_success) {
     opdata->batch_size = xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
-    opdata->inputs[0] = input_id;
-    opdata->outputs[0] = output_id;
   }
   return status;
 }

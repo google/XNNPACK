@@ -29,9 +29,6 @@ static enum xnn_status create_transpose_operator(
   assert(input_id < num_values);
 
   assert(node->num_outputs == 1);
-  const uint32_t output_id = node->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
 
   enum xnn_status status;
   switch (node->compute_type) {
@@ -50,8 +47,6 @@ static enum xnn_status create_transpose_operator(
   }
 
   if (status == xnn_status_success) {
-    opdata->inputs[0] = input_id;
-    opdata->outputs[0] = output_id;
     opdata->shape1.num_dims = node->params.transpose.num_dims;
     opdata->shape2.num_dims = node->params.transpose.num_dims;
     memcpy(opdata->shape1.dim, values[input_id].shape.dim, opdata->shape1.num_dims * sizeof(size_t));

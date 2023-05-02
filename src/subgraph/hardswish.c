@@ -30,9 +30,6 @@ static enum xnn_status create_hardswish_operator(
   assert(input_id < num_values);
 
   assert(node->num_outputs == 1);
-  const uint32_t output_id = node->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
 
   const size_t num_input_dims = values[input_id].shape.num_dims;
   const size_t channel_dim = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
@@ -56,8 +53,6 @@ static enum xnn_status create_hardswish_operator(
   }
   if (status == xnn_status_success) {
     opdata->batch_size = xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
-    opdata->inputs[0] = input_id;
-    opdata->outputs[0] = output_id;
   }
   return status;
 }

@@ -76,9 +76,6 @@ static enum xnn_status create_maximum_operator(
       memcpy(opdata->shape1.dim, values[input1_id].shape.dim, values[input1_id].shape.num_dims * sizeof(size_t));
       memcpy(opdata->shape2.dim, values[input2_id].shape.dim, values[input2_id].shape.num_dims * sizeof(size_t));
     }
-    opdata->inputs[0] = input1_id;
-    opdata->inputs[1] = input2_id;
-    opdata->outputs[0] = output_id;
   }
   return status;
 }
