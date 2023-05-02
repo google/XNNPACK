@@ -582,10 +582,10 @@ enum xnn_status xnn_define_fully_connected(
 
   node->create = create_fully_connected_operator;
   node->setup = setup_fully_connected_operator;
-  // Only set this pointer if this is dynamic.
-  if (subgraph->values[filter_id].data == NULL ||
-      (bias_id != XNN_INVALID_VALUE_ID && subgraph->values[bias_id].data == NULL)) {
-    // TODO(zhin): we cannot yet check allocation type here because that is only set after runtime create.
+  // Only set this pointer if weights are dynamic.
+  if (
+    !xnn_value_is_static(subgraph->values + filter_id) ||
+    (bias_id != XNN_INVALID_VALUE_ID && !xnn_value_is_static(subgraph->values + bias_id))) {
     node->setup_workspace = setup_fully_connected_operator_workspace;
   }
 

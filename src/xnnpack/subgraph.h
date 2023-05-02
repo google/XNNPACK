@@ -157,7 +157,7 @@ XNN_INLINE bool xnn_value_is_internal(const struct xnn_value* value) {
 }
 
 XNN_INLINE bool xnn_value_is_persistent(const struct xnn_value* value) {
-  return (value->flags & XNN_VALUE_FLAG_PERSISTENT) != 0;
+  return value->allocation_type == xnn_allocation_type_persistent;
 }
 
 XNN_INLINE bool xnn_value_is_valid(const struct xnn_value* value) {
@@ -165,7 +165,7 @@ XNN_INLINE bool xnn_value_is_valid(const struct xnn_value* value) {
 }
 
 XNN_INLINE bool xnn_value_is_static(const struct xnn_value* value) {
-  return value->data != NULL;
+  return value->allocation_type == xnn_allocation_type_static;
 }
 
 struct xnn_node;
