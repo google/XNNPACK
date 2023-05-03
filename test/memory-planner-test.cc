@@ -63,24 +63,24 @@ TEST(MemoryPlanner, MemoryBlocksCoalescing) {
   struct xnn_value_allocation_tracker tracker;
   xnn_init_value_allocation_tracker(&tracker, &runtime);
   // As this is an empty runtime, we create the following xnn_value_usage stub.
-  tracker.usage[0].first_node = 1,
-  tracker.usage[0].last_node = 1,
+  tracker.usage[0].first_node = 1;
+  tracker.usage[0].last_node = 1;
   xnn_add_value_allocation_tracker(&tracker, 0, 56);
 
-  tracker.usage[1].first_node = 0,
-  tracker.usage[1].last_node = 1,
+  tracker.usage[1].first_node = 0;
+  tracker.usage[1].last_node = 1;
   xnn_add_value_allocation_tracker(&tracker, 1, 40);
 
-  tracker.usage[2].first_node = 1,
-  tracker.usage[2].last_node = 1,
+  tracker.usage[2].first_node = 1;
+  tracker.usage[2].last_node = 1;
   xnn_add_value_allocation_tracker(&tracker, 2, 64);
 
-  tracker.usage[3].first_node = 0,
-  tracker.usage[3].last_node = 0,
+  tracker.usage[3].first_node = 0;
+  tracker.usage[3].last_node = 0;
   xnn_add_value_allocation_tracker(&tracker, 3, 152);
 
-  tracker.usage[4].first_node = 1,
-  tracker.usage[4].last_node = 1,
+  tracker.usage[4].first_node = 1;
+  tracker.usage[4].last_node = 1;
   xnn_add_value_allocation_tracker(&tracker, 4, 20);
 
   for (size_t i = 0; i < runtime.num_values; i++) {
@@ -115,36 +115,36 @@ TEST(MemoryPlanner, GeneralPlanning) {
   struct xnn_value_allocation_tracker tracker;
   xnn_init_value_allocation_tracker(&tracker, &runtime);
   // As this is an empty runtime, we create the following xnn_value_usage stub.
-  tracker.usage[0].first_node = 0,
-  tracker.usage[0].last_node = 1,
+  tracker.usage[0].first_node = 0;
+  tracker.usage[0].last_node = 1;
   xnn_add_value_allocation_tracker(&tracker, 0, 32);
 
-  tracker.usage[1].first_node = 1,
-  tracker.usage[1].last_node = 4,
+  tracker.usage[1].first_node = 1;
+  tracker.usage[1].last_node = 4;
   xnn_add_value_allocation_tracker(&tracker, 1, 28);
 
-  tracker.usage[2].first_node = 2,
-  tracker.usage[2].last_node = 5,
+  tracker.usage[2].first_node = 2;
+  tracker.usage[2].last_node = 5;
   xnn_add_value_allocation_tracker(&tracker, 2, 36);
 
-  tracker.usage[3].first_node = 3,
-  tracker.usage[3].last_node = 5,
+  tracker.usage[3].first_node = 3;
+  tracker.usage[3].last_node = 5;
   xnn_add_value_allocation_tracker(&tracker, 3, 16);
 
-  tracker.usage[4].first_node = 4,
-  tracker.usage[4].last_node = 5,
+  tracker.usage[4].first_node = 4;
+  tracker.usage[4].last_node = 5;
   xnn_add_value_allocation_tracker(&tracker, 4, 8);
 
-  tracker.usage[5].first_node = 5,
-  tracker.usage[5].last_node = 7,
+  tracker.usage[5].first_node = 5;
+  tracker.usage[5].last_node = 7;
   xnn_add_value_allocation_tracker(&tracker, 5, 64);
 
-  tracker.usage[6].first_node = 6,
-  tracker.usage[6].last_node = 8,
+  tracker.usage[6].first_node = 6;
+  tracker.usage[6].last_node = 8;
   xnn_add_value_allocation_tracker(&tracker, 6, 10);
 
-  tracker.usage[7].first_node = 7,
-  tracker.usage[7].last_node = 8,
+  tracker.usage[7].first_node = 7;
+  tracker.usage[7].last_node = 8;
   xnn_add_value_allocation_tracker(&tracker, 7, 40);
 
   for (size_t i = 0; i < runtime.num_values; i++) {
@@ -707,13 +707,10 @@ TEST(MemoryPlanner, FullyConnectedDynamicFilterDynamicBias) {
   xnn_operator_data* fc_opdata = &runtime->opdata[2];
 
   ASSERT_EQ(fc_opdata->type, xnn_node_type_fully_connected);
-  size_t fc_workspace_size = 0;
-  size_t alignment = 0;
-  fc_opdata->setup_workspace(fc_opdata, &fc_workspace_size, nullptr, &alignment);
 
   ASSERT_EQ(runtime->workspace->size,
             round_up_po2(2 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES)  // for filter_id
-            + round_up_po2(fc_workspace_size, XNN_EXTRA_BYTES)  // for weights packing
+            + round_up_po2(fc_opdata->workspace_size, XNN_EXTRA_BYTES)  // for weights packing
             + round_up_po2(2 * sizeof(float), XNN_EXTRA_BYTES)  // for bias_id
             + MEMORY_ARENA_EXTRA_BYTES);
 }
@@ -748,13 +745,10 @@ TEST(MemoryPlanner, FullyConnectedDynamicFilterStaticBias) {
   xnn_operator_data* fc_opdata = &runtime->opdata[1];
 
   ASSERT_EQ(fc_opdata->type, xnn_node_type_fully_connected);
-  size_t fc_workspace_size = 0;
-  size_t alignment = 0;
-  fc_opdata->setup_workspace(fc_opdata, &fc_workspace_size, nullptr, &alignment);
 
   ASSERT_EQ(runtime->workspace->size,
             round_up_po2(2 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES)  // for filter_id
-            + round_up_po2(fc_workspace_size, XNN_EXTRA_BYTES)  // for weights packing
+            + round_up_po2(fc_opdata->workspace_size, XNN_EXTRA_BYTES)  // for weights packing
             + MEMORY_ARENA_EXTRA_BYTES);
 }
 
@@ -787,13 +781,10 @@ TEST(MemoryPlanner, FullyConnectedDynamicFilterNoBias) {
   xnn_operator_data* fc_opdata = &runtime->opdata[1];
 
   ASSERT_EQ(fc_opdata->type, xnn_node_type_fully_connected);
-  size_t fc_workspace_size = 0;
-  size_t alignment = 0;
-  fc_opdata->setup_workspace(fc_opdata, &fc_workspace_size, nullptr, &alignment);
 
   ASSERT_EQ(runtime->workspace->size,
             round_up_po2(2 * 3 * 3 * 3 * sizeof(float), XNN_EXTRA_BYTES)  // for filter_id
-            + round_up_po2(fc_workspace_size, XNN_EXTRA_BYTES)  // for weights packing
+            + round_up_po2(fc_opdata->workspace_size, XNN_EXTRA_BYTES)  // for weights packing
             + MEMORY_ARENA_EXTRA_BYTES);
 }
 
@@ -827,12 +818,9 @@ TEST(MemoryPlanner, FullyConnectedStaticFilterDynamicBias) {
   xnn_operator_data* fc_opdata = &runtime->opdata[1];
 
   ASSERT_EQ(fc_opdata->type, xnn_node_type_fully_connected);
-  size_t fc_workspace_size = 0;
-  size_t alignment = 0;
-  fc_opdata->setup_workspace(fc_opdata, &fc_workspace_size, nullptr, &alignment);
 
   ASSERT_EQ(runtime->workspace->size,
-            round_up_po2(fc_workspace_size, XNN_EXTRA_BYTES)  // for weights packing
+            round_up_po2(fc_opdata->workspace_size, XNN_EXTRA_BYTES)  // for weights packing
             + round_up_po2(2 * sizeof(float), XNN_EXTRA_BYTES)  // for bias_id
             + MEMORY_ARENA_EXTRA_BYTES);
 }
@@ -861,12 +849,9 @@ TEST(MemoryPlanner, FullyConnectedExternalFilterExternalBias) {
   xnn_operator_data* fc_opdata = &runtime->opdata[0];
 
   ASSERT_EQ(fc_opdata->type, xnn_node_type_fully_connected);
-  size_t fc_workspace_size = 0;
-  size_t alignment = 0;
-  fc_opdata->setup_workspace(fc_opdata, &fc_workspace_size, nullptr, &alignment);
 
   ASSERT_EQ(runtime->workspace->size,
-            + round_up_po2(fc_workspace_size, XNN_EXTRA_BYTES)  // for weights packing
+            + round_up_po2(fc_opdata->workspace_size, XNN_EXTRA_BYTES)  // for weights packing
             + MEMORY_ARENA_EXTRA_BYTES);
 }
 
