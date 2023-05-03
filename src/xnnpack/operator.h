@@ -109,10 +109,19 @@ struct xnn_ukernel {
   };
 };
 
+// Valid state transitions:
+// - xnn_run_state_invalid -> xnn_run_state_skip
+// - xnn_run_state_invalid -> xnn_run_state_ready
+// - xnn_run_state_invalid -> xnn_run_state_needs_setup -> xnn_run_state_ready
 enum xnn_run_state {
+  // When an operator is first created, it starts off in invalid state, it needs to be setup, or reshape + setup.
   xnn_run_state_invalid = 0,
+  // Operator is ready to be run.
   xnn_run_state_ready,
+  // Operator doesn't need to be run.
   xnn_run_state_skip,
+  // Operator has been reshaped, but not setup yet, pointers are not set.
+  xnn_run_state_needs_setup,
 };
 
 struct subconvolution_params {
@@ -194,8 +203,6 @@ struct xnn_operator {
   void* lookup_table;
   void* pixelwise_buffer;
   struct subconvolution_params* subconvolution_buffer;
-  void* workspace;
-  size_t workspace_size;
   uint32_t flags;
 
   union {

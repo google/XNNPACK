@@ -189,7 +189,7 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_f32(
     dynamic_fully_connected_op_out);
 }
 
-static enum xnn_status setup_dynamic_fully_connected_nc(
+static enum xnn_status reshape_dynamic_fully_connected_nc(
     xnn_operator_t dynamic_fully_connected_op,
     enum xnn_operator_type expected_operator_type,
     size_t batch_size,
@@ -197,10 +197,8 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
     size_t output_channels,
     size_t input_stride,
     size_t output_stride,
-    const void* input,
-    const void* kernel,
-    const void* bias,
-    void* output,
+    size_t* workspace_size,
+    size_t* workspace_alignment,
     uint32_t log2_input_element_size,
     uint32_t log2_filter_element_size,
     uint32_t bias_element_size,
@@ -210,7 +208,7 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
     size_t num_threads)
 {
   if (dynamic_fully_connected_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
       xnn_operator_type_to_string(expected_operator_type),
       xnn_operator_type_to_string(dynamic_fully_connected_op->type));
     return xnn_status_invalid_parameter;
@@ -218,28 +216,28 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
   dynamic_fully_connected_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+    xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(dynamic_fully_connected_op->type));
     return xnn_status_uninitialized;
   }
 
   if (input_channels == 0) {
     xnn_log_error(
-      "failed to create %s operator with %zu input channels: number of channels must be non-zero",
+      "failed to reshape %s operator with %zu input channels: number of channels must be non-zero",
       xnn_operator_type_to_string(dynamic_fully_connected_op->type), input_channels);
     return xnn_status_invalid_parameter;
   }
 
   if (output_channels == 0) {
     xnn_log_error(
-      "failed to create %s operator with %zu output channels: number of channels must be non-zero",
+      "failed to reshape %s operator with %zu output channels: number of channels must be non-zero",
       xnn_operator_type_to_string(dynamic_fully_connected_op->type), output_channels);
     return xnn_status_invalid_parameter;
   }
 
   if (input_stride < input_channels) {
     xnn_log_error(
-      "failed to create %s operator with input element stride of %zu: "
+      "failed to reshape %s operator with input element stride of %zu: "
       "stride must be at least as large as the number of input channels (%zu)",
       xnn_operator_type_to_string(dynamic_fully_connected_op->type), input_stride, input_channels);
     return xnn_status_invalid_parameter;
@@ -247,7 +245,7 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
 
   if (output_stride < output_channels) {
     xnn_log_error(
-      "failed to create %s operator with output element stride of %zu: "
+      "failed to reshape %s operator with output element stride of %zu: "
       "stride must be at least as large as the number of output channels (%zu)",
       xnn_operator_type_to_string(dynamic_fully_connected_op->type), output_stride, output_channels);
     return xnn_status_invalid_parameter;
@@ -271,7 +269,12 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
   const uint32_t nr = dynamic_fully_connected_op->ukernel.gemm.nr;
   const uint32_t kr = dynamic_fully_connected_op->ukernel.gemm.kr;
   const uint32_t sr = dynamic_fully_connected_op->ukernel.gemm.sr;
+  const size_t n_stride = round_up(output_channels, nr);
   const size_t k_stride = round_up_po2(input_channels, kr * sr);
+
+  // TODO(zhin): fast path to query workspace size when workspace_size != NULL?
+  *workspace_size = n_stride * bias_element_size + ((n_stride * k_stride) << log2_filter_element_size);
+  *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
 
   assert(dynamic_fully_connected_op->ukernel.gemm.packw_gemm_goi != NULL);
   dynamic_fully_connected_op->context.packw_gemm_goi = (struct packw_gemm_goi_context) {
@@ -279,11 +282,8 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
     .nr = nr,
     .kr = kr,
     .sr = sr,
-    .kernel = kernel,
     .k_stride = input_channels << log2_input_element_size,
-    .bias = bias,
     .b_stride = bias_element_size,
-    .packed_weights = dynamic_fully_connected_op->workspace,
     .w_stride = bias_element_size + (k_stride << log2_input_element_size),
     .packw_gemm_goi = dynamic_fully_connected_op->ukernel.gemm.packw_gemm_goi,
   };
@@ -291,10 +291,7 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
     .k_scaled = input_channels << log2_input_element_size,
     .w_stride = bias_element_size +
         (round_up_po2(input_channels, dynamic_fully_connected_op->ukernel.gemm.kr * dynamic_fully_connected_op->ukernel.gemm.sr) << log2_input_element_size),
-    .a = input,
     .a_stride = input_stride << log2_input_element_size,
-    .packed_w = dynamic_fully_connected_op->workspace,
-    .c = output,
     .cm_stride = output_stride << log2_output_element_size,
     .cn_stride = nr << log2_output_element_size,
     .log2_csize = log2_output_element_size,
@@ -343,23 +340,21 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_setup_dynamic_fully_connected_nc_f16(
+enum xnn_status xnn_reshape_dynamic_fully_connected_nc_f16(
     xnn_operator_t dynamic_fully_connected_op,
     size_t batch_size,
     size_t input_channels,
     size_t output_channels,
     size_t input_stride,
     size_t output_stride,
-    const void* input,
-    const void* kernel,
-    const void* bias,
-    void* output,
+    size_t* workspace_size,
+    size_t* workspace_alignment,
     pthreadpool_t threadpool)
 {
-  return setup_dynamic_fully_connected_nc(
+  return reshape_dynamic_fully_connected_nc(
     dynamic_fully_connected_op, xnn_operator_type_dynamic_fully_connected_nc_f16,
     batch_size, input_channels, output_channels, input_stride, output_stride,
-    input, kernel, bias, output,
+    workspace_size, workspace_alignment,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*bias_element_size=*/sizeof(uint16_t),
@@ -369,23 +364,21 @@ enum xnn_status xnn_setup_dynamic_fully_connected_nc_f16(
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_dynamic_fully_connected_nc_f32(
+enum xnn_status xnn_reshape_dynamic_fully_connected_nc_f32(
     xnn_operator_t dynamic_fully_connected_op,
     size_t batch_size,
     size_t input_channels,
     size_t output_channels,
     size_t input_stride,
     size_t output_stride,
-    const float* input,
-    const float* kernel,
-    const float* bias,
-    float* output,
+    size_t* workspace_size,
+    size_t* workspace_alignment,
     pthreadpool_t threadpool)
 {
-  return setup_dynamic_fully_connected_nc(
+  return reshape_dynamic_fully_connected_nc(
     dynamic_fully_connected_op, xnn_operator_type_dynamic_fully_connected_nc_f32,
     batch_size, input_channels, output_channels, input_stride, output_stride,
-    input, kernel, bias, output,
+    workspace_size, workspace_alignment,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*bias_element_size=*/sizeof(float),
@@ -395,55 +388,71 @@ enum xnn_status xnn_setup_dynamic_fully_connected_nc_f32(
     pthreadpool_get_threads_count(threadpool));
 }
 
-static void setup_dynamic_fully_connected_nc_workspace(
-    xnn_operator_t dynamic_fully_connected_op,
-    size_t input_channels,
-    size_t output_channels,
-    uint32_t log2_filter_element_size,
-    uint32_t bias_element_size,
-    size_t* workspace_size_out,
-    void* workspace,
-    size_t* alignment_out)
+static enum xnn_status setup_dynamic_fully_connected_nc(
+  xnn_operator_t dynamic_fully_connected_op,
+  enum xnn_operator_type expected_operator_type,
+  void* workspace,
+  const void* input,
+  const void* kernel,
+  const void* bias,
+  void* output)
 {
-  if (workspace == NULL) {
-    const uint32_t nr = dynamic_fully_connected_op->ukernel.gemm.nr;
-    const uint32_t kr = dynamic_fully_connected_op->ukernel.gemm.kr;
-    const uint32_t sr = dynamic_fully_connected_op->ukernel.gemm.sr;
-    const size_t n_stride = round_up(output_channels, nr);
-    const size_t k_stride = round_up_po2(input_channels, kr * sr);
-    const size_t workspace_size = n_stride * bias_element_size + ((n_stride * k_stride) << log2_filter_element_size);
-    *workspace_size_out = workspace_size;
-    if (alignment_out != NULL) {
-      *alignment_out = XNN_ALLOCATION_ALIGNMENT;
-    }
-  } else {
-    dynamic_fully_connected_op->workspace = workspace;
-    dynamic_fully_connected_op->workspace_size = *workspace_size_out;
+  if (dynamic_fully_connected_op->type != expected_operator_type) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(dynamic_fully_connected_op->type));
+    return xnn_status_invalid_parameter;
   }
+
+  switch (dynamic_fully_connected_op->state) {
+    case xnn_run_state_skip:
+      return xnn_status_success;
+    case xnn_run_state_invalid:
+      xnn_log_error(
+        "failed to setup %s operator: operator has not been reshaped yet",
+        xnn_operator_type_to_string(dynamic_fully_connected_op->type));
+      return xnn_status_invalid_state;
+    case xnn_run_state_needs_setup:
+      // Operator has been reshaped, but not setup, continue with setup.
+    case xnn_run_state_ready:
+      // Operator has been reshaped, and we are setting up with different pointers.
+      break;
+  }
+
+  dynamic_fully_connected_op->context.packw_gemm_goi.kernel = kernel;
+  dynamic_fully_connected_op->context.packw_gemm_goi.bias = bias;
+  dynamic_fully_connected_op->context.packw_gemm_goi.packed_weights = workspace;
+  dynamic_fully_connected_op->context.gemm.a = input;
+  dynamic_fully_connected_op->context.gemm.packed_w = workspace;
+  dynamic_fully_connected_op->context.gemm.c = output;
+
+  dynamic_fully_connected_op->state = xnn_run_state_ready;
+
+  return xnn_status_success;
 }
 
-void xnn_setup_dynamic_fully_connected_nc_f16_workspace(
-    xnn_operator_t dynamic_fully_connected_op,
-    size_t input_channels,
-    size_t output_channels,
-    size_t* workspace_size_out,
-    void* workspace,
-    size_t* alignment_out)
+enum xnn_status xnn_setup_dynamic_fully_connected_nc_f16(
+  xnn_operator_t dynamic_fully_connected_op,
+  void* workspace,
+  const void* input,
+  const void* kernel,
+  const void* bias,
+  void* output)
 {
-  return setup_dynamic_fully_connected_nc_workspace(
-    dynamic_fully_connected_op, input_channels, output_channels, XNN_LOG2_SIZEOF_HALF, sizeof(uint16_t),
-    workspace_size_out, workspace, alignment_out);
+  return setup_dynamic_fully_connected_nc(
+    dynamic_fully_connected_op, xnn_operator_type_dynamic_fully_connected_nc_f16,
+    workspace, input, kernel, bias, output);
 }
 
-void xnn_setup_dynamic_fully_connected_nc_f32_workspace(
-    xnn_operator_t dynamic_fully_connected_op,
-    size_t input_channels,
-    size_t output_channels,
-    size_t* workspace_size_out,
-    void* workspace,
-    size_t* alignment_out)
+enum xnn_status xnn_setup_dynamic_fully_connected_nc_f32(
+  xnn_operator_t dynamic_fully_connected_op,
+  void* workspace,
+  const float* input,
+  const float* kernel,
+  const float* bias,
+  float* output)
 {
-  return setup_dynamic_fully_connected_nc_workspace(
-    dynamic_fully_connected_op, input_channels, output_channels, XNN_LOG2_SIZEOF_FLOAT, sizeof(float),
-    workspace_size_out, workspace, alignment_out);
+  return setup_dynamic_fully_connected_nc(
+    dynamic_fully_connected_op, xnn_operator_type_dynamic_fully_connected_nc_f32,
+    workspace, input, kernel, bias, output);
 }

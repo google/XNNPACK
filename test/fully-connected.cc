@@ -665,21 +665,18 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel)
   ASSERT_NE(nullptr, op);
 
   size_t workspace_size = 0;
-  size_t alignment = 0;
-  xnn_setup_dynamic_fully_connected_nc_f32_workspace(
-    op, input_channels, output_channels, &workspace_size, nullptr, &alignment);
-  ASSERT_LE(alignment, XNN_ALLOCATION_ALIGNMENT);
+  size_t workspace_alignment = 0;
+  ASSERT_EQ(
+    xnn_status_success, xnn_reshape_dynamic_fully_connected_nc_f32(
+                          op, batch_size, input_channels, output_channels, input_channels, output_channels,
+                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-  xnn_setup_dynamic_fully_connected_nc_f32_workspace(
-    op, input_channels, output_channels, &workspace_size, workspace.data(), nullptr);
+  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
   ASSERT_EQ(
     xnn_status_success, xnn_setup_dynamic_fully_connected_nc_f32(
-                          op, batch_size,
-                          input_channels, output_channels, input_channels, output_channels,
-                          input.data(), kernel.data(), bias.data(), operator_output.data(),
-                          /*threadpool=*/nullptr));
+                          op, workspace.data(), input.data(), kernel.data(), bias.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -758,21 +755,18 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel_no_bias
   ASSERT_NE(nullptr, op);
 
   size_t workspace_size = 0;
-  size_t alignment = 0;
-  xnn_setup_dynamic_fully_connected_nc_f32_workspace(
-    op, input_channels, output_channels, &workspace_size, nullptr, &alignment);
-  ASSERT_LE(alignment, XNN_ALLOCATION_ALIGNMENT);
+  size_t workspace_alignment = 0;
+  ASSERT_EQ(
+    xnn_status_success, xnn_reshape_dynamic_fully_connected_nc_f32(
+                          op, batch_size, input_channels, output_channels, input_channels, output_channels,
+                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-  xnn_setup_dynamic_fully_connected_nc_f32_workspace(
-    op, input_channels, output_channels, &workspace_size, workspace.data(), nullptr);
+  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
   ASSERT_EQ(
     xnn_status_success, xnn_setup_dynamic_fully_connected_nc_f32(
-                          op, batch_size,
-                          input_channels, output_channels, input_channels, output_channels,
-                          input.data(), kernel.data(), nullptr, operator_output.data(),
-                          /*threadpool=*/nullptr));
+                          op, workspace.data(), input.data(), kernel.data(), /*bias=*/nullptr, operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -843,24 +837,22 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_bias)
     GTEST_SKIP();
   }
 
-  size_t workspace_size = 0;
-  size_t alignment = 0;
-  xnn_setup_dynamic_fully_connected_nc_f32_workspace(
-    op, input_channels, output_channels, &workspace_size, nullptr, &alignment);
-  ASSERT_LE(alignment, XNN_ALLOCATION_ALIGNMENT);
-  ASSERT_NE(workspace_size, 0);
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-  xnn_setup_dynamic_fully_connected_nc_f32_workspace(
-    op, input_channels, output_channels, &workspace_size, workspace.data(), nullptr);
-
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
+
+  size_t workspace_size = 0;
+  size_t workspace_alignment = 0;
+  ASSERT_EQ(
+    xnn_status_success, xnn_reshape_dynamic_fully_connected_nc_f32(
+                          op, batch_size, input_channels, output_channels, input_channels, output_channels,
+                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+  ASSERT_NE(workspace_size, 0);
+  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
   ASSERT_EQ(
     xnn_status_success, xnn_setup_dynamic_fully_connected_nc_f32(
-                          op, batch_size,
-                          input_channels, output_channels, input_channels, output_channels,
-                          input.data(), kernel.data(), bias.data(), operator_output.data(),
-                          /*threadpool=*/nullptr));
+                          op, workspace.data(), input.data(), kernel.data(), bias.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -936,24 +928,22 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel_and_bia
     GTEST_SKIP();
   }
 
-  size_t workspace_size = 0;
-  size_t alignment = 0;
-  xnn_setup_dynamic_fully_connected_nc_f32_workspace(
-    op, input_channels, output_channels, &workspace_size, nullptr, &alignment);
-  ASSERT_LE(alignment, XNN_ALLOCATION_ALIGNMENT);
-  ASSERT_NE(workspace_size, 0);
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-  xnn_setup_dynamic_fully_connected_nc_f32_workspace(
-    op, input_channels, output_channels, &workspace_size, workspace.data(), nullptr);
-
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
+
+  size_t workspace_size = 0;
+  size_t workspace_alignment = 0;
+  ASSERT_EQ(
+    xnn_status_success, xnn_reshape_dynamic_fully_connected_nc_f32(
+                          op, batch_size, input_channels, output_channels, input_channels, output_channels,
+                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+  ASSERT_NE(workspace_size, 0);
+  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
   ASSERT_EQ(
     xnn_status_success, xnn_setup_dynamic_fully_connected_nc_f32(
-                          op, batch_size,
-                          input_channels, output_channels, input_channels, output_channels,
-                          input.data(), kernel.data(), bias.data(), operator_output.data(),
-                          /*threadpool=*/nullptr));
+                          op, workspace.data(), input.data(), kernel.data(), bias.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

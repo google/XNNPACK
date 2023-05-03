@@ -174,6 +174,34 @@ static enum xnn_status create_fully_connected_operator(
   return status;
 }
 
+static enum xnn_status reshape_fully_connected_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_dynamic_fully_connected_nc_f16:
+      return xnn_reshape_dynamic_fully_connected_nc_f16(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_channels, opdata->output_channels,
+        opdata->input_channels, opdata->output_channels,
+        &opdata->workspace_size, &opdata->workspace_alignment,
+        threadpool);
+    case xnn_operator_type_dynamic_fully_connected_nc_f32:
+      return xnn_reshape_dynamic_fully_connected_nc_f32(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_channels, opdata->output_channels,
+        opdata->input_channels, opdata->output_channels,
+        &opdata->workspace_size, &opdata->workspace_alignment,
+        threadpool);
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 static enum xnn_status setup_fully_connected_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
@@ -223,20 +251,12 @@ static enum xnn_status setup_fully_connected_operator(
       assert(kernel_data != NULL);
       return xnn_setup_dynamic_fully_connected_nc_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_channels, opdata->output_channels,
-        opdata->input_channels, opdata->output_channels,
-        input_data, kernel_data, bias_data, output_data,
-        threadpool);
+        opdata->workspace, input_data, kernel_data, bias_data, output_data);
     case xnn_operator_type_dynamic_fully_connected_nc_f32:
       assert(kernel_data != NULL);
       return xnn_setup_dynamic_fully_connected_nc_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_channels, opdata->output_channels,
-        opdata->input_channels, opdata->output_channels,
-        input_data, kernel_data, bias_data, output_data,
-        threadpool);
+        opdata->workspace, input_data, kernel_data, bias_data, output_data);
     case xnn_operator_type_fully_connected_nc_f16:
       assert(kernel_data == NULL);
       assert(bias_data == NULL);
@@ -340,35 +360,6 @@ static inline enum xnn_compute_type validate_datatypes_without_bias(
       XNN_UNREACHABLE;
   }
   return xnn_compute_type_invalid;
-}
-
-static void setup_fully_connected_operator_workspace(
-  struct xnn_operator_data* opdata,
-  size_t* workspace_size,
-  void* workspace,
-  size_t* alignment_out)
-{
-  switch (opdata->operator_objects[0]->type) {
-    case xnn_operator_type_dynamic_fully_connected_nc_f16:
-      xnn_setup_dynamic_fully_connected_nc_f16_workspace(
-        opdata->operator_objects[0],
-        opdata->input_channels,
-        opdata->output_channels,
-        workspace_size,
-        workspace,
-        alignment_out);
-      break;
-    case xnn_operator_type_dynamic_fully_connected_nc_f32:
-      xnn_setup_dynamic_fully_connected_nc_f32_workspace(
-        opdata->operator_objects[0],
-        opdata->input_channels, opdata->output_channels,
-        workspace_size,
-        workspace,
-        alignment_out);
-      break;
-    default:
-      XNN_UNREACHABLE;
-  }
 }
 
 enum xnn_status xnn_define_fully_connected(
@@ -586,7 +577,7 @@ enum xnn_status xnn_define_fully_connected(
   if (
     !xnn_value_is_static(subgraph->values + filter_id) ||
     (bias_id != XNN_INVALID_VALUE_ID && !xnn_value_is_static(subgraph->values + bias_id))) {
-    node->setup_workspace = setup_fully_connected_operator_workspace;
+    node->reshape = reshape_fully_connected_operator;
   }
 
   return xnn_status_success;

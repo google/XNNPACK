@@ -214,11 +214,7 @@ static enum xnn_status initialize_workspace_values(
       continue;
     }
     struct xnn_operator_data* opdata = &runtime->opdata[usage->opdata_id];
-    if (opdata->setup_workspace != NULL) {
-      opdata->setup_workspace(
-        opdata, &opdata->workspace_size,
-        (void*) ((uintptr_t) runtime->workspace->data + persistent_size + usage->alloc_offset), NULL);
-    }
+    opdata->workspace = (void*) ((uintptr_t) runtime->workspace->data + persistent_size + usage->alloc_offset);
   }
 
   // Adjust the value pointers of all runtimes that share this workspace.
@@ -256,13 +252,10 @@ static enum xnn_status initialize_workspace_values(
           }
 
           if (opdata->workspace != NULL) {
-            assert(opdata->setup_workspace != NULL);
-            opdata->setup_workspace(
-              opdata, &opdata->workspace_size, (void*) ((uintptr_t) opdata->workspace + workspace_data_delta), NULL);
+            opdata->workspace = (void*) ((uintptr_t) opdata->workspace + workspace_data_delta);
           }
 
           assert(opdata->setup != NULL);
-          // TODO(zhin): come up with another API to only setup input/output pointers.
           const enum xnn_status status = opdata->setup(opdata, rt->values, rt->num_values, rt->threadpool);
           if (status != xnn_status_success) {
             xnn_log_error("failed to setup runtime: error in operator #%zu", i);
@@ -484,7 +477,7 @@ enum xnn_status xnn_create_runtime_v4(
         goto error;
       }
       runtime->opdata[i].setup = node->setup;
-      runtime->opdata[i].setup_workspace = node->setup_workspace;
+      runtime->opdata[i].reshape = node->reshape;
     }
   }
 
@@ -528,19 +521,25 @@ error:
   return status;
 }
 
-void track_operator_workspace(
+enum xnn_status track_operator_workspace(
   xnn_runtime_t runtime,
   struct xnn_value_allocation_tracker* mem_alloc_tracker)
 {
   for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
     struct xnn_operator_data* opdata = &runtime->opdata[opdata_id];
-    if (opdata->setup_workspace != NULL) {
-      opdata->setup_workspace(opdata, &opdata->workspace_size, NULL, NULL);
+    if (opdata->reshape != NULL) {
+      // Get operator workspace size.
+      enum xnn_status status = opdata->reshape(opdata, runtime->values, runtime->num_values, runtime->threadpool);
+      if (status != xnn_status_success) {
+        xnn_log_error("failed to reshape node #%" PRIu32, opdata_id);
+        return status;
+      }
       xnn_add_operator_workspace_allocation_tracker(
         mem_alloc_tracker, runtime->num_values + opdata_id, round_up_po2(opdata->workspace_size, XNN_EXTRA_BYTES),
         opdata_id);
     }
   }
+  return xnn_status_success;
 }
 
 enum xnn_status xnn_setup_runtime(
@@ -569,11 +568,15 @@ enum xnn_status xnn_setup_runtime(
   size_t old_persistent_size = runtime->workspace->persistent_size;
   runtime->workspace->persistent_size = persistent_size;
 
-  track_operator_workspace(runtime, &mem_alloc_tracker);
+  enum xnn_status status = track_operator_workspace(runtime, &mem_alloc_tracker);
+  if (status != xnn_status_success) {
+    return status;
+  }
+
   optimize_tensor_allocation_for_in_place_operations(&mem_alloc_tracker, runtime);
   xnn_plan_value_allocation_tracker(&mem_alloc_tracker);
 
-  const enum xnn_status status = initialize_workspace_values(runtime, &mem_alloc_tracker, old_persistent_size);
+  status = initialize_workspace_values(runtime, &mem_alloc_tracker, old_persistent_size);
   if (status != xnn_status_success) {
     xnn_release_value_allocation_tracker(&mem_alloc_tracker);
     return status;
@@ -608,7 +611,7 @@ enum xnn_status xnn_setup_runtime(
   }
 
   for (size_t i = 0; i < runtime->num_ops; i++) {
-    const struct xnn_operator_data* opdata = &runtime->opdata[i];
+    struct xnn_operator_data* opdata = &runtime->opdata[i];
     for (size_t j = 0; j < XNN_MAX_OPERATOR_OBJECTS; j++) {
       if (opdata->operator_objects[j] == NULL) {
         // Operator was removed during optimization
@@ -616,10 +619,23 @@ enum xnn_status xnn_setup_runtime(
       }
 
       assert(opdata->setup != NULL);
-      const enum xnn_status status = opdata->setup(opdata, runtime->values, runtime->num_values, runtime->threadpool);
-      if (status != xnn_status_success) {
-        xnn_log_error("failed to setup runtime: error in operator #%zu", i);
-        return status;
+      if (opdata->reshape != NULL) {
+        enum xnn_status status = opdata->reshape(opdata, runtime->values, runtime->num_values, runtime->threadpool);
+        if (status != xnn_status_success) {
+          xnn_log_error("failed to setup runtime: error in reshaping operator #%zu", i);
+          return status;
+        }
+        status = opdata->setup(opdata, runtime->values, runtime->num_values, runtime->threadpool);
+        if (status != xnn_status_success) {
+          xnn_log_error("failed to setup runtime: error in setting pointers of operator #%zu", i);
+          return status;
+        }
+      } else {
+        const enum xnn_status status = opdata->setup(opdata, runtime->values, runtime->num_values, runtime->threadpool);
+        if (status != xnn_status_success) {
+          xnn_log_error("failed to setup runtime: error in operator #%zu", i);
+          return status;
+        }
       }
     }
   }

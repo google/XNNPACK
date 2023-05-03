@@ -179,17 +179,17 @@ typedef enum xnn_status (*xnn_create_operator_fn)(
   struct xnn_code_cache* code_cache,
   struct xnn_weights_cache* weights_cache);
 
+typedef enum xnn_status (*xnn_reshape_operator_fn)(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool);
+
 typedef enum xnn_status (*xnn_setup_operator_fn)(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
   size_t num_values,
   pthreadpool_t threadpool);
-
-typedef void (*xnn_setup_operator_workspace_fn)(
-  struct xnn_operator_data* opdata,
-  size_t* workspace_size,
-  void* workspace,
-  size_t* alignment_out);
 
 enum xnn_compute_type {
   xnn_compute_type_invalid = 0,
@@ -335,10 +335,10 @@ struct xnn_node {
   size_t num_zeroes;
   // Factory function to create an operator object from the node.
   xnn_create_operator_fn create;
+  // Function to reshape an operator using opdata.
+  xnn_reshape_operator_fn reshape;
   // Function to setup an operator using opdata.
   xnn_setup_operator_fn setup;
-  // Function to setup an operator workspace using opdata.
-  xnn_setup_operator_workspace_fn setup_workspace;
 };
 
 #ifdef __MACH__
@@ -355,8 +355,8 @@ struct xnn_operator_data {
   enum xnn_node_type type;
   uint32_t id;
   xnn_operator_t operator_objects[XNN_MAX_OPERATOR_OBJECTS];
+  xnn_reshape_operator_fn reshape;
   xnn_setup_operator_fn setup;
-  xnn_setup_operator_workspace_fn setup_workspace;
   size_t batch_size;
   size_t input_height;
   size_t input_width;

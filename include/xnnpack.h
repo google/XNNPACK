@@ -1956,26 +1956,24 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_f32(
   uint32_t flags,
   xnn_operator_t* dynamic_fully_connected_op_out);
 
-void xnn_setup_dynamic_fully_connected_nc_f32_workspace(
-    xnn_operator_t dynamic_fully_connected_op,
-    size_t input_channels,
-    size_t output_channels,
-    size_t* workspace_size_out,
-    void* workspace,
-    size_t* alignment_out);
-
-enum xnn_status xnn_setup_dynamic_fully_connected_nc_f32(
+enum xnn_status xnn_reshape_dynamic_fully_connected_nc_f32(
   xnn_operator_t dynamic_fully_connected_op,
   size_t batch_size,
   size_t input_channels,
   size_t output_channels,
   size_t input_stride,
   size_t output_stride,
+  size_t* workspace_size,
+  size_t* workspace_alignment,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_dynamic_fully_connected_nc_f32(
+  xnn_operator_t dynamic_fully_connected_op,
+  void* workspace,
   const float* input,
   const float* kernel,
   const float* bias,
-  float* output,
-  pthreadpool_t threadpool);
+  float* output);
 
 enum xnn_status xnn_create_elu_nc_f32(
   size_t channels,
@@ -2951,26 +2949,24 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_f16(
   uint32_t flags,
   xnn_operator_t* dynamic_fully_connected_op_out);
 
-void xnn_setup_dynamic_fully_connected_nc_f16_workspace(
-    xnn_operator_t dynamic_fully_connected_op,
-    size_t input_channels,
-    size_t output_channels,
-    size_t* workspace_size_out,
-    void* workspace,
-    size_t* alignment_out);
-
-enum xnn_status xnn_setup_dynamic_fully_connected_nc_f16(
+enum xnn_status xnn_reshape_dynamic_fully_connected_nc_f16(
   xnn_operator_t dynamic_fully_connected_op,
   size_t batch_size,
   size_t input_channels,
   size_t output_channels,
   size_t input_stride,
   size_t output_stride,
+  size_t* workspace_size,
+  size_t* workspace_alignment,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_dynamic_fully_connected_nc_f16(
+  xnn_operator_t dynamic_fully_connected_op,
+  void* workspace,
   const void* input,
   const void* kernel,
   const void* bias,
-  void* output,
-  pthreadpool_t threadpool);
+  void* output);
 
 enum xnn_status xnn_create_elu_nc_f16(
   size_t channels,
