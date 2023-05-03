@@ -105,7 +105,7 @@ class VCvtMicrokernelTester {
       std::fill(output.begin(), output.end(), nanf(""));
 
       union xnn_f16_f32_cvt_params params;
-      if (init_params) {
+      if (init_params != nullptr) {
         init_params(&params);
       }
 
@@ -133,7 +133,7 @@ class VCvtMicrokernelTester {
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       union xnn_f32_f16_cvt_params params;
-      if (init_params) {
+      if (init_params != nullptr) {
         init_params(&params);
       }
 
@@ -170,9 +170,7 @@ class VCvtMicrokernelTester {
       std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       union xnn_f32_qs8_cvt_params params;
-      if (init_params) {
-        init_params(&params, scale(), output_zero_point(), qmin(), qmax());
-      }
+      init_params(&params, scale(), output_zero_point(), qmin(), qmax());
 
       // Call optimized micro-kernel.
       vcvt(batch_size() * sizeof(float), input.data(), output.data(), &params);

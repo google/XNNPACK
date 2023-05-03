@@ -281,7 +281,7 @@ class VBinaryMicrokernelTester {
 
       // Prepare parameters.
       xnn_f32_default_params params;
-      if (init_params) {
+      if (init_params != nullptr) {
         init_params(&params);
       }
 
