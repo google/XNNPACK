@@ -592,7 +592,5 @@ class ArgmaxPoolingOperatorTester {
   size_t next_input_height_{0};
   size_t next_input_width_{0};
   size_t next_batch_size_{0};
-  uint8_t qmin_{0};
-  uint8_t qmax_{255};
   size_t iterations_{1};
 };
