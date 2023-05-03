@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace xnnpack{
+namespace xnnpack {
 
 void compute_convolution_qs8_reference_results(
     size_t batch_size,
@@ -498,4 +498,4 @@ void compute_depthwise_convolution_qu8_reference_results(
     has_bias,
     bias);
 }
-}
+}  // namespace xnnpack

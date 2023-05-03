@@ -273,5 +273,5 @@ TEST(INDIRECTION, input4x4_kernel2x1_primarytile4_subsampling2) {
       })
       .Test();
 }
-}
+}  // namespace
 }  // namespace xnnpack
