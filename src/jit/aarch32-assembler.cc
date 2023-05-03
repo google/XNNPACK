@@ -334,7 +334,7 @@ void Assembler::vld1(DataSize size, DRegisterList regs, MemOperand op) {
 
 void Assembler::vld1(DataSize size, DRegisterList regs, MemOperand op, CoreRegister rm) {
   const uint8_t type = encode_regs_length_to_type(regs);
-  if (!type) {
+  if (type == 0) {
     error_ = Error::kInvalidRegisterListLength;
     return;
   }
@@ -618,7 +618,7 @@ void Assembler::vsdot_s8(QRegister qd, QRegister qn, DRegisterLane dm) {
 
 void Assembler::vst1(DataSize size, DRegisterList regs, MemOperand op) {
   const uint8_t type = encode_regs_length_to_type(regs);
-  if (!type) {
+  if (type == 0) {
     error_ = Error::kInvalidRegisterListLength;
     return;
   }
@@ -634,7 +634,7 @@ void Assembler::vst1(DataSize size, DRegisterList regs, MemOperand op, CoreRegis
   }
 
   const uint8_t type = encode_regs_length_to_type(regs);
-  if (!type) {
+  if (type == 0) {
     error_ = Error::kInvalidRegisterListLength;
     return;
   }

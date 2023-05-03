@@ -213,15 +213,15 @@ inline uint8_t load_store_opcode(uint8_t register_length) {
   }
 }
 
-inline bool imm7_offset_valid(int32_t imm, XRegister) {
+inline bool imm7_offset_valid(int32_t imm, XRegister xt) {
   return imm >= kImm7Min && imm <= kImm7Max && (imm & 0x7) == 0;
 }
 
-inline bool imm7_offset_valid(int32_t imm, DRegister) {
+inline bool imm7_offset_valid(int32_t imm, DRegister dt) {
   return imm >= kImm7Min && imm <= kImm7Max && (imm & 0x7) == 0;
 }
 
-inline bool imm7_offset_valid(int32_t imm, QRegister) {
+inline bool imm7_offset_valid(int32_t imm, QRegister qt) {
   return imm >= (kImm7Min * 2) && imm <= (kImm7Max * 2) && (imm & 0xF) == 0;
 }
 
