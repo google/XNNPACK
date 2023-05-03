@@ -11004,6 +11004,7 @@ xnnpack_unit_test(
     name = "subgraph_fp16_test",
     srcs = [
         "test/mock-allocator.h",
+        "test/runtime-tester.h",
         "test/subgraph-fp16.cc",
         "test/subgraph-tester.h",
     ],

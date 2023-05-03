@@ -836,6 +836,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
           fp16_value->flags = 0;
           fp16_value->fp16_id = XNN_INVALID_VALUE_ID;
           fp16_value->fp32_id = value->id;
+          fp16_value->allocation_type = xnn_allocation_type_workspace;
           value->fp16_id = fp16_value->id;
         }
       }

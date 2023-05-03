@@ -15,6 +15,7 @@
 #include <xnnpack/node-type.h>
 
 #include "subgraph-tester.h"
+#include "runtime-tester.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -150,6 +151,43 @@ TEST(SUBGRAPH_FP16, with_static_value) {
   ASSERT_EQ(static_cast<const uint16_t*>(static_value->data)[0], fp16_ieee_from_fp32_value(1.0f));
   ASSERT_EQ(static_cast<const uint16_t*>(static_value->data)[1], fp16_ieee_from_fp32_value(2.0f));
   ASSERT_EQ(static_cast<const uint16_t*>(static_value->data)[2], fp16_ieee_from_fp32_value(3.0f));
+
+  // Check that the output of convert is allocated in workspace.
+  const xnn_value* convert_out = tester.Value(3);
+  ASSERT_EQ(convert_out->allocation_type, xnn_allocation_type_workspace);
+  // Check that external input remains external (bug in runtime changed its allocation type.
+  // const xnn_value* input = tester.Value(0);
+  // ASSERT_EQ(input->allocation_type, xnn_allocation_type_external);
+}
+
+TEST(SUBGRAPH_FP16, external_inputs_allocation_type_remains_external) {
+  // external input[0]   static[1]
+  //               \     /
+  //                \   /
+  //                [add]
+  //                  |
+  //               external
+  //               output[2]
+  auto tester = RuntimeTester(3);
+  tester
+      .AddInputTensorF32({1, 2, 2, 3}, 0)
+      .AddInputTensorF32({1, 2, 2, 3}, 1)
+      .AddOutputTensorF32({1, 2, 2, 3}, 2)
+      .AddAddition(0, 1, 2)
+      .Optimize()
+      .RewriteForFp16();
+
+  xnn_runtime_t runtime = tester.Runtime();
+  xnn_status status = xnn_create_runtime_v3(tester.Subgraph(), nullptr, nullptr, /*flags=*/0, &runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  // Check that both external inputs remain external inputs after rewriting for FP16.
+  ASSERT_EQ(tester.Value(0)->allocation_type, xnn_allocation_type_external);
+  ASSERT_EQ(tester.Value(1)->allocation_type, xnn_allocation_type_external);
 }
 
 TEST(SUBGRAPH_FP16, static_buffer_allocation_failure) {

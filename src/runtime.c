@@ -500,7 +500,7 @@ enum xnn_status xnn_create_runtime_v4(
       continue;
     }
 
-    if (value->fp16_compatible) {
+    if (value->fp16_compatible && xnn_value_is_static(value)) {
       // Value is static and has been converted to FP16 in a new buffer.
       value->allocation_type = xnn_allocation_type_dynamic;
       // Runtime takes ownership of the data from subgraph.
@@ -594,7 +594,7 @@ enum xnn_status xnn_setup_runtime(
 
     const struct xnn_value* value = &runtime->values[value_id];
     if (value->allocation_type != xnn_allocation_type_external) {
-      xnn_log_error("failed to setup runtime: Value %" PRIu32 " is not external", value_id);
+      xnn_log_error("failed to setup runtime: Value %" PRIu32 " is not external (%d)", value_id, value->allocation_type);
       return xnn_status_invalid_parameter;
     }
   }

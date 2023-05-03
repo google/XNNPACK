@@ -64,7 +64,7 @@ class RuntimeTester : public SubgraphTester {
   size_t NumOperators() {
     size_t count = 0;
     for (size_t i = 0; i < runtime_->num_ops; i++) {
-      if (runtime_->opdata[i].operator_objects[0] != NULL) {
+      if (runtime_->opdata[i].operator_objects[0] != nullptr) {
         count++;
       }
     }
