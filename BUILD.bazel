@@ -4986,6 +4986,29 @@ xnnpack_cc_library(
     ],
 )
 
+xnnpack_cc_library(
+    name = "post_operation_test_mode",
+    srcs = [
+        "src/operators/post-operation.c",
+    ],
+    hdrs = [
+        "src/xnnpack/post-operation.h",
+    ],
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ] + select({
+        ":debug_build": [],
+        "//conditions:default": xnnpack_min_size_copts(),
+    }),
+    deps = [
+        ":allocator",
+        ":microkernel_configs_test_mode",
+        ":microparams",
+        ":params",
+    ],
+)
+
 # Define a library with just the header to remove circular dependencies:
 # indirection <-> operators.
 xnnpack_cc_library(
@@ -5100,7 +5123,7 @@ xnnpack_cc_library(
         ":operator_utils",
         ":packing_test_mode",
         ":params",
-        ":post_operation",
+        ":post_operation_test_mode",
         ":xnnpack_h",
         "@FP16",
         "@pthreadpool",
@@ -5160,7 +5183,7 @@ xnnpack_cc_library(
         ":memory",
         ":microkernels_h",
         ":microparams",
-        ":post_operation",
+        ":post_operation_test_mode",
         ":xnnpack_h",
     ],
 )
@@ -5225,7 +5248,7 @@ xnnpack_cc_library(
         ":logging",
         ":math",
         ":node_type",
-        ":operators",
+        ":operators_test_mode",
         ":params",
         ":requantization",
         ":xnnpack_h",
