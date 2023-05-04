@@ -1319,12 +1319,13 @@ void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_ukernel_fn gemm) const {
     xnn_pack_f32_qs8w_gemm_goi_w(1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(), packed_w.data(), nr() * sizeof(float), nullptr);
 
     // Fill in packed scale
-    for (size_t ni = 0; ni < n(); ni += nr()) {
-      const size_t nsize = nr() * 2 * sizeof(float) + nr() * packed_k();
-      const size_t scaleoffset = nsize * (ni / nr()) +  (nr() * sizeof(float) + nr() * packed_k());
-      float* packed_scale = (float*) ((uintptr_t) packed_w.data() + scaleoffset);
-      memcpy(packed_scale, scale.data() + ni, nr() * sizeof(float));
-    }
+    xnn_init_qs8_qc8w_scale_fp32_params(
+      n(), nr(), nr(),
+      nr() * (ks() * packed_k() * sizeof(int8_t) + (sizeof(float) + sizeof(float))),
+      nr() * (ks() * packed_k() * sizeof(int8_t) + (sizeof(float) + sizeof(float))),
+      0,
+      scale.data(),
+      (void*) ((uintptr_t) packed_w.data() + nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(float))));
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
@@ -1400,12 +1401,13 @@ void GemmMicrokernelTester::Test(xnn_f32_qc8w_gemm_relu_ukernel_fn gemm_relu) co
     xnn_pack_f32_qs8w_gemm_goi_w(1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(), packed_w.data(), nr() * sizeof(float), nullptr);
 
     // Fill in packed scale
-    for (size_t ni = 0; ni < n(); ni += nr()) {
-      const size_t nsize = nr() * 2 * sizeof(float) + nr() * packed_k();
-      const size_t scaleoffset = nsize * (ni / nr()) +  (nr() * sizeof(float) + nr() * packed_k());
-      float* packed_scale = (float*) ((uintptr_t) packed_w.data() + scaleoffset);
-      memcpy(packed_scale, scale.data() + ni, nr() * sizeof(float));
-    }
+    xnn_init_qs8_qc8w_scale_fp32_params(
+      n(), nr(), nr(),
+      nr() * (ks() * packed_k() * sizeof(int8_t) + (sizeof(float) + sizeof(float))),
+      nr() * (ks() * packed_k() * sizeof(int8_t) + (sizeof(float) + sizeof(float))),
+      0,
+      scale.data(),
+      (void*) ((uintptr_t) packed_w.data() + nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(float))));
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
