@@ -11,6 +11,7 @@
 #include <cmath>
 #include <functional>
 #include <limits>
+#include <memory>
 #include <ostream>
 #include <random>
 #include <string>

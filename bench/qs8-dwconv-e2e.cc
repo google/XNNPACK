@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstring>
 #include <functional>
+#include <memory>
 #include <random>
 #include <vector>
 
