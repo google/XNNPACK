@@ -17,3 +17,14 @@ SpaceBeforeParensOptions:
   AfterIfMacros: true
   AfterForeachMacros: false
 SpacesBeforeTrailingComments: 2
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '<xnnpack[./][[:alnum:].-]+>' # match XNNPack includes first
+    Priority: 5
+  - Regex: 'benchmark.h' # includes used in benchmarks
+    Priority: 3
+  - Regex: 'bench/' # includes used in benchmarks
+    Priority: 3
+  - Regex: '<[[:alnum:].]+>' # system headers
+    Priority: 2 # lower priority to keep it sorted first before XNNPack includes
+MaxEmptyLinesToKeep: 2 # used to separate includes from functions
