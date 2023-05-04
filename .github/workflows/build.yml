@@ -1,5 +1,15 @@
 name: Build using CMake
-on: [push]
+on:
+  push:
+    paths:
+      - '**.S'
+      - '**.c'
+      - '**.cc'
+      - '**.h'
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - 'scripts/build-*.sh'
+      - '.github/**/*.yml'
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
