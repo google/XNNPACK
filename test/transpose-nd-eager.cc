@@ -1,6 +1,7 @@
-#include <gtest/gtest.h>
-
 #include <algorithm>
+#include <vector>
+
+#include <gtest/gtest.h>
 
 #include "transpose-operator-tester.h"
 

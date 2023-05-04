@@ -3,14 +3,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <thread>
 #include <random>
+#include <thread>
+#include <vector>
+
+#include <gtest/gtest.h>
 
 #include <xnnpack.h>
 #include <xnnpack/common.h>
 #include <xnnpack/mutex.h>
-
-#include <gtest/gtest.h>
 
 TEST(MUTEX, init_lock_unlock_destroy) {
 

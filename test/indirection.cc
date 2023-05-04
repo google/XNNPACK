@@ -4,14 +4,15 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cstddef>
+#include <vector>
+
+#include <gtest/gtest.h>
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/indirection.h>
-#include <xnnpack/operator.h>
 #include <xnnpack/operator-utils.h>
-
-#include <gtest/gtest.h>
+#include <xnnpack/operator.h>
 
 namespace xnnpack {
 namespace {

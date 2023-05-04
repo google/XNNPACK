@@ -6,18 +6,19 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <fp16.h>
-#include "mock-allocator.h"
 
 #include <xnnpack.h>
-#include <xnnpack/subgraph.h>
 #include <xnnpack/node-type.h>
+#include <xnnpack/subgraph.h>
 
-#include "subgraph-tester.h"
+#include "mock-allocator.h"
 #include "runtime-tester.h"
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include "subgraph-tester.h"
 
 namespace xnnpack {
 

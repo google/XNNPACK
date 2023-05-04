@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <cstring>
+#include <string>
 
 #include <gtest/gtest.h>
 

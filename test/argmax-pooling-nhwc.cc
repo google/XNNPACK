@@ -3,11 +3,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <algorithm>
+
 #include <gtest/gtest.h>
 
-#include "argmax-pooling-operator-tester.h"
-
 #include <xnnpack/params.h>
+
+#include "argmax-pooling-operator-tester.h"
 
 
 static uint32_t FindMaxSinglePassPoolingSize(const xnn_argmaxpool_config* ukernel) {

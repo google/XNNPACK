@@ -5,19 +5,21 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <memory>
 #include <numeric>
 #include <random>
+#include <vector>
+
+#include <gtest/gtest.h>
 
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
-
-#include <gtest/gtest.h>
 
 template <typename T> class Concatenate4Test : public ::testing::Test {
 protected:

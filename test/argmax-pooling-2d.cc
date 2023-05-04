@@ -10,13 +10,14 @@
 #include <limits>
 #include <memory>
 #include <random>
+#include <vector>
+
+#include <gtest/gtest.h>
 
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
-
-#include <gtest/gtest.h>
 
 namespace {
 inline size_t compute_output_dimension(size_t padded_input_dimension, size_t kernel_dimension)

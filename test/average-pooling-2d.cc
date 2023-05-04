@@ -10,14 +10,15 @@
 #include <limits>
 #include <memory>
 #include <random>
+#include <vector>
+
+#include <gtest/gtest.h>
 
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
-#include <xnnpack/operator.h>
 #include <xnnpack/operator-utils.h>
+#include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
-
-#include <gtest/gtest.h>
 
 class AveragePoolingTestF32 : public ::testing::Test {
 protected:

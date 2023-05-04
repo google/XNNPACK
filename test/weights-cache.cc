@@ -3,19 +3,18 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <xnnpack/cache.h>
-
-#include <algorithm> // For std::rotate.
-#include <cstdint>   // For uintptr_t.
-#include <cstdint>   // For uintptr_t.
-#include <cstring>   // For memcpy.
-#include <cstring>   // For memcpy.
-#include <thread>   // For memcpy.
-
-#include <xnnpack.h>
-#include <xnnpack/common.h>
+#include <algorithm>  // For std::rotate.
+#include <cstdint>    // For uintptr_t.
+#include <cstring>    // For memcpy.
+#include <string>
+#include <thread>
+#include <vector>
 
 #include <gtest/gtest.h>
+
+#include <xnnpack.h>
+#include <xnnpack/cache.h>
+#include <xnnpack/common.h>
 
 static void* cache_end(const xnn_weights_cache* cache) {
   return reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(cache->cache.weights.start) + cache->cache.weights.size);

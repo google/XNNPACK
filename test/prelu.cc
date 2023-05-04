@@ -11,13 +11,14 @@
 #include <memory>
 #include <numeric>
 #include <random>
+#include <vector>
+
+#include <gtest/gtest.h>
 
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/subgraph.h>
-
-#include <gtest/gtest.h>
 
 class PreluTestF32 : public ::testing::Test {
 protected:

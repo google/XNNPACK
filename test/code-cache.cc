@@ -3,13 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <cstdint> // For uintptr_t.
-#include <cstring> // For memcpy.
+#include <cstdint>  // For uintptr_t.
+#include <cstring>  // For memcpy.
+#include <string>
+
+#include <gtest/gtest.h>
 
 #include <xnnpack.h>
 #include <xnnpack/cache.h>
-
-#include <gtest/gtest.h>
 
 static void* cache_end(const xnn_code_cache* cache) {
   return reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(cache->cache.code.start) + cache->cache.code.size);

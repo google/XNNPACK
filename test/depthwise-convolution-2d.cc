@@ -8,19 +8,21 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <memory>
 #include <random>
 #include <type_traits>
 #include <vector>
 
+#include <gtest/gtest.h>
+
 #include <xnnpack.h>
-#include <xnnpack/operator.h>
 #include <xnnpack/operator-utils.h>
+#include <xnnpack/operator.h>
 #include <xnnpack/requantization.h>
 #include <xnnpack/subgraph.h>
 
 #include "convolution-test-helpers.h"
-#include <gtest/gtest.h>
 
 namespace xnnpack {
 

@@ -10,6 +10,9 @@
 #include <limits>
 #include <memory>
 #include <random>
+#include <vector>
+
+#include <gtest/gtest.h>
 
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
@@ -17,7 +20,6 @@
 #include <xnnpack/subgraph.h>
 
 #include "subgraph-unary-tester.h"
-#include <gtest/gtest.h>
 
 using SpaceToDepth2DTestQS8 = UnaryTest<int8_t, int8_t, /*min_dim=*/4, /*max_dim=*/4>;
 using SpaceToDepth2DTestQU8 = UnaryTest<uint8_t, uint8_t, /*min_dim=*/4, /*max_dim=*/4>;
