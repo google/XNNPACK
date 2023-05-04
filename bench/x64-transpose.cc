@@ -42,7 +42,7 @@ void transpose(
   std::fill(y.begin(), y.end(), 0);
 
   xnn_x64_transpose_params params;
-  if (init_params) {
+  if (init_params != nullptr) {
     init_params(&params);
   }
   for (auto _ : state) {

@@ -116,8 +116,8 @@ uint64_t GetCurrentCpuFrequency() {
     "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_cur_freq", cpu);
 
   FILE* f = fopen(cpuinfo_name, "r");
-  if (f) {
-    if (fscanf(f, "%d", &freq)) {
+  if (f != nullptr) {
+    if (fscanf(f, "%d", &freq) != 0) {
       fclose(f);
       return uint64_t(freq) * 1000;
     }

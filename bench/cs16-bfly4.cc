@@ -26,7 +26,7 @@ void cs16_bfly4(
     xnn_cs16_bfly4_ukernel_fn bfly4,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if ((isa_check != nullptr) && !isa_check(state)) {
     return;
   }
   const size_t fft_size = state.range(0);

@@ -25,7 +25,7 @@ void cs16_fftr(
     xnn_cs16_fftr_ukernel_fn fftr,
     benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (isa_check && !isa_check(state)) {
+  if ((isa_check != nullptr) && !isa_check(state)) {
     return;
   }
   const size_t samples = state.range(0);
