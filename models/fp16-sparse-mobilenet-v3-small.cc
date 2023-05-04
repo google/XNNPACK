@@ -13,10 +13,9 @@
 #include <random>
 
 #include <xnnpack/cache.h>
+#include <xnnpack/models.h>
 
 #include <fp16/fp16.h>
-
-#include "models/models.h"
 
 namespace models {
 

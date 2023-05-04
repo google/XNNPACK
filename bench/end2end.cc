@@ -10,12 +10,12 @@
 #include <random>
 #include <vector>
 
-#include <xnnpack.h>
-
 #include <benchmark/benchmark.h>
 
 #include "bench/utils.h"
-#include "models/models.h"
+
+#include <xnnpack.h>
+#include <xnnpack/models.h>
 
 
 static void End2EndBenchmark(

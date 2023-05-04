@@ -16,8 +16,7 @@
 #include <xnnpack/cache.h>
 #include <xnnpack/common.h>
 #include <xnnpack/memory.h>
-
-#include "models/models.h"
+#include <xnnpack/models.h>
 
 namespace models {
 

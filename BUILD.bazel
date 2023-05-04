@@ -6478,7 +6478,7 @@ xnnpack_benchmark(
 xnnpack_cc_library(
     name = "fp16_mobilenet_v1",
     srcs = ["models/fp16-mobilenet-v1.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6491,7 +6491,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp32_mobilenet_v1",
     srcs = ["models/fp32-mobilenet-v1.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6503,7 +6503,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp16_sparse_mobilenet_v1",
     srcs = ["models/fp16-sparse-mobilenet-v1.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6515,7 +6515,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp32_sparse_mobilenet_v1",
     srcs = ["models/fp32-sparse-mobilenet-v1.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6527,7 +6527,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "qs8_qc8w_mobilenet_v1",
     srcs = ["models/qs8-qc8w-mobilenet-v1.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6539,7 +6539,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "qs8_qc8w_mobilenet_v2",
     srcs = ["models/qs8-qc8w-mobilenet-v2.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6551,7 +6551,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "qs8_mobilenet_v1",
     srcs = ["models/qs8-mobilenet-v1.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6563,7 +6563,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "qs8_mobilenet_v2",
     srcs = ["models/qs8-mobilenet-v2.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6575,7 +6575,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "qu8_mobilenet_v1",
     srcs = ["models/qu8-mobilenet-v1.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6587,7 +6587,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "qu8_mobilenet_v2",
     srcs = ["models/qu8-mobilenet-v2.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6599,7 +6599,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp16_mobilenet_v2",
     srcs = ["models/fp16-mobilenet-v2.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6612,7 +6612,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp32_mobilenet_v2",
     srcs = ["models/fp32-mobilenet-v2.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6624,7 +6624,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp16_sparse_mobilenet_v2",
     srcs = ["models/fp16-sparse-mobilenet-v2.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6636,7 +6636,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp32_sparse_mobilenet_v2",
     srcs = ["models/fp32-sparse-mobilenet-v2.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6648,7 +6648,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp16_mobilenet_v3_large",
     srcs = ["models/fp16-mobilenet-v3-large.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6661,7 +6661,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp32_mobilenet_v3_large",
     srcs = ["models/fp32-mobilenet-v3-large.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6673,7 +6673,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp16_sparse_mobilenet_v3_large",
     srcs = ["models/fp16-sparse-mobilenet-v3-large.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6685,7 +6685,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp32_sparse_mobilenet_v3_large",
     srcs = ["models/fp32-sparse-mobilenet-v3-large.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6697,7 +6697,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp16_mobilenet_v3_small",
     srcs = ["models/fp16-mobilenet-v3-small.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6710,7 +6710,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp32_mobilenet_v3_small",
     srcs = ["models/fp32-mobilenet-v3-small.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6722,7 +6722,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp32_mobilenet_v3_small_fused",
     srcs = ["models/fp32-mobilenet-v3-small-fused.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6735,7 +6735,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp16_sparse_mobilenet_v3_small",
     srcs = ["models/fp16-sparse-mobilenet-v3-small.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",
@@ -6747,7 +6747,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "fp32_sparse_mobilenet_v3_small",
     srcs = ["models/fp32-sparse-mobilenet-v3-small.cc"],
-    hdrs = ["models/models.h"],
+    hdrs = ["src/xnnpack/models.h"],
     copts = xnnpack_std_cxxopts(),
     deps = [
         ":XNNPACK",

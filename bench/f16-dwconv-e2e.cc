@@ -10,18 +10,16 @@
 #include <random>
 #include <vector>
 
-#include <xnnpack.h>
-
 #include <benchmark/benchmark.h>
 #include "bench/end2end.h"
 #include "bench/utils.h"
-#include "models/models.h"
 
 #include <xnnpack.h>
 #include <xnnpack/config.h>
 #include <xnnpack/dwconv.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
+#include <xnnpack/models.h>
 
 
 static void DWConvEnd2EndBenchmark(

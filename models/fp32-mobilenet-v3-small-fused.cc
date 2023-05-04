@@ -14,9 +14,8 @@
 
 #include <xnnpack/cache.h>
 #include <xnnpack/common.h>
+#include <xnnpack/models.h>
 #include <xnnpack/post-operation.h>
-
-#include "models/models.h"
 
 namespace models {
 
