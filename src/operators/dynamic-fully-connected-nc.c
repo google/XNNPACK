@@ -278,6 +278,7 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
 
   assert(dynamic_fully_connected_op->ukernel.gemm.packw_gemm_goi != NULL);
   dynamic_fully_connected_op->context.packw_gemm_goi = (struct packw_gemm_goi_context) {
+    .g = 1,
     .k = input_channels,
     .nr = nr,
     .kr = kr,

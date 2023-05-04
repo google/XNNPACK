@@ -308,7 +308,7 @@ void xnn_compute_packw_gemm_goi(
   void* packed_weights = (void*) ((uintptr_t) context->packed_weights + context->w_stride * n_block_start);
 
   context->packw_gemm_goi(
-    /*g=*/1, n_block_size, context->k,
+    context->g, n_block_size, context->k,
     context->nr, context->kr, context->sr,
     kernel, bias, packed_weights,
     /*extra_bytes=*/0, /*params=*/NULL);

@@ -172,6 +172,7 @@ XNN_PRIVATE void xnn_compute_transposev_6d(
     size_t tile_n);
 
 struct packw_gemm_goi_context {
+  size_t g;
   size_t k;
   size_t nr;
   size_t kr;
