@@ -1520,6 +1520,18 @@ typedef void (*xnn_f32_vhswish_ukernel_fn)(
     float* output,
     const union xnn_f32_hswish_params* params);
 
+typedef void (*xnn_qs8_vhswish_ukernel_fn)(
+    size_t batch,
+    const int8_t* input,
+    int8_t* output,
+    const union xnn_qs8_hswish_params* params);
+
+typedef void (*xnn_qu8_vhswish_ukernel_fn)(
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
+    const union xnn_qu8_hswish_params* params);
+
 // VLRELU: Vector Leaky REctified Linear Unit elementwise
 
 typedef void (*xnn_f16_vlrelu_ukernel_fn)(
@@ -2231,6 +2243,20 @@ typedef size_t (*xnn_init_f16_hswish_params_fn)(
 
 typedef size_t (*xnn_init_f32_hswish_params_fn)(
   union xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef size_t (*xnn_init_qs8_hswish_params_fn)(
+  union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],
+  int16_t input_zero_point,
+  int16_t output_zero_point,
+  float input_scale,
+  float output_scale);
+
+typedef size_t (*xnn_init_qu8_hswish_params_fn)(
+  union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],
+  int16_t input_zero_point,
+  int16_t output_zero_point,
+  float input_scale,
+  float output_scale);
 
 typedef size_t (*xnn_init_f16_lrelu_params_fn)(
   union xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],

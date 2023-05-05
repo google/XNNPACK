@@ -1982,6 +1982,32 @@ union xnn_f32_hswish_params {
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };
 
+union xnn_qs8_hswish_params {
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    int16_t input_zero_point;
+    int16_t output_zero_point;
+    int16_t input_scale_div_mantissa;
+    int16_t input_scale_div_exp;
+    int16_t scale_ratio;
+    int16_t negative_half;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+};
+
+union xnn_qu8_hswish_params {
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    int16_t input_zero_point;
+    int16_t output_zero_point;
+    int16_t input_scale_div_mantissa;
+    int16_t input_scale_div_exp;
+    int16_t scale_ratio;
+    int16_t negative_half;
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+};
+
 
 // LReLU (Leaky ReLU): used by VLRELU microkernels.
 

@@ -2059,6 +2059,50 @@ size_t xnn_init_f32_hswish_wasmsimd_params(
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+size_t xnn_init_qs8_hswish_neon_params(
+  union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],
+  int16_t input_zero_point,
+  int16_t output_zero_point,
+  float input_scale,
+  float output_scale)
+{
+  params->neon.input_zero_point = input_zero_point;
+  params->neon.output_zero_point= output_zero_point;
+  const float divisor1 = 0x1.555556p-10f;
+  const uint32_t input_scale_div = float_as_uint32(input_scale * divisor1);
+  params->neon.input_scale_div_exp = (int16_t) (input_scale_div >> 23) - 111;
+  params->neon.input_scale_div_mantissa = (int16_t) ((input_scale_div << 9) >> 18 | UINT16_C(0x4000));
+  const float scale_ratio = input_scale / output_scale;
+  assert(scale_ratio >= 0x1.0p-8f);
+  assert(scale_ratio < 0x1.0p+7f);
+  params->neon.scale_ratio = (int16_t) lrintf(scale_ratio * 256.0f);
+  return sizeof(params->neon);
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+size_t xnn_init_qu8_hswish_neon_params(
+  union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],
+  int16_t input_zero_point,
+  int16_t output_zero_point,
+  float input_scale,
+  float output_scale)
+{
+  params->neon.input_zero_point = input_zero_point;
+  params->neon.output_zero_point= output_zero_point;
+  const float divisor1 = 0x1.555556p-10f;
+  const uint32_t input_scale_div = float_as_uint32(input_scale * divisor1);
+  params->neon.input_scale_div_exp = (int16_t) (input_scale_div >> 23) - 111;
+  params->neon.input_scale_div_mantissa = (int16_t) ((input_scale_div << 9) >> 18 | UINT16_C(0x4000));
+  const float scale_ratio = input_scale / output_scale;
+  assert(scale_ratio >= 0x1.0p-8f);
+  assert(scale_ratio < 0x1.0p+7f);
+  params->neon.scale_ratio = (int16_t) lrintf(scale_ratio * 256.0f);
+  return sizeof(params->neon);
+}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f16_sigmoid_fp16arith_rr2_p2_params(
   union xnn_f16_sigmoid_params params[XNN_MIN_ELEMENTS(1)])
 {

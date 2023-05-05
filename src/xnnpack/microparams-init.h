@@ -409,6 +409,29 @@ DECLARE_INIT_F32_HSWISH_PARAMS_FUNCTION(xnn_init_f32_hswish_scalar_params)
   DECLARE_INIT_F32_HSWISH_PARAMS_FUNCTION(xnn_init_f32_hswish_wasmsimd_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#define DECLARE_INIT_QS8_HSWISH_PARAMS_FUNCTION(fn_name)       \
+  XNN_INTERNAL size_t fn_name(                                 \
+    union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],   \
+    int16_t input_zero_point,                                  \
+    int16_t output_zero_point,                                 \
+    float input_scale,                                         \
+    float output_scale);
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  DECLARE_INIT_QS8_HSWISH_PARAMS_FUNCTION(xnn_init_qs8_hswish_neon_params)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#define DECLARE_INIT_QU8_HSWISH_PARAMS_FUNCTION(fn_name)       \
+  XNN_INTERNAL size_t fn_name(                                 \
+    union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],   \
+    int16_t input_zero_point,                                  \
+    int16_t output_zero_point,                                 \
+    float input_scale,                                         \
+    float output_scale);
+
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  DECLARE_INIT_QU8_HSWISH_PARAMS_FUNCTION(xnn_init_qu8_hswish_neon_params)
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #define DECLARE_INIT_F16_SIGMOID_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                                 \

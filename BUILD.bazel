@@ -765,6 +765,9 @@ PROD_NEON_MICROKERNEL_SRCS = [
     "src/qs8-vaddc/gen/qs8-vaddc-minmax-neon-ld64-x16.c",
     "src/qs8-vaddc/gen/qs8-vaddc-minmax-neon-ld64-x32.c",
     "src/qs8-vcvt/gen/qs8-vcvt-neon-x32.c",
+    "src/qs8-vhswish/gen/qs8-vhswish-neon-x8.c",
+    "src/qs8-vhswish/gen/qs8-vhswish-neon-x16.c",
+    "src/qs8-vhswish/gen/qs8-vhswish-neon-x32.c",
     "src/qs8-vlrelu/gen/qs8-vlrelu-neon-x32.c",
     "src/qs8-vmul/gen/qs8-vmul-minmax-rndnu-neon-ld64-x16.c",
     "src/qs8-vmulc/gen/qs8-vmulc-minmax-rndnu-neon-ld64-x16.c",
@@ -789,6 +792,9 @@ PROD_NEON_MICROKERNEL_SRCS = [
     "src/qu8-vaddc/gen/qu8-vaddc-minmax-neon-ld64-x16.c",
     "src/qu8-vaddc/gen/qu8-vaddc-minmax-neon-ld64-x32.c",
     "src/qu8-vcvt/gen/qu8-vcvt-neon-x32.c",
+    "src/qu8-vhswish/gen/qu8-vhswish-neon-x8.c",
+    "src/qu8-vhswish/gen/qu8-vhswish-neon-x16.c",
+    "src/qu8-vhswish/gen/qu8-vhswish-neon-x32.c",
     "src/qu8-vlrelu/gen/qu8-vlrelu-neon-x32.c",
     "src/qu8-vmul/gen/qu8-vmul-minmax-rndnu-neon-ld64-x16.c",
     "src/qu8-vmulc/gen/qu8-vmulc-minmax-rndnu-neon-ld64-x16.c",
@@ -1969,6 +1975,7 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/vadd.h",
     "src/xnnpack/vbinary.h",
     "src/xnnpack/vcvt.h",
+    "src/xnnpack/vhswish.h",
     "src/xnnpack/vlog.h",
     "src/xnnpack/vlrelu.h",
     "src/xnnpack/vlshift.h",
@@ -5572,6 +5579,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qs8_vhswish_bench",
+    srcs = [
+        "bench/qs8-vhswish.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "qs8_vlrelu_bench",
     srcs = [
         "bench/qs8-vlrelu.cc",
@@ -5643,6 +5658,14 @@ xnnpack_benchmark(
     name = "qu8_vcvt_bench",
     srcs = [
         "bench/qu8-vcvt.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "qu8_vhswish_bench",
+    srcs = [
+        "bench/qu8-vhswish.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -8883,6 +8906,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qs8_vhswish_test",
+    srcs = [
+        "test/qs8-vhswish.cc",
+        "test/vhswish-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "qs8_vlrelu_test",
     srcs = [
         "test/qs8-vlrelu.cc",
@@ -9094,6 +9126,15 @@ xnnpack_unit_test(
     srcs = [
         "test/qu8-vcvt.cc",
         "test/vcvt-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "qu8_vhswish_test",
+    srcs = [
+        "test/qu8-vhswish.cc",
+        "test/vhswish-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
