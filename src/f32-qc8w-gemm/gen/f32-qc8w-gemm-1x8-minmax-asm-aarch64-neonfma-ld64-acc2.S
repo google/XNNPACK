@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-gemm/1x8-aarch64-neonfma-ld64.S.in
+//   Template: src/f32-gemm/1x8-aarch64-neonfma-ld64-acc2.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2020 Google LLC
@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64(
+# void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc2(
 #     size_t mr,                (x0) - unused.  mr = 1
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -26,10 +26,10 @@
 # Register usage
 # A0  x3 v0
 # B   x5 v20 v21 v22 v23
-# C0  x6 v16 v17
+# C0  x6 v16 v17 v18 v19
 # Clamp  v4, v5
 
-BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
+BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc2
 
         # Load cn_stride, params pointer
         LDP     x14, x8, [sp]
@@ -40,13 +40,12 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
         # Load initial bias from w into accumulators
         LDP     q16, q17, [x5], 32
 
-        MOVI    v18.4s, 0               // second set of C for pipelining FMLA
-        MOVI    v19.4s, 0
-
         # Is there at least 2 floats (8 bytes)
         SUBS    x0, x2, 8               // k = kc - 8
-
         B.LO    3f
+
+        MOVI    v18.4s, 0               // second set of C for pipelining FMLA
+        MOVI    v19.4s, 0
 
         # Main loop - 2 floats of A (8 bytes)
 1:
@@ -65,18 +64,21 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
         SUBS    x0, x0, 8
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v21.4s, v0.s[0]
-        FMLA    v16.4s, v22.4s, v0.s[1]
-        FMLA    v17.4s, v23.4s, v0.s[1]
+        FMLA    v18.4s, v22.4s, v0.s[1]
+        FMLA    v19.4s, v23.4s, v0.s[1]
         B.HS    1b
+
+        FADD    v16.4s, v16.4s, v18.4s
+        FADD    v17.4s, v17.4s, v19.4s
 
         # Is there a remainder?- 1 float of A (4 bytes)
         TBNZ    x0, 2, 3f
 
 2:
         # Scale
-        LDP     q20, q21, [x5], 32
-        FMUL    v16.4s, v16.4s, v20.4s
-        FMUL    v17.4s, v17.4s, v21.4s
+        LDP     q24, q25, [x5], 32
+        FMUL    v16.4s, v16.4s, v24.4s
+        FMUL    v17.4s, v17.4s, v25.4s
         SUBS    x1, x1, 8
 
         # Clamp
@@ -97,9 +99,9 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
 
 3:
         # Remainder- 1 float of A (4 bytes)
-        LDR     s0, [x3], 4
         LDR     d21, [x5], 8
         SXTL    v21.8h, v21.8b
+        LDR     s0, [x3], 4
         SXTL    v20.4s, v21.4h
         SXTL2   v21.4s, v21.8h
         SCVTF   v20.4s, v20.4s
@@ -125,7 +127,7 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
 7:
         RET
 
-END_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
+END_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc2
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

@@ -43,12 +43,14 @@ tools/xngen src/f32-gemm/scalar.c.in -D MR=4 -D NR=4 -D WASM=1 -D INC=1 -D ACTIV
 ############################### AArch64 assembly ##############################
 
 ### LD64 micro-kernels
+tools/xngen src/f32-gemm/1x8-aarch64-neonfma-ld64.S.in        -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch64-neonfma-ld64.S &
+tools/xngen src/f32-gemm/1x8-aarch64-neonfma-ld64.S.in        -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-1x8-minmax-asm-aarch64-neonfma-ld64.S &
+tools/xngen src/f32-gemm/1x8-aarch64-neonfma-ld64-acc2.S.in   -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch64-neonfma-ld64-acc2.S &
+tools/xngen src/f32-gemm/1x8-aarch64-neonfma-ld64-acc4.S.in   -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch64-neonfma-ld64-acc4.S &
 tools/xngen src/f32-gemm/4x8-aarch64-neonfma-ld64.S.in        -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch64-neonfma-ld64.S &
 tools/xngen src/f32-gemm/4x8-aarch64-neonfma-ld64.S.in        -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-4x8-minmax-asm-aarch64-neonfma-ld64.S &
 tools/xngen src/f32-gemm/6x8-aarch64-neonfma-ld64.S.in        -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x8-minmax-asm-aarch64-neonfma-ld64.S &
 tools/xngen src/f32-gemm/6x8-aarch64-neonfma-ld64.S.in        -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-6x8-minmax-asm-aarch64-neonfma-ld64.S &
-tools/xngen src/f32-gemm/1x8-aarch64-neonfma-ld64.S.in        -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch64-neonfma-ld64.S &
-tools/xngen src/f32-gemm/1x8-aarch64-neonfma-ld64.S.in        -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-1x8-minmax-asm-aarch64-neonfma-ld64.S &
 
 ### LD128 micro-kernels
 tools/xngen src/f32-gemm/4x8-aarch64-neonfma-ld128.S.in       -D INC=0 -o src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch64-neonfma-ld128.S &

@@ -29,10 +29,10 @@ class Generator : public MacroAssembler {
 //     size_t mr,                (x0) - unused.  mr = 1
 //     size_t nc,                x1
 //     size_t kc,                x2 / x0
-//     const uint8_t*restrict a, x3
+//     const float* a,           x3
 //     size_t a_stride,          (x4) - unused
-//     const void*restrict w,    x5
-//     uint8_t*restrict c,       x6
+//     const void* w,            x5
+//     float* c,                 x6
 //     size_t cm_stride,         (x7) - unused
 //     size_t cn_stride,         [sp] -> x14
 //     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
@@ -42,7 +42,7 @@ class Generator : public MacroAssembler {
 // Register usage
 // A0  x3 v0
 // B   x5 v20 v21 v22 v23
-// C0  x6 v16 v17 v18 v19
+// C0  x6 v16 v17
 // Clamp  v4, v5
 
 // Converted from: src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch64-neonfma-ld64.S
@@ -89,16 +89,14 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   subs(x0, x0, 8);
   fmla(v16.v4s(), v20.v4s(), v0.s()[0]);
   fmla(v17.v4s(), v21.v4s(), v0.s()[0]);
-  fmla(v18.v4s(), v22.v4s(), v0.s()[1]);
-  fmla(v19.v4s(), v23.v4s(), v0.s()[1]);
+  fmla(v16.v4s(), v22.v4s(), v0.s()[1]);
+  fmla(v17.v4s(), v23.v4s(), v0.s()[1]);
   b_hs(l1);
 
   // Is there a remainder?- 1 float of A (4 bytes)
   tbnz(x0, 2, l3);
 
   bind(l2);
-  fadd(v16.v4s(), v16.v4s(), v18.v4s());
-  fadd(v17.v4s(), v17.v4s(), v19.v4s());
   subs(x1, x1, 8);
 
   // Clamp
@@ -119,9 +117,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   add(x6, x6, x14);
 
   sub(x3, x3, x2); // a0 -= kc
-
   b_hi(l0);
-
   ret();
 
   bind(l3);
