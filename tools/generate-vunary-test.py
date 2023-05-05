@@ -263,12 +263,14 @@ def main(args):
 //   Generator: {generator}
 
 
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-
 #include <xnnpack/vunary.h>
+
 #include "vunary-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 

@@ -334,6 +334,8 @@ def main(args):
 //   Generator: {generator}
 
 
+#include <limits>
+
 #include <gtest/gtest.h>
 
 #include <xnnpack/common.h>

@@ -8,6 +8,8 @@
 //   Generator: tools/generate-vcvt-test.py
 
 
+#include <limits>
+
 #include <gtest/gtest.h>
 
 #include <xnnpack/common.h>

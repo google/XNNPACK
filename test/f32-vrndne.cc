@@ -8,12 +8,14 @@
 //   Generator: tools/generate-vunary-test.py
 
 
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include <xnnpack/common.h>
 #include <xnnpack/isa-checks.h>
-
 #include <xnnpack/vunary.h>
+
 #include "vunary-microkernel-tester.h"
 
 
