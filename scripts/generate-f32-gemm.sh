@@ -173,22 +173,22 @@ tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=6 -D NR=8  -D FMA=0 -D INC=1 
 tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=6 -D NR=8  -D FMA=1 -D INC=0 -D DUP=1 -D DATATYPE=F32  -o src/f32-gemm/gen/f32-gemm-6x8-minmax-neonfma-dup-ld128.c &
 tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=6 -D NR=8  -D FMA=1 -D INC=1 -D DUP=1 -D DATATYPE=F32  -o src/f32-gemm/gen/f32-gemminc-6x8-minmax-neonfma-dup-ld128.c &
 ### LOAD4+PERMUTE micro-kernels
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/gen/f32-gemm-1x8s4-minmax-neon.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=0 -D INC=1 -o src/f32-gemm/gen/f32-gemminc-1x8s4-minmax-neon.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/gen/f32-gemm-1x8s4-minmax-neonfma.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=1 -D INC=1 -o src/f32-gemm/gen/f32-gemminc-1x8s4-minmax-neonfma.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=4 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/gen/f32-gemm-4x8s4-minmax-neon.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=4 -D NR=8  -D FMA=0 -D INC=1 -o src/f32-gemm/gen/f32-gemminc-4x8s4-minmax-neon.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=4 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/gen/f32-gemm-4x8s4-minmax-neonfma.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=4 -D NR=8  -D FMA=1 -D INC=1 -o src/f32-gemm/gen/f32-gemminc-4x8s4-minmax-neonfma.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/gen/f32-gemm-6x8s4-minmax-neon.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=0 -D INC=1 -o src/f32-gemm/gen/f32-gemminc-6x8s4-minmax-neon.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/gen/f32-gemm-6x8s4-minmax-neonfma.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=1 -D INC=1 -o src/f32-gemm/gen/f32-gemminc-6x8s4-minmax-neonfma.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=0 -D INC=0 -o src/f32-gemm/gen/f32-gemm-8x8s4-minmax-neon.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=0 -D INC=1 -o src/f32-gemm/gen/f32-gemminc-8x8s4-minmax-neon.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=1 -D INC=0 -o src/f32-gemm/gen/f32-gemm-8x8s4-minmax-neonfma.c &
-tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=1 -D INC=1 -o src/f32-gemm/gen/f32-gemminc-8x8s4-minmax-neonfma.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=0 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8s4-minmax-neon.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=0 -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-1x8s4-minmax-neon.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=1 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8s4-minmax-neonfma.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=1 -D NR=8  -D FMA=1 -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-1x8s4-minmax-neonfma.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=4 -D NR=8  -D FMA=0 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x8s4-minmax-neon.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=4 -D NR=8  -D FMA=0 -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-4x8s4-minmax-neon.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=4 -D NR=8  -D FMA=1 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x8s4-minmax-neonfma.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=4 -D NR=8  -D FMA=1 -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-4x8s4-minmax-neonfma.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=0 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x8s4-minmax-neon.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=0 -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-6x8s4-minmax-neon.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=1 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x8s4-minmax-neonfma.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=6 -D NR=8  -D FMA=1 -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-6x8s4-minmax-neonfma.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=0 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-8x8s4-minmax-neon.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=0 -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-8x8s4-minmax-neon.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=1 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-8x8s4-minmax-neonfma.c &
+tools/xngen src/f32-gemm/neon-shuffle.c.in   -D MR=8 -D NR=8  -D FMA=1 -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-8x8s4-minmax-neonfma.c &
 
 ################################## WAsm SIMD ##################################
 ### LOAD1+BROADCAST micro-kernels
@@ -496,17 +496,17 @@ tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=0 -D SSE=2 -o src/f
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=1 -D SSE=2 -o src/f32-gemm/gen/f32-gemminc-5x8-minmax-sse2-dup.c &
 
 ### LOAD4+PERMUTE micro-kernels
-tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=1 -D NR=8 -D INC=0 -o src/f32-gemm/gen/f32-gemm-1x8s4-minmax-sse.c &
-tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=1 -D NR=8 -D INC=1 -o src/f32-gemm/gen/f32-gemminc-1x8s4-minmax-sse.c &
+tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=1 -D NR=8 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x8s4-minmax-sse.c &
+tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=1 -D NR=8 -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-1x8s4-minmax-sse.c &
 
-tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=3 -D NR=8 -D INC=0 -o src/f32-gemm/gen/f32-gemm-3x8s4-minmax-sse.c &
-tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=3 -D NR=8 -D INC=1 -o src/f32-gemm/gen/f32-gemminc-3x8s4-minmax-sse.c &
+tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=3 -D NR=8 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-3x8s4-minmax-sse.c &
+tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=3 -D NR=8 -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-3x8s4-minmax-sse.c &
 
-tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=4 -D NR=8 -D INC=0 -o src/f32-gemm/gen/f32-gemm-4x8s4-minmax-sse.c &
-tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=4 -D NR=8 -D INC=1 -o src/f32-gemm/gen/f32-gemminc-4x8s4-minmax-sse.c &
+tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=4 -D NR=8 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x8s4-minmax-sse.c &
+tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=4 -D NR=8 -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-4x8s4-minmax-sse.c &
 
-tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=5 -D NR=8 -D INC=0 -o src/f32-gemm/gen/f32-gemm-5x8s4-minmax-sse.c &
-tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=5 -D NR=8 -D INC=1 -o src/f32-gemm/gen/f32-gemminc-5x8s4-minmax-sse.c &
+tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=5 -D NR=8 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-5x8s4-minmax-sse.c &
+tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=5 -D NR=8 -D INC=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemminc-5x8s4-minmax-sse.c &
 
 ### MRx2 micro-kernels
 tools/xngen src/f32-gemm/MRx2c4-sse.c.in -D MR=4 -D NR=2 -o src/f32-gemm/gen/f32-gemm-4x2c4-minmax-sse.c &
