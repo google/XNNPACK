@@ -20,7 +20,7 @@
 #include <xnnpack.h>
 
 #include <benchmark/benchmark.h>
-#include <fp16.h>
+#include <fp16/fp16.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "tensorflow/lite/interpreter.h"

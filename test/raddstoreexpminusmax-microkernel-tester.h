@@ -14,7 +14,7 @@
 #include <random>
 #include <vector>
 
-#include <fp16.h>
+#include <fp16/fp16.h>
 
 #include <xnnpack.h>
 #include <xnnpack/microfnptr.h>

@@ -10,7 +10,7 @@
 #include <stddef.h>
 #include <string.h>
 
-#include <fp16.h>
+#include <fp16/fp16.h>
 
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>

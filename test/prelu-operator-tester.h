@@ -7,7 +7,7 @@
 
 #include <gtest/gtest.h>
 
-#include <fp16.h>
+#include <fp16/fp16.h>
 
 #include <algorithm>
 #include <cmath>

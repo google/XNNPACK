@@ -13,7 +13,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <fp16.h>
+#include <fp16/fp16.h>
 
 // GEMM GIO packing tests
 

@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <fp16.h>
+#include <fp16/fp16.h>
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>

@@ -13,7 +13,7 @@
 #include <string.h>
 #include <math.h>
 
-#include <fp16.h>
+#include <fp16/fp16.h>
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>

@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <fp16.h>
+#include <fp16/fp16.h>
 
 #include <xnnpack/math.h>
 #include <xnnpack/microparams-init.h>

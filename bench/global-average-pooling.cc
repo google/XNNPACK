@@ -17,7 +17,7 @@
 #include <xnnpack.h>
 
 #include <benchmark/benchmark.h>
-#include <fp16.h>
+#include <fp16/fp16.h>
 #include "bench/utils.h"
 
 static void global_average_pooling_qu8(benchmark::State& state) {
