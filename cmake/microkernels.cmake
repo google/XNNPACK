@@ -3079,9 +3079,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qs8-vcvt/gen/qs8-vcvt-neon-x8.c
   src/qs8-vcvt/gen/qs8-vcvt-neon-x16.c
   src/qs8-vcvt/gen/qs8-vcvt-neon-x32.c
-  src/qs8-vlrelu/gen/qs8-vhswish-neon-x8.c
-  src/qs8-vlrelu/gen/qs8-vhswish-neon-x16.c
-  src/qs8-vlrelu/gen/qs8-vhswish-neon-x32.c
+  src/qs8-vhswish/gen/qs8-vhswish-neon-x8.c
+  src/qs8-vhswish/gen/qs8-vhswish-neon-x16.c
+  src/qs8-vhswish/gen/qs8-vhswish-neon-x32.c
   src/qs8-vlrelu/gen/qs8-vlrelu-neon-x8.c
   src/qs8-vlrelu/gen/qs8-vlrelu-neon-x16.c
   src/qs8-vlrelu/gen/qs8-vlrelu-neon-x32.c
@@ -3209,9 +3209,9 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/qu8-vcvt/gen/qu8-vcvt-neon-x8.c
   src/qu8-vcvt/gen/qu8-vcvt-neon-x16.c
   src/qu8-vcvt/gen/qu8-vcvt-neon-x32.c
-  src/qu8-vlrelu/gen/qu8-vhswish-neon-x8.c
-  src/qu8-vlrelu/gen/qu8-vhswish-neon-x16.c
-  src/qu8-vlrelu/gen/qu8-vhswish-neon-x32.c
+  src/qu8-vhswish/gen/qu8-vhswish-neon-x8.c
+  src/qu8-vhswish/gen/qu8-vhswish-neon-x16.c
+  src/qu8-vhswish/gen/qu8-vhswish-neon-x32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-neon-x8.c
   src/qu8-vlrelu/gen/qu8-vlrelu-neon-x16.c
   src/qu8-vlrelu/gen/qu8-vlrelu-neon-x32.c

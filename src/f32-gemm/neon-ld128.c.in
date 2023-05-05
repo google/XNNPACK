@@ -3,8 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert NR % 4 == 0
 $assert DATATYPE in ["F32", "QC8"]
+$assert NR % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
@@ -14,6 +14,7 @@ $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
 #include <arm_neon.h>
 
 #include <xnnpack/gemm.h>
+
 
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
 $ISA = ("neonfma" if DUP else "aarch64_neonfma") if FMA else "neon"
@@ -149,7 +150,6 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
       $for N in range(0, NR, 4):
         $for M in range(MR):
           vacc${M}x${ABC[N:N+4]} = vmulq_f32(vacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
-
     const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
     $for N in range(0, NR, 4):
       $for M in range(MR):

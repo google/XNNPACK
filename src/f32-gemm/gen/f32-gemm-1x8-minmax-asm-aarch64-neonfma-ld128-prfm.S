@@ -52,13 +52,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm
         PRFM    PLDL1KEEP, [x5, 128]
         MOVI    v21.4s, 0
         PRFM    PLDL1KEEP, [x5, 192]
+        SUBS    x0, x2, 16              // k = kc - 16
         MOVI    v22.4s, 0
         MOVI    v23.4s, 0
-
         # Is there at least 4 floats (16 bytes) for main loop?
-        SUBS    x0, x2, 16              // k = kc - 16
-        B.LO    5f
-
+        B.LO    3f
 
         # Main loop - 4 floats of A (16 bytes)
 1:
@@ -80,13 +78,12 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm
         FMLA    v19.4s, v31.4s, v0.s[3]
         B.HS    1b
 
-3:
         # Is there a remainder?- 2 floats of A (8 bytes)
-        TBNZ    x0, 3, 6f
+        TBNZ    x0, 3, 4f
         # Is there a remainder?- 1 float of A (4 bytes)
-        TBNZ    x0, 2, 8f
+        TBNZ    x0, 2, 5f
 
-4:
+2:
         FADD    v16.4s, v16.4s, v18.4s
         FADD    v17.4s, v17.4s, v19.4s
         SUBS    x1, x1, 8
@@ -98,7 +95,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm
         FMIN    v17.4s, v17.4s, v5.4s
 
         # Store full 1 x 8
-        B.LO    9f
+        B.LO    6f
 
         STP     q16, q17, [x6]
         ADD     x6, x6, x14
@@ -108,9 +105,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm
 
         RET
 
-5:
-        TBZ     x0, 3, 7f
-6:
+3:
+        TBZ     x0, 3, 5f
+4:
         # Remainder- 2 floats of A (8 bytes)
         LDR     d0, [x3], 8
         LDP     q24, q25, [x5], 32
@@ -119,31 +116,30 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm
         FMLA    v17.4s, v25.4s, v0.s[0]
         FMLA    v18.4s, v26.4s, v0.s[1]
         FMLA    v19.4s, v27.4s, v0.s[1]
-7:
-        TBZ     x0, 2, 4b
-8:
+        TBZ     x0, 2, 2b
+5:
         # Remainder- 1 float of A (4 bytes)
         LDR     s0, [x3], 4
         LDP     q24, q25, [x5], 32
         FMLA    v16.4s, v24.4s, v0.s[0]
         FMLA    v17.4s, v25.4s, v0.s[0]
-        B       4b
+        B       2b
 
         # Store odd channels
-9:
-        TBZ     x1, 2, 10f
+6:
+        TBZ     x1, 2, 7f
         STR     q16, [x6], 16
         MOV     v16.16b, v17.16b
 
-10:
-        TBZ     x1, 1, 11f
+7:
+        TBZ     x1, 1, 8f
         STR     d16, [x6], 8
         DUP     d16, v16.d[1]
 
-11:
-        TBZ     x1, 0, 12f
+8:
+        TBZ     x1, 0, 9f
         STR     s16, [x6]
-12:
+9:
         RET
 
 END_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm

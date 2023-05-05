@@ -404,6 +404,8 @@ void xnn_f32_gemm_minmax_ukernel_8x8s4__neon(
       vacc7x4567 = vmlaq_f32(vacc7x4567, vmska7x4567c3, vb4567c3);
 
     }
+
+
     const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
     vacc0x0123 = vminq_f32(vacc0x0123, vmax);
     vacc1x0123 = vminq_f32(vacc1x0123, vmax);

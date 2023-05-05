@@ -163,6 +163,7 @@ void xnn_f32_gemminc_minmax_ukernel_4x8__neon_dup_ld128(
         k -= sizeof(float);
       } while (k != 0);
     }
+
     const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
     vacc0x0123 = vminq_f32(vacc0x0123, vmax);
     vacc1x0123 = vminq_f32(vacc1x0123, vmax);
