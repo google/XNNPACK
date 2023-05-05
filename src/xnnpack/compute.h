@@ -199,11 +199,11 @@ struct gemm_context {
   size_t a_stride;
   const void* packed_w;
   size_t w_stride;
-  size_t wg_stride;
+  size_t gw_stride;
   void* c;
   size_t cm_stride;
   size_t cn_stride;
-  size_t cg_stride;
+  size_t gc_stride;
   uint32_t log2_csize;
   struct xnn_hmp_gemm_ukernel ukernel;
   void* fused_params;

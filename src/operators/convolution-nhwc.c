@@ -1599,11 +1599,11 @@ static enum xnn_status setup_gemm(
       .a_stride = convolution_op->input_pixel_stride << log2_input_element_size,
       .packed_w = packed_weights(convolution_op),
       .w_stride = w_stride,
-      .wg_stride = w_stride * round_up(group_output_channels, nr),
+      .gw_stride = w_stride * round_up(group_output_channels, nr),
       .c = convolution_op->output,
       .cm_stride = convolution_op->output_pixel_stride << log2_output_element_size,
       .cn_stride = nr << log2_output_element_size,
-      .cg_stride = group_output_channels << log2_output_element_size,
+      .gc_stride = group_output_channels << log2_output_element_size,
       .log2_csize = log2_output_element_size,
       .ukernel = gemm_ukernel,
   };

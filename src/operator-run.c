@@ -332,8 +332,8 @@ void xnn_compute_grouped_gemm(
       k_scaled,
       (const void*) ((uintptr_t) context->a + mr_block_start * a_stride + group_index * k_scaled),
       a_stride,
-      (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride + group_index * context->wg_stride),
-      (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize) + group_index * context->cg_stride),
+      (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride + group_index * context->gw_stride),
+      (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize) + group_index * context->gc_stride),
       cm_stride,
       context->cn_stride,
       &context->params);
@@ -1325,8 +1325,8 @@ void xnn_compute_vmulcaddc(
         k_scaled,
         (const void*) ((uintptr_t) context->a + mr_block_start * a_stride + group_index * k_scaled),
         a_stride,
-        (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride + group_index * context->wg_stride),
-        (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize) + group_index * context->cg_stride),
+        (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride + group_index * context->gw_stride),
+        (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize) + group_index * context->gc_stride),
         cm_stride,
         context->cn_stride,
         &context->params);
