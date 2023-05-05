@@ -14,6 +14,7 @@
 
 #include <xnnpack/gemm.h>
 
+
 void xnn_f32_qc8w_gemm_minmax_ukernel_1x8s4__neonfma(
     size_t mr,
     size_t nc,
@@ -155,12 +156,10 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x8s4__neonfma(
       vacc0x4567 = vfmaq_f32(vacc0x4567, vmska0x4567c3, vb4567c3);
 
     }
-
     const float32x4_t vscale0123 = vld1q_f32(w); w = (const float*) w + 4;
     vacc0x0123 = vmulq_f32(vacc0x0123, vscale0123);
     const float32x4_t vscale4567 = vld1q_f32(w); w = (const float*) w + 4;
     vacc0x4567 = vmulq_f32(vacc0x4567, vscale4567);
-
     const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
     vacc0x0123 = vminq_f32(vacc0x0123, vmax);
     vacc0x4567 = vminq_f32(vacc0x4567, vmax);

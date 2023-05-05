@@ -15,6 +15,7 @@ $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
 
 #include <xnnpack/gemm.h>
 
+
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
 $ISA = ("neonfma" if DUP else "aarch64_neonfma") if FMA else "neon"
 void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_${"dup" if DUP else "lane"}_ld128(
@@ -142,14 +143,12 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         k -= sizeof(float);
       } while (k != 0);
     }
-
     $if DATATYPE == "QC8":
       $for N in range(0, NR, 4):
         const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32(w); w = ((const float*) w + 4);
       $for N in range(0, NR, 4):
         $for M in range(MR):
           vacc${M}x${ABC[N:N+4]} = vmulq_f32(vacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
-
     const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
     $for N in range(0, NR, 4):
       $for M in range(MR):
