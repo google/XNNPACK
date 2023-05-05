@@ -1983,6 +1983,7 @@ union xnn_f32_hswish_params {
 };
 
 union xnn_qs8_hswish_params {
+  char _; // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     int16_t input_zero_point;
@@ -1996,6 +1997,7 @@ union xnn_qs8_hswish_params {
 };
 
 union xnn_qu8_hswish_params {
+  char _; // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     int16_t input_zero_point;
