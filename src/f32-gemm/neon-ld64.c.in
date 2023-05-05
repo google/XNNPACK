@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert NR % 4 == 0
+$assert DATATYPE in ["F32", "QC8"]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
@@ -16,13 +17,17 @@ $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
 
 
 $ISA = ("neonfma" if DUP else "aarch64_neonfma") if FMA else "neon"
-void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_${"dup" if DUP else "lane"}_ld64(
+$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
+void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_${"dup" if DUP else "lane"}_ld64(
     size_t mr,
     size_t nc,
     size_t kc,
     const float* restrict a,
     size_t a_stride,
-    const float* restrict w,
+    $if DATATYPE == "F32":
+      const float* restrict w,
+    $else:
+      const void* restrict w,
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
@@ -69,7 +74,10 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_${"d
           float32x4_t vacc${M}x${ABC[N:N+4]} = vld1q_f32(acc); acc += 4;
     $else:
       $for N in range(0, NR, 4):
-        float32x4_t vacc0x${ABC[N:N+4]} = vld1q_f32(w); w += 4;
+        $if DATATYPE == "F32":
+          float32x4_t vacc0x${ABC[N:N+4]} = vld1q_f32(w); w += 4;
+        $elif DATATYPE == "QC8":
+          float32x4_t vacc0x${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
       $for M in range(1, MR):
         $for N in range(0, NR, 4):
           float32x4_t vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
@@ -80,8 +88,20 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_${"d
         const float32x2_t va${M} = vld1_f32(a${M}); a${M} += 2;
 
       $for L in range(2):
-        $for N in range(0, NR, 4):
-          const float32x4_t vb${ABC[N:N+4]}c${L} = vld1q_f32(w); w += 4;
+        $if DATATYPE == "F32":
+          $for N in range(0, NR, 4):
+            const float32x4_t vb${ABC[N:N+4]}c${L} = vld1q_f32(w); w += 4;
+        $elif DATATYPE == "QC8":
+          $for N in range(0, NR, 8):
+            const int8x8_t vw${ABC[N:N+8]}c${L} = vld1_s8(w); w = (const int8_t*) w + 8;
+          $for N in range(0, NR, 8):
+            const int16x8_t vxw${ABC[N:N+8]}c${L} = vmovl_s8(vw${ABC[N:N+8]}c${L});
+          $for N in range(0, NR, 8):
+            const int32x4_t vxw${ABC[N:N+4]}c${L} = vmovl_s16(vget_low_s16(vxw${ABC[N:N+8]}c${L}));
+            const int32x4_t vxw${ABC[N+4:N+8]}c${L} = vmovl_s16(vget_high_s16(vxw${ABC[N:N+8]}c${L}));
+
+          $for N in range(0, NR, 4):
+            const float32x4_t vb${ABC[N:N+4]}c${L} = vcvtq_f32_s32(vxw${ABC[N:N+4]}c${L});
 
         $if DUP:
           $for M in range(MR):
@@ -98,13 +118,31 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_${"d
       $for M in range(MR):
         const float32x4_t va${M} = vld1q_dup_f32(a${M}); a${M} += 1;
 
-      $for N in range(0, NR, 4):
-        const float32x4_t vb${ABC[N:N+4]} = vld1q_f32(w); w += 4;
+      $if DATATYPE == "F32":
+        $for N in range(0, NR, 4):
+          const float32x4_t vb${ABC[N:N+4]} = vld1q_f32(w); w += 4;
+      $elif DATATYPE == "QC8":
+        $for N in range(0, NR, 4):
+          const int8x8_t vw${ABC[N:N+4]}${ABC[N:N+4]} = vreinterpret_s8_u32(vld1_dup_u32(w)); w = (const int8_t*) w + 4;
+
+        $for N in range(0, NR, 4):
+          const int16x8_t vxw${ABC[N:N+4]}${ABC[N:N+4]} = vmovl_s8(vw${ABC[N:N+4]}${ABC[N:N+4]});
+
+        $for N in range(0, NR, 4):
+          const int32x4_t vxw${ABC[N:N+4]} = vmovl_s16(vget_low_s16(vxw${ABC[N:N+4]}${ABC[N:N+4]}));
+
+        $for N in range(0, NR, 4):
+          const float32x4_t vb${ABC[N:N+4]} = vcvtq_f32_s32(vxw${ABC[N:N+4]});
 
       $for N in range(0, NR, 4):
         $for M in range(MR):
           vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, va${M}, vb${ABC[N:N+4]});
     }
+    $if DATATYPE == "QC8":
+      $for N in range(0, NR, 4):
+        const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
+        $for M in range(MR):
+          vacc${M}x${ABC[N:N+4]} = vmulq_f32(vacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
     const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
     $for N in range(0, NR, 4):
       $for M in range(MR):
