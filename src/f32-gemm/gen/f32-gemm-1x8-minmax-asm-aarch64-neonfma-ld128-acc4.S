@@ -1,15 +1,15 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-gemm/1x8-aarch64-neonfma-ld64-acc4.S.in
+//   Template: src/f32-gemm/1x8-aarch64-neonfma-ld128-acc4.S.in
 //   Generator: tools/xngen
 //
-// Copyright 2020 Google LLC
+// Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4(
+# void xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4(
 #     size_t mr,                (x0) - unused.  mr = 1
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -29,7 +29,7 @@
 # C0  x6 v16 v17 v18 v19 v26 v27 v28 v29
 # Clamp  v4, v5
 
-BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4
+BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4
 
         # Load cn_stride, params pointer
         LDP     x14, x8, [sp]
@@ -52,40 +52,21 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_ac
 
         # Main loop - 4 floats of A (16 bytes)
 1:
-        LDR     q22, [x5], 16
-        SXTL    v21.8h, v22.8b
-        SXTL2   v23.8h, v22.16b
-        LDR     d0,  [x3], 8
-        SXTL    v20.4s, v21.4h
-        SXTL    v22.4s, v23.4h
-        SXTL2   v21.4s, v21.8h
-        SXTL2   v23.4s, v23.8h
-        SCVTF   v20.4s, v20.4s
-        SCVTF   v21.4s, v21.4s
-        SCVTF   v22.4s, v22.4s
-        SCVTF   v23.4s, v23.4s
+        LDR     q0, [x3], 16
+        LDP     q20, q21, [x5], 32
+        LDP     q22, q23, [x5], 32
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v21.4s, v0.s[0]
         FMLA    v18.4s, v22.4s, v0.s[1]
         FMLA    v19.4s, v23.4s, v0.s[1]
 
-        LDR     q22, [x5], 16
-        SXTL    v21.8h, v22.8b
-        SXTL2   v23.8h, v22.16b
-        LDR     d1,  [x3], 8
-        SXTL    v20.4s, v21.4h
-        SXTL    v22.4s, v23.4h
-        SXTL2   v21.4s, v21.8h
-        SXTL2   v23.4s, v23.8h
-        SCVTF   v20.4s, v20.4s
-        SCVTF   v21.4s, v21.4s
-        SCVTF   v22.4s, v22.4s
-        SCVTF   v23.4s, v23.4s
+        LDP     q20, q21, [x5], 32
+        LDP     q22, q23, [x5], 32
         SUBS    x0, x0, 16
-        FMLA    v26.4s, v20.4s, v1.s[0]
-        FMLA    v27.4s, v21.4s, v1.s[0]
-        FMLA    v28.4s, v22.4s, v1.s[1]
-        FMLA    v29.4s, v23.4s, v1.s[1]
+        FMLA    v26.4s, v20.4s, v0.s[2]
+        FMLA    v27.4s, v21.4s, v0.s[2]
+        FMLA    v28.4s, v22.4s, v0.s[3]
+        FMLA    v29.4s, v23.4s, v0.s[3]
         B.HS    1b
 
         FADD    v16.4s, v16.4s, v26.4s
@@ -99,13 +80,8 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_ac
         TBNZ    x0, 2, 5f
 
 2:
-        # Load Scale
-        LDP     q24, q25, [x5], 32
         FADD    v16.4s, v16.4s, v18.4s
         FADD    v17.4s, v17.4s, v19.4s
-        # Scale
-        FMUL    v16.4s, v16.4s, v24.4s
-        FMUL    v17.4s, v17.4s, v25.4s
         SUBS    x1, x1, 8
 
         # Clamp
@@ -129,18 +105,9 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_ac
 
         # Remainder- 2 float of A (4 bytes)
 4:
-        LDR     q22, [x5], 16
-        SXTL    v21.8h, v22.8b
-        SXTL2   v23.8h, v22.16b
-        LDR     d0,  [x3], 8
-        SXTL    v20.4s, v21.4h
-        SXTL    v22.4s, v23.4h
-        SXTL2   v21.4s, v21.8h
-        SXTL2   v23.4s, v23.8h
-        SCVTF   v20.4s, v20.4s
-        SCVTF   v21.4s, v21.4s
-        SCVTF   v22.4s, v22.4s
-        SCVTF   v23.4s, v23.4s
+        LDR     d0, [x3], 8
+        LDP     q20, q21, [x5], 32
+        LDP     q22, q23, [x5], 32
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v21.4s, v0.s[0]
         FMLA    v18.4s, v22.4s, v0.s[1]
@@ -150,12 +117,7 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_ac
 5:
         # Remainder- 1 float of A (4 bytes)
         LDR     s0, [x3], 4
-        LDR     d21, [x5], 8
-        SXTL    v21.8h, v21.8b
-        SXTL    v20.4s, v21.4h
-        SXTL2   v21.4s, v21.8h
-        SCVTF   v20.4s, v20.4s
-        SCVTF   v21.4s, v21.4s
+        LDP     q20, q21, [x5], 32
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v21.4s, v0.s[0]
         B       2b
@@ -177,7 +139,7 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_ac
 9:
         RET
 
-END_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4
+END_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

@@ -57,7 +57,16 @@
 - name: xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
+- name: xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4_prfm
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
+- name: xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
+- name: xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4_prfm
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm

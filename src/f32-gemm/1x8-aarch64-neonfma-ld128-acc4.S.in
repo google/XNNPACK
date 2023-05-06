@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -7,7 +7,7 @@ $assert DATATYPE in ["F32", "QC8"]
 #include <xnnpack/assembly.h>
 
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
-# void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4${"_prfm" if PREFETCH else ""}(
+# void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4${"_prfm" if PREFETCH else ""}(
 #     size_t mr,                (x0) - unused.  mr = 1
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -17,11 +17,7 @@ $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
 #     float* c,                 x6
 #     size_t cm_stride,         (x7) - unused
 #     size_t cn_stride,         [sp] -> x14
-$if INC:
-  #     const float*restrict acc,  [sp + 8] -> x15
-  #     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 16] -> (x8)
-$else:
-  #     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
+#     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -31,26 +27,16 @@ $else:
 # C0  x6 v16 v17 v18 v19 v26 v27 v28 v29
 # Clamp  v4, v5
 
-BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4${"_prfm" if PREFETCH else ""}
+BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4${"_prfm" if PREFETCH else ""}
 
-        $if INC:
-          # Load cn_stride, acc
-          LDP     x14, x15, [sp]
-          # Load params pointer
-          LDR     x8, [sp, 16]
-        $else:
-          # Load cn_stride, params pointer
-          LDP     x14, x8, [sp]
+        # Load cn_stride, params pointer
+        LDP     x14, x8, [sp]
 
         # Load min/max values
         LD2R    {v4.4s, v5.4s}, [x8]
 0:
-        $if INC:
-          # Load initial accumulators
-          LDP     q16, q17, [x15], 32
-        $else:
-          # Load initial bias from w into accumulators
-          LDP     q16, q17, [x5], 32
+        # Load initial bias from w into accumulators
+        LDP     q16, q17, [x5], 32
         SUBS    x0, x2, 16               // k = kc - 16
         MOVI    v18.4s, 0               // four sets of C for pipelining FMLA
         MOVI    v19.4s, 0
@@ -71,14 +57,14 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1
         # Main loop - 4 floats of A (16 bytes)
 1:
         $if DATATYPE == "F32":
-          LDR     d0, [x3], 8
+          LDR     q0, [x3], 16
           LDP     q20, q21, [x5], 32
           LDP     q22, q23, [x5], 32
         $else:
           LDR     q22, [x5], 16
           SXTL    v21.8h, v22.8b
           SXTL2   v23.8h, v22.16b
-          LDR     d0,  [x3], 8
+          LDR     q0, [x3], 16
           SXTL    v20.4s, v21.4h
           SXTL    v22.4s, v23.4h
           SXTL2   v21.4s, v21.8h
@@ -95,14 +81,12 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1
         FMLA    v19.4s, v23.4s, v0.s[1]
 
         $if DATATYPE == "F32":
-          LDR     d1, [x3], 8
           LDP     q20, q21, [x5], 32
           LDP     q22, q23, [x5], 32
         $else:
           LDR     q22, [x5], 16
           SXTL    v21.8h, v22.8b
           SXTL2   v23.8h, v22.16b
-          LDR     d1,  [x3], 8
           SXTL    v20.4s, v21.4h
           SXTL    v22.4s, v23.4h
           SXTL2   v21.4s, v21.8h
@@ -112,12 +96,12 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1
           SCVTF   v22.4s, v22.4s
           SCVTF   v23.4s, v23.4s
         SUBS    x0, x0, 16
-        FMLA    v26.4s, v20.4s, v1.s[0]
-        FMLA    v27.4s, v21.4s, v1.s[0]
+        FMLA    v26.4s, v20.4s, v0.s[2]
+        FMLA    v27.4s, v21.4s, v0.s[2]
         $if PREFETCH and (DATATYPE == "F32"):
           PRFM    PLDL1KEEP, [x5, 128]
-        FMLA    v28.4s, v22.4s, v1.s[1]
-        FMLA    v29.4s, v23.4s, v1.s[1]
+        FMLA    v28.4s, v22.4s, v0.s[3]
+        FMLA    v29.4s, v23.4s, v0.s[3]
         B.HS    1b
 
         FADD    v16.4s, v16.4s, v26.4s
@@ -219,7 +203,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1
 9:
         RET
 
-END_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4${"_prfm" if PREFETCH else ""}
+END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4${"_prfm" if PREFETCH else ""}
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

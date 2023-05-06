@@ -26,7 +26,7 @@
 # Register usage
 # A0  x3 v0  v1
 # B   x5 v20 v21 v22 v23
-# C0  x6 v16 v17 v18 v19 v26 v27 v28 219
+# C0  x6 v16 v17 v18 v19 v26 v27 v28 v29
 # Clamp  v4, v5
 
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4

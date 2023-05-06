@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4(
+# void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4_prfm(
 #     size_t mr,                (x0) - unused.  mr = 1
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -29,7 +29,7 @@
 # C0  x6 v16 v17 v18 v19 v26 v27 v28 v29
 # Clamp  v4, v5
 
-BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4
+BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4_prfm
 
         # Load cn_stride, params pointer
         LDP     x14, x8, [sp]
@@ -46,8 +46,11 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_ac
         B.LO    3f
 
         MOVI    v26.4s, 0
+        PRFM    PLDL1KEEP, [x5]
         MOVI    v27.4s, 0
+        PRFM    PLDL1KEEP, [x5, 64]
         MOVI    v28.4s, 0
+        PRFM    PLDL1KEEP, [x5, 128]
         MOVI    v29.4s, 0
 
         # Main loop - 4 floats of A (16 bytes)
@@ -66,6 +69,7 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_ac
         SCVTF   v23.4s, v23.4s
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v21.4s, v0.s[0]
+        PRFM    PLDL1KEEP, [x5, 128]
         FMLA    v18.4s, v22.4s, v0.s[1]
         FMLA    v19.4s, v23.4s, v0.s[1]
 
@@ -177,7 +181,7 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_ac
 9:
         RET
 
-END_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4
+END_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4_prfm
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

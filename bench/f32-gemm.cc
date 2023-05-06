@@ -466,6 +466,12 @@ static void GEMMBenchmark(benchmark::State& state,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1);
   }
+  static void f32_gemm_1x8__asm_aarch64_neonfma_ld64_acc4_prfm(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4_prfm,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  }
   static void f32_gemm_1x8__asm_aarch64_neonfma_ld128(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128,
@@ -475,6 +481,18 @@ static void GEMMBenchmark(benchmark::State& state,
   static void f32_gemm_1x8__asm_aarch64_neonfma_ld128_prfm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  }
+  static void f32_gemm_1x8__asm_aarch64_neonfma_ld128_acc4(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  }
+  static void f32_gemm_1x8__asm_aarch64_neonfma_ld128_acc4_prfm(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4_prfm,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1);
   }
@@ -750,8 +768,11 @@ static void GEMMBenchmark(benchmark::State& state,
   BENCHMARK_GEMM(f32_gemm_1x8__asm_aarch64_neonfma_ld64)
   BENCHMARK_GEMM(f32_gemm_1x8__asm_aarch64_neonfma_ld64_acc2)
   BENCHMARK_GEMM(f32_gemm_1x8__asm_aarch64_neonfma_ld64_acc4)
+  BENCHMARK_GEMM(f32_gemm_1x8__asm_aarch64_neonfma_ld64_acc4_prfm)
   BENCHMARK_GEMM(f32_gemm_1x8__asm_aarch64_neonfma_ld128)
   BENCHMARK_GEMM(f32_gemm_1x8__asm_aarch64_neonfma_ld128_prfm)
+  BENCHMARK_GEMM(f32_gemm_1x8__asm_aarch64_neonfma_ld128_acc4)
+  BENCHMARK_GEMM(f32_gemm_1x8__asm_aarch64_neonfma_ld128_acc4_prfm)
   BENCHMARK_GEMM(f32_gemm_1x12__asm_aarch64_neonfma_cortex_a53)
   BENCHMARK_GEMM(f32_gemm_1x8__asm_aarch64_neonfma_cortex_a53)
   BENCHMARK_GEMM(f32_gemm_1x8__asm_aarch64_neonfma_prfm_cortex_a53)
