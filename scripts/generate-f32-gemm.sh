@@ -163,7 +163,7 @@ tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=6 -D NR=8  -D FMA=0 -D INC=0 
 tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=6 -D NR=8  -D FMA=0 -D INC=1 -D DUP=1 -D DATATYPE=F32  -o src/f32-gemm/gen/f32-gemminc-6x8-minmax-neon-dup-ld64.c &
 tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=6 -D NR=8  -D FMA=1 -D INC=0 -D DUP=1 -D DATATYPE=F32  -o src/f32-gemm/gen/f32-gemm-6x8-minmax-neonfma-dup-ld64.c &
 tools/xngen src/f32-gemm/neon-ld64.c.in      -D MR=6 -D NR=8  -D FMA=1 -D INC=1 -D DUP=1 -D DATATYPE=F32  -o src/f32-gemm/gen/f32-gemminc-6x8-minmax-neonfma-dup-ld64.c &
-### DUP LD128 midupkernels
+### DUP LD128 micro-kernels
 tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=4 -D NR=8  -D FMA=0 -D INC=0 -D DUP=1 -D DATATYPE=F32  -o src/f32-gemm/gen/f32-gemm-4x8-minmax-neon-dup-ld128.c &
 tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=4 -D NR=8  -D FMA=0 -D INC=1 -D DUP=1 -D DATATYPE=F32  -o src/f32-gemm/gen/f32-gemminc-4x8-minmax-neon-dup-ld128.c &
 tools/xngen src/f32-gemm/neon-ld128.c.in     -D MR=4 -D NR=8  -D FMA=1 -D INC=0 -D DUP=1 -D DATATYPE=F32  -o src/f32-gemm/gen/f32-gemm-4x8-minmax-neonfma-dup-ld128.c &
