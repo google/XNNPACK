@@ -39,13 +39,11 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_ac
 0:
         # Load initial bias from w into accumulators
         LDP     q16, q17, [x5], 32
-
-        # Is there at least 2 floats (8 bytes)
         SUBS    x0, x2, 8               // k = kc - 8
-        B.LO    3f
-
-        MOVI    v18.4s, 0               // second set of C for pipelining FMLA
+        MOVI    v18.4s, 0                // second set of C for pipelining FMLA
         MOVI    v19.4s, 0
+        # Is there at least 2 floats (8 bytes)
+        B.LO    3f
 
         # Main loop - 2 floats of A (8 bytes)
 1:
@@ -68,15 +66,15 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_ac
         FMLA    v19.4s, v23.4s, v0.s[1]
         B.HS    1b
 
-        FADD    v16.4s, v16.4s, v18.4s
-        FADD    v17.4s, v17.4s, v19.4s
-
         # Is there a remainder?- 1 float of A (4 bytes)
         TBNZ    x0, 2, 3f
 
 2:
-        # Scale
+        # Load Scale
         LDP     q24, q25, [x5], 32
+        FADD    v16.4s, v16.4s, v18.4s
+        FADD    v17.4s, v17.4s, v19.4s
+        # Scale
         FMUL    v16.4s, v16.4s, v24.4s
         FMUL    v17.4s, v17.4s, v25.4s
         SUBS    x1, x1, 8
@@ -99,9 +97,9 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_ac
 
 3:
         # Remainder- 1 float of A (4 bytes)
+        LDR     s0, [x3], 4
         LDR     d21, [x5], 8
         SXTL    v21.8h, v21.8b
-        LDR     s0, [x3], 4
         SXTL    v20.4s, v21.4h
         SXTL2   v21.4s, v21.8h
         SCVTF   v20.4s, v20.4s

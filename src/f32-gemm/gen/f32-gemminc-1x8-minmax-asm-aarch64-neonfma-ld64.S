@@ -42,13 +42,8 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
 0:
         # Load initial accumulators
         LDP     q16, q17, [x15], 32
-
-        MOVI    v18.4s, 0               // second set of C for pipelining FMLA
-        MOVI    v19.4s, 0
-
-        # Is there at least 2 floats (8 bytes)
         SUBS    x0, x2, 8               // k = kc - 8
-
+        # Is there at least 2 floats (8 bytes)
         B.LO    3f
 
         # Main loop - 2 floats of A (8 bytes)

@@ -72,13 +72,8 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   bind(l0);
   // Load initial bias from w into accumulators
   ldp(q16, q17, mem[x5], 32);
-
-  movi(v18.v4s(), 0); // second set of C for pipelining FMLA
-  movi(v19.v4s(), 0);
-
-  // Is there at least 2 floats (8 bytes)
   subs(x0, x2, 8); // k = kc - 8
-
+  // Is there at least 2 floats (8 bytes)
   b_lo(l3);
 
   // Main loop - 2 floats of A (8 bytes)

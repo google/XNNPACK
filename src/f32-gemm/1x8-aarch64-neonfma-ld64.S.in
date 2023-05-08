@@ -7,7 +7,7 @@ $assert DATATYPE in ["F32", "QC8"]
 #include <xnnpack/assembly.h>
 
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
-# void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64(
+# void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64${"_prfm" if PREFETCH else ""}(
 #     size_t mr,                (x0) - unused.  mr = 1
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -31,7 +31,7 @@ $else:
 # C0  x6 v16 v17
 # Clamp  v4, v5
 
-BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
+BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64${"_prfm" if PREFETCH else ""}
 
         $if INC:
           # Load cn_stride, acc
@@ -51,14 +51,14 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1
         $else:
           # Load initial bias from w into accumulators
           LDP     q16, q17, [x5], 32
-
-        MOVI    v18.4s, 0               // second set of C for pipelining FMLA
-        MOVI    v19.4s, 0
-
-        # Is there at least 2 floats (8 bytes)
         SUBS    x0, x2, 8               // k = kc - 8
-
+        # Is there at least 2 floats (8 bytes)
         B.LO    3f
+        $if PREFETCH:
+          PRFM    PLDL1KEEP, [x5]
+          PRFM    PLDL1KEEP, [x5, 64]
+          PRFM    PLDL1KEEP, [x5, 128]
+          PRFM    PLDL1KEEP, [x5, 192]
 
         # Main loop - 2 floats of A (8 bytes)
 1:
@@ -81,6 +81,8 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1
           SCVTF   v23.4s, v23.4s
         SUBS    x0, x0, 8
         FMLA    v16.4s, v20.4s, v0.s[0]
+        $if PREFETCH:
+          PRFM    PLDL1KEEP, [x5, 128]
         FMLA    v17.4s, v21.4s, v0.s[0]
         FMLA    v16.4s, v22.4s, v0.s[1]
         FMLA    v17.4s, v23.4s, v0.s[1]
@@ -146,7 +148,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1
 7:
         RET
 
-END_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
+END_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64${"_prfm" if PREFETCH else ""}
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

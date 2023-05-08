@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-gemm/1x8-aarch64-neonfma-ld128-acc4.S.in
+//   Template: src/f32-gemm/1x8-aarch64-neonfma-ld128-acc2.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC
@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4(
+# void xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc2(
 #     size_t mr,                (x0) - unused.  mr = 1
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -26,10 +26,10 @@
 # Register usage
 # A0  x3 v0
 # B   x5 v20 v21 v22 v23
-# C0  x6 v16 v17 v18 v19 v26 v27 v28 v29
+# C0  x6 v16 v17 v18 v19
 # Clamp  v4, v5
 
-BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4
+BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc2
 
         # Load cn_stride, params pointer
         LDP     x14, x8, [sp]
@@ -40,15 +40,10 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4
         # Load initial bias from w into accumulators
         LDP     q16, q17, [x5], 32
         SUBS    x0, x2, 16               // k = kc - 16
-        MOVI    v18.4s, 0               // four sets of C for pipelining FMLA
+        MOVI    v18.4s, 0                // second set of C for pipelining FMLA
         MOVI    v19.4s, 0
         # Is there at least 4 floats (16 bytes)
         B.LO    3f
-
-        MOVI    v26.4s, 0
-        MOVI    v27.4s, 0
-        MOVI    v28.4s, 0
-        MOVI    v29.4s, 0
 
         # Main loop - 4 floats of A (16 bytes)
 1:
@@ -63,16 +58,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4
         LDP     q20, q21, [x5], 32
         LDP     q22, q23, [x5], 32
         SUBS    x0, x0, 16
-        FMLA    v26.4s, v20.4s, v0.s[2]
-        FMLA    v27.4s, v21.4s, v0.s[2]
-        FMLA    v28.4s, v22.4s, v0.s[3]
-        FMLA    v29.4s, v23.4s, v0.s[3]
+        FMLA    v16.4s, v20.4s, v0.s[2]
+        FMLA    v17.4s, v21.4s, v0.s[2]
+        FMLA    v18.4s, v22.4s, v0.s[3]
+        FMLA    v19.4s, v23.4s, v0.s[3]
         B.HS    1b
-
-        FADD    v16.4s, v16.4s, v26.4s
-        FADD    v18.4s, v18.4s, v28.4s
-        FADD    v17.4s, v17.4s, v27.4s
-        FADD    v19.4s, v19.4s, v29.4s
 
         # Is there a remainder?- 2 float of A (8 bytes)
         TBNZ    x0, 3, 4f
@@ -139,7 +129,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4
 9:
         RET
 
-END_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4
+END_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc2
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
