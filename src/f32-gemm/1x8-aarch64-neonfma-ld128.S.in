@@ -186,7 +186,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma
 9:
         RET
 
-END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4${"_prfm" if PREFETCH else ""}
+END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128${"_prfm" if PREFETCH else ""}
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

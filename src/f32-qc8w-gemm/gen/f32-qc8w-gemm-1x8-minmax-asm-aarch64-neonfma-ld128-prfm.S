@@ -166,7 +166,7 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_p
 9:
         RET
 
-END_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_acc4_prfm
+END_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
