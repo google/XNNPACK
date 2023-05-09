@@ -197,6 +197,7 @@ struct gemm_context {
   size_t k_scaled;
   const void* a;
   size_t a_stride;
+  size_t ga_stride;
   const void* packed_w;
   size_t w_stride;
   size_t gw_stride;

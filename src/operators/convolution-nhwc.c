@@ -1597,6 +1597,7 @@ static enum xnn_status setup_gemm(
       .k_scaled = group_input_channels << log2_input_element_size,
       .a = convolution_op->input,
       .a_stride = convolution_op->input_pixel_stride << log2_input_element_size,
+      .ga_stride = group_input_channels << log2_input_element_size,
       .packed_w = packed_weights(convolution_op),
       .w_stride = w_stride,
       .gw_stride = w_stride * round_up(group_output_channels, nr),

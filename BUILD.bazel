@@ -85,6 +85,7 @@ OPERATOR_SRCS = [
     "src/operator-run.c",
     "src/operators/argmax-pooling-nhwc.c",
     "src/operators/average-pooling-nhwc.c",
+    "src/operators/batch-matrix-multiply-nc.c",
     "src/operators/binary-elementwise-nd.c",
     "src/operators/channel-shuffle-nc.c",
     "src/operators/constant-pad-nd.c",
@@ -9610,6 +9611,15 @@ xnnpack_unit_test(
         "test/bankers-rounding-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "batch_matrix_multiply_nc_test",
+    srcs = [
+        "test/batch-matrix-multiply-nc.cc",
+        "test/batch-matrix-multiply-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS + [":aligned_allocator"],
 )
 
 xnnpack_unit_test(
