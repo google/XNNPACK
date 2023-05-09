@@ -1932,6 +1932,7 @@ union xnn_f32_expminus_params {
 // HSwish: used by VHSWISH microkernels.
 
 union xnn_f16_hswish_params {
+  char _; // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t sixth;
@@ -2014,6 +2015,7 @@ union xnn_qu8_hswish_params {
 // LReLU (Leaky ReLU): used by VLRELU microkernels.
 
 union xnn_f16_lrelu_params {
+  char _; // Dummy member variable to comply with the C standard
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     uint16_t slope;
