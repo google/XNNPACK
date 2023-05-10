@@ -6,11 +6,12 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
 #include "bench/utils.h"
+#include <benchmark/benchmark.h>
 
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>

@@ -5,10 +5,12 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cmath>
 #include <iomanip>
 #include <ios>
 #include <limits>
+#include <utility>
 #include <vector>
 
 #include <fp16/fp16.h>

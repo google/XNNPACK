@@ -7,19 +7,20 @@
 #include <cmath>
 #include <cstring>
 #include <functional>
+#include <memory>
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
 #include "bench/end2end.h"
 #include "bench/utils.h"
+#include <benchmark/benchmark.h>
 
 #include <xnnpack.h>
 #include <xnnpack/dwconv.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
-#include <xnnpack/params.h>
 #include <xnnpack/models.h>
+#include <xnnpack/params.h>
 
 
 static void DWConvEnd2EndBenchmark(

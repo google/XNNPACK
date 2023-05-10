@@ -7,12 +7,13 @@
 #include <cmath>
 #include <cstring>
 #include <functional>
+#include <memory>
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
 #include "bench/end2end.h"
 #include "bench/utils.h"
+#include <benchmark/benchmark.h>
 
 #include <xnnpack.h>
 #include <xnnpack/config.h>

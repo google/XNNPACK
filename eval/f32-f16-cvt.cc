@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <iomanip>
 #include <ios>
+#include <limits>
 #include <vector>
 
 #include <gtest/gtest.h>

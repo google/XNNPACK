@@ -8,15 +8,15 @@
 #include <cmath>
 #include <functional>
 #include <limits>
+#include <memory>
 #include <random>
 #include <vector>
 
-#include <fp16/fp16.h>
-
 #include <xnnpack.h>
 
-#include <benchmark/benchmark.h>
+#include <fp16/fp16.h>
 #include "bench/utils.h"
+#include <benchmark/benchmark.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "tensorflow/lite/interpreter.h"

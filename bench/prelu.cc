@@ -7,13 +7,14 @@
 #include <cfloat>
 #include <cmath>
 #include <functional>
+#include <memory>
 #include <random>
 #include <vector>
 
 #include <xnnpack.h>
 
-#include <benchmark/benchmark.h>
 #include "bench/utils.h"
+#include <benchmark/benchmark.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "tensorflow/lite/interpreter.h"
