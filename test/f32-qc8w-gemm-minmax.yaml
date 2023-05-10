@@ -30,6 +30,12 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 # AArch64 assembly
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neon_ld128_acc2
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neon_ld128_acc2_prfm
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
