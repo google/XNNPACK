@@ -84,7 +84,7 @@ void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c2__neonbf16_bfdot_lane_ld128(
         const bfloat16x8_t vb${ABC[N:N+4]}c${ABC[0:2]} = vld1q_bf16(w); w += 8;
 
       $for M in range(MR):
-        const uint32x4_t va${M}c${ABC[0:2]} = vdupq_lane_u32(vreinterpret_u32_bf16(vget_low_bf16(va${M})), 0);
+        const uint32x4_t va${M}c${ABC[0:2]} = vdupq_lane_u32(vget_low_u32(vreinterpretq_u32_bf16(va${M})), 0);
 
       $for N in range(0, NR, 4):
         const uint32x4_t vm${ABC[N:N+4]}c${ABC[0:2]} = vreinterpretq_u32_u16(vceqq_u16(vreinterpretq_u16_bf16(vb${ABC[N:N+4]}c${ABC[0:2]}), vmovq_n_u16(0)));
@@ -99,7 +99,7 @@ void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c2__neonbf16_bfdot_lane_ld128(
           const bfloat16x8_t vb${ABC[N:N+4]}c${ABC[2:4]} = vld1q_bf16(w); w += 8;
 
         $for M in range(MR):
-          const uint32x4_t va${M}c${ABC[2:4]} = vdupq_lane_u32(vreinterpret_u32_bf16(vget_low_bf16(va${M})), 1);
+          const uint32x4_t va${M}c${ABC[2:4]} = vdupq_lane_u32(vget_low_u32(vreinterpretq_u32_bf16(va${M})), 1);
 
         $for N in range(0, NR, 4):
           const uint32x4_t vm${ABC[N:N+4]}c${ABC[2:4]} = vreinterpretq_u32_u16(vceqq_u16(vreinterpretq_u16_bf16(vb${ABC[N:N+4]}c${ABC[2:4]}), vmovq_n_u16(0)));
@@ -114,7 +114,7 @@ void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c2__neonbf16_bfdot_lane_ld128(
             const bfloat16x8_t vb${ABC[N:N+4]}c${ABC[4:6]} = vld1q_bf16(w); w += 8;
 
           $for M in range(MR):
-            const uint32x4_t va${M}c${ABC[4:6]} = vdupq_lane_u32(vreinterpret_u32_bf16(vget_high_bf16(va${M})), 0);
+            const uint32x4_t va${M}c${ABC[4:6]} = vdupq_lane_u32(vget_high_u32(vreinterpretq_u32_bf16(va${M})), 0);
 
           $for N in range(0, NR, 4):
             const uint32x4_t vm${ABC[N:N+4]}c${ABC[4:6]} = vreinterpretq_u32_u16(vceqq_u16(vreinterpretq_u16_bf16(vb${ABC[N:N+4]}c${ABC[4:6]}), vmovq_n_u16(0)));
@@ -129,7 +129,7 @@ void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c2__neonbf16_bfdot_lane_ld128(
               const bfloat16x8_t vb${ABC[N:N+4]}c${ABC[6:8]} = vld1q_bf16(w); w += 8;
 
             $for M in range(MR):
-              const uint32x4_t va${M}c${ABC[6:8]} = vdupq_lane_u32(vreinterpret_u32_bf16(vget_high_bf16(va${M})), 1);
+              const uint32x4_t va${M}c${ABC[6:8]} = vdupq_lane_u32(vget_high_u32(vreinterpretq_u32_bf16(va${M})), 1);
 
             $for N in range(0, NR, 4):
               const uint32x4_t vm${ABC[N:N+4]}c${ABC[6:8]} = vreinterpretq_u32_u16(vceqq_u16(vreinterpretq_u16_bf16(vb${ABC[N:N+4]}c${ABC[6:8]}), vmovq_n_u16(0)));
@@ -185,7 +185,7 @@ void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c2__neonbf16_bfdot_lane_ld128(
                 vst1_lane_u32((void*) c${M}, vreinterpret_u32_bf16(vout${M}x${ABC[0:4]}), 0); c${M} += 2;
 
               $for M in range(MR):
-                vout${M}x${ABC[0:4]} = vreinterpret_bf16_u16(vext_u16(vreinterpret_u16_bf16(vout${M}x${ABC[0:4]}), vreinterpret_u16_bf16(vout${M}x${ABC[0:4]}), 2));
+                vout${M}x${ABC[0:4]} = vdup_lane_bf16(vout${M}x${ABC[0:4]}, 2);
             $elif LOG2N == 0:
               $for M in range(MR):
                 vst1_lane_bf16(c${M}, vout${M}x${ABC[0:4]}, 0);

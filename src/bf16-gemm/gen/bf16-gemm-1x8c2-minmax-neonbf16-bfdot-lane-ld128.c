@@ -75,7 +75,7 @@ void xnn_bf16_gemm_minmax_ukernel_1x8c2__neonbf16_bfdot_lane_ld128(
       const bfloat16x8_t vb0123c01 = vld1q_bf16(w); w += 8;
       const bfloat16x8_t vb4567c01 = vld1q_bf16(w); w += 8;
 
-      const uint32x4_t va0c01 = vdupq_lane_u32(vreinterpret_u32_bf16(vget_low_bf16(va0)), 0);
+      const uint32x4_t va0c01 = vdupq_lane_u32(vget_low_u32(vreinterpretq_u32_bf16(va0)), 0);
 
       const uint32x4_t vm0123c01 = vreinterpretq_u32_u16(vceqq_u16(vreinterpretq_u16_bf16(vb0123c01), vmovq_n_u16(0)));
       const uint32x4_t vm4567c01 = vreinterpretq_u32_u16(vceqq_u16(vreinterpretq_u16_bf16(vb4567c01), vmovq_n_u16(0)));
@@ -89,7 +89,7 @@ void xnn_bf16_gemm_minmax_ukernel_1x8c2__neonbf16_bfdot_lane_ld128(
         const bfloat16x8_t vb0123c23 = vld1q_bf16(w); w += 8;
         const bfloat16x8_t vb4567c23 = vld1q_bf16(w); w += 8;
 
-        const uint32x4_t va0c23 = vdupq_lane_u32(vreinterpret_u32_bf16(vget_low_bf16(va0)), 1);
+        const uint32x4_t va0c23 = vdupq_lane_u32(vget_low_u32(vreinterpretq_u32_bf16(va0)), 1);
 
         const uint32x4_t vm0123c23 = vreinterpretq_u32_u16(vceqq_u16(vreinterpretq_u16_bf16(vb0123c23), vmovq_n_u16(0)));
         const uint32x4_t vm4567c23 = vreinterpretq_u32_u16(vceqq_u16(vreinterpretq_u16_bf16(vb4567c23), vmovq_n_u16(0)));
@@ -103,7 +103,7 @@ void xnn_bf16_gemm_minmax_ukernel_1x8c2__neonbf16_bfdot_lane_ld128(
           const bfloat16x8_t vb0123c45 = vld1q_bf16(w); w += 8;
           const bfloat16x8_t vb4567c45 = vld1q_bf16(w); w += 8;
 
-          const uint32x4_t va0c45 = vdupq_lane_u32(vreinterpret_u32_bf16(vget_high_bf16(va0)), 0);
+          const uint32x4_t va0c45 = vdupq_lane_u32(vget_high_u32(vreinterpretq_u32_bf16(va0)), 0);
 
           const uint32x4_t vm0123c45 = vreinterpretq_u32_u16(vceqq_u16(vreinterpretq_u16_bf16(vb0123c45), vmovq_n_u16(0)));
           const uint32x4_t vm4567c45 = vreinterpretq_u32_u16(vceqq_u16(vreinterpretq_u16_bf16(vb4567c45), vmovq_n_u16(0)));
@@ -117,7 +117,7 @@ void xnn_bf16_gemm_minmax_ukernel_1x8c2__neonbf16_bfdot_lane_ld128(
             const bfloat16x8_t vb0123c67 = vld1q_bf16(w); w += 8;
             const bfloat16x8_t vb4567c67 = vld1q_bf16(w); w += 8;
 
-            const uint32x4_t va0c67 = vdupq_lane_u32(vreinterpret_u32_bf16(vget_high_bf16(va0)), 1);
+            const uint32x4_t va0c67 = vdupq_lane_u32(vget_high_u32(vreinterpretq_u32_bf16(va0)), 1);
 
             const uint32x4_t vm0123c67 = vreinterpretq_u32_u16(vceqq_u16(vreinterpretq_u16_bf16(vb0123c67), vmovq_n_u16(0)));
             const uint32x4_t vm4567c67 = vreinterpretq_u32_u16(vceqq_u16(vreinterpretq_u16_bf16(vb4567c67), vmovq_n_u16(0)));
@@ -159,7 +159,7 @@ void xnn_bf16_gemm_minmax_ukernel_1x8c2__neonbf16_bfdot_lane_ld128(
       if (nc & 2) {
         vst1_lane_u32((void*) c0, vreinterpret_u32_bf16(vout0x0123), 0); c0 += 2;
 
-        vout0x0123 = vreinterpret_bf16_u16(vext_u16(vreinterpret_u16_bf16(vout0x0123), vreinterpret_u16_bf16(vout0x0123), 2));
+        vout0x0123 = vdup_lane_bf16(vout0x0123, 2);
       }
       if (nc & 1) {
         vst1_lane_bf16(c0, vout0x0123, 0);
