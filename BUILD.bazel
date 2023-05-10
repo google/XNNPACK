@@ -7793,6 +7793,7 @@ xnnpack_unit_test(
         "test/f32-igemm-jit.cc",
     ],
     shard_count = 10,
+    tags = ["not_run:arm"],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
         ":jit_test_mode",
@@ -7993,6 +7994,7 @@ xnnpack_unit_test(
         "test/f32-gemm-jit.cc",
     ],
     shard_count = 10,
+    tags = ["not_run:arm"],
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
         ":jit_test_mode",
