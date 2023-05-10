@@ -11096,6 +11096,14 @@ xnnpack_unit_test(
     srcs = [
         "test/jit.cc",
     ],
+    copts = ["-fpic"],
+    linkopts = select({
+        "emscripten": [
+            "-sMAIN_MODULE=2",
+            "-sDYNAMIC_EXECUTION=1",
+        ],
+        "//conditions:default": [],
+    }),
     deps = [
         ":common",
         ":jit_test_mode",

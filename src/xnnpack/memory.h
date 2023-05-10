@@ -23,6 +23,8 @@ extern "C" {
 // Default size for buffer to hold repacked weights, 1MB.
 #define XNN_DEFAULT_WEIGHTS_BUFFER_SIZE 1048576
 
+#define XNN_INVALID_FUNCTION_INDEX -1
+
 struct xnn_code_buffer {
   // Pointer to allocated, externally managed memory.
   void* start;
@@ -32,6 +34,11 @@ struct xnn_code_buffer {
   // Maximum capacity of the buffer pointer to by `code`. This is the size of
   // the currently mapped memory.
   size_t capacity;
+#if XNN_PLATFORM_WEB
+  // The index of the first function added by loading a WASM module. The field
+  // is set by xnn_finalize_code_memory.
+  int first_function_index;
+#endif
 };
 
 // Allocates a code region and associates it with `buffer`.

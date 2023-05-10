@@ -6,6 +6,9 @@
 // Include first for the platform detection macros.
 #include <xnnpack/common.h>
 
+#if XNN_PLATFORM_WEB
+#include <emscripten/emscripten.h>
+#endif
 #if XNN_PLATFORM_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -141,6 +144,9 @@ enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buffer, size_t 
 
   buffer->size = 0;
   buffer->capacity = page_aligned_size;
+  #if XNN_PLATFORM_WEB
+    buffer->first_function_index = XNN_INVALID_FUNCTION_INDEX;
+  #endif
   return xnn_status_success;
 }
 
@@ -233,29 +239,53 @@ static enum xnn_status set_memory_permission(void* start, size_t size, enum xnn_
   return xnn_status_success;
 }
 
+#if XNN_PLATFORM_WEB
+EM_JS(int, xnnLoadWasmModuleJS, (const uint8_t* code, int code_size, const char* code_name, int invalid_function_index), {
+    const tableOriginalSize = wasmTable.length;
+    const binary = new Uint8Array(HEAPU8.slice(code, (code + code_size)));
+    try {
+      loadWebAssemblyModule(binary, {loadAsync: false, global: true, nodelete: true});
+      if (tableOriginalSize < wasmTable.length) {
+        return tableOriginalSize;
+      }
+      return invalid_function_index;
+    }
+    catch(error) {
+      return invalid_function_index;
+    }
+});
+#endif // XNN_PLATFORM_WEB
+
 #if XNN_PLATFORM_JIT
 enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buffer) {
-  const enum xnn_status status = release_unused_memory(buffer->size, buffer->start, &buffer->capacity);
-  if (status != xnn_status_success) {
-    return status;
-  }
+  #if XNN_PLATFORM_WEB
+    static const char* kJITModuleName = "JIT";
+    const int first_function_index = xnnLoadWasmModuleJS(buffer->start, buffer->size, kJITModuleName, XNN_INVALID_FUNCTION_INDEX);
+    buffer->first_function_index = first_function_index;
+    return first_function_index != XNN_INVALID_FUNCTION_INDEX ? xnn_status_success : xnn_status_invalid_parameter;
+  #else
+    const enum xnn_status status = release_unused_memory(buffer->size, buffer->start, &buffer->capacity);
+    if (status != xnn_status_success) {
+      return status;
+    }
 
-  if (buffer->capacity == 0) {
-    return xnn_status_success;
-  }
+    if (buffer->capacity == 0) {
+      return xnn_status_success;
+    }
 
-  // Flush icache, do it before changing permissions due to bugs on older ARM64 kernels.
-  #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_PLATFORM_JIT
-    #if XNN_PLATFORM_WINDOWS
-      FlushInstructionCache(GetCurrentProcess(), buffer->start, buffer->capacity);
-    #else
-      // iOS toolchain doesn't support this, use sys_icache_invalidate, when we support iOS.
-      __builtin___clear_cache(buffer->start, (void*) ((uint8_t*) buffer->start + buffer->capacity));
-    #endif  // XNN_PLATFORM_WINDOWS
-  #endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
+    // Flush icache, do it before changing permissions due to bugs on older ARM64 kernels.
+    #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_PLATFORM_JIT
+      #if XNN_PLATFORM_WINDOWS
+        FlushInstructionCache(GetCurrentProcess(), buffer->start, buffer->capacity);
+      #else
+        // iOS toolchain doesn't support this, use sys_icache_invalidate, when we support iOS.
+        __builtin___clear_cache(buffer->start, (void*) ((uint8_t*) buffer->start + buffer->capacity));
+      #endif  // XNN_PLATFORM_WINDOWS
+    #endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
 
-  // Set permissions to RX (no write).
-  return set_memory_permission(buffer->start, buffer->size, xnn_memory_permission_read_execute);
+    // Set permissions to RX (no write).
+    return set_memory_permission(buffer->start, buffer->size, xnn_memory_permission_read_execute);
+  #endif // XNN_PLATFORM_WEB
 }
 #endif  // XNN_PLATFORM_JIT
 
