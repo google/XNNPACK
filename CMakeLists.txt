@@ -198,6 +198,7 @@ SET(OPERATOR_SRCS
   src/operators/argmax-pooling-nhwc.c
   src/operators/average-pooling-nhwc.c
   src/operators/binary-elementwise-nd.c
+  src/operators/batch-matrix-multiply-nc.c
   src/operators/channel-shuffle-nc.c
   src/operators/constant-pad-nd.c
   src/operators/convolution-nchw.c
@@ -1033,6 +1034,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(bankers-rounding-nc-eager-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(bankers-rounding-nc-eager-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME bankers-rounding-nc-eager-test COMMAND bankers-rounding-nc-eager-test)
+
+    ADD_EXECUTABLE(batch-matrix-multiply-nc-test test/batch-matrix-multiply-nc.cc)
+    TARGET_INCLUDE_DIRECTORIES(batch-matrix-multiply-nc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(batch-matrix-multiply-nc-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME batch-matrix-multiply-nc-test COMMAND batch-matrix-multiply-nc-test)
 
     ADD_EXECUTABLE(ceiling-nc-test test/ceiling-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(ceiling-nc-test PRIVATE src test)
