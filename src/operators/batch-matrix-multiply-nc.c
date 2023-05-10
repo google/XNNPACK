@@ -178,7 +178,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
   assert(batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi != NULL);
   batch_matrix_multiply_op->context.packw_gemm_goi = (struct packw_gemm_goi_context) {
     .g = batch_size,
-    .k = k,
+    .kc = k,
     .nr = nr,
     .kr = kr,
     .sr = sr,

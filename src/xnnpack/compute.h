@@ -177,8 +177,7 @@ struct packw_gemm_goi_context {
   // Number of groups, used for grouped convolutions.
   size_t g;
   // Number of input channels.
-  // Sometimes written kc in other context.
-  size_t k;
+  size_t kc;
   // Number of output channels the GEMM is optimized for.
   size_t nr;
   size_t kr;
