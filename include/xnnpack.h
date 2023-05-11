@@ -1252,6 +1252,26 @@ enum xnn_status xnn_define_bankers_rounding(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Batch Matrix Multiply Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input1_id - Value ID for the first input tensor. The input tensor must be an N-dimensional tensor defined in
+///                    the @a subgraph. It must be at least 3D. The first N-2 dimensions must match the second input
+///                    tensor. The last 2 dimensions are [M, K]. The last dimension must match the second input tensor.
+/// @param input2_id - Value ID for the second input tensor. The input tensor must be an N-dimensional tensor defined
+///                    in the @a subgraph. It must be at least 3D. The first N-2 dimensions must match the first input
+///                    tensor. The last 2 dimensions are [N, K]. The last dimension must match the first input tensor.
+/// @param output_id - Value ID for the output tensor. The output tensor must be an N-dimensional tensor defined in the
+///                    @a subgraph. It must be at least 3D. The first N-2 dimensions must match the first and second
+///                    input tensors . The last 2 dimensions must be [M, N].
+/// @param flags - binary features of the Batch Matrix Multiply Node. No supported flags are currently defined.
+enum xnn_status xnn_define_batch_matrix_multiply(
+  xnn_subgraph_t subgraph,
+  uint32_t input1_id,
+  uint32_t input2_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a Ceiling Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.

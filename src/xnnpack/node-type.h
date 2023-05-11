@@ -12,6 +12,7 @@ enum xnn_node_type {
   xnn_node_type_argmax_pooling_2d,
   xnn_node_type_average_pooling_2d,
   xnn_node_type_bankers_rounding,
+  xnn_node_type_batch_matrix_multiply,
   xnn_node_type_ceiling,
   xnn_node_type_clamp,
   xnn_node_type_concatenate2,

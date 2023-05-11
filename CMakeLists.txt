@@ -229,6 +229,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/argmax-pooling-2d.c
   src/subgraph/average-pooling-2d.c
   src/subgraph/bankers-rounding.c
+  src/subgraph/batch-matrix-multiply.c
   src/subgraph/ceiling.c
   src/subgraph/clamp.c
   src/subgraph/concatenate.c
@@ -1424,6 +1425,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(bankers-rounding-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(bankers-rounding-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
     ADD_TEST(NAME bankers-rounding-test COMMAND bankers-rounding-test)
+
+    ADD_EXECUTABLE(batch-matrix-multiply-test test/batch-matrix-multiply.cc)
+    TARGET_INCLUDE_DIRECTORIES(batch-matrix-multiply-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(batch-matrix-multiply-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+    ADD_TEST(NAME batch-matrix-multiply-test COMMAND batch-matrix-multiply-test)
 
     ADD_EXECUTABLE(ceiling-test test/ceiling.cc)
     TARGET_INCLUDE_DIRECTORIES(ceiling-test PRIVATE src test)

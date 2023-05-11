@@ -118,6 +118,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/argmax-pooling-2d.c",
     "src/subgraph/average-pooling-2d.c",
     "src/subgraph/bankers-rounding.c",
+    "src/subgraph/batch-matrix-multiply.c",
     "src/subgraph/ceiling.c",
     "src/subgraph/clamp.c",
     "src/subgraph/concatenate.c",
@@ -10390,6 +10391,20 @@ xnnpack_unit_test(
         ":operators_test_mode",
         ":subgraph_test_mode",
         ":subgraph_unary_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "batch_matrix_multiply_test",
+    srcs = [
+        "test/batch-matrix-multiply.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":aligned_allocator",
+        ":common",
+        ":operators_test_mode",
+        ":subgraph_test_mode",
     ],
 )
 

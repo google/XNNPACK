@@ -28,6 +28,8 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Average Pooling 2D";
     case xnn_node_type_bankers_rounding:
       return "Bankers Rounding";
+    case xnn_node_type_batch_matrix_multiply:
+      return "Batch Matrix Multiply";
     case xnn_node_type_ceiling:
       return "Ceiling";
     case xnn_node_type_clamp:
