@@ -87,7 +87,7 @@ def xnnpack_cc_library(
         defines = [],
         includes = [],
         deps = [],
-        visibility = [],
+        visibility = ["//:__subpackages__"],
         testonly = False):
     """C/C++/assembly library with architecture-specific configuration.
 
@@ -252,6 +252,7 @@ def xnnpack_aggregate_library(
         }),
         defines = defines,
         compatible_with = compatible_with,
+        visibility = ["//:__subpackages__"],
     )
 
 def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], linkopts = [], automatic = True, timeout = "short", shard_count = 1):
