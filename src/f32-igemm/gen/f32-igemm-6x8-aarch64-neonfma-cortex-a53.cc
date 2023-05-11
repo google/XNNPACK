@@ -59,7 +59,7 @@ class Generator : public MacroAssembler {
 // unused A   v8 v9 v10 v11
 // temporary vector shadow register x8
 
-// Converted from: src/f32-igemm/gen/f32-igemm-6x8-minmax-asm-aarch64-neonfma-prfm-cortex-a53.S
+// Converted from: src/f32-igemm/gen/f32-igemm-6x8-minmax-asm-aarch64-neonfma-cortex-a53-prfm.S
 void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const jit_gemm_params* jit_gemm_params)
 {
   assert(max_mr <= 6);

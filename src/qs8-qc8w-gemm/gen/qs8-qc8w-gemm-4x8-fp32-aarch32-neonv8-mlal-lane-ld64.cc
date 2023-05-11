@@ -55,7 +55,7 @@ class Generator : public MacroAssembler {
 //    int8_t output_max;          d11[7]
 //  } xnn_qs8_minmax_params.neonv8;
 
-// Converted from: src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-prfm-ld64.S
+// Converted from: src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-ld64-prfm.S
 void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params)
 {
   assert(nc_mod_nr < 8);

@@ -60,7 +60,7 @@ class Generator : public MacroAssembler {
 //    int8_t output_max;          d11[7]
 //  } rndnu_neon;
 
-// Converted from: src/qs8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-prfm-ld64.S
+// Converted from: src/qs8-igemm/gen/4x8-minmax-rndnu-aarch32-neon-mlal-lane-ld64-prfm.S
 void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const void* params)
 {
   assert(nc_mod_nr < 8);

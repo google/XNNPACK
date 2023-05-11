@@ -20,27 +20,27 @@ tools/xngen src/x32-packw/scalar.c.in -D NR=16 -D KBLOCK=4 -D TYPE=float    -o s
 ################################### ARM NEON ##################################
 ### NR multiple of 4
 tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=1 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8-neon-ld4lane-x4.c &
-tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=1 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8-neon-ld4lane-prfm-x4.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=1 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8-neon-ld4lane-x4-prfm.c &
 tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=1 -D PREFETCH=0 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x8-neon-ld4lane-x8.c &
-tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=1 -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x8-neon-ld4lane-prfm-x8.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=1 -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x8-neon-ld4lane-x8-prfm.c &
 tools/xngen src/x32-packw/neon.c.in -D NR=12 -D SR=1 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane-x4.c &
-tools/xngen src/x32-packw/neon.c.in -D NR=12 -D SR=1 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane-prfm-x4.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=12 -D SR=1 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane-x4-prfm.c &
 tools/xngen src/x32-packw/neon.c.in -D NR=12 -D SR=1 -D PREFETCH=0 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane-x8.c &
-tools/xngen src/x32-packw/neon.c.in -D NR=12 -D SR=1 -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane-prfm-x8.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=12 -D SR=1 -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x12-neon-ld4lane-x8-prfm.c &
 tools/xngen src/x32-packw/neon.c.in -D NR=16 -D SR=1 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-neon-ld4lane-x4.c &
-tools/xngen src/x32-packw/neon.c.in -D NR=16 -D SR=1 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-neon-ld4lane-prfm-x4.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=16 -D SR=1 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-neon-ld4lane-x4-prfm.c &
 tools/xngen src/x32-packw/neon.c.in -D NR=16 -D SR=1 -D PREFETCH=0 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x16-neon-ld4lane-x8.c &
-tools/xngen src/x32-packw/neon.c.in -D NR=16 -D SR=1 -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x16-neon-ld4lane-prfm-x8.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=16 -D SR=1 -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x16-neon-ld4lane-x8-prfm.c &
 
 ### SR 4
 tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=4 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8s4-neon-ld4lane-x4.c &
-tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=4 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8s4-neon-ld4lane-prfm-x4.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=4 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8s4-neon-ld4lane-x4-prfm.c &
 tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=4 -D PREFETCH=0 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x8s4-neon-ld4lane-x8.c &
-tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=4 -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x8s4-neon-ld4lane-prfm-x8.c &
+tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=4 -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x8s4-neon-ld4lane-x8-prfm.c &
 
 ### NR2 micro-kernels
 tools/xngen src/x32-packw/NR2-neon.c.in -D NR=2 -D PREFETCH=0 -D KBLOCK=2 -o src/x32-packw/gen/x32-packw-x2-neon-ld2lane-x2.c &
-tools/xngen src/x32-packw/NR2-neon.c.in -D NR=2 -D PREFETCH=1 -D KBLOCK=2 -o src/x32-packw/gen/x32-packw-x2-neon-ld2lane-prfm-x2.c &
+tools/xngen src/x32-packw/NR2-neon.c.in -D NR=2 -D PREFETCH=1 -D KBLOCK=2 -o src/x32-packw/gen/x32-packw-x2-neon-ld2lane-x2-prfm.c &
 
 ################################### x86 SSE ###################################
 ### NR multiple of 4
@@ -48,43 +48,43 @@ tools/xngen src/x32-packw/sse2.c.in -D NR=8  -D PREFETCH=0 -D KBLOCK=4 -D AVX=0 
 tools/xngen src/x32-packw/sse2.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=4 -D AVX=0 -o src/x32-packw/gen/x32-packw-x16-sse2-x4.c &
 tools/xngen src/x32-packw/sse2.c.in -D NR=8  -D PREFETCH=0 -D KBLOCK=8 -D AVX=0 -o src/x32-packw/gen/x32-packw-x8-sse2-x8.c &
 tools/xngen src/x32-packw/sse2.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=8 -D AVX=0 -o src/x32-packw/gen/x32-packw-x16-sse2-x8.c &
-tools/xngen src/x32-packw/sse2.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=4 -D AVX=0 -o src/x32-packw/gen/x32-packw-x8-sse2-prfm-x4.c &
-tools/xngen src/x32-packw/sse2.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=4 -D AVX=0 -o src/x32-packw/gen/x32-packw-x16-sse2-prfm-x4.c &
-tools/xngen src/x32-packw/sse2.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=8 -D AVX=0 -o src/x32-packw/gen/x32-packw-x8-sse2-prfm-x8.c &
-tools/xngen src/x32-packw/sse2.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=8 -D AVX=0 -o src/x32-packw/gen/x32-packw-x16-sse2-prfm-x8.c &
+tools/xngen src/x32-packw/sse2.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=4 -D AVX=0 -o src/x32-packw/gen/x32-packw-x8-sse2-x4-prfm.c &
+tools/xngen src/x32-packw/sse2.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=4 -D AVX=0 -o src/x32-packw/gen/x32-packw-x16-sse2-x4-prfm.c &
+tools/xngen src/x32-packw/sse2.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=8 -D AVX=0 -o src/x32-packw/gen/x32-packw-x8-sse2-x8-prfm.c &
+tools/xngen src/x32-packw/sse2.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=8 -D AVX=0 -o src/x32-packw/gen/x32-packw-x16-sse2-x8-prfm.c &
 
 ### SR 4
 tools/xngen src/x32-packw/s4-sse2.c.in -D NR=8  -D SR=4 -D PREFETCH=0 -D KBLOCK=4  -D AVX=0 -o src/x32-packw/gen/x32-packw-x8s4-sse2-x4.c &
 tools/xngen src/x32-packw/s4-sse2.c.in -D NR=16 -D SR=4 -D PREFETCH=0 -D KBLOCK=4  -D AVX=0 -o src/x32-packw/gen/x32-packw-x16s4-sse2-x4.c &
 tools/xngen src/x32-packw/s4-sse2.c.in -D NR=8  -D SR=4 -D PREFETCH=0 -D KBLOCK=8  -D AVX=0 -o src/x32-packw/gen/x32-packw-x8s4-sse2-x8.c &
 tools/xngen src/x32-packw/s4-sse2.c.in -D NR=16 -D SR=4 -D PREFETCH=0 -D KBLOCK=8  -D AVX=0 -o src/x32-packw/gen/x32-packw-x16s4-sse2-x8.c &
-tools/xngen src/x32-packw/s4-sse2.c.in -D NR=8  -D SR=4 -D PREFETCH=1 -D KBLOCK=4  -D AVX=0 -o src/x32-packw/gen/x32-packw-x8s4-sse2-prfm-x4.c &
-tools/xngen src/x32-packw/s4-sse2.c.in -D NR=16 -D SR=4 -D PREFETCH=1 -D KBLOCK=4  -D AVX=0 -o src/x32-packw/gen/x32-packw-x16s4-sse2-prfm-x4.c &
-tools/xngen src/x32-packw/s4-sse2.c.in -D NR=8  -D SR=4 -D PREFETCH=1 -D KBLOCK=8  -D AVX=0 -o src/x32-packw/gen/x32-packw-x8s4-sse2-prfm-x8.c &
-tools/xngen src/x32-packw/s4-sse2.c.in -D NR=16 -D SR=4 -D PREFETCH=1 -D KBLOCK=8  -D AVX=0 -o src/x32-packw/gen/x32-packw-x16s4-sse2-prfm-x8.c &
+tools/xngen src/x32-packw/s4-sse2.c.in -D NR=8  -D SR=4 -D PREFETCH=1 -D KBLOCK=4  -D AVX=0 -o src/x32-packw/gen/x32-packw-x8s4-sse2-x4-prfm.c &
+tools/xngen src/x32-packw/s4-sse2.c.in -D NR=16 -D SR=4 -D PREFETCH=1 -D KBLOCK=4  -D AVX=0 -o src/x32-packw/gen/x32-packw-x16s4-sse2-x4-prfm.c &
+tools/xngen src/x32-packw/s4-sse2.c.in -D NR=8  -D SR=4 -D PREFETCH=1 -D KBLOCK=8  -D AVX=0 -o src/x32-packw/gen/x32-packw-x8s4-sse2-x8-prfm.c &
+tools/xngen src/x32-packw/s4-sse2.c.in -D NR=16 -D SR=4 -D PREFETCH=1 -D KBLOCK=8  -D AVX=0 -o src/x32-packw/gen/x32-packw-x16s4-sse2-x8-prfm.c &
 
 ### KR 4
 tools/xngen src/x32-packw/c4-sse2.c.in -D NR=2  -D KR=4 -D PREFETCH=0 -o src/x32-packw/gen/x32-packw-x2c4-sse2-x4.c &
-tools/xngen src/x32-packw/c4-sse2.c.in -D NR=2  -D KR=4 -D PREFETCH=1 -o src/x32-packw/gen/x32-packw-x2c4-sse2-prfm-x4.c &
+tools/xngen src/x32-packw/c4-sse2.c.in -D NR=2  -D KR=4 -D PREFETCH=1 -o src/x32-packw/gen/x32-packw-x2c4-sse2-x4-prfm.c &
 
 
 ################################### x86 AVX ###################################
 ### NR multiple of 8
 tools/xngen src/x32-packw/avx.c.in -D NR=8  -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8-avx-x4.c &
 tools/xngen src/x32-packw/avx.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-avx-x4.c &
-tools/xngen src/x32-packw/avx.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8-avx-prfm-x4.c &
-tools/xngen src/x32-packw/avx.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-avx-prfm-x4.c &
+tools/xngen src/x32-packw/avx.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8-avx-x4-prfm.c &
+tools/xngen src/x32-packw/avx.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-avx-x4-prfm.c &
 
 ### SR 4
 tools/xngen src/x32-packw/s4-avx.c.in -D NR=8  -D SR=4 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8s4-avx-x4.c &
 tools/xngen src/x32-packw/s4-avx.c.in -D NR=16 -D SR=4 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16s4-avx-x4.c &
-tools/xngen src/x32-packw/s4-avx.c.in -D NR=8  -D SR=4 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8s4-avx-prfm-x4.c &
-tools/xngen src/x32-packw/s4-avx.c.in -D NR=16 -D SR=4 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16s4-avx-prfm-x4.c &
+tools/xngen src/x32-packw/s4-avx.c.in -D NR=8  -D SR=4 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8s4-avx-x4-prfm.c &
+tools/xngen src/x32-packw/s4-avx.c.in -D NR=16 -D SR=4 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16s4-avx-x4-prfm.c &
 
 ################################### x86 AVX512 ##################################
 ### NR multiple of 16
 tools/xngen src/x32-packw/avx512.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-avx512f-x4.c &
-tools/xngen src/x32-packw/avx512.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-avx512f-prfm-x4.c &
+tools/xngen src/x32-packw/avx512.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-avx512f-x4-prfm.c &
 
 ################################## Wasm SIMD ##################################
 ### NR multiple of 4
