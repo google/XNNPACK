@@ -354,6 +354,10 @@ class VBinaryMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
+        // Special case for Div when denominator is 0.
+        if (y[i] == std::numeric_limits<float>::infinity() || y[i] == -std::numeric_limits<float>::infinity()) {
+          EXPECT_EQ(y[i], y_ref[i]) << "at " << i << " / " << batch_size();
+        }
         EXPECT_GE(y[i], 0.0f)
           << "at " << i << " / " << batch_size();
         EXPECT_NEAR(y[i], y_ref[i], std::abs(y_ref[i]) * 1.0e-6f)
