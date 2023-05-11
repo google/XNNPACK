@@ -221,7 +221,7 @@ enum xnn_status xnn_define_leaky_relu(
     return status;
   }
 
-  if (compute_type == xnn_datatype_qint8 || compute_type == xnn_datatype_quint8) {
+  if (compute_type == xnn_compute_type_qs8 || compute_type == xnn_compute_type_qu8) {
     const float positive_input_output_scale = input_value->quantization.scale / output_value->quantization.scale;
     if (positive_input_output_scale < 0x1.0p-8f || positive_input_output_scale > 0x1.0p+7f) {
       xnn_log_error(
