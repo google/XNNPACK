@@ -172,6 +172,7 @@ constexpr VRegister v30{30};
 constexpr VRegister v31{31};
 
 struct VRegisterList {
+  // NOLINTNEXTLINE(google-explicit-constructor)
   VRegisterList(VRegister vt1)
       : vt1(vt1), length(1) {}
   VRegisterList(VRegister vt1, VRegister vt2)
@@ -352,6 +353,7 @@ enum class AddressingMode {
 };
 
 struct MemOperand {
+  // NOLINTNEXTLINE(google-explicit-constructor)
   MemOperand(XRegister xn): base(xn), mode(AddressingMode::kOffset), offset(0) {}
   MemOperand(XRegister xn, int32_t offset): base(xn), mode(AddressingMode::kOffset), offset(offset) {}
   MemOperand(XRegister xn, int32_t offset, AddressingMode mode): base(xn), mode(mode), offset(offset) {}

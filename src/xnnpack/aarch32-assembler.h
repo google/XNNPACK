@@ -286,6 +286,7 @@ struct ConsecutiveRegisterList {
   explicit ConsecutiveRegisterList(RegType s, int len)
       : start(s),
         length(len) {}
+  // NOLINTNEXTLINE(google-explicit-constructor)
   ConsecutiveRegisterList(RegType start)
       : ConsecutiveRegisterList(start, start) {}
 
@@ -330,6 +331,7 @@ static inline DRegisterList operator-(const DRegister lhs, const DRegister rhs) 
 }
 
 struct QRegisterList {
+  // NOLINTNEXTLINE(google-explicit-constructor)
   QRegisterList(QRegister s) : start(s), length(1) {}
   QRegisterList(QRegister s, QRegister end) : start(s), length(end.code - s.code + 1) {}
   // Explicit conversion to DRegisterList.
