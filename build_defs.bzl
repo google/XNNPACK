@@ -254,7 +254,7 @@ def xnnpack_aggregate_library(
         compatible_with = compatible_with,
     )
 
-def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], automatic = True, timeout = "short", shard_count = 1):
+def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], linkopts = [], automatic = True, timeout = "short", shard_count = 1):
     """Unit test binary based on Google Test.
 
     Args:
@@ -268,6 +268,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
       deps: The list of additional libraries to be linked. Google Test library
             (with main() function) is always added as a dependency and does not
             need to be explicitly specified.
+      linkopts: The list of linking options
       tags: List of arbitrary text tags.
       automatic: Whether to create the test or testable binary.
       timeout: How long the test is expected to run before returning.
@@ -295,7 +296,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
             linkopts = select({
                 ":emscripten": xnnpack_emscripten_test_linkopts(),
                 "//conditions:default": [],
-            }),
+            }) + linkopts,
             linkstatic = True,
             deps = [
                 "@com_google_googletest//:gtest_main",
