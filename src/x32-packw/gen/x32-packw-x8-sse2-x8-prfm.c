@@ -17,7 +17,7 @@
 #include <xnnpack/packw.h>
 #include <xnnpack/prefetch.h>
 
-void xnn_x32_packw_gemm_goi_ukernel_x8__sse2_prfm_x8(
+void xnn_x32_packw_gemm_goi_ukernel_x8__sse2_x8_prfm(
   size_t g,
   size_t nc,
   size_t kc,

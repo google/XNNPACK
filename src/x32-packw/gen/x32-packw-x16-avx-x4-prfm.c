@@ -19,7 +19,7 @@
 #include <xnnpack/prefetch.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x16__avx_prfm_x4(
+void xnn_x32_packw_gemm_goi_ukernel_x16__avx_x4_prfm(
   size_t g,
   size_t nc,
   size_t kc,

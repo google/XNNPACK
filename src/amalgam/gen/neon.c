@@ -25447,7 +25447,7 @@ void xnn_u8_vclamp_ukernel__neon_x64(
   }
 }
 
-void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x8(
+void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8_prfm(
   size_t g,
   size_t nc,
   size_t kc,
@@ -26026,7 +26026,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_prfm_x8(
   } while (--g != 0);
 }
 
-void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x8(
+void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8_prfm(
   size_t g,
   size_t nc,
   size_t kc,
@@ -26714,7 +26714,7 @@ void xnn_x24_transposec_ukernel__2x2_neon_tbl64(
   } while (block_width != 0);
 }
 
-void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_prfm_x2(
+void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_x2_prfm(
   size_t g,
   size_t nc,
   size_t kc,
@@ -26801,7 +26801,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_prfm_x2(
   } while (--g != 0);
 }
 
-void xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
+void xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4_prfm(
   size_t g,
   size_t nc,
   size_t kc,
@@ -27126,7 +27126,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_prfm_x4(
   } while (--g != 0);
 }
 
-void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
+void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_x4_prfm(
   size_t g,
   size_t nc,
   size_t kc,
@@ -27827,7 +27827,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_prfm_x4(
   } while (--g != 0);
 }
 
-void xnn_x32_packx_ukernel_4x__neon_st4_prfm_x4(
+void xnn_x32_packx_ukernel_4x__neon_st4_x4_prfm(
     size_t m,
     size_t k,
     const uint32_t* x,

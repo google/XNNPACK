@@ -3643,7 +3643,7 @@ void xnn_f32_vsqr_ukernel__avx512f_x16(
   }
 }
 
-void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_prfm_x4(
+void xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_x4_prfm(
   size_t g,
   size_t nc,
   size_t kc,

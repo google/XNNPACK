@@ -16,7 +16,7 @@
 #include <xnnpack/prefetch.h>
 
 
-void xnn_x32_packx_ukernel_8x__neon_st4_prfm_x4(
+void xnn_x32_packx_ukernel_8x__neon_st4_x4_prfm(
     size_t m,
     size_t k,
     const uint32_t* x,

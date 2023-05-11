@@ -8257,7 +8257,7 @@ void xnn_qu8_vlrelu_ukernel__avx2_x32(
   }
 }
 
-void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_prfm_x16(
+void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16_prfm(
   size_t g,
   size_t nc,
   size_t kc,
@@ -11319,7 +11319,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16(
   } while (--g != 0);
 }
 
-void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_prfm_x16(
+void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16_prfm(
   size_t g,
   size_t nc,
   size_t kc,

@@ -18,7 +18,7 @@
 #include <xnnpack/prefetch.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_prfm_x8(
+void xnn_x32_packw_gemm_goi_ukernel_x12__neon_ld4lane_x8_prfm(
   size_t g,
   size_t nc,
   size_t kc,

@@ -18,7 +18,7 @@ $if PREFETCH:
 
 
 $IFWHILE = "if" if KBLOCK==8 else "while"
-void xnn_x32_packx_ukernel_${MR}x__neon_st4${"_prfm" if PREFETCH else ""}_x${KBLOCK}(
+void xnn_x32_packx_ukernel_${MR}x__neon_st4_x${KBLOCK}${"_prfm" if PREFETCH else ""}(
     size_t m,
     size_t k,
     const uint32_t* x,
