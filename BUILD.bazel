@@ -6353,6 +6353,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "batch_matrix_multiply_bench",
+    srcs = ["bench/batch-matrix-multiply.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
     name = "ceiling_bench",
     srcs = ["bench/ceiling.cc"],
     copts = xnnpack_optional_tflite_copts(),
