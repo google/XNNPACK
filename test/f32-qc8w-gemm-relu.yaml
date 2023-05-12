@@ -3,6 +3,39 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+# WAsm Relaxed SIMD
+- name: xnn_f32_qc8w_gemm_relu_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat
+  k-block: 1
+- name: xnn_f32_qc8w_gemm_relu_ukernel_1x8__wasmrelaxedsimd_fma_splat
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_relu_ukernel_1x8s4__wasmrelaxedsimd_fma
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_relu_ukernel_3x8__wasmrelaxedsimd_fma_loadsplat
+  k-block: 1
+- name: xnn_f32_qc8w_gemm_relu_ukernel_3x8__wasmrelaxedsimd_fma_splat
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_relu_ukernel_3x8s4__wasmrelaxedsimd_fma
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_relu_ukernel_4x2c4__wasmrelaxedsimd_fma
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_relu_ukernel_4x8__wasmrelaxedsimd_fma_loadsplat
+  k-block: 1
+- name: xnn_f32_qc8w_gemm_relu_ukernel_4x8__wasmrelaxedsimd_fma_splat
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_relu_ukernel_4x8s4__wasmrelaxedsimd_fma
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_relu_ukernel_5x8__wasmrelaxedsimd_fma_loadsplat
+  k-block: 1
+- name: xnn_f32_qc8w_gemm_relu_ukernel_5x8__wasmrelaxedsimd_fma_splat
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_relu_ukernel_5x8s4__wasmrelaxedsimd_fma
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_relu_ukernel_6x8__wasmrelaxedsimd_fma_loadsplat
+  k-block: 1
+- name: xnn_f32_qc8w_gemm_relu_ukernel_6x8__wasmrelaxedsimd_fma_splat
+  k-block: 4
+- name: xnn_f32_qc8w_gemm_relu_ukernel_6x8s4__wasmrelaxedsimd_fma
+  k-block: 4
 # WAsm
 - name: xnn_f32_qc8w_gemm_relu_ukernel_1x4__wasm
   k-block: 1
