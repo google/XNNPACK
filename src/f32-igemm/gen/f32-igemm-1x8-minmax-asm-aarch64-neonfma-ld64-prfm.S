@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_ld64(
+# void xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_prfm(
 #     size_t mr,                         (x0) - unused.  mr = 1
 #     size_t nc,                         x1
 #     size_t kc,                         x2 / x0
@@ -31,7 +31,7 @@
 # C0  x6 v16 v17 v18 v19
 # Clamp  v30, v31
 
-BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_ld64
+BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_prfm
 
         # Load cn_stride, a_offset
         LDP     x10, x11, [sp]
@@ -145,7 +145,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_ld64
 8:
         RET
 
-END_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_prfm_ld64
+END_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_prfm
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

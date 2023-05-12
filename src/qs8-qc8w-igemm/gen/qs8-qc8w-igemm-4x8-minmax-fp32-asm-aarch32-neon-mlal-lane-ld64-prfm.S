@@ -12,7 +12,7 @@
 
 .syntax unified
 
-// void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal_lane_prfm_ld64
+// void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal_lane_ld64_prfm
 //     size_t mr,                                     (r0)
 //     size_t nc,                                      r1
 //     size_t kc,                                     (r2) -> r5 -> sp + 44
@@ -48,7 +48,7 @@
 //   int8_t output_max;                          d13[7]
 // } xnn_qs8_minmax_params.neon;
 
-BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal_lane_prfm_ld64
+BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal_lane_ld64_prfm
         # Push 88 bytes
         # r2 will be reloaded in outer loop.  r3 is ks
         PUSH    {r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, lr}   // +44
@@ -466,7 +466,7 @@ BEGIN_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal
         ADD     sp, sp, 20                          // skip pad of 12, r2, r3
         POP     {r4, r5, r6, r7, r8, r9, r10, r11, pc}
 
-END_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal_lane_prfm_ld64
+END_FUNCTION xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x8__asm_aarch32_neon_mlal_lane_ld64_prfm
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
 #endif

@@ -6,7 +6,7 @@
 #include <xnnpack/assembly.h>
 
 # LINT.IfChange
-# void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a75(
+# void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75${"_prfm" if PREFETCH else ""}(
 #     size_t mr,                (x0) - unused.  mr = 1
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -31,7 +31,7 @@ $else:
 # C0  x6 v16 v17 v18 v19
 # Clamp  v4, v5
 
-BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a75
+BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75${"_prfm" if PREFETCH else ""}
 
         $if INC:
           # Load cn_stride, acc
@@ -226,7 +226,7 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch
 12:
         RET
 
-END_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a75
+END_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a75${"_prfm" if PREFETCH else ""}
 # LINT.ThenChange(gen/f32-gemm-1x8-aarch64-neonfma-cortex-a75.cc)
 
 #ifdef __ELF__

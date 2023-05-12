@@ -20,7 +20,7 @@ $XMAX = "VMAX.U8" if DATATYPE == "QU8" else "VMAX.S8"
 $XXTL = "VMOVL.U8" if DATATYPE == "QU8" else "VMOVL.S8"
 $SQXTXN = "VQMOVUN.S16" if DATATYPE == "QU8" else "VQMOVN.S16"
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-// void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8__asm_aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_${CPU}(
+// void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8__asm_aarch32_${ISA}_mlal_lane_cortex_${CPU}${"_prfm" if PREFETCH else ""}(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            (r2) -> r5
@@ -79,7 +79,7 @@ $else:
   //    int8_t output_max;          d13[7]
   //  } xnn_qs8_minmax_params.neonv8;
 
-BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8__asm_aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_${CPU}
+BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8__asm_aarch32_${ISA}_mlal_lane_cortex_${CPU}${"_prfm" if PREFETCH else ""}
         # Push 96 bytes
         PUSH    {r5, r7, r9, r11}                   // 16
         $if DATATYPE == "QU8":
@@ -475,7 +475,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukerne
         POP     {r5, r7, r9, r11}
         BX      lr
 
-END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8__asm_aarch32_${ISA}_mlal_lane${"_prfm" if PREFETCH else ""}_cortex_${CPU}
+END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8__asm_aarch32_${ISA}_mlal_lane_cortex_${CPU}${"_prfm" if PREFETCH else ""}
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

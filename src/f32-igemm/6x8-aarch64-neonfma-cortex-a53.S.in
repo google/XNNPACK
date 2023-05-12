@@ -5,7 +5,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a53(
+# void xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a53${"_prfm" if PREFETCH else ""}(
 #     size_t mr,                         x0
 #     size_t nc,                         x1
 #     size_t kc,                         x2 / x0
@@ -40,7 +40,7 @@
 // unused A   v8 v9 v10 v11
 // temporary vector shadow register x8
 
-BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a53
+BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a53${"_prfm" if PREFETCH else ""}
 
         # Load a_offset
         LDR     x11, [sp, 8]
@@ -593,7 +593,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma${"_prfm" if
         LDP     d12, d13, [sp], 64
         RET
 
-END_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a53
+END_FUNCTION xnn_f32_igemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a53${"_prfm" if PREFETCH else ""}
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

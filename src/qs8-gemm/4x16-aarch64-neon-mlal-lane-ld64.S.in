@@ -21,7 +21,7 @@ $XXTL = "UXTL" if DATATYPE == "QU8" else "SXTL"
 $SQXTXN = "SQXTUN" if DATATYPE == "QU8" else "SQXTN"
 $SQXTXN2 = "SQXTUN2" if DATATYPE == "QU8" else "SQXTN2"
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-# void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__asm_aarch64_neon_mlal_lane${"_prfm" if PREFETCH else ""}_ld64(
+# void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__asm_aarch64_neon_mlal_lane_ld64${"_prfm" if PREFETCH else ""}(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -63,7 +63,7 @@ $if DATATYPE == "QU8":
 $else:
   # unused v7 v8 v9 v10 v11 v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__asm_aarch64_neon_mlal_lane${"_prfm" if PREFETCH else ""}_ld64
+BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__asm_aarch64_neon_mlal_lane_ld64${"_prfm" if PREFETCH else ""}
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -790,7 +790,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukerne
 8:
         RET
 
-END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__asm_aarch64_neon_mlal_lane${"_prfm" if PREFETCH else ""}_ld64
+END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16__asm_aarch64_neon_mlal_lane_ld64${"_prfm" if PREFETCH else ""}
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

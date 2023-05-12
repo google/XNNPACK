@@ -5,7 +5,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a53(
+# void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53${"_prfm" if PREFETCH else ""}(
 #     size_t mr,                (x0) - unused.  mr = 1
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -32,7 +32,7 @@ $else:
 
 # A53 based on A57/A75 but with LDR instead of LDP
 
-BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a53
+BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53${"_prfm" if PREFETCH else ""}
 
         $if INC:
           # Load cn_stride, acc
@@ -255,7 +255,7 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch
 12:
         RET
 
-END_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma${"_prfm" if PREFETCH else ""}_cortex_a53
+END_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_cortex_a53${"_prfm" if PREFETCH else ""}
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

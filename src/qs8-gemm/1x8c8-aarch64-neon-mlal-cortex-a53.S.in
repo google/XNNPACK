@@ -12,7 +12,7 @@ $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8"}[DATATYPE]
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params"}[DATATYPE]
 $REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
-# void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__asm_aarch64_neon_mlal${"_prfm" if PREFETCH else ""}_cortex_a53(
+# void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__asm_aarch64_neon_mlal_cortex_a53${"_prfm" if PREFETCH else ""}(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -33,7 +33,7 @@ $REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANT
 // temp0  v17 v19 v21 v23
 // x16, x17, x7 tenporary a53 gpr load data
 
-BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__asm_aarch64_neon_mlal${"_prfm" if PREFETCH else ""}_cortex_a53
+BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__asm_aarch64_neon_mlal_cortex_a53${"_prfm" if PREFETCH else ""}
         LDP     x10, x11, [sp]          // cn_stride, params
         ADD     x2, x2, 7               // kc = (kc + 7) & ~7
         BIC     x2, x2, 7
@@ -297,7 +297,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukerne
 8:
         RET
 
-END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__asm_aarch64_neon_mlal${"_prfm" if PREFETCH else ""}_cortex_a53
+END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_1x8c8__asm_aarch64_neon_mlal_cortex_a53${"_prfm" if PREFETCH else ""}
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

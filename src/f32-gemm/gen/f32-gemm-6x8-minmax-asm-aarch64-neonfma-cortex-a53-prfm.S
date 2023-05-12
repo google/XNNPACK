@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_prfm_cortex_a53(
+# void xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a53_prfm(
 #     size_t mr,                x0
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -42,7 +42,7 @@
 // unused A   v8 v9 v10 v11
 // temporary vector shadow register x8
 
-BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_prfm_cortex_a53
+BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a53_prfm
 
         # Load params pointer
         LDR     x8, [sp, 8]
@@ -557,7 +557,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_prfm_cortex_
         LDP     d12, d13, [sp], 32
         RET
 
-END_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_prfm_cortex_a53
+END_FUNCTION xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_cortex_a53_prfm
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

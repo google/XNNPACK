@@ -7,7 +7,7 @@
 
 .syntax unified
 
-// void xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon${"_prfm" if PREFETCH else ""}_cortex_a53(
+// void xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53${"_prfm" if PREFETCH else ""}(
 //     size_t mr,                            (unused)
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r0
@@ -30,7 +30,7 @@
 // C0  r12 d16-d17  q8  d18-d19  q9
 // clamp  (r0) d4 d5 d6 d7
 
-BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon${"_prfm" if PREFETCH else ""}_cortex_a53
+BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53${"_prfm" if PREFETCH else ""}
         .arm
 #ifndef __APPLE__
         .arch   armv7-a
@@ -165,7 +165,7 @@ BEGIN_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon${"_prfm" if PR
         ADD     sp, sp, 8               // skip pad, r3
         POP     {r4, r7, r9, pc}
 
-END_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon${"_prfm" if PREFETCH else ""}_cortex_a53
+END_FUNCTION xnn_f32_igemm_minmax_ukernel_1x8__asm_aarch32_neon_cortex_a53${"_prfm" if PREFETCH else ""}
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

@@ -12,7 +12,7 @@
 
 .syntax unified
 
-// void xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_prfm_cortex_a7
+// void xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm
 //     size_t mr,                                     (r0)
 //     size_t nc,                                      r1
 //     size_t kc,                                     (r2) -> sp + 56 -> r5
@@ -47,7 +47,7 @@
 //    uint8_t output_max;            d13[7]
 //  } rndnu_neon;
 
-BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_prfm_cortex_a7
+BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm
         # Push 88 bytes
         # r2, r3 will be reloaded in outer loop.
         PUSH    {r2, r3, r5, r6, r7, r9, r11, lr}     // +32
@@ -349,7 +349,7 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lan
         ADD     sp, sp, 8               // skip r2, r3
         POP     {r5, r6, r7, r9, r11, pc}
 
-END_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_prfm_cortex_a7
+END_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7_prfm
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

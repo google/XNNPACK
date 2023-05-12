@@ -10,7 +10,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qs8_igemm_minmax_fp32_ukernel_2x8c8__asm_aarch64_neon_mlal_prfm_cortex_a53(
+# void xnn_qs8_igemm_minmax_fp32_ukernel_2x8c8__asm_aarch64_neon_mlal_cortex_a53_prfm(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -37,7 +37,7 @@
 // x16, x17, x20, x21 tenporary a53 gpr load data
 
 
-BEGIN_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_2x8c8__asm_aarch64_neon_mlal_prfm_cortex_a53
+BEGIN_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_2x8c8__asm_aarch64_neon_mlal_cortex_a53_prfm
 
         # Clamp C pointers
         LDP     x10, x8, [sp]           // Load cn_stride, a_offset
@@ -426,7 +426,7 @@ BEGIN_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_2x8c8__asm_aarch64_neon_mlal_pr
         LDP     d8, d9, [sp], 80
         RET
 
-END_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_2x8c8__asm_aarch64_neon_mlal_prfm_cortex_a53
+END_FUNCTION xnn_qs8_igemm_minmax_fp32_ukernel_2x8c8__asm_aarch64_neon_mlal_cortex_a53_prfm
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
