@@ -69,6 +69,7 @@ class AssemblerBase {
 
   // Write value into the code buffer and advances cursor_.
   void emit32(uint32_t value);
+  void emit8(byte value);
   // Finish assembly of code, this should be the last function called on an
   // instance of Assembler. Returns a pointer to the start of code region.
   void* finalize();
@@ -96,6 +97,22 @@ class AssemblerBase {
   // Holds an xnn_code_buffer, will write code to its code pointer, and unmap
   // unused pages on finalizing.
   xnn_code_buffer* xnn_buffer = nullptr;
+
+ private:
+  template <typename Value>
+  void emit(Value value) {
+    if (error_ != Error::kNoError) {
+      return;
+    }
+
+    if (cursor_ + sizeof(value) > top_) {
+      error_ = Error::kOutOfMemory;
+      return;
+    }
+
+    memcpy(cursor_, &value, sizeof(value));
+    cursor_ += sizeof(value);
+  }
 };
 
 }  // namespace xnnpack

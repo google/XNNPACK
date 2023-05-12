@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <cstdint>
 
 #include <xnnpack/assembler.h>
 #include <xnnpack/memory.h>
@@ -19,17 +20,11 @@ AssemblerBase::AssemblerBase(xnn_code_buffer* buf) {
 }
 
 void AssemblerBase::emit32(uint32_t value) {
-  if (error_ != Error::kNoError) {
-    return;
-  }
+  emit<uint32_t>(value);
+}
 
-  if (cursor_ + sizeof(value) > top_) {
-    error_ = Error::kOutOfMemory;
-    return;
-  }
-
-  memcpy(cursor_, &value, sizeof(value));
-  cursor_ += sizeof(value);
+void AssemblerBase::emit8(byte value) {
+  emit<byte>(value);
 }
 
 
