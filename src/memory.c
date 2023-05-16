@@ -251,6 +251,7 @@ EM_JS(int, xnnLoadWasmModuleJS, (const uint8_t* code, int code_size, const char*
       return invalid_function_index;
     }
     catch(error) {
+      console.log(error);
       return invalid_function_index;
     }
 });
