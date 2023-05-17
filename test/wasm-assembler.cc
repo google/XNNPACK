@@ -139,11 +139,9 @@ struct AddTwiceWithScopesTestSuite
 
 struct Add5CodeGenerator : WasmAssembler {
   explicit Add5CodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
-    ValTypesToInt single_local_int = {{i32, 1}};
-    AddFunc<1>({i32}, "add5", {i32}, single_local_int, [this](Local a) {
-      auto five = MakeLocal(i32);
-      five = I32Const(5);
-      a = I32Add(five, a);
+    ValTypesToInt no_locals = {};
+    AddFunc<1>({i32}, "add5", {i32}, no_locals, [this](Local a) {
+      a = I32Add(I32Const(5), a);
       local_get(a);
       end();
     });
@@ -198,16 +196,14 @@ struct MaxIncompleteIfTestSuite
 
 struct SumUntilCodeGenerator : WasmAssembler {
   explicit SumUntilCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
-    ValTypesToInt three_local_ints = {{i32, 3}};
-    AddFunc<1>({i32}, "SumUntil", {i32}, three_local_ints, [&](Local n) {
+    ValTypesToInt two_local_ints = {{i32, 2}};
+    AddFunc<1>({i32}, "SumUntil", {i32}, two_local_ints, [&](Local n) {
       auto i = MakeLocal(i32);
       auto result = MakeLocal(i32);
-      auto one = MakeLocal(i32);
-      one = I32Const(1);
       While([&] { I32LtS(i, n); },
             [&] {
               result = I32Add(result, i);
-              i = I32Add(i, one);
+              i = I32Add(i, I32Const(1));
             });
       local_get(result);
       end();
@@ -235,17 +231,15 @@ struct SumUntilTestSuite : GeneratorTestSuite<SumUntilCodeGenerator, SumUntil> {
 
 struct DoWhileCodeGenerator : WasmAssembler {
   explicit DoWhileCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
-    ValTypesToInt three_local_ints = {{i32, 3}};
-    AddFunc<1>({i32}, "DoWhile", {i32}, three_local_ints, [&](Local n) {
+    ValTypesToInt two_local_ints = {{i32, 2}};
+    AddFunc<1>({i32}, "DoWhile", {i32}, two_local_ints, [&](Local n) {
       auto i = MakeLocal(i32);
       auto result = MakeLocal(i32);
       result = I32Const(kPositive);
-      auto one = MakeLocal(i32);
-      one = I32Const(1);
       DoWhile(
           [&] {
             result = I32Add(result, result);
-            i = I32Add(i, one);
+            i = I32Add(i, I32Const(1));
           },
           [&] { I32LtS(i, n); });
       local_get(result);

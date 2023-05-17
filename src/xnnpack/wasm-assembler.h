@@ -21,6 +21,7 @@ namespace xnnpack {
 
 struct ValType {
   ValType() = delete;
+  ValType& operator=(const ValType&) = default;
   constexpr explicit ValType(byte code) : code(code) {}
   byte code;
 };
@@ -169,7 +170,14 @@ class LocalsManager {
 template <typename Derived>
 class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
  public:
+  class Local;
+
   struct ValueOnStack {
+    ValueOnStack(const ValType type, LocalWasmOps<Derived>* ops)
+        : type(type), ops(ops) {}
+    ValueOnStack(const Local& local) : type(local.type_), ops(local.ops_) {
+      ops->local_get(local);
+    }
     ValType type;
     LocalWasmOps<Derived>* ops;
   };
@@ -180,7 +188,7 @@ class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
 
     Local(const ValType& type, uint32_t index, bool is_managed,
           LocalWasmOps<Derived>* ops)
-        : type_(type), index_(index), is_managed_(is_managed), ops_(ops) {}
+        : type_(type), index_(index), ops_(ops), is_managed_(is_managed) {}
 
     Local(const Local& other) = delete;
 
@@ -219,10 +227,10 @@ class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
 
     ValType type_{0};
     uint32_t index_{};
+    LocalWasmOps<Derived>* ops_ = nullptr;
 
    private:
     bool is_managed_ = false;
-    LocalWasmOps<Derived>* ops_ = nullptr;
   };
 
   Local MakeLocal(ValType type) {
@@ -243,11 +251,11 @@ class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
 
   void local_set(const Local& local) const { local_set(local.index_); }
 
-  ValueOnStack I32Add(const Local& a, const Local& b) {
+  ValueOnStack I32Add(const ValueOnStack& a, const ValueOnStack& b) {
     return BinaryOp(a, b, &I32WasmOps<Derived>::i32_add);
   }
 
-  ValueOnStack I32LtS(const Local& a, const Local& b) {
+  ValueOnStack I32LtS(const ValueOnStack& a, const ValueOnStack& b) {
     return BinaryOp(a, b, &I32WasmOps<Derived>::i32_lt_s);
   }
 
@@ -261,13 +269,11 @@ class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
 
  private:
   template <typename Op>
-  ValueOnStack BinaryOp(const Local& a, const Local& b, Op&& op) {
-    assert((a.type_ == b.type_) &&
+  ValueOnStack BinaryOp(const ValueOnStack& a, const ValueOnStack& b, Op&& op) {
+    assert((a.type == b.type) &&
            "Binary operation on locals of different types");
-    local_get(a);
-    local_get(b);
     std::mem_fn(op)(*this);
-    return {a.type_, this};
+    return {a.type, this};
   }
 };
 
