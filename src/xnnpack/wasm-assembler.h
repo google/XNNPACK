@@ -19,7 +19,7 @@
 namespace xnnpack {
 
 struct ValType {
-  ValType() : code(0) {}
+  ValType() = delete;
   constexpr explicit ValType(byte code) : code(code) {}
   byte code;
 };
@@ -109,7 +109,8 @@ class LocalsManager {
 
   uint32_t GetNewLocalIndex(ValType type) {
     uint32_t& next = At(next_index_, type);
-    assert((At(max_index_, type) >= next) && "The number of local variables is exceeded");
+    assert((At(max_index_, type) >= next) &&
+           "The number of local variables is exceeded");
     return next++;
   }
 
@@ -141,7 +142,8 @@ class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
     Local(const Local&& other) = delete;
 
     Local& operator=(const Local& other) {
-      assert((type_ == other.type_) && "Assignment of locals of different type");
+      assert((type_ == other.type_) &&
+             "Assignment of locals of different type");
       ops_ = other.ops_;
       ops_->local_get(other.index_);
       ops_->local_set(index_);
@@ -157,7 +159,9 @@ class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
     }
 
     Local& operator=(const ValueOnStack& value_on_stack) {
-      assert((type_ == value_on_stack.type) && "The type of the local and the type of the value on stack don't match");
+      assert((type_ == value_on_stack.type) &&
+             "The type of the local and the type of the value on stack don't "
+             "match");
       type_ = value_on_stack.type;
       ops_ = value_on_stack.ops;
       value_on_stack.ops->local_set(index_);
@@ -168,7 +172,7 @@ class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
       if (is_managed_) ops_->DestructLocal(type_);
     }
 
-    ValType type_{};
+    ValType type_{0};
     uint32_t index_{};
 
    private:
