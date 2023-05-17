@@ -35,8 +35,7 @@ static void AppendResultType(const std::vector<ValType>& type,
   }
 }
 
-static void AppendFuncType(const Function& func,
-                           std::vector<byte>& out) {
+static void AppendFuncType(const Function& func, std::vector<byte>& out) {
   const FuncType& type = func.type;
   static constexpr byte kFunctionByte = 0x60;
   out.push_back(kFunctionByte);
@@ -79,11 +78,13 @@ void WasmAssembler::EmitExportsSection() {
 
 // Functions emitting Code section
 static void AppendFunctionBody(const Function& func, std::vector<byte>& out) {
-  // local variables are not yet supported
-  constexpr static int kLocalNum = 0;
-  out.push_back(func.body.size() + 1);
+  out.push_back(func.body.size() + 2 * func.locals_declaration.size() + 1);
 
-  AppendEncodedU32(kLocalNum, out);
+  AppendEncodedU32(func.locals_declaration.size(), out);
+  for (const auto& type_to_count : func.locals_declaration) {
+    AppendEncodedU32(type_to_count.second, out);
+    out.push_back(type_to_count.first.code);
+  }
   out.insert(out.end(), func.body.begin(), func.body.end());
 }
 
