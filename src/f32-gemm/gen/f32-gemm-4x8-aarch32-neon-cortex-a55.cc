@@ -54,7 +54,7 @@ class Generator : public MacroAssembler {
 // clamp  (r5) d4 d5 d6 d7
 // unused r14 (lr)
 
-// Converted from: src/f32-gemm/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a55.S
+// Converted from: src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a55.S
 void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
 {
   assert(max_mr <= 4);
