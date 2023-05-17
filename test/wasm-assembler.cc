@@ -18,10 +18,16 @@ using ::testing::NotNull;
 using GetIntPtr = int (*)();
 using Add5Ptr = int (*)(int);
 using AddPtr = int (*)(int, int);
+using MaxPtr = AddPtr;
+using SumUntil = Add5Ptr;
+using DoWhile = Add5Ptr;
+
 namespace xnnpack {
 namespace {
 
 constexpr int32_t kExpectedGet5ReturnValue = 5;
+constexpr int32_t kPositive = 5;
+constexpr int32_t kNegative = -5;
 constexpr int32_t kA = 55;
 constexpr int32_t kAPlusFive = kA + kExpectedGet5ReturnValue;
 constexpr int32_t kB = 42;
@@ -38,10 +44,14 @@ struct Get5Generator : WasmAssembler {
   }
 };
 
-struct Get5TestSuite {
-  using Generator = Get5Generator;
-  using Func = GetIntPtr;
-  static void ExpectFuncCorrect(Func get5) {
+template <typename G, typename F>
+struct GeneratorTestSuite {
+  using Generator = G;
+  using Func = F;
+};
+
+struct Get5TestSuite : GeneratorTestSuite<Get5Generator, GetIntPtr> {
+  static void ExpectFuncCorrect(GetIntPtr get5) {
     EXPECT_EQ(get5(), kExpectedGet5ReturnValue);
   }
 };
@@ -60,10 +70,8 @@ struct AddGenerator : WasmAssembler {
 };
 
 template <typename G, uint32_t kSum>
-struct AddTestSuiteTmpl {
-  using Generator = G;
-  using Func = AddPtr;
-  static void ExpectFuncCorrect(Func add) { EXPECT_EQ(add(kA, kB), kSum); }
+struct AddTestSuiteTmpl : GeneratorTestSuite<G, AddPtr> {
+  static void ExpectFuncCorrect(AddPtr add) { EXPECT_EQ(add(kA, kB), kSum); }
 };
 
 struct AddTestSuite : AddTestSuiteTmpl<AddGenerator, kExpectedSum> {};
@@ -144,11 +152,105 @@ struct Add5CodeGenerator : WasmAssembler {
   }
 };
 
-struct Add5TestSuite {
-  using Generator = Add5CodeGenerator;
-  using Func = Add5Ptr;
-  static void ExpectFuncCorrect(Func add_five) {
+struct Add5TestSuite : GeneratorTestSuite<Add5CodeGenerator, Add5Ptr> {
+  static void ExpectFuncCorrect(Add5Ptr add_five) {
     EXPECT_EQ(add_five(kA), kAPlusFive);
+  }
+};
+
+struct MaxCodeGenerator : WasmAssembler {
+  explicit MaxCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
+    ValTypesToInt single_local_int = {{i32, 1}};
+    AddFunc<2>({i32}, "max", {i32, i32}, single_local_int,
+               [this](const Local& a, const Local& b) {
+                 auto result = MakeLocal(i32);
+                 IfElse([&] { I32LtS(a, b); }, [&] { result = b; },
+                        [&] { result = a; });
+                 local_get(result);
+                 end();
+               });
+  }
+};
+
+struct MaxTestSuite : GeneratorTestSuite<MaxCodeGenerator, MaxPtr> {
+  static void ExpectFuncCorrect(MaxPtr max) {
+    EXPECT_EQ(max(2, 3), 3);
+    EXPECT_EQ(max(3, 2), 3);
+  }
+};
+
+struct SumUntilCodeGenerator : WasmAssembler {
+  explicit SumUntilCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
+    ValTypesToInt three_local_ints = {{i32, 3}};
+    AddFunc<1>({i32}, "SumUntil", {i32}, three_local_ints, [&](const Local& n) {
+      auto i = MakeLocal(i32);
+      auto result = MakeLocal(i32);
+      auto one = MakeLocal(i32);
+      one = I32Const(1);
+      While([&] { I32LtS(i, n); },
+            [&] {
+              result = I32Add(result, i);
+              i = I32Add(i, one);
+            });
+      local_get(result);
+      end();
+    });
+  }
+};
+
+struct SumUntilTestSuite : GeneratorTestSuite<SumUntilCodeGenerator, SumUntil> {
+  static int ReferenceSumUntil(int n) {
+    int i = 0;
+    int result = 0;
+    while (i < n) {
+      result += i;
+      i++;
+    }
+    return result;
+  }
+  static void ExpectFuncCorrect(SumUntil sum_until) {
+    static constexpr int kN = 5;
+    static constexpr int kNoIters = 0;
+    EXPECT_EQ(sum_until(kN), ReferenceSumUntil(kN));
+    EXPECT_EQ(sum_until(kNoIters), ReferenceSumUntil(kNoIters));
+  }
+};
+
+struct DoWhileCodeGenerator : WasmAssembler {
+  explicit DoWhileCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
+    ValTypesToInt three_local_ints = {{i32, 3}};
+    AddFunc<1>({i32}, "DoWhile", {i32}, three_local_ints, [&](const Local& n) {
+      auto i = MakeLocal(i32);
+      auto result = MakeLocal(i32);
+      result = I32Const(kPositive);
+      auto one = MakeLocal(i32);
+      one = I32Const(1);
+      DoWhile(
+          [&] {
+            result = I32Add(result, result);
+            i = I32Add(i, one);
+          },
+          [&] { I32LtS(i, n); });
+      local_get(result);
+      end();
+    });
+  }
+};
+
+struct DoWhileTestSuite : GeneratorTestSuite<DoWhileCodeGenerator, DoWhile> {
+  static int ReferenceDoWhile(int n) {
+    int result = kPositive;
+    int i = 0;
+    do {
+      result += result;
+      i++;
+    } while (i < n);
+    return result;
+  }
+
+  static void ExpectFuncCorrect(DoWhile do_while) {
+    EXPECT_EQ(do_while(kPositive), ReferenceDoWhile(kPositive));
+    EXPECT_EQ(do_while(kNegative), ReferenceDoWhile(kNegative));
   }
 };
 
@@ -194,7 +296,8 @@ REGISTER_TYPED_TEST_SUITE_P(WasmAssemblerTest, ValidCode);
 using WasmAssemblerTestSuits =
     testing::Types<Get5TestSuite, AddTestSuite, AddWithLocalTestSuite,
                    AddTwiceTestSuite, AddTwiceWithScopesTestSuite,
-                   Add5TestSuite>;
+                   Add5TestSuite, MaxTestSuite, SumUntilTestSuite,
+                   DoWhileTestSuite>;
 INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest,
                                WasmAssemblerTestSuits);
 

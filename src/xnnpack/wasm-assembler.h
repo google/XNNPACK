@@ -13,6 +13,7 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <functional>
 #include <utility>
 #include <vector>
 
@@ -79,6 +80,7 @@ template <typename Derived>
 class I32WasmOps : public WasmOpsBase<Derived, I32WasmOps<Derived>> {
  public:
   void i32_add() const { this->Emit8(0x6a); }
+  void i32_lt_s() const { this->Emit8(0x48); }
   void i32_const(int32_t value) const {
     this->Emit8(0x41);
     this->EmitEncodedS32(value);
@@ -89,7 +91,50 @@ template <typename Derived>
 class ControlFlowWasmOps
     : public WasmOpsBase<Derived, ControlFlowWasmOps<Derived>> {
  public:
+  template <typename Cond, typename If, typename Else>
+  void IfElse(Cond&& cond, If&& if_block, Else&& else_block) const {
+    cond();
+    this->Emit8(kIfCode);
+    this->Emit8(kEpsilonCode);  // Fallthru elements are not supported
+    if_block();
+    this->Emit8(kElseCode);
+    else_block();
+    end();
+  }
+
+  template <typename Cond, typename If>
+  void If(Cond&& cond, If&& if_block) const {
+    cond();
+    this->Emit8(kIfCode);
+    this->Emit8(kEpsilonCode);  // Fallthru elements are not supported
+    if_block();
+    end();
+  }
+
+  template <typename Cond, typename Body>
+  void DoWhile(Body&& body, Cond&& cond) {
+    this->Emit8(kLoopCode);
+    this->Emit8(kEpsilonCode);  // Fallthru elements are not supported
+    body();
+    cond();
+    this->Emit8(kBrIfCode);
+    this->EmitEncodedU32(0);
+    end();
+  }
+
+  template <typename Cond, typename Body>
+  void While(Cond&& cond, Body&& body) {
+    If(cond, [&] { DoWhile(std::forward<Body>(body), cond); });
+  }
+
   void end() const { this->Emit8(0x0b); }
+
+ private:
+  static constexpr byte kIfCode = 0x04;
+  static constexpr byte kElseCode = 0x05;
+  static constexpr byte kEpsilonCode = 0x40;
+  static constexpr byte kLoopCode = 0x03;
+  static constexpr byte kBrIfCode = 0x0d;
 };
 
 class LocalsManager {
@@ -199,11 +244,11 @@ class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
   void local_set(const Local& local) const { local_set(local.index_); }
 
   ValueOnStack I32Add(const Local& a, const Local& b) {
-    assert((a.type_ == b.type_) && "Addition of locals of different types");
-    local_get(a);
-    local_get(b);
-    this->i32_add();
-    return {a.type_, this};
+    return BinaryOp(a, b, &I32WasmOps<Derived>::i32_add);
+  }
+
+  ValueOnStack I32LtS(const Local& a, const Local& b) {
+    return BinaryOp(a, b, &I32WasmOps<Derived>::i32_lt_s);
   }
 
   ValueOnStack I32Const(uint32_t value) {
@@ -213,6 +258,17 @@ class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
 
  protected:
   static constexpr ValType i32{0x7F};
+
+ private:
+  template <typename Op>
+  ValueOnStack BinaryOp(const Local& a, const Local& b, Op&& op) {
+    assert((a.type_ == b.type_) &&
+           "Binary operation on locals of different types");
+    local_get(a);
+    local_get(b);
+    std::mem_fn(op)(*this);
+    return {a.type_, this};
+  }
 };
 
 class WasmOps : public LocalWasmOps<WasmOps>,
