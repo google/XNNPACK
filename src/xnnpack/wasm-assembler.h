@@ -184,7 +184,7 @@ class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
 
     Local(const Local& other) = delete;
 
-    Local(const Local&& other) = delete;
+    Local(Local&& other) = default;
 
     Local& operator=(const Local& other) {
       assert((type_ == other.type_) &&
@@ -311,7 +311,7 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
       input_locals[index] =
           Local{param[index], index, /*is_managed=*/false, this};
     }
-    internal::ArrayApply(input_locals, std::forward<Body>(body));
+    internal::ArrayApply(std::move(input_locals), std::forward<Body>(body));
     RegisterFunction(result, name, std::vector(param.begin(), param.end()),
                      locals_declaration_count, std::move(code));
   }

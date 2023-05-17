@@ -59,13 +59,12 @@ struct Get5TestSuite : GeneratorTestSuite<Get5Generator, GetIntPtr> {
 struct AddGenerator : WasmAssembler {
   explicit AddGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt no_locals;
-    AddFunc<2>({i32}, "add", {i32, i32}, no_locals,
-               [this](const Local& a, const Local& b) {
-                 local_get(a);
-                 local_get(b);
-                 i32_add();
-                 end();
-               });
+    AddFunc<2>({i32}, "add", {i32, i32}, no_locals, [this](Local a, Local b) {
+      local_get(a);
+      local_get(b);
+      i32_add();
+      end();
+    });
   }
 };
 
@@ -80,7 +79,7 @@ struct AddWithLocalGenerator : WasmAssembler {
   explicit AddWithLocalGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt single_local_int = {{i32, 1}};
     AddFunc<2>({i32}, "add_with_local", {i32, i32}, single_local_int,
-               [this](const Local& a, const Local& b) {
+               [this](Local a, Local b) {
                  auto sum = MakeLocal(i32);
                  sum = I32Add(a, b);
                  local_get(sum);
@@ -96,7 +95,7 @@ struct AddTwiceGenerator : WasmAssembler {
   explicit AddTwiceGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt two_local_ints = {{i32, 2}};
     AddFunc<2>({i32}, "add_twice", {i32, i32}, two_local_ints,
-               [this](const Local& a, const Local& b) {
+               [this](Local a, Local b) {
                  auto first = MakeLocal(i32);
                  auto second = MakeLocal(i32);
                  first = I32Add(a, b);
@@ -117,7 +116,7 @@ struct AddTwiceWithScopesGenerator : WasmAssembler {
       : WasmAssembler(buf) {
     ValTypesToInt two_local_ints = {{i32, 2}};
     AddFunc<2>({i32}, "add_twice_with_scopes", {i32, i32}, two_local_ints,
-               [this](const Local& a, const Local& b) {
+               [this](Local a, Local b) {
                  auto first = MakeLocal(i32);
                  {
                    auto sum = MakeLocal(i32);
@@ -140,13 +139,12 @@ struct AddTwiceWithScopesTestSuite
 
 struct Add5CodeGenerator : WasmAssembler {
   explicit Add5CodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
-    ValTypesToInt two_local_ints = {{i32, 2}};
-    AddFunc<1>({i32}, "add5", {i32}, two_local_ints, [this](const Local& a) {
+    ValTypesToInt single_local_int = {{i32, 1}};
+    AddFunc<1>({i32}, "add5", {i32}, single_local_int, [this](Local a) {
       auto five = MakeLocal(i32);
-      auto sum = MakeLocal(i32);
       five = I32Const(5);
-      sum = I32Add(five, a);
-      local_get(sum);
+      a = I32Add(five, a);
+      local_get(a);
       end();
     });
   }
@@ -162,7 +160,7 @@ struct MaxCodeGenerator : WasmAssembler {
   explicit MaxCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt single_local_int = {{i32, 1}};
     AddFunc<2>({i32}, "max", {i32, i32}, single_local_int,
-               [this](const Local& a, const Local& b) {
+               [this](Local a, Local b) {
                  auto result = MakeLocal(i32);
                  IfElse([&] { I32LtS(a, b); }, [&] { result = b; },
                         [&] { result = a; });
@@ -172,17 +170,36 @@ struct MaxCodeGenerator : WasmAssembler {
   }
 };
 
-struct MaxTestSuite : GeneratorTestSuite<MaxCodeGenerator, MaxPtr> {
+template <typename G>
+struct GenericMaxTestSuite : GeneratorTestSuite<G, MaxPtr> {
   static void ExpectFuncCorrect(MaxPtr max) {
     EXPECT_EQ(max(2, 3), 3);
     EXPECT_EQ(max(3, 2), 3);
   }
 };
 
+struct MaxTestSuite : GenericMaxTestSuite<MaxCodeGenerator> {};
+
+struct MaxIncompleteIfCodeGenerator : WasmAssembler {
+  explicit MaxIncompleteIfCodeGenerator(xnn_code_buffer* buf)
+      : WasmAssembler(buf) {
+    ValTypesToInt no_locals = {};
+    AddFunc<2>({i32}, "max_incomplete_if", {i32, i32}, no_locals,
+               [this](Local a, Local b) {
+                 If([&] { I32LtS(a, b); }, [&] { a = b; });
+                 local_get(a);
+                 end();
+               });
+  }
+};
+
+struct MaxIncompleteIfTestSuite
+    : GenericMaxTestSuite<MaxIncompleteIfCodeGenerator> {};
+
 struct SumUntilCodeGenerator : WasmAssembler {
   explicit SumUntilCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt three_local_ints = {{i32, 3}};
-    AddFunc<1>({i32}, "SumUntil", {i32}, three_local_ints, [&](const Local& n) {
+    AddFunc<1>({i32}, "SumUntil", {i32}, three_local_ints, [&](Local n) {
       auto i = MakeLocal(i32);
       auto result = MakeLocal(i32);
       auto one = MakeLocal(i32);
@@ -219,7 +236,7 @@ struct SumUntilTestSuite : GeneratorTestSuite<SumUntilCodeGenerator, SumUntil> {
 struct DoWhileCodeGenerator : WasmAssembler {
   explicit DoWhileCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt three_local_ints = {{i32, 3}};
-    AddFunc<1>({i32}, "DoWhile", {i32}, three_local_ints, [&](const Local& n) {
+    AddFunc<1>({i32}, "DoWhile", {i32}, three_local_ints, [&](Local n) {
       auto i = MakeLocal(i32);
       auto result = MakeLocal(i32);
       result = I32Const(kPositive);
@@ -296,8 +313,8 @@ REGISTER_TYPED_TEST_SUITE_P(WasmAssemblerTest, ValidCode);
 using WasmAssemblerTestSuits =
     testing::Types<Get5TestSuite, AddTestSuite, AddWithLocalTestSuite,
                    AddTwiceTestSuite, AddTwiceWithScopesTestSuite,
-                   Add5TestSuite, MaxTestSuite, SumUntilTestSuite,
-                   DoWhileTestSuite>;
+                   Add5TestSuite, MaxTestSuite, MaxIncompleteIfTestSuite,
+                   SumUntilTestSuite, DoWhileTestSuite>;
 INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest,
                                WasmAssemblerTestSuits);
 
