@@ -2058,6 +2058,26 @@ size_t xnn_init_f32_hswish_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+size_t xnn_init_qs8_hswish_scalar_params(
+  union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],
+  int16_t input_zero_point,
+  int16_t output_zero_point,
+  float input_scale,
+  float output_scale)
+{
+  params->scalar.input_zero_point = (int32_t) input_zero_point;
+  params->scalar.output_zero_point= (int32_t) output_zero_point;
+  const float divisor1 = 0x1.555556p-10f;
+  const uint32_t input_scale_div = float_as_uint32(input_scale * divisor1);
+  params->scalar.input_scale_div_exp = (int32_t) (input_scale_div >> 23) - 126;
+  params->scalar.input_scale_div_mantissa = (int32_t) ((input_scale_div << 9) >> 18 | UINT16_C(0x4000));
+  const float scale_ratio = input_scale / output_scale;
+  assert(scale_ratio >= 0x1.0p-8f);
+  assert(scale_ratio < 0x1.0p+7f);
+  params->scalar.scale_ratio = (int32_t) lrintf(scale_ratio * 256.0f);
+  return sizeof(params->scalar);
+}
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_qs8_hswish_neon_params(
   union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],
@@ -2080,6 +2100,25 @@ size_t xnn_init_qs8_hswish_neon_params(
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+size_t xnn_init_qu8_hswish_scalar_params(
+  union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],
+  int16_t input_zero_point,
+  int16_t output_zero_point,
+  float input_scale,
+  float output_scale)
+{
+  params->scalar.input_zero_point = (int32_t) input_zero_point;
+  params->scalar.output_zero_point= (int32_t) output_zero_point;
+  const float divisor1 = 0x1.555556p-10f;
+  const uint32_t input_scale_div = float_as_uint32(input_scale * divisor1);
+  params->scalar.input_scale_div_exp = (int32_t) (input_scale_div >> 23) - 126;
+  params->scalar.input_scale_div_mantissa = (int32_t) ((input_scale_div << 9) >> 18 | UINT16_C(0x4000));
+  const float scale_ratio = input_scale / output_scale;
+  assert(scale_ratio >= 0x1.0p-8f);
+  assert(scale_ratio < 0x1.0p+7f);
+  params->scalar.scale_ratio = (int32_t) lrintf(scale_ratio * 256.0f);
+  return sizeof(params->scalar);
+}
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_qu8_hswish_neon_params(
   union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],
