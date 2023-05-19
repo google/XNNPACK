@@ -195,6 +195,12 @@ static void GEMMBenchmark(benchmark::State& state,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1);
   }
+  static void f32_qc8w_gemm_4x2__asm_aarch64_neonfma_ld64(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_qc8w_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_ld64,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/4, /*nr=*/2, /*kr=*/1, /*sr=*/1);
+  }
   static void f32_qc8w_gemm_4x8__asm_aarch64_neonfma_ld64(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_qc8w_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld64,
@@ -207,11 +213,17 @@ static void GEMMBenchmark(benchmark::State& state,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1);
   }
-  static void f32_qc8w_gemm_4x2__asm_aarch64_neonfma_ld64(benchmark::State& state, const char* net) {
+  static void f32_qc8w_gemm_4x8__asm_aarch64_neonfma_ld128(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
-      xnn_f32_qc8w_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_ld64,
+      xnn_f32_qc8w_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128,
       xnn_init_f32_minmax_scalar_params,
-      /*mr=*/4, /*nr=*/2, /*kr=*/1, /*sr=*/1);
+      /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  }
+  static void f32_qc8w_gemm_6x8__asm_aarch64_neonfma_ld128(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1);
   }
 
   BENCHMARK_GEMM(f32_qc8w_gemm_1x8__asm_aarch64_neon_ld128_acc2)
@@ -231,6 +243,8 @@ static void GEMMBenchmark(benchmark::State& state,
   BENCHMARK_GEMM(f32_qc8w_gemm_4x2__asm_aarch64_neonfma_ld64)
   BENCHMARK_GEMM(f32_qc8w_gemm_4x8__asm_aarch64_neonfma_ld64)
   BENCHMARK_GEMM(f32_qc8w_gemm_6x8__asm_aarch64_neonfma_ld64)
+  BENCHMARK_GEMM(f32_qc8w_gemm_4x8__asm_aarch64_neonfma_ld128)
+  BENCHMARK_GEMM(f32_qc8w_gemm_6x8__asm_aarch64_neonfma_ld128)
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 #if XNN_ARCH_ARM64

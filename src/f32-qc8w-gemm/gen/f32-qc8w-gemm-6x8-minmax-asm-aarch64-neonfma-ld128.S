@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-gemm/6x8-aarch64-neonfma-ld64.S.in
+//   Template: src/f32-gemm/6x8-aarch64-neonfma-ld128.S.in
 //   Generator: tools/xngen
 //
 // Copyright 2019 Google LLC
@@ -9,14 +9,14 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64(
+# void xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128(
 #     size_t mr,                x0
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
-#     const uint8_t*restrict a, x3
+#     const float* a,           x3
 #     size_t a_stride,          x4
-#     const void*restrict w,    x5
-#     uint8_t*restrict c,       x6
+#     const void* w,            x5
+#     float* c,                 x6
 #     size_t cm_stride,         x7
 #     size_t cn_stride,         [sp] -> (x0)
 #     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
@@ -24,24 +24,24 @@
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0    x3 v0
-# A1    x9 v1
-# A2   x10 v2
-# A3   x11 v3
-# A4   x12 v4
-# A5    x4 v5
-# B     x5 v16 v17 v18 v19
-# C0    x6 v20 v21
-# C1   x16 v22 v23
-# C2   x17 v24 v25
-# C3   x14 v26 v27
-# C4   x13 v28 v29
-# C5    x7 v30 v31
+# A0   x3  v0
+# A1   x9  v1
+# A2  x10  v2
+# A3  x11  v3
+# A4  x12  v4
+# A5   x4  v5
+# B    x5  v16 v17 v18 v19
+# C    x6  v20 v21
+# C   x16  v22 v23
+# C   x17  v24 v25
+# C   x14  v26 v27
+# C   x13  v28 v29
+# C    x7  v30 v31
 # Clamp v6 v7
 # unused A   v8 v9 v10 v11
 # unused B   v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
+BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
 
         # Load params pointer
         LDR     x8, [sp, 8]
@@ -52,9 +52,6 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         ADD     x16, x6, x7             // c1 = c0 + cm_stride
         CSEL    x9, x3, x9, LO          //   a1 = a0
         CSEL    x16, x6, x16, LO        //   c1 = c0
-
-        # Load min/max values
-        LD2R    {v6.4s, v7.4s}, [x8]
 
         ADD     x10, x9, x4             // a2 = a1 + a_stride
         ADD     x17, x16, x7            // c2 = c1 + cm_stride
@@ -80,6 +77,8 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         CSEL    x4, x12, x4, LO         //   a5 = a4
         CSEL    x7, x13, x7, LO         //   c5 = c4
 
+        # Load min/max values
+        LD2R    {v6.4s, v7.4s}, [x8]
 
 0:
         # Load initial bias from w into accumulators
@@ -105,30 +104,30 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         MOV     v31.16b, v21.16b
         PRFM    PLDL1KEEP,  [x4]
 
-        # Is there at least 2 floats (8 bytes) for main loop?
-        SUBS    x0, x2, 8               // k = kc - 8
+        # Is there at least 4 floats (16 bytes)?
+        SUBS    x0, x2, 16              // k = kc - 16
         B.LO    3f
 
-        # Main loop - 2 floats of A (8 bytes)
-        # 24 FMA + 6 LD64 A + 2 LDP B
+        # Main loop - 4 floats of A (16 bytes)
+        # 48 FMA + 6 ld128 A + 4 LDP B
 1:
-        LDR     d0,  [x3], 8
+        LDR     q0,  [x3], 16
         LDR     q18, [x5], 16
         SXTL    v17.8h, v18.8b
         SXTL2   v19.8h, v18.16b
-        LDR     d1,  [x9], 8
+        LDR     q1,  [x9], 16
         SXTL    v16.4s, v17.4h
         SXTL2   v17.4s, v17.8h
-        LDR     d2, [x10], 8
+        LDR     q2, [x10], 16
         SXTL    v18.4s, v19.4h
         SXTL2   v19.4s, v19.8h
-        LDR     d3, [x11], 8
+        LDR     q3, [x11], 16
         SCVTF   v16.4s, v16.4s
         SCVTF   v17.4s, v17.4s
-        LDR     d4, [x12], 8
+        LDR     q4, [x12], 16
         SCVTF   v18.4s, v18.4s
         SCVTF   v19.4s, v19.4s
-        LDR     d5,  [x4], 8
+        LDR     q5,  [x4], 16
         FMLA    v20.4s, v16.4s,  v0.s[0]
         FMLA    v22.4s, v16.4s,  v1.s[0]
         FMLA    v24.4s, v16.4s,  v2.s[0]
@@ -143,6 +142,12 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         FMLA    v31.4s, v17.4s,  v5.s[0]
 
         FMLA    v20.4s, v18.4s,  v0.s[1]
+        LDR     q17, [x5], 8
+        SXTL    v17.8h, v17.8b
+        SXTL    v16.4s, v17.4h
+        SXTL2   v17.4s, v17.8h
+        SCVTF   v16.4s, v16.4s
+        SCVTF   v17.4s, v17.4s
         FMLA    v22.4s, v18.4s,  v1.s[1]
         FMLA    v24.4s, v18.4s,  v2.s[1]
         FMLA    v26.4s, v18.4s,  v3.s[1]
@@ -152,13 +157,47 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         FMLA    v23.4s, v19.4s,  v1.s[1]
         FMLA    v25.4s, v19.4s,  v2.s[1]
         FMLA    v27.4s, v19.4s,  v3.s[1]
-        SUBS    x0, x0, 8
         FMLA    v29.4s, v19.4s,  v4.s[1]
         FMLA    v31.4s, v19.4s,  v5.s[1]
+
+        FMLA    v20.4s, v16.4s,  v0.s[2]
+        LDR     q19, [x5], 8
+        SXTL    v19.8h, v19.8b
+        SXTL    v18.4s, v19.4h
+        SXTL2   v19.4s, v19.8h
+        SCVTF   v18.4s, v18.4s
+        SCVTF   v19.4s, v19.4s
+        FMLA    v22.4s, v16.4s,  v1.s[2]
+        FMLA    v24.4s, v16.4s,  v2.s[2]
+        FMLA    v26.4s, v16.4s,  v3.s[2]
+        FMLA    v28.4s, v16.4s,  v4.s[2]
+        FMLA    v30.4s, v16.4s,  v5.s[2]
+        FMLA    v21.4s, v17.4s,  v0.s[2]
+        FMLA    v23.4s, v17.4s,  v1.s[2]
+        FMLA    v25.4s, v17.4s,  v2.s[2]
+        FMLA    v27.4s, v17.4s,  v3.s[2]
+        FMLA    v29.4s, v17.4s,  v4.s[2]
+        FMLA    v31.4s, v17.4s,  v5.s[2]
+
+        FMLA    v20.4s, v18.4s,  v0.s[3]
+        FMLA    v22.4s, v18.4s,  v1.s[3]
+        FMLA    v24.4s, v18.4s,  v2.s[3]
+        FMLA    v26.4s, v18.4s,  v3.s[3]
+        FMLA    v28.4s, v18.4s,  v4.s[3]
+        FMLA    v30.4s, v18.4s,  v5.s[3]
+        FMLA    v21.4s, v19.4s,  v0.s[3]
+        FMLA    v23.4s, v19.4s,  v1.s[3]
+        FMLA    v25.4s, v19.4s,  v2.s[3]
+        FMLA    v27.4s, v19.4s,  v3.s[3]
+        SUBS    x0, x0, 16
+        FMLA    v29.4s, v19.4s,  v4.s[3]
+        FMLA    v31.4s, v19.4s,  v5.s[3]
         B.HS    1b
 
-        # Is there a remainder?- 1 float of A (4 bytes)
-        TBNZ    x0, 2, 3f
+        # Is there a remainder?- 2 floats of A (8 bytes) or less
+        TST     x0, 15
+        B.NE    3f
+
 2:
         # Scale
         LDP     q16, q17, [x5], 32
@@ -204,7 +243,7 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         FMIN    v31.4s, v31.4s, v7.4s
 
         # Store full 6 x 8
-        B.LO    4f
+        B.LO    5f
 
         ST1     {v20.16b, v21.16b},  [x6], x0
         SUB     x3,  x3, x2             // a0 -= kc
@@ -223,10 +262,61 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         RET
 
 3:
-        # Remainder- 1 float of A (4 bytes)
-        LDR     s0,  [x3], 4
-        LDR     d18, [x5], 8
+        # Is there a remainder?- 2 floats of A (8 bytes)
+        TBZ     x0, 3, 4f
+
+        # Remainder- 2 floats of A (8 bytes)
+        LDR     d0,  [x3], 8
+        LDR     q18, [x5], 16
         SXTL    v17.8h, v18.8b
+        SXTL2   v19.8h, v18.16b
+        LDR     d1,  [x9], 8
+        SXTL    v16.4s, v17.4h
+        SXTL2   v17.4s, v17.8h
+        LDR     d2, [x10], 8
+        SXTL    v18.4s, v19.4h
+        SXTL2   v19.4s, v19.8h
+        LDR     d3, [x11], 8
+        SCVTF   v16.4s, v16.4s
+        SCVTF   v17.4s, v17.4s
+        LDR     d4, [x12], 8
+        SCVTF   v18.4s, v18.4s
+        SCVTF   v19.4s, v19.4s
+        LDR     d5,  [x4], 8
+        FMLA    v20.4s, v16.4s,  v0.s[0]
+        FMLA    v22.4s, v16.4s,  v1.s[0]
+        FMLA    v24.4s, v16.4s,  v2.s[0]
+        FMLA    v26.4s, v16.4s,  v3.s[0]
+        FMLA    v28.4s, v16.4s,  v4.s[0]
+        FMLA    v30.4s, v16.4s,  v5.s[0]
+        FMLA    v21.4s, v17.4s,  v0.s[0]
+        FMLA    v23.4s, v17.4s,  v1.s[0]
+        FMLA    v25.4s, v17.4s,  v2.s[0]
+        FMLA    v27.4s, v17.4s,  v3.s[0]
+        FMLA    v29.4s, v17.4s,  v4.s[0]
+        FMLA    v31.4s, v17.4s,  v5.s[0]
+
+        FMLA    v20.4s, v18.4s,  v0.s[1]
+        FMLA    v22.4s, v18.4s,  v1.s[1]
+        FMLA    v24.4s, v18.4s,  v2.s[1]
+        FMLA    v26.4s, v18.4s,  v3.s[1]
+        FMLA    v28.4s, v18.4s,  v4.s[1]
+        FMLA    v30.4s, v18.4s,  v5.s[1]
+        FMLA    v21.4s, v19.4s,  v0.s[1]
+        FMLA    v23.4s, v19.4s,  v1.s[1]
+        FMLA    v25.4s, v19.4s,  v2.s[1]
+        FMLA    v27.4s, v19.4s,  v3.s[1]
+        FMLA    v29.4s, v19.4s,  v4.s[1]
+        FMLA    v31.4s, v19.4s,  v5.s[1]
+
+        # Is there a remainder?- 1 float of A (4 bytes)
+        TBZ     x0, 2, 2b
+
+        # Remainder- 1 float of A (4 bytes)
+4:
+        LDR     s0,  [x3], 4
+        LDR     d17, [x5], 8
+        SXTL    v17.8h, v17.8b
         LDR     s1,  [x9], 4
         SXTL    v16.4s, v17.4h
         LDR     s2, [x10], 4
@@ -251,8 +341,8 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         B       2b
 
         # Store odd width
-4:
-        TBZ     x1, 2, 5f
+5:
+        TBZ     x1, 2, 6f
         STR     q20,  [x6], 16
         MOV     v20.16b, v21.16b
         STR     q22, [x16], 16
@@ -266,8 +356,8 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         STR     q30,  [x7], 16
         MOV     v30.16b, v31.16b
 
-5:
-        TBZ     x1, 1, 6f
+6:
+        TBZ     x1, 1, 7f
         STR     d20,  [x6], 8
         STR     d22, [x16], 8
         DUP     d20, v20.d[1]
@@ -281,18 +371,18 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         DUP     d28, v28.d[1]
         DUP     d30, v30.d[1]
 
-6:
-        TBZ     x1, 0, 7f
+7:
+        TBZ     x1, 0, 8f
         STR     s20,  [x6]
         STR     s22, [x16]
         STR     s24, [x17]
         STR     s26, [x14]
         STR     s28, [x13]
         STR     s30,  [x7]
-7:
+8:
         RET
 
-END_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
+END_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
