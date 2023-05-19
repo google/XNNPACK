@@ -240,7 +240,7 @@ static enum xnn_status set_memory_permission(void* start, size_t size, enum xnn_
 }
 
 #if XNN_PLATFORM_WEB
-EM_JS(int, xnnLoadWasmModuleJS, (const uint8_t* code, int code_size, const char* code_name, int invalid_function_index), {
+EM_JS(int, xnnLoadWasmModuleJS, (const uint8_t* code, int code_size, int invalid_function_index), {
     const tableOriginalSize = wasmTable.length;
     const binary = new Uint8Array(HEAPU8.slice(code, (code + code_size)));
     try {
@@ -251,6 +251,7 @@ EM_JS(int, xnnLoadWasmModuleJS, (const uint8_t* code, int code_size, const char*
       return invalid_function_index;
     }
     catch(error) {
+      console.log(error);
       return invalid_function_index;
     }
 });
@@ -259,8 +260,7 @@ EM_JS(int, xnnLoadWasmModuleJS, (const uint8_t* code, int code_size, const char*
 #if XNN_PLATFORM_JIT
 enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buffer) {
   #if XNN_PLATFORM_WEB
-    static const char* kJITModuleName = "JIT";
-    const int first_function_index = xnnLoadWasmModuleJS(buffer->start, buffer->size, kJITModuleName, XNN_INVALID_FUNCTION_INDEX);
+    const int first_function_index = xnnLoadWasmModuleJS(buffer->start, buffer->size, XNN_INVALID_FUNCTION_INDEX);
     buffer->first_function_index = first_function_index;
     return first_function_index != XNN_INVALID_FUNCTION_INDEX ? xnn_status_success : xnn_status_invalid_parameter;
   #else

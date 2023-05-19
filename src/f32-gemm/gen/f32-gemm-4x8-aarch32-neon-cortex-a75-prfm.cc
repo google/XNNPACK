@@ -26,17 +26,17 @@ class Generator : public MacroAssembler {
 };
 
 
-// void xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a55(
+// void xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch32_neon_cortex_a75(
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5
 //     const uint8_t*restrict a,             r3
-//     size_t a_stride,          sp + 96 -> (r7)
+//     size_t a_stride,          sp + 96  -> (r7)
 //     const void*restrict w,    sp + 100 -> r9
 //     uint8_t*restrict c,       sp + 104 -> r11
 //     size_t cm_stride,         sp + 108 -> (r6)
-//     size_t cn_stride,         sp + 112 -> (r0)
-//     minmax_params*params,     sp + 116 -> (r5)
+//     size_t cn_stride,         sp + 112 -> r7
+//     const union xnn_f32_minmax_params params)  sp + 116 -> (r5)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
@@ -44,7 +44,7 @@ class Generator : public MacroAssembler {
 // A0   r3  d0 d4
 // A1  r12  d1 d5
 // A2  r10  d2 d6
-// A3   r7  d3 d7
+// A3   r0  d3 d7
 // B    r9  d8,  d9, d10, d11
 // B       d12, d13, d14, d15
 // C0  r11 d16-d17  q8  d18-d19  q9
@@ -52,9 +52,8 @@ class Generator : public MacroAssembler {
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
 // clamp  (r5) d4 d5 d6 d7
-// unused r14 (lr)
 
-// Converted from: src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a55.S
+// Converted from: src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a75.S
 void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
 {
   assert(max_mr <= 4);
@@ -71,12 +70,12 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   const bool clamp_max = max != +std::numeric_limits<float>::infinity();
   assert(num_post_operations == 0 || (!clamp_min && !clamp_max));
   // Push 96 bytes
-  vpush({d8-d15}); // 64
-  push({r4, r5, r6, r7, r8, r9, r10, r11}); // +32 = 96
+  push({r4, r5, r6, r7, r8, r9, r10, r11}); // 32
+  vpush({d8-d15}); // +64 = 96
 
   ldr(r7, mem[sp, 96]); // a_stride
-  ldr(r11, mem[sp, 104]); // c
   ldr(r6, mem[sp, 108]); // cm_stride
+  ldr(r11, mem[sp, 104]); // c
   ldr(r9, mem[sp, 100]); // w
 
   // Clamp A and C pointers
@@ -97,54 +96,38 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
 
   if (max_mr > 3) {
     cmp(r0, 4); // if mr >=4
-    add(r7, r10, r7); //   a3 = a2 + a_stride
+    add(r0, r10, r7); //   a3 = a2 + a_stride
     add(r6, r8, r6); //   c3 = c2 + cm_stride
-    movlo(r7, r10); // a3
+    movlo(r0, r10); // a3
     movlo(r6, r8); // c3
   }
+
+  ldr(r7, mem[sp, 112]); // cn_stride
 
   align(8);
   bind(l0);
   // Load initial bias from w into accumulators
   vldm(mem[r9]++, {d16-d19}); // Bias
-
-  subs(r5, r2, 16); // kc - 16
-  pld(mem[r3, 0]); // Prefetch A
-  pld(mem[r3, 64]);
+  subs(r5, r2, 16);
   if (max_mr > 1) {
     vmov(q10, q8);
-  }
-  pld(mem[r12, 0]);
-  pld(mem[r12, 64]);
-  if (max_mr > 1) {
     vmov(q11, q9);
   }
-  pld(mem[r10, 0]);
-  pld(mem[r10, 64]);
   if (max_mr > 2) {
     vmov(q12, q8);
-  }
-  pld(mem[r7, 0]);
-  pld(mem[r7, 64]);
-  if (max_mr > 2) {
     vmov(q13, q9);
   }
-  pld(mem[r9, 0]); // Prefetch B
-  pld(mem[r9, 64]);
   if (max_mr > 3) {
     vmov(q14, q8);
-  }
-  pld(mem[r9, 128]);
-  pld(mem[r9, 192]);
-  if (max_mr > 3) {
     vmov(q15, q9);
   }
-  pld(mem[r9, 256]);
-  pld(mem[r9, 320]);
+
+
   blo(l4); // less than 4 channels?
 
   // Prologue
   vld1_32({d0}, mem[r3]++); // A0
+  vldm(mem[r9]++, {d8-d11}); // B0
   if (max_mr > 1) {
     vld1_32({d1}, mem[r12]++); // A1
   }
@@ -152,241 +135,186 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     vld1_32({d2}, mem[r10]++); // A2
   }
   if (max_mr > 3) {
-    vld1_32({d3}, mem[r7]++); // A3
+    vld1_32({d3}, mem[r0]++); // A3
   }
+
   subs(r5, r5, 16);
-  vldm(mem[r9], {d8-d11}); // B0
-  vldr(d15, mem[r9, 56]); // B1CK 0
-  vldr(d13, mem[r9, 40]); // B1
   blo(l2); // less than 4 channels?  skip main loop
 
-  // Main loop - 4 floats of A (16 bytes)
-  // 32 FMA + 8 LD64 A + 8 LDR B
   align(8);
+
+  // Main loop - 4 floats of A (16 bytes)
   bind(l1);
-  // First group of 16 FMA, Second group loads
-  // BLOCK 0
   vmla_f32(q8, q4, d0[0]);
-  vld1_32({d4}, mem[r3]++); // A0
+  vldm(mem[r9]++, {d12-d15}); // B1
   if (max_mr > 1) {
     vmla_f32(q10, q4, d1[0]);
-    vld1_32({d5}, mem[r12]++); // A1
   }
   if (max_mr > 2) {
     vmla_f32(q12, q4, d2[0]);
   }
-
-  // BLOCK 1
+  vld1_32({d4}, mem[r3]++); // A0
   if (max_mr > 3) {
     vmla_f32(q14, q4, d3[0]);
   }
-  vldr(d12, mem[r9, 32]); // B1
   vmla_f32(q9, q5, d0[0]);
-  vldr(d9, mem[r9, 72]); // B0
   if (max_mr > 1) {
+    vld1_32({d5}, mem[r12]++); // A1
     vmla_f32(q11, q5, d1[0]);
   }
-
-  // BLOCK 2
   if (max_mr > 2) {
     vmla_f32(q13, q5, d2[0]);
-    vld1_32({d6}, mem[r10]++); // A2
   }
   if (max_mr > 3) {
     vmla_f32(q15, q5, d3[0]);
-    vld1_32({d7}, mem[r7]++); // A3
+  }
+  if (max_mr > 2) {
+    vld1_32({d6}, mem[r10]++); // A2
   }
   vmla_f32(q8, q6, d0[1]);
-
-  // BLOCK 3
   if (max_mr > 1) {
     vmla_f32(q10, q6, d1[1]);
   }
-  vldr(d14, mem[r9, 48]); // B1
+  if (max_mr > 3) {
+    vld1_32({d7}, mem[r0]++); // A3
+  }
   if (max_mr > 2) {
     vmla_f32(q12, q6, d2[1]);
   }
-  vldr(d11, mem[r9, 88]); // B0
   if (max_mr > 3) {
     vmla_f32(q14, q6, d3[1]);
   }
-
-  // BLOCK 4
+  vldm(mem[r9]++, {d8-d11}); // B0
   vmla_f32(q9, q7, d0[1]);
-  vldr(d8, mem[r9, 64]); // B0
   if (max_mr > 1) {
     vmla_f32(q11, q7, d1[1]);
   }
-  vldr(d13, mem[r9, 104]); // B1
   if (max_mr > 2) {
     vmla_f32(q13, q7, d2[1]);
   }
-  vldr(d10, mem[r9, 80]); // B0
-
-  // BLOCK 5
   if (max_mr > 3) {
     vmla_f32(q15, q7, d3[1]);
   }
-  vldr(d15, mem[r9, 120]); // B1
 
-  // Second group of 16 FMA, First group of loads
-  // BLOCK 0
   vmla_f32(q8, q4, d4[0]);
-  vld1_32({d0}, mem[r3]++); // A0
+  vldm(mem[r9]++, {d12-d15}); // B1
   if (max_mr > 1) {
     vmla_f32(q10, q4, d5[0]);
-    vld1_32({d1}, mem[r12]++); // A1
   }
   if (max_mr > 2) {
     vmla_f32(q12, q4, d6[0]);
   }
-
-  // BLOCK 1
+  vld1_32({d0}, mem[r3]++); // A0
   if (max_mr > 3) {
     vmla_f32(q14, q4, d7[0]);
   }
-  vldr(d12, mem[r9, 96]); // B1
   vmla_f32(q9, q5, d4[0]);
-  vldr(d9, mem[r9, 136]); // B0
   if (max_mr > 1) {
+    vld1_32({d1}, mem[r12]++); // A1
     vmla_f32(q11, q5, d5[0]);
   }
-
-  // BLOCK 2
   if (max_mr > 2) {
     vmla_f32(q13, q5, d6[0]);
     vld1_32({d2}, mem[r10]++); // A2
   }
   if (max_mr > 3) {
     vmla_f32(q15, q5, d7[0]);
-    vld1_32({d3}, mem[r7]++); // A3
   }
   vmla_f32(q8, q6, d4[1]);
-
-  // BLOCK 3
+  if (max_mr > 3) {
+    vld1_32({d3}, mem[r0]++); // A3
+  }
   if (max_mr > 1) {
     vmla_f32(q10, q6, d5[1]);
   }
-  vldr(d14, mem[r9, 112]); // B1
   if (max_mr > 2) {
     vmla_f32(q12, q6, d6[1]);
   }
-  vldr(d11, mem[r9, 152]); // B0
   if (max_mr > 3) {
     vmla_f32(q14, q6, d7[1]);
   }
-  subs(r5, r5, 16);
-
-  // BLOCK 4
+  vldm(mem[r9]++, {d8-d11}); // B0
   vmla_f32(q9, q7, d4[1]);
-  vldr(d8, mem[r9, 128]); // B0
   if (max_mr > 1) {
     vmla_f32(q11, q7, d5[1]);
   }
-  vldr(d13, mem[r9, 168]); // B1
+  subs(r5, r5, 16);
   if (max_mr > 2) {
     vmla_f32(q13, q7, d6[1]);
   }
-  vldr(d10, mem[r9, 144]); // B0
-
-  // BLOCK 5
   if (max_mr > 3) {
     vmla_f32(q15, q7, d7[1]);
   }
-  vldr(d15, mem[r9, 184]); // B1
-  add(r9, r9, 128); // B++
   bhs(l1);
 
-
-  // Epilogue - 4 floats of A (16 bytes)
+  // Epilogue
   bind(l2);
-  // First group of 16 FMA, Second group loads
-  // BLOCK 0
   vmla_f32(q8, q4, d0[0]);
-  vld1_32({d4}, mem[r3]++); // A0
+  vldm(mem[r9]++, {d12-d15}); // B1
   if (max_mr > 1) {
     vmla_f32(q10, q4, d1[0]);
-    vld1_32({d5}, mem[r12]++); // A1
   }
   if (max_mr > 2) {
     vmla_f32(q12, q4, d2[0]);
   }
-
-  // BLOCK 1
+  vld1_32({d4}, mem[r3]++); // A0
   if (max_mr > 3) {
     vmla_f32(q14, q4, d3[0]);
   }
-  vldr(d12, mem[r9, 32]); // B1
   vmla_f32(q9, q5, d0[0]);
-  vldr(d9, mem[r9, 72]); // B0
   if (max_mr > 1) {
+    vld1_32({d5}, mem[r12]++); // A1
     vmla_f32(q11, q5, d1[0]);
   }
-
-  // BLOCK 2
   if (max_mr > 2) {
     vmla_f32(q13, q5, d2[0]);
-    vld1_32({d6}, mem[r10]++); // A2
   }
   if (max_mr > 3) {
     vmla_f32(q15, q5, d3[0]);
-    vld1_32({d7}, mem[r7]++); // A3
+  }
+  if (max_mr > 2) {
+    vld1_32({d6}, mem[r10]++); // A2
   }
   vmla_f32(q8, q6, d0[1]);
-
-  // BLOCK 3
   if (max_mr > 1) {
     vmla_f32(q10, q6, d1[1]);
   }
-  vldr(d14, mem[r9, 48]); // B1
+  if (max_mr > 3) {
+    vld1_32({d7}, mem[r0]++); // A3
+  }
   if (max_mr > 2) {
     vmla_f32(q12, q6, d2[1]);
   }
-  vldr(d11, mem[r9, 88]); // B0
   if (max_mr > 3) {
     vmla_f32(q14, q6, d3[1]);
   }
-
-  // BLOCK 4
+  vldm(mem[r9]++, {d8-d11}); // B0
   vmla_f32(q9, q7, d0[1]);
-  vldr(d8, mem[r9, 64]); // B0
   if (max_mr > 1) {
     vmla_f32(q11, q7, d1[1]);
   }
-  vldr(d13, mem[r9, 104]); // B1
   if (max_mr > 2) {
     vmla_f32(q13, q7, d2[1]);
   }
-  vldr(d10, mem[r9, 80]); // B0
-
-  // BLOCK 5
   if (max_mr > 3) {
     vmla_f32(q15, q7, d3[1]);
   }
-  vldr(d15, mem[r9, 120]); // B1
 
-  // Second group of 16 FMA, First group of loads
-  // BLOCK 0
   vmla_f32(q8, q4, d4[0]);
-  vldr(d12, mem[r9, 96]); // B1
+  vldm(mem[r9]++, {d12-d15}); // B1
   if (max_mr > 1) {
     vmla_f32(q10, q4, d5[0]);
   }
   if (max_mr > 2) {
     vmla_f32(q12, q4, d6[0]);
   }
-
-  // BLOCK 1
   if (max_mr > 3) {
     vmla_f32(q14, q4, d7[0]);
   }
-  vldr(d14, mem[r9, 112]); // B1
   vmla_f32(q9, q5, d4[0]);
   if (max_mr > 1) {
     vmla_f32(q11, q5, d5[0]);
   }
-
-  // BLOCK 2
   if (max_mr > 2) {
     vmla_f32(q13, q5, d6[0]);
   }
@@ -394,9 +322,6 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     vmla_f32(q15, q5, d7[0]);
   }
   vmla_f32(q8, q6, d4[1]);
-  add(r9, r9, 128); // B++
-
-  // BLOCK 3
   if (max_mr > 1) {
     vmla_f32(q10, q6, d5[1]);
   }
@@ -406,18 +331,14 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 3) {
     vmla_f32(q14, q6, d7[1]);
   }
-  tst(r5, 15);
-
-  // BLOCK 4
   vmla_f32(q9, q7, d4[1]);
   if (max_mr > 1) {
     vmla_f32(q11, q7, d5[1]);
   }
+  tst(r5, 15);
   if (max_mr > 2) {
     vmla_f32(q13, q7, d6[1]);
   }
-
-  // BLOCK 5
   if (max_mr > 3) {
     vmla_f32(q15, q7, d7[1]);
   }
@@ -428,13 +349,14 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   align(8);
   bind(l3);
   // Load params pointer
-  ldr(r0, mem[sp, 112]); // cn_stride
   ldr(r5, mem[sp, 116]); // params
-  subs(r1, r1, 8);
 
   // Load min/max values
   if (clamp_min || clamp_max) {
     vld1r_32({d4,d5}, mem[r5]++);
+  }
+  subs(r1, r1, 8);
+  if (clamp_min || clamp_max) {
     vld1r_32({d6,d7}, mem[r5]);
   }
 
@@ -475,28 +397,28 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
 
   // Store full 4 x 8
   blo(l6);
-  vst1_32({d16-d19}, mem[r11], r0);
+  vst1_32({d16-d19}, mem[r11], r7);
   if (max_mr > 3) {
-    sub(r7, r7, r2);
+    sub(r0, r0, r2);
   }
   if (max_mr > 1) {
-    vst1_32({d20-d23}, mem[r4], r0);
+    vst1_32({d20-d23}, mem[r4], r7);
   }
   if (max_mr > 2) {
     sub(r10, r10, r2);
-    vst1_32({d24-d27}, mem[r8], r0);
+    vst1_32({d24-d27}, mem[r8], r7);
   }
   if (max_mr > 1) {
     sub(r12, r12, r2);
   }
   if (max_mr > 3) {
-    vst1_32({d28-d31}, mem[r6], r0);
+    vst1_32({d28-d31}, mem[r6], r7);
   }
   sub(r3, r3, r2);
   bhi(l0);
 
-  pop({r4, r5, r6, r7, r8, r9, r10, r11});
   vpop({d8-d15});
+  pop({r4, r5, r6, r7, r8, r9, r10, r11});
   bx(lr);
 
   align(8);
@@ -515,7 +437,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     vld1_32({d2}, mem[r10]++); // A2
   }
   if (max_mr > 3) {
-    vld1_32({d3}, mem[r7]++); // A3
+    vld1_32({d3}, mem[r0]++); // A3
   }
 
   vmla_f32(q8, q4, d0[0]);
@@ -563,7 +485,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     vldm(mem[r10]++, {s4}); // A2
   }
   if (max_mr > 3) {
-    vldm(mem[r7]++, {s6}); // A3
+    vldm(mem[r0]++, {s6}); // A3
   }
   vmla_f32(q8, q4, d0[0]);
   vmla_f32(q9, q5, d0[0]);
@@ -645,8 +567,8 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   }
 
   bind(l9);
-  pop({r4, r5, r6, r7, r8, r9, r10, r11});
   vpop({d8-d15});
+  pop({r4, r5, r6, r7, r8, r9, r10, r11});
   bx(lr);
 
   align(16);
@@ -686,7 +608,7 @@ void Generator::perform_post_operations(
 }  // namespace aarch32
 }  // namespace xnnpack
 
-xnn_status_t xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params) {
+xnn_status_t xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75(xnn_code_buffer* code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params) {
   using namespace xnnpack::aarch32;
   Generator g(code);
   assert(params != nullptr);

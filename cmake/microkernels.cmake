@@ -5351,6 +5351,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qs8-vcvt/gen/qs8-vcvt-scalar-x1.c
   src/qs8-vcvt/gen/qs8-vcvt-scalar-x2.c
   src/qs8-vcvt/gen/qs8-vcvt-scalar-x4.c
+  src/qs8-vhswish/gen/qs8-vhswish-scalar-x1.c
+  src/qs8-vhswish/gen/qs8-vhswish-scalar-x2.c
+  src/qs8-vhswish/gen/qs8-vhswish-scalar-x4.c
   src/qs8-vlrelu/gen/qs8-vlrelu-scalar-andxor-x1.c
   src/qs8-vlrelu/gen/qs8-vlrelu-scalar-andxor-x2.c
   src/qs8-vlrelu/gen/qs8-vlrelu-scalar-andxor-x4.c
@@ -5517,6 +5520,9 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qu8-vcvt/gen/qu8-vcvt-scalar-x1.c
   src/qu8-vcvt/gen/qu8-vcvt-scalar-x2.c
   src/qu8-vcvt/gen/qu8-vcvt-scalar-x4.c
+  src/qu8-vhswish/gen/qu8-vhswish-scalar-x1.c
+  src/qu8-vhswish/gen/qu8-vhswish-scalar-x2.c
+  src/qu8-vhswish/gen/qu8-vhswish-scalar-x4.c
   src/qu8-vlrelu/gen/qu8-vlrelu-scalar-andxor-x1.c
   src/qu8-vlrelu/gen/qu8-vlrelu-scalar-andxor-x2.c
   src/qu8-vlrelu/gen/qu8-vlrelu-scalar-andxor-x4.c
@@ -8748,14 +8754,14 @@ SET(AARCH32_ASM_MICROKERNEL_SRCS
   src/cs16-bfly4/cs16-bfly4-samples1-asm-aarch32-neon-x4.S
   src/cs16-fftr/cs16-fftr-asm-aarch32-neon-x1.S
   src/cs16-fftr/cs16-fftr-asm-aarch32-neon-x4.S
-  src/f32-gemm/f32-gemm-4x4-asm-aarch32-vfp-ld64.S
-  src/f32-gemm/f32-gemm-4x4-minmax-asm-aarch32-vfp-ld64.S
-  src/f32-gemm/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a55.S
   src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch32-neon-cortex-a53-prfm.S
   src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch32-neon-cortex-a53.S
+  src/f32-gemm/gen/f32-gemm-4x4-asm-aarch32-vfp-ld64.S
+  src/f32-gemm/gen/f32-gemm-4x4-minmax-asm-aarch32-vfp-ld64.S
   src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S
   src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a53-prfm.S
   src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a53.S
+  src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a55.S
   src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a75-prfm.S
   src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a75.S
   src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-ld64.S
@@ -8994,7 +9000,9 @@ SET(AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-asm-aarch64-neonfma-ld128.S
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2-minmax-asm-aarch64-neonfma-ld64.S
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-asm-aarch64-neonfma-ld64.S
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-asm-aarch64-neonfma-ld128.S
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-asm-aarch64-neonfma-ld64.S
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-asm-aarch64-neonfma-ld128.S
   src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-cortex-a53-prfm.S
   src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-cortex-a53.S
   src/qs8-gemm/gen/qs8-gemm-1x8c8-minmax-fp32-asm-aarch64-neon-mlal-prfm.S
