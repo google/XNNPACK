@@ -374,6 +374,7 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
           Local{param[index], index, /*is_managed=*/false, this};
     }
     internal::ArrayApply(std::move(input_locals), std::forward<Body>(body));
+    end();
     RegisterFunction(result, name, std::vector(param.begin(), param.end()),
                      locals_declaration_count, std::move(code));
   }

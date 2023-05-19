@@ -41,7 +41,6 @@ struct Get5Generator : WasmAssembler {
     ValTypesToInt no_locals;
     AddFunc<0>({i32}, "get5", {}, no_locals, [this]() {
       i32_const(5);
-      end();
     });
   }
 };
@@ -65,7 +64,6 @@ struct AddGenerator : WasmAssembler {
       local_get(a);
       local_get(b);
       i32_add();
-      end();
     });
   }
 };
@@ -85,7 +83,6 @@ struct AddWithLocalGenerator : WasmAssembler {
                  auto sum = MakeLocal(i32);
                  sum = I32Add(a, b);
                  local_get(sum);
-                 end();
                });
   }
 };
@@ -105,7 +102,6 @@ struct AddTwiceGenerator : WasmAssembler {
                  second = I32Add(second, a);
                  second = I32Add(second, b);
                  local_get(second);
-                 end();
                });
   }
 };
@@ -131,7 +127,6 @@ struct AddTwiceWithScopesGenerator : WasmAssembler {
                    first = I32Add(first, sum);
                  }
                  local_get(first);
-                 end();
                });
   }
 };
@@ -145,7 +140,6 @@ struct Add5CodeGenerator : WasmAssembler {
     AddFunc<1>({i32}, "add5", {i32}, no_locals, [this](Local a) {
       a = I32Add(I32Const(5), a);
       local_get(a);
-      end();
     });
   }
 };
@@ -165,7 +159,6 @@ struct MaxCodeGenerator : WasmAssembler {
                  IfElse([&] { I32LtS(a, b); }, [&] { result = b; },
                         [&] { result = a; });
                  local_get(result);
-                 end();
                });
   }
 };
@@ -188,7 +181,6 @@ struct MaxIncompleteIfCodeGenerator : WasmAssembler {
                [this](Local a, Local b) {
                  If([&] { I32LtS(a, b); }, [&] { a = b; });
                  local_get(a);
-                 end();
                });
   }
 };
@@ -208,7 +200,6 @@ struct SumUntilCodeGenerator : WasmAssembler {
               i = I32Add(i, I32Const(1));
             });
       local_get(result);
-      end();
     });
   }
 };
@@ -245,7 +236,6 @@ struct DoWhileCodeGenerator : WasmAssembler {
           },
           [&] { I32LtS(i, n); });
       local_get(result);
-      end();
     });
   }
 };
@@ -280,7 +270,6 @@ struct SumArrayMemory : WasmAssembler {
                          i = I32Add(i, I32Const(1));
                        });
                  local_get(result);
-                 end();
                });
   }
 };
@@ -311,7 +300,6 @@ struct MemCpyGenerator : WasmAssembler {
                          I32Store(dst, i, value);
                          i = I32Add(i, I32Const(1));
                        });
-                 end();
                });
   }
 };
@@ -329,7 +317,6 @@ struct InvalidCodeGenerator : WasmAssembler {
   explicit InvalidCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     AddFunc<0>({}, "invalid", {}, no_locals, [this]() {
       i32_const(5);
-      end();
     });
   }
 };
