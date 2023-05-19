@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <functional>
 #include <utility>
@@ -82,6 +83,7 @@ class I32WasmOps : public WasmOpsBase<Derived, I32WasmOps<Derived>> {
  public:
   void i32_add() const { this->Emit8(0x6a); }
   void i32_lt_s() const { this->Emit8(0x48); }
+  void i32_shl() const { this->Emit8(0x74); }
   void i32_const(int32_t value) const {
     this->Emit8(0x41);
     this->EmitEncodedS32(value);
@@ -168,7 +170,28 @@ class LocalsManager {
 };
 
 template <typename Derived>
-class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
+class MemoryOps : public WasmOpsBase<Derived, MemoryOps<Derived>> {
+ public:
+  void i32_load(uint32_t offset = 0, uint32_t alignment = 4) const {
+    load_or_store(0x28, offset, alignment);
+  }
+
+  void i32_store(uint32_t offset = 0, uint32_t alignment = 4) const {
+    load_or_store(0x36, offset, alignment);
+  }
+
+ private:
+  void load_or_store(byte opcode, uint32_t offset, uint32_t alignment) const {
+    this->Emit8(opcode);
+    this->EmitEncodedU32(log2(alignment));
+    this->EmitEncodedU32(offset);
+  }
+};
+
+template <typename Derived>
+class LocalWasmOps : public I32WasmOps<Derived>,
+                     public LocalsManager,
+                     public MemoryOps<Derived> {
  public:
   class Local;
 
@@ -238,13 +261,13 @@ class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
   }
 
   void local_get(uint32_t index) const {
-    this->Emit8(0x20);
-    this->EmitEncodedU32(index);
+    This()->Emit8(0x20);
+    This()->EmitEncodedU32(index);
   }
 
   void local_set(uint32_t index) const {
-    this->Emit8(0x21);
-    this->EmitEncodedU32(index);
+    This()->Emit8(0x21);
+    This()->EmitEncodedU32(index);
   }
 
   void local_get(const Local& local) const { local_get(local.index_); }
@@ -259,9 +282,38 @@ class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
     return BinaryOp(a, b, &I32WasmOps<Derived>::i32_lt_s);
   }
 
+  ValueOnStack I32Shl(const ValueOnStack& value, const ValueOnStack& bits_num) {
+    return BinaryOp(value, bits_num, &I32WasmOps<Derived>::i32_shl);
+  }
+
   ValueOnStack I32Const(uint32_t value) {
     this->i32_const(value);
     return {i32, this};
+  }
+
+  ValueOnStack I32Load(const ValueOnStack& address, uint32_t offset = 0,
+                       uint32_t alignment = 4) {
+    this->i32_load(offset, alignment);
+    return {i32, this};
+  }
+
+  ValueOnStack I32Load(const ValueOnStack& base,
+                       const ValueOnStack& dynamic_offset,
+                       uint32_t static_offset = 0, uint32_t alignment = 4) {
+    return I32Load(I32Add(base, I32Shl(dynamic_offset, I32Const(2))),
+                   static_offset, alignment);
+  }
+
+  void I32Store(const ValueOnStack& address, const ValueOnStack& value,
+                uint32_t offset = 0, uint32_t alignment = 4) {
+    this->i32_store(offset, alignment);
+  }
+
+  void I32Store(const ValueOnStack& base, const ValueOnStack& dynamic_offset,
+                const Local& value, uint32_t static_offset = 0,
+                uint32_t alignment = 4) {
+    I32Store(I32Add(base, I32Shl(dynamic_offset, I32Const(2))), value,
+             static_offset, alignment);
   }
 
  protected:
@@ -274,6 +326,10 @@ class LocalWasmOps : public I32WasmOps<Derived>, public LocalsManager {
            "Binary operation on locals of different types");
     std::mem_fn(op)(*this);
     return {a.type, this};
+  }
+
+  const auto* This() const {
+    return static_cast<const I32WasmOps<Derived>*>(this);
   }
 };
 
@@ -325,6 +381,7 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
   void Emit() {
     EmitMagicVersionAndDlynkSection();
     EmitTypeSection();
+    EmitImportSection();
     EmitFunctionSection();
     EmitExportsSection();
     EmitCodeSection();
@@ -336,6 +393,9 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
   static constexpr std::array<byte, 17> kDLynk = {
       0x00, 0x0f, 0x08, 0x64, 0x79, 0x6c, 0x69, 0x6e, 0x6b,
       0x2e, 0x30, 0x01, 0x04, 0x00, 0x00, 0x00, 0x00};
+  static constexpr std::array<byte, 17> kImportSection = {
+      0x02, 0x0f, 0x01, 0x03, 0x65, 0x6e, 0x76, 0x06, 0x6d,
+      0x65, 0x6d, 0x6f, 0x72, 0x79, 0x02, 0x00, 0x00};
 
   constexpr static byte kTypeSectionCode = 0x01;
   constexpr static byte kFunctionSectionCode = 0x03;
@@ -374,6 +434,8 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
   void EmitMagicVersionAndDlynkSection();
 
   void EmitTypeSection();
+
+  void EmitImportSection();
 
   void EmitFunctionSection();
   void AppendFuncs(std::vector<byte>& out);

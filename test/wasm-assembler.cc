@@ -9,7 +9,9 @@
 #include <xnnpack/memory.h>
 #include <xnnpack/wasm-assembler.h>
 
+#include <array>
 #include <cstdint>
+#include <numeric>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -265,6 +267,63 @@ struct DoWhileTestSuite : GeneratorTestSuite<DoWhileCodeGenerator, DoWhile> {
   }
 };
 
+struct SumArrayMemory : WasmAssembler {
+  explicit SumArrayMemory(xnn_code_buffer* buf) : WasmAssembler(buf) {
+    ValTypesToInt two_local_ints = {{i32, 2}};
+    AddFunc<2>({i32}, "SumArray", {i32, i32}, two_local_ints,
+               [&](Local array, Local n) {
+                 auto i = MakeLocal(i32);
+                 auto result = MakeLocal(i32);
+                 While([&] { I32LtS(i, n); },
+                       [&] {
+                         result = I32Add(result, I32Load(array, i));
+                         i = I32Add(i, I32Const(1));
+                       });
+                 local_get(result);
+                 end();
+               });
+  }
+};
+
+using SumArray = int (*)(const int*, int);
+using MemCpy = void (*)(int*, const int*, int);
+constexpr size_t kArraySize = 5;
+constexpr std::array<int, kArraySize> kArray = {1, 2, 3, 45, 6};
+const int kExpectedArraySum = std::accumulate(kArray.begin(), kArray.end(), 0);
+
+struct SumArrayTestSuite : GeneratorTestSuite<SumArrayMemory, SumArray> {
+  static void ExpectFuncCorrect(SumArray sum_array) {
+    EXPECT_EQ(sum_array(kArray.data(), kArraySize), kExpectedArraySum);
+  }
+};
+
+struct MemCpyGenerator : WasmAssembler {
+  explicit MemCpyGenerator(xnn_code_buffer* bf) : WasmAssembler(bf) {
+    ValTypesToInt two_local_ints = {{i32, 2}};
+    AddFunc<3>({}, "mymemcpy", {i32, i32, i32}, two_local_ints,
+               [&](Local dst, Local src, Local n) {
+                 auto i = MakeLocal(i32);
+                 auto value = MakeLocal(i32);
+
+                 While([&] { I32LtS(i, n); },
+                       [&] {
+                         value = I32Load(src, i);
+                         I32Store(dst, i, value);
+                         i = I32Add(i, I32Const(1));
+                       });
+                 end();
+               });
+  }
+};
+
+struct MemCpyTestSuite : GeneratorTestSuite<MemCpyGenerator, MemCpy> {
+  static void ExpectFuncCorrect(MemCpy mem_cpy) {
+    std::array<int, kArraySize> dst;
+    mem_cpy(dst.data(), kArray.data(), kArraySize);
+    EXPECT_THAT(dst, testing::ElementsAreArray(kArray));
+  }
+};
+
 struct InvalidCodeGenerator : WasmAssembler {
   ValTypesToInt no_locals;
   explicit InvalidCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
@@ -308,7 +367,8 @@ using WasmAssemblerTestSuits =
     testing::Types<Get5TestSuite, AddTestSuite, AddWithLocalTestSuite,
                    AddTwiceTestSuite, AddTwiceWithScopesTestSuite,
                    Add5TestSuite, MaxTestSuite, MaxIncompleteIfTestSuite,
-                   SumUntilTestSuite, DoWhileTestSuite>;
+                   SumUntilTestSuite, DoWhileTestSuite, SumArrayTestSuite,
+                   MemCpyTestSuite>;
 INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest,
                                WasmAssemblerTestSuits);
 

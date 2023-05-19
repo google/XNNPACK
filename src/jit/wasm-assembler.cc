@@ -47,6 +47,8 @@ void WasmAssembler::EmitTypeSection() {
   EmitSection(kTypeSectionCode, AppendArray(functions_, AppendFuncType));
 }
 
+void WasmAssembler::EmitImportSection() { EmitByteArray(kImportSection); }
+
 // Functions emitting Function section
 void WasmAssembler::AppendFuncs(std::vector<byte>& out) {
   AppendEncodedU32(functions_.size(), out);
