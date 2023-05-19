@@ -1984,7 +1984,13 @@ union xnn_f32_hswish_params {
 };
 
 union xnn_qs8_hswish_params {
-  char _; // Dummy member variable to comply with the C standard
+  struct {
+    int32_t input_zero_point;
+    int32_t output_zero_point;
+    int32_t input_scale_div_mantissa;
+    int32_t input_scale_div_exp;
+    int32_t scale_ratio;
+} scalar;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     int16_t input_zero_point;
@@ -1992,13 +1998,18 @@ union xnn_qs8_hswish_params {
     int16_t input_scale_div_mantissa;
     int16_t input_scale_div_exp;
     int16_t scale_ratio;
-    int16_t negative_half;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 };
 
 union xnn_qu8_hswish_params {
-  char _; // Dummy member variable to comply with the C standard
+struct {
+    int32_t input_zero_point;
+    int32_t output_zero_point;
+    int32_t input_scale_div_mantissa;
+    int32_t input_scale_div_exp;
+    int32_t scale_ratio;
+  } scalar;
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     int16_t input_zero_point;
@@ -2006,7 +2017,6 @@ union xnn_qu8_hswish_params {
     int16_t input_scale_div_mantissa;
     int16_t input_scale_div_exp;
     int16_t scale_ratio;
-    int16_t negative_half;
   } neon;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 };
