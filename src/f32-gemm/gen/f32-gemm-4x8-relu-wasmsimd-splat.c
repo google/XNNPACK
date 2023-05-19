@@ -142,7 +142,6 @@ void xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat(
       vacc1x4567 = wasm_f32x4_add(wasm_f32x4_mul(va1c3, vb4567c3), vacc1x4567);
       vacc2x4567 = wasm_f32x4_add(wasm_f32x4_mul(va2c3, vb4567c3), vacc2x4567);
       vacc3x4567 = wasm_f32x4_add(wasm_f32x4_mul(va3c3, vb4567c3), vacc3x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }

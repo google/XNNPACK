@@ -76,7 +76,6 @@ void xnn_f32_gemm_relu_ukernel_1x8__wasmrelaxedsimd_fma_splat(
 
       vacc0x0123 = __builtin_wasm_relaxed_madd_f32x4(va0c3, vb0123c3, vacc0x0123);
       vacc0x4567 = __builtin_wasm_relaxed_madd_f32x4(va0c3, vb4567c3, vacc0x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
