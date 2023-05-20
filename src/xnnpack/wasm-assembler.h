@@ -72,7 +72,7 @@ class WasmOpsBase {
     GetDerived()->EmitEncodedU32(value);
   }
 
- private:
+ protected:
   const Derived* GetDerived() const {
     return static_cast<const Derived*>(this);
   }
@@ -140,6 +140,25 @@ class ControlFlowWasmOps
   static constexpr byte kBrIfCode = 0x0d;
 };
 
+template <typename Derived>
+class MemoryWasmOps : public WasmOpsBase<Derived, MemoryWasmOps<Derived>> {
+ public:
+  void i32_load(uint32_t offset = 0, uint32_t alignment = 4) const {
+    load_or_store(0x28, offset, alignment);
+  }
+
+  void i32_store(uint32_t offset = 0, uint32_t alignment = 4) const {
+    load_or_store(0x36, offset, alignment);
+  }
+
+ private:
+  void load_or_store(byte opcode, uint32_t offset, uint32_t alignment) const {
+    this->Emit8(opcode);
+    this->EmitEncodedU32(log2(alignment));
+    this->EmitEncodedU32(offset);
+  }
+};
+
 class LocalsManager {
  public:
   void ResetLocalsManager(uint32_t parameters_count,
@@ -170,47 +189,24 @@ class LocalsManager {
 };
 
 template <typename Derived>
-class MemoryOps : public WasmOpsBase<Derived, MemoryOps<Derived>> {
- public:
-  void i32_load(uint32_t offset = 0, uint32_t alignment = 4) const {
-    load_or_store(0x28, offset, alignment);
-  }
-
-  void i32_store(uint32_t offset = 0, uint32_t alignment = 4) const {
-    load_or_store(0x36, offset, alignment);
-  }
-
- private:
-  void load_or_store(byte opcode, uint32_t offset, uint32_t alignment) const {
-    this->Emit8(opcode);
-    this->EmitEncodedU32(log2(alignment));
-    this->EmitEncodedU32(offset);
-  }
-};
-
-template <typename Derived>
-class LocalWasmOps : public I32WasmOps<Derived>,
-                     public LocalsManager,
-                     public MemoryOps<Derived> {
+class LocalWasmOps : public LocalsManager {
  public:
   class Local;
 
   struct ValueOnStack {
-    ValueOnStack(const ValType type, LocalWasmOps<Derived>* ops)
-        : type(type), ops(ops) {}
+    ValueOnStack(const ValType type, Derived* ops) : type(type), ops(ops) {}
     ValueOnStack(const Local& local) : type(local.type_), ops(local.ops_) {
       ops->local_get(local);
     }
     ValType type;
-    LocalWasmOps<Derived>* ops;
+    Derived* ops;
   };
 
   class Local {
    public:
     Local() = default;
 
-    Local(const ValType& type, uint32_t index, bool is_managed,
-          LocalWasmOps<Derived>* ops)
+    Local(const ValType& type, uint32_t index, bool is_managed, Derived* ops)
         : type_(type), index_(index), ops_(ops), is_managed_(is_managed) {}
 
     Local(const Local& other) = delete;
@@ -250,24 +246,25 @@ class LocalWasmOps : public I32WasmOps<Derived>,
 
     ValType type_{0};
     uint32_t index_{};
-    LocalWasmOps<Derived>* ops_ = nullptr;
+    Derived* ops_ = nullptr;
 
    private:
     bool is_managed_ = false;
   };
 
   Local MakeLocal(ValType type) {
-    return Local{type, GetNewLocalIndex(type), /*is_managed=*/true, this};
+    return Local{type, GetNewLocalIndex(type), /*is_managed=*/true,
+                 GetMutableDerived()};
   }
 
   void local_get(uint32_t index) const {
-    This()->Emit8(0x20);
-    This()->EmitEncodedU32(index);
+    GetDerived()->Emit8(0x20);
+    GetDerived()->EmitEncodedU32(index);
   }
 
   void local_set(uint32_t index) const {
-    This()->Emit8(0x21);
-    This()->EmitEncodedU32(index);
+    GetDerived()->Emit8(0x21);
+    GetDerived()->EmitEncodedU32(index);
   }
 
   void local_get(const Local& local) const { local_get(local.index_); }
@@ -275,26 +272,26 @@ class LocalWasmOps : public I32WasmOps<Derived>,
   void local_set(const Local& local) const { local_set(local.index_); }
 
   ValueOnStack I32Add(const ValueOnStack& a, const ValueOnStack& b) {
-    return BinaryOp(a, b, &I32WasmOps<Derived>::i32_add);
+    return BinaryOp(a, b, &Derived::i32_add);
   }
 
   ValueOnStack I32LtS(const ValueOnStack& a, const ValueOnStack& b) {
-    return BinaryOp(a, b, &I32WasmOps<Derived>::i32_lt_s);
+    return BinaryOp(a, b, &Derived::i32_lt_s);
   }
 
   ValueOnStack I32Shl(const ValueOnStack& value, const ValueOnStack& bits_num) {
-    return BinaryOp(value, bits_num, &I32WasmOps<Derived>::i32_shl);
+    return BinaryOp(value, bits_num, &Derived::i32_shl);
   }
 
   ValueOnStack I32Const(uint32_t value) {
-    this->i32_const(value);
-    return {i32, this};
+    GetDerived()->i32_const(value);
+    return MakeValueOnStack(i32);
   }
 
   ValueOnStack I32Load(const ValueOnStack& address, uint32_t offset = 0,
                        uint32_t alignment = 4) {
-    this->i32_load(offset, alignment);
-    return {i32, this};
+    GetDerived()->i32_load(offset, alignment);
+    return MakeValueOnStack(i32);
   }
 
   ValueOnStack I32Load(const ValueOnStack& base,
@@ -306,7 +303,7 @@ class LocalWasmOps : public I32WasmOps<Derived>,
 
   void I32Store(const ValueOnStack& address, const ValueOnStack& value,
                 uint32_t offset = 0, uint32_t alignment = 4) {
-    this->i32_store(offset, alignment);
+    GetDerived()->i32_store(offset, alignment);
   }
 
   void I32Store(const ValueOnStack& base, const ValueOnStack& dynamic_offset,
@@ -324,16 +321,24 @@ class LocalWasmOps : public I32WasmOps<Derived>,
   ValueOnStack BinaryOp(const ValueOnStack& a, const ValueOnStack& b, Op&& op) {
     assert((a.type == b.type) &&
            "Binary operation on locals of different types");
-    std::mem_fn(op)(*this);
-    return {a.type, this};
+    std::mem_fn(op)(*GetDerived());
+    return MakeValueOnStack(i32);
   }
 
-  const auto* This() const {
-    return static_cast<const I32WasmOps<Derived>*>(this);
+  const Derived* GetDerived() const {
+    return static_cast<const Derived*>(this);
+  }
+
+  Derived* GetMutableDerived() { return static_cast<Derived*>(this); }
+
+  ValueOnStack MakeValueOnStack(const ValType& type) {
+    return {type, GetMutableDerived()};
   }
 };
 
 class WasmOps : public LocalWasmOps<WasmOps>,
+                public I32WasmOps<WasmOps>,
+                public MemoryWasmOps<WasmOps>,
                 public ControlFlowWasmOps<WasmOps> {
  public:
   WasmOps() = default;
