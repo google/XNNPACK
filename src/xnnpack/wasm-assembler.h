@@ -22,6 +22,7 @@ namespace xnnpack {
 
 struct ValType {
   ValType() = delete;
+  ValType(const ValType&) = default;
   ValType& operator=(const ValType&) = default;
   constexpr explicit ValType(byte code) : code(code) {}
   byte code;
