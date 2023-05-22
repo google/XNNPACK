@@ -224,8 +224,11 @@ class LocalWasmOps : public LocalsManager {
     }
 
     Local& operator=(Local&& other) {
+      assert((index_ == kInvalidIndex) &&
+             "The local already binds to something");
       type_ = other.type_;
       index_ = other.index_;
+      other.index_ = kInvalidIndex;
       is_managed_ = other.is_managed_;
       ops_ = other.ops_;
       return *this;
@@ -242,15 +245,16 @@ class LocalWasmOps : public LocalsManager {
     }
 
     ~Local() {
-      if (is_managed_) ops_->DestructLocal(type_);
+      if (is_managed_ && index_ != kInvalidIndex) ops_->DestructLocal(type_);
     }
 
     ValType type_{0};
-    uint32_t index_{};
+    uint32_t index_{kInvalidIndex};
     Derived* ops_ = nullptr;
 
    private:
     bool is_managed_ = false;
+    static constexpr uint32_t kInvalidIndex = -1;
   };
 
   Local MakeLocal(ValType type) {

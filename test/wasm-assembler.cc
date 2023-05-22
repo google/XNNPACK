@@ -39,9 +39,7 @@ constexpr int32_t kExpectedSumTwice = 2 * kExpectedSum;
 struct Get5Generator : WasmAssembler {
   explicit Get5Generator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt no_locals;
-    AddFunc<0>({i32}, "get5", {}, no_locals, [this]() {
-      i32_const(5);
-    });
+    AddFunc<0>({i32}, "get5", {}, no_locals, [this]() { i32_const(5); });
   }
 };
 
@@ -312,12 +310,34 @@ struct MemCpyTestSuite : GeneratorTestSuite<MemCpyGenerator, MemCpy> {
   }
 };
 
+struct AddDelayedInitLocalsGenerator : WasmAssembler {
+  explicit AddDelayedInitLocalsGenerator(xnn_code_buffer* b)
+      : WasmAssembler(b) {
+    ValTypesToInt three_ints = {{i32, 3}};
+    AddFunc<2>({i32}, "add_delayed_init", {i32, i32}, three_ints,
+               [this](Local a, Local b) {
+                 Local c;
+                 c = MakeLocal(i32);
+                 Local d;
+                 d = MakeLocal(i32);
+                 Local sum;
+                 c = I32Add(c, a);
+                 d = I32Add(c, b);
+                 sum = MakeLocal(i32);
+                 sum = I32Add(a, sum);
+                 sum = I32Add(b, sum);
+                 local_get(sum);
+               });
+  }
+};
+
+struct AddDelayedInitTestSuite
+    : AddTestSuiteTmpl<AddDelayedInitLocalsGenerator, kExpectedSum> {};
+
 struct InvalidCodeGenerator : WasmAssembler {
   ValTypesToInt no_locals;
   explicit InvalidCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
-    AddFunc<0>({}, "invalid", {}, no_locals, [this]() {
-      i32_const(5);
-    });
+    AddFunc<0>({}, "invalid", {}, no_locals, [this]() { i32_const(5); });
   }
 };
 
@@ -355,7 +375,7 @@ using WasmAssemblerTestSuits =
                    AddTwiceTestSuite, AddTwiceWithScopesTestSuite,
                    Add5TestSuite, MaxTestSuite, MaxIncompleteIfTestSuite,
                    SumUntilTestSuite, DoWhileTestSuite, SumArrayTestSuite,
-                   MemCpyTestSuite>;
+                   MemCpyTestSuite, AddDelayedInitTestSuite>;
 INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest,
                                WasmAssemblerTestSuits);
 
