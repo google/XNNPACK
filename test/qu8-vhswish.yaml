@@ -10,3 +10,11 @@
   init: xnn_init_qu8_hswish_neon_params
 - name: xnn_qu8_vhswish_ukernel__neon_x32
   init: xnn_init_qu8_hswish_neon_params
+
+# Scalar
+- name: xnn_qu8_vhswish_ukernel__scalar_x1
+  init: xnn_init_qu8_hswish_scalar_params
+- name: xnn_qu8_vhswish_ukernel__scalar_x2
+  init: xnn_init_qu8_hswish_scalar_params
+- name: xnn_qu8_vhswish_ukernel__scalar_x4
+  init: xnn_init_qu8_hswish_scalar_params
