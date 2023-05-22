@@ -8,6 +8,7 @@ import argparse
 import os
 import re
 import sys
+import io
 
 
 TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -70,6 +71,17 @@ def human_sort_key(text):
   return [int(token) if token.isdigit() else token.lower() for token in NUMBERS_REGEX.split(text)]
 
 
+def overwrite_if_changed(filepath, mem_file):
+  file_changed = True
+  if os.path.exists(filepath):
+    with open(filepath, 'r', encoding='utf-8') as f:
+      mem_file.seek(0)
+      file_changed = f.read() != mem_file.read()
+  if file_changed:
+    with open(filepath, 'w', encoding='utf-8') as f:
+      mem_file.seek(0)
+      f.write(mem_file.read())
+
 def main(args):
   options = parser.parse_args(args)
   root_dir = os.path.normpath(os.path.join(TOOLS_DIR, '..'))
@@ -120,7 +132,7 @@ def main(args):
         else:
           print('Unknown architecture for assembly microkernel %s' % filepath)
 
-  with open(os.path.join(root_dir, 'microkernels.bzl'), 'w', encoding='utf-8') as microkernels_bzl:
+  with io.StringIO() as microkernels_bzl:
     microkernels_bzl.write('''\
 """
 Microkernel filenames lists.
@@ -140,8 +152,9 @@ Auto-generated file. Do not edit!
       for microkernel in sorted(asm_microkernels_per_arch[arch], key=human_sort_key):
         microkernels_bzl.write(f'    "{microkernel}",\n')
       microkernels_bzl.write(']\n')
+    overwrite_if_changed(os.path.join(root_dir, 'microkernels.bzl'), microkernels_bzl)
 
-  with open(os.path.join(root_dir, "cmake", 'microkernels.cmake'), 'w', encoding='utf-8') as microkernels_cmake:
+  with io.StringIO() as microkernels_cmake:
     microkernels_cmake.write("""\
 # Copyright 2022 Google LLC
 #
@@ -165,7 +178,7 @@ Auto-generated file. Do not edit!
       for microkernel in sorted(asm_microkernels_per_arch[arch], key=human_sort_key):
         microkernels_cmake.write(f'\n  {microkernel}')
       microkernels_cmake.write(')\n')
-
+    overwrite_if_changed(os.path.join(root_dir, "cmake", 'microkernels.cmake'), microkernels_cmake)
 
 if __name__ == '__main__':
   main(sys.argv[1:])
