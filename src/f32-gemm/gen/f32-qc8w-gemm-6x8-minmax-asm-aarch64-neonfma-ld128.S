@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128(
+# void xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128(
 #     size_t mr,                x0
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -19,8 +19,7 @@
 #     float* c,                 x6
 #     size_t cm_stride,         x7
 #     size_t cn_stride,         [sp] -> (x0)
-#     const float*restrict acc,  [sp + 8] -> x15
-#     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 16] -> (x8)
+#     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -42,10 +41,10 @@
 # unused A   v8 v9 v10 v11
 # unused B   v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
+BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
 
-        # Load acc, params pointer
-        LDP     x15, x8, [sp, 8]
+        # Load params pointer
+        LDR     x8, [sp, 8]
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -82,22 +81,27 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
         LD2R    {v6.4s, v7.4s}, [x8]
 
 0:
-        # Load initial accumulators
-        LDP     q20, q21, [x15], 32
-        LDP     q22, q23, [x15], 32
-        LDP     q24, q25, [x15], 32
-        LDP     q26, q27, [x15], 32
-        LDP     q28, q29, [x15], 32
-        LDP     q30, q31, [x15], 32
+        # Load initial bias from w into accumulators
+        LDP     q20, q21, [x5], 32
+        MOV     v22.16b, v20.16b
         PRFM    PLDL1KEEP, [x5, 0]      // Prefetch B
+        MOV     v23.16b, v21.16b
         PRFM    PLDL1KEEP, [x5, 64]
+        MOV     v24.16b, v20.16b
         PRFM    PLDL1KEEP, [x5, 128]
+        MOV     v25.16b, v21.16b
         PRFM    PLDL1KEEP, [x5, 192]
+        MOV     v26.16b, v20.16b
         PRFM    PLDL1KEEP,  [x3]        // Prefetch A
+        MOV     v27.16b, v21.16b
         PRFM    PLDL1KEEP,  [x9]
+        MOV     v28.16b, v20.16b
         PRFM    PLDL1KEEP, [x10]
+        MOV     v29.16b, v21.16b
         PRFM    PLDL1KEEP, [x11]
+        MOV     v30.16b, v20.16b
         PRFM    PLDL1KEEP, [x12]
+        MOV     v31.16b, v21.16b
         PRFM    PLDL1KEEP,  [x4]
 
         # Is there at least 4 floats (16 bytes)?
@@ -108,17 +112,26 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
         # 48 FMA + 6 ld128 A + 4 LDP B
 1:
         LDR     q0,  [x3], 16
-        LDP     q16,  q17, [x5], 32
+        LDR     q18, [x5], 16
+        SXTL    v17.8h, v18.8b
+        SXTL2   v19.8h, v18.16b
         LDR     q1,  [x9], 16
+        SXTL    v16.4s, v17.4h
+        SXTL2   v17.4s, v17.8h
         LDR     q2, [x10], 16
+        SXTL    v18.4s, v19.4h
+        SXTL2   v19.4s, v19.8h
         LDR     q3, [x11], 16
+        SCVTF   v16.4s, v16.4s
+        SCVTF   v17.4s, v17.4s
         LDR     q4, [x12], 16
+        SCVTF   v18.4s, v18.4s
+        SCVTF   v19.4s, v19.4s
         LDR     q5,  [x4], 16
         FMLA    v20.4s, v16.4s,  v0.s[0]
         FMLA    v22.4s, v16.4s,  v1.s[0]
         FMLA    v24.4s, v16.4s,  v2.s[0]
         FMLA    v26.4s, v16.4s,  v3.s[0]
-        LDP     q18,  q19, [x5], 32
         FMLA    v28.4s, v16.4s,  v4.s[0]
         FMLA    v30.4s, v16.4s,  v5.s[0]
         FMLA    v21.4s, v17.4s,  v0.s[0]
@@ -129,7 +142,12 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
         FMLA    v31.4s, v17.4s,  v5.s[0]
 
         FMLA    v20.4s, v18.4s,  v0.s[1]
-        LDP     q16,  q17, [x5], 32
+        LDR     q17, [x5], 8
+        SXTL    v17.8h, v17.8b
+        SXTL    v16.4s, v17.4h
+        SXTL2   v17.4s, v17.8h
+        SCVTF   v16.4s, v16.4s
+        SCVTF   v17.4s, v17.4s
         FMLA    v22.4s, v18.4s,  v1.s[1]
         FMLA    v24.4s, v18.4s,  v2.s[1]
         FMLA    v26.4s, v18.4s,  v3.s[1]
@@ -143,7 +161,12 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
         FMLA    v31.4s, v19.4s,  v5.s[1]
 
         FMLA    v20.4s, v16.4s,  v0.s[2]
-        LDP     q18,  q19, [x5], 32
+        LDR     q19, [x5], 8
+        SXTL    v19.8h, v19.8b
+        SXTL    v18.4s, v19.4h
+        SXTL2   v19.4s, v19.8h
+        SCVTF   v18.4s, v18.4s
+        SCVTF   v19.4s, v19.4s
         FMLA    v22.4s, v16.4s,  v1.s[2]
         FMLA    v24.4s, v16.4s,  v2.s[2]
         FMLA    v26.4s, v16.4s,  v3.s[2]
@@ -176,6 +199,20 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
         B.NE    3f
 
 2:
+        # Scale
+        LDP     q16, q17, [x5], 32
+        FMUL    v20.4s, v20.4s, v16.4s
+        FMUL    v21.4s, v21.4s, v17.4s
+        FMUL    v22.4s, v22.4s, v16.4s
+        FMUL    v23.4s, v23.4s, v17.4s
+        FMUL    v24.4s, v24.4s, v16.4s
+        FMUL    v25.4s, v25.4s, v17.4s
+        FMUL    v26.4s, v26.4s, v16.4s
+        FMUL    v27.4s, v27.4s, v17.4s
+        FMUL    v28.4s, v28.4s, v16.4s
+        FMUL    v29.4s, v29.4s, v17.4s
+        FMUL    v30.4s, v30.4s, v16.4s
+        FMUL    v31.4s, v31.4s, v17.4s
         # Clamp
         FMAX    v20.4s, v20.4s, v6.4s
         # Load cn_stride
@@ -208,17 +245,17 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
         # Store full 6 x 8
         B.LO    5f
 
-        ST1     {v30.16b, v31.16b},  [x7], x0
-        SUB     x3,  x3, x2             // a0 -= kc
-        ST1     {v28.16b, v29.16b}, [x13], x0
-        SUB     x9,  x9, x2             // a1 -= kc
-        ST1     {v26.16b, v27.16b}, [x14], x0
-        SUB     x10, x10, x2            // a2 -= kc
-        ST1     {v24.16b, v25.16b}, [x17], x0
-        SUB     x11, x11, x2            // a3 -= kc
-        ST1     {v22.16b, v23.16b}, [x16], x0
-        SUB     x12, x12, x2            // a4 -= kc
         ST1     {v20.16b, v21.16b},  [x6], x0
+        SUB     x3,  x3, x2             // a0 -= kc
+        ST1     {v22.16b, v23.16b}, [x16], x0
+        SUB     x9,  x9, x2             // a1 -= kc
+        ST1     {v24.16b, v25.16b}, [x17], x0
+        SUB     x10, x10, x2            // a2 -= kc
+        ST1     {v26.16b, v27.16b}, [x14], x0
+        SUB     x11, x11, x2            // a3 -= kc
+        ST1     {v28.16b, v29.16b}, [x13], x0
+        SUB     x12, x12, x2            // a4 -= kc
+        ST1     {v30.16b, v31.16b},  [x7], x0
         SUB     x4,  x4, x2             // a5 -= kc
 
         B.HI    0b
@@ -230,17 +267,26 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
 
         # Remainder- 2 floats of A (8 bytes)
         LDR     d0,  [x3], 8
-        LDP     q16,  q17, [x5], 32
+        LDR     q18, [x5], 16
+        SXTL    v17.8h, v18.8b
+        SXTL2   v19.8h, v18.16b
         LDR     d1,  [x9], 8
+        SXTL    v16.4s, v17.4h
+        SXTL2   v17.4s, v17.8h
         LDR     d2, [x10], 8
+        SXTL    v18.4s, v19.4h
+        SXTL2   v19.4s, v19.8h
         LDR     d3, [x11], 8
+        SCVTF   v16.4s, v16.4s
+        SCVTF   v17.4s, v17.4s
         LDR     d4, [x12], 8
+        SCVTF   v18.4s, v18.4s
+        SCVTF   v19.4s, v19.4s
         LDR     d5,  [x4], 8
         FMLA    v20.4s, v16.4s,  v0.s[0]
         FMLA    v22.4s, v16.4s,  v1.s[0]
         FMLA    v24.4s, v16.4s,  v2.s[0]
         FMLA    v26.4s, v16.4s,  v3.s[0]
-        LDP     q18,  q19, [x5], 32
         FMLA    v28.4s, v16.4s,  v4.s[0]
         FMLA    v30.4s, v16.4s,  v5.s[0]
         FMLA    v21.4s, v17.4s,  v0.s[0]
@@ -269,11 +315,16 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
         # Remainder- 1 float of A (4 bytes)
 4:
         LDR     s0,  [x3], 4
-        LDP     q16,  q17, [x5], 32
+        LDR     d17, [x5], 8
+        SXTL    v17.8h, v17.8b
         LDR     s1,  [x9], 4
+        SXTL    v16.4s, v17.4h
         LDR     s2, [x10], 4
+        SXTL2   v17.4s, v17.8h
         LDR     s3, [x11], 4
+        SCVTF   v16.4s, v16.4s
         LDR     s4, [x12], 4
+        SCVTF   v17.4s, v17.4s
         LDR     s5,  [x4], 4
         FMLA    v20.4s, v16.4s,  v0.s[0]
         FMLA    v22.4s, v16.4s,  v1.s[0]
@@ -292,46 +343,46 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
         # Store odd width
 5:
         TBZ     x1, 2, 6f
-        STR     q30,  [x7], 16
-        MOV     v30.16b, v31.16b
-        STR     q28, [x13], 16
-        MOV     v28.16b, v29.16b
-        STR     q26, [x14], 16
-        MOV     v26.16b, v27.16b
-        STR     q24, [x17], 16
-        MOV     v24.16b, v25.16b
-        STR     q22, [x16], 16
-        MOV     v22.16b, v23.16b
         STR     q20,  [x6], 16
         MOV     v20.16b, v21.16b
+        STR     q22, [x16], 16
+        MOV     v22.16b, v23.16b
+        STR     q24, [x17], 16
+        MOV     v24.16b, v25.16b
+        STR     q26, [x14], 16
+        MOV     v26.16b, v27.16b
+        STR     q28, [x13], 16
+        MOV     v28.16b, v29.16b
+        STR     q30,  [x7], 16
+        MOV     v30.16b, v31.16b
 
 6:
         TBZ     x1, 1, 7f
-        STR     d30,  [x7], 8
-        STR     d28, [x13], 8
-        DUP     d30, v30.d[1]
-        DUP     d28, v28.d[1]
-        STR     d26, [x14], 8
-        STR     d24, [x17], 8
-        DUP     d26, v26.d[1]
-        DUP     d24, v24.d[1]
-        STR     d22, [x16], 8
         STR     d20,  [x6], 8
-        DUP     d22, v22.d[1]
+        STR     d22, [x16], 8
         DUP     d20, v20.d[1]
+        DUP     d22, v22.d[1]
+        STR     d24, [x17], 8
+        STR     d26, [x14], 8
+        DUP     d24, v24.d[1]
+        DUP     d26, v26.d[1]
+        STR     d28, [x13], 8
+        STR     d30,  [x7], 8
+        DUP     d28, v28.d[1]
+        DUP     d30, v30.d[1]
 
 7:
         TBZ     x1, 0, 8f
-        STR     s30,  [x7]
-        STR     s28, [x13]
-        STR     s26, [x14]
-        STR     s24, [x17]
-        STR     s22, [x16]
         STR     s20,  [x6]
+        STR     s22, [x16]
+        STR     s24, [x17]
+        STR     s26, [x14]
+        STR     s28, [x13]
+        STR     s30,  [x7]
 8:
         RET
 
-END_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
+END_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
