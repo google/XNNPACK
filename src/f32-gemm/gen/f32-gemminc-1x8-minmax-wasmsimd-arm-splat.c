@@ -80,7 +80,6 @@ void xnn_f32_gemminc_minmax_ukernel_1x8__wasmsimd_arm_splat(
 
       vacc0x0123 = wasm_f32x4_add(wasm_f32x4_mul(va0c3, vb0123c3), vacc0x0123);
       vacc0x4567 = wasm_f32x4_add(wasm_f32x4_mul(va0c3, vb4567c3), vacc0x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
