@@ -417,7 +417,6 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
   void RegisterFunction(const std::vector<ValType>& result, const char* name,
                         const std::vector<ValType>& param,
                         ValTypesToInt locals_declaration_count,
-
                         std::vector<byte> code) {
     exports_.push_back(Export{name, functions_.size()});
     functions_.push_back(Function{FuncType{param, result},

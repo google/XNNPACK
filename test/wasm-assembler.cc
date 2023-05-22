@@ -334,6 +334,36 @@ struct AddDelayedInitLocalsGenerator : WasmAssembler {
 struct AddDelayedInitTestSuite
     : AddTestSuiteTmpl<AddDelayedInitLocalsGenerator, kExpectedSum> {};
 
+constexpr uint32_t kLargeNumberOfFunctions = 300;
+
+struct ManyFunctionsGenerator : WasmAssembler {
+  explicit ManyFunctionsGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
+    for (uint32_t func_index = 0; func_index < kLargeNumberOfFunctions;
+         func_index++) {
+      AddGet5(func_index);
+    }
+  }
+
+ private:
+  void AddGet5(uint32_t index) {
+    function_names[index] = "get5_" + std::to_string(index);
+    ValTypesToInt no_locals;
+    AddFunc<0>({i32}, function_names[index].c_str(), {}, no_locals,
+               [this]() { i32_const(5); });
+  }
+  static std::array<std::string, kLargeNumberOfFunctions> function_names;
+};
+
+std::array<std::string, kLargeNumberOfFunctions>
+    ManyFunctionsGenerator::function_names = {};
+
+struct ManyFunctionsGeneratorTestSuite
+    : GeneratorTestSuite<ManyFunctionsGenerator, GetIntPtr> {
+  static void ExpectFuncCorrect(GetIntPtr get_int) {
+    EXPECT_EQ(get_int(), kExpectedGet5ReturnValue);
+  }
+};
+
 struct InvalidCodeGenerator : WasmAssembler {
   ValTypesToInt no_locals;
   explicit InvalidCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
@@ -375,7 +405,8 @@ using WasmAssemblerTestSuits =
                    AddTwiceTestSuite, AddTwiceWithScopesTestSuite,
                    Add5TestSuite, MaxTestSuite, MaxIncompleteIfTestSuite,
                    SumUntilTestSuite, DoWhileTestSuite, SumArrayTestSuite,
-                   MemCpyTestSuite, AddDelayedInitTestSuite>;
+                   MemCpyTestSuite, AddDelayedInitTestSuite,
+                   ManyFunctionsGeneratorTestSuite>;
 INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest,
                                WasmAssemblerTestSuits);
 
