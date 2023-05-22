@@ -57,7 +57,156 @@ tools/xngen src/f32-gemm/4x8-aarch64-neonfma-ld128.S.in      -D INC=0           
 tools/xngen src/f32-gemm/6x8-aarch64-neonfma-ld128.S.in      -D INC=0               -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-minmax-asm-aarch64-neonfma-ld128.S &
 
 ### MRx2 micro-kernels
-tools/xngen src/f32-gemm/4x2-aarch64-neonfma-ld64.S.in      -D INC=0 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x2-minmax-asm-aarch64-neonfma-ld64.S &
+tools/xngen src/f32-gemm/4x2-aarch64-neonfma-ld64.S.in      -D INC=0                -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x2-minmax-asm-aarch64-neonfma-ld64.S &
+
+################################## WAsm SIMD ##################################
+### LOAD1+BROADCAST micro-kernels
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-arm-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-minmax-wasmsimd-arm-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmsimd-arm-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-minmax-wasmsimd-arm-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-minmax-wasmsimd-arm-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-x86-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-minmax-wasmsimd-x86-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmsimd-x86-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-minmax-wasmsimd-x86-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-minmax-wasmsimd-x86-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmrelaxedsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-minmax-wasmrelaxedsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmrelaxedsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-minmax-wasmrelaxedsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-minmax-wasmrelaxedsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-minmax-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-minmax-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-minmax-wasmrelaxedsimd-fma-loadsplat.c &
+
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-relu-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-relu-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-relu-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-relu-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-relu-wasmsimd-loadsplat.c &
+
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-relu-wasmrelaxedsimd-fma-loadsplat.c &
+
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-wasmsimd-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-wasmsimd-loadsplat.c &
+
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-wasmrelaxedsimd-fma-loadsplat.c &
+tools/xngen src/f32-gemm/wasmsimd-loadsplat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-wasmrelaxedsimd-fma-loadsplat.c &
+
+### LOAD4+DUPLICATE micro-kernels
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-arm-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-minmax-wasmsimd-arm-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmsimd-arm-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-minmax-wasmsimd-arm-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-minmax-wasmsimd-arm-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-x86-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-minmax-wasmsimd-x86-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmsimd-x86-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-minmax-wasmsimd-x86-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-minmax-wasmsimd-x86-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-minmax-wasmrelaxedsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-minmax-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-minmax-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-minmax-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-minmax-wasmrelaxedsimd-fma-splat.c &
+
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-relu-wasmsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-relu-wasmsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-relu-wasmsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-relu-wasmsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-relu-wasmsimd-splat.c &
+
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-relu-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-relu-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-relu-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-relu-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-relu-wasmrelaxedsimd-fma-splat.c &
+
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-wasmsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-wasmsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-wasmsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-wasmsimd-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-wasmsimd-splat.c &
+
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8-wasmrelaxedsimd-fma-splat.c &
+tools/xngen src/f32-gemm/wasmsimd-splat.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-wasmrelaxedsimd-fma-splat.c &
+
+### LOAD4+PERMUTE micro-kernels
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8s4-minmax-wasmsimd-arm.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8s4-minmax-wasmsimd-arm.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8s4-minmax-wasmsimd-arm.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8s4-minmax-wasmsimd-arm.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8s4-minmax-wasmsimd-arm.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8s4-minmax-wasmsimd-x86.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8s4-minmax-wasmsimd-x86.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8s4-minmax-wasmsimd-x86.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8s4-minmax-wasmsimd-x86.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8s4-minmax-wasmsimd-x86.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8s4-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8s4-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8s4-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8s4-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8s4-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8s4-minmax-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8s4-minmax-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8s4-minmax-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8s4-minmax-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8s4-minmax-wasmrelaxedsimd-fma.c &
+
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8s4-relu-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8s4-relu-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8s4-relu-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8s4-relu-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=RELU                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8s4-relu-wasmsimd.c &
+
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8s4-relu-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8s4-relu-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8s4-relu-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8s4-relu-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=RELU -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8s4-relu-wasmrelaxedsimd-fma.c &
+
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8s4-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8s4-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8s4-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8s4-wasmsimd.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8s4-wasmsimd.c &
+
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=1 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-1x8s4-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=3 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-3x8s4-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=4 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8s4-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=5 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-5x8s4-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/wasmsimd-s4.c.in -D MR=6 -D NR=8 -D INC=0 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8s4-wasmrelaxedsimd-fma.c &
+
+### MRx2 micro-kernels
+tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=ARM     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x2c4-minmax-wasmsimd-arm.c &
+tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=X86     -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x2c4-minmax-wasmsimd-x86.c &
+tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x2c4-minmax-wasmrelaxedsimd.c &
+tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=1 -D ACTIVATION=MINMAX -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x2c4-minmax-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVATION=RELU                   -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x2c4-relu-wasmsimd.c &
+tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=1 -D ACTIVATION=RELU   -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x2c4-relu-wasmrelaxedsimd-fma.c &
+tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=0 -D ACTIVATION=LINEAR                 -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x2c4-wasmsimd.c &
+tools/xngen src/f32-gemm/MRx2c4-wasmsimd.c.in -D MR=4 -D NR=2 -D FMA=1 -D ACTIVATION=LINEAR -D ARCH=RELAXED -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x2c4-wasmrelaxedsimd-fma.c &
 
 ################################### ARM NEON ##################################
 ### LD64 micro-kernels

@@ -123,7 +123,6 @@ void xnn_f32_gemm_minmax_ukernel_3x8s4__wasmrelaxedsimd_fma(
       vacc1x4567 = __builtin_wasm_relaxed_madd_f32x4(va1, vb4567c3, vacc1x4567);
       vacc2x4567 = __builtin_wasm_relaxed_madd_f32x4(va2, vb4567c3, vacc2x4567);
 
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -188,7 +187,6 @@ void xnn_f32_gemm_minmax_ukernel_3x8s4__wasmrelaxedsimd_fma(
       vacc0x4567 = __builtin_wasm_relaxed_madd_f32x4(wasm_v128_andnot(va0, wasm_f32x4_eq(vb4567c3, vzero)), vb4567c3, vacc0x4567);
       vacc1x4567 = __builtin_wasm_relaxed_madd_f32x4(wasm_v128_andnot(va1, wasm_f32x4_eq(vb4567c3, vzero)), vb4567c3, vacc1x4567);
       vacc2x4567 = __builtin_wasm_relaxed_madd_f32x4(wasm_v128_andnot(va2, wasm_f32x4_eq(vb4567c3, vzero)), vb4567c3, vacc2x4567);
-
 
       w += 32;
     }

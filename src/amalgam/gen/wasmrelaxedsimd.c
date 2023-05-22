@@ -3711,7 +3711,6 @@ void xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_splat(
 
       vacc0x0123 = __builtin_wasm_relaxed_madd_f32x4(va0c3, vb0123c3, vacc0x0123);
       vacc0x4567 = __builtin_wasm_relaxed_madd_f32x4(va0c3, vb4567c3, vacc0x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -3911,7 +3910,6 @@ void xnn_f32_gemm_relu_ukernel_1x8__wasmrelaxedsimd_fma_splat(
 
       vacc0x0123 = __builtin_wasm_relaxed_madd_f32x4(va0c3, vb0123c3, vacc0x0123);
       vacc0x4567 = __builtin_wasm_relaxed_madd_f32x4(va0c3, vb4567c3, vacc0x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -4106,7 +4104,6 @@ void xnn_f32_gemm_ukernel_1x8__wasmrelaxedsimd_fma_splat(
 
       vacc0x0123 = __builtin_wasm_relaxed_madd_f32x4(va0c3, vb0123c3, vacc0x0123);
       vacc0x4567 = __builtin_wasm_relaxed_madd_f32x4(va0c3, vb4567c3, vacc0x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -5112,7 +5109,6 @@ void xnn_f32_gemm_minmax_ukernel_6x8__wasmrelaxedsimd_fma_splat(
       vacc3x4567 = __builtin_wasm_relaxed_madd_f32x4(va3c3, vb4567c3, vacc3x4567);
       vacc4x4567 = __builtin_wasm_relaxed_madd_f32x4(va4c3, vb4567c3, vacc4x4567);
       vacc5x4567 = __builtin_wasm_relaxed_madd_f32x4(va5c3, vb4567c3, vacc5x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -5437,7 +5433,6 @@ void xnn_f32_gemm_relu_ukernel_6x8__wasmrelaxedsimd_fma_splat(
       vacc3x4567 = __builtin_wasm_relaxed_madd_f32x4(va3c3, vb4567c3, vacc3x4567);
       vacc4x4567 = __builtin_wasm_relaxed_madd_f32x4(va4c3, vb4567c3, vacc4x4567);
       vacc5x4567 = __builtin_wasm_relaxed_madd_f32x4(va5c3, vb4567c3, vacc5x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -5750,7 +5745,6 @@ void xnn_f32_gemm_ukernel_6x8__wasmrelaxedsimd_fma_splat(
       vacc3x4567 = __builtin_wasm_relaxed_madd_f32x4(va3c3, vb4567c3, vacc3x4567);
       vacc4x4567 = __builtin_wasm_relaxed_madd_f32x4(va4c3, vb4567c3, vacc4x4567);
       vacc5x4567 = __builtin_wasm_relaxed_madd_f32x4(va5c3, vb4567c3, vacc5x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
