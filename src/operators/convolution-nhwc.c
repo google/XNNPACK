@@ -1042,7 +1042,14 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     return xnn_status_invalid_parameter;
   }
 
-  float* requantization_scale = XNN_SIMD_ALLOCA(groups * group_output_channels * sizeof(float));
+  float* requantization_scale = xnn_allocate_simd_memory(groups * group_output_channels * sizeof(float));
+  if (requantization_scale == NULL) {
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator packed weights",
+      groups * group_output_channels * sizeof(float),
+      xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8));
+    return xnn_status_out_of_memory;
+  }
   for (size_t output_channel = 0; output_channel < groups * group_output_channels; output_channel++) {
     requantization_scale[output_channel] = input_scale * kernel_scale[output_channel] / output_scale;
     if (requantization_scale[output_channel] >= 256.0f) {
@@ -1052,6 +1059,8 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
         xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_qc8),
         input_scale, kernel_scale[output_channel], output_scale,
         output_channel, requantization_scale[output_channel]);
+
+      xnn_release_simd_memory(requantization_scale);
       return xnn_status_unsupported_parameter;
     }
   }
@@ -1078,7 +1087,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
       output_zero_point, output_min, output_max);
   }
 
-  return create_convolution2d_nhwc(
+  enum xnn_status status = create_convolution2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
     kernel_height, kernel_width,
     subsampling_height, subsampling_width,
@@ -1119,6 +1128,9 @@ enum xnn_status xnn_create_convolution2d_nhwc_qc8(
     /*code_cache=*/code_cache,
     /*weights_cache=*/weights_cache,
     convolution_op_out);
+
+  xnn_release_simd_memory(requantization_scale);
+  return status;
 }
 
 enum xnn_status xnn_create_convolution2d_nhwc_f16(
