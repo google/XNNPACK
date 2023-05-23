@@ -19,9 +19,9 @@ $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_
 //     size_t nc,                                      r1
 //     size_t kc,                                      r2 -> r5 -> sp + 52
 //     size_t ks,                                      r3 -> sp + 56 -> r14
-//     const int8_t**restrict a,           sp + 96  -> r2
-//     const void*restrict w,              sp + 100 -> r9
-//     int8_t*restrict c,                  sp + 104 -> r11
+//     const int8_t** restrict a,           sp + 96  -> r2
+//     const void* restrict w,              sp + 100 -> r9
+//     int8_t* restrict c,                  sp + 104 -> r11
 //     size_t cm_stride,                   sp + 108 -> (r6)
 //     size_t cn_stride,                   sp + 112 -> (r7)
 //     size_t a_offset,                    sp + 116 -> (r5)

@@ -12,7 +12,7 @@ $assert REQUANTIZATION in ["FP32", "RNDNU"]
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
 #     size_t ks,                 x3 / x9
-#     const int8_t**restrict a,  x4
+#     const int8_t** restrict a,  x4
 #     const int8_t* restrict w,  x5
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7

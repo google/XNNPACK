@@ -14,9 +14,9 @@
 #     size_t nc,                         x1
 #     size_t kc,                         x2 / x0
 #     size_t ks,                         x3 / x9
-#     const float**restrict a,           x4
-#     const float*restrict w,            x5
-#     float*restrict c,                  x6
+#     const float** restrict a,           x4
+#     const float* restrict w,            x5
+#     float* restrict c,                  x6
 #     size_t cm_stride,                  (x7) - unused
 #     size_t cn_stride,                  [sp] -> x10
 #     size_t a_offset,                   [sp + 8] -> x11
