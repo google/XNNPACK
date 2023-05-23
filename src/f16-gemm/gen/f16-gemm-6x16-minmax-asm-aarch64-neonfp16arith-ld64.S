@@ -13,10 +13,10 @@
 #     size_t mr,                x0
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
-#     const void*restrict a,    x3
+#     const void* restrict a,    x3
 #     size_t a_stride,          x4
-#     const void*restrict w,    x5
-#     void*restrict c,          x6
+#     const void* restrict w,    x5
+#     void* restrict c,          x6
 #     size_t cm_stride,         x7
 #     size_t cn_stride,         [sp] -> (x8)
 

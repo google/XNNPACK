@@ -84,6 +84,22 @@ static void qu8_vhswish(
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+BENCHMARK_CAPTURE(qu8_vhswish, scalar_x1,
+                  xnn_qu8_vhswish_ukernel__scalar_x1,
+                  xnn_init_qu8_hswish_scalar_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(qu8_vhswish, scalar_x2,
+                  xnn_qu8_vhswish_ukernel__scalar_x2,
+                  xnn_init_qu8_hswish_scalar_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(qu8_vhswish, scalar_x4,
+                  xnn_qu8_vhswish_ukernel__scalar_x4,
+                  xnn_init_qu8_hswish_scalar_params)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
+  ->UseRealTime();
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
