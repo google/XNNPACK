@@ -29,13 +29,13 @@ class Generator : public MacroAssembler {
 //     size_t mr,                (x0) - unused.  mr = 1
 //     size_t nc,                x1
 //     size_t kc,                x2 / x0
-//     const uint8_t* restrict a, x3
+//     const float* a,           x3
 //     size_t a_stride,          (x4) - unused
-//     const void* restrict w,    x5
-//     uint8_t* restrict c,       x6
+//     const float* w,           x5
+//     float* c,                 x6
 //     size_t cm_stride,         (x7) - unused
 //     size_t cn_stride,         [sp] -> x14
-//     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
+//     const xnn_f32_minmax_params* params)  [sp + 8] -> (x8)
 
 // d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 

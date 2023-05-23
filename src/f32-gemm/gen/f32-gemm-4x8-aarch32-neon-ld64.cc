@@ -30,13 +30,13 @@ class Generator : public MacroAssembler {
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            r2 -> r5
-//     const uint8_t* restrict a,             r3
+//     const float* a,                       r3
 //     size_t a_stride,          sp + 96  -> (r7)
-//     const void* restrict w,    sp + 100 -> r9
-//     uint8_t* restrict c,       sp + 104 -> r11
+//     const float* w,           sp + 100 -> r9
+//     float* c,                 sp + 104 -> r11
 //     size_t cm_stride,         sp + 108 -> (r6)
 //     size_t cn_stride,         sp + 112 -> r7
-//     const union xnn_f32_minmax_params params)  sp + 116 -> (r5)
+//     const xnn_f32_minmax_params* params)  sp + 116 -> (r5)
 
 // d8-d15, r4-r11,r14(lr) need to be preserved if used. r13(sp),r15(pc) are reserved.
 
