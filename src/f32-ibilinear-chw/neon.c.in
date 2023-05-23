@@ -18,10 +18,10 @@ $VMULADD_F32 = "vfma_f32" if FMA else "vmla_f32"
 void xnn_f32_ibilinear_chw_ukernel__${"neonfma" if FMA else "neon"}_p${PIXEL_TILE}(
     size_t output_pixels,
     size_t channels,
-    const float**restrict input,
+    const float** restrict input,
     size_t input_offset,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t input_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);

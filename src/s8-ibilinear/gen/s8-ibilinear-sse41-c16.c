@@ -19,10 +19,10 @@
 void xnn_s8_ibilinear_ukernel__sse41_c16(
     size_t output_pixels,
     size_t channels,
-    const int8_t**restrict input,
+    const int8_t** restrict input,
     size_t input_offset,
-    const int16_t*restrict weights,
-    int8_t*restrict output,
+    const int16_t* restrict weights,
+    int8_t* restrict output,
     size_t output_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);

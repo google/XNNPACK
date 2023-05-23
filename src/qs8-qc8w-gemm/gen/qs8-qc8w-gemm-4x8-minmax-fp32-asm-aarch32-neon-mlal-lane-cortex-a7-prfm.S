@@ -16,10 +16,10 @@
 //     size_t mr,                            r0
 //     size_t nc,                            r1
 //     size_t kc,                            (r2) -> r5
-//     const int8_t*restrict a,              r3
+//     const int8_t* restrict a,              r3
 //     size_t a_stride,           sp + 88 -> (r7)
-//     const void*restrict w,     sp + 92 -> r9
-//     int8_t*restrict c,         sp + 96 -> r11
+//     const void* restrict w,     sp + 92 -> r9
+//     int8_t* restrict c,         sp + 96 -> r11
 //     size_t cm_stride,          sp + 100 -> (r6)
 //     size_t cn_stride,          sp + 104 -> r7
 //     xnn_qs8_qc8w_conv_minmax_params params)  sp + 108 -> (r5)
