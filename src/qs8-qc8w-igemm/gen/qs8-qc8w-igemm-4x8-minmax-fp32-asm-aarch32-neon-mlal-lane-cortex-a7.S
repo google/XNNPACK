@@ -17,9 +17,9 @@
 //     size_t nc,                                      r1 -> sp + 56
 //     size_t kc,                                     (r2) -> r5 -> sp + 60
 //     size_t ks,                                     (r3) -> sp + 64 -> r14
-//     const int8_t**restrict a,            sp + 104  -> r2
-//     const void*restrict w,              sp + 108  -> r9
-//     int8_t*restrict c,                   sp + 112  -> r11
+//     const int8_t** restrict a,            sp + 104  -> r2
+//     const void* restrict w,              sp + 108  -> r9
+//     int8_t* restrict c,                   sp + 112  -> r11
 //     size_t cm_stride,                   sp + 116  -> (r6)
 //     size_t cn_stride,                   sp + 120  -> (r7)
 //     size_t a_offset,                    sp + 124 -> (r5)

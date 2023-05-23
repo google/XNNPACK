@@ -17,10 +17,10 @@
 void xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p8(
     size_t output_pixels,
     size_t channels,
-    const void**restrict input,
+    const void** restrict input,
     size_t input_offset,
-    const void*restrict weights,
-    void*restrict output,
+    const void* restrict weights,
+    void* restrict output,
     size_t input_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);

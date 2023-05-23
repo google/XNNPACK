@@ -15,10 +15,10 @@
 void xnn_f32_ibilinear_chw_ukernel__scalar_p2(
     size_t output_pixels,
     size_t channels,
-    const float**restrict input,
+    const float** restrict input,
     size_t input_offset,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t input_increment)
 {
   assert(output_pixels != 0);

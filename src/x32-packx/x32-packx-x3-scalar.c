@@ -28,7 +28,7 @@ void xnn_x32_packx_ukernel_3x__scalar(
     x2 = x1;
   }
 
-  float*restrict y_f32 = (float*) y;
+  float* restrict y_f32 = (float*) y;
 
   do {
     const float vx0 = *x0++;

@@ -19,7 +19,7 @@ $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
 #     size_t cm_stride,         x7
 #     size_t cn_stride,         [sp] -> (x0)
 $if INC:
-  #     const float*restrict acc,  [sp + 8] -> x15
+  #     const float* restrict acc,  [sp + 8] -> x15
   #     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 16] -> (x8)
 $else:
   #     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)

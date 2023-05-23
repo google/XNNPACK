@@ -5480,10 +5480,10 @@ void xnn_f32_gemm_minmax_ukernel_1x8__sse_load1(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
@@ -5711,10 +5711,10 @@ void xnn_f32_gemm_minmax_ukernel_4x8__sse_load1(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
@@ -5875,10 +5875,10 @@ void xnn_f32_gemm_minmax_ukernel_4x8__sse_load1(
 void xnn_f32_ibilinear_chw_ukernel__sse_p8(
     size_t output_pixels,
     size_t channels,
-    const float**restrict input,
+    const float** restrict input,
     size_t input_offset,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t input_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);
@@ -6094,10 +6094,10 @@ void xnn_f32_ibilinear_chw_ukernel__sse_p8(
 void xnn_f32_ibilinear_ukernel__sse_c8(
     size_t output_pixels,
     size_t channels,
-    const float**restrict input,
+    const float** restrict input,
     size_t input_offset,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t output_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);
@@ -6211,9 +6211,9 @@ void xnn_f32_igemm_minmax_ukernel_1x8__sse_load1(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -6308,9 +6308,9 @@ void xnn_f32_igemm_minmax_ukernel_4x2c4__sse(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -6472,9 +6472,9 @@ void xnn_f32_igemm_minmax_ukernel_4x8__sse_load1(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -8947,10 +8947,10 @@ void xnn_f32_vlrelu_ukernel__sse_x8(
 void xnn_f32_vmulcaddc_minmax_ukernel_c4__sse_2x(
     size_t rows,
     size_t channels,
-    const float*restrict input,
+    const float* restrict input,
     size_t input_stride,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t output_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -9243,7 +9243,7 @@ void xnn_x32_packx_ukernel_4x__sse(
     x3 = x2;
   }
 
-  float*restrict y_f32 = (float*) y;
+  float* restrict y_f32 = (float*) y;
 
   for (; k >= 4; k -= 4) {
     const __m128 vx0 = _mm_loadu_ps(x0);

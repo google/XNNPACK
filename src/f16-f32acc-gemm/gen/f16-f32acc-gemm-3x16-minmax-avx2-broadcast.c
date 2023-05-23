@@ -19,10 +19,10 @@ void xnn_f16_f32acc_gemm_minmax_ukernel_3x16__avx2_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
-    const void*restrict a,
+    const void* restrict a,
     size_t a_stride,
-    const void*restrict w,
-    void*restrict c,
+    const void* restrict w,
+    void* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])

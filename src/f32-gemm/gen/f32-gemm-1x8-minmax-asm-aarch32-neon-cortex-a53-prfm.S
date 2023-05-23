@@ -15,10 +15,10 @@
 //     size_t mr,                                r0
 //     size_t nc,                                r1
 //     size_t kc,                                r2 -> r0
-//     const uint8_t*restrict a,                 r3
+//     const uint8_t* restrict a,                 r3
 //     size_t a_stride,               sp + 8  -> (unused)
-//     const void*restrict w,         sp + 12 -> r9
-//     uint8_t*restrict c,            sp + 16 -> r12
+//     const void* restrict w,         sp + 12 -> r9
+//     uint8_t* restrict c,            sp + 16 -> r12
 //     size_t cm_stride,              sp + 20 -> (unused)
 //     size_t cn_stride,              sp + 24 -> r7
 //     xnn_f32_minmax_params params)  sp + 28 -> (r0)

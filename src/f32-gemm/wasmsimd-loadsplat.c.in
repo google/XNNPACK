@@ -28,17 +28,17 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${ACTIVATION_SUFFIX}_ukerne
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
     $if DATATYPE == "F32":
-      const float*restrict w,
+      const float* restrict w,
     $else:
-      const void*restrict w,
-    float*restrict c,
+      const void* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     $if INC:
-      const float*restrict acc,
+      const float* restrict acc,
     const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);

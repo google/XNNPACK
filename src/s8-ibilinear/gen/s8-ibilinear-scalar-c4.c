@@ -16,10 +16,10 @@
 void xnn_s8_ibilinear_ukernel__scalar_c4(
     size_t output_pixels,
     size_t channels,
-    const int8_t**restrict input,
+    const int8_t** restrict input,
     size_t input_offset,
-    const int16_t*restrict weights,
-    int8_t*restrict output,
+    const int16_t* restrict weights,
+    int8_t* restrict output,
     size_t output_increment)
 {
   assert(output_pixels != 0);

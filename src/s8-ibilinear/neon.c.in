@@ -27,10 +27,10 @@ $VREINTERPRET_U16_X8 = {"S8": "vreinterpret_u16_s8", "U8": "vreinterpret_u16_u8"
 void xnn_${DATATYPE.lower()}_ibilinear_ukernel__neon_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
     size_t output_pixels,
     size_t channels,
-    const ${XINT8_T}**restrict input,
+    const ${XINT8_T}** restrict input,
     size_t input_offset,
-    const int16_t*restrict weights,
-    ${XINT8_T}*restrict output,
+    const int16_t* restrict weights,
+    ${XINT8_T}* restrict output,
     size_t output_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);

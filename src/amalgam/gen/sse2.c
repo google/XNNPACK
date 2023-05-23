@@ -1228,10 +1228,10 @@ void xnn_f32_f16_vcvt_ukernel__sse2_x16(
 void xnn_f32_prelu_ukernel__sse2_2x8(
     size_t rows,
     size_t channels,
-    const float*restrict input,
+    const float* restrict input,
     size_t input_stride,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t output_stride) XNN_OOB_READS
 {
   assert(rows != 0);
@@ -12128,10 +12128,10 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_x8(
 void xnn_s8_ibilinear_ukernel__sse2_c8(
     size_t output_pixels,
     size_t channels,
-    const int8_t**restrict input,
+    const int8_t** restrict input,
     size_t input_offset,
-    const int16_t*restrict weights,
-    int8_t*restrict output,
+    const int16_t* restrict weights,
+    int8_t* restrict output,
     size_t output_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);
@@ -12614,10 +12614,10 @@ void xnn_s8_vclamp_ukernel__sse2_x64(
 void xnn_u8_ibilinear_ukernel__sse2_c8(
     size_t output_pixels,
     size_t channels,
-    const uint8_t**restrict input,
+    const uint8_t** restrict input,
     size_t input_offset,
-    const int16_t*restrict weights,
-    uint8_t*restrict output,
+    const int16_t* restrict weights,
+    uint8_t* restrict output,
     size_t output_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);

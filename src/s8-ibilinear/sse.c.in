@@ -37,10 +37,10 @@ $ISA = "xop" if XOP else "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[S
 void xnn_${DATATYPE.lower()}_ibilinear_ukernel__${ISA}_c${CHANNEL_TILE}${"" if PIXEL_TILE == 1 else "x%d" % PIXEL_TILE}(
     size_t output_pixels,
     size_t channels,
-    const ${XINT8_T}**restrict input,
+    const ${XINT8_T}** restrict input,
     size_t input_offset,
-    const int16_t*restrict weights,
-    ${XINT8_T}*restrict output,
+    const int16_t* restrict weights,
+    ${XINT8_T}* restrict output,
     size_t output_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);

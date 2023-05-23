@@ -16,10 +16,10 @@
 void xnn_f32_prelu_ukernel__scalar_2x1(
     size_t rows,
     size_t channels,
-    const float*restrict input,
+    const float* restrict input,
     size_t input_stride,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t output_stride)
 {
   assert(rows != 0);

@@ -34,7 +34,7 @@ void xnn_x32_packx_ukernel_4x__sse(
     x3 = x2;
   }
 
-  float*restrict y_f32 = (float*) y;
+  float* restrict y_f32 = (float*) y;
 
   for (; k >= 4; k -= 4) {
     const __m128 vx0 = _mm_loadu_ps(x0);
