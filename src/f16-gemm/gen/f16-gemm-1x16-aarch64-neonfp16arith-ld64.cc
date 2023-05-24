@@ -29,10 +29,10 @@ class Generator : public MacroAssembler {
 //     size_t mr,                (x0) - unused.  mr = 1
 //     size_t nc,                x1
 //     size_t kc,                x2 / x0
-//     const void*restrict a,    x3
+//     const void* restrict a,    x3
 //     size_t a_stride,          (x4) - unused
-//     const void*restrict w,    x5
-//     void*restrict c,          x6
+//     const void* restrict w,    x5
+//     void* restrict c,          x6
 //     size_t cm_stride,         (x7) - unused
 //     size_t cn_stride,         [sp] -> x14
 //     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
