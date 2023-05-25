@@ -23,6 +23,9 @@ using AddPtr = int (*)(int, int);
 using MaxPtr = AddPtr;
 using SumUntil = Add5Ptr;
 using DoWhile = Add5Ptr;
+using SumUntilManyLocals = int (*)();
+using SumArray = int (*)(const int*, int);
+using MemCpy = void (*)(int*, const int*, int);
 
 namespace xnnpack {
 namespace {
@@ -35,6 +38,11 @@ constexpr int32_t kAPlusFive = kA + kExpectedGet5ReturnValue;
 constexpr int32_t kB = 42;
 constexpr int32_t kExpectedSum = kA + kB;
 constexpr int32_t kExpectedSumTwice = 2 * kExpectedSum;
+constexpr uint32_t kLargeNumberOfLocals = 300;
+constexpr uint32_t kLargeNumberOfFunctions = 300;
+constexpr size_t kArraySize = 5;
+constexpr std::array<int, kArraySize> kArray = {1, 2, 3, 45, 6};
+const int kExpectedArraySum = std::accumulate(kArray.begin(), kArray.end(), 0);
 
 struct Get5Generator : WasmAssembler {
   explicit Get5Generator(xnn_code_buffer* buf) : WasmAssembler(buf) {
@@ -202,16 +210,17 @@ struct SumUntilCodeGenerator : WasmAssembler {
   }
 };
 
-struct SumUntilTestSuite : GeneratorTestSuite<SumUntilCodeGenerator, SumUntil> {
-  static int ReferenceSumUntil(int n) {
-    int i = 0;
-    int result = 0;
-    while (i < n) {
-      result += i;
-      i++;
-    }
-    return result;
+static int ReferenceSumUntil(int n) {
+  int i = 0;
+  int result = 0;
+  while (i < n) {
+    result += i;
+    i++;
   }
+  return result;
+}
+
+struct SumUntilTestSuite : GeneratorTestSuite<SumUntilCodeGenerator, SumUntil> {
   static void ExpectFuncCorrect(SumUntil sum_until) {
     static constexpr int kN = 5;
     static constexpr int kNoIters = 0;
@@ -272,12 +281,6 @@ struct SumArrayMemory : WasmAssembler {
   }
 };
 
-using SumArray = int (*)(const int*, int);
-using MemCpy = void (*)(int*, const int*, int);
-constexpr size_t kArraySize = 5;
-constexpr std::array<int, kArraySize> kArray = {1, 2, 3, 45, 6};
-const int kExpectedArraySum = std::accumulate(kArray.begin(), kArray.end(), 0);
-
 struct SumArrayTestSuite : GeneratorTestSuite<SumArrayMemory, SumArray> {
   static void ExpectFuncCorrect(SumArray sum_array) {
     EXPECT_EQ(sum_array(kArray.data(), kArraySize), kExpectedArraySum);
@@ -334,8 +337,6 @@ struct AddDelayedInitLocalsGenerator : WasmAssembler {
 struct AddDelayedInitTestSuite
     : AddTestSuiteTmpl<AddDelayedInitLocalsGenerator, kExpectedSum> {};
 
-constexpr uint32_t kLargeNumberOfFunctions = 300;
-
 struct ManyFunctionsGenerator : WasmAssembler {
   explicit ManyFunctionsGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     for (uint32_t func_index = 0; func_index < kLargeNumberOfFunctions;
@@ -364,6 +365,32 @@ struct ManyFunctionsGeneratorTestSuite
   }
 };
 
+struct ManyLocalsGenerator : WasmAssembler {
+  explicit ManyLocalsGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
+    ValTypesToInt many_ints = {{i32, kLargeNumberOfFunctions + 1}};
+    AddFunc<0>({i32}, "sum_until_with_many_locals", {}, many_ints, [this]() {
+      std::array<Local, kLargeNumberOfFunctions> locals;
+      for (int i = 0; i < kLargeNumberOfFunctions; i++) {
+        locals[i] = MakeLocal(i32);
+        locals[i] = I32Const(i);
+      }
+      auto sum = MakeLocal(i32);
+
+      for (int i = 0; i < kLargeNumberOfFunctions; i++) {
+        sum = I32Add(sum, locals[i]);
+      }
+      local_get(sum);
+    });
+  }
+};
+
+struct ManyLocalsGeneratorTestSuite
+    : GeneratorTestSuite<ManyLocalsGenerator, SumUntilManyLocals> {
+  static void ExpectFuncCorrect(SumUntilManyLocals sum_until) {
+    EXPECT_EQ(sum_until(), ReferenceSumUntil(kLargeNumberOfFunctions));
+  }
+};
+
 struct InvalidCodeGenerator : WasmAssembler {
   ValTypesToInt no_locals;
   explicit InvalidCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
@@ -382,9 +409,10 @@ TYPED_TEST_P(WasmAssemblerTest, ValidCode) {
   using TestSuite = TypeParam;
   using Generator = typename TestSuite::Generator;
   using Func = typename TestSuite::Func;
+  static constexpr size_t kBufferSize = 131072;
 
   xnn_code_buffer b;
-  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  xnn_allocate_code_memory(&b, kBufferSize);
 
   Generator generator(&b);
   generator.Emit();
@@ -400,13 +428,12 @@ TYPED_TEST_P(WasmAssemblerTest, ValidCode) {
 
 REGISTER_TYPED_TEST_SUITE_P(WasmAssemblerTest, ValidCode);
 
-using WasmAssemblerTestSuits =
-    testing::Types<Get5TestSuite, AddTestSuite, AddWithLocalTestSuite,
-                   AddTwiceTestSuite, AddTwiceWithScopesTestSuite,
-                   Add5TestSuite, MaxTestSuite, MaxIncompleteIfTestSuite,
-                   SumUntilTestSuite, DoWhileTestSuite, SumArrayTestSuite,
-                   MemCpyTestSuite, AddDelayedInitTestSuite,
-                   ManyFunctionsGeneratorTestSuite>;
+using WasmAssemblerTestSuits = testing::Types<
+    Get5TestSuite, AddTestSuite, AddWithLocalTestSuite, AddTwiceTestSuite,
+    AddTwiceWithScopesTestSuite, Add5TestSuite, MaxTestSuite,
+    MaxIncompleteIfTestSuite, SumUntilTestSuite, DoWhileTestSuite,
+    SumArrayTestSuite, MemCpyTestSuite, AddDelayedInitTestSuite,
+    ManyFunctionsGeneratorTestSuite, ManyLocalsGeneratorTestSuite>;
 INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest,
                                WasmAssemblerTestSuits);
 
