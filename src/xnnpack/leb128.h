@@ -24,6 +24,12 @@ static void StoreEncodedU32(uint32_t n, Store&& store) {
   } while (n != 0);
 }
 
+inline static uint32_t WidthEncodedU32(uint32_t n) {
+  uint32_t cnt = 0;
+  StoreEncodedU32(n, [&](auto _) { cnt++; });
+  return cnt;
+}
+
 template <typename Store>
 static void StoreEncodedS32(int32_t n, Store&& store) {
   auto more = true;
@@ -39,16 +45,16 @@ static void StoreEncodedS32(int32_t n, Store&& store) {
   } while (more);
 }
 
-inline auto MakeStoreToVector(std::vector<uint8_t>& out) {
+inline static auto MakeStoreToVector(std::vector<uint8_t>& out) {
   return [&out](uint8_t b) { out.push_back(b); };
 }
 
-inline void AppendEncodedU32(uint32_t n, std::vector<uint8_t>& out) {
+inline static void AppendEncodedU32(uint32_t n, std::vector<uint8_t>& out) {
   StoreEncodedU32(n, MakeStoreToVector(out));
 }
 
-inline void AppendEncodedS32(int32_t n, std::vector<uint8_t>& out) {
-  StoreEncodedU32(n, MakeStoreToVector(out));
+inline static void AppendEncodedS32(int32_t n, std::vector<uint8_t>& out) {
+  StoreEncodedS32(n, MakeStoreToVector(out));
 }
 }  // namespace internal
 }  // namespace xnnpack

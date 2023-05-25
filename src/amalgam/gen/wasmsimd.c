@@ -10909,10 +10909,10 @@ void xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_arm_splat(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
@@ -10969,7 +10969,6 @@ void xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_arm_splat(
 
       vacc0x0123 = wasm_f32x4_add(wasm_f32x4_mul(va0c3, vb0123c3), vacc0x0123);
       vacc0x4567 = wasm_f32x4_add(wasm_f32x4_mul(va0c3, vb4567c3), vacc0x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -11031,10 +11030,10 @@ void xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_x86_splat(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
@@ -11091,7 +11090,6 @@ void xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_x86_splat(
 
       vacc0x0123 = wasm_f32x4_add(wasm_f32x4_mul(va0c3, vb0123c3), vacc0x0123);
       vacc0x4567 = wasm_f32x4_add(wasm_f32x4_mul(va0c3, vb4567c3), vacc0x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -11153,10 +11151,10 @@ void xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)])
@@ -11211,7 +11209,6 @@ void xnn_f32_gemm_relu_ukernel_1x8__wasmsimd_splat(
 
       vacc0x0123 = wasm_f32x4_add(wasm_f32x4_mul(va0c3, vb0123c3), vacc0x0123);
       vacc0x4567 = wasm_f32x4_add(wasm_f32x4_mul(va0c3, vb4567c3), vacc0x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -11271,10 +11268,10 @@ void xnn_f32_gemm_ukernel_1x8__wasmsimd_splat(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
@@ -11329,7 +11326,6 @@ void xnn_f32_gemm_ukernel_1x8__wasmsimd_splat(
 
       vacc0x0123 = wasm_f32x4_add(wasm_f32x4_mul(va0c3, vb0123c3), vacc0x0123);
       vacc0x4567 = wasm_f32x4_add(wasm_f32x4_mul(va0c3, vb4567c3), vacc0x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -11859,10 +11855,10 @@ void xnn_f32_gemm_minmax_ukernel_4x8__wasmsimd_x86_splat(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
@@ -11985,7 +11981,6 @@ void xnn_f32_gemm_minmax_ukernel_4x8__wasmsimd_x86_splat(
       vacc1x4567 = wasm_f32x4_add(wasm_f32x4_mul(va1c3, vb4567c3), vacc1x4567);
       vacc2x4567 = wasm_f32x4_add(wasm_f32x4_mul(va2c3, vb4567c3), vacc2x4567);
       vacc3x4567 = wasm_f32x4_add(wasm_f32x4_mul(va3c3, vb4567c3), vacc3x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -12104,10 +12099,10 @@ void xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)])
@@ -12228,7 +12223,6 @@ void xnn_f32_gemm_relu_ukernel_4x8__wasmsimd_splat(
       vacc1x4567 = wasm_f32x4_add(wasm_f32x4_mul(va1c3, vb4567c3), vacc1x4567);
       vacc2x4567 = wasm_f32x4_add(wasm_f32x4_mul(va2c3, vb4567c3), vacc2x4567);
       vacc3x4567 = wasm_f32x4_add(wasm_f32x4_mul(va3c3, vb4567c3), vacc3x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -12339,10 +12333,10 @@ void xnn_f32_gemm_ukernel_4x8__wasmsimd_splat(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
@@ -12463,7 +12457,6 @@ void xnn_f32_gemm_ukernel_4x8__wasmsimd_splat(
       vacc1x4567 = wasm_f32x4_add(wasm_f32x4_mul(va1c3, vb4567c3), vacc1x4567);
       vacc2x4567 = wasm_f32x4_add(wasm_f32x4_mul(va2c3, vb4567c3), vacc2x4567);
       vacc3x4567 = wasm_f32x4_add(wasm_f32x4_mul(va3c3, vb4567c3), vacc3x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -12565,10 +12558,10 @@ void xnn_f32_gemm_minmax_ukernel_5x8__wasmsimd_arm_splat(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
@@ -12713,7 +12706,6 @@ void xnn_f32_gemm_minmax_ukernel_5x8__wasmsimd_arm_splat(
       vacc2x4567 = wasm_f32x4_add(wasm_f32x4_mul(va2c3, vb4567c3), vacc2x4567);
       vacc3x4567 = wasm_f32x4_add(wasm_f32x4_mul(va3c3, vb4567c3), vacc3x4567);
       vacc4x4567 = wasm_f32x4_add(wasm_f32x4_mul(va4c3, vb4567c3), vacc4x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -12851,10 +12843,10 @@ void xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_relu_params params[restrict XNN_MIN_ELEMENTS(1)])
@@ -12997,7 +12989,6 @@ void xnn_f32_gemm_relu_ukernel_5x8__wasmsimd_splat(
       vacc2x4567 = wasm_f32x4_add(wasm_f32x4_mul(va2c3, vb4567c3), vacc2x4567);
       vacc3x4567 = wasm_f32x4_add(wasm_f32x4_mul(va3c3, vb4567c3), vacc3x4567);
       vacc4x4567 = wasm_f32x4_add(wasm_f32x4_mul(va4c3, vb4567c3), vacc4x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -13125,10 +13116,10 @@ void xnn_f32_gemm_ukernel_5x8__wasmsimd_splat(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
@@ -13271,7 +13262,6 @@ void xnn_f32_gemm_ukernel_5x8__wasmsimd_splat(
       vacc2x4567 = wasm_f32x4_add(wasm_f32x4_mul(va2c3, vb4567c3), vacc2x4567);
       vacc3x4567 = wasm_f32x4_add(wasm_f32x4_mul(va3c3, vb4567c3), vacc3x4567);
       vacc4x4567 = wasm_f32x4_add(wasm_f32x4_mul(va4c3, vb4567c3), vacc4x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -13387,10 +13377,10 @@ void xnn_f32_gemm_ukernel_5x8__wasmsimd_splat(
 void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
     size_t output_pixels,
     size_t channels,
-    const float**restrict input,
+    const float** restrict input,
     size_t input_offset,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t input_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);
@@ -13606,10 +13596,10 @@ void xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8(
 void xnn_f32_ibilinear_ukernel__wasmsimd_c8(
     size_t output_pixels,
     size_t channels,
-    const float**restrict input,
+    const float** restrict input,
     size_t input_offset,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t output_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);
@@ -13715,9 +13705,9 @@ void xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_arm_splat(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -13850,9 +13840,9 @@ void xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_x86_splat(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -13985,9 +13975,9 @@ void xnn_f32_igemm_relu_ukernel_1x8__wasmsimd_splat(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -14116,9 +14106,9 @@ void xnn_f32_igemm_ukernel_1x8__wasmsimd_splat(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -14244,9 +14234,9 @@ void xnn_f32_igemm_minmax_ukernel_4x2c4__wasmsimd_arm(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -14421,9 +14411,9 @@ void xnn_f32_igemm_minmax_ukernel_4x2c4__wasmsimd_x86(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -14598,9 +14588,9 @@ void xnn_f32_igemm_ukernel_4x2c4__wasmsimd(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -14768,9 +14758,9 @@ void xnn_f32_igemm_minmax_ukernel_4x8__wasmsimd_x86_splat(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -15032,9 +15022,9 @@ void xnn_f32_igemm_relu_ukernel_4x8__wasmsimd_splat(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -15286,9 +15276,9 @@ void xnn_f32_igemm_ukernel_4x8__wasmsimd_splat(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -15531,9 +15521,9 @@ void xnn_f32_igemm_minmax_ukernel_5x8__wasmsimd_arm_splat(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -15838,9 +15828,9 @@ void xnn_f32_igemm_relu_ukernel_5x8__wasmsimd_splat(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -16133,9 +16123,9 @@ void xnn_f32_igemm_ukernel_5x8__wasmsimd_splat(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -17925,10 +17915,10 @@ void xnn_f32_pavgpool_minmax_ukernel_9x__wasmsimd_x86_c4(
 void xnn_f32_prelu_ukernel__wasmsimd_iminmax_2x8(
     size_t rows,
     size_t channels,
-    const float*restrict input,
+    const float* restrict input,
     size_t input_stride,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t output_stride) XNN_OOB_READS
 {
   assert(rows != 0);
@@ -18053,10 +18043,10 @@ void xnn_f32_prelu_ukernel__wasmsimd_iminmax_2x8(
 void xnn_f32_prelu_ukernel__wasmsimd_laneselect_2x8(
     size_t rows,
     size_t channels,
-    const float*restrict input,
+    const float* restrict input,
     size_t input_stride,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t output_stride) XNN_OOB_READS
 {
   assert(rows != 0);
@@ -22982,10 +22972,10 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_laneselect_x8(
 void xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_arm_2x(
     size_t rows,
     size_t channels,
-    const float*restrict input,
+    const float* restrict input,
     size_t input_stride,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t output_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -23084,10 +23074,10 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_arm_2x(
 void xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_x86_2x(
     size_t rows,
     size_t channels,
-    const float*restrict input,
+    const float* restrict input,
     size_t input_stride,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t output_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -32278,10 +32268,10 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_x8(
 void xnn_s8_ibilinear_ukernel__wasmsimd_dot16x2_c8(
     size_t output_pixels,
     size_t channels,
-    const int8_t**restrict input,
+    const int8_t** restrict input,
     size_t input_offset,
-    const int16_t*restrict weights,
-    int8_t*restrict output,
+    const int16_t* restrict weights,
+    int8_t* restrict output,
     size_t output_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);
@@ -32727,10 +32717,10 @@ void xnn_s8_vclamp_ukernel__wasmsimd_x64(
 void xnn_u8_ibilinear_ukernel__wasmsimd_dot16x2_c8(
     size_t output_pixels,
     size_t channels,
-    const uint8_t**restrict input,
+    const uint8_t** restrict input,
     size_t input_offset,
-    const int16_t*restrict weights,
-    uint8_t*restrict output,
+    const int16_t* restrict weights,
+    uint8_t* restrict output,
     size_t output_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);

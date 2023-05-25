@@ -18,10 +18,10 @@ void xnn_f32_gemm_minmax_ukernel_1x8__wasmsimd_x86_loadsplat(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])

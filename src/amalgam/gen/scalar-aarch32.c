@@ -35,6 +35,7 @@
 #include <xnnpack/vadd.h>
 #include <xnnpack/vbinary.h>
 #include <xnnpack/vcvt.h>
+#include <xnnpack/vhswish.h>
 #include <xnnpack/vmul.h>
 #include <xnnpack/vmulcaddc.h>
 #include <xnnpack/vunary.h>
@@ -6776,10 +6777,10 @@ void xnn_f32_gemm_ukernel_4x4__scalar(
 void xnn_f32_ibilinear_chw_ukernel__scalar_p4(
     size_t output_pixels,
     size_t channels,
-    const float**restrict input,
+    const float** restrict input,
     size_t input_offset,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t input_increment)
 {
   assert(output_pixels != 0);
@@ -6901,10 +6902,10 @@ void xnn_f32_ibilinear_chw_ukernel__scalar_p4(
 void xnn_f32_ibilinear_ukernel__scalar_c2(
     size_t output_pixels,
     size_t channels,
-    const float**restrict input,
+    const float** restrict input,
     size_t input_offset,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t output_increment)
 {
   assert(output_pixels != 0);
@@ -6985,9 +6986,9 @@ void xnn_f32_igemm_minmax_ukernel_1x4__scalar(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -7086,9 +7087,9 @@ void xnn_f32_igemm_relu_ukernel_1x4__scalar(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -7180,9 +7181,9 @@ void xnn_f32_igemm_ukernel_1x4__scalar(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -7270,9 +7271,9 @@ void xnn_f32_igemm_minmax_ukernel_4x2__scalar(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -7419,9 +7420,9 @@ void xnn_f32_igemm_ukernel_4x2__scalar(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -7549,9 +7550,9 @@ void xnn_f32_igemm_minmax_ukernel_4x4__scalar(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -7758,9 +7759,9 @@ void xnn_f32_igemm_relu_ukernel_4x4__scalar(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -7948,9 +7949,9 @@ void xnn_f32_igemm_ukernel_4x4__scalar(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -8672,10 +8673,10 @@ void xnn_f32_pavgpool_minmax_ukernel_9x__scalar_c1(
 void xnn_f32_prelu_ukernel__scalar_2x4(
     size_t rows,
     size_t channels,
-    const float*restrict input,
+    const float* restrict input,
     size_t input_stride,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t output_stride)
 {
   assert(rows != 0);
@@ -12029,10 +12030,10 @@ void xnn_f32_vlrelu_ukernel__scalar_x4(
 void xnn_f32_vmulcaddc_minmax_ukernel_c1__scalar_2x(
     size_t rows,
     size_t channels,
-    const float*restrict input,
+    const float* restrict input,
     size_t input_stride,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t output_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
@@ -13529,9 +13530,9 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x2__scalar_fmagic(
     size_t nc,
     size_t kc,
     size_t ks,
-    const int8_t**restrict a,
-    const void*restrict w,
-    int8_t*restrict c,
+    const int8_t** restrict a,
+    const void* restrict w,
+    int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -13626,9 +13627,9 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_2x2__scalar_fmagic(
     size_t nc,
     size_t kc,
     size_t ks,
-    const int8_t**restrict a,
-    const void*restrict w,
-    int8_t*restrict c,
+    const int8_t** restrict a,
+    const void* restrict w,
+    int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -14381,9 +14382,9 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x2__scalar_fmagic(
     size_t nc,
     size_t kc,
     size_t ks,
-    const int8_t**restrict a,
-    const void*restrict w,
-    int8_t*restrict c,
+    const int8_t** restrict a,
+    const void* restrict w,
+    int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -14480,9 +14481,9 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x2__scalar_fmagic(
     size_t nc,
     size_t kc,
     size_t ks,
-    const int8_t**restrict a,
-    const void*restrict w,
-    int8_t*restrict c,
+    const int8_t** restrict a,
+    const void* restrict w,
+    int8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -14667,6 +14668,45 @@ void xnn_qs8_vaddc_minmax_ukernel__scalar_x1(
     vout = math_max_s32(vout, voutput_min_less_zero_point);
     vout = math_min_s32(vout, voutput_max_less_zero_point);
     *output++ = (int8_t) (vout + voutput_zero_point);
+
+    batch -= sizeof(int8_t);
+  } while (batch != 0);
+}
+
+void xnn_qs8_vhswish_ukernel__scalar_x1(
+    size_t batch,
+    const int8_t* input,
+    int8_t* output,
+    const union xnn_qs8_hswish_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const int32_t vinput_zero_point = params->scalar.input_zero_point;
+  const int32_t voutput_zero_point = params->scalar.output_zero_point;
+  const int32_t vinput_scale_div_mantissa = params->scalar.input_scale_div_mantissa;
+  const int32_t vinput_scale_div_exp = params->scalar.input_scale_div_exp;
+  const int32_t vscale_ratio = params->scalar.scale_ratio;
+
+  do {
+    const int32_t vacc = (vinput_zero_point - (int32_t) *input++) << 7;
+    int32_t vin = vacc * vinput_scale_div_mantissa;
+    if (vinput_scale_div_exp > 0) {
+      vin <<= vinput_scale_div_exp;
+    } else {
+      vin >>= -vinput_scale_div_exp;
+    }
+    vin -= 16384;
+    vin = math_min_s32(vin, 0);
+    vin = math_max_s32(vin, -32768);
+
+    int32_t vout = math_asr_s32(vacc * vscale_ratio, 15);
+    vout = math_asr_s32(vin * vout, 15) + voutput_zero_point;
+    vout = math_max_s32(vout, -128);
+    vout = math_min_s32(vout, 127);
+    *output++ = (int8_t) vout;
 
     batch -= sizeof(int8_t);
   } while (batch != 0);
@@ -16077,9 +16117,9 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x2__scalar_fmagic(
     size_t nc,
     size_t kc,
     size_t ks,
-    const uint8_t**restrict a,
-    const void*restrict w,
-    uint8_t*restrict c,
+    const uint8_t** restrict a,
+    const void* restrict w,
+    uint8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -16175,9 +16215,9 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x2__scalar_fmagic(
     size_t nc,
     size_t kc,
     size_t ks,
-    const uint8_t**restrict a,
-    const void*restrict w,
-    uint8_t*restrict c,
+    const uint8_t** restrict a,
+    const void* restrict w,
+    uint8_t* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -16366,6 +16406,45 @@ void xnn_qu8_vaddc_minmax_ukernel__scalar_x1(
   } while (batch != 0);
 }
 
+void xnn_qu8_vhswish_ukernel__scalar_x1(
+    size_t batch,
+    const uint8_t* input,
+    uint8_t* output,
+    const union xnn_qu8_hswish_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(uint8_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const int32_t vinput_zero_point = params->scalar.input_zero_point;
+  const int32_t voutput_zero_point = params->scalar.output_zero_point;
+  const int32_t vinput_scale_div_mantissa = params->scalar.input_scale_div_mantissa;
+  const int32_t vinput_scale_div_exp = params->scalar.input_scale_div_exp;
+  const int32_t vscale_ratio = params->scalar.scale_ratio;
+
+  do {
+    const int32_t vacc = (vinput_zero_point - (int32_t) *input++) << 7;
+    int32_t vin = vacc * vinput_scale_div_mantissa;
+    if (vinput_scale_div_exp > 0) {
+      vin <<= vinput_scale_div_exp;
+    } else {
+      vin >>= -vinput_scale_div_exp;
+    }
+    vin -= 16384;
+    vin = math_min_s32(vin, 0);
+    vin = math_max_s32(vin, -32768);
+
+    int32_t vout = math_asr_s32(vacc * vscale_ratio, 15);
+    vout = math_asr_s32(vin * vout, 15) + voutput_zero_point;
+    vout = math_max_s32(vout, 0);
+    vout = math_min_s32(vout, 255);
+    *output++ = (uint8_t) vout;
+
+    batch -= sizeof(uint8_t);
+  } while (batch != 0);
+}
+
 void xnn_qu8_vmul_minmax_fp32_ukernel__scalar_x4(
     size_t batch,
     const uint8_t* input_a,
@@ -16538,10 +16617,10 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_x4(
 void xnn_s8_ibilinear_ukernel__scalar_c1(
     size_t output_pixels,
     size_t channels,
-    const int8_t**restrict input,
+    const int8_t** restrict input,
     size_t input_offset,
-    const int16_t*restrict weights,
-    int8_t*restrict output,
+    const int16_t* restrict weights,
+    int8_t* restrict output,
     size_t output_increment)
 {
   assert(output_pixels != 0);
@@ -16806,10 +16885,10 @@ void xnn_s8_vclamp_ukernel__scalar_x4(
 void xnn_u8_ibilinear_ukernel__scalar_c1(
     size_t output_pixels,
     size_t channels,
-    const uint8_t**restrict input,
+    const uint8_t** restrict input,
     size_t input_offset,
-    const int16_t*restrict weights,
-    uint8_t*restrict output,
+    const int16_t* restrict weights,
+    uint8_t* restrict output,
     size_t output_increment)
 {
   assert(output_pixels != 0);
@@ -17182,7 +17261,7 @@ void xnn_x32_packx_ukernel_2x__scalar(
     x1 = x0;
   }
 
-  float*restrict y_f32 = (float*) y;
+  float* restrict y_f32 = (float*) y;
 
   do {
     const float vx0 = *x0++;
@@ -17214,7 +17293,7 @@ void xnn_x32_packx_ukernel_3x__scalar(
     x2 = x1;
   }
 
-  float*restrict y_f32 = (float*) y;
+  float* restrict y_f32 = (float*) y;
 
   do {
     const float vx0 = *x0++;
@@ -17252,7 +17331,7 @@ void xnn_x32_packx_ukernel_4x__scalar(
     x3 = x2;
   }
 
-  float*restrict y_f32 = (float*) y;
+  float* restrict y_f32 = (float*) y;
 
   do {
     const float vx0 = *x0++;

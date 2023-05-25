@@ -27,6 +27,10 @@ DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__neon_x8)
 DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__neon_x16)
 DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__neon_x32)
 
+DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__scalar_x1)
+DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__scalar_x2)
+DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__scalar_x4)
+
 #define DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                          \
       size_t n,                                       \
@@ -38,6 +42,9 @@ DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__neon_x8)
 DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__neon_x16)
 DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__neon_x32)
 
+DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__scalar_x1)
+DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__scalar_x2)
+DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__scalar_x4)
 
 #ifdef __cplusplus
 }  // extern "C"
