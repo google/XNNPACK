@@ -131,8 +131,7 @@ class VHSwishMicrokernelTester {
       for (size_t i = 0; i < batch_size(); i++) {
         EXPECT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
           << "at " << i << " / " << batch_size()
-          << ", x[" << i << "] = " << int32_t(input[i])
-          << ". Scale " << input_scale() << " / " << output_scale();
+          << ", x[" << i << "] = " << int32_t(input[i]);
       }
     }
   }
@@ -183,8 +182,7 @@ class VHSwishMicrokernelTester {
       for (size_t i = 0; i < batch_size(); i++) {
         EXPECT_EQ(int32_t(output[i]), int32_t(output_ref[i]))
           << "at " << i << " / " << batch_size()
-          << ", x[" << i << "] = " << int32_t(input[i])
-          << ". Scale " << input_scale() << " / " << output_scale();
+          << ", x[" << i << "] = " << int32_t(input[i]);
       }
     }
   }

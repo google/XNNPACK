@@ -3,8 +3,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert DATATYPE in ["F32", "QC8"]
 $assert NR == 2
 $assert MR % 2 == 0
+$assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
 $assert ACTIVATION != "MINMAX" or ARCH in ["ARM", "X86", "RELAXED"]
 $assert not FMA or ARCH == "RELAXED"
 #include <assert.h>
@@ -14,7 +16,7 @@ $assert not FMA or ARCH == "RELAXED"
 #include <xnnpack/gemm.h>
 
 
-$assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
+$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
 $if ACTIVATION == "MINMAX":
 $  WASM_F32X4_MIN={"ARM": "wasm_f32x4_min", "X86": "wasm_f32x4_pmin", "RELAXED": "__builtin_wasm_relaxed_min_f32x4"}[ARCH]
 $  WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "__builtin_wasm_relaxed_max_f32x4"}[ARCH]
@@ -22,13 +24,16 @@ $ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
 $ISA = "wasmsimd" if not FMA and (ACTIVATION in ["LINEAR", "RELU"] or ARCH != "RELAXED") else "wasmrelaxedsimd"
 $ARCH_SUFFIX = "" if not FMA and (ACTIVATION in ["LINEAR", "RELU"] or ARCH == "RELAXED") else "_" + ("fma" if FMA else ARCH.lower())
 $PARAMS = {"LINEAR": "xnn_f32_default_params", "RELU": "xnn_f32_relu_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
-void xnn_f32_gemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__${ISA}${ARCH_SUFFIX}(
+void xnn_${DATATYPE_SPEC}_gemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__${ISA}${ARCH_SUFFIX}(
     size_t mr,
     size_t nc,
     size_t kc,
     const float* restrict a,
     size_t a_stride,
-    const float* restrict w,
+    $if DATATYPE == "F32":
+      const float* restrict w,
+    $else:
+      const void* restrict w,
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
@@ -70,11 +75,17 @@ void xnn_f32_gemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__${ISA}${ARCH_SUFFIX
   do {
     v128_t vacc0x0c4 = wasm_v128_load32_zero(w);
     $for N in range(1, NR):
-      v128_t vacc0x${N}c4 = wasm_v128_load32_zero(w + ${N});
+      $if DATATYPE == "F32":
+        v128_t vacc0x${N}c4 = wasm_v128_load32_zero(w + ${N});
+      $else:
+        v128_t vacc0x${N}c4 = wasm_v128_load32_zero((const float*) w + ${N});
     $for M in range(1, MR):
       $for N in range(NR):
         v128_t vacc${M}x${N}c4 = vacc0x${N}c4;
-    w += ${NR};
+    $if DATATYPE == "F32":
+      w += ${NR};
+    $else:
+      w = (const float*) w + ${NR};
 
     size_t k = kc;
     for (; k >= 4 * sizeof(float); k -= 4 * sizeof(float)) {
@@ -82,10 +93,19 @@ void xnn_f32_gemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__${ISA}${ARCH_SUFFIX
         const v128_t va${M} = wasm_v128_load(a${M});
         a${M} += 4;
 
-      const v128_t vb0 = wasm_v128_load(w);
+      $if DATATYPE == "F32":
+        const v128_t vb0 = wasm_v128_load(w);
+      $else:
+        const v128_t vb0 = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w))));
       $for N in range(1, NR):
-        const v128_t vb${N} = wasm_v128_load(w + ${N * 4});
-      w += ${NR * 4};
+        $if DATATYPE == "F32":
+          const v128_t vb${N} = wasm_v128_load(w + ${N * 4});
+        $else:
+          const v128_t vb${N} = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w + ${N * 4}))));
+      $if DATATYPE == "F32":
+        w += ${NR * 4};
+      $else:
+        w = (const int8_t*) w + ${NR * 4};
 
       $for M in range(MR):
         $for N in range(NR):
@@ -99,10 +119,19 @@ void xnn_f32_gemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__${ISA}${ARCH_SUFFIX
         const v128_t va${M} = wasm_v128_load(a${M});
         a${M} = (const float*) ((uintptr_t) a${M} + k);
 
-      const v128_t vb0 = wasm_v128_load(w);
+      $if DATATYPE == "F32":
+        const v128_t vb0 = wasm_v128_load(w);
+      $else:
+        const v128_t vb0 = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w))));
       $for N in range(1, NR):
-        const v128_t vb${N} = wasm_v128_load(w + ${N * 4});
-      w += ${NR * 4};
+        $if DATATYPE == "F32":
+          const v128_t vb${N} = wasm_v128_load(w + ${N * 4});
+        $else:
+          const v128_t vb${N} = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w + ${N * 4}))));
+      $if DATATYPE == "F32":
+        w += ${NR * 4};
+      $else:
+        w = (const int8_t*) w + ${NR * 4};
 
       const v128_t vzero = wasm_f32x4_const_splat(0.0f);
       $for N in range(NR):
@@ -126,6 +155,11 @@ void xnn_f32_gemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__${ISA}${ARCH_SUFFIX
         wasm_v32x4_shuffle(vacc${M}x01c2, vacc${M+1}x01c2, 0, 1, 4, 5),
         wasm_v32x4_shuffle(vacc${M}x01c2, vacc${M+1}x01c2, 2, 3, 6, 7));
 
+    $if DATATYPE == "QC8":
+      const v128_t vscalex01 = wasm_v128_load64_splat(w);
+      w = (const float*) w + 2;
+      $for M in range(0, MR, 2):
+        vacc${M}${M+1}x01 = wasm_f32x4_mul(vacc${M}${M+1}x01, vscalex01);
     $if ACTIVATION == "MINMAX":
       $for M in range(0, MR, 2):
         vacc${M}${M+1}x01 = ${WASM_F32X4_MAX}(vmin, vacc${M}${M+1}x01);

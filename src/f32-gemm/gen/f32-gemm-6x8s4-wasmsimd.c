@@ -18,10 +18,10 @@ void xnn_f32_gemm_ukernel_6x8s4__wasmsimd(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
@@ -184,7 +184,6 @@ void xnn_f32_gemm_ukernel_6x8s4__wasmsimd(
       vacc4x4567 = wasm_f32x4_add(wasm_f32x4_mul(va4, vb4567c3), vacc4x4567);
       vacc5x4567 = wasm_f32x4_add(wasm_f32x4_mul(va5, vb4567c3), vacc5x4567);
 
-
       w += 32;
       k -= 4 * sizeof(float);
     }
@@ -288,7 +287,6 @@ void xnn_f32_gemm_ukernel_6x8s4__wasmsimd(
       vacc3x4567 = wasm_f32x4_add(wasm_f32x4_mul(wasm_v128_andnot(va3, wasm_f32x4_eq(vb4567c3, vzero)), vb4567c3), vacc3x4567);
       vacc4x4567 = wasm_f32x4_add(wasm_f32x4_mul(wasm_v128_andnot(va4, wasm_f32x4_eq(vb4567c3, vzero)), vb4567c3), vacc4x4567);
       vacc5x4567 = wasm_f32x4_add(wasm_f32x4_mul(wasm_v128_andnot(va5, wasm_f32x4_eq(vb4567c3, vzero)), vb4567c3), vacc5x4567);
-
 
       w += 32;
     }

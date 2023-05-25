@@ -1,6 +1,9 @@
 #include <xnnpack/assembler.h>
+#include <xnnpack/leb128.h>
 #include <xnnpack/wasm-assembler.h>
 
+#include <cstdint>
+#include <numeric>
 #include <vector>
 
 namespace xnnpack {
@@ -9,6 +12,7 @@ using internal::AppendEncodedU32;
 using internal::Export;
 using internal::Function;
 using internal::FuncType;
+using internal::WidthEncodedU32;
 
 void WasmAssembler::EmitMagicVersionAndDlynkSection() {
   EmitByteArray(kMagic);
@@ -35,8 +39,7 @@ static void AppendResultType(const std::vector<ValType>& type,
   }
 }
 
-static void AppendFuncType(const Function& func,
-                           std::vector<byte>& out) {
+static void AppendFuncType(const Function& func, std::vector<byte>& out) {
   const FuncType& type = func.type;
   static constexpr byte kFunctionByte = 0x60;
   out.push_back(kFunctionByte);
@@ -47,6 +50,8 @@ static void AppendFuncType(const Function& func,
 void WasmAssembler::EmitTypeSection() {
   EmitSection(kTypeSectionCode, AppendArray(functions_, AppendFuncType));
 }
+
+void WasmAssembler::EmitImportSection() { EmitByteArray(kImportSection); }
 
 // Functions emitting Function section
 void WasmAssembler::AppendFuncs(std::vector<byte>& out) {
@@ -79,11 +84,22 @@ void WasmAssembler::EmitExportsSection() {
 
 // Functions emitting Code section
 static void AppendFunctionBody(const Function& func, std::vector<byte>& out) {
-  // local variables are not yet supported
-  constexpr static int kLocalNum = 0;
-  out.push_back(func.body.size() + 1);
+  const auto& locals_declaration = func.locals_declaration;
+  const uint32_t locals_declaration_size =
+      std::accumulate(locals_declaration.begin(),
+                      locals_declaration.end(), 0,
+                      [](uint32_t sum, const auto& declaration) {
+                        return sum + WidthEncodedU32(declaration.second);
+                      }) +
+      locals_declaration.size() +
+      WidthEncodedU32(locals_declaration.size());
+  AppendEncodedU32(func.body.size() + locals_declaration_size, out);
 
-  AppendEncodedU32(kLocalNum, out);
+  AppendEncodedU32(locals_declaration.size(), out);
+  for (const auto& type_to_count : locals_declaration) {
+    AppendEncodedU32(type_to_count.second, out);
+    out.push_back(type_to_count.first.code);
+  }
   out.insert(out.end(), func.body.begin(), func.body.end());
 }
 

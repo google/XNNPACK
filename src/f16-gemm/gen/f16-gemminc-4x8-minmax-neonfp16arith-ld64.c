@@ -28,7 +28,7 @@ void xnn_f16_gemminc_minmax_ukernel_4x8__neonfp16arith_ld64(
     void* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const void*restrict acc,
+    const void* restrict acc,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);

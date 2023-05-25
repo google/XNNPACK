@@ -1,0 +1,55 @@
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert DATATYPE in ["QS8", "QU8"]
+$assert BATCH_TILE >= 1
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <xnnpack/math.h>
+#include <xnnpack/vhswish.h>
+
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+$OUTPUT_MIN = {"QS8": -128, "QU8": 0}[DATATYPE]
+$OUTPUT_MAX = {"QS8": 127, "QU8": 255}[DATATYPE]
+void xnn_${DATATYPE.lower()}_vhswish_ukernel__scalar_x${BATCH_TILE}(
+    size_t batch,
+    const ${XINT8_T}* input,
+    ${XINT8_T}* output,
+    const union xnn_${DATATYPE.lower()}_hswish_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const int32_t vinput_zero_point = params->scalar.input_zero_point;
+  const int32_t voutput_zero_point = params->scalar.output_zero_point;
+  const int32_t vinput_scale_div_mantissa = params->scalar.input_scale_div_mantissa;
+  const int32_t vinput_scale_div_exp = params->scalar.input_scale_div_exp;
+  const int32_t vscale_ratio = params->scalar.scale_ratio;
+
+  do {
+    const int32_t vacc = (vinput_zero_point - (int32_t) *input++) << 7;
+    int32_t vin = vacc * vinput_scale_div_mantissa;
+    if (vinput_scale_div_exp > 0) {
+      vin <<= vinput_scale_div_exp;
+    } else {
+      vin >>= -vinput_scale_div_exp;
+    }
+    vin -= 16384;
+    vin = math_min_s32(vin, 0);
+    vin = math_max_s32(vin, -32768);
+
+    int32_t vout = math_asr_s32(vacc * vscale_ratio, 15);
+    vout = math_asr_s32(vin * vout, 15) + voutput_zero_point;
+    vout = math_max_s32(vout, ${OUTPUT_MIN});
+    vout = math_min_s32(vout, ${OUTPUT_MAX});
+    *output++ = (${XINT8_T}) vout;
+
+    batch -= sizeof(${XINT8_T});
+  } while (batch != 0);
+}
