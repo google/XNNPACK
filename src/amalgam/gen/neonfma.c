@@ -2453,10 +2453,10 @@ void xnn_f32_gemm_minmax_ukernel_6x8s4__neonfma(
 void xnn_f32_ibilinear_chw_ukernel__neonfma_p8(
     size_t output_pixels,
     size_t channels,
-    const float**restrict input,
+    const float** restrict input,
     size_t input_offset,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t input_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);
@@ -2693,10 +2693,10 @@ void xnn_f32_ibilinear_chw_ukernel__neonfma_p8(
 void xnn_f32_ibilinear_ukernel__neonfma_c8(
     size_t output_pixels,
     size_t channels,
-    const float**restrict input,
+    const float** restrict input,
     size_t input_offset,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t output_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);
@@ -2830,9 +2830,9 @@ void xnn_f32_igemm_minmax_ukernel_1x8s4__neonfma(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -2993,9 +2993,9 @@ void xnn_f32_igemm_minmax_ukernel_4x8s4__neonfma(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -3324,9 +3324,9 @@ void xnn_f32_igemm_minmax_ukernel_6x8s4__neonfma(
     size_t nc,
     size_t kc,
     size_t ks,
-    const float**restrict a,
-    const float*restrict w,
-    float*restrict c,
+    const float** restrict a,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -4642,10 +4642,10 @@ void xnn_f32_velu_ukernel__neonfma_rr1_p6_x8(
 void xnn_f32_vmulcaddc_minmax_ukernel_c4__neonfma_2x(
     size_t rows,
     size_t channels,
-    const float*restrict input,
+    const float* restrict input,
     size_t input_stride,
-    const float*restrict weights,
-    float*restrict output,
+    const float* restrict weights,
+    float* restrict output,
     size_t output_stride,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {

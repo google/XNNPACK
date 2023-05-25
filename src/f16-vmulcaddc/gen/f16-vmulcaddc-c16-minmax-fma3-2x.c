@@ -19,10 +19,10 @@
 void xnn_f16_vmulcaddc_minmax_ukernel_c16__fma3_2x(
     size_t rows,
     size_t channels,
-    const void*restrict input,
+    const void* restrict input,
     size_t input_stride,
-    const void*restrict weights,
-    void*restrict output,
+    const void* restrict weights,
+    void* restrict output,
     size_t output_stride,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {

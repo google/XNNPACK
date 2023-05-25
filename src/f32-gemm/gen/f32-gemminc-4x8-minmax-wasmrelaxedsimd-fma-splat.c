@@ -18,13 +18,13 @@ void xnn_f32_gemminc_minmax_ukernel_4x8__wasmrelaxedsimd_fma_splat(
     size_t mr,
     size_t nc,
     size_t kc,
-    const float*restrict a,
+    const float* restrict a,
     size_t a_stride,
-    const float*restrict w,
-    float*restrict c,
+    const float* restrict w,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const float*restrict acc,
+    const float* restrict acc,
     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
@@ -146,7 +146,6 @@ void xnn_f32_gemminc_minmax_ukernel_4x8__wasmrelaxedsimd_fma_splat(
       vacc1x4567 = __builtin_wasm_relaxed_madd_f32x4(va1c3, vb4567c3, vacc1x4567);
       vacc2x4567 = __builtin_wasm_relaxed_madd_f32x4(va2c3, vb4567c3, vacc2x4567);
       vacc3x4567 = __builtin_wasm_relaxed_madd_f32x4(va3c3, vb4567c3, vacc3x4567);
-
       w += 32;
       k -= 4 * sizeof(float);
     }
