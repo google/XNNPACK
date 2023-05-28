@@ -130,7 +130,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${ACTIVATION_SUFFIX}_ukerne
       $for N in range(0, NR, 4):
         const v128_t vscale${ABC[N:N+4]} = wasm_v128_load((const float*) w + ${N});
         $for M in range(MR):
-           vacc${M}x${ABC[N:N+4]} = wasm_f32x4_mul(vacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
+          vacc${M}x${ABC[N:N+4]} = wasm_f32x4_mul(vacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
       w = (const float*) w + ${NR};
     $if ACTIVATION == "MINMAX":
       $for N in range(0, NR, 4):
