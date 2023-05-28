@@ -9,7 +9,7 @@ args = parser.parse_args()
 
 min_num_lines = args.min_lines
 
-filename_regex = '(src|source|unit_test|include)/.*$'
+filename_regex = r'^[^\(]*(src|source|unit_test|include)/.*$'
 
 # caveat: Does fully not handle numbers with different number of digits.
 def compare_strs(str1, str2, num_sort=True):

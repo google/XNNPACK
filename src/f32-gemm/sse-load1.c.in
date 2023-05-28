@@ -3,22 +3,32 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert DATATYPE in ["F32", "QC8"]
 $assert NR % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <xmmintrin.h>
+$if DATATYPE == "QC8":
+  #include <smmintrin.h>
 
 #include <xnnpack/gemm.h>
+$if DATATYPE == "QC8":
+  #include <xnnpack/unaligned.h>
 
 
-void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__sse_load1(
+$ISA = {"F32": "sse", "QC8": "sse41"}[DATATYPE]
+$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
+void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_load1(
     size_t mr,
     size_t nc,
     size_t kc,
     const float* restrict a,
     size_t a_stride,
-    const float* restrict w,
+    $if DATATYPE == "F32":
+      const float* restrict w,
+    $else:
+      const void* restrict w,
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
@@ -66,11 +76,17 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__sse_load1(
       acc += ${MR*NR};
     $else:
       $for N in range(0, NR, 4):
-        __m128 vacc0x${ABC[N:N+4]} = _mm_load_ps(w + ${N});
+        $if DATATYPE == "F32":
+          __m128 vacc0x${ABC[N:N+4]} = _mm_load_ps(w + ${N});
+        $else:
+          __m128 vacc0x${ABC[N:N+4]} = _mm_loadu_ps((const float*) w + ${N});
       $for M in range(1, MR):
         $for N in range(0, NR, 4):
           __m128 vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
-      w += ${NR};
+      $if DATATYPE == "F32":
+        w += ${NR};
+      $else:
+        w = (const float*) w + ${NR};
 
     size_t k = kc;
     do {
@@ -78,10 +94,19 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__sse_load1(
         const __m128 va${M} = _mm_load1_ps(a${M});
         a${M} += 1;
 
-      const __m128 vb${ABC[0:4]} = _mm_load_ps(w);
+      $if DATATYPE == "F32":
+        const __m128 vb${ABC[0:4]} = _mm_load_ps(w);
+      $else:
+        const __m128 vb${ABC[0:4]} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int32_t*) w))));
       $for N in range(4, NR, 4):
-        const __m128 vb${ABC[N:N+4]} = _mm_load_ps(w + ${N});
-      w += ${NR};
+        $if DATATYPE == "F32":
+          const __m128 vb${ABC[N:N+4]} = _mm_load_ps(w + ${N});
+        $else:
+          const __m128 vb${ABC[N:N+4]} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${N}))));
+      $if DATATYPE == "F32":
+        w += ${NR};
+      $else:
+        w = (const int8_t*) w + ${NR};
 
       $for N in range(0, NR, 4):
         $for M in range(MR):
@@ -90,6 +115,12 @@ void xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__sse_load1(
       k -= sizeof(float);
     } while (k != 0);
 
+    $if DATATYPE == "QC8":
+      $for N in range(0, NR, 4):
+        const __m128 vscale${ABC[N:N+4]} = _mm_loadu_ps((const float*) w + ${N});
+        $for M in range(MR):
+          vacc${M}x${ABC[N:N+4]} = _mm_mul_ps(vacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
+      w = (const float*) w + ${NR};
     const __m128 vmax = _mm_load_ps(params->sse.max);
     $for N in range(0, NR, 4):
       $for M in range(MR):
