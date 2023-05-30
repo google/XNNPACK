@@ -128,7 +128,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x2c4__sse41(
     __m128 vacc01x01 = _mm_add_ps(_mm_movelh_ps(vacc0x01c2, vacc1x01c2), _mm_movehl_ps(vacc1x01c2, vacc0x01c2));
     __m128 vacc23x01 = _mm_add_ps(_mm_movelh_ps(vacc2x01c2, vacc3x01c2), _mm_movehl_ps(vacc3x01c2, vacc2x01c2));
 
-    const __m128 vscalex01 = _mm_castpd_ps(_mm_loadu_pd(w));
+    const __m128 vscalex01 = _mm_castsi128_ps(_mm_loadu_si64(w));
     const __m128 vscale2x01 = _mm_movelh_ps(vscalex01, vscalex01);
     w = (const float*) w + 2;
     vacc01x01 = _mm_mul_ps(vacc01x01, vscale2x01);
