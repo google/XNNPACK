@@ -24,14 +24,13 @@ void xnn_qs8_vhswish_ukernel__scalar_x1(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int32_t vinput_zero_point = params->scalar.input_zero_point;
+  const uint32_t vinput_zero_point = (uint32_t) params->scalar.input_zero_point;
   const int32_t voutput_zero_point = params->scalar.output_zero_point;
   const int32_t vinput_scale_div_mantissa = params->scalar.input_scale_div_mantissa;
   const int32_t vinput_scale_div_exp = params->scalar.input_scale_div_exp;
   const int32_t vscale_ratio = params->scalar.scale_ratio;
-
   do {
-    const int32_t vacc = (vinput_zero_point - (int32_t) *input++) << 7;
+    const int32_t vacc = (int32_t) ((vinput_zero_point - (uint32_t) *input++) << 7);
     int32_t vin = vacc * vinput_scale_div_mantissa;
     if (vinput_scale_div_exp > 0) {
       vin <<= vinput_scale_div_exp;

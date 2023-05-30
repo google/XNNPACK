@@ -26,30 +26,112 @@ void xnn_${DATATYPE.lower()}_vhswish_ukernel__scalar_x${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int32_t vinput_zero_point = params->scalar.input_zero_point;
+  const uint32_t vinput_zero_point = (uint32_t) params->scalar.input_zero_point;
   const int32_t voutput_zero_point = params->scalar.output_zero_point;
   const int32_t vinput_scale_div_mantissa = params->scalar.input_scale_div_mantissa;
   const int32_t vinput_scale_div_exp = params->scalar.input_scale_div_exp;
   const int32_t vscale_ratio = params->scalar.scale_ratio;
+  $if BATCH_TILE == 1:
+    do {
+      const int32_t vacc = (int32_t) ((vinput_zero_point - (uint32_t) *input++) << 7);
+      int32_t vin = vacc * vinput_scale_div_mantissa;
+      if (vinput_scale_div_exp > 0) {
+        vin <<= vinput_scale_div_exp;
+      } else {
+        vin >>= -vinput_scale_div_exp;
+      }
+      vin -= 16384;
+      vin = math_min_s32(vin, 0);
+      vin = math_max_s32(vin, -32768);
 
-  do {
-    const int32_t vacc = (vinput_zero_point - (int32_t) *input++) << 7;
-    int32_t vin = vacc * vinput_scale_div_mantissa;
-    if (vinput_scale_div_exp > 0) {
-      vin <<= vinput_scale_div_exp;
-    } else {
-      vin >>= -vinput_scale_div_exp;
+      int32_t vout = math_asr_s32(vacc * vscale_ratio, 15);
+      vout = math_asr_s32(vin * vout, 15) + voutput_zero_point;
+      vout = math_max_s32(vout, ${OUTPUT_MIN});
+      vout = math_min_s32(vout, ${OUTPUT_MAX});
+      *output++ = (${XINT8_T}) vout;
+
+      batch -= sizeof(${XINT8_T});
+    } while (batch != 0);
+  $else:
+    for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+      $for N in range(BATCH_TILE):
+        int32_t vacc${ABC[N]} = (int32_t) ((vinput_zero_point - (uint32_t) input[${N}]) << 7);
+      input += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        int32_t vin${ABC[N]} = vacc${ABC[N]} * vinput_scale_div_mantissa;
+
+      if (vinput_scale_div_exp > 0) {
+        $for N in range(BATCH_TILE):
+          vin${ABC[N]} <<= vinput_scale_div_exp;
+      } else {
+        $for N in range(BATCH_TILE):
+          vin${ABC[N]} >>= -vinput_scale_div_exp;
+      }
+
+      $for N in range(BATCH_TILE):
+        vin${ABC[N]} -= 16384;
+
+      $for N in range(BATCH_TILE):
+        vin${ABC[N]} = math_min_s32(vin${ABC[N]}, 0);
+
+      $for N in range(BATCH_TILE):
+        vin${ABC[N]} = math_max_s32(vin${ABC[N]}, -32768);
+
+      $for N in range(BATCH_TILE):
+        int32_t vout${ABC[N]} = math_asr_s32(vacc${ABC[N]} * vscale_ratio, 15);
+
+      $for N in range(BATCH_TILE):
+        vout${ABC[N]} = math_asr_s32(vin${ABC[N]} * vout${ABC[N]}, 15) + voutput_zero_point;
+
+      $for N in range(BATCH_TILE):
+        vout${ABC[N]} = math_max_s32(vout${ABC[N]}, ${OUTPUT_MIN});
+
+      $for N in range(BATCH_TILE):
+        vout${ABC[N]} = math_min_s32(vout${ABC[N]}, ${OUTPUT_MAX});
+
+      $for N in range(BATCH_TILE):
+        output[${N}] = (${XINT8_T}) vout${ABC[N]};
+      output += ${BATCH_TILE};
     }
-    vin -= 16384;
-    vin = math_min_s32(vin, 0);
-    vin = math_max_s32(vin, -32768);
+    if XNN_UNLIKELY(batch != 0) {
+      $if BATCH_TILE == 2:
+        const int32_t vacc = (int32_t) ((vinput_zero_point - (uint32_t) *input++) << 7);
+        int32_t vin = vacc * vinput_scale_div_mantissa;
+        if (vinput_scale_div_exp > 0) {
+          vin <<= vinput_scale_div_exp;
+        } else {
+          vin >>= -vinput_scale_div_exp;
+        }
+        vin -= 16384;
+        vin = math_min_s32(vin, 0);
+        vin = math_max_s32(vin, -32768);
 
-    int32_t vout = math_asr_s32(vacc * vscale_ratio, 15);
-    vout = math_asr_s32(vin * vout, 15) + voutput_zero_point;
-    vout = math_max_s32(vout, ${OUTPUT_MIN});
-    vout = math_min_s32(vout, ${OUTPUT_MAX});
-    *output++ = (${XINT8_T}) vout;
+        int32_t vout = math_asr_s32(vacc * vscale_ratio, 15);
+        vout = math_asr_s32(vin * vout, 15) + voutput_zero_point;
+        vout = math_max_s32(vout, ${OUTPUT_MIN});
+        vout = math_min_s32(vout, ${OUTPUT_MAX});
+        *output++ = (${XINT8_T}) vout;
+      $else:
+        do {
+          const int32_t vacc = (int32_t) ((vinput_zero_point - (uint32_t) *input++) << 7);
+          int32_t vin = vacc * vinput_scale_div_mantissa;
+          if (vinput_scale_div_exp > 0) {
+            vin <<= vinput_scale_div_exp;
+          } else {
+            vin >>= -vinput_scale_div_exp;
+          }
+          vin -= 16384;
+          vin = math_min_s32(vin, 0);
+          vin = math_max_s32(vin, -32768);
 
-    batch -= sizeof(${XINT8_T});
-  } while (batch != 0);
+          int32_t vout = math_asr_s32(vacc * vscale_ratio, 15);
+          vout = math_asr_s32(vin * vout, 15) + voutput_zero_point;
+          vout = math_max_s32(vout, ${OUTPUT_MIN});
+          vout = math_min_s32(vout, ${OUTPUT_MAX});
+          *output++ = (${XINT8_T}) vout;
+
+          batch -= sizeof(${XINT8_T});
+        } while (batch != 0);
+    }
 }
