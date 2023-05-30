@@ -3,22 +3,32 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert DATATYPE in ["F32", "QC8"]
 $assert NR == 2
 $assert MR % 2 == 0
 #include <assert.h>
 
 #include <xmmintrin.h>
+$if DATATYPE == "QC8":
+  #include <smmintrin.h>
 
 #include <xnnpack/gemm.h>
+$if DATATYPE == "QC8":
+  #include <xnnpack/unaligned.h>
 
 
-void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}c4__sse(
+$ISA = {"F32": "sse", "QC8": "sse41"}[DATATYPE]
+$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
+void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}c4__${ISA}(
     size_t mr,
     size_t nc,
     size_t kc,
     const float* restrict a,
     size_t a_stride,
-    const float* restrict w,
+    $if DATATYPE == "F32":
+      const float* restrict w,
+    $else:
+      const void* restrict w,
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
@@ -57,11 +67,17 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}c4__sse(
   do {
     __m128 vacc0x0c4 = _mm_load_ss(w);
     $for N in range(1, NR):
-      __m128 vacc0x${N}c4 = _mm_load_ss(w + ${N});
+      $if DATATYPE == "F32":
+        __m128 vacc0x${N}c4 = _mm_load_ss(w + ${N});
+      $else:
+        __m128 vacc0x${N}c4 = _mm_load_ss((const float*) w + ${N});
     $for M in range(1, MR):
       $for N in range(NR):
         __m128 vacc${M}x${N}c4 = vacc0x${N}c4;
-    w += ${NR};
+    $if DATATYPE == "F32":
+      w += ${NR};
+    $else:
+      w = (const float*) w + ${NR};
 
     size_t k = kc;
     for (; k >= 4 * sizeof(float); k -= 4 * sizeof(float)) {
@@ -69,10 +85,19 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}c4__sse(
         const __m128 va${M} = _mm_loadu_ps(a${M});
         a${M} += 4;
 
-      const __m128 vb0 = _mm_loadu_ps(w);
+      $if DATATYPE == "F32":
+        const __m128 vb0 = _mm_loadu_ps(w);
+      $else:
+        const __m128 vb0 = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int32_t*) w))));
       $for N in range(1, NR):
-        const __m128 vb${N} = _mm_loadu_ps(w + ${N * 4});
-      w += ${NR * 4};
+        $if DATATYPE == "F32":
+          const __m128 vb${N} = _mm_loadu_ps(w + ${N * 4});
+        $else:
+          const __m128 vb${N} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${N * 4}))));
+      $if DATATYPE == "F32":
+        w += ${NR * 4};
+      $else:
+        w = (const int8_t*) w + ${NR * 4};
 
       $for M in range(MR):
         $for N in range(NR):
@@ -83,10 +108,19 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}c4__sse(
         const __m128 va${M} = _mm_loadu_ps(a${M});
         a${M} = (const float*) ((uintptr_t) a${M} + k);
 
-      const __m128 vb0 = _mm_loadu_ps(w);
+      $if DATATYPE == "F32":
+        const __m128 vb0 = _mm_loadu_ps(w);
+      $else:
+        const __m128 vb0 = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int32_t*) w))));
       $for N in range(1, NR):
-        const __m128 vb${N} = _mm_loadu_ps(w + ${N * 4});
-      w += ${NR * 4};
+        $if DATATYPE == "F32":
+          const __m128 vb${N} = _mm_loadu_ps(w + ${N * 4});
+        $else:
+          const __m128 vb${N} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${N * 4}))));
+      $if DATATYPE == "F32":
+        w += ${NR * 4};
+      $else:
+        w = (const int8_t*) w + ${NR * 4};
 
       $for N in range(NR):
         const __m128 vmask${N} = _mm_cmpeq_ps(_mm_setzero_ps(), vb${N});
@@ -102,6 +136,12 @@ void xnn_f32_gemm_minmax_ukernel_${MR}x${NR}c4__sse(
     $for M in range(0, MR, 2):
       __m128 vacc${M}${M+1}x01 = _mm_add_ps(_mm_movelh_ps(vacc${M}x01c2, vacc${M+1}x01c2), _mm_movehl_ps(vacc${M+1}x01c2, vacc${M}x01c2));
 
+    $if DATATYPE == "QC8":
+      const __m128 vscalex01 = _mm_castpd_ps(_mm_loadu_pd(w));
+      const __m128 vscale2x01 = _mm_movelh_ps(vscalex01, vscalex01);
+      w = (const float*) w + 2;
+      $for M in range(0, MR, 2):
+        vacc${M}${M+1}x01 = _mm_mul_ps(vacc${M}${M+1}x01, vscale2x01);
     const __m128 vmax = _mm_load_ps(params->sse.max);
     $for M in range(0, MR, 2):
       vacc${M}${M+1}x01 = _mm_min_ps(vacc${M}${M+1}x01, vmax);
