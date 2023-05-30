@@ -137,7 +137,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}c4__${ISA}(
       __m128 vacc${M}${M+1}x01 = _mm_add_ps(_mm_movelh_ps(vacc${M}x01c2, vacc${M+1}x01c2), _mm_movehl_ps(vacc${M+1}x01c2, vacc${M}x01c2));
 
     $if DATATYPE == "QC8":
-      const __m128 vscalex01 = _mm_castsi128_ps(_mm_loadu_si64(w));
+      const __m128 vscalex01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w));
       const __m128 vscale2x01 = _mm_movelh_ps(vscalex01, vscalex01);
       w = (const float*) w + 2;
       $for M in range(0, MR, 2):
