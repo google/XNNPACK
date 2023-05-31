@@ -284,8 +284,7 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
   }
 
   struct xnn_ukernel_gemm* ukernel = &dynamic_fully_connected_op->ukernel.gemm;
-  const uint32_t nr = ukernel->nr;
-  if (nr > output_channels) {
+  if (ukernel->nr > output_channels) {
     uint32_t gemm2_mr = dynamic_fully_connected_op->ukernel.gemm2.mr;
     // Default microkernel is suboptimal, use a microkernel that better supports less output channels.
     if (gemm2_mr != 0 && dynamic_fully_connected_op->ukernel.gemm2.gemm_cases[gemm2_mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
@@ -293,6 +292,7 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
     }
   }
 
+  const uint32_t nr = ukernel->nr;
   uint32_t mr = ukernel->mr;
 
   if (batch_size == 1 && ukernel->gemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
