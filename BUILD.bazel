@@ -6435,6 +6435,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "fully_connected_bench",
+    srcs = ["bench/fully-connected.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
     name = "global_average_pooling_bench",
     srcs = ["bench/global-average-pooling.cc"],
     deps = OPERATOR_BENCHMARK_DEPS,
