@@ -413,15 +413,9 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
   }
 
   const struct xnn_gemm_config* gemm2_config = xnn_init_f32_gemm2_config();
-  if (gemm_config == NULL) {
-    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-                  xnn_operator_type_to_string(xnn_operator_type_convolution_nhwc_f32));
-    return xnn_status_unsupported_hardware;
-  }
-
   if (gemm_config->nr > output_channels) {
     // Default microkernel is suboptimal, use a microkernel that better supports less output channels.
-    if (gemm2_config->minmax.gemm[gemm2_config->mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
+    if (gemm2_config != NULL && gemm2_config->minmax.gemm[gemm2_config->mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
       gemm_config = gemm2_config;
     }
   }
