@@ -100,7 +100,10 @@ struct xnn_ukernel {
     struct xnn_ukernel_conv2d conv2d;
     struct xnn_ukernel_dwconv dwconv;
     struct xnn_ukernel_dwconv2d dwconv2d;
-    struct xnn_ukernel_gemm gemm;
+    struct {
+      struct xnn_ukernel_gemm gemm;
+      struct xnn_ukernel_gemm gemm2;
+    };
     struct xnn_ukernel_igemm igemm;
     struct xnn_ukernel_spmm spmm;
     struct xnn_ukernel_vmulcaddc vmulcaddc;
