@@ -117,15 +117,9 @@ class CeilingOperatorTester {
       // Smart pointer to automatically delete ceiling_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_ceiling_op(ceiling_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_ceiling_nc_f16(
-          ceiling_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(ceiling_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_ceiling_nc_f16(ceiling_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_ceiling_nc_f16(ceiling_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(ceiling_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -170,15 +164,9 @@ class CeilingOperatorTester {
       // Smart pointer to automatically delete ceiling_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_ceiling_op(ceiling_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_ceiling_nc_f32(
-          ceiling_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(ceiling_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_ceiling_nc_f32(ceiling_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_ceiling_nc_f32(ceiling_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(ceiling_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

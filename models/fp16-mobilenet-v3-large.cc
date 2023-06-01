@@ -2659,6 +2659,195 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
   }
 #endif  // XNN_PLATFORM_JIT
 
+  status = xnn_reshape_hardswish_nc_f16(
+    op1,
+    12544 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #1" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op36,
+    784 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #36" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op38,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #38" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op41,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #41" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op43,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #43" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op47,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #47" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op49,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #49" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op53,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #53" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op55,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #55" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op59,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #59" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op61,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #61" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op68,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #68" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op70,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #70" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op78,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #78" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op80,
+    49 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #80" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op87,
+    49 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #87" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op89,
+    49 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #89" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op97,
+    49 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #97" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op99,
+    49 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #99" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op107,
+    49 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #107" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f16(
+    op110,
+    1 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #110" << std::endl;
+    return ExecutionPlan();
+  }
+
   status = xnn_setup_convolution2d_nhwc_f16(
     op0,
     1 /* batch size */, 224 /* input height */, 224 /* input width */,
@@ -2671,9 +2860,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op1,
-    12544 /* batch size */,
-    v1.data() /* input */, v2.data() /* output */,
-    threadpool /* threadpool */);
+    v1.data() /* input */, v2.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #1" << std::endl;
     return ExecutionPlan();
@@ -3049,9 +3236,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op36,
-    784 /* batch size */,
-    v36.data() /* input */, v37.data() /* output */,
-    threadpool /* threadpool */);
+    v36.data() /* input */, v37.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #36" << std::endl;
     return ExecutionPlan();
@@ -3069,9 +3254,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op38,
-    196 /* batch size */,
-    v38.data() /* input */, v39.data() /* output */,
-    threadpool /* threadpool */);
+    v38.data() /* input */, v39.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #38" << std::endl;
     return ExecutionPlan();
@@ -3099,9 +3282,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op41,
-    196 /* batch size */,
-    v41.data() /* input */, v42.data() /* output */,
-    threadpool /* threadpool */);
+    v41.data() /* input */, v42.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #41" << std::endl;
     return ExecutionPlan();
@@ -3119,9 +3300,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op43,
-    196 /* batch size */,
-    v43.data() /* input */, v44.data() /* output */,
-    threadpool /* threadpool */);
+    v43.data() /* input */, v44.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #43" << std::endl;
     return ExecutionPlan();
@@ -3163,9 +3342,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op47,
-    196 /* batch size */,
-    v47.data() /* input */, v48.data() /* output */,
-    threadpool /* threadpool */);
+    v47.data() /* input */, v48.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #47" << std::endl;
     return ExecutionPlan();
@@ -3183,9 +3360,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op49,
-    196 /* batch size */,
-    v49.data() /* input */, v50.data() /* output */,
-    threadpool /* threadpool */);
+    v49.data() /* input */, v50.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #49" << std::endl;
     return ExecutionPlan();
@@ -3227,9 +3402,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op53,
-    196 /* batch size */,
-    v53.data() /* input */, v54.data() /* output */,
-    threadpool /* threadpool */);
+    v53.data() /* input */, v54.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #53" << std::endl;
     return ExecutionPlan();
@@ -3247,9 +3420,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op55,
-    196 /* batch size */,
-    v55.data() /* input */, v56.data() /* output */,
-    threadpool /* threadpool */);
+    v55.data() /* input */, v56.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #55" << std::endl;
     return ExecutionPlan();
@@ -3291,9 +3462,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op59,
-    196 /* batch size */,
-    v59.data() /* input */, v60.data() /* output */,
-    threadpool /* threadpool */);
+    v59.data() /* input */, v60.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #59" << std::endl;
     return ExecutionPlan();
@@ -3311,9 +3480,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op61,
-    196 /* batch size */,
-    v61.data() /* input */, v62.data() /* output */,
-    threadpool /* threadpool */);
+    v61.data() /* input */, v62.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #61" << std::endl;
     return ExecutionPlan();
@@ -3385,9 +3552,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op68,
-    196 /* batch size */,
-    v68.data() /* input */, v69.data() /* output */,
-    threadpool /* threadpool */);
+    v68.data() /* input */, v69.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #68" << std::endl;
     return ExecutionPlan();
@@ -3405,9 +3570,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op70,
-    196 /* batch size */,
-    v70.data() /* input */, v71.data() /* output */,
-    threadpool /* threadpool */);
+    v70.data() /* input */, v71.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #70" << std::endl;
     return ExecutionPlan();
@@ -3493,9 +3656,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op78,
-    196 /* batch size */,
-    v78.data() /* input */, v79.data() /* output */,
-    threadpool /* threadpool */);
+    v78.data() /* input */, v79.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #78" << std::endl;
     return ExecutionPlan();
@@ -3513,9 +3674,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op80,
-    49 /* batch size */,
-    v80.data() /* input */, v81.data() /* output */,
-    threadpool /* threadpool */);
+    v80.data() /* input */, v81.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #80" << std::endl;
     return ExecutionPlan();
@@ -3587,9 +3746,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op87,
-    49 /* batch size */,
-    v87.data() /* input */, v88.data() /* output */,
-    threadpool /* threadpool */);
+    v87.data() /* input */, v88.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #87" << std::endl;
     return ExecutionPlan();
@@ -3607,9 +3764,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op89,
-    49 /* batch size */,
-    v89.data() /* input */, v90.data() /* output */,
-    threadpool /* threadpool */);
+    v89.data() /* input */, v90.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #89" << std::endl;
     return ExecutionPlan();
@@ -3695,9 +3850,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op97,
-    49 /* batch size */,
-    v97.data() /* input */, v98.data() /* output */,
-    threadpool /* threadpool */);
+    v97.data() /* input */, v98.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #97" << std::endl;
     return ExecutionPlan();
@@ -3715,9 +3868,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op99,
-    49 /* batch size */,
-    v99.data() /* input */, v100.data() /* output */,
-    threadpool /* threadpool */);
+    v99.data() /* input */, v100.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #99" << std::endl;
     return ExecutionPlan();
@@ -3803,9 +3954,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op107,
-    49 /* batch size */,
-    v107.data() /* input */, v108.data() /* output */,
-    threadpool /* threadpool */);
+    v107.data() /* input */, v108.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #107" << std::endl;
     return ExecutionPlan();
@@ -3833,9 +3982,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f16(
     op110,
-    1 /* batch size */,
-    v110.data() /* input */, v111.data() /* output */,
-    threadpool /* threadpool */);
+    v110.data() /* input */, v111.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #110" << std::endl;
     return ExecutionPlan();

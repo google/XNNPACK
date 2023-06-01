@@ -55,10 +55,13 @@ static void xnnpack_elu_f16(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_elu_nc_f16(
-    elu_op, batch_size,
-    input.data(), output.data(),
-    nullptr /* thread pool */);
+  status = xnn_reshape_elu_nc_f16(elu_op, batch_size, /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape ELU operator");
+    return;
+  }
+
+  status = xnn_setup_elu_nc_f16(elu_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup ELU operator");
     return;
@@ -118,10 +121,13 @@ static void xnnpack_elu_f32(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_elu_nc_f32(
-    elu_op, batch_size,
-    input.data(), output.data(),
-    nullptr /* thread pool */);
+  status = xnn_reshape_elu_nc_f32(elu_op, batch_size, /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape ELU operator");
+    return;
+  }
+
+  status = xnn_setup_elu_nc_f32(elu_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup ELU operator");
     return;
@@ -187,10 +193,13 @@ static void xnnpack_elu_qs8(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_elu_nc_qs8(
-    elu_op, batch_size,
-    input.data(), output.data(),
-    nullptr /* thread pool */);
+  status = xnn_reshape_elu_nc_qs8(elu_op, batch_size, /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape ELU operator");
+    return;
+  }
+
+  status = xnn_setup_elu_nc_qs8(elu_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup ELU operator");
     return;

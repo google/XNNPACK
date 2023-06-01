@@ -12,6 +12,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <memory>
 #include <random>
 #include <vector>
 
@@ -117,15 +118,9 @@ class AbsOperatorTester {
       // Smart pointer to automatically delete abs_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_abs_op(abs_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_abs_nc_f16(
-          abs_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(abs_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_abs_nc_f16(abs_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_abs_nc_f16(abs_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(abs_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -170,15 +165,9 @@ class AbsOperatorTester {
       // Smart pointer to automatically delete abs_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_abs_op(abs_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_abs_nc_f32(
-          abs_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(abs_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_abs_nc_f32(abs_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_abs_nc_f32(abs_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(abs_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

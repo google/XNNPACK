@@ -117,15 +117,9 @@ class BankersRoundingOperatorTester {
       // Smart pointer to automatically delete rounding_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_rounding_op(rounding_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_bankers_rounding_nc_f16(
-          rounding_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(rounding_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_bankers_rounding_nc_f16(rounding_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_bankers_rounding_nc_f16(rounding_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(rounding_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -170,15 +164,9 @@ class BankersRoundingOperatorTester {
       // Smart pointer to automatically delete rounding_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_rounding_op(rounding_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_bankers_rounding_nc_f32(
-          rounding_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(rounding_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_bankers_rounding_nc_f32(rounding_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_bankers_rounding_nc_f32(rounding_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(rounding_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <functional>
 #include <limits>
+#include <memory>
 #include <random>
 #include <vector>
 
@@ -165,15 +166,9 @@ class TanhOperatorTester {
       // Smart pointer to automatically delete tanh_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_tanh_op(tanh_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_tanh_nc_f16(
-          tanh_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(tanh_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_tanh_nc_f16(tanh_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_tanh_nc_f16(tanh_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(tanh_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -220,15 +215,9 @@ class TanhOperatorTester {
       // Smart pointer to automatically delete tanh_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_tanh_op(tanh_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_tanh_nc_f32(
-          tanh_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(tanh_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_tanh_nc_f32(tanh_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_tanh_nc_f32(tanh_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(tanh_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -327,15 +316,9 @@ class TanhOperatorTester {
       // Smart pointer to automatically delete tanh_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_tanh_op(tanh_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_tanh_nc_qs8(
-          tanh_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(tanh_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_tanh_nc_qs8(tanh_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_tanh_nc_qs8(tanh_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(tanh_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -388,15 +371,9 @@ class TanhOperatorTester {
       // Smart pointer to automatically delete tanh_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_tanh_op(tanh_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_tanh_nc_qu8(
-          tanh_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(tanh_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_tanh_nc_qu8(tanh_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_tanh_nc_qu8(tanh_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(tanh_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

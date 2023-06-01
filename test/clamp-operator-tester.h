@@ -156,15 +156,9 @@ class ClampOperatorTester {
       // Smart pointer to automatically delete clamp_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_clamp_op(clamp_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_clamp_nc_f16(
-          clamp_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(clamp_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_clamp_nc_f16(clamp_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_clamp_nc_f16(clamp_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(clamp_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -223,15 +217,9 @@ class ClampOperatorTester {
       // Smart pointer to automatically delete clamp_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_clamp_op(clamp_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_clamp_nc_f32(
-          clamp_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(clamp_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_clamp_nc_f32(clamp_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_clamp_nc_f32(clamp_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(clamp_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -289,15 +277,9 @@ class ClampOperatorTester {
       // Smart pointer to automatically delete clamp_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_clamp_op(clamp_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_clamp_nc_s8(
-          clamp_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(clamp_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_clamp_nc_s8(clamp_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_clamp_nc_s8(clamp_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(clamp_op, /*threadpool=*/nullptr));
 
       // Verify results .
       for (size_t i = 0; i < batch_size(); i++) {
@@ -355,15 +337,9 @@ class ClampOperatorTester {
       // Smart pointer to automatically delete clamp_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_clamp_op(clamp_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_clamp_nc_u8(
-          clamp_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(clamp_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_clamp_nc_u8(clamp_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_clamp_nc_u8(clamp_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(clamp_op, /*threadpool=*/nullptr));
 
       // Verify results .
       for (size_t i = 0; i < batch_size(); i++) {

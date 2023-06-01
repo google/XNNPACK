@@ -93,6 +93,39 @@ static enum xnn_status create_clamp_operator(
   return status;
 }
 
+static enum xnn_status reshape_clamp_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_clamp_nc_f16:
+      return xnn_reshape_clamp_nc_f16(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_clamp_nc_f32:
+      return xnn_reshape_clamp_nc_f32(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_clamp_nc_s8:
+      return xnn_reshape_clamp_nc_s8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_clamp_nc_u8:
+      return xnn_reshape_clamp_nc_u8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 static enum xnn_status setup_clamp_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
@@ -119,31 +152,23 @@ static enum xnn_status setup_clamp_operator(
     case xnn_operator_type_clamp_nc_f16:
       return xnn_setup_clamp_nc_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_clamp_nc_f32:
       return xnn_setup_clamp_nc_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_clamp_nc_s8:
       return xnn_setup_clamp_nc_s8(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_clamp_nc_u8:
       return xnn_setup_clamp_nc_u8(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
       break;
     default:
       XNN_UNREACHABLE;
@@ -250,6 +275,7 @@ enum xnn_status xnn_define_clamp(
   node->flags = flags;
 
   node->create = create_clamp_operator;
+  node->reshape = reshape_clamp_operator;
   node->setup = setup_clamp_operator;
 
   return xnn_status_success;

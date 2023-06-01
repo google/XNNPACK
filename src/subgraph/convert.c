@@ -115,6 +115,58 @@ static enum xnn_status create_convert_operator(
   return status;
 }
 
+static enum xnn_status reshape_convert_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_convert_nc_f32_f16:
+      return xnn_reshape_convert_nc_f32_f16(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_convert_nc_f32_qs8:
+      return xnn_reshape_convert_nc_f32_qs8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_convert_nc_f32_qu8:
+      return xnn_reshape_convert_nc_f32_qu8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_convert_nc_f16_f32:
+      return xnn_reshape_convert_nc_f16_f32(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_convert_nc_qs8:
+      return xnn_reshape_convert_nc_qs8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_convert_nc_qs8_f32:
+      return xnn_reshape_convert_nc_qs8_f32(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_convert_nc_qu8:
+      return xnn_reshape_convert_nc_qu8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_convert_nc_qu8_f32:
+      return xnn_reshape_convert_nc_qu8_f32(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 static enum xnn_status setup_convert_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
@@ -141,59 +193,43 @@ static enum xnn_status setup_convert_operator(
     case xnn_operator_type_convert_nc_f32_f16:
       return xnn_setup_convert_nc_f32_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_convert_nc_f32_qs8:
       return xnn_setup_convert_nc_f32_qs8(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_convert_nc_f32_qu8:
       return xnn_setup_convert_nc_f32_qu8(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_convert_nc_f16_f32:
       return xnn_setup_convert_nc_f16_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_convert_nc_qs8:
       return xnn_setup_convert_nc_qs8(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_convert_nc_qs8_f32:
       return xnn_setup_convert_nc_qs8_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_convert_nc_qu8:
       return xnn_setup_convert_nc_qu8(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_convert_nc_qu8_f32:
       return xnn_setup_convert_nc_qu8_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -263,6 +299,7 @@ void xnn_init_convert_node(
   node->flags = flags;
 
   node->create = create_convert_operator;
+  node->reshape = reshape_convert_operator;
   node->setup = setup_convert_operator;
 }
 

@@ -80,6 +80,38 @@ static enum xnn_status create_leaky_relu_operator(
   return status;
 }
 
+static enum xnn_status reshape_leaky_relu_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_leaky_relu_nc_f16:
+      return xnn_reshape_leaky_relu_nc_f16(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_leaky_relu_nc_f32:
+      return xnn_reshape_leaky_relu_nc_f32(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_leaky_relu_nc_qs8:
+      return xnn_reshape_leaky_relu_nc_qs8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_leaky_relu_nc_qu8:
+      return xnn_reshape_leaky_relu_nc_qu8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 static enum xnn_status setup_leaky_relu_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
@@ -106,31 +138,23 @@ static enum xnn_status setup_leaky_relu_operator(
     case xnn_operator_type_leaky_relu_nc_f16:
       return xnn_setup_leaky_relu_nc_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_leaky_relu_nc_f32:
       return xnn_setup_leaky_relu_nc_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_leaky_relu_nc_qs8:
       return xnn_setup_leaky_relu_nc_qs8(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_leaky_relu_nc_qu8:
       return xnn_setup_leaky_relu_nc_qu8(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -261,6 +285,7 @@ enum xnn_status xnn_define_leaky_relu(
   node->flags = flags;
 
   node->create = create_leaky_relu_operator;
+  node->reshape = reshape_leaky_relu_operator;
   node->setup = setup_leaky_relu_operator;
 
   return xnn_status_success;

@@ -187,15 +187,9 @@ class ELUOperatorTester {
       // Smart pointer to automatically delete elu_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_elu_op(elu_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_elu_nc_f16(
-          elu_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(elu_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_elu_nc_f16(elu_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_elu_nc_f16(elu_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(elu_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -243,15 +237,9 @@ class ELUOperatorTester {
       // Smart pointer to automatically delete elu_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_elu_op(elu_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_elu_nc_f32(
-          elu_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(elu_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_elu_nc_f32(elu_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_elu_nc_f32(elu_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(elu_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -310,15 +298,9 @@ class ELUOperatorTester {
       // Smart pointer to automatically delete elu_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_elu_op(elu_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_elu_nc_qs8(
-          elu_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(elu_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_elu_nc_qs8(elu_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_elu_nc_qs8(elu_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(elu_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

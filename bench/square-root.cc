@@ -53,10 +53,13 @@ static void xnnpack_square_root_f32(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_square_root_nc_f32(
-    sqrt_op, batch_size,
-    input.data(), output.data(),
-    nullptr /* thread pool */);
+  status = xnn_reshape_square_root_nc_f32(sqrt_op, batch_size, /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape Square Root operator");
+    return;
+  }
+
+  status = xnn_setup_square_root_nc_f32(sqrt_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Square Root operator");
     return;

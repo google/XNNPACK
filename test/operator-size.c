@@ -70,8 +70,7 @@ int main(int argc, char** argv) {
       break;
     case 8:
       xnn_setup_clamp_nc_f32(
-        op, 0,
-        NULL, NULL, NULL);
+        op, NULL, NULL);
       break;
     case 9:
       xnn_create_convolution2d_nhwc_f32(
@@ -144,8 +143,7 @@ int main(int argc, char** argv) {
       break;
     case 20:
       xnn_setup_hardswish_nc_f32(
-        op, 0,
-        NULL, NULL, NULL);
+        op, NULL, NULL);
       break;
     case 21:
       xnn_create_max_pooling2d_nhwc_f32(
@@ -217,8 +215,7 @@ int main(int argc, char** argv) {
       break;
     case 34:
       xnn_setup_sigmoid_nc_f32(
-        op, 0,
-        NULL, NULL, NULL);
+        op, NULL, NULL);
       break;
     case 35:
       xnn_create_softmax_nc_f32(

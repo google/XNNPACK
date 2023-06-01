@@ -43,10 +43,13 @@ static void xnnpack_truncation_f32(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_truncation_nc_f32(
-    truncation_op, batch_size,
-    input.data(), output.data(),
-    nullptr /* thread pool */);
+  status = xnn_reshape_truncation_nc_f32(truncation_op, batch_size, /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape Truncation operator");
+    return;
+  }
+
+  status = xnn_setup_truncation_nc_f32(truncation_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Truncation operator");
     return;

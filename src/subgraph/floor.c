@@ -57,6 +57,28 @@ static enum xnn_status create_floor_operator(
   return status;
 }
 
+static enum xnn_status reshape_floor_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_floor_nc_f32:
+      return xnn_reshape_floor_nc_f32(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_floor_nc_f16:
+      return xnn_reshape_floor_nc_f32(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 static enum xnn_status setup_floor_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
@@ -83,17 +105,13 @@ static enum xnn_status setup_floor_operator(
     case xnn_operator_type_floor_nc_f32:
       return xnn_setup_floor_nc_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_floor_nc_f16:
       return xnn_setup_floor_nc_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -173,6 +191,7 @@ enum xnn_status xnn_define_floor(
   node->flags = flags;
 
   node->create = create_floor_operator;
+  node->reshape = reshape_floor_operator;
   node->setup = setup_floor_operator;
 
   return xnn_status_success;

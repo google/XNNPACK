@@ -176,9 +176,8 @@ TEST_F(ClampTestQS8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_clamp_nc_s8(op, batch_size, input.data(), operator_output.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_clamp_nc_s8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_clamp_nc_s8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
@@ -241,9 +240,8 @@ TEST_F(ClampTestQU8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_clamp_nc_u8(op, batch_size, input.data(), operator_output.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_clamp_nc_u8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_clamp_nc_u8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
@@ -302,10 +300,8 @@ TEST_F(ClampTestF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_clamp_nc_f32(op, batch_size, input.data(), operator_output.data(), /*threadpool=*/nullptr));
-
+  ASSERT_EQ(xnn_status_success, xnn_reshape_clamp_nc_f32(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_clamp_nc_f32(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.

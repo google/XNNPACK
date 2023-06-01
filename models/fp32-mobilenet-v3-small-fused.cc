@@ -2132,6 +2132,78 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   xnn_finalize_code_memory(&code_cache.cache.code);
 #endif
 
+  status = xnn_reshape_hardswish_nc_f32(
+    op18,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #18" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f32(
+    op27,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #27" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f32(
+    op37,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #37" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f32(
+    op47,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #47" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f32(
+    op56,
+    196 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #56" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f32(
+    op66,
+    49 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #66" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f32(
+    op75,
+    49 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #75" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_hardswish_nc_f32(
+    op85,
+    49 /* batch size */,
+    threadpool /* threadpool */);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #85" << std::endl;
+    return ExecutionPlan();
+  }
+
   status = xnn_setup_convolution2d_nhwc_f32(
     op0,
     1 /* batch size */, 224 /* input height */, 224 /* input width */,
@@ -2302,9 +2374,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f32(
     op18,
-    196 /* batch size */,
-    v18.data() /* input */, v19.data() /* output */,
-    threadpool /* threadpool */);
+    v18.data() /* input */, v19.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #18" << std::endl;
     return ExecutionPlan();
@@ -2386,9 +2456,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f32(
     op27,
-    196 /* batch size */,
-    v27.data() /* input */, v28.data() /* output */,
-    threadpool /* threadpool */);
+    v27.data() /* input */, v28.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #27" << std::endl;
     return ExecutionPlan();
@@ -2484,9 +2552,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f32(
     op37,
-    196 /* batch size */,
-    v37.data() /* input */, v38.data() /* output */,
-    threadpool /* threadpool */);
+    v37.data() /* input */, v38.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #37" << std::endl;
     return ExecutionPlan();
@@ -2582,9 +2648,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f32(
     op47,
-    196 /* batch size */,
-    v47.data() /* input */, v48.data() /* output */,
-    threadpool /* threadpool */);
+    v47.data() /* input */, v48.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #47" << std::endl;
     return ExecutionPlan();
@@ -2666,9 +2730,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f32(
     op56,
-    196 /* batch size */,
-    v56.data() /* input */, v57.data() /* output */,
-    threadpool /* threadpool */);
+    v56.data() /* input */, v57.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #56" << std::endl;
     return ExecutionPlan();
@@ -2764,9 +2826,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f32(
     op66,
-    49 /* batch size */,
-    v66.data() /* input */, v67.data() /* output */,
-    threadpool /* threadpool */);
+    v66.data() /* input */, v67.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #66" << std::endl;
     return ExecutionPlan();
@@ -2848,9 +2908,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f32(
     op75,
-    49 /* batch size */,
-    v75.data() /* input */, v76.data() /* output */,
-    threadpool /* threadpool */);
+    v75.data() /* input */, v76.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #75" << std::endl;
     return ExecutionPlan();
@@ -2946,9 +3004,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_hardswish_nc_f32(
     op85,
-    49 /* batch size */,
-    v85.data() /* input */, v86.data() /* output */,
-    threadpool /* threadpool */);
+    v85.data() /* input */, v86.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #85" << std::endl;
     return ExecutionPlan();

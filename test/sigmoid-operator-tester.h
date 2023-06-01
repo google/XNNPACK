@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <limits>
+#include <memory>
 #include <random>
 #include <vector>
 
@@ -169,15 +170,9 @@ class SigmoidOperatorTester {
       // Smart pointer to automatically delete sigmoid_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_sigmoid_op(sigmoid_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_sigmoid_nc_f16(
-          sigmoid_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(sigmoid_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_f16(sigmoid_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_sigmoid_nc_f16(sigmoid_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(sigmoid_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -226,15 +221,9 @@ class SigmoidOperatorTester {
       // Smart pointer to automatically delete sigmoid_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_sigmoid_op(sigmoid_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_sigmoid_nc_f32(
-          sigmoid_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(sigmoid_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_f32(sigmoid_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_sigmoid_nc_f32(sigmoid_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(sigmoid_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -291,15 +280,9 @@ class SigmoidOperatorTester {
       // Smart pointer to automatically delete sigmoid_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_sigmoid_op(sigmoid_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_sigmoid_nc_qs8(
-          sigmoid_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(sigmoid_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_qs8(sigmoid_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_sigmoid_nc_qs8(sigmoid_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(sigmoid_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -353,15 +336,9 @@ class SigmoidOperatorTester {
       // Smart pointer to automatically delete sigmoid_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_sigmoid_op(sigmoid_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_sigmoid_nc_qu8(
-          sigmoid_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(sigmoid_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_qu8(sigmoid_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_sigmoid_nc_qu8(sigmoid_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(sigmoid_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

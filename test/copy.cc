@@ -152,9 +152,8 @@ TEST_F(CopyTestQS8, matches_operator_api)
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   size_t batch_size = NumElements(dims);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_copy_nc_x8(op, batch_size, input.data(), operator_output.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
@@ -212,9 +211,8 @@ TEST_F(CopyTestQU8, matches_operator_api)
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   size_t batch_size = NumElements(dims);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_copy_nc_x8(op, batch_size, input.data(), operator_output.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
@@ -268,9 +266,8 @@ TEST_F(CopyTestF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
   size_t batch_size = NumElements(dims);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_copy_nc_x32(op, batch_size, input.data(), operator_output.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x32(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_copy_nc_x32(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.

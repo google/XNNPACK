@@ -117,15 +117,9 @@ class SquareOperatorTester {
       // Smart pointer to automatically delete square_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_square_op(square_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_square_nc_f16(
-          square_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(square_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_square_nc_f16(square_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_square_nc_f16(square_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(square_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -174,15 +168,9 @@ class SquareOperatorTester {
       // Smart pointer to automatically delete square_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_square_op(square_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_square_nc_f32(
-          square_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(square_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_square_nc_f32(square_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_square_nc_f32(square_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(square_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

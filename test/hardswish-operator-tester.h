@@ -118,15 +118,9 @@ class HardSwishOperatorTester {
       // Smart pointer to automatically delete hardswish_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_hardswish_op(hardswish_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_hardswish_nc_f16(
-          hardswish_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(hardswish_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_hardswish_nc_f16(hardswish_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_hardswish_nc_f16(hardswish_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(hardswish_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -173,15 +167,9 @@ class HardSwishOperatorTester {
       // Smart pointer to automatically delete hardswish_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_hardswish_op(hardswish_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_hardswish_nc_f32(
-          hardswish_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(hardswish_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_hardswish_nc_f32(hardswish_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_hardswish_nc_f32(hardswish_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(hardswish_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

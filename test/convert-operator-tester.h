@@ -12,6 +12,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <memory>
 #include <random>
 #include <vector>
 
@@ -162,15 +163,9 @@ class ConvertOperatorTester {
       // Smart pointer to automatically delete convert op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convert_nc_f16_f32(
-          convert_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convert_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f16_f32(convert_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f16_f32(convert_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -215,15 +210,9 @@ class ConvertOperatorTester {
       // Smart pointer to automatically delete convert op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convert_nc_f32_f16(
-          convert_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convert_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_f16(convert_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f32_f16(convert_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -280,15 +269,9 @@ class ConvertOperatorTester {
       // Smart pointer to automatically delete convert op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convert_nc_f32_qs8(
-          convert_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convert_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qs8(convert_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f32_qs8(convert_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -345,15 +328,9 @@ class ConvertOperatorTester {
       // Smart pointer to automatically delete convert op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convert_nc_f32_qu8(
-          convert_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convert_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qu8(convert_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f32_qu8(convert_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -403,15 +380,9 @@ class ConvertOperatorTester {
       // Smart pointer to automatically delete convert op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convert_nc_qs8_f32(
-          convert_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convert_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_qs8_f32(convert_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_qs8_f32(convert_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -469,15 +440,9 @@ class ConvertOperatorTester {
       // Smart pointer to automatically delete convert op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convert_nc_qs16_qs8(
-          convert_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convert_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_qs16_qs8(convert_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_qs16_qs8(convert_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -527,15 +492,9 @@ class ConvertOperatorTester {
       // Smart pointer to automatically delete convert op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convert_nc_qu8_f32(
-          convert_op,
-          batch_size(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convert_op, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_qu8_f32(convert_op, batch_size(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_qu8_f32(convert_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convert_op, /*threadpool=*/nullptr));
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

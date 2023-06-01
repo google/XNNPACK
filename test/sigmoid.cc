@@ -164,9 +164,8 @@ TEST_F(SigmoidTestQS8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_sigmoid_nc_qs8(op, batch_size, input.data(), operator_output.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_qs8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_sigmoid_nc_qs8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
@@ -227,9 +226,8 @@ TEST_F(SigmoidTestQU8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_sigmoid_nc_qu8(op, batch_size, input.data(), operator_output.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_qu8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_sigmoid_nc_qu8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
@@ -283,10 +281,8 @@ TEST_F(SigmoidTestF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_sigmoid_nc_f32(op, batch_size, input.data(), operator_output.data(), /*threadpool=*/nullptr));
-
+  ASSERT_EQ(xnn_status_success, xnn_reshape_sigmoid_nc_f32(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_sigmoid_nc_f32(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.

@@ -126,12 +126,10 @@ static bool is_copy_operator(enum xnn_operator_type operator_type) {
   }
 }
 
-static enum xnn_status setup_unary_elementwise_nc(
+static enum xnn_status reshape_unary_elementwise_nc(
     xnn_operator_t unary_elementwise_op,
     enum xnn_operator_type expected_operator_type,
     size_t batch_size,
-    const void* input,
-    void* output,
     uint32_t log2_input_size,
     uint32_t log2_output_size,
     const void* params,
@@ -146,10 +144,12 @@ static enum xnn_status setup_unary_elementwise_nc(
   }
   unary_elementwise_op->state = xnn_run_state_invalid;
 
-  if (batch_size == 0 || (input == output && is_copy_operator(expected_operator_type))) {
+  if (batch_size == 0) {
     unary_elementwise_op->state = xnn_run_state_skip;
     return xnn_status_success;
   }
+
+  unary_elementwise_op->batch_size = batch_size;
 
   const size_t channels = unary_elementwise_op->channels;
   const size_t input_stride = unary_elementwise_op->input_pixel_stride;
@@ -160,8 +160,6 @@ static enum xnn_status setup_unary_elementwise_nc(
   if ((((input_stride ^ channels) | (output_stride ^ channels)) == 0) || batch_size == 1) {
     const size_t block_size = 4096;
     unary_elementwise_op->context.univector_contiguous = (struct univector_contiguous_context) {
-      .x = input,
-      .y = output,
       .log2_xsize = log2_input_size,
       .log2_ysize = log2_output_size,
       .ukernel = ukernel,
@@ -178,9 +176,7 @@ static enum xnn_status setup_unary_elementwise_nc(
   } else {
     unary_elementwise_op->context.univector_strided = (struct univector_strided_context) {
       .n = channels << log2_input_size,
-      .x = input,
       .x_stride = input_stride << log2_input_size,
-      .y = output,
       .y_stride = output_stride << log2_output_size,
       .ukernel = ukernel,
     };
@@ -191,6 +187,55 @@ static enum xnn_status setup_unary_elementwise_nc(
     unary_elementwise_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_strided;
     unary_elementwise_op->compute[0].range[0] = batch_size;
     unary_elementwise_op->compute[0].tile[0] = (num_threads == 1) ? batch_size : 1;
+  }
+  unary_elementwise_op->state = xnn_run_state_ready;
+
+  return xnn_status_success;
+}
+
+static enum xnn_status setup_unary_elementwise_nc(
+    xnn_operator_t unary_elementwise_op,
+    enum xnn_operator_type expected_operator_type,
+    const void* input,
+    void* output)
+{
+  if (unary_elementwise_op->type != expected_operator_type) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(unary_elementwise_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  switch (unary_elementwise_op->state) {
+    case xnn_run_state_skip:
+      return xnn_status_success;
+    case xnn_run_state_invalid:
+      xnn_log_error(
+        "failed to setup %s operator: operator has not been reshaped yet",
+        xnn_operator_type_to_string(unary_elementwise_op->type));
+      return xnn_status_invalid_state;
+    case xnn_run_state_needs_setup:
+      // Operator has been reshaped, but not setup, continue with setup.
+    case xnn_run_state_ready:
+      // Operator has been reshaped, and we are setting up with different pointers.
+      break;
+  }
+
+  if ((input == output && is_copy_operator(expected_operator_type))) {
+    unary_elementwise_op->state = xnn_run_state_skip;
+    return xnn_status_success;
+  }
+
+  const size_t channels = unary_elementwise_op->channels;
+  const size_t input_stride = unary_elementwise_op->input_pixel_stride;
+  const size_t output_stride = unary_elementwise_op->output_pixel_stride;
+
+  if ((((input_stride ^ channels) | (output_stride ^ channels)) == 0) || unary_elementwise_op->batch_size == 1) {
+    unary_elementwise_op->context.univector_contiguous.x = input;
+    unary_elementwise_op->context.univector_contiguous.y = output;
+  } else {
+    unary_elementwise_op->context.univector_strided.x = input;
+    unary_elementwise_op->context.univector_strided.y = output;
   }
   unary_elementwise_op->state = xnn_run_state_ready;
 
@@ -1569,708 +1614,1060 @@ enum xnn_status xnn_create_truncation_nc_f32(
     truncation_op_out);
 }
 
-enum xnn_status xnn_setup_abs_nc_f16(
+enum xnn_status xnn_reshape_abs_nc_f16(
     xnn_operator_t abs_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     abs_op, xnn_operator_type_abs_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     &abs_op->params.f16_abs, sizeof(abs_op->params.f16_abs),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_abs_nc_f32(
+enum xnn_status xnn_reshape_abs_nc_f32(
     xnn_operator_t abs_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     abs_op, xnn_operator_type_abs_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &abs_op->params.f32_abs, sizeof(abs_op->params.f32_abs),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_bankers_rounding_nc_f16(
+enum xnn_status xnn_reshape_bankers_rounding_nc_f16(
     xnn_operator_t rounding_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     rounding_op, xnn_operator_type_bankers_rounding_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_bankers_rounding_nc_f32(
+enum xnn_status xnn_reshape_bankers_rounding_nc_f32(
     xnn_operator_t rounding_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     rounding_op, xnn_operator_type_bankers_rounding_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &rounding_op->params.f32_rnd, sizeof(rounding_op->params.f32_rnd),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_ceiling_nc_f16(
+enum xnn_status xnn_reshape_ceiling_nc_f16(
     xnn_operator_t ceiling_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     ceiling_op, xnn_operator_type_ceiling_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_ceiling_nc_f32(
+enum xnn_status xnn_reshape_ceiling_nc_f32(
     xnn_operator_t ceiling_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     ceiling_op, xnn_operator_type_ceiling_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &ceiling_op->params.f32_rnd, sizeof(ceiling_op->params.f32_rnd),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_clamp_nc_f16(
+enum xnn_status xnn_reshape_clamp_nc_f16(
     xnn_operator_t clamp_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     clamp_op, xnn_operator_type_clamp_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     &clamp_op->params.f16_minmax, sizeof(clamp_op->params.f16_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_clamp_nc_f32(
+enum xnn_status xnn_reshape_clamp_nc_f32(
     xnn_operator_t clamp_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     clamp_op, xnn_operator_type_clamp_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &clamp_op->params.f32_minmax, sizeof(clamp_op->params.f32_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_clamp_nc_s8(
+enum xnn_status xnn_reshape_clamp_nc_s8(
     xnn_operator_t clamp_op,
     size_t batch_size,
-    const int8_t* input,
-    int8_t* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     clamp_op, xnn_operator_type_clamp_nc_s8,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_INT8_T,
     &clamp_op->params.s8_minmax, sizeof(clamp_op->params.s8_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_clamp_nc_u8(
+enum xnn_status xnn_reshape_clamp_nc_u8(
     xnn_operator_t clamp_op,
     size_t batch_size,
-    const uint8_t* input,
-    uint8_t* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     clamp_op, xnn_operator_type_clamp_nc_u8,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     &clamp_op->params.u8_minmax, sizeof(clamp_op->params.u8_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_convert_nc_f16_f32(
+enum xnn_status xnn_reshape_convert_nc_f16_f32(
   xnn_operator_t convert_op,
   size_t batch_size,
-  const void* input,
-  float* output,
   pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     convert_op, xnn_operator_type_convert_nc_f16_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &convert_op->params.f16_f32_cvt, sizeof(convert_op->params.f16_f32_cvt),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_convert_nc_f32_f16(
+enum xnn_status xnn_reshape_convert_nc_f32_f16(
   xnn_operator_t convert_op,
   size_t batch_size,
-  const float* input,
-  void* output,
   pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     convert_op, xnn_operator_type_convert_nc_f32_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     &convert_op->params.f32_f16_cvt, sizeof(convert_op->params.f32_f16_cvt),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_convert_nc_f32_qs8(
+enum xnn_status xnn_reshape_convert_nc_f32_qs8(
   xnn_operator_t convert_op,
   size_t batch_size,
-  const float* input,
-  int8_t* output,
   pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     convert_op, xnn_operator_type_convert_nc_f32_qs8,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_INT8_T,
     &convert_op->params.f32_qs8_cvt, sizeof(convert_op->params.f32_qs8_cvt),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_convert_nc_f32_qu8(
+enum xnn_status xnn_reshape_convert_nc_f32_qu8(
   xnn_operator_t convert_op,
   size_t batch_size,
-  const float* input,
-  uint8_t* output,
   pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     convert_op, xnn_operator_type_convert_nc_f32_qu8,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     &convert_op->params.f32_qu8_cvt, sizeof(convert_op->params.f32_qu8_cvt),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_convert_nc_qs8(
+enum xnn_status xnn_reshape_convert_nc_qs8(
   xnn_operator_t convert_op,
   size_t batch_size,
-  const int8_t* input,
-  int8_t* output,
   pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     convert_op, xnn_operator_type_convert_nc_qs8,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_INT8_T,
     &convert_op->params.qs8_cvt, sizeof(convert_op->params.qs8_cvt),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_convert_nc_qs16_qs8(
+enum xnn_status xnn_reshape_convert_nc_qs16_qs8(
   xnn_operator_t convert_op,
   size_t batch_size,
-  const int16_t* input,
-  int8_t* output,
   pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     convert_op, xnn_operator_type_convert_nc_qs16_qs8,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_INT16_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_INT8_T,
     &convert_op->params.qs16_qs8_cvt, sizeof(convert_op->params.qs16_qs8_cvt),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_convert_nc_qs8_f32(
+enum xnn_status xnn_reshape_convert_nc_qs8_f32(
   xnn_operator_t convert_op,
   size_t batch_size,
-  const int8_t* input,
-  float* output,
   pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     convert_op, xnn_operator_type_convert_nc_qs8_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &convert_op->params.qs8_f32_cvt, sizeof(convert_op->params.qs8_f32_cvt),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_convert_nc_qu8(
+enum xnn_status xnn_reshape_convert_nc_qu8(
   xnn_operator_t convert_op,
   size_t batch_size,
-  const uint8_t* input,
-  uint8_t* output,
   pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     convert_op, xnn_operator_type_convert_nc_qu8,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     &convert_op->params.qu8_cvt, sizeof(convert_op->params.qu8_cvt),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_convert_nc_qu8_f32(
+enum xnn_status xnn_reshape_convert_nc_qu8_f32(
   xnn_operator_t convert_op,
   size_t batch_size,
-  const uint8_t* input,
-  float* output,
   pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     convert_op, xnn_operator_type_convert_nc_qu8_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &convert_op->params.qu8_f32_cvt, sizeof(convert_op->params.qu8_f32_cvt),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_copy_nc_x8(
+enum xnn_status xnn_reshape_copy_nc_x8(
     xnn_operator_t copy_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     copy_op, xnn_operator_type_copy_nc_x8,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_copy_nc_x16(
+enum xnn_status xnn_reshape_copy_nc_x16(
     xnn_operator_t copy_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     copy_op, xnn_operator_type_copy_nc_x16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT16_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT16_T,
     NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_copy_nc_x32(
+enum xnn_status xnn_reshape_copy_nc_x32(
     xnn_operator_t copy_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     copy_op, xnn_operator_type_copy_nc_x32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT32_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT32_T,
     NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_elu_nc_f16(
+enum xnn_status xnn_reshape_elu_nc_f16(
     xnn_operator_t elu_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     elu_op, xnn_operator_type_elu_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     &elu_op->params.f16_elu, sizeof(elu_op->params.f16_elu),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_elu_nc_f32(
+enum xnn_status xnn_reshape_elu_nc_f32(
     xnn_operator_t elu_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     elu_op, xnn_operator_type_elu_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &elu_op->params.f32_elu, sizeof(elu_op->params.f32_elu),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_floor_nc_f16(
+enum xnn_status xnn_reshape_floor_nc_f16(
     xnn_operator_t floor_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     floor_op, xnn_operator_type_floor_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_floor_nc_f32(
+enum xnn_status xnn_reshape_floor_nc_f32(
     xnn_operator_t floor_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     floor_op, xnn_operator_type_floor_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &floor_op->params.f32_rnd, sizeof(floor_op->params.f32_rnd),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_hardswish_nc_f16(
+enum xnn_status xnn_reshape_hardswish_nc_f16(
     xnn_operator_t hardswish_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     hardswish_op, xnn_operator_type_hardswish_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     &hardswish_op->params.f16_hswish, sizeof(hardswish_op->params.f16_hswish),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_hardswish_nc_f32(
+enum xnn_status xnn_reshape_hardswish_nc_f32(
     xnn_operator_t hardswish_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     hardswish_op, xnn_operator_type_hardswish_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &hardswish_op->params.f32_hswish, sizeof(hardswish_op->params.f32_hswish),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_leaky_relu_nc_f16(
+enum xnn_status xnn_reshape_leaky_relu_nc_f16(
   xnn_operator_t leaky_relu_op,
   size_t batch_size,
-  const void* input,
-  void* output,
   pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     leaky_relu_op, xnn_operator_type_leaky_relu_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     &leaky_relu_op->params.f16_lrelu, sizeof(leaky_relu_op->params.f16_lrelu),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_leaky_relu_nc_f32(
+enum xnn_status xnn_reshape_leaky_relu_nc_f32(
   xnn_operator_t leaky_relu_op,
   size_t batch_size,
-  const float* input,
-  float* output,
   pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     leaky_relu_op, xnn_operator_type_leaky_relu_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &leaky_relu_op->params.f32_lrelu, sizeof(leaky_relu_op->params.f32_lrelu),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_leaky_relu_nc_qs8(
+enum xnn_status xnn_reshape_leaky_relu_nc_qs8(
   xnn_operator_t leaky_relu_op,
   size_t batch_size,
-  const int8_t* input,
-  int8_t* output,
   pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     leaky_relu_op, xnn_operator_type_leaky_relu_nc_qs8,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_INT8_T,
     &leaky_relu_op->params.qs8_lrelu, sizeof(leaky_relu_op->params.qs8_lrelu),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_leaky_relu_nc_qu8(
+enum xnn_status xnn_reshape_leaky_relu_nc_qu8(
   xnn_operator_t leaky_relu_op,
   size_t batch_size,
-  const uint8_t* input,
-  uint8_t* output,
   pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     leaky_relu_op, xnn_operator_type_leaky_relu_nc_qu8,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     &leaky_relu_op->params.qu8_lrelu, sizeof(leaky_relu_op->params.qu8_lrelu),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_negate_nc_f16(
+enum xnn_status xnn_reshape_negate_nc_f16(
     xnn_operator_t negate_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     negate_op, xnn_operator_type_negate_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     &negate_op->params.f16_neg, sizeof(negate_op->params.f16_neg),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_negate_nc_f32(
+enum xnn_status xnn_reshape_negate_nc_f32(
     xnn_operator_t negate_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     negate_op, xnn_operator_type_negate_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &negate_op->params.f32_neg, sizeof(negate_op->params.f32_neg),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_sigmoid_nc_f16(
+enum xnn_status xnn_reshape_sigmoid_nc_f16(
     xnn_operator_t sigmoid_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     sigmoid_op, xnn_operator_type_sigmoid_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     &sigmoid_op->params.f16_sigmoid, sizeof(sigmoid_op->params.f16_sigmoid),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_sigmoid_nc_f32(
+enum xnn_status xnn_reshape_sigmoid_nc_f32(
     xnn_operator_t sigmoid_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     sigmoid_op, xnn_operator_type_sigmoid_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &sigmoid_op->params.f32_sigmoid, sizeof(sigmoid_op->params.f32_sigmoid),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_square_nc_f16(
+enum xnn_status xnn_reshape_square_nc_f16(
     xnn_operator_t square_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     square_op, xnn_operator_type_square_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_square_nc_f32(
+enum xnn_status xnn_reshape_square_nc_f32(
     xnn_operator_t square_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     square_op, xnn_operator_type_square_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &square_op->params.f32_default, sizeof(square_op->params.f32_default),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_square_root_nc_f16(
+enum xnn_status xnn_reshape_square_root_nc_f16(
     xnn_operator_t sqrt_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     sqrt_op, xnn_operator_type_square_root_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_square_root_nc_f32(
+enum xnn_status xnn_reshape_square_root_nc_f32(
     xnn_operator_t sqrt_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     sqrt_op, xnn_operator_type_square_root_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &sqrt_op->params.f32_sqrt, sizeof(sqrt_op->params.f32_sqrt),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_tanh_nc_f16(
+enum xnn_status xnn_reshape_tanh_nc_f16(
     xnn_operator_t tanh_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     tanh_op, xnn_operator_type_tanh_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     &tanh_op->params.f16_tanh, sizeof(tanh_op->params.f16_tanh),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_tanh_nc_f32(
+enum xnn_status xnn_reshape_tanh_nc_f32(
     xnn_operator_t tanh_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     tanh_op, xnn_operator_type_tanh_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &tanh_op->params.f32_tanh, sizeof(tanh_op->params.f32_tanh),
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_truncation_nc_f16(
+enum xnn_status xnn_reshape_truncation_nc_f16(
     xnn_operator_t truncation_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     truncation_op, xnn_operator_type_truncation_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_HALF,
     NULL, 0,
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_truncation_nc_f32(
+enum xnn_status xnn_reshape_truncation_nc_f32(
     xnn_operator_t truncation_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_unary_elementwise_nc(
+  return reshape_unary_elementwise_nc(
     truncation_op, xnn_operator_type_truncation_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &truncation_op->params.f32_rnd, sizeof(truncation_op->params.f32_rnd),
     pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_setup_abs_nc_f16(
+    xnn_operator_t abs_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    abs_op, xnn_operator_type_abs_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_abs_nc_f32(
+    xnn_operator_t abs_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    abs_op, xnn_operator_type_abs_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_bankers_rounding_nc_f16(
+    xnn_operator_t rounding_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    rounding_op, xnn_operator_type_bankers_rounding_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_bankers_rounding_nc_f32(
+    xnn_operator_t rounding_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    rounding_op, xnn_operator_type_bankers_rounding_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_ceiling_nc_f16(
+    xnn_operator_t ceiling_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    ceiling_op, xnn_operator_type_ceiling_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_ceiling_nc_f32(
+    xnn_operator_t ceiling_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    ceiling_op, xnn_operator_type_ceiling_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_clamp_nc_f16(
+    xnn_operator_t clamp_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    clamp_op, xnn_operator_type_clamp_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_clamp_nc_f32(
+    xnn_operator_t clamp_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    clamp_op, xnn_operator_type_clamp_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_clamp_nc_s8(
+    xnn_operator_t clamp_op,
+    const int8_t* input,
+    int8_t* output)
+{
+  return setup_unary_elementwise_nc(
+    clamp_op, xnn_operator_type_clamp_nc_s8,
+    input, output);
+}
+
+enum xnn_status xnn_setup_clamp_nc_u8(
+    xnn_operator_t clamp_op,
+    const uint8_t* input,
+    uint8_t* output)
+{
+  return setup_unary_elementwise_nc(
+    clamp_op, xnn_operator_type_clamp_nc_u8,
+    input, output);
+}
+
+enum xnn_status xnn_setup_convert_nc_f16_f32(
+  xnn_operator_t convert_op,
+  const void* input,
+  float* output)
+{
+  return setup_unary_elementwise_nc(
+    convert_op, xnn_operator_type_convert_nc_f16_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_convert_nc_f32_f16(
+  xnn_operator_t convert_op,
+  const float* input,
+  void* output)
+{
+  return setup_unary_elementwise_nc(
+    convert_op, xnn_operator_type_convert_nc_f32_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_convert_nc_f32_qs8(
+  xnn_operator_t convert_op,
+  const float* input,
+  int8_t* output)
+{
+  return setup_unary_elementwise_nc(
+    convert_op, xnn_operator_type_convert_nc_f32_qs8,
+    input, output);
+}
+
+enum xnn_status xnn_setup_convert_nc_f32_qu8(
+  xnn_operator_t convert_op,
+  const float* input,
+  uint8_t* output)
+{
+  return setup_unary_elementwise_nc(
+    convert_op, xnn_operator_type_convert_nc_f32_qu8,
+    input, output);
+}
+
+enum xnn_status xnn_setup_convert_nc_qs8(
+  xnn_operator_t convert_op,
+  const int8_t* input,
+  int8_t* output)
+{
+  return setup_unary_elementwise_nc(
+    convert_op, xnn_operator_type_convert_nc_qs8,
+    input, output);
+}
+
+enum xnn_status xnn_setup_convert_nc_qs16_qs8(
+  xnn_operator_t convert_op,
+  const int16_t* input,
+  int8_t* output)
+{
+  return setup_unary_elementwise_nc(
+    convert_op, xnn_operator_type_convert_nc_qs16_qs8,
+    input, output);
+}
+
+enum xnn_status xnn_setup_convert_nc_qs8_f32(
+  xnn_operator_t convert_op,
+  const int8_t* input,
+  float* output)
+{
+  return setup_unary_elementwise_nc(
+    convert_op, xnn_operator_type_convert_nc_qs8_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_convert_nc_qu8(
+  xnn_operator_t convert_op,
+  const uint8_t* input,
+  uint8_t* output)
+{
+  return setup_unary_elementwise_nc(
+    convert_op, xnn_operator_type_convert_nc_qu8,
+    input, output);
+}
+
+enum xnn_status xnn_setup_convert_nc_qu8_f32(
+  xnn_operator_t convert_op,
+  const uint8_t* input,
+  float* output)
+{
+  return setup_unary_elementwise_nc(
+    convert_op, xnn_operator_type_convert_nc_qu8_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_copy_nc_x8(
+    xnn_operator_t copy_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    copy_op, xnn_operator_type_copy_nc_x8,
+    input, output);
+}
+
+enum xnn_status xnn_setup_copy_nc_x16(
+    xnn_operator_t copy_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    copy_op, xnn_operator_type_copy_nc_x16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_copy_nc_x32(
+    xnn_operator_t copy_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    copy_op, xnn_operator_type_copy_nc_x32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_elu_nc_f16(
+    xnn_operator_t elu_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    elu_op, xnn_operator_type_elu_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_elu_nc_f32(
+    xnn_operator_t elu_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    elu_op, xnn_operator_type_elu_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_floor_nc_f16(
+    xnn_operator_t floor_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    floor_op, xnn_operator_type_floor_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_floor_nc_f32(
+    xnn_operator_t floor_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    floor_op, xnn_operator_type_floor_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_hardswish_nc_f16(
+    xnn_operator_t hardswish_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    hardswish_op, xnn_operator_type_hardswish_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_hardswish_nc_f32(
+    xnn_operator_t hardswish_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    hardswish_op, xnn_operator_type_hardswish_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_leaky_relu_nc_f16(
+  xnn_operator_t leaky_relu_op,
+  const void* input,
+  void* output)
+{
+  return setup_unary_elementwise_nc(
+    leaky_relu_op, xnn_operator_type_leaky_relu_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_leaky_relu_nc_f32(
+  xnn_operator_t leaky_relu_op,
+  const float* input,
+  float* output)
+{
+  return setup_unary_elementwise_nc(
+    leaky_relu_op, xnn_operator_type_leaky_relu_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_leaky_relu_nc_qs8(
+  xnn_operator_t leaky_relu_op,
+  const int8_t* input,
+  int8_t* output)
+{
+  return setup_unary_elementwise_nc(
+    leaky_relu_op, xnn_operator_type_leaky_relu_nc_qs8,
+    input, output);
+}
+
+enum xnn_status xnn_setup_leaky_relu_nc_qu8(
+  xnn_operator_t leaky_relu_op,
+  const uint8_t* input,
+  uint8_t* output)
+{
+  return setup_unary_elementwise_nc(
+    leaky_relu_op, xnn_operator_type_leaky_relu_nc_qu8,
+    input, output);
+}
+
+enum xnn_status xnn_setup_negate_nc_f16(
+    xnn_operator_t negate_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    negate_op, xnn_operator_type_negate_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_negate_nc_f32(
+    xnn_operator_t negate_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    negate_op, xnn_operator_type_negate_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_sigmoid_nc_f16(
+    xnn_operator_t sigmoid_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    sigmoid_op, xnn_operator_type_sigmoid_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_sigmoid_nc_f32(
+    xnn_operator_t sigmoid_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    sigmoid_op, xnn_operator_type_sigmoid_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_square_nc_f16(
+    xnn_operator_t square_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    square_op, xnn_operator_type_square_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_square_nc_f32(
+    xnn_operator_t square_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    square_op, xnn_operator_type_square_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_square_root_nc_f16(
+    xnn_operator_t sqrt_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    sqrt_op, xnn_operator_type_square_root_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_square_root_nc_f32(
+    xnn_operator_t sqrt_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    sqrt_op, xnn_operator_type_square_root_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_tanh_nc_f16(
+    xnn_operator_t tanh_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    tanh_op, xnn_operator_type_tanh_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_tanh_nc_f32(
+    xnn_operator_t tanh_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    tanh_op, xnn_operator_type_tanh_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_truncation_nc_f16(
+    xnn_operator_t truncation_op,
+    const void* input,
+    void* output)
+{
+  return setup_unary_elementwise_nc(
+    truncation_op, xnn_operator_type_truncation_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_truncation_nc_f32(
+    xnn_operator_t truncation_op,
+    const float* input,
+    float* output)
+{
+  return setup_unary_elementwise_nc(
+    truncation_op, xnn_operator_type_truncation_nc_f32,
+    input, output);
 }
 
 static enum xnn_status run_unary_elementwise_nc(
@@ -2329,13 +2726,21 @@ static enum xnn_status run_unary_elementwise_nc(
     config->ukernel,
     &unary_elementwise_op);
 
-  const enum xnn_status status = setup_unary_elementwise_nc(
+  enum xnn_status status = reshape_unary_elementwise_nc(
     &unary_elementwise_op, operator_type,
-    batch_size, input, output,
+    batch_size,
     log2_input_size,
     log2_output_size,
     params, params_size,
     pthreadpool_get_threads_count(threadpool));
+
+  if (status != xnn_status_success){
+    return status;
+  }
+
+  status = setup_unary_elementwise_nc(
+    &unary_elementwise_op, operator_type,
+    input, output);
 
   if (status != xnn_status_success){
     return status;

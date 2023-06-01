@@ -202,6 +202,89 @@ static enum xnn_status create_concatenate4_operator(
   return status;
 }
 
+static enum xnn_status reshape_concatenate_operator_helper(
+  const struct xnn_operator_data *opdata,
+  size_t index,
+  pthreadpool_t threadpool)
+{
+  switch (opdata->operator_objects[index]->type) {
+    case xnn_operator_type_copy_nc_x16:
+      return xnn_reshape_copy_nc_x16(
+        opdata->operator_objects[index],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_copy_nc_x32:
+      return xnn_reshape_copy_nc_x32(
+        opdata->operator_objects[index],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_copy_nc_x8:
+      return xnn_reshape_copy_nc_x8(
+        opdata->operator_objects[index],
+        opdata->batch_size,
+        threadpool);
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
+static enum xnn_status reshape_concatenate2_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  enum xnn_status status;
+
+  status = reshape_concatenate_operator_helper(opdata, 0, threadpool);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  return reshape_concatenate_operator_helper(opdata, 1, threadpool);
+}
+
+static enum xnn_status reshape_concatenate3_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  enum xnn_status status;
+
+  status = reshape_concatenate_operator_helper(opdata, 0, threadpool);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  status = reshape_concatenate_operator_helper(opdata, 1, threadpool);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  return reshape_concatenate_operator_helper(opdata, 2, threadpool);
+}
+
+static enum xnn_status reshape_concatenate4_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  enum xnn_status status;
+
+  status = reshape_concatenate_operator_helper(opdata, 0, threadpool);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  status = reshape_concatenate_operator_helper(opdata, 1, threadpool);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  status = reshape_concatenate_operator_helper(opdata, 2, threadpool);
+  if (status != xnn_status_success) {
+    return status;
+  }
+  return reshape_concatenate_operator_helper(opdata, 3, threadpool);
+}
+
 static enum xnn_status setup_concatenate_operator_helper(
   const void* input_data,
   void* output_data,
@@ -219,24 +302,18 @@ static enum xnn_status setup_concatenate_operator_helper(
     case xnn_operator_type_copy_nc_x16:
       return xnn_setup_copy_nc_x16(
         opdata->operator_objects[index],
-        opdata->batch_size,
         input_data,
-        (uint16_t*) output_data + channels,
-        threadpool);
+        (uint16_t*) output_data + channels);
     case xnn_operator_type_copy_nc_x32:
       return xnn_setup_copy_nc_x32(
         opdata->operator_objects[index],
-        opdata->batch_size,
         input_data,
-        (uint32_t*) output_data + channels,
-        threadpool);
+        (uint32_t*) output_data + channels);
     case xnn_operator_type_copy_nc_x8:
       return xnn_setup_copy_nc_x8(
         opdata->operator_objects[index],
-        opdata->batch_size,
         input_data,
-        (uint8_t*) output_data + channels,
-        threadpool);
+        (uint8_t*) output_data + channels);
     default:
       XNN_UNREACHABLE;
   }
@@ -592,15 +669,18 @@ enum xnn_status xnn_define_concatenate_n(
   switch (num_inputs) {
     case 2:
       node->create = create_concatenate2_operator;
+      node->reshape = reshape_concatenate2_operator;
       node->setup = setup_concatenate2_operator;
       break;
     case 3:
       node->create = create_concatenate3_operator;
+      node->reshape = reshape_concatenate3_operator;
       node->setup = setup_concatenate3_operator;
       node->inputs[2] = input_ids[2];
       break;
     case 4:
       node->create = create_concatenate4_operator;
+      node->reshape = reshape_concatenate4_operator;
       node->setup = setup_concatenate4_operator;
       node->inputs[2] = input_ids[2];
       node->inputs[3] = input_ids[3];

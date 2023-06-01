@@ -56,10 +56,13 @@ void xnnpack_convert_f16_f32(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_convert_nc_f16_f32(
-    convert_op, batch_size,
-    input.data(), output.data(),
-    nullptr /* thread pool */);
+  status = xnn_reshape_convert_nc_f16_f32(convert_op, batch_size, /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape F16->F32 Convert operator");
+    return;
+  }
+
+  status = xnn_setup_convert_nc_f16_f32(convert_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup F16->F32 Convert operator");
     return;
@@ -120,10 +123,13 @@ void xnnpack_convert_f32_f16(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_convert_nc_f32_f16(
-    convert_op, batch_size,
-    input.data(), output.data(),
-    nullptr /* thread pool */);
+  status = xnn_reshape_convert_nc_f32_f16(convert_op, batch_size, /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape F32->F16 Convert operator");
+    return;
+  }
+
+  status = xnn_setup_convert_nc_f32_f16(convert_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup F32->F16 Convert operator");
     return;
@@ -186,10 +192,13 @@ void xnnpack_convert_f32_qs8(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_convert_nc_f32_qs8(
-    convert_op, batch_size,
-    input.data(), output.data(),
-    nullptr /* thread pool */);
+  status = xnn_reshape_convert_nc_f32_qs8(convert_op, batch_size, /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape F32->QS8 Convert operator");
+    return;
+  }
+
+  status = xnn_setup_convert_nc_f32_qs8(convert_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup F32->QS8 Convert operator");
     return;
@@ -252,10 +261,13 @@ void xnnpack_convert_f32_qu8(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_convert_nc_f32_qu8(
-    convert_op, batch_size,
-    input.data(), output.data(),
-    nullptr /* thread pool */);
+  status = xnn_reshape_convert_nc_f32_qu8(convert_op, batch_size, /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape F32->QU8 Convert operator");
+    return;
+  }
+
+  status = xnn_setup_convert_nc_f32_qu8(convert_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup F32->QU8 Convert operator");
     return;
@@ -320,10 +332,13 @@ void xnnpack_convert_qs8(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_convert_nc_qs8(
-    convert_op, batch_size,
-    input.data(), output.data(),
-    nullptr /* thread pool */);
+  status = xnn_reshape_convert_nc_qs8(convert_op, batch_size, /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape QS8 Convert operator");
+    return;
+  }
+
+  status = xnn_setup_convert_nc_qs8(convert_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup QS8 Convert operator");
     return;
@@ -387,10 +402,13 @@ void xnnpack_convert_qs8_f32(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_convert_nc_qs8_f32(
-    convert_op, batch_size,
-    input.data(), output.data(),
-    nullptr /* thread pool */);
+  status = xnn_reshape_convert_nc_qs8_f32(convert_op, batch_size, /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape QS8->F32 Convert operator");
+    return;
+  }
+
+  status = xnn_setup_convert_nc_qs8_f32(convert_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup QS8->F32 Convert operator");
     return;
@@ -455,10 +473,13 @@ void xnnpack_convert_qu8(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_convert_nc_qu8(
-    convert_op, batch_size,
-    input.data(), output.data(),
-    nullptr /* thread pool */);
+  status = xnn_reshape_convert_nc_qu8(convert_op, batch_size, /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape QU8 Convert operator");
+    return;
+  }
+
+  status = xnn_setup_convert_nc_qu8(convert_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup QU8 Convert operator");
     return;
@@ -522,10 +543,13 @@ void xnnpack_convert_qu8_f32(benchmark::State& state) {
     return;
   }
 
-  status = xnn_setup_convert_nc_qu8_f32(
-    convert_op, batch_size,
-    input.data(), output.data(),
-    nullptr /* thread pool */);
+  status = xnn_reshape_convert_nc_qu8_f32(convert_op, batch_size, /*threadpool=*/nullptr);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape QU8->F32 Convert operator");
+    return;
+  }
+
+  status = xnn_setup_convert_nc_qu8_f32(convert_op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup QU8->F32 Convert operator");
     return;

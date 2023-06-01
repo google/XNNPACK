@@ -326,18 +326,19 @@ TEST_F(Concatenate3TestQS8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x8(channels_3, channels_3, output_stride, /*flags=*/0, &op3));
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op3(op3, xnn_delete_operator);
 
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op1, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op2, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op3, batch_size, /*threadpool=*/nullptr));
+
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_copy_nc_x8(op1, batch_size, input1.data(), operator_output.data(), nullptr /* thread pool */));
+    xnn_setup_copy_nc_x8(op1, input1.data(), operator_output.data()));
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_copy_nc_x8(
-      op2, batch_size, input2.data(), (uint8_t*) operator_output.data() + op1->channels, nullptr /* thread pool */));
+    xnn_setup_copy_nc_x8(op2, input2.data(), (uint8_t*) operator_output.data() + op1->channels));
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_copy_nc_x8(
-      op3, batch_size, input3.data(), (uint8_t*) operator_output.data() + op1->channels + op2->channels,
-      nullptr /* thread pool */));
+    xnn_setup_copy_nc_x8(op3, input3.data(), (uint8_t*) operator_output.data() + op1->channels + op2->channels));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, nullptr /* thread pool */));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, nullptr /* thread pool */));
@@ -420,18 +421,19 @@ TEST_F(Concatenate3TestQU8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x8(channels_3, channels_3, output_stride, /*flags=*/0, &op3));
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op3(op3, xnn_delete_operator);
 
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op1, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op2, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x8(op3, batch_size, /*threadpool=*/nullptr));
+
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_copy_nc_x8(op1, batch_size, input1.data(), operator_output.data(), nullptr /* thread pool */));
+    xnn_setup_copy_nc_x8(op1, input1.data(), operator_output.data()));
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_copy_nc_x8(
-      op2, batch_size, input2.data(), (uint8_t*) operator_output.data() + op1->channels, nullptr /* thread pool */));
+    xnn_setup_copy_nc_x8(op2, input2.data(), (uint8_t*) operator_output.data() + op1->channels));
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_copy_nc_x8(
-      op3, batch_size, input3.data(), (uint8_t*) operator_output.data() + op1->channels + op2->channels,
-      nullptr /* thread pool */));
+    xnn_setup_copy_nc_x8(op3, input3.data(), (uint8_t*) operator_output.data() + op1->channels + op2->channels));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, nullptr /* thread pool */));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, nullptr /* thread pool */));
@@ -514,17 +516,19 @@ TEST_F(Concatenate3TestF32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_create_copy_nc_x32(channels_3, channels_3, output_stride, /*flags=*/0, &op3));
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op3(op3, xnn_delete_operator);
 
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x32(op1, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x32(op2, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_copy_nc_x32(op3, batch_size, /*threadpool=*/nullptr));
+
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_copy_nc_x32(op1, batch_size, input1.data(), operator_output.data(), nullptr /* thread pool */));
+    xnn_setup_copy_nc_x32(op1, input1.data(), operator_output.data()));
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_copy_nc_x32(
-      op2, batch_size, input2.data(), (float*) operator_output.data() + op1->channels, nullptr /* thread pool */));
+    xnn_setup_copy_nc_x32(op2, input2.data(), (float*) operator_output.data() + op1->channels));
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_copy_nc_x32(
-                          op3, batch_size, input3.data(),
-                          (float*) operator_output.data() + op1->channels + op2->channels, nullptr /* thread pool */));
+    xnn_status_success,
+    xnn_setup_copy_nc_x32(op3, input3.data(), (float*) operator_output.data() + op1->channels + op2->channels));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, nullptr /* thread pool */));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, nullptr /* thread pool */));
