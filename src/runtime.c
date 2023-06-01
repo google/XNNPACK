@@ -625,6 +625,9 @@ enum xnn_status xnn_setup_runtime(
           xnn_log_error("failed to setup runtime: error in reshaping operator #%zu", i);
           return status;
         }
+        assert(
+          opdata->operator_objects[j]->state == xnn_run_state_skip ||
+          opdata->operator_objects[j]->state == xnn_run_state_needs_setup);
         status = opdata->setup(opdata, runtime->values, runtime->num_values, runtime->threadpool);
         if (status != xnn_status_success) {
           xnn_log_error("failed to setup runtime: error in setting pointers of operator #%zu", i);

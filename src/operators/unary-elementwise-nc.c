@@ -188,7 +188,7 @@ static enum xnn_status reshape_unary_elementwise_nc(
     unary_elementwise_op->compute[0].range[0] = batch_size;
     unary_elementwise_op->compute[0].tile[0] = (num_threads == 1) ? batch_size : 1;
   }
-  unary_elementwise_op->state = xnn_run_state_ready;
+  unary_elementwise_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;
 }

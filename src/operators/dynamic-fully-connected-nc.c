@@ -370,7 +370,7 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
   dynamic_fully_connected_op->compute[1].range[1] = output_channels;
   dynamic_fully_connected_op->compute[1].tile[0] = mr;
   dynamic_fully_connected_op->compute[1].tile[1] = nc;
-  dynamic_fully_connected_op->state = xnn_run_state_ready;
+  dynamic_fully_connected_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;
 }

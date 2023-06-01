@@ -391,7 +391,7 @@ static enum xnn_status reshape_lut_elementwise_nc(
     lut_elementwise_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_lut_strided;
     lut_elementwise_op->compute[0].range[0] = batch_size;
   }
-  lut_elementwise_op->state = xnn_run_state_ready;
+  lut_elementwise_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;
 }

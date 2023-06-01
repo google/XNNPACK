@@ -244,7 +244,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
   batch_matrix_multiply_op->compute[1].range[2] = n;
   batch_matrix_multiply_op->compute[1].tile[0] = mr;
   batch_matrix_multiply_op->compute[1].tile[1] = nc;
-  batch_matrix_multiply_op->state = xnn_run_state_ready;
+  batch_matrix_multiply_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;
 }
