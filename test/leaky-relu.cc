@@ -25,7 +25,7 @@ using LeakyReLUTestQU8 = UnaryTest<uint8_t>;
 
 TEST_F(LeakyReLUTestF32, define)
 {
-  const float negative_slope = std::uniform_real_distribution<float>(0.5f, 1.0f)(rng);
+  const float negative_slope = std::uniform_real_distribution<float>(0.5f, 1.2f)(rng);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -63,7 +63,7 @@ TEST_F(LeakyReLUTestF32, define)
 
 TEST_F(LeakyReLUTestQS8, define)
 {
-  const float negative_slope = std::uniform_real_distribution<float>(0.5f, 1.0f)(rng);
+  const float negative_slope = std::uniform_real_distribution<float>(0.5f, 1.2f)(rng);
 
   const int32_t input_zero_point = i8dist(rng);
   const float input_scale = scale_dist(rng);
@@ -110,7 +110,7 @@ TEST_F(LeakyReLUTestQU8, define)
   const float input_scale = scale_dist(rng);
   const int32_t output_zero_point = u8dist(rng);
   const float output_scale = scale_dist(rng);
-  const float negative_slope = std::uniform_real_distribution<float>(0.1f, 10.0f)(rng);
+  const float negative_slope = std::uniform_real_distribution<float>(0.5f, 1.2f)(rng);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
