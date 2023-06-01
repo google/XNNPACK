@@ -66,9 +66,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x1__asm_aarch64_neonfma_ld64
         # Load initial bias from w into accumulators
         MOVI    v24.2s, 0
         LDR     s24, [x5], 4
-        MOV     v26.2s, v24.2s
-        MOV     v28.2s, v24.2s
-        MOV     v30.2s, v24.2s
+        MOV     v26.8b, v24.8b
+        MOV     v28.8b, v24.8b
+        MOV     v30.8b, v24.8b
 
         # Is there at least 2 floats (8 bytes)?
         SUBS    x0, x2, 8               // k = kc - 8

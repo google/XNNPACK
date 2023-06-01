@@ -72,6 +72,10 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
 
 0:
         $if INC:
+          MOVI    v24.2s, 0
+          MOVI    v26.2s, 0
+          MOVI    v28.2s, 0
+          MOVI    v30.2s, 0
           # Load initial accumulators
           LDR     s24, [x15], 4
           LDR     s26, [x15], 4
@@ -79,10 +83,11 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
           LDR     s30, [x15], 4
         $else:
           # Load initial bias from w into accumulators
+          MOVI    v24.4s, 0
           LDR     s24, [x5], 4
-          MOV     v26.2s, v24.2s
-          MOV     v28.2s, v24.2s
-          MOV     v30.2s, v24.2s
+          MOV     v26.16b, v24.16b
+          MOV     v28.16b, v24.16b
+          MOV     v30.16b, v24.16b
 
         # Is there at least 4 floats (16 bytes)?
         SUBS    x0, x2, 16              // k = kc - 16
