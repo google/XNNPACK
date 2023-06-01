@@ -56,6 +56,8 @@ tools/xngen src/f32-gemm/1x8-aarch64-neonfma-ld128-acc4.S.in -D INC=0 -D PREFETC
 tools/xngen src/f32-gemm/4x8-aarch64-neonfma-ld128.S.in      -D INC=0               -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x8-minmax-asm-aarch64-neonfma-ld128.S &
 tools/xngen src/f32-gemm/6x8-aarch64-neonfma-ld128.S.in      -D INC=0               -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-6x8-minmax-asm-aarch64-neonfma-ld128.S &
 
+### MRx1 micro-kernels
+tools/xngen src/f32-gemm/4x1-aarch64-neonfma-ld64.S.in      -D INC=0                -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x1-minmax-asm-aarch64-neonfma-ld64.S &
 ### MRx2 micro-kernels
 tools/xngen src/f32-gemm/4x2-aarch64-neonfma-ld64.S.in      -D INC=0                -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x2-minmax-asm-aarch64-neonfma-ld64.S &
 
