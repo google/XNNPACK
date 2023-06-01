@@ -103,16 +103,16 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_ld64
         TBNZ    x0, 2, 3f
 
 2:
+        FADD    v24.2s, v24.2s, v25.2s
+        FADD    v26.2s, v26.2s, v27.2s
+        FADD    v28.2s, v28.2s, v29.2s
+        FADD    v30.2s, v30.2s, v31.2s
         # Scale
         LDR     d20, [x5], 8
         FMUL    v24.2s, v24.2s, v20.2s
         FMUL    v26.2s, v26.2s, v20.2s
         FMUL    v28.2s, v28.2s, v20.2s
         FMUL    v30.2s, v30.2s, v20.2s
-        FMLA    v24.2s, v25.2s, v20.2s
-        FMLA    v26.2s, v27.2s, v20.2s
-        FMLA    v28.2s, v29.2s, v20.2s
-        FMLA    v30.2s, v31.2s, v20.2s
 
         # Clamp
         FMAX    v24.2s, v24.2s, v4.2s
@@ -147,7 +147,7 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_ld64
         LDR     h20, [x5], 2
         SXTL    v20.8h, v20.8b
         SXTL    v20.4s, v20.4h
-        SCVTF   v20.4s, v20.4s
+        SCVTF   v20.2s, v20.2s
         LDR     s1, [x11], 4
         LDR     s2, [x12], 4
         LDR     s3,  [x4], 4
@@ -164,7 +164,6 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_ld64
         STR     s26,  [x9]
         STR     s28, [x10]
         STR     s30,  [x7]
-7:
         RET
 
 END_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_ld64

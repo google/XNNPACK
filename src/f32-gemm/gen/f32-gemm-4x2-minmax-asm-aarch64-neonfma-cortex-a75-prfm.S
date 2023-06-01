@@ -307,7 +307,6 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_cortex_a75_p
         STR     s26,  [x9]
         STR     s28, [x10]
         STR     s30,  [x7]
-10:
         RET
 
 

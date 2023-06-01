@@ -28,11 +28,11 @@
 # A1  x11 v1
 # A2  x12 v2
 # A3  x4  v3
-# B   x5  v20 v21
-# C0  x6  v24 v25
-# C1  x9  v26 v27
-# C2  x10 v28 v29
-# C3  x7  v30 v31
+# B   x5  v20
+# C0  x6  v24
+# C1  x9  v26
+# C2  x10 v28
+# C3  x7  v30
 # Clamp v4 v5
 
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x1__asm_aarch64_neonfma_ld64
@@ -64,14 +64,11 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x1__asm_aarch64_neonfma_ld64
 
 0:
         # Load initial bias from w into accumulators
+        MOVI    v24.2s, 0
         LDR     s24, [x5], 4
         MOV     v26.2s, v24.2s
         MOV     v28.2s, v24.2s
         MOV     v30.2s, v24.2s
-        MOVI    v25.2s, 0
-        MOVI    v27.2s, 0
-        MOVI    v29.2s, 0
-        MOVI    v31.2s, 0
 
         # Is there at least 2 floats (8 bytes)?
         SUBS    x0, x2, 8               // k = kc - 8
@@ -80,29 +77,26 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x1__asm_aarch64_neonfma_ld64
         # Main loop - 2 floats of A (8 bytes)
 1:
         LDR     d0,  [x3], 8
-        LDP     s20, s21, [x5], 8
+        LDR     d20, [x5], 8
         LDR     d1, [x11], 8
         LDR     d2, [x12], 8
         LDR     d3,  [x4], 8
         SUBS    x0, x0, 8
-        FMLA    s24, s20, v0.s[0]
-        FMLA    s26, s20, v1.s[0]
-        FMLA    s28, s20, v2.s[0]
-        FMLA    s30, s20, v3.s[0]
-        FMLA    s25, s21, v0.s[1]
-        FMLA    s27, s21, v1.s[1]
-        FMLA    s29, s21, v2.s[1]
-        FMLA    s31, s21, v3.s[1]
+        FMLA    v24.2s, v20.2s, v0.2s
+        FMLA    v26.2s, v20.2s, v1.2s
+        FMLA    v28.2s, v20.2s, v2.2s
+        FMLA    v30.2s, v20.2s, v3.2s
         B.HS    1b
+
+        FADDP   s24, v24.2s
+        FADDP   s26, v26.2s
+        FADDP   s28, v28.2s
+        FADDP   s30, v30.2s
 
         # Is there a remainder?- 1 float of A (4 bytes)
         TBNZ    x0, 2, 3f
 
 2:
-        FADD    s24, s24, s25
-        FADD    s26, s26, s27
-        FADD    s28, s28, s29
-        FADD    s30, s30, s31
 
 
         # Clamp

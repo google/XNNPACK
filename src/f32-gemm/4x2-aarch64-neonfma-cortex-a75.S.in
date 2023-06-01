@@ -346,7 +346,6 @@ BEGIN_FUNCTION xnn_f32_gemm${"inc" if INC else ""}_minmax_ukernel_4x2__asm_aarch
           STR     s26,  [x9]
           STR     s28, [x10]
           STR     s30,  [x7]
-10:
         RET
 
 
