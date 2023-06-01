@@ -1,0 +1,24 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Scalar
+- name: xnn_qs8_f32_gemm_minmax_ukernel_1x2__scalar
+  init: xnn_init_qs8_conv_minmax_rndnu_scalar_params
+  k-block: 1
+- name: xnn_qs8_f32_gemm_minmax_ukernel_1x4__scalar
+  init: xnn_init_qs8_conv_minmax_rndnu_scalar_params
+  k-block: 1
+- name: xnn_qs8_f32_gemm_minmax_ukernel_1x8__scalar
+  init: xnn_init_qs8_conv_minmax_rndnu_scalar_params
+  k-block: 1
+- name: xnn_qs8_f32_gemm_minmax_ukernel_2x2__scalar
+  init: xnn_init_qs8_conv_minmax_rndnu_scalar_params
+  k-block: 1
+- name: xnn_qs8_f32_gemm_minmax_ukernel_2x4__scalar
+  init: xnn_init_qs8_conv_minmax_rndnu_scalar_params
+  k-block: 1
+- name: xnn_qs8_f32_gemm_minmax_ukernel_2x8__scalar
+  init: xnn_init_qs8_conv_minmax_rndnu_scalar_params
+  k-block: 1

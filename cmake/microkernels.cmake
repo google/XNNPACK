@@ -5172,6 +5172,13 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/qs8-dwconv-25p4c-minmax-fp32-scalar-fmagic.c
   src/qs8-dwconv/gen/qs8-dwconv-25p4c-minmax-fp32-scalar-imagic.c
   src/qs8-dwconv/gen/qs8-dwconv-25p4c-minmax-fp32-scalar-lrintf.c
+  src/qs8-f32-gemm/gen/qs8-f32-gemm-1x2-minmax-scalar.c
+  src/qs8-f32-gemm/gen/qs8-f32-gemm-1x4-minmax-scalar.c
+  src/qs8-f32-gemm/gen/qs8-f32-gemm-1x8-minmax-scalar.c
+  src/qs8-f32-gemm/gen/qs8-f32-gemm-2x2-minmax-scalar.c
+  src/qs8-f32-gemm/gen/qs8-f32-gemm-2x4-minmax-scalar.c
+  src/qs8-f32-gemm/gen/qs8-f32-gemm-2x8-minmax-scalar.c
+  src/qs8-f32-gemm/gen/qs8-f32-gemm-4x4-minmax-scalar.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-scalar-x1.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-scalar-x2.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-scalar-x3.c

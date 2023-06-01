@@ -508,6 +508,89 @@ void GemmMicrokernelTester::Test(
 }
 
 void GemmMicrokernelTester::Test(
+  xnn_qs8_f32_gemm_minmax_ukernel_fn gemm,
+  xnn_init_qs8_conv_minmax_params_fn init_params
+  ) const
+{
+  ASSERT_LE(m(), mr());
+
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto f32rngscale = std::bind(std::uniform_real_distribution<float>(0, 1), std::ref(rng));
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1, 1), std::ref(rng));
+  auto i8rng = std::bind(
+    std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
+    std::ref(rng));
+  auto w8rng = std::bind(
+    std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()),
+    std::ref(rng));
+
+  std::vector<int8_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  std::vector<int32_t> input_zp(m());
+  std::vector<float> input_scale(m());
+  std::vector<int8_t> b(n() * k());
+  std::vector<float> bias(n());
+  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(float) * 2);
+  std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+  std::vector<int32_t> acc(m() * n());
+  std::vector<float> c_ref(m() * n(), 0);
+
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    do {
+      std::generate(a.begin(), a.end(), std::ref(i8rng));
+    } while (a.size() > 1 && *std::max_element(a.cbegin(), a.cend()) == *std::min_element(a.cbegin(), a.cend()));
+    do {
+      std::generate(b.begin(), b.end(), std::ref(w8rng));
+    } while (b.size() > 1 && *std::max_element(b.cbegin(), b.cend()) == *std::min_element(b.cbegin(), b.cend()));
+
+    std::generate(bias.begin(), bias.end(), std::ref(f32rng));
+    std::generate(input_scale.begin(), input_scale.end(), std::ref(f32rngscale));
+    std::generate(input_zp.begin(), input_zp.end(), std::ref(i8rng));
+    std::fill(c.begin(), c.end(), nanf(""));
+
+    std::fill(packed_w.begin(), packed_w.end(), 0);
+    const xnn_qs8_packing_params packing_params = { int8_t(a_zero_point() - 0x80) };
+    xnn_pack_qs8_f32_gemm_goi_w(1, n(), k(), nr(), kr(), sr(),
+                            b.data(), bias.data(), packed_w.data(), 0, &packing_params);
+
+    // Compute 32-bit results and output quantization arguments.
+    std::fill(c_ref.begin(), c_ref.end(), 0);
+    for (size_t m_index = 0; m_index < m(); m_index++) {
+      for (size_t n_index = 0; n_index < n(); n_index++) {
+        int32_t ksum = 0;
+        for (size_t k_index = 0; k_index < k(); k_index++) {
+          ksum += b[n_index * k() + k_index];
+          c_ref[m_index * n() + n_index] +=
+              int32_t(a[m_index * a_stride() + k_index]) *
+              int32_t(b[n_index * k() + k_index]);
+        }
+        c_ref[m_index * n() + n_index] -= (input_zp[m_index] * ksum);
+        c_ref[m_index * n() + n_index] *= input_scale[m_index];
+        c_ref[m_index * n() + n_index] += bias[n_index];
+      }
+    }
+
+    gemm(
+      m(), n(), k(),
+      a.data(), a_stride() * sizeof(int8_t),
+      static_cast<const void*>(packed_w.data()),
+      c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float), input_scale.data(), input_zp.data(),
+      nullptr);
+
+    for (size_t i = 0; i < m(); i++) {
+      for (size_t j = 0; j < n(); j++) {
+        EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_ref[i * n() + j],
+            std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 3.0e-2f))
+            << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+            << " (accumulator = " << acc[i * n() + j]
+            << "), optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
+            << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
+      }
+    }
+  }
+}
+
+void GemmMicrokernelTester::Test(
   xnn_qs8_gemm_minmax_ukernel_fn gemm,
   xnn_init_qs8_conv_minmax_params_fn init_params,
   xnn_qs8_requantize_fn requantize) const

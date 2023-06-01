@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert REQUANTIZATION in ["FP32", "RNDNU"]
+$assert REQUANTIZATION in ["FP32", "RNDNU"] or not REQUANTIZATION
 $assert REQUANTIZATION != "FP32" or VARIANT in ["FMAGIC", "IMAGIC", "LRINTF"]
 $assert DATATYPE in ["QC8", "QS8", "QU8"]
 #include <assert.h>
@@ -12,26 +12,29 @@ $if VARIANT == "LRINTF":
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
-$if NR % 4 != 0:
-  #include <xnnpack/unaligned.h>
+#include <xnnpack/unaligned.h>
 
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" + ("_" + VARIANT.lower() if VARIANT else "")
 $PARAMS_UNION = "xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
+$OUTPUT_T = XINT8_T if REQUANTIZATION else "float"
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}${"_" + VARIANT.lower() if VARIANT else ""}(
+void xnn_${DATATYPE_SPEC}${"_f32" if not REQUANTIZATION else ""}_gemm_minmax${"_" + REQUANTIZATION.lower() if REQUANTIZATION else ""}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}${"_" + VARIANT.lower() if VARIANT else ""}(
     size_t mr,
     size_t nc,
     size_t kc,
     const ${XINT8_T}* restrict a,
     size_t a_stride,
     const void* restrict w,
-    ${XINT8_T}* restrict c,
+    ${OUTPUT_T}* restrict c,
     size_t cm_stride,
     size_t cn_stride,
+    $if not REQUANTIZATION:
+      const float* input_scale,
+      const int32_t* input_zp,
     const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
@@ -40,10 +43,18 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${
   assert(kc != 0);
 
   const ${XINT8_T}* a0 = a;
-  ${XINT8_T}* c0 = c;
+  ${OUTPUT_T}* c0 = c;
+  $if not REQUANTIZATION:
+    int32_t vzp[${MR}];
+    float vscale[${MR}];
+    vzp[0] = unaligned_indexed_load_s32(input_zp, 0);
+    vscale[0] = unaligned_indexed_load_f32(input_scale, 0);
+    $for M in range(1, MR):
+      vzp[${M}] = mr > ${M} ? unaligned_indexed_load_s32(input_zp, ${M}) : vzp[0];
+      vscale[${M}] = mr > ${M} ? unaligned_indexed_load_f32(input_scale, ${M}) : vscale[0];
   $for M in range(1, MR):
     const ${XINT8_T}* a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M-1} + a_stride);
-    ${XINT8_T}* c${M} = (${XINT8_T}*) ((uintptr_t) c${M-1} + cm_stride);
+    ${OUTPUT_T}* c${M} = (${OUTPUT_T}*) ((uintptr_t) c${M-1} + cm_stride);
     $if M % 2 == 0:
       if XNN_UNPREDICTABLE(mr <= ${M}) {
         a${M} = a${M-1};
@@ -74,6 +85,17 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${
         int32_t vacc${M}x${N} = vacc0x${N};
     w = (const void*) ((const int32_t*) w + ${NR});
 
+    $if not REQUANTIZATION:
+      $for M in range(0, MR):
+        $for N in range(NR):
+          vacc${M}x${N} *= vzp[${M}];
+      $if NR % 4 != 0:
+        $for N in range(NR):
+          float vbias${N} = unaligned_indexed_load_f32(w, ${N});
+      $else:
+        $for N in range(NR):
+          float vbias${N} = ((const float*) w)[${N}];
+      w = (const void*) ((const float*) w + ${NR});
     size_t k = kc;
     do {
       $for M in range(MR):
@@ -96,7 +118,17 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${
       k -= sizeof(${XINT8_T});
     } while (k != 0);
 
-    $if REQUANTIZATION == "FP32":
+    $if not REQUANTIZATION:
+      $for M in range(MR):
+        $for N in range(NR):
+          float vfpacc${M}x${N} = (float) vacc${M}x${N};
+      $for N in range(NR):
+        $for M in range(MR):
+          vfpacc${M}x${N} *= vscale[${M}];
+      $for N in range(NR):
+        $for M in range(MR):
+          float vout${M}x${N} = vfpacc${M}x${N} + vbias${N};
+    $elif REQUANTIZATION == "FP32":
       $for M in range(MR):
         $for N in range(NR):
           float vfpacc${M}x${N} = (float) vacc${M}x${N};
@@ -212,13 +244,13 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in range(MR):
         $for N in range(NR):
-          c${M}[${N}] = (${XINT8_T}) vout${M}x${N};
+          c${M}[${N}] = (${OUTPUT_T}) vout${M}x${N};
 
       $for M in range(MR):
         a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} - kc);
 
       $for M in range(MR):
-        c${M} = (${XINT8_T}*) ((uintptr_t) c${M} + cn_stride);
+        c${M} = (${OUTPUT_T}*) ((uintptr_t) c${M} + cn_stride);
 
       nc -= ${NR};
     } else {
@@ -226,7 +258,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${
         if (nc & ${1 << LOG2N}) {
           $for M in range(MR):
             $for N in range(1 << LOG2N):
-              c${M}[${N}] = (${XINT8_T}) vout${M}x${N};
+              c${M}[${N}] = (${OUTPUT_T}) vout${M}x${N};
             $if LOG2N != 0:
               $for N in range(NR - (1 << LOG2N) - 1):
                 vout${M}x${N} = vout${M}x${N + (1 << LOG2N)};
