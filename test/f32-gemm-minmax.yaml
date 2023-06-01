@@ -105,6 +105,9 @@
 - name: xnn_f32_gemm_minmax_ukernel_4x1__asm_aarch64_neonfma_ld64
   init: xnn_init_f32_minmax_scalar_params
   k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_4x1__asm_aarch64_neonfma_ld128
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 4
 - name: xnn_f32_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_cortex_a75
   init: xnn_init_f32_minmax_scalar_params
   k-block: 8

@@ -1,13 +1,15 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-gemm/4x1-aarch64-neonfma-ld128.S.in
+//   Generator: tools/xngen
+//
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert DATATYPE in ["F32", "QC8"]
 #include <xnnpack/assembly.h>
 
-$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
-# void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4x1__asm_aarch64_neonfma_ld128(
+# void xnn_f32_gemm_minmax_ukernel_4x1__asm_aarch64_neonfma_ld128(
 #     size_t mr,                x0
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -17,11 +19,7 @@ $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
 #     float* c,                 x6
 #     size_t cm_stride,         x7
 #     size_t cn_stride,         [sp] -> x14
-$if INC:
-  #     const float* acc,         [sp + 8] -> x15
-  #     const xnn_f32_minmax_params* params)  [sp + 16] -> (x8)
-$else:
-  #     const xnn_f32_minmax_params* params)  [sp + 8] -> (x8)
+#     const xnn_f32_minmax_params* params)  [sp + 8] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -37,16 +35,10 @@ $else:
 # C3  x7  v30
 # Clamp v4 v5
 
-BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4x1__asm_aarch64_neonfma_ld128
+BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x1__asm_aarch64_neonfma_ld128
 
-        $if INC:
-          # Load cn_stride, acc
-          LDP     x14, x15, [sp]
-          # Load params pointer
-          LDR     x8, [sp, 16]
-        $else:
-          # Load cn_stride, params pointer
-          LDP     x14, x8, [sp]
+        # Load cn_stride, params pointer
+        LDP     x14, x8, [sp]
 
         # Clamp A and C pointers
         CMP     x0, 2                   // if mr < 2
@@ -71,18 +63,11 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
         CSEL    x7, x10, x7, LO         //   c3 = c2
 
 0:
-        $if INC:
-          # Load initial accumulators
-          LDR     s24, [x15], 4
-          LDR     s26, [x15], 4
-          LDR     s28, [x15], 4
-          LDR     s30, [x15], 4
-        $else:
-          # Load initial bias from w into accumulators
-          LDR     s24, [x5], 4
-          MOV     v26.2s, v24.2s
-          MOV     v28.2s, v24.2s
-          MOV     v30.2s, v24.2s
+        # Load initial bias from w into accumulators
+        LDR     s24, [x5], 4
+        MOV     v26.2s, v24.2s
+        MOV     v28.2s, v24.2s
+        MOV     v30.2s, v24.2s
 
         # Is there at least 4 floats (16 bytes)?
         SUBS    x0, x2, 16              // k = kc - 16
@@ -90,21 +75,11 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
 
         # Main loop - 4 floats of A (16 bytes)
 1:
-        $if DATATYPE == "F32":
-          LDR     q0,  [x3], 16
-          LDR     q20, [x5], 16
-          LDR     q1, [x11], 16
-          LDR     q2, [x12], 16
-          LDR     q3,  [x4], 16
-        $else:
-          LDR     s20, [x5], 4
-          LDR     q0,  [x3], 16
-          SXTL    v20.8h, v20.8b
-          LDR     q1, [x11], 16
-          SXTL    v20.4s, v20.4h
-          LDR     q2, [x12], 16
-          SCVTF   v20.4s, v20.4s
-          LDR     q3,  [x4], 16
+        LDR     q0,  [x3], 16
+        LDR     q20, [x5], 16
+        LDR     q1, [x11], 16
+        LDR     q2, [x12], 16
+        LDR     q3,  [x4], 16
         SUBS    x0, x0, 16
         FMLA    v24.4s, v20.4s, v0.4s
         FMLA    v26.4s, v20.4s, v1.4s
@@ -128,13 +103,6 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
         B.NE    3f
 
 2:
-        $if DATATYPE == "QC8":
-          # Scale
-          LDR     s20, [x5], 4
-          FMUL    s24, s24, v20.s[0]
-          FMUL    s26, s26, v20.s[0]
-          FMUL    s28, s28, v20.s[0]
-          FMUL    s30, s30, v20.s[0]
 
         # Clamp
         FMAX    s24, s24, s4
@@ -147,24 +115,14 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
         FMIN    s28, s28, s5
         FMIN    s30, s30, s5
 
-        $if INC:
-          ST1     {v30.s}[0],  [x7], x14
-          SUB     x3,  x3, x2             // a0 -= kc
-          ST1     {v28.s}[0], [x10], x14
-          SUB     x11, x11, x2            // a1 -= kc
-          ST1     {v26.s}[0],  [x9], x14
-          SUB     x12, x12, x2            // a2 -= kc
-          ST1     {v24.s}[0],  [x6], x14
-          SUB     x4,  x4, x2             // a3 -= kc
-        $else:
-          ST1     {v24.s}[0],  [x6], x14
-          SUB     x3,  x3, x2             // a0 -= kc
-          ST1     {v26.s}[0],  [x9], x14
-          SUB     x11, x11, x2            // a1 -= kc
-          ST1     {v28.s}[0], [x10], x14
-          SUB     x12, x12, x2            // a2 -= kc
-          ST1     {v30.s}[0],  [x7], x14
-          SUB     x4,  x4, x2             // a3 -= kc
+        ST1     {v24.s}[0],  [x6], x14
+        SUB     x3,  x3, x2             // a0 -= kc
+        ST1     {v26.s}[0],  [x9], x14
+        SUB     x11, x11, x2            // a1 -= kc
+        ST1     {v28.s}[0], [x10], x14
+        SUB     x12, x12, x2            // a2 -= kc
+        ST1     {v30.s}[0],  [x7], x14
+        SUB     x4,  x4, x2             // a3 -= kc
 
         B.HI    0b
 
@@ -176,13 +134,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
         # Remainder- 1 float of A (4 bytes)
 4:
         LDR     s0,  [x3], 4
-        $if DATATYPE == "F32":
-          LDR     s20, [x5], 4
-        $else:
-          LDR     b20, [x5], 1
-          SXTL    v20.8h, v20.8b
-          SXTL    v20.4s, v20.4h
-          SCVTF   v20.4s, v20.4s
+        LDR     s20, [x5], 4
         LDR     s1, [x11], 4
         LDR     s2, [x12], 4
         LDR     s3,  [x4], 4
@@ -194,7 +146,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
         B.NE    4b
         B       2b
 
-END_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4x1__asm_aarch64_neonfma_ld128
+END_FUNCTION xnn_f32_gemm_minmax_ukernel_4x1__asm_aarch64_neonfma_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
