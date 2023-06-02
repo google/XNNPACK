@@ -61,6 +61,7 @@ tools/xngen src/f32-gemm/4x1-aarch64-neonfma-ld64.S.in      -D INC=0            
 tools/xngen src/f32-gemm/4x1-aarch64-neonfma-ld128.S.in     -D INC=0                -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x1-minmax-asm-aarch64-neonfma-ld128.S &
 ### MRx2 micro-kernels
 tools/xngen src/f32-gemm/4x2-aarch64-neonfma-ld64.S.in      -D INC=0                -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x2-minmax-asm-aarch64-neonfma-ld64.S &
+tools/xngen src/f32-gemm/4x2-aarch64-neonfma-ld128.S.in     -D INC=0                -D DATATYPE=QC8 -o src/f32-gemm/gen/f32-qc8w-gemm-4x2-minmax-asm-aarch64-neonfma-ld128.S &
 
 ################################## WAsm SIMD ##################################
 ### LOAD1+BROADCAST micro-kernels
