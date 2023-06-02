@@ -1833,6 +1833,136 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
   }
   operators.emplace_back(op63, xnn_delete_operator);
 
+  {
+    const size_t a_shape[] = { 1, 24, 56, 56 };
+    const size_t b_shape[] = { 1, 24, 56, 56 };
+    status = xnn_reshape_add_nd_f32(
+      op9,
+      4, a_shape, 4, b_shape,
+      threadpool /* threadpool */);
+  }
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #9" << std::endl;
+    return ExecutionPlan();
+  }
+
+  {
+    const size_t a_shape[] = { 1, 32, 28, 28 };
+    const size_t b_shape[] = { 1, 32, 28, 28 };
+    status = xnn_reshape_add_nd_f32(
+      op16,
+      4, a_shape, 4, b_shape,
+      threadpool /* threadpool */);
+  }
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #16" << std::endl;
+    return ExecutionPlan();
+  }
+
+  {
+    const size_t a_shape[] = { 1, 32, 28, 28 };
+    const size_t b_shape[] = { 1, 32, 28, 28 };
+    status = xnn_reshape_add_nd_f32(
+      op20,
+      4, a_shape, 4, b_shape,
+      threadpool /* threadpool */);
+  }
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #20" << std::endl;
+    return ExecutionPlan();
+  }
+
+  {
+    const size_t a_shape[] = { 1, 64, 14, 14 };
+    const size_t b_shape[] = { 1, 64, 14, 14 };
+    status = xnn_reshape_add_nd_f32(
+      op27,
+      4, a_shape, 4, b_shape,
+      threadpool /* threadpool */);
+  }
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #27" << std::endl;
+    return ExecutionPlan();
+  }
+
+  {
+    const size_t a_shape[] = { 1, 64, 14, 14 };
+    const size_t b_shape[] = { 1, 64, 14, 14 };
+    status = xnn_reshape_add_nd_f32(
+      op31,
+      4, a_shape, 4, b_shape,
+      threadpool /* threadpool */);
+  }
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #31" << std::endl;
+    return ExecutionPlan();
+  }
+
+  {
+    const size_t a_shape[] = { 1, 64, 14, 14 };
+    const size_t b_shape[] = { 1, 64, 14, 14 };
+    status = xnn_reshape_add_nd_f32(
+      op35,
+      4, a_shape, 4, b_shape,
+      threadpool /* threadpool */);
+  }
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #35" << std::endl;
+    return ExecutionPlan();
+  }
+
+  {
+    const size_t a_shape[] = { 1, 96, 14, 14 };
+    const size_t b_shape[] = { 1, 96, 14, 14 };
+    status = xnn_reshape_add_nd_f32(
+      op42,
+      4, a_shape, 4, b_shape,
+      threadpool /* threadpool */);
+  }
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #42" << std::endl;
+    return ExecutionPlan();
+  }
+
+  {
+    const size_t a_shape[] = { 1, 96, 14, 14 };
+    const size_t b_shape[] = { 1, 96, 14, 14 };
+    status = xnn_reshape_add_nd_f32(
+      op46,
+      4, a_shape, 4, b_shape,
+      threadpool /* threadpool */);
+  }
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #46" << std::endl;
+    return ExecutionPlan();
+  }
+
+  {
+    const size_t a_shape[] = { 1, 160, 7, 7 };
+    const size_t b_shape[] = { 1, 160, 7, 7 };
+    status = xnn_reshape_add_nd_f32(
+      op53,
+      4, a_shape, 4, b_shape,
+      threadpool /* threadpool */);
+  }
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #53" << std::endl;
+    return ExecutionPlan();
+  }
+
+  {
+    const size_t a_shape[] = { 1, 160, 7, 7 };
+    const size_t b_shape[] = { 1, 160, 7, 7 };
+    status = xnn_reshape_add_nd_f32(
+      op57,
+      4, a_shape, 4, b_shape,
+      threadpool /* threadpool */);
+  }
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #57" << std::endl;
+    return ExecutionPlan();
+  }
+
   status = xnn_setup_convolution2d_nchw_f32(
     op0,
     1 /* batch size */, 224 /* input height */, 224 /* input width */,
@@ -1923,15 +2053,9 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 24, 56, 56 };
-    const size_t b_shape[] = { 1, 24, 56, 56 };
-    status = xnn_setup_add_nd_f32(
-      op9,
-      4, a_shape, 4, b_shape,
-      v9.data() /* a */, v6.data() /* b */, v10.data() /* output */,
-      threadpool /* threadpool */);
-  }
+  status = xnn_setup_add_nd_f32(
+    op9,
+    v9.data() /* a */, v6.data() /* b */, v10.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #9" << std::endl;
     return ExecutionPlan();
@@ -1997,15 +2121,9 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 32, 28, 28 };
-    const size_t b_shape[] = { 1, 32, 28, 28 };
-    status = xnn_setup_add_nd_f32(
-      op16,
-      4, a_shape, 4, b_shape,
-      v16.data() /* a */, v13.data() /* b */, v17.data() /* output */,
-      threadpool /* threadpool */);
-  }
+  status = xnn_setup_add_nd_f32(
+    op16,
+    v16.data() /* a */, v13.data() /* b */, v17.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #16" << std::endl;
     return ExecutionPlan();
@@ -2041,15 +2159,9 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 32, 28, 28 };
-    const size_t b_shape[] = { 1, 32, 28, 28 };
-    status = xnn_setup_add_nd_f32(
-      op20,
-      4, a_shape, 4, b_shape,
-      v20.data() /* a */, v17.data() /* b */, v21.data() /* output */,
-      threadpool /* threadpool */);
-  }
+  status = xnn_setup_add_nd_f32(
+    op20,
+    v20.data() /* a */, v17.data() /* b */, v21.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #20" << std::endl;
     return ExecutionPlan();
@@ -2115,15 +2227,9 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 64, 14, 14 };
-    const size_t b_shape[] = { 1, 64, 14, 14 };
-    status = xnn_setup_add_nd_f32(
-      op27,
-      4, a_shape, 4, b_shape,
-      v27.data() /* a */, v24.data() /* b */, v28.data() /* output */,
-      threadpool /* threadpool */);
-  }
+  status = xnn_setup_add_nd_f32(
+    op27,
+    v27.data() /* a */, v24.data() /* b */, v28.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #27" << std::endl;
     return ExecutionPlan();
@@ -2159,15 +2265,9 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 64, 14, 14 };
-    const size_t b_shape[] = { 1, 64, 14, 14 };
-    status = xnn_setup_add_nd_f32(
-      op31,
-      4, a_shape, 4, b_shape,
-      v31.data() /* a */, v28.data() /* b */, v32.data() /* output */,
-      threadpool /* threadpool */);
-  }
+  status = xnn_setup_add_nd_f32(
+    op31,
+    v31.data() /* a */, v28.data() /* b */, v32.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #31" << std::endl;
     return ExecutionPlan();
@@ -2203,15 +2303,9 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 64, 14, 14 };
-    const size_t b_shape[] = { 1, 64, 14, 14 };
-    status = xnn_setup_add_nd_f32(
-      op35,
-      4, a_shape, 4, b_shape,
-      v35.data() /* a */, v32.data() /* b */, v36.data() /* output */,
-      threadpool /* threadpool */);
-  }
+  status = xnn_setup_add_nd_f32(
+    op35,
+    v35.data() /* a */, v32.data() /* b */, v36.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #35" << std::endl;
     return ExecutionPlan();
@@ -2277,15 +2371,9 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 96, 14, 14 };
-    const size_t b_shape[] = { 1, 96, 14, 14 };
-    status = xnn_setup_add_nd_f32(
-      op42,
-      4, a_shape, 4, b_shape,
-      v42.data() /* a */, v39.data() /* b */, v43.data() /* output */,
-      threadpool /* threadpool */);
-  }
+  status = xnn_setup_add_nd_f32(
+    op42,
+    v42.data() /* a */, v39.data() /* b */, v43.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #42" << std::endl;
     return ExecutionPlan();
@@ -2321,15 +2409,9 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 96, 14, 14 };
-    const size_t b_shape[] = { 1, 96, 14, 14 };
-    status = xnn_setup_add_nd_f32(
-      op46,
-      4, a_shape, 4, b_shape,
-      v46.data() /* a */, v43.data() /* b */, v47.data() /* output */,
-      threadpool /* threadpool */);
-  }
+  status = xnn_setup_add_nd_f32(
+    op46,
+    v46.data() /* a */, v43.data() /* b */, v47.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #46" << std::endl;
     return ExecutionPlan();
@@ -2395,15 +2477,9 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 160, 7, 7 };
-    const size_t b_shape[] = { 1, 160, 7, 7 };
-    status = xnn_setup_add_nd_f32(
-      op53,
-      4, a_shape, 4, b_shape,
-      v53.data() /* a */, v50.data() /* b */, v54.data() /* output */,
-      threadpool /* threadpool */);
-  }
+  status = xnn_setup_add_nd_f32(
+    op53,
+    v53.data() /* a */, v50.data() /* b */, v54.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #53" << std::endl;
     return ExecutionPlan();
@@ -2439,15 +2515,9 @@ ExecutionPlan FP32SparseMobileNetV2(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  {
-    const size_t a_shape[] = { 1, 160, 7, 7 };
-    const size_t b_shape[] = { 1, 160, 7, 7 };
-    status = xnn_setup_add_nd_f32(
-      op57,
-      4, a_shape, 4, b_shape,
-      v57.data() /* a */, v54.data() /* b */, v58.data() /* output */,
-      threadpool /* threadpool */);
-  }
+  status = xnn_setup_add_nd_f32(
+    op57,
+    v57.data() /* a */, v54.data() /* b */, v58.data() /* output */);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #57" << std::endl;
     return ExecutionPlan();

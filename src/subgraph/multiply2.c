@@ -117,6 +117,54 @@ static enum xnn_status create_multiply_operator(
   return status;
 }
 
+static enum xnn_status reshape_multiply_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_multiply_nd_f16:
+      return xnn_reshape_multiply_nd_f16(
+        opdata->operator_objects[0],
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        threadpool);
+      break;
+    case xnn_operator_type_multiply_nd_f32:
+      return xnn_reshape_multiply_nd_f32(
+        opdata->operator_objects[0],
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        threadpool);
+      break;
+    case xnn_operator_type_multiply_nd_qs8:
+      return xnn_reshape_multiply_nd_qs8(
+        opdata->operator_objects[0],
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        threadpool);
+      break;
+    case xnn_operator_type_multiply_nd_qu8:
+      return xnn_reshape_multiply_nd_qu8(
+        opdata->operator_objects[0],
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        threadpool);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 static enum xnn_status setup_multiply_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
@@ -151,42 +199,22 @@ static enum xnn_status setup_multiply_operator(
     case xnn_operator_type_multiply_nd_f16:
       return xnn_setup_multiply_nd_f16(
         opdata->operator_objects[0],
-        opdata->shape1.num_dims,
-        opdata->shape1.dim,
-        opdata->shape2.num_dims,
-        opdata->shape2.dim,
-        input1_data, input2_data, output_data,
-        threadpool);
+        input1_data, input2_data, output_data);
       break;
     case xnn_operator_type_multiply_nd_f32:
       return xnn_setup_multiply_nd_f32(
         opdata->operator_objects[0],
-        opdata->shape1.num_dims,
-        opdata->shape1.dim,
-        opdata->shape2.num_dims,
-        opdata->shape2.dim,
-        input1_data, input2_data, output_data,
-        threadpool);
+        input1_data, input2_data, output_data);
       break;
     case xnn_operator_type_multiply_nd_qs8:
       return xnn_setup_multiply_nd_qs8(
         opdata->operator_objects[0],
-        opdata->shape1.num_dims,
-        opdata->shape1.dim,
-        opdata->shape2.num_dims,
-        opdata->shape2.dim,
-        input1_data, input2_data, output_data,
-        threadpool);
+        input1_data, input2_data, output_data);
       break;
     case xnn_operator_type_multiply_nd_qu8:
       return xnn_setup_multiply_nd_qu8(
         opdata->operator_objects[0],
-        opdata->shape1.num_dims,
-        opdata->shape1.dim,
-        opdata->shape2.num_dims,
-        opdata->shape2.dim,
-        input1_data, input2_data, output_data,
-        threadpool);
+        input1_data, input2_data, output_data);
       break;
     default:
       XNN_UNREACHABLE;
@@ -313,6 +341,7 @@ enum xnn_status xnn_define_multiply2(
   node->flags = flags;
 
   node->create = create_multiply_operator;
+  node->reshape = reshape_multiply_operator;
   node->setup = setup_multiply_operator;
 
   return xnn_status_success;

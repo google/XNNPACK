@@ -80,6 +80,34 @@ static enum xnn_status create_squared_difference_operator(
   return status;
 }
 
+static enum xnn_status reshape_squared_difference_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_squared_difference_nd_f16:
+      return xnn_reshape_squared_difference_nd_f16(
+        opdata->operator_objects[0],
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        threadpool);
+    case xnn_operator_type_squared_difference_nd_f32:
+      return xnn_reshape_squared_difference_nd_f32(
+        opdata->operator_objects[0],
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
+        threadpool);
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 static enum xnn_status setup_squared_difference_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
@@ -114,21 +142,11 @@ static enum xnn_status setup_squared_difference_operator(
     case xnn_operator_type_squared_difference_nd_f16:
       return xnn_setup_squared_difference_nd_f16(
         opdata->operator_objects[0],
-        opdata->shape1.num_dims,
-        opdata->shape1.dim,
-        opdata->shape2.num_dims,
-        opdata->shape2.dim,
-        input1_data, input2_data, output_data,
-        threadpool);
+        input1_data, input2_data, output_data);
     case xnn_operator_type_squared_difference_nd_f32:
       return xnn_setup_squared_difference_nd_f32(
         opdata->operator_objects[0],
-        opdata->shape1.num_dims,
-        opdata->shape1.dim,
-        opdata->shape2.num_dims,
-        opdata->shape2.dim,
-        input1_data, input2_data, output_data,
-        threadpool);
+        input1_data, input2_data, output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -227,6 +245,7 @@ enum xnn_status xnn_define_squared_difference(
   node->flags = flags;
 
   node->create = create_squared_difference_operator;
+  node->reshape = reshape_squared_difference_operator;
   node->setup = setup_squared_difference_operator;
 
   return xnn_status_success;

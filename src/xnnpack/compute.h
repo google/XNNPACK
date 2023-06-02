@@ -928,6 +928,7 @@ struct elementwise_binary_context {
     union xnn_f32_minmax_params f32;
   } params;
   xnn_vbinary_ukernel_fn ukernel;
+  bool flip_a_b;
 };
 
 #ifndef __cplusplus
