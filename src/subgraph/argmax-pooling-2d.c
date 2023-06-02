@@ -55,6 +55,20 @@ static enum xnn_status create_argmax_pooling_operator(
   return status;
 }
 
+static enum xnn_status reshape_argmax_pooling_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  return xnn_reshape_argmax_pooling2d_nhwc_f32(
+    opdata->operator_objects[0],
+    opdata->batch_size,
+    opdata->input_height,
+    opdata->input_width,
+    threadpool);
+}
+
 static enum xnn_status setup_argmax_pooling_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
@@ -87,13 +101,9 @@ static enum xnn_status setup_argmax_pooling_operator(
 
   return xnn_setup_argmax_pooling2d_nhwc_f32(
     opdata->operator_objects[0],
-    opdata->batch_size,
-    opdata->input_height,
-    opdata->input_width,
     input_data,
     output_value_data,
-    output_index_data,
-    threadpool);
+    output_index_data);
 }
 
 enum xnn_status xnn_define_argmax_pooling_2d(
@@ -214,6 +224,7 @@ enum xnn_status xnn_define_argmax_pooling_2d(
   node->flags = flags;
 
   node->create = create_argmax_pooling_operator;
+  node->reshape = reshape_argmax_pooling_operator;
   node->setup = setup_argmax_pooling_operator;
 
   return xnn_status_success;

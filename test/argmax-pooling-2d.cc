@@ -162,9 +162,12 @@ TEST_F(ArgmaxPoolingTestF32, matches_operator_api)
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_argmax_pooling2d_nhwc_f32(
-                          op, batch_size, input_height, input_width, input.data(), operator_output.data(),
-                          operator_output_index.data(), /*threadpool=*/nullptr));
+    xnn_status_success,
+    xnn_reshape_argmax_pooling2d_nhwc_f32(op, batch_size, input_height, input_width, /*threadpool=*/nullptr));
+
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_setup_argmax_pooling2d_nhwc_f32(op, input.data(), operator_output.data(), operator_output_index.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

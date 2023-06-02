@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <limits>
+#include <memory>
 #include <random>
 #include <vector>
 
@@ -389,11 +390,15 @@ class ArgmaxPoolingOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_argmax_pooling_op(argmax_pooling_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_argmax_pooling2d_nhwc_f32(
+        xnn_reshape_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
           batch_size(), input_height(), input_width(),
-          input.data(), output.data(), index.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_argmax_pooling2d_nhwc_f32(
+          argmax_pooling_op,
+          input.data(), output.data(), index.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(argmax_pooling_op, nullptr /* thread pool */));
@@ -481,11 +486,15 @@ class ArgmaxPoolingOperatorTester {
       ASSERT_NE(nullptr, argmax_pooling_op);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_argmax_pooling2d_nhwc_f32(
+        xnn_reshape_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
           batch_size(), input_height(), input_width(),
-          input.data(), output.data(), index.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_argmax_pooling2d_nhwc_f32(
+          argmax_pooling_op,
+          input.data(), output.data(), index.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(argmax_pooling_op, nullptr /* thread pool */));
@@ -540,13 +549,17 @@ class ArgmaxPoolingOperatorTester {
         }
       }
 
+      ASSERT_EQ(xnn_status_success,
+        xnn_reshape_argmax_pooling2d_nhwc_f32(
+          argmax_pooling_op,
+          next_batch_size(), next_input_height(), next_input_width(),
+          nullptr /* thread pool */));
+
       // Setup and run Argmax Pooling operator the second time, and destroy the operator.
       ASSERT_EQ(xnn_status_success,
         xnn_setup_argmax_pooling2d_nhwc_f32(
           argmax_pooling_op,
-          next_batch_size(), next_input_height(), next_input_width(),
-          input.data(), output.data(), index.data(),
-          nullptr /* thread pool */));
+          input.data(), output.data(), index.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(argmax_pooling_op, nullptr /* thread pool */));

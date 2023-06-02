@@ -44,8 +44,7 @@ int main(int argc, char** argv) {
       break;
     case 4:
       xnn_setup_argmax_pooling2d_nhwc_f32(
-        op, 0, 0, 0,
-        NULL, NULL, NULL, NULL);
+        op, NULL, NULL, NULL);
       break;
     case 5:
       xnn_create_average_pooling2d_nhwc_f32(

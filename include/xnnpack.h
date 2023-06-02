@@ -1731,15 +1731,18 @@ enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
   uint32_t flags,
   xnn_operator_t* argmax_pooling_op_out);
 
-enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
+enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
   xnn_operator_t argmax_pooling_op,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
+  xnn_operator_t argmax_pooling_op,
   const float* input,
   float* output,
-  uint32_t* index,
-  pthreadpool_t threadpool);
+  uint32_t* index);
 
 enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
   uint32_t input_padding_top,

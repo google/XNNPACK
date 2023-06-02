@@ -165,18 +165,15 @@ error:
   return status;
 }
 
-enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
+enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
     xnn_operator_t argmax_pooling_op,
     size_t batch_size,
     size_t input_height,
     size_t input_width,
-    const float* input,
-    float* output,
-    uint32_t* index,
     pthreadpool_t threadpool)
 {
   if (argmax_pooling_op->type != xnn_operator_type_argmax_pooling_nhwc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
       xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32),
       xnn_operator_type_to_string(argmax_pooling_op->type));
     return xnn_status_invalid_parameter;
@@ -184,14 +181,14 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   argmax_pooling_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+    xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
     return xnn_status_uninitialized;
   }
 
   if (input_width == 0 || input_height == 0) {
     xnn_log_error(
-      "failed to setup %s operator with %zux%zu input: input dimensions must be non-zero",
+      "failed to reshape %s operator with %zux%zu input: input dimensions must be non-zero",
       xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32), input_width, input_height);
     return xnn_status_invalid_parameter;
   }
@@ -204,7 +201,6 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   argmax_pooling_op->batch_size = batch_size;
   argmax_pooling_op->input_height = input_height;
   argmax_pooling_op->input_width = input_width;
-  argmax_pooling_op->input = input;
 
   const size_t pooling_height = argmax_pooling_op->kernel_height;
   const size_t pooling_width = argmax_pooling_op->kernel_width;
@@ -238,30 +234,21 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   const size_t step_width = pooling_width;
   const size_t step_height = pooling_size + (output_width - 1) * step_width * pooling_height;
 
-  if (input_height != argmax_pooling_op->last_input_height ||
-      input_width != argmax_pooling_op->last_input_width)
-  {
-    // Micro-kernel may read up to (first_pass_tile_size - 1) elements after the end of indirection buffer.
-    const size_t indirection_buffer_size = sizeof(void*) * ((first_pass_tile_size - 1) + output_height * step_height);
+  // Micro-kernel may read up to (first_pass_tile_size - 1) elements after the end of indirection buffer.
+  const size_t indirection_buffer_size = sizeof(void*) * ((first_pass_tile_size - 1) + output_height * step_height);
 
-    const void** indirection_buffer =
-      (const void**) xnn_reallocate_memory(argmax_pooling_op->indirection_buffer, indirection_buffer_size);
-    if (indirection_buffer == NULL) {
-      xnn_log_error(
-        "failed to allocate %zu bytes for %s operator indirection buffer",
-        indirection_buffer_size, xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
-      return xnn_status_out_of_memory;
-    }
-    argmax_pooling_op->indirection_buffer = indirection_buffer;
-    xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
+  // Allocate indirection buffer as size is known here. We initialize the buffer in setup, when input pointer is known.
+  const void** indirection_buffer =
+    (const void**) xnn_reallocate_memory(argmax_pooling_op->indirection_buffer, indirection_buffer_size);
+  if (indirection_buffer == NULL) {
+    xnn_log_error(
+      "failed to allocate %zu bytes for %s operator indirection buffer",
       indirection_buffer_size, xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
-
-    xnn_indirection_init_maxpool2d(argmax_pooling_op, step_height, step_width, /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT);
-
-    argmax_pooling_op->last_input = input;
-    argmax_pooling_op->last_input_height = input_height;
-    argmax_pooling_op->last_input_width = input_width;
+    return xnn_status_out_of_memory;
   }
+  argmax_pooling_op->indirection_buffer = indirection_buffer;
+  xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
+    indirection_buffer_size, xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
 
   const size_t channels = argmax_pooling_op->channels;
 
@@ -275,13 +262,10 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   argmax_pooling_op->context.argmax_pooling = (struct argmax_pooling_context) {
     .indirect_input = argmax_pooling_op->indirection_buffer,
     .indirect_input_height_stride = indirect_input_height_stride,
-    .input_offset = (size_t) ((uintptr_t) input - (uintptr_t) argmax_pooling_op->last_input),
     .input_batch_stride = input_height * input_width * argmax_pooling_op->input_pixel_stride * sizeof(float),
-    .output = output,
     .output_batch_stride = output_height * output_height_stride,
     .output_height_stride = output_height_stride,
     .output_width = output_width,
-    .index = index,
     .index_batch_stride = output_height * index_height_stride,
     .index_height_stride = index_height_stride,
     .pooling_size = pooling_size,
@@ -302,6 +286,63 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
     argmax_pooling_op->context.argmax_pooling.multipass_ukernel = ukernel->mp;
     argmax_pooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_argmax_pooling_multipass;
   }
+  argmax_pooling_op->state = xnn_run_state_needs_setup;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
+    xnn_operator_t argmax_pooling_op,
+    const float* input,
+    float* output,
+    uint32_t* index)
+{
+  if (argmax_pooling_op->type != xnn_operator_type_argmax_pooling_nhwc_f32) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32),
+      xnn_operator_type_to_string(argmax_pooling_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0)
+  {
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
+    return xnn_status_uninitialized;
+  }
+
+  switch (argmax_pooling_op->state) {
+    case xnn_run_state_skip:
+      return xnn_status_success;
+    case xnn_run_state_invalid:
+      xnn_log_error(
+        "failed to setup %s operator: operator has not been reshaped yet",
+        xnn_operator_type_to_string(argmax_pooling_op->type));
+      return xnn_status_invalid_state;
+    case xnn_run_state_needs_setup:
+      // Operator has been reshaped, but not setup, continue with setup.
+    case xnn_run_state_ready:
+      // Operator has been reshaped, and we are setting up with different pointers.
+      break;
+  }
+
+  // Set input before initializing indirection buffers.
+  argmax_pooling_op->input = input;
+  argmax_pooling_op->context.argmax_pooling.output = output;
+  argmax_pooling_op->context.argmax_pooling.index = index;
+
+  const size_t pooling_height = argmax_pooling_op->kernel_height;
+  const size_t pooling_width = argmax_pooling_op->kernel_width;
+  const size_t pooling_size = pooling_height * pooling_width;
+  const size_t output_width = argmax_pooling_op->output_width;
+  // TODO(zhin): Consider storing step_width and step_height in operator, this is already calculated in reshape.
+  const size_t step_width = pooling_width;
+  const size_t step_height = pooling_size + (output_width - 1) * step_width * pooling_height;
+
+  xnn_indirection_init_maxpool2d(argmax_pooling_op, step_height, step_width, /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT);
+
+  argmax_pooling_op->context.argmax_pooling.indirect_input = argmax_pooling_op->indirection_buffer,
+
   argmax_pooling_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
