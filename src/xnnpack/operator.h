@@ -300,6 +300,11 @@ struct xnn_operator {
     union xnn_s8_minmax_params s8_minmax;
     union xnn_u8_minmax_params u8_minmax;
   } params;
+  // Second set of params. Operators like Dynamic Fully Connected only decides on the specific config to use during
+  // reshape, so it needs to keep two sets of params around. Configs can have different initialization functions.
+  union {
+    union xnn_f32_minmax_params f32_minmax;
+  } params2;
   size_t num_post_operation_params;
   void* post_operation_params;
   enum xnn_operator_type type;

@@ -28,6 +28,8 @@ static enum xnn_status create_dynamic_fully_connected_nc(
     uint32_t log2_input_element_size,
     const void* params,
     size_t params_size,
+    const void* params2,
+    size_t params2_size,
     const struct xnn_gemm_config* gemm_config,
     const struct gemm_fused_ukernels* gemm_ukernels,
     const struct xnn_gemm_config* gemm2_config,
@@ -55,6 +57,7 @@ static enum xnn_status create_dynamic_fully_connected_nc(
   }
 
   memcpy(&dynamic_fully_connected_op->params, params, params_size);
+  memcpy(&dynamic_fully_connected_op->params2, params2, params2_size);
   dynamic_fully_connected_op->type = operator_type;
   dynamic_fully_connected_op->flags = flags;
 
@@ -146,6 +149,7 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_f16(
     flags,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
     &params, sizeof(params),
+    &params, sizeof(params),
     gemm_config, &gemm_config->minmax,
     /*gemm2_config=*/NULL, /*gemm2_ukernels=*/NULL,
     xnn_operator_type_dynamic_fully_connected_nc_f16,
@@ -199,10 +203,15 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_f32(
 
   const struct xnn_gemm_config* gemm2_config = xnn_init_f32_gemm2_config();
   const struct gemm_fused_ukernels* gemm2_ukernels = NULL;
+  union xnn_f32_minmax_params params2;
   if (gemm2_config != NULL) {
     gemm2_ukernels = &gemm2_config->minmax;
     if (linear_activation && gemm2_config->linear.gemm[gemm2_config->mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
       gemm2_ukernels = &gemm2_config->linear;
+    }
+
+    if XNN_LIKELY(gemm2_config->init.f32 != NULL) {
+      gemm2_config->init.f32(&params2, output_min, output_max);
     }
   }
 
@@ -210,6 +219,7 @@ enum xnn_status xnn_create_dynamic_fully_connected_nc_f32(
     flags,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &params, sizeof(params),
+    &params2, sizeof(params2),
     gemm_config, gemm_ukernels,
     gemm2_config, gemm2_ukernels,
     xnn_operator_type_dynamic_fully_connected_nc_f32,
@@ -232,6 +242,8 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
     uint32_t log2_output_element_size,
     const void* params,
     size_t params_size,
+    const void* params2,
+    size_t params2_size,
     size_t num_threads)
 {
   if (dynamic_fully_connected_op->type != expected_operator_type) {
@@ -284,10 +296,12 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
   }
 
   struct xnn_ukernel_gemm* ukernel = &dynamic_fully_connected_op->ukernel.gemm;
+  bool use_gemm2 = false;
   if (ukernel->nr > output_channels) {
     uint32_t gemm2_mr = dynamic_fully_connected_op->ukernel.gemm2.mr;
     // Default microkernel is suboptimal, use a microkernel that better supports less output channels.
     if (gemm2_mr != 0 && dynamic_fully_connected_op->ukernel.gemm2.gemm_cases[gemm2_mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
+      use_gemm2 = true;
       ukernel = &dynamic_fully_connected_op->ukernel.gemm2;
     }
   }
@@ -333,6 +347,10 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
     .ukernel = gemm_ukernel,
   };
   memcpy(&dynamic_fully_connected_op->context.gemm.params, params, params_size);
+  dynamic_fully_connected_op->context.gemm.fused_params = &dynamic_fully_connected_op->context.gemm.params;
+  if (use_gemm2) {
+    memcpy(&dynamic_fully_connected_op->context.gemm.params, params2, params2_size);
+  }
   dynamic_fully_connected_op->context.gemm.fused_params = &dynamic_fully_connected_op->context.gemm.params;
 
   dynamic_fully_connected_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
@@ -396,6 +414,8 @@ enum xnn_status xnn_reshape_dynamic_fully_connected_nc_f16(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
     &dynamic_fully_connected_op->params.f16_minmax,
     sizeof(dynamic_fully_connected_op->params.f16_minmax),
+    &dynamic_fully_connected_op->params.f16_minmax,
+    sizeof(dynamic_fully_connected_op->params.f16_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
 
@@ -420,6 +440,8 @@ enum xnn_status xnn_reshape_dynamic_fully_connected_nc_f32(
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &dynamic_fully_connected_op->params.f32_minmax,
     sizeof(dynamic_fully_connected_op->params.f32_minmax),
+    &dynamic_fully_connected_op->params2.f32_minmax,
+    sizeof(dynamic_fully_connected_op->params2.f32_minmax),
     pthreadpool_get_threads_count(threadpool));
 }
 
