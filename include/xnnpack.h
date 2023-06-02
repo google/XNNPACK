@@ -2717,15 +2717,18 @@ enum xnn_status xnn_create_constant_pad_nd_x32(
   uint32_t flags,
   xnn_operator_t* constant_pad_op_out);
 
-enum xnn_status xnn_setup_constant_pad_nd_x32(
+enum xnn_status xnn_reshape_constant_pad_nd_x32(
   xnn_operator_t constant_pad_op,
   size_t num_dims,
   const size_t* input_shape,
   const size_t* pre_padding,
   const size_t* post_padding,
-  const void* input,
-  void* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_constant_pad_nd_x32(
+  xnn_operator_t constant_pad_op,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_run_constant_pad_nd_x32(
   uint32_t flags,
@@ -3600,15 +3603,18 @@ enum xnn_status xnn_create_constant_pad_nd_x16(
   uint32_t flags,
   xnn_operator_t* constant_pad_op_out);
 
-enum xnn_status xnn_setup_constant_pad_nd_x16(
+enum xnn_status xnn_reshape_constant_pad_nd_x16(
   xnn_operator_t constant_pad_op,
   size_t num_dims,
   const size_t* input_shape,
   const size_t* pre_padding,
   const size_t* post_padding,
-  const void* input,
-  void* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_constant_pad_nd_x16(
+  xnn_operator_t constant_pad_op,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_run_constant_pad_nd_x16(
   uint32_t flags,
@@ -4651,15 +4657,18 @@ enum xnn_status xnn_create_constant_pad_nd_x8(
   uint32_t flags,
   xnn_operator_t* constant_pad_op_out);
 
-enum xnn_status xnn_setup_constant_pad_nd_x8(
+enum xnn_status xnn_reshape_constant_pad_nd_x8(
   xnn_operator_t constant_pad_op,
   size_t num_dims,
   const size_t* input_shape,
   const size_t* pre_padding,
   const size_t* post_padding,
-  const void* input,
-  void* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_constant_pad_nd_x8(
+  xnn_operator_t constant_pad_op,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_run_constant_pad_nd_x8(
   uint32_t flags,

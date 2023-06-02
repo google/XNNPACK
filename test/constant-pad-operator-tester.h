@@ -184,12 +184,16 @@ class ConstantPadOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_pad_op(pad_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_constant_pad_nd_x8(
+        xnn_reshape_constant_pad_nd_x8(
           pad_op,
           num_dims(),
           input_shape().data(), pre_paddings().data(), post_paddings().data(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_constant_pad_nd_x8(
+          pad_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(pad_op, nullptr /* thread pool */));
@@ -401,12 +405,16 @@ class ConstantPadOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_pad_op(pad_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_constant_pad_nd_x16(
+        xnn_reshape_constant_pad_nd_x16(
           pad_op,
           num_dims(),
           input_shape().data(), pre_paddings().data(), post_paddings().data(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_constant_pad_nd_x16(
+          pad_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(pad_op, nullptr /* thread pool */));
@@ -617,12 +625,16 @@ class ConstantPadOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_pad_op(pad_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_constant_pad_nd_x32(
+        xnn_reshape_constant_pad_nd_x32(
           pad_op,
           num_dims(),
           input_shape().data(), pre_paddings().data(), post_paddings().data(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_constant_pad_nd_x32(
+          pad_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(pad_op, nullptr /* thread pool */));

@@ -212,9 +212,10 @@ TEST_F(StaticConstantPadTestInt8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_constant_pad_nd_x8(
-                          op, dims.size(), dims.data(), pre_paddings.data(), post_paddings.data(), input.data(),
-                          operator_output.data(), /*threadpool=*/nullptr));
+    xnn_status_success,
+    xnn_reshape_constant_pad_nd_x8(
+      op, dims.size(), dims.data(), pre_paddings.data(), post_paddings.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_constant_pad_nd_x8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
@@ -286,9 +287,10 @@ TEST_F(StaticConstantPadTestUint8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_constant_pad_nd_x8(
-                          op, dims.size(), dims.data(), pre_paddings.data(), post_paddings.data(), input.data(),
-                          operator_output.data(), /*threadpool=*/nullptr));
+    xnn_status_success,
+    xnn_reshape_constant_pad_nd_x8(
+      op, dims.size(), dims.data(), pre_paddings.data(), post_paddings.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_constant_pad_nd_x8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
@@ -358,9 +360,10 @@ TEST_F(StaticConstantPadTestF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_constant_pad_nd_x32(
-                          op, dims.size(), dims.data(), pre_paddings.data(), post_paddings.data(), input.data(),
-                          operator_output.data(), /*threadpool=*/nullptr));
+    xnn_status_success,
+    xnn_reshape_constant_pad_nd_x32(
+      op, dims.size(), dims.data(), pre_paddings.data(), post_paddings.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_constant_pad_nd_x32(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
