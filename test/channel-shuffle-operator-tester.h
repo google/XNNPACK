@@ -123,11 +123,15 @@ class ChannelShuffleOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_channel_shuffle_op(channel_shuffle_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_channel_shuffle_nc_x8(
+        xnn_reshape_channel_shuffle_nc_x8(
           channel_shuffle_op,
           batch_size(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_channel_shuffle_nc_x8(
+          channel_shuffle_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(channel_shuffle_op, nullptr /* thread pool */));
@@ -171,11 +175,15 @@ class ChannelShuffleOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_channel_shuffle_op(channel_shuffle_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_channel_shuffle_nc_x32(
+        xnn_reshape_channel_shuffle_nc_x32(
           channel_shuffle_op,
           batch_size(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_channel_shuffle_nc_x32(
+          channel_shuffle_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(channel_shuffle_op, nullptr /* thread pool */));

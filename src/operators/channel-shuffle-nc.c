@@ -150,18 +150,16 @@ enum xnn_status xnn_create_channel_shuffle_nc_x32(
     channel_shuffle_op_out);
 }
 
-static enum xnn_status setup_channel_shuffle_nc(
+static enum xnn_status reshape_channel_shuffle_nc(
     xnn_operator_t channel_shuffle_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     uint32_t log2_element_size,
     const struct xnn_zip_config zip[restrict XNN_MIN_ELEMENTS(1)])
 {
   channel_shuffle_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+    xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(channel_shuffle_op->type));
     return xnn_status_uninitialized;
   }
@@ -172,14 +170,10 @@ static enum xnn_status setup_channel_shuffle_nc(
   }
 
   channel_shuffle_op->batch_size = batch_size;
-  channel_shuffle_op->input = input;
-  channel_shuffle_op->output = output;
 
   const size_t groups = channel_shuffle_op->groups;
   channel_shuffle_op->context.channel_shuffle = (struct channel_shuffle_context) {
-    .x = input,
     .x_stride = channel_shuffle_op->input_pixel_stride << log2_element_size,
-    .y = output,
     .y_stride = channel_shuffle_op->output_pixel_stride << log2_element_size,
     .n = channel_shuffle_op->group_channels << log2_element_size,
     .m = groups,
@@ -207,6 +201,80 @@ static enum xnn_status setup_channel_shuffle_nc(
     case 1:
       XNN_UNREACHABLE;
   }
+  channel_shuffle_op->state = xnn_run_state_needs_setup;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_reshape_channel_shuffle_nc_x8(
+    xnn_operator_t channel_shuffle_op,
+    size_t batch_size,
+    pthreadpool_t threadpool)
+{
+  if (channel_shuffle_op->type != xnn_operator_type_channel_shuffle_nc_x8) {
+    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_channel_shuffle_nc_x8),
+      xnn_operator_type_to_string(channel_shuffle_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  return reshape_channel_shuffle_nc(
+    channel_shuffle_op,
+    batch_size,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+    channel_shuffle_op->zip_config);
+}
+
+enum xnn_status xnn_reshape_channel_shuffle_nc_x32(
+    xnn_operator_t channel_shuffle_op,
+    size_t batch_size,
+    pthreadpool_t threadpool)
+{
+  if (channel_shuffle_op->type != xnn_operator_type_channel_shuffle_nc_x32) {
+    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_channel_shuffle_nc_x32),
+      xnn_operator_type_to_string(channel_shuffle_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  return reshape_channel_shuffle_nc(
+    channel_shuffle_op,
+    batch_size,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT32_T,
+    channel_shuffle_op->zip_config);
+}
+
+static enum xnn_status setup_channel_shuffle_nc(
+    xnn_operator_t channel_shuffle_op,
+    const void* input,
+    void* output)
+{
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(channel_shuffle_op->type));
+    return xnn_status_uninitialized;
+  }
+
+  switch (channel_shuffle_op->state) {
+    case xnn_run_state_skip:
+      return xnn_status_success;
+    case xnn_run_state_invalid:
+      xnn_log_error(
+        "failed to setup %s operator: operator has not been reshaped yet",
+        xnn_operator_type_to_string(channel_shuffle_op->type));
+      return xnn_status_invalid_state;
+    case xnn_run_state_needs_setup:
+      // Operator has been reshaped, but not setup, continue with setup.
+    case xnn_run_state_ready:
+      // Operator has been reshaped, and we are setting up with different pointers.
+      break;
+  }
+
+  channel_shuffle_op->input = input;
+  channel_shuffle_op->output = output;
+  channel_shuffle_op->context.channel_shuffle.x = input;
+  channel_shuffle_op->context.channel_shuffle.y = output;
+
   channel_shuffle_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
@@ -214,10 +282,8 @@ static enum xnn_status setup_channel_shuffle_nc(
 
 enum xnn_status xnn_setup_channel_shuffle_nc_x8(
     xnn_operator_t channel_shuffle_op,
-    size_t batch_size,
     const void* input,
-    void* output,
-    pthreadpool_t threadpool)
+    void* output)
 {
   if (channel_shuffle_op->type != xnn_operator_type_channel_shuffle_nc_x8) {
     xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
@@ -228,19 +294,14 @@ enum xnn_status xnn_setup_channel_shuffle_nc_x8(
 
   return setup_channel_shuffle_nc(
     channel_shuffle_op,
-    batch_size,
     input,
-    output,
-    /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    channel_shuffle_op->zip_config);
+    output);
 }
 
 enum xnn_status xnn_setup_channel_shuffle_nc_x32(
     xnn_operator_t channel_shuffle_op,
-    size_t batch_size,
     const void* input,
-    void* output,
-    pthreadpool_t threadpool)
+    void* output)
 {
   if (channel_shuffle_op->type != xnn_operator_type_channel_shuffle_nc_x32) {
     xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
@@ -251,9 +312,6 @@ enum xnn_status xnn_setup_channel_shuffle_nc_x32(
 
   return setup_channel_shuffle_nc(
     channel_shuffle_op,
-    batch_size,
     input,
-    output,
-    /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT32_T,
-    channel_shuffle_op->zip_config);
+    output);
 }

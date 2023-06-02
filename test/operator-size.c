@@ -237,8 +237,7 @@ int main(int argc, char** argv) {
       break;
     case 40:
       xnn_setup_channel_shuffle_nc_x32(
-        op, 0,
-        NULL, NULL, NULL);
+        op, NULL, NULL);
       break;
     case 41:
       xnn_create_unpooling2d_nhwc_x32(

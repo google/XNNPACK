@@ -2702,12 +2702,15 @@ enum xnn_status xnn_create_channel_shuffle_nc_x32(
   uint32_t flags,
   xnn_operator_t* channel_shuffle_op_out);
 
-enum xnn_status xnn_setup_channel_shuffle_nc_x32(
+enum xnn_status xnn_reshape_channel_shuffle_nc_x32(
   xnn_operator_t channel_shuffle_op,
   size_t batch_size,
-  const void* input,
-  void* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_channel_shuffle_nc_x32(
+  xnn_operator_t channel_shuffle_op,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_create_constant_pad_nd_x32(
   const void* padding_value,
@@ -4633,12 +4636,15 @@ enum xnn_status xnn_create_channel_shuffle_nc_x8(
   uint32_t flags,
   xnn_operator_t* channel_shuffle_op_out);
 
-enum xnn_status xnn_setup_channel_shuffle_nc_x8(
+enum xnn_status xnn_reshape_channel_shuffle_nc_x8(
   xnn_operator_t channel_shuffle_op,
   size_t batch_size,
-  const void* input,
-  void* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_channel_shuffle_nc_x8(
+  xnn_operator_t channel_shuffle_op,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_create_constant_pad_nd_x8(
   const void* padding_value,
