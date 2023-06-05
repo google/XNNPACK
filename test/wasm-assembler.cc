@@ -16,7 +16,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using ::testing::ElementsAreArray;
 using ::testing::NotNull;
+using ::testing::Sequence;
+using ::testing::Test;
 using GetIntPtr = int (*)();
 using Add5Ptr = int (*)(int);
 using AddPtr = int (*)(int, int);
@@ -26,6 +29,9 @@ using DoWhile = Add5Ptr;
 using SumUntilManyLocals = int (*)();
 using SumArray = int (*)(const int*, int);
 using MemCpy = void (*)(int*, const int*, int);
+using V128Add = void (*)(const float*, float*);
+using V128AddConst = void (*)(const float*, float*);
+using V128Shuffle = void (*)(const float*, float*);
 
 namespace xnnpack {
 namespace {
@@ -309,7 +315,7 @@ struct MemCpyTestSuite : GeneratorTestSuite<MemCpyGenerator, MemCpy> {
   static void ExpectFuncCorrect(MemCpy mem_cpy) {
     std::array<int, kArraySize> dst;
     mem_cpy(dst.data(), kArray.data(), kArraySize);
-    EXPECT_THAT(dst, testing::ElementsAreArray(kArray));
+    EXPECT_THAT(dst, ElementsAreArray(kArray));
   }
 };
 
@@ -391,6 +397,86 @@ struct ManyLocalsGeneratorTestSuite
   }
 };
 
+struct V128AddGenerator : WasmAssembler {
+  explicit V128AddGenerator(xnn_code_buffer* bf) : WasmAssembler(bf) {
+    ValTypesToInt two_v128 = {{v128, 2}};
+    AddFunc<2>({}, "v128_add", {i32, i32}, two_v128,
+               [this](Local src, Local dst) {
+                 auto a = MakeLocal(v128);
+                 auto b = MakeLocal(v128);
+                 a = V128Load(src);
+                 b = V128Load(src, /*offset=*/16);
+                 a = F32x4Add(a, b);
+                 V128Store(dst, a);
+               });
+  }
+};
+
+struct V128AddGeneratorTestSuite
+    : GeneratorTestSuite<V128AddGenerator, V128Add> {
+  static void ExpectFuncCorrect(V128Add v128_add) {
+    static constexpr std::array<float, 8> kIn = {1, 2, 3, 4, 10, 20, 30, 40};
+    static constexpr std::array<float, 4> kExpectedOut = {11, 22, 33, 44};
+    std::array<float, 4> out;
+    v128_add(kIn.data(), out.data());
+    EXPECT_THAT(out, ElementsAreArray(kExpectedOut));
+  }
+};
+
+struct V128AddConstGenerator : WasmAssembler {
+  explicit V128AddConstGenerator(xnn_code_buffer* bf) : WasmAssembler(bf) {
+    ValTypesToInt two_v128 = {{v128, 2}};
+    AddFunc<2>({}, "v128_add_const", {i32, i32}, two_v128,
+               [this](Local src, Local dst) {
+                 auto a = MakeLocal(v128);
+                 auto b = MakeLocal(v128);
+                 a = V128Load(src);
+                 b = V128Load32Splat(src, /*offset=*/16);
+                 a = F32x4Add(a, b);
+                 V128Store(dst, a);
+               });
+  }
+};
+
+struct V128AddConstGeneratorTestSuite
+    : GeneratorTestSuite<V128AddConstGenerator, V128AddConst> {
+  static void ExpectFuncCorrect(V128AddConst v128_add_const) {
+    static constexpr std::array<float, 5> kIn = {1, 2, 3, 4, 5};
+    static constexpr std::array<float, 4> kExpectedOut = {6, 7, 8, 9};
+    std::array<float, 4> out;
+    v128_add_const(kIn.data(), out.data());
+    EXPECT_THAT(out, ElementsAreArray(kExpectedOut));
+  }
+};
+
+struct I64x2ShuffleGenerator : WasmAssembler {
+  explicit I64x2ShuffleGenerator(xnn_code_buffer* bf) : WasmAssembler(bf) {
+    ValTypesToInt two_v128 = {{v128, 2}};
+    AddFunc<2>({}, "i64x2_shuffle", {i32, i32}, two_v128,
+               [this](Local src, Local dst) {
+                 auto a = MakeLocal(v128);
+                 auto b = MakeLocal(v128);
+                 a = V128Load(src);
+                 b = V128Load(src, /*offset=*/16);
+                 V128Store(dst, I64x2Shuffle(a, b, {0, 0}), /*offset=*/0);
+                 V128Store(dst, I64x2Shuffle(a, b, {3, 1}), /*offset=*/16);
+                 V128Store(dst, I64x2Shuffle(a, b, {0, 2}), /*offset=*/32);
+               });
+  }
+};
+
+struct I64x2ShuffleGeneratorTestSuite
+    : GeneratorTestSuite<I64x2ShuffleGenerator, V128Shuffle> {
+  static void ExpectFuncCorrect(V128Shuffle v128_shuffle) {
+    static constexpr std::array<float, 8> kIn = {1, 2, 3, 4, 5, 6, 7, 8};
+    static constexpr std::array<float, 12> kExpectedOut = {1, 2, 1, 2, 7, 8,
+                                                           3, 4, 1, 2, 5, 6};
+    std::array<float, 12> out;
+    v128_shuffle(kIn.data(), out.data());
+    EXPECT_THAT(out, ElementsAreArray(kExpectedOut));
+  }
+};
+
 struct InvalidCodeGenerator : WasmAssembler {
   ValTypesToInt no_locals;
   explicit InvalidCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
@@ -399,7 +485,7 @@ struct InvalidCodeGenerator : WasmAssembler {
 };
 
 template <typename TestSuite>
-class WasmAssemblerTest : public testing::Test {};
+class WasmAssemblerTest : public Test {};
 
 }  // namespace
 
@@ -433,11 +519,13 @@ using WasmAssemblerTestSuits = testing::Types<
     AddTwiceWithScopesTestSuite, Add5TestSuite, MaxTestSuite,
     MaxIncompleteIfTestSuite, SumUntilTestSuite, DoWhileTestSuite,
     SumArrayTestSuite, MemCpyTestSuite, AddDelayedInitTestSuite,
-    ManyFunctionsGeneratorTestSuite, ManyLocalsGeneratorTestSuite>;
+    ManyFunctionsGeneratorTestSuite, ManyLocalsGeneratorTestSuite,
+    V128AddGeneratorTestSuite, V128AddConstGeneratorTestSuite,
+    I64x2ShuffleGeneratorTestSuite>;
 INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest,
                                WasmAssemblerTestSuits);
 
-TEST(WasmAsseblerTest, InvalidCode) {
+TEST(WasmAssemblerTest, InvalidCode) {
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
 
@@ -445,6 +533,63 @@ TEST(WasmAsseblerTest, InvalidCode) {
   generator.Emit();
   EXPECT_THAT(generator.finalize(), NotNull());
   EXPECT_THAT(b.first_function_index, XNN_INVALID_FUNCTION_INDEX);
+}
+
+namespace {
+class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
+                    public internal::LocalWasmOps<WasmOpsTest>,
+                    public internal::MemoryWasmOps<WasmOpsTest>,
+                    public Test {
+ public:
+  MOCK_METHOD(void, Emit8, (byte), (const));
+  MOCK_METHOD(void, EmitEncodedU32, (uint32_t), (const));
+  MOCK_METHOD(void, EmitEncodedS32, (int32_t), (const));
+
+ protected:
+  void Emit8ExpectCall(byte opcode) {
+    EXPECT_CALL(*this, Emit8(opcode)).Times(1).InSequence(sequence_);
+  }
+
+  void EmitEncodedU32ExpectCall(uint32_t value) {
+    EXPECT_CALL(*this, EmitEncodedU32(value)).Times(1).InSequence(sequence_);
+  }
+
+  Sequence sequence_;
+  ValueOnStack v128_value_{v128, this};
+};
+
+class V128StoreLaneWasmOpTest : public WasmOpsTest {
+ protected:
+  void SetStoreLaneExpectations(byte expected_opcode) {
+    Emit8ExpectCall(0xFD);
+    EmitEncodedU32ExpectCall(expected_opcode);
+    EmitEncodedU32ExpectCall(kLogAlignment);
+    EmitEncodedU32ExpectCall(kOffset);
+    Emit8ExpectCall(kLane);
+  }
+
+  static constexpr uint32_t kLogAlignment = 3;
+  static constexpr uint32_t kAlignment = 1 << 3;
+  static constexpr uint32_t kOffset = 16;
+  static constexpr uint8_t kLane = 1;
+};
+}  // namespace
+
+TEST_F(WasmOpsTest, F32x4Mul) {
+  Emit8ExpectCall(0xFD);
+  EmitEncodedU32ExpectCall(0xE6);
+  auto result = F32x4Mul(v128_value_, v128_value_);
+  EXPECT_EQ(result.type, v128);
+}
+
+TEST_F(V128StoreLaneWasmOpTest, 32Lane) {
+  SetStoreLaneExpectations(0x5A);
+  V128Store32Lane(v128_value_, v128_value_, kLane, kOffset, kAlignment);
+}
+
+TEST_F(V128StoreLaneWasmOpTest, 64Lane) {
+  SetStoreLaneExpectations(0x5B);
+  V128Store64Lane(v128_value_, v128_value_, kLane, kOffset, kAlignment);
 }
 
 using ::xnnpack::internal::At;

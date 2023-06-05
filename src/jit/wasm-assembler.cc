@@ -2,11 +2,28 @@
 #include <xnnpack/leb128.h>
 #include <xnnpack/wasm-assembler.h>
 
+#include <array>
 #include <cstdint>
 #include <numeric>
 #include <vector>
 
 namespace xnnpack {
+
+namespace internal {
+std::array<uint8_t, 16> MakeLanesForI8x16Shuffle(const uint8_t* lanes,
+                                                 size_t num_lanes) {
+  std::array<uint8_t, 16> i8x16_lanes;
+  auto it = i8x16_lanes.begin();
+  for (int lane_index = 0; lane_index < num_lanes; lane_index++) {
+    const uint8_t lane = lanes[lane_index];
+    assert((lane < num_lanes * 2) && "Lane index is too large");
+    const size_t i8x16_lanes_per_original_lane = 16 / num_lanes;
+    for (int i = 0; i < i8x16_lanes_per_original_lane; i++)
+      *it++ = i + lane * i8x16_lanes_per_original_lane;
+  }
+  return i8x16_lanes;
+}
+}  // namespace internal
 
 using internal::AppendEncodedU32;
 using internal::Export;
