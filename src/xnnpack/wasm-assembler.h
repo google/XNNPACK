@@ -82,7 +82,7 @@ class WasmOpsBase {
 template <typename Derived>
 class I32WasmOps : public WasmOpsBase<Derived, I32WasmOps<Derived>> {
  public:
-  void i32_add() const { this->Emit8(0x6a); }
+  void i32_add() const { this->Emit8(0x6A); }
   void i32_lt_s() const { this->Emit8(0x48); }
   void i32_shl() const { this->Emit8(0x74); }
   void i32_const(int32_t value) const {
@@ -131,14 +131,14 @@ class ControlFlowWasmOps
     If(cond, [&] { DoWhile(std::forward<Body>(body), cond); });
   }
 
-  void end() const { this->Emit8(0x0b); }
+  void end() const { this->Emit8(0x0B); }
 
  private:
   static constexpr byte kIfCode = 0x04;
   static constexpr byte kElseCode = 0x05;
   static constexpr byte kEpsilonCode = 0x40;
   static constexpr byte kLoopCode = 0x03;
-  static constexpr byte kBrIfCode = 0x0d;
+  static constexpr byte kBrIfCode = 0x0D;
 };
 
 template <typename Derived>
@@ -390,7 +390,7 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
   }
 
   void Emit() {
-    EmitMagicVersionAndDlynkSection();
+    EmitMagicVersion();
     EmitTypeSection();
     EmitImportSection();
     EmitFunctionSection();
@@ -399,20 +399,17 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
   }
 
  private:
-  static constexpr std::array<byte, 4> kMagic = {0x00, 0x61, 0x73, 0x6d};
+  static constexpr std::array<byte, 4> kMagic = {0x00, 0x61, 0x73, 0x6D};
   static constexpr std::array<byte, 4> kVersion = {0x01, 0x00, 0x00, 0x00};
-  static constexpr std::array<byte, 17> kDLynk = {
-      0x00, 0x0f, 0x08, 0x64, 0x79, 0x6c, 0x69, 0x6e, 0x6b,
-      0x2e, 0x30, 0x01, 0x04, 0x00, 0x00, 0x00, 0x00};
   static constexpr std::array<byte, 17> kImportSection = {
-      0x02, 0x0f, 0x01, 0x03, 0x65, 0x6e, 0x76, 0x06, 0x6d,
-      0x65, 0x6d, 0x6f, 0x72, 0x79, 0x02, 0x00, 0x00};
+      0x02, 0x0F, 0x01, 0x03, 0x65, 0x6E, 0x76, 0x06, 0x6D,
+      0x65, 0x6D, 0x6F, 0x72, 0x79, 0x02, 0x00, 0x00};
 
   constexpr static byte kTypeSectionCode = 0x01;
   constexpr static byte kFunctionSectionCode = 0x03;
   constexpr static byte kFunctionExportCode = 0x0;
   constexpr static byte kExportsSectionCode = 0x07;
-  constexpr static byte kCodeSectionCode = 0x0a;
+  constexpr static byte kCodeSectionCode = 0x0A;
 
   void RegisterFunction(const std::vector<ValType>& result, const char* name,
                         const std::vector<ValType>& param,
@@ -441,7 +438,7 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
     EmitByteArray(out);
   }
 
-  void EmitMagicVersionAndDlynkSection();
+  void EmitMagicVersion();
 
   void EmitTypeSection();
 

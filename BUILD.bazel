@@ -2007,8 +2007,8 @@ INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + [
 
 WASM_JIT_LINKOPTS = select({
     "emscripten": [
-        "-sMAIN_MODULE=2",
-        "-sDYNAMIC_EXECUTION=1",
+        "-sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=$addFunction",
+        "-sALLOW_TABLE_GROWTH=1",
     ],
     "//conditions:default": [],
 })

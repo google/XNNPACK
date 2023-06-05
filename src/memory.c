@@ -244,7 +244,12 @@ EM_JS(int, xnnLoadWasmModuleJS, (const uint8_t* code, int code_size, int invalid
     const tableOriginalSize = wasmTable.length;
     const binary = new Uint8Array(HEAPU8.slice(code, (code + code_size)));
     try {
-      loadWebAssemblyModule(binary, {loadAsync: false, global: true, nodelete: true});
+      var module = new WebAssembly.Module(binary);
+      var instance = new WebAssembly.Instance(module, {env : {memory: wasmMemory}});
+      for (var symName in instance.exports) {
+        var value = instance.exports[symName];
+        addFunction(value);
+      }
       if (tableOriginalSize < wasmTable.length) {
         return tableOriginalSize;
       }

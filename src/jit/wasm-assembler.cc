@@ -14,10 +14,9 @@ using internal::Function;
 using internal::FuncType;
 using internal::WidthEncodedU32;
 
-void WasmAssembler::EmitMagicVersionAndDlynkSection() {
+void WasmAssembler::EmitMagicVersion() {
   EmitByteArray(kMagic);
   EmitByteArray(kVersion);
-  EmitByteArray(kDLynk);
 }
 
 template <typename Array, typename Appender>
