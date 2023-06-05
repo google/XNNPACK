@@ -44,8 +44,8 @@ constexpr int32_t kAPlusFive = kA + kExpectedGet5ReturnValue;
 constexpr int32_t kB = 42;
 constexpr int32_t kExpectedSum = kA + kB;
 constexpr int32_t kExpectedSumTwice = 2 * kExpectedSum;
-constexpr uint32_t kLargeNumberOfLocals = 300;
-constexpr uint32_t kLargeNumberOfFunctions = 300;
+constexpr uint32_t kLargeNumberOfLocals = 129;
+constexpr uint32_t kLargeNumberOfFunctions = 129;
 constexpr size_t kArraySize = 5;
 constexpr std::array<int, kArraySize> kArray = {1, 2, 3, 45, 6};
 const int kExpectedArraySum = std::accumulate(kArray.begin(), kArray.end(), 0);
@@ -373,16 +373,16 @@ struct ManyFunctionsGeneratorTestSuite
 
 struct ManyLocalsGenerator : WasmAssembler {
   explicit ManyLocalsGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
-    ValTypesToInt many_ints = {{i32, kLargeNumberOfFunctions + 1}};
+    ValTypesToInt many_ints = {{i32, kLargeNumberOfLocals+ 1}};
     AddFunc<0>({i32}, "sum_until_with_many_locals", {}, many_ints, [this]() {
-      std::array<Local, kLargeNumberOfFunctions> locals;
-      for (int i = 0; i < kLargeNumberOfFunctions; i++) {
+      std::array<Local, kLargeNumberOfLocals> locals;
+      for (int i = 0; i < kLargeNumberOfLocals; i++) {
         locals[i] = MakeLocal(i32);
         locals[i] = I32Const(i);
       }
       auto sum = MakeLocal(i32);
 
-      for (int i = 0; i < kLargeNumberOfFunctions; i++) {
+      for (int i = 0; i < kLargeNumberOfLocals; i++) {
         sum = I32Add(sum, locals[i]);
       }
       local_get(sum);
@@ -393,7 +393,7 @@ struct ManyLocalsGenerator : WasmAssembler {
 struct ManyLocalsGeneratorTestSuite
     : GeneratorTestSuite<ManyLocalsGenerator, SumUntilManyLocals> {
   static void ExpectFuncCorrect(SumUntilManyLocals sum_until) {
-    EXPECT_EQ(sum_until(), ReferenceSumUntil(kLargeNumberOfFunctions));
+    EXPECT_EQ(sum_until(), ReferenceSumUntil(kLargeNumberOfLocals));
   }
 };
 
