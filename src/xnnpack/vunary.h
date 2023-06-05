@@ -801,6 +801,13 @@ DECLARE_F32_VRELU_UKERNEL_FUNCTION(xnn_f32_vrelu_ukernel__wasm32_shr_x1)
 DECLARE_F32_VRELU_UKERNEL_FUNCTION(xnn_f32_vrelu_ukernel__wasm32_shr_x2)
 DECLARE_F32_VRELU_UKERNEL_FUNCTION(xnn_f32_vrelu_ukernel__wasm32_shr_x4)
 
+#define DECLARE_GENERATE_F32_VRELU_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL xnn_status_t fn_name(                         \
+      struct xnn_code_buffer* bf,                            \
+      size_t k_unroll,                                       \
+      int use_locals);
+
+DECLARE_GENERATE_F32_VRELU_UKERNEL_FUNCTION(xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr)
 
 #define DECLARE_F32_VRND_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                       \

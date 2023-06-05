@@ -56,6 +56,23 @@ static void f32_vrelu(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+static void f32_vrelu(
+  benchmark::State& state,
+  xnn_vrelu_generator_fn generator,
+  int k_unroll,
+  bool use_local,
+  benchmark::utils::IsaCheckFunction isa_check = nullptr)
+{
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+  generator(&b, k_unroll, use_local);
+  auto kernel = (xnn_f32_vrelu_ukernel_fn)(b.first_function_index);
+  xnn_release_code_memory(&b);
+  f32_vrelu(state, kernel, isa_check);
+}
+#endif
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_vrelu, sse_x4,
                     xnn_f32_vrelu_ukernel__sse_x4)
@@ -139,6 +156,46 @@ static void f32_vrelu(
 
   BENCHMARK_CAPTURE(f32_vrelu, wasm32_shr_x4,
                     xnn_f32_vrelu_ukernel__wasm32_shr_x4)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_x1,
+                    xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 1, false)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_x2,
+                    xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 2, false)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_x4,
+                    xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 4, false)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_x8,
+                    xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 8, false)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_local_x1,
+                    xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 1, true)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_local_x2,
+                    xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 2, true)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_local_x4,
+                    xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 4, true)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_local_x8,
+                    xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 8, true)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

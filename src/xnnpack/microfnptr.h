@@ -1580,6 +1580,12 @@ typedef void (*xnn_f32_vrelu_ukernel_fn)(
     float* output,
     const union xnn_f32_relu_params* params);
 
+// VRELU generator
+typedef xnn_status_t (*xnn_vrelu_generator_fn)(
+    struct xnn_code_buffer*,
+    size_t,
+    int);
+
 // VROUND: Vector ROUNDing elementwise
 
 typedef void (*xnn_f16_vround_ukernel_fn)(

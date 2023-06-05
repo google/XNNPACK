@@ -20,6 +20,9 @@
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
 
+#if XNN_PLATFORM_WEB
+  #include <xnnpack/memory.h>
+#endif
 
 class VUnaryMicrokernelTester {
  public:
@@ -1184,6 +1187,17 @@ class VUnaryMicrokernelTester {
       }
     }
   }
+
+#if XNN_PLATFORM_WEB
+  void Test(xnn_vrelu_generator_fn generator, size_t k_unroll, bool use_locals) const {
+    xnn_code_buffer b;
+    ASSERT_EQ(xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE), xnn_status_success);
+    ASSERT_EQ(generator(&b, k_unroll, use_locals), xnn_status_success);
+    auto kernel = (xnn_f32_vrelu_ukernel_fn)(b.first_function_index);
+    xnn_release_code_memory(&b);
+    Test(kernel);
+  }
+#endif // XNN_PLATFORM_WEB
 
  private:
   size_t batch_size_ = 1;

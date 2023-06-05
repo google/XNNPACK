@@ -83,8 +83,12 @@ template <typename Derived>
 class I32WasmOps : public WasmOpsBase<Derived, I32WasmOps<Derived>> {
  public:
   void i32_add() const { this->Emit8(0x6A); }
+  void i32_sub() const { this->Emit8(0x6B); }
+  void i32_and() const { this->Emit8(0x71); }
   void i32_lt_s() const { this->Emit8(0x48); }
+  void i32_le_s() const { this->Emit8(0x4C); }
   void i32_shl() const { this->Emit8(0x74); }
+  void i32_shr_u() const { this->Emit8(0x76); }
   void i32_const(int32_t value) const {
     this->Emit8(0x41);
     this->EmitEncodedS32(value);
@@ -280,12 +284,29 @@ class LocalWasmOps : public LocalsManager {
     return BinaryOp(a, b, &Derived::i32_add);
   }
 
+  ValueOnStack I32Sub(const ValueOnStack& a, const ValueOnStack& b) {
+    return BinaryOp(a, b, &Derived::i32_sub);
+  }
+
+  ValueOnStack I32And(const ValueOnStack& a, const ValueOnStack& b) {
+    return BinaryOp(a, b, &Derived::i32_and);
+  }
+
   ValueOnStack I32LtS(const ValueOnStack& a, const ValueOnStack& b) {
     return BinaryOp(a, b, &Derived::i32_lt_s);
   }
 
+  ValueOnStack I32LeS(const ValueOnStack& a, const ValueOnStack& b) {
+    return BinaryOp(a, b, &Derived::i32_le_s);
+  }
+
   ValueOnStack I32Shl(const ValueOnStack& value, const ValueOnStack& bits_num) {
     return BinaryOp(value, bits_num, &Derived::i32_shl);
+  }
+
+  ValueOnStack I32ShrU(const ValueOnStack& value,
+                       const ValueOnStack& bits_num) {
+    return BinaryOp(value, bits_num, &Derived::i32_shr_u);
   }
 
   ValueOnStack I32Const(uint32_t value) {
