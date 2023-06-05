@@ -270,8 +270,6 @@ static enum xnn_status setup_channel_shuffle_nc(
       break;
   }
 
-  channel_shuffle_op->input = input;
-  channel_shuffle_op->output = output;
   channel_shuffle_op->context.channel_shuffle.x = input;
   channel_shuffle_op->context.channel_shuffle.y = output;
 
