@@ -283,8 +283,8 @@ TEST_F(EvenSplit2TestQS8, matches_operator_api)
     xnn_status_success,
     xnn_setup_copy_nc_x8(op2, (uint8_t*) input.data() + op1->channels, operator_output2.data()));
 
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, nullptr /* thread pool */));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, nullptr /* thread pool */));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, /*threadpool=*/nullptr));
 
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;
@@ -362,8 +362,8 @@ TEST_F(EvenSplit2TestQU8, matches_operator_api)
     xnn_status_success,
     xnn_setup_copy_nc_x8(op2, (uint8_t*) input.data() + op1->channels, operator_output2.data()));
 
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, nullptr /* thread pool */));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, nullptr /* thread pool */));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, /*threadpool=*/nullptr));
 
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;
@@ -441,8 +441,8 @@ TEST_F(EvenSplit2TestF32, matches_operator_api)
     xnn_status_success,
     xnn_setup_copy_nc_x32(op2, (uint32_t*) input.data() + op1->channels, operator_output2.data()));
 
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, nullptr /* thread pool */));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, nullptr /* thread pool */));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, /*threadpool=*/nullptr));
 
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;

@@ -87,12 +87,12 @@ TEST_F(Divide2TestF32, matches_operator_api)
   ASSERT_EQ(
     xnn_status_success, xnn_reshape_divide_nd_f32(
                           op, input1_dims.size(), input1_dims.data(), input2_dims.size(), input2_dims.data(),
-                          nullptr /* thread pool */));
+                          /*threadpool=*/nullptr));
 
   ASSERT_EQ(
     xnn_status_success, xnn_setup_divide_nd_f32(op, input1.data(), input2.data(), operator_output.data()));
 
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, nullptr /* thread pool */));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;

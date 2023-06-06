@@ -2734,9 +2734,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op0,
-    1 /* batch size */, 224 /* input height */, 224 /* input width */,
+    /*batch_size=*/1, /*input_height=*/224, /*input_width=*/224,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #0" << std::endl;
     return ExecutionPlan();
@@ -2744,8 +2744,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op1,
-    12544 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/12544,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #1" << std::endl;
     return ExecutionPlan();
@@ -2753,9 +2753,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op2,
-    1 /* batch size */, 112 /* input height */, 112 /* input width */,
+    /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #2" << std::endl;
     return ExecutionPlan();
@@ -2763,9 +2763,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op3,
-    1 /* batch size */, 112 /* input height */, 112 /* input width */,
+    /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #3" << std::endl;
     return ExecutionPlan();
@@ -2777,7 +2777,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_add_nd_f16(
       op4,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #4" << std::endl;
@@ -2786,9 +2786,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op5,
-    1 /* batch size */, 112 /* input height */, 112 /* input width */,
+    /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #5" << std::endl;
     return ExecutionPlan();
@@ -2796,9 +2796,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op6,
-    1 /* batch size */, 112 /* input height */, 112 /* input width */,
+    /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #6" << std::endl;
     return ExecutionPlan();
@@ -2806,9 +2806,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op7,
-    1 /* batch size */, 56 /* input height */, 56 /* input width */,
+    /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #7" << std::endl;
     return ExecutionPlan();
@@ -2816,9 +2816,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op8,
-    1 /* batch size */, 56 /* input height */, 56 /* input width */,
+    /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #8" << std::endl;
     return ExecutionPlan();
@@ -2826,9 +2826,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op9,
-    1 /* batch size */, 56 /* input height */, 56 /* input width */,
+    /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #9" << std::endl;
     return ExecutionPlan();
@@ -2836,9 +2836,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op10,
-    1 /* batch size */, 56 /* input height */, 56 /* input width */,
+    /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #10" << std::endl;
     return ExecutionPlan();
@@ -2850,7 +2850,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_add_nd_f16(
       op11,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #11" << std::endl;
@@ -2859,9 +2859,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op12,
-    1 /* batch size */, 56 /* input height */, 56 /* input width */,
+    /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #12" << std::endl;
     return ExecutionPlan();
@@ -2869,9 +2869,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op13,
-    1 /* batch size */, 56 /* input height */, 56 /* input width */,
+    /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #13" << std::endl;
     return ExecutionPlan();
@@ -2879,9 +2879,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op15,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #15" << std::endl;
     return ExecutionPlan();
@@ -2889,9 +2889,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op16,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #16" << std::endl;
     return ExecutionPlan();
@@ -2903,7 +2903,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_multiply_nd_f16(
       op17,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #17" << std::endl;
@@ -2912,9 +2912,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op18,
-    1 /* batch size */, 28 /* input height */, 28 /* input width */,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #18" << std::endl;
     return ExecutionPlan();
@@ -2922,9 +2922,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op19,
-    1 /* batch size */, 28 /* input height */, 28 /* input width */,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #19" << std::endl;
     return ExecutionPlan();
@@ -2932,9 +2932,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op20,
-    1 /* batch size */, 28 /* input height */, 28 /* input width */,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #20" << std::endl;
     return ExecutionPlan();
@@ -2942,9 +2942,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op22,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #22" << std::endl;
     return ExecutionPlan();
@@ -2952,9 +2952,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op23,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #23" << std::endl;
     return ExecutionPlan();
@@ -2966,7 +2966,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_multiply_nd_f16(
       op24,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #24" << std::endl;
@@ -2975,9 +2975,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op25,
-    1 /* batch size */, 28 /* input height */, 28 /* input width */,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #25" << std::endl;
     return ExecutionPlan();
@@ -2989,7 +2989,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_add_nd_f16(
       op26,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #26" << std::endl;
@@ -2998,9 +2998,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op27,
-    1 /* batch size */, 28 /* input height */, 28 /* input width */,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #27" << std::endl;
     return ExecutionPlan();
@@ -3008,9 +3008,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op28,
-    1 /* batch size */, 28 /* input height */, 28 /* input width */,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #28" << std::endl;
     return ExecutionPlan();
@@ -3018,9 +3018,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op30,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #30" << std::endl;
     return ExecutionPlan();
@@ -3028,9 +3028,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op31,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #31" << std::endl;
     return ExecutionPlan();
@@ -3042,7 +3042,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_multiply_nd_f16(
       op32,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #32" << std::endl;
@@ -3051,9 +3051,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op33,
-    1 /* batch size */, 28 /* input height */, 28 /* input width */,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #33" << std::endl;
     return ExecutionPlan();
@@ -3065,7 +3065,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_add_nd_f16(
       op34,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #34" << std::endl;
@@ -3074,9 +3074,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op35,
-    1 /* batch size */, 28 /* input height */, 28 /* input width */,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #35" << std::endl;
     return ExecutionPlan();
@@ -3084,8 +3084,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op36,
-    784 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/784,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #36" << std::endl;
     return ExecutionPlan();
@@ -3093,9 +3093,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op37,
-    1 /* batch size */, 28 /* input height */, 28 /* input width */,
+    /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #37" << std::endl;
     return ExecutionPlan();
@@ -3103,8 +3103,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op38,
-    196 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/196,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #38" << std::endl;
     return ExecutionPlan();
@@ -3112,9 +3112,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op39,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #39" << std::endl;
     return ExecutionPlan();
@@ -3122,9 +3122,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op40,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #40" << std::endl;
     return ExecutionPlan();
@@ -3132,8 +3132,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op41,
-    196 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/196,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #41" << std::endl;
     return ExecutionPlan();
@@ -3141,9 +3141,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op42,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #42" << std::endl;
     return ExecutionPlan();
@@ -3151,8 +3151,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op43,
-    196 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/196,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #43" << std::endl;
     return ExecutionPlan();
@@ -3160,9 +3160,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op44,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #44" << std::endl;
     return ExecutionPlan();
@@ -3174,7 +3174,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_add_nd_f16(
       op45,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #45" << std::endl;
@@ -3183,9 +3183,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op46,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #46" << std::endl;
     return ExecutionPlan();
@@ -3193,8 +3193,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op47,
-    196 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/196,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #47" << std::endl;
     return ExecutionPlan();
@@ -3202,9 +3202,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op48,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #48" << std::endl;
     return ExecutionPlan();
@@ -3212,8 +3212,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op49,
-    196 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/196,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #49" << std::endl;
     return ExecutionPlan();
@@ -3221,9 +3221,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op50,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #50" << std::endl;
     return ExecutionPlan();
@@ -3235,7 +3235,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_add_nd_f16(
       op51,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #51" << std::endl;
@@ -3244,9 +3244,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op52,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #52" << std::endl;
     return ExecutionPlan();
@@ -3254,8 +3254,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op53,
-    196 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/196,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #53" << std::endl;
     return ExecutionPlan();
@@ -3263,9 +3263,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op54,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #54" << std::endl;
     return ExecutionPlan();
@@ -3273,8 +3273,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op55,
-    196 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/196,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #55" << std::endl;
     return ExecutionPlan();
@@ -3282,9 +3282,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op56,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #56" << std::endl;
     return ExecutionPlan();
@@ -3296,7 +3296,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_add_nd_f16(
       op57,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #57" << std::endl;
@@ -3305,9 +3305,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op58,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #58" << std::endl;
     return ExecutionPlan();
@@ -3315,8 +3315,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op59,
-    196 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/196,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #59" << std::endl;
     return ExecutionPlan();
@@ -3324,9 +3324,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op60,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #60" << std::endl;
     return ExecutionPlan();
@@ -3334,8 +3334,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op61,
-    196 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/196,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #61" << std::endl;
     return ExecutionPlan();
@@ -3343,9 +3343,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op63,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #63" << std::endl;
     return ExecutionPlan();
@@ -3353,9 +3353,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op64,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #64" << std::endl;
     return ExecutionPlan();
@@ -3367,7 +3367,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_multiply_nd_f16(
       op65,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #65" << std::endl;
@@ -3376,9 +3376,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op66,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #66" << std::endl;
     return ExecutionPlan();
@@ -3386,9 +3386,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op67,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #67" << std::endl;
     return ExecutionPlan();
@@ -3396,8 +3396,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op68,
-    196 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/196,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #68" << std::endl;
     return ExecutionPlan();
@@ -3405,9 +3405,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op69,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #69" << std::endl;
     return ExecutionPlan();
@@ -3415,8 +3415,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op70,
-    196 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/196,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #70" << std::endl;
     return ExecutionPlan();
@@ -3424,9 +3424,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op72,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #72" << std::endl;
     return ExecutionPlan();
@@ -3434,9 +3434,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op73,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #73" << std::endl;
     return ExecutionPlan();
@@ -3448,7 +3448,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_multiply_nd_f16(
       op74,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #74" << std::endl;
@@ -3457,9 +3457,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op75,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #75" << std::endl;
     return ExecutionPlan();
@@ -3471,7 +3471,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_add_nd_f16(
       op76,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #76" << std::endl;
@@ -3480,9 +3480,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op77,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #77" << std::endl;
     return ExecutionPlan();
@@ -3490,8 +3490,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op78,
-    196 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/196,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #78" << std::endl;
     return ExecutionPlan();
@@ -3499,9 +3499,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op79,
-    1 /* batch size */, 14 /* input height */, 14 /* input width */,
+    /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #79" << std::endl;
     return ExecutionPlan();
@@ -3509,8 +3509,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op80,
-    49 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/49,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #80" << std::endl;
     return ExecutionPlan();
@@ -3518,9 +3518,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op82,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #82" << std::endl;
     return ExecutionPlan();
@@ -3528,9 +3528,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op83,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #83" << std::endl;
     return ExecutionPlan();
@@ -3542,7 +3542,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_multiply_nd_f16(
       op84,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #84" << std::endl;
@@ -3551,9 +3551,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op85,
-    1 /* batch size */, 7 /* input height */, 7 /* input width */,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #85" << std::endl;
     return ExecutionPlan();
@@ -3561,9 +3561,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op86,
-    1 /* batch size */, 7 /* input height */, 7 /* input width */,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #86" << std::endl;
     return ExecutionPlan();
@@ -3571,8 +3571,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op87,
-    49 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/49,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #87" << std::endl;
     return ExecutionPlan();
@@ -3580,9 +3580,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op88,
-    1 /* batch size */, 7 /* input height */, 7 /* input width */,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #88" << std::endl;
     return ExecutionPlan();
@@ -3590,8 +3590,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op89,
-    49 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/49,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #89" << std::endl;
     return ExecutionPlan();
@@ -3599,9 +3599,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op91,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #91" << std::endl;
     return ExecutionPlan();
@@ -3609,9 +3609,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op92,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #92" << std::endl;
     return ExecutionPlan();
@@ -3623,7 +3623,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_multiply_nd_f16(
       op93,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #93" << std::endl;
@@ -3632,9 +3632,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op94,
-    1 /* batch size */, 7 /* input height */, 7 /* input width */,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #94" << std::endl;
     return ExecutionPlan();
@@ -3646,7 +3646,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_add_nd_f16(
       op95,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #95" << std::endl;
@@ -3655,9 +3655,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op96,
-    1 /* batch size */, 7 /* input height */, 7 /* input width */,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #96" << std::endl;
     return ExecutionPlan();
@@ -3665,8 +3665,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op97,
-    49 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/49,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #97" << std::endl;
     return ExecutionPlan();
@@ -3674,9 +3674,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op98,
-    1 /* batch size */, 7 /* input height */, 7 /* input width */,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #98" << std::endl;
     return ExecutionPlan();
@@ -3684,8 +3684,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op99,
-    49 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/49,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #99" << std::endl;
     return ExecutionPlan();
@@ -3693,9 +3693,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op101,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #101" << std::endl;
     return ExecutionPlan();
@@ -3703,9 +3703,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op102,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #102" << std::endl;
     return ExecutionPlan();
@@ -3717,7 +3717,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_multiply_nd_f16(
       op103,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #103" << std::endl;
@@ -3726,9 +3726,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op104,
-    1 /* batch size */, 7 /* input height */, 7 /* input width */,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #104" << std::endl;
     return ExecutionPlan();
@@ -3740,7 +3740,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
     status = xnn_reshape_add_nd_f16(
       op105,
       4, a_shape, 4, b_shape,
-      threadpool /* threadpool */);
+      /*threadpool=*/threadpool);
   }
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #105" << std::endl;
@@ -3749,9 +3749,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nchw_f16(
     op106,
-    1 /* batch size */, 7 /* input height */, 7 /* input width */,
+    /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #106" << std::endl;
     return ExecutionPlan();
@@ -3759,8 +3759,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op107,
-    49 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/49,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #107" << std::endl;
     return ExecutionPlan();
@@ -3768,9 +3768,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nhwc_f16(
     op109,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #109" << std::endl;
     return ExecutionPlan();
@@ -3778,8 +3778,8 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_hardswish_nc_f16(
     op110,
-    1 /* batch size */,
-    threadpool /* threadpool */);
+    /*batch_size=*/1,
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #110" << std::endl;
     return ExecutionPlan();
@@ -3787,9 +3787,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_reshape_convolution2d_nhwc_f16(
     op112,
-    1 /* batch size */, 1 /* input height */, 1 /* input width */,
+    /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    threadpool /* threadpool */);
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #112" << std::endl;
     return ExecutionPlan();
@@ -3797,7 +3797,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op0,
-    v0.data() /* input */, v1.data() /* output */);
+    /*input=*/v0.data(), /*output=*/v1.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #0" << std::endl;
     return ExecutionPlan();
@@ -3805,7 +3805,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op1,
-    v1.data() /* input */, v2.data() /* output */);
+    /*input=*/v1.data(), /*output=*/v2.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #1" << std::endl;
     return ExecutionPlan();
@@ -3813,7 +3813,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op2,
-    v2.data() /* input */, v3.data() /* output */);
+    /*input=*/v2.data(), /*output=*/v3.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #2" << std::endl;
     return ExecutionPlan();
@@ -3821,7 +3821,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op3,
-    v3.data() /* input */, v4.data() /* output */);
+    /*input=*/v3.data(), /*output=*/v4.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #3" << std::endl;
     return ExecutionPlan();
@@ -3829,7 +3829,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_add_nd_f16(
     op4,
-    v4.data() /* a */, v2.data() /* b */, v5.data() /* output */);
+    v4.data() /* a */, v2.data() /* b */, /*output=*/v5.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #4" << std::endl;
     return ExecutionPlan();
@@ -3837,7 +3837,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op5,
-    v5.data() /* input */, v6.data() /* output */);
+    /*input=*/v5.data(), /*output=*/v6.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #5" << std::endl;
     return ExecutionPlan();
@@ -3845,7 +3845,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op6,
-    v6.data() /* input */, v7.data() /* output */);
+    /*input=*/v6.data(), /*output=*/v7.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #6" << std::endl;
     return ExecutionPlan();
@@ -3853,7 +3853,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op7,
-    v7.data() /* input */, v8.data() /* output */);
+    /*input=*/v7.data(), /*output=*/v8.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #7" << std::endl;
     return ExecutionPlan();
@@ -3861,7 +3861,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op8,
-    v8.data() /* input */, v9.data() /* output */);
+    /*input=*/v8.data(), /*output=*/v9.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #8" << std::endl;
     return ExecutionPlan();
@@ -3869,7 +3869,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op9,
-    v9.data() /* input */, v10.data() /* output */);
+    /*input=*/v9.data(), /*output=*/v10.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #9" << std::endl;
     return ExecutionPlan();
@@ -3877,7 +3877,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op10,
-    v10.data() /* input */, v11.data() /* output */);
+    /*input=*/v10.data(), /*output=*/v11.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #10" << std::endl;
     return ExecutionPlan();
@@ -3885,7 +3885,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_add_nd_f16(
     op11,
-    v11.data() /* a */, v8.data() /* b */, v12.data() /* output */);
+    v11.data() /* a */, v8.data() /* b */, /*output=*/v12.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #11" << std::endl;
     return ExecutionPlan();
@@ -3893,7 +3893,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op12,
-    v12.data() /* input */, v13.data() /* output */);
+    /*input=*/v12.data(), /*output=*/v13.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #12" << std::endl;
     return ExecutionPlan();
@@ -3901,7 +3901,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op13,
-    v13.data() /* input */, v14.data() /* output */);
+    /*input=*/v13.data(), /*output=*/v14.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #13" << std::endl;
     return ExecutionPlan();
@@ -3909,9 +3909,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_global_average_pooling_ncw_f16(
     op14,
-    1 /* batch size */, 784 /* width */,
-    v14.data() /* input */, v15.data() /* output */,
-    threadpool /* threadpool */);
+    /*batch_size=*/1, 784 /* width */,
+    /*input=*/v14.data(), /*output=*/v15.data(),
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #14" << std::endl;
     return ExecutionPlan();
@@ -3919,7 +3919,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op15,
-    v15.data() /* input */, v16.data() /* output */);
+    /*input=*/v15.data(), /*output=*/v16.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #15" << std::endl;
     return ExecutionPlan();
@@ -3927,7 +3927,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op16,
-    v16.data() /* input */, v17.data() /* output */);
+    /*input=*/v16.data(), /*output=*/v17.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #16" << std::endl;
     return ExecutionPlan();
@@ -3935,7 +3935,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_multiply_nd_f16(
     op17,
-    v14.data() /* a */, v17.data() /* b */, v18.data() /* output */);
+    v14.data() /* a */, v17.data() /* b */, /*output=*/v18.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #17" << std::endl;
     return ExecutionPlan();
@@ -3943,7 +3943,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op18,
-    v18.data() /* input */, v19.data() /* output */);
+    /*input=*/v18.data(), /*output=*/v19.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #18" << std::endl;
     return ExecutionPlan();
@@ -3951,7 +3951,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op19,
-    v19.data() /* input */, v20.data() /* output */);
+    /*input=*/v19.data(), /*output=*/v20.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #19" << std::endl;
     return ExecutionPlan();
@@ -3959,7 +3959,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op20,
-    v20.data() /* input */, v21.data() /* output */);
+    /*input=*/v20.data(), /*output=*/v21.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #20" << std::endl;
     return ExecutionPlan();
@@ -3967,9 +3967,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_global_average_pooling_ncw_f16(
     op21,
-    1 /* batch size */, 784 /* width */,
-    v21.data() /* input */, v22.data() /* output */,
-    threadpool /* threadpool */);
+    /*batch_size=*/1, 784 /* width */,
+    /*input=*/v21.data(), /*output=*/v22.data(),
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #21" << std::endl;
     return ExecutionPlan();
@@ -3977,7 +3977,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op22,
-    v22.data() /* input */, v23.data() /* output */);
+    /*input=*/v22.data(), /*output=*/v23.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #22" << std::endl;
     return ExecutionPlan();
@@ -3985,7 +3985,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op23,
-    v23.data() /* input */, v24.data() /* output */);
+    /*input=*/v23.data(), /*output=*/v24.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #23" << std::endl;
     return ExecutionPlan();
@@ -3993,7 +3993,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_multiply_nd_f16(
     op24,
-    v21.data() /* a */, v24.data() /* b */, v25.data() /* output */);
+    v21.data() /* a */, v24.data() /* b */, /*output=*/v25.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #24" << std::endl;
     return ExecutionPlan();
@@ -4001,7 +4001,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op25,
-    v25.data() /* input */, v26.data() /* output */);
+    /*input=*/v25.data(), /*output=*/v26.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #25" << std::endl;
     return ExecutionPlan();
@@ -4009,7 +4009,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_add_nd_f16(
     op26,
-    v26.data() /* a */, v19.data() /* b */, v27.data() /* output */);
+    v26.data() /* a */, v19.data() /* b */, /*output=*/v27.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #26" << std::endl;
     return ExecutionPlan();
@@ -4017,7 +4017,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op27,
-    v27.data() /* input */, v28.data() /* output */);
+    /*input=*/v27.data(), /*output=*/v28.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #27" << std::endl;
     return ExecutionPlan();
@@ -4025,7 +4025,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op28,
-    v28.data() /* input */, v29.data() /* output */);
+    /*input=*/v28.data(), /*output=*/v29.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #28" << std::endl;
     return ExecutionPlan();
@@ -4033,9 +4033,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_global_average_pooling_ncw_f16(
     op29,
-    1 /* batch size */, 784 /* width */,
-    v29.data() /* input */, v30.data() /* output */,
-    threadpool /* threadpool */);
+    /*batch_size=*/1, 784 /* width */,
+    /*input=*/v29.data(), /*output=*/v30.data(),
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #29" << std::endl;
     return ExecutionPlan();
@@ -4043,7 +4043,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op30,
-    v30.data() /* input */, v31.data() /* output */);
+    /*input=*/v30.data(), /*output=*/v31.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #30" << std::endl;
     return ExecutionPlan();
@@ -4051,7 +4051,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op31,
-    v31.data() /* input */, v32.data() /* output */);
+    /*input=*/v31.data(), /*output=*/v32.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #31" << std::endl;
     return ExecutionPlan();
@@ -4059,7 +4059,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_multiply_nd_f16(
     op32,
-    v29.data() /* a */, v32.data() /* b */, v33.data() /* output */);
+    v29.data() /* a */, v32.data() /* b */, /*output=*/v33.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #32" << std::endl;
     return ExecutionPlan();
@@ -4067,7 +4067,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op33,
-    v33.data() /* input */, v34.data() /* output */);
+    /*input=*/v33.data(), /*output=*/v34.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #33" << std::endl;
     return ExecutionPlan();
@@ -4075,7 +4075,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_add_nd_f16(
     op34,
-    v34.data() /* a */, v27.data() /* b */, v35.data() /* output */);
+    v34.data() /* a */, v27.data() /* b */, /*output=*/v35.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #34" << std::endl;
     return ExecutionPlan();
@@ -4083,7 +4083,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op35,
-    v35.data() /* input */, v36.data() /* output */);
+    /*input=*/v35.data(), /*output=*/v36.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #35" << std::endl;
     return ExecutionPlan();
@@ -4091,7 +4091,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op36,
-    v36.data() /* input */, v37.data() /* output */);
+    /*input=*/v36.data(), /*output=*/v37.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #36" << std::endl;
     return ExecutionPlan();
@@ -4099,7 +4099,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op37,
-    v37.data() /* input */, v38.data() /* output */);
+    /*input=*/v37.data(), /*output=*/v38.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #37" << std::endl;
     return ExecutionPlan();
@@ -4107,7 +4107,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op38,
-    v38.data() /* input */, v39.data() /* output */);
+    /*input=*/v38.data(), /*output=*/v39.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #38" << std::endl;
     return ExecutionPlan();
@@ -4115,7 +4115,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op39,
-    v39.data() /* input */, v40.data() /* output */);
+    /*input=*/v39.data(), /*output=*/v40.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #39" << std::endl;
     return ExecutionPlan();
@@ -4123,7 +4123,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op40,
-    v40.data() /* input */, v41.data() /* output */);
+    /*input=*/v40.data(), /*output=*/v41.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #40" << std::endl;
     return ExecutionPlan();
@@ -4131,7 +4131,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op41,
-    v41.data() /* input */, v42.data() /* output */);
+    /*input=*/v41.data(), /*output=*/v42.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #41" << std::endl;
     return ExecutionPlan();
@@ -4139,7 +4139,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op42,
-    v42.data() /* input */, v43.data() /* output */);
+    /*input=*/v42.data(), /*output=*/v43.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #42" << std::endl;
     return ExecutionPlan();
@@ -4147,7 +4147,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op43,
-    v43.data() /* input */, v44.data() /* output */);
+    /*input=*/v43.data(), /*output=*/v44.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #43" << std::endl;
     return ExecutionPlan();
@@ -4155,7 +4155,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op44,
-    v44.data() /* input */, v45.data() /* output */);
+    /*input=*/v44.data(), /*output=*/v45.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #44" << std::endl;
     return ExecutionPlan();
@@ -4163,7 +4163,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_add_nd_f16(
     op45,
-    v45.data() /* a */, v40.data() /* b */, v46.data() /* output */);
+    v45.data() /* a */, v40.data() /* b */, /*output=*/v46.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #45" << std::endl;
     return ExecutionPlan();
@@ -4171,7 +4171,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op46,
-    v46.data() /* input */, v47.data() /* output */);
+    /*input=*/v46.data(), /*output=*/v47.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #46" << std::endl;
     return ExecutionPlan();
@@ -4179,7 +4179,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op47,
-    v47.data() /* input */, v48.data() /* output */);
+    /*input=*/v47.data(), /*output=*/v48.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #47" << std::endl;
     return ExecutionPlan();
@@ -4187,7 +4187,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op48,
-    v48.data() /* input */, v49.data() /* output */);
+    /*input=*/v48.data(), /*output=*/v49.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #48" << std::endl;
     return ExecutionPlan();
@@ -4195,7 +4195,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op49,
-    v49.data() /* input */, v50.data() /* output */);
+    /*input=*/v49.data(), /*output=*/v50.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #49" << std::endl;
     return ExecutionPlan();
@@ -4203,7 +4203,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op50,
-    v50.data() /* input */, v51.data() /* output */);
+    /*input=*/v50.data(), /*output=*/v51.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #50" << std::endl;
     return ExecutionPlan();
@@ -4211,7 +4211,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_add_nd_f16(
     op51,
-    v51.data() /* a */, v46.data() /* b */, v52.data() /* output */);
+    v51.data() /* a */, v46.data() /* b */, /*output=*/v52.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #51" << std::endl;
     return ExecutionPlan();
@@ -4219,7 +4219,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op52,
-    v52.data() /* input */, v53.data() /* output */);
+    /*input=*/v52.data(), /*output=*/v53.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #52" << std::endl;
     return ExecutionPlan();
@@ -4227,7 +4227,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op53,
-    v53.data() /* input */, v54.data() /* output */);
+    /*input=*/v53.data(), /*output=*/v54.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #53" << std::endl;
     return ExecutionPlan();
@@ -4235,7 +4235,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op54,
-    v54.data() /* input */, v55.data() /* output */);
+    /*input=*/v54.data(), /*output=*/v55.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #54" << std::endl;
     return ExecutionPlan();
@@ -4243,7 +4243,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op55,
-    v55.data() /* input */, v56.data() /* output */);
+    /*input=*/v55.data(), /*output=*/v56.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #55" << std::endl;
     return ExecutionPlan();
@@ -4251,7 +4251,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op56,
-    v56.data() /* input */, v57.data() /* output */);
+    /*input=*/v56.data(), /*output=*/v57.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #56" << std::endl;
     return ExecutionPlan();
@@ -4259,7 +4259,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_add_nd_f16(
     op57,
-    v57.data() /* a */, v52.data() /* b */, v58.data() /* output */);
+    v57.data() /* a */, v52.data() /* b */, /*output=*/v58.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #57" << std::endl;
     return ExecutionPlan();
@@ -4267,7 +4267,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op58,
-    v58.data() /* input */, v59.data() /* output */);
+    /*input=*/v58.data(), /*output=*/v59.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #58" << std::endl;
     return ExecutionPlan();
@@ -4275,7 +4275,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op59,
-    v59.data() /* input */, v60.data() /* output */);
+    /*input=*/v59.data(), /*output=*/v60.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #59" << std::endl;
     return ExecutionPlan();
@@ -4283,7 +4283,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op60,
-    v60.data() /* input */, v61.data() /* output */);
+    /*input=*/v60.data(), /*output=*/v61.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #60" << std::endl;
     return ExecutionPlan();
@@ -4291,7 +4291,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op61,
-    v61.data() /* input */, v62.data() /* output */);
+    /*input=*/v61.data(), /*output=*/v62.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #61" << std::endl;
     return ExecutionPlan();
@@ -4299,9 +4299,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_global_average_pooling_ncw_f16(
     op62,
-    1 /* batch size */, 196 /* width */,
-    v62.data() /* input */, v63.data() /* output */,
-    threadpool /* threadpool */);
+    /*batch_size=*/1, 196 /* width */,
+    /*input=*/v62.data(), /*output=*/v63.data(),
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #62" << std::endl;
     return ExecutionPlan();
@@ -4309,7 +4309,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op63,
-    v63.data() /* input */, v64.data() /* output */);
+    /*input=*/v63.data(), /*output=*/v64.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #63" << std::endl;
     return ExecutionPlan();
@@ -4317,7 +4317,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op64,
-    v64.data() /* input */, v65.data() /* output */);
+    /*input=*/v64.data(), /*output=*/v65.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #64" << std::endl;
     return ExecutionPlan();
@@ -4325,7 +4325,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_multiply_nd_f16(
     op65,
-    v62.data() /* a */, v65.data() /* b */, v66.data() /* output */);
+    v62.data() /* a */, v65.data() /* b */, /*output=*/v66.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #65" << std::endl;
     return ExecutionPlan();
@@ -4333,7 +4333,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op66,
-    v66.data() /* input */, v67.data() /* output */);
+    /*input=*/v66.data(), /*output=*/v67.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #66" << std::endl;
     return ExecutionPlan();
@@ -4341,7 +4341,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op67,
-    v67.data() /* input */, v68.data() /* output */);
+    /*input=*/v67.data(), /*output=*/v68.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #67" << std::endl;
     return ExecutionPlan();
@@ -4349,7 +4349,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op68,
-    v68.data() /* input */, v69.data() /* output */);
+    /*input=*/v68.data(), /*output=*/v69.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #68" << std::endl;
     return ExecutionPlan();
@@ -4357,7 +4357,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op69,
-    v69.data() /* input */, v70.data() /* output */);
+    /*input=*/v69.data(), /*output=*/v70.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #69" << std::endl;
     return ExecutionPlan();
@@ -4365,7 +4365,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op70,
-    v70.data() /* input */, v71.data() /* output */);
+    /*input=*/v70.data(), /*output=*/v71.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #70" << std::endl;
     return ExecutionPlan();
@@ -4373,9 +4373,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_global_average_pooling_ncw_f16(
     op71,
-    1 /* batch size */, 196 /* width */,
-    v71.data() /* input */, v72.data() /* output */,
-    threadpool /* threadpool */);
+    /*batch_size=*/1, 196 /* width */,
+    /*input=*/v71.data(), /*output=*/v72.data(),
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #71" << std::endl;
     return ExecutionPlan();
@@ -4383,7 +4383,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op72,
-    v72.data() /* input */, v73.data() /* output */);
+    /*input=*/v72.data(), /*output=*/v73.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #72" << std::endl;
     return ExecutionPlan();
@@ -4391,7 +4391,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op73,
-    v73.data() /* input */, v74.data() /* output */);
+    /*input=*/v73.data(), /*output=*/v74.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #73" << std::endl;
     return ExecutionPlan();
@@ -4399,7 +4399,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_multiply_nd_f16(
     op74,
-    v71.data() /* a */, v74.data() /* b */, v75.data() /* output */);
+    v71.data() /* a */, v74.data() /* b */, /*output=*/v75.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #74" << std::endl;
     return ExecutionPlan();
@@ -4407,7 +4407,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op75,
-    v75.data() /* input */, v76.data() /* output */);
+    /*input=*/v75.data(), /*output=*/v76.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #75" << std::endl;
     return ExecutionPlan();
@@ -4415,7 +4415,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_add_nd_f16(
     op76,
-    v76.data() /* a */, v67.data() /* b */, v77.data() /* output */);
+    v76.data() /* a */, v67.data() /* b */, /*output=*/v77.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #76" << std::endl;
     return ExecutionPlan();
@@ -4423,7 +4423,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op77,
-    v77.data() /* input */, v78.data() /* output */);
+    /*input=*/v77.data(), /*output=*/v78.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #77" << std::endl;
     return ExecutionPlan();
@@ -4431,7 +4431,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op78,
-    v78.data() /* input */, v79.data() /* output */);
+    /*input=*/v78.data(), /*output=*/v79.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #78" << std::endl;
     return ExecutionPlan();
@@ -4439,7 +4439,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op79,
-    v79.data() /* input */, v80.data() /* output */);
+    /*input=*/v79.data(), /*output=*/v80.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #79" << std::endl;
     return ExecutionPlan();
@@ -4447,7 +4447,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op80,
-    v80.data() /* input */, v81.data() /* output */);
+    /*input=*/v80.data(), /*output=*/v81.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #80" << std::endl;
     return ExecutionPlan();
@@ -4455,9 +4455,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_global_average_pooling_ncw_f16(
     op81,
-    1 /* batch size */, 49 /* width */,
-    v81.data() /* input */, v82.data() /* output */,
-    threadpool /* threadpool */);
+    /*batch_size=*/1, 49 /* width */,
+    /*input=*/v81.data(), /*output=*/v82.data(),
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #81" << std::endl;
     return ExecutionPlan();
@@ -4465,7 +4465,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op82,
-    v82.data() /* input */, v83.data() /* output */);
+    /*input=*/v82.data(), /*output=*/v83.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #82" << std::endl;
     return ExecutionPlan();
@@ -4473,7 +4473,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op83,
-    v83.data() /* input */, v84.data() /* output */);
+    /*input=*/v83.data(), /*output=*/v84.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #83" << std::endl;
     return ExecutionPlan();
@@ -4481,7 +4481,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_multiply_nd_f16(
     op84,
-    v81.data() /* a */, v84.data() /* b */, v85.data() /* output */);
+    v81.data() /* a */, v84.data() /* b */, /*output=*/v85.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #84" << std::endl;
     return ExecutionPlan();
@@ -4489,7 +4489,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op85,
-    v85.data() /* input */, v86.data() /* output */);
+    /*input=*/v85.data(), /*output=*/v86.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #85" << std::endl;
     return ExecutionPlan();
@@ -4497,7 +4497,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op86,
-    v86.data() /* input */, v87.data() /* output */);
+    /*input=*/v86.data(), /*output=*/v87.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #86" << std::endl;
     return ExecutionPlan();
@@ -4505,7 +4505,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op87,
-    v87.data() /* input */, v88.data() /* output */);
+    /*input=*/v87.data(), /*output=*/v88.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #87" << std::endl;
     return ExecutionPlan();
@@ -4513,7 +4513,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op88,
-    v88.data() /* input */, v89.data() /* output */);
+    /*input=*/v88.data(), /*output=*/v89.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #88" << std::endl;
     return ExecutionPlan();
@@ -4521,7 +4521,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op89,
-    v89.data() /* input */, v90.data() /* output */);
+    /*input=*/v89.data(), /*output=*/v90.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #89" << std::endl;
     return ExecutionPlan();
@@ -4529,9 +4529,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_global_average_pooling_ncw_f16(
     op90,
-    1 /* batch size */, 49 /* width */,
-    v90.data() /* input */, v91.data() /* output */,
-    threadpool /* threadpool */);
+    /*batch_size=*/1, 49 /* width */,
+    /*input=*/v90.data(), /*output=*/v91.data(),
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #90" << std::endl;
     return ExecutionPlan();
@@ -4539,7 +4539,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op91,
-    v91.data() /* input */, v92.data() /* output */);
+    /*input=*/v91.data(), /*output=*/v92.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #91" << std::endl;
     return ExecutionPlan();
@@ -4547,7 +4547,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op92,
-    v92.data() /* input */, v93.data() /* output */);
+    /*input=*/v92.data(), /*output=*/v93.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #92" << std::endl;
     return ExecutionPlan();
@@ -4555,7 +4555,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_multiply_nd_f16(
     op93,
-    v90.data() /* a */, v93.data() /* b */, v94.data() /* output */);
+    v90.data() /* a */, v93.data() /* b */, /*output=*/v94.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #93" << std::endl;
     return ExecutionPlan();
@@ -4563,7 +4563,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op94,
-    v94.data() /* input */, v95.data() /* output */);
+    /*input=*/v94.data(), /*output=*/v95.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #94" << std::endl;
     return ExecutionPlan();
@@ -4571,7 +4571,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_add_nd_f16(
     op95,
-    v95.data() /* a */, v86.data() /* b */, v96.data() /* output */);
+    v95.data() /* a */, v86.data() /* b */, /*output=*/v96.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #95" << std::endl;
     return ExecutionPlan();
@@ -4579,7 +4579,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op96,
-    v96.data() /* input */, v97.data() /* output */);
+    /*input=*/v96.data(), /*output=*/v97.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #96" << std::endl;
     return ExecutionPlan();
@@ -4587,7 +4587,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op97,
-    v97.data() /* input */, v98.data() /* output */);
+    /*input=*/v97.data(), /*output=*/v98.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #97" << std::endl;
     return ExecutionPlan();
@@ -4595,7 +4595,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op98,
-    v98.data() /* input */, v99.data() /* output */);
+    /*input=*/v98.data(), /*output=*/v99.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #98" << std::endl;
     return ExecutionPlan();
@@ -4603,7 +4603,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op99,
-    v99.data() /* input */, v100.data() /* output */);
+    /*input=*/v99.data(), /*output=*/v100.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #99" << std::endl;
     return ExecutionPlan();
@@ -4611,9 +4611,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_global_average_pooling_ncw_f16(
     op100,
-    1 /* batch size */, 49 /* width */,
-    v100.data() /* input */, v101.data() /* output */,
-    threadpool /* threadpool */);
+    /*batch_size=*/1, 49 /* width */,
+    /*input=*/v100.data(), /*output=*/v101.data(),
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #100" << std::endl;
     return ExecutionPlan();
@@ -4621,7 +4621,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op101,
-    v101.data() /* input */, v102.data() /* output */);
+    /*input=*/v101.data(), /*output=*/v102.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #101" << std::endl;
     return ExecutionPlan();
@@ -4629,7 +4629,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op102,
-    v102.data() /* input */, v103.data() /* output */);
+    /*input=*/v102.data(), /*output=*/v103.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #102" << std::endl;
     return ExecutionPlan();
@@ -4637,7 +4637,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_multiply_nd_f16(
     op103,
-    v100.data() /* a */, v103.data() /* b */, v104.data() /* output */);
+    v100.data() /* a */, v103.data() /* b */, /*output=*/v104.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #103" << std::endl;
     return ExecutionPlan();
@@ -4645,7 +4645,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op104,
-    v104.data() /* input */, v105.data() /* output */);
+    /*input=*/v104.data(), /*output=*/v105.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #104" << std::endl;
     return ExecutionPlan();
@@ -4653,7 +4653,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_add_nd_f16(
     op105,
-    v105.data() /* a */, v96.data() /* b */, v106.data() /* output */);
+    v105.data() /* a */, v96.data() /* b */, /*output=*/v106.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #105" << std::endl;
     return ExecutionPlan();
@@ -4661,7 +4661,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nchw_f16(
     op106,
-    v106.data() /* input */, v107.data() /* output */);
+    /*input=*/v106.data(), /*output=*/v107.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #106" << std::endl;
     return ExecutionPlan();
@@ -4669,7 +4669,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op107,
-    v107.data() /* input */, v108.data() /* output */);
+    /*input=*/v107.data(), /*output=*/v108.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #107" << std::endl;
     return ExecutionPlan();
@@ -4677,9 +4677,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_global_average_pooling_ncw_f16(
     op108,
-    1 /* batch size */, 49 /* width */,
-    v108.data() /* input */, v109.data() /* output */,
-    threadpool /* threadpool */);
+    /*batch_size=*/1, 49 /* width */,
+    /*input=*/v108.data(), /*output=*/v109.data(),
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #108" << std::endl;
     return ExecutionPlan();
@@ -4687,7 +4687,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op109,
-    v109.data() /* input */, v110.data() /* output */);
+    /*input=*/v109.data(), /*output=*/v110.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #109" << std::endl;
     return ExecutionPlan();
@@ -4695,7 +4695,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_hardswish_nc_f16(
     op110,
-    v110.data() /* input */, v111.data() /* output */);
+    /*input=*/v110.data(), /*output=*/v111.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #110" << std::endl;
     return ExecutionPlan();
@@ -4703,9 +4703,9 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_global_average_pooling_nwc_f16(
     op111,
-    1 /* batch size */, 1 /* width */,
-    v111.data() /* input */, v112.data() /* output */,
-    threadpool /* threadpool */);
+    /*batch_size=*/1, 1 /* width */,
+    /*input=*/v111.data(), /*output=*/v112.data(),
+    /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #111" << std::endl;
     return ExecutionPlan();
@@ -4713,7 +4713,7 @@ ExecutionPlan FP16SparseMobileNetV3Large(float sparsity, pthreadpool_t threadpoo
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op112,
-    v112.data() /* input */, v113.data() /* output */);
+    /*input=*/v112.data(), /*output=*/v113.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #112" << std::endl;
     return ExecutionPlan();

@@ -373,10 +373,10 @@ TEST_F(EvenSplit4TestQS8, matches_operator_api)
     xnn_status_success,
     xnn_setup_copy_nc_x8(op4, (uint8_t*) input.data() + op1->channels * 3, operator_output4.data()));
 
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, nullptr /* thread pool */));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, nullptr /* thread pool */));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op3, nullptr /* thread pool */));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op4, nullptr /* thread pool */));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op3, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op4, /*threadpool=*/nullptr));
 
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;
@@ -494,10 +494,10 @@ TEST_F(EvenSplit4TestQU8, matches_operator_api)
     xnn_status_success,
     xnn_setup_copy_nc_x8(op4, (uint8_t*) input.data() + op1->channels * 3, operator_output4.data()));
 
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, nullptr /* thread pool */));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, nullptr /* thread pool */));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op3, nullptr /* thread pool */));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op4, nullptr /* thread pool */));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op3, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op4, /*threadpool=*/nullptr));
 
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;
@@ -615,10 +615,10 @@ TEST_F(EvenSplit4TestF32, matches_operator_api)
     xnn_status_success,
     xnn_setup_copy_nc_x32(op4, (uint32_t*) input.data() + op1->channels * 3, operator_output4.data()));
 
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, nullptr /* thread pool */));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, nullptr /* thread pool */));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op3, nullptr /* thread pool */));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op4, nullptr /* thread pool */));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op3, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op4, /*threadpool=*/nullptr));
 
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;
