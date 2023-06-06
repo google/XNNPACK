@@ -286,6 +286,81 @@ static enum xnn_status create_convolution_operator(
   return status;
 }
 
+static enum xnn_status reshape_convolution_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_convolution_nchw_f16:
+      return xnn_reshape_convolution2d_nchw_f16(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        NULL, NULL,
+        threadpool);
+      break;
+    case xnn_operator_type_convolution_nchw_f32:
+      return xnn_reshape_convolution2d_nchw_f32(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        NULL, NULL,
+        threadpool);
+      break;
+    case xnn_operator_type_convolution_nhwc_f32:
+      return xnn_reshape_convolution2d_nhwc_f32(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        NULL, NULL,
+        threadpool);
+      break;
+    case xnn_operator_type_convolution_nhwc_f16:
+      return xnn_reshape_convolution2d_nhwc_f16(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        NULL, NULL,
+        threadpool);
+      break;
+    case xnn_operator_type_convolution_nhwc_qc8:
+      return xnn_reshape_convolution2d_nhwc_qc8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        NULL, NULL,
+        threadpool);
+      break;
+    case xnn_operator_type_convolution_nhwc_qs8:
+      return xnn_reshape_convolution2d_nhwc_qs8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        NULL, NULL,
+        threadpool);
+      break;
+    case xnn_operator_type_convolution_nhwc_qu8:
+      return xnn_reshape_convolution2d_nhwc_qu8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        NULL, NULL,
+        threadpool);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 static enum xnn_status setup_convolution_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
@@ -312,72 +387,44 @@ static enum xnn_status setup_convolution_operator(
     case xnn_operator_type_convolution_nchw_f16:
       return xnn_setup_convolution2d_nchw_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
       break;
     case xnn_operator_type_convolution_nchw_f32:
       return xnn_setup_convolution2d_nchw_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
       break;
     case xnn_operator_type_convolution_nhwc_f32:
       return xnn_setup_convolution2d_nhwc_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
       break;
     case xnn_operator_type_convolution_nhwc_f16:
       return xnn_setup_convolution2d_nhwc_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
       break;
     case xnn_operator_type_convolution_nhwc_qc8:
       return xnn_setup_convolution2d_nhwc_qc8(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
       break;
     case xnn_operator_type_convolution_nhwc_qs8:
       return xnn_setup_convolution2d_nhwc_qs8(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
       break;
     case xnn_operator_type_convolution_nhwc_qu8:
       return xnn_setup_convolution2d_nhwc_qu8(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
       break;
     default:
       XNN_UNREACHABLE;
@@ -767,6 +814,7 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   node->flags = flags;
 
   node->create = create_convolution_operator;
+  node->reshape = reshape_convolution_operator;
   node->setup = setup_convolution_operator;
 
   return xnn_status_success;

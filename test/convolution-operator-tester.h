@@ -702,15 +702,12 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_qc8(
-          convolution_op,
-          batch_size(), input_height(), input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nhwc_qc8(
+                              convolution_op, batch_size(), input_height(), input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qc8(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       // Verify results.
       VerifyNHWCxQC8(output, output_ref);
@@ -740,15 +737,13 @@ class ConvolutionOperatorTester {
         // Smart pointer to automatically delete convolution_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op2, xnn_delete_operator);
         std::vector<int8_t> output2(output.size(), INT8_C(0xA5));
-        ASSERT_EQ(xnn_status_success,
-                  xnn_setup_convolution2d_nhwc_qc8(
-                      convolution_op2,
-                      batch_size(), input_height(), input_width(),
-                      input.data(), output2.data(),
-                      nullptr /* thread pool */));
-
-        ASSERT_EQ(xnn_status_success,
-                  xnn_run_operator(convolution_op2, nullptr /* thread pool */));
+        ASSERT_EQ(
+          xnn_status_success,
+          xnn_reshape_convolution2d_nhwc_qc8(
+            convolution_op2, batch_size(), input_height(), input_width(),
+            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qc8(convolution_op2, input.data(), output2.data()));
+        ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op2, nullptr /* thread pool */));
 
         VerifyNHWCxQC8(output2, output_ref);
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
@@ -917,15 +912,12 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_qs8(
-          convolution_op,
-          batch_size(), input_height(), input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nhwc_qs8(
+                              convolution_op, batch_size(), input_height(), input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       VerifyNHWCxQS8(output, output_ref, output_zero_point);
 
@@ -959,14 +951,13 @@ class ConvolutionOperatorTester {
             auto_convolution_op(convolution_op2, xnn_delete_operator);
 
         std::vector<int8_t> output2(output.size(), INT8_C(0xA5));
-        ASSERT_EQ(xnn_status_success,
-                  xnn_setup_convolution2d_nhwc_qs8(
-                      convolution_op2, batch_size(), input_height(),
-                      input_width(), input.data(), output2.data(),
-                      nullptr /* thread pool */));
-
-        ASSERT_EQ(xnn_status_success,
-                  xnn_run_operator(convolution_op2, nullptr /* thread pool */));
+        ASSERT_EQ(
+          xnn_status_success,
+          xnn_reshape_convolution2d_nhwc_qs8(
+            convolution_op2, batch_size(), input_height(), input_width(),
+            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(convolution_op2, input.data(), output2.data()));
+        ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op2, nullptr /* thread pool */));
 
         VerifyNHWCxQS8(output2, output_ref, output_zero_point);
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
@@ -1155,15 +1146,12 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_qu8(
-          convolution_op,
-          batch_size(), input_height(), input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nhwc_qu8(
+                              convolution_op, batch_size(), input_height(), input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       // Verify results.
       VerifyNHWCxQU8(output, output_ref, output_zero_point);
@@ -1198,14 +1186,13 @@ class ConvolutionOperatorTester {
             auto_convolution_op2(convolution_op2, xnn_delete_operator);
         std::vector<uint8_t> output2(output.size(), UINT8_C(0xA5));
 
-        ASSERT_EQ(xnn_status_success,
-                  xnn_setup_convolution2d_nhwc_qu8(
-                      convolution_op2, batch_size(), input_height(),
-                      input_width(), input.data(), output2.data(),
-                      nullptr /* thread pool */));
-
-        ASSERT_EQ(xnn_status_success,
-                  xnn_run_operator(convolution_op2, nullptr /* thread pool */));
+        ASSERT_EQ(
+          xnn_status_success,
+          xnn_reshape_convolution2d_nhwc_qu8(
+            convolution_op2, batch_size(), input_height(), input_width(),
+            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(convolution_op2, input.data(), output2.data()));
+        ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op2, nullptr /* thread pool */));
 
         // Verify results.
         VerifyNHWCxQU8(output2, output_ref, output_zero_point);
@@ -1398,21 +1385,19 @@ class ConvolutionOperatorTester {
         }
       #endif
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_f32(
-          convolution_op,
-          batch_size(), input_height(), input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
+        ASSERT_EQ(
+          xnn_status_success,
+          xnn_reshape_convolution2d_nhwc_f32(
+            convolution_op, batch_size(), input_height(), input_width(),
+            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(convolution_op, input.data(), output.data()));
+        ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+        VerifyNHWCxF32(output, output_ref, output_min, output_max);
 
-      VerifyNHWCxF32(output, output_ref, output_min, output_max);
-
-      if (use_weights_cache()) {
-        // We already finalized the code cache, so create a new code cache if we are testing JIT.
-        std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_inner_code_cache(
+        if (use_weights_cache()) {
+          // We already finalized the code cache, so create a new code cache if we are testing JIT.
+          std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_inner_code_cache(
             nullptr, xnn_release_code_cache);
         #if XNN_PLATFORM_JIT
           xnn_code_cache inner_code_cache;
@@ -1450,14 +1435,13 @@ class ConvolutionOperatorTester {
         #endif
 
         std::vector<float> output2(output.size(), nanf(""));
-        ASSERT_EQ(xnn_status_success,
-                  xnn_setup_convolution2d_nhwc_f32(
-                      convolution_op2,
-                      batch_size(), input_height(), input_width(),
-                      input.data(), output2.data(),
-                      nullptr /* thread pool */));
-        ASSERT_EQ(xnn_status_success,
-                  xnn_run_operator(convolution_op2, nullptr /* thread pool */));
+        ASSERT_EQ(
+          xnn_status_success,
+          xnn_reshape_convolution2d_nhwc_f32(
+            convolution_op2, batch_size(), input_height(), input_width(),
+            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(convolution_op2, input.data(), output2.data()));
+        ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op2, nullptr /* thread pool */));
 
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op2(convolution_op2, xnn_delete_operator);
         ASSERT_EQ(weights_cache.cache.hits, 1);
@@ -1679,21 +1663,19 @@ class ConvolutionOperatorTester {
         }
       #endif
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_f16(
-          convolution_op,
-          batch_size(), input_height(), input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
+        ASSERT_EQ(
+          xnn_status_success,
+          xnn_reshape_convolution2d_nhwc_f16(
+            convolution_op, batch_size(), input_height(), input_width(),
+            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(convolution_op, input.data(), output.data()));
+        ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+        VerifyNHWCxF16(output, output_ref, output_min, output_max);
 
-      VerifyNHWCxF16(output, output_ref, output_min, output_max);
-
-      if (use_weights_cache()) {
-        // We already finalized the code cache, so create a new code cache if we are testing JIT.
-        std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_inner_code_cache(
+        if (use_weights_cache()) {
+          // We already finalized the code cache, so create a new code cache if we are testing JIT.
+          std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_inner_code_cache(
             nullptr, xnn_release_code_cache);
         #if XNN_PLATFORM_JIT
           xnn_code_cache inner_code_cache;
@@ -1731,15 +1713,13 @@ class ConvolutionOperatorTester {
         #endif
 
         std::vector<uint16_t> output2(output.size(), UINT16_C(0x7E00) /* NaN */);
-        ASSERT_EQ(xnn_status_success,
-                  xnn_setup_convolution2d_nhwc_f16(
-                      convolution_op2,
-                      batch_size(), input_height(), input_width(),
-                      input.data(), output2.data(),
-                      nullptr /* thread pool */));
-
-        ASSERT_EQ(xnn_status_success,
-                  xnn_run_operator(convolution_op2, nullptr /* thread pool */));
+        ASSERT_EQ(
+          xnn_status_success,
+          xnn_reshape_convolution2d_nhwc_f16(
+            convolution_op2, batch_size(), input_height(), input_width(),
+            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(convolution_op2, input.data(), output2.data()));
+        ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op2, nullptr /* thread pool */));
 
         VerifyNHWCxF16(output2, output_ref, output_min, output_max);
         VerifyWeightsCache(weights_cache, old_weights_cache_size);
@@ -1943,15 +1923,12 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nchw_f32(
-          convolution_op,
-          batch_size(), input_height(), input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nchw_f32(
+                              convolution_op, batch_size(), input_height(), input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nchw_f32(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       VerifyNCHWxF32(output, output_ref, output_min, output_max);
 
@@ -1978,15 +1955,13 @@ class ConvolutionOperatorTester {
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op2, xnn_delete_operator);
         std::vector<float> output2(output.size(), nanf(""));
 
-        ASSERT_EQ(xnn_status_success,
-                  xnn_setup_convolution2d_nchw_f32(
-                      convolution_op2,
-                      batch_size(), input_height(), input_width(),
-                      input.data(), output2.data(),
-                      nullptr /* thread pool */));
-
-        ASSERT_EQ(xnn_status_success,
-                  xnn_run_operator(convolution_op2, nullptr /* thread pool */));
+        ASSERT_EQ(
+          xnn_status_success,
+          xnn_reshape_convolution2d_nchw_f32(
+            convolution_op2, batch_size(), input_height(), input_width(),
+            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nchw_f32(convolution_op2, input.data(), output2.data()));
+        ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op2, nullptr /* thread pool */));
 
         VerifyNCHWxF32(output2, output_ref, output_min, output_max);
         if (IsSpmm()) {
@@ -2224,15 +2199,12 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nchw_f16(
-          convolution_op,
-          batch_size(), input_height(), input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nchw_f16(
+                              convolution_op, batch_size(), input_height(), input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nchw_f16(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       VerifyNCHWxF16(output, output_ref, output_min, output_max);
 
@@ -2261,15 +2233,13 @@ class ConvolutionOperatorTester {
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op2, xnn_delete_operator);
         std::vector<uint16_t> output2(output.size(), UINT16_C(0x7E00) /* NaN */);
 
-        ASSERT_EQ(xnn_status_success,
-                  xnn_setup_convolution2d_nchw_f16(
-                      convolution_op2,
-                      batch_size(), input_height(), input_width(),
-                      input.data(), output2.data(),
-                      nullptr /* thread pool */));
-
-        ASSERT_EQ(xnn_status_success,
-                  xnn_run_operator(convolution_op2, nullptr /* thread pool */));
+        ASSERT_EQ(
+          xnn_status_success,
+          xnn_reshape_convolution2d_nchw_f16(
+            convolution_op2, batch_size(), input_height(), input_width(),
+            /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+        ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nchw_f16(convolution_op2, input.data(), output2.data()));
+        ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op2, nullptr /* thread pool */));
 
         VerifyNCHWxF16(output2, output_ref, output_min, output_max);
         if (IsSpmm()) {
@@ -2441,15 +2411,12 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_qc8(
-          convolution_op,
-          batch_size(), input_height(), input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nhwc_qc8(
+                              convolution_op, batch_size(), input_height(), input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qc8(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       // Verify results of the first run.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -2530,15 +2497,12 @@ class ConvolutionOperatorTester {
         });
 
       // Setup and run Convolution operator the second time, and destroy the operator.
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_qc8(
-          convolution_op,
-          next_batch_size(), next_input_height(), next_input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nhwc_qc8(
+                              convolution_op, next_batch_size(), next_input_height(), next_input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qc8(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       // Verify results of the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -2679,15 +2643,12 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_qs8(
-          convolution_op,
-          batch_size(), input_height(), input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nhwc_qs8(
+                              convolution_op, batch_size(), input_height(), input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       // Verify results of the first run.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -2762,15 +2723,12 @@ class ConvolutionOperatorTester {
         });
 
       // Setup and run Convolution operator the second time, and destroy the operator.
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_qs8(
-          convolution_op,
-          next_batch_size(), next_input_height(), next_input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nhwc_qs8(
+                              convolution_op, next_batch_size(), next_input_height(), next_input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       // Verify results of the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -2911,15 +2869,12 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_qu8(
-          convolution_op,
-          batch_size(), input_height(), input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nhwc_qu8(
+                              convolution_op, batch_size(), input_height(), input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       // Verify results of the first run.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -2994,15 +2949,12 @@ class ConvolutionOperatorTester {
         });
 
       // Setup and run Convolution operator the second time, and destroy the operator.
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_qu8(
-          convolution_op,
-          next_batch_size(), next_input_height(), next_input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nhwc_qu8(
+                              convolution_op, next_batch_size(), next_input_height(), next_input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       // Verify results of the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -3132,15 +3084,12 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_f16(
-          convolution_op,
-          batch_size(), input_height(), input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nhwc_f16(
+                              convolution_op, batch_size(), input_height(), input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       // Verify results of the first run.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -3211,15 +3160,12 @@ class ConvolutionOperatorTester {
       }
 
       // Setup and run Convolution operator the second time, and destroy the operator.
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_f16(
-          convolution_op,
-          next_batch_size(), next_input_height(), next_input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nhwc_f16(
+                              convolution_op, next_batch_size(), next_input_height(), next_input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       // Verify results of the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -3345,15 +3291,12 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_f32(
-          convolution_op,
-          batch_size(), input_height(), input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nhwc_f32(
+                              convolution_op, batch_size(), input_height(), input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       // Verify results of the first run.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -3427,15 +3370,12 @@ class ConvolutionOperatorTester {
       }
 
       // Setup and run Convolution operator the second time, and destroy the operator.
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_convolution2d_nhwc_f32(
-          convolution_op,
-          next_batch_size(), next_input_height(), next_input_width(),
-          input.data(), output.data(),
-          nullptr /* thread pool */));
-
-      ASSERT_EQ(xnn_status_success,
-        xnn_run_operator(convolution_op, nullptr /* thread pool */));
+      ASSERT_EQ(
+        xnn_status_success, xnn_reshape_convolution2d_nhwc_f32(
+                              convolution_op, next_batch_size(), next_input_height(), next_input_width(),
+                              /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, nullptr /* thread pool */));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(convolution_op, input.data(), output.data()));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(convolution_op, nullptr /* thread pool */));
 
       // Verify results of the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {

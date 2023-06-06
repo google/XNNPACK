@@ -933,24 +933,24 @@ error:
   return status;
 }
 
-static enum xnn_status setup_convolution2d_nchw(
+static enum xnn_status reshape_convolution2d_nchw(
   xnn_operator_t convolution_op,
   enum xnn_operator_type expected_operator_type,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
-  const void* input,
-  void* output,
   uint32_t log2_input_element_size,
   uint32_t log2_filter_element_size,
   uint32_t bias_element_size,
   uint32_t log2_output_element_size,
   const void* params,
   void* chw_params,
+  size_t* output_height_out,
+  size_t* output_width_out,
   size_t num_threads)
 {
   if (convolution_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
       xnn_operator_type_to_string(expected_operator_type),
       xnn_operator_type_to_string(convolution_op->type));
     return xnn_status_invalid_parameter;
@@ -958,14 +958,14 @@ static enum xnn_status setup_convolution2d_nchw(
   convolution_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+    xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(convolution_op->type));
     return xnn_status_uninitialized;
   }
 
   if (input_width == 0 || input_height == 0) {
     xnn_log_error(
-      "failed to setup %s operator with %zux%zu input: input dimensions must be non-zero",
+      "failed to reshape %s operator with %zux%zu input: input dimensions must be non-zero",
       xnn_operator_type_to_string(convolution_op->type), input_width, input_height);
     return xnn_status_invalid_parameter;
   }
@@ -976,7 +976,7 @@ static enum xnn_status setup_convolution2d_nchw(
   }
 
   if (convolution_op->weights_cache != NULL && !xnn_weights_cache_is_finalized(convolution_op->weights_cache)) {
-    xnn_log_error("failed to setup %s operator: weights cache is not finalized",
+    xnn_log_error("failed to reshape %s operator: weights cache is not finalized",
       xnn_operator_type_to_string(convolution_op->type));
     return xnn_status_invalid_state;
   }
@@ -984,19 +984,23 @@ static enum xnn_status setup_convolution2d_nchw(
   convolution_op->batch_size = batch_size;
   convolution_op->input_height = input_height;
   convolution_op->input_width = input_width;
-  convolution_op->input = input;
-  convolution_op->output = output;
 
   const size_t output_height = xnn_compute_convolution_output_dimension(
       convolution_op->padding_top + input_height + convolution_op->padding_bottom,
       convolution_op->kernel_height,
       convolution_op->dilation_height,
       convolution_op->stride_height);
+  if (output_height_out != NULL) {
+    *output_height_out = output_height;
+  }
   const size_t output_width = xnn_compute_convolution_output_dimension(
       convolution_op->padding_left + input_width + convolution_op->padding_right,
       convolution_op->kernel_width,
       convolution_op->dilation_width,
       convolution_op->stride_width);
+  if (output_width_out != NULL) {
+    *output_width_out = output_width;
+  }
 
   const size_t input_batch_stride = (input_height * input_width * convolution_op->input_pixel_stride) << log2_input_element_size;
   const size_t output_batch_stride = (output_height * output_width * convolution_op->output_pixel_stride) << log2_output_element_size;
@@ -1023,7 +1027,7 @@ static enum xnn_status setup_convolution2d_nchw(
         const int64_t increment = (int64_t) diff * input_size;
         if ((int64_t) (int32_t) increment != increment) {
           xnn_log_error(
-            "failed to setup %s operator with sparse kernel representation: input increment exceeds int32_t range",
+            "failed to reshape %s operator with sparse kernel representation: input increment exceeds int32_t range",
             xnn_operator_type_to_string(convolution_op->type));
           return xnn_status_unsupported_parameter;
         }
@@ -1033,11 +1037,9 @@ static enum xnn_status setup_convolution2d_nchw(
       convolution_op->context.spmm = (struct spmm_context) {
           .n = convolution_op->group_output_channels,
           .scaled_m = input_size << log2_input_element_size,
-          .input = (const void*) ((uintptr_t) input + (convolution_op->first_input_channel * input_size << log2_input_element_size)),
           .nonzero_weights = nonzero_values,
           .input_increments = input_increments,
           .output_channel_nonzeros = output_channel_nonzeros,
-          .output = output,
           .batched_input_stride = input_batch_stride,
           .batched_output_stride = output_batch_stride,
           .ukernel = convolution_op->ukernel.spmm.function,
@@ -1062,7 +1064,7 @@ static enum xnn_status setup_convolution2d_nchw(
       convolution_op->compute[0].range[0] = batch_size;
       convolution_op->compute[0].range[1] = input_size << log2_input_element_size;
       convolution_op->compute[0].tile[0] = mc << log2_input_element_size;
-      convolution_op->state = xnn_run_state_ready;
+      convolution_op->state = xnn_run_state_needs_setup;
 
       return xnn_status_success;
     }
@@ -1083,11 +1085,9 @@ static enum xnn_status setup_convolution2d_nchw(
       convolution_op->context.conv2d = (struct conv2d_context) {
         .input_height = input_height,
         .input_width = input_width,
-        .input = input,
         .input_batch_stride = input_batch_stride,
         .zero = convolution_op->zero_buffer,
         .packed_weights = packed_weights(convolution_op),
-        .output = output,
         .output_batch_stride = output_batch_stride,
         .input_padding_top = convolution_op->padding_top,
         .output_channels = convolution_op->group_output_channels,
@@ -1116,7 +1116,7 @@ static enum xnn_status setup_convolution2d_nchw(
       convolution_op->compute[0].range[0] = batch_size;
       convolution_op->compute[0].range[1] = output_height;
       convolution_op->compute[0].tile[0] = output_height_slice;
-      convolution_op->state = xnn_run_state_ready;
+      convolution_op->state = xnn_run_state_needs_setup;
 
       return xnn_status_success;
     }
@@ -1140,7 +1140,6 @@ static enum xnn_status setup_convolution2d_nchw(
       convolution_op->context.dwconv2d = (struct dwconv2d_context) {
         .input_height = input_height,
         .input_width = input_width << log2_input_element_size,
-        .input = input,
         .zero = convolution_op->zero_buffer,
         .input_padding_top = convolution_op->padding_top,
         .input_channel_stride = input_height * input_width << log2_input_element_size,
@@ -1148,7 +1147,6 @@ static enum xnn_status setup_convolution2d_nchw(
         .packed_weights = packed_weights(convolution_op),
         .weights_channel_stride = bias_element_size +
           (convolution_op->kernel_height * convolution_op->kernel_width << log2_filter_element_size),
-        .output = output,
         .output_channel_stride = output_height * output_width << log2_output_element_size,
         .output_batch_stride = output_batch_stride,
         .chw_ukernel = convolution_op->ukernel.dwconv2d.chw_fn,
@@ -1159,7 +1157,7 @@ static enum xnn_status setup_convolution2d_nchw(
       convolution_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv2d_chw;
       convolution_op->compute[0].range[0] = batch_size;
       convolution_op->compute[0].range[1] = convolution_op->groups;
-      convolution_op->state = xnn_run_state_ready;
+      convolution_op->state = xnn_run_state_needs_setup;
 
       return xnn_status_success;
     }
@@ -1168,48 +1166,133 @@ static enum xnn_status setup_convolution2d_nchw(
   }
 }
 
-enum xnn_status xnn_setup_convolution2d_nchw_f16(
+enum xnn_status xnn_reshape_convolution2d_nchw_f16(
     xnn_operator_t convolution_op,
     size_t batch_size,
     size_t input_height,
     size_t input_width,
-    const void* input,
-    void* output,
+    size_t* output_height_out,
+    size_t* output_width_out,
     pthreadpool_t threadpool)
 {
-  return setup_convolution2d_nchw(
+  return reshape_convolution2d_nchw(
     convolution_op,
     xnn_operator_type_convolution_nchw_f16,
     batch_size, input_height, input_width,
-    input, output,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*bias_element_size=*/sizeof(uint16_t),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_HALF,
     &convolution_op->params.f16_minmax,
     &convolution_op->params.f16_chw,
+    output_height_out, output_width_out,
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_convolution2d_nchw_f32(
+enum xnn_status xnn_reshape_convolution2d_nchw_f32(
     xnn_operator_t convolution_op,
     size_t batch_size,
     size_t input_height,
     size_t input_width,
-    const float* input,
-    float* output,
+    size_t* output_height_out,
+    size_t* output_width_out,
     pthreadpool_t threadpool)
 {
-  return setup_convolution2d_nchw(
+  return reshape_convolution2d_nchw(
     convolution_op,
     xnn_operator_type_convolution_nchw_f32,
     batch_size, input_height, input_width,
-    input, output,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*bias_element_size=*/sizeof(float),
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     &convolution_op->params.f32_minmax,
     &convolution_op->params.f32_chw,
+    output_height_out, output_width_out,
     pthreadpool_get_threads_count(threadpool));
+}
+
+static enum xnn_status setup_convolution2d_nchw(
+  xnn_operator_t convolution_op,
+  enum xnn_operator_type expected_operator_type,
+  const void* input,
+  void* output)
+{
+  if (convolution_op->type != expected_operator_type) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(convolution_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  switch (convolution_op->state) {
+    case xnn_run_state_skip:
+      return xnn_status_success;
+    case xnn_run_state_invalid:
+      xnn_log_error(
+        "failed to setup %s operator: operator has not been reshaped yet",
+        xnn_operator_type_to_string(convolution_op->type));
+      return xnn_status_invalid_state;
+    case xnn_run_state_needs_setup:
+      // Operator has been reshaped, but not setup, continue with setup.
+    case xnn_run_state_ready:
+      // Operator has been reshaped, and we are setting up with different pointers.
+      break;
+  }
+
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(convolution_op->type));
+    return xnn_status_uninitialized;
+  }
+
+  switch (convolution_op->ukernel.type) {
+    case xnn_microkernel_type_spmm:
+    {
+      convolution_op->context.spmm.input = (const void*) ((uintptr_t) input + (convolution_op->first_input_channel *
+                                                                               convolution_op->context.spmm.scaled_m));
+      convolution_op->context.spmm.output = output;
+      break;
+    }
+    case xnn_microkernel_type_conv2d_hwc2chw:
+    {
+      convolution_op->context.conv2d.input = input;
+      convolution_op->context.conv2d.output = output;
+      break;
+    }
+    case xnn_microkernel_type_dwconv:
+    {
+      convolution_op->context.dwconv2d.input = input;
+      convolution_op->context.dwconv2d.output = output;
+      break;
+    }
+    default:
+      XNN_UNREACHABLE;
+  }
+
+  convolution_op->state = xnn_run_state_ready;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_convolution2d_nchw_f16(
+    xnn_operator_t convolution_op,
+    const void* input,
+    void* output)
+{
+  return setup_convolution2d_nchw(
+    convolution_op,
+    xnn_operator_type_convolution_nchw_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_convolution2d_nchw_f32(
+    xnn_operator_t convolution_op,
+    const float* input,
+    float* output)
+{
+  return setup_convolution2d_nchw(
+    convolution_op,
+    xnn_operator_type_convolution_nchw_f32,
+    input, output);
 }

@@ -531,9 +531,11 @@ TEST_F(DepthwiseConvolutionTestQC8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_convolution2d_nhwc_qc8(
-                          op, batch_size, input_height, input_width, input.data(), operator_output.data(),
+    xnn_status_success, xnn_reshape_convolution2d_nhwc_qc8(
+                          op, batch_size, input_height, input_width,
+                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                           /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qc8(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -661,9 +663,11 @@ TEST_F(DepthwiseConvolutionTestQS8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(
-                          op, batch_size, input_height, input_width, input.data(), operator_output.data(),
+    xnn_status_success, xnn_reshape_convolution2d_nhwc_qs8(
+                          op, batch_size, input_height, input_width,
+                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                           /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -793,9 +797,11 @@ TEST_F(DepthwiseConvolutionTestQU8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(
-                          op, batch_size, input_height, input_width, input.data(), operator_output.data(),
+    xnn_status_success, xnn_reshape_convolution2d_nhwc_qu8(
+                          op, batch_size, input_height, input_width,
+                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                           /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -883,9 +889,11 @@ TEST_F(DepthwiseConvolutionTestF32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_convolution2d_nhwc_f32(
-                          op, batch_size, input_height, input_width, input.data(), operator_output.data(),
+    xnn_status_success, xnn_reshape_convolution2d_nhwc_f32(
+                          op, batch_size, input_height, input_width,
+                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                           /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
