@@ -44,13 +44,12 @@ class Generator : public MacroAssembler {
 // A1  x11 v1
 // A2  x12 v2
 // A3  x4  v3
-// B   x5  v20 v21
+// B   x5  v20 v24 v21 v25 v22 v26 v23 v27
 // C0  x6  v16 v17
 // C1  x9  v18 v19
 // C2  x10 v28 v29
 // C3  x7  v30 v31
 // Clamp v4 v5
-
 
 // Converted from: src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch64-neonfma-ld128.S
 void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
@@ -101,7 +100,6 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     csel(x4, x12, x4, kLO); //   a3 = a2
     csel(x7, x10, x7, kLO); //   c3 = c2
   }
-
   bind(l0);
   // Load initial bias from w into accumulators
   ldp(q16, q17, mem[x5], 32);
@@ -125,7 +123,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   // Main loop - 4 floats of A (16 bytes)
   bind(l1);
   ldr(q0, mem[x3], 16);
-  ldp(q20, q21, mem[x5], 32);
+  ldp(q20, q24, mem[x5], 32);
   if (max_mr > 1) {
     ldr(q1, mem[x11], 16);
   }
@@ -136,63 +134,87 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     ldr(q3, mem[x4], 16);
   }
   fmla(v16.v4s(), v20.v4s(), v0.s()[0]);
-  fmla(v17.v4s(), v21.v4s(), v0.s()[0]);
   if (max_mr > 1) {
     fmla(v18.v4s(), v20.v4s(), v1.s()[0]);
-    fmla(v19.v4s(), v21.v4s(), v1.s()[0]);
   }
-  ldp(q22, q23, mem[x5], 32);
   if (max_mr > 2) {
     fmla(v28.v4s(), v20.v4s(), v2.s()[0]);
-    fmla(v29.v4s(), v21.v4s(), v2.s()[0]);
   }
   if (max_mr > 3) {
     fmla(v30.v4s(), v20.v4s(), v3.s()[0]);
-    fmla(v31.v4s(), v21.v4s(), v3.s()[0]);
   }
-  ldp(q24, q25, mem[x5], 32);
-  fmla(v16.v4s(), v22.v4s(), v0.s()[1]);
-  fmla(v17.v4s(), v23.v4s(), v0.s()[1]);
+  ldp(q21, q25, mem[x5], 32);
+  fmla(v17.v4s(), v24.v4s(), v0.s()[0]);
   if (max_mr > 1) {
-    fmla(v18.v4s(), v22.v4s(), v1.s()[1]);
-    fmla(v19.v4s(), v23.v4s(), v1.s()[1]);
-  }
-  ldp(q26, q27, mem[x5], 32);
-  if (max_mr > 2) {
-    fmla(v28.v4s(), v22.v4s(), v2.s()[1]);
-    fmla(v29.v4s(), v23.v4s(), v2.s()[1]);
-  }
-  if (max_mr > 3) {
-    fmla(v30.v4s(), v22.v4s(), v3.s()[1]);
-    fmla(v31.v4s(), v23.v4s(), v3.s()[1]);
-  }
-  fmla(v16.v4s(), v24.v4s(), v0.s()[2]);
-  fmla(v17.v4s(), v25.v4s(), v0.s()[2]);
-  if (max_mr > 1) {
-    fmla(v18.v4s(), v24.v4s(), v1.s()[2]);
-    fmla(v19.v4s(), v25.v4s(), v1.s()[2]);
+    fmla(v19.v4s(), v24.v4s(), v1.s()[0]);
   }
   if (max_mr > 2) {
-    fmla(v28.v4s(), v24.v4s(), v2.s()[2]);
-    fmla(v29.v4s(), v25.v4s(), v2.s()[2]);
+    fmla(v29.v4s(), v24.v4s(), v2.s()[0]);
   }
   if (max_mr > 3) {
-    fmla(v30.v4s(), v24.v4s(), v3.s()[2]);
-    fmla(v31.v4s(), v25.v4s(), v3.s()[2]);
+    fmla(v31.v4s(), v24.v4s(), v3.s()[0]);
   }
-  fmla(v16.v4s(), v26.v4s(), v0.s()[3]);
+  ldp(q22, q26, mem[x5], 32);
+  fmla(v16.v4s(), v21.v4s(), v0.s()[1]);
+  if (max_mr > 1) {
+    fmla(v18.v4s(), v21.v4s(), v1.s()[1]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v21.v4s(), v2.s()[1]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v21.v4s(), v3.s()[1]);
+  }
+  ldp(q23, q27, mem[x5], 32);
+  fmla(v17.v4s(), v25.v4s(), v0.s()[1]);
+  if (max_mr > 1) {
+    fmla(v19.v4s(), v25.v4s(), v1.s()[1]);
+  }
+  if (max_mr > 2) {
+    fmla(v29.v4s(), v25.v4s(), v2.s()[1]);
+  }
+  if (max_mr > 3) {
+    fmla(v31.v4s(), v25.v4s(), v3.s()[1]);
+  }
+  fmla(v16.v4s(), v22.v4s(), v0.s()[2]);
+  if (max_mr > 1) {
+    fmla(v18.v4s(), v22.v4s(), v1.s()[2]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v22.v4s(), v2.s()[2]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v22.v4s(), v3.s()[2]);
+  }
+  fmla(v17.v4s(), v26.v4s(), v0.s()[2]);
+  if (max_mr > 1) {
+    fmla(v19.v4s(), v26.v4s(), v1.s()[2]);
+  }
+  if (max_mr > 2) {
+    fmla(v29.v4s(), v26.v4s(), v2.s()[2]);
+  }
+  if (max_mr > 3) {
+    fmla(v31.v4s(), v26.v4s(), v3.s()[2]);
+  }
+  fmla(v16.v4s(), v23.v4s(), v0.s()[3]);
+  if (max_mr > 1) {
+    fmla(v18.v4s(), v23.v4s(), v1.s()[3]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v23.v4s(), v2.s()[3]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v23.v4s(), v3.s()[3]);
+  }
+  subs(x0, x0, 16);
   fmla(v17.v4s(), v27.v4s(), v0.s()[3]);
   if (max_mr > 1) {
-    fmla(v18.v4s(), v26.v4s(), v1.s()[3]);
     fmla(v19.v4s(), v27.v4s(), v1.s()[3]);
   }
   if (max_mr > 2) {
-    fmla(v28.v4s(), v26.v4s(), v2.s()[3]);
     fmla(v29.v4s(), v27.v4s(), v2.s()[3]);
   }
-  subs(x0, x0, 16);
   if (max_mr > 3) {
-    fmla(v30.v4s(), v26.v4s(), v3.s()[3]);
     fmla(v31.v4s(), v27.v4s(), v3.s()[3]);
   }
   b_hs(l1);
@@ -242,6 +264,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   // Store full 4 x 8
   b_lo(l5);
 
+
   st1({v16.v16b(), v17.v16b()}, mem[x6], x14);
   sub(x3, x3, x2); // a0 -= kc
   if (max_mr > 1) {
@@ -266,8 +289,9 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   tbz(x0, 3, l4);
 
   // Remainder- 2 floats of A (8 bytes)
+  ldp(q20, q24, mem[x5], 32);
+  ldp(q21, q25, mem[x5], 32);
   ldr(d0, mem[x3], 8);
-  ldp(q20, q21, mem[x5], 32);
   if (max_mr > 1) {
     ldr(d1, mem[x11], 8);
   }
@@ -278,33 +302,44 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     ldr(d3, mem[x4], 8);
   }
   fmla(v16.v4s(), v20.v4s(), v0.s()[0]);
-  fmla(v17.v4s(), v21.v4s(), v0.s()[0]);
   if (max_mr > 1) {
     fmla(v18.v4s(), v20.v4s(), v1.s()[0]);
-    fmla(v19.v4s(), v21.v4s(), v1.s()[0]);
   }
-  ldp(q22, q23, mem[x5], 32);
   if (max_mr > 2) {
     fmla(v28.v4s(), v20.v4s(), v2.s()[0]);
-    fmla(v29.v4s(), v21.v4s(), v2.s()[0]);
   }
   if (max_mr > 3) {
     fmla(v30.v4s(), v20.v4s(), v3.s()[0]);
-    fmla(v31.v4s(), v21.v4s(), v3.s()[0]);
   }
-  fmla(v16.v4s(), v22.v4s(), v0.s()[1]);
-  fmla(v17.v4s(), v23.v4s(), v0.s()[1]);
+  fmla(v17.v4s(), v24.v4s(), v0.s()[0]);
   if (max_mr > 1) {
-    fmla(v18.v4s(), v22.v4s(), v1.s()[1]);
-    fmla(v19.v4s(), v23.v4s(), v1.s()[1]);
+    fmla(v19.v4s(), v24.v4s(), v1.s()[0]);
   }
   if (max_mr > 2) {
-    fmla(v28.v4s(), v22.v4s(), v2.s()[1]);
-    fmla(v29.v4s(), v23.v4s(), v2.s()[1]);
+    fmla(v29.v4s(), v24.v4s(), v2.s()[0]);
   }
   if (max_mr > 3) {
-    fmla(v30.v4s(), v22.v4s(), v3.s()[1]);
-    fmla(v31.v4s(), v23.v4s(), v3.s()[1]);
+    fmla(v31.v4s(), v24.v4s(), v3.s()[0]);
+  }
+  fmla(v16.v4s(), v21.v4s(), v0.s()[1]);
+  if (max_mr > 1) {
+    fmla(v18.v4s(), v21.v4s(), v1.s()[1]);
+  }
+  if (max_mr > 2) {
+    fmla(v28.v4s(), v21.v4s(), v2.s()[1]);
+  }
+  if (max_mr > 3) {
+    fmla(v30.v4s(), v21.v4s(), v3.s()[1]);
+  }
+  fmla(v17.v4s(), v25.v4s(), v0.s()[1]);
+  if (max_mr > 1) {
+    fmla(v19.v4s(), v25.v4s(), v1.s()[1]);
+  }
+  if (max_mr > 2) {
+    fmla(v29.v4s(), v25.v4s(), v2.s()[1]);
+  }
+  if (max_mr > 3) {
+    fmla(v31.v4s(), v25.v4s(), v3.s()[1]);
   }
 
   // Is there a remainder?- 1 float of A (4 bytes)
@@ -312,8 +347,9 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
 
   // Remainder- 1 float of A (4 bytes)
   bind(l4);
+  // Remainder- 2 floats of A (8 bytes)
+  ldp(q20, q24, mem[x5], 32);
   ldr(s0, mem[x3], 4);
-  ldp(q20, q21, mem[x5], 32);
   if (max_mr > 1) {
     ldr(s1, mem[x11], 4);
   }
@@ -324,21 +360,26 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
     ldr(s3, mem[x4], 4);
   }
   fmla(v16.v4s(), v20.v4s(), v0.s()[0]);
-  fmla(v17.v4s(), v21.v4s(), v0.s()[0]);
   if (max_mr > 1) {
     fmla(v18.v4s(), v20.v4s(), v1.s()[0]);
-    fmla(v19.v4s(), v21.v4s(), v1.s()[0]);
   }
   if (max_mr > 2) {
     fmla(v28.v4s(), v20.v4s(), v2.s()[0]);
-    fmla(v29.v4s(), v21.v4s(), v2.s()[0]);
   }
   if (max_mr > 3) {
     fmla(v30.v4s(), v20.v4s(), v3.s()[0]);
-    fmla(v31.v4s(), v21.v4s(), v3.s()[0]);
+  }
+  fmla(v17.v4s(), v24.v4s(), v0.s()[0]);
+  if (max_mr > 1) {
+    fmla(v19.v4s(), v24.v4s(), v1.s()[0]);
+  }
+  if (max_mr > 2) {
+    fmla(v29.v4s(), v24.v4s(), v2.s()[0]);
+  }
+  if (max_mr > 3) {
+    fmla(v31.v4s(), v24.v4s(), v3.s()[0]);
   }
   b(l2);
-
 
   // Store odd width
   bind(l5);

@@ -29,13 +29,12 @@
 # A1  x11 v1
 # A2  x12 v2
 # A3  x4  v3
-# B   x5  v20 v21
+# B   x5  v20 v24 v21 v25 v22 v26 v23 v27
 # C0  x6  v16 v17
 # C1  x9  v18 v19
 # C2  x10 v28 v29
 # C3  x7  v30 v31
 # Clamp v4 v5
-
 
 BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
 
@@ -65,7 +64,6 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
         ADD     x7, x10, x7             // c3 = c2 + cm_stride
         CSEL    x4, x12, x4, LO         //   a3 = a2
         CSEL    x7, x10, x7, LO         //   c3 = c2
-
 0:
         # Load initial accumulators
         LDP     q16, q17, [x15], 32
@@ -80,45 +78,45 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
         # Main loop - 4 floats of A (16 bytes)
 1:
         LDR     q0, [x3], 16
-        LDP     q20, q21, [x5], 32
+        LDP     q20, q24, [x5], 32
         LDR     q1, [x11], 16
         LDR     q2, [x12], 16
         LDR     q3, [x4], 16
         FMLA    v16.4s, v20.4s, v0.s[0]
-        FMLA    v17.4s, v21.4s, v0.s[0]
         FMLA    v18.4s, v20.4s, v1.s[0]
-        FMLA    v19.4s, v21.4s, v1.s[0]
-        LDP     q22, q23, [x5], 32
         FMLA    v28.4s, v20.4s, v2.s[0]
-        FMLA    v29.4s, v21.4s, v2.s[0]
         FMLA    v30.4s, v20.4s, v3.s[0]
-        FMLA    v31.4s, v21.4s, v3.s[0]
-        LDP     q24, q25, [x5], 32
-        FMLA    v16.4s, v22.4s, v0.s[1]
-        FMLA    v17.4s, v23.4s, v0.s[1]
-        FMLA    v18.4s, v22.4s, v1.s[1]
-        FMLA    v19.4s, v23.4s, v1.s[1]
-        LDP     q26, q27, [x5], 32
-        FMLA    v28.4s, v22.4s, v2.s[1]
-        FMLA    v29.4s, v23.4s, v2.s[1]
-        FMLA    v30.4s, v22.4s, v3.s[1]
-        FMLA    v31.4s, v23.4s, v3.s[1]
-        FMLA    v16.4s, v24.4s, v0.s[2]
-        FMLA    v17.4s, v25.4s, v0.s[2]
-        FMLA    v18.4s, v24.4s, v1.s[2]
-        FMLA    v19.4s, v25.4s, v1.s[2]
-        FMLA    v28.4s, v24.4s, v2.s[2]
-        FMLA    v29.4s, v25.4s, v2.s[2]
-        FMLA    v30.4s, v24.4s, v3.s[2]
-        FMLA    v31.4s, v25.4s, v3.s[2]
-        FMLA    v16.4s, v26.4s, v0.s[3]
-        FMLA    v17.4s, v27.4s, v0.s[3]
-        FMLA    v18.4s, v26.4s, v1.s[3]
-        FMLA    v19.4s, v27.4s, v1.s[3]
-        FMLA    v28.4s, v26.4s, v2.s[3]
-        FMLA    v29.4s, v27.4s, v2.s[3]
+        LDP     q21, q25, [x5], 32
+        FMLA    v17.4s, v24.4s, v0.s[0]
+        FMLA    v19.4s, v24.4s, v1.s[0]
+        FMLA    v29.4s, v24.4s, v2.s[0]
+        FMLA    v31.4s, v24.4s, v3.s[0]
+        LDP     q22, q26, [x5], 32
+        FMLA    v16.4s, v21.4s, v0.s[1]
+        FMLA    v18.4s, v21.4s, v1.s[1]
+        FMLA    v28.4s, v21.4s, v2.s[1]
+        FMLA    v30.4s, v21.4s, v3.s[1]
+        LDP     q23, q27, [x5], 32
+        FMLA    v17.4s, v25.4s, v0.s[1]
+        FMLA    v19.4s, v25.4s, v1.s[1]
+        FMLA    v29.4s, v25.4s, v2.s[1]
+        FMLA    v31.4s, v25.4s, v3.s[1]
+        FMLA    v16.4s, v22.4s, v0.s[2]
+        FMLA    v18.4s, v22.4s, v1.s[2]
+        FMLA    v28.4s, v22.4s, v2.s[2]
+        FMLA    v30.4s, v22.4s, v3.s[2]
+        FMLA    v17.4s, v26.4s, v0.s[2]
+        FMLA    v19.4s, v26.4s, v1.s[2]
+        FMLA    v29.4s, v26.4s, v2.s[2]
+        FMLA    v31.4s, v26.4s, v3.s[2]
+        FMLA    v16.4s, v23.4s, v0.s[3]
+        FMLA    v18.4s, v23.4s, v1.s[3]
+        FMLA    v28.4s, v23.4s, v2.s[3]
+        FMLA    v30.4s, v23.4s, v3.s[3]
         SUBS    x0, x0, 16
-        FMLA    v30.4s, v26.4s, v3.s[3]
+        FMLA    v17.4s, v27.4s, v0.s[3]
+        FMLA    v19.4s, v27.4s, v1.s[3]
+        FMLA    v29.4s, v27.4s, v2.s[3]
         FMLA    v31.4s, v27.4s, v3.s[3]
         B.HS    1b
 
@@ -148,6 +146,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
         # Store full 4 x 8
         B.LO    5f
 
+
         ST1     {v30.16b, v31.16b},  [x7], x14
         SUB     x3,  x3, x2             // a0 -= kc
         ST1     {v28.16b, v29.16b}, [x10], x14
@@ -166,49 +165,49 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
         TBZ     x0, 3, 4f
 
         # Remainder- 2 floats of A (8 bytes)
-        LDR     d0,  [x3], 8
-        LDP     q20, q21, [x5], 32
+        LDP     q20, q24, [x5], 32
+        LDP     q21, q25, [x5], 32
+        LDR     d0, [x3], 8
         LDR     d1, [x11], 8
         LDR     d2, [x12], 8
-        LDR     d3,  [x4], 8
+        LDR     d3, [x4], 8
         FMLA    v16.4s, v20.4s, v0.s[0]
-        FMLA    v17.4s, v21.4s, v0.s[0]
         FMLA    v18.4s, v20.4s, v1.s[0]
-        FMLA    v19.4s, v21.4s, v1.s[0]
-        LDP     q22, q23, [x5], 32
         FMLA    v28.4s, v20.4s, v2.s[0]
-        FMLA    v29.4s, v21.4s, v2.s[0]
         FMLA    v30.4s, v20.4s, v3.s[0]
-        FMLA    v31.4s, v21.4s, v3.s[0]
-        FMLA    v16.4s, v22.4s, v0.s[1]
-        FMLA    v17.4s, v23.4s, v0.s[1]
-        FMLA    v18.4s, v22.4s, v1.s[1]
-        FMLA    v19.4s, v23.4s, v1.s[1]
-        FMLA    v28.4s, v22.4s, v2.s[1]
-        FMLA    v29.4s, v23.4s, v2.s[1]
-        FMLA    v30.4s, v22.4s, v3.s[1]
-        FMLA    v31.4s, v23.4s, v3.s[1]
+        FMLA    v17.4s, v24.4s, v0.s[0]
+        FMLA    v19.4s, v24.4s, v1.s[0]
+        FMLA    v29.4s, v24.4s, v2.s[0]
+        FMLA    v31.4s, v24.4s, v3.s[0]
+        FMLA    v16.4s, v21.4s, v0.s[1]
+        FMLA    v18.4s, v21.4s, v1.s[1]
+        FMLA    v28.4s, v21.4s, v2.s[1]
+        FMLA    v30.4s, v21.4s, v3.s[1]
+        FMLA    v17.4s, v25.4s, v0.s[1]
+        FMLA    v19.4s, v25.4s, v1.s[1]
+        FMLA    v29.4s, v25.4s, v2.s[1]
+        FMLA    v31.4s, v25.4s, v3.s[1]
 
         # Is there a remainder?- 1 float of A (4 bytes)
         TBZ     x0, 2, 2b
 
         # Remainder- 1 float of A (4 bytes)
 4:
-        LDR     s0,  [x3], 4
-        LDP     q20, q21, [x5], 32
+        # Remainder- 2 floats of A (8 bytes)
+        LDP     q20, q24, [x5], 32
+        LDR     s0, [x3], 4
         LDR     s1, [x11], 4
         LDR     s2, [x12], 4
-        LDR     s3,  [x4], 4
+        LDR     s3, [x4], 4
         FMLA    v16.4s, v20.4s, v0.s[0]
-        FMLA    v17.4s, v21.4s, v0.s[0]
         FMLA    v18.4s, v20.4s, v1.s[0]
-        FMLA    v19.4s, v21.4s, v1.s[0]
         FMLA    v28.4s, v20.4s, v2.s[0]
-        FMLA    v29.4s, v21.4s, v2.s[0]
         FMLA    v30.4s, v20.4s, v3.s[0]
-        FMLA    v31.4s, v21.4s, v3.s[0]
+        FMLA    v17.4s, v24.4s, v0.s[0]
+        FMLA    v19.4s, v24.4s, v1.s[0]
+        FMLA    v29.4s, v24.4s, v2.s[0]
+        FMLA    v31.4s, v24.4s, v3.s[0]
         B       2b
-
 
         # Store odd width
 5:

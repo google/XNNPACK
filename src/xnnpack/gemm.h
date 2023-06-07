@@ -157,6 +157,9 @@ DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_f32acc_gemm_minmax_ukernel_7x8_
       size_t cn_stride,                                   \
       const union xnn_f32_minmax_params* params);
 
+DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_gemm_goi_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128)
+DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_gemm_goi_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128)
+
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64)
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_gemm_minmax_ukernel_4x2__neon_lane_ld64)
 DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_gemm_minmax_ukernel_4x8__neon_lane_ld64)

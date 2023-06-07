@@ -9,7 +9,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm(
+# void xnn_f32_gemm_goi_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128(
 #     size_t mr,                (x0) - unused.  mr = 1
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -28,55 +28,43 @@
 # B   x5  v20 v24 v21 v25 v22 v26 v23 v27
 # C0  x6  v16 v17
 # Clamp   v4, v5
+# B stride x16, x17
 
-BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm
+BEGIN_FUNCTION xnn_f32_gemm_goi_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128
 
         # Load cn_stride, params pointer
         LDP     x14, x8, [sp]
 
         # Load min/max values
         LD2R    {v4.4s, v5.4s}, [x8]
+        SUB     x16, x2, x2, LSL #3     // B stride on 8th row to top (16 - KC * 7)
+        ADD     x16, x16, 16
+        LSL     x17, x2, 3              // B stride for N loop
+        SUB     x17, x17, x2
 0:
-        # Load initial bias from w into accumulators
-        LDP     q16, q17, [x5], 32
+        # Zero bias for GOI
+        MOVI    v16.16b, 0
+        MOVI    v17.16b, 0
         # Is there at least 4 floats (16 bytes)
         SUBS    x0, x2, 16               // k = kc - 16
         B.LO    3f
 
-        PRFM    PLDL1KEEP, [x5]
-        PRFM    PLDL1KEEP, [x5, 64]
-        PRFM    PLDL1KEEP, [x5, 128]
 
         # Main loop - 4 floats of A (16 bytes)
 1:
-        LDR     q21, [x5], 16
-        SXTL    v24.8h, v21.8b
-        SXTL2   v25.8h, v21.16b
         LDR     q0, [x3], 16
-        SXTL    v20.4s, v24.4h
-        SXTL    v21.4s, v25.4h
-        SXTL2   v24.4s, v24.8h
-        SXTL2   v25.4s, v25.8h
-        SCVTF   v20.4s, v20.4s
-        SCVTF   v24.4s, v24.4s
-        SCVTF   v21.4s, v21.4s
-        SCVTF   v25.4s, v25.4s
+        LD4     {v20.s, v21.s, v22.s, v23.s}[0], [x5], x2
+        LD4     {v20.s, v21.s, v22.s, v23.s}[1], [x5], x2
+        LD4     {v20.s, v21.s, v22.s, v23.s}[2], [x5], x2
+        LD4     {v20.s, v21.s, v22.s, v23.s}[3], [x5], x2
+        LD4     {v24.s, v25.s, v26.s, v27.s}[0], [x5], x2
+        LD4     {v24.s, v25.s, v26.s, v27.s}[1], [x5], x2
+        LD4     {v24.s, v25.s, v26.s, v27.s}[2], [x5], x2
+        LD4     {v24.s, v25.s, v26.s, v27.s}[3], [x5], x16
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v24.4s, v0.s[0]
-        PRFM    PLDL1KEEP, [x5, 128]
         FMLA    v16.4s, v21.4s, v0.s[1]
         FMLA    v17.4s, v25.4s, v0.s[1]
-        LDR     q23, [x5], 16
-        SXTL    v26.8h, v23.8b
-        SXTL2   v27.8h, v23.16b
-        SXTL    v22.4s, v26.4h
-        SXTL    v23.4s, v27.4h
-        SXTL2   v26.4s, v26.8h
-        SXTL2   v27.4s, v27.8h
-        SCVTF   v22.4s, v22.4s
-        SCVTF   v26.4s, v26.4s
-        SCVTF   v23.4s, v23.4s
-        SCVTF   v27.4s, v27.4s
         SUBS    x0, x0, 16
         FMLA    v16.4s, v22.4s, v0.s[2]
         FMLA    v17.4s, v26.4s, v0.s[2]
@@ -90,10 +78,6 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_p
         TBNZ    x0, 2, 5f
 
 2:
-        # Scale
-        LDP     q22, q26, [x5], 32
-        FMUL    v16.4s, v16.4s, v22.4s
-        FMUL    v17.4s, v17.4s, v26.4s
         SUBS    x1, x1, 8
 
         # Clamp
@@ -105,6 +89,7 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_p
         # Store full 1 x 8
         B.LO    6f
 
+        ADD      x5, x5, x17  // advance to next row of weights
         STP     q16, q17, [x6]
         ADD     x6, x6, x14
 
@@ -117,18 +102,15 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_p
 
         # Remainder- 2 float of A (4 bytes)
 4:
-        # Remainder- 2 floats of A (8 bytes)
-        LDP     d24, d25, [x5], 16
-        SXTL    v24.8h, v24.8b
-        SXTL    v20.4s, v24.4h
-        SXTL2   v24.4s, v24.8h
-        SCVTF   v20.4s, v20.4s
-        SCVTF   v24.4s, v24.4s
-        SXTL    v25.8h, v25.8b
-        SXTL    v21.4s, v25.4h
-        SXTL2   v25.4s, v25.8h
-        SCVTF   v21.4s, v21.4s
-        SCVTF   v25.4s, v25.4s
+        LD2     {v20.s, v21.s}[0], [x5], x2
+        LD2     {v20.s, v21.s}[1], [x5], x2
+        LD2     {v20.s, v21.s}[2], [x5], x2
+        LD2     {v20.s, v21.s}[3], [x5], x2
+        LD2     {v24.s, v25.s}[0], [x5], x2
+        LD2     {v24.s, v25.s}[1], [x5], x2
+        LD2     {v24.s, v25.s}[2], [x5], x2
+        LD2     {v24.s, v25.s}[3], [x5], x16
+        SUB     x5, x5, 8
         LDR     d0, [x3], 8
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v24.4s, v0.s[0]
@@ -138,13 +120,15 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_p
 
         # Remainder- 1 float of A (4 bytes)
 5:
-        # Remainder- 2 floats of A (8 bytes)
-        LDR     d24, [x5], 8
-        SXTL    v24.8h, v24.8b
-        SXTL    v20.4s, v24.4h
-        SXTL2   v24.4s, v24.8h
-        SCVTF   v20.4s, v20.4s
-        SCVTF   v24.4s, v24.4s
+        LD1     {v20.s}[0], [x5], x2
+        LD1     {v20.s}[1], [x5], x2
+        LD1     {v20.s}[2], [x5], x2
+        LD1     {v20.s}[3], [x5], x2
+        LD1     {v24.s}[0], [x5], x2
+        LD1     {v24.s}[1], [x5], x2
+        LD1     {v24.s}[2], [x5], x2
+        LD1     {v24.s}[3], [x5], x16
+        SUB     x5, x5, 12
         LDR     s0, [x3], 4
         FMLA    v16.4s, v20.4s, v0.s[0]
         FMLA    v17.4s, v24.4s, v0.s[0]
@@ -167,7 +151,7 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_p
 9:
         RET
 
-END_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128_prfm
+END_FUNCTION xnn_f32_gemm_goi_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

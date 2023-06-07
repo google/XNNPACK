@@ -8002,6 +8002,18 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_gemm_goi_minmax_test",
+    srcs = [
+        "test/f32-gemm-goi-minmax.cc",
+        "test/gemm-goi-microkernel-tester.h",
+    ],
+    shard_count = 10,
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":packing",
+    ],
+)
+
+xnnpack_unit_test(
     name = "f32_qc8w_gemm_test",
     srcs = [
         "test/f32-qc8w-gemm.cc",

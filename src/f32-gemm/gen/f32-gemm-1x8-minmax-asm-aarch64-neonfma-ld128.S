@@ -24,10 +24,10 @@
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0  x3 v0
-# B   x5 v20 v21 v22 v23
-# C0  x6 v16 v17
-# Clamp  v4, v5
+# A0  x3  v0
+# B   x5  v20 v24 v21 v25 v22 v26 v23 v27
+# C0  x6  v16 v17
+# Clamp   v4, v5
 
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128
 
@@ -39,28 +39,27 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128
 0:
         # Load initial bias from w into accumulators
         LDP     q16, q17, [x5], 32
-        SUBS    x0, x2, 16               // k = kc - 16
         # Is there at least 4 floats (16 bytes)
+        SUBS    x0, x2, 16               // k = kc - 16
         B.LO    3f
 
 
         # Main loop - 4 floats of A (16 bytes)
 1:
         LDR     q0, [x3], 16
-        LDP     q20, q21, [x5], 32
-        LDP     q22, q23, [x5], 32
+        LDP     q20, q24, [x5], 32
+        LDP     q21, q25, [x5], 32
         FMLA    v16.4s, v20.4s, v0.s[0]
-        FMLA    v17.4s, v21.4s, v0.s[0]
-        FMLA    v16.4s, v22.4s, v0.s[1]
-        FMLA    v17.4s, v23.4s, v0.s[1]
-
-        LDP     q20, q21, [x5], 32
-        LDP     q22, q23, [x5], 32
+        FMLA    v17.4s, v24.4s, v0.s[0]
+        FMLA    v16.4s, v21.4s, v0.s[1]
+        FMLA    v17.4s, v25.4s, v0.s[1]
+        LDP     q22, q26, [x5], 32
+        LDP     q23, q27, [x5], 32
         SUBS    x0, x0, 16
-        FMLA    v16.4s, v20.4s, v0.s[2]
-        FMLA    v17.4s, v21.4s, v0.s[2]
-        FMLA    v16.4s, v22.4s, v0.s[3]
-        FMLA    v17.4s, v23.4s, v0.s[3]
+        FMLA    v16.4s, v22.4s, v0.s[2]
+        FMLA    v17.4s, v26.4s, v0.s[2]
+        FMLA    v16.4s, v23.4s, v0.s[3]
+        FMLA    v17.4s, v27.4s, v0.s[3]
         B.HS    1b
 
         # Is there a remainder?- 2 float of A (8 bytes)
@@ -92,21 +91,23 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128
 
         # Remainder- 2 float of A (4 bytes)
 4:
+        # Remainder- 2 floats of A (8 bytes)
+        LDP     q20, q24, [x5], 32
+        LDP     q21, q25, [x5], 32
         LDR     d0, [x3], 8
-        LDP     q20, q21, [x5], 32
-        LDP     q22, q23, [x5], 32
         FMLA    v16.4s, v20.4s, v0.s[0]
-        FMLA    v17.4s, v21.4s, v0.s[0]
-        FMLA    v16.4s, v22.4s, v0.s[1]
-        FMLA    v17.4s, v23.4s, v0.s[1]
+        FMLA    v17.4s, v24.4s, v0.s[0]
+        FMLA    v16.4s, v21.4s, v0.s[1]
+        FMLA    v17.4s, v25.4s, v0.s[1]
         TBZ     x0, 2, 2b
 
-5:
         # Remainder- 1 float of A (4 bytes)
+5:
+        # Remainder- 2 floats of A (8 bytes)
+        LDP     q20, q24, [x5], 32
         LDR     s0, [x3], 4
-        LDP     q20, q21, [x5], 32
         FMLA    v16.4s, v20.4s, v0.s[0]
-        FMLA    v17.4s, v21.4s, v0.s[0]
+        FMLA    v17.4s, v24.4s, v0.s[0]
         B       2b
 
         # Store odd channels

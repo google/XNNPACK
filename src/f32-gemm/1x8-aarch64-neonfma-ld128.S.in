@@ -7,7 +7,7 @@ $assert DATATYPE in ["F32", "QC8"]
 #include <xnnpack/assembly.h>
 
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
-# void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128${"_prfm" if PREFETCH else ""}(
+# void xnn_${DATATYPE_SPEC}_gemm${"_goi" if GOI else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128${"_prfm" if PREFETCH else ""}(
 #     size_t mr,                (x0) - unused.  mr = 1
 #     size_t nc,                x1
 #     size_t kc,                x2 / x0
@@ -22,23 +22,35 @@ $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0  x3 v0
-# B   x5 v20 v21 v22 v23
-# C0  x6 v16 v17
-# Clamp  v4, v5
+# A0  x3  v0
+# B   x5  v20 v24 v21 v25 v22 v26 v23 v27
+# C0  x6  v16 v17
+# Clamp   v4, v5
+$if GOI:
+  # B stride x16, x17
 
-BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128${"_prfm" if PREFETCH else ""}
+BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"_goi" if GOI else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128${"_prfm" if PREFETCH else ""}
 
         # Load cn_stride, params pointer
         LDP     x14, x8, [sp]
 
         # Load min/max values
         LD2R    {v4.4s, v5.4s}, [x8]
+        $if GOI:
+          SUB     x16, x2, x2, LSL #3     // B stride on 8th row to top (16 - KC * 7)
+          ADD     x16, x16, 16
+          LSL     x17, x2, 3              // B stride for N loop
+          SUB     x17, x17, x2
 0:
-        # Load initial bias from w into accumulators
-        LDP     q16, q17, [x5], 32
-        SUBS    x0, x2, 16               // k = kc - 16
+        $if GOI:
+            # Zero bias for GOI
+            MOVI    v16.16b, 0
+            MOVI    v17.16b, 0
+        $else:
+          # Load initial bias from w into accumulators
+          LDP     q16, q17, [x5], 32
         # Is there at least 4 floats (16 bytes)
+        SUBS    x0, x2, 16               // k = kc - 16
         B.LO    3f
 
         $if PREFETCH:
@@ -48,52 +60,63 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma
 
         # Main loop - 4 floats of A (16 bytes)
 1:
-        $if DATATYPE == "F32":
+        $if GOI:
           LDR     q0, [x3], 16
-          LDP     q20, q21, [x5], 32
-          LDP     q22, q23, [x5], 32
+          LD4     {v20.s, v21.s, v22.s, v23.s}[0], [x5], x2
+          LD4     {v20.s, v21.s, v22.s, v23.s}[1], [x5], x2
+          LD4     {v20.s, v21.s, v22.s, v23.s}[2], [x5], x2
+          LD4     {v20.s, v21.s, v22.s, v23.s}[3], [x5], x2
+          LD4     {v24.s, v25.s, v26.s, v27.s}[0], [x5], x2
+          LD4     {v24.s, v25.s, v26.s, v27.s}[1], [x5], x2
+          LD4     {v24.s, v25.s, v26.s, v27.s}[2], [x5], x2
+          LD4     {v24.s, v25.s, v26.s, v27.s}[3], [x5], x16
         $else:
-          LDR     q22, [x5], 16
-          SXTL    v21.8h, v22.8b
-          SXTL2   v23.8h, v22.16b
-          LDR     q0, [x3], 16
-          SXTL    v20.4s, v21.4h
-          SXTL    v22.4s, v23.4h
-          SXTL2   v21.4s, v21.8h
-          SXTL2   v23.4s, v23.8h
-          SCVTF   v20.4s, v20.4s
-          SCVTF   v21.4s, v21.4s
-          SCVTF   v22.4s, v22.4s
-          SCVTF   v23.4s, v23.4s
+          $if DATATYPE == "F32":
+            LDR     q0, [x3], 16
+            LDP     q20, q24, [x5], 32
+            LDP     q21, q25, [x5], 32
+          $else:
+            LDR     q21, [x5], 16
+            SXTL    v24.8h, v21.8b
+            SXTL2   v25.8h, v21.16b
+            LDR     q0, [x3], 16
+            SXTL    v20.4s, v24.4h
+            SXTL    v21.4s, v25.4h
+            SXTL2   v24.4s, v24.8h
+            SXTL2   v25.4s, v25.8h
+            SCVTF   v20.4s, v20.4s
+            SCVTF   v24.4s, v24.4s
+            SCVTF   v21.4s, v21.4s
+            SCVTF   v25.4s, v25.4s
         FMLA    v16.4s, v20.4s, v0.s[0]
-        FMLA    v17.4s, v21.4s, v0.s[0]
+        FMLA    v17.4s, v24.4s, v0.s[0]
         $if PREFETCH:
           PRFM    PLDL1KEEP, [x5, 128]
-        FMLA    v16.4s, v22.4s, v0.s[1]
-        FMLA    v17.4s, v23.4s, v0.s[1]
-
-        $if DATATYPE == "F32":
-          LDP     q20, q21, [x5], 32
-          LDP     q22, q23, [x5], 32
-        $else:
-          LDR     q22, [x5], 16
-          SXTL    v21.8h, v22.8b
-          SXTL2   v23.8h, v22.16b
-          SXTL    v20.4s, v21.4h
-          SXTL    v22.4s, v23.4h
-          SXTL2   v21.4s, v21.8h
-          SXTL2   v23.4s, v23.8h
-          SCVTF   v20.4s, v20.4s
-          SCVTF   v21.4s, v21.4s
-          SCVTF   v22.4s, v22.4s
-          SCVTF   v23.4s, v23.4s
+        FMLA    v16.4s, v21.4s, v0.s[1]
+        FMLA    v17.4s, v25.4s, v0.s[1]
+        $if not GOI:
+          $if DATATYPE == "F32":
+            LDP     q22, q26, [x5], 32
+            LDP     q23, q27, [x5], 32
+          $else:
+            LDR     q23, [x5], 16
+            SXTL    v26.8h, v23.8b
+            SXTL2   v27.8h, v23.16b
+            SXTL    v22.4s, v26.4h
+            SXTL    v23.4s, v27.4h
+            SXTL2   v26.4s, v26.8h
+            SXTL2   v27.4s, v27.8h
+            SCVTF   v22.4s, v22.4s
+            SCVTF   v26.4s, v26.4s
+            SCVTF   v23.4s, v23.4s
+            SCVTF   v27.4s, v27.4s
         SUBS    x0, x0, 16
-        FMLA    v16.4s, v20.4s, v0.s[2]
-        FMLA    v17.4s, v21.4s, v0.s[2]
+        FMLA    v16.4s, v22.4s, v0.s[2]
+        FMLA    v17.4s, v26.4s, v0.s[2]
         $if PREFETCH and (DATATYPE == "F32"):
           PRFM    PLDL1KEEP, [x5, 128]
-        FMLA    v16.4s, v22.4s, v0.s[3]
-        FMLA    v17.4s, v23.4s, v0.s[3]
+        FMLA    v16.4s, v23.4s, v0.s[3]
+        FMLA    v17.4s, v27.4s, v0.s[3]
         B.HS    1b
 
         # Is there a remainder?- 2 float of A (8 bytes)
@@ -104,9 +127,9 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma
 2:
         $if DATATYPE == "QC8":
           # Scale
-          LDP     q24, q25, [x5], 32
-          FMUL    v16.4s, v16.4s, v24.4s
-          FMUL    v17.4s, v17.4s, v25.4s
+          LDP     q22, q26, [x5], 32
+          FMUL    v16.4s, v16.4s, v22.4s
+          FMUL    v17.4s, v17.4s, v26.4s
         SUBS    x1, x1, 8
 
         # Clamp
@@ -118,6 +141,8 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma
         # Store full 1 x 8
         B.LO    6f
 
+        $if GOI:
+          ADD      x5, x5, x17  // advance to next row of weights
         STP     q16, q17, [x6]
         ADD     x6, x6, x14
 
@@ -130,43 +155,66 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma
 
         # Remainder- 2 float of A (4 bytes)
 4:
-        $if DATATYPE == "F32":
-          LDR     d0, [x3], 8
-          LDP     q20, q21, [x5], 32
-          LDP     q22, q23, [x5], 32
+        $if GOI:
+          LD2     {v20.s, v21.s}[0], [x5], x2
+          LD2     {v20.s, v21.s}[1], [x5], x2
+          LD2     {v20.s, v21.s}[2], [x5], x2
+          LD2     {v20.s, v21.s}[3], [x5], x2
+          LD2     {v24.s, v25.s}[0], [x5], x2
+          LD2     {v24.s, v25.s}[1], [x5], x2
+          LD2     {v24.s, v25.s}[2], [x5], x2
+          LD2     {v24.s, v25.s}[3], [x5], x16
+          SUB     x5, x5, 8
         $else:
-          LDR     q22, [x5], 16
-          SXTL    v21.8h, v22.8b
-          SXTL2   v23.8h, v22.16b
-          LDR     d0,  [x3], 8
-          SXTL    v20.4s, v21.4h
-          SXTL    v22.4s, v23.4h
-          SXTL2   v21.4s, v21.8h
-          SXTL2   v23.4s, v23.8h
-          SCVTF   v20.4s, v20.4s
-          SCVTF   v21.4s, v21.4s
-          SCVTF   v22.4s, v22.4s
-          SCVTF   v23.4s, v23.4s
+          # Remainder- 2 floats of A (8 bytes)
+          $if DATATYPE == "F32":
+            LDP     q20, q24, [x5], 32
+            LDP     q21, q25, [x5], 32
+          $else:
+            LDP     d24, d25, [x5], 16
+            SXTL    v24.8h, v24.8b
+            SXTL    v20.4s, v24.4h
+            SXTL2   v24.4s, v24.8h
+            SCVTF   v20.4s, v20.4s
+            SCVTF   v24.4s, v24.4s
+            SXTL    v25.8h, v25.8b
+            SXTL    v21.4s, v25.4h
+            SXTL2   v25.4s, v25.8h
+            SCVTF   v21.4s, v21.4s
+            SCVTF   v25.4s, v25.4s
+        LDR     d0, [x3], 8
         FMLA    v16.4s, v20.4s, v0.s[0]
-        FMLA    v17.4s, v21.4s, v0.s[0]
-        FMLA    v16.4s, v22.4s, v0.s[1]
-        FMLA    v17.4s, v23.4s, v0.s[1]
+        FMLA    v17.4s, v24.4s, v0.s[0]
+        FMLA    v16.4s, v21.4s, v0.s[1]
+        FMLA    v17.4s, v25.4s, v0.s[1]
         TBZ     x0, 2, 2b
 
-5:
         # Remainder- 1 float of A (4 bytes)
-        LDR     s0, [x3], 4
-        $if DATATYPE == "F32":
-          LDP     q20, q21, [x5], 32
+5:
+        $if GOI:
+          LD1     {v20.s}[0], [x5], x2
+          LD1     {v20.s}[1], [x5], x2
+          LD1     {v20.s}[2], [x5], x2
+          LD1     {v20.s}[3], [x5], x2
+          LD1     {v24.s}[0], [x5], x2
+          LD1     {v24.s}[1], [x5], x2
+          LD1     {v24.s}[2], [x5], x2
+          LD1     {v24.s}[3], [x5], x16
+          SUB     x5, x5, 12
         $else:
-          LDR     d21, [x5], 8
-          SXTL    v21.8h, v21.8b
-          SXTL    v20.4s, v21.4h
-          SXTL2   v21.4s, v21.8h
-          SCVTF   v20.4s, v20.4s
-          SCVTF   v21.4s, v21.4s
+          # Remainder- 2 floats of A (8 bytes)
+          $if DATATYPE == "F32":
+            LDP     q20, q24, [x5], 32
+          $else:
+            LDR     d24, [x5], 8
+            SXTL    v24.8h, v24.8b
+            SXTL    v20.4s, v24.4h
+            SXTL2   v24.4s, v24.8h
+            SCVTF   v20.4s, v20.4s
+            SCVTF   v24.4s, v24.4s
+        LDR     s0, [x3], 4
         FMLA    v16.4s, v20.4s, v0.s[0]
-        FMLA    v17.4s, v21.4s, v0.s[0]
+        FMLA    v17.4s, v24.4s, v0.s[0]
         B       2b
 
         # Store odd channels
@@ -186,7 +234,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma
 9:
         RET
 
-END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128${"_prfm" if PREFETCH else ""}
+END_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"_goi" if GOI else ""}_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128${"_prfm" if PREFETCH else ""}
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
