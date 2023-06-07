@@ -63,12 +63,26 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"_goi" if GOI else ""}_minmax_ukernel_
         $if GOI:
           LDR     q0, [x3], 16
           LD4     {v20.s, v21.s, v22.s, v23.s}[0], [x5], x2
+          $if PREFETCH:
+            PRFM    PLDL1KEEP, [x5, 128]
           LD4     {v20.s, v21.s, v22.s, v23.s}[1], [x5], x2
+          $if PREFETCH:
+            PRFM    PLDL1KEEP, [x5, 128]
           LD4     {v20.s, v21.s, v22.s, v23.s}[2], [x5], x2
+          $if PREFETCH:
+            PRFM    PLDL1KEEP, [x5, 128]
           LD4     {v20.s, v21.s, v22.s, v23.s}[3], [x5], x2
+          $if PREFETCH:
+            PRFM    PLDL1KEEP, [x5, 128]
           LD4     {v24.s, v25.s, v26.s, v27.s}[0], [x5], x2
+          $if PREFETCH:
+            PRFM    PLDL1KEEP, [x5, 128]
           LD4     {v24.s, v25.s, v26.s, v27.s}[1], [x5], x2
+          $if PREFETCH:
+            PRFM    PLDL1KEEP, [x5, 128]
           LD4     {v24.s, v25.s, v26.s, v27.s}[2], [x5], x2
+          $if PREFETCH:
+            PRFM    PLDL1KEEP, [x5, 128]
           LD4     {v24.s, v25.s, v26.s, v27.s}[3], [x5], x16
         $else:
           $if DATATYPE == "F32":
@@ -113,7 +127,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"_goi" if GOI else ""}_minmax_ukernel_
         SUBS    x0, x0, 16
         FMLA    v16.4s, v22.4s, v0.s[2]
         FMLA    v17.4s, v26.4s, v0.s[2]
-        $if PREFETCH and (DATATYPE == "F32"):
+        $if PREFETCH and (DATATYPE == "F32") and not GOI:
           PRFM    PLDL1KEEP, [x5, 128]
         FMLA    v16.4s, v23.4s, v0.s[3]
         FMLA    v17.4s, v27.4s, v0.s[3]

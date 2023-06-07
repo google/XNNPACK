@@ -70,7 +70,8 @@ tools/xngen src/f32-gemm/6x8-aarch64-neonfma-ld128.S.in               -D INC=1 -
 
 ### LD128 GOI micro-kernels
 tools/xngen src/f32-gemm/1x8-aarch64-neonfma-ld128.S.in      -D GOI=1 -D INC=0 -D PREFETCH=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-goi-1x8-minmax-asm-aarch64-neonfma-ld128.S &
-tools/xngen src/f32-gemm/4x8-aarch64-neonfma-ld128.S.in      -D GOI=1 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-goi-4x8-minmax-asm-aarch64-neonfma-ld128.S &
+tools/xngen src/f32-gemm/1x8-aarch64-neonfma-ld128.S.in      -D GOI=1 -D INC=0 -D PREFETCH=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-goi-1x8-minmax-asm-aarch64-neonfma-ld128-prfm.S &
+tools/xngen src/f32-gemm/4x8-aarch64-neonfma-ld128.S.in      -D GOI=1 -D INC=0               -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-goi-4x8-minmax-asm-aarch64-neonfma-ld128.S &
 
 ### MRx1 micro-kernels
 tools/xngen src/f32-gemm/4x1-aarch64-neonfma-ld64.S.in        -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x1-minmax-asm-aarch64-neonfma-ld64.S &
