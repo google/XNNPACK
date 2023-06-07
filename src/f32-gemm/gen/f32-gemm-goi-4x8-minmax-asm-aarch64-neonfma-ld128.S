@@ -156,7 +156,7 @@ BEGIN_FUNCTION xnn_f32_gemm_goi_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
         # Store full 4 x 8
         B.LO    5f
 
-        ADD      x5, x5, x17  // advance to next row of weights
+        ADD     x5, x5, x17             // advance to next row of weights
 
         ST1     {v16.16b, v17.16b},  [x6], x14
         SUB     x3,  x3, x2             // a0 -= kc
