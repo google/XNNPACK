@@ -156,7 +156,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"_goi" if GOI else ""}_minmax_ukernel_
         B.LO    6f
 
         $if GOI:
-          ADD      x5, x5, x17  // advance to next row of weights
+          ADD     x5, x5, x17             // advance to next row of weights
         STP     q16, q17, [x6]
         ADD     x6, x6, x14
 

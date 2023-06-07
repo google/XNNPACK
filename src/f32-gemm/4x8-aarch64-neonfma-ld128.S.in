@@ -238,7 +238,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${"_goi" if GOI e
         B.LO    5f
 
         $if GOI:
-          ADD      x5, x5, x17  // advance to next row of weights
+          ADD     x5, x5, x17             // advance to next row of weights
 
         $if INC:
           ST1     {v30.16b, v31.16b},  [x7], x14
