@@ -625,7 +625,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukerne
         BX      lr
 
 END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x8__asm_aarch32_${ISA}_mlal_lane_ld64${"_prfm" if PREFETCH else ""}
-# LINT.ThenChange(gen/qs8-gemm-4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc,gen/qs8-qc8w-gemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc)
+# LINT.ThenChange(gen/qs8-gemm-4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc,../qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc)
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
