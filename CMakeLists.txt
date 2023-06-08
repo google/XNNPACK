@@ -341,10 +341,10 @@ SET(JIT_AARCH32_SRCS
   src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-ld64.cc
   src/qs8-gemm/gen/qs8-gemm-4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc
   src/qs8-gemm/gen/qs8-gemm-4x8c4-rndnu-aarch32-neondot-ld64.cc
+  src/qs8-gemm/gen/qs8-qc8w-gemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc
+  src/qs8-gemm/gen/qs8-qc8w-gemm-4x8c4-fp32-aarch32-neondot-ld64.cc
   src/qs8-igemm/gen/qs8-igemm-4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc
   src/qs8-igemm/gen/qs8-igemm-4x8c4-rndnu-aarch32-neondot-ld64.cc
-  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc
-  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c4-fp32-aarch32-neondot-ld64.cc
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8c4-fp32-aarch32-neondot-ld64.cc)
 
