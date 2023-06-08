@@ -7,8 +7,14 @@
 #include <numeric>
 #include <vector>
 
-namespace xnnpack {
+using ::xnnpack::internal::AppendEncodedU32;
+using ::xnnpack::internal::Export;
+using ::xnnpack::internal::Function;
+using ::xnnpack::internal::FuncType;
+using ::xnnpack::internal::VectorEncodingLength;
+using ::xnnpack::internal::WidthEncodedU32;
 
+namespace xnnpack {
 namespace internal {
 std::array<uint8_t, 16> MakeLanesForI8x16Shuffle(const uint8_t* lanes,
                                                  size_t num_lanes) {
@@ -24,12 +30,6 @@ std::array<uint8_t, 16> MakeLanesForI8x16Shuffle(const uint8_t* lanes,
   return i8x16_lanes;
 }
 }  // namespace internal
-
-using internal::AppendEncodedU32;
-using internal::Export;
-using internal::Function;
-using internal::FuncType;
-using internal::WidthEncodedU32;
 
 void WasmAssembler::EmitMagicVersion() {
   EmitByteArray(kMagic);
@@ -47,79 +47,97 @@ static auto AppendArray(Array&& arr, Appender&& appender) {
 }
 
 // Functions emitting types section
-static void AppendResultType(const std::vector<ValType>& type,
-                             std::vector<byte>& out) {
-  AppendEncodedU32(type.size(), out);
+void WasmAssembler::EmitResultType(const std::vector<ValType>& type) {
+  EmitEncodedU32(type.size());
   for (ValType val_type : type) {
-    out.push_back(val_type.code);
+    emit8(val_type.code);
   }
 }
 
-static void AppendFuncType(const Function& func, std::vector<byte>& out) {
-  const FuncType& type = func.type;
+void WasmAssembler::EmitFuncType(const FuncType& type) {
   static constexpr byte kFunctionByte = 0x60;
-  out.push_back(kFunctionByte);
-  AppendResultType(type.param, out);
-  AppendResultType(type.result, out);
+  emit8(kFunctionByte);
+  EmitResultType(type.param);
+  EmitResultType(type.result);
+}
+
+static uint32_t FuncTypeEncodingSize(const FuncType& type) {
+  const uint32_t args_count = type.param.size();
+  const uint32_t args_encoding_length =
+      WidthEncodedU32(args_count) + args_count;
+  // a function can return at  most one value
+  const uint32_t result_encoding_length = type.result.empty() ? 1 : 2;
+  return 1 +  // the function byte 0x60
+         args_encoding_length + result_encoding_length;
 }
 
 void WasmAssembler::EmitTypeSection() {
-  EmitSection(kTypeSectionCode, AppendArray(functions_, AppendFuncType));
+  EmitSection(kTypeSectionCode, func_types_, FuncTypeEncodingSize,
+              [this](const FuncType& type) { EmitFuncType(type); });
 }
 
 void WasmAssembler::EmitImportSection() { EmitByteArray(kImportSection); }
 
 // Functions emitting Function section
-void WasmAssembler::AppendFuncs(std::vector<byte>& out) {
-  AppendEncodedU32(functions_.size(), out);
-  for (int i = 0; i < functions_.size(); i++) {
-    AppendEncodedU32(i, out);
-  }
-}
-
 void WasmAssembler::EmitFunctionSection() {
-  EmitSection(kFunctionSectionCode,
-              [this](std::vector<byte>& out) { AppendFuncs(out); });
+  EmitSection(
+      kFunctionSectionCode, functions_,
+      [](const Function& func) { return WidthEncodedU32(func.type_index); },
+      [this](const Function& func) { EmitEncodedU32(func.type_index); });
 }
 
 // Functions emitting Export section
-static void AppendExport(const Export& exp, std::vector<byte>& out) {
+void WasmAssembler::EmitExport(const Export& exp) {
   constexpr static byte kFunctionExportCode = 0x0;
-  const size_t name_length = strlen(exp.name);
-  AppendEncodedU32(name_length, out);
-  for (int i = 0; i < name_length; i++) {
-    out.push_back(exp.name[i]);
+  EmitEncodedU32(exp.name_length);
+  for (int i = 0; i < exp.name_length; i++) {
+    emit8(exp.name[i]);
   }
-  out.push_back(kFunctionExportCode);
-  AppendEncodedU32(exp.function_index, out);
+  emit8(kFunctionExportCode);
+  EmitEncodedU32(exp.function_index);
+}
+
+static uint32_t ExportEncodingLength(const Export& exp) {
+  return WidthEncodedU32(exp.name_length) + exp.name_length + 1 +
+         WidthEncodedU32(exp.function_index);
 }
 
 void WasmAssembler::EmitExportsSection() {
-  EmitSection(kExportsSectionCode, AppendArray(exports_, AppendExport));
+  EmitSection(kExportsSectionCode, exports_, ExportEncodingLength,
+              [this](const Export& exp) { EmitExport(exp); });
 }
 
 // Functions emitting Code section
-static void AppendFunctionBody(const Function& func, std::vector<byte>& out) {
+static uint32_t LocalsDeclarationSize(const Function& func) {
   const auto& locals_declaration = func.locals_declaration;
-  const uint32_t locals_declaration_size =
-      std::accumulate(locals_declaration.begin(),
-                      locals_declaration.end(), 0,
-                      [](uint32_t sum, const auto& declaration) {
-                        return sum + WidthEncodedU32(declaration.second);
-                      }) +
-      locals_declaration.size() +
-      WidthEncodedU32(locals_declaration.size());
-  AppendEncodedU32(func.body.size() + locals_declaration_size, out);
+  return VectorEncodingLength(
+             locals_declaration,
+             [](const auto& decl) { return WidthEncodedU32(decl.second); }) +
+         locals_declaration.size();
+}
 
-  AppendEncodedU32(locals_declaration.size(), out);
+static uint32_t FunctionEncodingSize(const Function& func) {
+  const uint32_t decl_encoding_size = LocalsDeclarationSize(func);
+  const uint32_t decl_size = func.locals_declaration.size();
+  return WidthEncodedU32(func.body.size() + decl_size) + decl_encoding_size +
+         func.body.size();
+}
+
+void WasmAssembler::EmitFunction(const Function& func) {
+  const auto& locals_declaration = func.locals_declaration;
+  uint32_t decl_encoding_size = LocalsDeclarationSize(func);
+  EmitEncodedU32(func.body.size() + decl_encoding_size);
+
+  EmitEncodedU32(locals_declaration.size());
   for (const auto& type_to_count : locals_declaration) {
-    AppendEncodedU32(type_to_count.second, out);
-    out.push_back(type_to_count.first.code);
+    EmitEncodedU32(type_to_count.second);
+    emit8(type_to_count.first.code);
   }
-  out.insert(out.end(), func.body.begin(), func.body.end());
+  for (byte b : func.body) emit8(b);
 }
 
 void WasmAssembler::EmitCodeSection() {
-  EmitSection(kCodeSectionCode, AppendArray(functions_, AppendFunctionBody));
+  EmitSection(kCodeSectionCode, functions_, FunctionEncodingSize,
+              [this](const Function& func) { EmitFunction(func); });
 }
 }  // namespace xnnpack

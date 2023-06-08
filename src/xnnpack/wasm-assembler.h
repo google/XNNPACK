@@ -14,7 +14,9 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 #include <functional>
+#include <numeric>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -36,7 +38,20 @@ inline bool operator==(const ValType& lhs, const ValType& rhs) {
 using ValTypesToInt = std::vector<std::pair<ValType, uint32_t>>;
 
 namespace internal {
+template <typename Array, typename ElementEncodingLength>
+static uint32_t VectorEncodingLength(
+    Array&& array, ElementEncodingLength&& element_encoding_length) {
+  const auto add_encoding_length = [&](uint32_t acc, const auto& element) {
+    return acc + element_encoding_length(element);
+  };
+  const uint32_t total_length_of_element_encodings = std::accumulate(
+      array.begin(), array.end(), uint32_t{0}, add_encoding_length);
+  return WidthEncodedU32(array.size()) + total_length_of_element_encodings;
+}
+
 struct FuncType {
+  FuncType(std::vector<ValType> param, std::vector<ValType> result)
+      : param(std::move(param)), result(std::move(result)) {}
   std::vector<ValType> param;
   std::vector<ValType> result;
 };
@@ -51,13 +66,22 @@ inline uint32_t& At(ValTypesToInt& map, ValType type) {
 }
 
 struct Function {
-  FuncType type;
+  Function(uint32_t type_index, ValTypesToInt locals_declaration,
+           std::vector<byte> body)
+      : type_index(type_index),
+        locals_declaration(std::move(locals_declaration)),
+        body(std::move(body)) {}
+  uint32_t type_index;
   ValTypesToInt locals_declaration;
   std::vector<byte> body;
 };
 
 struct Export {
+  Export(const char* name, size_t function_index)
+      : name(name), name_length(strlen(name)), function_index(function_index) {}
+
   const char* name;
+  size_t name_length;
   size_t function_index;
 };
 
@@ -562,10 +586,11 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
                         const std::vector<ValType>& param,
                         ValTypesToInt locals_declaration_count,
                         std::vector<byte> code) {
-    exports_.push_back(Export{name, functions_.size()});
-    functions_.push_back(Function{FuncType{param, result},
-                                  std::move(locals_declaration_count),
-                                  std::move(code)});
+    exports_.emplace_back(name, functions_.size());
+    func_types_.emplace_back(param, result);
+    functions_.emplace_back(func_types_.size() - 1,
+                            std::move(locals_declaration_count),
+                            std::move(code));
   }
 
   template <typename Array>
@@ -575,34 +600,39 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
     }
   }
 
-  template <typename AppendSection>
-  void EmitSection(byte section_code, AppendSection&& append_section) {
-    std::vector<byte> out;
-    append_section(out);
-
+  template <typename Array, typename SizeCalculator, typename EmitElement>
+  void EmitSection(byte section_code, Array&& array,
+                   SizeCalculator&& size_calculator,
+                   EmitElement&& emit_element) {
     emit8(section_code);
-    EmitEncodedU32(out.size());
-    EmitByteArray(out);
+    EmitEncodedU32(VectorEncodingLength(
+        array, std::forward<SizeCalculator>(size_calculator)));
+    EmitEncodedU32(array.size());
+    for (const auto& element : array) emit_element(element);
   }
 
   void EmitMagicVersion();
 
   void EmitTypeSection();
+  void EmitFuncType(const FuncType& type);
+  void EmitResultType(const std::vector<ValType>& type);
 
   void EmitImportSection();
 
   void EmitFunctionSection();
-  void AppendFuncs(std::vector<byte>& out);
 
   void EmitExportsSection();
+  void EmitExport(const Export& exp);
 
   void EmitCodeSection();
+  void EmitFunction(const Function& func);
 
   void EmitEncodedU32(uint32_t n) {
     internal::StoreEncodedU32(n, [this](byte b) { emit8(b); });
   }
 
   std::vector<Function> functions_;
+  std::vector<FuncType> func_types_;
   std::vector<Export> exports_;
 };
 

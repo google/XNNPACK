@@ -87,6 +87,27 @@ struct AddTestSuiteTmpl : GeneratorTestSuite<G, AddPtr> {
 
 struct AddTestSuite : AddTestSuiteTmpl<AddGenerator, kExpectedSum> {};
 
+struct Get5AndAddGenerator : WasmAssembler {
+  explicit Get5AndAddGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
+    ValTypesToInt no_locals;
+    AddFunc<0>({i32}, "get5", {}, no_locals, [this]() { i32_const(5); });
+    AddFunc<2>({i32}, "add", {i32, i32}, no_locals, [this](Local a, Local b) {
+      local_get(a);
+      local_get(b);
+      i32_add();
+    });
+  }
+};
+
+struct Get5AndAddTestSuite
+    : GeneratorTestSuite<Get5AndAddGenerator, GetIntPtr> {
+  static void ExpectFuncCorrect(GetIntPtr get5) {
+    Get5TestSuite::ExpectFuncCorrect(get5);
+    AddPtr add = (AddPtr)((int)get5 + 1);
+    AddTestSuite::ExpectFuncCorrect(add);
+  }
+};
+
 struct AddWithLocalGenerator : WasmAssembler {
   explicit AddWithLocalGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt single_local_int = {{i32, 1}};
@@ -367,13 +388,17 @@ std::array<std::string, kLargeNumberOfFunctions>
 struct ManyFunctionsGeneratorTestSuite
     : GeneratorTestSuite<ManyFunctionsGenerator, GetIntPtr> {
   static void ExpectFuncCorrect(GetIntPtr get_int) {
-    EXPECT_EQ(get_int(), kExpectedGet5ReturnValue);
+    for (uint32_t func_index = 0; func_index < kLargeNumberOfFunctions;
+         func_index++) {
+      GetIntPtr get_int_offseted = (GetIntPtr)((int)get_int + func_index);
+      Get5TestSuite::ExpectFuncCorrect(get_int_offseted);
+    }
   }
 };
 
 struct ManyLocalsGenerator : WasmAssembler {
   explicit ManyLocalsGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
-    ValTypesToInt many_ints = {{i32, kLargeNumberOfLocals+ 1}};
+    ValTypesToInt many_ints = {{i32, kLargeNumberOfLocals + 1}};
     AddFunc<0>({i32}, "sum_until_with_many_locals", {}, many_ints, [this]() {
       std::array<Local, kLargeNumberOfLocals> locals;
       for (int i = 0; i < kLargeNumberOfLocals; i++) {
@@ -515,8 +540,8 @@ TYPED_TEST_P(WasmAssemblerTest, ValidCode) {
 REGISTER_TYPED_TEST_SUITE_P(WasmAssemblerTest, ValidCode);
 
 using WasmAssemblerTestSuits = testing::Types<
-    Get5TestSuite, AddTestSuite, AddWithLocalTestSuite, AddTwiceTestSuite,
-    AddTwiceWithScopesTestSuite, Add5TestSuite, MaxTestSuite,
+    Get5TestSuite, AddTestSuite, Get5AndAddTestSuite, AddWithLocalTestSuite,
+    AddTwiceTestSuite, AddTwiceWithScopesTestSuite, Add5TestSuite, MaxTestSuite,
     MaxIncompleteIfTestSuite, SumUntilTestSuite, DoWhileTestSuite,
     SumArrayTestSuite, MemCpyTestSuite, AddDelayedInitTestSuite,
     ManyFunctionsGeneratorTestSuite, ManyLocalsGeneratorTestSuite,
