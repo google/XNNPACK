@@ -946,6 +946,9 @@ static void init_f32_relu_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       f32_relu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__scalar_x8;
+      #if XNN_ENABLE_JIT
+        f32_relu_config.generator = xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr;
+      #endif
       f32_relu_config.element_tile = 8;
     } else {
       f32_relu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrelu_ukernel__wasm_x8;

@@ -5198,11 +5198,15 @@ xnnpack_cc_library(
         "src/jit/aarch32-assembler.cc",
         "src/jit/aarch64-assembler.cc",
         "src/jit/assembler.cc",
+        "src/jit/wasm-assembler.cc",
     ],
     hdrs = [
         "src/xnnpack/aarch32-assembler.h",
         "src/xnnpack/aarch64-assembler.h",
+        "src/xnnpack/array-apply.h",
         "src/xnnpack/assembler.h",
+        "src/xnnpack/leb128.h",
+        "src/xnnpack/wasm-assembler.h",
     ],
     aarch32_srcs = JIT_AARCH32_SRCS,
     aarch64_srcs = JIT_AARCH64_SRCS,
@@ -5211,6 +5215,9 @@ xnnpack_cc_library(
         "-DXNN_TEST_MODE=1",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
+    wasm_srcs = JIT_WASM32_SRCS,
+    wasmrelaxedsimd_srcs = JIT_WASM32_SRCS,
+    wasmsimd_srcs = JIT_WASM32_SRCS,
     deps = [
         ":common",
         ":logging",
@@ -9714,6 +9721,7 @@ xnnpack_unit_test(
         "test/clamp-nc.cc",
         "test/clamp-operator-tester.h",
     ],
+    linkopts = WASM_JIT_LINKOPTS,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -9723,6 +9731,7 @@ xnnpack_unit_test(
         "test/clamp-nc-eager.cc",
         "test/clamp-operator-tester.h",
     ],
+    linkopts = WASM_JIT_LINKOPTS,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -10483,6 +10492,7 @@ xnnpack_unit_test(
     srcs = [
         "test/clamp.cc",
     ],
+    linkopts = WASM_JIT_LINKOPTS,
     deps = [
         ":XNNPACK_test_mode",
         ":node_type",
@@ -11098,6 +11108,7 @@ xnnpack_unit_test(
         "test/runtime-tester.h",
         "test/subgraph-tester.h",
     ],
+    linkopts = WASM_JIT_LINKOPTS,
     deps = [
         ":XNNPACK_test_mode",
         ":subgraph_test_mode",
@@ -11126,6 +11137,7 @@ xnnpack_unit_test(
         "test/runtime-tester.h",
         "test/subgraph-tester.h",
     ],
+    linkopts = WASM_JIT_LINKOPTS,
     deps = [
         ":XNNPACK",
         ":common",

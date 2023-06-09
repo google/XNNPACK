@@ -43,6 +43,10 @@ XNN_INTERNAL void xnn_overwrite_igemm_cases_with_generated_code(
   xnn_operator_t convolution_op,
   struct xnn_hmp_igemm_ukernel *igemm_cases,
   size_t mr);
+
+XNN_INTERNAL void xnn_generate_vunary_ukernel(
+  const struct xnn_unary_elementwise_config* config,
+  xnn_operator_t op);
 #endif  // XNN_PLATFORM_JIT
 
 static inline void* packed_weights(struct xnn_operator* op) {
