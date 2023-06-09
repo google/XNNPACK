@@ -46,7 +46,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x2__wasm_fmagic(
     int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
     int32_t vacc1x0 = vacc0x0;
     int32_t vacc1x1 = vacc0x1;
-    w = (const void*) ((const int32_t*) w + 2);
+    w = (const int32_t*) w + 2;
 
     size_t k = kc;
     do {
@@ -55,7 +55,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x2__wasm_fmagic(
 
       const int32_t vb0 = (int32_t) (uint32_t) ((const uint8_t*) w)[0] - vb_zero_point;
       const int32_t vb1 = (int32_t) (uint32_t) ((const uint8_t*) w)[1] - vb_zero_point;
-      w = (const void*) ((const uint8_t*) w + 2);
+      w = (const uint8_t*) w + 2;
 
       vacc0x0 += va0 * vb0;
       vacc0x1 += va0 * vb1;

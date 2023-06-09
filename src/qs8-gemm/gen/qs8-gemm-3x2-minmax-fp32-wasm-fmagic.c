@@ -53,7 +53,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_3x2__wasm_fmagic(
     int32_t vacc1x1 = vacc0x1;
     int32_t vacc2x0 = vacc0x0;
     int32_t vacc2x1 = vacc0x1;
-    w = (const void*) ((const int32_t*) w + 2);
+    w = (const int32_t*) w + 2;
 
     size_t k = kc;
     do {
@@ -63,7 +63,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_3x2__wasm_fmagic(
 
       const int32_t vb0 = (int32_t) ((const int8_t*) w)[0];
       const int32_t vb1 = (int32_t) ((const int8_t*) w)[1];
-      w = (const void*) ((const int8_t*) w + 2);
+      w = (const int8_t*) w + 2;
 
       vacc0x0 += va0 * vb0;
       vacc0x1 += va0 * vb1;

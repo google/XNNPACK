@@ -59,7 +59,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x4__scalar_fmagic(
     int32_t vacc2x1 = vacc0x1;
     int32_t vacc2x2 = vacc0x2;
     int32_t vacc2x3 = vacc0x3;
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t k = kc;
     do {
@@ -71,7 +71,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x4__scalar_fmagic(
       const int32_t vb1 = (int32_t) (uint32_t) ((const uint8_t*) w)[1] - vb_zero_point;
       const int32_t vb2 = (int32_t) (uint32_t) ((const uint8_t*) w)[2] - vb_zero_point;
       const int32_t vb3 = (int32_t) (uint32_t) ((const uint8_t*) w)[3] - vb_zero_point;
-      w = (const void*) ((const uint8_t*) w + 4);
+      w = (const uint8_t*) w + 4;
 
       vacc0x0 += va0 * vb0;
       vacc0x1 += va0 * vb1;

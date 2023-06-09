@@ -38,7 +38,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x4__scalar_imagic(
     int32_t vacc0x1 = ((const int32_t*) w)[1];
     int32_t vacc0x2 = ((const int32_t*) w)[2];
     int32_t vacc0x3 = ((const int32_t*) w)[3];
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t k = kc;
     do {
@@ -48,7 +48,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x4__scalar_imagic(
       const int32_t vb1 = (int32_t) ((const int8_t*) w)[1];
       const int32_t vb2 = (int32_t) ((const int8_t*) w)[2];
       const int32_t vb3 = (int32_t) ((const int8_t*) w)[3];
-      w = (const void*) ((const int8_t*) w + 4);
+      w = (const int8_t*) w + 4;
 
       vacc0x0 += va0 * vb0;
       vacc0x1 += va0 * vb1;

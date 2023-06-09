@@ -39,7 +39,7 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_1x4__scalar(
     int32_t vacc0x1 = ((const int32_t*) w)[1];
     int32_t vacc0x2 = ((const int32_t*) w)[2];
     int32_t vacc0x3 = ((const int32_t*) w)[3];
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t k = kc;
     do {
@@ -49,7 +49,7 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_1x4__scalar(
       const int32_t vb1 = (int32_t) (uint32_t) ((const uint8_t*) w)[1] - vb_zero_point;
       const int32_t vb2 = (int32_t) (uint32_t) ((const uint8_t*) w)[2] - vb_zero_point;
       const int32_t vb3 = (int32_t) (uint32_t) ((const uint8_t*) w)[3] - vb_zero_point;
-      w = (const void*) ((const uint8_t*) w + 4);
+      w = (const uint8_t*) w + 4;
 
       vacc0x0 += va0 * vb0;
       vacc0x1 += va0 * vb1;

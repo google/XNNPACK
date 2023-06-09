@@ -72,7 +72,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${
     $for M in range(1, MR):
       $for N in range(NR):
         int32_t vacc${M}x${N} = vacc0x${N};
-    w = (const void*) ((const int32_t*) w + ${NR});
+    w = (const int32_t*) w + ${NR};
 
     size_t k = kc;
     do {
@@ -87,7 +87,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x${
           const int32_t vb${N} = (int32_t) (uint32_t) ((const uint8_t*) w)[${N}] - vb_zero_point;
         $else:
           const int32_t vb${N} = (int32_t) ((const int8_t*) w)[${N}];
-      w = (const void*) ((const ${XINT8_T}*) w + ${NR});
+      w = (const ${XINT8_T}*) w + ${NR};
 
       $for M in range(MR):
         $for N in range(NR):
