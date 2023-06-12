@@ -5,14 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 #################################### Scalar ###################################
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=2 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=0 -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-1x2-minmax-scalar.c &
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=4 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=0 -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-1x4-minmax-scalar.c &
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=8 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=0 -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-1x8-minmax-scalar.c &
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=2 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=0 -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-2x2-minmax-scalar.c &
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=4 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=0 -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-2x4-minmax-scalar.c &
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=8 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=0 -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-2x8-minmax-scalar.c &
-tools/xngen src/qs8-gemm/scalar.c.in -D MR=4 -D NR=4 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=0 -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-4x4-minmax-scalar.c &
-
 tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x2-minmax-fp32-scalar-fmagic.c &
 tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x2-minmax-fp32-scalar-fmagic.c &
 tools/xngen src/qs8-gemm/scalar.c.in -D MR=3 -D NR=2 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x2-minmax-fp32-scalar-fmagic.c &
@@ -1345,7 +1337,6 @@ tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=3 -D VARIANT=LD256 -D DATA
 tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D DATATYPE=QU8 -D REQUANTIZATION=FP32     -o src/qu8-gemm/gen/qu8-gemm-4x16c8-minmax-fp32-avx512skx.c &
 
 ################################## Unit tests #################################
-tools/generate-gemm-test.py --spec test/qd8-f32-qs8w-gemm.yaml --output test/qd8-f32-qs8w-gemm.cc
 tools/generate-gemm-test.py --spec test/qs8-qc8w-gemm-minmax-fp32.yaml --output test/qs8-qc8w-gemm-minmax-fp32.cc --output test/qs8-qc8w-gemm-minmax-fp32-2.cc --output test/qs8-qc8w-gemm-minmax-fp32-3.cc &
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-fp32.yaml --output test/qs8-gemm-minmax-fp32.cc --output test/qs8-gemm-minmax-fp32-2.cc &
 tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-fp32.yaml --output test/qu8-gemm-minmax-fp32.cc --output test/qu8-gemm-minmax-fp32-2.cc &

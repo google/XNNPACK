@@ -949,8 +949,6 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
 
   if activation == "ukernel":
     activation = "linear"
-  if activation == "qs8w":
-    _, _, _, _, _, activation, _ = ukernel.split("_", 6)
   test_args = [ukernel]
   if init_fn:
     test_args.append(init_fn)
