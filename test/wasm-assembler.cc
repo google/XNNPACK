@@ -45,7 +45,7 @@ constexpr int32_t kB = 42;
 constexpr int32_t kExpectedSum = kA + kB;
 constexpr int32_t kExpectedSumTwice = 2 * kExpectedSum;
 constexpr uint32_t kLargeNumberOfLocals = 129;
-constexpr uint32_t kLargeNumberOfFunctions = 129;
+constexpr uint32_t kLargeNumberOfFunctions = 235;
 constexpr size_t kArraySize = 5;
 constexpr std::array<int, kArraySize> kArray = {1, 2, 3, 45, 6};
 const int kExpectedArraySum = std::accumulate(kArray.begin(), kArray.end(), 0);
@@ -89,22 +89,48 @@ struct AddTestSuite : AddTestSuiteTmpl<AddGenerator, kExpectedSum> {};
 
 struct Get5AndAddGenerator : WasmAssembler {
   explicit Get5AndAddGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
-    ValTypesToInt no_locals;
-    AddFunc<0>({i32}, "get5", {}, no_locals, [this]() { i32_const(5); });
-    AddFunc<2>({i32}, "add", {i32, i32}, no_locals, [this](Local a, Local b) {
-      local_get(a);
-      local_get(b);
-      i32_add();
-    });
+    GenerateGet5();
+    GenerateAdd();
+    GenerateGet5();
+    GenerateAdd();
   }
+
+ private:
+  void GenerateGet5() {
+    ValTypesToInt no_locals;
+    const std::string& name = kFunctionNames[count++];
+    AddFunc<0>({i32}, name.c_str(), {}, no_locals, [this]() { i32_const(5); });
+  }
+
+  void GenerateAdd() {
+    ValTypesToInt no_locals;
+    const std::string& name = kFunctionNames[count++];
+    AddFunc<2>({i32}, name.c_str(), {i32, i32}, no_locals,
+               [this](Local a, Local b) {
+                 local_get(a);
+                 local_get(b);
+                 i32_add();
+               });
+  }
+
+  const std::array<std::string, 4> kFunctionNames = {
+      std::string("get5_1"),
+      std::string("add_1"),
+      std::string("get5_2"),
+      std::string("add_2"),
+  };
+
+  int count = 0;
 };
 
 struct Get5AndAddTestSuite
     : GeneratorTestSuite<Get5AndAddGenerator, GetIntPtr> {
   static void ExpectFuncCorrect(GetIntPtr get5) {
-    Get5TestSuite::ExpectFuncCorrect(get5);
-    AddPtr add = (AddPtr)((int)get5 + 1);
-    AddTestSuite::ExpectFuncCorrect(add);
+    int first = (int)get5;
+    Get5TestSuite::ExpectFuncCorrect((GetIntPtr)(first + 0));
+    AddTestSuite::ExpectFuncCorrect((AddPtr)(first + 1));
+    Get5TestSuite::ExpectFuncCorrect((GetIntPtr)(first + 2));
+    AddTestSuite::ExpectFuncCorrect((AddPtr)(first + 3));
   }
 };
 

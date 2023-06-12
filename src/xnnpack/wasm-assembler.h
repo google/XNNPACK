@@ -16,10 +16,12 @@
 #include <cstdint>
 #include <cstring>
 #include <functional>
+#include <initializer_list>
 #include <numeric>
 #include <type_traits>
 #include <utility>
 #include <vector>
+
 
 namespace xnnpack {
 
@@ -49,12 +51,41 @@ static uint32_t VectorEncodingLength(
   return WidthEncodedU32(array.size()) + total_length_of_element_encodings;
 }
 
-struct FuncType {
-  FuncType(std::vector<ValType> param, std::vector<ValType> result)
-      : param(std::move(param)), result(std::move(result)) {}
-  std::vector<ValType> param;
-  std::vector<ValType> result;
+struct ResultType {
+  ResultType(std::initializer_list<ValType> codes) : type(kNoTypeCode) {
+    switch (codes.size()) {
+      case 0:
+        break;
+      case 1:
+        type = *codes.begin();
+        break;
+      default:
+        XNN_UNREACHABLE;
+    }
+  }
+
+  bool IsVoid() const { return type.code == kNoTypeCode; }
+
+  ValType type;
+
+ private:
+  static constexpr byte kNoTypeCode = 0;
 };
+
+inline bool operator==(const ResultType& lhs, const ResultType& rhs) {
+  return lhs.type == rhs.type;
+}
+
+struct FuncType {
+  FuncType(std::vector<ValType> param, ResultType result)
+      : param(std::move(param)), result(result) {}
+  std::vector<ValType> param;
+  ResultType result;
+};
+
+inline bool operator==(const FuncType& lhs, const FuncType& rhs) {
+  return lhs.param == rhs.param && lhs.result == rhs.result;
+}
 
 inline uint32_t& At(ValTypesToInt& map, ValType type) {
   const auto it =
@@ -538,14 +569,15 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
   using Function = internal::Function;
   using FuncType = internal::FuncType;
   using LocalsManager = internal::LocalsManager;
+  using ResultType = internal::ResultType;
 
  public:
   explicit WasmAssembler(xnn_code_buffer* buf) : AssemblerBase(buf) {}
 
   template <size_t InSize, typename Body>
-  void AddFunc(const std::vector<ValType>& result, const char* name,
+  void AddFunc(const ResultType& result, const char* name,
                const std::array<ValType, InSize>& param,
-               const ValTypesToInt& locals_declaration_count, Body&& body) {
+               ValTypesToInt locals_declaration_count, Body&& body) {
     std::vector<byte> code;
     SetOut(&code);
     ResetLocalsManager(InSize, locals_declaration_count);
@@ -557,7 +589,7 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
     internal::ArrayApply(std::move(input_locals), std::forward<Body>(body));
     end();
     RegisterFunction(result, name, std::vector(param.begin(), param.end()),
-                     locals_declaration_count, std::move(code));
+                     std::move(locals_declaration_count), std::move(code));
   }
 
   void Emit() {
@@ -582,16 +614,11 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
   constexpr static byte kExportsSectionCode = 0x07;
   constexpr static byte kCodeSectionCode = 0x0A;
 
-  void RegisterFunction(const std::vector<ValType>& result, const char* name,
-                        const std::vector<ValType>& param,
-                        ValTypesToInt locals_declaration_count,
-                        std::vector<byte> code) {
-    exports_.emplace_back(name, functions_.size());
-    func_types_.emplace_back(param, result);
-    functions_.emplace_back(func_types_.size() - 1,
-                            std::move(locals_declaration_count),
-                            std::move(code));
-  }
+  void RegisterFunction(const ResultType& result, const char* name,
+                        std::vector<ValType>&& param,
+                        ValTypesToInt&& locals_declaration_count,
+                        std::vector<byte> code);
+  uint32_t FindOrAddFuncType(FuncType&& type);
 
   template <typename Array>
   void EmitByteArray(Array&& array) {
@@ -615,7 +642,8 @@ class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
 
   void EmitTypeSection();
   void EmitFuncType(const FuncType& type);
-  void EmitResultType(const std::vector<ValType>& type);
+  void EmitParamType(const std::vector<ValType>& type);
+  void EmitResultType(const ResultType& type);
 
   void EmitImportSection();
 
