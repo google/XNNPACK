@@ -24,11 +24,11 @@ void xnn_f32_rmin_ukernel__wasm_x1(
   assert(input != NULL);
   assert(output != NULL);
 
-  float vacc0 = *input;
+  float vmin0 = *input;
   do {
     const float vt = *input++;
-    vacc0 = __builtin_wasm_min_f32(vacc0, vt);
+    vmin0 = __builtin_wasm_min_f32(vmin0, vt);
     batch -= sizeof(float);
   } while (batch != 0);
-  *output = vacc0;
+  output[0] = vmin0;
 }

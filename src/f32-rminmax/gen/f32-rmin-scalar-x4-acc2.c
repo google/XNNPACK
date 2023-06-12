@@ -25,8 +25,8 @@ void xnn_f32_rmin_ukernel__scalar_x4_acc2(
   assert(input != NULL);
   assert(output != NULL);
 
-  float vacc0 = *input;
-  float vacc1 = vacc0;
+  float vmin0 = *input;
+  float vmin1 = vmin0;
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float vt0 = input[0];
     const float vt1 = input[1];
@@ -34,19 +34,19 @@ void xnn_f32_rmin_ukernel__scalar_x4_acc2(
     const float vt3 = input[3];
     input += 4;
 
-    vacc0 = math_min_f32(vacc0, vt0);
-    vacc1 = math_min_f32(vacc1, vt1);
-    vacc0 = math_min_f32(vacc0, vt2);
-    vacc1 = math_min_f32(vacc1, vt3);
+    vmin0 = math_min_f32(vmin0, vt0);
+    vmin1 = math_min_f32(vmin1, vt1);
+    vmin0 = math_min_f32(vmin0, vt2);
+    vmin1 = math_min_f32(vmin1, vt3);
   }
-  vacc0 = math_min_f32(vacc0, vacc1);
+  vmin0 = math_min_f32(vmin0, vmin1);
 
   if XNN_UNLIKELY(batch != 0) {
     do {
       const float vt = *input++;
-      vacc0 = math_min_f32(vacc0, vt);
+      vmin0 = math_min_f32(vmin0, vt);
       batch -= sizeof(float);
     } while (batch != 0);
   }
-  *output = vacc0;
+  output[0] = vmin0;
 }

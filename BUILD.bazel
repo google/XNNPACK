@@ -6094,6 +6094,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_rminmax_bench",
+    srcs = [
+        "bench/f32-rminmax.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_rmin_bench",
     srcs = [
         "bench/f32-rmin.cc",
@@ -8171,6 +8179,15 @@ xnnpack_unit_test(
     name = "f32_rmax_test",
     srcs = [
         "test/f32-rmax.cc",
+        "test/reduce-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "f32_rminmax_test",
+    srcs = [
+        "test/f32-rminmax.cc",
         "test/reduce-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,

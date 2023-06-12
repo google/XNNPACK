@@ -116,6 +116,12 @@ DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rmin_ukernel__wasmsimd_pminmax_x12_a
 DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rmin_ukernel__wasmsimd_pminmax_x16_acc2)
 DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rmin_ukernel__wasmsimd_pminmax_x16_acc4)
 
+DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__scalar_x1)
+DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__scalar_x2_acc2)
+DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__scalar_x3_acc3)
+DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__scalar_x4_acc2)
+DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__scalar_x4_acc4)
+
 #define DECLARE_F32_RSUM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                       \
       size_t batch,                                \

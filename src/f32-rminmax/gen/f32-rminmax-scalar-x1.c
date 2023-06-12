@@ -14,7 +14,7 @@
 #include <xnnpack/reduce.h>
 
 
-void xnn_f32_rmax_ukernel__scalar_x1(
+void xnn_f32_rminmax_ukernel__scalar_x1(
     size_t batch,
     const float* input,
     float* output,
@@ -25,11 +25,14 @@ void xnn_f32_rmax_ukernel__scalar_x1(
   assert(input != NULL);
   assert(output != NULL);
 
+  float vmin0 = *input;
   float vmax0 = *input;
   do {
     const float vt = *input++;
+    vmin0 = math_min_f32(vmin0, vt);
     vmax0 = math_max_f32(vmax0, vt);
     batch -= sizeof(float);
   } while (batch != 0);
-  output[0] = vmax0;
+  output[0] = vmin0;
+  output[1] = vmax0;
 }

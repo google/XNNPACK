@@ -30,10 +30,11 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f16_f32acc|f32)_r(max|min|sum)_ukernel__(.+)_x(\d+)(_acc\d+)?", name)
+  match = re.fullmatch(r"xnn_(f16|f16_f32acc|f32)_r(minmax|max|min|sum)_ukernel__(.+)_x(\d+)(_acc\d+)?", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
   op_type = {
+    "minmax": "MinMax",
     "max": "Max",
     "min": "Min",
     "sum": "Sum",

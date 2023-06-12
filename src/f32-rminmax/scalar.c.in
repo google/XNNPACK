@@ -5,7 +5,7 @@
 
 $assert BATCH_TILE >= 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["MAX", "MIN"]
+$assert OP in ["MAX", "MIN", "MINMAX"]
 #include <assert.h>
 
 #include <xnnpack/common.h>
@@ -15,11 +15,12 @@ $if not WASM:
 
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
-$OP_FUNC = {
-$  "MAX": "__builtin_wasm_max_f32" if WASM else "math_max_f32",
-$  "MIN": "__builtin_wasm_min_f32" if WASM else "math_min_f32",
-$}[OP]
+$MAX = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
+$MIN = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
+$EMIT_MIN = "MIN" in OP
+$EMIT_MAX = "MAX" in OP
 $ISA = "wasm" if WASM else "scalar"
+$MAX_POS = 1 if OP == "MINMAX" else 0
 void xnn_f32_r${OP.lower()}_ukernel__${ISA}_x${BATCH_TILE}${ACC_SUFFIX}(
     size_t batch,
     const float* input,
@@ -31,13 +32,22 @@ void xnn_f32_r${OP.lower()}_ukernel__${ISA}_x${BATCH_TILE}${ACC_SUFFIX}(
   assert(input != NULL);
   assert(output != NULL);
 
-  float vacc0 = *input;
+  $if EMIT_MIN:
+    float vmin0 = *input;
+  $if EMIT_MAX:
+    float vmax0 = *input;
   $for A in range(1, ACCUMULATORS):
-    float vacc${A} = vacc0;
+    $if EMIT_MIN:
+      float vmin${A} = vmin0;
+    $if EMIT_MAX:
+      float vmax${A} = vmax0;
   $if BATCH_TILE == 1:
     do {
       const float vt = *input++;
-      vacc0 = ${OP_FUNC}(vacc0, vt);
+      $if EMIT_MIN:
+        vmin0 = ${MIN}(vmin0, vt);
+      $if EMIT_MAX:
+        vmax0 = ${MAX}(vmax0, vt);
       batch -= sizeof(float);
     } while (batch != 0);
   $else:
@@ -47,26 +57,41 @@ void xnn_f32_r${OP.lower()}_ukernel__${ISA}_x${BATCH_TILE}${ACC_SUFFIX}(
       input += ${BATCH_TILE};
 
       $for N in range(BATCH_TILE):
-        vacc${N % ACCUMULATORS} = ${OP_FUNC}(vacc${N % ACCUMULATORS}, vt${N});
+        $if EMIT_MIN:
+          vmin${N % ACCUMULATORS} = ${MIN}(vmin${N % ACCUMULATORS}, vt${N});
+        $if EMIT_MAX:
+          vmax${N % ACCUMULATORS} = ${MAX}(vmax${N % ACCUMULATORS}, vt${N});
     }
     $if ACCUMULATORS > 1:
       $ACC_SLICE = 1
       $while ACC_SLICE < ACCUMULATORS:
         $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
           $if A + ACC_SLICE < ACCUMULATORS:
-            vacc${A} = ${OP_FUNC}(vacc${A}, vacc${A + ACC_SLICE});
+            $if EMIT_MIN:
+              vmin${A} = ${MIN}(vmin${A}, vmin${A + ACC_SLICE});
+            $if EMIT_MAX:
+              vmax${A} = ${MAX}(vmax${A}, vmax${A + ACC_SLICE});
         $ACC_SLICE *= 2
 
     if XNN_UNLIKELY(batch != 0) {
       $if BATCH_TILE == 2:
         const float vt = *input;
-        vacc0 = ${OP_FUNC}(vacc0, vt);
+        $if EMIT_MIN:
+          vmin0 = ${MIN}(vmin0, vt);
+        $if EMIT_MAX:
+          vmax0 = ${MAX}(vmax0, vt);
       $else:
         do {
           const float vt = *input++;
-          vacc0 = ${OP_FUNC}(vacc0, vt);
+          $if EMIT_MIN:
+            vmin0 = ${MIN}(vmin0, vt);
+          $if EMIT_MAX:
+            vmax0 = ${MAX}(vmax0, vt);
           batch -= sizeof(float);
         } while (batch != 0);
     }
-  *output = vacc0;
+  $if EMIT_MIN:
+    output[0] = vmin0;
+  $if EMIT_MAX:
+    output[${MAX_POS}] = vmax0;
 }

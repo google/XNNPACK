@@ -25,21 +25,21 @@ void xnn_f32_rmax_ukernel__scalar_x2_acc2(
   assert(input != NULL);
   assert(output != NULL);
 
-  float vacc0 = *input;
-  float vacc1 = vacc0;
+  float vmax0 = *input;
+  float vmax1 = vmax0;
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
     const float vt0 = input[0];
     const float vt1 = input[1];
     input += 2;
 
-    vacc0 = math_max_f32(vacc0, vt0);
-    vacc1 = math_max_f32(vacc1, vt1);
+    vmax0 = math_max_f32(vmax0, vt0);
+    vmax1 = math_max_f32(vmax1, vt1);
   }
-  vacc0 = math_max_f32(vacc0, vacc1);
+  vmax0 = math_max_f32(vmax0, vmax1);
 
   if XNN_UNLIKELY(batch != 0) {
     const float vt = *input;
-    vacc0 = math_max_f32(vacc0, vt);
+    vmax0 = math_max_f32(vmax0, vt);
   }
-  *output = vacc0;
+  output[0] = vmax0;
 }
