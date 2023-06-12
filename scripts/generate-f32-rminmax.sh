@@ -17,6 +17,12 @@ tools/xngen src/f32-rminmax/neon.c.in -D BATCH_TILE=12 -D ACCUMULATORS=3 -D OP=M
 tools/xngen src/f32-rminmax/neon.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -D OP=MIN -o src/f32-rminmax/gen/f32-rmin-neon-x16-acc2.c &
 tools/xngen src/f32-rminmax/neon.c.in -D BATCH_TILE=16 -D ACCUMULATORS=4 -D OP=MIN -o src/f32-rminmax/gen/f32-rmin-neon-x16-acc4.c &
 
+tools/xngen src/f32-rminmax/neon.c.in -D BATCH_TILE=4  -D ACCUMULATORS=1 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-neon-x4.c &
+tools/xngen src/f32-rminmax/neon.c.in -D BATCH_TILE=8  -D ACCUMULATORS=2 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-neon-x8-acc2.c &
+tools/xngen src/f32-rminmax/neon.c.in -D BATCH_TILE=12 -D ACCUMULATORS=3 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-neon-x12-acc3.c &
+tools/xngen src/f32-rminmax/neon.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-neon-x16-acc2.c &
+tools/xngen src/f32-rminmax/neon.c.in -D BATCH_TILE=16 -D ACCUMULATORS=4 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-neon-x16-acc4.c &
+
 ################################### x86 SSE ###################################
 tools/xngen src/f32-rminmax/sse.c.in -D BATCH_TILE=4  -D ACCUMULATORS=1 -D OP=MAX -o src/f32-rminmax/gen/f32-rmax-sse-x4.c &
 tools/xngen src/f32-rminmax/sse.c.in -D BATCH_TILE=8  -D ACCUMULATORS=2 -D OP=MAX -o src/f32-rminmax/gen/f32-rmax-sse-x8-acc2.c &
