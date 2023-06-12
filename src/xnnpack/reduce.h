@@ -121,6 +121,12 @@ DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__scalar_x2_acc2)
 DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__scalar_x3_acc3)
 DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__scalar_x4_acc2)
 DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__scalar_x4_acc4)
+DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__neon_x4)
+DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__neon_x8_acc2)
+DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__neon_x12_acc3)
+DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__neon_x16_acc2)
+DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__neon_x16_acc4)
+DECLARE_F32_REDUCE_UKERNEL_FUNCTION(xnn_f32_rminmax_ukernel__scalar_x1)
 
 #define DECLARE_F32_RSUM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                       \
