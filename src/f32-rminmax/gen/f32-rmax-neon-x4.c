@@ -26,20 +26,20 @@ void xnn_f32_rmax_ukernel__neon_x4(
   assert(input != NULL);
   assert(output != NULL);
 
-  float32x4_t vacc0 = vld1q_dup_f32(input);
+  float32x4_t vmax0 = vld1q_dup_f32(input);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float32x4_t vt = vld1q_f32(input); input += 4;
-    vacc0 = vmaxq_f32(vacc0, vt);
+    vmax0 = vmaxq_f32(vmax0, vt);
   }
-  float32x2_t vacc = vmax_f32(vget_low_f32(vacc0), vget_high_f32(vacc0));
+  float32x2_t vmax = vmax_f32(vget_low_f32(vmax0), vget_high_f32(vmax0));
   if XNN_UNLIKELY(batch & (2 * sizeof(float))) {
     const float32x2_t vt = vld1_f32(input); input += 2;
-    vacc = vmax_f32(vacc, vt);
+    vmax = vmax_f32(vmax, vt);
   }
-  vacc = vpmax_f32(vacc, vacc);
+  vmax = vpmax_f32(vmax, vmax);
   if XNN_UNLIKELY(batch & (1 * sizeof(float))) {
     const float32x2_t vt = vld1_dup_f32(input);
-    vacc = vmax_f32(vacc, vt);
+    vmax = vmax_f32(vmax, vt);
   }
-  vst1_lane_f32(output, vacc, 0);
+  vst1_lane_f32(output, vmax, 0);
 }

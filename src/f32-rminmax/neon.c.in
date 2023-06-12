@@ -8,7 +8,7 @@ $assert BATCH_TILE >= 4
 $SIMD_TILE = BATCH_TILE // 4
 $assert ACCUMULATORS <= SIMD_TILE
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["MAX", "MIN"]
+$assert OP in ["MAX", "MIN", "MINMAX"]
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -18,10 +18,10 @@ $assert OP in ["MAX", "MIN"]
 
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
-$VOPQ_F32, VOP_F32, VPOP_F32 = {
-$  "MAX": ("vmaxq_f32", "vmax_f32", "vpmax_f32"),
-$  "MIN": ("vminq_f32", "vmin_f32", "vpmin_f32"),
-$}[OP]
+$EMIT_MIN = "MIN" in OP
+$EMIT_MAX = "MAX" in OP
+$VMINQ_F32, VMIN_F32, VPMIN_F32 = "vminq_f32", "vmin_f32", "vpmin_f32"
+$VMAXQ_F32, VMAX_F32, VPMAX_F32 = "vmaxq_f32", "vmax_f32", "vpmax_f32"
 void xnn_f32_r${OP.lower()}_ukernel__neon_x${BATCH_TILE}${ACC_SUFFIX}(
     size_t batch,
     const float* input,
@@ -33,37 +33,71 @@ void xnn_f32_r${OP.lower()}_ukernel__neon_x${BATCH_TILE}${ACC_SUFFIX}(
   assert(input != NULL);
   assert(output != NULL);
 
-  float32x4_t vacc0 = vld1q_dup_f32(input);
+  $if EMIT_MIN:
+    float32x4_t vmin0 = vld1q_dup_f32(input);
+    $if EMIT_MAX:
+      float32x4_t vmax0 = vmin0;
+  $elif EMIT_MAX:
+    float32x4_t vmax0 = vld1q_dup_f32(input);
   $for A in range(1, ACCUMULATORS):
-    float32x4_t vacc${A} = vacc0;
+    $if EMIT_MIN:
+      float32x4_t vmin${A} = vmin0;
+    $if EMIT_MAX:
+      float32x4_t vmax${A} = vmax0;
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(SIMD_TILE):
         const float32x4_t vt${N} = vld1q_f32(input); input += 4;
 
       $for N in range(SIMD_TILE):
-        vacc${N % ACCUMULATORS} = ${VOPQ_F32}(vacc${N % ACCUMULATORS}, vt${N});
+        $if $EMIT_MIN:
+          vmin${N % ACCUMULATORS} = ${VMINQ_F32}(vmin${N % ACCUMULATORS}, vt${N});
+        $if $EMIT_MAX:
+          vmax${N % ACCUMULATORS} = ${VMAXQ_F32}(vmax${N % ACCUMULATORS}, vt${N});
     }
     $if ACCUMULATORS > 1:
       $ACC_SLICE = 1
       $while ACC_SLICE < ACCUMULATORS:
         $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
           $if A + ACC_SLICE < ACCUMULATORS:
-            vacc${A} = ${VOPQ_F32}(vacc${A}, vacc${A + ACC_SLICE});
+            $if $EMIT_MIN:
+              vmin${A} = ${VMINQ_F32}(vmin${A}, vmin${A + ACC_SLICE});
+            $if $EMIT_MAX:
+              vmax${A} = ${VMAXQ_F32}(vmax${A}, vmax${A + ACC_SLICE});
         $ACC_SLICE *= 2
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float32x4_t vt = vld1q_f32(input); input += 4;
-    vacc0 = ${VOPQ_F32}(vacc0, vt);
+    $if $EMIT_MIN:
+      vmin0 = ${VMINQ_F32}(vmin0, vt);
+    $if $EMIT_MAX:
+      vmax0 = ${VMAXQ_F32}(vmax0, vt);
   }
-  float32x2_t vacc = ${VOP_F32}(vget_low_f32(vacc0), vget_high_f32(vacc0));
+  $if $EMIT_MIN:
+    float32x2_t vmin = ${VMIN_F32}(vget_low_f32(vmin0), vget_high_f32(vmin0));
+  $if $EMIT_MAX:
+    float32x2_t vmax = ${VMAX_F32}(vget_low_f32(vmax0), vget_high_f32(vmax0));
   if XNN_UNLIKELY(batch & (2 * sizeof(float))) {
     const float32x2_t vt = vld1_f32(input); input += 2;
-    vacc = ${VOP_F32}(vacc, vt);
+    $if $EMIT_MIN:
+      vmin = ${VMIN_F32}(vmin, vt);
+    $if $EMIT_MAX:
+      vmax = ${VMAX_F32}(vmax, vt);
   }
-  vacc = ${VPOP_F32}(vacc, vacc);
+  $if $EMIT_MIN:
+    vmin = ${VPMIN_F32}(vmin, vmin);
+  $if $EMIT_MAX:
+    vmax = ${VPMAX_F32}(vmax, vmax);
   if XNN_UNLIKELY(batch & (1 * sizeof(float))) {
     const float32x2_t vt = vld1_dup_f32(input);
-    vacc = ${VOP_F32}(vacc, vt);
+    $if $EMIT_MIN:
+      vmin = ${VMIN_F32}(vmin, vt);
+    $if $EMIT_MAX:
+      vmax = ${VMAX_F32}(vmax, vt);
   }
-  vst1_lane_f32(output, vacc, 0);
+  $if $EMIT_MIN:
+    vst1_lane_f32(output, vmin, 0);
+    $if $EMIT_MAX:
+      vst1_lane_f32(output + 1, vmax, 0);
+  $elif $EMIT_MAX:
+    vst1_lane_f32(output, vmax, 0);
 }
