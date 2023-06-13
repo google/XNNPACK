@@ -50,6 +50,8 @@ constexpr size_t kArraySize = 5;
 constexpr std::array<int, kArraySize> kArray = {1, 2, 3, 45, 6};
 const int kExpectedArraySum = std::accumulate(kArray.begin(), kArray.end(), 0);
 
+#include <xnnpack/wasm-assembler-macro-define.h>
+
 struct Get5Generator : WasmAssembler {
   explicit Get5Generator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt no_locals;
@@ -168,6 +170,25 @@ struct AddTwiceGenerator : WasmAssembler {
 struct AddTwiceTestSuite
     : AddTestSuiteTmpl<AddTwiceGenerator, kExpectedSumTwice> {};
 
+struct AddTwiceDeclareInitGenerator : WasmAssembler {
+  explicit AddTwiceDeclareInitGenerator(xnn_code_buffer* buf)
+      : WasmAssembler(buf) {
+    ValTypesToInt two_local_ints = {{i32, 2}};
+    AddFunc<2>({i32}, "add_twice_declare_init", {i32, i32}, two_local_ints,
+               [this](Local a, Local b) {
+                 auto first = MakeLocal(I32Add(a, b));
+                 auto second = MakeLocal(first);
+                 second = first;
+                 second = I32Add(second, a);
+                 second = I32Add(second, b);
+                 local_get(second);
+               });
+  }
+};
+
+struct AddTwiceDeclareInitTestSuite
+    : AddTestSuiteTmpl<AddTwiceDeclareInitGenerator, kExpectedSumTwice> {};
+
 struct AddTwiceWithScopesGenerator : WasmAssembler {
   explicit AddTwiceWithScopesGenerator(xnn_code_buffer* buf)
       : WasmAssembler(buf) {
@@ -215,8 +236,8 @@ struct MaxCodeGenerator : WasmAssembler {
     AddFunc<2>({i32}, "max", {i32, i32}, single_local_int,
                [this](Local a, Local b) {
                  auto result = MakeLocal(i32);
-                 IfElse([&] { I32LtS(a, b); }, [&] { result = b; },
-                        [&] { result = a; });
+                 IF_ELSE(
+                     I32LtS(a, b), { result = b; }, { result = a; })
                  local_get(result);
                });
   }
@@ -238,7 +259,7 @@ struct MaxIncompleteIfCodeGenerator : WasmAssembler {
     ValTypesToInt no_locals = {};
     AddFunc<2>({i32}, "max_incomplete_if", {i32, i32}, no_locals,
                [this](Local a, Local b) {
-                 If([&] { I32LtS(a, b); }, [&] { a = b; });
+                 IF(I32LtS(a, b), { a = b; });
                  local_get(a);
                });
   }
@@ -253,11 +274,10 @@ struct SumUntilCodeGenerator : WasmAssembler {
     AddFunc<1>({i32}, "SumUntil", {i32}, two_local_ints, [&](Local n) {
       auto i = MakeLocal(i32);
       auto result = MakeLocal(i32);
-      While([&] { I32LtS(i, n); },
-            [&] {
-              result = I32Add(result, i);
-              i = I32Add(i, I32Const(1));
-            });
+      WHILE(I32LtS(i, n), {
+        result = I32Add(result, i);
+        i = I32Add(i, I32Const(1));
+      });
       local_get(result);
     });
   }
@@ -289,12 +309,12 @@ struct DoWhileCodeGenerator : WasmAssembler {
       auto i = MakeLocal(i32);
       auto result = MakeLocal(i32);
       result = I32Const(kPositive);
-      DoWhile(
-          [&] {
+      DO_WHILE(
+          {
             result = I32Add(result, result);
             i = I32Add(i, I32Const(1));
           },
-          [&] { I32LtS(i, n); });
+          I32LtS(i, n));
       local_get(result);
     });
   }
@@ -567,7 +587,8 @@ REGISTER_TYPED_TEST_SUITE_P(WasmAssemblerTest, ValidCode);
 
 using WasmAssemblerTestSuits = testing::Types<
     Get5TestSuite, AddTestSuite, Get5AndAddTestSuite, AddWithLocalTestSuite,
-    AddTwiceTestSuite, AddTwiceWithScopesTestSuite, Add5TestSuite, MaxTestSuite,
+    AddTwiceTestSuite, AddTwiceDeclareInitTestSuite,
+    AddTwiceWithScopesTestSuite, Add5TestSuite, MaxTestSuite,
     MaxIncompleteIfTestSuite, SumUntilTestSuite, DoWhileTestSuite,
     SumArrayTestSuite, MemCpyTestSuite, AddDelayedInitTestSuite,
     ManyFunctionsGeneratorTestSuite, ManyLocalsGeneratorTestSuite,
@@ -588,6 +609,7 @@ TEST(WasmAssemblerTest, InvalidCode) {
 
 namespace {
 class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
+                    public internal::I32WasmOps<WasmOpsTest>,
                     public internal::LocalWasmOps<WasmOpsTest>,
                     public internal::MemoryWasmOps<WasmOpsTest>,
                     public Test {
@@ -607,6 +629,7 @@ class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
 
   Sequence sequence_;
   ValueOnStack v128_value_{v128, this};
+  ValueOnStack i32_value_{i32, this};
 };
 
 class V128StoreLaneWasmOpTest : public WasmOpsTest {
@@ -641,6 +664,16 @@ TEST_F(V128StoreLaneWasmOpTest, 32Lane) {
 TEST_F(V128StoreLaneWasmOpTest, 64Lane) {
   SetStoreLaneExpectations(0x5B);
   V128Store64Lane(v128_value_, v128_value_, kLane, kOffset, kAlignment);
+}
+
+TEST_F(WasmOpsTest, I32Ne) {
+  Emit8ExpectCall(0x47);
+  I32Ne(i32_value_, i32_value_);
+}
+
+TEST_F(WasmOpsTest, I32GeU) {
+  Emit8ExpectCall(0x4F);
+  I32GeU(i32_value_, i32_value_);
 }
 
 using ::xnnpack::internal::At;

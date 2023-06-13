@@ -2016,6 +2016,7 @@ WASM_JIT_LINKOPTS = select({
 
 JIT_WASM32_SRCS = [
     "src/f32-vrelu/f32-vrelu-ukernel-jit-wasm32-shr.cc",
+    "src/f32-gemm/f32-gemm-Xx8-wasmsimd-x86-loadsplat.cc",
 ]
 
 filegroup(
@@ -5173,6 +5174,8 @@ xnnpack_cc_library(
         "src/xnnpack/assembler.h",
         "src/xnnpack/leb128.h",
         "src/xnnpack/wasm-assembler.h",
+        "src/xnnpack/wasm-assembler-macro-define.h",
+        "src/xnnpack/wasm-assembler-macro-undef.h",
     ],
     aarch32_srcs = JIT_AARCH32_SRCS,
     aarch64_srcs = JIT_AARCH64_SRCS,
@@ -5207,6 +5210,8 @@ xnnpack_cc_library(
         "src/xnnpack/assembler.h",
         "src/xnnpack/leb128.h",
         "src/xnnpack/wasm-assembler.h",
+        "src/xnnpack/wasm-assembler-macro-define.h",
+        "src/xnnpack/wasm-assembler-macro-undef.h",
     ],
     aarch32_srcs = JIT_AARCH32_SRCS,
     aarch64_srcs = JIT_AARCH64_SRCS,
@@ -6027,6 +6032,7 @@ xnnpack_benchmark(
         "bench/gemm.h",
     ],
     copts = xnnpack_optional_ruy_copts(),
+    linkopts = WASM_JIT_LINKOPTS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":allocator",
         ":math",
@@ -7988,8 +7994,10 @@ xnnpack_unit_test(
         "test/f32-gemm.cc",
         "test/f32-gemm-2.cc",
     ],
+    linkopts = WASM_JIT_LINKOPTS,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
+        ":jit",
     ],
 )
 

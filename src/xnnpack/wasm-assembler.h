@@ -143,8 +143,10 @@ class I32WasmOps : public WasmOpsBase<Derived, I32WasmOps<Derived>> {
   void i32_and() const { this->Emit8(0x71); }
   void i32_lt_s() const { this->Emit8(0x48); }
   void i32_le_s() const { this->Emit8(0x4C); }
+  void i32_ge_u() const { this->Emit8(0x4F); }
   void i32_shl() const { this->Emit8(0x74); }
   void i32_shr_u() const { this->Emit8(0x76); }
+  void i32_ne() const { this->Emit8(0x47); }
   void i32_const(int32_t value) const {
     this->Emit8(0x41);
     this->EmitEncodedS32(value);
@@ -332,7 +334,13 @@ class LocalWasmOps : public LocalsManager {
 
     Local(const Local& other) = delete;
 
-    Local(Local&& other) = default;
+    Local(Local&& other)
+        : type_(other.type_),
+          index_(other.index_),
+          ops_(other.ops_),
+          is_managed_(other.is_managed_) {
+      other.index_ = kInvalidIndex;
+    }
 
     Local& operator=(const Local& other) {
       assert((type_ == other.type_) &&
@@ -382,6 +390,12 @@ class LocalWasmOps : public LocalsManager {
                  GetMutableDerived()};
   }
 
+  Local MakeLocal(const ValueOnStack& rhs) {
+    auto result = MakeLocal(rhs.type);
+    result = rhs;
+    return result;
+  }
+
   void local_get(uint32_t index) const {
     GetDerived()->Emit8(0x20);
     GetDerived()->EmitEncodedU32(index);
@@ -416,8 +430,16 @@ class LocalWasmOps : public LocalsManager {
     return BinaryOp(a, b, &Derived::i32_le_s);
   }
 
+  ValueOnStack I32GeU(const ValueOnStack& a, const ValueOnStack& b) {
+    return BinaryOp(a, b, &Derived::i32_ge_u);
+  }
+
   ValueOnStack I32Shl(const ValueOnStack& value, const ValueOnStack& bits_num) {
     return BinaryOp(value, bits_num, &Derived::i32_shl);
+  }
+
+  ValueOnStack I32Ne(const ValueOnStack& lhs, const ValueOnStack& rhs) {
+    return BinaryOp(lhs, rhs, &Derived::i32_ne);
   }
 
   ValueOnStack I32ShrU(const ValueOnStack& value,
