@@ -599,7 +599,7 @@ void GemmMicrokernelTester::Test(
     std::fill(packed_w.begin(), packed_w.end(), 0);
     // Row sums are multiplied by input zero point, since we don';t know it
     // until runtime, set it to 1.
-    const xnn_qs8_packing_params packing_params = { .input_zero_point = 1 };
+    const xnn_qs8_packing_params packing_params = { /*input_zero_point=*/1 };
     xnn_pack_qs8_gemm_goi_w(1, n(), k(), nr(), kr(), sr(),
                             b.data(), nullptr, packed_w.data(), sizeof(float) * nr(), &packing_params);
     // Fill in packed bias
