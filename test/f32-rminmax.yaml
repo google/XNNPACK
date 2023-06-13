@@ -16,3 +16,10 @@
 - name: xnn_f32_rminmax_ukernel__neon_x12_acc3
 - name: xnn_f32_rminmax_ukernel__neon_x16_acc2
 - name: xnn_f32_rminmax_ukernel__neon_x16_acc4
+
+# x86 SSE
+- name: xnn_f32_rminmax_ukernel__sse_x4
+- name: xnn_f32_rminmax_ukernel__sse_x8_acc2
+- name: xnn_f32_rminmax_ukernel__sse_x12_acc3
+- name: xnn_f32_rminmax_ukernel__sse_x16_acc2
+- name: xnn_f32_rminmax_ukernel__sse_x16_acc4

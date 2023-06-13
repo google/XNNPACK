@@ -83,6 +83,29 @@ BENCHMARK_CAPTURE(f32_rminmax, scalar_x4_acc4,
   ->Apply(benchmark::utils::ReductionParameters<float>)
   ->UseRealTime();
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f32_rminmax, sse_x4,
+                    xnn_f32_rminmax_ukernel__sse_x4)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, sse_x8_acc2,
+                    xnn_f32_rminmax_ukernel__sse_x8_acc2)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, sse_x12_acc3,
+                    xnn_f32_rminmax_ukernel__sse_x12_acc3)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, sse_x16_acc2,
+                    xnn_f32_rminmax_ukernel__sse_x16_acc2)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, sse_x16_acc4,
+                    xnn_f32_rminmax_ukernel__sse_x16_acc4)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(f32_rminmax, neon_x4,
                     xnn_f32_rminmax_ukernel__neon_x4,

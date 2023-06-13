@@ -26,37 +26,37 @@ void xnn_f32_rmin_ukernel__sse_x12_acc3(
   assert(input != NULL);
   assert(output != NULL);
 
-  __m128 vacc0 = _mm_load_ss(input);
-  vacc0 = _mm_shuffle_ps(vacc0, vacc0, _MM_SHUFFLE(0, 0, 0, 0));
-  __m128 vacc1 = vacc0;
-  __m128 vacc2 = vacc0;
+  __m128 vmin0 = _mm_load_ss(input);
+  vmin0 = _mm_shuffle_ps(vmin0, vmin0, _MM_SHUFFLE(0, 0, 0, 0));
+  __m128 vmin1 = vmin0;
+  __m128 vmin2 = vmin0;
   for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
     const __m128 vt0 = _mm_loadu_ps(input);
     const __m128 vt1 = _mm_loadu_ps(input + 4);
     const __m128 vt2 = _mm_loadu_ps(input + 8);
     input += 12;
 
-    vacc0 = _mm_min_ps(vacc0, vt0);
-    vacc1 = _mm_min_ps(vacc1, vt1);
-    vacc2 = _mm_min_ps(vacc2, vt2);
+    vmin0 = _mm_min_ps(vmin0, vt0);
+    vmin1 = _mm_min_ps(vmin1, vt1);
+    vmin2 = _mm_min_ps(vmin2, vt2);
   }
-  vacc0 = _mm_min_ps(vacc0, vacc1);
-  vacc0 = _mm_min_ps(vacc0, vacc2);
+  vmin0 = _mm_min_ps(vmin0, vmin1);
+  vmin0 = _mm_min_ps(vmin0, vmin2);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 vt = _mm_loadu_ps(input);
     input += 4;
 
-    vacc0 = _mm_min_ps(vacc0, vt);
+    vmin0 = _mm_min_ps(vmin0, vt);
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
       const __m128 vt = _mm_load_ss(input);
       input += 1;
-      vacc0 = _mm_min_ss(vacc0, vt);
+      vmin0 = _mm_min_ss(vmin0, vt);
       batch -= sizeof(float);
     } while (batch != 0);
   }
-  vacc0 = _mm_min_ps(vacc0, _mm_movehl_ps(vacc0, vacc0));
-  vacc0 = _mm_min_ss(vacc0, _mm_shuffle_ps(vacc0, vacc0, _MM_SHUFFLE(1, 1, 1, 1)));
-  _mm_store_ss(output, vacc0);
+  vmin0 = _mm_min_ps(vmin0, _mm_movehl_ps(vmin0, vmin0));
+  vmin0 = _mm_min_ss(vmin0, _mm_shuffle_ps(vmin0, vmin0, _MM_SHUFFLE(1, 1, 1, 1)));
+  _mm_store_ss(output, vmin0);
 }

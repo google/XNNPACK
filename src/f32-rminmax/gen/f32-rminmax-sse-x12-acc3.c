@@ -15,7 +15,7 @@
 #include <xnnpack/reduce.h>
 
 
-void xnn_f32_rmin_ukernel__sse_x16_acc4(
+void xnn_f32_rminmax_ukernel__sse_x12_acc3(
     size_t batch,
     const float* input,
     float* output,
@@ -28,39 +28,48 @@ void xnn_f32_rmin_ukernel__sse_x16_acc4(
 
   __m128 vmin0 = _mm_load_ss(input);
   vmin0 = _mm_shuffle_ps(vmin0, vmin0, _MM_SHUFFLE(0, 0, 0, 0));
+  __m128 vmax0 = vmin0;
   __m128 vmin1 = vmin0;
+  __m128 vmax1 = vmax0;
   __m128 vmin2 = vmin0;
-  __m128 vmin3 = vmin0;
-  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+  __m128 vmax2 = vmax0;
+  for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
     const __m128 vt0 = _mm_loadu_ps(input);
     const __m128 vt1 = _mm_loadu_ps(input + 4);
     const __m128 vt2 = _mm_loadu_ps(input + 8);
-    const __m128 vt3 = _mm_loadu_ps(input + 12);
-    input += 16;
+    input += 12;
 
     vmin0 = _mm_min_ps(vmin0, vt0);
+    vmax0 = _mm_max_ps(vmax0, vt0);
     vmin1 = _mm_min_ps(vmin1, vt1);
+    vmax1 = _mm_max_ps(vmax1, vt1);
     vmin2 = _mm_min_ps(vmin2, vt2);
-    vmin3 = _mm_min_ps(vmin3, vt3);
+    vmax2 = _mm_max_ps(vmax2, vt2);
   }
   vmin0 = _mm_min_ps(vmin0, vmin1);
-  vmin2 = _mm_min_ps(vmin2, vmin3);
+  vmax0 = _mm_max_ps(vmax0, vmax1);
   vmin0 = _mm_min_ps(vmin0, vmin2);
+  vmax0 = _mm_max_ps(vmax0, vmax2);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 vt = _mm_loadu_ps(input);
     input += 4;
 
     vmin0 = _mm_min_ps(vmin0, vt);
+    vmax0 = _mm_max_ps(vmax0, vt);
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
       const __m128 vt = _mm_load_ss(input);
       input += 1;
       vmin0 = _mm_min_ss(vmin0, vt);
+      vmax0 = _mm_max_ss(vmax0, vt);
       batch -= sizeof(float);
     } while (batch != 0);
   }
   vmin0 = _mm_min_ps(vmin0, _mm_movehl_ps(vmin0, vmin0));
   vmin0 = _mm_min_ss(vmin0, _mm_shuffle_ps(vmin0, vmin0, _MM_SHUFFLE(1, 1, 1, 1)));
+  vmax0 = _mm_max_ps(vmax0, _mm_movehl_ps(vmax0, vmax0));
+  vmax0 = _mm_max_ss(vmax0, _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(1, 1, 1, 1)));
   _mm_store_ss(output, vmin0);
+  _mm_store_ss(output + 1 , vmax0);
 }

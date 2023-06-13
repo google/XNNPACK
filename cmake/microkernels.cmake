@@ -5845,6 +5845,11 @@ SET(ALL_SSE_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rmin-sse-x12-acc3.c
   src/f32-rminmax/gen/f32-rmin-sse-x16-acc2.c
   src/f32-rminmax/gen/f32-rmin-sse-x16-acc4.c
+  src/f32-rminmax/gen/f32-rminmax-sse-x4.c
+  src/f32-rminmax/gen/f32-rminmax-sse-x8-acc2.c
+  src/f32-rminmax/gen/f32-rminmax-sse-x12-acc3.c
+  src/f32-rminmax/gen/f32-rminmax-sse-x16-acc2.c
+  src/f32-rminmax/gen/f32-rminmax-sse-x16-acc4.c
   src/f32-rsum/gen/f32-rsum-sse-x4.c
   src/f32-rsum/gen/f32-rsum-sse-x8-acc2.c
   src/f32-rsum/gen/f32-rsum-sse-x12-acc3.c

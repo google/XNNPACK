@@ -26,11 +26,11 @@ void xnn_f32_rmax_ukernel__sse_x16_acc4(
   assert(input != NULL);
   assert(output != NULL);
 
-  __m128 vacc0 = _mm_load_ss(input);
-  vacc0 = _mm_shuffle_ps(vacc0, vacc0, _MM_SHUFFLE(0, 0, 0, 0));
-  __m128 vacc1 = vacc0;
-  __m128 vacc2 = vacc0;
-  __m128 vacc3 = vacc0;
+  __m128 vmax0 = _mm_load_ss(input);
+  vmax0 = _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(0, 0, 0, 0));
+  __m128 vmax1 = vmax0;
+  __m128 vmax2 = vmax0;
+  __m128 vmax3 = vmax0;
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m128 vt0 = _mm_loadu_ps(input);
     const __m128 vt1 = _mm_loadu_ps(input + 4);
@@ -38,29 +38,29 @@ void xnn_f32_rmax_ukernel__sse_x16_acc4(
     const __m128 vt3 = _mm_loadu_ps(input + 12);
     input += 16;
 
-    vacc0 = _mm_max_ps(vacc0, vt0);
-    vacc1 = _mm_max_ps(vacc1, vt1);
-    vacc2 = _mm_max_ps(vacc2, vt2);
-    vacc3 = _mm_max_ps(vacc3, vt3);
+    vmax0 = _mm_max_ps(vmax0, vt0);
+    vmax1 = _mm_max_ps(vmax1, vt1);
+    vmax2 = _mm_max_ps(vmax2, vt2);
+    vmax3 = _mm_max_ps(vmax3, vt3);
   }
-  vacc0 = _mm_max_ps(vacc0, vacc1);
-  vacc2 = _mm_max_ps(vacc2, vacc3);
-  vacc0 = _mm_max_ps(vacc0, vacc2);
+  vmax0 = _mm_max_ps(vmax0, vmax1);
+  vmax2 = _mm_max_ps(vmax2, vmax3);
+  vmax0 = _mm_max_ps(vmax0, vmax2);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 vt = _mm_loadu_ps(input);
     input += 4;
 
-    vacc0 = _mm_max_ps(vacc0, vt);
+    vmax0 = _mm_max_ps(vmax0, vt);
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
       const __m128 vt = _mm_load_ss(input);
       input += 1;
-      vacc0 = _mm_max_ss(vacc0, vt);
+      vmax0 = _mm_max_ss(vmax0, vt);
       batch -= sizeof(float);
     } while (batch != 0);
   }
-  vacc0 = _mm_max_ps(vacc0, _mm_movehl_ps(vacc0, vacc0));
-  vacc0 = _mm_max_ss(vacc0, _mm_shuffle_ps(vacc0, vacc0, _MM_SHUFFLE(1, 1, 1, 1)));
-  _mm_store_ss(output, vacc0);
+  vmax0 = _mm_max_ps(vmax0, _mm_movehl_ps(vmax0, vmax0));
+  vmax0 = _mm_max_ss(vmax0, _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(1, 1, 1, 1)));
+  _mm_store_ss(output , vmax0);
 }
