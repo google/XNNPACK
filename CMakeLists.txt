@@ -2591,7 +2591,7 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_EXECUTABLE(qd8-f32-qs8w-gemm-test test/qd8-f32-qs8w-gemm.cc)
   TARGET_INCLUDE_DIRECTORIES(qd8-f32-qs8w-gemm-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(qd8-f32-qs8w-gemm-test PRIVATE fp16 pthreadpool gtest gtest_main)
-  TARGET_LINK_LIBRARIES(qd8-f32-qs8w-gemm-test PRIVATE hardware-config logging microkernel-utils microkernels-all microparams-init packing)
+  TARGET_LINK_LIBRARIES(qd8-f32-qs8w-gemm-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME qd8-f32-qs8w-gemm-test COMMAND qd8-f32-qs8w-gemm-test)
 
   ADD_EXECUTABLE(qs8-qc8w-dwconv-minmax-multipass-fp32-test test/qs8-qc8w-dwconv-minmax-multipass-fp32.cc)
