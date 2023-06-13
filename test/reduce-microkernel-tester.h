@@ -24,6 +24,7 @@
 
 
 class ReduceMicrokernelTester {
+  using FloatIt = std::vector<float>::iterator;
  public:
   enum class OpType {
     Max,
@@ -60,7 +61,9 @@ class ReduceMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
       // Compute reference results.
-      auto [output_min_ref, output_max_ref] = std::minmax_element(input.begin(), input.begin() + batch_size());
+
+      FloatIt min, max;
+      std::tie(min, max) = std::minmax_element(input.begin(), input.begin() + batch_size());
 
       // Prepare parameters.
       xnn_f32_default_params params;
@@ -75,17 +78,17 @@ class ReduceMicrokernelTester {
       // Verify results.
       switch (op_type) {
         case OpType::Max:
-          EXPECT_EQ(output[0], *output_max_ref)
+          EXPECT_EQ(output[0], *max)
               << "with batch " << batch_size();
           break;
         case OpType::Min:
-          EXPECT_EQ(output[0], *output_min_ref)
+          EXPECT_EQ(output[0], *min)
               << "with batch " << batch_size();
           break;
         case OpType::MinMax:
-          EXPECT_EQ(output[0], *output_min_ref)
+          EXPECT_EQ(output[0], *min)
               << "with batch " << batch_size();
-          EXPECT_EQ(output[1], *output_max_ref)
+          EXPECT_EQ(output[1], *max)
               << "with batch " << batch_size();
           break;
       }
