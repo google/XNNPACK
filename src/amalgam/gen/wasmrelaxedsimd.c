@@ -9583,7 +9583,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
     v128_t vacc0x1 = wasm_v128_load32_zero((const int32_t*) w + 1);
     v128_t vacc0x2 = wasm_v128_load32_zero((const int32_t*) w + 2);
     v128_t vacc0x3 = wasm_v128_load32_zero((const int32_t*) w + 3);
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t k = kc;
     do {
@@ -9603,7 +9603,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
 
       vacc0x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va0, vb3, vacc0x3);
 
-      w = (const void*) ((const int8_t*) w + 64);
+      w = (const int8_t*) w + 64;
       k -= 16 * sizeof(int8_t);
     } while (k != 0);
 
@@ -9717,7 +9717,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
     v128_t vacc3x1 = vacc0x1;
     v128_t vacc3x2 = vacc0x2;
     v128_t vacc3x3 = vacc0x3;
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t k = kc;
     do {
@@ -9755,7 +9755,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
       vacc2x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va2, vb3, vacc2x3);
       vacc3x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va3, vb3, vacc3x3);
 
-      w = (const void*) ((const int8_t*) w + 64);
+      w = (const int8_t*) w + 64;
       k -= 16 * sizeof(int8_t);
     } while (k != 0);
 
@@ -9885,7 +9885,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
     v128_t vacc0x1 = wasm_v128_load32_zero((const int32_t*) w + 1);
     v128_t vacc0x2 = wasm_v128_load32_zero((const int32_t*) w + 2);
     v128_t vacc0x3 = wasm_v128_load32_zero((const int32_t*) w + 3);
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t p = ks;
     do {
@@ -9913,7 +9913,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
 
         vacc0x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va0, vb3, vacc0x3);
 
-        w = (const void*) ((const int8_t*) w + 64);
+        w = (const int8_t*) w + 64;
         k -= 16 * sizeof(int8_t);
       } while (k != 0);
       p -= 1 * sizeof(void*);
@@ -10026,7 +10026,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
     v128_t vacc3x1 = vacc0x1;
     v128_t vacc3x2 = vacc0x2;
     v128_t vacc3x3 = vacc0x3;
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t p = ks;
     do {
@@ -10084,7 +10084,7 @@ void xnn_qs8_igemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
         vacc2x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va2, vb3, vacc2x3);
         vacc3x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va3, vb3, vacc3x3);
 
-        w = (const void*) ((const int8_t*) w + 64);
+        w = (const int8_t*) w + 64;
         k -= 16 * sizeof(int8_t);
       } while (k != 0);
       p -= 4 * sizeof(void*);
@@ -10210,7 +10210,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
     v128_t vacc0x1 = wasm_v128_load32_zero((const int32_t*) w + 1);
     v128_t vacc0x2 = wasm_v128_load32_zero((const int32_t*) w + 2);
     v128_t vacc0x3 = wasm_v128_load32_zero((const int32_t*) w + 3);
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t k = kc;
     do {
@@ -10230,7 +10230,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
 
       vacc0x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va0, vb3, vacc0x3);
 
-      w = (const void*) ((const int8_t*) w + 64);
+      w = (const int8_t*) w + 64;
       k -= 16 * sizeof(int8_t);
     } while (k != 0);
 
@@ -10242,7 +10242,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
     vacc0x0123 = wasm_f32x4_convert_i32x4(vacc0x0123);
 
     const v128_t vscale0123 = wasm_v128_load(w);
-    w = (const void*) ((const float*) w + 4);
+    w = (const float*) w + 4;
     vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vscale0123);
 
     const v128_t vmagic_bias = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias);
@@ -10345,7 +10345,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
     v128_t vacc3x1 = vacc0x1;
     v128_t vacc3x2 = vacc0x2;
     v128_t vacc3x3 = vacc0x3;
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t k = kc;
     do {
@@ -10383,7 +10383,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
       vacc2x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va2, vb3, vacc2x3);
       vacc3x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va3, vb3, vacc3x3);
 
-      w = (const void*) ((const int8_t*) w + 64);
+      w = (const int8_t*) w + 64;
       k -= 16 * sizeof(int8_t);
     } while (k != 0);
 
@@ -10407,7 +10407,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
     vacc3x0123 = wasm_f32x4_convert_i32x4(vacc3x0123);
 
     const v128_t vscale0123 = wasm_v128_load(w);
-    w = (const void*) ((const float*) w + 4);
+    w = (const float*) w + 4;
     vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vscale0123);
     vacc1x0123 = wasm_f32x4_mul(vacc1x0123, vscale0123);
     vacc2x0123 = wasm_f32x4_mul(vacc2x0123, vscale0123);
@@ -10514,7 +10514,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
     v128_t vacc0x1 = wasm_v128_load32_zero((const int32_t*) w + 1);
     v128_t vacc0x2 = wasm_v128_load32_zero((const int32_t*) w + 2);
     v128_t vacc0x3 = wasm_v128_load32_zero((const int32_t*) w + 3);
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t p = ks;
     do {
@@ -10542,7 +10542,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
 
         vacc0x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va0, vb3, vacc0x3);
 
-        w = (const void*) ((const int8_t*) w + 64);
+        w = (const int8_t*) w + 64;
         k -= 16 * sizeof(int8_t);
       } while (k != 0);
       p -= 1 * sizeof(void*);
@@ -10556,7 +10556,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
     vacc0x0123 = wasm_f32x4_convert_i32x4(vacc0x0123);
 
     const v128_t vscale0123 = wasm_v128_load(w);
-    w = (const void*) ((const float*) w + 4);
+    w = (const float*) w + 4;
     vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vscale0123);
 
     const v128_t vmagic_bias = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias);
@@ -10656,7 +10656,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
     v128_t vacc3x1 = vacc0x1;
     v128_t vacc3x2 = vacc0x2;
     v128_t vacc3x3 = vacc0x3;
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t p = ks;
     do {
@@ -10714,7 +10714,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
         vacc2x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va2, vb3, vacc2x3);
         vacc3x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va3, vb3, vacc3x3);
 
-        w = (const void*) ((const int8_t*) w + 64);
+        w = (const int8_t*) w + 64;
         k -= 16 * sizeof(int8_t);
       } while (k != 0);
       p -= 4 * sizeof(void*);
@@ -10740,7 +10740,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
     vacc3x0123 = wasm_f32x4_convert_i32x4(vacc3x0123);
 
     const v128_t vscale0123 = wasm_v128_load(w);
-    w = (const void*) ((const float*) w + 4);
+    w = (const float*) w + 4;
     vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vscale0123);
     vacc1x0123 = wasm_f32x4_mul(vacc1x0123, vscale0123);
     vacc2x0123 = wasm_f32x4_mul(vacc2x0123, vscale0123);

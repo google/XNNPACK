@@ -56,13 +56,13 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__neon_m
     const void* w = weights;
     for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
       $for C in range(0, CHANNEL_TILE, 4):
-        int32x4_t vacc${ABC[C:C+4]} = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
+        int32x4_t vacc${ABC[C:C+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
 
 
       $for K in range(KERNEL_TILE):
         $for C in range(0, CHANNEL_TILE, 8):
           const uint8x8_t vi${K}x${ABC[C:C+8]} = vld1_u8(i${K}); i${K} += 8;
-          const uint8x8_t vk${K}x${ABC[C:C+8]} = vld1_u8(w); w = (const void*) ((const int8_t*) w + 8);
+          const uint8x8_t vk${K}x${ABC[C:C+8]} = vld1_u8(w); w = (const int8_t*) w + 8;
 
         $for C in range(0, CHANNEL_TILE, 8):
           $if K == 0:
@@ -141,8 +141,8 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__neon_m
       $if CHANNEL_TILE > 8:
         const uint8_t* k = (const uint8_t*) ((const int32_t*) w + ${CHANNEL_TILE});
       ${"do " if CHANNEL_TILE > 8 else ""}{
-        int32x4_t vacc${ABC[0:4]} = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
-        int32x4_t vacc${ABC[4:8]} = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
+        int32x4_t vacc${ABC[0:4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
+        int32x4_t vacc${ABC[4:8]} = vld1q_s32(w); w = (const int32_t*) w + 4;
 
         $for K in range(KERNEL_TILE):
           $if CHANNEL_TILE > 8:

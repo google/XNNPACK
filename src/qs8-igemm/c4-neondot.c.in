@@ -66,7 +66,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x$
 
   do {
     $for N in range(0, NR, 4):
-      int32x4_t vacc0x${ABC[N:N+4]} = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
+      int32x4_t vacc0x${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
     $for M in range(1, MR):
       $for N in range(0, NR, 4):
         int32x4_t vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
@@ -91,7 +91,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x$
         // Load a 8x${NR} block of weights.
         $for K in range(0, 8, 4):
           $for N in range(0, NR, 4):
-            const int8x16_t vb${ABC[K:K+4]}x${ABC[N:N+4]} = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
+            const int8x16_t vb${ABC[K:K+4]}x${ABC[N:N+4]} = vld1q_s8(w); w = (const int8_t*) w + 16;
 
         // Multiply-accumulate: ${MR}x8 * 8x${NR} --> ${MR}x${NR}.
         $for K in range(0, 8, 4):
@@ -109,7 +109,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x$
 
         // Load a 4x${NR} block of weights.
         $for N in range(0, NR, 4):
-          const int8x16_t vb0123x${ABC[N:N+4]} = vld1q_s8(w); w = (const void*) ((const int8_t*) w + 16);
+          const int8x16_t vb0123x${ABC[N:N+4]} = vld1q_s8(w); w = (const int8_t*) w + 16;
 
         // Multiply-accumulate: ${MR}x4 * 4x${NR} --> ${MR}x${NR}.
         $for M in range(MR):
@@ -142,7 +142,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukernel_${MR}x$
 
       $if DATATYPE == "QC8":
         $for N in range(0, NR, 4):
-          const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32((const float*) w); w = (const void*) ((const float*) w + 4);
+          const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32((const float*) w); w = (const float*) w + 4;
           $for M in range(MR):
             vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
       $else:

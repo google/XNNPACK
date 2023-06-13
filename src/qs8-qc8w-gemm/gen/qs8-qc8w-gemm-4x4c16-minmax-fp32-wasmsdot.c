@@ -75,7 +75,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
     v128_t vacc3x1 = vacc0x1;
     v128_t vacc3x2 = vacc0x2;
     v128_t vacc3x3 = vacc0x3;
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t k = kc;
     do {
@@ -113,7 +113,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
       vacc2x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va2, vb3, vacc2x3);
       vacc3x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va3, vb3, vacc3x3);
 
-      w = (const void*) ((const int8_t*) w + 64);
+      w = (const int8_t*) w + 64;
       k -= 16 * sizeof(int8_t);
     } while (k != 0);
 
@@ -137,7 +137,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
     vacc3x0123 = wasm_f32x4_convert_i32x4(vacc3x0123);
 
     const v128_t vscale0123 = wasm_v128_load(w);
-    w = (const void*) ((const float*) w + 4);
+    w = (const float*) w + 4;
     vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vscale0123);
     vacc1x0123 = wasm_f32x4_mul(vacc1x0123, vscale0123);
     vacc2x0123 = wasm_f32x4_mul(vacc2x0123, vscale0123);

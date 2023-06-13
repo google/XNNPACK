@@ -69,12 +69,12 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m
 
       for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
         $for C in range(0, CHANNEL_TILE, 4):
-          int32x4_t vacc${ABC[C:C+4]} = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
+          int32x4_t vacc${ABC[C:C+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
         $for K in range(FIRST_PASS_TILE):
 
           $for C in range(0, CHANNEL_TILE, 8):
             const uint8x8_t vi${K}x${ABC[C:C+8]} = vld1_u8(i${K}); i${K} += 8;
-            const uint8x8_t vk${K}x${ABC[C:C+8]} = vld1_u8(w); w = (const void*) ((const int8_t*) w + 8);
+            const uint8x8_t vk${K}x${ABC[C:C+8]} = vld1_u8(w); w = (const int8_t*) w + 8;
 
           $for C in range(0, CHANNEL_TILE, 8):
             $if K == 0:
@@ -105,15 +105,15 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m
       $else:
         if XNN_UNLIKELY(c != 0) {
           ${"do " if CHANNEL_TILE > 8 else ""}{
-            int32x4_t vacc${ABC[0:4]} = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
-            int32x4_t vacc${ABC[4:8]} = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
+            int32x4_t vacc${ABC[0:4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
+            int32x4_t vacc${ABC[4:8]} = vld1q_s32(w); w = (const int32_t*) w + 4;
             $for K in range(FIRST_PASS_TILE):
 
               $if CHANNEL_TILE > 8:
                 const uint8x8_t vi${K}x${ABC[0:8]} = vld1_u8(i${K}); i${K} += 8;
               $else:
                 const uint8x8_t vi${K}x${ABC[0:8]} = vld1_u8(i${K});
-              const uint8x8_t vk${K}x${ABC[0:8]} = vld1_u8(w); w = (const void*) ((const int8_t*) w + 8);
+              const uint8x8_t vk${K}x${ABC[0:8]} = vld1_u8(w); w = (const int8_t*) w + 8;
 
               $if K == 0:
                 uint16x8_t vprod${ABC[0:8]} = vmull_u8(vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]});
@@ -161,7 +161,7 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m
 
           $for C in range(0, CHANNEL_TILE, 8):
             const uint8x8_t vi${K}x${ABC[C:C+8]} = vld1_u8(i${K}); i${K} += 8;
-            const uint8x8_t vk${K}x${ABC[C:C+8]} = vld1_u8(w); w = (const void*) ((const int8_t*) w + 8);
+            const uint8x8_t vk${K}x${ABC[C:C+8]} = vld1_u8(w); w = (const int8_t*) w + 8;
 
           $for C in range(0, CHANNEL_TILE, 8):
             $if K == 0:
@@ -200,7 +200,7 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m
                 const uint8x8_t vi${K}x${ABC[0:8]} = vld1_u8(i${K}); i${K} += 8;
               $else:
                 const uint8x8_t vi${K}x${ABC[0:8]} = vld1_u8(i${K});
-              const uint8x8_t vk${K}x${ABC[0:8]} = vld1_u8(w); w = (const void*) ((const int8_t*) w + 8);
+              const uint8x8_t vk${K}x${ABC[0:8]} = vld1_u8(w); w = (const int8_t*) w + 8;
 
               $if K == 0:
                 uint16x8_t vprod${ABC[0:8]} = vmull_u8(vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]});
@@ -246,7 +246,7 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m
 
           $for C in range(0, CHANNEL_TILE, 8):
             const uint8x8_t vi${K}x${ABC[C:C+8]} = vld1_u8(i${K}); i${K} += 8;
-            const uint8x8_t vk${K}x${ABC[C:C+8]} = vld1_u8(w); w = (const void*) ((const int8_t*) w + 8);
+            const uint8x8_t vk${K}x${ABC[C:C+8]} = vld1_u8(w); w = (const int8_t*) w + 8;
 
           $for C in range(0, CHANNEL_TILE, 8):
             $if K == 0:
@@ -332,7 +332,7 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m
               const uint8x8_t vi${K}x${ABC[0:8]} = vld1_u8(i${K}); i${K} += 8;
             $else:
               const uint8x8_t vi${K}x${ABC[0:8]} = vld1_u8(i${K});
-            const uint8x8_t vk${K}x${ABC[0:8]} = vld1_u8(w); w = (const void*) ((const int8_t*) w + 8);
+            const uint8x8_t vk${K}x${ABC[0:8]} = vld1_u8(w); w = (const int8_t*) w + 8;
 
             $if K == 0:
               uint16x8_t vprod${ABC[0:8]} = vmull_u8(vi${K}x${ABC[0:8]}, vk${K}x${ABC[0:8]});

@@ -45,7 +45,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
     v128_t vacc0x1 = wasm_v128_load32_zero((const int32_t*) w + 1);
     v128_t vacc0x2 = wasm_v128_load32_zero((const int32_t*) w + 2);
     v128_t vacc0x3 = wasm_v128_load32_zero((const int32_t*) w + 3);
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t k = kc;
     do {
@@ -65,7 +65,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x4c16__wasmsdot(
 
       vacc0x3 = __builtin_wasm_relaxed_dot_i8x16_i7x16_add_s_i32x4(va0, vb3, vacc0x3);
 
-      w = (const void*) ((const int8_t*) w + 64);
+      w = (const int8_t*) w + 64;
       k -= 16 * sizeof(int8_t);
     } while (k != 0);
 
