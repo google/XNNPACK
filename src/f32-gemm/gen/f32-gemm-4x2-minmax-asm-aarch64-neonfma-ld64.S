@@ -38,119 +38,119 @@
 BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_ld64
 
         # Load cn_stride, params pointer
-        LDP     x14, x8, [sp]
+        LDP         x14, x8, [sp]
 
         # Clamp A and C pointers
-        CMP     x0, 2                   // if mr < 2
-        ADD     x11, x3, x4             // a1 = a0 + a_stride
-        ADD     x9, x6, x7              // c1 = c0 + cm_stride
-        CSEL    x11, x3, x11, LO        //   a1 = a0
-        CSEL    x9, x6, x9, LO          //   c1 = c0
+        CMP         x0, 2                   // if mr < 2
+        ADD         x11, x3, x4             // a1 = a0 + a_stride
+        ADD         x9, x6, x7              // c1 = c0 + cm_stride
+        CSEL        x11, x3, x11, LO        //   a1 = a0
+        CSEL        x9, x6, x9, LO          //   c1 = c0
 
         # Load min/max values
-        LD2R    {v4.2s, v5.2s}, [x8]
+        LD2R        {v4.2s, v5.2s}, [x8]
 
-        ADD     x12, x11, x4            // a2 = a1 + a_stride
-        ADD     x10, x9, x7             // c2 = c1 + cm_stride
-                                        // if mr <= 2
-        CSEL    x12, x11, x12, LS       //   a2 = a1
-        CSEL    x10, x9, x10, LS        //   c2 = c1
+        ADD         x12, x11, x4            // a2 = a1 + a_stride
+        ADD         x10, x9, x7             // c2 = c1 + cm_stride
+                                            // if mr <= 2
+        CSEL        x12, x11, x12, LS       //   a2 = a1
+        CSEL        x10, x9, x10, LS        //   c2 = c1
 
-        CMP     x0, 4                   // if mr < 4
-        ADD     x4, x12, x4             // a3 = a2 + a_stride
-        ADD     x7, x10, x7             // c3 = c2 + cm_stride
-        CSEL    x4, x12, x4, LO         //   a3 = a2
-        CSEL    x7, x10, x7, LO         //   c3 = c2
+        CMP         x0, 4                   // if mr < 4
+        ADD         x4, x12, x4             // a3 = a2 + a_stride
+        ADD         x7, x10, x7             // c3 = c2 + cm_stride
+        CSEL        x4, x12, x4, LO         //   a3 = a2
+        CSEL        x7, x10, x7, LO         //   c3 = c2
 
 0:
         # Load initial bias from w into accumulators
-        LDR     d24, [x5], 8
-        MOV     v26.8b, v24.8b
-        MOV     v28.8b, v24.8b
-        MOV     v30.8b, v24.8b
-        MOVI    v25.2s, 0
-        MOVI    v27.2s, 0
-        MOVI    v29.2s, 0
-        MOVI    v31.2s, 0
+        LDR         d24, [x5], 8
+        MOV         v26.8b, v24.8b
+        MOV         v28.8b, v24.8b
+        MOV         v30.8b, v24.8b
+        MOVI        v25.2s, 0
+        MOVI        v27.2s, 0
+        MOVI        v29.2s, 0
+        MOVI        v31.2s, 0
 
         # Is there at least 2 floats (8 bytes)?
-        SUBS    x0, x2, 8               // k = kc - 8
-        B.LO    3f
+        SUBS        x0, x2, 8               // k = kc - 8
+        B.LO        3f
 
         # Main loop - 2 floats of A (8 bytes)
 1:
-        LDR     d0,  [x3], 8
-        LDP     d20, d21, [x5], 16
-        LDR     d1, [x11], 8
-        LDR     d2, [x12], 8
-        LDR     d3,  [x4], 8
-        SUBS    x0, x0, 8
-        FMLA    v24.2s, v20.2s, v0.s[0]
-        FMLA    v26.2s, v20.2s, v1.s[0]
-        FMLA    v28.2s, v20.2s, v2.s[0]
-        FMLA    v30.2s, v20.2s, v3.s[0]
-        FMLA    v25.2s, v21.2s, v0.s[1]
-        FMLA    v27.2s, v21.2s, v1.s[1]
-        FMLA    v29.2s, v21.2s, v2.s[1]
-        FMLA    v31.2s, v21.2s, v3.s[1]
-        B.HS    1b
+        LDR         d0,  [x3], 8
+        LDP         d20, d21, [x5], 16
+        LDR         d1, [x11], 8
+        LDR         d2, [x12], 8
+        LDR         d3,  [x4], 8
+        SUBS        x0, x0, 8
+        FMLA        v24.2s, v20.2s, v0.s[0]
+        FMLA        v26.2s, v20.2s, v1.s[0]
+        FMLA        v28.2s, v20.2s, v2.s[0]
+        FMLA        v30.2s, v20.2s, v3.s[0]
+        FMLA        v25.2s, v21.2s, v0.s[1]
+        FMLA        v27.2s, v21.2s, v1.s[1]
+        FMLA        v29.2s, v21.2s, v2.s[1]
+        FMLA        v31.2s, v21.2s, v3.s[1]
+        B.HS        1b
 
         # Is there a remainder?- 1 float of A (4 bytes)
-        TBNZ    x0, 2, 3f
+        TBNZ        x0, 2, 3f
 
 2:
-        FADD    v24.2s, v24.2s, v25.2s
-        FADD    v26.2s, v26.2s, v27.2s
-        FADD    v28.2s, v28.2s, v29.2s
-        FADD    v30.2s, v30.2s, v31.2s
+        FADD        v24.2s, v24.2s, v25.2s
+        FADD        v26.2s, v26.2s, v27.2s
+        FADD        v28.2s, v28.2s, v29.2s
+        FADD        v30.2s, v30.2s, v31.2s
 
         # Clamp
-        FMAX    v24.2s, v24.2s, v4.2s
-        SUBS    x1, x1, 2
-        FMAX    v26.2s, v26.2s, v4.2s
-        FMAX    v28.2s, v28.2s, v4.2s
-        FMAX    v30.2s, v30.2s, v4.2s
-        FMIN    v24.2s, v24.2s, v5.2s
-        FMIN    v26.2s, v26.2s, v5.2s
-        FMIN    v28.2s, v28.2s, v5.2s
-        FMIN    v30.2s, v30.2s, v5.2s
+        FMAX        v24.2s, v24.2s, v4.2s
+        SUBS        x1, x1, 2
+        FMAX        v26.2s, v26.2s, v4.2s
+        FMAX        v28.2s, v28.2s, v4.2s
+        FMAX        v30.2s, v30.2s, v4.2s
+        FMIN        v24.2s, v24.2s, v5.2s
+        FMIN        v26.2s, v26.2s, v5.2s
+        FMIN        v28.2s, v28.2s, v5.2s
+        FMIN        v30.2s, v30.2s, v5.2s
 
         # Store full 4 x 2
-        B.LO    4f
+        B.LO        4f
 
-        ST1     {v24.8b},  [x6], x14
-        SUB     x3,  x3, x2             // a0 -= kc
-        ST1     {v26.8b},  [x9], x14
-        SUB     x11, x11, x2            // a1 -= kc
-        ST1     {v28.8b}, [x10], x14
-        SUB     x12, x12, x2            // a2 -= kc
-        ST1     {v30.8b},  [x7], x14
-        SUB     x4,  x4, x2             // a3 -= kc
+        ST1         {v24.8b},  [x6], x14
+        SUB         x3,  x3, x2             // a0 -= kc
+        ST1         {v26.8b},  [x9], x14
+        SUB         x11, x11, x2            // a1 -= kc
+        ST1         {v28.8b}, [x10], x14
+        SUB         x12, x12, x2            // a2 -= kc
+        ST1         {v30.8b},  [x7], x14
+        SUB         x4,  x4, x2             // a3 -= kc
 
-        B.HI    0b
+        B.HI        0b
 
         RET
 
         # Remainder- 1 float of A (4 bytes)
 3:
-        LDR     s0,  [x3], 4
-        LDR     d20, [x5], 8
-        LDR     s1, [x11], 4
-        LDR     s2, [x12], 4
-        LDR     s3,  [x4], 4
-        SUBS    x0, x0, 4
-        FMLA    v24.2s, v20.2s, v0.s[0]
-        FMLA    v26.2s, v20.2s, v1.s[0]
-        FMLA    v28.2s, v20.2s, v2.s[0]
-        FMLA    v30.2s, v20.2s, v3.s[0]
-        B       2b
+        LDR         s0,  [x3], 4
+        LDR         d20, [x5], 8
+        LDR         s1, [x11], 4
+        LDR         s2, [x12], 4
+        LDR         s3,  [x4], 4
+        SUBS        x0, x0, 4
+        FMLA        v24.2s, v20.2s, v0.s[0]
+        FMLA        v26.2s, v20.2s, v1.s[0]
+        FMLA        v28.2s, v20.2s, v2.s[0]
+        FMLA        v30.2s, v20.2s, v3.s[0]
+        B           2b
 
         # Store odd width
 4:
-        STR     s24,  [x6]
-        STR     s26,  [x9]
-        STR     s28, [x10]
-        STR     s30,  [x7]
+        STR         s24,  [x6]
+        STR         s26,  [x9]
+        STR         s28, [x10]
+        STR         s30,  [x7]
         RET
 
 END_FUNCTION xnn_f32_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_ld64

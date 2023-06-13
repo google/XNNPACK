@@ -33,121 +33,121 @@
 BEGIN_FUNCTION xnn_f32_gemm_goi_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128
 
         # Load cn_stride, params pointer
-        LDP     x14, x8, [sp]
+        LDP         x14, x8, [sp]
 
         # Load min/max values
-        LD2R    {v4.4s, v5.4s}, [x8]
-        SUB     x16, x2, x2, LSL #3     // B stride on 8th row to top (16 - KC * 7)
-        ADD     x16, x16, 16
-        LSL     x17, x2, 3              // B stride for N loop
-        SUB     x17, x17, x2
+        LD2R        {v4.4s, v5.4s}, [x8]
+        SUB         x16, x2, x2, LSL #3     // B stride on 8th row to top (16 - KC * 7)
+        ADD         x16, x16, 16
+        LSL         x17, x2, 3              // B stride for N loop
+        SUB         x17, x17, x2
 0:
         # Zero bias for GOI
-        MOVI    v16.16b, 0
-        MOVI    v17.16b, 0
+        MOVI        v16.16b, 0
+        MOVI        v17.16b, 0
         # Is there at least 4 floats (16 bytes)
-        SUBS    x0, x2, 16               // k = kc - 16
-        B.LO    3f
+        SUBS        x0, x2, 16                  // k = kc - 16
+        B.LO        3f
 
 
         # Main loop - 4 floats of A (16 bytes)
 1:
-        LDR     q0, [x3], 16
-        LD4     {v20.s, v21.s, v22.s, v23.s}[0], [x5], x2
-        LD4     {v20.s, v21.s, v22.s, v23.s}[1], [x5], x2
-        LD4     {v20.s, v21.s, v22.s, v23.s}[2], [x5], x2
-        LD4     {v20.s, v21.s, v22.s, v23.s}[3], [x5], x2
-        LD4     {v24.s, v25.s, v26.s, v27.s}[0], [x5], x2
-        LD4     {v24.s, v25.s, v26.s, v27.s}[1], [x5], x2
-        LD4     {v24.s, v25.s, v26.s, v27.s}[2], [x5], x2
-        LD4     {v24.s, v25.s, v26.s, v27.s}[3], [x5], x16
-        FMLA    v16.4s, v20.4s, v0.s[0]
-        FMLA    v17.4s, v24.4s, v0.s[0]
-        FMLA    v16.4s, v21.4s, v0.s[1]
-        FMLA    v17.4s, v25.4s, v0.s[1]
-        SUBS    x0, x0, 16
-        FMLA    v16.4s, v22.4s, v0.s[2]
-        FMLA    v17.4s, v26.4s, v0.s[2]
-        FMLA    v16.4s, v23.4s, v0.s[3]
-        FMLA    v17.4s, v27.4s, v0.s[3]
-        B.HS    1b
+        LDR         q0, [x3], 16
+        LD4         {v20.s, v21.s, v22.s, v23.s}[0], [x5], x2
+        LD4         {v20.s, v21.s, v22.s, v23.s}[1], [x5], x2
+        LD4         {v20.s, v21.s, v22.s, v23.s}[2], [x5], x2
+        LD4         {v20.s, v21.s, v22.s, v23.s}[3], [x5], x2
+        LD4         {v24.s, v25.s, v26.s, v27.s}[0], [x5], x2
+        LD4         {v24.s, v25.s, v26.s, v27.s}[1], [x5], x2
+        LD4         {v24.s, v25.s, v26.s, v27.s}[2], [x5], x2
+        LD4         {v24.s, v25.s, v26.s, v27.s}[3], [x5], x16
+        FMLA        v16.4s, v20.4s, v0.s[0]
+        FMLA        v17.4s, v24.4s, v0.s[0]
+        FMLA        v16.4s, v21.4s, v0.s[1]
+        FMLA        v17.4s, v25.4s, v0.s[1]
+        SUBS        x0, x0, 16
+        FMLA        v16.4s, v22.4s, v0.s[2]
+        FMLA        v17.4s, v26.4s, v0.s[2]
+        FMLA        v16.4s, v23.4s, v0.s[3]
+        FMLA        v17.4s, v27.4s, v0.s[3]
+        B.HS        1b
 
         # Is there a remainder?- 2 float of A (8 bytes)
-        TBNZ    x0, 3, 4f
+        TBNZ        x0, 3, 4f
         # Is there a remainder?- 1 float of A (4 bytes)
-        TBNZ    x0, 2, 5f
+        TBNZ        x0, 2, 5f
 
 2:
-        SUBS    x1, x1, 8
+        SUBS        x1, x1, 8
 
         # Clamp
-        FMAX    v16.4s, v16.4s, v4.4s
-        FMAX    v17.4s, v17.4s, v4.4s
-        FMIN    v16.4s, v16.4s, v5.4s
-        FMIN    v17.4s, v17.4s, v5.4s
+        FMAX        v16.4s, v16.4s, v4.4s
+        FMAX        v17.4s, v17.4s, v4.4s
+        FMIN        v16.4s, v16.4s, v5.4s
+        FMIN        v17.4s, v17.4s, v5.4s
 
         # Store full 1 x 8
-        B.LO    6f
+        B.LO        6f
 
-        ADD     x5, x5, x17             // advance to next row of weights
-        STP     q16, q17, [x6]
-        ADD     x6, x6, x14
+        ADD         x5, x5, x17             // advance to next row of weights
+        STP         q16, q17, [x6]
+        ADD         x6, x6, x14
 
-        SUB     x3,  x3, x2             // a0 -= kc
-        B.HI    0b
+        SUB         x3,  x3, x2             // a0 -= kc
+        B.HI        0b
         RET
 
 3:
-        TBZ     x0, 3, 5f
+        TBZ         x0, 3, 5f
 
         # Remainder- 2 float of A (4 bytes)
 4:
-        LD2     {v20.s, v21.s}[0], [x5], x2
-        LD2     {v20.s, v21.s}[1], [x5], x2
-        LD2     {v20.s, v21.s}[2], [x5], x2
-        LD2     {v20.s, v21.s}[3], [x5], x2
-        LD2     {v24.s, v25.s}[0], [x5], x2
-        LD2     {v24.s, v25.s}[1], [x5], x2
-        LD2     {v24.s, v25.s}[2], [x5], x2
-        LD2     {v24.s, v25.s}[3], [x5], x16
-        SUB     x5, x5, 8
-        LDR     d0, [x3], 8
-        FMLA    v16.4s, v20.4s, v0.s[0]
-        FMLA    v17.4s, v24.4s, v0.s[0]
-        FMLA    v16.4s, v21.4s, v0.s[1]
-        FMLA    v17.4s, v25.4s, v0.s[1]
-        TBZ     x0, 2, 2b
+        LD2         {v20.s, v21.s}[0], [x5], x2
+        LD2         {v20.s, v21.s}[1], [x5], x2
+        LD2         {v20.s, v21.s}[2], [x5], x2
+        LD2         {v20.s, v21.s}[3], [x5], x2
+        LD2         {v24.s, v25.s}[0], [x5], x2
+        LD2         {v24.s, v25.s}[1], [x5], x2
+        LD2         {v24.s, v25.s}[2], [x5], x2
+        LD2         {v24.s, v25.s}[3], [x5], x16
+        SUB         x5, x5, 8
+        LDR         d0, [x3], 8
+        FMLA        v16.4s, v20.4s, v0.s[0]
+        FMLA        v17.4s, v24.4s, v0.s[0]
+        FMLA        v16.4s, v21.4s, v0.s[1]
+        FMLA        v17.4s, v25.4s, v0.s[1]
+        TBZ         x0, 2, 2b
 
         # Remainder- 1 float of A (4 bytes)
 5:
-        LD1     {v20.s}[0], [x5], x2
-        LD1     {v20.s}[1], [x5], x2
-        LD1     {v20.s}[2], [x5], x2
-        LD1     {v20.s}[3], [x5], x2
-        LD1     {v24.s}[0], [x5], x2
-        LD1     {v24.s}[1], [x5], x2
-        LD1     {v24.s}[2], [x5], x2
-        LD1     {v24.s}[3], [x5], x16
-        SUB     x5, x5, 12
-        LDR     s0, [x3], 4
-        FMLA    v16.4s, v20.4s, v0.s[0]
-        FMLA    v17.4s, v24.4s, v0.s[0]
-        B       2b
+        LD1         {v20.s}[0], [x5], x2
+        LD1         {v20.s}[1], [x5], x2
+        LD1         {v20.s}[2], [x5], x2
+        LD1         {v20.s}[3], [x5], x2
+        LD1         {v24.s}[0], [x5], x2
+        LD1         {v24.s}[1], [x5], x2
+        LD1         {v24.s}[2], [x5], x2
+        LD1         {v24.s}[3], [x5], x16
+        SUB         x5, x5, 12
+        LDR         s0, [x3], 4
+        FMLA        v16.4s, v20.4s, v0.s[0]
+        FMLA        v17.4s, v24.4s, v0.s[0]
+        B           2b
 
         # Store odd channels
 6:
-        TBZ     x1, 2, 7f
-        STR     q16, [x6], 16
-        MOV     v16.16b, v17.16b
+        TBZ         x1, 2, 7f
+        STR         q16, [x6], 16
+        MOV         v16.16b, v17.16b
 
 7:
-        TBZ     x1, 1, 8f
-        STR     d16, [x6], 8
-        DUP     d16, v16.d[1]
+        TBZ         x1, 1, 8f
+        STR         d16, [x6], 8
+        DUP         d16, v16.d[1]
 
 8:
-        TBZ     x1, 0, 9f
-        STR     s16, [x6]
+        TBZ         x1, 0, 9f
+        STR         s16, [x6]
 9:
         RET
 

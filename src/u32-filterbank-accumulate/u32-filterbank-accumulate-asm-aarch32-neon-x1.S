@@ -25,58 +25,58 @@
 BEGIN_FUNCTION xnn_u32_filterbank_accumulate_ukernel__asm_aarch32_neon_x1
         .arm
 #ifndef __APPLE__
-        .arch   armv7-a
-        .fpu    neon
+        .arch       armv7-a
+        .fpu        neon
 #endif
-        LDR     r12, [sp]               // output
-        PUSH    {r4,lr}                 // push 8 bytes
+        LDR         r12, [sp]               // output
+        PUSH        {r4,lr}                 // push 8 bytes
 
-        VMOV.U8 d0, 0                   // weight_accumulator
+        VMOV.U8     d0, 0                   // weight_accumulator
 
         // Compute unweight as initial weight
-        LDRB    r4, [r2], 1             // weight_widths
-        VMOV.U8 d1, 0                   // unweight_accumulator
+        LDRB        r4, [r2], 1             // weight_widths
+        VMOV.U8     d1, 0                   // unweight_accumulator
 0:
-        VLD1.32 {d3[]}, [r3]!           // weight+unweight
-        VLD1.32 {d2[]}, [r1]!           // input
-        SUBS    r4, r4, 1
-        VMOVL.U16 q2, d3
-        VMLAL.U32 q0, d2, d4[1]         // unweight
-        BHI     0b
+        VLD1.32     {d3[]}, [r3]!           // weight+unweight
+        VLD1.32     {d2[]}, [r1]!           // input
+        SUBS        r4, r4, 1
+        VMOVL.U16   q2, d3
+        VMLAL.U32   q0, d2, d4[1]           // unweight
+        BHI         0b
 
-        SUBS    r0, r0, 1
-        BLS     3f
+        SUBS        r0, r0, 1
+        BLS         3f
 
 1:
-        LDRB    r4, [r2], 1             // weight_widths
-        VMOV.U8 d1, 0                   // unweight_accumulator
+        LDRB        r4, [r2], 1             // weight_widths
+        VMOV.U8     d1, 0                   // unweight_accumulator
 2:
-        VLD1.32 {d3[]}, [r3]!           // weight+unweight
-        VLD1.32 {d2[]}, [r1]!           // input
-        SUBS    r4, r4, 1
-        VMOVL.U16 q2, d3
-        VMLAL.U32 q0, d4, d2
-        BHI     2b
+        VLD1.32     {d3[]}, [r3]!           // weight+unweight
+        VLD1.32     {d2[]}, [r1]!           // input
+        SUBS        r4, r4, 1
+        VMOVL.U16   q2, d3
+        VMLAL.U32   q0, d4, d2
+        BHI         2b
 
-        VST1.64 {d0}, [r12]!
-        SUBS    r0, r0, 1
-        VMOV    d0, d1
-        BNE     1b
+        VST1.64     {d0}, [r12]!
+        SUBS        r0, r0, 1
+        VMOV        d0, d1
+        BNE         1b
 
 3:
         // Final row only compute weight
-        LDRB    r4, [r2], 1             // weight_widths
+        LDRB        r4, [r2], 1             // weight_widths
 4:
-        VLD1.32 {d3[]}, [r3]!           // weight+unweight
-        VLD1.32 {d2[]}, [r1]!           // input
-        SUBS    r4, r4, 1
-        VMOVL.U16 q2, d3
-        VMLAL.U32 q0, d2, d4[0]         // weight
-        BHI     4b
+        VLD1.32     {d3[]}, [r3]!           // weight+unweight
+        VLD1.32     {d2[]}, [r1]!           // input
+        SUBS        r4, r4, 1
+        VMOVL.U16   q2, d3
+        VMLAL.U32   q0, d2, d4[0]           // weight
+        BHI         4b
 
-        VST1.64 {d0}, [r12]!
+        VST1.64     {d0}, [r12]!
 
-        POP     {r4,pc}
+        POP         {r4,pc}
 
 END_FUNCTION xnn_u32_filterbank_accumulate_ukernel__asm_aarch32_neon_x1
 
