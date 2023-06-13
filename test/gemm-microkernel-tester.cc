@@ -3549,3 +3549,16 @@ void GemmMicrokernelTester::Test(
 }
 
 #endif  // XNN_PLATFORM_JIT && !XNN_PLATFORM_WEB
+
+#if XNN_PLATFORM_WEB
+void GemmMicrokernelTester::Test(
+  xnn_jit_gemm_code_generator_fn gemm_generator) const
+{
+  xnn_code_buffer b;
+  ASSERT_EQ(xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE), xnn_status_success);
+  ASSERT_EQ(gemm_generator(&b, mr(), n() % nr(), k() * sizeof(uint32_t), nullptr), xnn_status_success);
+  auto kernel = (xnn_f32_gemm_ukernel_fn)(b.first_function_index);
+  xnn_release_code_memory(&b);
+  Test(kernel);
+}
+#endif

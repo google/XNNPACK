@@ -39,6 +39,10 @@
   k-block: 4
 - name: xnn_f32_gemm_ukernel_6x8s4__wasmsimd
   k-block: 4
+# WAsm SIMD JIT
+- name: xnn_generate_f32_gemm_ukernel_1x8__wasmsimd_x86_loadsplat
+  k-block: 1
+  post-op: false
 # WAsm Relaxed SIMD
 - name: xnn_f32_gemm_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat
   k-block: 1

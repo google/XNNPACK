@@ -478,7 +478,11 @@ static void GEMMBenchmark(benchmark::State& state,
   jit_params.f32_minmax.max = +std::numeric_limits<float>::infinity();
   generator(&code_buffer, mr, nc % nr, kc * sizeof(float), &jit_params);
   xnn_finalize_code_memory(&code_buffer);
-  xnn_f32_gemm_minmax_ukernel_fn gemm = reinterpret_cast<xnn_f32_gemm_minmax_ukernel_fn>(code_buffer.start);
+  #if XNN_PLATFORM_WEB
+    xnn_f32_gemm_minmax_ukernel_fn gemm = reinterpret_cast<xnn_f32_gemm_minmax_ukernel_fn>(code_buffer.first_function_index);
+  #else
+    xnn_f32_gemm_minmax_ukernel_fn gemm = reinterpret_cast<xnn_f32_gemm_minmax_ukernel_fn>(code_buffer.start);
+  #endif
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -1524,6 +1528,17 @@ static void GEMMBenchmark(benchmark::State& state,
 #undef BENCHMARK_UPTO_MR_GEMM
 
 #endif // XNN_ARCH_ARM64 && XNN_PLATFORM_JIT
+
+#if XNN_ARCH_WASMSIMD && XNN_PLATFORM_JIT
+  static void f32_gemm_1x8__jit_wasmsimd_x86_loadsplat(benchmark::State& state, const char* net)
+  {
+    GEMMBenchmark(state,
+      xnn_generate_f32_gemm_ukernel_1x8__wasmsimd_x86_loadsplat,
+      xnn_init_f32_minmax_wasmsimd_params,
+      /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  }
+  BENCHMARK_GEMM(f32_gemm_1x8__jit_wasmsimd_x86_loadsplat)
+#endif // XNN_ARCH_WASMSIMD && XNN_PLATFORM_JIT
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void f32_gemm_1x16__avx512f_broadcast(benchmark::State& state, const char* net) {
