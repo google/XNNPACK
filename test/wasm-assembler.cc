@@ -588,6 +588,7 @@ TEST(WasmAssemblerTest, InvalidCode) {
 
 namespace {
 class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
+                    public internal::I32WasmOps<WasmOpsTest>,
                     public internal::LocalWasmOps<WasmOpsTest>,
                     public internal::MemoryWasmOps<WasmOpsTest>,
                     public Test {
@@ -607,6 +608,7 @@ class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
 
   Sequence sequence_;
   ValueOnStack v128_value_{v128, this};
+  ValueOnStack i32_value_{i32, this};
 };
 
 class V128StoreLaneWasmOpTest : public WasmOpsTest {
@@ -641,6 +643,16 @@ TEST_F(V128StoreLaneWasmOpTest, 32Lane) {
 TEST_F(V128StoreLaneWasmOpTest, 64Lane) {
   SetStoreLaneExpectations(0x5B);
   V128Store64Lane(v128_value_, v128_value_, kLane, kOffset, kAlignment);
+}
+
+TEST_F(WasmOpsTest, I32Ne) {
+  Emit8ExpectCall(0x47);
+  I32Ne(i32_value_, i32_value_);
+}
+
+TEST_F(WasmOpsTest, I32GeU) {
+  Emit8ExpectCall(0x4F);
+  I32GeU(i32_value_, i32_value_);
 }
 
 using ::xnnpack::internal::At;
