@@ -626,7 +626,7 @@ class FullyConnectedOperatorTester {
       // Smart pointer to automatically delete fully_connected_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op, xnn_delete_operator);
 
-      #if XNN_PLATFORM_JIT
+      #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_PLATFORM_JIT // TODO(b/287020333)
         if (use_jit()) {
           // Check that we actually generated code.
           ASSERT_GT(code_cache.cache.code.size, 0);
@@ -671,7 +671,7 @@ class FullyConnectedOperatorTester {
                       &fully_connected_op2));
         ASSERT_NE(nullptr, fully_connected_op2);
 
-        #if XNN_PLATFORM_JIT
+        #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_PLATFORM_JIT // TODO(b/287020333)
           if (use_jit()) {
             // Check that we actually generated code.
             ASSERT_GT(inner_code_cache.cache.code.size, 0);

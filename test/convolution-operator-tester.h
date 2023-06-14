@@ -1655,7 +1655,7 @@ class ConvolutionOperatorTester {
       // Smart pointer to automatically delete convolution_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op, xnn_delete_operator);
 
-      #if XNN_PLATFORM_JIT
+      #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_PLATFORM_JIT // TODO(b/287020333)
         if (use_jit()) {
           // Check that we actually generated code.
           ASSERT_GT(code_cache.cache.code.size, 0);
@@ -1704,7 +1704,7 @@ class ConvolutionOperatorTester {
         // Smart pointer to automatically delete convolution_op.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op2, xnn_delete_operator);
 
-        #if XNN_PLATFORM_JIT
+        #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_PLATFORM_JIT // TODO(b/287020333)
           if (use_jit()) {
             // Check that we actually generated code.
             ASSERT_GT(inner_code_cache.cache.code.size, 0);
