@@ -13,11 +13,11 @@
 #include <xnnpack/spmm.h>
 
 
-void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
+void xnn_f32_qc8w_spmm_minmax_ukernel_8x4__scalar(
     size_t mc,
     size_t nc,
     const float* input,
-    const float* weights,
+    const void* weights,
     const int32_t* widx_dmap,
     const uint32_t* nidx_nnzmap,
     float* output,
@@ -32,16 +32,17 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
   const float vmax = params->scalar.max;
   size_t output_decrement = output_stride * nc - 8 * sizeof(float);
   while (mc >= 8 * sizeof(float)) {
-    const float* w = weights;
+    const void* w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
     size_t n = nc;
     while (n >= 4) {
       uint32_t nnz = *nnzmap++;
-      float vacc0x0 = *w++;
-      float vacc0x1 = *w++;
-      float vacc0x2 = *w++;
-      float vacc0x3 = *w++;
+      float vacc0x0 = ((const float*)w)[0];
+      float vacc0x1 = ((const float*)w)[1];
+      float vacc0x2 = ((const float*)w)[2];
+      float vacc0x3 = ((const float*)w)[3];
+      w = (const float*) w + 4;
       float vacc1x0 = vacc0x0;
       float vacc1x1 = vacc0x1;
       float vacc1x2 = vacc0x2;
@@ -82,10 +83,11 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
           const float vi6 = input[6];
           const float vi7 = input[7];
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-          const float vw0 = *w++;
-          const float vw1 = *w++;
-          const float vw2 = *w++;
-          const float vw3 = *w++;
+          const float vw0 = (float) ((const int8_t*) w)[0];
+          const float vw1 = (float) ((const int8_t*) w)[1];
+          const float vw2 = (float) ((const int8_t*) w)[2];
+          const float vw3 = (float) ((const int8_t*) w)[3];
+          w = (const int8_t*) w + 4;
           vacc0x0 += vi0 * vw0;
           vacc1x0 += vi1 * vw0;
           vacc2x0 += vi2 * vw0;
@@ -120,6 +122,43 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
           vacc7x3 += vi7 * vw3;
         } while (--nnz != 0);
       }
+      const float vscale0 = ((const float*)w)[0];
+      const float vscale1 = ((const float*)w)[1];
+      const float vscale2 = ((const float*)w)[2];
+      const float vscale3 = ((const float*)w)[3];
+      w = (const float*) w + 4;
+      vacc0x0 *= vscale0;
+      vacc1x0 *= vscale0;
+      vacc2x0 *= vscale0;
+      vacc3x0 *= vscale0;
+      vacc4x0 *= vscale0;
+      vacc5x0 *= vscale0;
+      vacc6x0 *= vscale0;
+      vacc7x0 *= vscale0;
+      vacc0x1 *= vscale1;
+      vacc1x1 *= vscale1;
+      vacc2x1 *= vscale1;
+      vacc3x1 *= vscale1;
+      vacc4x1 *= vscale1;
+      vacc5x1 *= vscale1;
+      vacc6x1 *= vscale1;
+      vacc7x1 *= vscale1;
+      vacc0x2 *= vscale2;
+      vacc1x2 *= vscale2;
+      vacc2x2 *= vscale2;
+      vacc3x2 *= vscale2;
+      vacc4x2 *= vscale2;
+      vacc5x2 *= vscale2;
+      vacc6x2 *= vscale2;
+      vacc7x2 *= vscale2;
+      vacc0x3 *= vscale3;
+      vacc1x3 *= vscale3;
+      vacc2x3 *= vscale3;
+      vacc3x3 *= vscale3;
+      vacc4x3 *= vscale3;
+      vacc5x3 *= vscale3;
+      vacc6x3 *= vscale3;
+      vacc7x3 *= vscale3;
       float vout0x0 = math_min_f32(vacc0x0, vmax);
       float vout1x0 = math_min_f32(vacc1x0, vmax);
       float vout2x0 = math_min_f32(vacc2x0, vmax);
@@ -233,7 +272,8 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
     if XNN_UNLIKELY(n != 0) {
       do {
         uint32_t nnz = *nnzmap++;
-        float vacc0 = *w++;
+        float vacc0 = *((const float*)w);
+        w = (const float*) w + 1;
         float vacc1 = vacc0;
         float vacc2 = vacc0;
         float vacc3 = vacc0;
@@ -253,7 +293,8 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
             const float vi6 = input[6];
             const float vi7 = input[7];
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-            const float vw = *w++;
+            const float vw = (float) ((const int8_t*) w)[3];
+            w = (const int8_t*) w + 1;
             vacc0 += vi0 * vw;
             vacc1 += vi1 * vw;
             vacc2 += vi2 * vw;
@@ -264,6 +305,16 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
             vacc7 += vi7 * vw;
           } while (--nnz != 0);
         }
+        float vscale = *((const float*)w);
+        w = (const float*) w + 1;
+        vacc0 *= vscale;
+        vacc1 *= vscale;
+        vacc2 *= vscale;
+        vacc3 *= vscale;
+        vacc4 *= vscale;
+        vacc5 *= vscale;
+        vacc6 *= vscale;
+        vacc7 *= vscale;
         float vout0 = math_min_f32(vacc0, vmax);
         float vout1 = math_min_f32(vacc1, vmax);
         float vout2 = math_min_f32(vacc2, vmax);
@@ -299,16 +350,17 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
   if XNN_UNLIKELY(mc != 0) {
     output_decrement += 4 * sizeof(float);
     if (mc & (4 * sizeof(float))) {
-      const float* w = weights;
+      const void* w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       size_t n = nc;
       while (n >= 4) {
         uint32_t nnz = *nnzmap++;
-        float vacc0x0 = *w++;
-        float vacc0x1 = *w++;
-        float vacc0x2 = *w++;
-        float vacc0x3 = *w++;
+        float vacc0x0 = ((const float*)w)[0];
+        float vacc0x1 = ((const float*)w)[1];
+        float vacc0x2 = ((const float*)w)[2];
+        float vacc0x3 = ((const float*)w)[3];
+        w = (const float*) w + 4;
         float vacc1x0 = vacc0x0;
         float vacc2x0 = vacc0x0;
         float vacc3x0 = vacc0x0;
@@ -329,10 +381,11 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
             const float vi2 = input[2];
             const float vi3 = input[3];
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-            const float vw0 = *w++;
-            const float vw1 = *w++;
-            const float vw2 = *w++;
-            const float vw3 = *w++;
+            const float vw0 = (float) ((const int8_t*) w)[0];
+            const float vw1 = (float) ((const int8_t*) w)[1];
+            const float vw2 = (float) ((const int8_t*) w)[2];
+            const float vw3 = (float) ((const int8_t*) w)[3];
+            w = (const int8_t*) w + 4;
             vacc0x0 += vi0 * vw0;
             vacc1x0 += vi1 * vw0;
             vacc2x0 += vi2 * vw0;
@@ -351,6 +404,27 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
             vacc3x3 += vi3 * vw3;
           } while (--nnz != 0);
         }
+        const float vscale0 = ((const float*)w)[0];
+        const float vscale1 = ((const float*)w)[1];
+        const float vscale2 = ((const float*)w)[2];
+        const float vscale3 = ((const float*)w)[3];
+        w = (const float*) w + 4;
+        vacc0x0 *= vscale0;
+        vacc1x0 *= vscale0;
+        vacc2x0 *= vscale0;
+        vacc3x0 *= vscale0;
+        vacc0x1 *= vscale1;
+        vacc1x1 *= vscale1;
+        vacc2x1 *= vscale1;
+        vacc3x1 *= vscale1;
+        vacc0x2 *= vscale2;
+        vacc1x2 *= vscale2;
+        vacc2x2 *= vscale2;
+        vacc3x2 *= vscale2;
+        vacc0x3 *= vscale3;
+        vacc1x3 *= vscale3;
+        vacc2x3 *= vscale3;
+        vacc3x3 *= vscale3;
         float vout0x0 = math_min_f32(vacc0x0, vmax);
         float vout1x0 = math_min_f32(vacc1x0, vmax);
         float vout2x0 = math_min_f32(vacc2x0, vmax);
@@ -408,7 +482,8 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
       if XNN_UNLIKELY(n != 0) {
         do {
           uint32_t nnz = *nnzmap++;
-          float vacc0 = *w++;
+          float vacc0 = *((const float*)w);
+          w = (const float*) w + 1;
           float vacc1 = vacc0;
           float vacc2 = vacc0;
           float vacc3 = vacc0;
@@ -420,13 +495,20 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
               const float vi2 = input[2];
               const float vi3 = input[3];
               input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-              const float vw = *w++;
+              const float vw = (float) ((const int8_t*) w)[3];
+              w = (const int8_t*) w + 1;
               vacc0 += vi0 * vw;
               vacc1 += vi1 * vw;
               vacc2 += vi2 * vw;
               vacc3 += vi3 * vw;
             } while (--nnz != 0);
           }
+          float vscale = *((const float*)w);
+          w = (const float*) w + 1;
+          vacc0 *= vscale;
+          vacc1 *= vscale;
+          vacc2 *= vscale;
+          vacc3 *= vscale;
           float vout0 = math_min_f32(vacc0, vmax);
           float vout1 = math_min_f32(vacc1, vmax);
           float vout2 = math_min_f32(vacc2, vmax);
@@ -448,16 +530,17 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
     }
     output_decrement += 2 * sizeof(float);
     if (mc & (2 * sizeof(float))) {
-      const float* w = weights;
+      const void* w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       size_t n = nc;
       while (n >= 4) {
         uint32_t nnz = *nnzmap++;
-        float vacc0x0 = *w++;
-        float vacc0x1 = *w++;
-        float vacc0x2 = *w++;
-        float vacc0x3 = *w++;
+        float vacc0x0 = ((const float*)w)[0];
+        float vacc0x1 = ((const float*)w)[1];
+        float vacc0x2 = ((const float*)w)[2];
+        float vacc0x3 = ((const float*)w)[3];
+        w = (const float*) w + 4;
         float vacc1x0 = vacc0x0;
         float vacc1x1 = vacc0x1;
         float vacc1x2 = vacc0x2;
@@ -468,10 +551,11 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
             const float vi0 = input[0];
             const float vi1 = input[1];
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-            const float vw0 = *w++;
-            const float vw1 = *w++;
-            const float vw2 = *w++;
-            const float vw3 = *w++;
+            const float vw0 = (float) ((const int8_t*) w)[0];
+            const float vw1 = (float) ((const int8_t*) w)[1];
+            const float vw2 = (float) ((const int8_t*) w)[2];
+            const float vw3 = (float) ((const int8_t*) w)[3];
+            w = (const int8_t*) w + 4;
             vacc0x0 += vi0 * vw0;
             vacc1x0 += vi1 * vw0;
             vacc0x1 += vi0 * vw1;
@@ -482,6 +566,19 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
             vacc1x3 += vi1 * vw3;
           } while (--nnz != 0);
         }
+        const float vscale0 = ((const float*)w)[0];
+        const float vscale1 = ((const float*)w)[1];
+        const float vscale2 = ((const float*)w)[2];
+        const float vscale3 = ((const float*)w)[3];
+        w = (const float*) w + 4;
+        vacc0x0 *= vscale0;
+        vacc1x0 *= vscale0;
+        vacc0x1 *= vscale1;
+        vacc1x1 *= vscale1;
+        vacc0x2 *= vscale2;
+        vacc1x2 *= vscale2;
+        vacc0x3 *= vscale3;
+        vacc1x3 *= vscale3;
         float vout0x0 = math_min_f32(vacc0x0, vmax);
         float vout1x0 = math_min_f32(vacc1x0, vmax);
         float vout0x1 = math_min_f32(vacc0x1, vmax);
@@ -515,7 +612,8 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
       if XNN_UNLIKELY(n != 0) {
         do {
           uint32_t nnz = *nnzmap++;
-          float vacc0 = *w++;
+          float vacc0 = *((const float*)w);
+          w = (const float*) w + 1;
           float vacc1 = vacc0;
           if XNN_LIKELY(nnz != 0) {
             do {
@@ -523,11 +621,16 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
               const float vi0 = input[0];
               const float vi1 = input[1];
               input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-              const float vw = *w++;
+              const float vw = (float) ((const int8_t*) w)[3];
+              w = (const int8_t*) w + 1;
               vacc0 += vi0 * vw;
               vacc1 += vi1 * vw;
             } while (--nnz != 0);
           }
+          float vscale = *((const float*)w);
+          w = (const float*) w + 1;
+          vacc0 *= vscale;
+          vacc1 *= vscale;
           float vout0 = math_min_f32(vacc0, vmax);
           float vout1 = math_min_f32(vacc1, vmax);
           vout0 = math_max_f32(vout0, vmin);
@@ -543,31 +646,42 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
     }
     output_decrement += 1 * sizeof(float);
     if (mc & (1 * sizeof(float))) {
-      const float* w = weights;
+      const void* w = weights;
       const int32_t* dmap = widx_dmap;
       const uint32_t* nnzmap = nidx_nnzmap;
       size_t n = nc;
       while (n >= 4) {
         uint32_t nnz = *nnzmap++;
-        float vacc0x0 = *w++;
-        float vacc0x1 = *w++;
-        float vacc0x2 = *w++;
-        float vacc0x3 = *w++;
+        float vacc0x0 = ((const float*)w)[0];
+        float vacc0x1 = ((const float*)w)[1];
+        float vacc0x2 = ((const float*)w)[2];
+        float vacc0x3 = ((const float*)w)[3];
+        w = (const float*) w + 4;
         if XNN_LIKELY(nnz != 0) {
           do {
             const intptr_t diff = *dmap++;
             const float vi0 = input[0];
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-            const float vw0 = *w++;
-            const float vw1 = *w++;
-            const float vw2 = *w++;
-            const float vw3 = *w++;
+            const float vw0 = (float) ((const int8_t*) w)[0];
+            const float vw1 = (float) ((const int8_t*) w)[1];
+            const float vw2 = (float) ((const int8_t*) w)[2];
+            const float vw3 = (float) ((const int8_t*) w)[3];
+            w = (const int8_t*) w + 4;
             vacc0x0 += vi0 * vw0;
             vacc0x1 += vi0 * vw1;
             vacc0x2 += vi0 * vw2;
             vacc0x3 += vi0 * vw3;
           } while (--nnz != 0);
         }
+        const float vscale0 = ((const float*)w)[0];
+        const float vscale1 = ((const float*)w)[1];
+        const float vscale2 = ((const float*)w)[2];
+        const float vscale3 = ((const float*)w)[3];
+        w = (const float*) w + 4;
+        vacc0x0 *= vscale0;
+        vacc0x1 *= vscale1;
+        vacc0x2 *= vscale2;
+        vacc0x3 *= vscale3;
         float vout0x0 = math_min_f32(vacc0x0, vmax);
         float vout0x1 = math_min_f32(vacc0x1, vmax);
         float vout0x2 = math_min_f32(vacc0x2, vmax);
@@ -589,16 +703,21 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
       if XNN_UNLIKELY(n != 0) {
         do {
           uint32_t nnz = *nnzmap++;
-          float vacc0 = *w++;
+          float vacc0 = *((const float*)w);
+          w = (const float*) w + 1;
           if XNN_LIKELY(nnz != 0) {
             do {
               const intptr_t diff = *dmap++;
               const float vi0 = input[0];
               input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-              const float vw = *w++;
+              const float vw = (float) ((const int8_t*) w)[3];
+              w = (const int8_t*) w + 1;
               vacc0 += vi0 * vw;
             } while (--nnz != 0);
           }
+          float vscale = *((const float*)w);
+          w = (const float*) w + 1;
+          vacc0 *= vscale;
           float vout0 = math_min_f32(vacc0, vmax);
           vout0 = math_max_f32(vout0, vmin);
           output[0] = vout0;

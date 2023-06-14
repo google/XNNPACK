@@ -10,7 +10,6 @@
 #include <utility>
 #include <vector>
 
-
 using ::xnnpack::internal::AppendEncodedU32;
 using ::xnnpack::internal::Export;
 using ::xnnpack::internal::Function;
@@ -33,6 +32,53 @@ std::array<uint8_t, 16> MakeLanesForI8x16Shuffle(const uint8_t* lanes,
   }
   return i8x16_lanes;
 }
+
+template <typename Indices>
+auto FindIndicesForType(Indices&& indices, ValType type) {
+  auto it = std::find_if(indices.begin(), indices.end(),
+                         [type](const auto& indices_for_type) {
+                           return indices_for_type.type == type;
+                         });
+  assert((it != indices.end()) && "Unknown ValType");
+  return it;
+}
+
+void LocalsManager::ResetLocalsManager(
+    uint32_t parameters_count, const ValTypesToInt& locals_declaration_count) {
+  uint32_t curr = parameters_count;
+  size_t i = 0;
+  for (const auto type_to_count : locals_declaration_count) {
+    const ValType type = type_to_count.first;
+    const uint32_t size = type_to_count.second;
+    indices_[i] = ValTypeIndices(type, curr, size);
+    curr += size;
+    i++;
+  }
+}
+
+uint32_t LocalsManager::GetNewLocalIndex(ValType type) {
+  return FindIndicesForType(indices_, type)->GetNewIndex();
+}
+
+void LocalsManager::DestructLocal(ValType type, uint32_t index) {
+  FindIndicesForType(indices_, type)->DestroyLocal(index);
+}
+
+uint32_t LocalsManager::ValTypeIndices::GetNewIndex() {
+  for (size_t i = 0; i < kMaxLocalsOfSameType; i++) {
+    if (!bitset[i]) {
+      bitset[i].flip();
+      assert((i < size) && "The number of local variables is exceeded");
+      return first_index + i;
+    }
+  }
+  XNN_UNREACHABLE;
+}
+
+void LocalsManager::ValTypeIndices::DestroyLocal(uint32_t index) {
+  bitset[index - first_index].flip();
+}
+
 }  // namespace internal
 
 void WasmAssembler::EmitMagicVersion() {
@@ -155,16 +201,15 @@ void WasmAssembler::EmitCodeSection() {
 }
 
 void WasmAssembler::RegisterFunction(const ResultType& result, const char* name,
-                      std::vector<ValType>&& param,
-                      ValTypesToInt&& locals_declaration_count,
-                      std::vector<byte> code) {
+                                     std::vector<ValType>&& param,
+                                     ValTypesToInt&& locals_declaration_count,
+                                     std::vector<byte> code) {
   exports_.emplace_back(name, functions_.size());
   functions_.emplace_back(FindOrAddFuncType(FuncType(std::move(param), result)),
-                          std::move(locals_declaration_count),
-                          std::move(code));
+                          std::move(locals_declaration_count), std::move(code));
 }
 
-uint32_t  WasmAssembler::FindOrAddFuncType(FuncType&& type) {
+uint32_t WasmAssembler::FindOrAddFuncType(FuncType&& type) {
   const auto it = std::find(func_types_.begin(), func_types_.end(), type);
   if (it != func_types_.end()) return std::distance(func_types_.begin(), it);
   func_types_.push_back(std::move(type));

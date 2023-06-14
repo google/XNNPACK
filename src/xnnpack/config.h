@@ -135,6 +135,18 @@ struct xnn_transpose_config {
 
 XNN_INTERNAL const struct xnn_transpose_config* xnn_init_transpose_config();
 
+struct xnn_cmul_config {
+  xnn_vbinary_ukernel_fn ukernel;
+  union {
+    xnn_init_f32_default_params_fn f32_default;
+  } init;
+  // Number of elements in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
+  size_t element_tile;
+};
+
+XNN_INTERNAL const struct xnn_cmul_config* xnn_init_f32_cmul_config();
+
 struct xnn_binary_elementwise_subconfig {
   xnn_vbinary_ukernel_fn op_ukernel;
   xnn_vbinary_ukernel_fn opc_ukernel;
@@ -816,7 +828,6 @@ struct xnn_unpool_config {
 };
 
 XNN_INTERNAL const struct xnn_unpool_config* xnn_init_x32_unpool_config();
-
 
 #ifdef __cplusplus
 }  // extern "C"

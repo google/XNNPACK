@@ -90,6 +90,8 @@ const char* xnn_node_type_to_string(enum xnn_node_type type) {
       return "Negate";
     case xnn_node_type_prelu:
       return "PReLU";
+    case xnn_node_type_rope:
+      return "RoPE";
     case xnn_node_type_sigmoid:
       return "Sigmoid";
     case xnn_node_type_softmax:

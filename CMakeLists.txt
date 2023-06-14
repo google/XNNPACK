@@ -214,6 +214,7 @@ SET(OPERATOR_SRCS
   src/operators/reduce-nd.c
   src/operators/resize-bilinear-nchw.c
   src/operators/resize-bilinear-nhwc.c
+  src/operators/rope-nthc.c
   src/operators/slice-nd.c
   src/operators/softmax-nc.c
   src/operators/transpose-nd.c
@@ -283,6 +284,7 @@ SET(XNNPACK_SRCS
   src/argmaxpool-config.c
   src/avgpool-config.c
   src/binary-elementwise-config.c
+  src/cmul-config.c
   src/conv-hwc2chw-config.c
   src/dwconv-config.c
   src/dwconv2d-chw-config.c
@@ -1263,6 +1265,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(resize-bilinear-nchw-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(resize-bilinear-nchw-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME resize-bilinear-nchw-test COMMAND resize-bilinear-nchw-test)
+
+    ADD_EXECUTABLE(rope-nthc-test test/rope-nthc.cc)
+    TARGET_INCLUDE_DIRECTORIES(rope-nthc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(rope-nthc-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME rope-nthc-test COMMAND rope-nthc-test)
 
     ADD_EXECUTABLE(sigmoid-nc-test test/sigmoid-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(sigmoid-nc-test PRIVATE src test)
