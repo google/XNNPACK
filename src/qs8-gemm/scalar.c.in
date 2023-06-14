@@ -37,8 +37,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     size_t cm_stride,
     size_t cn_stride,
     $if DATATYPE == "QD8":
-      const struct ${SCALING_PARAMS} quantization_params[restrict XNN_MIN_ELEMENTS(1)],
-    const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)])
+      const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
+      const struct ${SCALING_PARAMS} quantization_params[restrict XNN_MIN_ELEMENTS(1)])
+    $else:
+      const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= ${MR});

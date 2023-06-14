@@ -208,8 +208,8 @@ typedef void (*xnn_qd8_f32_qs8w_gemm_ukernel_fn)(
     float* c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_qd8_quantization_params* quantization_params,
-    const union xnn_f32_minmax_params* params);
+    const union xnn_f32_minmax_params* params,
+    const struct xnn_qd8_quantization_params* quantization_params);
 
 typedef void (*xnn_qs8_qc8w_gemm_minmax_ukernel_fn)(
     size_t mr,

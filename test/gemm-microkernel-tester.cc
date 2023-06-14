@@ -650,7 +650,7 @@ void GemmMicrokernelTester::Test(
     gemm(m(), n(), k(),
         a.data(), a_stride() * sizeof(int8_t),
         static_cast<const void*>(packed_w.data()),
-        c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float), quantization_params.data(), &params);
+        c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float), &params, quantization_params.data());
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
