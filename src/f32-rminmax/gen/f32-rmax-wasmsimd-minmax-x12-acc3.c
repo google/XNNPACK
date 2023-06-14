@@ -26,37 +26,37 @@ void xnn_f32_rmax_ukernel__wasmsimd_minmax_x12_acc3(
   assert(input != NULL);
   assert(output != NULL);
 
-  v128_t vacc0 = wasm_v128_load32_splat(input);
-  v128_t vacc1 = vacc0;
-  v128_t vacc2 = vacc0;
+  v128_t vmax0 = wasm_v128_load32_splat(input);
+  v128_t vmax1 = vmax0;
+  v128_t vmax2 = vmax0;
   for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
     const v128_t vt0 = wasm_v128_load(input);
     const v128_t vt1 = wasm_v128_load(input + 4);
     const v128_t vt2 = wasm_v128_load(input + 8);
     input += 12;
 
-    vacc0 = wasm_f32x4_max(vacc0, vt0);
-    vacc1 = wasm_f32x4_max(vacc1, vt1);
-    vacc2 = wasm_f32x4_max(vacc2, vt2);
+    vmax0 = wasm_f32x4_max(vmax0, vt0);
+    vmax1 = wasm_f32x4_max(vmax1, vt1);
+    vmax2 = wasm_f32x4_max(vmax2, vt2);
   }
-  vacc0 = wasm_f32x4_max(vacc0, vacc1);
-  vacc0 = wasm_f32x4_max(vacc0, vacc2);
+  vmax0 = wasm_f32x4_max(vmax0, vmax1);
+  vmax0 = wasm_f32x4_max(vmax0, vmax2);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const v128_t vt = wasm_v128_load(input);
     input += 4;
 
-    vacc0 = wasm_f32x4_max(vacc0, vt);
+    vmax0 = wasm_f32x4_max(vmax0, vt);
   }
-  vacc0 = wasm_f32x4_max(vacc0, wasm_v64x2_shuffle(vacc0, vacc0, 1, 1));
+  vmax0 = wasm_f32x4_max(vmax0, wasm_v64x2_shuffle(vmax0, vmax0, 1, 1));
   if XNN_UNLIKELY(batch & (2 * sizeof(float))) {
     const v128_t vt = wasm_v128_load64_zero(input);
     input += 2;
-    vacc0 = wasm_f32x4_max(vacc0, vt);
+    vmax0 = wasm_f32x4_max(vmax0, vt);
   }
-  vacc0 = wasm_f32x4_max(vacc0, wasm_v32x4_shuffle(vacc0, vacc0, 1, 1, 1, 1));
+  vmax0 = wasm_f32x4_max(vmax0, wasm_v32x4_shuffle(vmax0, vmax0, 1, 1, 1, 1));
   if XNN_UNLIKELY(batch & (1 * sizeof(float))) {
     const v128_t vt = wasm_v128_load32_zero(input);
-    vacc0 = wasm_f32x4_max(vacc0, vt);
+    vmax0 = wasm_f32x4_max(vmax0, vt);
   }
-  wasm_v128_store32_lane(output, vacc0, 0);
+  wasm_v128_store32_lane(output, vmax0, 0);
 }

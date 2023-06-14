@@ -67,6 +67,18 @@ tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=12 -D ACCUMULATORS=3 -D 
 tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -D OP=MIN -D MINMAX=PMINMAX -o src/f32-rminmax/gen/f32-rmin-wasmsimd-pminmax-x16-acc2.c &
 tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=16 -D ACCUMULATORS=4 -D OP=MIN -D MINMAX=PMINMAX -o src/f32-rminmax/gen/f32-rmin-wasmsimd-pminmax-x16-acc4.c &
 
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=4  -D ACCUMULATORS=1 -D OP=MINMAX -D MINMAX=MINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmsimd-minmax-x4.c &
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=8  -D ACCUMULATORS=2 -D OP=MINMAX -D MINMAX=MINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmsimd-minmax-x8-acc2.c &
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=12 -D ACCUMULATORS=3 -D OP=MINMAX -D MINMAX=MINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmsimd-minmax-x12-acc3.c &
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -D OP=MINMAX -D MINMAX=MINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmsimd-minmax-x16-acc2.c &
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=16 -D ACCUMULATORS=4 -D OP=MINMAX -D MINMAX=MINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmsimd-minmax-x16-acc4.c &
+
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=4  -D ACCUMULATORS=1 -D OP=MINMAX -D MINMAX=PMINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmsimd-pminmax-x4.c &
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=8  -D ACCUMULATORS=2 -D OP=MINMAX -D MINMAX=PMINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmsimd-pminmax-x8-acc2.c &
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=12 -D ACCUMULATORS=3 -D OP=MINMAX -D MINMAX=PMINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmsimd-pminmax-x12-acc3.c &
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -D OP=MINMAX -D MINMAX=PMINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmsimd-pminmax-x16-acc2.c &
+tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=16 -D ACCUMULATORS=4 -D OP=MINMAX -D MINMAX=PMINMAX -o src/f32-rminmax/gen/f32-rminmax-wasmsimd-pminmax-x16-acc4.c &
+
 #################################### Scalar ###################################
 ### Generic C micro-kernels
 tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=1 -D ACCUMULATORS=1 -D OP=MINMAX -D WASM=0 -o src/f32-rminmax/gen/f32-rminmax-scalar-x1.c &
@@ -98,6 +110,12 @@ tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=2 -D ACCUMULATORS=2 -D OP=
 tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=3 -D ACCUMULATORS=3 -D OP=MIN -D WASM=1 -o src/f32-rminmax/gen/f32-rmin-wasm-x3-acc3.c &
 tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D ACCUMULATORS=2 -D OP=MIN -D WASM=1 -o src/f32-rminmax/gen/f32-rmin-wasm-x4-acc2.c &
 tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D ACCUMULATORS=4 -D OP=MIN -D WASM=1 -o src/f32-rminmax/gen/f32-rmin-wasm-x4-acc4.c &
+
+tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=1 -D ACCUMULATORS=1 -D OP=MINMAX -D WASM=1 -o src/f32-rminmax/gen/f32-rminmax-wasm-x1.c &
+tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=2 -D ACCUMULATORS=2 -D OP=MINMAX -D WASM=1 -o src/f32-rminmax/gen/f32-rminmax-wasm-x2-acc2.c &
+tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=3 -D ACCUMULATORS=3 -D OP=MINMAX -D WASM=1 -o src/f32-rminmax/gen/f32-rminmax-wasm-x3-acc3.c &
+tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D ACCUMULATORS=2 -D OP=MINMAX -D WASM=1 -o src/f32-rminmax/gen/f32-rminmax-wasm-x4-acc2.c &
+tools/xngen src/f32-rminmax/scalar.c.in -D BATCH_TILE=4 -D ACCUMULATORS=4 -D OP=MINMAX -D WASM=1 -o src/f32-rminmax/gen/f32-rminmax-wasm-x4-acc4.c &
 
 ################################## Unit tests #################################
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-rmax.yaml --output test/f32-rmax.cc &

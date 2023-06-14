@@ -8,7 +8,7 @@ $assert BATCH_TILE >= 4
 $SIMD_TILE = BATCH_TILE // 4
 $assert ACCUMULATORS <= SIMD_TILE
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["MAX", "MIN"]
+$assert OP in ["MAX", "MIN", "MINMAX"]
 $assert MINMAX in ["MINMAX", "PMINMAX"]
 #include <assert.h>
 
@@ -19,10 +19,10 @@ $assert MINMAX in ["MINMAX", "PMINMAX"]
 
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
-$WASM_F32X4_OP = {
-$  "MAX": {"MINMAX": "wasm_f32x4_max", "PMINMAX": "wasm_f32x4_pmax"}[MINMAX],
-$  "MIN": {"MINMAX": "wasm_f32x4_min", "PMINMAX": "wasm_f32x4_pmin"}[MINMAX],
-$}[OP]
+$EMIT_MIN = "MIN" in OP
+$EMIT_MAX = "MAX" in OP
+$WASM_F32X4_MIN = {"MINMAX": "wasm_f32x4_min", "PMINMAX": "wasm_f32x4_pmin"}[MINMAX]
+$WASM_F32X4_MAX = {"MINMAX": "wasm_f32x4_max", "PMINMAX": "wasm_f32x4_pmax"}[MINMAX]
 $MINMAX_SUFFIX = {"MINMAX": "_minmax", "PMINMAX": "_pminmax"}[MINMAX]
 void xnn_f32_r${OP.lower()}_ukernel__wasmsimd${MINMAX_SUFFIX}_x${BATCH_TILE}${ACC_SUFFIX}(
     size_t batch,
@@ -35,9 +35,17 @@ void xnn_f32_r${OP.lower()}_ukernel__wasmsimd${MINMAX_SUFFIX}_x${BATCH_TILE}${AC
   assert(input != NULL);
   assert(output != NULL);
 
-  v128_t vacc0 = wasm_v128_load32_splat(input);
+  $if EMIT_MIN:
+    v128_t vmin0 = wasm_v128_load32_splat(input);
+    $if EMIT_MAX:
+      v128_t vmax0 = vmin0;
+  $elif EMIT_MAX:
+    v128_t vmax0 = wasm_v128_load32_splat(input);
   $for A in range(1, ACCUMULATORS):
-    v128_t vacc${A} = vacc0;
+    $if EMIT_MIN:
+      v128_t vmin${A} = vmin0;
+    $if EMIT_MAX:
+      v128_t vmax${A} = vmax0;
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       const v128_t vt0 = wasm_v128_load(input);
@@ -46,31 +54,57 @@ void xnn_f32_r${OP.lower()}_ukernel__wasmsimd${MINMAX_SUFFIX}_x${BATCH_TILE}${AC
       input += ${BATCH_TILE};
 
       $for N in range(SIMD_TILE):
-        vacc${N % ACCUMULATORS} = ${WASM_F32X4_OP}(vacc${N % ACCUMULATORS}, vt${N});
+        $if EMIT_MIN:
+          vmin${N % ACCUMULATORS} = ${WASM_F32X4_MIN}(vmin${N % ACCUMULATORS}, vt${N});
+        $if EMIT_MAX:
+          vmax${N % ACCUMULATORS} = ${WASM_F32X4_MAX}(vmax${N % ACCUMULATORS}, vt${N});
     }
     $if ACCUMULATORS > 1:
       $ACC_SLICE = 1
       $while ACC_SLICE < ACCUMULATORS:
         $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
           $if A + ACC_SLICE < ACCUMULATORS:
-            vacc${A} = ${WASM_F32X4_OP}(vacc${A}, vacc${A + ACC_SLICE});
+            $if EMIT_MIN:
+              vmin${A} = ${WASM_F32X4_MIN}(vmin${A}, vmin${A + ACC_SLICE});
+            $if EMIT_MAX:
+              vmax${A} = ${WASM_F32X4_MAX}(vmax${A}, vmax${A + ACC_SLICE});
         $ACC_SLICE *= 2
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const v128_t vt = wasm_v128_load(input);
     input += 4;
 
-    vacc0 = ${WASM_F32X4_OP}(vacc0, vt);
+    $if EMIT_MIN:
+      vmin0 = ${WASM_F32X4_MIN}(vmin0, vt);
+    $if EMIT_MAX:
+      vmax0 = ${WASM_F32X4_MAX}(vmax0, vt);
   }
-  vacc0 = ${WASM_F32X4_OP}(vacc0, wasm_v64x2_shuffle(vacc0, vacc0, 1, 1));
+  $if EMIT_MIN:
+    vmin0 = ${WASM_F32X4_MIN}(vmin0, wasm_v64x2_shuffle(vmin0, vmin0, 1, 1));
+  $if EMIT_MAX:
+    vmax0 = ${WASM_F32X4_MAX}(vmax0, wasm_v64x2_shuffle(vmax0, vmax0, 1, 1));
   if XNN_UNLIKELY(batch & (2 * sizeof(float))) {
     const v128_t vt = wasm_v128_load64_zero(input);
     input += 2;
-    vacc0 = ${WASM_F32X4_OP}(vacc0, vt);
+    $if EMIT_MIN:
+      vmin0 = ${WASM_F32X4_MIN}(vmin0, vt);
+    $if EMIT_MAX:
+      vmax0 = ${WASM_F32X4_MAX}(vmax0, vt);
   }
-  vacc0 = ${WASM_F32X4_OP}(vacc0, wasm_v32x4_shuffle(vacc0, vacc0, 1, 1, 1, 1));
+  $if EMIT_MIN:
+    vmin0 = ${WASM_F32X4_MIN}(vmin0, wasm_v32x4_shuffle(vmin0, vmin0, 1, 1, 1, 1));
+  $if EMIT_MAX:
+    vmax0 = ${WASM_F32X4_MAX}(vmax0, wasm_v32x4_shuffle(vmax0, vmax0, 1, 1, 1, 1));
   if XNN_UNLIKELY(batch & (1 * sizeof(float))) {
     const v128_t vt = wasm_v128_load32_zero(input);
-    vacc0 = ${WASM_F32X4_OP}(vacc0, vt);
+    $if EMIT_MIN:
+      vmin0 = ${WASM_F32X4_MIN}(vmin0, vt);
+    $if EMIT_MAX:
+      vmax0 = ${WASM_F32X4_MAX}(vmax0, vt);
   }
-  wasm_v128_store32_lane(output, vacc0, 0);
+  $if EMIT_MIN:
+    wasm_v128_store32_lane(output, vmin0, 0);
+    $if EMIT_MAX:
+      wasm_v128_store32_lane(output + 1, vmax0, 0);
+  $elif EMIT_MAX:
+    wasm_v128_store32_lane(output, vmax0, 0);
 }

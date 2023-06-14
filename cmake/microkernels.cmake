@@ -6893,6 +6893,11 @@ SET(ALL_WASM_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rmin-wasm-x3-acc3.c
   src/f32-rminmax/gen/f32-rmin-wasm-x4-acc2.c
   src/f32-rminmax/gen/f32-rmin-wasm-x4-acc4.c
+  src/f32-rminmax/gen/f32-rminmax-wasm-x1.c
+  src/f32-rminmax/gen/f32-rminmax-wasm-x2-acc2.c
+  src/f32-rminmax/gen/f32-rminmax-wasm-x3-acc3.c
+  src/f32-rminmax/gen/f32-rminmax-wasm-x4-acc2.c
+  src/f32-rminmax/gen/f32-rminmax-wasm-x4-acc4.c
   src/f32-vbinary/gen/f32-vadd-minmax-wasm-x1.c
   src/f32-vbinary/gen/f32-vadd-minmax-wasm-x2.c
   src/f32-vbinary/gen/f32-vadd-minmax-wasm-x4.c
@@ -8091,6 +8096,16 @@ SET(ALL_WASMSIMD_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rmin-wasmsimd-pminmax-x12-acc3.c
   src/f32-rminmax/gen/f32-rmin-wasmsimd-pminmax-x16-acc2.c
   src/f32-rminmax/gen/f32-rmin-wasmsimd-pminmax-x16-acc4.c
+  src/f32-rminmax/gen/f32-rminmax-wasmsimd-minmax-x4.c
+  src/f32-rminmax/gen/f32-rminmax-wasmsimd-minmax-x8-acc2.c
+  src/f32-rminmax/gen/f32-rminmax-wasmsimd-minmax-x12-acc3.c
+  src/f32-rminmax/gen/f32-rminmax-wasmsimd-minmax-x16-acc2.c
+  src/f32-rminmax/gen/f32-rminmax-wasmsimd-minmax-x16-acc4.c
+  src/f32-rminmax/gen/f32-rminmax-wasmsimd-pminmax-x4.c
+  src/f32-rminmax/gen/f32-rminmax-wasmsimd-pminmax-x8-acc2.c
+  src/f32-rminmax/gen/f32-rminmax-wasmsimd-pminmax-x12-acc3.c
+  src/f32-rminmax/gen/f32-rminmax-wasmsimd-pminmax-x16-acc2.c
+  src/f32-rminmax/gen/f32-rminmax-wasmsimd-pminmax-x16-acc4.c
   src/f32-rsum/gen/f32-rsum-wasmsimd-x4.c
   src/f32-rsum/gen/f32-rsum-wasmsimd-x8-acc2.c
   src/f32-rsum/gen/f32-rsum-wasmsimd-x12-acc3.c

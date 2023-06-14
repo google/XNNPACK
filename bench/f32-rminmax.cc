@@ -62,27 +62,6 @@ static void f32_rminmax(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-BENCHMARK_CAPTURE(f32_rminmax, scalar_x1,
-                  xnn_f32_rminmax_ukernel__scalar_x1)
-  ->Apply(benchmark::utils::ReductionParameters<float>)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(f32_rminmax, scalar_x2_acc2,
-                  xnn_f32_rminmax_ukernel__scalar_x2_acc2)
-  ->Apply(benchmark::utils::ReductionParameters<float>)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(f32_rminmax, scalar_x3_acc3,
-                  xnn_f32_rminmax_ukernel__scalar_x3_acc3)
-  ->Apply(benchmark::utils::ReductionParameters<float>)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(f32_rminmax, scalar_x4_acc2,
-                  xnn_f32_rminmax_ukernel__scalar_x4_acc2)
-  ->Apply(benchmark::utils::ReductionParameters<float>)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(f32_rminmax, scalar_x4_acc4,
-                  xnn_f32_rminmax_ukernel__scalar_x4_acc4)
-  ->Apply(benchmark::utils::ReductionParameters<float>)
-  ->UseRealTime();
-
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rminmax, sse_x4,
                     xnn_f32_rminmax_ukernel__sse_x4)
@@ -139,7 +118,94 @@ BENCHMARK_CAPTURE(f32_rminmax, scalar_x4_acc4,
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_rminmax, wasmsimd_minmax_x4,
+                    xnn_f32_rminmax_ukernel__wasmsimd_minmax_x4)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, wasmsimd_minmax_x8_acc2,
+                    xnn_f32_rminmax_ukernel__wasmsimd_minmax_x8_acc2)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, wasmsimd_minmax_x12_acc3,
+                    xnn_f32_rminmax_ukernel__wasmsimd_minmax_x12_acc3)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, wasmsimd_minmax_x16_acc2,
+                    xnn_f32_rminmax_ukernel__wasmsimd_minmax_x16_acc2)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, wasmsimd_minmax_x16_acc4,
+                    xnn_f32_rminmax_ukernel__wasmsimd_minmax_x16_acc4)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_rminmax, wasmsimd_pminmax_x4,
+                    xnn_f32_rminmax_ukernel__wasmsimd_pminmax_x4)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, wasmsimd_pminmax_x8_acc2,
+                    xnn_f32_rminmax_ukernel__wasmsimd_pminmax_x8_acc2)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, wasmsimd_pminmax_x12_acc3,
+                    xnn_f32_rminmax_ukernel__wasmsimd_pminmax_x12_acc3)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, wasmsimd_pminmax_x16_acc2,
+                    xnn_f32_rminmax_ukernel__wasmsimd_pminmax_x16_acc2)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, wasmsimd_pminmax_x16_acc4,
+                    xnn_f32_rminmax_ukernel__wasmsimd_pminmax_x16_acc4)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(f32_rminmax, wasm_x1,
+                    xnn_f32_rminmax_ukernel__wasm_x1)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, wasm_x2_acc2,
+                    xnn_f32_rminmax_ukernel__wasm_x2_acc2)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, wasm_x3_acc3,
+                    xnn_f32_rminmax_ukernel__wasm_x3_acc3)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, wasm_x4_acc2,
+                    xnn_f32_rminmax_ukernel__wasm_x4_acc2)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rminmax, wasm_x4_acc4,
+                    xnn_f32_rminmax_ukernel__wasm_x4_acc4)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+BENCHMARK_CAPTURE(f32_rminmax, scalar_x1,
+                  xnn_f32_rminmax_ukernel__scalar_x1)
+  ->Apply(benchmark::utils::ReductionParameters<float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_rminmax, scalar_x2_acc2,
+                  xnn_f32_rminmax_ukernel__scalar_x2_acc2)
+  ->Apply(benchmark::utils::ReductionParameters<float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_rminmax, scalar_x3_acc3,
+                  xnn_f32_rminmax_ukernel__scalar_x3_acc3)
+  ->Apply(benchmark::utils::ReductionParameters<float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_rminmax, scalar_x4_acc2,
+                  xnn_f32_rminmax_ukernel__scalar_x4_acc2)
+  ->Apply(benchmark::utils::ReductionParameters<float>)
+  ->UseRealTime();
+BENCHMARK_CAPTURE(f32_rminmax, scalar_x4_acc4,
+                  xnn_f32_rminmax_ukernel__scalar_x4_acc4)
+  ->Apply(benchmark::utils::ReductionParameters<float>)
+  ->UseRealTime();
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
-

@@ -23,3 +23,22 @@
 - name: xnn_f32_rminmax_ukernel__sse_x12_acc3
 - name: xnn_f32_rminmax_ukernel__sse_x16_acc2
 - name: xnn_f32_rminmax_ukernel__sse_x16_acc4
+
+# Wasm
+- name: xnn_f32_rminmax_ukernel__wasm_x1
+- name: xnn_f32_rminmax_ukernel__wasm_x2_acc2
+- name: xnn_f32_rminmax_ukernel__wasm_x3_acc3
+- name: xnn_f32_rminmax_ukernel__wasm_x4_acc2
+- name: xnn_f32_rminmax_ukernel__wasm_x4_acc4
+
+# Wasm SIMD
+- name: xnn_f32_rminmax_ukernel__wasmsimd_minmax_x4
+- name: xnn_f32_rminmax_ukernel__wasmsimd_minmax_x8_acc2
+- name: xnn_f32_rminmax_ukernel__wasmsimd_minmax_x12_acc3
+- name: xnn_f32_rminmax_ukernel__wasmsimd_minmax_x16_acc2
+- name: xnn_f32_rminmax_ukernel__wasmsimd_minmax_x16_acc4
+- name: xnn_f32_rminmax_ukernel__wasmsimd_pminmax_x4
+- name: xnn_f32_rminmax_ukernel__wasmsimd_pminmax_x8_acc2
+- name: xnn_f32_rminmax_ukernel__wasmsimd_pminmax_x12_acc3
+- name: xnn_f32_rminmax_ukernel__wasmsimd_pminmax_x16_acc2
+- name: xnn_f32_rminmax_ukernel__wasmsimd_pminmax_x16_acc4

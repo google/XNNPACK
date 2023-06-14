@@ -26,8 +26,8 @@ void xnn_f32_rmin_ukernel__wasmsimd_pminmax_x16_acc2(
   assert(input != NULL);
   assert(output != NULL);
 
-  v128_t vacc0 = wasm_v128_load32_splat(input);
-  v128_t vacc1 = vacc0;
+  v128_t vmin0 = wasm_v128_load32_splat(input);
+  v128_t vmin1 = vmin0;
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const v128_t vt0 = wasm_v128_load(input);
     const v128_t vt1 = wasm_v128_load(input + 4);
@@ -35,28 +35,28 @@ void xnn_f32_rmin_ukernel__wasmsimd_pminmax_x16_acc2(
     const v128_t vt3 = wasm_v128_load(input + 12);
     input += 16;
 
-    vacc0 = wasm_f32x4_pmin(vacc0, vt0);
-    vacc1 = wasm_f32x4_pmin(vacc1, vt1);
-    vacc0 = wasm_f32x4_pmin(vacc0, vt2);
-    vacc1 = wasm_f32x4_pmin(vacc1, vt3);
+    vmin0 = wasm_f32x4_pmin(vmin0, vt0);
+    vmin1 = wasm_f32x4_pmin(vmin1, vt1);
+    vmin0 = wasm_f32x4_pmin(vmin0, vt2);
+    vmin1 = wasm_f32x4_pmin(vmin1, vt3);
   }
-  vacc0 = wasm_f32x4_pmin(vacc0, vacc1);
+  vmin0 = wasm_f32x4_pmin(vmin0, vmin1);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const v128_t vt = wasm_v128_load(input);
     input += 4;
 
-    vacc0 = wasm_f32x4_pmin(vacc0, vt);
+    vmin0 = wasm_f32x4_pmin(vmin0, vt);
   }
-  vacc0 = wasm_f32x4_pmin(vacc0, wasm_v64x2_shuffle(vacc0, vacc0, 1, 1));
+  vmin0 = wasm_f32x4_pmin(vmin0, wasm_v64x2_shuffle(vmin0, vmin0, 1, 1));
   if XNN_UNLIKELY(batch & (2 * sizeof(float))) {
     const v128_t vt = wasm_v128_load64_zero(input);
     input += 2;
-    vacc0 = wasm_f32x4_pmin(vacc0, vt);
+    vmin0 = wasm_f32x4_pmin(vmin0, vt);
   }
-  vacc0 = wasm_f32x4_pmin(vacc0, wasm_v32x4_shuffle(vacc0, vacc0, 1, 1, 1, 1));
+  vmin0 = wasm_f32x4_pmin(vmin0, wasm_v32x4_shuffle(vmin0, vmin0, 1, 1, 1, 1));
   if XNN_UNLIKELY(batch & (1 * sizeof(float))) {
     const v128_t vt = wasm_v128_load32_zero(input);
-    vacc0 = wasm_f32x4_pmin(vacc0, vt);
+    vmin0 = wasm_f32x4_pmin(vmin0, vt);
   }
-  wasm_v128_store32_lane(output, vacc0, 0);
+  wasm_v128_store32_lane(output, vmin0, 0);
 }
