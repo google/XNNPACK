@@ -334,7 +334,13 @@ class LocalWasmOps : public LocalsManager {
 
     Local(const Local& other) = delete;
 
-    Local(Local&& other) = default;
+    Local(Local&& other)
+        : type_(other.type_),
+          index_(other.index_),
+          ops_(other.ops_),
+          is_managed_(other.is_managed_) {
+      other.index_ = kInvalidIndex;
+    }
 
     Local& operator=(const Local& other) {
       assert((type_ == other.type_) &&
@@ -382,6 +388,12 @@ class LocalWasmOps : public LocalsManager {
   Local MakeLocal(ValType type) {
     return Local{type, GetNewLocalIndex(type), /*is_managed=*/true,
                  GetMutableDerived()};
+  }
+
+  Local MakeLocal(const ValueOnStack& rhs) {
+    auto result = MakeLocal(rhs.type);
+    result = rhs;
+    return result;
   }
 
   void local_get(uint32_t index) const {

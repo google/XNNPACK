@@ -168,6 +168,25 @@ struct AddTwiceGenerator : WasmAssembler {
 struct AddTwiceTestSuite
     : AddTestSuiteTmpl<AddTwiceGenerator, kExpectedSumTwice> {};
 
+struct AddTwiceDeclareInitGenerator : WasmAssembler {
+  explicit AddTwiceDeclareInitGenerator(xnn_code_buffer* buf)
+      : WasmAssembler(buf) {
+    ValTypesToInt two_local_ints = {{i32, 2}};
+    AddFunc<2>({i32}, "add_twice_declare_init", {i32, i32}, two_local_ints,
+               [this](Local a, Local b) {
+                 auto first = MakeLocal(I32Add(a, b));
+                 auto second = MakeLocal(first);
+                 second = first;
+                 second = I32Add(second, a);
+                 second = I32Add(second, b);
+                 local_get(second);
+               });
+  }
+};
+
+struct AddTwiceDeclareInitTestSuite
+    : AddTestSuiteTmpl<AddTwiceDeclareInitGenerator, kExpectedSumTwice> {};
+
 struct AddTwiceWithScopesGenerator : WasmAssembler {
   explicit AddTwiceWithScopesGenerator(xnn_code_buffer* buf)
       : WasmAssembler(buf) {
@@ -567,7 +586,8 @@ REGISTER_TYPED_TEST_SUITE_P(WasmAssemblerTest, ValidCode);
 
 using WasmAssemblerTestSuits = testing::Types<
     Get5TestSuite, AddTestSuite, Get5AndAddTestSuite, AddWithLocalTestSuite,
-    AddTwiceTestSuite, AddTwiceWithScopesTestSuite, Add5TestSuite, MaxTestSuite,
+    AddTwiceTestSuite, AddTwiceDeclareInitTestSuite,
+    AddTwiceWithScopesTestSuite, Add5TestSuite, MaxTestSuite,
     MaxIncompleteIfTestSuite, SumUntilTestSuite, DoWhileTestSuite,
     SumArrayTestSuite, MemCpyTestSuite, AddDelayedInitTestSuite,
     ManyFunctionsGeneratorTestSuite, ManyLocalsGeneratorTestSuite,
