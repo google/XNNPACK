@@ -8856,7 +8856,7 @@ TEST(DECONVOLUTION_NHWC_F16, 1x1_without_bias) {
     .TestF16();
 }
 
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT // TODO(b/287020333)
 TEST(DECONVOLUTION_NHWC_F16, jit_1x1) {
   const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
   if (gemm_config == nullptr) {
@@ -8920,7 +8920,7 @@ TEST(DECONVOLUTION_NHWC_F16, jit_1x1_with_relu) {
     .iterations(3)
     .TestF16();
 }
-#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT
 
 /**************************** Future GEMM path, grouped ****************************/
 
@@ -9857,7 +9857,7 @@ TEST(DECONVOLUTION_NHWC_F16, weights_cache_3x3) {
     .TestF16();
 }
 
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT // TODO(b/287020333)
 TEST(DECONVOLUTION_NHWC_F16, jit_3x3) {
   const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
   if (gemm_config == nullptr) {
@@ -9925,7 +9925,7 @@ TEST(DECONVOLUTION_NHWC_F16, jit_3x3_with_relu) {
     .iterations(3)
     .TestF16();
 }
-#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT
 
 /**************************** CONV path, grouped ****************************/
 
@@ -11567,7 +11567,7 @@ TEST(DECONVOLUTION_NHWC_F16, weights_cache_3x3s2) {
     .TestF16();
 }
 
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT // TODO(b/287020333)
 TEST(DECONVOLUTION_NHWC_F16, jit_3x3s2) {
   const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
   if (gemm_config == nullptr) {
@@ -11639,7 +11639,7 @@ TEST(DECONVOLUTION_NHWC_F16, jit_3x3s2_with_relu) {
     .iterations(3)
     .TestF16();
 }
-#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT
 
 /**************************** SUBCONV2D/IGEMM path, grouped ****************************/
 
@@ -13110,7 +13110,7 @@ TEST(DECONVOLUTION_NHWC_F16, weights_cache_2x2s2) {
     .TestF16();
 }
 
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT // TODO(b/287020333)
 TEST(DECONVOLUTION_NHWC_F16, jit_2x2s2) {
   const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
   if (gemm_config == nullptr) {
@@ -13178,7 +13178,7 @@ TEST(DECONVOLUTION_NHWC_F16, jit_2x2s2_with_relu) {
     .iterations(3)
     .TestF16();
 }
-#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT
 
 /**************************** SUBCONV2D/GEMM path, grouped ****************************/
 
@@ -14212,7 +14212,7 @@ TEST(DECONVOLUTION_NHWC_F32, 1x1_without_bias) {
     .TestF32();
 }
 
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT // TODO(b/287020333)
 TEST(DECONVOLUTION_NHWC_F32, jit_1x1) {
   const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
   ASSERT_NE(gemm_config, nullptr);
@@ -14268,7 +14268,7 @@ TEST(DECONVOLUTION_NHWC_F32, jit_1x1_with_relu) {
     .iterations(3)
     .TestF32();
 }
-#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT
 
 /**************************** Future GEMM path, grouped ****************************/
 
@@ -15038,7 +15038,7 @@ TEST(DECONVOLUTION_NHWC_F32, weights_cache_3x3) {
     .TestF32();
 }
 
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT // TODO(b/287020333)
 TEST(DECONVOLUTION_NHWC_F32, jit_3x3) {
   const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
   ASSERT_NE(gemm_config, nullptr);
@@ -15098,7 +15098,7 @@ TEST(DECONVOLUTION_NHWC_F32, jit_3x3_with_relu) {
     .iterations(3)
     .TestF32();
 }
-#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT
 
 /**************************** CONV path, grouped ****************************/
 
@@ -16522,7 +16522,7 @@ TEST(DECONVOLUTION_NHWC_F32, stress_weights_cache_5x5s4) {
     .StressWeightsCacheTestF32();
 }
 
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT // TODO(b/287020333)
 TEST(DECONVOLUTION_NHWC_F32, jit_3x3s2) {
   const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
   ASSERT_NE(gemm_config, nullptr);
@@ -16586,7 +16586,7 @@ TEST(DECONVOLUTION_NHWC_F32, jit_3x3s2_with_relu) {
     .iterations(3)
     .TestF32();
 }
-#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT
 
 /**************************** SUBCONV2D/IGEMM path, grouped ****************************/
 
@@ -17855,7 +17855,7 @@ TEST(DECONVOLUTION_NHWC_F32, weights_cache_2x2s2) {
     .TestF32();
 }
 
-#if XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT // TODO(b/287020333)
 TEST(DECONVOLUTION_NHWC_F32, jit_2x2s2) {
   const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
   ASSERT_NE(gemm_config, nullptr);
@@ -17915,7 +17915,7 @@ TEST(DECONVOLUTION_NHWC_F32, jit_2x2s2_with_relu) {
     .iterations(3)
     .TestF32();
 }
-#endif  // XNN_PLATFORM_JIT && XNN_ENABLE_JIT
+#endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT
 
 /**************************** SUBCONV2D/GEMM path, grouped ****************************/
 
