@@ -23,7 +23,7 @@ $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" + ("_" + VARIANT.lower() if 
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QD8": "xnn_f32_minmax_params"}[DATATYPE]
 $SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE == "QD8" else ""
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-$OUTTYPE = XINT8_T if REQUANTIZATION else "float"
+$OUT_T = XINT8_T if REQUANTIZATION else "float"
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}__${"wasm" if WASM else "scalar"}${VARIANT_SPEC}(
@@ -33,7 +33,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     const ${XINT8_T}* restrict a,
     size_t a_stride,
     const void* restrict w,
-    ${OUTTYPE}* restrict c,
+    ${OUT_T}* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     $if DATATYPE == "QD8":
@@ -48,10 +48,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
   assert(kc != 0);
 
   const ${XINT8_T}* a0 = a;
-  ${OUTTYPE}* c0 = c;
+  ${OUT_T}* c0 = c;
   $for M in range(1, MR):
     const ${XINT8_T}* a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M-1} + a_stride);
-    ${OUTTYPE}* c${M} = (${OUTTYPE}*) ((uintptr_t) c${M-1} + cm_stride);
+    ${OUT_T}* c${M} = (${OUT_T}*) ((uintptr_t) c${M-1} + cm_stride);
     $if M % 2 == 0:
       if XNN_UNPREDICTABLE(mr <= ${M}) {
         a${M} = a${M-1};
@@ -255,13 +255,13 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
           $if DATATYPE == "QD8":
             c${M}[${N}] = vout${M}x${N};
           $else:
-            c${M}[${N}] = (${OUTTYPE}) vout${M}x${N};
+            c${M}[${N}] = (${OUT_T}) vout${M}x${N};
 
       $for M in range(MR):
         a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} - kc);
 
       $for M in range(MR):
-        c${M} = (${OUTTYPE}*) ((uintptr_t) c${M} + cn_stride);
+        c${M} = (${OUT_T}*) ((uintptr_t) c${M} + cn_stride);
 
       nc -= ${NR};
     } else {
@@ -269,7 +269,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
         if (nc & ${1 << LOG2N}) {
           $for M in range(MR):
             $for N in range(1 << LOG2N):
-              c${M}[${N}] = (${OUTTYPE}) vout${M}x${N};
+              c${M}[${N}] = (${OUT_T}) vout${M}x${N};
             $if LOG2N != 0:
               $for N in range(NR - (1 << LOG2N) - 1):
                 vout${M}x${N} = vout${M}x${N + (1 << LOG2N)};
