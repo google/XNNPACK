@@ -8075,8 +8075,8 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "f32_gemminc_minmax_test",
     srcs = [
-        "test/f32-gemm-minmax-2.cc",
         "test/f32-gemminc-minmax.cc",
+        "test/f32-gemminc-minmax-2.cc",
     ],
     shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
