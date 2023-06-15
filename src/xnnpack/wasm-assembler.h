@@ -154,8 +154,25 @@ class I32WasmOps : public WasmOpsBase<Derived, I32WasmOps<Derived>> {
 };
 
 template <typename Derived>
+class F32WasmOps : public WasmOpsBase<Derived, F32WasmOps<Derived>> {
+ public:
+  void f32_const(float value) const {
+    this->Emit8(0x43);
+    this->EmitEncodedF32(value);
+  }
+
+ private:
+  void EmitEncodedF32(float value) const {
+    std::array<byte, sizeof(float)> encoding;
+    memcpy(encoding.data(), &value, sizeof(float));
+    for (byte b : encoding) this->Emit8(b);
+  }
+};
+
+template <typename Derived>
 class V128WasmOps : public WasmOpsBase<Derived, V128WasmOps<Derived>> {
  public:
+  void f32x4_splat() const { EmitVectorOpcode(0x13); }
   void f32x4_mul() const { EmitVectorOpcode(0xE6); }
   void f32x4_add() const { EmitVectorOpcode(0xE4); }
   void f32x4_pmax() const { EmitVectorOpcode(0xEB); }
@@ -458,6 +475,11 @@ class LocalWasmOps : public LocalsManager {
     return MakeValueOnStack(i32);
   }
 
+  ValueOnStack F32Const(float value) {
+    GetDerived()->f32_const(value);
+    return MakeValueOnStack(f32);
+  }
+
   ValueOnStack I32Load(const ValueOnStack& address, uint32_t offset = 0,
                        uint32_t alignment = 4) {
     return LoadOp(i32, offset, alignment, &Derived::i32_load);
@@ -502,6 +524,12 @@ class LocalWasmOps : public LocalsManager {
     });
   }
 
+  ValueOnStack F32x4Splat(const ValueOnStack& a) {
+    assert(a.type == f32);
+    GetDerived()->f32x4_splat();
+    return MakeValueOnStack(v128);
+  }
+
   ValueOnStack F32x4Mul(const ValueOnStack& a, const ValueOnStack& b) {
     return BinaryOp(a, b, &Derived::f32x4_mul);
   }
@@ -540,6 +568,7 @@ class LocalWasmOps : public LocalsManager {
 
  protected:
   static constexpr ValType i32{0x7F};
+  static constexpr ValType f32{0x7D};
   static constexpr ValType v128{0x7B};
 
  private:
@@ -585,6 +614,7 @@ class LocalWasmOps : public LocalsManager {
 
 class WasmOps : public LocalWasmOps<WasmOps>,
                 public I32WasmOps<WasmOps>,
+                public F32WasmOps<WasmOps>,
                 public V128WasmOps<WasmOps>,
                 public MemoryWasmOps<WasmOps>,
                 public ControlFlowWasmOps<WasmOps> {

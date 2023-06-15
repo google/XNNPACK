@@ -21,6 +21,7 @@ using ::testing::NotNull;
 using ::testing::Sequence;
 using ::testing::Test;
 using GetIntPtr = int (*)();
+using GetPiPtr = float (*)();
 using Add5Ptr = int (*)(int);
 using AddPtr = int (*)(int, int);
 using MaxPtr = AddPtr;
@@ -49,6 +50,7 @@ constexpr uint32_t kLargeNumberOfFunctions = 235;
 constexpr size_t kArraySize = 5;
 constexpr std::array<int, kArraySize> kArray = {1, 2, 3, 45, 6};
 const int kExpectedArraySum = std::accumulate(kArray.begin(), kArray.end(), 0);
+constexpr float kPi = 3.14;
 
 struct Get5Generator : WasmAssembler {
   explicit Get5Generator(xnn_code_buffer* buf) : WasmAssembler(buf) {
@@ -63,11 +65,14 @@ struct GeneratorTestSuite {
   using Func = F;
 };
 
-struct Get5TestSuite : GeneratorTestSuite<Get5Generator, GetIntPtr> {
-  static void ExpectFuncCorrect(GetIntPtr get5) {
-    EXPECT_EQ(get5(), kExpectedGet5ReturnValue);
-  }
+template <typename ValueType, const ValueType& expected_value, typename G,
+          typename F>
+struct GetValueTestSuite : GeneratorTestSuite<G, F> {
+  static void ExpectFuncCorrect(F f) { EXPECT_EQ(f(), expected_value); }
 };
+
+struct Get5TestSuite : GetValueTestSuite<int32_t, kExpectedGet5ReturnValue,
+                                         Get5Generator, GetIntPtr> {};
 
 struct AddGenerator : WasmAssembler {
   explicit AddGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
@@ -547,6 +552,16 @@ struct I64x2ShuffleGeneratorTestSuite
   }
 };
 
+struct GetPiGenerator : WasmAssembler {
+  explicit GetPiGenerator(xnn_code_buffer* bf) : WasmAssembler(bf) {
+    ValTypesToInt no_locals = {};
+    AddFunc<0>({f32}, "get_pi", {}, no_locals, [&] { F32Const(kPi); });
+  }
+};
+
+struct GetPiTestSuite : GetValueTestSuite<float, kPi, GetPiGenerator, GetPiPtr> {
+};
+
 struct InvalidCodeGenerator : WasmAssembler {
   ValTypesToInt no_locals;
   explicit InvalidCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
@@ -592,7 +607,7 @@ using WasmAssemblerTestSuits = testing::Types<
     SumArrayTestSuite, MemCpyTestSuite, AddDelayedInitTestSuite,
     ManyFunctionsGeneratorTestSuite, ManyLocalsGeneratorTestSuite,
     V128AddGeneratorTestSuite, V128AddConstGeneratorTestSuite,
-    I64x2ShuffleGeneratorTestSuite>;
+    I64x2ShuffleGeneratorTestSuite, GetPiTestSuite>;
 INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest,
                                WasmAssemblerTestSuits);
 
@@ -640,6 +655,7 @@ class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
   Sequence sequence_;
   ValueOnStack v128_value_{v128, this};
   ValueOnStack i32_value_{i32, this};
+  ValueOnStack f32_value_{f32, this};
 
   static constexpr uint32_t kLogAlignment = 3;
   static constexpr uint32_t kAlignment = 1 << 3;
@@ -697,6 +713,11 @@ TEST_F(WasmOpsTest, V128F32x4Pmax) {
 
 TEST_F(WasmOpsTest, V128F32x4Pmin) {
   TestV128BinaryOp(0xEA, &WasmOpsTest::F32x4Pmin);
+}
+
+TEST_F(WasmOpsTest, V128F32x4Splat) {
+  ExpectEmitSIMDOpcode(0x13);
+  F32x4Splat(f32_value_);
 }
 
 using ::xnnpack::internal::At;
