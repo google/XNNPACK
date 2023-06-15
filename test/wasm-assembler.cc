@@ -618,6 +618,13 @@ class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
   MOCK_METHOD(void, EmitEncodedS32, (int32_t), (const));
 
  protected:
+  template <typename Op>
+  void TestV128BinaryOp(uint32_t opcode, Op&& op) {
+    ExpectEmitSIMDOpcode(opcode);
+    auto result = std::mem_fn(op)(*this, v128_value_, v128_value_);
+    EXPECT_EQ(result.type, v128);
+  }
+
   void Emit8ExpectCall(byte opcode) {
     EXPECT_CALL(*this, Emit8(opcode)).Times(1).InSequence(sequence_);
   }
@@ -653,9 +660,7 @@ class V128StoreLaneWasmOpTest : public WasmOpsTest {
 }  // namespace
 
 TEST_F(WasmOpsTest, F32x4Mul) {
-  ExpectEmitSIMDOpcode(0xE6);
-  auto result = F32x4Mul(v128_value_, v128_value_);
-  EXPECT_EQ(result.type, v128);
+  TestV128BinaryOp(0xE6, &WasmOpsTest::F32x4Mul);
 }
 
 TEST_F(V128StoreLaneWasmOpTest, 32Lane) {
@@ -684,6 +689,14 @@ TEST_F(WasmOpsTest, V128Load64Splat) {
   EmitEncodedU32ExpectCall(kOffset);
 
   V128Load64Splat(i32_value_, kOffset, kAlignment);
+}
+
+TEST_F(WasmOpsTest, V128F32x4Pmax) {
+  TestV128BinaryOp(0xEB, &WasmOpsTest::F32x4Pmax);
+}
+
+TEST_F(WasmOpsTest, V128F32x4Pmin) {
+  TestV128BinaryOp(0xEA, &WasmOpsTest::F32x4Pmin);
 }
 
 using ::xnnpack::internal::At;

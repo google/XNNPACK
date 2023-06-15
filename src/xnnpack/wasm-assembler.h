@@ -158,6 +158,8 @@ class V128WasmOps : public WasmOpsBase<Derived, V128WasmOps<Derived>> {
  public:
   void f32x4_mul() const { EmitVectorOpcode(0xE6); }
   void f32x4_add() const { EmitVectorOpcode(0xE4); }
+  void f32x4_pmax() const { EmitVectorOpcode(0xEB); }
+  void f32x4_pmin() const { EmitVectorOpcode(0xEA); }
   void i8x16_shuffle(const std::array<uint8_t, 16>& lanes) const {
     EmitVectorOpcode(0x0D);
     for (auto lane : lanes) {
@@ -482,6 +484,14 @@ class LocalWasmOps : public LocalsManager {
 
   ValueOnStack F32x4Add(const ValueOnStack& a, const ValueOnStack& b) {
     return BinaryOp(a, b, &Derived::f32x4_add);
+  }
+
+  ValueOnStack F32x4Pmax(const ValueOnStack& a, const ValueOnStack& b) {
+    return BinaryOp(a, b, &Derived::f32x4_pmax);
+  }
+
+  ValueOnStack F32x4Pmin(const ValueOnStack& a, const ValueOnStack& b) {
+    return BinaryOp(a, b, &Derived::f32x4_pmin);
   }
 
   ValueOnStack I64x2Shuffle(const ValueOnStack& a, const ValueOnStack& b,
