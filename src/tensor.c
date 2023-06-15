@@ -235,7 +235,7 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value(
       return xnn_status_unsupported_parameter;
   }
 
-  const size_t channels = dims[0];
+  const size_t channels = dims[channel_dim];
   for (size_t channel = 0; channel < channels; channel++) {
     if (scale[channel] <= 0.0f || !isnormal(scale[channel])) {
       xnn_log_error(
