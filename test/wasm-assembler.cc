@@ -625,32 +625,35 @@ class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
   void EmitEncodedU32ExpectCall(uint32_t value) {
     EXPECT_CALL(*this, EmitEncodedU32(value)).Times(1).InSequence(sequence_);
   }
+  void ExpectEmitSIMDOpcode(uint32_t opcode) {
+    Emit8ExpectCall(0xFD);
+    EmitEncodedU32ExpectCall(opcode);
+  }
 
   Sequence sequence_;
   ValueOnStack v128_value_{v128, this};
   ValueOnStack i32_value_{i32, this};
+
+  static constexpr uint32_t kLogAlignment = 3;
+  static constexpr uint32_t kAlignment = 1 << 3;
+  static constexpr uint32_t kOffset = 16;
 };
 
 class V128StoreLaneWasmOpTest : public WasmOpsTest {
  protected:
   void SetStoreLaneExpectations(byte expected_opcode) {
-    Emit8ExpectCall(0xFD);
-    EmitEncodedU32ExpectCall(expected_opcode);
+    ExpectEmitSIMDOpcode(expected_opcode);
     EmitEncodedU32ExpectCall(kLogAlignment);
     EmitEncodedU32ExpectCall(kOffset);
     Emit8ExpectCall(kLane);
   }
 
-  static constexpr uint32_t kLogAlignment = 3;
-  static constexpr uint32_t kAlignment = 1 << 3;
-  static constexpr uint32_t kOffset = 16;
   static constexpr uint8_t kLane = 1;
 };
 }  // namespace
 
 TEST_F(WasmOpsTest, F32x4Mul) {
-  Emit8ExpectCall(0xFD);
-  EmitEncodedU32ExpectCall(0xE6);
+  ExpectEmitSIMDOpcode(0xE6);
   auto result = F32x4Mul(v128_value_, v128_value_);
   EXPECT_EQ(result.type, v128);
 }
@@ -673,6 +676,14 @@ TEST_F(WasmOpsTest, I32Ne) {
 TEST_F(WasmOpsTest, I32GeU) {
   Emit8ExpectCall(0x4F);
   I32GeU(i32_value_, i32_value_);
+}
+
+TEST_F(WasmOpsTest, V128Load64Splat) {
+  ExpectEmitSIMDOpcode(0x0A);
+  EmitEncodedU32ExpectCall(kLogAlignment);
+  EmitEncodedU32ExpectCall(kOffset);
+
+  V128Load64Splat(i32_value_, kOffset, kAlignment);
 }
 
 using ::xnnpack::internal::At;

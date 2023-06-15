@@ -244,6 +244,10 @@ class MemoryWasmOps : public WasmOpsBase<Derived, MemoryWasmOps<Derived>> {
     vector_load_or_store(0x09, offset, alignment);
   }
 
+  void v128_load64_splat(uint32_t offset = 0, uint32_t alignment = 4) const {
+    vector_load_or_store(0x0A, offset, alignment);
+  }
+
   void v128_store(uint32_t offset = 0, uint32_t alignment = 4) const {
     vector_load_or_store(0x0B, offset, alignment);
   }
@@ -500,6 +504,11 @@ class LocalWasmOps : public LocalsManager {
   ValueOnStack V128Load32Splat(const ValueOnStack& address, uint32_t offset = 0,
                                uint32_t alignment = 4) {
     return LoadOp(v128, offset, alignment, &Derived::v128_load32_splat);
+  }
+
+  ValueOnStack V128Load64Splat(const ValueOnStack& address, uint32_t offset = 0,
+                               uint32_t alignment = 4) {
+    return LoadOp(v128, offset, alignment, &Derived::v128_load64_splat);
   }
 
   void V128Store(const ValueOnStack& address, const ValueOnStack& value,
