@@ -78,6 +78,6 @@ xnn_status_t xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr(xnn_code_buffer* b,
   if (finalized == nullptr || generator.error() != xnnpack::Error::kNoError) {
     return xnn_status_uninitialized;
   }
-  return xnn_finalize_code_memory(b);
+  return xnn_status_success;
 }
 }

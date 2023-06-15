@@ -212,7 +212,11 @@ void xnn_generate_vunary_ukernel(
         xnn_log_warning("failed to generate vunary kernel");
         return;
       }
-      *jit_ptr = (xnn_vunary_ukernel_fn) b.first_function_index;
+      if (xnn_finalize_code_memory(&b) != xnn_status_success) {
+        xnn_log_warning("failed to finalize vunary kernel code");
+        return;
+      }
+      *jit_ptr = (xnn_vunary_ukernel_fn) xnn_first_function_ptr(&b);
       xnn_release_code_memory(&b);
     }
   #endif // XNN_PLATFORM_WEB

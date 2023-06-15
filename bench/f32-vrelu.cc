@@ -67,9 +67,10 @@ static void f32_vrelu(
   xnn_code_buffer b;
   xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
   generator(&b, k_unroll, use_local);
-  auto kernel = (xnn_f32_vrelu_ukernel_fn)(b.first_function_index);
-  xnn_release_code_memory(&b);
+  xnn_finalize_code_memory(&b);
+  auto kernel = (xnn_f32_vrelu_ukernel_fn)(xnn_first_function_ptr(&b));
   f32_vrelu(state, kernel, isa_check);
+  xnn_release_code_memory(&b);
 }
 #endif  // (XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD) && XNN_PLATFORM_JIT
 

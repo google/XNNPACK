@@ -591,7 +591,7 @@ TYPED_TEST_P(WasmAssemblerTest, ValidCode) {
 
   ASSERT_EQ(xnn_finalize_code_memory(&b), xnn_status_success);
   ASSERT_EQ(Error::kNoError, generator.error());
-  auto func = (Func)b.first_function_index;
+  auto func = (Func)xnn_first_function_ptr(&b);
   TestSuite::ExpectFuncCorrect(func);
 
   ASSERT_EQ(xnn_release_code_memory(&b), xnn_status_success);
