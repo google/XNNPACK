@@ -136,4 +136,3 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
   post-op: false
-

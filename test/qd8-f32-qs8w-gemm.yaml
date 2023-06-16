@@ -30,10 +30,10 @@
 - name: xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x8c4__neondot
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-- name: xnn_qd8_f32_qs8w_gemm_minmax_ukernel_2x8c4__neondot
+- name: xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x16c4__neondot
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-- name: xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x16c4__neondot
+- name: xnn_qd8_f32_qs8w_gemm_minmax_ukernel_2x8c4__neondot
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 - name: xnn_qd8_f32_qs8w_gemm_minmax_ukernel_2x16c4__neondot
