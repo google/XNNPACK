@@ -131,3 +131,9 @@
   prototype: xnn_f32_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
+# WAsm SIMD JIT
+- name: xnn_generate_f32_gemm_ukernel_1x8__wasmsimd_x86_loadsplat
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+  post-op: false
+

@@ -890,7 +890,7 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE == 'f32' and POST_OP:
           fused_operators);
   }
 
-$if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16']:
+$if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16'] and PROTOTYPE is not None:
   #if XNN_ENABLE_ASSEMBLY
     TEST(${TEST_NAME}, matches_assembly) {
       $if ISA_CHECK:
@@ -962,10 +962,6 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
   if jit:
     if "minmax" in init_fn:
       activation = "minmax"
-
-  if jit and not prototype:
-    printf("JIT microkernel does not have prototype specified in YAML file.")
-    sys.exit(1);
 
   return xngen.preprocess(
       GEMM_TEST_CODE, {
