@@ -20,7 +20,7 @@
 #include "gavgpool-microkernel-tester.h"
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_GAVGPOOL_MINMAX_7P7X__NEONFP16ARITH_C8, channels_eq_8_2pass_fulltile) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GAvgPoolMicrokernelTester()
@@ -282,10 +282,10 @@
       }
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_GAVGPOOL_MINMAX_7P7X__NEONFP16ARITH_C16, channels_eq_16_2pass_fulltile) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GAvgPoolMicrokernelTester()
@@ -547,10 +547,10 @@
       }
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_GAVGPOOL_MINMAX_7P7X__NEONFP16ARITH_C24, channels_eq_24_2pass_fulltile) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GAvgPoolMicrokernelTester()
@@ -812,10 +812,10 @@
       }
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_GAVGPOOL_MINMAX_7P7X__NEONFP16ARITH_C32, channels_eq_32_2pass_fulltile) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GAvgPoolMicrokernelTester()
@@ -1077,10 +1077,10 @@
       }
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_GAVGPOOL_MINMAX_7X__NEONFP16ARITH_C8, channels_eq_8_fulltile) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GAvgPoolMicrokernelTester()
@@ -1235,10 +1235,10 @@
         .Test(xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c8, xnn_init_f16_scaleminmax_fp16arith_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_GAVGPOOL_MINMAX_7X__NEONFP16ARITH_C16, channels_eq_16_fulltile) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GAvgPoolMicrokernelTester()
@@ -1393,10 +1393,10 @@
         .Test(xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c16, xnn_init_f16_scaleminmax_fp16arith_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_GAVGPOOL_MINMAX_7X__NEONFP16ARITH_C24, channels_eq_24_fulltile) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GAvgPoolMicrokernelTester()
@@ -1551,10 +1551,10 @@
         .Test(xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c24, xnn_init_f16_scaleminmax_fp16arith_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_GAVGPOOL_MINMAX_7X__NEONFP16ARITH_C32, channels_eq_32_fulltile) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GAvgPoolMicrokernelTester()
@@ -1709,7 +1709,7 @@
         .Test(xnn_f16_gavgpool_minmax_ukernel_7x__neonfp16arith_c32, xnn_init_f16_scaleminmax_fp16arith_params);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

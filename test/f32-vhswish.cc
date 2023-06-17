@@ -160,7 +160,7 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_VHSWISH__RVV_X1V, batch_eq_1v) {
     TEST_REQUIRES_RISCV_VECTOR;
     VUnaryMicrokernelTester()
@@ -186,10 +186,10 @@
         .Test(xnn_f32_vhswish_ukernel__rvv_x1v, xnn_init_f32_hswish_scalar_params);
     }
   }
-#endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 
-#if XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_VHSWISH__RVV_X2V, batch_eq_2v) {
     TEST_REQUIRES_RISCV_VECTOR;
     VUnaryMicrokernelTester()
@@ -233,10 +233,10 @@
         .Test(xnn_f32_vhswish_ukernel__rvv_x2v, xnn_init_f32_hswish_scalar_params);
     }
   }
-#endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 
-#if XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_VHSWISH__RVV_X4V, batch_eq_4v) {
     TEST_REQUIRES_RISCV_VECTOR;
     VUnaryMicrokernelTester()
@@ -280,10 +280,10 @@
         .Test(xnn_f32_vhswish_ukernel__rvv_x4v, xnn_init_f32_hswish_scalar_params);
     }
   }
-#endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 
-#if XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
   TEST(F32_VHSWISH__RVV_X8V, batch_eq_8v) {
     TEST_REQUIRES_RISCV_VECTOR;
     VUnaryMicrokernelTester()
@@ -327,7 +327,7 @@
         .Test(xnn_f32_vhswish_ukernel__rvv_x8v, xnn_init_f32_hswish_scalar_params);
     }
   }
-#endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

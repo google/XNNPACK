@@ -19,7 +19,7 @@
 #include "vunary-microkernel-tester.h"
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
   TEST(F16_VSQRT__AARCH64_NEONFP16ARITH_SQRT_X8, batch_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -63,10 +63,10 @@
         .Test(xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x8);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
   TEST(F16_VSQRT__AARCH64_NEONFP16ARITH_SQRT_X16, batch_eq_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -110,10 +110,10 @@
         .Test(xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x16);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSQRT__NEONFP16ARITH_NR1FMA1ADJ_X8, batch_eq_8) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -157,10 +157,10 @@
         .Test(xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x8);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSQRT__NEONFP16ARITH_NR1FMA1ADJ_X16, batch_eq_16) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -204,10 +204,10 @@
         .Test(xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x16);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSQRT__NEONFP16ARITH_NR1FMA1ADJ_X24, batch_eq_24) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -251,10 +251,10 @@
         .Test(xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x24);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSQRT__NEONFP16ARITH_NR1FMA1ADJ_X32, batch_eq_32) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -298,10 +298,10 @@
         .Test(xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x32);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_SCALAR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_SCALAR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSQRT__FP16ARITH_SQRT_X1, batch_eq_1) {
     TEST_REQUIRES_ARM_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -327,10 +327,10 @@
         .Test(xnn_f16_vsqrt_ukernel__fp16arith_sqrt_x1);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_SCALAR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_SCALAR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_SCALAR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_SCALAR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSQRT__FP16ARITH_SQRT_X2, batch_eq_2) {
     TEST_REQUIRES_ARM_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -374,10 +374,10 @@
         .Test(xnn_f16_vsqrt_ukernel__fp16arith_sqrt_x2);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_SCALAR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_SCALAR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_FP16_SCALAR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#if XNN_ENABLE_ARM_FP16_SCALAR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   TEST(F16_VSQRT__FP16ARITH_SQRT_X4, batch_eq_4) {
     TEST_REQUIRES_ARM_FP16_ARITH;
     VUnaryMicrokernelTester()
@@ -421,7 +421,7 @@
         .Test(xnn_f16_vsqrt_ukernel__fp16arith_sqrt_x4);
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_SCALAR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
+#endif  // XNN_ENABLE_ARM_FP16_SCALAR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
