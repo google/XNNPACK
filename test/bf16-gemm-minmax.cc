@@ -4584,7 +4584,7 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(BF16_GEMM_MINMAX_1X8C2__NEONBF16_BFDOT_LANE_LD128, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
     GemmMicrokernelTester()
@@ -5037,10 +5037,10 @@
       .cm_stride(11)
       .Test(xnn_bf16_gemm_minmax_ukernel_1x8c2__neonbf16_bfdot_lane_ld128, xnn_init_bf16_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(BF16_GEMM_MINMAX_4X8C2__NEONBF16_BFDOT_LANE_LD128, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
     GemmMicrokernelTester()
@@ -5493,10 +5493,10 @@
       .cm_stride(11)
       .Test(xnn_bf16_gemm_minmax_ukernel_4x8c2__neonbf16_bfdot_lane_ld128, xnn_init_bf16_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(BF16_GEMM_MINMAX_5X8C2__NEONBF16_BFDOT_LANE_LD128, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
     GemmMicrokernelTester()
@@ -5949,10 +5949,10 @@
       .cm_stride(11)
       .Test(xnn_bf16_gemm_minmax_ukernel_5x8c2__neonbf16_bfdot_lane_ld128, xnn_init_bf16_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(BF16_GEMM_MINMAX_6X8C2__NEONBF16_BFDOT_LANE_LD128, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
     GemmMicrokernelTester()
@@ -6405,10 +6405,10 @@
       .cm_stride(11)
       .Test(xnn_bf16_gemm_minmax_ukernel_6x8c2__neonbf16_bfdot_lane_ld128, xnn_init_bf16_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(BF16_GEMM_MINMAX_1X4C8__NEONBF16_BFDOT, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
     GemmMicrokernelTester()
@@ -6861,10 +6861,10 @@
       .cm_stride(7)
       .Test(xnn_bf16_gemm_minmax_ukernel_1x4c8__neonbf16_bfdot, xnn_init_bf16_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(BF16_GEMM_MINMAX_2X4C8__NEONBF16_BFDOT, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
     GemmMicrokernelTester()
@@ -7317,10 +7317,10 @@
       .cm_stride(7)
       .Test(xnn_bf16_gemm_minmax_ukernel_2x4c8__neonbf16_bfdot, xnn_init_bf16_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(BF16_GEMM_MINMAX_3X4C8__NEONBF16_BFDOT, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
     GemmMicrokernelTester()
@@ -7773,10 +7773,10 @@
       .cm_stride(7)
       .Test(xnn_bf16_gemm_minmax_ukernel_3x4c8__neonbf16_bfdot, xnn_init_bf16_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(BF16_GEMM_MINMAX_4X4C8__NEONBF16_BFDOT, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
     GemmMicrokernelTester()
@@ -8229,10 +8229,10 @@
       .cm_stride(7)
       .Test(xnn_bf16_gemm_minmax_ukernel_4x4c8__neonbf16_bfdot, xnn_init_bf16_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(BF16_GEMM_MINMAX_5X4C8__NEONBF16_BFDOT, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
     GemmMicrokernelTester()
@@ -8685,10 +8685,10 @@
       .cm_stride(7)
       .Test(xnn_bf16_gemm_minmax_ukernel_5x4c8__neonbf16_bfdot, xnn_init_bf16_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(BF16_GEMM_MINMAX_1X4C8__NEONBF16_BFMLAL, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
     GemmMicrokernelTester()
@@ -9141,10 +9141,10 @@
       .cm_stride(7)
       .Test(xnn_bf16_gemm_minmax_ukernel_1x4c8__neonbf16_bfmlal, xnn_init_bf16_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(BF16_GEMM_MINMAX_2X4C8__NEONBF16_BFMLAL, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
     GemmMicrokernelTester()
@@ -9597,10 +9597,10 @@
       .cm_stride(7)
       .Test(xnn_bf16_gemm_minmax_ukernel_2x4c8__neonbf16_bfmlal, xnn_init_bf16_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(BF16_GEMM_MINMAX_3X4C8__NEONBF16_BFMLAL, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
     GemmMicrokernelTester()
@@ -10053,10 +10053,10 @@
       .cm_stride(7)
       .Test(xnn_bf16_gemm_minmax_ukernel_3x4c8__neonbf16_bfmlal, xnn_init_bf16_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(BF16_GEMM_MINMAX_4X4C8__NEONBF16_BFMLAL, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
     GemmMicrokernelTester()
@@ -10509,10 +10509,10 @@
       .cm_stride(7)
       .Test(xnn_bf16_gemm_minmax_ukernel_4x4c8__neonbf16_bfmlal, xnn_init_bf16_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(BF16_GEMM_MINMAX_5X4C8__NEONBF16_BFMLAL, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_BF16;
     GemmMicrokernelTester()
@@ -10965,4 +10965,4 @@
       .cm_stride(7)
       .Test(xnn_bf16_gemm_minmax_ukernel_5x4c8__neonbf16_bfmlal, xnn_init_bf16_minmax_scalar_params);
   }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_BF16 && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))

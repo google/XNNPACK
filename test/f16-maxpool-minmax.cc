@@ -20,7 +20,7 @@
 #include "maxpool-microkernel-tester.h"
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_unipass_fulltile) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     MaxPoolMicrokernelTester()
@@ -904,7 +904,7 @@
       }
     }
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

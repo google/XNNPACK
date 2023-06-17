@@ -936,7 +936,7 @@
 #endif  // XNN_ARCH_ARM && XNN_PLATFORM_JIT
 
 
-#if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && XNN_PLATFORM_JIT
+#if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM) && XNN_PLATFORM_JIT
   TEST(GENERATE_QC8_GEMM_FP32_4X8C4__AARCH32_NEONDOT_LD64, k_eq_8) {
     TEST_REQUIRES_ARM_NEON_DOT;
     GemmMicrokernelTester()
@@ -1389,4 +1389,4 @@
       .cm_stride(11)
       .Test(xnn_generate_qc8_gemm_fp32_ukernel_4x8c4__aarch32_neondot_ld64, xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
   }
-#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM && XNN_PLATFORM_JIT
+#endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM) && XNN_PLATFORM_JIT

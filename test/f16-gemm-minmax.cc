@@ -24,7 +24,7 @@
 #include "gemm-microkernel-tester.h"
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
   TEST(F16_GEMM_MINMAX_1X8__ASM_AARCH64_NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -477,10 +477,10 @@
       .cm_stride(11)
       .Test(xnn_f16_gemm_minmax_ukernel_1x8__asm_aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
   TEST(F16_GEMM_MINMAX_1X16__ASM_AARCH64_NEONFP16ARITH_LD32, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -933,10 +933,10 @@
       .cm_stride(19)
       .Test(xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
   TEST(F16_GEMM_MINMAX_1X16__ASM_AARCH64_NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -1389,10 +1389,10 @@
       .cm_stride(19)
       .Test(xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
   TEST(F16_GEMM_MINMAX_4X8__ASM_AARCH64_NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -1845,10 +1845,10 @@
       .cm_stride(11)
       .Test(xnn_f16_gemm_minmax_ukernel_4x8__asm_aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
   TEST(F16_GEMM_MINMAX_4X16__ASM_AARCH64_NEONFP16ARITH_LD32, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -2301,10 +2301,10 @@
       .cm_stride(19)
       .Test(xnn_f16_gemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld32, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
   TEST(F16_GEMM_MINMAX_4X16__ASM_AARCH64_NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -2757,10 +2757,10 @@
       .cm_stride(19)
       .Test(xnn_f16_gemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
   TEST(F16_GEMM_MINMAX_6X8__ASM_AARCH64_NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -3213,10 +3213,10 @@
       .cm_stride(11)
       .Test(xnn_f16_gemm_minmax_ukernel_6x8__asm_aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
   TEST(F16_GEMM_MINMAX_6X16__ASM_AARCH64_NEONFP16ARITH_CORTEX_A55, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -3669,10 +3669,10 @@
       .cm_stride(19)
       .Test(xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
   TEST(F16_GEMM_MINMAX_6X16__ASM_AARCH64_NEONFP16ARITH_CORTEX_A55R0, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -4125,10 +4125,10 @@
       .cm_stride(19)
       .Test(xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55r0, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
   TEST(F16_GEMM_MINMAX_6X16__ASM_AARCH64_NEONFP16ARITH_CORTEX_A75, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -4581,10 +4581,10 @@
       .cm_stride(19)
       .Test(xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a75, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
   TEST(F16_GEMM_MINMAX_6X16__ASM_AARCH64_NEONFP16ARITH_LD32, k_eq_2) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -5037,10 +5037,10 @@
       .cm_stride(19)
       .Test(xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
   TEST(F16_GEMM_MINMAX_6X16__ASM_AARCH64_NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -5493,10 +5493,10 @@
       .cm_stride(19)
       .Test(xnn_f16_gemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
   TEST(F16_GEMM_MINMAX_8X8__ASM_AARCH64_NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -5949,10 +5949,10 @@
       .cm_stride(11)
       .Test(xnn_f16_gemm_minmax_ukernel_8x8__asm_aarch64_neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(F16_GEMM_MINMAX_1X8__NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -6405,10 +6405,10 @@
       .cm_stride(11)
       .Test(xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(F16_GEMM_MINMAX_1X16__NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -6861,10 +6861,10 @@
       .cm_stride(19)
       .Test(xnn_f16_gemm_minmax_ukernel_1x16__neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(F16_GEMM_MINMAX_4X8__NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -7317,10 +7317,10 @@
       .cm_stride(11)
       .Test(xnn_f16_gemm_minmax_ukernel_4x8__neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(F16_GEMM_MINMAX_4X16__NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -7773,10 +7773,10 @@
       .cm_stride(19)
       .Test(xnn_f16_gemm_minmax_ukernel_4x16__neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(F16_GEMM_MINMAX_6X8__NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -8229,10 +8229,10 @@
       .cm_stride(11)
       .Test(xnn_f16_gemm_minmax_ukernel_6x8__neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(F16_GEMM_MINMAX_6X16__NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -8685,10 +8685,10 @@
       .cm_stride(19)
       .Test(xnn_f16_gemm_minmax_ukernel_6x16__neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(F16_GEMM_MINMAX_8X8__NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -9141,10 +9141,10 @@
       .cm_stride(11)
       .Test(xnn_f16_gemm_minmax_ukernel_8x8__neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
   TEST(F16_GEMM_MINMAX_8X16__NEONFP16ARITH_LD64, k_eq_4) {
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     GemmMicrokernelTester()
@@ -9597,7 +9597,7 @@
       .cm_stride(19)
       .Test(xnn_f16_gemm_minmax_ukernel_8x16__neonfp16arith_ld64, xnn_init_f16_minmax_fp16arith_params);
   }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && ((XNN_ARCH_ARM || XNN_ARCH_ARM64))
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

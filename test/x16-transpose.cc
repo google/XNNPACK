@@ -2715,7 +2715,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
   TEST(X16_TRANSPOSEC__16X16_REUSE_MOV_AVX2_2, bh_16_bw_16) {
     TEST_REQUIRES_X86_AVX2;
     TransposeMicrokernelTester()
@@ -2915,10 +2915,10 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .iterations(1)
       .Test(xnn_x16_transposec_ukernel__16x16_reuse_mov_avx2, xnn_init_x16_transpose_avx2_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#endif  // (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
   TEST(X16_TRANSPOSEC__16X16_REUSE_SWITCH_AVX2_2, bh_16_bw_16) {
     TEST_REQUIRES_X86_AVX2;
     TransposeMicrokernelTester()
@@ -3118,7 +3118,7 @@ TEST(X16_TRANSPOSEC__4X4_SCALAR_INT_2, bh_28_bw_92_ies_19_oes_15) {
       .iterations(1)
       .Test(xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2, xnn_init_x16_transpose_avx2_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#endif  // (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

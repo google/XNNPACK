@@ -4601,7 +4601,7 @@ TEST(X32_TRANSPOSEC__4X4_SCALAR_INT_4, bh_28_bw_92_ies_21_oes_17) {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
   TEST(X32_TRANSPOSEC__8X8_MULTI_MOV_AVX_4, bh_8_bw_8) {
     TEST_REQUIRES_X86_AVX;
     TransposeMicrokernelTester()
@@ -4801,10 +4801,10 @@ TEST(X32_TRANSPOSEC__4X4_SCALAR_INT_4, bh_28_bw_92_ies_21_oes_17) {
       .iterations(1)
       .Test(xnn_x32_transposec_ukernel__8x8_multi_mov_avx, xnn_init_x32_transpose_avx_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#endif  // (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
   TEST(X32_TRANSPOSEC__8X8_MULTI_SWITCH_AVX_4, bh_8_bw_8) {
     TEST_REQUIRES_X86_AVX;
     TransposeMicrokernelTester()
@@ -5004,10 +5004,10 @@ TEST(X32_TRANSPOSEC__4X4_SCALAR_INT_4, bh_28_bw_92_ies_21_oes_17) {
       .iterations(1)
       .Test(xnn_x32_transposec_ukernel__8x8_multi_switch_avx, xnn_init_x32_transpose_avx_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#endif  // (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
   TEST(X32_TRANSPOSEC__8X8_REUSE_MOV_AVX_4, bh_8_bw_8) {
     TEST_REQUIRES_X86_AVX;
     TransposeMicrokernelTester()
@@ -5207,10 +5207,10 @@ TEST(X32_TRANSPOSEC__4X4_SCALAR_INT_4, bh_28_bw_92_ies_21_oes_17) {
       .iterations(1)
       .Test(xnn_x32_transposec_ukernel__8x8_reuse_mov_avx, xnn_init_x32_transpose_avx_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#endif  // (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
   TEST(X32_TRANSPOSEC__8X8_REUSE_MULTI_AVX_4, bh_8_bw_8) {
     TEST_REQUIRES_X86_AVX;
     TransposeMicrokernelTester()
@@ -5410,10 +5410,10 @@ TEST(X32_TRANSPOSEC__4X4_SCALAR_INT_4, bh_28_bw_92_ies_21_oes_17) {
       .iterations(1)
       .Test(xnn_x32_transposec_ukernel__8x8_reuse_multi_avx, xnn_init_x32_transpose_avx_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#endif  // (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
   TEST(X32_TRANSPOSEC__8X8_REUSE_SWITCH_AVX_4, bh_8_bw_8) {
     TEST_REQUIRES_X86_AVX;
     TransposeMicrokernelTester()
@@ -5613,7 +5613,7 @@ TEST(X32_TRANSPOSEC__4X4_SCALAR_INT_4, bh_28_bw_92_ies_21_oes_17) {
       .iterations(1)
       .Test(xnn_x32_transposec_ukernel__8x8_reuse_switch_avx, xnn_init_x32_transpose_avx_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#endif  // (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

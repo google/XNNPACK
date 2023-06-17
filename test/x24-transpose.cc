@@ -1497,7 +1497,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
     .Test(xnn_x24_transposec_ukernel__4x4_scalar);
 }
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
   TEST(X24_TRANSPOSEC__2X2_NEON_TBL64_3, bh_2_bw_2) {
     TEST_REQUIRES_ARM_NEON;
     TransposeMicrokernelTester()
@@ -1697,7 +1697,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .iterations(1)
       .Test(xnn_x24_transposec_ukernel__2x2_neon_tbl64, xnn_init_x24_transpose_neon_tbl64_params);
   }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
+#endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ASSEMBLY
 
 
 #if XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
@@ -1903,7 +1903,7 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#if (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
   TEST(X24_TRANSPOSEC__4X4_SSSE3_3, bh_4_bw_4) {
     TEST_REQUIRES_X86_SSSE3;
     TransposeMicrokernelTester()
@@ -2103,4 +2103,4 @@ TEST(X24_TRANSPOSEC__4X4_SCALAR_3, bh_28_bw_92_ies_20_oes_16) {
       .iterations(1)
       .Test(xnn_x24_transposec_ukernel__4x4_ssse3, xnn_init_x24_transpose_ssse3_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
+#endif  // (XNN_ARCH_X86 || XNN_ARCH_X86_64) && XNN_ENABLE_ASSEMBLY
