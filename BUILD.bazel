@@ -103,6 +103,7 @@ OPERATOR_SRCS = [
     "src/operators/reduce-nd.c",
     "src/operators/resize-bilinear-nchw.c",
     "src/operators/resize-bilinear-nhwc.c",
+    "src/operators/rope-nthc.c",
     "src/operators/slice-nd.c",
     "src/operators/softmax-nc.c",
     "src/operators/transpose-nd.c",
@@ -144,6 +145,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/multiply2.c",
     "src/subgraph/negate.c",
     "src/subgraph/prelu.c",
+    "src/subgraph/rope.c",
     "src/subgraph/sigmoid.c",
     "src/subgraph/softmax.c",
     "src/subgraph/space-to-depth-2d.c",
@@ -259,6 +261,7 @@ PROD_SCALAR_AARCH32_MICROKERNEL_SRCS = [
     "src/f32-vbinary/gen/f32-vsub-minmax-scalar-x8.c",
     "src/f32-vbinary/gen/f32-vsubc-minmax-scalar-x8.c",
     "src/f32-vclamp/gen/f32-vclamp-scalar-x4.c",
+    "src/f32-vcmul/gen/f32-vcmul-scalar-x4.c",
     "src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-x4.c",
     "src/f32-vhswish/gen/f32-vhswish-scalar-x4.c",
     "src/f32-vlrelu/gen/f32-vlrelu-scalar-x4.c",
@@ -408,6 +411,7 @@ PROD_SCALAR_WASM_MICROKERNEL_SRCS = [
     "src/f32-vbinary/gen/f32-vsub-minmax-scalar-x8.c",
     "src/f32-vbinary/gen/f32-vsubc-minmax-scalar-x8.c",
     "src/f32-vclamp/gen/f32-vclamp-scalar-x4.c",
+    "src/f32-vcmul/gen/f32-vcmul-scalar-x4.c",
     "src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-x2.c",
     "src/f32-vhswish/gen/f32-vhswish-scalar-x4.c",
     "src/f32-vlrelu/gen/f32-vlrelu-scalar-x4.c",
@@ -569,6 +573,7 @@ PROD_SCALAR_RISCV_MICROKERNEL_SRCS = [
     "src/f32-vbinary/gen/f32-vsub-minmax-scalar-x8.c",
     "src/f32-vbinary/gen/f32-vsubc-minmax-scalar-x8.c",
     "src/f32-vclamp/gen/f32-vclamp-scalar-x4.c",
+    "src/f32-vcmul/gen/f32-vcmul-scalar-x4.c",
     "src/f32-velu/gen/f32-velu-scalar-rr2-lut16-p3-x4.c",
     "src/f32-vhswish/gen/f32-vhswish-scalar-x4.c",
     "src/f32-vlrelu/gen/f32-vlrelu-scalar-x4.c",
@@ -732,6 +737,7 @@ PROD_NEON_MICROKERNEL_SRCS = [
     "src/f32-vbinary/gen/f32-vsub-minmax-neon-x8.c",
     "src/f32-vbinary/gen/f32-vsubc-minmax-neon-x8.c",
     "src/f32-vclamp/gen/f32-vclamp-neon-x8.c",
+    "src/f32-vcmul/gen/f32-vcmul-neon-x8.c",
     "src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-x8.c",
     "src/f32-vhswish/gen/f32-vhswish-neon-x16.c",
     "src/f32-vlrelu/gen/f32-vlrelu-neon-x8.c",
@@ -1076,6 +1082,7 @@ PROD_SSE_MICROKERNEL_SRCS = [
     "src/f32-vbinary/gen/f32-vsub-minmax-sse-x8.c",
     "src/f32-vbinary/gen/f32-vsubc-minmax-sse-x8.c",
     "src/f32-vclamp/gen/f32-vclamp-sse-x8.c",
+    "src/f32-vcmul/gen/f32-vcmul-sse-x8.c",
     "src/f32-vhswish/gen/f32-vhswish-sse-x8.c",
     "src/f32-vlrelu/gen/f32-vlrelu-sse-x8.c",
     "src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-sse-2x.c",
@@ -1745,6 +1752,7 @@ PROD_WASMSIMD_MICROKERNEL_SRCS = [
     "src/f32-vbinary/gen/f32-vsubc-wasmsimd-x16.c",
     "src/f32-vclamp/gen/f32-vclamp-wasmsimd-arm-x8.c",
     "src/f32-vclamp/gen/f32-vclamp-wasmsimd-x86-x8.c",
+    "src/f32-vcmul/gen/f32-vcmul-wasmsimd-x8.c",
     "src/f32-velu/gen/f32-velu-wasmsimd-arm-rr2-p6-x20.c",
     "src/f32-velu/gen/f32-velu-wasmsimd-x86-rr2-p6-x20.c",
     "src/f32-vhswish/gen/f32-vhswish-wasmsimd-x16.c",
@@ -2124,6 +2132,7 @@ xnnpack_cc_library(
         "src/argmaxpool-config.c",
         "src/avgpool-config.c",
         "src/binary-elementwise-config.c",
+        "src/cmul-config.c",
         "src/conv-hwc2chw-config.c",
         "src/dwconv-config.c",
         "src/dwconv2d-chw-config.c",
@@ -2177,6 +2186,7 @@ xnnpack_cc_library(
         "src/argmaxpool-config.c",
         "src/avgpool-config.c",
         "src/binary-elementwise-config.c",
+        "src/cmul-config.c",
         "src/conv-hwc2chw-config.c",
         "src/dwconv-config.c",
         "src/dwconv2d-chw-config.c",
@@ -10175,6 +10185,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "rope_nthc_test",
+    srcs = [
+        "test/rope-nthc.cc",
+        "test/rope-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "sigmoid_nc_test",
     srcs = [
         "test/sigmoid-nc.cc",
@@ -10924,6 +10943,20 @@ xnnpack_unit_test(
         ":XNNPACK_test_mode",
         ":node_type",
         ":operators_test_mode",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "rope_test",
+    srcs = [
+        "test/rope.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":node_type",
+        ":operators_test_mode",
+        ":requantization",
         ":subgraph_test_mode",
     ],
 )

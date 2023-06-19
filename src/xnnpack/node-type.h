@@ -43,6 +43,7 @@ enum xnn_node_type {
   xnn_node_type_multiply2,
   xnn_node_type_negate,
   xnn_node_type_prelu,
+  xnn_node_type_rope,
   xnn_node_type_sigmoid,
   xnn_node_type_softmax,
   xnn_node_type_space_to_depth_2d,
