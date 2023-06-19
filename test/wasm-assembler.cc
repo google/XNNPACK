@@ -694,6 +694,7 @@ TEST(WasmAssemblerTest, InvalidCode) {
 namespace {
 class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
                     public internal::I32WasmOps<WasmOpsTest>,
+                    public internal::ControlFlowWasmOps<WasmOpsTest>,
                     public internal::LocalWasmOps<WasmOpsTest>,
                     public internal::MemoryWasmOps<WasmOpsTest>,
                     public Test {
@@ -788,6 +789,11 @@ TEST_F(WasmOpsTest, V128F32x4Pmin) {
 TEST_F(WasmOpsTest, V128F32x4Splat) {
   ExpectEmitSIMDOpcode(0x13);
   F32x4Splat(f32_value_);
+}
+
+TEST_F(WasmOpsTest, Return) {
+  Emit8ExpectCall(0x0F);
+  Return();
 }
 
 using ::xnnpack::internal::At;
