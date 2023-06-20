@@ -306,6 +306,75 @@ struct SumUntilTestSuite : GeneratorTestSuite<SumUntilCodeGenerator, SumUntil> {
   }
 };
 
+static constexpr uint32_t kNSmall = 27;
+struct SumUntilLocalsArrayCodeGenerator : WasmAssembler {
+  explicit SumUntilLocalsArrayCodeGenerator(xnn_code_buffer* buf)
+      : WasmAssembler(buf) {
+    ValTypesToInt local_ints_decl = {{i32, kNSmall + 1}};
+    AddFunc<0>({i32}, "SumUntilN", {}, local_ints_decl, [&] {
+      auto summands = MakeLocalsArray(kNSmall, i32);
+      auto result = MakeLocal(i32);
+      InitSummands(summands);
+      Sum(result, summands);
+      local_get(result);
+    });
+  }
+
+ private:
+  void InitSummands(LocalsArray& summands) {
+    size_t i = 0;
+    for (auto& summand : summands) {
+      summand = I32Const(i);
+      i++;
+    }
+  }
+  void Sum(Local& result, const LocalsArray& summands) {
+    for (const auto& summand : summands) {
+      result = I32Add(result, summand);
+    }
+  }
+};
+
+struct SumUntilLocalsArrayTestSuite
+    : GeneratorTestSuite<SumUntilLocalsArrayCodeGenerator, GetIntPtr> {
+  static void ExpectFuncCorrect(GetIntPtr sum_until_n) {
+    EXPECT_EQ(sum_until_n(), ReferenceSumUntil(kNSmall));
+  }
+};
+
+struct SumUntilLocalsArrayWithIndexCodeGenerator : WasmAssembler {
+  explicit SumUntilLocalsArrayWithIndexCodeGenerator(xnn_code_buffer* buf)
+      : WasmAssembler(buf) {
+    ValTypesToInt local_ints_decl = {{i32, kNSmall + 1}};
+    AddFunc<0>({i32}, "SumUntilN", {}, local_ints_decl, [&] {
+      auto summands = MakeLocalsArray(kNSmall, i32);
+      auto result = MakeLocal(i32);
+      InitSummands(summands);
+      Sum(result, summands);
+      local_get(result);
+    });
+  }
+
+ private:
+  void InitSummands(LocalsArray& summands) {
+    for (size_t i = 0; i < kNSmall; i++) {
+      summands[i] = I32Const(i);
+    }
+  }
+  void Sum(Local& result, const LocalsArray& summands) {
+    for (size_t i = 0; i < kNSmall; i++) {
+      result = I32Add(result, summands[i]);
+    }
+  }
+};
+
+struct SumUntilLocalsArrayWithIndexTestSuite
+    : GeneratorTestSuite<SumUntilLocalsArrayWithIndexCodeGenerator, GetIntPtr> {
+  static void ExpectFuncCorrect(GetIntPtr sum_until_n) {
+    EXPECT_EQ(sum_until_n(), ReferenceSumUntil(kNSmall));
+  }
+};
+
 struct DoWhileCodeGenerator : WasmAssembler {
   explicit DoWhileCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt two_local_ints = {{i32, 2}};
@@ -559,8 +628,8 @@ struct GetPiGenerator : WasmAssembler {
   }
 };
 
-struct GetPiTestSuite : GetValueTestSuite<float, kPi, GetPiGenerator, GetPiPtr> {
-};
+struct GetPiTestSuite
+    : GetValueTestSuite<float, kPi, GetPiGenerator, GetPiPtr> {};
 
 struct InvalidCodeGenerator : WasmAssembler {
   ValTypesToInt no_locals;
@@ -603,11 +672,12 @@ using WasmAssemblerTestSuits = testing::Types<
     Get5TestSuite, AddTestSuite, Get5AndAddTestSuite, AddWithLocalTestSuite,
     AddTwiceTestSuite, AddTwiceDeclareInitTestSuite,
     AddTwiceWithScopesTestSuite, Add5TestSuite, MaxTestSuite,
-    MaxIncompleteIfTestSuite, SumUntilTestSuite, DoWhileTestSuite,
-    SumArrayTestSuite, MemCpyTestSuite, AddDelayedInitTestSuite,
-    ManyFunctionsGeneratorTestSuite, ManyLocalsGeneratorTestSuite,
-    V128AddGeneratorTestSuite, V128AddConstGeneratorTestSuite,
-    I64x2ShuffleGeneratorTestSuite, GetPiTestSuite>;
+    MaxIncompleteIfTestSuite, SumUntilTestSuite, SumUntilLocalsArrayTestSuite,
+    SumUntilLocalsArrayWithIndexTestSuite, DoWhileTestSuite, SumArrayTestSuite,
+    MemCpyTestSuite, AddDelayedInitTestSuite, ManyFunctionsGeneratorTestSuite,
+    ManyLocalsGeneratorTestSuite, V128AddGeneratorTestSuite,
+    V128AddConstGeneratorTestSuite, I64x2ShuffleGeneratorTestSuite,
+    GetPiTestSuite>;
 INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest,
                                WasmAssemblerTestSuits);
 

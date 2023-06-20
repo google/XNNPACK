@@ -22,7 +22,6 @@
 #include <utility>
 #include <vector>
 
-
 namespace xnnpack {
 
 struct ValType {
@@ -408,6 +407,37 @@ class LocalWasmOps : public LocalsManager {
     static constexpr uint32_t kInvalidIndex = -1;
   };
 
+  constexpr static size_t kMaxLocalsSize = 32;
+
+  struct LocalsArray {
+    explicit LocalsArray(size_t size) : size(size) {
+      assert(size <= kMaxLocalsSize);
+    }
+    auto begin() { return arr.begin(); }
+    auto begin() const { return arr.cbegin(); }
+    auto end() {
+      auto result = arr.begin();
+      std::advance(result, size);
+      return result;
+    }
+    auto end() const {
+      auto result = arr.cbegin();
+      std::advance(result, size);
+      return result;
+    }
+    auto& operator[](size_t index) {
+      assert(index < size);
+      return arr[index];
+    }
+    const auto& operator[](size_t index) const {
+      assert(index < size);
+      return arr[index];
+    }
+
+    size_t size;
+    std::array<Local, kMaxLocalsSize> arr;
+  };
+
   Local MakeLocal(ValType type) {
     return Local{type, GetNewLocalIndex(type), /*is_managed=*/true,
                  GetMutableDerived()};
@@ -417,6 +447,12 @@ class LocalWasmOps : public LocalsManager {
     auto result = MakeLocal(rhs.type);
     result = rhs;
     return result;
+  }
+
+  LocalsArray MakeLocalsArray(size_t size, ValType type) {
+    LocalsArray locals(size);
+    for (auto& local : locals) local = MakeLocal(type);
+    return locals;
   }
 
   void local_get(uint32_t index) const {
