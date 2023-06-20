@@ -307,72 +307,101 @@ struct SumUntilTestSuite : GeneratorTestSuite<SumUntilCodeGenerator, SumUntil> {
 };
 
 static constexpr uint32_t kNSmall = 27;
-struct SumUntilLocalsArrayCodeGenerator : WasmAssembler {
-  explicit SumUntilLocalsArrayCodeGenerator(xnn_code_buffer* buf)
-      : WasmAssembler(buf) {
-    ValTypesToInt local_ints_decl = {{i32, kNSmall + 1}};
-    AddFunc<0>({i32}, "SumUntilN", {}, local_ints_decl, [&] {
-      auto summands = MakeLocalsArray(kNSmall, i32);
-      auto result = MakeLocal(i32);
-      InitSummands(summands);
-      Sum(result, summands);
-      local_get(result);
-    });
-  }
 
- private:
+template <typename Derived>
+struct CanInitWithIterator {
+  template <typename LocalsArray>
   void InitSummands(LocalsArray& summands) {
     size_t i = 0;
     for (auto& summand : summands) {
-      summand = I32Const(i);
+      summand = static_cast<Derived*>(this)->I32Const(i);
       i++;
-    }
-  }
-  void Sum(Local& result, const LocalsArray& summands) {
-    for (const auto& summand : summands) {
-      result = I32Add(result, summand);
     }
   }
 };
 
-struct SumUntilLocalsArrayTestSuite
-    : GeneratorTestSuite<SumUntilLocalsArrayCodeGenerator, GetIntPtr> {
+template <typename Derived>
+struct CanSumWithIterator {
+  template <typename Local, typename LocalsArray>
+  void Sum(Local& result, const LocalsArray& summands) {
+    for (const auto& summand : summands) {
+      result = static_cast<Derived*>(this)->I32Add(result, summand);
+    }
+  }
+};
+
+template <typename Derived>
+struct CanInitWithIndex {
+  template <typename LocalsArray>
+  void InitSummands(LocalsArray& summands) {
+    for (size_t i = 0; i < summands.size; i++) {
+      summands[i] = static_cast<Derived*>(this)->I32Const(i);
+    }
+  }
+};
+
+template <typename Derived>
+struct CanSumWithIndex {
+  template <typename Local, typename LocalsArray>
+  void Sum(Local& result, const LocalsArray& summands) {
+    for (size_t i = 0; i < summands.size; i++) {
+      result = static_cast<Derived*>(this)->I32Add(result, summands[i]);
+    }
+  }
+};
+
+template <typename Derived>
+struct CanGenerateSumUntil {
+  void GenerateFunctionBody() {
+    auto self = static_cast<Derived*>(this);
+    auto& i32 = Derived::i32;
+    auto summands = self->MakeLocalsArray(kNSmall, i32);
+    auto result = self->MakeLocal(i32);
+    self->InitSummands(summands);
+    self->Sum(result, summands);
+    self->local_get(result);
+  }
+};
+
+struct SumUntilLocalsArrayWithIteratorCodeGenerator
+    : WasmAssembler,
+      CanGenerateSumUntil<SumUntilLocalsArrayWithIteratorCodeGenerator>,
+      CanSumWithIterator<SumUntilLocalsArrayWithIteratorCodeGenerator>,
+      CanInitWithIterator<SumUntilLocalsArrayWithIteratorCodeGenerator> {
+  explicit SumUntilLocalsArrayWithIteratorCodeGenerator(xnn_code_buffer* buf)
+      : WasmAssembler(buf) {
+    ValTypesToInt local_ints_decl = {{i32, kNSmall + 1}};
+    AddFunc<0>({i32}, "SumUntilN", {}, local_ints_decl,
+               [&] { this->GenerateFunctionBody(); });
+  }
+};
+
+template <typename G>
+struct SumUntilLocalsArrayTestSuite : GeneratorTestSuite<G, GetIntPtr> {
   static void ExpectFuncCorrect(GetIntPtr sum_until_n) {
     EXPECT_EQ(sum_until_n(), ReferenceSumUntil(kNSmall));
   }
 };
 
-struct SumUntilLocalsArrayWithIndexCodeGenerator : WasmAssembler {
+struct SumUntilLocalsArrayWithIterator
+    : SumUntilLocalsArrayTestSuite<
+          SumUntilLocalsArrayWithIteratorCodeGenerator> {};
+
+struct SumUntilLocalsArrayWithIndexCodeGenerator
+    : WasmAssembler,
+      CanGenerateSumUntil<SumUntilLocalsArrayWithIndexCodeGenerator>,
+      CanSumWithIndex<SumUntilLocalsArrayWithIndexCodeGenerator>,
+      CanInitWithIndex<SumUntilLocalsArrayWithIndexCodeGenerator> {
   explicit SumUntilLocalsArrayWithIndexCodeGenerator(xnn_code_buffer* buf)
       : WasmAssembler(buf) {
     ValTypesToInt local_ints_decl = {{i32, kNSmall + 1}};
-    AddFunc<0>({i32}, "SumUntilN", {}, local_ints_decl, [&] {
-      auto summands = MakeLocalsArray(kNSmall, i32);
-      auto result = MakeLocal(i32);
-      InitSummands(summands);
-      Sum(result, summands);
-      local_get(result);
-    });
-  }
-
- private:
-  void InitSummands(LocalsArray& summands) {
-    for (size_t i = 0; i < kNSmall; i++) {
-      summands[i] = I32Const(i);
-    }
-  }
-  void Sum(Local& result, const LocalsArray& summands) {
-    for (size_t i = 0; i < kNSmall; i++) {
-      result = I32Add(result, summands[i]);
-    }
+    AddFunc<0>({i32}, "SumUntilN", {}, local_ints_decl,
+               [&] { this->GenerateFunctionBody(); });
   }
 };
 
 struct SumUntilLocalsArrayWithIndexTestSuite
-    : GeneratorTestSuite<SumUntilLocalsArrayWithIndexCodeGenerator, GetIntPtr> {
-  static void ExpectFuncCorrect(GetIntPtr sum_until_n) {
-    EXPECT_EQ(sum_until_n(), ReferenceSumUntil(kNSmall));
-  }
+    : SumUntilLocalsArrayTestSuite<SumUntilLocalsArrayWithIndexCodeGenerator> {
 };
 
 struct DoWhileCodeGenerator : WasmAssembler {
@@ -668,16 +697,18 @@ TYPED_TEST_P(WasmAssemblerTest, ValidCode) {
 
 REGISTER_TYPED_TEST_SUITE_P(WasmAssemblerTest, ValidCode);
 
-using WasmAssemblerTestSuits = testing::Types<
-    Get5TestSuite, AddTestSuite, Get5AndAddTestSuite, AddWithLocalTestSuite,
-    AddTwiceTestSuite, AddTwiceDeclareInitTestSuite,
-    AddTwiceWithScopesTestSuite, Add5TestSuite, MaxTestSuite,
-    MaxIncompleteIfTestSuite, SumUntilTestSuite, SumUntilLocalsArrayTestSuite,
-    SumUntilLocalsArrayWithIndexTestSuite, DoWhileTestSuite, SumArrayTestSuite,
-    MemCpyTestSuite, AddDelayedInitTestSuite, ManyFunctionsGeneratorTestSuite,
-    ManyLocalsGeneratorTestSuite, V128AddGeneratorTestSuite,
-    V128AddConstGeneratorTestSuite, I64x2ShuffleGeneratorTestSuite,
-    GetPiTestSuite>;
+using WasmAssemblerTestSuits =
+    testing::Types<Get5TestSuite, AddTestSuite, Get5AndAddTestSuite,
+                   AddWithLocalTestSuite, AddTwiceTestSuite,
+                   AddTwiceDeclareInitTestSuite, AddTwiceWithScopesTestSuite,
+                   Add5TestSuite, MaxTestSuite, MaxIncompleteIfTestSuite,
+                   SumUntilTestSuite, SumUntilLocalsArrayWithIterator,
+                   SumUntilLocalsArrayWithIndexTestSuite, DoWhileTestSuite,
+                   SumArrayTestSuite, MemCpyTestSuite, AddDelayedInitTestSuite,
+                   ManyFunctionsGeneratorTestSuite,
+                   ManyLocalsGeneratorTestSuite, V128AddGeneratorTestSuite,
+                   V128AddConstGeneratorTestSuite,
+                   I64x2ShuffleGeneratorTestSuite, GetPiTestSuite>;
 INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest,
                                WasmAssemblerTestSuits);
 

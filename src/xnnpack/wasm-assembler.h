@@ -613,7 +613,6 @@ class LocalWasmOps : public LocalsManager {
     GetDerived()->v128_store32_lane(lane, offset, alignment);
   }
 
- protected:
   static constexpr ValType i32{0x7F};
   static constexpr ValType f32{0x7D};
   static constexpr ValType v128{0x7B};
@@ -686,7 +685,7 @@ class WasmOps : public LocalWasmOps<WasmOps>,
 };
 }  // namespace internal
 
-class WasmAssembler : public AssemblerBase, protected internal::WasmOps {
+class WasmAssembler : public AssemblerBase, public internal::WasmOps {
  private:
   using Export = internal::Export;
   using Function = internal::Function;
