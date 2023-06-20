@@ -38,6 +38,9 @@ inline bool operator==(const ValType& lhs, const ValType& rhs) {
 
 using ValTypesToInt = std::vector<std::pair<ValType, uint32_t>>;
 
+static constexpr uint32_t kI32DefaultAlignment = 1;
+static constexpr uint32_t kV128DefaultAlignment = 1;
+
 namespace internal {
 template <typename Array, typename ElementEncodingLength>
 static uint32_t VectorEncodingLength(
@@ -247,37 +250,43 @@ class ControlFlowWasmOps
 template <typename Derived>
 class MemoryWasmOps : public WasmOpsBase<Derived, MemoryWasmOps<Derived>> {
  public:
-  void i32_load(uint32_t offset = 0, uint32_t alignment = 4) const {
+  void i32_load(uint32_t offset = 0,
+                uint32_t alignment = kI32DefaultAlignment) const {
     load_or_store(0x28, offset, alignment);
   }
 
-  void i32_store(uint32_t offset = 0, uint32_t alignment = 4) const {
+  void i32_store(uint32_t offset = 0,
+                 uint32_t alignment = kI32DefaultAlignment) const {
     load_or_store(0x36, offset, alignment);
   }
 
-  void v128_load(uint32_t offset = 0, uint32_t alignment = 4) const {
+  void v128_load(uint32_t offset = 0,
+                 uint32_t alignment = kV128DefaultAlignment) const {
     vector_load_or_store(0x00, offset, alignment);
   }
 
-  void v128_load32_splat(uint32_t offset = 0, uint32_t alignment = 4) const {
+  void v128_load32_splat(uint32_t offset = 0,
+                         uint32_t alignment = kV128DefaultAlignment) const {
     vector_load_or_store(0x09, offset, alignment);
   }
 
-  void v128_load64_splat(uint32_t offset = 0, uint32_t alignment = 4) const {
+  void v128_load64_splat(uint32_t offset = 0,
+                         uint32_t alignment = kV128DefaultAlignment) const {
     vector_load_or_store(0x0A, offset, alignment);
   }
 
-  void v128_store(uint32_t offset = 0, uint32_t alignment = 4) const {
+  void v128_store(uint32_t offset = 0,
+                  uint32_t alignment = kV128DefaultAlignment) const {
     vector_load_or_store(0x0B, offset, alignment);
   }
 
   void v128_store64_lane(uint8_t lane, uint32_t offset = 0,
-                         uint32_t alignment = 4) const {
+                         uint32_t alignment = kV128DefaultAlignment) const {
     v128_store_lane(0x5B, lane, /*max_lane=*/4, offset, alignment);
   }
 
   void v128_store32_lane(uint8_t lane, uint32_t offset = 0,
-                         uint32_t alignment = 4) const {
+                         uint32_t alignment = kV128DefaultAlignment) const {
     v128_store_lane(0x5A, lane, /*max_lane=*/8, offset, alignment);
   }
 
@@ -295,7 +304,7 @@ class MemoryWasmOps : public WasmOpsBase<Derived, MemoryWasmOps<Derived>> {
   }
 
   void v128_store_lane(byte opcode, uint8_t lane, uint8_t max_lane,
-                       uint32_t offset = 0, uint32_t alignment = 4) const {
+                       uint32_t offset, uint32_t alignment) const {
     assert(lane < max_lane);
     vector_load_or_store(opcode, offset, alignment);
     this->Emit8(lane);
@@ -518,25 +527,27 @@ class LocalWasmOps : public LocalsManager {
   }
 
   ValueOnStack I32Load(const ValueOnStack& address, uint32_t offset = 0,
-                       uint32_t alignment = 4) {
+                       uint32_t alignment = kI32DefaultAlignment) {
     return LoadOp(i32, offset, alignment, &Derived::i32_load);
   }
 
   ValueOnStack I32Load(const ValueOnStack& base,
                        const ValueOnStack& dynamic_offset,
-                       uint32_t static_offset = 0, uint32_t alignment = 4) {
+                       uint32_t static_offset = 0,
+                       uint32_t alignment = kI32DefaultAlignment) {
     return I32Load(I32Add(base, I32Shl(dynamic_offset, I32Const(2))),
                    static_offset, alignment);
   }
 
   void I32Store(const ValueOnStack& address, const ValueOnStack& value,
-                uint32_t offset = 0, uint32_t alignment = 4) {
+                uint32_t offset = 0,
+                uint32_t alignment = kI32DefaultAlignment) {
     GetDerived()->i32_store(offset, alignment);
   }
 
   void I32Store(const ValueOnStack& base, const ValueOnStack& dynamic_offset,
                 const Local& value, uint32_t static_offset = 0,
-                uint32_t alignment = 4) {
+                uint32_t alignment = kI32DefaultAlignment) {
     I32Store(I32Add(base, I32Shl(dynamic_offset, I32Const(2))), value,
              static_offset, alignment);
   }
@@ -572,34 +583,35 @@ class LocalWasmOps : public LocalsManager {
   }
 
   ValueOnStack V128Load(const ValueOnStack& address, uint32_t offset = 0,
-                        uint32_t alignment = 4) {
+                        uint32_t alignment = kV128DefaultAlignment) {
     return LoadOp(v128, offset, alignment, &Derived::v128_load);
   }
 
   ValueOnStack V128Load32Splat(const ValueOnStack& address, uint32_t offset = 0,
-                               uint32_t alignment = 4) {
+                               uint32_t alignment = kV128DefaultAlignment) {
     return LoadOp(v128, offset, alignment, &Derived::v128_load32_splat);
   }
 
   ValueOnStack V128Load64Splat(const ValueOnStack& address, uint32_t offset = 0,
-                               uint32_t alignment = 4) {
+                               uint32_t alignment = kV128DefaultAlignment) {
     return LoadOp(v128, offset, alignment, &Derived::v128_load64_splat);
   }
 
   void V128Store(const ValueOnStack& address, const ValueOnStack& value,
-                 uint32_t offset = 0, uint32_t alignment = 4) {
+                 uint32_t offset = 0,
+                 uint32_t alignment = kV128DefaultAlignment) {
     GetDerived()->v128_store(offset, alignment);
   }
 
   void V128Store64Lane(const ValueOnStack& address, const ValueOnStack& value,
                        uint8_t lane, uint32_t offset = 0,
-                       uint32_t alignment = 4) {
+                       uint32_t alignment = kV128DefaultAlignment) {
     GetDerived()->v128_store64_lane(lane, offset, alignment);
   }
 
   void V128Store32Lane(const ValueOnStack& address, const ValueOnStack& value,
                        uint8_t lane, uint32_t offset = 0,
-                       uint32_t alignment = 4) {
+                       uint32_t alignment = kV128DefaultAlignment) {
     GetDerived()->v128_store32_lane(lane, offset, alignment);
   }
 
