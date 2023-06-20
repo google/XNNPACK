@@ -234,6 +234,7 @@ class ControlFlowWasmOps
   }
 
   void end() const { this->Emit8(0x0B); }
+  void Return() const { this->Emit8(0x0F); }
 
  private:
   static constexpr byte kIfCode = 0x04;
