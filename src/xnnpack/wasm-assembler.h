@@ -465,19 +465,17 @@ class LocalWasmOps : public LocalsManager {
     return locals;
   }
 
-  void local_get(uint32_t index) const {
-    GetDerived()->Emit8(0x20);
-    GetDerived()->EmitEncodedU32(index);
-  }
+  void local_get(uint32_t index) const { Emit8AndU32(0x20, index); }
 
-  void local_set(uint32_t index) const {
-    GetDerived()->Emit8(0x21);
-    GetDerived()->EmitEncodedU32(index);
-  }
+  void local_set(uint32_t index) const { Emit8AndU32(0x21, index); }
+
+  void local_tee(uint32_t index) const { Emit8AndU32(0x22, index); }
 
   void local_get(const Local& local) const { local_get(local.index_); }
 
   void local_set(const Local& local) const { local_set(local.index_); }
+
+  void local_tee(const Local& local) const { local_tee(local.index_); }
 
   ValueOnStack I32Add(const ValueOnStack& a, const ValueOnStack& b) {
     return BinaryOp(a, b, &Derived::i32_add);
@@ -648,6 +646,11 @@ class LocalWasmOps : public LocalsManager {
                       Op&& op) {
     std::mem_fn(op)(*GetDerived(), offset, alignment);
     return MakeValueOnStack(type);
+  }
+
+  void Emit8AndU32(byte b, uint32_t value) const {
+    GetDerived()->Emit8(b);
+    GetDerived()->EmitEncodedU32(value);
   }
 
   const Derived* GetDerived() const {

@@ -728,6 +728,9 @@ class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
   ValueOnStack i32_value_{i32, this};
   ValueOnStack f32_value_{f32, this};
 
+  Local i32_local_{i32, i32_local_index, false, this};
+
+  static constexpr uint32_t i32_local_index = 152;
   static constexpr uint32_t kLogAlignment = 3;
   static constexpr uint32_t kAlignment = 1 << 3;
   static constexpr uint32_t kOffset = 16;
@@ -794,6 +797,12 @@ TEST_F(WasmOpsTest, V128F32x4Splat) {
 TEST_F(WasmOpsTest, Return) {
   Emit8ExpectCall(0x0F);
   Return();
+}
+
+TEST_F(WasmOpsTest, Tee) {
+  Emit8ExpectCall(0x22);
+  EmitEncodedU32ExpectCall(i32_local_index);
+  local_tee(i32_local_);
 }
 
 using ::xnnpack::internal::At;
