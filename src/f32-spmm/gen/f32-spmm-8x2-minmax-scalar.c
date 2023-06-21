@@ -39,20 +39,20 @@ void xnn_f32_spmm_minmax_ukernel_8x2__scalar(
     while (n >= 2) {
       uint32_t nnz = *nnzmap++;
       float vacc0x0 = *w++;
-      float vacc1x0 = vacc0x0;
-      float vacc2x0 = vacc0x0;
-      float vacc3x0 = vacc0x0;
-      float vacc4x0 = vacc0x0;
-      float vacc5x0 = vacc0x0;
-      float vacc6x0 = vacc0x0;
-      float vacc7x0 = vacc0x0;
       float vacc0x1 = *w++;
+      float vacc1x0 = vacc0x0;
       float vacc1x1 = vacc0x1;
+      float vacc2x0 = vacc0x0;
       float vacc2x1 = vacc0x1;
+      float vacc3x0 = vacc0x0;
       float vacc3x1 = vacc0x1;
+      float vacc4x0 = vacc0x0;
       float vacc4x1 = vacc0x1;
+      float vacc5x0 = vacc0x0;
       float vacc5x1 = vacc0x1;
+      float vacc6x0 = vacc0x0;
       float vacc6x1 = vacc0x1;
+      float vacc7x0 = vacc0x0;
       float vacc7x1 = vacc0x1;
       if XNN_LIKELY(nnz != 0) {
         do {
@@ -222,10 +222,10 @@ void xnn_f32_spmm_minmax_ukernel_8x2__scalar(
       while (n >= 2) {
         uint32_t nnz = *nnzmap++;
         float vacc0x0 = *w++;
+        float vacc0x1 = *w++;
         float vacc1x0 = vacc0x0;
         float vacc2x0 = vacc0x0;
         float vacc3x0 = vacc0x0;
-        float vacc0x1 = *w++;
         float vacc1x1 = vacc0x1;
         float vacc2x1 = vacc0x1;
         float vacc3x1 = vacc0x1;
@@ -327,8 +327,8 @@ void xnn_f32_spmm_minmax_ukernel_8x2__scalar(
       while (n >= 2) {
         uint32_t nnz = *nnzmap++;
         float vacc0x0 = *w++;
-        float vacc1x0 = vacc0x0;
         float vacc0x1 = *w++;
+        float vacc1x0 = vacc0x0;
         float vacc1x1 = vacc0x1;
         if XNN_LIKELY(nnz != 0) {
           do {
