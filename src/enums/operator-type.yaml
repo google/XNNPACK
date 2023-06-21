@@ -213,6 +213,8 @@
   string: "Resize Bilinear (NHWC, S8)"
 - name: xnn_operator_type_resize_bilinear_nhwc_u8
   string: "Resize Bilinear (NHWC, U8)"
+- name: xnn_operator_type_rope_nthc_f32
+  string: "RoPE (NTHC, F32)"
 - name: xnn_operator_type_sigmoid_nc_f16
   string: "Sigmoid (NC, F16)"
 - name: xnn_operator_type_sigmoid_nc_f32
