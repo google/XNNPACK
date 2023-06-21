@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <xnnpack/array-apply.h>
+#include <xnnpack/array-helpers.h>
 #include <xnnpack/assembler.h>
 #include <xnnpack/leb128.h>
 
@@ -695,6 +695,14 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
 
  public:
   explicit WasmAssembler(xnn_code_buffer* buf) : AssemblerBase(buf) {}
+
+  template <size_t InSize, typename Body>
+  void AddFunc(const ResultType& result, const char* name,
+               ValTypesToInt locals_declaration_count, Body&& body) {
+    const auto params = internal::MakeArray<InSize>(i32);
+    AddFunc(result, name, params, std::move(locals_declaration_count),
+            std::forward<Body>(body));
+  }
 
   template <size_t InSize, typename Body>
   void AddFunc(const ResultType& result, const char* name,

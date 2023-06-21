@@ -55,7 +55,7 @@ constexpr float kPi = 3.14;
 struct Get5Generator : WasmAssembler {
   explicit Get5Generator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt no_locals;
-    AddFunc<0>({i32}, "get5", {}, no_locals, [this]() { i32_const(5); });
+    AddFunc<0>({i32}, "get5", no_locals, [this]() { i32_const(5); });
   }
 };
 
@@ -142,7 +142,7 @@ struct Get5AndAddTestSuite
 struct AddWithLocalGenerator : WasmAssembler {
   explicit AddWithLocalGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt single_local_int = {{i32, 1}};
-    AddFunc<2>({i32}, "add_with_local", {i32, i32}, single_local_int,
+    AddFunc<2>({i32}, "add_with_local", single_local_int,
                [this](Local a, Local b) {
                  auto sum = MakeLocal(i32);
                  sum = I32Add(a, b);

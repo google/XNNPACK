@@ -5175,7 +5175,7 @@ xnnpack_cc_library(
     hdrs = [
         "src/xnnpack/aarch32-assembler.h",
         "src/xnnpack/aarch64-assembler.h",
-        "src/xnnpack/array-apply.h",
+        "src/xnnpack/array-helpers.h",
         "src/xnnpack/assembler.h",
         "src/xnnpack/leb128.h",
         "src/xnnpack/wasm-assembler.h",
@@ -5209,7 +5209,7 @@ xnnpack_cc_library(
     hdrs = [
         "src/xnnpack/aarch32-assembler.h",
         "src/xnnpack/aarch64-assembler.h",
-        "src/xnnpack/array-apply.h",
+        "src/xnnpack/array-helpers.h",
         "src/xnnpack/assembler.h",
         "src/xnnpack/leb128.h",
         "src/xnnpack/wasm-assembler.h",
