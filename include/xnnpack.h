@@ -1226,6 +1226,25 @@ enum xnn_status xnn_define_prelu(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a RoPE (Rotary Positional Embeddings) Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param max_sequence_size - maximum possible sequence length of the input/output tensors.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
+///                   with [batch, sequence_length, heads, channels] dimensions.
+/// @param weights_id - Value ID for the weights tensor. The weights tensor must be a 2D tensor defined in the
+///                     @a subgraph with [max_sequence_length, channels] dimensions.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
+///                    with [batch, sequence_length, heads, channels] dimensions.
+/// @param flags - binary features of the RoPE Node. No supported flags are currently defined.
+enum xnn_status xnn_define_rope(
+  xnn_subgraph_t subgraph,
+  size_t max_sequence_size,
+  uint32_t input_id,
+  uint32_t weights_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a Abs Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
@@ -2119,6 +2138,28 @@ enum xnn_status xnn_setup_fully_connected_nc_f32(
   float* output,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_fully_connected_nc_f32_qc8w(
+  size_t input_channels,
+  size_t output_channels,
+  size_t input_stride,
+  size_t output_stride,
+  const float* kernel_scale,
+  const int8_t* kernel,
+  const float* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_setup_fully_connected_nc_f32_qc8w(
+  xnn_operator_t fully_connected_op,
+  size_t batch_size,
+  const float* input,
+  float* output,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_global_average_pooling_nwc_f32(
   size_t channels,
   size_t input_stride,
@@ -2403,6 +2444,25 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
   const float* input,
   float* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_rope_nthc_f32(
+  size_t max_sequence_size,
+  size_t channels,
+  const float* weights,
+  uint32_t flags,
+  xnn_operator_t* rope_op_out);
+
+enum xnn_status xnn_reshape_rope_nthc_f32(
+  xnn_operator_t rope_op,
+  size_t batch_size,
+  size_t sequence_size,
+  size_t heads,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_rope_nthc_f32(
+  xnn_operator_t rope_op,
+  const float* input,
+  float* output);
 
 enum xnn_status xnn_create_sigmoid_nc_f32(
   size_t channels,

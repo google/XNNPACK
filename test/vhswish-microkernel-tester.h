@@ -115,7 +115,7 @@ class VHSwishMicrokernelTester {
       const int32_t input_scale_div = (int32_t) lrintf(256.0f * input_scale() / 6.0f);
       const int32_t scale_ratio = (int32_t) lrintf(256.0f * input_scale() / output_scale());
       for (size_t i = 0; i < batch_size(); i++) {
-        const int32_t input_value = (input_zero_point() - input[i]) << 7;
+        const int32_t input_value = int32_t(uint32_t(input_zero_point() - input[i]) << 7);
         int32_t in = input_value * input_scale_div;
         in -= 16384;  // subtract 0.5 in Q15
         in = std::min(in, 0);
@@ -166,7 +166,7 @@ class VHSwishMicrokernelTester {
       const int32_t input_scale_div = (int32_t) lrintf(256.0f * input_scale() / 6.0f);
       const int32_t scale_ratio = (int32_t) lrintf(256.0f * input_scale() / output_scale());
       for (size_t i = 0; i < batch_size(); i++) {
-        const int32_t input_value = (input_zero_point() - input[i]) << 7;
+        const int32_t input_value = int32_t(uint32_t(input_zero_point() - input[i]) << 7);
         int32_t in = input_value * input_scale_div;
         in -= 16384;  // subtract 0.5 in Q15
         in = std::min(in, 0);
