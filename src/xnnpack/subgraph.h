@@ -213,6 +213,9 @@ struct xnn_node {
   /// Static parameters of the operator node.
   union {
     struct {
+      size_t axis;
+    } concatenate;
+    struct {
       uint32_t input_padding_top;
       uint32_t input_padding_right;
       uint32_t input_padding_bottom;
@@ -262,6 +265,9 @@ struct xnn_node {
       uint32_t block_size;
     } depth_to_space;
     struct {
+      size_t axis;
+    } even_split;
+    struct {
       uint32_t padding_top;
       uint32_t padding_right;
       uint32_t padding_bottom;
@@ -292,15 +298,8 @@ struct xnn_node {
       size_t new_width;
     } static_resize;
     struct {
-      size_t axis;
-    } concatenate;
-    struct {
-      size_t axis;
-    } even_split;
-    struct {
-      size_t perm[XNN_MAX_TENSOR_DIMS];
-      size_t num_dims;
-    } transpose;
+      size_t max_sequence_size;
+    } rope;
     struct {
       size_t num_dims;
       size_t offsets[XNN_MAX_TENSOR_DIMS];
@@ -313,6 +312,10 @@ struct xnn_node {
       size_t num_reduction_axes;
       size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
     } reduce;
+    struct {
+      size_t perm[XNN_MAX_TENSOR_DIMS];
+      size_t num_dims;
+    } transpose;
   } params;
   struct {
     float output_min;
@@ -358,6 +361,8 @@ struct xnn_operator_data {
   xnn_reshape_operator_fn reshape;
   xnn_setup_operator_fn setup;
   size_t batch_size;
+  size_t sequence_size;
+  size_t heads;
   size_t input_height;
   size_t input_width;
   size_t output_height;
