@@ -3,18 +3,25 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$assert DATATYPE in ["F32", "QC8"]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
+$if DATATYPE == "QC8" and not NR % 4 == 0:
+  #include <xnnpack/unaligned.h>
 
 #include <xnnpack/math.h>
 #include <xnnpack/spmm.h>
 
+$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
 
-void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_x" + str(UNROLL) if UNROLL > 1 else ""}(
+void xnn_${DATATYPE_SPEC}_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_x" + str(UNROLL) if UNROLL > 1 else ""}(
     size_t mc,
     size_t nc,
     const float* input,
-    const float* weights,
+    $if DATATYPE == "F32":
+      const float* weights,
+    $else:
+      const void* weights,
     const int32_t* widx_dmap,
     const uint32_t* nidx_nnzmap,
     float* output,
@@ -29,15 +36,27 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_x" + str(UNROLL) if UNRO
   const float vmax = params->scalar.max;
   size_t output_decrement = output_stride * nc - ${MR} * sizeof(float);
   while (mc >= ${MR} * sizeof(float)) {
-    const float* w = weights;
+    $if DATATYPE == "F32":
+      const float* w = weights;
+    $else:
+      const void* w = weights;
     const int32_t* dmap = widx_dmap;
     const uint32_t* nnzmap = nidx_nnzmap;
     size_t n = nc;
     while (n >= ${NR}) {
       uint32_t nnz = *nnzmap++;
-      $for N in range(0, NR, 1):
-        float vacc0x${N} = *w++;
-        $for M in range(1, MR):
+      $if DATATYPE == "F32":
+        $for N in range(NR):
+          float vacc0x${N} = *w++;
+      $else:
+        $for N in range(NR):
+          $if NR % 4 == 0:
+            float vacc0x${N} = ((const float*)w)[${N}];
+          $else:
+            float vacc0x${N} = unaligned_indexed_load_f32(w, ${N});
+        w = (const float*) w + ${NR};
+      $for M in range(1, MR):
+        $for N in range(NR):
           float vacc${ABC[M]}x${N} = vacc0x${N};
       if XNN_LIKELY(nnz != 0) {
         do {
@@ -45,13 +64,28 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_x" + str(UNROLL) if UNRO
           $for M in range(MR):
             const float vi${ABC[M]} = input[${M}];
           input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-          $for N in range(0, NR, 1):
-            const float vw${N} = *w++;
-          $for N in range(0, NR, 1):
+          $if DATATYPE == "F32":
+            $for N in range(NR):
+              const float vw${N} = *w++;
+          $elif DATATYPE == "QC8":
+            $for N in range(NR):
+              const float vw${N} = (float) ((const int8_t*) w)[${N}];
+            w = (const int8_t*) w + ${NR};
+          $for N in range(NR):
             $for M in range(MR):
               vacc${ABC[M]}x${N} += vi${ABC[M]} * vw${N};
         } while (--nnz != 0);
       }
+      $if DATATYPE == "QC8":
+        $for N in range(NR):
+          $if NR % 4 == 0:
+            const float vscale${N} = ((const float*)w)[${N}];
+          $else:
+            const float vscale${N} = unaligned_indexed_load_f32(w, ${N});
+        w = (const float*) w + ${NR};
+        $for N in range(NR):
+          $for M in range(MR):
+            vacc${ABC[M]}x${N} *= vscale${N};
       $for N in range(NR):
         $for M in range(MR):
           float vout${ABC[M]}x${N} = math_min_f32(vacc${ABC[M]}x${N}, vmax);
@@ -69,7 +103,14 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_x" + str(UNROLL) if UNRO
     if XNN_UNLIKELY(n != 0) {
       do {
         uint32_t nnz = *nnzmap++;
-        float vacc0 = *w++;
+        $if DATATYPE == "F32":
+          float vacc0 = *w++;
+        $else:
+          $if NR % 4 == 0:
+            float vacc0 = *((const float*)w);
+          $else:
+            float vacc0 = unaligned_load_f32(w);
+          w = (const float*) w + 1;
         $for M in range(1, MR):
           float vacc${ABC[M]} = vacc0;
         if XNN_LIKELY(nnz != 0) {
@@ -78,11 +119,23 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_x" + str(UNROLL) if UNRO
             $for M in range(MR):
               const float vi${ABC[M]} = input[${M}];
             input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-            const float vw = *w++;
+            $if DATATYPE == "F32":
+              const float vw = *w++;
+            $elif DATATYPE == "QC8":
+              const float vw = (float) ((const int8_t*) w)[${N}];
+              w = (const int8_t*) w + 1;
             $for M in range(MR):
               vacc${ABC[M]} += vi${ABC[M]} * vw;
           } while (--nnz != 0);
         }
+        $if DATATYPE == "QC8":
+          $if NR % 4 == 0:
+            float vscale = *((const float*)w);
+          $else:
+            float vscale = unaligned_load_f32(w);
+          w = (const float*) w + 1;
+          $for M in range(MR):
+            vacc${ABC[M]} *= vscale;
         $for M in range(MR):
           float vout${ABC[M]} = math_min_f32(vacc${ABC[M]}, vmax);
         $for M in range(MR):
@@ -105,14 +158,26 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_x" + str(UNROLL) if UNRO
       $else:
         output_decrement += ${SUBMR} * sizeof(float);
       if (mc & (${SUBMR} * sizeof(float))) {
-        const float* w = weights;
+        $if DATATYPE == "F32":
+          const float* w = weights;
+        $else:
+          const void* w = weights;
         const int32_t* dmap = widx_dmap;
         const uint32_t* nnzmap = nidx_nnzmap;
         size_t n = nc;
         while (n >= ${NR}) {
           uint32_t nnz = *nnzmap++;
-          $for N in range(0, NR, 1):
-            float vacc0x${N} = *w++;
+          $if DATATYPE == "F32":
+            $for N in range(NR):
+              float vacc0x${N} = *w++;
+          $else:
+            $for N in range(NR):
+              $if NR % 4 == 0:
+                float vacc0x${N} = ((const float*)w)[${N}];
+              $else:
+                float vacc0x${N} = unaligned_indexed_load_f32(w, ${N});
+            w = (const float*) w + ${NR};
+          $for N in range(NR):
             $for M in range(1, SUBMR):
               float vacc${ABC[M]}x${N} = vacc0x${N};
           if XNN_LIKELY(nnz != 0) {
@@ -121,17 +186,32 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_x" + str(UNROLL) if UNRO
               $for M in range(SUBMR):
                 const float vi${ABC[M]} = input[${M}];
               input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-              $for N in range(0, NR, 1):
-                const float vw${N} = *w++;
-              $for N in range(0, NR, 1):
+              $if DATATYPE == "F32":
+                $for N in range(NR):
+                  const float vw${N} = *w++;
+              $elif DATATYPE == "QC8":
+                $for N in range(NR):
+                  const float vw${N} = (float) ((const int8_t*) w)[${N}];
+                w = (const int8_t*) w + ${NR};
+              $for N in range(NR):
                 $for M in range(SUBMR):
                   vacc${ABC[M]}x${N} += vi${ABC[M]} * vw${N};
             } while (--nnz != 0);
           }
-          $for N in range(0, NR, 1):
+          $if DATATYPE == "QC8":
+            $for N in range(NR):
+              $if NR % 4 == 0:
+                const float vscale${N} = ((const float*)w)[${N}];
+              $else:
+                const float vscale${N} = unaligned_indexed_load_f32(w, ${N});
+            w = (const float*) w + ${NR};
+            $for N in range(NR):
+              $for M in range(SUBMR):
+                vacc${ABC[M]}x${N} *= vscale${N};
+          $for N in range(NR):
             $for M in range(SUBMR):
               float vout${ABC[M]}x${N} = math_min_f32(vacc${ABC[M]}x${N}, vmax);
-          $for N in range(0, NR, 1):
+          $for N in range(NR):
             $for M in range(SUBMR):
               vout${ABC[M]}x${N} = math_max_f32(vout${ABC[M]}x${N}, vmin);
           $for N in range(NR):
@@ -143,7 +223,14 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_x" + str(UNROLL) if UNRO
         if XNN_UNLIKELY(n != 0) {
           do {
             uint32_t nnz = *nnzmap++;
-            float vacc0 = *w++;
+            $if DATATYPE == "F32":
+              float vacc0 = *w++;
+            $else:
+              $if NR % 4 == 0:
+                float vacc0 = *((const float*)w);
+              $else:
+                float vacc0 = unaligned_load_f32(w);
+              w = (const float*) w + 1;
             $for M in range(1, SUBMR):
               float vacc${ABC[M]} = vacc0;
             if XNN_LIKELY(nnz != 0) {
@@ -152,11 +239,23 @@ void xnn_f32_spmm_minmax_ukernel_${MR}x${NR}__scalar${"_x" + str(UNROLL) if UNRO
                 $for M in range(SUBMR):
                   const float vi${ABC[M]} = input[${M}];
                 input = (const float*restrict) ((uintptr_t) input + (uintptr_t) diff);
-                const float vw = *w++;
+                $if DATATYPE == "F32":
+                  const float vw = *w++;
+                $elif DATATYPE == "QC8":
+                  const float vw = (float) ((const int8_t*) w)[${N}];
+                  w = (const int8_t*) w + 1;
                 $for M in range(SUBMR):
                   vacc${ABC[M]} += vi${ABC[M]} * vw;
               } while (--nnz != 0);
             }
+            $if DATATYPE == "QC8":
+              $if NR % 4 == 0:
+                float vscale = *((const float*)w);
+              $else:
+                float vscale = unaligned_load_f32(w);
+              w = (const float*) w + 1;
+              $for M in range(SUBMR):
+                vacc${ABC[M]} *= vscale;
             $for M in range(SUBMR):
               float vout${ABC[M]} = math_min_f32(vacc${ABC[M]}, vmax);
             $for M in range(SUBMR):
