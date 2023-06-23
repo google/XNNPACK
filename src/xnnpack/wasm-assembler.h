@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bitset>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -87,15 +88,6 @@ struct FuncType {
 
 inline bool operator==(const FuncType& lhs, const FuncType& rhs) {
   return lhs.param == rhs.param && lhs.result == rhs.result;
-}
-
-inline uint32_t& At(ValTypesToInt& map, ValType type) {
-  const auto it =
-      std::find_if(map.begin(), map.end(), [type](const auto& type_to_int) {
-        return type_to_int.first.code == type.code;
-      });
-  assert((it != map.end()) && "Unknown ValType");
-  return it->second;
 }
 
 struct Function {
@@ -314,30 +306,32 @@ class MemoryWasmOps : public WasmOpsBase<Derived, MemoryWasmOps<Derived>> {
 class LocalsManager {
  public:
   void ResetLocalsManager(uint32_t parameters_count,
-                          const ValTypesToInt& locals_declaration_count) {
-    next_index_ = locals_declaration_count;
-    max_index_ = locals_declaration_count;
-    uint32_t curr = parameters_count;
-    for (const auto type_to_count : locals_declaration_count) {
-      const ValType type = type_to_count.first;
-      At(next_index_, type) = curr;
-      curr += type_to_count.second;
-      At(max_index_, type) = curr - 1;
-    }
-  }
+                          const ValTypesToInt& locals_declaration_count);
 
-  uint32_t GetNewLocalIndex(ValType type) {
-    uint32_t& next = At(next_index_, type);
-    assert((At(max_index_, type) >= next) &&
-           "The number of local variables is exceeded");
-    return next++;
-  }
+  uint32_t GetNewLocalIndex(ValType type);
 
-  void DestructLocal(ValType type) { At(next_index_, type)--; }
+  void DestructLocal(ValType type, uint32_t index);
 
  private:
-  ValTypesToInt next_index_;
-  ValTypesToInt max_index_;
+  struct ValTypeIndices {
+    static constexpr size_t kMaxLocalsOfSameType = 512;
+
+    ValTypeIndices() : type(0), first_index(0), size(0) {}
+    explicit ValTypeIndices(ValType type, uint32_t first_index, uint32_t size)
+        : type(type), first_index(first_index), size(size) {}
+
+    uint32_t GetNewIndex();
+    void DestroyLocal(uint32_t index);
+
+    ValType type;
+    std::bitset<kMaxLocalsOfSameType> bitset;
+    uint32_t first_index;
+    uint32_t size;
+  };
+
+  static constexpr size_t kMaxNumTypes = 5;
+  std::array<ValTypeIndices, kMaxNumTypes> indices_ =
+      internal::MakeArray<kMaxNumTypes>(ValTypeIndices{ValType(0), 0, 0});
 };
 
 std::array<uint8_t, 16> MakeLanesForI8x16Shuffle(const uint8_t* lanes,
@@ -405,7 +399,8 @@ class LocalWasmOps : public LocalsManager {
     }
 
     ~Local() {
-      if (is_managed_ && index_ != kInvalidIndex) ops_->DestructLocal(type_);
+      if (is_managed_ && index_ != kInvalidIndex)
+        ops_->DestructLocal(type_, index_);
     }
 
     ValType type_{0};

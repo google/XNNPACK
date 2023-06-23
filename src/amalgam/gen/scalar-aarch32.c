@@ -9571,20 +9571,20 @@ void xnn_f32_spmm_minmax_ukernel_8x2__scalar(
     while (n >= 2) {
       uint32_t nnz = *nnzmap++;
       float vacc0x0 = *w++;
-      float vacc1x0 = vacc0x0;
-      float vacc2x0 = vacc0x0;
-      float vacc3x0 = vacc0x0;
-      float vacc4x0 = vacc0x0;
-      float vacc5x0 = vacc0x0;
-      float vacc6x0 = vacc0x0;
-      float vacc7x0 = vacc0x0;
       float vacc0x1 = *w++;
+      float vacc1x0 = vacc0x0;
       float vacc1x1 = vacc0x1;
+      float vacc2x0 = vacc0x0;
       float vacc2x1 = vacc0x1;
+      float vacc3x0 = vacc0x0;
       float vacc3x1 = vacc0x1;
+      float vacc4x0 = vacc0x0;
       float vacc4x1 = vacc0x1;
+      float vacc5x0 = vacc0x0;
       float vacc5x1 = vacc0x1;
+      float vacc6x0 = vacc0x0;
       float vacc6x1 = vacc0x1;
+      float vacc7x0 = vacc0x0;
       float vacc7x1 = vacc0x1;
       if XNN_LIKELY(nnz != 0) {
         do {
@@ -9754,10 +9754,10 @@ void xnn_f32_spmm_minmax_ukernel_8x2__scalar(
       while (n >= 2) {
         uint32_t nnz = *nnzmap++;
         float vacc0x0 = *w++;
+        float vacc0x1 = *w++;
         float vacc1x0 = vacc0x0;
         float vacc2x0 = vacc0x0;
         float vacc3x0 = vacc0x0;
-        float vacc0x1 = *w++;
         float vacc1x1 = vacc0x1;
         float vacc2x1 = vacc0x1;
         float vacc3x1 = vacc0x1;
@@ -9859,8 +9859,8 @@ void xnn_f32_spmm_minmax_ukernel_8x2__scalar(
       while (n >= 2) {
         uint32_t nnz = *nnzmap++;
         float vacc0x0 = *w++;
-        float vacc1x0 = vacc0x0;
         float vacc0x1 = *w++;
+        float vacc1x0 = vacc0x0;
         float vacc1x1 = vacc0x1;
         if XNN_LIKELY(nnz != 0) {
           do {
@@ -10004,36 +10004,36 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
     while (n >= 4) {
       uint32_t nnz = *nnzmap++;
       float vacc0x0 = *w++;
-      float vacc1x0 = vacc0x0;
-      float vacc2x0 = vacc0x0;
-      float vacc3x0 = vacc0x0;
-      float vacc4x0 = vacc0x0;
-      float vacc5x0 = vacc0x0;
-      float vacc6x0 = vacc0x0;
-      float vacc7x0 = vacc0x0;
       float vacc0x1 = *w++;
-      float vacc1x1 = vacc0x1;
-      float vacc2x1 = vacc0x1;
-      float vacc3x1 = vacc0x1;
-      float vacc4x1 = vacc0x1;
-      float vacc5x1 = vacc0x1;
-      float vacc6x1 = vacc0x1;
-      float vacc7x1 = vacc0x1;
       float vacc0x2 = *w++;
-      float vacc1x2 = vacc0x2;
-      float vacc2x2 = vacc0x2;
-      float vacc3x2 = vacc0x2;
-      float vacc4x2 = vacc0x2;
-      float vacc5x2 = vacc0x2;
-      float vacc6x2 = vacc0x2;
-      float vacc7x2 = vacc0x2;
       float vacc0x3 = *w++;
+      float vacc1x0 = vacc0x0;
+      float vacc1x1 = vacc0x1;
+      float vacc1x2 = vacc0x2;
       float vacc1x3 = vacc0x3;
+      float vacc2x0 = vacc0x0;
+      float vacc2x1 = vacc0x1;
+      float vacc2x2 = vacc0x2;
       float vacc2x3 = vacc0x3;
+      float vacc3x0 = vacc0x0;
+      float vacc3x1 = vacc0x1;
+      float vacc3x2 = vacc0x2;
       float vacc3x3 = vacc0x3;
+      float vacc4x0 = vacc0x0;
+      float vacc4x1 = vacc0x1;
+      float vacc4x2 = vacc0x2;
       float vacc4x3 = vacc0x3;
+      float vacc5x0 = vacc0x0;
+      float vacc5x1 = vacc0x1;
+      float vacc5x2 = vacc0x2;
       float vacc5x3 = vacc0x3;
+      float vacc6x0 = vacc0x0;
+      float vacc6x1 = vacc0x1;
+      float vacc6x2 = vacc0x2;
       float vacc6x3 = vacc0x3;
+      float vacc7x0 = vacc0x0;
+      float vacc7x1 = vacc0x1;
+      float vacc7x2 = vacc0x2;
       float vacc7x3 = vacc0x3;
       if XNN_LIKELY(nnz != 0) {
         do {
@@ -10271,18 +10271,18 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
       while (n >= 4) {
         uint32_t nnz = *nnzmap++;
         float vacc0x0 = *w++;
+        float vacc0x1 = *w++;
+        float vacc0x2 = *w++;
+        float vacc0x3 = *w++;
         float vacc1x0 = vacc0x0;
         float vacc2x0 = vacc0x0;
         float vacc3x0 = vacc0x0;
-        float vacc0x1 = *w++;
         float vacc1x1 = vacc0x1;
         float vacc2x1 = vacc0x1;
         float vacc3x1 = vacc0x1;
-        float vacc0x2 = *w++;
         float vacc1x2 = vacc0x2;
         float vacc2x2 = vacc0x2;
         float vacc3x2 = vacc0x2;
-        float vacc0x3 = *w++;
         float vacc1x3 = vacc0x3;
         float vacc2x3 = vacc0x3;
         float vacc3x3 = vacc0x3;
@@ -10420,12 +10420,12 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
       while (n >= 4) {
         uint32_t nnz = *nnzmap++;
         float vacc0x0 = *w++;
-        float vacc1x0 = vacc0x0;
         float vacc0x1 = *w++;
-        float vacc1x1 = vacc0x1;
         float vacc0x2 = *w++;
-        float vacc1x2 = vacc0x2;
         float vacc0x3 = *w++;
+        float vacc1x0 = vacc0x0;
+        float vacc1x1 = vacc0x1;
+        float vacc1x2 = vacc0x2;
         float vacc1x3 = vacc0x3;
         if XNN_LIKELY(nnz != 0) {
           do {
@@ -11728,6 +11728,87 @@ void xnn_f32_vclamp_ukernel__scalar_x4(
       vacc = math_max_f32(vacc, vy_min);
       vacc = math_min_f32(vacc, vy_max);
       *output++ = vacc;
+      batch -= sizeof(float);
+    } while (batch != 0);
+  }
+}
+
+void xnn_f32_vcmul_ukernel__scalar_x4(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_default_params* params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float* ar = input_a;
+  const float* ai = (const float*) ((uintptr_t) input_a + batch);
+  const float* br = input_b;
+  const float* bi = (const float*) ((uintptr_t) input_b + batch);
+  float* or = output;
+  float* oi = (float*) ((uintptr_t) output + batch);
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float va0r = ar[0];
+    const float va1r = ar[1];
+    const float va2r = ar[2];
+    const float va3r = ar[3];
+    ar += 4;
+
+    const float va0i = ai[0];
+    const float va1i = ai[1];
+    const float va2i = ai[2];
+    const float va3i = ai[3];
+    ai += 4;
+
+    const float vb0r = br[0];
+    const float vb1r = br[1];
+    const float vb2r = br[2];
+    const float vb3r = br[3];
+    br += 4;
+
+    const float vb0i = bi[0];
+    const float vb1i = bi[1];
+    const float vb2i = bi[2];
+    const float vb3i = bi[3];
+    bi += 4;
+
+    const float vacc0r = va0r * vb0r - va0i * vb0i;
+    const float vacc1r = va1r * vb1r - va1i * vb1i;
+    const float vacc2r = va2r * vb2r - va2i * vb2i;
+    const float vacc3r = va3r * vb3r - va3i * vb3i;
+
+    const float vacc0i = va0r * vb0i + va0i * vb0r;
+    const float vacc1i = va1r * vb1i + va1i * vb1r;
+    const float vacc2i = va2r * vb2i + va2i * vb2r;
+    const float vacc3i = va3r * vb3i + va3i * vb3r;
+
+    or[0] = vacc0r;
+    or[1] = vacc1r;
+    or[2] = vacc2r;
+    or[3] = vacc3r;
+    or += 4;
+
+    oi[0] = vacc0i;
+    oi[1] = vacc1i;
+    oi[2] = vacc2i;
+    oi[3] = vacc3i;
+    oi += 4;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    do {
+      const float var = *ar++;
+      const float vai = *ai++;
+      const float vbr = *br++;
+      const float vbi = *bi++;
+      const float vaccr = var * vbr - vai * vbi;
+      const float vacci = var * vbi + vai * vbr;
+      *or++ = vaccr;
+      *oi++ = vacci;
       batch -= sizeof(float);
     } while (batch != 0);
   }
