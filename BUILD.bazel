@@ -5992,9 +5992,9 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "xx_transpose_bench",
+    name = "xx_transposev_bench",
     srcs = [
-        "bench/xx-transpose.cc",
+        "bench/xx-transposev.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
@@ -9617,7 +9617,7 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "xx_transpose_test",
+    name = "xx_transposev_test",
     srcs = [
         "test/transpose-microkernel-tester.h",
         "test/xx-transposev.cc",
