@@ -5732,7 +5732,7 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/xx-copy/xx-copy-scalar-memcpy.c",
     "src/xx-fill/xx-fill-scalar-x16.c",
     "src/xx-pad/xx-pad-scalar.c",
-    "src/xx-transpose/xx-transpose-1x1-scalar-memcpy.c",
+    "src/xx-transposev/xx-transposev-1x1-scalar-memcpy.c",
 ]
 
 ALL_SSE_MICROKERNEL_SRCS = [

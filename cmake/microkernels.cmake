@@ -5713,7 +5713,7 @@ SET(ALL_SCALAR_MICROKERNEL_SRCS
   src/xx-copy/xx-copy-scalar-memcpy.c
   src/xx-fill/xx-fill-scalar-x16.c
   src/xx-pad/xx-pad-scalar.c
-  src/xx-transpose/xx-transpose-1x1-scalar-memcpy.c)
+  src/xx-transposev/xx-transposev-1x1-scalar-memcpy.c)
 
 SET(ALL_SSE_MICROKERNEL_SRCS
   src/f32-avgpool/f32-avgpool-9p8x-minmax-sse-c4.c
