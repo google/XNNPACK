@@ -753,7 +753,7 @@ PROD_NEON_MICROKERNEL_SRCS = [
     "src/f32-vrnd/gen/f32-vrndu-neon-x8.c",
     "src/f32-vrnd/gen/f32-vrndz-neon-x8.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut64-p2-nr2recps-x8.c",
-    "src/f32-vtanh/gen/f32-tanh-neon-expm1minus-rr1-p6h5ts-nr2recps-x8.c",
+    "src/f32-vtanh/gen/f32-vtanh-neon-expm1minus-rr1-p6h5ts-nr2recps-x8.c",
     "src/f32-vunary/gen/f32-vabs-neon-x8.c",
     "src/f32-vunary/gen/f32-vneg-neon-x8.c",
     "src/f32-vunary/gen/f32-vsqr-neon-x8.c",
@@ -877,7 +877,7 @@ PROD_NEONFMA_MICROKERNEL_SRCS = [
     "src/f32-velu/gen/f32-velu-neonfma-rr1-p6-x8.c",
     "src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-neonfma-2x.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-nr2recps-x16.c",
-    "src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5ts-nr2fma-x8.c",
+    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2fma-x8.c",
 ]
 
 PROD_NEON_AARCH64_MICROKERNEL_SRCS = [
@@ -902,7 +902,7 @@ PROD_NEON_AARCH64_MICROKERNEL_SRCS = [
     "src/f32-vbinary/gen/f32-vdivc-minmax-aarch64-neon-x8.c",
     "src/f32-vbinary/gen/f32-vrdivc-minmax-aarch64-neon-x8.c",
     "src/f32-vsqrt/gen/f32-vsqrt-aarch64-neon-sqrt-x4.c",
-    "src/f32-vtanh/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div-x16.c",
+    "src/f32-vtanh/gen/f32-vtanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div-x16.c",
     "src/x8-lut/gen/x8-lut-aarch64-neon-tbx128x4-x64.c",
     "src/x24-transposec/x24-transposec-4x4-aarch64-neon-tbl128.c",
     "src/x32-transposec/x32-transposec-4x4-aarch64-neon-tbl128.c",
@@ -1298,7 +1298,7 @@ PROD_AVX_MICROKERNEL_SRCS = [
     "src/f32-vrnd/gen/f32-vrndz-avx-x16.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-avx-rr2-p5-nr2-x40.c",
     "src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-x8.c",
-    "src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut4-p4h2ts-div-x48.c",
+    "src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut4-p4h2ts-perm-div-x48.c",
     "src/f32-vunary/gen/f32-vabs-avx-x16.c",
     "src/f32-vunary/gen/f32-vneg-avx-x16.c",
     "src/f32-vunary/gen/f32-vsqr-avx-x16.c",
@@ -1414,7 +1414,7 @@ PROD_FMA3_MICROKERNEL_SRCS = [
     "src/f16-dwconv/gen/f16-dwconv-25p8c-minmax-fma3-acc2.c",
     "src/f16-ibilinear/gen/f16-ibilinear-fma3-c8.c",
     "src/f16-vmulcaddc/gen/f16-vmulcaddc-c8-minmax-fma3-2x.c",
-    "src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9-x32.c",
+    "src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-x32.c",
     "src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-fma3.c",
     "src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-fma3.c",
     "src/f32-dwconv/gen/f32-dwconv-5f5m5l8c8s4r-minmax-fma3.c",
@@ -1429,7 +1429,7 @@ PROD_FMA3_MICROKERNEL_SRCS = [
     "src/f32-igemm/gen/f32-igemm-4x16s4-minmax-fma3-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-5x16-minmax-fma3-broadcast.c",
     "src/f32-vhswish/gen/f32-vhswish-fma3-x16.c",
-    "src/f32-vtanh/gen/f32-vtanh-fma3-expm1minus-rr1-lut4-p4h3ts-div-x40.c",
+    "src/f32-vtanh/gen/f32-vtanh-fma3-expm1minus-rr1-lut4-p4h3ts-perm-div-x40.c",
 ]
 
 PROD_AVX2_MICROKERNEL_SRCS = [
@@ -1783,8 +1783,8 @@ PROD_WASMSIMD_MICROKERNEL_SRCS = [
     "src/f32-vrnd/gen/f32-vrndz-wasmsimd-x8.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x16.c",
     "src/f32-vsqrt/gen/f32-vsqrt-wasmsimd-sqrt-x8.c",
-    "src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-min-x16.c",
-    "src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-pmax-x16.c",
+    "src/f32-vtanh/gen/f32-vtanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-min-x16.c",
+    "src/f32-vtanh/gen/f32-vtanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-pmax-x16.c",
     "src/f32-vunary/gen/f32-vabs-wasmsimd-x8.c",
     "src/f32-vunary/gen/f32-vneg-wasmsimd-x8.c",
     "src/f32-vunary/gen/f32-vsqr-wasmsimd-x8.c",
