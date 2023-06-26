@@ -1973,6 +1973,78 @@ size_t xnn_init_f32_minmax_scalar_params(
   return sizeof(params->scalar);
 }
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+size_t xnn_init_f32_qc4w_minmax_sse_params(
+  union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max,
+  int16_t bias)
+{
+  for (uint32_t i = 0; i < 4; i++) {
+    params->sse.min[i] = output_min;
+    params->sse.max[i] = output_max;
+  }
+  for (uint32_t i = 0; i < 8; i++) {
+    params->sse.bias[i] = -bias;
+  }
+  return sizeof(params->sse);
+}
+
+size_t xnn_init_f32_qc4w_minmax_avx_params(
+  union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max,
+  int16_t bias)
+{
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.min[i] = output_min;
+    params->avx.max[i] = output_max;
+  }
+  for (uint32_t i = 0; i < 16; i++) {
+    params->avx.bias[i] = -bias;
+  }
+  for (uint32_t i = 0; i < 7; i++) {
+    params->avx.mask_table[i] = -1;
+  }
+  for (uint32_t i = 7; i < 14; i++) {
+    params->avx.mask_table[i] = 0;
+  }
+  return sizeof(params->avx);
+}
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+size_t xnn_init_f32_qc4w_minmax_wasmsimd_params(
+  union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max,
+  int16_t bias)
+{
+  params->wasmsimd.min[0] = output_min;
+  params->wasmsimd.min[1] = output_min;
+  params->wasmsimd.max[0] = output_max;
+  params->wasmsimd.max[1] = output_max;
+  for (uint32_t i = 0; i < 4; i++) {
+    params->wasmsimd.bias[i] = -bias;
+  }
+  return sizeof(params->wasmsimd);
+}
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+size_t xnn_init_f32_qc4w_minmax_scalar_params(
+  union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max,
+  int16_t bias)
+{
+  params->scalar.min = output_min;
+  params->scalar.max = output_max;
+  for (uint32_t i = 0; i < 2; i++) {
+    params->scalar.bias[i] = -bias;
+  }
+  return sizeof(params->scalar);
+}
+
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f16_hswish_fp16arith_params(
   union xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)])

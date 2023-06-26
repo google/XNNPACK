@@ -367,6 +367,70 @@ void xnn_pack_f32_qs8w_gemm_goi_w(
   } while (--g != 0);
 }
 
+// qs4 packs 2 columns into 2 rows.
+// kc can be odd.  assume k values in a row are padded to a byte boundary
+void xnn_pack_f32_qc4w_gemm_goi_w(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const void* k,  // 4 bit values
+  const float* bias,
+  void* packed_weights,
+  size_t extra_bytes,
+  const void* params)
+{
+  assert(g != 0);
+  assert(nr >= sr);
+  assert(k != NULL);
+  assert(packed_weights != NULL);
+  assert(kr % 2 == 0);
+
+  kr >>= 1;
+  kc = (kc + 1) >> 1;
+  const int32_t* b = (const int32_t*) bias;
+  const size_t skr = sr * kr;
+  do {
+    for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
+      const size_t nr_block_size = min(nc - nr_block_start, nr);
+      if XNN_LIKELY(b != NULL) {
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
+          packed_weights = (int32_t*) packed_weights + 1;
+        }
+      } else {
+        size_t n = nr_block_size;
+        do {
+          unaligned_store_s32(packed_weights, 0);
+          packed_weights = (int32_t*) packed_weights + 1;
+        } while (--n != 0);
+      }
+      packed_weights = (int32_t*) packed_weights + (nr - nr_block_size);
+
+      for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
+            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            if (kc_idx < kc) {
+              const uint8_t kv = ((const uint8_t*) k)[(nr_block_start + nr_block_offset) * kc + kc_idx];
+              ((uint8_t*) packed_weights)[kr_block_offset] = kv;
+            }
+          }
+          packed_weights = (uint8_t*) packed_weights + kr;
+        }
+        packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
+      }
+      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+    }
+    k = (const uint8_t*) k + nc * kc;
+    if XNN_UNPREDICTABLE(b != NULL) {
+      b += nc;
+    }
+  } while (--g != 0);
+}
+
 void xnn_pack_qs8_gemm_xw_goi_w(
   size_t g,
   size_t nc,

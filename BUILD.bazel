@@ -6067,6 +6067,18 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_qc4w_gemm_bench",
+    srcs = [
+        "bench/f32-qc4w-gemm.cc",
+        "bench/gemm.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":allocator",
+        ":math",
+    ],
+)
+
+xnnpack_benchmark(
     name = "f32_qc8w_gemm_bench",
     srcs = [
         "bench/f32-qc8w-gemm.cc",
@@ -8077,6 +8089,17 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-qc8w-gemm-relu.cc",
     ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "f32_qc4w_gemm_minmax_test",
+    srcs = [
+        "test/f32-qc4w-gemm-minmax.cc",
+    ],
+    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
