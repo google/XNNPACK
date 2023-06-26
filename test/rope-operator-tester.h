@@ -89,7 +89,7 @@ class RoPEOperatorTester {
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       batch_size() * tokens() * heads() * channels());
-    std::vector<float> weights(tokens() * channels());
+    std::vector<float> weights(XNN_EXTRA_BYTES / sizeof(float) + tokens() * channels());
     std::vector<float> output(batch_size() * tokens() * heads() * channels());
     std::vector<double> output_ref(batch_size() * tokens() * heads() * channels());
 
