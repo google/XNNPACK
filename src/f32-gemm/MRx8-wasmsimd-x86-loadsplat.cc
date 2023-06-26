@@ -123,7 +123,7 @@ class F32GemmLoadsplatGenerator : public WasmAssembler {
     as[0] = a;
     cs[0] = c;
     auto i_local = MakeLocal(I32Const(1));
-    for (size_t i = 1; i < as.size; i++) {
+    for (size_t i = 1; i < as.size(); i++) {
       as[i] = I32Add(as[i - 1], a_stride);
       cs[i] = I32Add(cs[i - 1], cm_stride);
       If([&] { I32GeU(i_local, mr); },

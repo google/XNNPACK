@@ -48,8 +48,8 @@ void LocalsManager::ResetLocalsManager(
   uint32_t curr = parameters_count;
   size_t i = 0;
   for (const auto type_to_count : locals_declaration_count) {
-    const ValType type = type_to_count.first;
-    const uint32_t size = type_to_count.second;
+    const ValType type = type_to_count.type;
+    const uint32_t size = type_to_count.value;
     indices_[i] = ValTypeIndices(type, curr, size);
     curr += size;
     i++;
@@ -171,7 +171,7 @@ static uint32_t LocalsDeclarationSize(const Function& func) {
   const auto& locals_declaration = func.locals_declaration;
   return VectorEncodingLength(
              locals_declaration,
-             [](const auto& decl) { return WidthEncodedU32(decl.second); }) +
+             [](const auto& decl) { return WidthEncodedU32(decl.value); }) +
          locals_declaration.size();
 }
 
@@ -189,8 +189,8 @@ void WasmAssembler::EmitFunction(const Function& func) {
 
   EmitEncodedU32(locals_declaration.size());
   for (const auto& type_to_count : locals_declaration) {
-    EmitEncodedU32(type_to_count.second);
-    emit8(type_to_count.first.code);
+    EmitEncodedU32(type_to_count.value);
+    emit8(type_to_count.type.code);
   }
   for (byte b : func.body) emit8(b);
 }

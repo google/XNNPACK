@@ -30,17 +30,77 @@ struct ValType {
   ValType(const ValType&) = default;
   ValType& operator=(const ValType&) = default;
   constexpr explicit ValType(byte code) : code(code) {}
-  byte code;
+  byte code{};
 };
 
 inline bool operator==(const ValType& lhs, const ValType& rhs) {
   return lhs.code == rhs.code;
 }
 
-using ValTypesToInt = std::vector<std::pair<ValType, uint32_t>>;
+namespace internal {
+
+template <typename T, size_t max_size>
+class ArrayPrefix {
+ public:
+  explicit ArrayPrefix(size_t size) : size_(size) { assert(size_ <= max_size); }
+
+  ArrayPrefix(size_t size, T t) : size_(size), array_(MakeArray<max_size>(t)) {
+    assert(size_ <= max_size);
+  }
+
+  ArrayPrefix(std::initializer_list<T> init)
+      : size_(init.size()), array_(MakeArray<max_size>(*init.begin())) {
+    assert(size_ <= max_size);
+    std::copy(init.begin(), init.end(), begin());
+  }
+
+  auto begin() { return array_.begin(); }
+  auto begin() const { return array_.cbegin(); }
+  auto end() {
+    auto result = array_.begin();
+    std::advance(result, size_);
+    return result;
+  }
+  auto end() const {
+    auto result = array_.cbegin();
+    std::advance(result, size_);
+    return result;
+  }
+  auto& operator[](size_t index) {
+    assert(index < size_);
+    return array_[index];
+  }
+  const auto& operator[](size_t index) const {
+    assert(index < size_);
+    return array_[index];
+  }
+  size_t size() const { return size_; }
+
+ private:
+  size_t size_;
+  std::array<T, max_size> array_;
+};
+
+struct ValTypeToInt {
+  template <typename Int>
+  ValTypeToInt(ValType type, Int value) : type(type), value(value) {}
+  ValTypeToInt() = default;
+  ValType type;
+  uint32_t value;
+};
+
+}  // namespace internal
 
 static constexpr uint32_t kI32DefaultAlignment = 1;
 static constexpr uint32_t kV128DefaultAlignment = 1;
+static constexpr size_t kMaxNumTypes = 5;
+
+class ValTypesToInt
+    : public internal::ArrayPrefix<internal::ValTypeToInt, kMaxNumTypes> {
+ public:
+  using ArrayPrefix::ArrayPrefix;
+  ValTypesToInt() : ArrayPrefix(0, {ValType(0), 0}) {}
+};
 
 namespace internal {
 template <typename Array, typename ElementEncodingLength>
@@ -329,7 +389,6 @@ class LocalsManager {
     uint32_t size;
   };
 
-  static constexpr size_t kMaxNumTypes = 5;
   std::array<ValTypeIndices, kMaxNumTypes> indices_ =
       internal::MakeArray<kMaxNumTypes>(ValTypeIndices{ValType(0), 0, 0});
 };
@@ -414,34 +473,7 @@ class LocalWasmOps : public LocalsManager {
 
   constexpr static size_t kMaxLocalsSize = 32;
 
-  struct LocalsArray {
-    explicit LocalsArray(size_t size) : size(size) {
-      assert(size <= kMaxLocalsSize);
-    }
-    auto begin() { return arr.begin(); }
-    auto begin() const { return arr.cbegin(); }
-    auto end() {
-      auto result = arr.begin();
-      std::advance(result, size);
-      return result;
-    }
-    auto end() const {
-      auto result = arr.cbegin();
-      std::advance(result, size);
-      return result;
-    }
-    auto& operator[](size_t index) {
-      assert(index < size);
-      return arr[index];
-    }
-    const auto& operator[](size_t index) const {
-      assert(index < size);
-      return arr[index];
-    }
-
-    size_t size;
-    std::array<Local, kMaxLocalsSize> arr;
-  };
+  using LocalsArray = ArrayPrefix<Local, kMaxLocalsSize>;
 
   Local MakeLocal(ValType type) {
     return Local{type, GetNewLocalIndex(type), /*is_managed=*/true,

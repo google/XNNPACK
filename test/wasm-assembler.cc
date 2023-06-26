@@ -334,7 +334,7 @@ template <typename Derived>
 struct CanInitWithIndex {
   template <typename LocalsArray>
   void InitSummands(LocalsArray& summands) {
-    for (size_t i = 0; i < summands.size; i++) {
+    for (size_t i = 0; i < summands.size(); i++) {
       summands[i] = static_cast<Derived*>(this)->I32Const(i);
     }
   }
@@ -344,7 +344,7 @@ template <typename Derived>
 struct CanSumWithIndex {
   template <typename Local, typename LocalsArray>
   void Sum(Local& result, const LocalsArray& summands) {
-    for (size_t i = 0; i < summands.size; i++) {
+    for (size_t i = 0; i < summands.size(); i++) {
       result = static_cast<Derived*>(this)->I32Add(result, summands[i]);
     }
   }
