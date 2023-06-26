@@ -660,6 +660,26 @@ struct GetPiGenerator : WasmAssembler {
 struct GetPiTestSuite
     : GetValueTestSuite<float, kPi, GetPiGenerator, GetPiPtr> {};
 
+struct Get5TrickyLifetimeGenerator : WasmAssembler {
+  explicit Get5TrickyLifetimeGenerator(xnn_code_buffer* bf)
+      : WasmAssembler(bf) {
+    ValTypesToInt two_locals = {{i32, 2}};
+    AddFunc<0>({i32}, "get5", {}, two_locals, [&] {
+      Local a;
+      {
+        auto b = MakeLocal(I32Const(kExpectedGet5ReturnValue));
+        a = MakeLocal(b);
+      }
+      auto c = MakeLocal(I32Const(0));
+      local_get(a);
+    });
+  }
+};
+
+struct Get5TrickyTestSuite
+    : GetValueTestSuite<int32_t, kExpectedGet5ReturnValue,
+                        Get5TrickyLifetimeGenerator, GetIntPtr> {};
+
 struct InvalidCodeGenerator : WasmAssembler {
   ValTypesToInt no_locals;
   explicit InvalidCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
@@ -697,18 +717,17 @@ TYPED_TEST_P(WasmAssemblerTest, ValidCode) {
 
 REGISTER_TYPED_TEST_SUITE_P(WasmAssemblerTest, ValidCode);
 
-using WasmAssemblerTestSuits =
-    testing::Types<Get5TestSuite, AddTestSuite, Get5AndAddTestSuite,
-                   AddWithLocalTestSuite, AddTwiceTestSuite,
-                   AddTwiceDeclareInitTestSuite, AddTwiceWithScopesTestSuite,
-                   Add5TestSuite, MaxTestSuite, MaxIncompleteIfTestSuite,
-                   SumUntilTestSuite, SumUntilLocalsArrayWithIterator,
-                   SumUntilLocalsArrayWithIndexTestSuite, DoWhileTestSuite,
-                   SumArrayTestSuite, MemCpyTestSuite, AddDelayedInitTestSuite,
-                   ManyFunctionsGeneratorTestSuite,
-                   ManyLocalsGeneratorTestSuite, V128AddGeneratorTestSuite,
-                   V128AddConstGeneratorTestSuite,
-                   I64x2ShuffleGeneratorTestSuite, GetPiTestSuite>;
+using WasmAssemblerTestSuits = testing::Types<
+    Get5TestSuite, AddTestSuite, Get5AndAddTestSuite, AddWithLocalTestSuite,
+    AddTwiceTestSuite, AddTwiceDeclareInitTestSuite,
+    AddTwiceWithScopesTestSuite, Add5TestSuite, MaxTestSuite,
+    MaxIncompleteIfTestSuite, SumUntilTestSuite,
+    SumUntilLocalsArrayWithIterator, SumUntilLocalsArrayWithIndexTestSuite,
+    DoWhileTestSuite, SumArrayTestSuite, MemCpyTestSuite,
+    AddDelayedInitTestSuite, ManyFunctionsGeneratorTestSuite,
+    ManyLocalsGeneratorTestSuite, V128AddGeneratorTestSuite,
+    V128AddConstGeneratorTestSuite, I64x2ShuffleGeneratorTestSuite,
+    GetPiTestSuite, Get5TrickyTestSuite>;
 INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest,
                                WasmAssemblerTestSuits);
 
@@ -836,7 +855,6 @@ TEST_F(WasmOpsTest, Tee) {
   local_tee(i32_local_);
 }
 
-using ::xnnpack::internal::At;
 using ::xnnpack::internal::LocalsManager;
 
 TEST(WasmAssembler, LocalsManager) {
@@ -850,10 +868,11 @@ TEST(WasmAssembler, LocalsManager) {
   manager.ResetLocalsManager(params, local_declaration);
   EXPECT_EQ(manager.GetNewLocalIndex(f16), 6);
   EXPECT_EQ(manager.GetNewLocalIndex(f16), 7);
-  manager.DestructLocal(f16);
+  EXPECT_EQ(manager.GetNewLocalIndex(f16), 8);
+  manager.DestructLocal(f16, 7);
   EXPECT_EQ(manager.GetNewLocalIndex(f16), 7);
   // assert fails
-  // manager.MakeLocal(f32);
+  // manager.GetNewLocalIndex(f32);
   EXPECT_EQ(manager.GetNewLocalIndex(i32), 4);
 }
 

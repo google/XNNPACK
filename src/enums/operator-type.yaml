@@ -133,6 +133,8 @@
   string: "Fully Connected (NC, F16)"
 - name: xnn_operator_type_fully_connected_nc_f32
   string: "Fully Connected (NC, F32)"
+- name: xnn_operator_type_fully_connected_nc_f32_qc8w
+  string: "Fully Connected (NC, F32, QC8W)"
 - name: xnn_operator_type_fully_connected_nc_qs8
   string: "Fully Connected (NC, QS8)"
 - name: xnn_operator_type_fully_connected_nc_qu8
