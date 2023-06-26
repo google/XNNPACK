@@ -1,6 +1,3 @@
-// Copyright (c) Facebook, Inc. and its affiliates.
-// All rights reserved.
-//
 // Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
@@ -51,12 +48,13 @@ static void GEMMBenchmark(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
-  auto s8rng = std::bind(std::uniform_real_distribution<uint8_t>(), std::ref(rng));
+  auto u8rng = std::bind(
+    std::uniform_real_distribution<uint16_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
   std::vector<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
-  std::vector<uint8_t> k(nc * kc * sizeof(int8_t) / 2 /* int4_t */);
-  std::generate(k.begin(), k.end(), std::ref(s8rng));
+  std::vector<uint8_t> k(nc * kc * sizeof(uint8_t) / 2 /* int4_t */);
+  std::generate(k.begin(), k.end(), std::ref(u8rng));
   std::vector<float> b(nc);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
 
