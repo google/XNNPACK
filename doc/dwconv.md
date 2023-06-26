@@ -22,9 +22,9 @@ For each element of this row of output, DWCONV will produce `channel_tile`
 number of outputs in the main loop, with a separate loop to handle remainders
 (remainder loop).
 
-In each iteration of the main loop, the microkernel will read `channel_tile` biases, `channel_tile
-* kernel_tile` inputs, `channel_tile * kernel_tile` weights, and, optionally, `channel_tile` of per-channel scales,
-  perform the convolution, then write `channel_tile` outputs.
+In each iteration of the main loop, the microkernel will read `channel_tile` biases, `channel_tile * kernel_tile`
+inputs, `channel_tile * kernel_tile` weights, and, optionally, `channel_tile` of per-channel scales,
+perform the convolution, then write `channel_tile` outputs.
 
 In the remainder loop, the microkernel will read `remainder_channels` biases,
 `remainder_channels * kernel_tile` inputs, `remainder_channels * kernel_tile`
