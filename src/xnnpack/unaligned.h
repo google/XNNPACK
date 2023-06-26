@@ -80,3 +80,8 @@ XNN_INLINE static void unaligned_indexed_store_u32(void* address, size_t index, 
   typedef XNN_UNALIGNED uint32_t xnn_unaligned_uint32_t;
   ((xnn_unaligned_uint32_t*) address)[index] = value;
 }
+
+XNN_INLINE static void unaligned_indexed_store_u16(void* address, size_t index, uint16_t value) {
+  typedef XNN_UNALIGNED uint16_t xnn_unaligned_uint16_t;
+  ((xnn_unaligned_uint16_t*) address)[index] = value;
+}

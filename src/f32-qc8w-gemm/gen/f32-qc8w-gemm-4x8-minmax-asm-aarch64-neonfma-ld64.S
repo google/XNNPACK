@@ -47,8 +47,8 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld64
         CSEL        x11, x3, x11, LO        //   a1 = a0
         CSEL        x9, x6, x9, LO          //   c1 = c0
 
-        # Load min/max values
-        LD2R        {v4.4s, v5.4s}, [x8]
+        # Load min/max/zerop values
+        LD3R        {v4.4s, v5.4s, v6.4s}, [x8]
 
         ADD         x12, x11, x4            // a2 = a1 + a_stride
         ADD         x10, x9, x7             // c2 = c1 + cm_stride
@@ -61,6 +61,7 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld64
         ADD         x7, x10, x7             // c3 = c2 + cm_stride
         CSEL        x4, x12, x4, LO         //   a3 = a2
         CSEL        x7, x10, x7, LO         //   c3 = c2
+        MOVI        v7.16b, 15
 
 0:
         # Load initial bias from w into accumulators
@@ -78,7 +79,7 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld64
 
         # Main loop - 2 floats of A (8 bytes)
 1:
-        LDR         q22, [x5], 16
+        LDR         q22, [x5], 16   // 16 QC8 weights
         SXTL        v21.8h, v22.8b
         SXTL2       v23.8h, v22.16b
         LDR         d0,  [x3], 8

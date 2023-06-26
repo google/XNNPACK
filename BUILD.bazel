@@ -180,7 +180,7 @@ TABLE_SRCS = [
 PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/u8-lut32norm/u8-lut32norm-scalar.c",
     "src/xx-copy/xx-copy-scalar-memcpy.c",
-    "src/xx-transpose/xx-transpose-1x1-scalar-memcpy.c",
+    "src/xx-transposev/xx-transposev-1x1-scalar-memcpy.c",
     "src/x8-lut/gen/x8-lut-scalar-x4.c",
     "src/x24-transposec/gen/x24-transposec-1x2-scalar.c",
     "src/x32-packw/gen/x32-packw-x2-gemm-goi-scalar-float-x4.c",
@@ -332,9 +332,9 @@ PROD_SCALAR_AARCH32_MICROKERNEL_SRCS = [
     "src/x8-zip/x8-zip-x3-scalar.c",
     "src/x8-zip/x8-zip-x4-scalar.c",
     "src/x16-transposec/gen/x16-transposec-2x4-scalar-int.c",
-    "src/x32-packx/x32-packx-x2-scalar.c",
-    "src/x32-packx/x32-packx-x3-scalar.c",
-    "src/x32-packx/x32-packx-x4-scalar.c",
+    "src/x32-packx/x32-packx-2x-scalar.c",
+    "src/x32-packx/x32-packx-3x-scalar.c",
+    "src/x32-packx/x32-packx-4x-scalar.c",
     "src/x32-transposec/gen/x32-transposec-2x4-scalar-int.c",
     "src/x32-unpool/x32-unpool-scalar.c",
     "src/x32-zip/x32-zip-xm-scalar.c",
@@ -491,9 +491,9 @@ PROD_SCALAR_WASM_MICROKERNEL_SRCS = [
     "src/x8-zip/x8-zip-x3-scalar.c",
     "src/x8-zip/x8-zip-x4-scalar.c",
     "src/x16-transposec/gen/x16-transposec-2x4-scalar-int.c",
-    "src/x32-packx/x32-packx-x2-scalar.c",
-    "src/x32-packx/x32-packx-x3-scalar.c",
-    "src/x32-packx/x32-packx-x4-scalar.c",
+    "src/x32-packx/x32-packx-2x-scalar.c",
+    "src/x32-packx/x32-packx-3x-scalar.c",
+    "src/x32-packx/x32-packx-4x-scalar.c",
     "src/x32-transposec/gen/x32-transposec-2x4-scalar-int.c",
     "src/x32-unpool/x32-unpool-scalar.c",
     "src/x32-zip/x32-zip-xm-scalar.c",
@@ -650,9 +650,9 @@ PROD_SCALAR_RISCV_MICROKERNEL_SRCS = [
     "src/x8-zip/x8-zip-x3-scalar.c",
     "src/x8-zip/x8-zip-x4-scalar.c",
     "src/x16-transposec/gen/x16-transposec-2x4-scalar-int.c",
-    "src/x32-packx/x32-packx-x2-scalar.c",
-    "src/x32-packx/x32-packx-x3-scalar.c",
-    "src/x32-packx/x32-packx-x4-scalar.c",
+    "src/x32-packx/x32-packx-2x-scalar.c",
+    "src/x32-packx/x32-packx-3x-scalar.c",
+    "src/x32-packx/x32-packx-4x-scalar.c",
     "src/x32-transposec/gen/x32-transposec-2x4-scalar-int.c",
     "src/x32-unpool/x32-unpool-scalar.c",
     "src/x32-zip/x32-zip-xm-scalar.c",
@@ -753,7 +753,7 @@ PROD_NEON_MICROKERNEL_SRCS = [
     "src/f32-vrnd/gen/f32-vrndu-neon-x8.c",
     "src/f32-vrnd/gen/f32-vrndz-neon-x8.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut64-p2-nr2recps-x8.c",
-    "src/f32-vtanh/gen/f32-tanh-neon-expm1minus-rr1-p6h5ts-nr2recps-x8.c",
+    "src/f32-vtanh/gen/f32-vtanh-neon-expm1minus-rr1-p6h5ts-nr2recps-x8.c",
     "src/f32-vunary/gen/f32-vabs-neon-x8.c",
     "src/f32-vunary/gen/f32-vneg-neon-x8.c",
     "src/f32-vunary/gen/f32-vsqr-neon-x8.c",
@@ -877,7 +877,7 @@ PROD_NEONFMA_MICROKERNEL_SRCS = [
     "src/f32-velu/gen/f32-velu-neonfma-rr1-p6-x8.c",
     "src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-neonfma-2x.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-nr2recps-x16.c",
-    "src/f32-vtanh/gen/f32-tanh-neonfma-expm1minus-rr1-p6h5ts-nr2fma-x8.c",
+    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2fma-x8.c",
 ]
 
 PROD_NEON_AARCH64_MICROKERNEL_SRCS = [
@@ -902,7 +902,7 @@ PROD_NEON_AARCH64_MICROKERNEL_SRCS = [
     "src/f32-vbinary/gen/f32-vdivc-minmax-aarch64-neon-x8.c",
     "src/f32-vbinary/gen/f32-vrdivc-minmax-aarch64-neon-x8.c",
     "src/f32-vsqrt/gen/f32-vsqrt-aarch64-neon-sqrt-x4.c",
-    "src/f32-vtanh/gen/f32-tanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div-x16.c",
+    "src/f32-vtanh/gen/f32-vtanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div-x16.c",
     "src/x8-lut/gen/x8-lut-aarch64-neon-tbx128x4-x64.c",
     "src/x24-transposec/x24-transposec-4x4-aarch64-neon-tbl128.c",
     "src/x32-transposec/x32-transposec-4x4-aarch64-neon-tbl128.c",
@@ -1100,7 +1100,7 @@ PROD_SSE_MICROKERNEL_SRCS = [
     "src/f32-vunary/gen/f32-vabs-sse-x8.c",
     "src/f32-vunary/gen/f32-vneg-sse-x8.c",
     "src/f32-vunary/gen/f32-vsqr-sse-x8.c",
-    "src/x32-packx/x32-packx-x4-sse.c",
+    "src/x32-packx/x32-packx-4x-sse.c",
     "src/x32-transposec/x32-transposec-4x4-sse.c",
 ]
 
@@ -1298,7 +1298,7 @@ PROD_AVX_MICROKERNEL_SRCS = [
     "src/f32-vrnd/gen/f32-vrndz-avx-x16.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-avx-rr2-p5-nr2-x40.c",
     "src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-x8.c",
-    "src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut4-p4h2ts-div-x48.c",
+    "src/f32-vtanh/gen/f32-vtanh-avx-expm1minus-rr1-lut4-p4h2ts-perm-div-x48.c",
     "src/f32-vunary/gen/f32-vabs-avx-x16.c",
     "src/f32-vunary/gen/f32-vneg-avx-x16.c",
     "src/f32-vunary/gen/f32-vsqr-avx-x16.c",
@@ -1414,7 +1414,7 @@ PROD_FMA3_MICROKERNEL_SRCS = [
     "src/f16-dwconv/gen/f16-dwconv-25p8c-minmax-fma3-acc2.c",
     "src/f16-ibilinear/gen/f16-ibilinear-fma3-c8.c",
     "src/f16-vmulcaddc/gen/f16-vmulcaddc-c8-minmax-fma3-2x.c",
-    "src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9-x32.c",
+    "src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-x32.c",
     "src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-fma3.c",
     "src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-fma3.c",
     "src/f32-dwconv/gen/f32-dwconv-5f5m5l8c8s4r-minmax-fma3.c",
@@ -1429,7 +1429,7 @@ PROD_FMA3_MICROKERNEL_SRCS = [
     "src/f32-igemm/gen/f32-igemm-4x16s4-minmax-fma3-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-5x16-minmax-fma3-broadcast.c",
     "src/f32-vhswish/gen/f32-vhswish-fma3-x16.c",
-    "src/f32-vtanh/gen/f32-vtanh-fma3-expm1minus-rr1-lut4-p4h3ts-div-x40.c",
+    "src/f32-vtanh/gen/f32-vtanh-fma3-expm1minus-rr1-lut4-p4h3ts-perm-div-x40.c",
 ]
 
 PROD_AVX2_MICROKERNEL_SRCS = [
@@ -1783,8 +1783,8 @@ PROD_WASMSIMD_MICROKERNEL_SRCS = [
     "src/f32-vrnd/gen/f32-vrndz-wasmsimd-x8.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-wasmsimd-rr2-p5-div-x16.c",
     "src/f32-vsqrt/gen/f32-vsqrt-wasmsimd-sqrt-x8.c",
-    "src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-min-x16.c",
-    "src/f32-vtanh/gen/f32-tanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-pmax-x16.c",
+    "src/f32-vtanh/gen/f32-vtanh-wasmsimd-expm1minus-rr1-p6h5ts-div-abs-min-x16.c",
+    "src/f32-vtanh/gen/f32-vtanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-pmax-x16.c",
     "src/f32-vunary/gen/f32-vabs-wasmsimd-x8.c",
     "src/f32-vunary/gen/f32-vneg-wasmsimd-x8.c",
     "src/f32-vunary/gen/f32-vsqr-wasmsimd-x8.c",
@@ -6067,6 +6067,18 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_qc4w_gemm_bench",
+    srcs = [
+        "bench/f32-qc4w-gemm.cc",
+        "bench/gemm.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":allocator",
+        ":math",
+    ],
+)
+
+xnnpack_benchmark(
     name = "f32_qc8w_gemm_bench",
     srcs = [
         "bench/f32-qc8w-gemm.cc",
@@ -8083,6 +8095,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f32_qc4w_gemm_minmax_test",
+    srcs = [
+        "test/f32-qc4w-gemm-minmax.cc",
+    ],
+    shard_count = 10,
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "f32_qc8w_gemm_minmax_test",
     srcs = [
         "test/f32-qc8w-gemm-minmax.cc",
@@ -9597,7 +9620,7 @@ xnnpack_unit_test(
     name = "xx_transpose_test",
     srcs = [
         "test/transpose-microkernel-tester.h",
-        "test/xx-transpose.cc",
+        "test/xx-transposev.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

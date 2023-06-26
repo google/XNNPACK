@@ -171,6 +171,6 @@ tools/generate-transpose-test.py --spec test/x16-transpose.yaml --output test/x1
 tools/generate-transpose-test.py --spec test/x24-transpose.yaml --output test/x24-transpose.cc &
 tools/generate-transpose-test.py --spec test/x32-transpose.yaml --output test/x32-transpose.cc &
 tools/generate-transpose-test.py --spec test/x64-transpose.yaml --output test/x64-transpose.cc &
-tools/generate-transpose-test.py --spec test/xx-transpose.yaml  --output test/xx-transpose.cc &
+tools/generate-transpose-test.py --spec test/xx-transposev.yaml  --output test/xx-transposev.cc &
 
 wait
