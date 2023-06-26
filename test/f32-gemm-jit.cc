@@ -1531,6 +1531,23 @@
           xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a7, xnn_init_f32_minmax_scalar_params,
           fused_operators);
   }
+  TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A7, hardswish_max_mr_lt_4) {
+    TEST_REQUIRES_ARM_NEON;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 4; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(2)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a7, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
+  }
 
   #if XNN_ENABLE_ASSEMBLY
     TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A7, matches_assembly) {
@@ -2084,6 +2101,23 @@
       .Test(
           xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params,
           fused_operators);
+  }
+  TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53, hardswish_max_mr_lt_4) {
+    TEST_REQUIRES_ARM_NEON;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 4; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
   }
 
   #if XNN_ENABLE_ASSEMBLY
@@ -2639,6 +2673,23 @@
           xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53_prfm, xnn_init_f32_minmax_scalar_params,
           fused_operators);
   }
+  TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53_PRFM, hardswish_max_mr_lt_4) {
+    TEST_REQUIRES_ARM_NEON;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 4; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a53_prfm, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
+  }
 
   #if XNN_ENABLE_ASSEMBLY
     TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A53_PRFM, matches_assembly) {
@@ -3192,6 +3243,23 @@
       .Test(
           xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55, xnn_init_f32_minmax_scalar_params,
           fused_operators);
+  }
+  TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A55, hardswish_max_mr_lt_4) {
+    TEST_REQUIRES_ARM_NEON;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 4; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a55, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
   }
 
   #if XNN_ENABLE_ASSEMBLY
@@ -3747,6 +3815,23 @@
           xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75, xnn_init_f32_minmax_scalar_params,
           fused_operators);
   }
+  TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A75, hardswish_max_mr_lt_4) {
+    TEST_REQUIRES_ARM_NEON;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 4; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
+  }
 
   #if XNN_ENABLE_ASSEMBLY
     TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A75, matches_assembly) {
@@ -4301,6 +4386,23 @@
           xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75_prfm, xnn_init_f32_minmax_scalar_params,
           fused_operators);
   }
+  TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A75_PRFM, hardswish_max_mr_lt_4) {
+    TEST_REQUIRES_ARM_NEON;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 4; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_cortex_a75_prfm, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
+  }
 
   #if XNN_ENABLE_ASSEMBLY
     TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_CORTEX_A75_PRFM, matches_assembly) {
@@ -4809,6 +4911,23 @@
       .Test(
           xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params,
           fused_operators);
+  }
+  TEST(GENERATE_F32_GEMM_4X8__AARCH32_NEON_LD64, hardswish_max_mr_lt_4) {
+    TEST_REQUIRES_ARM_NEON;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 4; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(2)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
   }
 
   #if XNN_ENABLE_ASSEMBLY
@@ -8089,6 +8208,23 @@
           xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a53, xnn_init_f32_minmax_scalar_params,
           fused_operators);
   }
+  TEST(GENERATE_F32_GEMM_4X8__AARCH64_NEONFMA_CORTEX_A53, hardswish_max_mr_lt_4) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 4; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a53, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
+  }
 
   #if XNN_ENABLE_ASSEMBLY
     TEST(GENERATE_F32_GEMM_4X8__AARCH64_NEONFMA_CORTEX_A53, matches_assembly) {
@@ -8642,6 +8778,23 @@
       .Test(
           xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a53_prfm, xnn_init_f32_minmax_scalar_params,
           fused_operators);
+  }
+  TEST(GENERATE_F32_GEMM_4X8__AARCH64_NEONFMA_CORTEX_A53_PRFM, hardswish_max_mr_lt_4) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 4; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a53_prfm, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
   }
 
   #if XNN_ENABLE_ASSEMBLY
@@ -9197,6 +9350,23 @@
           xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params,
           fused_operators);
   }
+  TEST(GENERATE_F32_GEMM_4X8__AARCH64_NEONFMA_CORTEX_A55, hardswish_max_mr_lt_4) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 4; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
+  }
 
   #if XNN_ENABLE_ASSEMBLY
     TEST(GENERATE_F32_GEMM_4X8__AARCH64_NEONFMA_CORTEX_A55, matches_assembly) {
@@ -9750,6 +9920,23 @@
       .Test(
           xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a75, xnn_init_f32_minmax_scalar_params,
           fused_operators);
+  }
+  TEST(GENERATE_F32_GEMM_4X8__AARCH64_NEONFMA_CORTEX_A75, hardswish_max_mr_lt_4) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 4; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(8)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a75, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
   }
 
   #if XNN_ENABLE_ASSEMBLY
@@ -10305,6 +10492,23 @@
           xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a75_prfm, xnn_init_f32_minmax_scalar_params,
           fused_operators);
   }
+  TEST(GENERATE_F32_GEMM_4X8__AARCH64_NEONFMA_CORTEX_A75_PRFM, hardswish_max_mr_lt_4) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 4; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(8)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_cortex_a75_prfm, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
+  }
 
   #if XNN_ENABLE_ASSEMBLY
     TEST(GENERATE_F32_GEMM_4X8__AARCH64_NEONFMA_CORTEX_A75_PRFM, matches_assembly) {
@@ -10813,6 +11017,23 @@
       .Test(
           xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_ld128, xnn_init_f32_minmax_scalar_params,
           fused_operators);
+  }
+  TEST(GENERATE_F32_GEMM_4X8__AARCH64_NEONFMA_LD128, hardswish_max_mr_lt_4) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 4; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_4x8__aarch64_neonfma_ld128, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
   }
 
   #if XNN_ENABLE_ASSEMBLY
@@ -12982,6 +13203,23 @@
           xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a75, xnn_init_f32_minmax_scalar_params,
           fused_operators);
   }
+  TEST(GENERATE_F32_GEMM_6X8__AARCH64_NEONFMA_CORTEX_A75, hardswish_max_mr_lt_6) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 6; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(8)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a75, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
+  }
 
   #if XNN_ENABLE_ASSEMBLY
     TEST(GENERATE_F32_GEMM_6X8__AARCH64_NEONFMA_CORTEX_A75, matches_assembly) {
@@ -13536,6 +13774,23 @@
           xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a75_prfm, xnn_init_f32_minmax_scalar_params,
           fused_operators);
   }
+  TEST(GENERATE_F32_GEMM_6X8__AARCH64_NEONFMA_CORTEX_A75_PRFM, hardswish_max_mr_lt_6) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 6; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(8)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_cortex_a75_prfm, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
+  }
 
   #if XNN_ENABLE_ASSEMBLY
     TEST(GENERATE_F32_GEMM_6X8__AARCH64_NEONFMA_CORTEX_A75_PRFM, matches_assembly) {
@@ -14044,6 +14299,23 @@
       .Test(
           xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_ld128, xnn_init_f32_minmax_scalar_params,
           fused_operators);
+  }
+  TEST(GENERATE_F32_GEMM_6X8__AARCH64_NEONFMA_LD128, hardswish_max_mr_lt_6) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 6; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(4)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_6x8__aarch64_neonfma_ld128, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
   }
 
   #if XNN_ENABLE_ASSEMBLY

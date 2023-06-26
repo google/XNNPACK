@@ -889,6 +889,27 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE == 'f32' and POST_OP:
           ${", ".join(TEST_ARGS)},
           fused_operators);
   }
+  $if MR > 1:
+    TEST(${TEST_NAME}, hardswish_max_mr_lt_${MR}) {
+      $if ISA_CHECK:
+        ${ISA_CHECK};
+      const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+      for (uint32_t max_mr = 1; max_mr < ${MR}; max_mr++) {
+        GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
+          .mr(max_mr)
+          .nr(${NR})
+          .kr(${KR})
+          .sr(${SR})
+          .m(max_mr)
+          .n(${NR})
+          .k(${KBLOCK})
+          .Test(
+              ${", ".join(TEST_ARGS)},
+              fused_operators);
+      }
+    }
 
 $if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16'] and PROTOTYPE is not None:
   #if XNN_ENABLE_ASSEMBLY
