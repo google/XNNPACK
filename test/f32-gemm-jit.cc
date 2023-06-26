@@ -14686,4 +14686,35 @@
       }
     }
   }
+
+  TEST(GENERATE_F32_GEMM_6X8__WASMSIMD_X86_LOADSPLAT, hardswish) {
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    GemmMicrokernelTester()
+      .mr(6)
+      .nr(8)
+      .kr(1)
+      .sr(1)
+      .m(6)
+      .n(8)
+      .k(1)
+      .Test(
+          xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat, xnn_init_f32_minmax_scalar_params,
+          fused_operators);
+  }
+  TEST(GENERATE_F32_GEMM_6X8__WASMSIMD_X86_LOADSPLAT, hardswish_mr_lt_6) {
+    const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
+    for (uint32_t max_mr = 1; max_mr < 6; max_mr++) {
+      GemmMicrokernelTester()
+        .mr(max_mr)
+        .nr(8)
+        .kr(1)
+        .sr(1)
+        .m(max_mr)
+        .n(8)
+        .k(1)
+        .Test(
+            xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat, xnn_init_f32_minmax_scalar_params,
+            fused_operators);
+    }
+  }
 #endif  // (XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD) && XNN_PLATFORM_JIT

@@ -8,7 +8,10 @@
 
 #include <xnnpack/assembler.h>
 #include <xnnpack/microparams.h>
+#include <xnnpack/post-operation.h>
 #include <xnnpack/wasm-assembler.h>
+
+#include <wasm_simd128.h>
 
 
 namespace xnnpack {
@@ -19,18 +22,17 @@ class F32GemmLoadsplatGenerator : public WasmAssembler {
       : WasmAssembler(bf) {}
 
   void generate(const char* name, size_t max_mr, const jit_gemm_params* jit_gemm_params) {
+    const size_t num_post_operations = jit_gemm_params->num_post_operations;
+    const xnn_post_operation* post_operations = jit_gemm_params->post_operations;
     const float min = jit_gemm_params->f32_minmax.min;
     const float max = jit_gemm_params->f32_minmax.max;
-    const bool clamp_min = min != -std::numeric_limits<float>::infinity();
-    const bool clamp_max = max != +std::numeric_limits<float>::infinity();
 
-    ValTypesToInt locals_declaration = {
-      {i32, max_mr * 2 + 1}, {v128, max_mr * 3 + 2 + static_cast<int>(clamp_min) + static_cast<int>(clamp_max)}};
+    ValTypesToInt locals_declaration = {{i32, max_mr * 2 + 1}, {v128, max_mr * 3 + 8}};
     AddFunc<10>({}, name, locals_declaration,
                 [&](auto mr, auto nc, auto kc, auto a, auto a_stride, auto w, auto c, auto cm_stride, auto cn_stride,
                     auto params) {
-                  auto vmin = InitClampLimit(min, clamp_min);
-                  auto vmax = InitClampLimit(max, clamp_max);
+                  InitClampLimit(min, max);
+                  InitPostOps(post_operations, num_post_operations, params);
 
                   LocalsArray as = MakeLocalsArray(max_mr, i32);
                   LocalsArray cs = MakeLocalsArray(max_mr, i32);
@@ -66,8 +68,10 @@ class F32GemmLoadsplatGenerator : public WasmAssembler {
                         },
                         [&] { I32Ne(k, I32Const(0)); });
 
-                      Clamp(vacc0123, vmin, vmax, clamp_min, clamp_max);
-                      Clamp(vacc4567, vmin, vmax, clamp_min, clamp_max);
+                      Clamp(vacc0123);
+                      ApplyPostOps(post_operations, num_post_operations, vacc0123);
+                      Clamp(vacc4567);
+                      ApplyPostOps(post_operations, num_post_operations, vacc4567);
 
                       IfElse([&] { I32GeU(nc, I32Const(8)); },
                              [&] {
@@ -113,6 +117,68 @@ class F32GemmLoadsplatGenerator : public WasmAssembler {
   }
 
  private:
+  struct HswishConsts {
+    using Local = F32GemmLoadsplatGenerator::Local;
+    Local vsixth;
+    Local vsix;
+    Local vthree;
+    Local vzero;
+  };
+
+  struct ClampConsts {
+    using Local = F32GemmLoadsplatGenerator::Local;
+    bool clamp_min;
+    bool clamp_max;
+    Local vmin;
+    Local vmax;
+  };
+
+  auto MakeF32x4Const(float value) { return MakeLocal(F32x4Splat(F32Const(value))); }
+
+  auto Hswish(Local& v) {
+    Local vacc = MakeLocal(F32x4Add(v, hswish_consts_.vthree));
+    v = F32x4Mul(v, hswish_consts_.vsixth);
+    vacc = F32x4Pmax(vacc, hswish_consts_.vzero);
+    vacc = F32x4Pmin(vacc, hswish_consts_.vsix);
+    v = F32x4Mul(vacc, v);
+  }
+
+  auto MakeV128Load64Splat(const Local& address, uint32_t offset) {
+    return MakeLocal(V128Load64Splat(address, offset));
+  }
+
+  void InitPostOps(const xnn_post_operation* ops, size_t num_ops, Local& params) {
+    for (size_t i = 0; i < num_ops; i++) {
+      switch (ops[i].op_type) {
+        case xnn_post_operation_type_hardswish:
+          hswish_consts_.vsixth = MakeV128Load64Splat(params, /*offset=*/0);
+          hswish_consts_.vthree = MakeV128Load64Splat(params, /*offset=*/2 * sizeof(float));
+          hswish_consts_.vsix = MakeV128Load64Splat(params, /*offset=*/4 * sizeof(float));
+          hswish_consts_.vzero = MakeF32x4Const(0);
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
+      params = I32Add(params, I32Const(6 * sizeof(float)));
+    }
+  }
+
+  void ApplyPostOps(const xnn_post_operation* ops, size_t num_ops, Local& v) {
+    for (size_t i = 0; i < num_ops; i++) {
+      switch (ops[i].op_type) {
+        case xnn_post_operation_type_hardswish:
+          Hswish(v);
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
+    }
+  }
+
+  void ApplyPostOps(const xnn_post_operation* ops, size_t num_ops, LocalsArray& vs) {
+    for (auto& v : vs) ApplyPostOps(ops, num_ops, v);
+  }
+
   void InitAccumulators(LocalsArray& vaccs, const Local& w, size_t offset) {
     vaccs[0] = V128Load(w, offset);
     std::for_each(std::next(std::begin(vaccs)), std::end(vaccs), [&](auto& vacc) { vacc = vaccs[0]; });
@@ -135,28 +201,32 @@ class F32GemmLoadsplatGenerator : public WasmAssembler {
     }
   }
 
-  Local InitClampLimit(float limit_float, bool is_clamping_enabled) {
-    Local limit;
-    if (is_clamping_enabled) {
-      limit = MakeLocal(F32x4Splat(F32Const(limit_float)));
+  void InitClampLimit(float min, float max) {
+    clamps_consts_.clamp_min = min != -std::numeric_limits<float>::infinity();
+    clamps_consts_.clamp_max = max != +std::numeric_limits<float>::infinity();
+    if (clamps_consts_.clamp_min) {
+      clamps_consts_.vmin = MakeF32x4Const(min);
     }
-    return limit;
-  }
-
-  void Clamp(Local& value, const Local& vmin, const Local& vmax, bool clamp_min, bool clamp_max) {
-    if (clamp_max) {
-      value = F32x4Pmin(vmax, value);
-    }
-    if (clamp_min) {
-      value = F32x4Pmax(vmin, value);
+    if (clamps_consts_.clamp_max) {
+      clamps_consts_.vmax = MakeF32x4Const(max);
     }
   }
 
-  void Clamp(LocalsArray& values, const Local& vmin, const Local& vmax, bool clamp_min, bool clamp_max) {
-    for (auto& value : values) {
-      Clamp(value, vmin, vmax, clamp_min, clamp_max);
+  void Clamp(Local& value) {
+    if (clamps_consts_.clamp_max) {
+      value = F32x4Pmin(clamps_consts_.vmax, value);
+    }
+    if (clamps_consts_.clamp_min) {
+      value = F32x4Pmax(clamps_consts_.vmin, value);
     }
   }
+
+  void Clamp(LocalsArray& values) {
+    for (auto& value : values) Clamp(value);
+  }
+
+  HswishConsts hswish_consts_;
+  ClampConsts clamps_consts_;
 };
 
 xnn_status generate(xnn_code_buffer* b, const char* name, size_t max_mr, const void* params) {

@@ -2309,6 +2309,117 @@ void GemmMicrokernelTester::Test(
     }
   }
 }
+
+static void PerformUnaryOperation(std::vector<float>& v, const std::vector<xnn_post_operation>& post_operations) {
+  for (auto& op : post_operations) {
+    switch (op.op_type) {
+      case xnn_post_operation_type_hardswish: {
+        for (float& f : v) {
+          f = f * std::min(std::max(0.0f, (f + 3.0f)), 6.0f) / 6.0f;
+        }
+        break;
+      }
+      default:
+        FAIL() << "Unsupport post operation: " << (op.op_type);
+    }
+  }
+}
+
+void GemmMicrokernelTester::Test(
+    xnn_jit_gemm_code_generator_fn gemm_generator,
+    xnn_init_f32_minmax_params_fn init_params,
+    const std::vector<xnn_post_operation>& post_operations) const
+{
+  ASSERT_LE(m(), mr());
+  ASSERT_GE(a_stride(), k());
+  ASSERT_GE(cm_stride(), n());
+
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  std::uniform_real_distribution<float> f32dist;
+
+  std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float> b(n() * k());
+  std::vector<float> bias(n());
+  std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + packed_n());
+  std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+  std::vector<float> c_ref(m() * n());
+
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+    std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
+    std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+    std::fill(c.begin(), c.end(), nanf(""));
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+
+    std::fill(packed_w.begin(), packed_w.end(), 0.0f);
+    xnn_pack_f32_gemm_goi_w(1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(), packed_w.data(), 0, nullptr);
+
+    for (size_t m_index = 0; m_index < m(); m_index++) {
+      for (size_t n_index = 0; n_index < n(); n_index++) {
+        for (size_t k_index = 0; k_index < k(); k_index++) {
+          ASSERT_LE(n(), packed_n());
+          ASSERT_LT(m_index * n() + n_index, c_ref.size());
+          c_ref[m_index * n() + n_index] +=
+            a[m_index * a_stride() + k_index] *
+            b[n_index * k() + k_index];
+        }
+        c_ref[m_index * n() + n_index] += bias[n_index];
+      }
+    }
+
+    PerformUnaryOperation(c_ref, post_operations);
+
+    const float output_min = -std::numeric_limits<float>::infinity();
+    const float output_max = std::numeric_limits<float>::infinity();
+
+    char *post_operation_params = allocate_and_initialize_post_operation_params(
+        post_operations.size(), post_operations.data());
+
+    struct xnn_code_buffer code_buffer;
+    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
+    jit_gemm_params p = {};
+    p.f32_minmax.min = output_min;
+    p.f32_minmax.max = output_max;
+    p.num_post_operations = post_operations.size();
+    p.post_operations = post_operations.data();
+    ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(float), &p));
+    ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
+    xnn_f32_gemm_post_operation_ukernel_fn gemm_post_operation =
+        reinterpret_cast<xnn_f32_gemm_post_operation_ukernel_fn>(xnn_first_function_ptr(&code_buffer));
+
+    gemm_post_operation(m(), n(), k() * sizeof(float),
+      a.data(), a_stride() * sizeof(float),
+      packed_w.data(),
+      c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
+      post_operation_params);
+
+    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
+
+    // Validate micro-kernel outputs.
+    for (size_t i = 0; i < m(); i++) {
+      for (size_t j = 0; j < n(); j++) {
+        EXPECT_LE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], output_max)
+            << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
+        EXPECT_GE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], output_min)
+            << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
+        EXPECT_NEAR(
+            c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
+            c_ref[i * n() + j],
+            std::abs(c_ref[i * n() + j]) * 1.0e-6f)
+            << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
+            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
+      }
+    }
+  }
+}
+
 #if !XNN_PLATFORM_WEB
 
 void GemmMicrokernelTester::Test(
@@ -3193,116 +3304,6 @@ void GemmMicrokernelTester::Test(
             << "), optimized = " << (uint32_t) c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k()
             << ", requantization scale = " << requantization_scale << ", output zero point = " << int32_t(c_zero_point);
-      }
-    }
-  }
-}
-
-void PerformUnaryOperation(std::vector<float>& v, const std::vector<xnn_post_operation>& post_operations) {
-  for (auto& op : post_operations) {
-    switch (op.op_type) {
-      case xnn_post_operation_type_hardswish: {
-        for (float& f : v) {
-          f = f * std::min(std::max(0.0f, (f + 3.0f)), 6.0f) / 6.0f;
-        }
-        break;
-      }
-      default:
-        FAIL() << "Unsupport post operation: " << (op.op_type);
-    }
-  }
-}
-
-void GemmMicrokernelTester::Test(
-    xnn_jit_gemm_code_generator_fn gemm_generator,
-    xnn_init_f32_minmax_params_fn init_params,
-    const std::vector<xnn_post_operation>& post_operations) const
-{
-  ASSERT_LE(m(), mr());
-  ASSERT_GE(a_stride(), k());
-  ASSERT_GE(cm_stride(), n());
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
-  std::uniform_real_distribution<float> f32dist;
-
-  std::vector<float> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float> b(n() * k());
-  std::vector<float> bias(n());
-  std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_n() * packed_k() + packed_n());
-  std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
-  std::vector<float> c_ref(m() * n());
-
-  for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
-    std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
-    std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-    std::fill(c.begin(), c.end(), nanf(""));
-    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
-
-    std::fill(packed_w.begin(), packed_w.end(), 0.0f);
-    xnn_pack_f32_gemm_goi_w(1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(), packed_w.data(), 0, nullptr);
-
-    for (size_t m_index = 0; m_index < m(); m_index++) {
-      for (size_t n_index = 0; n_index < n(); n_index++) {
-        for (size_t k_index = 0; k_index < k(); k_index++) {
-          ASSERT_LE(n(), packed_n());
-          ASSERT_LT(m_index * n() + n_index, c_ref.size());
-          c_ref[m_index * n() + n_index] +=
-            a[m_index * a_stride() + k_index] *
-            b[n_index * k() + k_index];
-        }
-        c_ref[m_index * n() + n_index] += bias[n_index];
-      }
-    }
-
-    PerformUnaryOperation(c_ref, post_operations);
-
-    const float output_min = -std::numeric_limits<float>::infinity();
-    const float output_max = std::numeric_limits<float>::infinity();
-
-    char *post_operation_params = allocate_and_initialize_post_operation_params(
-        post_operations.size(), post_operations.data());
-
-    struct xnn_code_buffer code_buffer;
-    ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(&code_buffer, XNN_DEFAULT_CODE_BUFFER_SIZE));
-    jit_gemm_params p = {};
-    p.f32_minmax.min = output_min;
-    p.f32_minmax.max = output_max;
-    p.num_post_operations = post_operations.size();
-    p.post_operations = post_operations.data();
-    ASSERT_EQ(xnn_status_success, gemm_generator(&code_buffer, mr(), n() % nr(), k() * sizeof(float), &p));
-    ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
-    xnn_f32_gemm_post_operation_ukernel_fn gemm_post_operation =
-        reinterpret_cast<xnn_f32_gemm_post_operation_ukernel_fn>(code_buffer.start);
-
-    gemm_post_operation(m(), n(), k() * sizeof(float),
-      a.data(), a_stride() * sizeof(float),
-      packed_w.data(),
-      c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
-      post_operation_params);
-
-    ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
-
-    // Validate micro-kernel outputs.
-    for (size_t i = 0; i < m(); i++) {
-      for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], output_max)
-            << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
-            << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-        EXPECT_GE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], output_min)
-            << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
-            << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-        EXPECT_NEAR(
-            c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()],
-            c_ref[i * n() + j],
-            std::abs(c_ref[i * n() + j]) * 1.0e-6f)
-            << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
-            << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
       }
     }
   }
