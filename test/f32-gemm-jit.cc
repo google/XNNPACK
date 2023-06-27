@@ -14701,7 +14701,7 @@
           xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat, xnn_init_f32_minmax_scalar_params,
           fused_operators);
   }
-  TEST(GENERATE_F32_GEMM_6X8__WASMSIMD_X86_LOADSPLAT, hardswish_mr_lt_6) {
+  TEST(GENERATE_F32_GEMM_6X8__WASMSIMD_X86_LOADSPLAT, hardswish_max_mr_lt_6) {
     const std::vector<xnn_post_operation> fused_operators = { {xnn_post_operation_type_hardswish} };
     for (uint32_t max_mr = 1; max_mr < 6; max_mr++) {
       GemmMicrokernelTester()
