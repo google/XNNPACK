@@ -2599,7 +2599,7 @@ static void init_qu8_gemm_config(void) {
   }
 
   static BOOL CALLBACK init_f32_gemm2_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_gemm_config();
+    init_f32_gemm2_config();
     return TRUE;
   }
 
