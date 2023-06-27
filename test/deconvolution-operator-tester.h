@@ -583,12 +583,17 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_qs8(
+        xnn_reshape_deconvolution2d_nhwc_qs8(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
           adjustment_height(), adjustment_width(),
-          input.data(), output.data(),
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_qs8(
+          deconvolution_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
@@ -617,12 +622,17 @@ class DeconvolutionOperatorTester {
         std::vector<int8_t> output2(output.size(), INT8_C(0xA5));
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_setup_deconvolution2d_nhwc_qs8(
+                  xnn_reshape_deconvolution2d_nhwc_qs8(
                       deconvolution_op2,
                       batch_size(), input_height(), input_width(),
                       adjustment_height(), adjustment_width(),
-                      input.data(), output2.data(),
+                      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                       nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_deconvolution2d_nhwc_qs8(
+                      deconvolution_op2,
+                      input.data(), output2.data()));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(deconvolution_op2, nullptr /* thread pool */));
@@ -784,12 +794,17 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_qu8(
+        xnn_reshape_deconvolution2d_nhwc_qu8(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
           adjustment_height(), adjustment_width(),
-          input.data(), output.data(),
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_qu8(
+          deconvolution_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
@@ -820,12 +835,17 @@ class DeconvolutionOperatorTester {
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op2, xnn_delete_operator);
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_setup_deconvolution2d_nhwc_qu8(
+                  xnn_reshape_deconvolution2d_nhwc_qu8(
                       deconvolution_op2,
                       batch_size(), input_height(), input_width(),
                       adjustment_height(), adjustment_width(),
-                      input.data(), output.data(),
+                      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                       nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_deconvolution2d_nhwc_qu8(
+                      deconvolution_op2,
+                      input.data(), output.data()));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(deconvolution_op2, nullptr /* thread pool */));
@@ -1005,12 +1025,17 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_f16(
+        xnn_reshape_deconvolution2d_nhwc_f16(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
           adjustment_height(), adjustment_width(),
-          input.data(), output.data(),
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_f16(
+          deconvolution_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
@@ -1038,12 +1063,17 @@ class DeconvolutionOperatorTester {
         std::vector<uint16_t> output2(output.size(), UINT16_C(0x7E00) /* NaN */);
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_setup_deconvolution2d_nhwc_f16(
+                  xnn_reshape_deconvolution2d_nhwc_f16(
                       deconvolution_op2,
                       batch_size(), input_height(), input_width(),
                       adjustment_height(), adjustment_width(),
-                      input.data(), output2.data(),
+                      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                       nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_deconvolution2d_nhwc_f16(
+                      deconvolution_op2,
+                      input.data(), output2.data()));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(deconvolution_op2, nullptr /* thread pool */));
@@ -1240,12 +1270,17 @@ class DeconvolutionOperatorTester {
       #endif
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_f32(
+        xnn_reshape_deconvolution2d_nhwc_f32(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
           adjustment_height(), adjustment_width(),
-          input.data(), output.data(),
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_f32(
+          deconvolution_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
@@ -1291,12 +1326,17 @@ class DeconvolutionOperatorTester {
         #endif
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_setup_deconvolution2d_nhwc_f32(
+                  xnn_reshape_deconvolution2d_nhwc_f32(
                       deconvolution_op2,
                       batch_size(), input_height(), input_width(),
                       adjustment_height(), adjustment_width(),
-                      input.data(), output2.data(),
+                      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                       nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_deconvolution2d_nhwc_f32(
+                      deconvolution_op2,
+                      input.data(), output2.data()));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(deconvolution_op2, nullptr /* thread pool */));
@@ -1435,12 +1475,17 @@ class DeconvolutionOperatorTester {
       xnn_operator_t deconvolution_op = operators[iteration];
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_f32(
+        xnn_reshape_deconvolution2d_nhwc_f32(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
           adjustment_height(), adjustment_width(),
-          inputs[iteration].data(), outputs[iteration].data(),
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_f32(
+          deconvolution_op,
+          inputs[iteration].data(), outputs[iteration].data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
@@ -1601,12 +1646,17 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_qs8(
+        xnn_reshape_deconvolution2d_nhwc_qs8(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
           adjustment_height(), adjustment_width(),
-          input.data(), output.data(),
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_qs8(
+          deconvolution_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
@@ -1687,12 +1737,17 @@ class DeconvolutionOperatorTester {
 
       // Setup and run Deconvolution operator the second time, and destroy the operator.
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_qs8(
+        xnn_reshape_deconvolution2d_nhwc_qs8(
           deconvolution_op,
           next_batch_size(), next_input_height(), next_input_width(),
           adjustment_height(), adjustment_width(),
-          input.data(), output.data(),
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_qs8(
+          deconvolution_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
@@ -1833,12 +1888,17 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_qu8(
+        xnn_reshape_deconvolution2d_nhwc_qu8(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
           adjustment_height(), adjustment_width(),
-          input.data(), output.data(),
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_qu8(
+          deconvolution_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
@@ -1919,12 +1979,17 @@ class DeconvolutionOperatorTester {
 
       // Setup and run Deconvolution operator the second time, and destroy the operator.
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_qu8(
+        xnn_reshape_deconvolution2d_nhwc_qu8(
           deconvolution_op,
           next_batch_size(), next_input_height(), next_input_width(),
           adjustment_height(), adjustment_width(),
-          input.data(), output.data(),
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_qu8(
+          deconvolution_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
@@ -2069,12 +2134,17 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_f16(
+        xnn_reshape_deconvolution2d_nhwc_f16(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
           adjustment_height(), adjustment_width(),
-          input.data(), output.data(),
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_f16(
+          deconvolution_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
@@ -2154,12 +2224,17 @@ class DeconvolutionOperatorTester {
 
       // Setup and run Deconvolution operator the second time, and destroy the operator.
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_f16(
+        xnn_reshape_deconvolution2d_nhwc_f16(
           deconvolution_op,
           next_batch_size(), next_input_height(), next_input_width(),
           adjustment_height(), adjustment_width(),
-          input.data(), output.data(),
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_f16(
+          deconvolution_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
@@ -2288,12 +2363,17 @@ class DeconvolutionOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_f32(
+        xnn_reshape_deconvolution2d_nhwc_f32(
           deconvolution_op,
           batch_size(), input_height(), input_width(),
           adjustment_height(), adjustment_width(),
-          input.data(), output.data(),
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_f32(
+          deconvolution_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(deconvolution_op, nullptr /* thread pool */));
@@ -2373,12 +2453,17 @@ class DeconvolutionOperatorTester {
 
       // Setup and run Deconvolution operator the second time, and destroy the operator.
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_deconvolution2d_nhwc_f32(
+        xnn_reshape_deconvolution2d_nhwc_f32(
           deconvolution_op,
           next_batch_size(), next_input_height(), next_input_width(),
           adjustment_height(), adjustment_width(),
-          input.data(), output.data(),
+          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_deconvolution2d_nhwc_f32(
+          deconvolution_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(deconvolution_op, nullptr /* thread pool */));

@@ -96,6 +96,8 @@ struct xnn_ukernel_vunary {
 
 struct xnn_ukernel {
   enum xnn_microkernel_type type;
+  // Used by subconv2d whether it is a GEMM or IGEMM.
+  enum xnn_microkernel_type subtype;
   union {
     struct xnn_ukernel_conv2d conv2d;
     struct xnn_ukernel_dwconv dwconv;

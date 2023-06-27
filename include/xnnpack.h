@@ -1992,16 +1992,21 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* deconvolution_op_out);
 
-enum xnn_status xnn_setup_deconvolution2d_nhwc_f32(
+enum xnn_status xnn_reshape_deconvolution2d_nhwc_f32(
   xnn_operator_t deconvolution_op,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
   uint32_t adjustment_height,
   uint32_t adjustment_width,
-  const float* input,
-  float* output,
+  size_t* output_height_out,
+  size_t* output_width_out,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_deconvolution2d_nhwc_f32(
+  xnn_operator_t deconvolution_op,
+  const float* input,
+  float* output);
 
 enum xnn_status xnn_create_divide_nd_f32(
   float output_min,
@@ -3121,16 +3126,21 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f16(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* deconvolution_op_out);
 
-enum xnn_status xnn_setup_deconvolution2d_nhwc_f16(
+enum xnn_status xnn_reshape_deconvolution2d_nhwc_f16(
   xnn_operator_t deconvolution_op,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
   uint32_t adjustment_height,
   uint32_t adjustment_width,
-  const void* input,
-  void* output,
+  size_t* output_height_out,
+  size_t* output_width_out,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_deconvolution2d_nhwc_f16(
+  xnn_operator_t deconvolution_op,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_create_divide_nd_f16(
   float output_min,
@@ -3957,16 +3967,21 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* deconvolution_op_out);
 
-enum xnn_status xnn_setup_deconvolution2d_nhwc_qs8(
+enum xnn_status xnn_reshape_deconvolution2d_nhwc_qs8(
   xnn_operator_t deconvolution_op,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
   uint32_t adjustment_height,
   uint32_t adjustment_width,
-  const int8_t* input,
-  int8_t* output,
+  size_t* output_height_out,
+  size_t* output_width_out,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_deconvolution2d_nhwc_qs8(
+  xnn_operator_t deconvolution_op,
+  const int8_t* input,
+  int8_t* output);
 
 enum xnn_status xnn_create_elu_nc_qs8(
   size_t channels,
@@ -4348,16 +4363,21 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qu8(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* deconvolution_op_out);
 
-enum xnn_status xnn_setup_deconvolution2d_nhwc_qu8(
+enum xnn_status xnn_reshape_deconvolution2d_nhwc_qu8(
   xnn_operator_t deconvolution_op,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
   uint32_t adjustment_height,
   uint32_t adjustment_width,
-  const uint8_t* input,
-  uint8_t* output,
+  size_t* output_height_out,
+  size_t* output_width_out,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_deconvolution2d_nhwc_qu8(
+  xnn_operator_t deconvolution_op,
+  const uint8_t* input,
+  uint8_t* output);
 
 enum xnn_status xnn_create_fully_connected_nc_qu8(
   size_t input_channels,

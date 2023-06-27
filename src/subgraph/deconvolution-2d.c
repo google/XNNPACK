@@ -196,6 +196,66 @@ static enum xnn_status create_deconvolution_operator(
   return status;
 }
 
+static enum xnn_status reshape_deconvolution_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_deconvolution_nhwc_f16:
+      return xnn_reshape_deconvolution2d_nhwc_f16(
+          opdata->operator_objects[0],
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          opdata->adjustment_height,
+          opdata->adjustment_width,
+          /*output_height_out=*/NULL,
+          /*output_width_out=*/NULL,
+          threadpool);
+      break;
+    case xnn_operator_type_deconvolution_nhwc_f32:
+      return xnn_reshape_deconvolution2d_nhwc_f32(
+          opdata->operator_objects[0],
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          opdata->adjustment_height,
+          opdata->adjustment_width,
+          /*output_height_out=*/NULL,
+          /*output_width_out=*/NULL,
+          threadpool);
+      break;
+    case xnn_operator_type_deconvolution_nhwc_qs8:
+      return xnn_reshape_deconvolution2d_nhwc_qs8(
+          opdata->operator_objects[0],
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          opdata->adjustment_height,
+          opdata->adjustment_width,
+          /*output_height_out=*/NULL,
+          /*output_width_out=*/NULL,
+          threadpool);
+      break;
+    case xnn_operator_type_deconvolution_nhwc_qu8:
+      return xnn_reshape_deconvolution2d_nhwc_qu8(
+          opdata->operator_objects[0],
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          opdata->adjustment_height,
+          opdata->adjustment_width,
+          /*output_height_out=*/NULL,
+          /*output_width_out=*/NULL,
+          threadpool);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 static enum xnn_status setup_deconvolution_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
@@ -222,50 +282,26 @@ static enum xnn_status setup_deconvolution_operator(
     case xnn_operator_type_deconvolution_nhwc_f16:
       return xnn_setup_deconvolution2d_nhwc_f16(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
-          opdata->adjustment_height,
-          opdata->adjustment_width,
           input_data,
-          output_data,
-          threadpool);
+          output_data);
       break;
     case xnn_operator_type_deconvolution_nhwc_f32:
       return xnn_setup_deconvolution2d_nhwc_f32(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
-          opdata->adjustment_height,
-          opdata->adjustment_width,
           input_data,
-          output_data,
-          threadpool);
+          output_data);
       break;
     case xnn_operator_type_deconvolution_nhwc_qs8:
       return xnn_setup_deconvolution2d_nhwc_qs8(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
-          opdata->adjustment_height,
-          opdata->adjustment_width,
           input_data,
-          output_data,
-          threadpool);
+          output_data);
       break;
     case xnn_operator_type_deconvolution_nhwc_qu8:
       return xnn_setup_deconvolution2d_nhwc_qu8(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
-          opdata->adjustment_height,
-          opdata->adjustment_width,
           input_data,
-          output_data,
-          threadpool);
+          output_data);
       break;
     default:
       XNN_UNREACHABLE;
@@ -605,6 +641,7 @@ enum xnn_status xnn_define_deconvolution_2d(
   node->flags = flags;
 
   node->create = create_deconvolution_operator;
+  node->reshape = reshape_deconvolution_operator;
   node->setup = setup_deconvolution_operator;
 
   return xnn_status_success;

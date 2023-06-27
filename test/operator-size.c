@@ -98,8 +98,7 @@ int main(int argc, char** argv) {
       break;
     case 12:
       xnn_setup_deconvolution2d_nhwc_f32(
-        op, 0, 0, 0, 0, 0,
-        NULL, NULL, NULL);
+        op, NULL, NULL);
       break;
     case 13:
       xnn_create_divide_nd_f32(

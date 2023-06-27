@@ -99,12 +99,22 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
   }
 
   for (size_t i = 0; i < deconvolution_operators.size(); i++) {
-    status = xnn_setup_deconvolution2d_nhwc_qu8(
+    status = xnn_reshape_deconvolution2d_nhwc_qu8(
         deconvolution_operators[i],
         batch_size, input_height, input_width,
         0 /* height adjustment */, 0 /* width adjustment */,
-        input.data(), output.data() + i * output_elements,
-        nullptr /* thread pool */);
+	/*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+        /*threadpool=*/nullptr);
+    if (status != xnn_status_success) {
+      state.SkipWithError("failed to setup QINT8 Deconvolution operator");
+      return;
+    }
+  }
+
+  for (size_t i = 0; i < deconvolution_operators.size(); i++) {
+    status = xnn_setup_deconvolution2d_nhwc_qu8(
+        deconvolution_operators[i],
+        input.data(), output.data() + i * output_elements);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to setup QINT8 Deconvolution operator");
       return;
@@ -217,12 +227,22 @@ void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
   }
 
   for (size_t i = 0; i < deconvolution_operators.size(); i++) {
-    status = xnn_setup_deconvolution2d_nhwc_f32(
+    status = xnn_reshape_deconvolution2d_nhwc_f32(
         deconvolution_operators[i],
         batch_size, input_height, input_width,
         0 /* height adjustment */, 0 /* width adjustment */,
-        input.data(), output.data() + i * output_elements,
-        nullptr /* thread pool */);
+	/*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+        /*threadpool=*/nullptr);
+    if (status != xnn_status_success) {
+      state.SkipWithError("failed to setup QINT8 Deconvolution operator");
+      return;
+    }
+  }
+
+  for (size_t i = 0; i < deconvolution_operators.size(); i++) {
+    status = xnn_setup_deconvolution2d_nhwc_f32(
+        deconvolution_operators[i],
+        input.data(), output.data() + i * output_elements);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to setup QINT8 Deconvolution operator");
       return;
