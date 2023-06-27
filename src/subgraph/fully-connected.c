@@ -95,19 +95,41 @@ static enum xnn_status create_fully_connected_operator(
           node->flags /* flags */,
           &opdata->operator_objects[0]);
       } else {
-        status = xnn_create_fully_connected_nc_f32(
-          input_channels,
-          output_channels,
-          input_channels /* input stride */,
-          output_channels /* output stride */,
-          kernel_data,
-          bias_data,
-          node->activation.output_min,
-          node->activation.output_max,
-          node->flags /* flags */,
-          code_cache,
-          weights_cache,
-          &opdata->operator_objects[0]);
+        switch (values[filter_id].datatype) {
+          case xnn_datatype_qcint8:
+            status = xnn_create_fully_connected_nc_f32_qc8w(
+              input_channels,
+              output_channels,
+              input_channels /* input stride */,
+              output_channels /* output stride */,
+              values[filter_id].quantization.channelwise_scale,
+              kernel_data,
+              bias_data,
+              node->activation.output_min,
+              node->activation.output_max,
+              node->flags /* flags */,
+              code_cache,
+              weights_cache,
+              &opdata->operator_objects[0]);
+            break;
+          case xnn_datatype_fp32:
+            status = xnn_create_fully_connected_nc_f32(
+              input_channels,
+              output_channels,
+              input_channels /* input stride */,
+              output_channels /* output stride */,
+              kernel_data,
+              bias_data,
+              node->activation.output_min,
+              node->activation.output_max,
+              node->flags /* flags */,
+              code_cache,
+              weights_cache,
+              &opdata->operator_objects[0]);
+            break;
+          default:
+            XNN_UNREACHABLE;
+        }
       }
       break;
     case xnn_compute_type_qs8:
@@ -275,6 +297,15 @@ static enum xnn_status setup_fully_connected_operator(
         input_data,
         output_data,
         threadpool);
+    case xnn_operator_type_fully_connected_nc_f32_qc8w:
+      assert(kernel_data == NULL);
+      assert(bias_data == NULL);
+      return xnn_setup_fully_connected_nc_f32_qc8w(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        input_data,
+        output_data,
+        threadpool);
     case xnn_operator_type_fully_connected_nc_qs8:
       assert(kernel_data == NULL);
       assert(bias_data == NULL);
@@ -313,6 +344,13 @@ static inline enum xnn_compute_type validate_datatypes_with_bias(
         return xnn_compute_type_fp32;
       }
       break;
+    case xnn_datatype_qcint8:
+      if (input_datatype == xnn_datatype_fp32 &&
+          bias_datatype == xnn_datatype_fp32 &&
+          output_datatype == xnn_datatype_fp32)
+      {
+        return xnn_compute_type_fp32;
+      }
     case xnn_datatype_qint8:
       if (input_datatype == xnn_datatype_qint8 &&
           bias_datatype == xnn_datatype_qint32 &&
@@ -346,6 +384,10 @@ static inline enum xnn_compute_type validate_datatypes_without_bias(
         return xnn_compute_type_fp32;
       }
       break;
+    case xnn_datatype_qcint8:
+      if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32) {
+        return xnn_compute_type_fp32;
+      }
     case xnn_datatype_qint8:
       if (input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_qint8) {
         return xnn_compute_type_qs8;
@@ -438,6 +480,8 @@ enum xnn_status xnn_define_fully_connected(
   switch (kernel_value->datatype) {
     case xnn_datatype_fp32:
       break;
+    case xnn_datatype_qcint8:
+      break;
     case xnn_datatype_qint8:
       if (kernel_value->quantization.zero_point != 0) {
         xnn_log_error(
@@ -454,6 +498,16 @@ enum xnn_status xnn_define_fully_connected(
         xnn_node_type_to_string(xnn_node_type_fully_connected), filter_id,
         xnn_datatype_to_string(kernel_value->datatype), kernel_value->datatype);
       return xnn_status_invalid_parameter;
+  }
+
+  if (kernel_value->datatype == xnn_datatype_qcint8) {
+    size_t output_channels_dim = ((flags & XNN_FLAG_TRANSPOSE_WEIGHTS) != 0) ?  1 : 0;
+    if (kernel_value->quantization.channel_dimension != output_channels_dim) {
+      xnn_log_error(
+        "failed to define %s operator with filter ID #%" PRIu32 ": invalid channel dimension %zu",
+        xnn_node_type_to_string(xnn_node_type_fully_connected), input_id, kernel_value->quantization.channel_dimension);
+      return xnn_status_invalid_parameter;
+    }
   }
 
   const struct xnn_value* bias_value = NULL;
@@ -476,6 +530,12 @@ enum xnn_status xnn_define_fully_connected(
     // Non-static bias is supported, but only for some data types
     switch (bias_value->datatype) {
       case xnn_datatype_fp32:
+        if (kernel_value->datatype == xnn_datatype_qcint8 && bias_value->data == NULL) {
+          xnn_log_error(
+            "failed to define %s operator with bias ID #%" PRIu32 ": non-static Value",
+            xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id);
+          return xnn_status_invalid_parameter;
+        }
         break;  // non-static bias is supported
       default:
         if (bias_value->data == NULL) {
