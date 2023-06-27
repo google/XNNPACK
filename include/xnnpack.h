@@ -2512,12 +2512,15 @@ enum xnn_status xnn_create_softmax_nc_f32(
   uint32_t flags,
   xnn_operator_t* softmax_op_out);
 
-enum xnn_status xnn_setup_softmax_nc_f32(
+enum xnn_status xnn_reshape_softmax_nc_f32(
   xnn_operator_t softmax_op,
   size_t batch_size,
-  const float* input,
-  float* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_softmax_nc_f32(
+  xnn_operator_t softmax_op,
+  const float* input,
+  float* output);
 
 enum xnn_status xnn_create_square_nc_f32(
   size_t channels,
@@ -3510,12 +3513,15 @@ enum xnn_status xnn_create_softmax_nc_f16(
   uint32_t flags,
   xnn_operator_t* softmax_op_out);
 
-enum xnn_status xnn_setup_softmax_nc_f16(
+enum xnn_status xnn_reshape_softmax_nc_f16(
   xnn_operator_t softmax_op,
   size_t batch_size,
-  const void* input,
-  void* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_softmax_nc_f16(
+  xnn_operator_t softmax_op,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_create_square_nc_f16(
   size_t channels,
@@ -4557,12 +4563,15 @@ enum xnn_status xnn_create_softmax_nc_qu8(
   uint32_t flags,
   xnn_operator_t* softmax_op_out);
 
-enum xnn_status xnn_setup_softmax_nc_qu8(
+enum xnn_status xnn_reshape_softmax_nc_qu8(
   xnn_operator_t softmax_op,
   size_t batch_size,
-  const uint8_t* input,
-  uint8_t* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_softmax_nc_qu8(
+  xnn_operator_t softmax_op,
+  const uint8_t* input,
+  uint8_t* output);
 
 enum xnn_status xnn_create_subtract_nd_qu8(
   uint8_t input1_zero_point,

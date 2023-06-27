@@ -147,11 +147,9 @@ error:
   return status;
 }
 
-enum xnn_status xnn_setup_softmax_nc_qu8(
+enum xnn_status xnn_reshape_softmax_nc_qu8(
     xnn_operator_t softmax_op,
     size_t batch_size,
-    const uint8_t* input,
-    uint8_t* output,
     pthreadpool_t threadpool)
 {
   if (softmax_op->type != xnn_operator_type_softmax_nc_qu8) {
@@ -174,15 +172,11 @@ enum xnn_status xnn_setup_softmax_nc_qu8(
   }
 
   softmax_op->batch_size = batch_size;
-  softmax_op->input = input;
-  softmax_op->output = output;
 
   softmax_op->context.u8_softmax = (struct u8_softmax_context) {
     .n = softmax_op->channels,
-    .x = input,
     .x_stride = softmax_op->input_pixel_stride * sizeof(uint8_t),
     .t = softmax_op->lookup_table,
-    .y = output,
     .y_stride = softmax_op->output_pixel_stride * sizeof(uint8_t),
     .rmax_ukernel = softmax_op->rmax_config->rmax.u8,
     .lut_norm_ukernel = softmax_op->lut32norm_config->lut32norm,
@@ -190,6 +184,40 @@ enum xnn_status xnn_setup_softmax_nc_qu8(
   softmax_op->compute[0].type = xnn_parallelization_type_1d;
   softmax_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_u8_softmax;
   softmax_op->compute[0].range[0] = batch_size;
+  softmax_op->state = xnn_run_state_needs_setup;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_softmax_nc_qu8(
+    xnn_operator_t softmax_op,
+    const uint8_t* input,
+    uint8_t* output)
+{
+  if (softmax_op->type != xnn_operator_type_softmax_nc_qu8) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_softmax_nc_qu8),
+      xnn_operator_type_to_string(softmax_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  switch (softmax_op->state) {
+    case xnn_run_state_skip:
+      return xnn_status_success;
+    case xnn_run_state_invalid:
+      xnn_log_error(
+        "failed to setup %s operator: operator has not been reshaped yet",
+        xnn_operator_type_to_string(softmax_op->type));
+      return xnn_status_invalid_state;
+    case xnn_run_state_needs_setup:
+      // Operator has been reshaped, but not setup, continue with setup.
+    case xnn_run_state_ready:
+      // Operator has been reshaped, and we are setting up with different pointers.
+      break;
+  }
+
+  softmax_op->context.u8_softmax.x = input;
+  softmax_op->context.u8_softmax.y = output;
   softmax_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
@@ -352,12 +380,10 @@ enum xnn_status xnn_create_softmax_nc_f32(
     softmax_op_out);
 }
 
-static enum xnn_status setup_softmax_nc_floating_point(
+static enum xnn_status reshape_softmax_nc_floating_point(
     xnn_operator_t softmax_op,
     enum xnn_operator_type expected_operator_type,
     size_t batch_size,
-    const void* input,
-    void* output,
     uint32_t log2_element_size,
     xnn_rmax_ukernel_fn rmax,
     const struct xnn_raddstoreexpminusmax_config raddstoreexpminusmax[restrict XNN_MIN_ELEMENTS(1)],
@@ -372,7 +398,7 @@ static enum xnn_status setup_softmax_nc_floating_point(
     return xnn_status_unsupported_hardware;
   }
   if (softmax_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
       xnn_operator_type_to_string(expected_operator_type),
       xnn_operator_type_to_string(softmax_op->type));
     return xnn_status_invalid_parameter;
@@ -380,7 +406,7 @@ static enum xnn_status setup_softmax_nc_floating_point(
   softmax_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+    xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_uninitialized;
   }
@@ -391,14 +417,10 @@ static enum xnn_status setup_softmax_nc_floating_point(
   }
 
   softmax_op->batch_size = batch_size;
-  softmax_op->input = input;
-  softmax_op->output = output;
 
   softmax_op->context.floating_point_softmax = (struct floating_point_softmax_context) {
     .n = softmax_op->channels << log2_element_size,
-    .x = input,
     .x_stride = softmax_op->input_pixel_stride << log2_element_size,
-    .y = output,
     .y_stride = softmax_op->output_pixel_stride << log2_element_size,
     .rmax_ukernel = rmax,
     .raddstoreexpminusmax_ukernel = raddstoreexpminusmax->ukernel,
@@ -413,6 +435,41 @@ static enum xnn_status setup_softmax_nc_floating_point(
   softmax_op->compute[0].type = xnn_parallelization_type_1d;
   softmax_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_floating_point_softmax;
   softmax_op->compute[0].range[0] = batch_size;
+  softmax_op->state = xnn_run_state_needs_setup;
+
+  return xnn_status_success;
+}
+
+static enum xnn_status setup_softmax_nc_floating_point(
+    xnn_operator_t softmax_op,
+    enum xnn_operator_type expected_operator_type,
+    const void* input,
+    void* output)
+{
+  if (softmax_op->type != expected_operator_type) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(softmax_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  switch (softmax_op->state) {
+    case xnn_run_state_skip:
+      return xnn_status_success;
+    case xnn_run_state_invalid:
+      xnn_log_error(
+        "failed to setup %s operator: operator has not been reshaped yet",
+        xnn_operator_type_to_string(softmax_op->type));
+      return xnn_status_invalid_state;
+    case xnn_run_state_needs_setup:
+      // Operator has been reshaped, but not setup, continue with setup.
+    case xnn_run_state_ready:
+      // Operator has been reshaped, and we are setting up with different pointers.
+      break;
+  }
+
+  softmax_op->context.floating_point_softmax.x = input;
+  softmax_op->context.floating_point_softmax.y = output;
   softmax_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
@@ -427,9 +484,34 @@ static void compute_reciprocal_f16(
 
 enum xnn_status xnn_setup_softmax_nc_f16(
     xnn_operator_t softmax_op,
-    size_t batch_size,
     const void* input,
-    void* output,
+    void* output)
+{
+  return setup_softmax_nc_floating_point(
+    softmax_op, xnn_operator_type_softmax_nc_f16,
+    input, output);
+}
+
+static void compute_reciprocal_f32(
+    const float input[XNN_MIN_ELEMENTS(1)],
+    float output[XNN_MIN_ELEMENTS(1)])
+{
+  *output = 1.0f / *input;
+}
+
+enum xnn_status xnn_setup_softmax_nc_f32(
+    xnn_operator_t softmax_op,
+    const float* input,
+    float* output)
+{
+  return setup_softmax_nc_floating_point(
+    softmax_op, xnn_operator_type_softmax_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_reshape_softmax_nc_f16(
+    xnn_operator_t softmax_op,
+    size_t batch_size,
     pthreadpool_t threadpool)
 {
   union xnn_f16_expminus_params expminus_params;
@@ -442,9 +524,9 @@ enum xnn_status xnn_setup_softmax_nc_f16(
   if (f16_vmul_config->init.f16_minmax != NULL) {
     f16_vmul_config->init.f16_minmax(&minmax_params, UINT16_C(0xFC00), UINT16_C(0x7C00));
   }
-  return setup_softmax_nc_floating_point(
+  return reshape_softmax_nc_floating_point(
     softmax_op, xnn_operator_type_softmax_nc_f16,
-    batch_size, input, output,
+    batch_size,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
     softmax_op->rmax_config->rmax.f16, softmax_op->raddstoreexpminusmax_config, f16_vmul_config,
     (xnn_compute_reciprocal_fn) compute_reciprocal_f16,
@@ -452,18 +534,9 @@ enum xnn_status xnn_setup_softmax_nc_f16(
     &minmax_params, sizeof(minmax_params));
 }
 
-static void compute_reciprocal_f32(
-    const float input[XNN_MIN_ELEMENTS(1)],
-    float output[XNN_MIN_ELEMENTS(1)])
-{
-  *output = 1.0f / *input;
-}
-
-enum xnn_status xnn_setup_softmax_nc_f32(
+enum xnn_status xnn_reshape_softmax_nc_f32(
     xnn_operator_t softmax_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
   const struct xnn_binary_elementwise_config* f32_vmul_config = softmax_op->vmul_config;
@@ -476,9 +549,9 @@ enum xnn_status xnn_setup_softmax_nc_f32(
   if (f32_vmul_config->init.f32_minmax != NULL) {
     f32_vmul_config->init.f32_minmax(&minmax_params, -INFINITY, INFINITY);
   }
-  return setup_softmax_nc_floating_point(
+  return reshape_softmax_nc_floating_point(
     softmax_op, xnn_operator_type_softmax_nc_f32,
-    batch_size, input, output,
+    batch_size,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     softmax_op->rmax_config->rmax.f16, softmax_op->raddstoreexpminusmax_config, f32_vmul_config,
     (xnn_compute_reciprocal_fn) compute_reciprocal_f32,

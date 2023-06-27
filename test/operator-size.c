@@ -215,8 +215,7 @@ int main(int argc, char** argv) {
       break;
     case 36:
       xnn_setup_softmax_nc_f32(
-        op, 0,
-        NULL, NULL, NULL);
+        op, NULL, NULL);
       break;
     case 37:
       xnn_create_subtract_nd_f32(
