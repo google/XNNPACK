@@ -50,8 +50,8 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__asm_aarch64_neonfma_ld64
         CSEL        x11, x3, x11, LO        //   a1 = a0
         CSEL        x9, x6, x9, LO          //   c1 = c0
 
-        # Load min/max/zerop values
-        LD3R        {v4.4s, v5.4s, v6.4s}, [x8]
+        # Load min/max values
+        LD2R        {v4.4s, v5.4s}, [x8]
 
         ADD         x12, x11, x4            // a2 = a1 + a_stride
         ADD         x10, x9, x7             // c2 = c1 + cm_stride
@@ -64,7 +64,6 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__asm_aarch64_neonfma_ld64
         ADD         x7, x10, x7             // c3 = c2 + cm_stride
         CSEL        x4, x12, x4, LO         //   a3 = a2
         CSEL        x7, x10, x7, LO         //   c3 = c2
-        MOVI        v7.16b, 15
 
 0:
         # Load initial accumulators
@@ -80,7 +79,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__asm_aarch64_neonfma_ld64
         # Main loop - 2 floats of A (8 bytes)
 1:
         LDR         d0,  [x3], 8
-        LDP         q20, q21, [x5], 32    // 8 float weights
+        LDP         q20, q21, [x5], 32    // 8 F32 weights
         LDR         d1, [x11], 8
         LDR         d2, [x12], 8
         LDR         d3,  [x4], 8
@@ -140,7 +139,6 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__asm_aarch64_neonfma_ld64
         SUB         x4,  x4, x2             // a3 -= kc
 
         B.HI        0b
-
         RET
 
         # Remainder- 1 float of A (4 bytes)
