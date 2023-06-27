@@ -150,7 +150,7 @@ static enum xnn_status reshape_mean_nd(
     pthreadpool_t threadpool)
 {
   if (mean_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
       xnn_operator_type_to_string(expected_operator_type),
       xnn_operator_type_to_string(mean_op->type));
     return xnn_status_invalid_parameter;
@@ -158,14 +158,14 @@ static enum xnn_status reshape_mean_nd(
   mean_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+    xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(mean_op->type));
     return xnn_status_uninitialized;
   }
 
   if (num_input_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
-      "failed to setup %s operator with %zu input dimensions dimensions: "
+      "failed to reshape %s operator with %zu input dimensions dimensions: "
       "the number of input dimensions must not exceed %d",
       xnn_operator_type_to_string(mean_op->type), num_input_dims, XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
@@ -173,7 +173,7 @@ static enum xnn_status reshape_mean_nd(
 
   if (num_reduction_axes > num_input_dims) {
     xnn_log_error(
-      "failed to setup %s operator with %zu reduction axes: "
+      "failed to reshape %s operator with %zu reduction axes: "
       "the number of reduction axes must not exceed the number of input dimensions %zu",
       xnn_operator_type_to_string(mean_op->type), num_reduction_axes, num_input_dims);
     return xnn_status_invalid_parameter;
@@ -181,7 +181,7 @@ static enum xnn_status reshape_mean_nd(
 
   if (num_reduction_axes == 0) {
     xnn_log_error(
-      "failed to setup %s operator with %zu reduction axes: the number of reduction axes must be non-zero",
+      "failed to reshape %s operator with %zu reduction axes: the number of reduction axes must be non-zero",
       xnn_operator_type_to_string(mean_op->type), num_reduction_axes);
     return xnn_status_invalid_parameter;
   }
@@ -189,7 +189,7 @@ static enum xnn_status reshape_mean_nd(
   for (size_t i = 0; i < num_reduction_axes; i++) {
     if (reduction_axes[i] > num_input_dims) {
       xnn_log_error(
-        "failed to setup %s operator with #%zu reduction axis of %zu: the index is out of bounds for a %zuD input shape",
+        "failed to reshape %s operator with #%zu reduction axis of %zu: the index is out of bounds for a %zuD input shape",
         xnn_operator_type_to_string(mean_op->type), i, reduction_axes[i], num_input_dims);
       return xnn_status_invalid_parameter;
     }
@@ -209,7 +209,7 @@ static enum xnn_status reshape_mean_nd(
 
   if (num_reduction_axes != 1) {
     xnn_log_error(
-      "failed to setup %s operator with %zu normalized reduction axes: only a single post-normalization reduction axis is supported",
+      "failed to reshape %s operator with %zu normalized reduction axes: only a single post-normalization reduction axis is supported",
       xnn_operator_type_to_string(mean_op->type), num_reduction_axes);
     return xnn_status_invalid_parameter;
   }
