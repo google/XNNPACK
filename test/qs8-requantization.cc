@@ -979,6 +979,7 @@ TEST(QS8_GEMMLOWP__SCALAR, random_cases) {
    */
 
   TEST(QS8_FP32__SSE41, random_cases) {
+    TEST_REQUIRES_X86_SSE41;
     RequantizationTester()
       .qmin(std::numeric_limits<int8_t>::min())
       .qmax(std::numeric_limits<int8_t>::max())
