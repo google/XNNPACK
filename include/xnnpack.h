@@ -2876,15 +2876,18 @@ enum xnn_status xnn_create_slice_nd_x32(
   uint32_t flags,
   xnn_operator_t* slice_op_out);
 
-enum xnn_status xnn_setup_slice_nd_x32(
+enum xnn_status xnn_reshape_slice_nd_x32(
   xnn_operator_t slice_op,
   size_t num_dims,
   const size_t* input_shape,
   const size_t* offsets,
   const size_t* sizes,
-  const void* input,
-  void* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_slice_nd_x32(
+  xnn_operator_t slice_op,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_run_slice_nd_x32(
   size_t num_dims,
@@ -3779,15 +3782,18 @@ enum xnn_status xnn_create_slice_nd_x16(
   uint32_t flags,
   xnn_operator_t* slice_op_out);
 
-enum xnn_status xnn_setup_slice_nd_x16(
+enum xnn_status xnn_reshape_slice_nd_x16(
   xnn_operator_t slice_op,
   size_t num_dims,
   const size_t* input_shape,
   const size_t* offsets,
   const size_t* sizes,
-  const void* input,
-  void* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_slice_nd_x16(
+  xnn_operator_t slice_op,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_create_space_to_depth_nhwc_x16(
   size_t input_channels,
@@ -4847,15 +4853,18 @@ enum xnn_status xnn_create_slice_nd_x8(
   uint32_t flags,
   xnn_operator_t* slice_op_out);
 
-enum xnn_status xnn_setup_slice_nd_x8(
+enum xnn_status xnn_reshape_slice_nd_x8(
   xnn_operator_t slice_op,
   size_t num_dims,
   const size_t* input_shape,
   const size_t* offsets,
   const size_t* sizes,
-  const void* input,
-  void* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_slice_nd_x8(
+  xnn_operator_t slice_op,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_create_space_to_depth_nhwc_x8(
   size_t input_channels,

@@ -99,20 +99,18 @@ enum xnn_status xnn_create_slice_nd_x32(
   return create_slice_nd(flags, xnn_operator_type_slice_nd_x32, slice_op_out);
 }
 
-static enum xnn_status setup_slice_nd(
+static enum xnn_status reshape_slice_nd(
     xnn_operator_t slice_op,
     enum xnn_operator_type expected_operator_type,
     size_t num_dims,
     const size_t* input_shape,
     const size_t* offsets,
     const size_t* sizes,
-    const void* input,
-    void* output,
     uint32_t log2_element_size,
     size_t num_threads)
 {
   if (slice_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
       xnn_operator_type_to_string(expected_operator_type),
       xnn_operator_type_to_string(slice_op->type));
     return xnn_status_invalid_parameter;
@@ -120,7 +118,7 @@ static enum xnn_status setup_slice_nd(
   slice_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+    xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(slice_op->type));
     return xnn_status_uninitialized;
   }
@@ -142,7 +140,7 @@ static enum xnn_status setup_slice_nd(
   for (size_t i = 0; i < num_dims; i++) {
     if (input_shape[i] == 0) {
       xnn_log_error(
-        "failed to setup %s operator: input shape dimension #%zu is zero",
+        "failed to reshape %s operator: input shape dimension #%zu is zero",
         xnn_operator_type_to_string(slice_op->type), i);
       return xnn_status_invalid_parameter;
     }
@@ -183,9 +181,8 @@ static enum xnn_status setup_slice_nd(
   assert(num_normalized_dims <= XNN_MAX_TENSOR_DIMS);
 
   slice_op->context.slice = (struct slice_context) {
-    .input = input,
-    .output = output,
     .ukernel = copy_config->ukernel,
+    .num_normalized_dims = num_normalized_dims,
   };
 
   // TODO(b/246969669): move strides calculation into normalization to simplify code here.
@@ -202,16 +199,6 @@ static enum xnn_status setup_slice_nd(
     output_stride *= normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1 - i];
   }
   slice_op->context.slice.contiguous_size = normalized_output_shape[XNN_MAX_TENSOR_DIMS - 1] << log2_element_size;
-
-  slice_op->context.slice.input =
-      (void*) ((uintptr_t) slice_op->context.slice.input + slice_op->context.slice.offsets[0]);
-
-  // Pre-calculate offsets into input pointer.
-  for (size_t i = 1; i < num_normalized_dims; i++) {
-    slice_op->context.slice.input =
-        (void*) ((uintptr_t) slice_op->context.slice.input +
-                 slice_op->context.slice.offsets[i] * slice_op->context.slice.input_stride[i-1]);
-  }
 
   switch (num_normalized_dims) {
     case 1:
@@ -254,6 +241,98 @@ static enum xnn_status setup_slice_nd(
     default:
       XNN_UNREACHABLE;
   }
+  slice_op->state = xnn_run_state_needs_setup;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_reshape_slice_nd_x8(
+    xnn_operator_t slice_op,
+    size_t num_dims,
+    const size_t* input_shape,
+    const size_t* offsets,
+    const size_t* sizes,
+    pthreadpool_t threadpool)
+{
+  return reshape_slice_nd(
+    slice_op, xnn_operator_type_slice_nd_x8,
+    num_dims, input_shape, offsets, sizes,
+    0 /* log2(element size) */,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_reshape_slice_nd_x16(
+    xnn_operator_t slice_op,
+    size_t num_dims,
+    const size_t* input_shape,
+    const size_t* offsets,
+    const size_t* sizes,
+    pthreadpool_t threadpool)
+{
+  return reshape_slice_nd(
+    slice_op, xnn_operator_type_slice_nd_x16,
+    num_dims, input_shape, offsets, sizes,
+    1 /* log2(element size) */,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_reshape_slice_nd_x32(
+    xnn_operator_t slice_op,
+    size_t num_dims,
+    const size_t* input_shape,
+    const size_t* offsets,
+    const size_t* sizes,
+    pthreadpool_t threadpool)
+{
+  return reshape_slice_nd(
+    slice_op, xnn_operator_type_slice_nd_x32,
+    num_dims, input_shape, offsets, sizes,
+    2 /* log2(element size) */,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+static enum xnn_status setup_slice_nd(
+    xnn_operator_t slice_op,
+    enum xnn_operator_type expected_operator_type,
+    const void* input,
+    void* output)
+{
+  if (slice_op->type != expected_operator_type) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(slice_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  switch (slice_op->state) {
+    case xnn_run_state_skip:
+      return xnn_status_success;
+    case xnn_run_state_invalid:
+      xnn_log_error(
+        "failed to setup %s operator: operator has not been reshaped yet",
+        xnn_operator_type_to_string(slice_op->type));
+      return xnn_status_invalid_state;
+    case xnn_run_state_needs_setup:
+      // Operator has been reshaped, but not setup, continue with setup.
+    case xnn_run_state_ready:
+      // Operator has been reshaped, and we are setting up with different pointers.
+      break;
+  }
+
+
+  slice_op->context.slice.input = input;
+  slice_op->context.slice.output = output;
+
+  slice_op->context.slice.input =
+      (void*) ((uintptr_t) slice_op->context.slice.input + slice_op->context.slice.offsets[0]);
+
+  // Pre-calculate offsets into input pointer.
+  for (size_t i = 1; i < slice_op->context.slice.num_normalized_dims; i++) {
+    slice_op->context.slice.input =
+        (void*) ((uintptr_t) slice_op->context.slice.input +
+                 slice_op->context.slice.offsets[i] * slice_op->context.slice.input_stride[i-1]);
+  }
+
   slice_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
@@ -261,53 +340,32 @@ static enum xnn_status setup_slice_nd(
 
 enum xnn_status xnn_setup_slice_nd_x8(
     xnn_operator_t slice_op,
-    size_t num_dims,
-    const size_t* input_shape,
-    const size_t* offsets,
-    const size_t* sizes,
     const void* input,
-    void* output,
-    pthreadpool_t threadpool)
+    void* output)
 {
   return setup_slice_nd(
     slice_op, xnn_operator_type_slice_nd_x8,
-    num_dims, input_shape, offsets, sizes,
-    input, output, 0 /* log2(element size) */,
-    pthreadpool_get_threads_count(threadpool));
+    input, output);
 }
 
 enum xnn_status xnn_setup_slice_nd_x16(
     xnn_operator_t slice_op,
-    size_t num_dims,
-    const size_t* input_shape,
-    const size_t* offsets,
-    const size_t* sizes,
     const void* input,
-    void* output,
-    pthreadpool_t threadpool)
+    void* output)
 {
   return setup_slice_nd(
     slice_op, xnn_operator_type_slice_nd_x16,
-    num_dims, input_shape, offsets, sizes,
-    input, output, 1 /* log2(element size) */,
-    pthreadpool_get_threads_count(threadpool));
+    input, output);
 }
 
 enum xnn_status xnn_setup_slice_nd_x32(
     xnn_operator_t slice_op,
-    size_t num_dims,
-    const size_t* input_shape,
-    const size_t* offsets,
-    const size_t* sizes,
     const void* input,
-    void* output,
-    pthreadpool_t threadpool)
+    void* output)
 {
   return setup_slice_nd(
     slice_op, xnn_operator_type_slice_nd_x32,
-    num_dims, input_shape, offsets, sizes,
-    input, output, 2 /* log2(element size) */,
-    pthreadpool_get_threads_count(threadpool));
+    input, output);
 }
 
 static enum xnn_status xnn_run_slice_nd(
@@ -339,12 +397,19 @@ static enum xnn_status xnn_run_slice_nd(
     copy_config,
     &slice_op);
 
-  const enum xnn_status status = setup_slice_nd(
+  enum xnn_status status = reshape_slice_nd(
     &slice_op, operator_type,
     num_dims, input_shape, offsets, sizes,
-    input, output,
     log2_element_size,
     pthreadpool_get_threads_count(threadpool));
+
+  if (status != xnn_status_success){
+    return status;
+  }
+
+  status = setup_slice_nd(
+    &slice_op, operator_type,
+    input, output);
 
   if (status != xnn_status_success){
     return status;

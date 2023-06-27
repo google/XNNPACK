@@ -205,9 +205,10 @@ TEST_F(StaticSliceTestQS8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_slice_nd_x8(
-                          op, dims.size(), dims.data(), offsets.data(), sizes.data(), input.data(),
-                          operator_output.data(), /*threadpool=*/nullptr));
+    xnn_status_success,
+    xnn_reshape_slice_nd_x8(op, dims.size(), dims.data(), offsets.data(), sizes.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(
+    xnn_status_success, xnn_setup_slice_nd_x8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
@@ -265,9 +266,10 @@ TEST_F(StaticSliceTestQU8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_slice_nd_x8(
-                          op, dims.size(), dims.data(), offsets.data(), sizes.data(), input.data(),
-                          operator_output.data(), /*threadpool=*/nullptr));
+    xnn_status_success,
+    xnn_reshape_slice_nd_x8(op, dims.size(), dims.data(), offsets.data(), sizes.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(
+    xnn_status_success, xnn_setup_slice_nd_x8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
@@ -322,9 +324,9 @@ TEST_F(StaticSliceTestF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_slice_nd_x32(
-                          op, dims.size(), dims.data(), offsets.data(), sizes.data(), input.data(),
-                          operator_output.data(), /*threadpool=*/nullptr));
+    xnn_status_success,
+    xnn_reshape_slice_nd_x32(op, dims.size(), dims.data(), offsets.data(), sizes.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_slice_nd_x32(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.

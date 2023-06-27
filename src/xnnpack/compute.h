@@ -1191,6 +1191,7 @@ struct slice_context {
   size_t offsets[XNN_MAX_TENSOR_DIMS];
   size_t contiguous_size;
   xnn_vunary_ukernel_fn ukernel;
+  size_t num_normalized_dims;
 };
 
 #ifndef __cplusplus
