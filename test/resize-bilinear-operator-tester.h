@@ -281,12 +281,16 @@ class ResizeBilinearOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_resize_bilinear_op(resize_bilinear_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_resize_bilinear2d_nhwc_f16(
+        xnn_reshape_resize_bilinear2d_nhwc_f16(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
           output_height(), output_width(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_resize_bilinear2d_nhwc_f16(
+          resize_bilinear_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
@@ -363,12 +367,16 @@ class ResizeBilinearOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_resize_bilinear_op(resize_bilinear_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_resize_bilinear2d_nhwc_f32(
+        xnn_reshape_resize_bilinear2d_nhwc_f32(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
           output_height(), output_width(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_resize_bilinear2d_nhwc_f32(
+          resize_bilinear_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
@@ -445,12 +453,16 @@ class ResizeBilinearOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_resize_bilinear_op(resize_bilinear_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_resize_bilinear2d_nhwc_s8(
+        xnn_reshape_resize_bilinear2d_nhwc_s8(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
           output_height(), output_width(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_resize_bilinear2d_nhwc_s8(
+          resize_bilinear_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
@@ -528,12 +540,16 @@ class ResizeBilinearOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_resize_bilinear_op(resize_bilinear_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_resize_bilinear2d_nhwc_u8(
+        xnn_reshape_resize_bilinear2d_nhwc_u8(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
           output_height(), output_width(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_resize_bilinear2d_nhwc_u8(
+          resize_bilinear_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
@@ -617,12 +633,16 @@ class ResizeBilinearOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_resize_bilinear_op(resize_bilinear_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_resize_bilinear2d_nchw_f16(
+        xnn_reshape_resize_bilinear2d_nchw_f16(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
           output_height(), output_width(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_resize_bilinear2d_nchw_f16(
+          resize_bilinear_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));
@@ -705,12 +725,16 @@ class ResizeBilinearOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_resize_bilinear_op(resize_bilinear_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_resize_bilinear2d_nchw_f32(
+        xnn_reshape_resize_bilinear2d_nchw_f32(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
           output_height(), output_width(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_resize_bilinear2d_nchw_f32(
+          resize_bilinear_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(resize_bilinear_op, nullptr /* thread pool */));

@@ -224,9 +224,9 @@ TEST_F(StaticResizeBilinear2DTestQS8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_resize_bilinear2d_nhwc_s8(
-      op, batch_size, input_height, input_width, output_height, output_width, input.data(), operator_output.data(),
-      /*threadpool=*/nullptr));
+    xnn_reshape_resize_bilinear2d_nhwc_s8(
+      op, batch_size, input_height, input_width, output_height, output_width, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_resize_bilinear2d_nhwc_s8(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -288,9 +288,9 @@ TEST_F(StaticResizeBilinear2DTestQU8, matches_operator_api)
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_resize_bilinear2d_nhwc_u8(
-      op, batch_size, input_height, input_width, output_height, output_width, input.data(), operator_output.data(),
-      /*threadpool=*/nullptr));
+    xnn_reshape_resize_bilinear2d_nhwc_u8(
+      op, batch_size, input_height, input_width, output_height, output_width, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_resize_bilinear2d_nhwc_u8(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -348,9 +348,9 @@ TEST_F(StaticResizeBilinear2DTestF32, matches_operator_api)
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_resize_bilinear2d_nhwc_f32(
-      op, batch_size, input_height, input_width, output_height, output_width, input.data(), operator_output.data(),
-      /*threadpool=*/nullptr));
+    xnn_reshape_resize_bilinear2d_nhwc_f32(
+      op, batch_size, input_height, input_width, output_height, output_width, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_resize_bilinear2d_nhwc_f32(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
