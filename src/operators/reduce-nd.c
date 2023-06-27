@@ -133,14 +133,12 @@ enum xnn_status xnn_create_mean_nd_f32(
     mean_op_out);
 }
 
-static enum xnn_status setup_mean_nd(
+static enum xnn_status reshape_mean_nd(
     xnn_operator_t mean_op,
     size_t num_reduction_axes,
     const size_t* reduction_axes,
     size_t num_input_dims,
     const size_t* input_shape,
-    const float* input,
-    float* output,
     size_t log2_data_element_size,
     size_t log2_accumulator_element_size,
     enum xnn_operator_type expected_operator_type,
@@ -238,8 +236,6 @@ static enum xnn_status setup_mean_nd(
     // Reduction along the innermost dimension
 
     mean_op->context.reduce = (struct reduce_context) {
-        .input = input,
-        .output = output,
         .input_stride = axis_dim << log2_data_element_size,
         .output_stride = UINT32_C(1) << log2_data_element_size,
         .scaled_elements = axis_dim << log2_data_element_size,
@@ -251,6 +247,7 @@ static enum xnn_status setup_mean_nd(
     mean_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
     mean_op->compute[0].range[0] = batch_like_dim;
     mean_op->compute[0].tile[0] = 2;
+    mean_op->ukernel.type = xnn_microkernel_type_mean;
   } else {
     // Reduction along the non-innermost dimension
     const size_t channel_like_dim = normalized_input_shape[num_input_dims - 1];
@@ -270,13 +267,11 @@ static enum xnn_status setup_mean_nd(
     }
 
     mean_op->context.global_average_pooling_nwc = (struct global_average_pooling_nwc_context) {
-        .input = input,
         .zero = mean_op->zero_buffer,
         .input_pixel_stride = channel_like_dim << log2_data_element_size,
         .input_batch_stride = (channel_like_dim * axis_dim) << log2_data_element_size,
         .input_elements = axis_dim,
         .channels = channel_like_dim,
-        .output = output,
         .output_batch_stride = channel_like_dim << log2_data_element_size,
     };
     memcpy(&mean_op->context.global_average_pooling_nwc.params, scaleminmax_params, scaleminmax_params_size);
@@ -292,8 +287,9 @@ static enum xnn_status setup_mean_nd(
       mean_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_global_average_pooling_nwc_multipass;
       mean_op->context.global_average_pooling_nwc.multipass_ukernel = mean_op->gavgpool_config->multipass;
     }
+    mean_op->ukernel.type = xnn_microkernel_type_global_average_pooling;
   }
-  mean_op->state = xnn_run_state_ready;
+  mean_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;
 }
@@ -307,21 +303,18 @@ static void update_params_mean_f16(
   mean_op->gavgpool_config->update.f16(&mean_op->params.f16_scale_minmax, fp16_ieee_from_fp32_value(scale));
 }
 
-enum xnn_status xnn_setup_mean_nd_f16(
+enum xnn_status xnn_reshape_mean_nd_f16(
     xnn_operator_t mean_op,
     size_t num_reduction_axes,
     const size_t* reduction_axes,
     size_t num_input_dims,
     const size_t* input_shape,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_mean_nd(
+  return reshape_mean_nd(
     mean_op,
     num_reduction_axes, reduction_axes,
     num_input_dims, input_shape,
-    input, output,
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_HALF,
     xnn_operator_type_mean_nd_f16,
@@ -342,21 +335,18 @@ static void update_params_mean_f32(
   mean_op->gavgpool_config->update.f32(&mean_op->params.f32_scale_minmax, scale);
 }
 
-enum xnn_status xnn_setup_mean_nd_f32(
+enum xnn_status xnn_reshape_mean_nd_f32(
     xnn_operator_t mean_op,
     size_t num_reduction_axes,
     const size_t* reduction_axes,
     size_t num_input_dims,
     const size_t* input_shape,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_mean_nd(
+  return reshape_mean_nd(
     mean_op,
     num_reduction_axes, reduction_axes,
     num_input_dims, input_shape,
-    input, output,
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     xnn_operator_type_mean_nd_f32,
@@ -366,4 +356,68 @@ enum xnn_status xnn_setup_mean_nd_f32(
     /*scale_params_size=*/sizeof(mean_op->params.f32_scale),
     update_params_mean_f32,
     threadpool);
+}
+
+static enum xnn_status setup_mean_nd(
+    xnn_operator_t mean_op,
+    const float* input,
+    float* output,
+    enum xnn_operator_type expected_operator_type)
+{
+  if (mean_op->type != expected_operator_type) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(mean_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  switch (mean_op->state) {
+    case xnn_run_state_skip:
+      return xnn_status_success;
+    case xnn_run_state_invalid:
+      xnn_log_error(
+        "failed to setup %s operator: operator has not been reshaped yet",
+        xnn_operator_type_to_string(mean_op->type));
+      return xnn_status_invalid_state;
+    case xnn_run_state_needs_setup:
+      // Operator has been reshaped, but not setup, continue with setup.
+    case xnn_run_state_ready:
+      // Operator has been reshaped, and we are setting up with different pointers.
+      break;
+  }
+
+  if (mean_op->ukernel.type == xnn_microkernel_type_mean) {
+    // Reduction along the innermost dimension
+    mean_op->context.reduce.input = input;
+    mean_op->context.reduce.output = output;
+  } else {
+    assert(mean_op->ukernel.type == xnn_microkernel_type_global_average_pooling);
+    mean_op->context.global_average_pooling_nwc.input = input;
+    mean_op->context.global_average_pooling_nwc.output = output;
+  }
+  mean_op->state = xnn_run_state_ready;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_mean_nd_f16(
+    xnn_operator_t mean_op,
+    const void* input,
+    void* output)
+{
+  return setup_mean_nd(
+    mean_op,
+    input, output,
+    xnn_operator_type_mean_nd_f16);
+}
+
+enum xnn_status xnn_setup_mean_nd_f32(
+    xnn_operator_t mean_op,
+    const float* input,
+    float* output)
+{
+  return setup_mean_nd(
+    mean_op,
+    input, output,
+    xnn_operator_type_mean_nd_f32);
 }

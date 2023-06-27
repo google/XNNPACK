@@ -15,8 +15,12 @@
   string: "DWConv"
 - name: xnn_microkernel_type_gemm
   string: "GEMM"
+- name: xnn_microkernel_type_global_average_pooling
+  string: "Global Average Pooling"
 - name: xnn_microkernel_type_igemm
   string: "IGEMM"
+- name: xnn_microkernel_type_mean
+  string: "Mean"
 - name: xnn_microkernel_type_pixelwise_average_pooling
   string: "Pixelwise Average Pooling"
 - name: xnn_microkernel_type_spmm

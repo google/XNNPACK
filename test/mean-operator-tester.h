@@ -152,14 +152,18 @@ class MeanOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_mean_op(mean_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_mean_nd_f16(
+        xnn_reshape_mean_nd_f16(
           mean_op,
           num_reduction_axes(),
           reduction_axes().data(),
           num_input_dims(),
           input_shape().data(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_mean_nd_f16(
+          mean_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(mean_op, nullptr /* thread pool */));
@@ -257,14 +261,18 @@ class MeanOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_mean_op(mean_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_mean_nd_f32(
+        xnn_reshape_mean_nd_f32(
           mean_op,
           num_reduction_axes(),
           reduction_axes().data(),
           num_input_dims(),
           input_shape().data(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_mean_nd_f32(
+          mean_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(mean_op, nullptr /* thread pool */));

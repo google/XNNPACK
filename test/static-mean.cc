@@ -140,11 +140,14 @@ TEST_F(MeanTestF32, matches_operator_api)
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   ASSERT_EQ(xnn_status_success,
-    xnn_setup_mean_nd_f32(op,
+    xnn_reshape_mean_nd_f32(op,
       reduction_axes.size(), reduction_axes.data(),
       input_shape.size(), input_shape.data(),
-      input.data(), operator_output.data(),
       /*threadpool=*/nullptr));
+
+  ASSERT_EQ(xnn_status_success,
+    xnn_setup_mean_nd_f32(op,
+      input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

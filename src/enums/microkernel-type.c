@@ -14,8 +14,8 @@
 #include <xnnpack/microkernel-type.h>
 
 
-static const uint8_t offset[10] = {
-  0, 8, 24, 39, 46, 51, 57, 83, 88, 98
+static const uint8_t offset[12] = {
+  0, 8, 24, 39, 46, 51, 74, 80, 85, 111, 116, 126
 };
 
 static const char data[] =
@@ -24,7 +24,9 @@ static const char data[] =
   "Conv2D HWC2CHW\0"
   "DWConv\0"
   "GEMM\0"
+  "Global Average Pooling\0"
   "IGEMM\0"
+  "Mean\0"
   "Pixelwise Average Pooling\0"
   "SPMM\0"
   "Subconv2D\0"

@@ -50,6 +50,41 @@ static enum xnn_status create_mean_operator(
   return status;
 }
 
+static enum xnn_status reshape_mean_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_values);
+
+  const struct xnn_value* input_value = values + input_id;
+  assert(input_value->type == xnn_value_type_dense_tensor);
+
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_mean_nd_f16:
+      return xnn_reshape_mean_nd_f16(
+        opdata->operator_objects[0],
+        opdata->num_reduction_axes,
+        opdata->reduction_axes,
+        input_value->shape.num_dims,
+        input_value->shape.dim,
+        threadpool);
+    case xnn_operator_type_mean_nd_f32:
+      return xnn_reshape_mean_nd_f32(
+        opdata->operator_objects[0],
+        opdata->num_reduction_axes,
+        opdata->reduction_axes,
+        input_value->shape.num_dims,
+        input_value->shape.dim,
+        threadpool);
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 static enum xnn_status setup_mean_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
@@ -78,21 +113,11 @@ static enum xnn_status setup_mean_operator(
     case xnn_operator_type_mean_nd_f16:
       return xnn_setup_mean_nd_f16(
         opdata->operator_objects[0],
-        opdata->num_reduction_axes,
-        opdata->reduction_axes,
-        input_value->shape.num_dims,
-        input_value->shape.dim,
-        input_data, output_data,
-        threadpool);
+        input_data, output_data);
     case xnn_operator_type_mean_nd_f32:
       return xnn_setup_mean_nd_f32(
         opdata->operator_objects[0],
-        opdata->num_reduction_axes,
-        opdata->reduction_axes,
-        input_value->shape.num_dims,
-        input_value->shape.dim,
-        input_data, output_data,
-        threadpool);
+        input_data, output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -206,6 +231,7 @@ enum xnn_status xnn_define_static_mean(
   node->flags = flags;
 
   node->create = create_mean_operator;
+  node->reshape = reshape_mean_operator;
   node->setup = setup_mean_operator;
 
   return xnn_status_success;
