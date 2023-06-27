@@ -58,11 +58,18 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
     return;
   }
 
-  status = xnn_setup_prelu_nc_f32(
+  status = xnn_reshape_prelu_nc_f32(
     prelu_op,
     batch_size * height * width,
-    input.data(), output.data(),
     nullptr /* thread pool */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape FP32 PReLU operator");
+    return;
+  }
+
+  status = xnn_setup_prelu_nc_f32(
+    prelu_op,
+    input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup FP32 PReLU operator");
     return;

@@ -133,7 +133,11 @@ TEST_F(PreluTestF32, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_prelu_nc_f32(op, batch_size, input.data(), operator_output.data(), /*threadpool=*/nullptr));
+    xnn_reshape_prelu_nc_f32(op, batch_size, /*threadpool=*/nullptr));
+
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_setup_prelu_nc_f32(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

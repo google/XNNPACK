@@ -187,8 +187,8 @@ int main(int argc, char** argv) {
       break;
     case 30:
       xnn_setup_prelu_nc_f32(
-        op, 0,
-        NULL, NULL, NULL);
+        op,
+        NULL, NULL);
       break;
     case 31:
       xnn_create_resize_bilinear2d_nhwc_f32(

@@ -178,17 +178,15 @@ enum xnn_status xnn_create_prelu_nc_f32(
     prelu_op_out);
 }
 
-static enum xnn_status setup_prelu_nc(
+static enum xnn_status reshape_prelu_nc(
     xnn_operator_t prelu_op,
     enum xnn_operator_type expected_operator_type,
     size_t batch_size,
-    const float* input,
-    float* output,
     uint32_t log2_element_size,
     size_t num_threads)
 {
   if (prelu_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
       xnn_operator_type_to_string(expected_operator_type),
       xnn_operator_type_to_string(prelu_op->type));
     return xnn_status_invalid_parameter;
@@ -196,7 +194,7 @@ static enum xnn_status setup_prelu_nc(
   prelu_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+    xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_uninitialized;
   }
@@ -207,7 +205,7 @@ static enum xnn_status setup_prelu_nc(
   }
 
   if (prelu_op->weights_cache != NULL && !xnn_weights_cache_is_finalized(prelu_op->weights_cache)) {
-    xnn_log_error("failed to setup %s operator: weights cache is not finalized",
+    xnn_log_error("failed to reshape %s operator: weights cache is not finalized",
       xnn_operator_type_to_string(expected_operator_type));
     return xnn_status_invalid_state;
   }
@@ -217,10 +215,8 @@ static enum xnn_status setup_prelu_nc(
   const size_t channels = prelu_op->channels;
   prelu_op->context.prelu = (struct prelu_context) {
     .n = channels << log2_element_size,
-    .x = input,
     .x_stride = prelu_op->input_pixel_stride << log2_element_size,
     .w = packed_weights(prelu_op),
-    .y = output,
     .y_stride = prelu_op->output_pixel_stride << log2_element_size,
     .ukernel = prelu->ukernel,
   };
@@ -242,6 +238,65 @@ static enum xnn_status setup_prelu_nc(
   prelu_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_prelu;
   prelu_op->compute[0].range[0] = batch_size;
   prelu_op->compute[0].tile[0] = batch_tile;
+  prelu_op->state = xnn_run_state_needs_setup;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_reshape_prelu_nc_f16(
+    xnn_operator_t prelu_op,
+    size_t batch_size,
+    pthreadpool_t threadpool)
+{
+  return reshape_prelu_nc(
+    prelu_op, xnn_operator_type_prelu_nc_f16,
+    batch_size,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+enum xnn_status xnn_reshape_prelu_nc_f32(
+    xnn_operator_t prelu_op,
+    size_t batch_size,
+    pthreadpool_t threadpool)
+{
+  return reshape_prelu_nc(
+    prelu_op, xnn_operator_type_prelu_nc_f32,
+    batch_size,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    pthreadpool_get_threads_count(threadpool));
+}
+
+static enum xnn_status setup_prelu_nc(
+    xnn_operator_t prelu_op,
+    enum xnn_operator_type expected_operator_type,
+    const float* input,
+    float* output)
+{
+  if (prelu_op->type != expected_operator_type) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(prelu_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  switch (prelu_op->state) {
+    case xnn_run_state_skip:
+      return xnn_status_success;
+    case xnn_run_state_invalid:
+      xnn_log_error(
+        "failed to setup %s operator: operator has not been reshaped yet",
+        xnn_operator_type_to_string(prelu_op->type));
+      return xnn_status_invalid_state;
+    case xnn_run_state_needs_setup:
+      // Operator has been reshaped, but not setup, continue with setup.
+    case xnn_run_state_ready:
+      // Operator has been reshaped, and we are setting up with different pointers.
+      break;
+  }
+
+  prelu_op->context.prelu.x = input;
+  prelu_op->context.prelu.y = output;
   prelu_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
@@ -249,28 +304,20 @@ static enum xnn_status setup_prelu_nc(
 
 enum xnn_status xnn_setup_prelu_nc_f16(
     xnn_operator_t prelu_op,
-    size_t batch_size,
     const void* input,
-    void* output,
-    pthreadpool_t threadpool)
+    void* output)
 {
   return setup_prelu_nc(
     prelu_op, xnn_operator_type_prelu_nc_f16,
-    batch_size, input, output,
-    /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    pthreadpool_get_threads_count(threadpool));
+    input, output);
 }
 
 enum xnn_status xnn_setup_prelu_nc_f32(
     xnn_operator_t prelu_op,
-    size_t batch_size,
     const float* input,
-    float* output,
-    pthreadpool_t threadpool)
+    float* output)
 {
   return setup_prelu_nc(
     prelu_op, xnn_operator_type_prelu_nc_f32,
-    batch_size, input, output,
-    /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    pthreadpool_get_threads_count(threadpool));
+    input, output);
 }

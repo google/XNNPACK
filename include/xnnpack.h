@@ -2428,12 +2428,15 @@ enum xnn_status xnn_create_prelu_nc_f32(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* prelu_op_out);
 
-enum xnn_status xnn_setup_prelu_nc_f32(
+enum xnn_status xnn_reshape_prelu_nc_f32(
   xnn_operator_t prelu_op,
   size_t batch_size,
-  const float* input,
-  float* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_prelu_nc_f32(
+  xnn_operator_t prelu_op,
+  const float* input,
+  float* output);
 
 enum xnn_status xnn_create_resize_bilinear2d_nhwc_f32(
   size_t channels,
@@ -3443,12 +3446,15 @@ enum xnn_status xnn_create_prelu_nc_f16(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* prelu_op_out);
 
-enum xnn_status xnn_setup_prelu_nc_f16(
+enum xnn_status xnn_reshape_prelu_nc_f16(
   xnn_operator_t prelu_op,
   size_t batch_size,
-  const void* input,
-  void* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_prelu_nc_f16(
+  xnn_operator_t prelu_op,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_create_resize_bilinear2d_nhwc_f16(
   size_t channels,

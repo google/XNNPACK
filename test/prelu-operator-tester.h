@@ -175,11 +175,15 @@ class PReLUOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_prelu_op(prelu_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_prelu_nc_f16(
+        xnn_reshape_prelu_nc_f16(
           prelu_op,
           batch_size(),
-          x.data(), y.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_prelu_nc_f16(
+          prelu_op,
+          x.data(), y.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(prelu_op, nullptr /* thread pool */));
@@ -202,11 +206,14 @@ class PReLUOperatorTester {
 
         std::vector<uint16_t> y2(y.size(), UINT16_C(0x7E00) /* NaN */);
         ASSERT_EQ(xnn_status_success,
-                  xnn_setup_prelu_nc_f16(
+                  xnn_reshape_prelu_nc_f16(
                       prelu_op2,
                       batch_size(),
-                      x.data(), y2.data(),
                       nullptr /* thread pool */));
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_prelu_nc_f16(
+                      prelu_op2,
+                      x.data(), y2.data()));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(prelu_op2, nullptr /* thread pool */));
@@ -280,11 +287,15 @@ class PReLUOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_prelu_op(prelu_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_prelu_nc_f32(
+        xnn_reshape_prelu_nc_f32(
           prelu_op,
           batch_size(),
-          x.data(), y.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_prelu_nc_f32(
+          prelu_op,
+          x.data(), y.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(prelu_op, nullptr /* thread pool */));
@@ -307,11 +318,15 @@ class PReLUOperatorTester {
         std::vector<float> y2(y.size(), nanf(""));
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_setup_prelu_nc_f32(
+                  xnn_reshape_prelu_nc_f32(
                       prelu_op2,
                       batch_size(),
-                      x.data(), y2.data(),
                       nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_prelu_nc_f32(
+                      prelu_op2,
+                      x.data(), y2.data()));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(prelu_op2, nullptr /* thread pool */));
