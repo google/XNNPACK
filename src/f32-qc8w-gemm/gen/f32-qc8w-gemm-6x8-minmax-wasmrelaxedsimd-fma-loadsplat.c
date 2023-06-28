@@ -105,16 +105,16 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_6x8__wasmrelaxedsimd_fma_loadsplat(
       w = (const int8_t*) w + 8;
 
       vacc0x0123 = __builtin_wasm_relaxed_madd_f32x4(va0, vb0123, vacc0x0123);
-      vacc1x0123 = __builtin_wasm_relaxed_madd_f32x4(va1, vb0123, vacc1x0123);
-      vacc2x0123 = __builtin_wasm_relaxed_madd_f32x4(va2, vb0123, vacc2x0123);
-      vacc3x0123 = __builtin_wasm_relaxed_madd_f32x4(va3, vb0123, vacc3x0123);
-      vacc4x0123 = __builtin_wasm_relaxed_madd_f32x4(va4, vb0123, vacc4x0123);
-      vacc5x0123 = __builtin_wasm_relaxed_madd_f32x4(va5, vb0123, vacc5x0123);
       vacc0x4567 = __builtin_wasm_relaxed_madd_f32x4(va0, vb4567, vacc0x4567);
+      vacc1x0123 = __builtin_wasm_relaxed_madd_f32x4(va1, vb0123, vacc1x0123);
       vacc1x4567 = __builtin_wasm_relaxed_madd_f32x4(va1, vb4567, vacc1x4567);
+      vacc2x0123 = __builtin_wasm_relaxed_madd_f32x4(va2, vb0123, vacc2x0123);
       vacc2x4567 = __builtin_wasm_relaxed_madd_f32x4(va2, vb4567, vacc2x4567);
+      vacc3x0123 = __builtin_wasm_relaxed_madd_f32x4(va3, vb0123, vacc3x0123);
       vacc3x4567 = __builtin_wasm_relaxed_madd_f32x4(va3, vb4567, vacc3x4567);
+      vacc4x0123 = __builtin_wasm_relaxed_madd_f32x4(va4, vb0123, vacc4x0123);
       vacc4x4567 = __builtin_wasm_relaxed_madd_f32x4(va4, vb4567, vacc4x4567);
+      vacc5x0123 = __builtin_wasm_relaxed_madd_f32x4(va5, vb0123, vacc5x0123);
       vacc5x4567 = __builtin_wasm_relaxed_madd_f32x4(va5, vb4567, vacc5x4567);
 
       k -= sizeof(float);

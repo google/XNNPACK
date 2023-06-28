@@ -116,8 +116,8 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${ACTIVATION_SUFFIX}_ukerne
       $else:
         w = (const int8_t*) w + ${NR};
 
-      $for N in range(0, NR, 4):
-        $for M in range(MR):
+      $for M in range(MR):
+        $for N in range(0, NR, 4):
           $if FMA:
             vacc${M}x${ABC[N:N+4]} = __builtin_wasm_relaxed_madd_f32x4(va${M}, vb${ABC[N:N+4]}, vacc${M}x${ABC[N:N+4]});
           $else:
