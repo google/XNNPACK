@@ -39,7 +39,7 @@ protected:
     channels = dim_dist(rng) * 2;  // ensure the number of channels is even
 
     input = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * sequence_size * heads * channels);
-    weights = std::vector<T>(max_sequence_size * channels);
+    weights = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + max_sequence_size * channels);
     operator_output = std::vector<T>(batch_size * sequence_size * heads * channels);
     subgraph_output = std::vector<T>(operator_output.size());
   }
