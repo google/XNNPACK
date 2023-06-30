@@ -304,13 +304,6 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
     return xnn_status_invalid_parameter;
   }
 
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0)
-  {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32));
-    return xnn_status_uninitialized;
-  }
-
   switch (argmax_pooling_op->state) {
     case xnn_run_state_skip:
       return xnn_status_success;

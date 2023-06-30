@@ -1424,12 +1424,6 @@ static enum xnn_status setup_deconvolution2d_nhwc(
       break;
   }
 
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(deconvolution_op->type));
-    return xnn_status_uninitialized;
-  }
-
   deconvolution_op->input = input;
   deconvolution_op->output = output;
 

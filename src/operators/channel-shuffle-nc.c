@@ -249,12 +249,6 @@ static enum xnn_status setup_channel_shuffle_nc(
     const void* input,
     void* output)
 {
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(channel_shuffle_op->type));
-    return xnn_status_uninitialized;
-  }
-
   switch (channel_shuffle_op->state) {
     case xnn_run_state_skip:
       return xnn_status_success;

@@ -1240,12 +1240,6 @@ static enum xnn_status setup_convolution2d_nchw(
       break;
   }
 
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(convolution_op->type));
-    return xnn_status_uninitialized;
-  }
-
   switch (convolution_op->ukernel.type) {
     case xnn_microkernel_type_spmm:
     {
