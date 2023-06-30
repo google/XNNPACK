@@ -242,8 +242,7 @@ int main(int argc, char** argv) {
       break;
     case 42:
       xnn_setup_unpooling2d_nhwc_x32(
-        op, 0, 0, 0,
-        NULL, NULL, NULL, NULL);
+        op, NULL, NULL, NULL);
       break;
   }
 

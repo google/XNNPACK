@@ -170,10 +170,13 @@ TEST_F(Unpooling2DTestX32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
+    xnn_status_success, xnn_reshape_unpooling2d_nhwc_x32(
+                          op, batch_size, input_height, input_width, /*output_height_out=*/nullptr,
+                          /*output_width_out=*/nullptr, /*threadpool=*/nullptr));
+  ASSERT_EQ(
     xnn_status_success,
     xnn_setup_unpooling2d_nhwc_x32(
-      op, batch_size, input_height, input_width, input.data(), input_index.data(), operator_output.data(),
-      /*threadpool=*/nullptr));
+      op, input.data(), input_index.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

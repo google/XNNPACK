@@ -130,18 +130,17 @@ error:
   return status;
 }
 
-enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
-    xnn_operator_t unpooling_op,
-    size_t batch_size,
-    size_t input_height,
-    size_t input_width,
-    const void* input,
-    const uint32_t* index,
-    void* output,
-    pthreadpool_t threadpool)
+enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
+  xnn_operator_t unpooling_op,
+  size_t batch_size,
+  size_t input_height,
+  size_t input_width,
+  size_t* output_height_out,
+  size_t* output_width_out,
+  pthreadpool_t threadpool)
 {
   if (unpooling_op->type != xnn_operator_type_unpooling_nhwc_x32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
       xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32),
       xnn_operator_type_to_string(unpooling_op->type));
     return xnn_status_invalid_parameter;
@@ -149,14 +148,14 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
   unpooling_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
+    xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
     return xnn_status_uninitialized;
   }
 
   if (input_width == 0 || input_height == 0) {
     xnn_log_error(
-      "failed to setup %s operator with %zux%zu input: input dimensions must be non-zero",
+      "failed to reshape %s operator with %zux%zu input: input dimensions must be non-zero",
       xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32), input_width, input_height);
     return xnn_status_invalid_parameter;
   }
@@ -169,7 +168,6 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
   unpooling_op->batch_size = batch_size;
   unpooling_op->input_height = input_height;
   unpooling_op->input_width = input_width;
-  unpooling_op->input = input;
 
   unpooling_op->output_height = xnn_compute_unpooling_output_dimension(
     input_height, unpooling_op->padding_top + unpooling_op->padding_bottom,
@@ -177,17 +175,26 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
   unpooling_op->output_width = xnn_compute_unpooling_output_dimension(
     input_width, unpooling_op->padding_left + unpooling_op->padding_right,
     unpooling_op->kernel_width);
-  unpooling_op->output = output;
+
+  if (output_height_out != NULL) {
+    *output_height_out = unpooling_op->output_height;
+  }
+  if (output_width_out != NULL) {
+    *output_width_out = unpooling_op->output_width;
+  }
+
+  // Dummy output for initializing indirection buffers. Output needs to be earlier output due to valid_batch_size
+  // optimization, where the smaller batch sizes are not re-initialized if we setup with different output.
+  unpooling_op->output = unpooling_op->last_output;
 
   size_t valid_batch_size = 0;
-  if (output == unpooling_op->last_output &&
-      input_height == unpooling_op->last_input_height &&
+  if (input_height == unpooling_op->last_input_height &&
       input_width == unpooling_op->last_input_width)
   {
     valid_batch_size = unpooling_op->valid_batch_size;
     if (batch_size <= valid_batch_size) {
       unpooling_op->compute[0].range[0] = batch_size * input_height;
-      unpooling_op->state = xnn_run_state_ready;
+      unpooling_op->state = xnn_run_state_needs_setup;
       return xnn_status_success;
     }
   }
@@ -213,10 +220,8 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
   const size_t channels = unpooling_op->channels;
   const size_t input_pixel_stride_in_bytes = unpooling_op->input_pixel_stride * sizeof(float);
   unpooling_op->context.unpooling = (struct unpooling_context) {
-    .input = input,
     .input_height_stride = input_width * input_pixel_stride_in_bytes,
     .input_width_stride = input_pixel_stride_in_bytes,
-    .index = index,
     .index_height_stride = input_width * channels * sizeof(uint32_t),
     .index_width_stride = channels * sizeof(uint32_t),
     .indirect_output = indirection_buffer,
@@ -231,12 +236,63 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
   unpooling_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_unpooling;
   unpooling_op->compute[0].range[0] = batch_size * input_height;
   unpooling_op->compute[0].range[1] = input_width;
-  unpooling_op->state = xnn_run_state_ready;
+  unpooling_op->state = xnn_run_state_needs_setup;
 
-  unpooling_op->last_output = output;
   unpooling_op->last_input_height = input_height;
   unpooling_op->last_input_width = input_width;
   unpooling_op->valid_batch_size = max(valid_batch_size, batch_size);
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
+    xnn_operator_t unpooling_op,
+    const void* input,
+    const uint32_t* index,
+    void* output)
+{
+  if (unpooling_op->type != xnn_operator_type_unpooling_nhwc_x32) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32),
+      xnn_operator_type_to_string(unpooling_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  switch (unpooling_op->state) {
+    case xnn_run_state_skip:
+      return xnn_status_success;
+    case xnn_run_state_invalid:
+      xnn_log_error(
+        "failed to setup %s operator: operator has not been reshaped yet",
+        xnn_operator_type_to_string(unpooling_op->type));
+      return xnn_status_invalid_state;
+    case xnn_run_state_needs_setup:
+      // Operator has been reshaped, but not setup, continue with setup.
+    case xnn_run_state_ready:
+      // Operator has been reshaped, and we are setting up with different pointers.
+      break;
+  }
+
+  const size_t pooling_height = unpooling_op->kernel_height;
+  const size_t pooling_width = unpooling_op->kernel_width;
+  const size_t pooling_size = pooling_height * pooling_width;
+  const size_t batch_size = unpooling_op->valid_batch_size;
+  const size_t input_height = unpooling_op->input_height;
+  const size_t input_width = unpooling_op->input_width;
+
+  const size_t indirection_buffer_num_elements = batch_size * input_height * input_width * pooling_size;
+  for (size_t i = 0; i < indirection_buffer_num_elements; i++) {
+    unpooling_op->context.unpooling.indirect_output[i] =
+      (void*) ((uintptr_t) unpooling_op->context.unpooling.indirect_output[i] +
+               ((uintptr_t) output - (uintptr_t) unpooling_op->last_output));
+  }
+
+  unpooling_op->context.unpooling.input = input;
+  unpooling_op->context.unpooling.index = index;
+
+  unpooling_op->state = xnn_run_state_ready;
+
+  unpooling_op->last_output = output;
 
   return xnn_status_success;
 }

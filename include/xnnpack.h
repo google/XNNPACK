@@ -2964,15 +2964,20 @@ enum xnn_status xnn_create_unpooling2d_nhwc_x32(
   uint32_t flags,
   xnn_operator_t* unpooling_op_out);
 
-enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
+enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
   xnn_operator_t unpooling_op,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
+  size_t* output_height_out,
+  size_t* output_width_out,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
+  xnn_operator_t unpooling_op,
   const void* input,
   const uint32_t* index,
-  void* output,
-  pthreadpool_t threadpool);
+  void* output);
 
 enum xnn_status xnn_create_abs_nc_f16(
   size_t channels,
