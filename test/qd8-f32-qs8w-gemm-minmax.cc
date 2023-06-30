@@ -7,7 +7,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/qd8-f32-qs8w-gemm.yaml
+//   Specification: test/qd8-f32-qs8w-gemm-minmax.yaml
 //   Generator: tools/generate-gemm-test.py
 
 
