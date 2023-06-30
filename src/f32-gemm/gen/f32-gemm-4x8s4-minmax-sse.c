@@ -78,7 +78,6 @@ void xnn_f32_gemm_minmax_ukernel_4x8s4__sse(
       __m128 va3 = _mm_loadu_ps(a3);
       a3 += 4;
 
-
       const __m128 vb0123c0 = _mm_load_ps(w + 0);
       const __m128 vb4567c0 = _mm_load_ps(w + 4);
 
@@ -95,7 +94,6 @@ void xnn_f32_gemm_minmax_ukernel_4x8s4__sse(
       va1 = _mm_shuffle_ps(va1, va1, _MM_SHUFFLE(0, 3, 2, 1));
       va2 = _mm_shuffle_ps(va2, va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm_shuffle_ps(va3, va3, _MM_SHUFFLE(0, 3, 2, 1));
-
       const __m128 vb0123c1 = _mm_load_ps(w + 8);
       const __m128 vb4567c1 = _mm_load_ps(w + 12);
 
@@ -112,7 +110,6 @@ void xnn_f32_gemm_minmax_ukernel_4x8s4__sse(
       va1 = _mm_shuffle_ps(va1, va1, _MM_SHUFFLE(0, 3, 2, 1));
       va2 = _mm_shuffle_ps(va2, va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm_shuffle_ps(va3, va3, _MM_SHUFFLE(0, 3, 2, 1));
-
       const __m128 vb0123c2 = _mm_load_ps(w + 16);
       const __m128 vb4567c2 = _mm_load_ps(w + 20);
 
@@ -129,7 +126,6 @@ void xnn_f32_gemm_minmax_ukernel_4x8s4__sse(
       va1 = _mm_shuffle_ps(va1, va1, _MM_SHUFFLE(0, 3, 2, 1));
       va2 = _mm_shuffle_ps(va2, va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm_shuffle_ps(va3, va3, _MM_SHUFFLE(0, 3, 2, 1));
-
       const __m128 vb0123c3 = _mm_load_ps(w + 24);
       const __m128 vb4567c3 = _mm_load_ps(w + 28);
 
@@ -156,7 +152,6 @@ void xnn_f32_gemm_minmax_ukernel_4x8s4__sse(
       __m128 va3 = _mm_loadu_ps(a3);
       a3 = (const float*) ((uintptr_t) a3 + k);
 
-
       const __m128 vb0123c0 = _mm_load_ps(w + 0);
       const __m128 vb4567c0 = _mm_load_ps(w + 4);
 
@@ -173,7 +168,6 @@ void xnn_f32_gemm_minmax_ukernel_4x8s4__sse(
       va1 = _mm_shuffle_ps(va1, va1, _MM_SHUFFLE(0, 3, 2, 1));
       va2 = _mm_shuffle_ps(va2, va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm_shuffle_ps(va3, va3, _MM_SHUFFLE(0, 3, 2, 1));
-
       const __m128 vb0123c1 = _mm_load_ps(w + 8);
       const __m128 vb4567c1 = _mm_load_ps(w + 12);
 
@@ -190,7 +184,6 @@ void xnn_f32_gemm_minmax_ukernel_4x8s4__sse(
       va1 = _mm_shuffle_ps(va1, va1, _MM_SHUFFLE(0, 3, 2, 1));
       va2 = _mm_shuffle_ps(va2, va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm_shuffle_ps(va3, va3, _MM_SHUFFLE(0, 3, 2, 1));
-
       const __m128 vb0123c2 = _mm_load_ps(w + 16);
       const __m128 vb4567c2 = _mm_load_ps(w + 20);
 
@@ -207,7 +200,6 @@ void xnn_f32_gemm_minmax_ukernel_4x8s4__sse(
       va1 = _mm_shuffle_ps(va1, va1, _MM_SHUFFLE(0, 3, 2, 1));
       va2 = _mm_shuffle_ps(va2, va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm_shuffle_ps(va3, va3, _MM_SHUFFLE(0, 3, 2, 1));
-
       const __m128 vb0123c3 = _mm_load_ps(w + 24);
       const __m128 vb4567c3 = _mm_load_ps(w + 28);
 

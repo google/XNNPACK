@@ -107,10 +107,11 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           $else:
             const __m128 va${M}c${LLLL} = _mm_shuffle_ps(va${M}, va${M}, _MM_SHUFFLE(${L}, ${L}, ${L}, ${L}));
 
-        $for N in range(0, NR, 4):
-          $if DATATYPE == "F32":
+        $if DATATYPE == "F32":
+          $for N in range(0, NR, 4):
             const __m128 vb${ABC[N:N+4]}c${L} = _mm_load_ps(w + ${L * NR + N});
-          $else:
+        $else:
+          $for N in range(0, NR, 4):
             const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${L * NR + N}))));
 
         $for N in range(0, NR, 4):
@@ -131,12 +132,11 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
 
         $if DATATYPE == "F32":
           const __m128 vb${ABC[0:4]} = _mm_load_ps(w);
+          $for N in range(4, NR, 4):
+            const __m128 vb${ABC[N:N+4]} = _mm_load_ps(w + ${N});
         $else:
           const __m128 vb${ABC[0:4]} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const void*) w))));
-        $for N in range(4, NR, 4):
-          $if DATATYPE == "F32":
-            const __m128 vb${ABC[N:N+4]} = _mm_load_ps(w + ${N});
-          $else:
+          $for N in range(4, NR, 4):
             const __m128 vb${ABC[N:N+4]} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${N}))));
         $if DATATYPE == "F32":
           w += ${NR};
