@@ -4,7 +4,10 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert DATATYPE in ["F32", "QC8"]
-$assert NR % 4 == 0
+$if DATATYPE == "QC8" and SSE == 2:
+  $assert NR % 8 == 0
+$else:
+  $assert NR % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $SSE_HEADER = {1: "xmmintrin.h", 2: "emmintrin.h", 4: "emmintrin.h"}[SSE]
 #include <assert.h>
@@ -14,12 +17,12 @@ $if DATATYPE == "QC8":
   #include <smmintrin.h>
 
 #include <xnnpack/gemm.h>
-$if DATATYPE == "QC8":
+$if DATATYPE == "QC8" and SSE == 4:
   #include <xnnpack/unaligned.h>
 
 
 $if DATATYPE == "QC8":
-  $ISA = "sse41"
+  $ISA = {2: "sse2", 4: "sse41"}[SSE]
 $else:
   $ISA = {1: "sse", 2: "sse2"}[SSE]
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
@@ -111,8 +114,15 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           $for N in range(0, NR, 4):
             const __m128 vb${ABC[N:N+4]}c${L} = _mm_load_ps(w + ${L * NR + N});
         $else:
-          $for N in range(0, NR, 4):
-            const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${L * NR + N}))));
+          $if SSE >= 4:
+            $for N in range(0, NR, 4):
+              const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${L * NR + N}))));
+          $else:
+            $for N in range(0, NR, 8):
+              const __m128i vb${ABC[N:N+8]}c${L} = _mm_loadl_epi64((__m128i const*)((const int8_t*) w + ${L * NR + N}));
+              const __m128i vbw${ABC[N:N+8]}c${L} = _mm_unpacklo_epi8(vb${ABC[N:N+8]}c${L}, vb${ABC[N:N+8]}c${L});
+              const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, vbw${ABC[N:N+8]}c${L}), 24));
+              const __m128 vb${ABC[N+4:N+8]}c${L} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpackhi_epi16(vbw${ABC[N:N+8]}c${L}, vbw${ABC[N:N+8]}c${L}), 24));
 
         $for N in range(0, NR, 4):
           $for M in range(MR):
@@ -134,13 +144,18 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           const __m128 vb${ABC[0:4]} = _mm_load_ps(w);
           $for N in range(4, NR, 4):
             const __m128 vb${ABC[N:N+4]} = _mm_load_ps(w + ${N});
-        $else:
-          const __m128 vb${ABC[0:4]} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const void*) w))));
-          $for N in range(4, NR, 4):
-            const __m128 vb${ABC[N:N+4]} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${N}))));
-        $if DATATYPE == "F32":
           w += ${NR};
         $else:
+          $if SSE >= 4:
+            const __m128 vb${ABC[0:4]} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const void*) w))));
+            $for N in range(4, NR, 4):
+              const __m128 vb${ABC[N:N+4]} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${N}))));
+          $else:
+            $for N in range(0, NR, 8):
+              const __m128i vb${ABC[N:N+8]} = _mm_loadl_epi64((__m128i const*)((const int8_t*) w + ${N}));
+              const __m128i vbw${ABC[N:N+8]} = _mm_unpacklo_epi8(vb${ABC[N:N+8]}, vb${ABC[N:N+8]});
+              const __m128 vb${ABC[N:N+4]} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpacklo_epi16(vbw${ABC[N:N+8]}, vbw${ABC[N:N+8]}), 24));
+              const __m128 vb${ABC[N+4:N+8]} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpackhi_epi16(vbw${ABC[N:N+8]}, vbw${ABC[N:N+8]}), 24));
           w = (const int8_t*) w + ${NR};
 
         $for N in range(0, NR, 4):
