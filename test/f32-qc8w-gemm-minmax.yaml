@@ -154,6 +154,9 @@
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sse2_dup
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sse2_load1
+  init: xnn_init_f32_minmax_sse_params
+  k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sse41_dup
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
@@ -166,6 +169,9 @@
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_3x8__sse2_dup
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_3x8__sse2_load1
+  init: xnn_init_f32_minmax_sse_params
+  k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_3x8__sse41_dup
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
@@ -181,6 +187,9 @@
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_4x8__sse2_dup
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_4x8__sse2_load1
+  init: xnn_init_f32_minmax_sse_params
+  k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_4x8__sse41_dup
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
@@ -193,6 +202,9 @@
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_5x8__sse2_dup
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_5x8__sse2_load1
+  init: xnn_init_f32_minmax_sse_params
+  k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_5x8__sse41_dup
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
