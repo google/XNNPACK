@@ -2279,14 +2279,19 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
   uint32_t flags,
   xnn_operator_t* max_pooling_op_out);
 
-enum xnn_status xnn_setup_max_pooling2d_nhwc_f32(
+enum xnn_status xnn_reshape_max_pooling2d_nhwc_f32(
   xnn_operator_t max_pooling_op,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
-  const float* input,
-  float* output,
+  size_t* output_height_out,
+  size_t* output_width_out,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_max_pooling2d_nhwc_f32(
+  xnn_operator_t max_pooling_op,
+  const float* input,
+  float* output);
 
 enum xnn_status xnn_create_maximum_nd_f32(
   uint32_t flags,
@@ -3359,14 +3364,19 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f16(
   uint32_t flags,
   xnn_operator_t* max_pooling_op_out);
 
-enum xnn_status xnn_setup_max_pooling2d_nhwc_f16(
+enum xnn_status xnn_reshape_max_pooling2d_nhwc_f16(
   xnn_operator_t max_pooling_op,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
-  const void* input,
-  void* output,
+  size_t* output_height_out,
+  size_t* output_width_out,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_max_pooling2d_nhwc_f16(
+  xnn_operator_t max_pooling_op,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_create_maximum_nd_f16(
   uint32_t flags,
@@ -4694,14 +4704,19 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_s8(
   uint32_t flags,
   xnn_operator_t* max_pooling_op_out);
 
-enum xnn_status xnn_setup_max_pooling2d_nhwc_s8(
+enum xnn_status xnn_reshape_max_pooling2d_nhwc_s8(
   xnn_operator_t max_pooling_op,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
-  const int8_t* input,
-  int8_t* output,
+  size_t* output_height_out,
+  size_t* output_width_out,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_max_pooling2d_nhwc_s8(
+  xnn_operator_t max_pooling_op,
+  const int8_t* input,
+  int8_t* output);
 
 enum xnn_status xnn_create_resize_bilinear2d_nhwc_s8(
   size_t channels,
@@ -4762,14 +4777,19 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
   uint32_t flags,
   xnn_operator_t* max_pooling_op_out);
 
-enum xnn_status xnn_setup_max_pooling2d_nhwc_u8(
+enum xnn_status xnn_reshape_max_pooling2d_nhwc_u8(
   xnn_operator_t max_pooling_op,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
-  const uint8_t* input,
-  uint8_t* output,
+  size_t* output_height_out,
+  size_t* output_width_out,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_max_pooling2d_nhwc_u8(
+  xnn_operator_t max_pooling_op,
+  const uint8_t* input,
+  uint8_t* output);
 
 enum xnn_status xnn_create_resize_bilinear2d_nhwc_u8(
   size_t channels,

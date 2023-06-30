@@ -135,6 +135,50 @@ static enum xnn_status create_max_pooling_operator(
   return status;
 }
 
+static enum xnn_status reshape_max_pooling_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_max_pooling_nhwc_f16:
+      return xnn_reshape_max_pooling2d_nhwc_f16(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        /*output_height_out=*/NULL, /*output_width_out=*/NULL,
+        threadpool);
+    case xnn_operator_type_max_pooling_nhwc_f32:
+      return xnn_reshape_max_pooling2d_nhwc_f32(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        /*output_height_out=*/NULL, /*output_width_out=*/NULL,
+        threadpool);
+    case xnn_operator_type_max_pooling_nhwc_s8:
+      return xnn_reshape_max_pooling2d_nhwc_s8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        /*output_height_out=*/NULL, /*output_width_out=*/NULL,
+        threadpool);
+    case xnn_operator_type_max_pooling_nhwc_u8:
+      return xnn_reshape_max_pooling2d_nhwc_u8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        opdata->input_height,
+        opdata->input_width,
+        /*output_height_out=*/NULL, /*output_width_out=*/NULL,
+        threadpool);
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 static enum xnn_status setup_max_pooling_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
@@ -161,39 +205,23 @@ static enum xnn_status setup_max_pooling_operator(
     case xnn_operator_type_max_pooling_nhwc_f16:
       return xnn_setup_max_pooling2d_nhwc_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_max_pooling_nhwc_f32:
       return xnn_setup_max_pooling2d_nhwc_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_max_pooling_nhwc_s8:
       return xnn_setup_max_pooling2d_nhwc_s8(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_max_pooling_nhwc_u8:
       return xnn_setup_max_pooling2d_nhwc_u8(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -375,6 +403,7 @@ enum xnn_status xnn_define_max_pooling_2d(
   node->flags = flags;
 
   node->create = create_max_pooling_operator;
+  node->reshape = reshape_max_pooling_operator;
   node->setup = setup_max_pooling_operator;
 
   return xnn_status_success;

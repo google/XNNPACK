@@ -294,9 +294,11 @@ TEST_F(MaxPooling2DTestQS8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_max_pooling2d_nhwc_s8(
-                          op, batch_size, input_height, input_width, input.data(), operator_output.data(),
+    xnn_status_success, xnn_reshape_max_pooling2d_nhwc_s8(
+                          op, batch_size, input_height, input_width,
+                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                           /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_max_pooling2d_nhwc_s8(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -366,9 +368,11 @@ TEST_F(MaxPooling2DTestQU8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_max_pooling2d_nhwc_u8(
-                          op, batch_size, input_height, input_width, input.data(), operator_output.data(),
+    xnn_status_success, xnn_reshape_max_pooling2d_nhwc_u8(
+                          op, batch_size, input_height, input_width,
+                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                           /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_max_pooling2d_nhwc_u8(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -432,9 +436,11 @@ TEST_F(MaxPooling2DTestF32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_max_pooling2d_nhwc_f32(
-                          op, batch_size, input_height, input_width, input.data(), operator_output.data(),
+    xnn_status_success, xnn_reshape_max_pooling2d_nhwc_f32(
+                          op, batch_size, input_height, input_width,
+                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                           /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_max_pooling2d_nhwc_f32(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
