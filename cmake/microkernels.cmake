@@ -5971,12 +5971,16 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f32-prelu/gen/f32-prelu-sse2-2x8.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-sse2-dup.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-sse2-load1.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8s4-minmax-sse2.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8-minmax-sse2-dup.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8-minmax-sse2-load1.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8s4-minmax-sse2.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-sse2-dup.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-sse2-load1.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8s4-minmax-sse2.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-minmax-sse2-dup.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8-minmax-sse2-load1.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x8s4-minmax-sse2.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse2-x8.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse2-x16.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse2-x24.c
