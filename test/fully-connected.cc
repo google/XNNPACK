@@ -501,10 +501,8 @@ TEST_F(FullyConnectedTestQS8, matches_operator_api)
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
-  ASSERT_EQ(
-    xnn_status_success, xnn_setup_fully_connected_nc_qs8(
-                          op, batch_size, input.data(), operator_output.data(),
-                          /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_qs8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_fully_connected_nc_qs8(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -611,10 +609,8 @@ TEST_F(FullyConnectedTestQU8, matches_operator_api)
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
-  ASSERT_EQ(
-    xnn_status_success, xnn_setup_fully_connected_nc_qu8(
-                          op, batch_size, input.data(), operator_output.data(),
-                          /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_qu8(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_fully_connected_nc_qu8(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -692,10 +688,8 @@ TEST_F(FullyConnectedTestF32, matches_operator_api)
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
-  ASSERT_EQ(
-    xnn_status_success, xnn_setup_fully_connected_nc_f32(
-                          op, batch_size, input.data(), operator_output.data(),
-                          /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_f32(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_fully_connected_nc_f32(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -775,10 +769,8 @@ TEST_F(FullyConnectedTestF32QC8W, matches_operator_api)
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
-  ASSERT_EQ(
-    xnn_status_success, xnn_setup_fully_connected_nc_f32_qc8w(
-                          op, batch_size, input.data(), operator_output.data(),
-                          /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_f32_qc8w(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_fully_connected_nc_f32_qc8w(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -858,10 +850,8 @@ TEST_F(FullyConnectedTestF32QC8W, matches_operator_api_without_bias)
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
-  ASSERT_EQ(
-    xnn_status_success, xnn_setup_fully_connected_nc_f32_qc8w(
-                          op, batch_size, input.data(), operator_output.data(),
-                          /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_f32_qc8w(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_fully_connected_nc_f32_qc8w(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

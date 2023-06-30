@@ -2141,12 +2141,15 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* fully_connected_op_out);
 
-enum xnn_status xnn_setup_fully_connected_nc_f32(
+enum xnn_status xnn_reshape_fully_connected_nc_f32(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
-  const float* input,
-  float* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_fully_connected_nc_f32(
+  xnn_operator_t fully_connected_op,
+  const float* input,
+  float* output);
 
 enum xnn_status xnn_create_fully_connected_nc_f32_qc8w(
   size_t input_channels,
@@ -2163,12 +2166,15 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc8w(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* fully_connected_op_out);
 
-enum xnn_status xnn_setup_fully_connected_nc_f32_qc8w(
+enum xnn_status xnn_reshape_fully_connected_nc_f32_qc8w(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
-  const float* input,
-  float* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_fully_connected_nc_f32_qc8w(
+  xnn_operator_t fully_connected_op,
+  const float* input,
+  float* output);
 
 enum xnn_status xnn_create_global_average_pooling_nwc_f32(
   size_t channels,
@@ -3283,12 +3289,15 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* fully_connected_op_out);
 
-enum xnn_status xnn_setup_fully_connected_nc_f16(
+enum xnn_status xnn_reshape_fully_connected_nc_f16(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
-  const void* input,
-  void* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_fully_connected_nc_f16(
+  xnn_operator_t fully_connected_op,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_create_global_average_pooling_nwc_f16(
   size_t channels,
@@ -4105,12 +4114,15 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* fully_connected_op_out);
 
-enum xnn_status xnn_setup_fully_connected_nc_qs8(
+enum xnn_status xnn_reshape_fully_connected_nc_qs8(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
-  const int8_t* input,
-  int8_t* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_fully_connected_nc_qs8(
+  xnn_operator_t fully_connected_op,
+  const int8_t* input,
+  int8_t* output);
 
 enum xnn_status xnn_create_global_average_pooling_nwc_qs8(
   size_t channels,
@@ -4486,12 +4498,15 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* fully_connected_op_out);
 
-enum xnn_status xnn_setup_fully_connected_nc_qu8(
+enum xnn_status xnn_reshape_fully_connected_nc_qu8(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
-  const uint8_t* input,
-  uint8_t* output,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_fully_connected_nc_qu8(
+  xnn_operator_t fully_connected_op,
+  const uint8_t* input,
+  uint8_t* output);
 
 enum xnn_status xnn_create_global_average_pooling_nwc_qu8(
   size_t channels,

@@ -219,6 +219,31 @@ static enum xnn_status reshape_fully_connected_operator(
         opdata->input_channels, opdata->output_channels,
         &opdata->workspace_size, &opdata->workspace_alignment,
         threadpool);
+    case xnn_operator_type_fully_connected_nc_f16:
+      return xnn_reshape_fully_connected_nc_f16(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_fully_connected_nc_f32:
+      return xnn_reshape_fully_connected_nc_f32(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_fully_connected_nc_f32_qc8w:
+      return xnn_reshape_fully_connected_nc_f32_qc8w(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_fully_connected_nc_qs8:
+      return xnn_reshape_fully_connected_nc_qs8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
+    case xnn_operator_type_fully_connected_nc_qu8:
+      return xnn_reshape_fully_connected_nc_qu8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
     default:
       XNN_UNREACHABLE;
   }
@@ -284,46 +309,36 @@ static enum xnn_status setup_fully_connected_operator(
       assert(bias_data == NULL);
       return xnn_setup_fully_connected_nc_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_fully_connected_nc_f32:
       assert(kernel_data == NULL);
       assert(bias_data == NULL);
       return xnn_setup_fully_connected_nc_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_fully_connected_nc_f32_qc8w:
       assert(kernel_data == NULL);
       assert(bias_data == NULL);
       return xnn_setup_fully_connected_nc_f32_qc8w(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_fully_connected_nc_qs8:
       assert(kernel_data == NULL);
       assert(bias_data == NULL);
       return xnn_setup_fully_connected_nc_qs8(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     case xnn_operator_type_fully_connected_nc_qu8:
       assert(kernel_data == NULL);
       assert(bias_data == NULL);
       return xnn_setup_fully_connected_nc_qu8(
         opdata->operator_objects[0],
-        opdata->batch_size,
         input_data,
-        output_data,
-        threadpool);
+        output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -632,13 +647,8 @@ enum xnn_status xnn_define_fully_connected(
   node->flags = flags;
 
   node->create = create_fully_connected_operator;
+  node->reshape = reshape_fully_connected_operator;
   node->setup = setup_fully_connected_operator;
-  // Only set this pointer if weights are dynamic.
-  if (
-    !xnn_value_is_static(subgraph->values + filter_id) ||
-    (bias_id != XNN_INVALID_VALUE_ID && !xnn_value_is_static(subgraph->values + bias_id))) {
-    node->reshape = reshape_fully_connected_operator;
-  }
 
   return xnn_status_success;
 }

@@ -116,8 +116,7 @@ int main(int argc, char** argv) {
       break;
     case 16:
       xnn_setup_fully_connected_nc_f32(
-        op, 0,
-        NULL, NULL, NULL);
+        op, NULL, NULL);
       break;
     case 17:
       xnn_create_global_average_pooling_nwc_f32(

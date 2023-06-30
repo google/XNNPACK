@@ -277,11 +277,15 @@ class FullyConnectedOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_fully_connected_nc_qs8(
+        xnn_reshape_fully_connected_nc_qs8(
           fully_connected_op,
           batch_size(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_fully_connected_nc_qs8(
+          fully_connected_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(fully_connected_op, nullptr /* thread pool */));
@@ -312,11 +316,15 @@ class FullyConnectedOperatorTester {
         std::vector<int8_t> output2(output.size(), INT8_C(0xA5));
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_setup_fully_connected_nc_qs8(
+                  xnn_reshape_fully_connected_nc_qs8(
                       fully_connected_op2,
                       batch_size(),
-                      input.data(), output2.data(),
                       nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_fully_connected_nc_qs8(
+                      fully_connected_op2,
+                      input.data(), output2.data()));
 
         ASSERT_EQ(
             xnn_status_success,
@@ -455,11 +463,15 @@ class FullyConnectedOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_fully_connected_nc_qu8(
+        xnn_reshape_fully_connected_nc_qu8(
           fully_connected_op,
           batch_size(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_fully_connected_nc_qu8(
+          fully_connected_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(fully_connected_op, nullptr /* thread pool */));
@@ -487,10 +499,12 @@ class FullyConnectedOperatorTester {
             auto_fully_connected_op(fully_connected_op2, xnn_delete_operator);
         std::vector<uint8_t> output2(output.size(), UINT8_C(0xA5));
 
-        ASSERT_EQ(xnn_status_success,
-                  xnn_setup_fully_connected_nc_qu8(
-                      fully_connected_op2, batch_size(), input.data(),
-                      output2.data(), nullptr /* thread pool */));
+        ASSERT_EQ(
+          xnn_status_success,
+          xnn_reshape_fully_connected_nc_qu8(fully_connected_op2, batch_size(), nullptr /* thread pool */));
+
+        ASSERT_EQ(
+          xnn_status_success, xnn_setup_fully_connected_nc_qu8(fully_connected_op2, input.data(), output2.data()));
 
         ASSERT_EQ(
             xnn_status_success,
@@ -636,11 +650,15 @@ class FullyConnectedOperatorTester {
       #endif
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_fully_connected_nc_f32(
+        xnn_reshape_fully_connected_nc_f32(
           fully_connected_op,
           batch_size(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_fully_connected_nc_f32(
+          fully_connected_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(fully_connected_op, nullptr /* thread pool */));
@@ -682,13 +700,17 @@ class FullyConnectedOperatorTester {
 
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op2, xnn_delete_operator);
 
+        ASSERT_EQ(xnn_status_success,
+                  xnn_reshape_fully_connected_nc_f32(
+                      fully_connected_op2,
+                      batch_size(),
+                      nullptr /* thread pool */));
+
         std::vector<float> output2(output.size(), nanf(""));
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_fully_connected_nc_f32(
                       fully_connected_op2,
-                      batch_size(),
-                      input.data(), output2.data(),
-                      nullptr /* thread pool */));
+                      input.data(), output2.data()));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(fully_connected_op2, nullptr /* thread pool */));
@@ -845,11 +867,15 @@ class FullyConnectedOperatorTester {
       #endif
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_fully_connected_nc_f32_qc8w(
+        xnn_reshape_fully_connected_nc_f32_qc8w(
           fully_connected_op,
           batch_size(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_fully_connected_nc_f32_qc8w(
+          fully_connected_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(fully_connected_op, nullptr /* thread pool */));
@@ -894,13 +920,18 @@ class FullyConnectedOperatorTester {
 
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op2, xnn_delete_operator);
 
+        ASSERT_EQ(xnn_status_success,
+                  xnn_reshape_fully_connected_nc_f32_qc8w(
+                      fully_connected_op2,
+                      batch_size(),
+                      nullptr /* thread pool */));
+
         std::vector<float> output2(output.size(), nanf(""));
+
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_fully_connected_nc_f32_qc8w(
                       fully_connected_op2,
-                      batch_size(),
-                      input.data(), output2.data(),
-                      nullptr /* thread pool */));
+                      input.data(), output2.data()));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(fully_connected_op2, nullptr /* thread pool */));
@@ -1033,11 +1064,15 @@ class FullyConnectedOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_fully_connected_nc_f16(
+        xnn_reshape_fully_connected_nc_f16(
           fully_connected_op,
           batch_size(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_fully_connected_nc_f16(
+          fully_connected_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(fully_connected_op, nullptr /* thread pool */));
@@ -1065,11 +1100,15 @@ class FullyConnectedOperatorTester {
         std::vector<uint16_t> output2(output.size(), UINT16_C(0x7E00) /* NaN */);
 
         ASSERT_EQ(xnn_status_success,
-                  xnn_setup_fully_connected_nc_f16(
+                  xnn_reshape_fully_connected_nc_f16(
                       fully_connected_op2,
                       batch_size(),
-                      input.data(), output2.data(),
                       nullptr /* thread pool */));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_fully_connected_nc_f16(
+                      fully_connected_op2,
+                      input.data(), output2.data()));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(fully_connected_op2, nullptr /* thread pool */));

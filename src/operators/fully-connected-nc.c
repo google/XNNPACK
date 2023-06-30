@@ -204,114 +204,6 @@ error:
   return status;
 }
 
-static enum xnn_status setup_fully_connected_nc(
-  xnn_operator_t fully_connected_op,
-  enum xnn_operator_type expected_operator_type,
-  size_t batch_size,
-  const void* input,
-  void* output,
-  uint32_t log2_input_element_size,
-  uint32_t log2_filter_element_size,
-  uint32_t extra_weights_elements_size,
-  uint32_t log2_output_element_size,
-  const void* params,
-  size_t params_size,
-  size_t num_threads)
-{
-  if (fully_connected_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(fully_connected_op->type));
-    return xnn_status_invalid_parameter;
-  }
-  fully_connected_op->state = xnn_run_state_invalid;
-
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(fully_connected_op->type));
-    return xnn_status_uninitialized;
-  }
-
-  if (batch_size == 0) {
-    fully_connected_op->state = xnn_run_state_skip;
-    return xnn_status_success;
-  }
-
-  if (fully_connected_op->weights_cache != NULL &&
-      !xnn_weights_cache_is_finalized(fully_connected_op->weights_cache)) {
-    xnn_log_error("failed to setup %s operator: weights cache is not finalized",
-      xnn_operator_type_to_string(fully_connected_op->type));
-    return xnn_status_invalid_state;
-  }
-
-  const size_t input_channels = fully_connected_op->group_input_channels;
-  const size_t output_channels = fully_connected_op->group_output_channels;
-
-  uint32_t mr = fully_connected_op->ukernel.gemm.mr;
-  const uint32_t nr = fully_connected_op->ukernel.gemm.nr;
-  struct xnn_hmp_gemm_ukernel *gemm_cases = fully_connected_op->ukernel.gemm.gemm_cases;
-
-  if (batch_size == 1 && fully_connected_op->ukernel.gemm.gemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
-    mr = 1;
-  }
-
-  #if XNN_PLATFORM_JIT
-    xnn_overwrite_gemm_cases_with_generated_code(fully_connected_op, gemm_cases, mr);
-  #endif  // XNN_PLATFORM_JIT
-
-  assert(mr != 0 && mr <= XNN_MAX_MR);
-  struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr-1];
-
-  fully_connected_op->context.gemm = (struct gemm_context) {
-    .k_scaled = input_channels << log2_input_element_size,
-    .w_stride = extra_weights_elements_size +
-        (round_up_po2(input_channels, fully_connected_op->ukernel.gemm.kr * fully_connected_op->ukernel.gemm.sr) << log2_filter_element_size),
-    .a = input,
-    .a_stride = fully_connected_op->input_pixel_stride << log2_input_element_size,
-    .packed_w = packed_weights(fully_connected_op),
-    .c = output,
-    .cm_stride = fully_connected_op->output_pixel_stride << log2_output_element_size,
-    .cn_stride = nr << log2_output_element_size,
-    .log2_csize = log2_output_element_size,
-    .ukernel = gemm_ukernel,
-  };
-  memcpy(&fully_connected_op->context.gemm.params, params, params_size);
-  fully_connected_op->context.gemm.fused_params = &fully_connected_op->context.gemm.params;
-
-  #if XNN_TEST_MODE
-    const size_t nc = nr;
-  #else
-    size_t nc = output_channels;
-    if (num_threads > 1) {
-      const size_t num_other_tiles = divide_round_up(batch_size, mr);
-      const size_t target_tiles_per_thread = 5;
-      const size_t max_nc = divide_round_up(output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
-      if (max_nc < nc) {
-        nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
-      }
-    }
-  #endif
-  #if XNN_MAX_UARCH_TYPES > 1
-    if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
-      fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d_with_uarch;
-      fully_connected_op->compute[0].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_gemm;
-    } else {
-      fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
-      fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
-    }
-  #else
-    fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
-    fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
-  #endif
-  fully_connected_op->compute[0].range[0] = batch_size;
-  fully_connected_op->compute[0].range[1] = output_channels;
-  fully_connected_op->compute[0].tile[0] = mr;
-  fully_connected_op->compute[0].tile[1] = nc;
-  fully_connected_op->state = xnn_run_state_ready;
-
-  return xnn_status_success;
-}
-
 enum xnn_status xnn_create_fully_connected_nc_f16(
     size_t input_channels,
     size_t output_channels,
@@ -762,17 +654,118 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     fully_connected_op_out);
 }
 
-enum xnn_status xnn_setup_fully_connected_nc_f16(
+static enum xnn_status reshape_fully_connected_nc(
+  xnn_operator_t fully_connected_op,
+  enum xnn_operator_type expected_operator_type,
+  size_t batch_size,
+  uint32_t log2_input_element_size,
+  uint32_t log2_filter_element_size,
+  uint32_t extra_weights_elements_size,
+  uint32_t log2_output_element_size,
+  const void* params,
+  size_t params_size,
+  size_t num_threads)
+{
+  if (fully_connected_op->type != expected_operator_type) {
+    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(fully_connected_op->type));
+    return xnn_status_invalid_parameter;
+  }
+  fully_connected_op->state = xnn_run_state_invalid;
+
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
+      xnn_operator_type_to_string(fully_connected_op->type));
+    return xnn_status_uninitialized;
+  }
+
+  if (batch_size == 0) {
+    fully_connected_op->state = xnn_run_state_skip;
+    return xnn_status_success;
+  }
+
+  if (fully_connected_op->weights_cache != NULL &&
+      !xnn_weights_cache_is_finalized(fully_connected_op->weights_cache)) {
+    xnn_log_error("failed to reshape %s operator: weights cache is not finalized",
+      xnn_operator_type_to_string(fully_connected_op->type));
+    return xnn_status_invalid_state;
+  }
+
+  const size_t input_channels = fully_connected_op->group_input_channels;
+  const size_t output_channels = fully_connected_op->group_output_channels;
+
+  uint32_t mr = fully_connected_op->ukernel.gemm.mr;
+  const uint32_t nr = fully_connected_op->ukernel.gemm.nr;
+  struct xnn_hmp_gemm_ukernel *gemm_cases = fully_connected_op->ukernel.gemm.gemm_cases;
+
+  if (batch_size == 1 && fully_connected_op->ukernel.gemm.gemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
+    mr = 1;
+  }
+
+  #if XNN_PLATFORM_JIT
+    xnn_overwrite_gemm_cases_with_generated_code(fully_connected_op, gemm_cases, mr);
+  #endif  // XNN_PLATFORM_JIT
+
+  assert(mr != 0 && mr <= XNN_MAX_MR);
+  struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr-1];
+
+  fully_connected_op->context.gemm = (struct gemm_context) {
+    .k_scaled = input_channels << log2_input_element_size,
+    .w_stride = extra_weights_elements_size +
+        (round_up_po2(input_channels, fully_connected_op->ukernel.gemm.kr * fully_connected_op->ukernel.gemm.sr) << log2_filter_element_size),
+    .a_stride = fully_connected_op->input_pixel_stride << log2_input_element_size,
+    .packed_w = packed_weights(fully_connected_op),
+    .cm_stride = fully_connected_op->output_pixel_stride << log2_output_element_size,
+    .cn_stride = nr << log2_output_element_size,
+    .log2_csize = log2_output_element_size,
+    .ukernel = gemm_ukernel,
+  };
+  memcpy(&fully_connected_op->context.gemm.params, params, params_size);
+  fully_connected_op->context.gemm.fused_params = &fully_connected_op->context.gemm.params;
+
+  #if XNN_TEST_MODE
+    const size_t nc = nr;
+  #else
+    size_t nc = output_channels;
+    if (num_threads > 1) {
+      const size_t num_other_tiles = divide_round_up(batch_size, mr);
+      const size_t target_tiles_per_thread = 5;
+      const size_t max_nc = divide_round_up(output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
+      if (max_nc < nc) {
+        nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
+      }
+    }
+  #endif
+  #if XNN_MAX_UARCH_TYPES > 1
+    if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
+      fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d_with_uarch;
+      fully_connected_op->compute[0].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_gemm;
+    } else {
+      fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
+      fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
+    }
+  #else
+    fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
+    fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
+  #endif
+  fully_connected_op->compute[0].range[0] = batch_size;
+  fully_connected_op->compute[0].range[1] = output_channels;
+  fully_connected_op->compute[0].tile[0] = mr;
+  fully_connected_op->compute[0].tile[1] = nc;
+  fully_connected_op->state = xnn_run_state_needs_setup;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_reshape_fully_connected_nc_f16(
     xnn_operator_t fully_connected_op,
     size_t batch_size,
-    const void* input,
-    void* output,
     pthreadpool_t threadpool)
 {
-  return setup_fully_connected_nc(
+  return reshape_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_f16,
     batch_size,
-    input, output,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*extra_weights_elements_size=*/sizeof(uint16_t),
@@ -782,17 +775,14 @@ enum xnn_status xnn_setup_fully_connected_nc_f16(
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_fully_connected_nc_f32(
+enum xnn_status xnn_reshape_fully_connected_nc_f32(
     xnn_operator_t fully_connected_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_fully_connected_nc(
+  return reshape_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_f32,
     batch_size,
-    input, output,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*extra_weights_elements_size=*/sizeof(float),
@@ -802,17 +792,14 @@ enum xnn_status xnn_setup_fully_connected_nc_f32(
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_fully_connected_nc_f32_qc8w(
+enum xnn_status xnn_reshape_fully_connected_nc_f32_qc8w(
     xnn_operator_t fully_connected_op,
     size_t batch_size,
-    const float* input,
-    float* output,
     pthreadpool_t threadpool)
 {
-  return setup_fully_connected_nc(
+  return reshape_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_f32_qc8w,
     batch_size,
-    input, output,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*extra_weights_elements_size=*/sizeof(float) + sizeof(float),
@@ -822,17 +809,14 @@ enum xnn_status xnn_setup_fully_connected_nc_f32_qc8w(
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_fully_connected_nc_qs8(
+enum xnn_status xnn_reshape_fully_connected_nc_qs8(
     xnn_operator_t fully_connected_op,
     size_t batch_size,
-    const int8_t* input,
-    int8_t* output,
     pthreadpool_t threadpool)
 {
-  return setup_fully_connected_nc(
+  return reshape_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qs8,
     batch_size,
-    input, output,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*extra_weights_elements_size=*/sizeof(int32_t),
@@ -842,17 +826,14 @@ enum xnn_status xnn_setup_fully_connected_nc_qs8(
     pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_setup_fully_connected_nc_qu8(
+enum xnn_status xnn_reshape_fully_connected_nc_qu8(
     xnn_operator_t fully_connected_op,
     size_t batch_size,
-    const uint8_t* input,
-    uint8_t* output,
     pthreadpool_t threadpool)
 {
-  return setup_fully_connected_nc(
+  return reshape_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qu8,
     batch_size,
-    input, output,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*extra_weights_elements_size=*/sizeof(int32_t),
@@ -860,4 +841,90 @@ enum xnn_status xnn_setup_fully_connected_nc_qu8(
     &fully_connected_op->params.qu8_conv_minmax,
     sizeof(fully_connected_op->params.qu8_conv_minmax),
     pthreadpool_get_threads_count(threadpool));
+}
+
+static enum xnn_status setup_fully_connected_nc(
+  xnn_operator_t fully_connected_op,
+  enum xnn_operator_type expected_operator_type,
+  const void* input,
+  void* output)
+{
+  if (fully_connected_op->type != expected_operator_type) {
+    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
+      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(fully_connected_op->type));
+    return xnn_status_invalid_parameter;
+  }
+
+  switch (fully_connected_op->state) {
+    case xnn_run_state_skip:
+      return xnn_status_success;
+    case xnn_run_state_invalid:
+      xnn_log_error(
+        "failed to setup %s operator: operator has not been reshaped yet",
+        xnn_operator_type_to_string(fully_connected_op->type));
+      return xnn_status_invalid_state;
+    case xnn_run_state_needs_setup:
+      // Operator has been reshaped, but not setup, continue with setup.
+    case xnn_run_state_ready:
+      // Operator has been reshaped, and we are setting up with different pointers.
+      break;
+  }
+
+  fully_connected_op->context.gemm.a = input;
+  fully_connected_op->context.gemm.c = output;
+
+  fully_connected_op->state = xnn_run_state_ready;
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_fully_connected_nc_f16(
+    xnn_operator_t fully_connected_op,
+    const void* input,
+    void* output)
+{
+  return setup_fully_connected_nc(
+    fully_connected_op, xnn_operator_type_fully_connected_nc_f16,
+    input, output);
+}
+
+enum xnn_status xnn_setup_fully_connected_nc_f32(
+    xnn_operator_t fully_connected_op,
+    const float* input,
+    float* output)
+{
+  return setup_fully_connected_nc(
+    fully_connected_op, xnn_operator_type_fully_connected_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_fully_connected_nc_f32_qc8w(
+    xnn_operator_t fully_connected_op,
+    const float* input,
+    float* output)
+{
+  return setup_fully_connected_nc(
+    fully_connected_op, xnn_operator_type_fully_connected_nc_f32_qc8w,
+    input, output);
+}
+
+enum xnn_status xnn_setup_fully_connected_nc_qs8(
+    xnn_operator_t fully_connected_op,
+    const int8_t* input,
+    int8_t* output)
+{
+  return setup_fully_connected_nc(
+    fully_connected_op, xnn_operator_type_fully_connected_nc_qs8,
+    input, output);
+}
+
+enum xnn_status xnn_setup_fully_connected_nc_qu8(
+    xnn_operator_t fully_connected_op,
+    const uint8_t* input,
+    uint8_t* output)
+{
+  return setup_fully_connected_nc(
+    fully_connected_op, xnn_operator_type_fully_connected_nc_qu8,
+    input, output);
 }

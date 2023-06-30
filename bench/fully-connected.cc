@@ -63,11 +63,20 @@ void xnnpack_fully_connected_f32(benchmark::State& state, const char* net) {
   }
 
   for (size_t i = 0; i < ops.size(); i++) {
-    status = xnn_setup_fully_connected_nc_f32(
+    status = xnn_reshape_fully_connected_nc_f32(
       ops[i],
       batch_size,
-      input.data(), output.data() + i * output_elements,
       nullptr /* thread pool */);
+    if (status != xnn_status_success) {
+      state.SkipWithError("failed to setup FP32 Fully Connected operator");
+      return;
+    }
+  }
+
+  for (size_t i = 0; i < ops.size(); i++) {
+    status = xnn_setup_fully_connected_nc_f32(
+      ops[i],
+      input.data(), output.data() + i * output_elements);
     if (status != xnn_status_success) {
       state.SkipWithError("failed to setup FP32 Fully Connected operator");
       return;
