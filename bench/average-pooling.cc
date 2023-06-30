@@ -70,11 +70,19 @@ static void xnnpack_average_pooling_qu8(benchmark::State& state, const char* net
     return;
   }
 
-  status = xnn_setup_average_pooling2d_nhwc_qu8(
+  status = xnn_reshape_average_pooling2d_nhwc_qu8(
     pooling_op,
     batch_size, input_height, input_width,
-    input.data(), output.data(),
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     nullptr /* thread pool */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape Average Pooling operator");
+    return;
+  }
+
+  status = xnn_setup_average_pooling2d_nhwc_qu8(
+    pooling_op,
+    input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Average Pooling operator");
     return;
@@ -146,11 +154,19 @@ static void xnnpack_average_pooling_f32(benchmark::State& state, const char* net
     return;
   }
 
-  status = xnn_setup_average_pooling2d_nhwc_f32(
+  status = xnn_reshape_average_pooling2d_nhwc_f32(
     pooling_op,
     batch_size, input_height, input_width,
-    input.data(), output.data(),
+    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     nullptr /* thread pool */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape Average Pooling operator");
+    return;
+  }
+
+  status = xnn_setup_average_pooling2d_nhwc_f32(
+    pooling_op,
+    input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Average Pooling operator");
     return;

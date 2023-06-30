@@ -1780,14 +1780,19 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f32(
   uint32_t flags,
   xnn_operator_t* average_pooling_op_out);
 
-enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
+enum xnn_status xnn_reshape_average_pooling2d_nhwc_f32(
   xnn_operator_t average_pooling_op,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
-  const float* input,
-  float* output,
+  size_t* output_height_out,
+  size_t* output_width_out,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
+  xnn_operator_t average_pooling_op,
+  const float* input,
+  float* output);
 
 enum xnn_status xnn_create_bankers_rounding_nc_f32(
   size_t channels,
@@ -3018,14 +3023,19 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
   uint32_t flags,
   xnn_operator_t* average_pooling_op_out);
 
-enum xnn_status xnn_setup_average_pooling2d_nhwc_f16(
+enum xnn_status xnn_reshape_average_pooling2d_nhwc_f16(
   xnn_operator_t average_pooling_op,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
-  const void* input,
-  void* output,
+  size_t* output_height_out,
+  size_t* output_width_out,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_average_pooling2d_nhwc_f16(
+  xnn_operator_t average_pooling_op,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_create_bankers_rounding_nc_f16(
   size_t channels,
@@ -4314,14 +4324,19 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_qu8(
   uint32_t flags,
   xnn_operator_t* average_pooling_op_out);
 
-enum xnn_status xnn_setup_average_pooling2d_nhwc_qu8(
+enum xnn_status xnn_reshape_average_pooling2d_nhwc_qu8(
   xnn_operator_t average_pooling_op,
   size_t batch_size,
   size_t input_height,
   size_t input_width,
-  const uint8_t* input,
-  uint8_t* output,
+  size_t* output_height_out,
+  size_t* output_width_out,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_average_pooling2d_nhwc_qu8(
+  xnn_operator_t average_pooling_op,
+  const uint8_t* input,
+  uint8_t* output);
 
 enum xnn_status xnn_create_convolution2d_nhwc_qu8(
   uint32_t input_padding_top,

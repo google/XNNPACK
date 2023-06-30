@@ -57,8 +57,7 @@ int main(int argc, char** argv) {
       break;
     case 6:
       xnn_setup_average_pooling2d_nhwc_f32(
-        op, 0, 0, 0,
-        NULL, NULL, NULL);
+        op, NULL, NULL);
       break;
     case 7:
       xnn_create_clamp_nc_f32(
