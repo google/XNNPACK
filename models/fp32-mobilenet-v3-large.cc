@@ -2802,6 +2802,15 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  status = xnn_reshape_global_average_pooling_nwc_f32(
+    op14,
+    /*batch_size=*/1, 784 /* width */,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #14" << std::endl;
+    return ExecutionPlan();
+  }
+
   status = xnn_reshape_convolution2d_nhwc_f32(
     op15,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
@@ -2862,6 +2871,15 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #20" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_global_average_pooling_nwc_f32(
+    op21,
+    /*batch_size=*/1, 784 /* width */,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #21" << std::endl;
     return ExecutionPlan();
   }
 
@@ -2938,6 +2956,15 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #28" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_global_average_pooling_nwc_f32(
+    op29,
+    /*batch_size=*/1, 784 /* width */,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #29" << std::endl;
     return ExecutionPlan();
   }
 
@@ -3266,6 +3293,15 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  status = xnn_reshape_global_average_pooling_nwc_f32(
+    op62,
+    /*batch_size=*/1, 196 /* width */,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #62" << std::endl;
+    return ExecutionPlan();
+  }
+
   status = xnn_reshape_convolution2d_nhwc_f32(
     op63,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
@@ -3344,6 +3380,15 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #70" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_global_average_pooling_nwc_f32(
+    op71,
+    /*batch_size=*/1, 196 /* width */,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #71" << std::endl;
     return ExecutionPlan();
   }
 
@@ -3441,6 +3486,15 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  status = xnn_reshape_global_average_pooling_nwc_f32(
+    op81,
+    /*batch_size=*/1, 49 /* width */,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #81" << std::endl;
+    return ExecutionPlan();
+  }
+
   status = xnn_reshape_convolution2d_nhwc_f32(
     op82,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
@@ -3519,6 +3573,15 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #89" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_global_average_pooling_nwc_f32(
+    op90,
+    /*batch_size=*/1, 49 /* width */,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #90" << std::endl;
     return ExecutionPlan();
   }
 
@@ -3616,6 +3679,15 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  status = xnn_reshape_global_average_pooling_nwc_f32(
+    op100,
+    /*batch_size=*/1, 49 /* width */,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #100" << std::endl;
+    return ExecutionPlan();
+  }
+
   status = xnn_reshape_convolution2d_nhwc_f32(
     op101,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
@@ -3691,6 +3763,15 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  status = xnn_reshape_global_average_pooling_nwc_f32(
+    op108,
+    /*batch_size=*/1, 49 /* width */,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #108" << std::endl;
+    return ExecutionPlan();
+  }
+
   status = xnn_reshape_convolution2d_nhwc_f32(
     op109,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
@@ -3707,6 +3788,15 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #110" << std::endl;
+    return ExecutionPlan();
+  }
+
+  status = xnn_reshape_global_average_pooling_nwc_f32(
+    op111,
+    /*batch_size=*/1, 1 /* width */,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #111" << std::endl;
     return ExecutionPlan();
   }
 
@@ -3834,9 +3924,7 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_f32(
     op14,
-    /*batch_size=*/1, 784 /* width */,
-    /*input=*/v14.data(), /*output=*/v15.data(),
-    /*threadpool=*/threadpool);
+    /*input=*/v14.data(), /*output=*/v15.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #14" << std::endl;
     return ExecutionPlan();
@@ -3892,9 +3980,7 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_f32(
     op21,
-    /*batch_size=*/1, 784 /* width */,
-    /*input=*/v21.data(), /*output=*/v22.data(),
-    /*threadpool=*/threadpool);
+    /*input=*/v21.data(), /*output=*/v22.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #21" << std::endl;
     return ExecutionPlan();
@@ -3958,9 +4044,7 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_f32(
     op29,
-    /*batch_size=*/1, 784 /* width */,
-    /*input=*/v29.data(), /*output=*/v30.data(),
-    /*threadpool=*/threadpool);
+    /*input=*/v29.data(), /*output=*/v30.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #29" << std::endl;
     return ExecutionPlan();
@@ -4224,9 +4308,7 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_f32(
     op62,
-    /*batch_size=*/1, 196 /* width */,
-    /*input=*/v62.data(), /*output=*/v63.data(),
-    /*threadpool=*/threadpool);
+    /*input=*/v62.data(), /*output=*/v63.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #62" << std::endl;
     return ExecutionPlan();
@@ -4298,9 +4380,7 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_f32(
     op71,
-    /*batch_size=*/1, 196 /* width */,
-    /*input=*/v71.data(), /*output=*/v72.data(),
-    /*threadpool=*/threadpool);
+    /*input=*/v71.data(), /*output=*/v72.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #71" << std::endl;
     return ExecutionPlan();
@@ -4380,9 +4460,7 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_f32(
     op81,
-    /*batch_size=*/1, 49 /* width */,
-    /*input=*/v81.data(), /*output=*/v82.data(),
-    /*threadpool=*/threadpool);
+    /*input=*/v81.data(), /*output=*/v82.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #81" << std::endl;
     return ExecutionPlan();
@@ -4454,9 +4532,7 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_f32(
     op90,
-    /*batch_size=*/1, 49 /* width */,
-    /*input=*/v90.data(), /*output=*/v91.data(),
-    /*threadpool=*/threadpool);
+    /*input=*/v90.data(), /*output=*/v91.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #90" << std::endl;
     return ExecutionPlan();
@@ -4536,9 +4612,7 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_f32(
     op100,
-    /*batch_size=*/1, 49 /* width */,
-    /*input=*/v100.data(), /*output=*/v101.data(),
-    /*threadpool=*/threadpool);
+    /*input=*/v100.data(), /*output=*/v101.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #100" << std::endl;
     return ExecutionPlan();
@@ -4602,9 +4676,7 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_f32(
     op108,
-    /*batch_size=*/1, 49 /* width */,
-    /*input=*/v108.data(), /*output=*/v109.data(),
-    /*threadpool=*/threadpool);
+    /*input=*/v108.data(), /*output=*/v109.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #108" << std::endl;
     return ExecutionPlan();
@@ -4628,9 +4700,7 @@ ExecutionPlan FP32MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_f32(
     op111,
-    /*batch_size=*/1, 1 /* width */,
-    /*input=*/v111.data(), /*output=*/v112.data(),
-    /*threadpool=*/threadpool);
+    /*input=*/v111.data(), /*output=*/v112.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #111" << std::endl;
     return ExecutionPlan();

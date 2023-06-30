@@ -50,11 +50,17 @@ static void global_average_pooling_qu8(benchmark::State& state) {
     state.SkipWithError("failed to create Global Average Pooling operator");
   }
 
-  status = xnn_setup_global_average_pooling_nwc_qu8(
+  status = xnn_reshape_global_average_pooling_nwc_qu8(
     global_pooling_op,
     batch_size, input_height * input_width,
-    input.data(), output.data(),
     nullptr /* thread pool */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape Global Average Pooling operator");
+  }
+
+  status = xnn_setup_global_average_pooling_nwc_qu8(
+    global_pooling_op,
+    input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Global Average Pooling operator");
   }
@@ -111,11 +117,17 @@ static void global_average_pooling_qs8(benchmark::State& state) {
     state.SkipWithError("failed to create Global Average Pooling operator");
   }
 
-  status = xnn_setup_global_average_pooling_nwc_qs8(
+  status = xnn_reshape_global_average_pooling_nwc_qs8(
     global_pooling_op,
     batch_size, input_height * input_width,
-    input.data(), output.data(),
     nullptr /* thread pool */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape Global Average Pooling operator");
+  }
+
+  status = xnn_setup_global_average_pooling_nwc_qs8(
+    global_pooling_op,
+    input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Global Average Pooling operator");
   }
@@ -170,11 +182,17 @@ static void global_average_pooling_f16(benchmark::State& state) {
     state.SkipWithError("failed to create Global Average Pooling operator");
   }
 
-  status = xnn_setup_global_average_pooling_nwc_f16(
+  status = xnn_reshape_global_average_pooling_nwc_f16(
     global_pooling_op,
     batch_size, input_height * input_width,
-    input.data(), output.data(),
     nullptr /* thread pool */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape Global Average Pooling operator");
+  }
+
+  status = xnn_setup_global_average_pooling_nwc_f16(
+    global_pooling_op,
+    input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Global Average Pooling operator");
   }
@@ -228,11 +246,17 @@ static void global_average_pooling_f32(benchmark::State& state) {
     state.SkipWithError("failed to create Global Average Pooling operator");
   }
 
-  status = xnn_setup_global_average_pooling_nwc_f32(
+  status = xnn_reshape_global_average_pooling_nwc_f32(
     global_pooling_op,
     batch_size, input_height * input_width,
-    input.data(), output.data(),
     nullptr /* thread pool */);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape Global Average Pooling operator");
+  }
+
+  status = xnn_setup_global_average_pooling_nwc_f32(
+    global_pooling_op,
+    input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Global Average Pooling operator");
   }

@@ -2434,6 +2434,15 @@ ExecutionPlan FP16MobileNetV2(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  status = xnn_reshape_global_average_pooling_nwc_f16(
+    op62,
+    /*batch_size=*/1, 49 /* width */,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #62" << std::endl;
+    return ExecutionPlan();
+  }
+
   status = xnn_reshape_convolution2d_nhwc_f16(
     op63,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
@@ -2942,9 +2951,7 @@ ExecutionPlan FP16MobileNetV2(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_f16(
     op62,
-    /*batch_size=*/1, 49 /* width */,
-    /*input=*/v62.data(), /*output=*/v63.data(),
-    /*threadpool=*/threadpool);
+    /*input=*/v62.data(), /*output=*/v63.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #62" << std::endl;
     return ExecutionPlan();

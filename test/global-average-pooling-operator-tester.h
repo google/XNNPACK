@@ -199,11 +199,15 @@ class GlobalAveragePoolingOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_global_average_pooling_nwc_qu8(
+        xnn_reshape_global_average_pooling_nwc_qu8(
           global_average_pooling_op,
           batch_size(), width(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_global_average_pooling_nwc_qu8(
+          global_average_pooling_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));
@@ -268,11 +272,15 @@ class GlobalAveragePoolingOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_global_average_pooling_nwc_qs8(
+        xnn_reshape_global_average_pooling_nwc_qs8(
           global_average_pooling_op,
           batch_size(), width(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_global_average_pooling_nwc_qs8(
+          global_average_pooling_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));
@@ -345,11 +353,15 @@ class GlobalAveragePoolingOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_global_average_pooling_nwc_f16(
+        xnn_reshape_global_average_pooling_nwc_f16(
           global_average_pooling_op,
           batch_size(), width(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_global_average_pooling_nwc_f16(
+          global_average_pooling_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));
@@ -424,11 +436,15 @@ class GlobalAveragePoolingOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_global_average_pooling_nwc_f32(
+        xnn_reshape_global_average_pooling_nwc_f32(
           global_average_pooling_op,
           batch_size(), width(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_global_average_pooling_nwc_f32(
+          global_average_pooling_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));
@@ -499,11 +515,15 @@ class GlobalAveragePoolingOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_global_average_pooling_ncw_f16(
+        xnn_reshape_global_average_pooling_ncw_f16(
           global_average_pooling_op,
           batch_size(), width(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_global_average_pooling_ncw_f16(
+          global_average_pooling_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));
@@ -576,11 +596,15 @@ class GlobalAveragePoolingOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_global_average_pooling_ncw_f32(
+        xnn_reshape_global_average_pooling_ncw_f32(
           global_average_pooling_op,
           batch_size(), width(),
-          input.data(), output.data(),
           nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_global_average_pooling_ncw_f32(
+          global_average_pooling_op,
+          input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(global_average_pooling_op, nullptr /* thread pool */));

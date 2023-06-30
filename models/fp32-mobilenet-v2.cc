@@ -2941,9 +2941,7 @@ ExecutionPlan FP32MobileNetV2(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_f32(
     op62,
-    /*batch_size=*/1, 49 /* width */,
-    /*input=*/v62.data(), /*output=*/v63.data(),
-    /*threadpool=*/threadpool);
+    /*input=*/v62.data(), /*output=*/v63.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #62" << std::endl;
     return ExecutionPlan();

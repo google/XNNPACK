@@ -233,9 +233,9 @@ TEST_F(GlobalAveragePooling1DTestQS8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_global_average_pooling_nwc_qs8(
-                          op, batch_size, input_width, input.data(), operator_output.data(),
-                          /*threadpool=*/nullptr));
+    xnn_status_success,
+    xnn_reshape_global_average_pooling_nwc_qs8(op, batch_size, input_width, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_global_average_pooling_nwc_qs8(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -300,9 +300,9 @@ TEST_F(GlobalAveragePooling1DTestQU8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_global_average_pooling_nwc_qu8(
-                          op, batch_size, input_width, input.data(), operator_output.data(),
-                          /*threadpool=*/nullptr));
+    xnn_status_success,
+    xnn_reshape_global_average_pooling_nwc_qu8(op, batch_size, input_width, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_global_average_pooling_nwc_qu8(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -365,9 +365,9 @@ TEST_F(GlobalAveragePooling1DTestF32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
-    xnn_status_success, xnn_setup_global_average_pooling_nwc_f32(
-                          op, batch_size, input_width, input.data(), operator_output.data(),
-                          /*threadpool=*/nullptr));
+    xnn_status_success,
+    xnn_reshape_global_average_pooling_nwc_f32(op, batch_size, input_width, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_global_average_pooling_nwc_f32(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

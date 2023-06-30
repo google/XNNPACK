@@ -1184,6 +1184,15 @@ ExecutionPlan QS8MobileNetV1(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  status = xnn_reshape_global_average_pooling_nwc_qs8(
+    op27,
+    /*batch_size=*/1, 49 /* width */,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #27" << std::endl;
+    return ExecutionPlan();
+  }
+
   status = xnn_reshape_convolution2d_nhwc_qs8(
     op28,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
@@ -1412,9 +1421,7 @@ ExecutionPlan QS8MobileNetV1(pthreadpool_t threadpool) {
 
   status = xnn_setup_global_average_pooling_nwc_qs8(
     op27,
-    /*batch_size=*/1, 49 /* width */,
-    /*input=*/v27.data(), /*output=*/v28.data(),
-    /*threadpool=*/threadpool);
+    /*input=*/v27.data(), /*output=*/v28.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #27" << std::endl;
     return ExecutionPlan();
