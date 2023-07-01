@@ -50,8 +50,10 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sse41_load1(
       const __m128 va0 = _mm_load1_ps(a0);
       a0 += 1;
 
-      const __m128 vb0123 = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int32_t*) w))));
-      const __m128 vb4567 = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + 4))));
+      const __m128i vbi0123 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32(w)));
+      const __m128i vbi4567 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 4)));
+      const __m128 vb0123 = _mm_cvtepi32_ps(vbi0123);
+      const __m128 vb4567 = _mm_cvtepi32_ps(vbi4567);
       w = (const int8_t*) w + 8;
 
       vacc0x0123 = _mm_add_ps(vacc0x0123, _mm_mul_ps(va0, vb0123));
