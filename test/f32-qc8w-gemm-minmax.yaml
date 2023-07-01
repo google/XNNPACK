@@ -187,6 +187,9 @@
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_3x8s4__sse41
   init: xnn_init_f32_minmax_sse_params
   k-block: 4
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_4x2c4__sse2
+  init: xnn_init_f32_minmax_sse_params
+  k-block: 4
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_4x2c4__sse41
   init: xnn_init_f32_minmax_sse_params
   k-block: 4

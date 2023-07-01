@@ -5975,6 +5975,7 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8-minmax-sse2-dup.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8-minmax-sse2-load1.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8s4-minmax-sse2.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x2c4-minmax-sse2.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-sse2-dup.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-sse2-load1.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8s4-minmax-sse2.c
