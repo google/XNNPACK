@@ -206,9 +206,8 @@ TEST_F(StaticTransposeTestQS8, matches_operator_api)
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_transpose_nd_x8(
-      op, input.data(), operator_output.data(), dims.size(), dims.data(), perm.data(), /*threadpool=*/nullptr));
+    xnn_status_success, xnn_reshape_transpose_nd_x8(op, dims.size(), dims.data(), perm.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_transpose_nd_x8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
@@ -271,9 +270,8 @@ TEST_F(StaticTransposeTestQU8, matches_operator_api)
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_transpose_nd_x8(
-      op, input.data(), operator_output.data(), dims.size(), dims.data(), perm.data(), /*threadpool=*/nullptr));
+    xnn_status_success, xnn_reshape_transpose_nd_x8(op, dims.size(), dims.data(), perm.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_transpose_nd_x8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
@@ -334,8 +332,8 @@ TEST_F(StaticTransposeTestF32, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_transpose_nd_x32(
-      op, input.data(), operator_output.data(), dims.size(), dims.data(), perm.data(), /*threadpool=*/nullptr));
+    xnn_reshape_transpose_nd_x32(op, dims.size(), dims.data(), perm.data(), /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_transpose_nd_x32(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

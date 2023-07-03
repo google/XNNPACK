@@ -107,6 +107,68 @@ static enum xnn_status create_depth_to_space_operator(
   return status;
 }
 
+static enum xnn_status reshape_depth_to_space_operator(
+  struct xnn_operator_data* opdata,
+  const struct xnn_value* values,
+  size_t num_values,
+  pthreadpool_t threadpool)
+{
+  switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_depth_to_space_nchw2nhwc_x16:
+      return xnn_reshape_depth_to_space_nchw2nhwc_x16(
+          opdata->operator_objects[0],
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          /*output_height_out=*/NULL,
+          /*output_width_out=*/NULL,
+          /*output_channels_out=*/NULL,
+          threadpool);
+    case xnn_operator_type_depth_to_space_nchw2nhwc_x32:
+      return xnn_reshape_depth_to_space_nchw2nhwc_x32(
+          opdata->operator_objects[0],
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          /*output_height_out=*/NULL,
+          /*output_width_out=*/NULL,
+          /*output_channels_out=*/NULL,
+          threadpool);
+    case xnn_operator_type_depth_to_space_nhwc_x16:
+      return xnn_reshape_depth_to_space_nhwc_x16(
+          opdata->operator_objects[0],
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          /*output_height_out=*/NULL,
+          /*output_width_out=*/NULL,
+          /*output_channels_out=*/NULL,
+          threadpool);
+    case xnn_operator_type_depth_to_space_nhwc_x32:
+      return xnn_reshape_depth_to_space_nhwc_x32(
+          opdata->operator_objects[0],
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          /*output_height_out=*/NULL,
+          /*output_width_out=*/NULL,
+          /*output_channels_out=*/NULL,
+          threadpool);
+    case xnn_operator_type_depth_to_space_nhwc_x8:
+      return xnn_reshape_depth_to_space_nhwc_x8(
+          opdata->operator_objects[0],
+          opdata->batch_size,
+          opdata->input_height,
+          opdata->input_width,
+          /*output_height_out=*/NULL,
+          /*output_width_out=*/NULL,
+          /*output_channels_out=*/NULL,
+          threadpool);
+    default:
+      XNN_UNREACHABLE;
+  }
+}
+
 static enum xnn_status setup_depth_to_space_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
@@ -133,48 +195,28 @@ static enum xnn_status setup_depth_to_space_operator(
     case xnn_operator_type_depth_to_space_nchw2nhwc_x16:
       return xnn_setup_depth_to_space_nchw2nhwc_x16(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
           input_data,
-          output_data,
-          threadpool);
+          output_data);
     case xnn_operator_type_depth_to_space_nchw2nhwc_x32:
       return xnn_setup_depth_to_space_nchw2nhwc_x32(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
           input_data,
-          output_data,
-          threadpool);
+          output_data);
     case xnn_operator_type_depth_to_space_nhwc_x16:
       return xnn_setup_depth_to_space_nhwc_x16(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
           input_data,
-          output_data,
-          threadpool);
+          output_data);
     case xnn_operator_type_depth_to_space_nhwc_x32:
       return xnn_setup_depth_to_space_nhwc_x32(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
           input_data,
-          output_data,
-          threadpool);
+          output_data);
     case xnn_operator_type_depth_to_space_nhwc_x8:
       return xnn_setup_depth_to_space_nhwc_x8(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
           input_data,
-          output_data,
-          threadpool);
+          output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -281,6 +323,7 @@ enum xnn_status xnn_define_depth_to_space(
   node->flags = flags;
 
   node->create = create_depth_to_space_operator;
+  node->reshape = reshape_depth_to_space_operator;
   node->setup = setup_depth_to_space_operator;
 
   return xnn_status_success;

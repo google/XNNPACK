@@ -14,8 +14,8 @@
 #include <xnnpack/microkernel-type.h>
 
 
-static const uint8_t offset[12] = {
-  0, 8, 24, 39, 46, 51, 74, 80, 85, 111, 116, 126
+static const uint8_t offset[13] = {
+  0, 8, 24, 39, 46, 51, 74, 80, 85, 111, 116, 126, 136
 };
 
 static const char data[] =
@@ -30,6 +30,7 @@ static const char data[] =
   "Pixelwise Average Pooling\0"
   "SPMM\0"
   "Subconv2D\0"
+  "Transpose\0"
   "VMulCAddC";
 
 const char* xnn_microkernel_type_to_string(enum xnn_microkernel_type microkernel_type) {

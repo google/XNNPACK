@@ -82,11 +82,15 @@ class TransposeOperatorTester {
     std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_transpose_op(transpose_op, xnn_delete_operator);
 
     ASSERT_EQ(xnn_status_success,
-              xnn_setup_transpose_nd_x8(
+              xnn_reshape_transpose_nd_x8(
                   transpose_op,
-                  input.data(), output.data(),
                   num_dims(), shape_.data(), perm_.data(),
                   nullptr /* thread pool */));
+
+    ASSERT_EQ(xnn_status_success,
+              xnn_setup_transpose_nd_x8(
+                  transpose_op,
+                  input.data(), output.data()));
 
     // Run operator.
     ASSERT_EQ(xnn_status_success,
@@ -150,11 +154,15 @@ class TransposeOperatorTester {
     std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_transpose_op(transpose_op, xnn_delete_operator);
 
     ASSERT_EQ(xnn_status_success,
-              xnn_setup_transpose_nd_x16(
+              xnn_reshape_transpose_nd_x16(
                   transpose_op,
-                  input.data(), output.data(),
                   num_dims(), shape_.data(), perm_.data(),
                   nullptr /* thread pool */));
+
+    ASSERT_EQ(xnn_status_success,
+              xnn_setup_transpose_nd_x16(
+                  transpose_op,
+                  input.data(), output.data()));
 
     // Run operator.
     ASSERT_EQ(xnn_status_success,
@@ -218,11 +226,15 @@ class TransposeOperatorTester {
     std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_transpose_op(transpose_op, xnn_delete_operator);
 
     ASSERT_EQ(xnn_status_success,
-              xnn_setup_transpose_nd_x32(
+              xnn_reshape_transpose_nd_x32(
                   transpose_op,
-                  input.data(), output.data(),
                   num_dims(), shape_.data(), perm_.data(),
                   nullptr /* thread pool */));
+
+    ASSERT_EQ(xnn_status_success,
+              xnn_setup_transpose_nd_x32(
+                  transpose_op,
+                  input.data(), output.data()));
 
     // Run operator.
     ASSERT_EQ(xnn_status_success,

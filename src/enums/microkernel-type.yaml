@@ -27,6 +27,8 @@
   string: "SPMM"
 - name: xnn_microkernel_type_subconv2d
   string: "Subconv2D"
+- name: xnn_microkernel_type_transpose
+  string: "Transpose"
 - name: xnn_microkernel_type_vmulcaddc
   string: "VMulCAddC"
 

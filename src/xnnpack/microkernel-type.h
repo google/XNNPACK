@@ -28,6 +28,7 @@ enum xnn_microkernel_type {
   xnn_microkernel_type_pixelwise_average_pooling,
   xnn_microkernel_type_spmm,
   xnn_microkernel_type_subconv2d,
+  xnn_microkernel_type_transpose,
   xnn_microkernel_type_vmulcaddc,
 };
 

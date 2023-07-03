@@ -236,9 +236,11 @@ TEST_F(DepthToSpaceTestQS8, matches_operator_api)
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_depth_to_space_nhwc_x8(
-      op, batch_size(), input_height(), input_width(), input.data(), operator_output.data(), /*threadpool=*/nullptr));
+    xnn_status_success, xnn_reshape_depth_to_space_nhwc_x8(
+                          op, batch_size(), input_height(), input_width(),
+                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
+                          /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_depth_to_space_nhwc_x8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
@@ -300,9 +302,11 @@ TEST_F(DepthToSpaceTestQU8, matches_operator_api)
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_depth_to_space_nhwc_x8(
-      op, batch_size(), input_height(), input_width(), input.data(), operator_output.data(), /*threadpool=*/nullptr));
+    xnn_status_success, xnn_reshape_depth_to_space_nhwc_x8(
+                          op, batch_size(), input_height(), input_width(),
+                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
+                          /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_depth_to_space_nhwc_x8(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
   // Call subgraph API.
@@ -362,9 +366,11 @@ TEST_F(DepthToSpaceTestF32, matches_operator_api)
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_depth_to_space_nhwc_x32(
-      op, batch_size(), input_height(), input_width(), input.data(), operator_output.data(), /*threadpool=*/nullptr));
+    xnn_status_success, xnn_reshape_depth_to_space_nhwc_x32(
+                          op, batch_size(), input_height(), input_width(),
+                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, /*output_channels_out=*/nullptr,
+                          /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_depth_to_space_nhwc_x32(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
