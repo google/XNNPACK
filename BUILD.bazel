@@ -2032,13 +2032,10 @@ INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + [
     "src/xnnpack/requantization-stubs.h",
 ]
 
-WASM_JIT_LINKOPTS = select({
-    "emscripten": [
-        "-sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=$addFunction",
-        "-sALLOW_TABLE_GROWTH=1",
-    ],
-    "//conditions:default": [],
-})
+WASM_JIT_LINKOPTS = [
+    "-sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=$addFunction",
+    "-sALLOW_TABLE_GROWTH=1",
+]
 
 JIT_WASM32_SRCS = [
     "src/f32-vrelu/f32-vrelu-ukernel-jit-wasm32-shr.cc",
@@ -5210,6 +5207,10 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = JIT_AARCH32_SRCS,
     aarch64_srcs = JIT_AARCH64_SRCS,
+    linkopts = select({
+        "xnn_enable_jit_explicit_true_on_emscripten": WASM_JIT_LINKOPTS,
+        "//conditions:default": [],
+    }),
     msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = JIT_WASM32_SRCS,
     wasmrelaxedsimd_srcs = JIT_WASMRELAXEDSIMD32_SRCS,
@@ -5248,6 +5249,10 @@ xnnpack_cc_library(
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
     ],
+    linkopts = select({
+        "emscripten": WASM_JIT_LINKOPTS,
+        "//conditions:default": [],
+    }),
     msvc_copts = xnnpack_msvc_std_copts(),
     wasm_srcs = JIT_WASM32_SRCS,
     wasmrelaxedsimd_srcs = JIT_WASMRELAXEDSIMD32_SRCS,
@@ -6061,7 +6066,6 @@ xnnpack_benchmark(
         "bench/gemm.h",
     ],
     copts = xnnpack_optional_ruy_copts(),
-    linkopts = WASM_JIT_LINKOPTS,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":allocator",
         ":math",
@@ -6219,8 +6223,7 @@ xnnpack_benchmark(
     srcs = [
         "bench/f32-vrelu.cc",
     ],
-    linkopts = WASM_JIT_LINKOPTS,
-    deps = MICROKERNEL_BENCHMARK_DEPS + [":jit"],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [":jit_test_mode"],
 )
 
 xnnpack_benchmark(
@@ -8060,7 +8063,7 @@ xnnpack_unit_test(
     shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
-        ":jit",
+        ":jit_test_mode",
     ],
 )
 
@@ -8123,7 +8126,6 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-gemm-jit.cc",
     ],
-    linkopts = WASM_JIT_LINKOPTS,
     shard_count = 10,
     tags = ["not_run:arm"],
     deps = MICROKERNEL_TEST_DEPS + [
@@ -8574,8 +8576,7 @@ xnnpack_unit_test(
         "test/f32-vrelu.cc",
         "test/vunary-microkernel-tester.h",
     ],
-    linkopts = WASM_JIT_LINKOPTS,
-    deps = MICROKERNEL_TEST_DEPS + [":jit"],
+    deps = MICROKERNEL_TEST_DEPS + [":jit_test_mode"],
 )
 
 xnnpack_unit_test(
@@ -9810,7 +9811,6 @@ xnnpack_unit_test(
         "test/clamp-nc.cc",
         "test/clamp-operator-tester.h",
     ],
-    linkopts = WASM_JIT_LINKOPTS,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -9820,7 +9820,6 @@ xnnpack_unit_test(
         "test/clamp-nc-eager.cc",
         "test/clamp-operator-tester.h",
     ],
-    linkopts = WASM_JIT_LINKOPTS,
     deps = OPERATOR_TEST_DEPS,
 )
 
@@ -10590,7 +10589,6 @@ xnnpack_unit_test(
     srcs = [
         "test/clamp.cc",
     ],
-    linkopts = WASM_JIT_LINKOPTS,
     deps = [
         ":XNNPACK_test_mode",
         ":node_type",
@@ -11220,7 +11218,6 @@ xnnpack_unit_test(
         "test/runtime-tester.h",
         "test/subgraph-tester.h",
     ],
-    linkopts = WASM_JIT_LINKOPTS,
     deps = [
         ":XNNPACK_test_mode",
         ":subgraph_test_mode",
@@ -11249,7 +11246,6 @@ xnnpack_unit_test(
         "test/runtime-tester.h",
         "test/subgraph-tester.h",
     ],
-    linkopts = WASM_JIT_LINKOPTS,
     deps = [
         ":XNNPACK",
         ":common",
@@ -11294,7 +11290,6 @@ xnnpack_unit_test(
         "test/jit.cc",
     ],
     copts = ["-fpic"],
-    linkopts = WASM_JIT_LINKOPTS,
     deps = [
         ":common",
         ":jit_test_mode",
@@ -11337,10 +11332,9 @@ xnnpack_unit_test(
     srcs = [
         "test/wasm-assembler.cc",
     ],
-    linkopts = WASM_JIT_LINKOPTS,
     deps = [
         ":common",
-        ":jit",
+        ":jit_test_mode",
         ":memory",
     ],
 )
@@ -11553,6 +11547,14 @@ config_setting(
 config_setting(
     name = "xnn_enable_jit_explicit_true",
     define_values = {"xnn_enable_jit": "true"},
+)
+
+selects.config_setting_group(
+    name = "xnn_enable_jit_explicit_true_on_emscripten",
+    match_all = [
+        ":xnn_enable_jit_explicit_true",
+        ":emscripten",
+    ],
 )
 
 # Disables usage of JIT kernels.
