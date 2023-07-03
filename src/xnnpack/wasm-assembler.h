@@ -79,7 +79,8 @@ static uint32_t VectorEncodingLength(
 }
 
 struct ResultType {
-  ResultType(std::initializer_list<ValType> codes) : type(kNoTypeCode) {
+  constexpr ResultType(std::initializer_list<ValType> codes)
+      : type(kNoTypeCode) {
     switch (codes.size()) {
       case 0:
         break;
@@ -99,19 +100,31 @@ struct ResultType {
   static constexpr byte kNoTypeCode = 0;
 };
 
+template <>
+static constexpr ResultType kDefault<ResultType>{};
+
 inline bool operator==(const ResultType& lhs, const ResultType& rhs) {
   return lhs.type == rhs.type;
 }
 
 static constexpr size_t kMaxParamsCount = 16;
-using Params = ArrayPrefix<ValType, kMaxParamsCount>;
+struct Params : ArrayPrefix<ValType, kMaxParamsCount> {
+  using ArrayPrefix::ArrayPrefix;
+};
+
+template <>
+static constexpr Params kDefault<Params>{0, kDefault<ValType>};
 
 struct FuncType {
-  FuncType(const Params& params, ResultType result)
+  constexpr FuncType(const Params& params, ResultType result)
       : params(params), result(result) {}
   Params params;
   ResultType result;
 };
+
+template <>
+static constexpr FuncType kDefault<FuncType>{kDefault<Params>,
+                                             kDefault<ResultType>};
 
 inline bool operator==(const FuncType& lhs, const FuncType& rhs) {
   return lhs.result == rhs.result &&
@@ -786,9 +799,12 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
     internal::StoreEncodedU32(n, [this](byte b) { emit8(b); });
   }
 
+  static constexpr size_t kMaxNumFuncTypes = 16;
+
   std::vector<Function> functions_;
-  std::vector<FuncType> func_types_;
   std::vector<Export> exports_;
+  internal::ArrayPrefix<FuncType, kMaxNumFuncTypes> func_types_{
+      0, internal::kDefault<FuncType>};
 };
 
 }  // namespace xnnpack
