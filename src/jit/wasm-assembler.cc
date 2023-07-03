@@ -97,7 +97,7 @@ static auto AppendArray(Array&& arr, Appender&& appender) {
 }
 
 // Functions emitting types section
-void WasmAssembler::EmitParamType(const std::vector<ValType>& type) {
+void WasmAssembler::EmitParamsType(const Params& type) {
   EmitEncodedU32(type.size());
   for (ValType val_type : type) {
     emit8(val_type.code);
@@ -116,12 +116,12 @@ void WasmAssembler::EmitResultType(const ResultType& type) {
 void WasmAssembler::EmitFuncType(const FuncType& type) {
   static constexpr byte kFunctionByte = 0x60;
   emit8(kFunctionByte);
-  EmitParamType(type.param);
+  EmitParamsType(type.params);
   EmitResultType(type.result);
 }
 
 static uint32_t FuncTypeEncodingSize(const FuncType& type) {
-  const uint32_t args_count = type.param.size();
+  const uint32_t args_count = type.params.size();
   const uint32_t args_encoding_length =
       WidthEncodedU32(args_count) + args_count;
   // a function can return at  most one value
@@ -201,12 +201,12 @@ void WasmAssembler::EmitCodeSection() {
 }
 
 void WasmAssembler::RegisterFunction(const ResultType& result, const char* name,
-                                     std::vector<ValType>&& param,
+                                     const Params& params,
                                      ValTypesToInt&& locals_declaration_count,
                                      std::vector<byte> code) {
   exports_.emplace_back(name, functions_.size());
-  functions_.emplace_back(FindOrAddFuncType(FuncType(std::move(param), result)),
-                          std::move(locals_declaration_count), std::move(code));
+  functions_.emplace_back(FindOrAddFuncType(FuncType(params, result)),
+                          locals_declaration_count, std::move(code));
 }
 
 uint32_t WasmAssembler::FindOrAddFuncType(FuncType&& type) {

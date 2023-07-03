@@ -39,55 +39,19 @@ inline bool operator==(const ValType& lhs, const ValType& rhs) {
 
 namespace internal {
 
-template <typename T, size_t max_size>
-class ArrayPrefix {
- public:
-  explicit ArrayPrefix(size_t size) : size_(size) { assert(size_ <= max_size); }
-
-  ArrayPrefix(size_t size, T t) : size_(size), array_(MakeArray<max_size>(t)) {
-    assert(size_ <= max_size);
-  }
-
-  ArrayPrefix(std::initializer_list<T> init)
-      : size_(init.size()), array_(MakeArray<max_size>(*init.begin())) {
-    assert(size_ <= max_size);
-    std::copy(init.begin(), init.end(), begin());
-  }
-
-  auto begin() { return array_.begin(); }
-  auto begin() const { return array_.cbegin(); }
-  auto end() {
-    auto result = array_.begin();
-    std::advance(result, size_);
-    return result;
-  }
-  auto end() const {
-    auto result = array_.cbegin();
-    std::advance(result, size_);
-    return result;
-  }
-  auto& operator[](size_t index) {
-    assert(index < size_);
-    return array_[index];
-  }
-  const auto& operator[](size_t index) const {
-    assert(index < size_);
-    return array_[index];
-  }
-  size_t size() const { return size_; }
-
- private:
-  size_t size_;
-  std::array<T, max_size> array_;
-};
+template <>
+static constexpr ValType kDefault<ValType>{0};
 
 struct ValTypeToInt {
   template <typename Int>
-  ValTypeToInt(ValType type, Int value) : type(type), value(value) {}
+  constexpr ValTypeToInt(ValType type, Int value) : type(type), value(value) {}
   ValTypeToInt() = default;
   ValType type;
   uint32_t value;
 };
+
+template <>
+static constexpr ValTypeToInt kDefault<ValTypeToInt>{kDefault<ValType>, 0};
 
 }  // namespace internal
 
@@ -139,15 +103,20 @@ inline bool operator==(const ResultType& lhs, const ResultType& rhs) {
   return lhs.type == rhs.type;
 }
 
+static constexpr size_t kMaxParamsCount = 16;
+using Params = ArrayPrefix<ValType, kMaxParamsCount>;
+
 struct FuncType {
-  FuncType(std::vector<ValType> param, ResultType result)
-      : param(std::move(param)), result(result) {}
-  std::vector<ValType> param;
+  FuncType(const Params& params, ResultType result)
+      : params(params), result(result) {}
+  Params params;
   ResultType result;
 };
 
 inline bool operator==(const FuncType& lhs, const FuncType& rhs) {
-  return lhs.param == rhs.param && lhs.result == rhs.result;
+  return lhs.result == rhs.result &&
+         std::equal(lhs.params.begin(), lhs.params.end(), rhs.params.begin(),
+                    rhs.params.end());
 }
 
 struct Function {
@@ -390,7 +359,7 @@ class LocalsManager {
   };
 
   std::array<ValTypeIndices, kMaxNumTypes> indices_ =
-      internal::MakeArray<kMaxNumTypes>(ValTypeIndices{ValType(0), 0, 0});
+      MakeArray<kMaxNumTypes>(ValTypeIndices{kDefault<ValType>, 0, 0});
 };
 
 std::array<uint8_t, 16> MakeLanesForI8x16Shuffle(const uint8_t* lanes,
@@ -716,6 +685,7 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
  private:
   using Export = internal::Export;
   using Function = internal::Function;
+  using Params = internal::Params;
   using FuncType = internal::FuncType;
   using LocalsManager = internal::LocalsManager;
   using ResultType = internal::ResultType;
@@ -727,13 +697,13 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
   void AddFunc(const ResultType& result, const char* name,
                ValTypesToInt locals_declaration_count, Body&& body) {
     const auto params = internal::MakeArray<InSize>(i32);
-    AddFunc(result, name, params, std::move(locals_declaration_count),
-            std::forward<Body>(body));
+    AddFunc<InSize>(result, name, params, std::move(locals_declaration_count),
+                    std::forward<Body>(body));
   }
 
   template <size_t InSize, typename Body>
   void AddFunc(const ResultType& result, const char* name,
-               const std::array<ValType, InSize>& param,
+               const std::array<ValType, InSize>& params,
                ValTypesToInt locals_declaration_count, Body&& body) {
     std::vector<byte> code;
     SetOut(&code);
@@ -741,11 +711,11 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
     std::array<Local, InSize> input_locals{};
     for (uint32_t index = 0; index < InSize; index++) {
       input_locals[index] =
-          Local{param[index], index, /*is_managed=*/false, this};
+          Local{params[index], index, /*is_managed=*/false, this};
     }
     internal::ArrayApply(std::move(input_locals), std::forward<Body>(body));
     end();
-    RegisterFunction(result, name, std::vector(param.begin(), param.end()),
+    RegisterFunction(result, name, Params(params),
                      std::move(locals_declaration_count), std::move(code));
   }
 
@@ -772,7 +742,7 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
   constexpr static byte kCodeSectionCode = 0x0A;
 
   void RegisterFunction(const ResultType& result, const char* name,
-                        std::vector<ValType>&& param,
+                        const Params& params,
                         ValTypesToInt&& locals_declaration_count,
                         std::vector<byte> code);
   uint32_t FindOrAddFuncType(FuncType&& type);
@@ -799,7 +769,7 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
 
   void EmitTypeSection();
   void EmitFuncType(const FuncType& type);
-  void EmitParamType(const std::vector<ValType>& type);
+  void EmitParamsType(const Params& type);
   void EmitResultType(const ResultType& type);
 
   void EmitImportSection();
