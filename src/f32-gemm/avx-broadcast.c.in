@@ -97,16 +97,15 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
 
       $if DATATYPE == "F32":
         const __m256 vb${ABC[0:8]} = _mm256_load_ps(w);
-      $else:
-        const __m256 vb${ABC[0:8]} = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) w)));
-      $for N in range(8, NR, 8):
-        $if DATATYPE == "F32":
+        $for N in range(8, NR, 8):
           const __m256 vb${ABC[N:N+8]} = _mm256_load_ps(w + ${N});
-        $else:
-          const __m256 vb${ABC[N:N+8]} = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + ${N}))));
-      $if DATATYPE == "F32":
         w += ${NR};
       $else:
+        const __m256i vbi${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) w));
+        $for N in range(8, NR, 8):
+          const __m256i vbi${ABC[N:N+8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + ${N})));
+        $for N in range(0, NR, 8):
+          const __m256 vb${ABC[N:N+8]} = _mm256_cvtepi32_ps(vbi${ABC[N:N+8]});
         w = (const int8_t*) w + ${NR};
 
       $for N in range(0, NR, 8):

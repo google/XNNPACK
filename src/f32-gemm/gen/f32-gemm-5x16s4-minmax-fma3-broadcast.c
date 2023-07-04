@@ -88,7 +88,6 @@ void xnn_f32_gemm_minmax_ukernel_5x16s4__fma3_broadcast(
       __m256 va4 = _mm256_broadcast_ps((const __m128*) a4);
       a4 += 4;
 
-
       const __m256 vb01234567c0 = _mm256_load_ps(w + 0);
       const __m256 vb89ABCDEFc0 = _mm256_load_ps(w + 8);
 
@@ -108,7 +107,6 @@ void xnn_f32_gemm_minmax_ukernel_5x16s4__fma3_broadcast(
       va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
       va4 = _mm256_permute_ps(va4, _MM_SHUFFLE(0, 3, 2, 1));
-
       const __m256 vb01234567c1 = _mm256_load_ps(w + 16);
       const __m256 vb89ABCDEFc1 = _mm256_load_ps(w + 24);
 
@@ -128,7 +126,6 @@ void xnn_f32_gemm_minmax_ukernel_5x16s4__fma3_broadcast(
       va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
       va4 = _mm256_permute_ps(va4, _MM_SHUFFLE(0, 3, 2, 1));
-
       const __m256 vb01234567c2 = _mm256_load_ps(w + 32);
       const __m256 vb89ABCDEFc2 = _mm256_load_ps(w + 40);
 
@@ -148,7 +145,6 @@ void xnn_f32_gemm_minmax_ukernel_5x16s4__fma3_broadcast(
       va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
       va4 = _mm256_permute_ps(va4, _MM_SHUFFLE(0, 3, 2, 1));
-
       const __m256 vb01234567c3 = _mm256_load_ps(w + 48);
       const __m256 vb89ABCDEFc3 = _mm256_load_ps(w + 56);
 
@@ -180,7 +176,6 @@ void xnn_f32_gemm_minmax_ukernel_5x16s4__fma3_broadcast(
       a4 = (const float*) ((uintptr_t) a4 + k);
 
       const __m256 vzero = _mm256_setzero_ps();
-
       const __m256 vb01234567c0 = _mm256_load_ps(w + 0);
       const __m256 vb89ABCDEFc0 = _mm256_load_ps(w + 8);
 
@@ -200,7 +195,6 @@ void xnn_f32_gemm_minmax_ukernel_5x16s4__fma3_broadcast(
       va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
       va4 = _mm256_permute_ps(va4, _MM_SHUFFLE(0, 3, 2, 1));
-
       const __m256 vb01234567c1 = _mm256_load_ps(w + 16);
       const __m256 vb89ABCDEFc1 = _mm256_load_ps(w + 24);
 
@@ -220,7 +214,6 @@ void xnn_f32_gemm_minmax_ukernel_5x16s4__fma3_broadcast(
       va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
       va4 = _mm256_permute_ps(va4, _MM_SHUFFLE(0, 3, 2, 1));
-
       const __m256 vb01234567c2 = _mm256_load_ps(w + 32);
       const __m256 vb89ABCDEFc2 = _mm256_load_ps(w + 40);
 
@@ -240,7 +233,6 @@ void xnn_f32_gemm_minmax_ukernel_5x16s4__fma3_broadcast(
       va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
       va4 = _mm256_permute_ps(va4, _MM_SHUFFLE(0, 3, 2, 1));
-
       const __m256 vb01234567c3 = _mm256_load_ps(w + 48);
       const __m256 vb89ABCDEFc3 = _mm256_load_ps(w + 56);
 

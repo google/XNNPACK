@@ -107,10 +107,13 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         $else:
           $if SSE >= 4:
             $for N in range(0, NR, 4):
-              const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${L * NR + N}))));
+              const __m128i vbi${ABC[N:N+4]}c${L} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${L * NR + N})));
+            $for N in range(0, NR, 4):
+              const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(vbi${ABC[N:N+4]}c${L});
           $else:
             $for N in range(0, NR, 8):
-              const __m128i vb${ABC[N:N+8]}c${L} = _mm_loadl_epi64((__m128i const*)((const int8_t*) w + ${L * NR + N}));
+              const __m128i vb${ABC[N:N+8]}c${L} = _mm_loadl_epi64((const __m128i *) ((const int8_t*) w + ${L * NR + N}));
+            $for N in range(0, NR, 8):
               const __m128i vbw${ABC[N:N+8]}c${L} = _mm_unpacklo_epi8(vb${ABC[N:N+8]}c${L}, vb${ABC[N:N+8]}c${L});
               const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, vbw${ABC[N:N+8]}c${L}), 24));
               const __m128 vb${ABC[N+4:N+8]}c${L} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpackhi_epi16(vbw${ABC[N:N+8]}c${L}, vbw${ABC[N:N+8]}c${L}), 24));
@@ -141,10 +144,13 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         $else:
           $if SSE >= 4:
             $for N in range(0, NR, 4):
-              const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(_mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${L * NR + N}))));
+              const __m128i vbi${ABC[N:N+4]}c${L} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${L * NR + N})));
+            $for N in range(0, NR, 4):
+              const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(vbi${ABC[N:N+4]}c${L});
           $else:
             $for N in range(0, NR, 8):
-              const __m128i vb${ABC[N:N+8]}c${L} = _mm_loadl_epi64((__m128i const*)((const int8_t*) w + ${L * NR + N}));
+              const __m128i vb${ABC[N:N+8]}c${L} = _mm_loadl_epi64((const __m128i *) ((const int8_t*) w + ${L * NR + N}));
+            $for N in range(0, NR, 8):
               const __m128i vbw${ABC[N:N+8]}c${L} = _mm_unpacklo_epi8(vb${ABC[N:N+8]}c${L}, vb${ABC[N:N+8]}c${L});
               const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, vbw${ABC[N:N+8]}c${L}), 24));
               const __m128 vb${ABC[N+4:N+8]}c${L} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpackhi_epi16(vbw${ABC[N:N+8]}c${L}, vbw${ABC[N:N+8]}c${L}), 24));

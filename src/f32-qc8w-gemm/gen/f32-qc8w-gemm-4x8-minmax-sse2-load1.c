@@ -79,7 +79,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x8__sse2_load1(
       const __m128 va3 = _mm_load1_ps(a3);
       a3 += 1;
 
-      const __m128i vb01234567 = _mm_loadl_epi64((__m128i const*) w);
+      const __m128i vb01234567 = _mm_loadl_epi64((const __m128i *) w);
       const __m128i vbw01234567 = _mm_unpacklo_epi8(vb01234567, vb01234567);
       const __m128 vb0123 = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpacklo_epi16(vbw01234567, vbw01234567), 24));
       const __m128 vb4567 = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpackhi_epi16(vbw01234567, vbw01234567), 24));

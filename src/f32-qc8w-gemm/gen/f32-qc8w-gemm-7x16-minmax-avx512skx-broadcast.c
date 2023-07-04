@@ -88,7 +88,8 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_7x16__avx512skx_broadcast(
 
     size_t k = kc;
     do {
-      const __m512 vb0123456789ABCDEF = _mm512_cvtepi32_ps(_mm512_cvtepi8_epi32(_mm_loadu_epi8((const void*) w)));
+      const __m512i vbi0123456789ABCDEF = _mm512_cvtepi8_epi32(_mm_loadu_epi8(w));
+      const __m512 vb0123456789ABCDEF  = _mm512_cvtepi32_ps(vbi0123456789ABCDEF);
       w = (const int8_t*) w + 16;
 
       const __m512 va0 = _mm512_set1_ps(*a0);

@@ -102,7 +102,8 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_7x8__avx2_broadcast(
       const __m256 va6 = _mm256_broadcast_ss(a6);
       a6 += 1;
 
-      const __m256 vb01234567 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) w)));
+      const __m256i vbi01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) w));
+      const __m256 vb01234567 = _mm256_cvtepi32_ps(vbi01234567);
       w = (const int8_t*) w + 8;
 
       vacc0x01234567 = _mm256_fmadd_ps(va0, vb01234567, vacc0x01234567);

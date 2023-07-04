@@ -79,9 +79,10 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x16s4__avx2_broadcast(
       __m256 va3 = _mm256_broadcast_ps((const __m128*) a3);
       a3 += 4;
 
-
-      const __m256 vb01234567c0 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 0))));
-      const __m256 vb89ABCDEFc0 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 8))));
+      const __m256i vbi01234567c0 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 0)));
+      const __m256i vbi89ABCDEFc0 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 8)));
+      const __m256 vb01234567c0 = _mm256_cvtepi32_ps(vbi01234567c0);
+      const __m256 vb89ABCDEFc0 = _mm256_cvtepi32_ps(vbi89ABCDEFc0);
 
       vacc0x01234567 = _mm256_fmadd_ps(va0, vb01234567c0, vacc0x01234567);
       vacc1x01234567 = _mm256_fmadd_ps(va1, vb01234567c0, vacc1x01234567);
@@ -96,9 +97,10 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x16s4__avx2_broadcast(
       va1 = _mm256_permute_ps(va1, _MM_SHUFFLE(0, 3, 2, 1));
       va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
-
-      const __m256 vb01234567c1 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 16))));
-      const __m256 vb89ABCDEFc1 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 24))));
+      const __m256i vbi01234567c1 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 16)));
+      const __m256i vbi89ABCDEFc1 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 24)));
+      const __m256 vb01234567c1 = _mm256_cvtepi32_ps(vbi01234567c1);
+      const __m256 vb89ABCDEFc1 = _mm256_cvtepi32_ps(vbi89ABCDEFc1);
 
       vacc0x01234567 = _mm256_fmadd_ps(va0, vb01234567c1, vacc0x01234567);
       vacc1x01234567 = _mm256_fmadd_ps(va1, vb01234567c1, vacc1x01234567);
@@ -113,9 +115,10 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x16s4__avx2_broadcast(
       va1 = _mm256_permute_ps(va1, _MM_SHUFFLE(0, 3, 2, 1));
       va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
-
-      const __m256 vb01234567c2 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 32))));
-      const __m256 vb89ABCDEFc2 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 40))));
+      const __m256i vbi01234567c2 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 32)));
+      const __m256i vbi89ABCDEFc2 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 40)));
+      const __m256 vb01234567c2 = _mm256_cvtepi32_ps(vbi01234567c2);
+      const __m256 vb89ABCDEFc2 = _mm256_cvtepi32_ps(vbi89ABCDEFc2);
 
       vacc0x01234567 = _mm256_fmadd_ps(va0, vb01234567c2, vacc0x01234567);
       vacc1x01234567 = _mm256_fmadd_ps(va1, vb01234567c2, vacc1x01234567);
@@ -130,9 +133,10 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x16s4__avx2_broadcast(
       va1 = _mm256_permute_ps(va1, _MM_SHUFFLE(0, 3, 2, 1));
       va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
-
-      const __m256 vb01234567c3 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 48))));
-      const __m256 vb89ABCDEFc3 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 56))));
+      const __m256i vbi01234567c3 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 48)));
+      const __m256i vbi89ABCDEFc3 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 56)));
+      const __m256 vb01234567c3 = _mm256_cvtepi32_ps(vbi01234567c3);
+      const __m256 vb89ABCDEFc3 = _mm256_cvtepi32_ps(vbi89ABCDEFc3);
 
       vacc0x01234567 = _mm256_fmadd_ps(va0, vb01234567c3, vacc0x01234567);
       vacc1x01234567 = _mm256_fmadd_ps(va1, vb01234567c3, vacc1x01234567);
@@ -158,9 +162,10 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x16s4__avx2_broadcast(
       a3 = (const float*) ((uintptr_t) a3 + k);
 
       const __m256 vzero = _mm256_setzero_ps();
-
-      const __m256 vb01234567c0 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 0))));
-      const __m256 vb89ABCDEFc0 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 8))));
+      const __m256i vbi01234567c0 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 0)));
+      const __m256i vbi89ABCDEFc0 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 8)));
+      const __m256 vb01234567c0 = _mm256_cvtepi32_ps(vbi01234567c0);
+      const __m256 vb89ABCDEFc0 = _mm256_cvtepi32_ps(vbi89ABCDEFc0);
 
       vacc0x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va0, _mm256_cmp_ps(vb01234567c0, vzero, _CMP_NEQ_OQ)), vb01234567c0, vacc0x01234567);
       vacc1x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va1, _mm256_cmp_ps(vb01234567c0, vzero, _CMP_NEQ_OQ)), vb01234567c0, vacc1x01234567);
@@ -175,9 +180,10 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x16s4__avx2_broadcast(
       va1 = _mm256_permute_ps(va1, _MM_SHUFFLE(0, 3, 2, 1));
       va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
-
-      const __m256 vb01234567c1 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 16))));
-      const __m256 vb89ABCDEFc1 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 24))));
+      const __m256i vbi01234567c1 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 16)));
+      const __m256i vbi89ABCDEFc1 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 24)));
+      const __m256 vb01234567c1 = _mm256_cvtepi32_ps(vbi01234567c1);
+      const __m256 vb89ABCDEFc1 = _mm256_cvtepi32_ps(vbi89ABCDEFc1);
 
       vacc0x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va0, _mm256_cmp_ps(vb01234567c1, vzero, _CMP_NEQ_OQ)), vb01234567c1, vacc0x01234567);
       vacc1x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va1, _mm256_cmp_ps(vb01234567c1, vzero, _CMP_NEQ_OQ)), vb01234567c1, vacc1x01234567);
@@ -192,9 +198,10 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x16s4__avx2_broadcast(
       va1 = _mm256_permute_ps(va1, _MM_SHUFFLE(0, 3, 2, 1));
       va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
-
-      const __m256 vb01234567c2 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 32))));
-      const __m256 vb89ABCDEFc2 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 40))));
+      const __m256i vbi01234567c2 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 32)));
+      const __m256i vbi89ABCDEFc2 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 40)));
+      const __m256 vb01234567c2 = _mm256_cvtepi32_ps(vbi01234567c2);
+      const __m256 vb89ABCDEFc2 = _mm256_cvtepi32_ps(vbi89ABCDEFc2);
 
       vacc0x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va0, _mm256_cmp_ps(vb01234567c2, vzero, _CMP_NEQ_OQ)), vb01234567c2, vacc0x01234567);
       vacc1x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va1, _mm256_cmp_ps(vb01234567c2, vzero, _CMP_NEQ_OQ)), vb01234567c2, vacc1x01234567);
@@ -209,9 +216,10 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x16s4__avx2_broadcast(
       va1 = _mm256_permute_ps(va1, _MM_SHUFFLE(0, 3, 2, 1));
       va2 = _mm256_permute_ps(va2, _MM_SHUFFLE(0, 3, 2, 1));
       va3 = _mm256_permute_ps(va3, _MM_SHUFFLE(0, 3, 2, 1));
-
-      const __m256 vb01234567c3 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 48))));
-      const __m256 vb89ABCDEFc3 = _mm256_cvtepi32_ps(_mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 56))));
+      const __m256i vbi01234567c3 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 48)));
+      const __m256i vbi89ABCDEFc3 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 56)));
+      const __m256 vb01234567c3 = _mm256_cvtepi32_ps(vbi01234567c3);
+      const __m256 vb89ABCDEFc3 = _mm256_cvtepi32_ps(vbi89ABCDEFc3);
 
       vacc0x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va0, _mm256_cmp_ps(vb01234567c3, vzero, _CMP_NEQ_OQ)), vb01234567c3, vacc0x01234567);
       vacc1x01234567 = _mm256_fmadd_ps(_mm256_and_ps(va1, _mm256_cmp_ps(vb01234567c3, vzero, _CMP_NEQ_OQ)), vb01234567c3, vacc1x01234567);

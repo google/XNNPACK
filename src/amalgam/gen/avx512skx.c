@@ -118,7 +118,8 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x16__avx512skx_broadcast(
 
     size_t k = kc;
     do {
-      const __m512 vb0123456789ABCDEF = _mm512_cvtepi32_ps(_mm512_cvtepi8_epi32(_mm_loadu_epi8((const void*) w)));
+      const __m512i vbi0123456789ABCDEF = _mm512_cvtepi8_epi32(_mm_loadu_epi8(w));
+      const __m512 vb0123456789ABCDEF  = _mm512_cvtepi32_ps(vbi0123456789ABCDEF);
       w = (const int8_t*) w + 16;
 
       const __m512 va0 = _mm512_set1_ps(*a0);
@@ -230,7 +231,8 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_7x16__avx512skx_broadcast(
 
     size_t k = kc;
     do {
-      const __m512 vb0123456789ABCDEF = _mm512_cvtepi32_ps(_mm512_cvtepi8_epi32(_mm_loadu_epi8((const void*) w)));
+      const __m512i vbi0123456789ABCDEF = _mm512_cvtepi8_epi32(_mm_loadu_epi8(w));
+      const __m512 vb0123456789ABCDEF  = _mm512_cvtepi32_ps(vbi0123456789ABCDEF);
       w = (const int8_t*) w + 16;
 
       const __m512 va0 = _mm512_set1_ps(*a0);
@@ -341,7 +343,7 @@ void xnn_f32_qs8_vcvt_ukernel__avx512skx_x128(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512 vscale = _mm512_load_ps(params->avx2.scale);
+  const __m512 vscale = _mm512_load_ps(params->avx512.scale);
   const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->avx512.output_max_less_zero_point);
   const __m512i voutput_zero_point = _mm512_load_si512(params->avx512.output_zero_point);
   const __m512i vshuffle512_mask = _mm512_load_si512(params->avx512.shuffle512_mask);
@@ -459,7 +461,7 @@ void xnn_f32_qu8_vcvt_ukernel__avx512skx_x128(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512 vscale = _mm512_load_ps(params->avx2.scale);
+  const __m512 vscale = _mm512_load_ps(params->avx512.scale);
   const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->avx512.output_max_less_zero_point);
   const __m512i voutput_zero_point = _mm512_load_si512(params->avx512.output_zero_point);
   const __m512i vshuffle512_mask = _mm512_load_si512(params->avx512.shuffle512_mask);
