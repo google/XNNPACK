@@ -18,6 +18,7 @@
 #include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 #include <xnnpack/microparams.h>
+#include <xnnpack/prefetch.h>
 #include <xnnpack/vmulcaddc.h>
 #include <xnnpack/vunary.h>
 
@@ -4366,7 +4367,7 @@ void xnn_f32_igemm_minmax_ukernel_4x16s4__fma3_broadcast(
   } while (nc != 0);
 }
 
-void xnn_f32_igemm_minmax_ukernel_5x16__fma3_broadcast(
+void xnn_f32_igemm_minmax_ukernel_5x16__fma3_broadcast_prfm(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -4457,6 +4458,7 @@ void xnn_f32_igemm_minmax_ukernel_5x16__fma3_broadcast(
         const __m256 vb01234567 = _mm256_load_ps(w);
         const __m256 vb89ABCDEF = _mm256_load_ps(w + 8);
         w += 16;
+        xnn_prefetch_to_l1(w + 224);
 
         const __m256 va0 = _mm256_broadcast_ss(a0);
         a0 += 1;

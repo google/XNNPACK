@@ -305,26 +305,28 @@ tools/xngen src/f32-igemm/MRx2c4-sse.c.in -D MR=4 -D NR=2 -o src/f32-igemm/gen/f
 
 ################################### x86 AVX ###################################
 ### AVX+BROADCAST micro-kernels
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=1 -D NR=8 -D FMA=0 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-avx-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=4 -D NR=8 -D FMA=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-avx-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=5 -D NR=8 -D FMA=0 -o src/f32-igemm/gen/f32-igemm-5x8-minmax-avx-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=6 -D NR=8 -D FMA=0 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-avx-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=7 -D NR=8 -D FMA=0 -o src/f32-igemm/gen/f32-igemm-7x8-minmax-avx-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=1 -D NR=16 -D FMA=0 -o src/f32-igemm/gen/f32-igemm-1x16-minmax-avx-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=3 -D NR=16 -D FMA=0 -o src/f32-igemm/gen/f32-igemm-3x16-minmax-avx-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=4 -D NR=16 -D FMA=0 -o src/f32-igemm/gen/f32-igemm-4x16-minmax-avx-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=5 -D NR=16 -D FMA=0 -o src/f32-igemm/gen/f32-igemm-5x16-minmax-avx-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=1 -D NR=8  -D FMA=0 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-avx-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=4 -D NR=8  -D FMA=0 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-avx-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=5 -D NR=8  -D FMA=0 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-5x8-minmax-avx-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=6 -D NR=8  -D FMA=0 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-avx-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=7 -D NR=8  -D FMA=0 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-7x8-minmax-avx-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=1 -D NR=16 -D FMA=0 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-1x16-minmax-avx-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=3 -D NR=16 -D FMA=0 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-3x16-minmax-avx-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=4 -D NR=16 -D FMA=0 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x16-minmax-avx-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=5 -D NR=16 -D FMA=0 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-5x16-minmax-avx-broadcast.c &
 ### FMA3+BROADCAST micro-kernels
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=1 -D NR=8 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-fma3-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=4 -D NR=8 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-fma3-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=5 -D NR=8 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-5x8-minmax-fma3-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=6 -D NR=8 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-fma3-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=7 -D NR=8 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-7x8-minmax-fma3-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=8 -D NR=8 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-8x8-minmax-fma3-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=1 -D NR=16 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-1x16-minmax-fma3-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=3 -D NR=16 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-3x16-minmax-fma3-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=4 -D NR=16 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-4x16-minmax-fma3-broadcast.c &
-tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=5 -D NR=16 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-5x16-minmax-fma3-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=1 -D NR=8  -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-1x8-minmax-fma3-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=4 -D NR=8  -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x8-minmax-fma3-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=5 -D NR=8  -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-5x8-minmax-fma3-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=6 -D NR=8  -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-6x8-minmax-fma3-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=7 -D NR=8  -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-7x8-minmax-fma3-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=8 -D NR=8  -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-8x8-minmax-fma3-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=1 -D NR=16 -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-1x16-minmax-fma3-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=3 -D NR=16 -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-3x16-minmax-fma3-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=4 -D NR=16 -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-4x16-minmax-fma3-broadcast.c &
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=5 -D NR=16 -D FMA=3 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-5x16-minmax-fma3-broadcast.c &
+
+tools/xngen src/f32-igemm/avx-broadcast.c.in -D MR=5 -D NR=16 -D FMA=3 -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-5x16-minmax-fma3-broadcast-prfm.c &
 
 tools/xngen src/f32-igemm/avx-shuffle4.c.in -D MR=1 -D NR=16 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-1x16s4-minmax-fma3-broadcast.c &
 tools/xngen src/f32-igemm/avx-shuffle4.c.in -D MR=3 -D NR=16 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-3x16s4-minmax-fma3-broadcast.c &

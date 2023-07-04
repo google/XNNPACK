@@ -1915,6 +1915,7 @@ ALL_FMA3_MICROKERNEL_SRCS = [
     "src/f32-igemm/gen/f32-igemm-4x16-minmax-fma3-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-4x16s4-minmax-fma3-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-5x8-minmax-fma3-broadcast.c",
+    "src/f32-igemm/gen/f32-igemm-5x16-minmax-fma3-broadcast-prfm.c",
     "src/f32-igemm/gen/f32-igemm-5x16-minmax-fma3-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-5x16s4-minmax-fma3-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-6x8-minmax-fma3-broadcast.c",

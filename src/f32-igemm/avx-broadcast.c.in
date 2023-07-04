@@ -10,10 +10,12 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <immintrin.h>
 
 #include <xnnpack/igemm.h>
+$if PREFETCH:
+  #include <xnnpack/prefetch.h>
 
 
 $ISA = {0: "avx", 3: "fma3"}[FMA]
-void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__${ISA}_broadcast(
+void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__${ISA}_broadcast${"_prfm" if PREFETCH else ""}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -80,6 +82,8 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__${ISA}_broadcast(
         $for N in range(8, NR, 8):
           const __m256 vb${ABC[N:N+8]} = _mm256_load_ps(w + ${N});
         w += ${NR};
+        $if PREFETCH:
+          xnn_prefetch_to_l1(w + 224);
 
         $for M in range(MR):
           const __m256 va${M} = _mm256_broadcast_ss(a${M});

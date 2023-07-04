@@ -1153,6 +1153,14 @@ static void f32_igemm(benchmark::State& state,
       benchmark::utils::CheckFMA3);
   }
 
+  static void f32_igemm_5x16__fma3_broadcast_prfm(benchmark::State& state, const char* net) {
+    f32_igemm(state,
+      xnn_f32_igemm_minmax_ukernel_5x16__fma3_broadcast_prfm,
+      xnn_init_f32_minmax_avx_params,
+      /*mr=*/5, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckFMA3);
+  }
+
   static void f32_igemm_1x16__avx512f_broadcast(benchmark::State& state, const char* net) {
     f32_igemm(state,
       xnn_f32_igemm_minmax_ukernel_1x16__avx512f_broadcast,
@@ -1233,6 +1241,8 @@ static void f32_igemm(benchmark::State& state,
   BENCHMARK_CONV(f32_igemm_3x16__fma3_broadcast)
   BENCHMARK_CONV(f32_igemm_4x16__fma3_broadcast)
   BENCHMARK_CONV(f32_igemm_5x16__fma3_broadcast)
+
+  BENCHMARK_CONV(f32_igemm_5x16__fma3_broadcast_prfm)
 
   BENCHMARK_CONV(f32_igemm_1x16__avx512f_broadcast)
   BENCHMARK_CONV(f32_igemm_4x16__avx512f_broadcast)

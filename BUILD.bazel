@@ -1427,7 +1427,7 @@ PROD_FMA3_MICROKERNEL_SRCS = [
     "src/f32-igemm/gen/f32-igemm-1x16-minmax-fma3-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-1x16s4-minmax-fma3-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-4x16s4-minmax-fma3-broadcast.c",
-    "src/f32-igemm/gen/f32-igemm-5x16-minmax-fma3-broadcast.c",
+    "src/f32-igemm/gen/f32-igemm-5x16-minmax-fma3-broadcast-prfm.c",
     "src/f32-vhswish/gen/f32-vhswish-fma3-x16.c",
     "src/f32-vtanh/gen/f32-vtanh-fma3-expm1minus-rr1-lut4-p4h3ts-perm-div-x40.c",
 ]
