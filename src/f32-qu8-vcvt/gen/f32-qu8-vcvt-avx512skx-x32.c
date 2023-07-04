@@ -27,7 +27,7 @@ void xnn_f32_qu8_vcvt_ukernel__avx512skx_x32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512 vscale = _mm512_load_ps(params->avx2.scale);
+  const __m512 vscale = _mm512_load_ps(params->avx512.scale);
   const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->avx512.output_max_less_zero_point);
   const __m512i voutput_zero_point = _mm512_load_si512(params->avx512.output_zero_point);
   const __m256i vshuffle256_mask = _mm256_load_si256((const __m256i*) params->avx512.shuffle256_mask);
