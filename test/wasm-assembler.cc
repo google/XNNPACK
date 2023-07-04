@@ -738,7 +738,7 @@ TEST(WasmAssemblerTest, InvalidCode) {
   InvalidCodeGenerator generator(&b);
   generator.Emit();
   EXPECT_THAT(generator.finalize(), NotNull());
-  EXPECT_THAT(b.first_function_index, XNN_INVALID_FUNCTION_INDEX);
+  EXPECT_THAT(xnn_first_function_ptr(&b), XNN_INVALID_FUNCTION_INDEX);
 }
 
 namespace {

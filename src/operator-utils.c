@@ -17,23 +17,24 @@
 // Generate code for a single set of parameters.
 // Code is generated into the code cache, and the offset of the generated code is returned.
 // If code already exists in code cache, the offset of the existing code is returned.
-// Return value of XNN_CACHE_NOT_FOUND indicates that no code is generated.
-static size_t get_generated_gemm(
+// Stores the value XNN_CACHE_NOT_FOUND in `offset` field when no code is generated.
+static enum xnn_status get_generated_gemm(
     xnn_jit_gemm_code_generator_fn generator,
     const struct jit_gemm_params *jit_gemm_params,
     size_t mr,
     size_t group_output_channels,
     size_t nr,
     size_t group_input_channels_in_bytes,
-    struct xnn_code_cache* code_cache)
+    struct xnn_code_cache* code_cache,
+    struct xnn_generated_code_chunk* code_chunk)
 {
   assert(code_cache != NULL);
   size_t offset = XNN_CACHE_NOT_FOUND;
+  enum xnn_status status = xnn_status_success;
   if (generator == NULL) {
+    status = xnn_status_uninitialized;
     goto error;
   }
-
-  enum xnn_status status = xnn_status_success;
 
   status = xnn_reserve_code_memory(&code_cache->cache.code, XNN_DEFAULT_MICROKERNEL_SIZE);
   if (xnn_status_success != status) {
@@ -52,11 +53,16 @@ static size_t get_generated_gemm(
   }
 
   const size_t new_size = code_cache->cache.code.size;
-  return xnn_get_or_insert_code_cache(code_cache, old_code, new_size - old_size);
+  const size_t code_size = new_size - old_size;
+  offset = xnn_get_or_insert_code_cache(code_cache, old_code, code_size);
+  *code_chunk = (struct xnn_generated_code_chunk) {offset, offset + code_size};
+  return xnn_status_success;
 
 error:
-  return offset;
+  *code_chunk = (struct xnn_generated_code_chunk) {offset, offset};
+  return status;
 }
+
 
 void xnn_generate_gemms_up_to_max_mr(
   size_t max_mr,
@@ -80,14 +86,14 @@ void xnn_generate_gemms_up_to_max_mr(
 
     for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
       xnn_log_debug("using generator for mr %zu to generate gemm of mr %zu and uarch %zu", smallest_mr, mr, i);
-      op->ukernel.gemm.gemm_cases[mr - 1].generated_code_offset[i] =
-          get_generated_gemm(generators.gemm[smallest_mr - 1].function[i], jit_gemm_params, mr,
-                             group_output_channels, nr, group_input_channels_in_bytes, op->code_cache);
+      get_generated_gemm(generators.gemm[smallest_mr - 1].function[i],
+                           jit_gemm_params, mr, group_output_channels, nr, group_input_channels_in_bytes, op->code_cache,
+                           &op->ukernel.gemm.gemm_cases[mr - 1].generated_code_chunk[i]);
     }
   }
 }
 
-static size_t get_generated_igemm(
+static enum xnn_status get_generated_igemm(
   xnn_jit_igemm_code_generator_fn generator,
   const struct jit_gemm_params *jit_gemm_params,
   size_t group_output_channels,
@@ -95,13 +101,15 @@ static size_t get_generated_igemm(
   size_t group_input_channels_in_bytes,
   size_t kernel_size,
   size_t mr,
-  struct xnn_code_cache* code_cache)
+  struct xnn_code_cache* code_cache,
+  struct xnn_generated_code_chunk* code_chunk)
 {
   size_t offset = XNN_CACHE_NOT_FOUND;
+  enum xnn_status status = xnn_status_success;
   if (generator == NULL) {
+    status = xnn_status_uninitialized;
     goto error;
   }
-  enum xnn_status status = xnn_status_success;
 
   status = xnn_reserve_code_memory(&code_cache->cache.code, XNN_DEFAULT_MICROKERNEL_SIZE);
   if (xnn_status_success != status) {
@@ -120,10 +128,14 @@ static size_t get_generated_igemm(
   }
 
   const size_t new_size = code_cache->cache.code.size;
-  return xnn_get_or_insert_code_cache(code_cache, old_code, new_size - old_size);
+  const size_t code_size = new_size - old_size;
+  offset = xnn_get_or_insert_code_cache(code_cache, old_code, code_size);
+  *code_chunk = (struct xnn_generated_code_chunk) {offset, offset + code_size};
+  return xnn_status_success;
 
 error:
-  return offset;
+  *code_chunk = (struct xnn_generated_code_chunk) {offset, offset};
+  return status;
 }
 
 void xnn_generate_igemms_up_to_max_mr(
@@ -149,10 +161,9 @@ void xnn_generate_igemms_up_to_max_mr(
 
     for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
       xnn_log_debug("using generator for mr %zu to generate igemm of mr %zu and uarch %zu", smallest_mr, mr, i);
-      op->ukernel.igemm.igemm_cases[mr - 1].generated_code_offset[i] =
         get_generated_igemm(generators.igemm[smallest_mr - 1].function[i], jit_gemm_params,
                             group_output_channels, nr, group_input_channels_in_bytes, kernel_size, mr,
-                            op->code_cache);
+                            op->code_cache, &op->ukernel.igemm.igemm_cases[mr - 1].generated_code_chunk[i]);
     }
   }
 }
@@ -172,9 +183,14 @@ void xnn_overwrite_gemm_cases_with_generated_code(
   }
 
   for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
-    const size_t jit_code_offset = gemm_cases[mr - 1].generated_code_offset[i];
-    if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
-      gemm_cases[mr - 1].function[i] = (xnn_gemm_ukernel_fn) cached_code_at_offset(op, jit_code_offset);
+    const struct xnn_generated_code_chunk chunk = gemm_cases[mr - 1].generated_code_chunk[i];
+    if (chunk.offset != XNN_CACHE_NOT_FOUND) {
+      const uintptr_t gemm_kernel = xnn_first_function_in_chunk_ptr(&op->code_cache->cache.code, chunk.offset, chunk.offset_end);
+      if (gemm_kernel == (uintptr_t) XNN_INVALID_FUNCTION_INDEX) {
+        xnn_log_warning("failed to finalize gemm kernel code");
+        continue;
+      }
+      gemm_cases[mr - 1].function[i] = (xnn_gemm_ukernel_fn) gemm_kernel;
     }
   }
 }
@@ -189,10 +205,13 @@ void xnn_overwrite_igemm_cases_with_generated_code(
   }
 
   for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
-    const size_t jit_code_offset = igemm_cases[mr - 1].generated_code_offset[i];
-    if (jit_code_offset != XNN_CACHE_NOT_FOUND) {
-      igemm_cases[mr - 1].function[i] = (xnn_igemm_ukernel_fn) cached_code_at_offset(op, jit_code_offset);
+    const struct xnn_generated_code_chunk chunk = igemm_cases[mr - 1].generated_code_chunk[i];
+    const uintptr_t gemm_kernel = xnn_first_function_in_chunk_ptr(&op->code_cache->cache.code, chunk.offset, chunk.offset_end);
+    if (gemm_kernel == (uintptr_t) XNN_INVALID_FUNCTION_INDEX) {
+      xnn_log_warning("failed to finalize igemm kernel code");
+      continue;
     }
+    igemm_cases[mr - 1].function[i] = (xnn_igemm_ukernel_fn) gemm_kernel;
   }
 }
 
@@ -214,9 +233,14 @@ void xnn_generate_vunary_ukernel(
       }
       if (xnn_finalize_code_memory(&b) != xnn_status_success) {
         xnn_log_warning("failed to finalize vunary kernel code");
+      }
+      const uintptr_t function_index = xnn_first_function_in_chunk_ptr(&b, 0, b.size);
+      if (function_index == XNN_INVALID_FUNCTION_INDEX) {
+        xnn_log_warning("failed to finalize vunary kernel code");
         return;
       }
-      *jit_ptr = (xnn_vunary_ukernel_fn) xnn_first_function_ptr(&b);
+
+      *jit_ptr = (xnn_vunary_ukernel_fn) function_index;
       xnn_release_code_memory(&b);
     }
   #endif // XNN_PLATFORM_WEB
@@ -296,7 +320,7 @@ static bool mr_is_available_gemm(size_t mr, struct xnn_hmp_gemm_ukernel *gemm_ca
 {
   #if XNN_PLATFORM_JIT
     if (code_cache_available) {
-      return gemm_cases[mr-1].generated_code_offset[XNN_UARCH_DEFAULT] != XNN_CACHE_NOT_FOUND ||
+      return gemm_cases[mr-1].generated_code_chunk[XNN_UARCH_DEFAULT].offset != XNN_CACHE_NOT_FOUND ||
           gemm_cases[mr-1].function[XNN_UARCH_DEFAULT] != NULL;
     }
   #endif
@@ -333,7 +357,7 @@ static bool mr_is_available_igemm(size_t mr, struct xnn_hmp_igemm_ukernel *igemm
 {
   #if XNN_PLATFORM_JIT
     if (code_cache_available) {
-      return igemm_cases[mr-1].generated_code_offset[XNN_UARCH_DEFAULT] != XNN_CACHE_NOT_FOUND ||
+      return igemm_cases[mr-1].generated_code_chunk[XNN_UARCH_DEFAULT].offset != XNN_CACHE_NOT_FOUND ||
           igemm_cases[mr-1].function[XNN_UARCH_DEFAULT] != NULL;
     }
   #endif

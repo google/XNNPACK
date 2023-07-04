@@ -490,22 +490,27 @@ struct xnn_prelu_config {
 XNN_INTERNAL const struct xnn_prelu_config* xnn_init_f16_prelu_config();
 XNN_INTERNAL const struct xnn_prelu_config* xnn_init_f32_prelu_config();
 
+struct xnn_generated_code_chunk {
+  size_t offset;
+  size_t offset_end;
+};
+
 struct xnn_hmp_gemm_ukernel {
   xnn_gemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
 #if XNN_PLATFORM_JIT
-  size_t generated_code_offset[XNN_MAX_UARCH_TYPES];
+  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
 #endif  // XNN_PLATFORM_JIT
 };
 
 static inline struct xnn_hmp_gemm_ukernel xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn function) {
   struct xnn_hmp_gemm_ukernel ukernel = {{ function }};
 #if XNN_PLATFORM_JIT
-  ukernel.generated_code_offset[0] = SIZE_MAX;
+  ukernel.generated_code_chunk[0] = (struct xnn_generated_code_chunk) {SIZE_MAX, SIZE_MAX};
 #endif  // XNN_PLATFORM_JIT
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
 #if XNN_PLATFORM_JIT
-    ukernel.generated_code_offset[i] = SIZE_MAX;
+    ukernel.generated_code_chunk[i] = (struct xnn_generated_code_chunk) {SIZE_MAX, SIZE_MAX};
 #endif  // XNN_PLATFORM_JIT
   }
   return ukernel;
@@ -527,19 +532,19 @@ static inline bool xnn_is_hmp_gemm_ukernel(struct xnn_hmp_gemm_ukernel ukernel) 
 struct xnn_hmp_igemm_ukernel {
   xnn_igemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
 #if XNN_PLATFORM_JIT
-  size_t generated_code_offset[XNN_MAX_UARCH_TYPES];
+  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
 #endif  // XNN_PLATFORM_JIT
 };
 
 static inline struct xnn_hmp_igemm_ukernel xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn function) {
   struct xnn_hmp_igemm_ukernel ukernel = {{ function }};
 #if XNN_PLATFORM_JIT
-  ukernel.generated_code_offset[0] = SIZE_MAX;
+  ukernel.generated_code_chunk[0] = (struct xnn_generated_code_chunk) {SIZE_MAX, SIZE_MAX};
 #endif  // XNN_PLATFORM_JIT
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
 #if XNN_PLATFORM_JIT
-    ukernel.generated_code_offset[i] = SIZE_MAX;
+    ukernel.generated_code_chunk[i] = (struct xnn_generated_code_chunk) {SIZE_MAX, SIZE_MAX};
 #endif  // XNN_PLATFORM_JIT
   }
   return ukernel;

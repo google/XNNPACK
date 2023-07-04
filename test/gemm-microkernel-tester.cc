@@ -2262,7 +2262,7 @@ void GemmMicrokernelTester::Test(
     void* trampoline_start = GenerateTrampoline(&code_buffer, TrampolineType::kGEMM);
     ASSERT_NE(trampoline_start, nullptr);
     ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
-    void* ukernel_address = xnn_first_function_ptr(&code_buffer);
+    void* ukernel_address = (void*) xnn_first_function_ptr(&code_buffer);
 
     xnn_f32_gemm_minmax_ukernel_trampoline_fn gemm_minmax =
         reinterpret_cast<xnn_f32_gemm_minmax_ukernel_trampoline_fn>(trampoline_start);
@@ -2276,7 +2276,7 @@ void GemmMicrokernelTester::Test(
     ASSERT_EQ(error, 0) << "Callee-saved register not saved correctly: " << RegisterFromCorruptedValue(error);
 #else
     ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&code_buffer));
-    void* ukernel_address = xnn_first_function_ptr(&code_buffer);
+    uintptr_t ukernel_address = xnn_first_function_ptr(&code_buffer);
     auto gemm_minmax = reinterpret_cast<xnn_f32_gemm_minmax_ukernel_fn>(ukernel_address);
     gemm_minmax(m(), n(), k() * sizeof(float),
       a.data(), a_stride() * sizeof(float),

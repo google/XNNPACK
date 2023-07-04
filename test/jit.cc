@@ -49,7 +49,8 @@ TEST(JIT_MEMORY, allocate_and_release_junk_code_web) {
   std::string junk = "1234";
   std::memcpy(b.start, junk.data(), junk.length());
   b.size = junk.length();
-  ASSERT_EQ(xnn_status_invalid_parameter, xnn_finalize_code_memory(&b));
+  ASSERT_EQ(XNN_INVALID_FUNCTION_INDEX, xnn_first_function_in_chunk_ptr(&b, 0, junk.length()));
+  ASSERT_EQ(xnn_status_success, xnn_finalize_code_memory(&b));
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&b));
   ASSERT_EQ(nullptr, b.start);
   ASSERT_EQ(0, b.size);
@@ -197,17 +198,57 @@ void MakeBuffer(Array&& array, xnn_code_buffer* b) {
   std::memcpy(b->start, array.data(), array.size());
 }
 
-TEST(JIT_MEMORY, finalize_code_with_dot_and_add_exported) {
+template <typename Array>
+void MakeBufferWithTwoModules(Array&& array, xnn_code_buffer* b) {
+  const size_t buffer_size = 2 * array.size();
+  ASSERT_EQ(xnn_status_success, xnn_allocate_code_memory(b, array.size()));
+  b->size = array.size();
+  std::memcpy(b->start, array.data(), array.size());
+  xnn_reserve_code_memory(b, buffer_size);
+  b->size += array.size();
+  std::memcpy((void*)((uintptr_t)b->start + array.size()), array.data(), array.size());
+}
+
+TEST(JIT_MEMORY, finalize_code_twice_with_dot_and_add_exported) {
   xnn_code_buffer buffer;
   MakeBuffer(kDotCode, &buffer);
   const auto status = xnn_finalize_code_memory(&buffer);
+  const int dot = xnn_first_function_ptr(&buffer);
   ASSERT_EQ(status, xnn_status_success);
-  const int dot = buffer.first_function_index;
   EXPECT_NE(dot, XNN_INVALID_FUNCTION_INDEX);
   const int add = dot + 1;
   EXPECT_EQ(((DotPtr)dot)(kVecA.data(), kVecB.data(), kVecSize),
             kExpectedDotProduct);
   EXPECT_EQ(((AddPtr)add)(kA, kB), kSum);
+  ASSERT_EQ(xnn_finalize_code_memory(&buffer), xnn_status_success);
+  EXPECT_NE(dot, xnn_first_function_ptr(&buffer));
+
+  ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&buffer));
+}
+
+TEST(JIT_MEMORY, finalize_code_for_multiple_modules_in_buffer) {
+  xnn_code_buffer buffer;
+  MakeBufferWithTwoModules(kDotCode, &buffer);
+  const auto status = xnn_finalize_code_memory(&buffer);
+  ASSERT_EQ(status, xnn_status_success);
+  {
+    // for the first module
+    const int dot = xnn_first_function_in_chunk_ptr(&buffer, 0, kDotCode.size());
+    EXPECT_NE(dot, XNN_INVALID_FUNCTION_INDEX);
+    const int add = dot + 1;
+    EXPECT_EQ(((DotPtr)dot)(kVecA.data(), kVecB.data(), kVecSize),
+              kExpectedDotProduct);
+    EXPECT_EQ(((AddPtr)add)(kA, kB), kSum);
+  }
+  {
+    // for the second module
+    const int dot = xnn_first_function_in_chunk_ptr(&buffer, kDotCode.size(), buffer.size);
+    EXPECT_NE(dot, XNN_INVALID_FUNCTION_INDEX);
+    const int add = dot + 1;
+    EXPECT_EQ(((DotPtr)dot)(kVecA.data(), kVecB.data(), kVecSize),
+              kExpectedDotProduct);
+    EXPECT_EQ(((AddPtr)add)(kA, kB), kSum);
+  }
 
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&buffer));
 }
@@ -216,8 +257,8 @@ TEST(JIT_MEMORY, finalize_code_with_no_exports) {
   xnn_code_buffer buffer;
   MakeBuffer(kNoExportsCode, &buffer);
   const auto status = xnn_finalize_code_memory(&buffer);
-  EXPECT_EQ(status, xnn_status_invalid_parameter);
-  EXPECT_EQ(buffer.first_function_index, XNN_INVALID_FUNCTION_INDEX);
+  EXPECT_EQ(status, xnn_status_success);
+  EXPECT_EQ(xnn_first_function_ptr(&buffer), XNN_INVALID_FUNCTION_INDEX);
   ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&buffer));
 }
 #endif  // XNN_PLATFORM_JIT && XNN_PLATFORM_WEB

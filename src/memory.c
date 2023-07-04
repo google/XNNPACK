@@ -144,9 +144,6 @@ enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buffer, size_t 
 
   buffer->size = 0;
   buffer->capacity = page_aligned_size;
-  #if XNN_PLATFORM_WEB
-    buffer->first_function_index = XNN_INVALID_FUNCTION_INDEX;
-  #endif
   return xnn_status_success;
 }
 
@@ -240,9 +237,9 @@ static enum xnn_status set_memory_permission(void* start, size_t size, enum xnn_
 }
 
 #if XNN_PLATFORM_WEB
-EM_JS(int, xnnLoadWasmModuleJS, (const uint8_t* code, int code_size, int invalid_function_index), {
+EM_JS(int, xnnLoadWasmModuleJS, (const uint8_t* code, int offset, int offset_end, int invalid_function_index), {
     const tableOriginalSize = wasmTable.length;
-    const binary = new Uint8Array(HEAPU8.slice(code, (code + code_size)));
+    const binary = new Uint8Array(HEAPU8.slice(code + offset, code + offset_end));
     try {
       var module = new WebAssembly.Module(binary);
       var instance = new WebAssembly.Instance(module, {env : {memory: wasmMemory}});
@@ -265,9 +262,7 @@ EM_JS(int, xnnLoadWasmModuleJS, (const uint8_t* code, int code_size, int invalid
 #if XNN_PLATFORM_JIT
 enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buffer) {
   #if XNN_PLATFORM_WEB
-    const int first_function_index = xnnLoadWasmModuleJS(buffer->start, buffer->size, XNN_INVALID_FUNCTION_INDEX);
-    buffer->first_function_index = first_function_index;
-    return first_function_index != XNN_INVALID_FUNCTION_INDEX ? xnn_status_success : xnn_status_invalid_parameter;
+    return xnn_status_success;
   #else
     const enum xnn_status status = release_unused_memory(buffer->size, buffer->start, &buffer->capacity);
     if (status != xnn_status_success) {
@@ -291,6 +286,14 @@ enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buffer) {
     // Set permissions to RX (no write).
     return set_memory_permission(buffer->start, buffer->size, xnn_memory_permission_read_execute);
   #endif // XNN_PLATFORM_WEB
+}
+
+uintptr_t xnn_first_function_in_chunk_ptr(struct xnn_code_buffer* buffer, size_t offset, size_t offset_end) {
+  #if (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+    return (uintptr_t) buffer->start + offset;
+  #elif XNN_PLATFORM_WEB
+    return xnnLoadWasmModuleJS(buffer->start, offset, offset_end, XNN_INVALID_FUNCTION_INDEX);
+  #endif
 }
 #endif  // XNN_PLATFORM_JIT
 

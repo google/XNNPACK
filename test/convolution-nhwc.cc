@@ -5075,7 +5075,7 @@ TEST(CONVOLUTION_NHWC_F32, weights_cache_depthwise_2x2d2) {
     .TestNHWCxF32();
 }
 
-#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT // TODO(b/287020333)
+#if (XNN_ARCH_ARM || XNN_ARCH_ARM64 || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD) && XNN_ENABLE_JIT
 TEST(CONVOLUTION_NHWC_F32, jit_1x1) {
   ConvolutionOperatorTester()
     .input_size(27, 37)
@@ -5372,6 +5372,7 @@ TEST(CONVOLUTION_NHWC_F32, jit_unioutput_grouped_1x1_with_output_stride) {
     .TestNHWCxF32();
 }
 
+#if !XNN_PLATFORM_WEB  // TODO(b/287020333)
 TEST(CONVOLUTION_NHWC_F32, jit_1x3) {
   ConvolutionOperatorTester()
     .input_size(20, 19)
@@ -5939,6 +5940,8 @@ TEST(CONVOLUTION_NHWC_F32, jit_unioutput_grouped_3x3_with_output_stride) {
     .TestNHWCxF32();
 }
 
+#endif //  !XNN_PLATFORM_WEB
+
 TEST(CONVOLUTION_NHWC_F32, DISABLED_jit_depthwise_1x1) {
   ConvolutionOperatorTester()
     .input_size(15, 14)
@@ -6305,7 +6308,7 @@ TEST(CONVOLUTION_NHWC_F32, jit_weights_cache_1x1) {
     .use_weights_cache(true)
     .TestNHWCxF32();
 }
-#endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT
+#endif  //  (XNN_ARCH_ARM || XNN_ARCH_ARM64 || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD) && XNN_ENABLE_JIT
 
 TEST(DEPTHWISE_CONVOLUTION_NHWC_F32, 1x1) {
   ConvolutionOperatorTester()
@@ -8095,7 +8098,7 @@ TEST(CONVOLUTION_NHWC_F16, weights_cache_depthwise_2x2d2) {
     .TestNHWCxF16();
 }
 
-#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT // TODO(b/287020333)
+#if (XNN_ARCH_ARM || XNN_ARCH_ARM64 || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD) && XNN_ENABLE_JIT
 TEST(CONVOLUTION_NHWC_F16, jit_1x1) {
   ConvolutionOperatorTester()
     .input_size(27, 37)
@@ -8154,8 +8157,7 @@ TEST(CONVOLUTION_NHWC_F16, jit_3x3) {
     .use_jit(true)
     .TestNHWCxF16();
 }
-#endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT
-
+#endif  //  (XNN_ARCH_ARM || XNN_ARCH_ARM64 || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD) && XNN_ENABLE_JIT
 
 TEST(DEPTHWISE_CONVOLUTION_NHWC_F16, 1x1) {
   ConvolutionOperatorTester()
