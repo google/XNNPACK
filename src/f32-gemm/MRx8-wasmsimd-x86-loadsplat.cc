@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cstdint>
-#include <cstdio>
 #include <iterator>
 #include <limits>
 
@@ -11,8 +10,6 @@
 #include <xnnpack/post-operation.h>
 #include <xnnpack/wasm-assembler.h>
 
-#include <wasm_simd128.h>
-
 
 namespace xnnpack {
 namespace {
@@ -21,7 +18,7 @@ class F32GemmLoadsplatGenerator : public WasmAssembler {
   explicit F32GemmLoadsplatGenerator(xnn_code_buffer* bf)
       : WasmAssembler(bf) {}
 
-  void generate(const char* name, size_t max_mr, const jit_gemm_params* jit_gemm_params) {
+  void generate(const char* name, size_t max_mr, size_t loop_unroll_iters, const jit_gemm_params* jit_gemm_params) {
     const size_t num_post_operations = jit_gemm_params->num_post_operations;
     const xnn_post_operation* post_operations = jit_gemm_params->post_operations;
     const float min = jit_gemm_params->f32_minmax.min;
@@ -49,24 +46,20 @@ class F32GemmLoadsplatGenerator : public WasmAssembler {
                       w = I32Add(w, I32Const(8 * sizeof(float)));
 
                       auto k = MakeLocal(kc);
-                      DoWhile(
-                        [&] {
-                          LocalsArray va = MakeLocalsArray(max_mr, v128);
+                      InnerLoop(as, vacc0123, vacc4567, w, k, max_mr, loop_unroll_iters);
+                      const size_t max_iters_left = loop_unroll_iters - 1;
+                      size_t mask = max_iters_left > 0 ? (1 << static_cast<size_t>(log2(max_iters_left))) : 0;
 
-                          auto vb0123 = MakeLocal(V128Load(w, /*offset=*/0));
-                          auto vb4567 = MakeLocal(V128Load(w, /*offset=*/sizeof(v128_t)));
-
-                          for (size_t i = 0; i < max_mr; i++) {
-                            va[i] = V128Load32Splat(as[i]);
-                            vacc0123[i] = F32x4Add(vacc0123[i], F32x4Mul(va[i], vb0123));
-                            vacc4567[i] = F32x4Add(vacc4567[i], F32x4Mul(va[i], vb4567));
-                            as[i] = I32Add(as[i], I32Const(sizeof(float)));
-                          }
-
-                          w = I32Add(w, I32Const(8 * sizeof(float)));
-                          k = I32Sub(k, I32Const(sizeof(float)));
-                        },
-                        [&] { I32Ne(k, I32Const(0)); });
+                      if (max_iters_left > 0) {
+                        If([&] {I32Ne(k, I32Const(0));},
+                           [&] {
+                               while (mask > 0) {
+                                 If([&] { I32GeU(k, I32Const(mask * sizeof(float))); },
+                                    [&] { InnerLoopBody(as, vacc0123, vacc4567, w, k, max_mr, mask); });
+                                 mask >>= 1;
+                               }
+                        });
+                      }
 
                       Clamp(vacc0123);
                       ApplyPostOps(post_operations, num_post_operations, vacc0123);
@@ -225,14 +218,40 @@ class F32GemmLoadsplatGenerator : public WasmAssembler {
     for (auto& value : values) Clamp(value);
   }
 
+  void InnerLoopBody(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& w, Local& k, size_t max_mr,
+                     size_t loop_unroll_iters) {
+    for (size_t unrolled_iter = 0; unrolled_iter < loop_unroll_iters; unrolled_iter++) {
+      const auto vb0123 = MakeLocal(V128Load(w, /*offset=*/(2 * unrolled_iter) * sizeof(v128_t)));
+      const auto vb4567 = MakeLocal(V128Load(w, /*offset=*/(2 * unrolled_iter + 1) * sizeof(v128_t)));
+      for (size_t i = 0; i < max_mr; i++) {
+        const auto va = MakeLocal(V128Load32Splat(as[i]));
+        vacc0123[i] = F32x4Add(vacc0123[i], F32x4Mul(va, vb0123));
+        vacc4567[i] = F32x4Add(vacc4567[i], F32x4Mul(va, vb4567));
+        as[i] = I32Add(as[i], I32Const(sizeof(float)));
+      }
+    }
+    w = I32Add(w, I32Const(8 * loop_unroll_iters * sizeof(float)));
+    k = I32Sub(k, I32Const(loop_unroll_iters * sizeof(float)));
+  }
+
+  void InnerLoop(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& w, Local& k, size_t max_mr,
+                 size_t loop_unroll_iters) {
+    const auto body = [&] { InnerLoopBody(as, vacc0123, vacc4567, w, k, max_mr, loop_unroll_iters); };
+    if (loop_unroll_iters == 1) {
+      DoWhile(body, [&] { I32Ne(k, I32Const(0)); });
+    } else {
+      While([&] { I32GeU(k, I32Const(loop_unroll_iters * sizeof(float))); }, body);
+    }
+  }
+
   HswishConsts hswish_consts_;
   ClampConsts clamps_consts_;
 };
 
-xnn_status generate(xnn_code_buffer* b, const char* name, size_t max_mr, const void* params) {
+xnn_status generate(xnn_code_buffer* b, const char* name, size_t max_mr, size_t loop_unroll_iters, const void* params) {
   xnnpack::F32GemmLoadsplatGenerator generator(b);
 
-  generator.generate(name, max_mr, static_cast<const jit_gemm_params*>(params));
+  generator.generate(name, max_mr, loop_unroll_iters, static_cast<const jit_gemm_params*>(params));
   generator.Emit();
   auto finalized = generator.finalize();
   if (finalized == nullptr || generator.error() != xnnpack::Error::kNoError) {
@@ -245,11 +264,34 @@ xnn_status generate(xnn_code_buffer* b, const char* name, size_t max_mr, const v
 }  // namespace xnnpack
 
 extern "C" {
-xnn_status_t xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat(xnn_code_buffer* b, size_t max_mr,
+xnn_status_t xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1(xnn_code_buffer* b, size_t max_mr,
                                                                        size_t nc_mod_nr, size_t kc,
                                                                        const void* params) {
   static const char* kFunctionName = "xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat";
   assert(max_mr <= 6);
-  return xnnpack::generate(b, kFunctionName, max_mr, params);
+  return xnnpack::generate(b, kFunctionName, max_mr, 1, params);
+}
+
+xnn_status_t xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x2(xnn_code_buffer* b, size_t max_mr,
+                                                                               size_t nc_mod_nr, size_t kc,
+                                                                               const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x2";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, 2, params);
+}
+
+xnn_status_t xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x4(xnn_code_buffer* b, size_t max_mr,
+                                                                               size_t nc_mod_nr, size_t kc,
+                                                                               const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x4";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, 4, params);
+}
+xnn_status_t xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x8(xnn_code_buffer* b, size_t max_mr,
+                                                                               size_t nc_mod_nr, size_t kc,
+                                                                               const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x8";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, 8, params);
 }
 }
