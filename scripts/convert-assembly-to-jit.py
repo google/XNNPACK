@@ -197,8 +197,8 @@ def fix_fn_name(name: str) -> str:
 
 
 def remove_prfm_from_fn_name(name: str) -> str:
-  assert ('_prfm_' in name)
-  return name.replace('prfm_', '')
+  assert ('_prfm' in name)
+  return name.replace('_prfm', '')
 
 
 def fix_regs(regs: str) -> str:
