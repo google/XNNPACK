@@ -23,6 +23,7 @@
 #include <xnnpack/memory.h>
 #include <xnnpack/microfnptr.h>
 #include <xnnpack/microparams-init.h>
+#include <xnnpack/prequantization.h>
 #include <xnnpack/requantization.h>
 
 #if XNN_ARCH_ARM64
@@ -508,46 +509,6 @@ void GemmMicrokernelTester::Test(
   }
 }
 
-xnn_qd8_quantization_params calculate_asymmetric_f32_qs8_params(
-    const float* values, const size_t size)
-{
-  xnn_qd8_quantization_params params;
-  const int32_t kMinScale = std::numeric_limits<int8_t>::min();
-  const int32_t kMaxScale = std::numeric_limits<int8_t>::max();
-  const float qmin = kMinScale;
-  const float qmax = kMaxScale;
-  const auto minmax = std::minmax_element(values, values + size);
-  const float rmin = static_cast<float>(std::min(0.0f, *minmax.first));
-  const float rmax = static_cast<float>(std::max(0.0f, *minmax.second));
-  if (rmin == rmax) {
-    params.scale = 1.f;
-    params.zero_point = 0;
-  } else {
-    const float scale = (rmax - rmin) / (qmax- qmin);
-    const float zero_point_from_min = qmin - rmin / scale;
-    const float zero_point_from_max = qmax - rmax / scale;
-    const float zero_point_from_min_error =
-        std::abs(qmin) + std::abs(rmin / scale);
-    const float zero_point_from_max_error =
-        std::abs(qmax) + std::abs(rmax / scale);
-    const float zero_point =
-        zero_point_from_min_error < zero_point_from_max_error
-        ? zero_point_from_min
-        : zero_point_from_max;
-    int8_t nudged_zero_point = 0;
-    if (zero_point <= qmin) {
-      nudged_zero_point = kMinScale;
-    } else if (zero_point >= qmax) {
-      nudged_zero_point = kMaxScale;
-    } else {
-      nudged_zero_point = static_cast<int8_t>(std::rintf(zero_point));
-    }
-    params.scale = scale;
-    params.zero_point = nudged_zero_point;
-  }
-  return params;
-}
-
 void GemmMicrokernelTester::Test(
   xnn_qd8_f32_qs8w_gemm_ukernel_fn gemm,
   xnn_init_f32_minmax_params_fn init_params) const
@@ -574,7 +535,9 @@ void GemmMicrokernelTester::Test(
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), std::ref(f32rng));
     for (int i = 0; i < m(); ++i) {
-      quantization_params[i] = calculate_asymmetric_f32_qs8_params(&input[i * k()], k());
+      const float* input_ptr = &input[i * k()];
+      const auto minmax = std::minmax_element(input_ptr, input_ptr + k());
+      xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second, &quantization_params[i]);
       const float inv_scale = 1.0f / quantization_params[i].scale;
       for (int j = 0; j < k(); ++j) {
         float scaled_input = input[i * k() + j] * inv_scale;

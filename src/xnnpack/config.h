@@ -297,7 +297,14 @@ struct xnn_reduce_config {
   size_t element_tile;
 };
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rminmax_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rsum_config();
+
+struct xnn_prequantize_config {
+  xnn_f32_prequantize_ukernel_fn ukernel;
+};
+
+XNN_INTERNAL const struct xnn_prequantize_config* xnn_init_f32_qd8_prequantize_config();
 
 struct xnn_xx_fill_config {
   xnn_fill_ukernel_fn ukernel;

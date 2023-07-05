@@ -1343,6 +1343,13 @@ typedef void (*xnn_pad_ukernel_fn)(
     size_t output_stride,
     const uint32_t fill_value);
 
+// PREQUANTIZE: Calculate dyanmic range quantization parameters
+
+typedef void (*xnn_f32_prequantize_ukernel_fn)(
+    float min,
+    float max,
+    struct xnn_qd8_quantization_params* quantization_params);
+
 // REDUCE: Reduce
 
 typedef void (*xnn_reduce_ukernel_fn)(
