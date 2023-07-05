@@ -518,6 +518,10 @@ class LocalWasmOps : public LocalsManager {
     return BinaryOp(lhs, rhs, &Derived::i32_ne);
   }
 
+  ValueOnStack I32NeZ(const ValueOnStack& value) {
+    return I32Ne(value, I32Const(0));
+  }
+
   ValueOnStack I32ShrU(const ValueOnStack& value,
                        const ValueOnStack& bits_num) {
     return BinaryOp(value, bits_num, &Derived::i32_shr_u);
