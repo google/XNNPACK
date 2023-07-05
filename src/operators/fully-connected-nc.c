@@ -408,13 +408,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc8w(
     return xnn_status_invalid_parameter;
   }
 
-  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
-    xnn_log_error(
-      "failed to create %s operator with transposed weights: transposing QC8 weights not supported",
-      xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32_qc8w));
-    return xnn_status_invalid_parameter;
-  }
-
   for (size_t output_channel = 0; output_channel < output_channels; output_channel++) {
     if (kernel_scale[output_channel] <= 0.0f || !isnormal(kernel_scale[output_channel])) {
       xnn_log_error(
@@ -457,7 +450,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc8w(
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*bias_element_size=*/sizeof(float),
-    (xnn_pack_gemm_gio_w_fn) NULL,
+    (xnn_pack_gemm_gio_w_fn) xnn_pack_f32_qs8w_gemm_gio_w,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     /*packing_params=*/NULL,
     /*packed_weights_padding_byte=*/0,
