@@ -734,7 +734,7 @@ class FullyConnectedOperatorTester {
             << "batch index = " << i << ", channel = " << c;
         EXPECT_NEAR(output_ref[i * output_channels() + c],
                     output[i * output_stride() + c],
-                    std::max(1.0e-4 * std::abs(output_ref[i * output_channels() + c]), 1.0e-4))
+                    1.0e-4 * std::abs(output_ref[i * output_channels() + c]))
             << "batch index = " << i << ", channel = " << c;
       }
     }
@@ -742,6 +742,7 @@ class FullyConnectedOperatorTester {
 
   void TestF32QC8W() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
+    ASSERT_FALSE(transpose_weights()) << "transposed QC8 weights not supported";
 
     std::random_device random_device;
     auto rng = std::mt19937(random_device());
@@ -789,27 +790,14 @@ class FullyConnectedOperatorTester {
       } else {
         std::fill(output_ref.begin(), output_ref.end(), 0.0f);
       }
-      if (transpose_weights()) {
-        for (size_t i = 0; i < batch_size(); i++) {
-          for (size_t oc = 0; oc < output_channels(); oc++) {
-            for (size_t ic = 0; ic < input_channels(); ic++) {
-              output_ref[i * output_channels() + oc] +=
-                  input[i * input_stride() + ic] *
-                  static_cast<float>(static_cast<int32_t>(kernel[ic * output_channels() + oc]));
-            }
-            output_ref[i * output_channels() + oc] *= scale[oc];
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t oc = 0; oc < output_channels(); oc++) {
+          for (size_t ic = 0; ic < input_channels(); ic++) {
+            output_ref[i * output_channels() + oc] +=
+              input[i * input_stride() + ic] *
+              static_cast<float>(static_cast<int32_t>(kernel[oc * input_channels() + ic]));
           }
-        }
-      } else {
-        for (size_t i = 0; i < batch_size(); i++) {
-          for (size_t oc = 0; oc < output_channels(); oc++) {
-            for (size_t ic = 0; ic < input_channels(); ic++) {
-              output_ref[i * output_channels() + oc] +=
-                  input[i * input_stride() + ic] *
-                  static_cast<float>(static_cast<int32_t>(kernel[oc * input_channels() + ic]));
-            }
-            output_ref[i * output_channels() + oc] *= scale[oc];
-          }
+          output_ref[i * output_channels() + oc] *= scale[oc];
         }
       }
 
