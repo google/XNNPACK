@@ -855,6 +855,11 @@ TEST_F(WasmOpsTest, Tee) {
   local_tee(i32_local_);
 }
 
+TEST_F(WasmOpsTest, Select) {
+  Emit8ExpectCall(0x1B);
+  Select(i32_value_, i32_value_, i32_value_);
+}
+
 using ::xnnpack::internal::LocalsManager;
 
 TEST(WasmAssembler, LocalsManager) {
