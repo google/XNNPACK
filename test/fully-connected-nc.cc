@@ -561,7 +561,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC8W, unit_batch_with_output_stride) {
     .TestF32QC8W();
 }
 
-TEST(FULLY_CONNECTED_NC_F32_QC8W, DISABLED_unit_batch_transpose_weights) {
+TEST(FULLY_CONNECTED_NC_F32_QC8W, unit_batch_transpose_weights) {
   FullyConnectedOperatorTester()
     .transpose_weights(true)
     .batch_size(1)
@@ -630,7 +630,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC8W, small_batch_with_output_stride) {
     .TestF32QC8W();
 }
 
-TEST(FULLY_CONNECTED_NC_F32_QC8W, DISABLED_small_batch_transpose_weights) {
+TEST(FULLY_CONNECTED_NC_F32_QC8W, small_batch_transpose_weights) {
   FullyConnectedOperatorTester()
     .transpose_weights(true)
     .batch_size(12)
@@ -660,7 +660,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC8W, weights_cache_unit_batch) {
     .TestF32QC8W();
 }
 
-TEST(FULLY_CONNECTED_NC_F32_QC8W, DISABLED_weights_cache_unit_batch_transpose_weights) {
+TEST(FULLY_CONNECTED_NC_F32_QC8W, weights_cache_unit_batch_transpose_weights) {
   FullyConnectedOperatorTester()
     .transpose_weights(true)
     .batch_size(1)
