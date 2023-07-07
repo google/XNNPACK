@@ -16,6 +16,15 @@
 #include <xnnpack/log.h>
 
 
+static bool is_continugous(xnn_operator_t lut_elementwise_op)
+{
+  const size_t channels = lut_elementwise_op->channels;
+  const size_t input_stride = lut_elementwise_op->input_pixel_stride;
+  const size_t output_stride = lut_elementwise_op->output_pixel_stride;
+  const size_t batch_size = lut_elementwise_op->batch_size;
+  return (((input_stride ^ channels) | (output_stride ^ channels)) == 0) || batch_size == 1;
+}
+
 typedef float (*xnn_lut_init_fn)(float, const void*);
 
 static enum xnn_status create_lut_elementwise_nc(
@@ -365,7 +374,7 @@ static enum xnn_status reshape_lut_elementwise_nc(
   const size_t channels = lut_elementwise_op->channels;
   const size_t input_stride = lut_elementwise_op->input_pixel_stride;
   const size_t output_stride = lut_elementwise_op->output_pixel_stride;
-  if ((((input_stride ^ channels) | (output_stride ^ channels)) == 0) || batch_size == 1) {
+  if (is_continugous(lut_elementwise_op)) {
     const size_t block_size = 1024;
     lut_elementwise_op->context.lut_contiguous = (struct lut_contiguous_context) {
       .x_stride = input_stride * sizeof(uint8_t),
@@ -479,12 +488,7 @@ static enum xnn_status setup_lut_elementwise_nc(
       break;
   }
 
-  const size_t channels = lut_elementwise_op->channels;
-  const size_t input_stride = lut_elementwise_op->input_pixel_stride;
-  const size_t output_stride = lut_elementwise_op->output_pixel_stride;
-  const size_t batch_size = lut_elementwise_op->batch_size;
-
-  if ((((input_stride ^ channels) | (output_stride ^ channels)) == 0) || batch_size == 1) {
+  if (is_continugous(lut_elementwise_op)) {
     lut_elementwise_op->context.lut_contiguous.x = input;
     lut_elementwise_op->context.lut_contiguous.y = output;
   } else {
