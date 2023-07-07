@@ -137,10 +137,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           vout${M}x${ABC[N:N+4]} = vmulq_f32(vout${M}x${ABC[N:N+4]}, vscale${M});
 
       $for N in range(0, NR, 4):
-        const float32x4_t vbias${N} = vld1q_f32(w); w = (const float*) w + 4;
+        const float32x4_t vbias${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
       $for M in range(0, MR):
         $for N in range(0, NR, 4):
-          vout${M}x${ABC[N:N+4]} = vaddq_f32(vout${M}x${ABC[N:N+4]}, vbias${N});
+          vout${M}x${ABC[N:N+4]} = vaddq_f32(vout${M}x${ABC[N:N+4]}, vbias${ABC[N:N+4]});
       const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
       const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
       $for M in range(0, MR):

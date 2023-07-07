@@ -112,14 +112,14 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x16c4__neondot(
     vout0x89AB = vmulq_f32(vout0x89AB, vscale0);
     vout0xCDEF = vmulq_f32(vout0xCDEF, vscale0);
 
-    const float32x4_t vbias0 = vld1q_f32(w); w = (const float*) w + 4;
-    const float32x4_t vbias4 = vld1q_f32(w); w = (const float*) w + 4;
-    const float32x4_t vbias8 = vld1q_f32(w); w = (const float*) w + 4;
-    const float32x4_t vbias12 = vld1q_f32(w); w = (const float*) w + 4;
-    vout0x0123 = vaddq_f32(vout0x0123, vbias0);
-    vout0x4567 = vaddq_f32(vout0x4567, vbias4);
-    vout0x89AB = vaddq_f32(vout0x89AB, vbias8);
-    vout0xCDEF = vaddq_f32(vout0xCDEF, vbias12);
+    const float32x4_t vbias0123 = vld1q_f32(w); w = (const float*) w + 4;
+    const float32x4_t vbias4567 = vld1q_f32(w); w = (const float*) w + 4;
+    const float32x4_t vbias89AB = vld1q_f32(w); w = (const float*) w + 4;
+    const float32x4_t vbiasCDEF = vld1q_f32(w); w = (const float*) w + 4;
+    vout0x0123 = vaddq_f32(vout0x0123, vbias0123);
+    vout0x4567 = vaddq_f32(vout0x4567, vbias4567);
+    vout0x89AB = vaddq_f32(vout0x89AB, vbias89AB);
+    vout0xCDEF = vaddq_f32(vout0xCDEF, vbiasCDEF);
     const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
     const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
     vout0x0123 = vmaxq_f32(vout0x0123, vmin);

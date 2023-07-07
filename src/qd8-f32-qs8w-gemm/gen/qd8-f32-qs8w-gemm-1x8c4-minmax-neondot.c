@@ -92,10 +92,10 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x8c4__neondot(
     vout0x0123 = vmulq_f32(vout0x0123, vscale0);
     vout0x4567 = vmulq_f32(vout0x4567, vscale0);
 
-    const float32x4_t vbias0 = vld1q_f32(w); w = (const float*) w + 4;
-    const float32x4_t vbias4 = vld1q_f32(w); w = (const float*) w + 4;
-    vout0x0123 = vaddq_f32(vout0x0123, vbias0);
-    vout0x4567 = vaddq_f32(vout0x4567, vbias4);
+    const float32x4_t vbias0123 = vld1q_f32(w); w = (const float*) w + 4;
+    const float32x4_t vbias4567 = vld1q_f32(w); w = (const float*) w + 4;
+    vout0x0123 = vaddq_f32(vout0x0123, vbias0123);
+    vout0x4567 = vaddq_f32(vout0x4567, vbias4567);
     const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
     const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
     vout0x0123 = vmaxq_f32(vout0x0123, vmin);
