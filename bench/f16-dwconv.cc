@@ -212,7 +212,7 @@ static void f16_dwconv(benchmark::State& state,
   std::generate(b.begin(), b.end(), std::ref(f16rng));
 
   std::vector<uint16_t> z(channels + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> buffer(channels + XNN_MAX_SIMD_SIZE / sizeof(uint16_t));
+  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> buffer(channels + XNN_MULTIPASS_EXTRA_BYTES / sizeof(uint16_t));
 
   const size_t tile_size = xnn_dwconv_multipass_tile_size(
     kernel_size, first_pass_tile, middle_pass_tile, last_pass_tile);

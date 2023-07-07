@@ -345,6 +345,13 @@
   #define XNN_MAX_SIMD_SIZE 16
 #endif
 
+// Use constant here to avoid dependency on xnnpack.h
+#if XNN_MAX_SIMD_SIZE >= 16
+  #define XNN_MULTIPASS_EXTRA_BYTES XNN_MAX_SIMD_SIZE
+#else
+  #define XNN_MULTIPASS_EXTRA_BYTES 16
+#endif
+
 
 #define XNN_LOG2_SIZEOF_INT8_T   0  // log2(sizeof(int8_t))
 #define XNN_LOG2_SIZEOF_UINT8_T  0  // log2(sizeof(uint8_t))

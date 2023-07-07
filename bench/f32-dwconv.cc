@@ -212,7 +212,7 @@ static void f32_dwconv(
   std::generate(b.begin(), b.end(), std::ref(f32rng));
 
   std::vector<float> z(channels + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float, AlignedAllocator<float, 64>> buffer(channels + XNN_MAX_SIMD_SIZE / sizeof(float));
+  std::vector<float, AlignedAllocator<float, 64>> buffer(channels + XNN_MULTIPASS_EXTRA_BYTES / sizeof(float));
 
   const size_t tile_size = xnn_dwconv_multipass_tile_size(
     kernel_size, first_pass_tile, middle_pass_tile, last_pass_tile);
