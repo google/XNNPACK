@@ -77,23 +77,23 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         # Load initial bias from w into accumulators
         LDP         q16, q20, [x5], 32
         SUBS        x0, x2, 16              // k = kc - 16
-        MUL        v17.4s, v16.4s, v12.s[1]
-        MUL        v18.4s, v16.4s, v12.s[2]
-        LDP        q24, q28, [x5], 32
-        MUL        v19.4s, v16.4s, v12.s[3]
-        MUL        v21.4s, v20.4s, v12.s[1]
-        MUL        v22.4s, v20.4s, v12.s[2]
-        MUL        v23.4s, v20.4s, v12.s[3]
-        MUL        v25.4s, v24.4s, v12.s[1]
-        MUL        v26.4s, v24.4s, v12.s[2]
-        MUL        v27.4s, v24.4s, v12.s[3]
-        MUL        v29.4s, v28.4s, v12.s[1]
-        MUL        v30.4s, v28.4s, v12.s[2]
-        MUL        v31.4s, v28.4s, v12.s[3]
-        MUL        v24.4s, v24.4s, v12.s[0]
-        MUL        v28.4s, v28.4s, v12.s[0]
-        MUL        v16.4s, v16.4s, v12.s[0]
-        MUL        v20.4s, v20.4s, v12.s[0]
+        MUL         v17.4s, v16.4s, v12.s[1]
+        MUL         v18.4s, v16.4s, v12.s[2]
+        LDP         q24, q28, [x5], 32
+        MUL         v19.4s, v16.4s, v12.s[3]
+        MUL         v21.4s, v20.4s, v12.s[1]
+        MUL         v22.4s, v20.4s, v12.s[2]
+        MUL         v23.4s, v20.4s, v12.s[3]
+        MUL         v25.4s, v24.4s, v12.s[1]
+        MUL         v26.4s, v24.4s, v12.s[2]
+        MUL         v27.4s, v24.4s, v12.s[3]
+        MUL         v29.4s, v28.4s, v12.s[1]
+        MUL         v30.4s, v28.4s, v12.s[2]
+        MUL         v31.4s, v28.4s, v12.s[3]
+        MUL         v24.4s, v24.4s, v12.s[0]
+        MUL         v28.4s, v28.4s, v12.s[0]
+        MUL         v16.4s, v16.4s, v12.s[0]
+        MUL         v20.4s, v20.4s, v12.s[0]
 
         # Is there at least 16 bytes for prologue/epilogue?
         B.LO        4f
@@ -439,7 +439,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         SCVTF       v29.4s, v29.4s
         SCVTF       v30.4s, v30.4s
         SCVTF       v31.4s, v31.4s
-        FMUL        v16.4s, v16.4s, v13.s[0] // scale
+        FMUL        v16.4s, v16.4s, v13.s[0]    // scale
         FMUL        v17.4s, v17.4s, v13.s[1]
         FMUL        v18.4s, v18.4s, v13.s[2]
         FMUL        v19.4s, v19.4s, v13.s[3]
@@ -455,7 +455,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         FMUL        v29.4s, v29.4s, v13.s[1]
         FMUL        v30.4s, v30.4s, v13.s[2]
         FMUL        v31.4s, v31.4s, v13.s[3]
-        LDP         q0, q1, [x5], 32       // bias
+        LDP         q0, q1, [x5], 32        // bias
         LDP         q2, q3, [x5], 32
         FADD        v16.4s, v16.4s, v0.4s
         FADD        v17.4s, v17.4s, v0.4s
@@ -473,8 +473,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         FADD        v29.4s, v29.4s, v3.4s
         FADD        v30.4s, v30.4s, v3.4s
         FADD        v31.4s, v31.4s, v3.4s
-        LD1R        {v0.4s}, [x11], #4    // min
-        LD1R        {v1.4s}, [x11]        //max
+        LD1R        {v0.4s}, [x11], #4      // min
+        LD1R        {v1.4s}, [x11]          //max
         FMAX        v16.4s, v16.4s, v0.4s
         FMAX        v17.4s, v17.4s, v0.4s
         FMAX        v18.4s, v18.4s, v0.4s

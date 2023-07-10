@@ -103,23 +103,23 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x
           MOV         v30.16b, v28.16b
           MOV         v31.16b, v28.16b
         $else:
-          MUL        v17.4s, v16.4s, v12.s[1]
-          MUL        v18.4s, v16.4s, v12.s[2]
-          LDP        q24, q28, [x5], 32
-          MUL        v19.4s, v16.4s, v12.s[3]
-          MUL        v21.4s, v20.4s, v12.s[1]
-          MUL        v22.4s, v20.4s, v12.s[2]
-          MUL        v23.4s, v20.4s, v12.s[3]
-          MUL        v25.4s, v24.4s, v12.s[1]
-          MUL        v26.4s, v24.4s, v12.s[2]
-          MUL        v27.4s, v24.4s, v12.s[3]
-          MUL        v29.4s, v28.4s, v12.s[1]
-          MUL        v30.4s, v28.4s, v12.s[2]
-          MUL        v31.4s, v28.4s, v12.s[3]
-          MUL        v24.4s, v24.4s, v12.s[0]
-          MUL        v28.4s, v28.4s, v12.s[0]
-          MUL        v16.4s, v16.4s, v12.s[0]
-          MUL        v20.4s, v20.4s, v12.s[0]
+          MUL         v17.4s, v16.4s, v12.s[1]
+          MUL         v18.4s, v16.4s, v12.s[2]
+          LDP         q24, q28, [x5], 32
+          MUL         v19.4s, v16.4s, v12.s[3]
+          MUL         v21.4s, v20.4s, v12.s[1]
+          MUL         v22.4s, v20.4s, v12.s[2]
+          MUL         v23.4s, v20.4s, v12.s[3]
+          MUL         v25.4s, v24.4s, v12.s[1]
+          MUL         v26.4s, v24.4s, v12.s[2]
+          MUL         v27.4s, v24.4s, v12.s[3]
+          MUL         v29.4s, v28.4s, v12.s[1]
+          MUL         v30.4s, v28.4s, v12.s[2]
+          MUL         v31.4s, v28.4s, v12.s[3]
+          MUL         v24.4s, v24.4s, v12.s[0]
+          MUL         v28.4s, v28.4s, v12.s[0]
+          MUL         v16.4s, v16.4s, v12.s[0]
+          MUL         v20.4s, v20.4s, v12.s[0]
 
         # Is there at least 16 bytes for prologue/epilogue?
         B.LO        4f
@@ -466,7 +466,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x
           SCVTF       v29.4s, v29.4s
           SCVTF       v30.4s, v30.4s
           SCVTF       v31.4s, v31.4s
-          FMUL        v16.4s, v16.4s, v13.s[0] // scale
+          FMUL        v16.4s, v16.4s, v13.s[0]    // scale
           FMUL        v17.4s, v17.4s, v13.s[1]
           FMUL        v18.4s, v18.4s, v13.s[2]
           FMUL        v19.4s, v19.4s, v13.s[3]
@@ -482,7 +482,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x
           FMUL        v29.4s, v29.4s, v13.s[1]
           FMUL        v30.4s, v30.4s, v13.s[2]
           FMUL        v31.4s, v31.4s, v13.s[3]
-          LDP         q0, q1, [x5], 32       // bias
+          LDP         q0, q1, [x5], 32        // bias
           LDP         q2, q3, [x5], 32
           FADD        v16.4s, v16.4s, v0.4s
           FADD        v17.4s, v17.4s, v0.4s
@@ -500,8 +500,8 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x
           FADD        v29.4s, v29.4s, v3.4s
           FADD        v30.4s, v30.4s, v3.4s
           FADD        v31.4s, v31.4s, v3.4s
-          LD1R        {v0.4s}, [x11], #4    // min
-          LD1R        {v1.4s}, [x11]        //max
+          LD1R        {v0.4s}, [x11], #4      // min
+          LD1R        {v1.4s}, [x11]          //max
           FMAX        v16.4s, v16.4s, v0.4s
           FMAX        v17.4s, v17.4s, v0.4s
           FMAX        v18.4s, v18.4s, v0.4s
@@ -883,6 +883,12 @@ $if DATATYPE == "QD8":
                 STR         s18, [x9]
                 STR         s17, [x8]
                 STR         s16, [x6]
+        10:
+                # Restore d8-d13 from stack
+                LDP         d12, d13, [sp, 32]
+                LDP         d10, d11, [sp, 16]
+                LDP         d8, d9, [sp], 48
+                RET
 $else:
         6:
                 TBZ         x1, 3, 7f
@@ -920,13 +926,11 @@ $else:
                 STR         b1, [x8]
                 STR         b2, [x9]
                 STR         b3, [x7]
-10:
-        # Restore d8-d${STACK_REGISTERS} from stack
-        $if DATATYPE == "QD8":
-          LDP         d12, d13, [sp, 32]
-        LDP         d10, d11, [sp, 16]
-        LDP         d8, d9, [sp], ${SP_OFFSET}
-        RET
+        10:
+                # Restore d8-d11 from stack
+                LDP         d10, d11, [sp, 16]
+                LDP         d8, d9, [sp], 32
+                RET
 
 END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
 
