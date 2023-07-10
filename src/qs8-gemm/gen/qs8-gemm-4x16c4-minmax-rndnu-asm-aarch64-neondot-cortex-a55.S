@@ -638,12 +638,12 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_cor
         DUP         h2, v2.h[1]
         DUP         h3, v3.h[1]
 9:
-        TBZ         x1, 0, 10f
+        TBZ         x1, 0, 6f
         STR         b0, [x6]
         STR         b1, [x8]
         STR         b2, [x9]
         STR         b3, [x7]
-10:
+6:
         # Restore d8-d11 from stack
         LDP         d10, d11, [sp, 16]
         LDP         d8, d9, [sp], 32
