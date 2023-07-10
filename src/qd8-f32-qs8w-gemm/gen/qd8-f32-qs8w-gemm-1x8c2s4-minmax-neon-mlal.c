@@ -44,9 +44,9 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x8c2s4__neon_mlal(
   do {
     int32x4_t vacc0x0123 = vld1q_s32(w); w = (const int32_t*) w + 4;
     int32x4_t vacc0x4567 = vld1q_s32(w); w = (const int32_t*) w + 4;
-    const int32x4_t vzp01 = vld1q_s32(&quantization_params[0].zero_point);
-    vacc0x0123 = vmulq_lane_s32(vacc0x0123, vget_low_s32(vzp01), 0);
-    vacc0x4567 = vmulq_lane_s32(vacc0x4567, vget_low_s32(vzp01), 0);
+    const int32x4_t vzp01 = vld1q_dup_s32(&quantization_params[0].zero_point);
+    vacc0x0123 = vmulq_s32(vacc0x0123, vzp01);
+    vacc0x4567 = vmulq_s32(vacc0x4567, vzp01);
 
     size_t k = kc;
     while (k >= 16 * sizeof(int8_t)) {
