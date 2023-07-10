@@ -386,9 +386,7 @@ void xnn_pack_f32_qc4w_gemm_goi_w(
   assert(nr >= sr);
   assert(k != NULL);
   assert(packed_weights != NULL);
-  assert(kr % 2 == 0);
 
-  kr >>= 1;
   kc = (kc + 1) >> 1;
   const int32_t* b = (const int32_t*) bias;
   const size_t skr = sr * kr;

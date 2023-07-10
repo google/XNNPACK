@@ -25,22 +25,21 @@
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0    x3 v0
-# A1    x9 v1
-# A2   x10 v2
-# A3   x11 v3
-# A4   x12 v4
-# A5    x4 v5
-# B     x5 v16 v17 v18 v19
-# C0    x6 v20 v21
-# C1   x16 v22 v23
-# C2   x17 v24 v25
-# C3   x14 v26 v27
-# C4   x13 v28 v29
-# C5    x7 v30 v31
-# Clamp v6 v7
-# unused A   v8 v9 v10 v11
-# unused B   v12 v13 v14 v15
+# A0     x3 v0
+# A1     x9 v1
+# A2    x10 v2
+# A3    x11 v3
+# A4    x12 v4
+# A5     x4 v5
+# B      x5 v16 v17 v18 v19
+# C0     x6 v20 v21
+# C1    x16 v22 v23
+# C2    x17 v24 v25
+# C3    x14 v26 v27
+# C4    x13 v28 v29
+# C5     x7 v30 v31
+# Clamp  v6 v7
+# Unused v8 v9 v10 v11 v12 v13 v14 v15
 
 BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
 
@@ -109,7 +108,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         # 24 FMA + 6 LD64 A + 2 LDP B
 1:
         LDR         d0,  [x3], 8
-        LDP         q16,  q17, [x5], 32
+        LDP         q16,  q17, [x5], 32     // 8 F32 weights
         LDR         d1,  [x9], 8
         LDR         d2, [x10], 8
         LDR         d3, [x11], 8
@@ -198,7 +197,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
 3:
         # Remainder- 1 float of A (4 bytes)
         LDR         s0,  [x3], 4
-        LDP         q16,  q17, [x5], 32
+        LDP         q16,  q17, [x5], 32     // 8 F32 weights
         LDR         s1,  [x9], 4
         LDR         s2, [x10], 4
         LDR         s3, [x11], 4

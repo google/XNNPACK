@@ -76,7 +76,7 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_4x1__asm_aarch64_neonfma_ld128
 
         # Main loop - 4 floats of A (16 bytes)
 1:
-        LDR         s20, [x5], 4
+        LDR         s20, [x5], 4     // 4 QC8 weights
         LDR         q0,  [x3], 16
         SXTL        v20.8h, v20.8b
         LDR         q1, [x11], 16

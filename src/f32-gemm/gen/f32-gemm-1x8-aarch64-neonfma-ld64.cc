@@ -35,7 +35,7 @@ class Generator : public MacroAssembler {
 //     float* c,                 x6
 //     size_t cm_stride,         (x7) - unused
 //     size_t cn_stride,         [sp] -> x14
-//     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
+//     const xnn_f32_minmax_params* params)  [sp + 8] -> (x8)
 
 // d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -43,7 +43,7 @@ class Generator : public MacroAssembler {
 // A0  x3 v0
 // B   x5 v20 v21 v22 v23
 // C0  x6 v16 v17
-// Clamp  v4, v5
+// Clamp v4 v5
 
 // Converted from: src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch64-neonfma-ld64.S
 void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
@@ -79,7 +79,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   // Main loop - 2 floats of A (8 bytes)
   bind(l1);
   ldr(d0, mem[x3], 8);
-  ldp(q20, q21, mem[x5], 32);
+  ldp(q20, q21, mem[x5], 32); // 16 F32 weights
   ldp(q22, q23, mem[x5], 32);
   subs(x0, x0, 8);
   fmla(v16.v4s(), v20.v4s(), v0.s()[0]);
@@ -118,7 +118,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   bind(l3);
   // Remainder- 1 float of A (4 bytes)
   ldr(s0, mem[x3], 4);
-  ldp(q20, q21, mem[x5], 32);
+  ldp(q20, q21, mem[x5], 32); // 8 F32 weights
   fmla(v16.v4s(), v20.v4s(), v0.s()[0]);
   fmla(v17.v4s(), v21.v4s(), v0.s()[0]);
   b(l2);

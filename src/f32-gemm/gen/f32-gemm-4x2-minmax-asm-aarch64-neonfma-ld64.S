@@ -80,7 +80,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_ld64
         # Main loop - 2 floats of A (8 bytes)
 1:
         LDR         d0,  [x3], 8
-        LDP         d20, d21, [x5], 16
+        LDP         d20, d21, [x5], 16      // 4 FP32 weights
         LDR         d1, [x11], 8
         LDR         d2, [x12], 8
         LDR         d3,  [x4], 8
@@ -134,7 +134,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_ld64
         # Remainder- 1 float of A (4 bytes)
 3:
         LDR         s0,  [x3], 4
-        LDR         d20, [x5], 8
+        LDR         d20, [x5], 8            // 2 F32 weights
         LDR         s1, [x11], 4
         LDR         s2, [x12], 4
         LDR         s3,  [x4], 4

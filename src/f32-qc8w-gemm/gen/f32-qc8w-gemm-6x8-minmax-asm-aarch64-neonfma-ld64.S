@@ -24,22 +24,21 @@
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
 # Register usage
-# A0    x3 v0
-# A1    x9 v1
-# A2   x10 v2
-# A3   x11 v3
-# A4   x12 v4
-# A5    x4 v5
-# B     x5 v16 v17 v18 v19
-# C0    x6 v20 v21
-# C1   x16 v22 v23
-# C2   x17 v24 v25
-# C3   x14 v26 v27
-# C4   x13 v28 v29
-# C5    x7 v30 v31
-# Clamp v6 v7
-# unused A   v8 v9 v10 v11
-# unused B   v12 v13 v14 v15
+# A0     x3 v0
+# A1     x9 v1
+# A2    x10 v2
+# A3    x11 v3
+# A4    x12 v4
+# A5     x4 v5
+# B      x5 v16 v17 v18 v19
+# C0     x6 v20 v21
+# C1    x16 v22 v23
+# C2    x17 v24 v25
+# C3    x14 v26 v27
+# C4    x13 v28 v29
+# C5     x7 v30 v31
+# Clamp  v6 v7
+# Unused v8 v9 v10 v11 v12 v13 v14 v15
 
 BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
 
@@ -113,21 +112,21 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         # 24 FMA + 6 LD64 A + 2 LDP B
 1:
         LDR         d0,  [x3], 8
-        LDR         q18, [x5], 16
+        LDR         q18, [x5], 16           // 16 QC8 weights
         SXTL        v17.8h, v18.8b
         SXTL2       v19.8h, v18.16b
-        LDR         d1,  [x9], 8
         SXTL        v16.4s, v17.4h
         SXTL2       v17.4s, v17.8h
-        LDR         d2, [x10], 8
         SXTL        v18.4s, v19.4h
         SXTL2       v19.4s, v19.8h
-        LDR         d3, [x11], 8
         SCVTF       v16.4s, v16.4s
         SCVTF       v17.4s, v17.4s
-        LDR         d4, [x12], 8
         SCVTF       v18.4s, v18.4s
         SCVTF       v19.4s, v19.4s
+        LDR         d1,  [x9], 8
+        LDR         d2, [x10], 8
+        LDR         d3, [x11], 8
+        LDR         d4, [x12], 8
         LDR         d5,  [x4], 8
         FMLA        v20.4s, v16.4s,  v0.s[0]
         FMLA        v22.4s, v16.4s,  v1.s[0]
@@ -225,16 +224,16 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
 3:
         # Remainder- 1 float of A (4 bytes)
         LDR         s0,  [x3], 4
-        LDR         d18, [x5], 8
+        LDR         d18, [x5], 8            // 8 QC8 weights
         SXTL        v17.8h, v18.8b
-        LDR         s1,  [x9], 4
         SXTL        v16.4s, v17.4h
-        LDR         s2, [x10], 4
         SXTL2       v17.4s, v17.8h
-        LDR         s3, [x11], 4
         SCVTF       v16.4s, v16.4s
-        LDR         s4, [x12], 4
         SCVTF       v17.4s, v17.4s
+        LDR         s1,  [x9], 4
+        LDR         s2, [x10], 4
+        LDR         s3, [x11], 4
+        LDR         s4, [x12], 4
         LDR         s5,  [x4], 4
         FMLA        v20.4s, v16.4s,  v0.s[0]
         FMLA        v22.4s, v16.4s,  v1.s[0]

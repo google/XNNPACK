@@ -19,7 +19,7 @@
 #     float* c,                 x6
 #     size_t cm_stride,         (x7) - unused
 #     size_t cn_stride,         [sp] -> x14
-#     const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
+#     const xnn_f32_minmax_params* params)  [sp + 8] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -27,7 +27,7 @@
 # A0  x3  v0
 # B   x5  v20 v24 v21 v25 v22 v26 v23 v27
 # C0  x6  v16 v17
-# Clamp   v4, v5
+# Clamp v4 v5
 # B stride x16, x17
 
 BEGIN_FUNCTION xnn_f32_gemm_goi_minmax_ukernel_1x8__asm_aarch64_neonfma_ld128
