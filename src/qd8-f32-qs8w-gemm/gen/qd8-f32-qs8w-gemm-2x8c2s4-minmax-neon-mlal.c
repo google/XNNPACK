@@ -12,21 +12,21 @@
 #include <arm_neon.h>
 
 #include <xnnpack/gemm.h>
-#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/math.h>
 
 
-void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x8c2s4__neonv8_mlal(
+void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_2x8c2s4__neon_mlal(
     size_t mr,
     size_t nc,
     size_t kc,
     const int8_t* restrict a,
     size_t a_stride,
     const void* restrict w,
-    int8_t* restrict c,
+    float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_qs8_qc8w_conv_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= 2);
@@ -38,9 +38,9 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x8c2s4__neonv8_mlal(
   assert(c != NULL);
 
   const int8_t* a0 = a;
-  int8_t* c0 = c;
+  float* c0 = c;
   const int8_t* a1 = (const int8_t*) ((uintptr_t) a0 + a_stride);
-  int8_t* c1 = (int8_t*) ((uintptr_t) c0 + cm_stride);
+  float* c1 = (float*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr != 2) {
     a1 = a0;
     c1 = c0;
@@ -50,8 +50,11 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x8c2s4__neonv8_mlal(
   do {
     int32x4_t vacc0x0123 = vld1q_s32(w); w = (const int32_t*) w + 4;
     int32x4_t vacc0x4567 = vld1q_s32(w); w = (const int32_t*) w + 4;
-    int32x4_t vacc1x0123 = vacc0x0123;
-    int32x4_t vacc1x4567 = vacc0x4567;
+    const int32x4_t vzp01 = vld1q_s32(&quantization_params[0].zero_point);
+    int32x4_t vacc1x0123 = vmulq_lane_s32(vacc0x0123, vget_high_s32(vzp01), 0);
+    int32x4_t vacc1x4567 = vmulq_lane_s32(vacc0x4567, vget_high_s32(vzp01), 0);
+    vacc0x0123 = vmulq_lane_s32(vacc0x0123, vget_low_s32(vzp01), 0);
+    vacc0x4567 = vmulq_lane_s32(vacc0x4567, vget_low_s32(vzp01), 0);
 
     size_t k = kc;
     while (k >= 16 * sizeof(int8_t)) {
@@ -194,76 +197,75 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x8c2s4__neonv8_mlal(
 
     }
 
-    float32x4_t vfpacc0x0123 = vcvtq_f32_s32(vacc0x0123);
-    float32x4_t vfpacc0x4567 = vcvtq_f32_s32(vacc0x4567);
-    float32x4_t vfpacc1x0123 = vcvtq_f32_s32(vacc1x0123);
-    float32x4_t vfpacc1x4567 = vcvtq_f32_s32(vacc1x4567);
-
-    const float32x4_t vscale0123 = vld1q_f32(w); w = (const float*) w + 4;
-    vfpacc0x0123 = vmulq_f32(vfpacc0x0123, vscale0123);
-    vfpacc1x0123 = vmulq_f32(vfpacc1x0123, vscale0123);
-    const float32x4_t vscale4567 = vld1q_f32(w); w = (const float*) w + 4;
-    vfpacc0x4567 = vmulq_f32(vfpacc0x4567, vscale4567);
-    vfpacc1x4567 = vmulq_f32(vfpacc1x4567, vscale4567);
-
-    vacc0x0123 = vcvtnq_s32_f32(vfpacc0x0123);
-    vacc0x4567 = vcvtnq_s32_f32(vfpacc0x4567);
-    vacc1x0123 = vcvtnq_s32_f32(vfpacc1x0123);
-    vacc1x4567 = vcvtnq_s32_f32(vfpacc1x4567);
-
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->fp32_neonv8.output_zero_point);
+    float32x4_t vout0x0123 = vcvtq_f32_s32(vacc0x0123);
+    float32x4_t vout0x4567 = vcvtq_f32_s32(vacc0x4567);
+    float32x4_t vout1x0123 = vcvtq_f32_s32(vacc1x0123);
+    float32x4_t vout1x4567 = vcvtq_f32_s32(vacc1x4567);
+    const float32x4_t vscale01 = vld1q_f32(&quantization_params[0].scale);
+    const float32x4_t vbias0123 = vld1q_f32(w); w = (const float*) w + 4;
+    const float32x4_t vbias4567 = vld1q_f32(w); w = (const float*) w + 4;
     #if XNN_ARCH_ARM64
-      int16x8_t vacc0x01234567 = vqmovn_high_s32(vqmovn_s32(vacc0x0123), vacc0x4567);
-      int16x8_t vacc1x01234567 = vqmovn_high_s32(vqmovn_s32(vacc1x0123), vacc1x4567);
-
-      vacc0x01234567 = vqaddq_s16(vacc0x01234567, voutput_zero_point);
-      vacc1x01234567 = vqaddq_s16(vacc1x01234567, voutput_zero_point);
-
-      int8x16_t vout0x01234567_1x01234567 = vqmovn_high_s16(vqmovn_s16(vacc0x01234567), vacc1x01234567);
+      vout0x0123 = vfmaq_lane_f32(vbias0123, vout0x0123, vget_low_f32(vscale01), 0);
     #else
-      int16x8_t vacc0x01234567 = vcombine_s16(vqmovn_s32(vacc0x0123), vqmovn_s32(vacc0x4567));
-      int16x8_t vacc1x01234567 = vcombine_s16(vqmovn_s32(vacc1x0123), vqmovn_s32(vacc1x4567));
-
-      vacc0x01234567 = vqaddq_s16(vacc0x01234567, voutput_zero_point);
-      vacc1x01234567 = vqaddq_s16(vacc1x01234567, voutput_zero_point);
-
-      int8x16_t vout0x01234567_1x01234567 = vcombine_s8(vqmovn_s16(vacc0x01234567), vqmovn_s16(vacc1x01234567));
+      vout0x0123 = vmlaq_lane_f32(vbias0123, vout0x0123, vget_low_f32(vscale01), 0);
     #endif
-
-    const int8x16_t voutput_min = vld1q_dup_s8(&params->fp32_neonv8.output_min);
-    vout0x01234567_1x01234567 = vmaxq_s8(vout0x01234567_1x01234567, voutput_min);
-
-    const int8x16_t voutput_max = vld1q_dup_s8(&params->fp32_neonv8.output_max);
-    vout0x01234567_1x01234567 = vminq_s8(vout0x01234567_1x01234567, voutput_max);
-
-    if (nc >= 8) {
-      vst1_s8(c0 + 0, vget_low_s8(vout0x01234567_1x01234567));
-      vst1_s8(c1 + 0, vget_high_s8(vout0x01234567_1x01234567));
-
-      c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
-      c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
+    #if XNN_ARCH_ARM64
+      vout0x4567 = vfmaq_lane_f32(vbias4567, vout0x4567, vget_low_f32(vscale01), 0);
+    #else
+      vout0x4567 = vmlaq_lane_f32(vbias4567, vout0x4567, vget_low_f32(vscale01), 0);
+    #endif
+    #if XNN_ARCH_ARM64
+      vout1x0123 = vfmaq_lane_f32(vbias0123, vout1x0123, vget_high_f32(vscale01), 0);
+    #else
+      vout1x0123 = vmlaq_lane_f32(vbias0123, vout1x0123, vget_high_f32(vscale01), 0);
+    #endif
+    #if XNN_ARCH_ARM64
+      vout1x4567 = vfmaq_lane_f32(vbias4567, vout1x4567, vget_high_f32(vscale01), 0);
+    #else
+      vout1x4567 = vmlaq_lane_f32(vbias4567, vout1x4567, vget_high_f32(vscale01), 0);
+    #endif
+    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+    vout0x0123 = vmaxq_f32(vout0x0123, vmin);
+    vout0x4567 = vmaxq_f32(vout0x4567, vmin);
+    vout0x0123 = vminq_f32(vout0x0123, vmax);
+    vout0x4567 = vminq_f32(vout0x4567, vmax);
+    vout1x0123 = vmaxq_f32(vout1x0123, vmin);
+    vout1x4567 = vmaxq_f32(vout1x4567, vmin);
+    vout1x0123 = vminq_f32(vout1x0123, vmax);
+    vout1x4567 = vminq_f32(vout1x4567, vmax);
+    if XNN_LIKELY(nc >= 8) {
+      vst1q_f32(&c1[0], vout1x0123);
+      vst1q_f32(&c1[4], vout1x4567);
+      vst1q_f32(&c0[0], vout0x0123);
+      vst1q_f32(&c0[4], vout0x4567);
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
       a1 = (const int8_t*) ((uintptr_t) a1 - kc);
 
+      c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
+
       nc -= 8;
     } else {
-      // Final case where not all of the 8 columns fit in the destination.
       if (nc & 4) {
-        vst1q_lane_u32((void*) c0, vreinterpretq_u32_s8(vout0x01234567_1x01234567), 0); c0 += 4;
-        vst1q_lane_u32((void*) c1, vreinterpretq_u32_s8(vout0x01234567_1x01234567), 2); c1 += 4;
-        vout0x01234567_1x01234567 = vextq_s8(vout0x01234567_1x01234567, vout0x01234567_1x01234567, 4);
+        vst1q_f32(c1, vout1x0123); c1 += 4;
+        vout1x0123 = vout1x4567;
+        vst1q_f32(c0, vout0x0123); c0 += 4;
+        vout0x0123 = vout0x4567;
       }
+      float32x2_t vout1x01 = vget_low_f32(vout1x0123);
+      float32x2_t vout0x01 = vget_low_f32(vout0x0123);
       if (nc & 2) {
-        vst1q_lane_u16((void*) c0, vreinterpretq_u16_s8(vout0x01234567_1x01234567), 0); c0 += 2;
-        vst1q_lane_u16((void*) c1, vreinterpretq_u16_s8(vout0x01234567_1x01234567), 4); c1 += 2;
-        vout0x01234567_1x01234567 = vextq_s8(vout0x01234567_1x01234567, vout0x01234567_1x01234567, 2);
+        vst1_f32(c1, vout1x01); c1 += 2;
+        vst1_f32(c0, vout0x01); c0 += 2;
+        vout1x01 = vget_high_f32(vout1x0123);
+        vout0x01 = vget_high_f32(vout0x0123);
       }
       if (nc & 1) {
-        vst1q_lane_s8(c0, vout0x01234567_1x01234567, 0);
-        vst1q_lane_s8(c1, vout0x01234567_1x01234567, 8);
+        vst1_lane_f32(c1, vout1x01, 0);
+        vst1_lane_f32(c0, vout0x01, 0);
       }
-
       nc = 0;
     }
   } while (nc != 0);

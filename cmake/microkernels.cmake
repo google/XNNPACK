@@ -2455,6 +2455,8 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/math/gen/f32-tanh-neon-expm1minus-rr1-p6h5ts-nr2recps.c
   src/math/gen/f32-tanh-neon-expm1minus-rr2-lut8-p4h2ts-nr2recps.c
   src/math/gen/f32-tanh-neon-expm1minus-rr2-lut8-p4h3ps-nr2recps.c
+  src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-1x8c2s4-minmax-neon-mlal.c
+  src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-2x8c2s4-minmax-neon-mlal.c
   src/qs8-dwconv/gen/qs8-dwconv-5f5m5l8c8s8r-minmax-fp32-neon-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-5f5m5l8c8s8r-minmax-rndnu-neon-mla8-ld64.c
   src/qs8-dwconv/gen/qs8-dwconv-5f5m5l8c8s8r-minmax-rndnu-neon-mul8-ld64.c
