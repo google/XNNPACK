@@ -842,6 +842,8 @@ tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a75.S.in -D PREFETCH
 tools/xngen src/qs8-gemm/4x16-aarch64-neon-mlal-lane-cortex-a75.S.in -D PREFETCH=1 -D REQUANTIZATION=RNDNU -D DATATYPE=QU8 -o src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a75-prfm.S &
 
 ### C4 micro-kernels
+tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=         -D DATATYPE=QD8 -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-4x16c4-minmax-asm-aarch64-neondot-cortex-a55.S &
+
 tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld32.S.in       -D REQUANTIZATION=RNDNU    -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-asm-aarch64-neondot-ld32.S &
 tools/xngen src/qs8-gemm/1x16c4-aarch64-neondot-ld64.S.in       -D REQUANTIZATION=RNDNU    -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-asm-aarch64-neondot-ld64.S &
 tools/xngen src/qs8-gemm/4x16c4-aarch64-neondot-cortex-a55.S.in -D REQUANTIZATION=RNDNU    -D DATATYPE=QS8 -o src/qs8-gemm/gen/qs8-gemm-4x16c4-minmax-rndnu-asm-aarch64-neondot-cortex-a55.S &

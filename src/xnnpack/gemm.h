@@ -2004,6 +2004,7 @@ DECLARE_QS8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_gemm_minmax_fp32_ukernel_4x4__s
       const union xnn_f32_minmax_params* params,                   \
       const struct xnn_qd8_quantization_params* quantization_params);
 
+DECLARE_QD8_F32_QS8W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55)
 DECLARE_QD8_F32_QS8W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x2__scalar)
 DECLARE_QD8_F32_QS8W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x4__scalar)
 DECLARE_QD8_F32_QS8W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x8__scalar)
