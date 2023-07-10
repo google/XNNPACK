@@ -141,4 +141,3 @@
 - name: xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x4
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
-# TODO(b/289507252)

@@ -119,7 +119,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neon_ld128_acc2_prfm
         # Remainder- 2 float of A (4 bytes)
 4:
         LDR         d0, [x3], 8
-        LDP         q20, q21, [x5], 32    // 16 F32 weights
+        LDP         q20, q21, [x5], 32      // 16 F32 weights
         LDP         q22, q23, [x5], 32
         FMUL        v26.4s, v20.4s, v0.s[0]
         FMUL        v27.4s, v21.4s, v0.s[0]
@@ -134,7 +134,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neon_ld128_acc2_prfm
 5:
         # Remainder- 1 float of A (4 bytes)
         LDR         s0, [x3], 4
-        LDP         q20, q21, [x5], 32    // 8 F32 weights
+        LDP         q20, q21, [x5], 32      // 8 F32 weights
         FMUL        v26.4s, v20.4s, v0.s[0]
         FMUL        v27.4s, v21.4s, v0.s[0]
         FADD        v16.4s, v16.4s, v26.4s

@@ -56,7 +56,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4_pr
         # Main loop - 4 floats of A (16 bytes)
 1:
         LDR         d0, [x3], 8
-        LDP         q20, q21, [x5], 32    // 16 F32 weights
+        LDP         q20, q21, [x5], 32      // 16 F32 weights
         LDP         q22, q23, [x5], 32
         FMLA        v16.4s, v20.4s, v0.s[0]
         FMLA        v17.4s, v21.4s, v0.s[0]
@@ -65,7 +65,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4_pr
         FMLA        v19.4s, v23.4s, v0.s[1]
 
         LDR         d1, [x3], 8
-        LDP         q20, q21, [x5], 32    // 16 F32 weights
+        LDP         q20, q21, [x5], 32      // 16 F32 weights
         LDP         q22, q23, [x5], 32
         SUBS        x0, x0, 16
         FMLA        v26.4s, v20.4s, v1.s[0]
@@ -112,7 +112,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4_pr
         # Remainder- 2 float of A (4 bytes)
 4:
         LDR         d0, [x3], 8
-        LDP         q20, q21, [x5], 32    // 16 F32 weights
+        LDP         q20, q21, [x5], 32      // 16 F32 weights
         LDP         q22, q23, [x5], 32
         FMLA        v16.4s, v20.4s, v0.s[0]
         FMLA        v17.4s, v21.4s, v0.s[0]
@@ -123,7 +123,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4_pr
 5:
         # Remainder- 1 float of A (4 bytes)
         LDR         s0, [x3], 4
-        LDP         q20, q21, [x5], 32    // 8 F32 weights
+        LDP         q20, q21, [x5], 32      // 8 F32 weights
         FMLA        v16.4s, v20.4s, v0.s[0]
         FMLA        v17.4s, v21.4s, v0.s[0]
         B           2b

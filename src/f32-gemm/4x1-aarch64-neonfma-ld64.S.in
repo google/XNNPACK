@@ -107,12 +107,12 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
 1:
         $if DATATYPE == "F32":
           LDR         d0,  [x3], 8
-          LDR         d20, [x5], 8      // 2 F32 weights
+          LDR         d20, [x5], 8        // 2 F32 weights
           LDR         d1, [x11], 8
           LDR         d2, [x12], 8
           LDR         d3,  [x4], 8
        $elif DATATYPE == "QC4":
-          LDR         b21, [x5], 1      // 2 QC4 weights
+          LDR         b21, [x5], 1        // 2 QC4 weights
           LDR         d0,  [x3], 8
           AND         v20.8b, v21.8b, v7.8b   // first weight
           USHR        v21.8b, v21.8b, 4       // second weight
@@ -124,7 +124,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
           SCVTF       v20.2s, v20.2s
           LDR         d3,  [x4], 8
        $else:
-          LDR         h20, [x5], 2      // 8 QC8 weights
+          LDR         h20, [x5], 2        // 8 QC8 weights
           LDR         d0,  [x3], 8
           SXTL        v20.8h, v20.8b
           LDR         d1, [x11], 8
