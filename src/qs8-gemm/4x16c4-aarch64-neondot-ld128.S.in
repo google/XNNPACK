@@ -721,7 +721,7 @@ $else:
   14:
           RET
 
-END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukernel_4x16c4__asm_aarch64_neondot_ld128
+END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

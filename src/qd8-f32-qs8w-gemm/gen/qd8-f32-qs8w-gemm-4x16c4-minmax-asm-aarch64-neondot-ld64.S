@@ -363,7 +363,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
  13:
           RET
 
-END_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax__ukernel_4x16c4__asm_aarch64_neondot_ld64
+END_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_ld64
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits
