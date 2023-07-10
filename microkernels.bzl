@@ -3454,6 +3454,7 @@ ALL_NEONDOT_MICROKERNEL_SRCS = [
     "src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-2x8c4-minmax-neondot.c",
     "src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-2x16c4-minmax-neondot.c",
     "src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-3x16c4-minmax-neondot.c",
+    "src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-4x8c4-minmax-neondot.c",
     "src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-4x16c4-minmax-neondot.c",
     "src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-fp32-neondot.c",
     "src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neondot.c",

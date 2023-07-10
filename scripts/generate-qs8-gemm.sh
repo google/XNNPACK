@@ -712,6 +712,7 @@ tools/xngen src/qs8-gemm/c16-neon-mlal.c.in -D MR=4 -D NR=16 -D REQUANTIZATION=R
 ### C4 micro-kernels
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1 -D NR=8 -D REQUANTIZATION= -D DATATYPE=QD8 -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-1x8c4-minmax-neondot.c
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=2 -D NR=8 -D REQUANTIZATION= -D DATATYPE=QD8 -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-2x8c4-minmax-neondot.c
+tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=4 -D NR=8 -D REQUANTIZATION= -D DATATYPE=QD8 -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-4x8c4-minmax-neondot.c
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=1 -D NR=16 -D REQUANTIZATION= -D DATATYPE=QD8 -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-1x16c4-minmax-neondot.c
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=2 -D NR=16 -D REQUANTIZATION= -D DATATYPE=QD8 -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-2x16c4-minmax-neondot.c
 tools/xngen src/qs8-gemm/c4-neondot.c.in -D MR=3 -D NR=16 -D REQUANTIZATION= -D DATATYPE=QD8 -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-3x16c4-minmax-neondot.c
