@@ -10,7 +10,7 @@
 
 #include <xnnpack/assembly.h>
 
-# void xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld128(
+# void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_ld128(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -20,17 +20,14 @@
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
 #     size_t cn_stride,          [sp] -> x12
-#     const union xnn_qs8_conv_minmax_params *params)  [sp + 8] -> x11
+#     const union xnn_f32_minmax_params *params,  [sp + 8]  -> x11
+#     const struct xnn_qd8_quantization_params *quantization_params) [sp + 16] -> x16
 
-# params structure is 16 bytes
-#  struct {
-#    int32_t right_pre_shift;
-#    int32_t multiplier;
-#    int32_t right_post_shift;
-#    int16_t output_zero_point;
-#    int8_t output_min;
-#    int8_t output_max;
-#  } rndnu_neon;
+# params structure is 8 bytes
+# struct {
+#  int32_t zero_point;
+#  float scale;
+# } scalar;
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -44,9 +41,9 @@
 // C1  x8 v17 v21 v25 v29
 // C2  x9 v18 v22 v26 v30
 // C3  x7 v19 v23 v27 v31
-// unused v8 v9 v10 v11 v12 v13 v14 v15
+// unused v8 v9 v10 v11 v14 v15
 
-BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld128
+BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_ld128
 
         # Clamp A and C pointers
         CMP         x0, 2                   // if mr < 2
@@ -65,6 +62,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld1
 
         LDP         x12, x11, [sp]          // cn_stride, params
 
+        LDR         x16, [sp, 16]           // &quantization_params[0].zero_point
+        STP         d12,  d13, [sp, -32]!
+        LDP         q12, q13, [x16]        // v12 & v13 interleaved zero_point & scale
 
         CMP         x0, 4                   // if mr < 4
         ADD         x4, x13, x4             // a3 = a2 + a_stride
@@ -76,20 +76,24 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld1
 0:
         # Load initial bias from w into accumulators
         SUBS        x0, x2, 16              // k = kc - 16
-        LDP         q16, q20, [x5], 32
-        MOV         v17.16b, v16.16b
-        MOV         v18.16b, v16.16b
-        LDP         q24, q28, [x5], 32
-        MOV         v19.16b, v16.16b
-        MOV         v21.16b, v20.16b
-        MOV         v22.16b, v20.16b
-        MOV         v23.16b, v20.16b
-        MOV         v25.16b, v24.16b
-        MOV         v26.16b, v24.16b
-        MOV         v27.16b, v24.16b
-        MOV         v29.16b, v28.16b
-        MOV         v30.16b, v28.16b
-        MOV         v31.16b, v28.16b
+        LDP         q0, q1, [x5], 32
+        MUL         v16.4s, v0.4s, v12.s[0]
+        MUL         v17.4s, v0.4s, v12.s[2]
+        MUL         v18.4s, v0.4s, v13.s[0]
+        LDP         q2, q3, [x5], 32
+        MUL         v19.4s, v0.4s, v13.s[2]
+        MUL         v20.4s, v1.4s, v12.s[0]
+        MUL         v21.4s, v1.4s, v12.s[2]
+        MUL         v22.4s, v1.4s, v13.s[0]
+        MUL         v23.4s, v1.4s, v13.s[2]
+        MUL         v24.4s, v2.4s, v12.s[0]
+        MUL         v25.4s, v2.4s, v12.s[2]
+        MUL         v26.4s, v2.4s, v13.s[0]
+        MUL         v27.4s, v2.4s, v13.s[2]
+        MUL         v28.4s, v3.4s, v12.s[0]
+        MUL         v29.4s, v3.4s, v12.s[2]
+        MUL         v30.4s, v3.4s, v13.s[0]
+        MUL         v31.4s, v3.4s, v13.s[2]
 
         # Is there at least 16 bytes?
         B.LO        3f
@@ -185,121 +189,113 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld1
         B.NE        3f
 
 2:
-        # Apply params - preshift, scale, postshift, bias and clamp
-        LD1R        {v4.4s}, [x11], 4
-        SQSHL       v16.4s, v16.4s, v4.4s   // shift to upper bits
-        SQSHL       v17.4s, v17.4s, v4.4s
-        SQSHL       v18.4s, v18.4s, v4.4s
-        SQSHL       v19.4s, v19.4s, v4.4s
-        SQSHL       v20.4s, v20.4s, v4.4s
-        SQSHL       v21.4s, v21.4s, v4.4s
-        SQSHL       v22.4s, v22.4s, v4.4s
-        SQSHL       v23.4s, v23.4s, v4.4s
-        LD1R        {v5.4s}, [x11], 4
-        SQSHL       v24.4s, v24.4s, v4.4s
-        SQSHL       v25.4s, v25.4s, v4.4s
-        SQSHL       v26.4s, v26.4s, v4.4s
-        SQSHL       v27.4s, v27.4s, v4.4s
-        SQSHL       v28.4s, v28.4s, v4.4s
-        SQSHL       v29.4s, v29.4s, v4.4s
-        SQSHL       v30.4s, v30.4s, v4.4s
-        SQSHL       v31.4s, v31.4s, v4.4s
-        LD1R        {v6.4s}, [x11], 4
-        SQDMULH     v16.4s, v16.4s, v5.4s   // scale without rounding
-        SQDMULH     v17.4s, v17.4s, v5.4s
-        SQDMULH     v18.4s, v18.4s, v5.4s
-        SQDMULH     v19.4s, v19.4s, v5.4s
-        SQDMULH     v20.4s, v20.4s, v5.4s
-        SQDMULH     v21.4s, v21.4s, v5.4s
-        SQDMULH     v22.4s, v22.4s, v5.4s
-        SQDMULH     v23.4s, v23.4s, v5.4s
-        SQDMULH     v24.4s, v24.4s, v5.4s
-        SQDMULH     v25.4s, v25.4s, v5.4s
-        SQDMULH     v26.4s, v26.4s, v5.4s
-        SQDMULH     v27.4s, v27.4s, v5.4s
-        SQDMULH     v28.4s, v28.4s, v5.4s
-        SQDMULH     v29.4s, v29.4s, v5.4s
-        SQDMULH     v30.4s, v30.4s, v5.4s
-        SQDMULH     v31.4s, v31.4s, v5.4s
-        SRSHL       v16.4s, v16.4s, v6.4s   // signed rounding shift left
-        SRSHL       v17.4s, v17.4s, v6.4s
-        SRSHL       v18.4s, v18.4s, v6.4s
-        SRSHL       v19.4s, v19.4s, v6.4s
-        SRSHL       v20.4s, v20.4s, v6.4s
-        SRSHL       v21.4s, v21.4s, v6.4s
-        SRSHL       v22.4s, v22.4s, v6.4s
-        SRSHL       v23.4s, v23.4s, v6.4s
-        SRSHL       v24.4s, v24.4s, v6.4s
-        SRSHL       v25.4s, v25.4s, v6.4s
-        SRSHL       v26.4s, v26.4s, v6.4s
-        SRSHL       v27.4s, v27.4s, v6.4s
-        SRSHL       v28.4s, v28.4s, v6.4s
-        SRSHL       v29.4s, v29.4s, v6.4s
-        SRSHL       v30.4s, v30.4s, v6.4s
-        SRSHL       v31.4s, v31.4s, v6.4s
-
-        SQXTN       v16.4h, v16.4s
-        SQXTN       v17.4h, v17.4s
-        SQXTN       v18.4h, v18.4s
-        SQXTN       v19.4h, v19.4s
-        SQXTN       v24.4h, v24.4s
-        SQXTN       v25.4h, v25.4s
-        SQXTN       v26.4h, v26.4s
-        SQXTN       v27.4h, v27.4s
-        LD1R        {v6.8h}, [x11], 2       // add bias
-
-        SQXTN2      v16.8h, v20.4s
-        SQXTN2      v17.8h, v21.4s
-        SQXTN2      v18.8h, v22.4s
-        SQXTN2      v19.8h, v23.4s
-        SQXTN2      v24.8h, v28.4s
-        SQXTN2      v25.8h, v29.4s
-        SQXTN2      v26.8h, v30.4s
-        SQXTN2      v27.8h, v31.4s
-
-        SQADD       v16.8h, v16.8h, v6.8h
-        SQADD       v17.8h, v17.8h, v6.8h
-        SQADD       v18.8h, v18.8h, v6.8h
-        SQADD       v19.8h, v19.8h, v6.8h
-        SQADD       v24.8h, v24.8h, v6.8h
-        SQADD       v25.8h, v25.8h, v6.8h
-        SQADD       v26.8h, v26.8h, v6.8h
-        SQADD       v27.8h, v27.8h, v6.8h
-        LD1R        {v4.16b}, [x11], 1      // clamp min value
-
-        SQXTN       v0.8b, v16.8h
-        SQXTN       v1.8b, v17.8h
-        SQXTN       v2.8b, v18.8h
-        SQXTN       v3.8b, v19.8h
-        LD1R        {v5.16b}, [x11]         // clamp max value
-        SQXTN2      v0.16b, v24.8h
-        SQXTN2      v1.16b, v25.8h
-        SQXTN2      v2.16b, v26.8h
-        SQXTN2      v3.16b, v27.8h
-        SUB         x11, x11, 15               // rewind params pointer
-
-        SMAX        v0.16b, v0.16b, v4.16b
-        SMAX        v1.16b, v1.16b, v4.16b
-        SMAX        v2.16b, v2.16b, v4.16b
-        SMAX        v3.16b, v3.16b, v4.16b
+        SCVTF       v16.4s, v16.4s
+        SCVTF       v17.4s, v17.4s
+        SCVTF       v18.4s, v18.4s
+        SCVTF       v19.4s, v19.4s
+        SCVTF       v20.4s, v20.4s
+        SCVTF       v21.4s, v21.4s
+        SCVTF       v22.4s, v22.4s
+        SCVTF       v23.4s, v23.4s
+        SCVTF       v24.4s, v24.4s
+        SCVTF       v25.4s, v25.4s
+        SCVTF       v26.4s, v26.4s
+        SCVTF       v27.4s, v27.4s
+        SCVTF       v28.4s, v28.4s
+        SCVTF       v29.4s, v29.4s
+        SCVTF       v30.4s, v30.4s
+        SCVTF       v31.4s, v31.4s
+        LDP         q0, q1, [x5], 32       // bias
+        LDP         q2, q3, [x5], 32
+        FMUL        v16.4s, v16.4s, v12.s[1] // scale
+        FMUL        v17.4s, v17.4s, v12.s[3]
+        FMUL        v18.4s, v18.4s, v13.s[1]
+        FMUL        v19.4s, v19.4s, v13.s[3]
+        FMUL        v20.4s, v20.4s, v12.s[1]
+        FMUL        v21.4s, v21.4s, v12.s[3]
+        FMUL        v22.4s, v22.4s, v13.s[1]
+        FMUL        v23.4s, v23.4s, v13.s[3]
+        FMUL        v24.4s, v24.4s, v12.s[1]
+        FMUL        v25.4s, v25.4s, v12.s[3]
+        FMUL        v26.4s, v26.4s, v13.s[1]
+        FMUL        v27.4s, v27.4s, v13.s[3]
+        FMUL        v28.4s, v28.4s, v12.s[1]
+        FMUL        v29.4s, v29.4s, v12.s[3]
+        FMUL        v30.4s, v30.4s, v13.s[1]
+        FMUL        v31.4s, v31.4s, v13.s[3]
+        LD2R        {v4.4s, v5.4s}, [x11]    // min max
+        FADD        v16.4s, v16.4s, v0.4s
+        FADD        v17.4s, v17.4s, v0.4s
+        FADD        v18.4s, v18.4s, v0.4s
+        FADD        v19.4s, v19.4s, v0.4s
+        FADD        v20.4s, v20.4s, v1.4s
+        FADD        v21.4s, v21.4s, v1.4s
+        FADD        v22.4s, v22.4s, v1.4s
+        FADD        v23.4s, v23.4s, v1.4s
+        FADD        v24.4s, v24.4s, v2.4s
+        FADD        v25.4s, v25.4s, v2.4s
+        FADD        v26.4s, v26.4s, v2.4s
+        FADD        v27.4s, v27.4s, v2.4s
+        FADD        v28.4s, v28.4s, v3.4s
+        FADD        v29.4s, v29.4s, v3.4s
+        FADD        v30.4s, v30.4s, v3.4s
+        FADD        v31.4s, v31.4s, v3.4s
+        FMAX        v16.4s, v16.4s, v4.4s
+        FMAX        v17.4s, v17.4s, v4.4s
+        FMAX        v18.4s, v18.4s, v4.4s
+        FMAX        v19.4s, v19.4s, v4.4s
+        FMAX        v20.4s, v20.4s, v4.4s
+        FMAX        v21.4s, v21.4s, v4.4s
+        FMAX        v22.4s, v22.4s, v4.4s
+        FMAX        v23.4s, v23.4s, v4.4s
+        FMAX        v24.4s, v24.4s, v4.4s
+        FMAX        v25.4s, v25.4s, v4.4s
+        FMAX        v26.4s, v26.4s, v4.4s
+        FMAX        v27.4s, v27.4s, v4.4s
+        FMAX        v28.4s, v28.4s, v4.4s
+        FMAX        v29.4s, v29.4s, v4.4s
+        FMAX        v30.4s, v30.4s, v4.4s
+        FMAX        v31.4s, v31.4s, v4.4s
+        FMIN        v0.4s, v16.4s, v5.4s
+        FMIN        v1.4s, v17.4s, v5.4s
+        FMIN        v2.4s, v18.4s, v5.4s
+        FMIN        v3.4s, v19.4s, v5.4s
+        FMIN        v20.4s, v20.4s, v5.4s
+        FMIN        v21.4s, v21.4s, v5.4s
+        FMIN        v22.4s, v22.4s, v5.4s
+        FMIN        v23.4s, v23.4s, v5.4s
+        FMIN        v24.4s, v24.4s, v5.4s
+        FMIN        v25.4s, v25.4s, v5.4s
+        FMIN        v26.4s, v26.4s, v5.4s
+        FMIN        v27.4s, v27.4s, v5.4s
+        FMIN        v28.4s, v28.4s, v5.4s
+        FMIN        v29.4s, v29.4s, v5.4s
+        FMIN        v30.4s, v30.4s, v5.4s
+        FMIN        v31.4s, v31.4s, v5.4s
         SUBS        x1, x1, 16
-        SMIN        v0.16b, v0.16b, v5.16b
-        SMIN        v1.16b, v1.16b, v5.16b
-        SMIN        v2.16b, v2.16b, v5.16b
-        SMIN        v3.16b, v3.16b, v5.16b
-        B.LO        10f
-
-        # Store full 4 x 16
-        ST1         {v0.16b}, [x6], x12
+        B.LO        5f
+        STP         q0, q20, [x6]
+        STP         q24, q28, [x6, #32]
+        ADD         x6, x6, x12
+        STP         q1, q21, [x8]
+        STP         q25, q29, [x8, #32]
+        ADD         x8, x8, x12
+        STP         q2, q22, [x9]
+        STP         q26, q30, [x9, #32]
+        ADD         x9, x9, x12
+        STP         q3, q23, [x7]
+        STP         q27, q31, [x7, #32]
+        ADD         x7, x7, x12
         SUB         x3,  x3, x2             // a0 -= kc
-        ST1         {v1.16b}, [x8], x12
         SUB         x15, x15, x2            // a1 -= kc
-        ST1         {v2.16b}, [x9], x12
         SUB         x13, x13, x2            // a2 -= kc
-        ST1         {v3.16b}, [x7], x12
         SUB         x4,  x4, x2             // a3 -= kc
         B.NE        0b
+
+        # Restore d12-d13 from stack
+        LDP         d12, d13, [sp], 32
         RET
+
 
         # Remainder- 8 bytes of A
         .p2align    3
@@ -380,8 +376,40 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld1
 
         # Store odd width
         .p2align    3
-10:
-        TBZ         x1, 3, 11f
+5:
+        TBZ         x1, 3, 6f
+        STP         q3, q23, [x7]
+        STP         q2, q22, [x9]
+        MOV         v3.16b, v27.16b
+        MOV         v23.16b, v31.16b
+        MOV         v2.16b, v26.16b
+        MOV         v22.16b, v30.16b
+        STP         q1, q21, [x8]
+        STP         q0, q20, [x6]
+        MOV         v1.16b, v25.16b
+        MOV         v21.16b, v29.16b
+        MOV         v0.16b, v24.16b
+        MOV         v20.16b, v28.16b
+        ADD         x6, x6, #32
+        ADD         x7, x7, #32
+        ADD         x8, x8, #32
+        ADD         x9, x9, #32
+6:
+        TBZ         x1, 2, 7f
+        STR         q3, [x7]
+        STR         q2, [x9]
+        MOV         v3.16b, v23.16b
+        MOV         v2.16b, v22.16b
+        STR         q1, [x8]
+        STR         q0, [x6]
+        MOV         v1.16b, v21.16b
+        MOV         v0.16b, v20.16b
+        ADD         x6, x6, #16
+        ADD         x7, x7, #16
+        ADD         x8, x8, #16
+        ADD         x9, x9, #16
+7:
+        TBZ         x1, 1, 8f
         STR         d0, [x6], 8
         STR         d1, [x8], 8
         DUP         d0, v0.d[1]
@@ -390,36 +418,18 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld1
         STR         d3, [x7], 8
         DUP         d2, v2.d[1]
         DUP         d3, v3.d[1]
-11:
-        TBZ         x1, 2, 12f
-        STR         s0, [x6], 4
-        STR         s1, [x8], 4
-        DUP         s0, v0.s[1]
-        DUP         s1, v1.s[1]
-        STR         s2, [x9], 4
-        STR         s3, [x7], 4
-        DUP         s2, v2.s[1]
-        DUP         s3, v3.s[1]
-12:
-        TBZ         x1, 1, 13f
-        STR         h0, [x6], 2
-        STR         h1, [x8], 2
-        DUP         h0, v0.h[1]
-        DUP         h1, v1.h[1]
-        STR         h2, [x9], 2
-        STR         h3, [x7], 2
-        DUP         h2, v2.h[1]
-        DUP         h3, v3.h[1]
-13:
-        TBZ         x1, 0, 14f
-        STR         b0, [x6]
-        STR         b1, [x8]
-        STR         b2, [x9]
-        STR         b3, [x7]
-14:
+8:
+        TBZ         x1, 0, 9f
+        STR         s3, [x7]
+        STR         s2, [x9]
+        STR         s1, [x8]
+        STR         s0, [x6]
+9:
+        # Restore d12-d13 from stack
+        LDP         d12, d13, [sp], 32
         RET
 
-END_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__asm_aarch64_neondot_ld128
+END_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax__ukernel_4x16c4__asm_aarch64_neondot_ld128
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

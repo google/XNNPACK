@@ -20,7 +20,7 @@
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
 #     size_t cn_stride,          [sp] -> x12
-#     const union xnn_qs8_conv_minmax_params params)  [sp + 8] -> x11
+#     const union xnn_qs8_conv_minmax_params *params)  [sp + 8] -> x11
 
 # params structure is 8 bytes
 #  struct {
@@ -63,6 +63,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld12
 
         LDP         x12, x11, [sp]          // cn_stride, params
 
+
         CMP         x0, 4                   // if mr < 4
         ADD         x4, x13, x4             // a3 = a2 + a_stride
         ADD         x7,  x9, x7             // c3 = c2 + cm_stride
@@ -72,6 +73,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld12
         .p2align    3
 0:
         # Load initial bias from w into accumulators
+        SUBS        x0, x2, 16              // k = kc - 16
         LDP         q16, q20, [x5], 32
         MOV         v17.16b, v16.16b
         MOV         v18.16b, v16.16b
@@ -82,11 +84,11 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld12
         MOV         v23.16b, v20.16b
         MOV         v25.16b, v24.16b
         MOV         v26.16b, v24.16b
-        SUBS        x0, x2, 16              // k = kc - 16
         MOV         v27.16b, v24.16b
         MOV         v29.16b, v28.16b
         MOV         v30.16b, v28.16b
         MOV         v31.16b, v28.16b
+
         # Is there at least 16 bytes?
         B.LO        3f
 
@@ -283,7 +285,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld12
         SMIN        v1.16b, v1.16b, v5.16b
         SMIN        v2.16b, v2.16b, v5.16b
         SMIN        v3.16b, v3.16b, v5.16b
-        B.LO        5f
+        B.LO        10f
 
         # Store full 4 x 16
         ST1         {v0.16b}, [x6], x12
@@ -376,8 +378,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld12
 
         # Store odd width
         .p2align    3
-5:
-        TBZ         x1, 3, 6f
+10:
+        TBZ         x1, 3, 11f
         STR         d0, [x6], 8
         STR         d1, [x8], 8
         DUP         d0, v0.d[1]
@@ -386,8 +388,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld12
         STR         d3, [x7], 8
         DUP         d2, v2.d[1]
         DUP         d3, v3.d[1]
-6:
-        TBZ         x1, 2, 7f
+11:
+        TBZ         x1, 2, 12f
         STR         s0, [x6], 4
         STR         s1, [x8], 4
         DUP         s0, v0.s[1]
@@ -396,8 +398,8 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld12
         STR         s3, [x7], 4
         DUP         s2, v2.s[1]
         DUP         s3, v3.s[1]
-7:
-        TBZ         x1, 1, 8f
+12:
+        TBZ         x1, 1, 13f
         STR         h0, [x6], 2
         STR         h1, [x8], 2
         DUP         h0, v0.h[1]
@@ -406,13 +408,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld12
         STR         h3, [x7], 2
         DUP         h2, v2.h[1]
         DUP         h3, v3.h[1]
-8:
-        TBZ         x1, 0, 9f
+13:
+        TBZ         x1, 0, 14f
         STR         b0, [x6]
         STR         b1, [x8]
         STR         b2, [x9]
         STR         b3, [x7]
-9:
+14:
         RET
 
 END_FUNCTION xnn_qs8_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld128
