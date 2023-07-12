@@ -299,13 +299,13 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         nc -= ${4};
       } else {
         if (nc & 2) {
-          $for M in range(MR):
+          $for M in reversed(range(MR)):
             _mm_storel_pi((__m64*) c${M}, vout${M}x0123);
             vout${M}x0123 = _mm_unpackhi_ps(vout${M}x0123, vout${M}x0123);
             c${M} += 2;
         }
         if (nc & 1) {
-          $for M in range(MR):
+          $for M in reversed(range(MR)):
             _mm_store_ss(c${M}, vout${M}x0123);
         }
         nc = 0;

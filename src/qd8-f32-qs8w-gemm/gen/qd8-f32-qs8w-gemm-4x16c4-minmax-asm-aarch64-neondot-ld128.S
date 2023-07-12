@@ -274,18 +274,18 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         FMIN        v31.4s, v31.4s, v5.4s
         SUBS        x1, x1, 16
         B.LO        5f
-        STP         q0, q20, [x6]
-        STP         q24, q28, [x6, #32]
-        ADD         x6, x6, x12
-        STP         q1, q21, [x8]
-        STP         q25, q29, [x8, #32]
-        ADD         x8, x8, x12
-        STP         q2, q22, [x9]
-        STP         q26, q30, [x9, #32]
-        ADD         x9, x9, x12
         STP         q3, q23, [x7]
         STP         q27, q31, [x7, #32]
         ADD         x7, x7, x12
+        STP         q2, q22, [x9]
+        STP         q26, q30, [x9, #32]
+        ADD         x9, x9, x12
+        STP         q1, q21, [x8]
+        STP         q25, q29, [x8, #32]
+        ADD         x8, x8, x12
+        STP         q0, q20, [x6]
+        STP         q24, q28, [x6, #32]
+        ADD         x6, x6, x12
         SUB         x3,  x3, x2             // a0 -= kc
         SUB         x15, x15, x2            // a1 -= kc
         SUB         x13, x13, x2            // a2 -= kc
@@ -410,14 +410,14 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         ADD         x9, x9, #16
 7:
         TBZ         x1, 1, 8f
-        STR         d0, [x6], 8
-        STR         d1, [x8], 8
-        DUP         d0, v0.d[1]
-        DUP         d1, v1.d[1]
-        STR         d2, [x9], 8
         STR         d3, [x7], 8
-        DUP         d2, v2.d[1]
+        STR         d2, [x9], 8
         DUP         d3, v3.d[1]
+        DUP         d2, v2.d[1]
+        STR         d1, [x8], 8
+        STR         d0, [x6], 8
+        DUP         d1, v1.d[1]
+        DUP         d0, v0.d[1]
 8:
         TBZ         x1, 0, 9f
         STR         s3, [x7]

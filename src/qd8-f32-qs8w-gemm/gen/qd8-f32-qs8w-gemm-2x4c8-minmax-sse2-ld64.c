@@ -162,16 +162,16 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_2x4c8__sse2_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        _mm_storel_pi((__m64*) c0, vout0x0123);
-        vout0x0123 = _mm_unpackhi_ps(vout0x0123, vout0x0123);
-        c0 += 2;
         _mm_storel_pi((__m64*) c1, vout1x0123);
         vout1x0123 = _mm_unpackhi_ps(vout1x0123, vout1x0123);
         c1 += 2;
+        _mm_storel_pi((__m64*) c0, vout0x0123);
+        vout0x0123 = _mm_unpackhi_ps(vout0x0123, vout0x0123);
+        c0 += 2;
       }
       if (nc & 1) {
-        _mm_store_ss(c0, vout0x0123);
         _mm_store_ss(c1, vout1x0123);
+        _mm_store_ss(c0, vout0x0123);
       }
       nc = 0;
     }

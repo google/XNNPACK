@@ -590,10 +590,6 @@ void GemmMicrokernelTester::Test(
     } while (b.size() > 1 && *std::max_element(b.cbegin(), b.cend()) == *std::min_element(b.cbegin(), b.cend()));
 
     std::generate(bias.begin(), bias.end(), std::ref(f32rng));
-    for (int i = m(); i < mr(); ++i) {
-      quantization_params[i].zero_point = quantization_params[m()-1].zero_point;
-      quantization_params[i].scale = quantization_params[m()-1].scale;
-    }
     std::fill(c.begin(), c.end(), nanf(""));
 
     std::fill(packed_w.begin(), packed_w.end(), 0);

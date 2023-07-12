@@ -250,7 +250,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
           vout${M}x${N} += voutput_zero_point;
 
     if XNN_LIKELY(nc >= ${NR}) {
-      $for M in range(MR):
+      $if DATATYPE == "QD8":
+        $STORE_RANGE = reversed(range(MR))
+      $else:
+        $STORE_RANGE = range(MR)
+      $for M in STORE_RANGE:
         $for N in range(NR):
           $if DATATYPE == "QD8":
             c${M}[${N}] = vout${M}x${N};
@@ -267,7 +271,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     } else {
       $for LOG2N in reversed(range(NR.bit_length() - 1)):
         if (nc & ${1 << LOG2N}) {
-          $for M in range(MR):
+          $if DATATYPE == "QD8":
+            $STORE_RANGE = reversed(range(MR))
+          $else:
+            $STORE_RANGE = range(MR)
+          $for M in STORE_RANGE:
             $for N in range(1 << LOG2N):
               c${M}[${N}] = (${OUT_T}) vout${M}x${N};
             $if LOG2N != 0:
