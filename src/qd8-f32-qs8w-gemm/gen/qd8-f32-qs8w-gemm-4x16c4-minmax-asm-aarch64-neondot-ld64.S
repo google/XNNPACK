@@ -57,8 +57,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         LDP         x12, x11, [sp]          // cn_stride, params
 
         LDR         x16, [sp, 16]           // &quantization_params[0].zero_point
-        STP         d12,  d13, [sp, -32]!
-        LDP         q12, q13, [x16]        // v12 & v13 interleaved zero_point & scale
+        STP         d12,  d13, [sp, -16]!
+        LDP         q12, q13, [x16]         // v12 & v13 interleaved zero_point & scale
 
         CMP         x0, 4                   // if mr < 4
         ADD         x4, x13, x4             // a3 = a2 + a_stride
@@ -159,9 +159,9 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         SCVTF       v29.4s, v29.4s
         SCVTF       v30.4s, v30.4s
         SCVTF       v31.4s, v31.4s
-        LDP         q0, q1, [x5], 32       // bias
+        LDP         q0, q1, [x5], 32        // bias
         LDP         q2, q3, [x5], 32
-        FMUL        v16.4s, v16.4s, v12.s[1] // scale
+        FMUL        v16.4s, v16.4s, v12.s[1]    // scale
         FMUL        v17.4s, v17.4s, v12.s[3]
         FMUL        v18.4s, v18.4s, v13.s[1]
         FMUL        v19.4s, v19.4s, v13.s[3]
@@ -177,7 +177,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         FMUL        v29.4s, v29.4s, v12.s[3]
         FMUL        v30.4s, v30.4s, v13.s[1]
         FMUL        v31.4s, v31.4s, v13.s[3]
-        LD2R        {v4.4s, v5.4s}, [x11]    // min max
+        LD2R        {v4.4s, v5.4s}, [x11]       // min max
         FADD        v16.4s, v16.4s, v0.4s
         FADD        v17.4s, v17.4s, v0.4s
         FADD        v18.4s, v18.4s, v0.4s
@@ -247,10 +247,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         B.NE        0b
 
         # Restore d12-d13 from stack
-        LDP         d12, d13, [sp], 32
+        LDP         d12, d13, [sp], 16
         RET
-
-
 
         # Remainder- 4 bytes of A
         .p2align    3
@@ -332,36 +330,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         STR         s16, [x6]
 8:
         # Restore d12-d13 from stack
-        LDP         d12, d13, [sp], 32
+        LDP         d12, d13, [sp], 16
         RET
- 10:
-          TBZ         x1, 2, 11f
-          STR         s0, [x6], 4
-          STR         s1, [x8], 4
-          DUP         s0, v0.s[1]
-          DUP         s1, v1.s[1]
-          STR         s2, [x9], 4
-          STR         s3, [x7], 4
-          DUP         s2, v2.s[1]
-          DUP         s3, v3.s[1]
- 11:
-          TBZ         x1, 1, 12f
-          STR         h0, [x6], 2
-          STR         h1, [x8], 2
-          DUP         h0, v0.h[1]
-          DUP         h1, v1.h[1]
-          STR         h2, [x9], 2
-          STR         h3, [x7], 2
-          DUP         h2, v2.h[1]
-          DUP         h3, v3.h[1]
- 12:
-          TBZ         x1, 0, 13f
-          STR         b0, [x6]
-          STR         b1, [x8]
-          STR         b2, [x9]
-          STR         b3, [x7]
- 13:
-          RET
 
 END_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_ld64
 

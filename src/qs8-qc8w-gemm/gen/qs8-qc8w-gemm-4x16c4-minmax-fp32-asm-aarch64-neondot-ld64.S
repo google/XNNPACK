@@ -190,7 +190,6 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot
         FCVTNS      v29.4s, v29.4s
         FCVTNS      v30.4s, v30.4s
         FCVTNS      v31.4s, v31.4s
-
         SQXTN       v16.4h, v16.4s
         SQXTN       v17.4h, v17.4s
         SQXTN       v18.4h, v18.4s
@@ -254,7 +253,6 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot
         B.NE        0b
         RET
 
-
         # Remainder- 4 bytes of A
         .p2align    3
 3:
@@ -295,34 +293,34 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot
         STR         d3, [x7], 8
         DUP         d2, v2.d[1]
         DUP         d3, v3.d[1]
- 10:
-          TBZ         x1, 2, 11f
-          STR         s0, [x6], 4
-          STR         s1, [x8], 4
-          DUP         s0, v0.s[1]
-          DUP         s1, v1.s[1]
-          STR         s2, [x9], 4
-          STR         s3, [x7], 4
-          DUP         s2, v2.s[1]
-          DUP         s3, v3.s[1]
- 11:
-          TBZ         x1, 1, 12f
-          STR         h0, [x6], 2
-          STR         h1, [x8], 2
-          DUP         h0, v0.h[1]
-          DUP         h1, v1.h[1]
-          STR         h2, [x9], 2
-          STR         h3, [x7], 2
-          DUP         h2, v2.h[1]
-          DUP         h3, v3.h[1]
- 12:
-          TBZ         x1, 0, 13f
-          STR         b0, [x6]
-          STR         b1, [x8]
-          STR         b2, [x9]
-          STR         b3, [x7]
- 13:
-          RET
+10:
+        TBZ         x1, 2, 11f
+        STR         s0, [x6], 4
+        STR         s1, [x8], 4
+        DUP         s0, v0.s[1]
+        DUP         s1, v1.s[1]
+        STR         s2, [x9], 4
+        STR         s3, [x7], 4
+        DUP         s2, v2.s[1]
+        DUP         s3, v3.s[1]
+11:
+        TBZ         x1, 1, 12f
+        STR         h0, [x6], 2
+        STR         h1, [x8], 2
+        DUP         h0, v0.h[1]
+        DUP         h1, v1.h[1]
+        STR         h2, [x9], 2
+        STR         h3, [x7], 2
+        DUP         h2, v2.h[1]
+        DUP         h3, v3.h[1]
+12:
+        TBZ         x1, 0, 13f
+        STR         b0, [x6]
+        STR         b1, [x8]
+        STR         b2, [x9]
+        STR         b3, [x7]
+13:
+        RET
 
 END_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x16c4__asm_aarch64_neondot_ld64
 
