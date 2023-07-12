@@ -260,9 +260,9 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x
           SCVTF       v29.4s, v29.4s
           SCVTF       v30.4s, v30.4s
           SCVTF       v31.4s, v31.4s
-          LDP         q0, q1, [x5], 32       // bias
+          LDP         q0, q1, [x5], 32        // bias
           LDP         q2, q3, [x5], 32
-          FMUL        v16.4s, v16.4s, v12.s[1] // scale
+          FMUL        v16.4s, v16.4s, v12.s[1]    // scale
           FMUL        v17.4s, v17.4s, v12.s[3]
           FMUL        v18.4s, v18.4s, v13.s[1]
           FMUL        v19.4s, v19.4s, v13.s[3]
@@ -278,7 +278,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x
           FMUL        v29.4s, v29.4s, v12.s[3]
           FMUL        v30.4s, v30.4s, v13.s[1]
           FMUL        v31.4s, v31.4s, v13.s[3]
-          LD2R        {v4.4s, v5.4s}, [x11]    // min max
+          LD2R        {v4.4s, v5.4s}, [x11]       // min max
           FADD        v16.4s, v16.4s, v0.4s
           FADD        v17.4s, v17.4s, v0.4s
           FADD        v18.4s, v18.4s, v0.4s
