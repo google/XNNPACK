@@ -64,7 +64,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
 
         LDR         x16, [sp, 16]           // &quantization_params[0].zero_point
         STP         d12,  d13, [sp, -32]!
-        LDP         q12, q13, [x16]        // v12 & v13 interleaved zero_point & scale
+        LDP         q12, q13, [x16]         // v12 & v13 interleaved zero_point & scale
 
         CMP         x0, 4                   // if mr < 4
         ADD         x4, x13, x4             // a3 = a2 + a_stride
@@ -205,9 +205,9 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         SCVTF       v29.4s, v29.4s
         SCVTF       v30.4s, v30.4s
         SCVTF       v31.4s, v31.4s
-        LDP         q0, q1, [x5], 32       // bias
+        LDP         q0, q1, [x5], 32        // bias
         LDP         q2, q3, [x5], 32
-        FMUL        v16.4s, v16.4s, v12.s[1] // scale
+        FMUL        v16.4s, v16.4s, v12.s[1]    // scale
         FMUL        v17.4s, v17.4s, v12.s[3]
         FMUL        v18.4s, v18.4s, v13.s[1]
         FMUL        v19.4s, v19.4s, v13.s[3]
@@ -223,7 +223,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         FMUL        v29.4s, v29.4s, v12.s[3]
         FMUL        v30.4s, v30.4s, v13.s[1]
         FMUL        v31.4s, v31.4s, v13.s[3]
-        LD2R        {v4.4s, v5.4s}, [x11]    // min max
+        LD2R        {v4.4s, v5.4s}, [x11]       // min max
         FADD        v16.4s, v16.4s, v0.4s
         FADD        v17.4s, v17.4s, v0.4s
         FADD        v18.4s, v18.4s, v0.4s
@@ -416,8 +416,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         DUP         d2, v2.d[1]
         STR         d1, [x8], 8
         STR         d0, [x6], 8
-        DUP         d1, v1.d[1]
-        DUP         d0, v0.d[1]
+        DUP         d2, v1.d[1]
+        DUP         d3, v0.d[1]
 8:
         TBZ         x1, 0, 9f
         STR         s3, [x7]

@@ -319,7 +319,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         DUP         d19, v19.d[1]
         DUP         d18, v18.d[1]
         STR         d17, [x8], 8
-        STR         d16, [x6], 8
+        STR         d18, [x6], 8
         DUP         d17, v17.d[1]
         DUP         d16, v16.d[1]
 7:
