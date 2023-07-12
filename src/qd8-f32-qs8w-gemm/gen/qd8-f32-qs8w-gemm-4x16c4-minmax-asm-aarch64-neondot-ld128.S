@@ -64,7 +64,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
 
         LDR         x16, [sp, 16]           // &quantization_params[0].zero_point
         STP         d12,  d13, [sp, -32]!
-        LDP         q12, q13, [x16]        // v12 & v13 interleaved zero_point & scale
+        LDP         q12, q13, [x16]         // v12 & v13 interleaved zero_point & scale
 
         CMP         x0, 4                   // if mr < 4
         ADD         x4, x13, x4             // a3 = a2 + a_stride
