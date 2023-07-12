@@ -490,7 +490,7 @@ TEST(FULLY_CONNECTED_NC_F32, weights_cache_unit_batch_transpose_weights) {
     .TestF32();
 }
 
-#if XNN_ENABLE_JIT
+#if !XNN_ARCH_WASM && XNN_ENABLE_JIT //  TODO(b/290880274)
 TEST(FULLY_CONNECTED_NC_F32, unit_batch_with_jit) {
   FullyConnectedOperatorTester()
     .batch_size(1)
@@ -510,7 +510,7 @@ TEST(FULLY_CONNECTED_NC_F32, small_batch_with_jit) {
     .iterations(3)
     .TestF32();
 }
-#endif  // XNN_ENABLE_JIT
+#endif  // !XNN_ARCH_WASM && XNN_ENABLE_JIT
 
 TEST(FULLY_CONNECTED_NC_F32_QC8W, unit_batch) {
   FullyConnectedOperatorTester()

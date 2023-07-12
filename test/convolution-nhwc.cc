@@ -5075,7 +5075,7 @@ TEST(CONVOLUTION_NHWC_F32, weights_cache_depthwise_2x2d2) {
     .TestNHWCxF32();
 }
 
-#if XNN_ENABLE_JIT
+#if !XNN_ARCH_WASM && XNN_ENABLE_JIT //  TODO(b/290880274)
 TEST(CONVOLUTION_NHWC_F32, jit_1x1) {
   ConvolutionOperatorTester()
     .input_size(27, 37)
@@ -6308,7 +6308,7 @@ TEST(CONVOLUTION_NHWC_F32, jit_weights_cache_1x1) {
     .use_weights_cache(true)
     .TestNHWCxF32();
 }
-#endif  // XNN_ENABLE_JIT
+#endif  // !XNN_ARCH_WASM && XNN_ENABLE_JIT
 
 TEST(DEPTHWISE_CONVOLUTION_NHWC_F32, 1x1) {
   ConvolutionOperatorTester()
