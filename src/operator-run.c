@@ -1341,7 +1341,7 @@ void xnn_compute_rope(
         mr_block_size,
         nr_block_size,
         k_scaled,
-        (const void*) ((uintptr_t) context->a + mr_block_start * a_stride + group_index * k_scaled),
+        (const void*) ((uintptr_t) context->a + mr_block_start * a_stride + group_index * context->ga_stride),
         a_stride,
         (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride + group_index * context->gw_stride),
         (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize) + group_index * context->gc_stride),
