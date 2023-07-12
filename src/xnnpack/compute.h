@@ -1212,6 +1212,24 @@ struct slice_context {
       size_t i, size_t j, size_t k, size_t l, size_t m);
 #endif
 
+struct f32_qd8_convert_context {
+  size_t n;
+  const float* x;
+  size_t x_stride;
+  int8_t* y;
+  size_t y_stride;
+  struct xnn_qd8_quantization_params* quantization_params;
+  xnn_reduce_ukernel_fn rminmax_ukernel;
+  xnn_vunary_ukernel_fn convert_ukernel;
+  xnn_init_f32_qs8_cvt_params_fn init_params;
+};
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_f32_qd8_convert(
+      const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index);
+#endif
+
 struct u8_softmax_context {
   size_t n;
   const uint8_t* x;

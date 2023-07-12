@@ -20,6 +20,7 @@
 #include <xnnpack/microkernel-type.h>
 #include <xnnpack/params.h>
 #include <xnnpack/compute.h>
+#include <xnnpack/quantization.h>
 
 
 void xnn_compute_transposec_2d(
@@ -1237,6 +1238,24 @@ void xnn_compute_reduce(
     input = (const void*) ((uintptr_t) input + input_stride);
     output = (void*) ((uintptr_t) output + output_stride);
   } while (--batch_range != 0);
+}
+
+void xnn_compute_f32_qd8_convert(
+    const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index)
+{
+  const size_t x_stride = context->x_stride;
+  const size_t y_stride = context->y_stride;
+  const void* input = (const void*) ((uintptr_t) context->x + x_stride * batch_index);
+  void* output = (void*) ((uintptr_t) context->y + y_stride * batch_index);
+
+  float minmax[2];
+  context->rminmax_ukernel(context->n, input, &minmax[0], NULL);
+  context->quantization_params[batch_index] = xnn_f32_qd8_asymmetric_quantization_params(minmax[0], minmax[1]);
+
+  union xnn_f32_qs8_cvt_params params;
+  context->init_params(&params, context->quantization_params[batch_index].scale, context->quantization_params[batch_index].zero_point, INT8_MIN, INT8_MAX);
+  context->convert_ukernel(context->n, input, output, &params);
 }
 
 void xnn_compute_u8_softmax(

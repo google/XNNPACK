@@ -348,6 +348,10 @@ struct xnn_operator {
     const struct xnn_cmul_config* cmul_config;
     const struct xnn_unary_elementwise_config* copy_config;
     const struct xnn_transpose_config* transpose_config;
+    struct {
+      const struct xnn_reduce_config* rminmax_config;
+      const struct xnn_unary_elementwise_config* convert_config;
+    };  // For F32 to QD8 convert operator.
   };
 
   struct compute_parameters compute[XNN_MAX_COMPUTE_INVOCATIONS];
@@ -383,6 +387,7 @@ struct xnn_operator {
     struct transpose_context transpose;
     struct floating_point_softmax_context floating_point_softmax;
     struct u8_softmax_context u8_softmax;
+    struct f32_qd8_convert_context f32_qd8_convert;
     struct univector_contiguous_context univector_contiguous;
     struct univector_strided_context univector_strided;
     struct unpooling_context unpooling;

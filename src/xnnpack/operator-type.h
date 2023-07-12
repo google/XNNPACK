@@ -44,6 +44,7 @@ enum xnn_operator_type {
   xnn_operator_type_constant_pad_nd_x32,
   xnn_operator_type_convert_nc_f16_f32,
   xnn_operator_type_convert_nc_f32_f16,
+  xnn_operator_type_convert_nc_f32_qd8,
   xnn_operator_type_convert_nc_f32_qs8,
   xnn_operator_type_convert_nc_f32_qu8,
   xnn_operator_type_convert_nc_qs8,
