@@ -2433,6 +2433,15 @@ ExecutionPlan FP32MobileNetV2(bool use_jit, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  status = xnn_reshape_global_average_pooling_nwc_f32(
+    op62,
+    /*batch_size=*/1, /*width=*/49,
+    /*threadpool=*/threadpool);
+  if (status != xnn_status_success) {
+    std::cerr << "failed to reshape operation #62" << std::endl;
+    return ExecutionPlan();
+  }
+
   status = xnn_reshape_convolution2d_nhwc_f32(
     op63,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
