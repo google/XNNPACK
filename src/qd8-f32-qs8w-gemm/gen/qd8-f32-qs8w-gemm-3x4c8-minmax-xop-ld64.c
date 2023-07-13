@@ -61,7 +61,7 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_3x4c8__xop_ld64(
   do {
     const __m128i vksum = _mm_load_si128((const __m128i*) w);
     const __m128i vzero = _mm_setzero_si128();
-    const __m128i vzp01 = _mm_loadu_si128((const __m128i*) &quantization_params[0].zero_point);
+    const __m128i vzp01 = _mm_loadu_si128((const __m128i*) quantization_params);
     const __m128i vzp0 = _mm_shuffle_epi32(vzp01, _MM_SHUFFLE(0, 0, 0, 0));
     const __m128i vzp1 = _mm_shuffle_epi32(vzp01, _MM_SHUFFLE(2, 2, 2, 2));
     __m128i vzp2 = _mm_cvtsi32_si128((int) quantization_params[2].zero_point);
@@ -138,11 +138,10 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_3x4c8__xop_ld64(
     __m128 vout0x0123 = _mm_cvtepi32_ps(vacc0x0123);
     __m128 vout1x0123 = _mm_cvtepi32_ps(vacc1x0123);
     __m128 vout2x0123 = _mm_cvtepi32_ps(vacc2x0123);
-    const __m128 vscale01 = _mm_castsi128_ps(_mm_loadu_si128((const __m128i*) &quantization_params[0].zero_point));
+    const __m128 vscale01 = _mm_castsi128_ps(_mm_loadu_si128((const __m128i*) quantization_params));
     const __m128 vscale0 = _mm_shuffle_ps(vscale01, vscale01, _MM_SHUFFLE(1, 1, 1, 1));
     const __m128 vscale1 = _mm_shuffle_ps(vscale01, vscale01, _MM_SHUFFLE(3, 3, 3, 3));
-    __m128 vscale2 = _mm_load_ss(&quantization_params[2].scale);
-    vscale2 = _mm_shuffle_ps(vscale2, vscale2, _MM_SHUFFLE(0, 0, 0, 0));
+    const __m128 vscale2 = _mm_broadcast_ss(&quantization_params[2].scale);
     vout0x0123 = _mm_mul_ps(vout0x0123, vscale0);
     vout1x0123 = _mm_mul_ps(vout1x0123, vscale1);
     vout2x0123 = _mm_mul_ps(vout2x0123, vscale2);

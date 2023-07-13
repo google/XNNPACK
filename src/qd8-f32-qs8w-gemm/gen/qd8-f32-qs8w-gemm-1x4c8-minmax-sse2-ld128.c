@@ -101,8 +101,7 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x4c8__sse2_ld128(
     __m128i vacc0x0123 = _mm_add_epi32(_mm_unpacklo_epi32(vacc0x02, vacc0x13), _mm_unpackhi_epi32(vacc0x02, vacc0x13));
 
     __m128 vout0x0123 = _mm_cvtepi32_ps(vacc0x0123);
-    const __m128 vscale01 = _mm_load_ss(&quantization_params[0].scale);
-    const __m128 vscale0 = _mm_shuffle_ps(vscale01, vscale01, _MM_SHUFFLE(0, 0, 0, 0));
+    const __m128 vscale0 = _mm_load1_ps(&quantization_params[0].scale);
     vout0x0123 = _mm_mul_ps(vout0x0123, vscale0);
 
     const __m128 vbias0123 = _mm_load_ps(w); w = (const float*) w + 4;
