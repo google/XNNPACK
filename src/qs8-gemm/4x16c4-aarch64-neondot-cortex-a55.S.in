@@ -831,106 +831,106 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x
         # Store odd width
         .p2align    3
 $if DATATYPE == "QD8":
-        6:
-                TBZ         x1, 3, 7f
-                STP         q19, q23, [x7]
-                STP         q18, q22, [x9]
-                STP         q17, q21, [x8]
-                STP         q16, q20, [x6]
-                MOV         v16.16b, v24.16b
-                MOV         v17.16b, v25.16b
-                MOV         v18.16b, v26.16b
-                MOV         v19.16b, v27.16b
-                MOV         v20.16b, v28.16b
-                MOV         v21.16b, v29.16b
-                MOV         v22.16b, v30.16b
-                MOV         v23.16b, v31.16b
-                ADD         x6, x6, #32
-                ADD         x7, x7, #32
-                ADD         x8, x8, #32
-                ADD         x9, x9, #32
-        7:
-                TBZ         x1, 2, 8f
-                STR         q19, [x7]
-                STR         q18, [x9]
-                STR         q17, [x8]
-                STR         q16, [x6]
-                MOV         v16.16b, v20.16b
-                MOV         v17.16b, v21.16b
-                MOV         v18.16b, v22.16b
-                MOV         v19.16b, v23.16b
-                ADD         x6, x6, #16
-                ADD         x7, x7, #16
-                ADD         x8, x8, #16
-                ADD         x9, x9, #16
-        8:
-                TBZ         x1, 1, 9f
-                ST1         {v19.2s}, [x7]
-                ST1         {v18.2s}, [x9]
-                ST1         {v17.2s}, [x8]
-                ST1         {v16.2s}, [x6]
-                DUP         d16, v16.d[1]
-                DUP         d17, v17.d[1]
-                DUP         d18, v18.d[1]
-                DUP         d19, v19.d[1]
-                ADD         x6, x6, #8
-                ADD         x7, x7, #8
-                ADD         x8, x8, #8
-                ADD         x9, x9, #8
-        9:
-                TBZ         x1, 0, 10f
-                STR         s19, [x7]
-                STR         s18, [x9]
-                STR         s17, [x8]
-                STR         s16, [x6]
-        10:
-                # Restore d8-d13 from stack
-                LDP         d12, d13, [sp, 32]
-                LDP         d10, d11, [sp, 16]
-                LDP         d8, d9, [sp], 48
-                RET
+  6:
+          TBZ         x1, 3, 7f
+          STP         q19, q23, [x7]
+          STP         q18, q22, [x9]
+          STP         q17, q21, [x8]
+          STP         q16, q20, [x6]
+          MOV         v16.16b, v24.16b
+          MOV         v17.16b, v25.16b
+          MOV         v18.16b, v26.16b
+          MOV         v19.16b, v27.16b
+          MOV         v20.16b, v28.16b
+          MOV         v21.16b, v29.16b
+          MOV         v22.16b, v30.16b
+          MOV         v23.16b, v31.16b
+          ADD         x6, x6, #32
+          ADD         x7, x7, #32
+          ADD         x8, x8, #32
+          ADD         x9, x9, #32
+  7:
+          TBZ         x1, 2, 8f
+          STR         q19, [x7]
+          STR         q18, [x9]
+          STR         q17, [x8]
+          STR         q16, [x6]
+          MOV         v16.16b, v20.16b
+          MOV         v17.16b, v21.16b
+          MOV         v18.16b, v22.16b
+          MOV         v19.16b, v23.16b
+          ADD         x6, x6, #16
+          ADD         x7, x7, #16
+          ADD         x8, x8, #16
+          ADD         x9, x9, #16
+  8:
+          TBZ         x1, 1, 9f
+          ST1         {v19.2s}, [x7]
+          ST1         {v18.2s}, [x9]
+          ST1         {v17.2s}, [x8]
+          ST1         {v16.2s}, [x6]
+          DUP         d16, v16.d[1]
+          DUP         d17, v17.d[1]
+          DUP         d18, v18.d[1]
+          DUP         d19, v19.d[1]
+          ADD         x6, x6, #8
+          ADD         x7, x7, #8
+          ADD         x8, x8, #8
+          ADD         x9, x9, #8
+  9:
+          TBZ         x1, 0, 10f
+          STR         s19, [x7]
+          STR         s18, [x9]
+          STR         s17, [x8]
+          STR         s16, [x6]
+  10:
+          # Restore d8-d13 from stack
+          LDP         d12, d13, [sp, 32]
+          LDP         d10, d11, [sp, 16]
+          LDP         d8, d9, [sp], 48
+          RET
 $else:
-        6:
-                TBZ         x1, 3, 7f
-                STR         d0, [x6], 8
-                STR         d1, [x8], 8
-                DUP         d0, v0.d[1]
-                DUP         d1, v1.d[1]
-                STR         d2, [x9], 8
-                STR         d3, [x7], 8
-                DUP         d2, v2.d[1]
-                DUP         d3, v3.d[1]
-        7:
-                TBZ         x1, 2, 8f
-                STR         s0, [x6], 4
-                STR         s1, [x8], 4
-                DUP         s0, v0.s[1]
-                DUP         s1, v1.s[1]
-                STR         s2, [x9], 4
-                STR         s3, [x7], 4
-                DUP         s2, v2.s[1]
-                DUP         s3, v3.s[1]
-        8:
-                TBZ         x1, 1, 9f
-                STR         h0, [x6], 2
-                STR         h1, [x8], 2
-                DUP         h0, v0.h[1]
-                DUP         h1, v1.h[1]
-                STR         h2, [x9], 2
-                STR         h3, [x7], 2
-                DUP         h2, v2.h[1]
-                DUP         h3, v3.h[1]
-        9:
-                TBZ         x1, 0, 10f
-                STR         b0, [x6]
-                STR         b1, [x8]
-                STR         b2, [x9]
-                STR         b3, [x7]
-        10:
-                # Restore d8-d11 from stack
-                LDP         d10, d11, [sp, 16]
-                LDP         d8, d9, [sp], 32
-                RET
+  6:
+          TBZ         x1, 3, 7f
+          STR         d0, [x6], 8
+          STR         d1, [x8], 8
+          DUP         d0, v0.d[1]
+          DUP         d1, v1.d[1]
+          STR         d2, [x9], 8
+          STR         d3, [x7], 8
+          DUP         d2, v2.d[1]
+          DUP         d3, v3.d[1]
+  7:
+          TBZ         x1, 2, 8f
+          STR         s0, [x6], 4
+          STR         s1, [x8], 4
+          DUP         s0, v0.s[1]
+          DUP         s1, v1.s[1]
+          STR         s2, [x9], 4
+          STR         s3, [x7], 4
+          DUP         s2, v2.s[1]
+          DUP         s3, v3.s[1]
+  8:
+          TBZ         x1, 1, 9f
+          STR         h0, [x6], 2
+          STR         h1, [x8], 2
+          DUP         h0, v0.h[1]
+          DUP         h1, v1.h[1]
+          STR         h2, [x9], 2
+          STR         h3, [x7], 2
+          DUP         h2, v2.h[1]
+          DUP         h3, v3.h[1]
+  9:
+          TBZ         x1, 0, 10f
+          STR         b0, [x6]
+          STR         b1, [x8]
+          STR         b2, [x9]
+          STR         b3, [x7]
+  10:
+          # Restore d8-d11 from stack
+          LDP         d10, d11, [sp, 16]
+          LDP         d8, d9, [sp], 32
+          RET
 
 END_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_4x16c4__asm_aarch64_neondot_cortex_a55
 
