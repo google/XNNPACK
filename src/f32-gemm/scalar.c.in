@@ -3,18 +3,22 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert DATATYPE in ["F32", "QC8"]
+$assert DATATYPE in ["F32", "QC4", "QC8"]
+$assert ACTIVATION == "MINMAX" or DATATYPE != "QC4"
 $assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
 $assert ACTIVATION != "LINEAR" or not WASM
+$if DATATYPE == "QC4":
+  $assert ACTIVATION == "MINMAX"
+  $assert NR % 2 == 0
 #include <assert.h>
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
-$if DATATYPE == "QC8" and not NR % 4 == 0:
+$if (DATATYPE == "QC8" and NR % 4 != 0) or (DATATYPE == "QC4" and NR % 4 != 0):
   #include <xnnpack/unaligned.h>
 
 
-$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
+$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC4": "f32_qc4w"}[DATATYPE]
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
 $KERNEL = "gemminc" if INC else "gemm"
@@ -35,7 +39,10 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
     size_t cn_stride,
     $if INC:
       const float* restrict acc,
-    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+    $if DATATYPE == "QC4":
+      const union xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    $else:
+      const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -72,6 +79,8 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
   $if ACTIVATION == "MINMAX":
     const float vmin = params->scalar.min;
     const float vmax = params->scalar.max;
+  $if DATATYPE == "QC4":
+    const int32_t vbias = params->scalar.bias[0];
   do {
     $if INC:
       $for M in range(MR):
@@ -85,7 +94,7 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
         w += ${NR};
       $else:
         $for N in range(NR):
-          $if NR % 4 == 0:
+          $if (DATATYPE == "QC8" and NR % 4 == 0) or (DATATYPE == "QC4" and NR % 4 == 0):
             float vacc0${N} = ((const float*)w)[${N}];
           $else:
             float vacc0${N} = unaligned_indexed_load_f32(w, ${N});
@@ -95,29 +104,65 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
           float vacc${M}${N} = vacc0${N};
 
     size_t k = kc;
-    do {
-      $for M in range(MR):
-        const float va${M} = *a${M}++;
+    $if DATATYPE == "QC4":
+      for (; k >= 2 * sizeof(float); k -= 2 * sizeof(float)) {
+        $for M in range(MR):
+          const float va${M}0 = *a${M}++;
+          const float va${M}1 = *a${M}++;
 
-      $if DATATYPE == "F32":
         $for N in range(NR):
-          const float vb${N} = w[${N}];
-        w += ${NR};
-      $elif DATATYPE == "QC8":
+          const uint8_t vbi${N} = ((const uint8_t*) w)[${N}];
         $for N in range(NR):
-          const float vb${N} = (float) ((const int8_t*) w)[${N}];
+          const float vb${N}0 = (float) ((int32_t) (vbi${N} & 0xF) + vbias);
+        $for N in range(NR):
+          const float vb${N}1 = (float) ((int32_t) (vbi${N} >> 4) + vbias);
         w = (const int8_t*) w + ${NR};
 
-      $for M in range(MR):
+        $for M in range(MR):
+          $for N in range(NR):
+            vacc${M}${N} = math_muladd_f32(va${M}0, vb${N}0, vacc${M}${N});
+        $for M in range(MR):
+          $for N in range(NR):
+            vacc${M}${N} = math_muladd_f32(va${M}1, vb${N}1, vacc${M}${N});
+      }
+      if XNN_UNLIKELY(k != 0) {
+        $for M in range(MR):
+          const float va${M} = *a${M}++;
+
         $for N in range(NR):
-          vacc${M}${N} = math_muladd_f32(va${M}, vb${N}, vacc${M}${N});
+          const uint8_t vbi${N} = ((const uint8_t*) w)[${N}];
+        $for N in range(NR):
+          const float vb${N} = (float) ((int32_t) (vbi${N} & 0xF) + vbias);
+        w = (const int8_t*) w + ${NR};
 
-      k -= sizeof(float);
-    } while (k != 0);
+        $for M in range(MR):
+          $for N in range(NR):
+            vacc${M}${N} = math_muladd_f32(va${M}, vb${N}, vacc${M}${N});
+      }
+    $else:
+      do {
+        $for M in range(MR):
+          const float va${M} = *a${M}++;
 
-    $if DATATYPE == "QC8":
+        $if DATATYPE == "F32":
+          $for N in range(NR):
+            const float vb${N} = w[${N}];
+          w += ${NR};
+        $elif DATATYPE == "QC8":
+          $for N in range(NR):
+            const float vb${N} = (float) ((const int8_t*) w)[${N}];
+          w = (const int8_t*) w + ${NR};
+
+        $for M in range(MR):
+          $for N in range(NR):
+            vacc${M}${N} = math_muladd_f32(va${M}, vb${N}, vacc${M}${N});
+
+        k -= sizeof(float);
+      } while (k != 0);
+
+    $if DATATYPE == "QC8" or DATATYPE == "QC4":
       $for N in range(NR):
-        $if NR % 4 == 0:
+        $if (DATATYPE == "QC8" and NR % 4 == 0) or (DATATYPE == "QC4" and NR % 4 == 0):
           const float vscale${N} = ((const float*)w)[${N}];
         $else:
           const float vscale${N} = unaligned_indexed_load_f32(w, ${N});

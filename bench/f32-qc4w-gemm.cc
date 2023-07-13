@@ -263,6 +263,29 @@ static void GEMMBenchmark(benchmark::State& state,
   BENCHMARK_GEMM(f32_qc4w_gemm_6x8__asm_aarch64_neonfma_ld128)
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
+static void f32_qc4w_gemm_1x4__scalar(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_f32_qc4w_gemm_minmax_ukernel_1x4__scalar,
+    xnn_init_f32_qc4w_minmax_scalar_params,
+    /*mr=*/1, /*nr=*/4, /*kr=*/1, /*sr=*/1);
+}
+static void f32_qc4w_gemm_2x4__scalar(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_f32_qc4w_gemm_minmax_ukernel_2x4__scalar,
+    xnn_init_f32_qc4w_minmax_scalar_params,
+    /*mr=*/2, /*nr=*/4, /*kr=*/1, /*sr=*/1);
+}
+static void f32_qc4w_gemm_4x4__scalar(benchmark::State& state, const char* net) {
+  GEMMBenchmark(state,
+    xnn_f32_qc4w_gemm_minmax_ukernel_4x4__scalar,
+    xnn_init_f32_qc4w_minmax_scalar_params,
+    /*mr=*/4, /*nr=*/4, /*kr=*/1, /*sr=*/1);
+}
+
+BENCHMARK_GEMM(f32_qc4w_gemm_1x4__scalar)
+BENCHMARK_GEMM(f32_qc4w_gemm_2x4__scalar)
+BENCHMARK_GEMM(f32_qc4w_gemm_4x4__scalar)
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

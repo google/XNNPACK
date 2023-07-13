@@ -67,6 +67,29 @@
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
   init: xnn_init_f32_qc4w_minmax_scalar_params
   k-block: 2
-#- name: xnn_f32_qc4w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld128
-#  init: xnn_init_f32_qc4w_minmax_scalar_params
-#  k-block: 4
+# WAsm
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_1x4__wasm
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_2x4__wasm
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_4x2__wasm
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_4x4__wasm
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+# Scalar
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_1x4__scalar
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_2x4__scalar
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_4x2__scalar
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_4x4__scalar
+  init: xnn_init_f32_qc4w_minmax_scalar_params
+  k-block: 2
