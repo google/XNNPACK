@@ -220,6 +220,12 @@ class V128WasmOps : public WasmOpsBase<Derived, V128WasmOps<Derived>> {
       this->Emit8(lane);
     }
   }
+  void v128_const(const std::array<byte, 16>& values) const {
+    EmitVectorOpcode(0x0C);
+    for (byte v : values) {
+      this->Emit8(v);
+    }
+  }
 
   void EmitVectorOpcodePrefix() const { this->Emit8(0xFD); }
 
@@ -591,6 +597,17 @@ class LocalWasmOps : public LocalsManager {
 
   ValueOnStack F32x4Mul(const ValueOnStack& a, const ValueOnStack& b) {
     return BinaryOp(a, b, &Derived::f32x4_mul);
+  }
+
+  ValueOnStack V128Const(float value) {
+    const uint8_t* value_int = reinterpret_cast<uint8_t*>(&value);
+    std::array<byte, 16> values;
+    for (size_t offset = 0; offset < 16 / sizeof(float); offset++) {
+      std::copy(value_int, value_int + sizeof(float),
+                values.data() + offset * sizeof(float));
+    }
+    GetDerived()->v128_const(values);
+    return MakeValueOnStack(v128);
   }
 
   ValueOnStack V128Load(const ValueOnStack& address, uint32_t offset = 0,
