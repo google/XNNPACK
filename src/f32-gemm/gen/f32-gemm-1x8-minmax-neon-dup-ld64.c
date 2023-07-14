@@ -49,13 +49,12 @@ void xnn_f32_gemm_minmax_ukernel_1x8__neon_dup_ld64(
 
       const float32x4_t vb0123c0 = vld1q_f32(w); w += 4;
       const float32x4_t vb4567c0 = vld1q_f32(w); w += 4;
+      const float32x4_t vb0123c1 = vld1q_f32(w); w += 4;
+      const float32x4_t vb4567c1 = vld1q_f32(w); w += 4;
 
       const float32x4_t va0c0 = vdupq_lane_f32(va0, 0);
       vacc0x0123 = vmlaq_f32(vacc0x0123, va0c0, vb0123c0);
       vacc0x4567 = vmlaq_f32(vacc0x4567, va0c0, vb4567c0);
-      const float32x4_t vb0123c1 = vld1q_f32(w); w += 4;
-      const float32x4_t vb4567c1 = vld1q_f32(w); w += 4;
-
       const float32x4_t va0c1 = vdupq_lane_f32(va0, 1);
       vacc0x0123 = vmlaq_f32(vacc0x0123, va0c1, vb0123c1);
       vacc0x4567 = vmlaq_f32(vacc0x4567, va0c1, vb4567c1);

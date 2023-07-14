@@ -49,12 +49,11 @@ void xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64(
 
       const float32x4_t vb0123c0 = vld1q_f32(w); w += 4;
       const float32x4_t vb4567c0 = vld1q_f32(w); w += 4;
-
-      vacc0x0123 = vmlaq_lane_f32(vacc0x0123, vb0123c0, va0, 0);
-      vacc0x4567 = vmlaq_lane_f32(vacc0x4567, vb4567c0, va0, 0);
       const float32x4_t vb0123c1 = vld1q_f32(w); w += 4;
       const float32x4_t vb4567c1 = vld1q_f32(w); w += 4;
 
+      vacc0x0123 = vmlaq_lane_f32(vacc0x0123, vb0123c0, va0, 0);
+      vacc0x4567 = vmlaq_lane_f32(vacc0x4567, vb4567c0, va0, 0);
       vacc0x0123 = vmlaq_lane_f32(vacc0x0123, vb0123c1, va0, 1);
       vacc0x4567 = vmlaq_lane_f32(vacc0x4567, vb4567c1, va0, 1);
     }

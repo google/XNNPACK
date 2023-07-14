@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert NR % 4 == 0
-$assert DATATYPE in ["F32", "QC8"]
+$assert DATATYPE in ["F32", "QC4", "QC8"]
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
@@ -17,7 +17,7 @@ $VMULADDQ_LANE_F32 = "vfmaq_lane_f32" if FMA else "vmlaq_lane_f32"
 
 
 $ISA = ("neonfma" if DUP else "aarch64_neonfma") if FMA else "neon"
-$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
+$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC4": "f32_qc4w"}[DATATYPE]
 void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_${"dup" if DUP else "lane"}_ld64(
     size_t mr,
     size_t nc,
@@ -33,7 +33,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
     size_t cn_stride,
     $if INC:
       const float* restrict acc,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    $if DATATYPE == "QC4":
+      const union xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    $else:
+      const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -66,6 +69,9 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         a${M} = a${M-1};
         c${M} = c${M-1};
       }
+  $if DATATYPE == "QC4":
+    const int16x8_t vbias = vld1q_dup_s16(&params->scalar.bias[0]);
+    const uint8x8_t vmask = vmov_n_u8(UINT8_C(0xF));
 
   do {
     $if INC:
@@ -76,7 +82,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
       $for N in range(0, NR, 4):
         $if DATATYPE == "F32":
           float32x4_t vacc0x${ABC[N:N+4]} = vld1q_f32(w); w += 4;
-        $elif DATATYPE == "QC8":
+        $else:
           float32x4_t vacc0x${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
       $for M in range(1, MR):
         $for N in range(0, NR, 4):
@@ -87,22 +93,37 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
       $for M in range(MR):
         const float32x2_t va${M} = vld1_f32(a${M}); a${M} += 2;
 
-      $for L in range(2):
-        $if DATATYPE == "F32":
+      $if DATATYPE == "F32":
+        $for L in range(2):
           $for N in range(0, NR, 4):
             const float32x4_t vb${ABC[N:N+4]}c${L} = vld1q_f32(w); w += 4;
-        $elif DATATYPE == "QC8":
-          $for N in range(0, NR, 8):
-            const int8x8_t vw${ABC[N:N+8]}c${L} = vld1_s8(w); w = (const int8_t*) w + 8;
-          $for N in range(0, NR, 8):
-            const int16x8_t vxw${ABC[N:N+8]}c${L} = vmovl_s8(vw${ABC[N:N+8]}c${L});
-          $for N in range(0, NR, 8):
+      $elif DATATYPE == "QC4":
+        $for N in range(0, NR, 8):
+          const uint8x8_t vw${ABC[N:N+8]}c01 = vld1_u8(w); w = (const uint8_t*) w + 8;
+          const uint8x8_t vw${ABC[N:N+8]}c0 = vand_u8(vw${ABC[N:N+8]}c01, vmask);
+          const uint8x8_t vw${ABC[N:N+8]}c1 = vshr_n_u8(vw${ABC[N:N+8]}c01, 4);
+          $for L in range(2):
+            const int16x8_t vxw${ABC[N:N+8]}c${L} = vaddw_s8(vbias, vreinterpret_s8_u8(vw${ABC[N:N+8]}c${L}));
+          $for L in range(2):
             const int32x4_t vxw${ABC[N:N+4]}c${L} = vmovl_s16(vget_low_s16(vxw${ABC[N:N+8]}c${L}));
             const int32x4_t vxw${ABC[N+4:N+8]}c${L} = vmovl_s16(vget_high_s16(vxw${ABC[N:N+8]}c${L}));
-
-          $for N in range(0, NR, 4):
+        $for N in range(0, NR, 4):
+          $for L in range(2):
+            const float32x4_t vb${ABC[N:N+4]}c${L} = vcvtq_f32_s32(vxw${ABC[N:N+4]}c${L});
+      $elif DATATYPE == "QC8":
+        $for N in range(0, NR, 8):
+          $for L in range(2):
+            const int8x8_t vw${ABC[N:N+8]}c${L} = vld1_s8(w); w = (const int8_t*) w + 8;
+          $for L in range(2):
+            const int16x8_t vxw${ABC[N:N+8]}c${L} = vmovl_s8(vw${ABC[N:N+8]}c${L});
+          $for L in range(2):
+            const int32x4_t vxw${ABC[N:N+4]}c${L} = vmovl_s16(vget_low_s16(vxw${ABC[N:N+8]}c${L}));
+            const int32x4_t vxw${ABC[N+4:N+8]}c${L} = vmovl_s16(vget_high_s16(vxw${ABC[N:N+8]}c${L}));
+        $for N in range(0, NR, 4):
+          $for L in range(2):
             const float32x4_t vb${ABC[N:N+4]}c${L} = vcvtq_f32_s32(vxw${ABC[N:N+4]}c${L});
 
+      $for L in range(2):
         $if DUP:
           $for M in range(MR):
             const float32x4_t va${M}c${L} = vdupq_lane_f32(va${M}, ${L});
@@ -121,16 +142,22 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
       $if DATATYPE == "F32":
         $for N in range(0, NR, 4):
           const float32x4_t vb${ABC[N:N+4]} = vld1q_f32(w); w += 4;
+      $elif DATATYPE == "QC4":
+        $for N in range(0, NR, 8):
+          const uint8x8_t vw${ABC[N:N+8]}c01 = vld1_u8(w); w = (const uint8_t*) w + 8;
+          const uint8x8_t vw${ABC[N:N+8]} = vand_u8(vw${ABC[N:N+8]}c01, vmask);
+          const int16x8_t vxw${ABC[N:N+8]} = vaddw_s8(vbias, vreinterpret_s8_u8(vw${ABC[N:N+8]}));
+          const int32x4_t vxw${ABC[N:N+4]} = vmovl_s16(vget_low_s16(vxw${ABC[N:N+8]}));
+          const int32x4_t vxw${ABC[N+4:N+8]} = vmovl_s16(vget_high_s16(vxw${ABC[N:N+8]}));
+        $for N in range(0, NR, 4):
+          const float32x4_t vb${ABC[N:N+4]} = vcvtq_f32_s32(vxw${ABC[N:N+4]});
       $elif DATATYPE == "QC8":
         $for N in range(0, NR, 4):
           const int8x8_t vw${ABC[N:N+4]}${ABC[N:N+4]} = vreinterpret_s8_u32(vld1_dup_u32(w)); w = (const int8_t*) w + 4;
-
         $for N in range(0, NR, 4):
           const int16x8_t vxw${ABC[N:N+4]}${ABC[N:N+4]} = vmovl_s8(vw${ABC[N:N+4]}${ABC[N:N+4]});
-
         $for N in range(0, NR, 4):
           const int32x4_t vxw${ABC[N:N+4]} = vmovl_s16(vget_low_s16(vxw${ABC[N:N+4]}${ABC[N:N+4]}));
-
         $for N in range(0, NR, 4):
           const float32x4_t vb${ABC[N:N+4]} = vcvtq_f32_s32(vxw${ABC[N:N+4]});
 
@@ -138,7 +165,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         $for M in range(MR):
           vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, va${M}, vb${ABC[N:N+4]});
     }
-    $if DATATYPE == "QC8":
+    $if DATATYPE == "QC8" or DATATYPE == "QC4":
       $for N in range(0, NR, 4):
         const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
         $for M in range(MR):

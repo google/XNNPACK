@@ -76,6 +76,8 @@ void xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_lane_ld64(
 
       const float32x4_t vb0123c0 = vld1q_f32(w); w += 4;
       const float32x4_t vb4567c0 = vld1q_f32(w); w += 4;
+      const float32x4_t vb0123c1 = vld1q_f32(w); w += 4;
+      const float32x4_t vb4567c1 = vld1q_f32(w); w += 4;
 
       vacc0x0123 = vfmaq_lane_f32(vacc0x0123, vb0123c0, va0, 0);
       vacc1x0123 = vfmaq_lane_f32(vacc1x0123, vb0123c0, va1, 0);
@@ -85,9 +87,6 @@ void xnn_f32_gemm_minmax_ukernel_4x8__aarch64_neonfma_lane_ld64(
       vacc1x4567 = vfmaq_lane_f32(vacc1x4567, vb4567c0, va1, 0);
       vacc2x4567 = vfmaq_lane_f32(vacc2x4567, vb4567c0, va2, 0);
       vacc3x4567 = vfmaq_lane_f32(vacc3x4567, vb4567c0, va3, 0);
-      const float32x4_t vb0123c1 = vld1q_f32(w); w += 4;
-      const float32x4_t vb4567c1 = vld1q_f32(w); w += 4;
-
       vacc0x0123 = vfmaq_lane_f32(vacc0x0123, vb0123c1, va0, 1);
       vacc1x0123 = vfmaq_lane_f32(vacc1x0123, vb0123c1, va1, 1);
       vacc2x0123 = vfmaq_lane_f32(vacc2x0123, vb0123c1, va2, 1);
