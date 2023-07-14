@@ -153,6 +153,25 @@ TEST(WEIGHTS_MEMORY, grow) {
   ASSERT_EQ(xnn_status_success, xnn_release_weights_memory(&b));
 }
 
+// Checks for a bug in mremap using the wrong value for old_size.
+TEST(WEIGHTS_MEMORY, grow_from_zero_size) {
+  xnn_weights_buffer b;
+  ASSERT_EQ(xnn_status_success, xnn_allocate_weights_memory(&b, 8));
+  size_t old_capacity = b.capacity;
+  ASSERT_GE(old_capacity, 0);
+  // Allocate weights, but don't use it, so size is still 0.
+  ASSERT_EQ(b.size, 0);
+
+  // Reserve an absurd amount of memory to force growth.
+  // It is not certain that we will grow (due to rounding to page size), but if
+  // we do, this catches a bug where we pass the wrong arguments to mremap.
+  size_t large = 32 * 1024 * 1024;  // 32MB
+  ASSERT_EQ(xnn_status_success, xnn_reserve_weights_memory(&b, large));
+
+  size_t new_capacity = b.capacity;
+  EXPECT_GE(new_capacity, old_capacity);
+}
+
 TEST(WEIGHTS_CACHE, finalize_empty) {
   xnn_weights_buffer b;
   const size_t initial_capacity = 1024 * 1024;  // 1MB.

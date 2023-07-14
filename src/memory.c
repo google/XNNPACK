@@ -109,7 +109,7 @@ static void* resize_buffer(
 {
   const size_t new_capacity = round_up_po2(new_size, get_page_size());
   #if XNN_PLATFORM_LINUX
-    void* new_pointer = mremap(old_pointer, old_size, new_capacity, MREMAP_MAYMOVE, NULL);
+    void* new_pointer = mremap(old_pointer, old_capacity, new_capacity, MREMAP_MAYMOVE, NULL);
     if (new_pointer == MAP_FAILED) {
       xnn_log_error("mremap failed with errno: %d", errno);
       return NULL;
