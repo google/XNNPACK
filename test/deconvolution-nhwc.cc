@@ -14212,7 +14212,7 @@ TEST(DECONVOLUTION_NHWC_F32, 1x1_without_bias) {
     .TestF32();
 }
 
-#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT // TODO(b/287020333)
+#if !XNN_ARCH_WASM && XNN_ENABLE_JIT //  TODO(b/290880274)
 TEST(DECONVOLUTION_NHWC_F32, jit_1x1) {
   const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
   ASSERT_NE(gemm_config, nullptr);
@@ -14268,7 +14268,7 @@ TEST(DECONVOLUTION_NHWC_F32, jit_1x1_with_relu) {
     .iterations(3)
     .TestF32();
 }
-#endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT
+#endif  // !XNN_ARCH_WASM && XNN_ENABLE_JIT
 
 /**************************** Future GEMM path, grouped ****************************/
 
@@ -15038,7 +15038,7 @@ TEST(DECONVOLUTION_NHWC_F32, weights_cache_3x3) {
     .TestF32();
 }
 
-#if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT // TODO(b/287020333)
+#if !XNN_ARCH_WASM && XNN_ENABLE_JIT //  TODO(b/290880274)
 TEST(DECONVOLUTION_NHWC_F32, jit_3x3) {
   const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
   ASSERT_NE(gemm_config, nullptr);
@@ -15098,7 +15098,7 @@ TEST(DECONVOLUTION_NHWC_F32, jit_3x3_with_relu) {
     .iterations(3)
     .TestF32();
 }
-#endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_JIT
+#endif //  !XNN_ARCH_WASM && XNN_ENABLE_JIT
 
 /**************************** CONV path, grouped ****************************/
 

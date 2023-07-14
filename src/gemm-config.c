@@ -760,6 +760,7 @@ static void init_f32_gemm_config(void) {
       #else
         #if XNN_ENABLE_JIT
           f32_gemm_config.generator.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_codegen(xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1);
+          f32_gemm_config.generator.igemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_igemm_codegen(xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1);
         #endif
 
         f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(4)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_f32_gemm_minmax_ukernel_4x8__wasmsimd_x86_splat);

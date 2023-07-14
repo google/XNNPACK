@@ -5372,7 +5372,7 @@ TEST(CONVOLUTION_NHWC_F32, jit_unioutput_grouped_1x1_with_output_stride) {
     .TestNHWCxF32();
 }
 
-#if !XNN_PLATFORM_WEB  // TODO(b/287020333)
+#if !XNN_ARCH_WASM && XNN_ENABLE_JIT //  TODO(b/290880274)
 TEST(CONVOLUTION_NHWC_F32, jit_1x3) {
   ConvolutionOperatorTester()
     .input_size(20, 19)
@@ -5940,7 +5940,7 @@ TEST(CONVOLUTION_NHWC_F32, jit_unioutput_grouped_3x3_with_output_stride) {
     .TestNHWCxF32();
 }
 
-#endif //  !XNN_PLATFORM_WEB
+#endif //  !XNN_ARCH_WASM && XNN_ENABLE_JIT
 
 TEST(CONVOLUTION_NHWC_F32, DISABLED_jit_depthwise_1x1) {
   ConvolutionOperatorTester()
