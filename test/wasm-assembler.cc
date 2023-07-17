@@ -18,6 +18,7 @@
 
 using ::testing::ElementsAreArray;
 using ::testing::FloatNear;
+using ::testing::IsNull;
 using ::testing::NotNull;
 using ::testing::Pointwise;
 using ::testing::Sequence;
@@ -748,17 +749,18 @@ TYPED_TEST_P(WasmAssemblerTest, ValidCode) {
 
 REGISTER_TYPED_TEST_SUITE_P(WasmAssemblerTest, ValidCode);
 
-using WasmAssemblerTestSuits = testing::Types<
-    Get5TestSuite, AddTestSuite, Get5AndAddTestSuite, AddWithLocalTestSuite,
-    AddTwiceTestSuite, AddTwiceDeclareInitTestSuite,
-    AddTwiceWithScopesTestSuite, Add5TestSuite, MaxTestSuite,
-    MaxIncompleteIfTestSuite, SumUntilTestSuite,
-    SumUntilLocalsArrayWithIterator, SumUntilLocalsArrayWithIndexTestSuite,
-    DoWhileTestSuite, SumArrayTestSuite, MemCpyTestSuite,
-    AddDelayedInitTestSuite, ManyFunctionsGeneratorTestSuite,
-    ManyLocalsGeneratorTestSuite, V128AddGeneratorTestSuite,
-    V128AddPiGeneratorTestSuite, V128AddConstGeneratorTestSuite,
-    I64x2ShuffleGeneratorTestSuite, GetPiTestSuite, Get5TrickyTestSuite>;
+using WasmAssemblerTestSuits =
+    testing::Types<Get5TestSuite, AddTestSuite, Get5AndAddTestSuite,
+                   AddWithLocalTestSuite, AddTwiceTestSuite,
+                   AddTwiceDeclareInitTestSuite, AddTwiceWithScopesTestSuite,
+                   Add5TestSuite, MaxTestSuite, MaxIncompleteIfTestSuite,
+                   SumUntilTestSuite, SumUntilLocalsArrayWithIterator,
+                   SumUntilLocalsArrayWithIndexTestSuite, DoWhileTestSuite,
+                   SumArrayTestSuite, MemCpyTestSuite, AddDelayedInitTestSuite,
+                   ManyLocalsGeneratorTestSuite, V128AddGeneratorTestSuite,
+                   V128AddPiGeneratorTestSuite, V128AddConstGeneratorTestSuite,
+                   I64x2ShuffleGeneratorTestSuite, GetPiTestSuite,
+                   Get5TrickyTestSuite>;
 INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest,
                                WasmAssemblerTestSuits);
 

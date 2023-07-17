@@ -80,7 +80,7 @@ class ArrayPrefix {
     return array_[index];
   }
   void push_back(const T& t) {
-    assert(size_ + 1 < max_size);
+    assert(size_ + 1 <= max_size);
     array_[size_++] = t;
   }
   size_t size() const { return size_; }

@@ -132,15 +132,25 @@ inline bool operator==(const FuncType& lhs, const FuncType& rhs) {
                     rhs.params.end());
 }
 
+struct Code {
+  explicit Code(byte* begin) : begin(begin), end(begin) {}
+
+  void store(byte b) { *end++ = b; }
+
+  size_t size() const { return end - begin; }
+
+  byte* begin;
+  byte* end;
+};
+
 struct Function {
-  Function(uint32_t type_index, ValTypesToInt locals_declaration,
-           std::vector<byte> body)
+  Function(uint32_t type_index, ValTypesToInt locals_declaration, Code body)
       : type_index(type_index),
         locals_declaration(std::move(locals_declaration)),
-        body(std::move(body)) {}
+        body(body) {}
   uint32_t type_index;
   ValTypesToInt locals_declaration;
-  std::vector<byte> body;
+  Code body;
 };
 
 struct Export {
@@ -699,6 +709,10 @@ class LocalWasmOps : public LocalsManager {
   }
 };
 
+inline static auto MakeStoreToCode(Code& out) {
+  return [&out](uint8_t b) { out.store(b); };
+}
+
 class WasmOps : public LocalWasmOps<WasmOps>,
                 public I32WasmOps<WasmOps>,
                 public F32WasmOps<WasmOps>,
@@ -707,17 +721,17 @@ class WasmOps : public LocalWasmOps<WasmOps>,
                 public ControlFlowWasmOps<WasmOps> {
  public:
   WasmOps() = default;
-  void SetOut(std::vector<byte>* out) { out_ = out; }
-  void Emit8(byte b) const { out_->push_back(b); }
+  void SetOut(Code* out) { out_ = out; }
+  void Emit8(byte b) const { out_->store(b); }
   void EmitEncodedS32(int32_t value) const {
-    internal::AppendEncodedS32(value, *out_);
+    StoreEncodedS32(value, MakeStoreToCode(*out_));
   }
   void EmitEncodedU32(uint32_t value) const {
-    internal::AppendEncodedU32(value, *out_);
+    StoreEncodedU32(value, MakeStoreToCode(*out_));
   }
 
  private:
-  std::vector<byte>* out_ = nullptr;
+  Code* out_ = nullptr;
 };
 }  // namespace internal
 
@@ -729,9 +743,12 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
   using FuncType = internal::FuncType;
   using LocalsManager = internal::LocalsManager;
   using ResultType = internal::ResultType;
+  using Code = internal::Code;
 
  public:
-  explicit WasmAssembler(xnn_code_buffer* buf) : AssemblerBase(buf) {}
+  explicit WasmAssembler(xnn_code_buffer* buf)
+      : AssemblerBase(buf),
+        next_func_body_begin_(cursor_ + kInitialCodeOffset) {}
 
   template <size_t InSize, typename Body>
   void AddFunc(const ResultType& result, const char* name,
@@ -745,7 +762,7 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
   void AddFunc(const ResultType& result, const char* name,
                const std::array<ValType, InSize>& params,
                ValTypesToInt locals_declaration_count, Body&& body) {
-    std::vector<byte> code;
+    Code code(next_func_body_begin_);
     SetOut(&code);
     ResetLocalsManager(InSize, locals_declaration_count);
     std::array<Local, InSize> input_locals{};
@@ -756,7 +773,8 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
     internal::ArrayApply(std::move(input_locals), std::forward<Body>(body));
     end();
     RegisterFunction(result, name, Params(params),
-                     std::move(locals_declaration_count), std::move(code));
+                     std::move(locals_declaration_count), code);
+    next_func_body_begin_ = code.end;
   }
 
   void Emit() {
@@ -765,6 +783,8 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
     EmitImportSection();
     EmitFunctionSection();
     EmitExportsSection();
+    assert(code_size_in_bytes() < kInitialCodeOffset &&
+           "Initial code offset is insufficient");
     EmitCodeSection();
   }
 
@@ -783,8 +803,7 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
 
   void RegisterFunction(const ResultType& result, const char* name,
                         const Params& params,
-                        ValTypesToInt&& locals_declaration_count,
-                        std::vector<byte> code);
+                        ValTypesToInt&& locals_declaration_count, Code code);
   uint32_t FindOrAddFuncType(FuncType&& type);
 
   template <typename Array>
@@ -827,11 +846,13 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
   }
 
   static constexpr size_t kMaxNumFuncTypes = 16;
+  static constexpr size_t kInitialCodeOffset = 1024;
 
   std::vector<Function> functions_;
   std::vector<Export> exports_;
   internal::ArrayPrefix<FuncType, kMaxNumFuncTypes> func_types_{
       0, internal::kDefault<FuncType>};
+  byte* next_func_body_begin_;
 };
 
 }  // namespace xnnpack

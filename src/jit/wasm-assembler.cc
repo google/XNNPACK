@@ -5,12 +5,12 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <cstring>
 #include <iterator>
 #include <numeric>
 #include <utility>
 #include <vector>
 
-using ::xnnpack::internal::AppendEncodedU32;
 using ::xnnpack::internal::Export;
 using ::xnnpack::internal::Function;
 using ::xnnpack::internal::FuncType;
@@ -84,16 +84,6 @@ void LocalsManager::ValTypeIndices::DestroyLocal(uint32_t index) {
 void WasmAssembler::EmitMagicVersion() {
   EmitByteArray(kMagic);
   EmitByteArray(kVersion);
-}
-
-template <typename Array, typename Appender>
-static auto AppendArray(Array&& arr, Appender&& appender) {
-  return [&](std::vector<byte>& out) {
-    AppendEncodedU32(arr.size(), out);
-    for (const auto& elem : arr) {
-      appender(elem, out);
-    }
-  };
 }
 
 // Functions emitting types section
@@ -192,7 +182,8 @@ void WasmAssembler::EmitFunction(const Function& func) {
     EmitEncodedU32(type_to_count.value);
     emit8(type_to_count.type.code);
   }
-  for (byte b : func.body) emit8(b);
+  std::memmove(cursor_, func.body.begin, func.body.size());
+  cursor_ += func.body.size();
 }
 
 void WasmAssembler::EmitCodeSection() {
@@ -203,10 +194,10 @@ void WasmAssembler::EmitCodeSection() {
 void WasmAssembler::RegisterFunction(const ResultType& result, const char* name,
                                      const Params& params,
                                      ValTypesToInt&& locals_declaration_count,
-                                     std::vector<byte> code) {
+                                     Code code) {
   exports_.emplace_back(name, functions_.size());
   functions_.emplace_back(FindOrAddFuncType(FuncType(params, result)),
-                          locals_declaration_count, std::move(code));
+                          locals_declaration_count, code);
 }
 
 uint32_t WasmAssembler::FindOrAddFuncType(FuncType&& type) {

@@ -44,17 +44,5 @@ static void StoreEncodedS32(int32_t n, Store&& store) {
     store(byte);
   } while (more);
 }
-
-inline static auto MakeStoreToVector(std::vector<uint8_t>& out) {
-  return [&out](uint8_t b) { out.push_back(b); };
-}
-
-inline static void AppendEncodedU32(uint32_t n, std::vector<uint8_t>& out) {
-  StoreEncodedU32(n, MakeStoreToVector(out));
-}
-
-inline static void AppendEncodedS32(int32_t n, std::vector<uint8_t>& out) {
-  StoreEncodedS32(n, MakeStoreToVector(out));
-}
 }  // namespace internal
 }  // namespace xnnpack
