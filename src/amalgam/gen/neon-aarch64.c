@@ -3625,23 +3625,20 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__aarch64_neonfma_lane_ld64(
       const float32x2_t va0 = vld1_f32(a0); a0 += 2;
 
       const int8x8_t vw01234567c0 = vld1_s8(w); w = (const int8_t*) w + 8;
+      const int8x8_t vw01234567c1 = vld1_s8(w); w = (const int8_t*) w + 8;
       const int16x8_t vxw01234567c0 = vmovl_s8(vw01234567c0);
+      const int16x8_t vxw01234567c1 = vmovl_s8(vw01234567c1);
       const int32x4_t vxw0123c0 = vmovl_s16(vget_low_s16(vxw01234567c0));
       const int32x4_t vxw4567c0 = vmovl_s16(vget_high_s16(vxw01234567c0));
-
+      const int32x4_t vxw0123c1 = vmovl_s16(vget_low_s16(vxw01234567c1));
+      const int32x4_t vxw4567c1 = vmovl_s16(vget_high_s16(vxw01234567c1));
       const float32x4_t vb0123c0 = vcvtq_f32_s32(vxw0123c0);
+      const float32x4_t vb0123c1 = vcvtq_f32_s32(vxw0123c1);
       const float32x4_t vb4567c0 = vcvtq_f32_s32(vxw4567c0);
+      const float32x4_t vb4567c1 = vcvtq_f32_s32(vxw4567c1);
 
       vacc0x0123 = vfmaq_lane_f32(vacc0x0123, vb0123c0, va0, 0);
       vacc0x4567 = vfmaq_lane_f32(vacc0x4567, vb4567c0, va0, 0);
-      const int8x8_t vw01234567c1 = vld1_s8(w); w = (const int8_t*) w + 8;
-      const int16x8_t vxw01234567c1 = vmovl_s8(vw01234567c1);
-      const int32x4_t vxw0123c1 = vmovl_s16(vget_low_s16(vxw01234567c1));
-      const int32x4_t vxw4567c1 = vmovl_s16(vget_high_s16(vxw01234567c1));
-
-      const float32x4_t vb0123c1 = vcvtq_f32_s32(vxw0123c1);
-      const float32x4_t vb4567c1 = vcvtq_f32_s32(vxw4567c1);
-
       vacc0x0123 = vfmaq_lane_f32(vacc0x0123, vb0123c1, va0, 1);
       vacc0x4567 = vfmaq_lane_f32(vacc0x4567, vb4567c1, va0, 1);
     }
@@ -3650,13 +3647,10 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__aarch64_neonfma_lane_ld64(
 
       const int8x8_t vw01230123 = vreinterpret_s8_u32(vld1_dup_u32(w)); w = (const int8_t*) w + 4;
       const int8x8_t vw45674567 = vreinterpret_s8_u32(vld1_dup_u32(w)); w = (const int8_t*) w + 4;
-
       const int16x8_t vxw01230123 = vmovl_s8(vw01230123);
       const int16x8_t vxw45674567 = vmovl_s8(vw45674567);
-
       const int32x4_t vxw0123 = vmovl_s16(vget_low_s16(vxw01230123));
       const int32x4_t vxw4567 = vmovl_s16(vget_low_s16(vxw45674567));
-
       const float32x4_t vb0123 = vcvtq_f32_s32(vxw0123);
       const float32x4_t vb4567 = vcvtq_f32_s32(vxw4567);
 
