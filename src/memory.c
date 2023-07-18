@@ -292,6 +292,9 @@ uintptr_t xnn_first_function_in_chunk_ptr(struct xnn_code_buffer* buffer, size_t
   #if (XNN_ARCH_ARM || XNN_ARCH_ARM64)
     return (uintptr_t) buffer->start + offset;
   #elif XNN_PLATFORM_WEB
+    if (offset == offset_end) {
+      return XNN_INVALID_FUNCTION_INDEX;
+    }
     return xnnLoadWasmModuleJS(buffer->start, offset, offset_end, XNN_INVALID_FUNCTION_INDEX);
   #endif
 }
