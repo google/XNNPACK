@@ -659,6 +659,50 @@ enum xnn_status xnn_define_fully_connected(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Sparse Fully Connected Node and add it to a Subgraph.
+///
+/// This operator is experimental, and will be removed in the future.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param output_min - lower bound for clipping output values.
+/// @param output_max - upper bound for clipping output values.
+/// @param input_id - Value ID for the input tensor. The input tensor must be an N-dimensional tensor defined in the
+///                   @a subgraph. If XNN_FLAG_TENSORFLOW_RESHAPE_2D is not specified, the input tensor must be at least
+///                   1D and its last dimension must match the last dimension of the filter tensor. In particular, if
+///                   input is a 2D tensor, it must have [batch_size, input_channels] dimensions.
+///                   If XNN_FLAG_TENSORFLOW_RESHAPE_2D is specified, the number of elements in the input tensor must be
+///                   divisible by the input_channels. The tensor will be first flattened into a 1D tensor of
+///                   [num_input_elements] dimensions, then reshaped into a 2D tensor of
+///                   [num_input_elements / input_channels, input_channels] dimensions where num_input_elements is the
+///                   total number of elements in the input tensor.
+/// @param filter_id - Value ID for the filter tensor. The filter tensor must a 2D tensor defined in the @a subgraph.
+///                    If the XNN_FLAG_TRANSPOSE_WEIGHTS flag is not specified, the filter tensor must have
+///                    [output_channels, input_channels] dimensions. If the XNN_FLAG_TRANSPOSE_WEIGHTS flag is
+///                    specified, the filter tensor must have [input_channels, output_channels] dimensions.
+/// @param bias_id - Value ID for the bias tensor, or XNN_INVALID_VALUE_ID for a Fully Connected Node without a bias.
+///                  If present, the bias tensor must be a 1D tensor defined in the @a subgraph with [output_channels]
+///                  dimensions.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph.
+///                    If XNN_FLAG_TENSORFLOW_RESHAPE_2D is not specified, the output tensor must have the same
+///                    dimensionality as the input tensor, all its dimensions but the last one must match the
+///                    corresponding dimensions of the input tensor, and the last dimensions of the output tensor must
+///                    match the first dimension of the filter tensor. In particular, if input is a 2D tensor, output
+///                    must be a 2D tensor of [batch_size, output_channels] dimensions.
+///                    If XNN_FLAG_TENSORFLOW_RESHAPE_2D is specified, output must be a 2D tensor of
+///                    [num_input_elements / input_channels, output_channels] dimensions where num_input_elements is the
+///                    total number of elements in the input tensor.
+/// @param flags - binary features of the Fully Connected Node. The only currently supported values are
+///                XNN_FLAG_TENSORFLOW_RESHAPE_2D and XNN_FLAG_TRANSPOSE_WEIGHTS.
+enum xnn_status xnn_define_fully_connected_sparse(
+  xnn_subgraph_t subgraph,
+  float output_min,
+  float output_max,
+  uint32_t input_id,
+  uint32_t filter_id,
+  uint32_t bias_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a 2D Max Pooling Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.

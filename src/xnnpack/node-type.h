@@ -31,6 +31,7 @@ enum xnn_node_type {
   xnn_node_type_even_split4,
   xnn_node_type_floor,
   xnn_node_type_fully_connected,
+  xnn_node_type_fully_connected_sparse,
   xnn_node_type_global_average_pooling_1d,
   xnn_node_type_global_average_pooling_2d,
   xnn_node_type_global_sum_pooling_1d,

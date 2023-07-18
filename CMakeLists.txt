@@ -245,6 +245,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/even-split.c
   src/subgraph/floor.c
   src/subgraph/fully-connected.c
+  src/subgraph/fully-connected-sparse.c
   src/subgraph/global-average-pooling.c
   src/subgraph/global-sum-pooling.c
   src/subgraph/hardswish.c
