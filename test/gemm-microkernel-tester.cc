@@ -1428,12 +1428,21 @@ void GemmMicrokernelTester::Test(xnn_f32_qc4w_gemm_minmax_ukernel_fn gemm_minmax
 
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
-    std::generate(b.begin(), b.end(), [&]() { return i8dist(rng); });
     std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
     std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });
     std::fill(c.begin(), c.end(), nanf(""));
     std::fill(c_ref.begin(), c_ref.end(), 0.0f);
     std::fill(packed_w.begin(), packed_w.end(), 0);
+
+    std::generate(b.begin(), b.end(), [&]() { return i8dist(rng); });
+    // For odd k ensure last nibble is padded with 0
+    if (k() & 1) {
+      for (size_t n_index = 0; n_index < n(); n_index++) {
+        const size_t nb_index = n_index * k_stride + k_stride - 1;
+        b[nb_index] &= 15;
+      }
+    }
+
     xnn_pack_f32_qc4w_gemm_goi_w(1, n(), k(), nr(), kr(), sr(), b.data(), bias.data(), packed_w.data(), nr() * sizeof(float), nullptr);
 
     // Fill in packed scale
