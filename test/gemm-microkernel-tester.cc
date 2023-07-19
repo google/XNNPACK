@@ -517,7 +517,7 @@ void GemmMicrokernelTester::Test(
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1, 1), std::ref(rng));
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f), std::ref(rng));
   auto w8rng = std::bind(
       std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()),
       std::ref(rng));
@@ -538,13 +538,13 @@ void GemmMicrokernelTester::Test(
       const float* input_ptr = &input[i * k()];
       const auto minmax = std::minmax_element(input_ptr, input_ptr + k());
       quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second);
-      const float inv_scale = 1.0f / quantization_params[i].scale;
+      const float scale = quantization_params[i].scale;
       for (int j = 0; j < k(); ++j) {
-        float scaled_input = input[i * k() + j] * inv_scale;
+        float scaled_input = input[i * k() + j] * scale;
         scaled_input = std::min<float>(scaled_input, float(std::numeric_limits<int8_t>::max()
                                                            - quantization_params[i].zero_point));
         scaled_input = std::max<float>(scaled_input, float(std::numeric_limits<int8_t>::min()
-                                                           - quantization_params[i].zero_point));
+                                                           + quantization_params[i].zero_point));
         a[i * a_stride() + j] = int8_t(std::lrintf(scaled_input) + long(quantization_params[i].zero_point));
       }
     }
