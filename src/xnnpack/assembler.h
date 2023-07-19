@@ -28,6 +28,7 @@ enum class Error {
   kInvalidRegisterListLength,
   kFinalizeCodeMemoryFail,
   kUnimplemented,
+  kMaxNumberOfFunctionsExceeded,
 };
 
 // Biggest user of label is for callee-saved registers check in test mode.

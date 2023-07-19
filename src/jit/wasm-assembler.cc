@@ -9,9 +9,7 @@
 #include <iterator>
 #include <numeric>
 #include <utility>
-#include <vector>
 
-using ::xnnpack::internal::Export;
 using ::xnnpack::internal::Function;
 using ::xnnpack::internal::FuncType;
 using ::xnnpack::internal::VectorEncodingLength;
@@ -136,24 +134,24 @@ void WasmAssembler::EmitFunctionSection() {
 }
 
 // Functions emitting Export section
-void WasmAssembler::EmitExport(const Export& exp) {
+void WasmAssembler::EmitExport(const Function& func) {
   constexpr static byte kFunctionExportCode = 0x0;
-  EmitEncodedU32(exp.name_length);
-  for (int i = 0; i < exp.name_length; i++) {
-    emit8(exp.name[i]);
+  EmitEncodedU32(func.name_length);
+  for (int i = 0; i < func.name_length; i++) {
+    emit8(func.name[i]);
   }
   emit8(kFunctionExportCode);
-  EmitEncodedU32(exp.function_index);
+  EmitEncodedU32(func.function_index);
 }
 
-static uint32_t ExportEncodingLength(const Export& exp) {
+static uint32_t ExportEncodingLength(const Function& exp) {
   return WidthEncodedU32(exp.name_length) + exp.name_length + 1 +
          WidthEncodedU32(exp.function_index);
 }
 
 void WasmAssembler::EmitExportsSection() {
-  EmitSection(kExportsSectionCode, exports_, ExportEncodingLength,
-              [this](const Export& exp) { EmitExport(exp); });
+  EmitSection(kExportsSectionCode, functions_, ExportEncodingLength,
+              [this](const Function& func) { EmitExport(func); });
 }
 
 // Functions emitting Code section
@@ -191,19 +189,18 @@ void WasmAssembler::EmitCodeSection() {
               [this](const Function& func) { EmitFunction(func); });
 }
 
-void WasmAssembler::RegisterFunction(const ResultType& result, const char* name,
-                                     const Params& params,
-                                     ValTypesToInt&& locals_declaration_count,
-                                     Code code) {
-  exports_.emplace_back(name, functions_.size());
-  functions_.emplace_back(FindOrAddFuncType(FuncType(params, result)),
+void WasmAssembler::RegisterFunction(
+    const ResultType& result, const char* name, const Params& params,
+    const ValTypesToInt& locals_declaration_count, Code code) {
+  functions_.emplace_back(name, functions_.size(),
+                          FindOrAddFuncType(FuncType(params, result)),
                           locals_declaration_count, code);
 }
 
-uint32_t WasmAssembler::FindOrAddFuncType(FuncType&& type) {
+uint32_t WasmAssembler::FindOrAddFuncType(const FuncType& type) {
   const auto it = std::find(func_types_.begin(), func_types_.end(), type);
   if (it != func_types_.end()) return std::distance(func_types_.begin(), it);
-  func_types_.push_back(std::move(type));
+  func_types_.push_back(type);
   return func_types_.size() - 1;
 }
 }  // namespace xnnpack

@@ -21,7 +21,6 @@
 #include <numeric>
 #include <type_traits>
 #include <utility>
-#include <vector>
 
 namespace xnnpack {
 
@@ -39,19 +38,15 @@ inline bool operator==(const ValType& lhs, const ValType& rhs) {
 
 namespace internal {
 
-template <>
-static constexpr ValType kDefault<ValType>{0};
+static constexpr ValType kPlaceholderValType(0);
 
 struct ValTypeToInt {
   template <typename Int>
   constexpr ValTypeToInt(ValType type, Int value) : type(type), value(value) {}
-  ValTypeToInt() = default;
+  constexpr ValTypeToInt() : ValTypeToInt(kPlaceholderValType, 0) {}
   ValType type;
   uint32_t value;
 };
-
-template <>
-static constexpr ValTypeToInt kDefault<ValTypeToInt>{kDefault<ValType>, 0};
 
 }  // namespace internal
 
@@ -63,7 +58,7 @@ class ValTypesToInt
     : public internal::ArrayPrefix<internal::ValTypeToInt, kMaxNumTypes> {
  public:
   using ArrayPrefix::ArrayPrefix;
-  ValTypesToInt() : ArrayPrefix(0, {ValType(0), 0}) {}
+  constexpr ValTypesToInt() : ArrayPrefix(0, {ValType(0), 0}) {}
 };
 
 namespace internal {
@@ -79,8 +74,8 @@ static uint32_t VectorEncodingLength(
 }
 
 struct ResultType {
-  constexpr ResultType(std::initializer_list<ValType> codes)
-      : type(kNoTypeCode) {
+  constexpr ResultType() : type(kNoTypeCode) {}
+  constexpr ResultType(std::initializer_list<ValType> codes) : ResultType() {
     switch (codes.size()) {
       case 0:
         break;
@@ -100,9 +95,6 @@ struct ResultType {
   static constexpr byte kNoTypeCode = 0;
 };
 
-template <>
-static constexpr ResultType kDefault<ResultType>{};
-
 inline bool operator==(const ResultType& lhs, const ResultType& rhs) {
   return lhs.type == rhs.type;
 }
@@ -110,21 +102,16 @@ inline bool operator==(const ResultType& lhs, const ResultType& rhs) {
 static constexpr size_t kMaxParamsCount = 16;
 struct Params : ArrayPrefix<ValType, kMaxParamsCount> {
   using ArrayPrefix::ArrayPrefix;
+  constexpr Params() : Params(0, kPlaceholderValType){};
 };
 
-template <>
-static constexpr Params kDefault<Params>{0, kDefault<ValType>};
-
 struct FuncType {
+  constexpr FuncType() = default;
   constexpr FuncType(const Params& params, ResultType result)
       : params(params), result(result) {}
   Params params;
   ResultType result;
 };
-
-template <>
-static constexpr FuncType kDefault<FuncType>{kDefault<Params>,
-                                             kDefault<ResultType>};
 
 inline bool operator==(const FuncType& lhs, const FuncType& rhs) {
   return lhs.result == rhs.result &&
@@ -133,7 +120,7 @@ inline bool operator==(const FuncType& lhs, const FuncType& rhs) {
 }
 
 struct Code {
-  explicit Code(byte* begin) : begin(begin), end(begin) {}
+  constexpr explicit Code(byte* begin) : begin(begin), end(begin) {}
 
   void store(byte b) { *end++ = b; }
 
@@ -144,22 +131,27 @@ struct Code {
 };
 
 struct Function {
-  Function(uint32_t type_index, ValTypesToInt locals_declaration, Code body)
-      : type_index(type_index),
-        locals_declaration(std::move(locals_declaration)),
+  constexpr Function() : Function(nullptr, 0, 0, 0, {}, Code(nullptr)) {}
+  constexpr Function(const char* name, size_t function_index,
+                     uint32_t type_index,
+                     const ValTypesToInt& locals_declaration, Code body)
+      : Function(name, strlen(name), function_index, type_index,
+                 locals_declaration, body) {}
+  constexpr Function(const char* name, size_t name_length,
+                     size_t function_index, uint32_t type_index,
+                     const ValTypesToInt& locals_declaration, Code body)
+      : name(name),
+        name_length(name_length),
+        function_index(function_index),
+        type_index(type_index),
+        locals_declaration(locals_declaration),
         body(body) {}
-  uint32_t type_index;
-  ValTypesToInt locals_declaration;
-  Code body;
-};
-
-struct Export {
-  Export(const char* name, size_t function_index)
-      : name(name), name_length(strlen(name)), function_index(function_index) {}
-
   const char* name;
   size_t name_length;
   size_t function_index;
+  uint32_t type_index;
+  ValTypesToInt locals_declaration;
+  Code body;
 };
 
 template <typename Derived, typename Intermediate>
@@ -388,7 +380,7 @@ class LocalsManager {
   };
 
   std::array<ValTypeIndices, kMaxNumTypes> indices_ =
-      MakeArray<kMaxNumTypes>(ValTypeIndices{kDefault<ValType>, 0, 0});
+      MakeArray<kMaxNumTypes>(ValTypeIndices{kPlaceholderValType, 0, 0});
 };
 
 std::array<uint8_t, 16> MakeLanesForI8x16Shuffle(const uint8_t* lanes,
@@ -410,7 +402,7 @@ class LocalWasmOps : public LocalsManager {
 
   class Local {
    public:
-    Local() = default;
+    constexpr Local() = default;
 
     Local(const ValType& type, uint32_t index, bool is_managed, Derived* ops)
         : type_(type), index_(index), ops_(ops), is_managed_(is_managed) {}
@@ -737,7 +729,6 @@ class WasmOps : public LocalWasmOps<WasmOps>,
 
 class WasmAssembler : public AssemblerBase, public internal::WasmOps {
  private:
-  using Export = internal::Export;
   using Function = internal::Function;
   using Params = internal::Params;
   using FuncType = internal::FuncType;
@@ -754,14 +745,18 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
   void AddFunc(const ResultType& result, const char* name,
                ValTypesToInt locals_declaration_count, Body&& body) {
     const auto params = internal::MakeArray<InSize>(i32);
-    AddFunc<InSize>(result, name, params, std::move(locals_declaration_count),
+    AddFunc<InSize>(result, name, params, locals_declaration_count,
                     std::forward<Body>(body));
   }
 
   template <size_t InSize, typename Body>
   void AddFunc(const ResultType& result, const char* name,
                const std::array<ValType, InSize>& params,
-               ValTypesToInt locals_declaration_count, Body&& body) {
+               const ValTypesToInt& locals_declaration_count, Body&& body) {
+    if (functions_.size() == kMaxNumFuncs) {
+      error_ = Error::kMaxNumberOfFunctionsExceeded;
+      return;
+    }
     Code code(next_func_body_begin_);
     SetOut(&code);
     ResetLocalsManager(InSize, locals_declaration_count);
@@ -772,8 +767,9 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
     }
     internal::ArrayApply(std::move(input_locals), std::forward<Body>(body));
     end();
-    RegisterFunction(result, name, Params(params),
-                     std::move(locals_declaration_count), code);
+    RegisterFunction(result, name,
+                     Params(params, internal::kPlaceholderValType),
+                     locals_declaration_count, code);
     next_func_body_begin_ = code.end;
   }
 
@@ -803,8 +799,9 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
 
   void RegisterFunction(const ResultType& result, const char* name,
                         const Params& params,
-                        ValTypesToInt&& locals_declaration_count, Code code);
-  uint32_t FindOrAddFuncType(FuncType&& type);
+                        const ValTypesToInt& locals_declaration_count,
+                        Code code);
+  uint32_t FindOrAddFuncType(const FuncType& type);
 
   template <typename Array>
   void EmitByteArray(Array&& array) {
@@ -836,7 +833,7 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
   void EmitFunctionSection();
 
   void EmitExportsSection();
-  void EmitExport(const Export& exp);
+  void EmitExport(const Function& func);
 
   void EmitCodeSection();
   void EmitFunction(const Function& func);
@@ -847,11 +844,10 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
 
   static constexpr size_t kMaxNumFuncTypes = 16;
   static constexpr size_t kInitialCodeOffset = 1024;
+  static constexpr size_t kMaxNumFuncs = 16;
 
-  std::vector<Function> functions_;
-  std::vector<Export> exports_;
-  internal::ArrayPrefix<FuncType, kMaxNumFuncTypes> func_types_{
-      0, internal::kDefault<FuncType>};
+  internal::ArrayPrefix<Function, kMaxNumFuncs> functions_{0};
+  internal::ArrayPrefix<FuncType, kMaxNumFuncTypes> func_types_{0};
   byte* next_func_body_begin_;
 };
 

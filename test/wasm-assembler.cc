@@ -515,38 +515,6 @@ struct AddDelayedInitLocalsGenerator : WasmAssembler {
 struct AddDelayedInitTestSuite
     : AddTestSuiteTmpl<AddDelayedInitLocalsGenerator, kExpectedSum> {};
 
-struct ManyFunctionsGenerator : WasmAssembler {
-  explicit ManyFunctionsGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
-    for (uint32_t func_index = 0; func_index < kLargeNumberOfFunctions;
-         func_index++) {
-      AddGet5(func_index);
-    }
-  }
-
- private:
-  void AddGet5(uint32_t index) {
-    function_names[index] = "get5_" + std::to_string(index);
-    ValTypesToInt no_locals;
-    AddFunc<0>({i32}, function_names[index].c_str(), {}, no_locals,
-               [this]() { i32_const(5); });
-  }
-  static std::array<std::string, kLargeNumberOfFunctions> function_names;
-};
-
-std::array<std::string, kLargeNumberOfFunctions>
-    ManyFunctionsGenerator::function_names = {};
-
-struct ManyFunctionsGeneratorTestSuite
-    : GeneratorTestSuite<ManyFunctionsGenerator, GetIntPtr> {
-  static void ExpectFuncCorrect(GetIntPtr get_int) {
-    for (uint32_t func_index = 0; func_index < kLargeNumberOfFunctions;
-         func_index++) {
-      GetIntPtr get_int_offseted = (GetIntPtr)((int)get_int + func_index);
-      Get5TestSuite::ExpectFuncCorrect(get_int_offseted);
-    }
-  }
-};
-
 struct ManyLocalsGenerator : WasmAssembler {
   explicit ManyLocalsGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt many_ints = {{i32, kLargeNumberOfLocals + 1}};
@@ -719,6 +687,26 @@ struct InvalidCodeGenerator : WasmAssembler {
   }
 };
 
+struct ManyFunctionsGenerator : WasmAssembler {
+  explicit ManyFunctionsGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
+    for (uint32_t func_index = 0; func_index < kLargeNumberOfFunctions;
+         func_index++) {
+      AddGet5(func_index);
+    }
+  }
+
+ private:
+  void AddGet5(uint32_t index) {
+    function_names[index] = "get5_" + std::to_string(index);
+    ValTypesToInt no_locals;
+    AddFunc<0>({i32}, function_names[index].c_str(), {}, no_locals,
+               [this]() { i32_const(5); });
+  }
+  static std::array<std::string, kLargeNumberOfFunctions> function_names;
+};
+std::array<std::string, kLargeNumberOfFunctions>
+    ManyFunctionsGenerator::function_names = {};
+
 template <typename TestSuite>
 class WasmAssemblerTest : public Test {};
 
@@ -772,6 +760,16 @@ TEST(WasmAssemblerTest, InvalidCode) {
   generator.Emit();
   EXPECT_THAT(generator.finalize(), NotNull());
   EXPECT_THAT(xnn_first_function_ptr(&b), XNN_INVALID_FUNCTION_INDEX);
+}
+
+TEST(WasmAssemblerTest, MaxNumberOfFunctionsExceeded) {
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+
+  ManyFunctionsGenerator generator(&b);
+  generator.Emit();
+  EXPECT_THAT(generator.finalize(), IsNull());
+  EXPECT_EQ(generator.error(), Error::kMaxNumberOfFunctionsExceeded);
 }
 
 namespace {

@@ -30,9 +30,6 @@ constexpr std::array<V, N> MakeArray(V value) {
   return MakeArrayImpl(value, std::make_index_sequence<N>{});
 }
 
-template <typename T>
-static constexpr T kDefault{};
-
 template <typename T, size_t max_size>
 class ArrayPrefix {
  public:
@@ -47,14 +44,15 @@ class ArrayPrefix {
 
   template <typename Array,
             typename = std::enable_if_t<!std::is_integral_v<Array>>>
-  explicit constexpr ArrayPrefix(Array&& array) : ArrayPrefix({}) {
+  explicit constexpr ArrayPrefix(Array&& array, T placeholder)
+      : ArrayPrefix(0, placeholder) {
     for (const auto& v : array) {
       push_back(v);
     }
   }
 
   constexpr ArrayPrefix(std::initializer_list<T> init)
-      : ArrayPrefix(init.size(), kDefault<T>) {
+      : ArrayPrefix(init.size(), T{}) {
     assert(size_ <= max_size);
     std::copy(init.begin(), init.end(), begin());
   }
@@ -82,6 +80,12 @@ class ArrayPrefix {
   void push_back(const T& t) {
     assert(size_ + 1 <= max_size);
     array_[size_++] = t;
+  }
+  template <typename... Args>
+  void emplace_back(Args&&... args) {
+    if (size_ + 1 <= max_size) {
+      new (&array_[size_++]) T(args...);
+    }
   }
   size_t size() const { return size_; }
 
