@@ -40,6 +40,10 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4(
   assert(packed_weights != NULL);
 
   uint16x8x4_t vtmp0123x01234567;
+  vtmp0123x01234567.val[0] = vdupq_n_u16(0);
+  vtmp0123x01234567.val[1] = vdupq_n_u16(0);
+  vtmp0123x01234567.val[2] = vdupq_n_u16(0);
+  vtmp0123x01234567.val[3] = vdupq_n_u16(0);
 
   do {
     // NC main loop multiple of 8

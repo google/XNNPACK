@@ -46,6 +46,8 @@ void xnn_x16_packw_gemm_goi_ukernel_x${NR}__neon_ld4lane_x${KBLOCK}${"_prfm" if 
   $for N in range(0, NR, 8):
     $for K in range(0, KBLOCK, 4):
       uint16x8x4_t vtmp${ABC[K:K+4]}x${ABC[N:N+8]};
+      $for L in range(4):
+        vtmp${ABC[K:K+4]}x${ABC[N:N+8]}.val[${L}] = vdupq_n_u16(0);
 
   do {
     // NC main loop multiple of ${NR}

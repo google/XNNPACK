@@ -46,6 +46,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}${"s4" if SR == 4 else ""}__neon_ld4la
   $for N in range(0, NR, 4):
     $for K in range(0, KBLOCK, 4):
       uint32x4x4_t vtmp${ABC[K:K+4]}x${ABC[N:N+4]};
+      $for L in range(4):
+        vtmp${ABC[K:K+4]}x${ABC[N:N+4]}.val[${L}] = vdupq_n_u32(0);
 
   do {
     // NC main loop multiple of ${NR}

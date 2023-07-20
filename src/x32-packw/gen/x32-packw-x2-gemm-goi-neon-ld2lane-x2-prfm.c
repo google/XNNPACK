@@ -41,6 +41,8 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_x2_prfm(
   assert(packed_weights != NULL);
 
   uint32x2x2_t v00;
+  v00.val[0] = vdup_n_u32(0);
+  v00.val[1] = vdup_n_u32(0);
 
   do {
     // NC main loop multiple of 2
