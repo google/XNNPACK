@@ -2339,69 +2339,69 @@ BENCHMARK_FP32_END2END_JIT(f32_gemm_6x8_6x8__jit_aarch64_neonfma_cortex_a75_prfm
       6 /* mr */, 8 /* nr */, 0 /* log2(kr) */, 2 /* log2(sr) */);
   }
 
-  static void f32_gemm_3x8__jit_wasmsimd_x86_loadsplat(
+  static void f32_gemm_3x8__jit_wasmsimd32_x86_loadsplat(
       benchmark::State &state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(
         state, model,
-        {{3, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1}},
+        {{3, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1}},
         xnn_init_f32_minmax_scalar_params, 8 /* nr */);
   }
-  static void f32_gemm_4x8__jit_wasmsimd_x86_loadsplat(
+  static void f32_gemm_4x8__jit_wasmsimd32_x86_loadsplat(
       benchmark::State &state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(
         state, model,
-        {{4, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1}},
+        {{4, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1}},
         xnn_init_f32_minmax_scalar_params, 8 /* nr */);
   }
-  static void f32_gemm_5x8__jit_wasmsimd_x86_loadsplat(
+  static void f32_gemm_5x8__jit_wasmsimd32_x86_loadsplat(
       benchmark::State &state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(
         state, model,
-        {{5, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1}},
+        {{5, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1}},
         xnn_init_f32_minmax_scalar_params, 8 /* nr */);
   }
-  static void f32_gemm_6x8__jit_wasmsimd_x86_loadsplat(
+  static void f32_gemm_6x8__jit_wasmsimd32_x86_loadsplat(
       benchmark::State &state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(
         state, model,
-        {{6, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1}},
+        {{6, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1}},
         xnn_init_f32_minmax_scalar_params, 8 /* nr */);
   }
 
-  static void f32_gemm_3x8__jit_wasmsimd_x86_loadsplat_unroll(
+  static void f32_gemm_3x8__jit_wasmsimd32_x86_loadsplat_unroll(
       benchmark::State &state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(
         state, model,
-        {{1, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x4, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x2},
-         {3, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1}
+        {{1, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x4, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x2},
+         {3, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1}
         },
         xnn_init_f32_minmax_scalar_params, 8 /* nr */);
   }
-  static void f32_gemm_4x8__jit_wasmsimd_x86_loadsplat_unroll(
+  static void f32_gemm_4x8__jit_wasmsimd32_x86_loadsplat_unroll(
       benchmark::State &state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(
         state, model,
-        {{1, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x4, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x2},
-         {4, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1}
+        {{1, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x4, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x2},
+         {4, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1}
         },
         xnn_init_f32_minmax_scalar_params, 8 /* nr */);
   }
-  static void f32_gemm_5x8__jit_wasmsimd_x86_loadsplat_unroll(
+  static void f32_gemm_5x8__jit_wasmsimd32_x86_loadsplat_unroll(
       benchmark::State &state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(
         state, model,
-        {{1, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x4, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x2},
-         {5, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1}
+        {{1, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x4, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x2},
+         {5, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1}
         },
         xnn_init_f32_minmax_scalar_params, 8 /* nr */);
   }
-  static void f32_gemm_6x8__jit_wasmsimd_x86_loadsplat_unroll(
+  static void f32_gemm_6x8__jit_wasmsimd32_x86_loadsplat_unroll(
       benchmark::State &state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(
         state, model,
-        {{1, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x4, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x2},
-         {5, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1},
-         {6, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd_x86_loadsplat_x2, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x2}
+        {{1, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x4, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x2},
+         {5, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1},
+         {6, xnn_generate_f32_gemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x2, xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x2}
         },
         xnn_init_f32_minmax_scalar_params, 8 /* nr */);
   }
@@ -2436,15 +2436,15 @@ BENCHMARK_FP32_END2END_JIT(f32_gemm_6x8_6x8__jit_aarch64_neonfma_cortex_a75_prfm
   BENCHMARK_FP32_END2END(f32_gemm_5x8s4__wasmsimd_x86);
   BENCHMARK_FP32_END2END(f32_gemm_6x8s4__wasmsimd_x86);
 
-  BENCHMARK_FP32_END2END_JIT(f32_gemm_3x8__jit_wasmsimd_x86_loadsplat);
-  BENCHMARK_FP32_END2END_JIT(f32_gemm_4x8__jit_wasmsimd_x86_loadsplat);
-  BENCHMARK_FP32_END2END_JIT(f32_gemm_5x8__jit_wasmsimd_x86_loadsplat);
-  BENCHMARK_FP32_END2END_JIT(f32_gemm_6x8__jit_wasmsimd_x86_loadsplat);
+  BENCHMARK_FP32_END2END_JIT(f32_gemm_3x8__jit_wasmsimd32_x86_loadsplat);
+  BENCHMARK_FP32_END2END_JIT(f32_gemm_4x8__jit_wasmsimd32_x86_loadsplat);
+  BENCHMARK_FP32_END2END_JIT(f32_gemm_5x8__jit_wasmsimd32_x86_loadsplat);
+  BENCHMARK_FP32_END2END_JIT(f32_gemm_6x8__jit_wasmsimd32_x86_loadsplat);
 
-  BENCHMARK_FP32_END2END_JIT(f32_gemm_3x8__jit_wasmsimd_x86_loadsplat_unroll);
-  BENCHMARK_FP32_END2END_JIT(f32_gemm_4x8__jit_wasmsimd_x86_loadsplat_unroll);
-  BENCHMARK_FP32_END2END_JIT(f32_gemm_5x8__jit_wasmsimd_x86_loadsplat_unroll);
-  BENCHMARK_FP32_END2END_JIT(f32_gemm_6x8__jit_wasmsimd_x86_loadsplat_unroll);
+  BENCHMARK_FP32_END2END_JIT(f32_gemm_3x8__jit_wasmsimd32_x86_loadsplat_unroll);
+  BENCHMARK_FP32_END2END_JIT(f32_gemm_4x8__jit_wasmsimd32_x86_loadsplat_unroll);
+  BENCHMARK_FP32_END2END_JIT(f32_gemm_5x8__jit_wasmsimd32_x86_loadsplat_unroll);
+  BENCHMARK_FP32_END2END_JIT(f32_gemm_6x8__jit_wasmsimd32_x86_loadsplat_unroll);
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 

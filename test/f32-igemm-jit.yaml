@@ -131,12 +131,12 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
 # WAsm SIMD JIT
-- name: xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x1
+- name: xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
-- name: xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x2
+- name: xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x2
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
-- name: xnn_generate_f32_igemm_ukernel_6x8__wasmsimd_x86_loadsplat_x4
+- name: xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x4
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1

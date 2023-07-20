@@ -30,6 +30,9 @@ _ARCH_TO_MACRO_MAP = {
   "wasm": "XNN_ARCH_WASM",
   "wasmsimd": "XNN_ARCH_WASMSIMD",
   "wasmrelaxedsimd": "XNN_ARCH_WASMRELAXEDSIMD",
+  "wasm32": "XNN_ARCH_WASM",
+  "wasmsimd32": "XNN_ARCH_WASMSIMD",
+  "wasmrelaxedsimd32": "XNN_ARCH_WASMRELAXEDSIMD",
 }
 
 # Mapping from ISA extension to macro guarding build-time enabled/disabled

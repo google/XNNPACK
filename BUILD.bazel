@@ -2052,8 +2052,8 @@ JIT_WASM32_SRCS = [
 ]
 
 JIT_WASMSIMD32_SRCS = JIT_WASM32_SRCS + [
-    "src/f32-gemm/MRx8-wasmsimd-x86-loadsplat.cc",
-    "src/f32-igemm/MRx8-wasmsimd-x86-loadsplat.cc",
+    "src/f32-gemm/MRx8-wasmsimd32-x86-loadsplat.cc",
+    "src/f32-igemm/MRx8-wasmsimd32-x86-loadsplat.cc",
     "src/xnnpack/wasmsimd-gemm-igemm-loadsplat-commons.h",
 ]
 
