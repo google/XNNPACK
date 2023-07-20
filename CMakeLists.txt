@@ -329,63 +329,6 @@ SET(JIT_SRCS
   src/jit/aarch64-assembler.cc
   src/jit/assembler.cc)
 
-SET(JIT_AARCH32_SRCS
-  src/f32-gemm/gen/f32-gemm-1x8-aarch32-neon-cortex-a53.cc
-  src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a7.cc
-  src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a53.cc
-  src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a55.cc
-  src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a75.cc
-  src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-ld64.cc
-  src/f32-igemm/gen/f32-igemm-1x8-aarch32-neon-cortex-a53.cc
-  src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a7.cc
-  src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a53.cc
-  src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a55.cc
-  src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a75.cc
-  src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-ld64.cc
-  src/qs8-gemm/gen/qs8-gemm-4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc
-  src/qs8-gemm/gen/qs8-gemm-4x8c4-rndnu-aarch32-neondot-ld64.cc
-  src/qs8-igemm/gen/qs8-igemm-4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc
-  src/qs8-igemm/gen/qs8-igemm-4x8c4-rndnu-aarch32-neondot-ld64.cc
-  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc
-  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c4-fp32-aarch32-neondot-ld64.cc
-  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc
-  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8c4-fp32-aarch32-neondot-ld64.cc)
-
-SET(JIT_AARCH64_SRCS
-  src/f16-gemm/gen/f16-gemm-1x16-aarch64-neonfp16arith-ld64.cc
-  src/f16-gemm/gen/f16-gemm-4x16-aarch64-neonfp16arith-ld64.cc
-  src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a55.cc
-  src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a55r0.cc
-  src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a75.cc
-  src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-ld64.cc
-  src/f16-igemm/gen/f16-igemm-1x16-aarch64-neonfp16arith-ld64.cc
-  src/f16-igemm/gen/f16-igemm-4x16-aarch64-neonfp16arith-ld64.cc
-  src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a55.cc
-  src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a55r0.cc
-  src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a75.cc
-  src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-ld64.cc
-  src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-cortex-a53.cc
-  src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-cortex-a75.cc
-  src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-ld64.cc
-  src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a53.cc
-  src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a55.cc
-  src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a75.cc
-  src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-ld128.cc
-  src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-cortex-a53.cc
-  src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-cortex-a55.cc
-  src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-cortex-a75.cc
-  src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-ld128.cc
-  src/f32-igemm/gen/f32-igemm-1x8-aarch64-neonfma-cortex-a53.cc
-  src/f32-igemm/gen/f32-igemm-1x8-aarch64-neonfma-cortex-a75.cc
-  src/f32-igemm/gen/f32-igemm-4x8-aarch64-neonfma-cortex-a53.cc
-  src/f32-igemm/gen/f32-igemm-4x8-aarch64-neonfma-cortex-a55.cc
-  src/f32-igemm/gen/f32-igemm-4x8-aarch64-neonfma-cortex-a75.cc
-  src/f32-igemm/gen/f32-igemm-4x8-aarch64-neonfma-ld128.cc
-  src/f32-igemm/gen/f32-igemm-6x8-aarch64-neonfma-cortex-a53.cc
-  src/f32-igemm/gen/f32-igemm-6x8-aarch64-neonfma-cortex-a55.cc
-  src/f32-igemm/gen/f32-igemm-6x8-aarch64-neonfma-cortex-a75.cc
-  src/f32-igemm/gen/f32-igemm-6x8-aarch64-neonfma-ld128.cc)
-
 SET(PROD_SCALAR_MICROKERNEL_SRCS src/amalgam/gen/scalar.c)
 SET(PROD_SCALAR_AARCH32_MICROKERNEL_SRCS src/amalgam/gen/scalar-aarch32.c)
 SET(PROD_SCALAR_RISCV_MICROKERNEL_SRCS src/amalgam/gen/scalar-riscv.c)
@@ -451,7 +394,7 @@ IF(XNNPACK_TARGET_PROCESSOR STREQUAL "arm")
     LIST(APPEND PROD_MICROKERNEL_SRCS ${AARCH32_ASM_MICROKERNEL_SRCS})
     LIST(APPEND ALL_MICROKERNEL_SRCS ${AARCH32_ASM_MICROKERNEL_SRCS})
   ENDIF()
-  LIST(APPEND JIT_SRCS ${JIT_AARCH32_SRCS})
+  LIST(APPEND JIT_SRCS ${AARCH32_JIT_MICROKERNEL_SRCS})
 ENDIF()
 IF(XNNPACK_TARGET_PROCESSOR MATCHES "^arm64")
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEON_MICROKERNEL_SRCS})
@@ -489,7 +432,7 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^arm64")
     LIST(APPEND PROD_MICROKERNEL_SRCS ${AARCH64_ASM_MICROKERNEL_SRCS})
     LIST(APPEND ALL_MICROKERNEL_SRCS ${AARCH64_ASM_MICROKERNEL_SRCS})
   ENDIF()
-  LIST(APPEND JIT_SRCS ${JIT_AARCH64_SRCS})
+  LIST(APPEND JIT_SRCS ${AARCH64_JIT_MICROKERNEL_SRCS})
 ENDIF()
 IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_SSE_MICROKERNEL_SRCS})

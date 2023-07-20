@@ -9494,3 +9494,80 @@ WASM32_ASM_MICROKERNEL_SRCS = [
     "src/f32-vrelu/f32-vrelu-asm-wasm32-shr-x2.S",
     "src/f32-vrelu/f32-vrelu-asm-wasm32-shr-x4.S",
 ]
+
+WASMRELAXEDSIMD32_ASM_MICROKERNEL_SRCS = [
+]
+
+WASMSIMD32_ASM_MICROKERNEL_SRCS = [
+]
+
+AARCH32_JIT_MICROKERNEL_SRCS = [
+    "src/f32-gemm/gen/f32-gemm-1x8-aarch32-neon-cortex-a53.cc",
+    "src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a7.cc",
+    "src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a53.cc",
+    "src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a55.cc",
+    "src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a75.cc",
+    "src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-ld64.cc",
+    "src/f32-igemm/gen/f32-igemm-1x8-aarch32-neon-cortex-a53.cc",
+    "src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a7.cc",
+    "src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a53.cc",
+    "src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a55.cc",
+    "src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a75.cc",
+    "src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-ld64.cc",
+    "src/qs8-gemm/gen/qs8-gemm-4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc",
+    "src/qs8-gemm/gen/qs8-gemm-4x8c4-rndnu-aarch32-neondot-ld64.cc",
+    "src/qs8-igemm/gen/qs8-igemm-4x8-rndnu-aarch32-neon-mlal-lane-ld64.cc",
+    "src/qs8-igemm/gen/qs8-igemm-4x8c4-rndnu-aarch32-neondot-ld64.cc",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc",
+    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c4-fp32-aarch32-neondot-ld64.cc",
+    "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc",
+    "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8c4-fp32-aarch32-neondot-ld64.cc",
+]
+
+AARCH64_JIT_MICROKERNEL_SRCS = [
+    "src/f16-gemm/gen/f16-gemm-1x16-aarch64-neonfp16arith-ld64.cc",
+    "src/f16-gemm/gen/f16-gemm-4x16-aarch64-neonfp16arith-ld64.cc",
+    "src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a55.cc",
+    "src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a55r0.cc",
+    "src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-cortex-a75.cc",
+    "src/f16-gemm/gen/f16-gemm-6x16-aarch64-neonfp16arith-ld64.cc",
+    "src/f16-igemm/gen/f16-igemm-1x16-aarch64-neonfp16arith-ld64.cc",
+    "src/f16-igemm/gen/f16-igemm-4x16-aarch64-neonfp16arith-ld64.cc",
+    "src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a55.cc",
+    "src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a55r0.cc",
+    "src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-cortex-a75.cc",
+    "src/f16-igemm/gen/f16-igemm-6x16-aarch64-neonfp16arith-ld64.cc",
+    "src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-cortex-a53.cc",
+    "src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-cortex-a75.cc",
+    "src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-ld64.cc",
+    "src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a53.cc",
+    "src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a55.cc",
+    "src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-cortex-a75.cc",
+    "src/f32-gemm/gen/f32-gemm-4x8-aarch64-neonfma-ld128.cc",
+    "src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-cortex-a53.cc",
+    "src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-cortex-a55.cc",
+    "src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-cortex-a75.cc",
+    "src/f32-gemm/gen/f32-gemm-6x8-aarch64-neonfma-ld128.cc",
+    "src/f32-igemm/gen/f32-igemm-1x8-aarch64-neonfma-cortex-a53.cc",
+    "src/f32-igemm/gen/f32-igemm-1x8-aarch64-neonfma-cortex-a75.cc",
+    "src/f32-igemm/gen/f32-igemm-4x8-aarch64-neonfma-cortex-a53.cc",
+    "src/f32-igemm/gen/f32-igemm-4x8-aarch64-neonfma-cortex-a55.cc",
+    "src/f32-igemm/gen/f32-igemm-4x8-aarch64-neonfma-cortex-a75.cc",
+    "src/f32-igemm/gen/f32-igemm-4x8-aarch64-neonfma-ld128.cc",
+    "src/f32-igemm/gen/f32-igemm-6x8-aarch64-neonfma-cortex-a53.cc",
+    "src/f32-igemm/gen/f32-igemm-6x8-aarch64-neonfma-cortex-a55.cc",
+    "src/f32-igemm/gen/f32-igemm-6x8-aarch64-neonfma-cortex-a75.cc",
+    "src/f32-igemm/gen/f32-igemm-6x8-aarch64-neonfma-ld128.cc",
+]
+
+WASM32_JIT_MICROKERNEL_SRCS = [
+    "src/f32-vrelu/f32-vrelu-ukernel-jit-wasm32-shr.cc",
+]
+
+WASMRELAXEDSIMD32_JIT_MICROKERNEL_SRCS = [
+]
+
+WASMSIMD32_JIT_MICROKERNEL_SRCS = [
+    "src/f32-gemm/MRx8-wasmsimd32-x86-loadsplat.cc",
+    "src/f32-igemm/MRx8-wasmsimd32-x86-loadsplat.cc",
+]
