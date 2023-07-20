@@ -132,7 +132,7 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
         $for N in range(NR):
           const uint8_t vbi${N} = ((const uint8_t*) w)[${N}];
         $for N in range(NR):
-          const float vb${N} = (float) ((int32_t) (vbi${N} & 0xF) + vbias);
+          const float vb${N} = (float) ((int32_t) vbi${N} + vbias);
         w = (const int8_t*) w + ${NR};
 
         $for M in range(MR):

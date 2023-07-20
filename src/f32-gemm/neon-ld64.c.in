@@ -144,8 +144,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           const float32x4_t vb${ABC[N:N+4]} = vld1q_f32(w); w += 4;
       $elif DATATYPE == "QC4":
         $for N in range(0, NR, 8):
-          const uint8x8_t vw${ABC[N:N+8]}c01 = vld1_u8(w); w = (const uint8_t*) w + 8;
-          const uint8x8_t vw${ABC[N:N+8]} = vand_u8(vw${ABC[N:N+8]}c01, vmask);
+          const uint8x8_t vw${ABC[N:N+8]} = vld1_u8(w); w = (const uint8_t*) w + 8;
           const int16x8_t vxw${ABC[N:N+8]} = vaddw_s8(vbias, vreinterpret_s8_u8(vw${ABC[N:N+8]}));
           const int32x4_t vxw${ABC[N:N+4]} = vmovl_s16(vget_low_s16(vxw${ABC[N:N+8]}));
           const int32x4_t vxw${ABC[N+4:N+8]} = vmovl_s16(vget_high_s16(vxw${ABC[N:N+8]}));

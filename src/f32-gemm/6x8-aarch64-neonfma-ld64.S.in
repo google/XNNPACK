@@ -304,8 +304,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_6
           LDP         q16,  q17, [x5], 32     // 8 F32 weights
         $elif DATATYPE == "QC4":
           LDR         d18, [x5], 8            // 8 QC4 weights
-          AND         v17.8b, v18.8b, v9.8b   // first set of 8 weights
-          SADDW       v17.8h, v8.8h, v17.8b
+          SADDW       v17.8h, v8.8h, v18.8b
           SXTL        v16.4s, v17.4h
           SXTL2       v17.4s, v17.8h
           SCVTF       v16.4s, v16.4s

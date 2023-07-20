@@ -169,13 +169,14 @@ BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld64
         LDR         s0,  [x3], 4
         LDR         d21, [x5], 8            // 8 QC4 weights
         SADDW       v21.8h, v6.8h, v21.8b
-        LDR         s1, [x11], 4
         SXTL        v20.4s, v21.4h
-        LDR         s2, [x12], 4
         SXTL2       v21.4s, v21.8h
-        LDR         s3 , [x4], 4
         SCVTF       v20.4s, v20.4s
         SCVTF       v21.4s, v21.4s
+        LDR         s1, [x11], 4
+        LDR         s2, [x12], 4
+        LDR         s3 , [x4], 4
+
         FMLA        v24.4s, v20.4s, v0.s[0]
         FMLA        v25.4s, v21.4s, v0.s[0]
         FMLA        v26.4s, v20.4s, v1.s[0]

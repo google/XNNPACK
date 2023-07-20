@@ -82,10 +82,10 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_1x4__scalar(
       const uint8_t vbi1 = ((const uint8_t*) w)[1];
       const uint8_t vbi2 = ((const uint8_t*) w)[2];
       const uint8_t vbi3 = ((const uint8_t*) w)[3];
-      const float vb0 = (float) ((int32_t) (vbi0 & 0xF) + vbias);
-      const float vb1 = (float) ((int32_t) (vbi1 & 0xF) + vbias);
-      const float vb2 = (float) ((int32_t) (vbi2 & 0xF) + vbias);
-      const float vb3 = (float) ((int32_t) (vbi3 & 0xF) + vbias);
+      const float vb0 = (float) ((int32_t) vbi0 + vbias);
+      const float vb1 = (float) ((int32_t) vbi1 + vbias);
+      const float vb2 = (float) ((int32_t) vbi2 + vbias);
+      const float vb3 = (float) ((int32_t) vbi3 + vbias);
       w = (const int8_t*) w + 4;
 
       vacc00 = math_muladd_f32(va0, vb0, vacc00);

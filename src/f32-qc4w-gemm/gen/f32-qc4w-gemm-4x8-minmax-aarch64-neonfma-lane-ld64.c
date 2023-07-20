@@ -113,8 +113,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x8__aarch64_neonfma_lane_ld64(
       const float32x4_t va2 = vld1q_dup_f32(a2); a2 += 1;
       const float32x4_t va3 = vld1q_dup_f32(a3); a3 += 1;
 
-      const uint8x8_t vw01234567c01 = vld1_u8(w); w = (const uint8_t*) w + 8;
-      const uint8x8_t vw01234567 = vand_u8(vw01234567c01, vmask);
+      const uint8x8_t vw01234567 = vld1_u8(w); w = (const uint8_t*) w + 8;
       const int16x8_t vxw01234567 = vaddw_s8(vbias, vreinterpret_s8_u8(vw01234567));
       const int32x4_t vxw0123 = vmovl_s16(vget_low_s16(vxw01234567));
       const int32x4_t vxw4567 = vmovl_s16(vget_high_s16(vxw01234567));

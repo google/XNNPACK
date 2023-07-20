@@ -1439,7 +1439,7 @@ void GemmMicrokernelTester::Test(xnn_f32_qc4w_gemm_minmax_ukernel_fn gemm_minmax
     if (k() & 1) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         const size_t nb_index = n_index * k_stride + k_stride - 1;
-        b[nb_index] &= 15;
+        b[nb_index] &= 0xF;
       }
     }
 

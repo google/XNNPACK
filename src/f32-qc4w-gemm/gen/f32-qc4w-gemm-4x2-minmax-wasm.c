@@ -114,8 +114,8 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x2__wasm(
 
       const uint8_t vbi0 = ((const uint8_t*) w)[0];
       const uint8_t vbi1 = ((const uint8_t*) w)[1];
-      const float vb0 = (float) ((int32_t) (vbi0 & 0xF) + vbias);
-      const float vb1 = (float) ((int32_t) (vbi1 & 0xF) + vbias);
+      const float vb0 = (float) ((int32_t) vbi0 + vbias);
+      const float vb1 = (float) ((int32_t) vbi1 + vbias);
       w = (const int8_t*) w + 2;
 
       vacc00 = math_muladd_f32(va0, vb0, vacc00);

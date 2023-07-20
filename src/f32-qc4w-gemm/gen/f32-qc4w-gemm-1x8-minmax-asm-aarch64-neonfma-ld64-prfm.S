@@ -103,7 +103,6 @@ BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_pr
         # Remainder- 1 float of A (4 bytes)
         LDR         s0, [x3], 4
          LDR         d21, [x5], 8            // 8 QC4 weights
-         AND         v21.8b, v21.8b, v7.8b   // first set of 8 weights
          SADDW       v21.8h, v6.8h, v21.8b
          SXTL        v20.4s, v21.4h
          SXTL2       v21.4s, v21.8h

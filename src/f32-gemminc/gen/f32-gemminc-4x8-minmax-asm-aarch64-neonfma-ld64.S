@@ -148,6 +148,7 @@ BEGIN_FUNCTION xnn_f32_gemminc_minmax_ukernel_4x8__asm_aarch64_neonfma_ld64
         LDR         s1, [x11], 4
         LDR         s2, [x12], 4
         LDR         s3 , [x4], 4
+
         FMLA        v24.4s, v20.4s, v0.s[0]
         FMLA        v25.4s, v21.4s, v0.s[0]
         FMLA        v26.4s, v20.4s, v1.s[0]

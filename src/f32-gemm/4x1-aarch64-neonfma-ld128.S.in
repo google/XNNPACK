@@ -207,7 +207,6 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
         $elif DATATYPE == "QC4":
           // TODO: This supports remainder of 1 or 2 but not 3.
           LDR         b20, [x5], 1
-          AND         v20.8b, v20.8b, v7.8b
           SADDW       v20.8h, v6.8h, v20.8b
           SXTL        v20.4s, v20.4h
           SCVTF       v20.2s, v20.2s
