@@ -163,3 +163,17 @@
 - name: xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x4c8__xop_ld128
   init: xnn_init_f32_minmax_sse_params
   k-block: 8
+
+# AVX512SKX
+- name: xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x16c8__avx512skx
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 8
+- name: xnn_qd8_f32_qs8w_gemm_minmax_ukernel_2x16c8__avx512skx
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 8
+- name: xnn_qd8_f32_qs8w_gemm_minmax_ukernel_3x16c8__avx512skx
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 8
+- name: xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c8__avx512skx
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 8

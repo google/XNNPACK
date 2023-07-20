@@ -1399,6 +1399,11 @@ tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=2 -D VARIANT=LD256 -D DATA
 tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=3 -D VARIANT=LD256 -D DATATYPE=QU8 -D REQUANTIZATION=FP32     -o src/qu8-gemm/gen/qu8-gemm-3x16c8-minmax-fp32-avx512skx.c &
 tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D DATATYPE=QU8 -D REQUANTIZATION=FP32     -o src/qu8-gemm/gen/qu8-gemm-4x16c8-minmax-fp32-avx512skx.c &
 
+tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=1 -D VARIANT=LD256 -D DATATYPE=QD8 -D REQUANTIZATION=     -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-1x16c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=2 -D VARIANT=LD256 -D DATATYPE=QD8 -D REQUANTIZATION=     -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-2x16c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=3 -D VARIANT=LD256 -D DATATYPE=QD8 -D REQUANTIZATION=     -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-3x16c8-minmax-avx512skx.c &
+tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D DATATYPE=QD8 -D REQUANTIZATION=     -o src/qd8-f32-qs8w-gemm/gen/qd8-f32-qs8w-gemm-4x16c8-minmax-avx512skx.c &
+
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/qd8-f32-qs8w-gemm-minmax.yaml --output test/qd8-f32-qs8w-gemm-minmax.cc
 tools/generate-gemm-test.py --spec test/qs8-qc8w-gemm-minmax-fp32.yaml --output test/qs8-qc8w-gemm-minmax-fp32.cc --output test/qs8-qc8w-gemm-minmax-fp32-2.cc --output test/qs8-qc8w-gemm-minmax-fp32-3.cc &

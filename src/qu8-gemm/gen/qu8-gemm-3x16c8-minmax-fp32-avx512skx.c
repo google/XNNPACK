@@ -60,9 +60,9 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x16c8__avx512skx(
   const __m512i voutput_min = _mm512_load_si512(params->fp32_avx512.output_min);
   do {
     __m512i vacc0x0123 = _mm512_maskz_expandloadu_epi32(vbias_mask, w);
-    __m512i vacc0x4567 = _mm512_maskz_expandloadu_epi32(vbias_mask, (const void*) ((const int32_t*) w + 4));
-    __m512i vacc0x89AB = _mm512_maskz_expandloadu_epi32(vbias_mask, (const void*) ((const int32_t*) w + 8));
-    __m512i vacc0xCDEF = _mm512_maskz_expandloadu_epi32(vbias_mask, (const void*) ((const int32_t*) w + 12));
+    __m512i vacc0x4567 = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 4);
+    __m512i vacc0x89AB = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 8);
+    __m512i vacc0xCDEF = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 12);
     __m512i vacc1x0123 = vacc0x0123;
     __m512i vacc1x4567 = vacc0x4567;
     __m512i vacc1x89AB = vacc0x89AB;
@@ -71,7 +71,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x16c8__avx512skx(
     __m512i vacc2x4567 = vacc0x4567;
     __m512i vacc2x89AB = vacc0x89AB;
     __m512i vacc2xCDEF = vacc0xCDEF;
-    w = (const void*) ((const int32_t*) w + 16);
+    w = (const int32_t*) w + 16;
 
     size_t k = 0;
     const __m512i vb_zero_point = _mm512_load_si512(params->fp32_avx512.kernel_zero_point);
@@ -104,7 +104,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x16c8__avx512skx(
       vacc1xCDEF = _mm512_add_epi32(vacc1xCDEF, _mm512_madd_epi16(va1, vbCDEF));
       vacc2xCDEF = _mm512_add_epi32(vacc2xCDEF, _mm512_madd_epi16(va2, vbCDEF));
 
-      w = (const void*) ((const uint8_t*) w + 128);
+      w = (const uint8_t*) w + 128;
       k += 8 * sizeof(uint8_t);
     }
 

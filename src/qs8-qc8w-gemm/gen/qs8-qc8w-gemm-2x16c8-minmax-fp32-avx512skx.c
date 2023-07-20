@@ -53,14 +53,14 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__avx512skx(
   const __m256i voutput_min = _mm256_load_si256((const __m256i*) params->fp32_avx512.output_min);
   do {
     __m512i vacc0x0123 = _mm512_maskz_expandloadu_epi32(vbias_mask, w);
-    __m512i vacc0x4567 = _mm512_maskz_expandloadu_epi32(vbias_mask, (const void*) ((const int32_t*) w + 4));
-    __m512i vacc0x89AB = _mm512_maskz_expandloadu_epi32(vbias_mask, (const void*) ((const int32_t*) w + 8));
-    __m512i vacc0xCDEF = _mm512_maskz_expandloadu_epi32(vbias_mask, (const void*) ((const int32_t*) w + 12));
+    __m512i vacc0x4567 = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 4);
+    __m512i vacc0x89AB = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 8);
+    __m512i vacc0xCDEF = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 12);
     __m512i vacc1x0123 = vacc0x0123;
     __m512i vacc1x4567 = vacc0x4567;
     __m512i vacc1x89AB = vacc0x89AB;
     __m512i vacc1xCDEF = vacc0xCDEF;
-    w = (const void*) ((const int32_t*) w + 16);
+    w = (const int32_t*) w + 16;
 
     size_t k = 0;
     while (k < kc) {
@@ -86,7 +86,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__avx512skx(
       vacc0xCDEF = _mm512_add_epi32(vacc0xCDEF, _mm512_madd_epi16(va0, vbCDEF));
       vacc1xCDEF = _mm512_add_epi32(vacc1xCDEF, _mm512_madd_epi16(va1, vbCDEF));
 
-      w = (const void*) ((const int8_t*) w + 128);
+      w = (const int8_t*) w + 128;
       k += 8 * sizeof(int8_t);
     }
 
@@ -102,7 +102,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x16c8__avx512skx(
     __m512 vscaled1x084C195D2A6E3B7F = _mm512_cvtepi32_ps(vacc1x084C195D2A6E3B7F);
 
     const __m512 vscale012345678ABCDEF = _mm512_load_ps(w);
-    w = (const void*) ((const float*) w + 16);
+    w = (const float*) w + 16;
     const __m512 vscale084C195D2A6E3B7F = _mm512_permutexvar_ps(_mm512_set_epi32(15, 7, 11, 3, 14, 6, 10, 2, 13, 5, 9, 1, 12, 4, 8, 0), vscale012345678ABCDEF);
     vscaled0x084C195D2A6E3B7F = _mm512_mul_ps(vscaled0x084C195D2A6E3B7F, vscale084C195D2A6E3B7F);
     vscaled1x084C195D2A6E3B7F = _mm512_mul_ps(vscaled1x084C195D2A6E3B7F, vscale084C195D2A6E3B7F);
