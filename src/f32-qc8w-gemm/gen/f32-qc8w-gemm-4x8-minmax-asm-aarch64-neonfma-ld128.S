@@ -78,43 +78,40 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
         # Main loop - 4 floats of A (16 bytes)
 1:
         LDR         q0, [x3], 16
-        LDR         d24, [x5], 8
-        SXTL        v24.8h, v24.8b
-        LDR         q1, [x11], 16
+        LDP         q20, q22, [x5], 32      // 32 QC8 weights
+        SXTL        v24.8h, v20.8b
+        SXTL2       v25.8h, v20.16b
         SXTL        v20.4s, v24.4h
         SXTL2       v24.4s, v24.8h
-        LDR         q2, [x12], 16
+        SXTL        v21.4s, v25.4h
+        SXTL2       v25.4s, v25.8h
         SCVTF       v20.4s, v20.4s
         SCVTF       v24.4s, v24.4s
+        SXTL        v26.8h, v22.8b
+        SXTL2       v27.8h, v22.16b
+        LDR         q1, [x11], 16
+        LDR         q2, [x12], 16
         LDR         q3, [x4], 16
         FMLA        v16.4s, v20.4s, v0.s[0]
         FMLA        v18.4s, v20.4s, v1.s[0]
         FMLA        v28.4s, v20.4s, v2.s[0]
         FMLA        v30.4s, v20.4s, v3.s[0]
-        LDR         d25, [x5], 8
-        SXTL        v25.8h, v25.8b
-        SXTL        v21.4s, v25.4h
-        SXTL2       v25.4s, v25.8h
         SCVTF       v21.4s, v21.4s
         SCVTF       v25.4s, v25.4s
+        SXTL        v22.4s, v26.4h
+        SXTL2       v26.4s, v26.8h
         FMLA        v17.4s, v24.4s, v0.s[0]
         FMLA        v19.4s, v24.4s, v1.s[0]
         FMLA        v29.4s, v24.4s, v2.s[0]
         FMLA        v31.4s, v24.4s, v3.s[0]
-        LDR         d26, [x5], 8
-        SXTL        v26.8h, v26.8b
-        SXTL        v22.4s, v26.4h
-        SXTL2       v26.4s, v26.8h
         SCVTF       v22.4s, v22.4s
         SCVTF       v26.4s, v26.4s
+        SXTL        v23.4s, v27.4h
+        SXTL2       v27.4s, v27.8h
         FMLA        v16.4s, v21.4s, v0.s[1]
         FMLA        v18.4s, v21.4s, v1.s[1]
         FMLA        v28.4s, v21.4s, v2.s[1]
         FMLA        v30.4s, v21.4s, v3.s[1]
-        LDR         d27, [x5], 8
-        SXTL        v27.8h, v27.8b
-        SXTL        v23.4s, v27.4h
-        SXTL2       v27.4s, v27.8h
         SCVTF       v23.4s, v23.4s
         SCVTF       v27.4s, v27.4s
         FMLA        v17.4s, v25.4s, v0.s[1]
@@ -195,15 +192,15 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
         TBZ         x0, 3, 4f
 
         # Remainder- 2 floats of A (8 bytes)
-        LDP         d24, d25, [x5], 16
-        SXTL        v24.8h, v24.8b
+        LDR         q20, [x5], 16           // 16 QC8 weights
+        SXTL        v24.8h, v20.8b
+        SXTL2       v25.8h, v20.16b
         SXTL        v20.4s, v24.4h
         SXTL2       v24.4s, v24.8h
-        SCVTF       v20.4s, v20.4s
-        SCVTF       v24.4s, v24.4s
-        SXTL        v25.8h, v25.8b
         SXTL        v21.4s, v25.4h
         SXTL2       v25.4s, v25.8h
+        SCVTF       v20.4s, v20.4s
+        SCVTF       v24.4s, v24.4s
         SCVTF       v21.4s, v21.4s
         SCVTF       v25.4s, v25.4s
         LDR         d0, [x3], 8
@@ -233,8 +230,8 @@ BEGIN_FUNCTION xnn_f32_qc8w_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
         # Remainder- 1 float of A (4 bytes)
 4:
         # Remainder- 2 floats of A (8 bytes)
-        LDR         d24, [x5], 8
-        SXTL        v24.8h, v24.8b
+        LDR         d20, [x5], 8            // 8 QC8 weights
+        SXTL        v24.8h, v20.8b
         SXTL        v20.4s, v24.4h
         SXTL2       v24.4s, v24.8h
         SCVTF       v20.4s, v20.4s

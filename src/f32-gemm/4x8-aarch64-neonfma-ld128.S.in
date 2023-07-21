@@ -113,11 +113,9 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${"_goi" if GOI e
 
         # Main loop - 4 floats of A (16 bytes)
 1:
+        LDR         q0, [x3], 16
         $if GOI:
-          LDR         q0, [x3], 16
-          LDR         q1, [x11], 16
-          LDR         q2, [x12], 16
-          LDR         q3, [x4], 16
+          # Load 32 F32 weights from 8x4 and transpose to 4x8
           LD4         {v20.s, v21.s, v22.s, v23.s}[0], [x5], x2
           LD4         {v20.s, v21.s, v22.s, v23.s}[1], [x5], x2
           LD4         {v20.s, v21.s, v22.s, v23.s}[2], [x5], x2
@@ -128,62 +126,54 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${"_goi" if GOI e
           LD4         {v24.s, v25.s, v26.s, v27.s}[3], [x5], x16
         $else:
           $if DATATYPE == "F32":
-            LDR         q0, [x3], 16
-            LDP         q20, q24, [x5], 32
-            LDR         q1, [x11], 16
-            LDR         q2, [x12], 16
-            LDR         q3, [x4], 16
+            LDP         q20, q24, [x5], 32      // 8 F32 weights
           $else:
-            LDR         q0, [x3], 16
-            LDR         d24, [x5], 8
-            SXTL        v24.8h, v24.8b
-            LDR         q1, [x11], 16
+            LDP         q20, q22, [x5], 32      // 32 QC8 weights
+            SXTL        v24.8h, v20.8b
+            SXTL2       v25.8h, v20.16b
             SXTL        v20.4s, v24.4h
             SXTL2       v24.4s, v24.8h
-            LDR         q2, [x12], 16
+            SXTL        v21.4s, v25.4h
+            SXTL2       v25.4s, v25.8h
             SCVTF       v20.4s, v20.4s
             SCVTF       v24.4s, v24.4s
-            LDR         q3, [x4], 16
+            SXTL        v26.8h, v22.8b
+            SXTL2       v27.8h, v22.16b
+        LDR         q1, [x11], 16
+        LDR         q2, [x12], 16
+        LDR         q3, [x4], 16
         FMLA        v16.4s, v20.4s, v0.s[0]
         FMLA        v18.4s, v20.4s, v1.s[0]
         FMLA        v28.4s, v20.4s, v2.s[0]
         FMLA        v30.4s, v20.4s, v3.s[0]
         $if not GOI:
           $if DATATYPE == "F32":
-            LDP         q21, q25, [x5], 32
+            LDP         q21, q25, [x5], 32      // 8 F32 weights
           $else:
-            LDR         d25, [x5], 8
-            SXTL        v25.8h, v25.8b
-            SXTL        v21.4s, v25.4h
-            SXTL2       v25.4s, v25.8h
             SCVTF       v21.4s, v21.4s
             SCVTF       v25.4s, v25.4s
+            SXTL        v22.4s, v26.4h
+            SXTL2       v26.4s, v26.8h
         FMLA        v17.4s, v24.4s, v0.s[0]
         FMLA        v19.4s, v24.4s, v1.s[0]
         FMLA        v29.4s, v24.4s, v2.s[0]
         FMLA        v31.4s, v24.4s, v3.s[0]
         $if not GOI:
           $if DATATYPE == "F32":
-            LDP         q22, q26, [x5], 32
+            LDP         q22, q26, [x5], 32      // 8 F32 weights
           $else:
-            LDR         d26, [x5], 8
-            SXTL        v26.8h, v26.8b
-            SXTL        v22.4s, v26.4h
-            SXTL2       v26.4s, v26.8h
             SCVTF       v22.4s, v22.4s
             SCVTF       v26.4s, v26.4s
+            SXTL        v23.4s, v27.4h
+            SXTL2       v27.4s, v27.8h
         FMLA        v16.4s, v21.4s, v0.s[1]
         FMLA        v18.4s, v21.4s, v1.s[1]
         FMLA        v28.4s, v21.4s, v2.s[1]
         FMLA        v30.4s, v21.4s, v3.s[1]
         $if not GOI:
           $if DATATYPE == "F32":
-            LDP         q23, q27, [x5], 32
+            LDP         q23, q27, [x5], 32      // 8 F32 weights
           $else:
-            LDR         d27, [x5], 8
-            SXTL        v27.8h, v27.8b
-            SXTL        v23.4s, v27.4h
-            SXTL2       v27.4s, v27.8h
             SCVTF       v23.4s, v23.4s
             SCVTF       v27.4s, v27.4s
         FMLA        v17.4s, v25.4s, v0.s[1]
@@ -289,18 +279,18 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${"_goi" if GOI e
         $else:
           # Remainder- 2 floats of A (8 bytes)
           $if DATATYPE == "F32":
-            LDP         q20, q24, [x5], 32
+            LDP         q20, q24, [x5], 32      // 16 F32 weights
             LDP         q21, q25, [x5], 32
           $else:
-            LDP         d24, d25, [x5], 16
-            SXTL        v24.8h, v24.8b
+            LDR         q20, [x5], 16           // 16 QC8 weights
+            SXTL        v24.8h, v20.8b
+            SXTL2       v25.8h, v20.16b
             SXTL        v20.4s, v24.4h
             SXTL2       v24.4s, v24.8h
-            SCVTF       v20.4s, v20.4s
-            SCVTF       v24.4s, v24.4s
-            SXTL        v25.8h, v25.8b
             SXTL        v21.4s, v25.4h
             SXTL2       v25.4s, v25.8h
+            SCVTF       v20.4s, v20.4s
+            SCVTF       v24.4s, v24.4s
             SCVTF       v21.4s, v21.4s
             SCVTF       v25.4s, v25.4s
         LDR         d0, [x3], 8
@@ -342,10 +332,10 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${"_goi" if GOI e
         $else:
           # Remainder- 2 floats of A (8 bytes)
           $if DATATYPE == "F32":
-            LDP         q20, q24, [x5], 32
+            LDP         q20, q24, [x5], 32      // 8 F32 weights
           $else:
-            LDR         d24, [x5], 8
-            SXTL        v24.8h, v24.8b
+            LDR         d20, [x5], 8            // 8 QC8 weights
+            SXTL        v24.8h, v20.8b
             SXTL        v20.4s, v24.4h
             SXTL2       v24.4s, v24.8h
             SCVTF       v20.4s, v20.4s

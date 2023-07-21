@@ -123,7 +123,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   // Main loop - 4 floats of A (16 bytes)
   bind(l1);
   ldr(q0, mem[x3], 16);
-  ldp(q20, q24, mem[x5], 32);
+  ldp(q20, q24, mem[x5], 32); // 8 F32 weights
   if (max_mr > 1) {
     ldr(q1, mem[x11], 16);
   }
@@ -143,7 +143,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 3) {
     fmla(v30.v4s(), v20.v4s(), v3.s()[0]);
   }
-  ldp(q21, q25, mem[x5], 32);
+  ldp(q21, q25, mem[x5], 32); // 8 F32 weights
   fmla(v17.v4s(), v24.v4s(), v0.s()[0]);
   if (max_mr > 1) {
     fmla(v19.v4s(), v24.v4s(), v1.s()[0]);
@@ -154,7 +154,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 3) {
     fmla(v31.v4s(), v24.v4s(), v3.s()[0]);
   }
-  ldp(q22, q26, mem[x5], 32);
+  ldp(q22, q26, mem[x5], 32); // 8 F32 weights
   fmla(v16.v4s(), v21.v4s(), v0.s()[1]);
   if (max_mr > 1) {
     fmla(v18.v4s(), v21.v4s(), v1.s()[1]);
@@ -165,7 +165,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   if (max_mr > 3) {
     fmla(v30.v4s(), v21.v4s(), v3.s()[1]);
   }
-  ldp(q23, q27, mem[x5], 32);
+  ldp(q23, q27, mem[x5], 32); // 8 F32 weights
   fmla(v17.v4s(), v25.v4s(), v0.s()[1]);
   if (max_mr > 1) {
     fmla(v19.v4s(), v25.v4s(), v1.s()[1]);
@@ -289,7 +289,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   tbz(x0, 3, l4);
 
   // Remainder- 2 floats of A (8 bytes)
-  ldp(q20, q24, mem[x5], 32);
+  ldp(q20, q24, mem[x5], 32); // 16 F32 weights
   ldp(q21, q25, mem[x5], 32);
   ldr(d0, mem[x3], 8);
   if (max_mr > 1) {
@@ -348,7 +348,7 @@ void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_g
   // Remainder- 1 float of A (4 bytes)
   bind(l4);
   // Remainder- 2 floats of A (8 bytes)
-  ldp(q20, q24, mem[x5], 32);
+  ldp(q20, q24, mem[x5], 32); // 8 F32 weights
   ldr(s0, mem[x3], 4);
   if (max_mr > 1) {
     ldr(s1, mem[x11], 4);

@@ -84,9 +84,7 @@ BEGIN_FUNCTION xnn_f32_gemm_goi_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
         # Main loop - 4 floats of A (16 bytes)
 1:
         LDR         q0, [x3], 16
-        LDR         q1, [x11], 16
-        LDR         q2, [x12], 16
-        LDR         q3, [x4], 16
+        # Load 32 F32 weights from 8x4 and transpose to 4x8
         LD4         {v20.s, v21.s, v22.s, v23.s}[0], [x5], x2
         LD4         {v20.s, v21.s, v22.s, v23.s}[1], [x5], x2
         LD4         {v20.s, v21.s, v22.s, v23.s}[2], [x5], x2
@@ -95,6 +93,9 @@ BEGIN_FUNCTION xnn_f32_gemm_goi_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
         LD4         {v24.s, v25.s, v26.s, v27.s}[1], [x5], x2
         LD4         {v24.s, v25.s, v26.s, v27.s}[2], [x5], x2
         LD4         {v24.s, v25.s, v26.s, v27.s}[3], [x5], x16
+        LDR         q1, [x11], 16
+        LDR         q2, [x12], 16
+        LDR         q3, [x4], 16
         FMLA        v16.4s, v20.4s, v0.s[0]
         FMLA        v18.4s, v20.4s, v1.s[0]
         FMLA        v28.4s, v20.4s, v2.s[0]

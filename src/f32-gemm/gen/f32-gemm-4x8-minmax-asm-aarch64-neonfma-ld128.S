@@ -78,7 +78,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
         # Main loop - 4 floats of A (16 bytes)
 1:
         LDR         q0, [x3], 16
-        LDP         q20, q24, [x5], 32
+        LDP         q20, q24, [x5], 32      // 8 F32 weights
         LDR         q1, [x11], 16
         LDR         q2, [x12], 16
         LDR         q3, [x4], 16
@@ -86,17 +86,17 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
         FMLA        v18.4s, v20.4s, v1.s[0]
         FMLA        v28.4s, v20.4s, v2.s[0]
         FMLA        v30.4s, v20.4s, v3.s[0]
-        LDP         q21, q25, [x5], 32
+        LDP         q21, q25, [x5], 32      // 8 F32 weights
         FMLA        v17.4s, v24.4s, v0.s[0]
         FMLA        v19.4s, v24.4s, v1.s[0]
         FMLA        v29.4s, v24.4s, v2.s[0]
         FMLA        v31.4s, v24.4s, v3.s[0]
-        LDP         q22, q26, [x5], 32
+        LDP         q22, q26, [x5], 32      // 8 F32 weights
         FMLA        v16.4s, v21.4s, v0.s[1]
         FMLA        v18.4s, v21.4s, v1.s[1]
         FMLA        v28.4s, v21.4s, v2.s[1]
         FMLA        v30.4s, v21.4s, v3.s[1]
-        LDP         q23, q27, [x5], 32
+        LDP         q23, q27, [x5], 32      // 8 F32 weights
         FMLA        v17.4s, v25.4s, v0.s[1]
         FMLA        v19.4s, v25.4s, v1.s[1]
         FMLA        v29.4s, v25.4s, v2.s[1]
@@ -165,7 +165,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
         TBZ         x0, 3, 4f
 
         # Remainder- 2 floats of A (8 bytes)
-        LDP         q20, q24, [x5], 32
+        LDP         q20, q24, [x5], 32      // 16 F32 weights
         LDP         q21, q25, [x5], 32
         LDR         d0, [x3], 8
         LDR         d1, [x11], 8
@@ -194,7 +194,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld128
         # Remainder- 1 float of A (4 bytes)
 4:
         # Remainder- 2 floats of A (8 bytes)
-        LDP         q20, q24, [x5], 32
+        LDP         q20, q24, [x5], 32      // 8 F32 weights
         LDR         s0, [x3], 4
         LDR         s1, [x11], 4
         LDR         s2, [x12], 4
