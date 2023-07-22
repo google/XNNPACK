@@ -44,14 +44,14 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x4c8__sse41_ld128(
 
   do {
     const __m128i vksum = _mm_load_si128((const __m128i*) w);
+    __m128i vinput_zero_point0 = _mm_cvtsi32_si128(*((const int*) &quantization_params[0].zero_point));
+    vinput_zero_point0 = _mm_shuffle_epi32(vinput_zero_point0, _MM_SHUFFLE(0, 0, 0, 0));
     const __m128i vzero = _mm_setzero_si128();
-    const __m128i vzp01 = _mm_cvtsi32_si128((int) quantization_params[0].zero_point);
-    const __m128i vzp0 = _mm_shuffle_epi32(vzp01, _MM_SHUFFLE(0, 0, 0, 0));
-    const __m128i vksumzp0 = _mm_mullo_epi32(vksum, vzp0);
-    __m128i vacc0x0 = _mm_blend_epi16(vksumzp0, vzero, 0xFC);
-    __m128i vacc0x1 = _mm_blend_epi16(vksumzp0, vzero, 0xF3);
-    __m128i vacc0x2 = _mm_blend_epi16(vksumzp0, vzero, 0xCF);
-    __m128i vacc0x3 = _mm_blend_epi16(vksumzp0, vzero, 0x3F);
+    const __m128i vinit0 = _mm_mullo_epi32(vksum, vinput_zero_point0);
+    __m128i vacc0x0 = _mm_blend_epi16(vinit0, vzero, 0xFC);
+    __m128i vacc0x1 = _mm_blend_epi16(vinit0, vzero, 0xF3);
+    __m128i vacc0x2 = _mm_blend_epi16(vinit0, vzero, 0xCF);
+    __m128i vacc0x3 = _mm_blend_epi16(vinit0, vzero, 0x3F);
     w = (const int32_t*) w + 4;
 
     size_t k = 0;
@@ -83,14 +83,18 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x4c8__sse41_ld128(
     __m128i vacc0x0123 = _mm_hadd_epi32(vacc0x01, vacc0x23);
 
     __m128 vout0x0123 = _mm_cvtepi32_ps(vacc0x0123);
-    const __m128 vscale0 = _mm_load1_ps(&quantization_params[0].scale);
-    vout0x0123 = _mm_mul_ps(vout0x0123, vscale0);
+
+    const __m128 vinput_scale0 = _mm_load1_ps(&quantization_params[0].scale);
+
+    vout0x0123 = _mm_mul_ps(vout0x0123, vinput_scale0);
 
     const __m128 vbias0123 = _mm_load_ps(w); w = (const float*) w + 4;
     vout0x0123 = _mm_add_ps(vout0x0123, vbias0123);
-    const __m128 vmax = _mm_load_ps(&params->sse.max[0]);
-    const __m128 vmin = _mm_load_ps(&params->sse.min[0]);
+
+    const __m128 vmin = _mm_load_ps(params->sse.min);
     vout0x0123 = _mm_max_ps(vout0x0123, vmin);
+
+    const __m128 vmax = _mm_load_ps(params->sse.max);
     vout0x0123 = _mm_min_ps(vout0x0123, vmax);
 
     if XNN_LIKELY(nc >= 4) {

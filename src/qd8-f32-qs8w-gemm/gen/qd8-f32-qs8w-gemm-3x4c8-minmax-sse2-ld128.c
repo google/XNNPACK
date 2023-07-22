@@ -56,28 +56,28 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_3x4c8__sse2_ld128(
 
   do {
     const __m128i vksum = _mm_load_si128((const __m128i*) w);
+    const __m128i vinput_zero_point01 = _mm_loadu_si128((const __m128i*) &quantization_params[0]);
+    const __m128i vinput_zero_point0 = _mm_shuffle_epi32(vinput_zero_point01, _MM_SHUFFLE(0, 0, 0, 0));
+    const __m128i vinput_zero_point1 = _mm_shuffle_epi32(vinput_zero_point01, _MM_SHUFFLE(2, 2, 2, 2));
+    __m128i vinput_zero_point2 = _mm_cvtsi32_si128(*((const int*) &quantization_params[2].zero_point));
+    vinput_zero_point2 = _mm_shuffle_epi32(vinput_zero_point2, _MM_SHUFFLE(0, 0, 0, 0));
     const __m128i vzero = _mm_setzero_si128();
-    const __m128i vzp01 = _mm_loadu_si128((const __m128i*) quantization_params);
-    const __m128i vzp0 = _mm_shuffle_epi32(vzp01, _MM_SHUFFLE(0, 0, 0, 0));
-    const __m128i vzp1 = _mm_shuffle_epi32(vzp01, _MM_SHUFFLE(2, 2, 2, 2));
-    __m128i vzp2 = _mm_cvtsi32_si128((int) quantization_params[2].zero_point);
-    vzp2 = _mm_shuffle_epi32(vzp2, _MM_SHUFFLE(0, 0, 0, 0));
     const __m128i vksum_lo = _mm_srli_epi32(_mm_slli_epi32(vksum, 16), 16);
     const __m128i vksum_hi = _mm_srli_epi32(vksum, 16);
 
-    __m128i vzpprodksumhi0 = _mm_mulhi_epu16(vzp0, vksum_lo);
-    const __m128i vzpprodksumlo0 = _mm_mullo_epi16(vzp0, vksum_lo);
-    __m128i vzpprodksumhi1 = _mm_mulhi_epu16(vzp1, vksum_lo);
-    const __m128i vzpprodksumlo1 = _mm_mullo_epi16(vzp1, vksum_lo);
-    __m128i vzpprodksumhi2 = _mm_mulhi_epu16(vzp2, vksum_lo);
-    const __m128i vzpprodksumlo2 = _mm_mullo_epi16(vzp2, vksum_lo);
+    __m128i vzpprodksumhi0 = _mm_mulhi_epu16(vinput_zero_point0, vksum_lo);
+    const __m128i vzpprodksumlo0 = _mm_mullo_epi16(vinput_zero_point0, vksum_lo);
+    __m128i vzpprodksumhi1 = _mm_mulhi_epu16(vinput_zero_point1, vksum_lo);
+    const __m128i vzpprodksumlo1 = _mm_mullo_epi16(vinput_zero_point1, vksum_lo);
+    __m128i vzpprodksumhi2 = _mm_mulhi_epu16(vinput_zero_point2, vksum_lo);
+    const __m128i vzpprodksumlo2 = _mm_mullo_epi16(vinput_zero_point2, vksum_lo);
 
-    vzpprodksumhi0 = _mm_add_epi16(vzpprodksumhi0, _mm_mullo_epi16(vzp0, vksum_hi));
-    vzpprodksumhi0 = _mm_sub_epi16(vzpprodksumhi0, _mm_and_si128(_mm_srai_epi16(vzp0, 15), vksum_lo));
-    vzpprodksumhi1 = _mm_add_epi16(vzpprodksumhi1, _mm_mullo_epi16(vzp1, vksum_hi));
-    vzpprodksumhi1 = _mm_sub_epi16(vzpprodksumhi1, _mm_and_si128(_mm_srai_epi16(vzp1, 15), vksum_lo));
-    vzpprodksumhi2 = _mm_add_epi16(vzpprodksumhi2, _mm_mullo_epi16(vzp2, vksum_hi));
-    vzpprodksumhi2 = _mm_sub_epi16(vzpprodksumhi2, _mm_and_si128(_mm_srai_epi16(vzp2, 15), vksum_lo));
+    vzpprodksumhi0 = _mm_add_epi16(vzpprodksumhi0, _mm_mullo_epi16(vinput_zero_point0, vksum_hi));
+    vzpprodksumhi0 = _mm_sub_epi16(vzpprodksumhi0, _mm_and_si128(_mm_srai_epi16(vinput_zero_point0, 15), vksum_lo));
+    vzpprodksumhi1 = _mm_add_epi16(vzpprodksumhi1, _mm_mullo_epi16(vinput_zero_point1, vksum_hi));
+    vzpprodksumhi1 = _mm_sub_epi16(vzpprodksumhi1, _mm_and_si128(_mm_srai_epi16(vinput_zero_point1, 15), vksum_lo));
+    vzpprodksumhi2 = _mm_add_epi16(vzpprodksumhi2, _mm_mullo_epi16(vinput_zero_point2, vksum_hi));
+    vzpprodksumhi2 = _mm_sub_epi16(vzpprodksumhi2, _mm_and_si128(_mm_srai_epi16(vinput_zero_point2, 15), vksum_lo));
 
     vzpprodksumhi0 = _mm_slli_si128(vzpprodksumhi0, 2);
     vzpprodksumhi1 = _mm_slli_si128(vzpprodksumhi1, 2);
@@ -162,25 +162,29 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_3x4c8__sse2_ld128(
     __m128 vout0x0123 = _mm_cvtepi32_ps(vacc0x0123);
     __m128 vout1x0123 = _mm_cvtepi32_ps(vacc1x0123);
     __m128 vout2x0123 = _mm_cvtepi32_ps(vacc2x0123);
-    const __m128 vscale01 = _mm_castsi128_ps(_mm_loadu_si128((const __m128i*) quantization_params));
-    const __m128 vscale0 = _mm_shuffle_ps(vscale01, vscale01, _MM_SHUFFLE(1, 1, 1, 1));
-    const __m128 vscale1 = _mm_shuffle_ps(vscale01, vscale01, _MM_SHUFFLE(3, 3, 3, 3));
-    const __m128 vscale2 = _mm_load1_ps(&quantization_params[2].scale);
-    vout0x0123 = _mm_mul_ps(vout0x0123, vscale0);
-    vout1x0123 = _mm_mul_ps(vout1x0123, vscale1);
-    vout2x0123 = _mm_mul_ps(vout2x0123, vscale2);
+
+    const __m128i vinput_scale01 = _mm_loadu_si128((const __m128i*) &quantization_params[0]);
+    const __m128 vinput_scale0 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale01, _MM_SHUFFLE(1, 1, 1, 1)));
+    const __m128 vinput_scale1 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale01, _MM_SHUFFLE(3, 3, 3, 3)));
+    const __m128 vinput_scale2 = _mm_load1_ps(&quantization_params[2].scale);
+
+    vout0x0123 = _mm_mul_ps(vout0x0123, vinput_scale0);
+    vout1x0123 = _mm_mul_ps(vout1x0123, vinput_scale1);
+    vout2x0123 = _mm_mul_ps(vout2x0123, vinput_scale2);
 
     const __m128 vbias0123 = _mm_load_ps(w); w = (const float*) w + 4;
     vout0x0123 = _mm_add_ps(vout0x0123, vbias0123);
     vout1x0123 = _mm_add_ps(vout1x0123, vbias0123);
     vout2x0123 = _mm_add_ps(vout2x0123, vbias0123);
-    const __m128 vmax = _mm_load_ps(&params->sse.max[0]);
-    const __m128 vmin = _mm_load_ps(&params->sse.min[0]);
+
+    const __m128 vmin = _mm_load_ps(params->sse.min);
     vout0x0123 = _mm_max_ps(vout0x0123, vmin);
-    vout0x0123 = _mm_min_ps(vout0x0123, vmax);
     vout1x0123 = _mm_max_ps(vout1x0123, vmin);
-    vout1x0123 = _mm_min_ps(vout1x0123, vmax);
     vout2x0123 = _mm_max_ps(vout2x0123, vmin);
+
+    const __m128 vmax = _mm_load_ps(params->sse.max);
+    vout0x0123 = _mm_min_ps(vout0x0123, vmax);
+    vout1x0123 = _mm_min_ps(vout1x0123, vmax);
     vout2x0123 = _mm_min_ps(vout2x0123, vmax);
 
     if XNN_LIKELY(nc >= 4) {

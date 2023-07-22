@@ -68,27 +68,30 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
         c${M} = c${M-1};
       }
 
-  $if DATATYPE == "QD8":
-    const int32_t vzp0 = quantization_params[0].zero_point;
-    $for M in range(1, MR):
-      const int32_t vzp${M} = quantization_params[${M}].zero_point;
   $if DATATYPE == "QU8":
     const int32_t vb_zero_point = params->${PARAMS_STRUCT}.kernel_zero_point;
   do {
-    $if NR % 4 != 0:
-      $for N in range(NR):
-        int32_t vacc0x${N} = unaligned_indexed_load_s32(w, ${N});
+    $if DATATYPE == "QD8":
+      $if NR % 4 != 0:
+        $for N in range(NR):
+          const int32_t vksum${N} = unaligned_indexed_load_s32(w, ${N});
+      $else:
+        $for N in range(NR):
+          const int32_t vksum${N} = ((const int32_t*) w)[${N}];
+      $for M in range(MR):
+        const int32_t vinput_zero_point${M} = quantization_params[${M}].zero_point;
+        $for N in range(NR):
+          int32_t vacc${M}x${N} = vksum${N} * vinput_zero_point${M};
     $else:
       $for N in range(NR):
-        int32_t vacc0x${N} = ((const int32_t*) w)[${N}];
-    $for M in range(1, MR):
-      $for N in range(NR):
-        int32_t vacc${M}x${N} = vacc0x${N};
-    w = (const int32_t*) w + ${NR};
-    $if DATATYPE == "QD8":
-      $for M in range(0, MR):
+        $if NR % 4 != 0:
+          int32_t vacc0x${N} = unaligned_indexed_load_s32(w, ${N});
+        $else:
+          int32_t vacc0x${N} = ((const int32_t*) w)[${N}];
+      $for M in range(1, MR):
         $for N in range(NR):
-          vacc${M}x${N} *= vzp${M};
+          int32_t vacc${M}x${N} = vacc0x${N};
+    w = (const int32_t*) w + ${NR};
 
     size_t k = kc;
     do {
@@ -116,175 +119,194 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
       $for M in range(MR):
         $for N in range(NR):
           float vout${M}x${N} = (float) vacc${M}x${N};
-      const float vscale0 = quantization_params[0].scale;
-      $for M in range(1, MR):
-        const float vscale${M} = quantization_params[${M}].scale;
-      $for N in range(NR):
-        $for M in range(MR):
-          vout${M}x${N} *= vscale${M};
-      $if NR % 4 != 0:
-        $for N in range(NR):
-          const float vbias${N} = unaligned_indexed_load_f32(w, ${N});
-      $else:
-        $for N in range(NR):
-          const float vbias${N} = ((const float*) w)[${N}];
-      w = (const float*) w + ${NR};
-      const float vmax = params->scalar.max;
-      const float vmin = params->scalar.min;
-      $for N in range(NR):
-        $for M in range(MR):
-          vout${M}x${N} += vbias${N};
-          vout${M}x${N} = ${MAX_F32}(vout${M}x${N}, vmin);
-          vout${M}x${N} = ${MIN_F32}(vout${M}x${N}, vmax);
-    $elif REQUANTIZATION == "FP32":
+
       $for M in range(MR):
+        const float vscale${M} = quantization_params[${M}].scale;
         $for N in range(NR):
-          float vfpacc${M}x${N} = (float) vacc${M}x${N};
+          $if M == 0:
+            $if NR % 4 != 0:
+              const float vbias${N} = unaligned_indexed_load_f32(w, ${N});
+            $else:
+              const float vbias${N} = ((const float*) w)[${N}];
+          vout${M}x${N} = math_muladd_f32(vout${M}x${N}, vscale${M}, vbias${N});
 
-      $if DATATYPE == "QC8":
-        $if NR % 4 != 0:
+      w = (const float*) w + ${NR};
+
+      const float voutput_min = params->scalar.min;
+      $for N in range(NR):
+        $for M in range(MR):
+          vout${M}x${N} = ${MAX_F32}(vout${M}x${N}, voutput_min);
+
+      const float voutput_max = params->scalar.max;
+      $for N in range(NR):
+        $for M in range(MR):
+          vout${M}x${N} = ${MIN_F32}(vout${M}x${N}, voutput_max);
+
+      if XNN_LIKELY(nc >= ${NR}) {
+        $for M in reversed(range(MR)):
           $for N in range(NR):
-            const float vscale${N} = unaligned_indexed_load_f32(w, ${N});
-            $for M in range(MR):
-              vfpacc${M}x${N} *= vscale${N};
+            c${M}[${N}] = vout${M}x${N};
+
+        $for M in range(MR):
+          a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} - kc);
+
+        $for M in range(MR):
+          c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+
+        nc -= ${NR};
+      } else {
+        $for LOG2N in reversed(range(NR.bit_length() - 1)):
+          if (nc & ${1 << LOG2N}) {
+            $for M in reversed(range(MR)):
+              $for N in range(1 << LOG2N):
+                c${M}[${N}] = vout${M}x${N};
+              $if LOG2N != 0:
+                $for N in range(NR - (1 << LOG2N) - 1):
+                  vout${M}x${N} = vout${M}x${N + (1 << LOG2N)};
+                c${M} += ${1 << LOG2N};
+          }
+
+        nc = 0;
+      }
+    $else:
+      $if REQUANTIZATION == "FP32":
+        $for M in range(MR):
+          $for N in range(NR):
+            float vfpacc${M}x${N} = (float) vacc${M}x${N};
+
+        $if DATATYPE == "QC8":
+          $if NR % 4 != 0:
+            $for N in range(NR):
+              const float vscale${N} = unaligned_indexed_load_f32(w, ${N});
+              $for M in range(MR):
+                vfpacc${M}x${N} *= vscale${N};
+          $else:
+            $for N in range(NR):
+              const float vscale${N} = ((const float*) w)[${N}];
+              $for M in range(MR):
+                vfpacc${M}x${N} *= vscale${N};
+          w = (const void*) ((const float*) w + ${NR});
         $else:
-          $for N in range(NR):
-            const float vscale${N} = ((const float*) w)[${N}];
-            $for M in range(MR):
-              vfpacc${M}x${N} *= vscale${N};
-        w = (const void*) ((const float*) w + ${NR});
-      $else:
-        const float vscale = params->${PARAMS_STRUCT}.scale;
-        $for M in range(MR):
-          $for N in range(NR):
-            vfpacc${M}x${N} *= vscale;
+          const float vscale = params->${PARAMS_STRUCT}.scale;
+          $for M in range(MR):
+            $for N in range(NR):
+              vfpacc${M}x${N} *= vscale;
 
-      $if VARIANT == "FMAGIC":
-        const float voutput_min_less_zero_point = params->${PARAMS_STRUCT}.output_min_less_zero_point;
-        $for M in range(MR):
-          $for N in range(NR):
-            vfpacc${M}x${N} = ${MAX_F32}(vfpacc${M}x${N}, voutput_min_less_zero_point);
+        $if VARIANT == "FMAGIC":
+          const float voutput_min_less_zero_point = params->${PARAMS_STRUCT}.output_min_less_zero_point;
+          $for M in range(MR):
+            $for N in range(NR):
+              vfpacc${M}x${N} = ${MAX_F32}(vfpacc${M}x${N}, voutput_min_less_zero_point);
 
-        const float voutput_max_less_zero_point = params->${PARAMS_STRUCT}.output_max_less_zero_point;
-        $for M in range(MR):
-          $for N in range(NR):
-            vfpacc${M}x${N} = ${MIN_F32}(vfpacc${M}x${N}, voutput_max_less_zero_point);
+          const float voutput_max_less_zero_point = params->${PARAMS_STRUCT}.output_max_less_zero_point;
+          $for M in range(MR):
+            $for N in range(NR):
+              vfpacc${M}x${N} = ${MIN_F32}(vfpacc${M}x${N}, voutput_max_less_zero_point);
 
-        const float vmagic_bias = params->${PARAMS_STRUCT}.magic_bias;
-        $for M in range(MR):
-          $for N in range(NR):
-            vfpacc${M}x${N} += vmagic_bias;
+          const float vmagic_bias = params->${PARAMS_STRUCT}.magic_bias;
+          $for M in range(MR):
+            $for N in range(NR):
+              vfpacc${M}x${N} += vmagic_bias;
 
-        const int32_t vmagic_bias_less_output_zero_point = params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point;
-        $for M in range(MR):
-          $for N in range(NR):
-            int32_t vout${M}x${N} = (int32_t) float_as_uint32(vfpacc${M}x${N}) - vmagic_bias_less_output_zero_point;
-      $elif VARIANT == "IMAGIC":
-        const float vmagic_bias = params->${PARAMS_STRUCT}.magic_bias;
-        $for M in range(MR):
-          $for N in range(NR):
-            vfpacc${M}x${N} += vmagic_bias;
+          const int32_t vmagic_bias_less_output_zero_point = params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point;
+          $for M in range(MR):
+            $for N in range(NR):
+              int32_t vout${M}x${N} = (int32_t) float_as_uint32(vfpacc${M}x${N}) - vmagic_bias_less_output_zero_point;
+        $elif VARIANT == "IMAGIC":
+          const float vmagic_bias = params->${PARAMS_STRUCT}.magic_bias;
+          $for M in range(MR):
+            $for N in range(NR):
+              vfpacc${M}x${N} += vmagic_bias;
 
-        $for M in range(MR):
-          $for N in range(NR):
-            int32_t vout${M}x${N} = (int32_t) float_as_uint32(vfpacc${M}x${N});
+          $for M in range(MR):
+            $for N in range(NR):
+              int32_t vout${M}x${N} = (int32_t) float_as_uint32(vfpacc${M}x${N});
 
-        const int32_t vmagic_min = params->${PARAMS_STRUCT}.magic_min;
-        $for M in range(MR):
-          $for N in range(NR):
-            vout${M}x${N} = math_max_s32(vout${M}x${N}, vmagic_min);
+          const int32_t vmagic_min = params->${PARAMS_STRUCT}.magic_min;
+          $for M in range(MR):
+            $for N in range(NR):
+              vout${M}x${N} = math_max_s32(vout${M}x${N}, vmagic_min);
 
-        const int32_t vmagic_max = params->${PARAMS_STRUCT}.magic_max;
-        $for M in range(MR):
-          $for N in range(NR):
-            vout${M}x${N} = math_min_s32(vout${M}x${N}, vmagic_max);
+          const int32_t vmagic_max = params->${PARAMS_STRUCT}.magic_max;
+          $for M in range(MR):
+            $for N in range(NR):
+              vout${M}x${N} = math_min_s32(vout${M}x${N}, vmagic_max);
 
-        const int32_t vmagic_bias_less_zero_point = params->${PARAMS_STRUCT}.magic_bias_less_zero_point;
-        $for M in range(MR):
-          $for N in range(NR):
-            vout${M}x${N} -= vmagic_bias_less_zero_point;
-      $elif VARIANT == "LRINTF":
-        const float voutput_min_less_zero_point = params->${PARAMS_STRUCT}.output_min_less_zero_point;
-        $for M in range(MR):
-          $for N in range(NR):
-            vfpacc${M}x${N} = ${MAX_F32}(vfpacc${M}x${N}, voutput_min_less_zero_point);
+          const int32_t vmagic_bias_less_zero_point = params->${PARAMS_STRUCT}.magic_bias_less_zero_point;
+          $for M in range(MR):
+            $for N in range(NR):
+              vout${M}x${N} -= vmagic_bias_less_zero_point;
+        $elif VARIANT == "LRINTF":
+          const float voutput_min_less_zero_point = params->${PARAMS_STRUCT}.output_min_less_zero_point;
+          $for M in range(MR):
+            $for N in range(NR):
+              vfpacc${M}x${N} = ${MAX_F32}(vfpacc${M}x${N}, voutput_min_less_zero_point);
 
-        const float voutput_max_less_zero_point = params->${PARAMS_STRUCT}.output_max_less_zero_point;
-        $for M in range(MR):
-          $for N in range(NR):
-            vfpacc${M}x${N} = ${MIN_F32}(vfpacc${M}x${N}, voutput_max_less_zero_point);
+          const float voutput_max_less_zero_point = params->${PARAMS_STRUCT}.output_max_less_zero_point;
+          $for M in range(MR):
+            $for N in range(NR):
+              vfpacc${M}x${N} = ${MIN_F32}(vfpacc${M}x${N}, voutput_max_less_zero_point);
 
+          $for M in range(MR):
+            $for N in range(NR):
+              const int32_t vrndacc${M}x${N} = (int32_t) lrintf(vfpacc${M}x${N});
+
+          const int32_t voutput_zero_point = params->${PARAMS_STRUCT}.output_zero_point;
+          $for M in range(MR):
+            $for N in range(NR):
+              int32_t vout${M}x${N} = vrndacc${M}x${N} + voutput_zero_point;
+      $elif REQUANTIZATION == "RNDNU":
+        const int32_t vmultiplier = params->${PARAMS_STRUCT}.multiplier;
+        const int64_t vrounding = params->${PARAMS_STRUCT}.rounding;
         $for M in range(MR):
           $for N in range(NR):
-            const int32_t vrndacc${M}x${N} = (int32_t) lrintf(vfpacc${M}x${N});
+            const int64_t vextacc${M}x${N} = math_mulext_s32(vacc${M}x${N}, vmultiplier) + vrounding;
+
+        const uint32_t vshift = params->${PARAMS_STRUCT}.shift;
+        $for M in range(MR):
+          $for N in range(NR):
+            int32_t vout${M}x${N} = (int32_t) math_asr_s64(vextacc${M}x${N}, vshift);
+
+        const int32_t voutput_min_less_zero_point = params->${PARAMS_STRUCT}.output_min_less_zero_point;
+        $for M in range(MR):
+          $for N in range(NR):
+            vout${M}x${N} = math_max_s32(vout${M}x${N}, voutput_min_less_zero_point);
+
+        const int32_t voutput_max_less_zero_point = params->${PARAMS_STRUCT}.output_max_less_zero_point;
+        $for M in range(MR):
+          $for N in range(NR):
+            vout${M}x${N} = math_min_s32(vout${M}x${N}, voutput_max_less_zero_point);
 
         const int32_t voutput_zero_point = params->${PARAMS_STRUCT}.output_zero_point;
         $for M in range(MR):
           $for N in range(NR):
-            int32_t vout${M}x${N} = vrndacc${M}x${N} + voutput_zero_point;
-    $elif REQUANTIZATION == "RNDNU":
-      const int32_t vmultiplier = params->${PARAMS_STRUCT}.multiplier;
-      const int64_t vrounding = params->${PARAMS_STRUCT}.rounding;
-      $for M in range(MR):
-        $for N in range(NR):
-          const int64_t vextacc${M}x${N} = math_mulext_s32(vacc${M}x${N}, vmultiplier) + vrounding;
+            vout${M}x${N} += voutput_zero_point;
 
-      const uint32_t vshift = params->${PARAMS_STRUCT}.shift;
-      $for M in range(MR):
-        $for N in range(NR):
-          int32_t vout${M}x${N} = (int32_t) math_asr_s64(vextacc${M}x${N}, vshift);
+      if XNN_LIKELY(nc >= ${NR}) {
+        $for M in range(MR):
+          $for N in range(NR):
+            c${M}[${N}] = (${XINT8_T}) vout${M}x${N};
 
-      const int32_t voutput_min_less_zero_point = params->${PARAMS_STRUCT}.output_min_less_zero_point;
-      $for M in range(MR):
-        $for N in range(NR):
-          vout${M}x${N} = math_max_s32(vout${M}x${N}, voutput_min_less_zero_point);
+        $for M in range(MR):
+          a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} - kc);
 
-      const int32_t voutput_max_less_zero_point = params->${PARAMS_STRUCT}.output_max_less_zero_point;
-      $for M in range(MR):
-        $for N in range(NR):
-          vout${M}x${N} = math_min_s32(vout${M}x${N}, voutput_max_less_zero_point);
+        $for M in range(MR):
+          c${M} = (${XINT8_T}*) ((uintptr_t) c${M} + cn_stride);
 
-      const int32_t voutput_zero_point = params->${PARAMS_STRUCT}.output_zero_point;
-      $for M in range(MR):
-        $for N in range(NR):
-          vout${M}x${N} += voutput_zero_point;
+        nc -= ${NR};
+      } else {
+        $for LOG2N in reversed(range(NR.bit_length() - 1)):
+          if (nc & ${1 << LOG2N}) {
+            $for M in range(MR):
+              $for N in range(1 << LOG2N):
+                c${M}[${N}] = (${XINT8_T}) vout${M}x${N};
+              $if LOG2N != 0:
+                $for N in range(NR - (1 << LOG2N) - 1):
+                  vout${M}x${N} = vout${M}x${N + (1 << LOG2N)};
+                c${M} += ${1 << LOG2N};
+          }
 
-    if XNN_LIKELY(nc >= ${NR}) {
-      $if DATATYPE == "QD8":
-        $STORE_RANGE = reversed(range(MR))
-      $else:
-        $STORE_RANGE = range(MR)
-      $for M in STORE_RANGE:
-        $for N in range(NR):
-          $if DATATYPE == "QD8":
-            c${M}[${N}] = vout${M}x${N};
-          $else:
-            c${M}[${N}] = (${OUT_T}) vout${M}x${N};
-
-      $for M in range(MR):
-        a${M} = (const ${XINT8_T}*) ((uintptr_t) a${M} - kc);
-
-      $for M in range(MR):
-        c${M} = (${OUT_T}*) ((uintptr_t) c${M} + cn_stride);
-
-      nc -= ${NR};
-    } else {
-      $for LOG2N in reversed(range(NR.bit_length() - 1)):
-        if (nc & ${1 << LOG2N}) {
-          $if DATATYPE == "QD8":
-            $STORE_RANGE = reversed(range(MR))
-          $else:
-            $STORE_RANGE = range(MR)
-          $for M in STORE_RANGE:
-            $for N in range(1 << LOG2N):
-              c${M}[${N}] = (${OUT_T}) vout${M}x${N};
-            $if LOG2N != 0:
-              $for N in range(NR - (1 << LOG2N) - 1):
-                vout${M}x${N} = vout${M}x${N + (1 << LOG2N)};
-              c${M} += ${1 << LOG2N};
-        }
-
-      nc = 0;
-    }
+        nc = 0;
+      }
   } while (nc != 0);
 }

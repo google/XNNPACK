@@ -61,49 +61,38 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c8__avx512skx(
   }
 
   const __mmask16 vbias_mask = _cvtu32_mask16(0x1111);
-  // Load quantization parameters.
-  const __m512i vszp01 = _mm512_broadcast_i32x4(_mm_loadu_si128((const __m128i*) &quantization_params[0]));
-  const __m512i vszp23 = _mm512_broadcast_i32x4(_mm_loadu_si128((const __m128i*) &quantization_params[2]));
-  const __m512i vzp0 = _mm512_shuffle_epi32(vszp01, _MM_SHUFFLE(0, 0, 0, 0));
-  const __m512 vscale0 = _mm512_permute_ps(_mm512_castsi512_ps(vszp01), _MM_SHUFFLE(1, 1, 1, 1));
-  const __m512i vzp1 = _mm512_shuffle_epi32(vszp01, _MM_SHUFFLE(2, 2, 2, 2));
-  const __m512 vscale1 = _mm512_permute_ps(_mm512_castsi512_ps(vszp01), _MM_SHUFFLE(3, 3, 3, 3));
-  const __m512i vzp2 = _mm512_shuffle_epi32(vszp23, _MM_SHUFFLE(0, 0, 0, 0));
-  const __m512 vscale2 = _mm512_permute_ps(_mm512_castsi512_ps(vszp23), _MM_SHUFFLE(1, 1, 1, 1));
-  const __m512i vzp3 = _mm512_shuffle_epi32(vszp23, _MM_SHUFFLE(2, 2, 2, 2));
-  const __m512 vscale3 = _mm512_permute_ps(_mm512_castsi512_ps(vszp23), _MM_SHUFFLE(3, 3, 3, 3));
-  // Load output min and max.
+  const __m512i vinput_zero_point0 = _mm512_set1_epi32((int) quantization_params[0].zero_point);
+  const __m512 vinput_scale0 = _mm512_set1_ps(quantization_params[0].scale);
+  const __m512i vinput_zero_point1 = _mm512_set1_epi32((int) quantization_params[1].zero_point);
+  const __m512 vinput_scale1 = _mm512_set1_ps(quantization_params[1].scale);
+  const __m512i vinput_zero_point2 = _mm512_set1_epi32((int) quantization_params[2].zero_point);
+  const __m512 vinput_scale2 = _mm512_set1_ps(quantization_params[2].scale);
+  const __m512i vinput_zero_point3 = _mm512_set1_epi32((int) quantization_params[3].zero_point);
+  const __m512 vinput_scale3 = _mm512_set1_ps(quantization_params[3].scale);
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
   do {
-    __m512i vacc0x0123 = _mm512_maskz_expandloadu_epi32(vbias_mask, w);
-    __m512i vacc0x4567 = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 4);
-    __m512i vacc0x89AB = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 8);
-    __m512i vacc0xCDEF = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 12);
+    const __m512i vksum0123 = _mm512_maskz_expandloadu_epi32(vbias_mask, w);
+    const __m512i vksum4567 = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 4);
+    const __m512i vksum89AB = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 8);
+    const __m512i vksumCDEF = _mm512_maskz_expandloadu_epi32(vbias_mask, (const int32_t*) w + 12);
 
-    // Set weight sums for 4 input rows.
-
-    __m512i vacc3x0123 = _mm512_mullo_epi32(vacc0x0123, vzp3);
-    __m512i vacc3x4567 = _mm512_mullo_epi32(vacc0x4567, vzp3);
-    __m512i vacc3x89AB = _mm512_mullo_epi32(vacc0x89AB, vzp3);
-    __m512i vacc3xCDEF = _mm512_mullo_epi32(vacc0xCDEF, vzp3);
-
-    __m512i vacc2x0123 = _mm512_mullo_epi32(vacc0x0123, vzp2);
-    __m512i vacc2x4567 = _mm512_mullo_epi32(vacc0x4567, vzp2);
-    __m512i vacc2x89AB = _mm512_mullo_epi32(vacc0x89AB, vzp2);
-    __m512i vacc2xCDEF = _mm512_mullo_epi32(vacc0xCDEF, vzp2);
-
-    __m512i vacc1x0123 = _mm512_mullo_epi32(vacc0x0123, vzp1);
-    __m512i vacc1x4567 = _mm512_mullo_epi32(vacc0x4567, vzp1);
-    __m512i vacc1x89AB = _mm512_mullo_epi32(vacc0x89AB, vzp1);
-    __m512i vacc1xCDEF = _mm512_mullo_epi32(vacc0xCDEF, vzp1);
-
-    vacc0x0123 = _mm512_mullo_epi32(vacc0x0123, vzp0);
-    vacc0x4567 = _mm512_mullo_epi32(vacc0x4567, vzp0);
-    vacc0x89AB = _mm512_mullo_epi32(vacc0x89AB, vzp0);
-    vacc0xCDEF = _mm512_mullo_epi32(vacc0xCDEF, vzp0);
-
-    // Advance weights pointer.
+    __m512i vacc0x0123 = _mm512_mullo_epi32(vksum0123, vinput_zero_point0);
+    __m512i vacc0x4567 = _mm512_mullo_epi32(vksum4567, vinput_zero_point0);
+    __m512i vacc0x89AB = _mm512_mullo_epi32(vksum89AB, vinput_zero_point0);
+    __m512i vacc0xCDEF = _mm512_mullo_epi32(vksumCDEF, vinput_zero_point0);
+    __m512i vacc1x0123 = _mm512_mullo_epi32(vksum0123, vinput_zero_point1);
+    __m512i vacc1x4567 = _mm512_mullo_epi32(vksum4567, vinput_zero_point1);
+    __m512i vacc1x89AB = _mm512_mullo_epi32(vksum89AB, vinput_zero_point1);
+    __m512i vacc1xCDEF = _mm512_mullo_epi32(vksumCDEF, vinput_zero_point1);
+    __m512i vacc2x0123 = _mm512_mullo_epi32(vksum0123, vinput_zero_point2);
+    __m512i vacc2x4567 = _mm512_mullo_epi32(vksum4567, vinput_zero_point2);
+    __m512i vacc2x89AB = _mm512_mullo_epi32(vksum89AB, vinput_zero_point2);
+    __m512i vacc2xCDEF = _mm512_mullo_epi32(vksumCDEF, vinput_zero_point2);
+    __m512i vacc3x0123 = _mm512_mullo_epi32(vksum0123, vinput_zero_point3);
+    __m512i vacc3x4567 = _mm512_mullo_epi32(vksum4567, vinput_zero_point3);
+    __m512i vacc3x89AB = _mm512_mullo_epi32(vksum89AB, vinput_zero_point3);
+    __m512i vacc3xCDEF = _mm512_mullo_epi32(vksumCDEF, vinput_zero_point3);
     w = (const int32_t*) w + 16;
 
     size_t k = 0;
@@ -166,36 +155,27 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_4x16c8__avx512skx(
     __m512 vscaled2x084C195D2A6E3B7F = _mm512_cvtepi32_ps(vacc2x084C195D2A6E3B7F);
     __m512 vscaled3x084C195D2A6E3B7F = _mm512_cvtepi32_ps(vacc3x084C195D2A6E3B7F);
 
-    // Scale.
-    vscaled0x084C195D2A6E3B7F = _mm512_mul_ps(vscaled0x084C195D2A6E3B7F, vscale0);
-    vscaled1x084C195D2A6E3B7F = _mm512_mul_ps(vscaled1x084C195D2A6E3B7F, vscale1);
-    vscaled2x084C195D2A6E3B7F = _mm512_mul_ps(vscaled2x084C195D2A6E3B7F, vscale2);
-    vscaled3x084C195D2A6E3B7F = _mm512_mul_ps(vscaled3x084C195D2A6E3B7F, vscale3);
+    __m512 vout0x0123456789ABCDEF = _mm512_permutexvar_ps(_mm512_set_epi32(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0), vscaled0x084C195D2A6E3B7F);
+    __m512 vout1x0123456789ABCDEF = _mm512_permutexvar_ps(_mm512_set_epi32(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0), vscaled1x084C195D2A6E3B7F);
+    __m512 vout2x0123456789ABCDEF = _mm512_permutexvar_ps(_mm512_set_epi32(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0), vscaled2x084C195D2A6E3B7F);
+    __m512 vout3x0123456789ABCDEF = _mm512_permutexvar_ps(_mm512_set_epi32(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0), vscaled3x084C195D2A6E3B7F);
 
-    // Reshuffle elements in order.
-    const __m512 vscaled0x0123456789ABCDEF = _mm512_permutexvar_ps(_mm512_set_epi32(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0), vscaled0x084C195D2A6E3B7F);
-    const __m512 vscaled1x0123456789ABCDEF = _mm512_permutexvar_ps(_mm512_set_epi32(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0), vscaled1x084C195D2A6E3B7F);
-    const __m512 vscaled2x0123456789ABCDEF = _mm512_permutexvar_ps(_mm512_set_epi32(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0), vscaled2x084C195D2A6E3B7F);
-    const __m512 vscaled3x0123456789ABCDEF = _mm512_permutexvar_ps(_mm512_set_epi32(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0), vscaled3x084C195D2A6E3B7F);
-
-    // Add bias.
-    __m512 vbias = _mm512_load_ps((const float*) w);
+    __m512 vbias0123456789ABCDEF = _mm512_load_ps((const float*) w);
     w = (const float*) w + 16;
-    const __m512 vbiased0x0123456789ABCDEF = _mm512_add_ps(vscaled0x0123456789ABCDEF, vbias);
-    const __m512 vbiased1x0123456789ABCDEF = _mm512_add_ps(vscaled1x0123456789ABCDEF, vbias);
-    const __m512 vbiased2x0123456789ABCDEF = _mm512_add_ps(vscaled2x0123456789ABCDEF, vbias);
-    const __m512 vbiased3x0123456789ABCDEF = _mm512_add_ps(vscaled3x0123456789ABCDEF, vbias);
+    vout0x0123456789ABCDEF = _mm512_fmadd_ps(vout0x0123456789ABCDEF, vinput_scale0, vbias0123456789ABCDEF);
+    vout1x0123456789ABCDEF = _mm512_fmadd_ps(vout1x0123456789ABCDEF, vinput_scale1, vbias0123456789ABCDEF);
+    vout2x0123456789ABCDEF = _mm512_fmadd_ps(vout2x0123456789ABCDEF, vinput_scale2, vbias0123456789ABCDEF);
+    vout3x0123456789ABCDEF = _mm512_fmadd_ps(vout3x0123456789ABCDEF, vinput_scale3, vbias0123456789ABCDEF);
 
-    // Clamp between min and max.
-    const __m512 vclamp_min0x0123456789ABCDEF = _mm512_max_ps(vbiased0x0123456789ABCDEF, voutput_min);
-    const __m512 vclamp_min1x0123456789ABCDEF = _mm512_max_ps(vbiased1x0123456789ABCDEF, voutput_min);
-    const __m512 vclamp_min2x0123456789ABCDEF = _mm512_max_ps(vbiased2x0123456789ABCDEF, voutput_min);
-    const __m512 vclamp_min3x0123456789ABCDEF = _mm512_max_ps(vbiased3x0123456789ABCDEF, voutput_min);
+    vout0x0123456789ABCDEF = _mm512_max_ps(vout0x0123456789ABCDEF, voutput_min);
+    vout1x0123456789ABCDEF = _mm512_max_ps(vout1x0123456789ABCDEF, voutput_min);
+    vout2x0123456789ABCDEF = _mm512_max_ps(vout2x0123456789ABCDEF, voutput_min);
+    vout3x0123456789ABCDEF = _mm512_max_ps(vout3x0123456789ABCDEF, voutput_min);
 
-    const __m512 vout0x0123456789ABCDEF = _mm512_min_ps(vclamp_min0x0123456789ABCDEF, voutput_max);
-    const __m512 vout1x0123456789ABCDEF = _mm512_min_ps(vclamp_min1x0123456789ABCDEF, voutput_max);
-    const __m512 vout2x0123456789ABCDEF = _mm512_min_ps(vclamp_min2x0123456789ABCDEF, voutput_max);
-    const __m512 vout3x0123456789ABCDEF = _mm512_min_ps(vclamp_min3x0123456789ABCDEF, voutput_max);
+    vout0x0123456789ABCDEF = _mm512_min_ps(vout0x0123456789ABCDEF, voutput_max);
+    vout1x0123456789ABCDEF = _mm512_min_ps(vout1x0123456789ABCDEF, voutput_max);
+    vout2x0123456789ABCDEF = _mm512_min_ps(vout2x0123456789ABCDEF, voutput_max);
+    vout3x0123456789ABCDEF = _mm512_min_ps(vout3x0123456789ABCDEF, voutput_max);
 
     if (nc >= 16) {
       _mm512_storeu_ps(c3, vout3x0123456789ABCDEF);

@@ -40,26 +40,22 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_2x4__scalar(
     c1 = c0;
   }
 
-  const int32_t vzp0 = quantization_params[0].zero_point;
-  const int32_t vzp1 = quantization_params[1].zero_point;
   do {
-    int32_t vacc0x0 = ((const int32_t*) w)[0];
-    int32_t vacc0x1 = ((const int32_t*) w)[1];
-    int32_t vacc0x2 = ((const int32_t*) w)[2];
-    int32_t vacc0x3 = ((const int32_t*) w)[3];
-    int32_t vacc1x0 = vacc0x0;
-    int32_t vacc1x1 = vacc0x1;
-    int32_t vacc1x2 = vacc0x2;
-    int32_t vacc1x3 = vacc0x3;
+    const int32_t vksum0 = ((const int32_t*) w)[0];
+    const int32_t vksum1 = ((const int32_t*) w)[1];
+    const int32_t vksum2 = ((const int32_t*) w)[2];
+    const int32_t vksum3 = ((const int32_t*) w)[3];
+    const int32_t vinput_zero_point0 = quantization_params[0].zero_point;
+    int32_t vacc0x0 = vksum0 * vinput_zero_point0;
+    int32_t vacc0x1 = vksum1 * vinput_zero_point0;
+    int32_t vacc0x2 = vksum2 * vinput_zero_point0;
+    int32_t vacc0x3 = vksum3 * vinput_zero_point0;
+    const int32_t vinput_zero_point1 = quantization_params[1].zero_point;
+    int32_t vacc1x0 = vksum0 * vinput_zero_point1;
+    int32_t vacc1x1 = vksum1 * vinput_zero_point1;
+    int32_t vacc1x2 = vksum2 * vinput_zero_point1;
+    int32_t vacc1x3 = vksum3 * vinput_zero_point1;
     w = (const int32_t*) w + 4;
-    vacc0x0 *= vzp0;
-    vacc0x1 *= vzp0;
-    vacc0x2 *= vzp0;
-    vacc0x3 *= vzp0;
-    vacc1x0 *= vzp1;
-    vacc1x1 *= vzp1;
-    vacc1x2 *= vzp1;
-    vacc1x3 *= vzp1;
 
     size_t k = kc;
     do {
@@ -92,47 +88,43 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_2x4__scalar(
     float vout1x1 = (float) vacc1x1;
     float vout1x2 = (float) vacc1x2;
     float vout1x3 = (float) vacc1x3;
+
     const float vscale0 = quantization_params[0].scale;
-    const float vscale1 = quantization_params[1].scale;
-    vout0x0 *= vscale0;
-    vout1x0 *= vscale1;
-    vout0x1 *= vscale0;
-    vout1x1 *= vscale1;
-    vout0x2 *= vscale0;
-    vout1x2 *= vscale1;
-    vout0x3 *= vscale0;
-    vout1x3 *= vscale1;
     const float vbias0 = ((const float*) w)[0];
+    vout0x0 = math_muladd_f32(vout0x0, vscale0, vbias0);
     const float vbias1 = ((const float*) w)[1];
+    vout0x1 = math_muladd_f32(vout0x1, vscale0, vbias1);
     const float vbias2 = ((const float*) w)[2];
+    vout0x2 = math_muladd_f32(vout0x2, vscale0, vbias2);
     const float vbias3 = ((const float*) w)[3];
+    vout0x3 = math_muladd_f32(vout0x3, vscale0, vbias3);
+    const float vscale1 = quantization_params[1].scale;
+    vout1x0 = math_muladd_f32(vout1x0, vscale1, vbias0);
+    vout1x1 = math_muladd_f32(vout1x1, vscale1, vbias1);
+    vout1x2 = math_muladd_f32(vout1x2, vscale1, vbias2);
+    vout1x3 = math_muladd_f32(vout1x3, vscale1, vbias3);
+
     w = (const float*) w + 4;
-    const float vmax = params->scalar.max;
-    const float vmin = params->scalar.min;
-    vout0x0 += vbias0;
-    vout0x0 = math_max_f32(vout0x0, vmin);
-    vout0x0 = math_min_f32(vout0x0, vmax);
-    vout1x0 += vbias0;
-    vout1x0 = math_max_f32(vout1x0, vmin);
-    vout1x0 = math_min_f32(vout1x0, vmax);
-    vout0x1 += vbias1;
-    vout0x1 = math_max_f32(vout0x1, vmin);
-    vout0x1 = math_min_f32(vout0x1, vmax);
-    vout1x1 += vbias1;
-    vout1x1 = math_max_f32(vout1x1, vmin);
-    vout1x1 = math_min_f32(vout1x1, vmax);
-    vout0x2 += vbias2;
-    vout0x2 = math_max_f32(vout0x2, vmin);
-    vout0x2 = math_min_f32(vout0x2, vmax);
-    vout1x2 += vbias2;
-    vout1x2 = math_max_f32(vout1x2, vmin);
-    vout1x2 = math_min_f32(vout1x2, vmax);
-    vout0x3 += vbias3;
-    vout0x3 = math_max_f32(vout0x3, vmin);
-    vout0x3 = math_min_f32(vout0x3, vmax);
-    vout1x3 += vbias3;
-    vout1x3 = math_max_f32(vout1x3, vmin);
-    vout1x3 = math_min_f32(vout1x3, vmax);
+
+    const float voutput_min = params->scalar.min;
+    vout0x0 = math_max_f32(vout0x0, voutput_min);
+    vout1x0 = math_max_f32(vout1x0, voutput_min);
+    vout0x1 = math_max_f32(vout0x1, voutput_min);
+    vout1x1 = math_max_f32(vout1x1, voutput_min);
+    vout0x2 = math_max_f32(vout0x2, voutput_min);
+    vout1x2 = math_max_f32(vout1x2, voutput_min);
+    vout0x3 = math_max_f32(vout0x3, voutput_min);
+    vout1x3 = math_max_f32(vout1x3, voutput_min);
+
+    const float voutput_max = params->scalar.max;
+    vout0x0 = math_min_f32(vout0x0, voutput_max);
+    vout1x0 = math_min_f32(vout1x0, voutput_max);
+    vout0x1 = math_min_f32(vout0x1, voutput_max);
+    vout1x1 = math_min_f32(vout1x1, voutput_max);
+    vout0x2 = math_min_f32(vout0x2, voutput_max);
+    vout1x2 = math_min_f32(vout1x2, voutput_max);
+    vout0x3 = math_min_f32(vout0x3, voutput_max);
+    vout1x3 = math_min_f32(vout1x3, voutput_max);
 
     if XNN_LIKELY(nc >= 4) {
       c1[0] = vout1x0;
@@ -153,18 +145,18 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_2x4__scalar(
       nc -= 4;
     } else {
       if (nc & 2) {
-        c1[0] = (float) vout1x0;
-        c1[1] = (float) vout1x1;
+        c1[0] = vout1x0;
+        c1[1] = vout1x1;
         vout1x0 = vout1x2;
         c1 += 2;
-        c0[0] = (float) vout0x0;
-        c0[1] = (float) vout0x1;
+        c0[0] = vout0x0;
+        c0[1] = vout0x1;
         vout0x0 = vout0x2;
         c0 += 2;
       }
       if (nc & 1) {
-        c1[0] = (float) vout1x0;
-        c0[0] = (float) vout0x0;
+        c1[0] = vout1x0;
+        c0[0] = vout0x0;
       }
 
       nc = 0;

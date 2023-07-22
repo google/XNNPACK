@@ -42,11 +42,11 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x8c2s4__neon_mlal(
 
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   do {
-    int32x4_t vacc0x0123 = vld1q_s32(w); w = (const int32_t*) w + 4;
-    int32x4_t vacc0x4567 = vld1q_s32(w); w = (const int32_t*) w + 4;
-    const int32x4_t vzp01 = vld1q_dup_s32(&quantization_params[0].zero_point);
-    vacc0x0123 = vmulq_s32(vacc0x0123, vzp01);
-    vacc0x4567 = vmulq_s32(vacc0x4567, vzp01);
+    const int32x4_t vizp0 = vld1q_dup_s32(&quantization_params[0].zero_point);
+    const int32x4_t vksum0123 = vld1q_s32(w); w = (const int32_t*) w + 4;
+    int32x4_t vacc0x0123 = vmulq_s32(vksum0123, vizp0);
+    const int32x4_t vksum4567 = vld1q_s32(w); w = (const int32_t*) w + 4;
+    int32x4_t vacc0x4567 = vmulq_s32(vksum4567, vizp0);
 
     size_t k = kc;
     while (k >= 16 * sizeof(int8_t)) {
@@ -139,28 +139,33 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x8c2s4__neon_mlal(
 
     float32x4_t vout0x0123 = vcvtq_f32_s32(vacc0x0123);
     float32x4_t vout0x4567 = vcvtq_f32_s32(vacc0x4567);
-    const float32x4_t vscale01 = vld1q_dup_f32(&quantization_params[0].scale);
+
+    const float32x4_t vinput_scale0 = vld1q_dup_f32(&quantization_params[0].scale);
     const float32x4_t vbias0123 = vld1q_f32(w); w = (const float*) w + 4;
+    #if XNN_ARCH_ARM64
+      vout0x0123 = vfmaq_f32(vbias0123, vout0x0123, vinput_scale0);
+    #else
+      vout0x0123 = vmlaq_f32(vbias0123, vout0x0123, vinput_scale0);
+    #endif
     const float32x4_t vbias4567 = vld1q_f32(w); w = (const float*) w + 4;
     #if XNN_ARCH_ARM64
-      vout0x0123 = vfmaq_f32(vbias0123, vout0x0123, vscale01);
+      vout0x4567 = vfmaq_f32(vbias4567, vout0x4567, vinput_scale0);
     #else
-      vout0x0123 = vmlaq_f32(vbias0123, vout0x0123, vscale01);
+      vout0x4567 = vmlaq_f32(vbias4567, vout0x4567, vinput_scale0);
     #endif
-    #if XNN_ARCH_ARM64
-      vout0x4567 = vfmaq_f32(vbias4567, vout0x4567, vscale01);
-    #else
-      vout0x4567 = vmlaq_f32(vbias4567, vout0x4567, vscale01);
-    #endif
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
-    vout0x0123 = vmaxq_f32(vout0x0123, vmin);
-    vout0x4567 = vmaxq_f32(vout0x4567, vmin);
-    vout0x0123 = vminq_f32(vout0x0123, vmax);
-    vout0x4567 = vminq_f32(vout0x4567, vmax);
+
+    const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
+    vout0x0123 = vmaxq_f32(vout0x0123, voutput_min);
+    vout0x4567 = vmaxq_f32(vout0x4567, voutput_min);
+
+    const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.max);
+    vout0x0123 = vminq_f32(vout0x0123, voutput_max);
+    vout0x4567 = vminq_f32(vout0x4567, voutput_max);
+
     if XNN_LIKELY(nc >= 8) {
-      vst1q_f32(&c0[0], vout0x0123);
-      vst1q_f32(&c0[4], vout0x4567);
+      vst1q_f32(c0, vout0x0123);
+      vst1q_f32(c0 + 0, vout0x0123);
+      vst1q_f32(c0 + 4, vout0x4567);
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
 

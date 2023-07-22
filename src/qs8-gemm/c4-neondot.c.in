@@ -7,7 +7,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert NR % 8 == 0
 $assert 8 <= NR <= 16
 $assert REQUANTIZATION in ["FP32", "RNDNU"] or not REQUANTIZATION
-$assert DATATYPE in ["QC8", "QS8", "QD8"]
+$assert DATATYPE in ["QC8", "QD8", "QS8"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $assert DATATYPE != "QD8" or not REQUANTIZATION
 #include <assert.h>
@@ -20,12 +20,11 @@ $if REQUANTIZATION == "FP32":
 #include <xnnpack/math.h>
 
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QD8": "qd8_f32_qs8w"}[DATATYPE]
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qs8w", "QS8": "qs8"}[DATATYPE]
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if REQUANTIZATION == "FP32" else "neon")
-$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QD8": "xnn_f32_minmax_params"}[DATATYPE]
-$SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE == "QD8" else ""
-$OUT_T = "int8_t" if REQUANTIZATION else "float"
+$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QS8": "xnn_qs8_conv_minmax_params"}[DATATYPE]
+$OUT_T = "float" if DATATYPE == "QD8" else "int8_t"
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__neondot(
     size_t mr,
     size_t nc,
@@ -38,7 +37,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     size_t cn_stride,
     $if DATATYPE == "QD8":
       const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
-      const struct ${SCALING_PARAMS} quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+      const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
     $else:
       const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -73,22 +72,31 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         c${M} = c${M-1};
       }
 
-  $if DATATYPE == "QD8":
-    $for M in range(0, MR):
-      const int32x4_t vzp${M} = vdupq_n_s32(quantization_params[${M}].zero_point);
   // Loop over groups of ${NR} columns.
   do {
     // Initialize accumulators with bias. ${NR} bias values are loaded from the
     // weight matrix, at the start of the group of ${NR} columns.
-    $for N in range(0, NR, 4):
-      int32x4_t vacc0x${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
-    $for M in range(1, MR):
-      $for N in range(0, NR, 4):
-        int32x4_t vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
     $if DATATYPE == "QD8":
-      $for M in range(MR):
+      $for M in range(0, MR, 2):
+        $if M + 1 == MR:
+          const int32x4_t vinput_zero_point${M} = vld1q_dup_s32(&quantization_params[${M}].zero_point);
+          $for N in range(0, NR, 4):
+            $if M == 0:
+              const int32x4_t vksum${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
+            int32x4_t vacc${M}x${ABC[N:N+4]} = vmulq_s32(vksum${ABC[N:N+4]}, vinput_zero_point${M});
+        $else:
+          const int32x4_t vinput_zero_point${ABC[M:M+2]} = vld1q_s32(&quantization_params[${M}].zero_point);
+          $for N in range(0, NR, 4):
+            $if M == 0:
+              const int32x4_t vksum${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
+            int32x4_t vacc${M}x${ABC[N:N+4]} = vmulq_lane_s32(vksum${ABC[N:N+4]}, vget_low_s32(vinput_zero_point${ABC[M:M+2]}), 0);
+            int32x4_t vacc${M+1}x${ABC[N:N+4]} = vmulq_lane_s32(vksum${ABC[N:N+4]}, vget_high_s32(vinput_zero_point${ABC[M:M+2]}), 0);
+    $else:
+      $for N in range(0, NR, 4):
+        int32x4_t vacc0x${ABC[N:N+4]} = vld1q_s32(w); w = (const int32_t*) w + 4;
+      $for M in range(1, MR):
         $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vmulq_s32(vacc${M}x${ABC[N:N+4]}, vzp${M});
+          int32x4_t vacc${M}x${ABC[N:N+4]} = vacc0x${ABC[N:N+4]};
 
     // Inner accumulation loop along the ${NR} columns.
     size_t k = kc;
@@ -131,63 +139,46 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       $for M in range(0, MR):
         $for N in range(0, NR, 4):
           float32x4_t vout${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
-      $for M in range(0, MR):
-        const float32x4_t vscale${M} = vdupq_n_f32(quantization_params[${M}].scale);
-        $for N in range(0, NR, 4):
-          vout${M}x${ABC[N:N+4]} = vmulq_f32(vout${M}x${ABC[N:N+4]}, vscale${M});
 
-      $for N in range(0, NR, 4):
-        const float32x4_t vbias${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
-      $for M in range(0, MR):
-        $for N in range(0, NR, 4):
-          vout${M}x${ABC[N:N+4]} = vaddq_f32(vout${M}x${ABC[N:N+4]}, vbias${ABC[N:N+4]});
-      const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
-      const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-      $for M in range(0, MR):
-        $for N in range(0, NR, 4):
-          vout${M}x${ABC[N:N+4]} = vmaxq_f32(vout${M}x${ABC[N:N+4]}, vmin);
-          vout${M}x${ABC[N:N+4]} = vminq_f32(vout${M}x${ABC[N:N+4]}, vmax);
-    $elif REQUANTIZATION == "RNDNU":
-      const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_pre_shift);
-      const int32x4_t vmultiplier = vld1q_dup_s32(&params->${PARAMS_STRUCT}.multiplier);
-      const int32x4_t vright_post_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_post_shift);
-
-      $for M in range(MR):
-        $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vqshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_pre_shift);
-
-      $for M in range(MR):
-        $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vqdmulhq_s32(vacc${M}x${ABC[N:N+4]}, vmultiplier);
-
-      $for M in range(MR):
-        $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vrshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_post_shift);
-    $elif REQUANTIZATION == "FP32":
-      $for M in range(MR):
-        $for N in range(0, NR, 4):
-          float32x4_t vfpacc${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
-
-      $if DATATYPE == "QC8":
-        $for N in range(0, NR, 4):
-          const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32((const float*) w); w = (const float*) w + 4;
-          $for M in range(MR):
-            vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
-      $else:
-        const float32x4_t vscale = vld1q_dup_f32(&params->${PARAMS_STRUCT}.scale);
-        $for M in range(MR):
+      $for M in range(0, MR, 2):
+        $if M + 1 == MR:
+          const float32x4_t vinput_scale${M} = vld1q_dup_f32(&quantization_params[${M}].scale);
           $for N in range(0, NR, 4):
-            vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale);
+            $if M == 0:
+              const float32x4_t vbias${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
+            #if XNN_ARCH_ARM64
+              vout${M}x${ABC[N:N+4]} = vfmaq_f32(vbias${ABC[N:N+4]}, vout${M}x${ABC[N:N+4]}, vinput_scale${M});
+            #else
+              vout${M}x${ABC[N:N+4]} = vmlaq_f32(vbias${ABC[N:N+4]}, vout${M}x${ABC[N:N+4]}, vinput_scale${M});
+            #endif
+        $else:
+          const float32x4_t vinput_scale${ABC[M:M+2]} = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[${M}].zero_point));
+          $for N in range(0, NR, 4):
+            $if M == 0:
+              const float32x4_t vbias${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
+            #if XNN_ARCH_ARM64
+              vout${M}x${ABC[N:N+4]} = vfmaq_lane_f32(vbias${ABC[N:N+4]}, vout${M}x${ABC[N:N+4]}, vget_low_f32(vinput_scale${ABC[M:M+2]}), 1);
+              vout${M+1}x${ABC[N:N+4]} = vfmaq_lane_f32(vbias${ABC[N:N+4]}, vout${M+1}x${ABC[N:N+4]}, vget_high_f32(vinput_scale${ABC[M:M+2]}), 1);
+            #else
+              vout${M}x${ABC[N:N+4]} = vmlaq_lane_f32(vbias${ABC[N:N+4]}, vout${M}x${ABC[N:N+4]}, vget_low_f32(vinput_scale${ABC[M:M+2]}), 1);
+              vout${M+1}x${ABC[N:N+4]} = vmlaq_lane_f32(vbias${ABC[N:N+4]}, vout${M+1}x${ABC[N:N+4]}, vget_high_f32(vinput_scale${ABC[M:M+2]}), 1);
+            #endif
 
-      $for M in range(MR):
+      const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
+      $for M in range(0, MR):
         $for N in range(0, NR, 4):
-          vacc${M}x${ABC[N:N+4]} = vcvtnq_s32_f32(vfpacc${M}x${ABC[N:N+4]});
+          vout${M}x${ABC[N:N+4]} = vmaxq_f32(vout${M}x${ABC[N:N+4]}, voutput_min);
 
-    $if DATATYPE == "QD8":
+      const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.max);
+      $for M in range(0, MR):
+        $for N in range(0, NR, 4):
+          vout${M}x${ABC[N:N+4]} = vminq_f32(vout${M}x${ABC[N:N+4]}, voutput_max);
+
       if XNN_LIKELY(nc >= ${NR}) {
         $for M in reversed(range(MR)):
-          $for N in range(0, NR, 4):
-            vst1q_f32(&c${M}[${N}], vout${M}x${ABC[N:N+4]});
+          vst1q_f32(c${M}, vout${M}x${ABC[0:4]});
+          $for N in range(4, NR, 4):
+            vst1q_f32(c${M} + ${N}, vout${M}x${ABC[N:N+4]});
 
         $for M in range(MR):
           a${M} = (const int8_t*) ((uintptr_t) a${M} - kc);
@@ -220,6 +211,42 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         nc = 0;
       }
     $else:
+      $if REQUANTIZATION == "RNDNU":
+        const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_pre_shift);
+        const int32x4_t vmultiplier = vld1q_dup_s32(&params->${PARAMS_STRUCT}.multiplier);
+        const int32x4_t vright_post_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_post_shift);
+
+        $for M in range(MR):
+          $for N in range(0, NR, 4):
+            vacc${M}x${ABC[N:N+4]} = vqshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_pre_shift);
+
+        $for M in range(MR):
+          $for N in range(0, NR, 4):
+            vacc${M}x${ABC[N:N+4]} = vqdmulhq_s32(vacc${M}x${ABC[N:N+4]}, vmultiplier);
+
+        $for M in range(MR):
+          $for N in range(0, NR, 4):
+            vacc${M}x${ABC[N:N+4]} = vrshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_post_shift);
+      $elif REQUANTIZATION == "FP32":
+        $for M in range(MR):
+          $for N in range(0, NR, 4):
+            float32x4_t vfpacc${M}x${ABC[N:N+4]} = vcvtq_f32_s32(vacc${M}x${ABC[N:N+4]});
+
+        $if DATATYPE == "QC8":
+          $for N in range(0, NR, 4):
+            const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32((const float*) w); w = (const float*) w + 4;
+            $for M in range(MR):
+              vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
+        $else:
+          const float32x4_t vscale = vld1q_dup_f32(&params->${PARAMS_STRUCT}.scale);
+          $for M in range(MR):
+            $for N in range(0, NR, 4):
+              vfpacc${M}x${ABC[N:N+4]} = vmulq_f32(vfpacc${M}x${ABC[N:N+4]}, vscale);
+
+        $for M in range(MR):
+          $for N in range(0, NR, 4):
+            vacc${M}x${ABC[N:N+4]} = vcvtnq_s32_f32(vfpacc${M}x${ABC[N:N+4]});
+
       const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->${PARAMS_STRUCT}.output_zero_point);
       #if XNN_ARCH_ARM64
         $for M in range(MR):

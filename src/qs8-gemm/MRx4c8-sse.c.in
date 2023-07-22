@@ -3,11 +3,12 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert SSE in [2, 3, 4]
 $assert not XOP or AVX
 $assert not AVX or SSE == 4
 $assert REQUANTIZATION == "FP32" or not REQUANTIZATION
-$assert DATATYPE in ["QC8", "QS8", "QU8", "QD8"]
+$assert DATATYPE in ["QC8", "QD8", "QS8", "QU8"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $assert DATATYPE != "QD8" or not REQUANTIZATION
 $assert VARIANT in ["LD64", "LD128", "EXTENDED"]
@@ -29,15 +30,14 @@ $else:
 #include <xnnpack/unaligned.h>
 
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8", "QD8": "qd8_f32_qs8w"}[DATATYPE]
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qs8w", "QS8": "qs8", "QU8": "qu8"}[DATATYPE]
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("sse4" if SSE == 4 and DATATYPE != "QU8" else "sse2")
-$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QD8": "xnn_f32_minmax_params"}[DATATYPE]
-$SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE == "QD8" else ""
-$OUT_T = {"QC8": "int8_t", "QS8": "int8_t", "QU8": "uint8_t", "QD8": "float"}[DATATYPE]
+$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params"}[DATATYPE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
+$OUT_T = "float" if DATATYPE == "QD8" else XINT8_T
 $ISA = "xop" if XOP else "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
 void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__${ISA}${LOAD_SUFFIX}(
     size_t mr,
@@ -51,7 +51,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
     size_t cn_stride,
     $if DATATYPE == "QD8":
       const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
-      const struct ${SCALING_PARAMS} quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+      const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
     $else:
       const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -89,42 +89,38 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
   do {
     $if DATATYPE == "QD8":
       const __m128i vksum = _mm_load_si128((const __m128i*) w);
-      const __m128i vzero = _mm_setzero_si128();
-      $if MR == 1:
-        const __m128i vzp01 = _mm_cvtsi32_si128((int) quantization_params[0].zero_point);
+      $if AVX:
+        $for M in range(MR):
+          const __m128i vinput_zero_point${M} = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params[${M}].zero_point));
       $else:
-        const __m128i vzp01 = _mm_loadu_si128((const __m128i*) quantization_params);
-      const __m128i vzp0 = _mm_shuffle_epi32(vzp01, _MM_SHUFFLE(0, 0, 0, 0));
-      $if MR >= 2:
-        const __m128i vzp1 = _mm_shuffle_epi32(vzp01, _MM_SHUFFLE(2, 2, 2, 2));
-        $if MR == 3:
-          __m128i vzp2 = _mm_cvtsi32_si128((int) quantization_params[2].zero_point);
-          vzp2 = _mm_shuffle_epi32(vzp2, _MM_SHUFFLE(0, 0, 0, 0));
-        $elif MR == 4:
-          const __m128i vzp23 = _mm_loadu_si128((const __m128i*) (quantization_params + 2));
-          const __m128i vzp2 = _mm_shuffle_epi32(vzp23, _MM_SHUFFLE(0, 0, 0, 0));
-          const __m128i vzp3 = _mm_shuffle_epi32(vzp23, _MM_SHUFFLE(2, 2, 2, 2));
-      $# SSE 4, AVX & XOP
+        $for M in range(0, MR, 2):
+          $if M + 1 == MR:
+            __m128i vinput_zero_point${M} = _mm_cvtsi32_si128(*((const int*) &quantization_params[${M}].zero_point));
+            vinput_zero_point${M} = _mm_shuffle_epi32(vinput_zero_point${M}, _MM_SHUFFLE(0, 0, 0, 0));
+          $else:
+            const __m128i vinput_zero_point${ABC[M:M+2]} = _mm_loadu_si128((const __m128i*) &quantization_params[${M}]);
+            const __m128i vinput_zero_point${M} = _mm_shuffle_epi32(vinput_zero_point${ABC[M:M+2]}, _MM_SHUFFLE(0, 0, 0, 0));
+            const __m128i vinput_zero_point${M+1} = _mm_shuffle_epi32(vinput_zero_point${ABC[M:M+2]}, _MM_SHUFFLE(2, 2, 2, 2));
+      const __m128i vzero = _mm_setzero_si128();
       $if SSE == 4:
         $for M in range(0, MR):
-          const __m128i vksumzp${M} = _mm_mullo_epi32(vksum, vzp${M});
+          const __m128i vinit${M} = _mm_mullo_epi32(vksum, vinput_zero_point${M});
         $for M in range(0, MR):
-          __m128i vacc${M}x0 = _mm_blend_epi16(vksumzp${M}, vzero, 0xFC);
-          __m128i vacc${M}x1 = _mm_blend_epi16(vksumzp${M}, vzero, 0xF3);
-          __m128i vacc${M}x2 = _mm_blend_epi16(vksumzp${M}, vzero, 0xCF);
-          __m128i vacc${M}x3 = _mm_blend_epi16(vksumzp${M}, vzero, 0x3F);
-      $# SSE 2 only
+          __m128i vacc${M}x0 = _mm_blend_epi16(vinit${M}, vzero, 0xFC);
+          __m128i vacc${M}x1 = _mm_blend_epi16(vinit${M}, vzero, 0xF3);
+          __m128i vacc${M}x2 = _mm_blend_epi16(vinit${M}, vzero, 0xCF);
+          __m128i vacc${M}x3 = _mm_blend_epi16(vinit${M}, vzero, 0x3F);
       $else:
         const __m128i vksum_lo = _mm_srli_epi32(_mm_slli_epi32(vksum, 16), 16);
         const __m128i vksum_hi = _mm_srli_epi32(vksum, 16);
 
         $for M in range(0, MR):
-          __m128i vzpprodksumhi${M} = _mm_mulhi_epu16(vzp${M}, vksum_lo);
-          const __m128i vzpprodksumlo${M} = _mm_mullo_epi16(vzp${M}, vksum_lo);
+          __m128i vzpprodksumhi${M} = _mm_mulhi_epu16(vinput_zero_point${M}, vksum_lo);
+          const __m128i vzpprodksumlo${M} = _mm_mullo_epi16(vinput_zero_point${M}, vksum_lo);
 
         $for M in range(0, MR):
-          vzpprodksumhi${M} = _mm_add_epi16(vzpprodksumhi${M}, _mm_mullo_epi16(vzp${M}, vksum_hi));
-          vzpprodksumhi${M} = _mm_sub_epi16(vzpprodksumhi${M}, _mm_and_si128(_mm_srai_epi16(vzp${M}, 15), vksum_lo));
+          vzpprodksumhi${M} = _mm_add_epi16(vzpprodksumhi${M}, _mm_mullo_epi16(vinput_zero_point${M}, vksum_hi));
+          vzpprodksumhi${M} = _mm_sub_epi16(vzpprodksumhi${M}, _mm_and_si128(_mm_srai_epi16(vinput_zero_point${M}, 15), vksum_lo));
 
         $for M in range(0, MR):
           vzpprodksumhi${M} = _mm_slli_si128(vzpprodksumhi${M}, 2);
@@ -259,35 +255,32 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
     $if DATATYPE == "QD8":
       $for M in range(MR):
         __m128 vout${M}x0123 = _mm_cvtepi32_ps(vacc${M}x0123);
-      $if MR == 1:
-        $if AVX == 1:
-          const __m128 vscale0 = _mm_broadcast_ss(&quantization_params[0].scale);
-        $else:
-          const __m128 vscale0 = _mm_load1_ps(&quantization_params[0].scale);
+
+      $if AVX:
+        $for M in range(MR):
+          const __m128 vinput_scale${M} = _mm_broadcast_ss(&quantization_params[${M}].scale);
       $else:
-        const __m128 vscale01 = _mm_castsi128_ps(_mm_loadu_si128((const __m128i*) quantization_params));
-        const __m128 vscale0 = _mm_shuffle_ps(vscale01, vscale01, _MM_SHUFFLE(1, 1, 1, 1));
-      $if MR >= 2:
-        const __m128 vscale1 = _mm_shuffle_ps(vscale01, vscale01, _MM_SHUFFLE(3, 3, 3, 3));
-        $if MR == 3:
-          $if AVX == 1:
-            const __m128 vscale2 = _mm_broadcast_ss(&quantization_params[2].scale);
+        $for M in range(0, MR, 2):
+          $if M + 1 == MR:
+            const __m128 vinput_scale${M} = _mm_load1_ps(&quantization_params[${M}].scale);
           $else:
-            const __m128 vscale2 = _mm_load1_ps(&quantization_params[2].scale);
-        $elif MR == 4:
-          const __m128 vscale23 = _mm_castsi128_ps(_mm_loadu_si128((const __m128i*) (quantization_params + 2)));
-          const __m128 vscale2 = _mm_shuffle_ps(vscale23, vscale23, _MM_SHUFFLE(1, 1, 1, 1));
-          const __m128 vscale3 = _mm_shuffle_ps(vscale23, vscale23, _MM_SHUFFLE(3, 3, 3, 3));
+            const __m128i vinput_scale${ABC[M:M+2]} = _mm_loadu_si128((const __m128i*) &quantization_params[${M}]);
+            const __m128 vinput_scale${M} = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale${ABC[M:M+2]}, _MM_SHUFFLE(1, 1, 1, 1)));
+            const __m128 vinput_scale${M+1} = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale${ABC[M:M+2]}, _MM_SHUFFLE(3, 3, 3, 3)));
+
       $for M in range(MR):
-        vout${M}x0123 = _mm_mul_ps(vout${M}x0123, vscale${M});
+        vout${M}x0123 = _mm_mul_ps(vout${M}x0123, vinput_scale${M});
 
       const __m128 vbias0123 = _mm_load_ps(w); w = (const float*) w + 4;
       $for M in range(MR):
         vout${M}x0123 = _mm_add_ps(vout${M}x0123, vbias0123);
-      const __m128 vmax = _mm_load_ps(&params->sse.max[0]);
-      const __m128 vmin = _mm_load_ps(&params->sse.min[0]);
+
+      const __m128 vmin = _mm_load_ps(params->sse.min);
       $for M in range(MR):
         vout${M}x0123 = _mm_max_ps(vout${M}x0123, vmin);
+
+      const __m128 vmax = _mm_load_ps(params->sse.max);
+      $for M in range(MR):
         vout${M}x0123 = _mm_min_ps(vout${M}x0123, vmax);
 
       if XNN_LIKELY(nc >= 4) {
