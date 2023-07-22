@@ -87,7 +87,7 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x4c8__xop_ld128(
 
     __m128 vout0x0123 = _mm_cvtepi32_ps(vacc0x0123);
 
-    const __m128 vinput_scale0 = _mm_broadcast_ss(&quantization_params[0].scale);
+    const __m128 vinput_scale0 = _mm_broadcast_ss(&quantization_params[0].inv_scale);
 
     vout0x0123 = _mm_mul_ps(vout0x0123, vinput_scale0);
 

@@ -268,7 +268,7 @@ class ConvertOperatorTester {
         for (size_t c = 0; c < channels(); c++) {
           float expected = input[i * input_stride() + c];
           int8_t quantized_val = output[i * output_stride() + c];
-          float dequantized_val = float(quantized_val - quantization_params[i].zero_point) / quantization_params[i].scale;
+          float dequantized_val = float(quantized_val - quantization_params[i].zero_point) * quantization_params[i].scale;
           EXPECT_NEAR(expected, dequantized_val, max_acceptable_error)
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }

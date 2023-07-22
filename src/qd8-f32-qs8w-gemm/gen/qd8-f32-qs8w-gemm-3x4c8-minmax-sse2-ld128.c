@@ -166,7 +166,7 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_3x4c8__sse2_ld128(
     const __m128i vinput_scale01 = _mm_loadu_si128((const __m128i*) &quantization_params[0]);
     const __m128 vinput_scale0 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale01, _MM_SHUFFLE(1, 1, 1, 1)));
     const __m128 vinput_scale1 = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale01, _MM_SHUFFLE(3, 3, 3, 3)));
-    const __m128 vinput_scale2 = _mm_load1_ps(&quantization_params[2].scale);
+    const __m128 vinput_scale2 = _mm_load1_ps(&quantization_params[2].inv_scale);
 
     vout0x0123 = _mm_mul_ps(vout0x0123, vinput_scale0);
     vout1x0123 = _mm_mul_ps(vout1x0123, vinput_scale1);

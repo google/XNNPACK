@@ -1254,7 +1254,7 @@ void xnn_compute_f32_qd8_convert(
   context->quantization_params[batch_index] = xnn_f32_qd8_asymmetric_quantization_params(minmax[0], minmax[1]);
 
   union xnn_f32_qs8_cvt_params params;
-  context->init_params(&params, context->quantization_params[batch_index].scale, context->quantization_params[batch_index].zero_point, INT8_MIN, INT8_MAX);
+  context->init_params(&params, 1.f / context->quantization_params[batch_index].inv_scale, context->quantization_params[batch_index].zero_point, INT8_MIN, INT8_MAX);
   context->convert_ukernel(context->n, input, output, &params);
 }
 

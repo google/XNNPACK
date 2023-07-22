@@ -197,7 +197,7 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_3x16c4__neondot(
       vout0xCDEF = vmlaq_lane_f32(vbiasCDEF, vout0xCDEF, vget_low_f32(vinput_scale01), 1);
       vout1xCDEF = vmlaq_lane_f32(vbiasCDEF, vout1xCDEF, vget_high_f32(vinput_scale01), 1);
     #endif
-    const float32x4_t vinput_scale2 = vld1q_dup_f32(&quantization_params[2].scale);
+    const float32x4_t vinput_scale2 = vld1q_dup_f32(&quantization_params[2].inv_scale);
     #if XNN_ARCH_ARM64
       vout2x0123 = vfmaq_f32(vbias0123, vout2x0123, vinput_scale2);
     #else

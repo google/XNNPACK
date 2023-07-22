@@ -121,7 +121,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
           float vout${M}x${N} = (float) vacc${M}x${N};
 
       $for M in range(MR):
-        const float vscale${M} = quantization_params[${M}].scale;
+        const float vscale${M} = quantization_params[${M}].inv_scale;
         $for N in range(NR):
           $if M == 0:
             $if NR % 4 != 0:

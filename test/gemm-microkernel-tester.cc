@@ -538,13 +538,13 @@ void GemmMicrokernelTester::Test(
       const float* input_ptr = &input[i * k()];
       const auto minmax = std::minmax_element(input_ptr, input_ptr + k());
       quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second);
-      const float scale = quantization_params[i].scale;
+      const float inv_scale = 1.f / quantization_params[i].inv_scale;
       for (int j = 0; j < k(); ++j) {
-        float scaled_input = input[i * k() + j] * scale;
+        float scaled_input = input_ptr[j] * inv_scale;
         scaled_input = std::min<float>(scaled_input, float(std::numeric_limits<int8_t>::max()
                                                            - quantization_params[i].zero_point));
         scaled_input = std::max<float>(scaled_input, float(std::numeric_limits<int8_t>::min()
-                                                           + quantization_params[i].zero_point));
+                                                           - quantization_params[i].zero_point));
         a[i * a_stride() + j] = int8_t(std::lrintf(scaled_input) + long(quantization_params[i].zero_point));
       }
     }
@@ -582,7 +582,7 @@ void GemmMicrokernelTester::Test(
               int32_t(b[n_index * k() + k_index]);
         }
         c_ref[m_index * n() + n_index] -= (quantization_params[m_index].zero_point * ksum);
-        c_ref[m_index * n() + n_index] *= quantization_params[m_index].scale;
+        c_ref[m_index * n() + n_index] *= quantization_params[m_index].inv_scale;
         c_ref[m_index * n() + n_index] += bias[n_index];
       }
     }

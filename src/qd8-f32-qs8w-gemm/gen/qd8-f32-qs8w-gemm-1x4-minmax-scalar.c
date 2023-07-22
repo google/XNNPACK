@@ -69,7 +69,7 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x4__scalar(
     float vout0x2 = (float) vacc0x2;
     float vout0x3 = (float) vacc0x3;
 
-    const float vscale0 = quantization_params[0].scale;
+    const float vscale0 = quantization_params[0].inv_scale;
     const float vbias0 = ((const float*) w)[0];
     vout0x0 = math_muladd_f32(vout0x0, vscale0, vbias0);
     const float vbias1 = ((const float*) w)[1];

@@ -44,7 +44,7 @@ void xnn_qd8_f32_qs8w_gemm_minmax_ukernel_1x16c8__avx512skx(
 
   const __mmask16 vbias_mask = _cvtu32_mask16(0x1111);
   const __m512i vinput_zero_point0 = _mm512_set1_epi32((int) quantization_params[0].zero_point);
-  const __m512 vinput_scale0 = _mm512_set1_ps(quantization_params[0].scale);
+  const __m512 vinput_scale0 = _mm512_set1_ps(quantization_params[0].inv_scale);
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
   do {

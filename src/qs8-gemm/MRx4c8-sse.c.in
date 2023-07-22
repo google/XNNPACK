@@ -258,11 +258,11 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
 
       $if AVX:
         $for M in range(MR):
-          const __m128 vinput_scale${M} = _mm_broadcast_ss(&quantization_params[${M}].scale);
+          const __m128 vinput_scale${M} = _mm_broadcast_ss(&quantization_params[${M}].inv_scale);
       $else:
         $for M in range(0, MR, 2):
           $if M + 1 == MR:
-            const __m128 vinput_scale${M} = _mm_load1_ps(&quantization_params[${M}].scale);
+            const __m128 vinput_scale${M} = _mm_load1_ps(&quantization_params[${M}].inv_scale);
           $else:
             const __m128i vinput_scale${ABC[M:M+2]} = _mm_loadu_si128((const __m128i*) &quantization_params[${M}]);
             const __m128 vinput_scale${M} = _mm_castsi128_ps(_mm_shuffle_epi32(vinput_scale${ABC[M:M+2]}, _MM_SHUFFLE(1, 1, 1, 1)));

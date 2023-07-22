@@ -21,20 +21,20 @@ static inline struct xnn_qd8_quantization_params xnn_f32_qd8_asymmetric_quantiza
   const float rmin = math_min_f32(0.0f, min);
   const float rmax = math_max_f32(0.0f, max);
   const float scale = rmin == rmax ? 1.f : (qmax - qmin) / (rmax - rmin);
-  const float rmin_scale = rmin * scale;
-  const float rmax_scale = rmax * scale;
-  const float zero_point_from_min_error = qmin + rmin_scale;
-  const float zero_point_from_max_error = qmax + rmax_scale;
+  const float descaled_min = rmin * scale;
+  const float descaled_max = rmax * scale;
+  const float zero_point_from_min_error = qmin + descaled_min;
+  const float zero_point_from_max_error = qmax + descaled_max;
   float zero_point =
       zero_point_from_min_error + zero_point_from_max_error > 0
-      ? qmin - rmin_scale
-      : qmax - rmax_scale;
+      ? qmin - descaled_min
+      : qmax - descaled_max;
   zero_point = math_max_f32(zero_point, qmin);
   zero_point = math_min_f32(zero_point, qmax);
   assert(zero_point >= INT8_MIN);
   assert(zero_point <= INT8_MAX);
   const int8_t nudged_zero_point = ((int8_t) rintf(zero_point));
-  quantization_params.scale = scale;
+  quantization_params.inv_scale = 1.f / scale;
   quantization_params.zero_point = nudged_zero_point;
   return quantization_params;
 }

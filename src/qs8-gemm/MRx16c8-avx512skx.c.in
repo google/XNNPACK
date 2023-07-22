@@ -82,7 +82,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
   $if DATATYPE == "QD8":
     $for M in range(MR):
       const __m512i vinput_zero_point${M} = _mm512_set1_epi32((int) quantization_params[${M}].zero_point);
-      const __m512 vinput_scale${M} = _mm512_set1_ps(quantization_params[${M}].scale);
+      const __m512 vinput_scale${M} = _mm512_set1_ps(quantization_params[${M}].inv_scale);
     const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
     const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
   $else:

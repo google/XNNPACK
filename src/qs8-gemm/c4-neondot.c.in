@@ -142,7 +142,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
 
       $for M in range(0, MR, 2):
         $if M + 1 == MR:
-          const float32x4_t vinput_scale${M} = vld1q_dup_f32(&quantization_params[${M}].scale);
+          const float32x4_t vinput_scale${M} = vld1q_dup_f32(&quantization_params[${M}].inv_scale);
           $for N in range(0, NR, 4):
             $if M == 0:
               const float32x4_t vbias${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
