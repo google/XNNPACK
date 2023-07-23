@@ -37,7 +37,6 @@
 // C2   r8 d24-d25 q12  d26-d27 q13
 // C3   r6 d28-d29 q14  d30-d31 q15
 // unused q7
-
 // params structure is 16 bytes
 //  struct {
 //    int32_t right_pre_shift;    d12[0]
@@ -57,12 +56,13 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__asm_aarch32_neondot_cort
         VPUSH       {d8-d13}                            // +48 = 80
 
         LDR         r7, [sp, 80]            // a_stride
-        ADD         r2, r2, 3               // kc = (kc + 3) & ~3
-        LDR         r11, [sp, 88]           // c
-        LDR         r6, [sp, 92]            // cm_stride
-        LDR         r9, [sp, 84]            // w
+        ADD         r2, r2, 3                           // kc = (kc + 3) & ~3
+        LDR         r11, [sp, 88]       // c
+
+        LDR         r6, [sp, 92]       // cm_stride
+        LDR         r9, [sp, 84]        // w
         BIC         r2, r2, 3
-        LDR         r5, [sp, 100]           // params
+        LDR         r5, [sp, 100]       // params
 
         # Clamp A and C pointers
         CMP         r0, 2                   // if mr >= 2
@@ -84,7 +84,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__asm_aarch32_neondot_cort
 
         # Load params values
         VLDM        r5, {d12-d13}           // RNDNU params
-        LDR         r7, [sp, 96]            // cn_stride
+        LDR         r7, [sp, 96]               // cn_stride
 
         .p2align    3
 0:
@@ -105,10 +105,10 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__asm_aarch32_neondot_cort
         VMOV        q14, q8
         VLD1.8      {d7},  [r9]!            // B3
         VMOV        q15, q9
-        BLO         4f                      // less than 8 channels?
+        BLO         5f                      // less than 8 channels?
 
         SUBS        r5, r5, 8               // k = k - 8
-        BLO         12f                     // less than 16 channels - skip mainloop
+        BLO         2f                      // less than 16 channels - skip mainloop
 
         # Main loop - 8 bytes of A.
         # 16 SDOT, 12 LD64
@@ -148,7 +148,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__asm_aarch32_neondot_cort
 
         # Epilogue
         .p2align    3
-12:
+2:
         VSDOT.S8    q8, q2, d0[0]
         VLD1.8      {d2}, [r10]!            // A2
         VSDOT.S8    q9, q3, d0[0]
@@ -175,9 +175,9 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__asm_aarch32_neondot_cort
         VSDOT.S8    q15, q5, d3[1]
 
         # Is there a remainder?- 4 bytes of A
-        BNE         3f
+        BNE         4f
 
-2:
+3:
         # RNDNU quantization
         VDUP.32     q0, d12[0]              // right_pre_shift
 
@@ -244,7 +244,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__asm_aarch32_neondot_cort
         VMIN.S8     q1, q1, q13
 
         # Store full 4 x 8
-        BLO         5f
+        BLO         6f
         VST1.8      {d0}, [r11], r7
         SUB         r3, r3, r2
         VST1.8      {d1}, [r4], r7
@@ -261,7 +261,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__asm_aarch32_neondot_cort
 
         # Remainder prologue
         .p2align    3
-3:
+4:
         VLD1.8      {d4},  [r9]!            // B0
         VLD1.8      {d0},  [r3]!            // A0
         VLD1.8      {d5},  [r9]!            // B1
@@ -270,7 +270,7 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__asm_aarch32_neondot_cort
         VLD1.8      {d7},  [r9]!            // B3
 
         # Remainder- 4 bytes of A
-4:
+5:
         VSDOT.S8    q8, q2, d0[0]
         VLD1.32     {d2[0]}, [r10]!         // A2
         VSDOT.S8    q9, q3, d0[0]
@@ -283,22 +283,22 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__asm_aarch32_neondot_cort
         VSDOT.S8    q13, q3, d2[0]
         VSDOT.S8    q14, q2, d3[0]
         VSDOT.S8    q15, q3, d3[0]
-        B           2b
+        B           3b
 
         # Store odd width
         .p2align    3
-5:
+6:
         TST         r1, 4
-        BEQ         6f
+        BEQ         7f
         VST1.32     {d0[0]}, [r11]!
         VST1.32     {d1[0]}, [r4]!
         VST1.32     {d2[0]}, [r8]!
         VST1.32     {d3[0]}, [r6]!
         VEXT.8      q0, q0, q0, 4
         VEXT.8      q1, q1, q1, 4
-6:
+7:
         TST         r1, 2
-        BEQ         7f
+        BEQ         8f
         VST1.16     {d0[0]}, [r11]!
         VST1.16     {d1[0]}, [r4]!
         VST1.16     {d2[0]}, [r8]!
@@ -306,18 +306,19 @@ BEGIN_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__asm_aarch32_neondot_cort
         VEXT.8      q0, q0, q0, 2
         VEXT.8      q1, q1, q1, 2
 
-7:
+8:
         TST         r1, 1
-        BEQ         12f
+        BEQ         9f
         VST1.8      {d0[0]}, [r11]
         VST1.8      {d1[0]}, [r4]
         VST1.8      {d2[0]}, [r8]
         VST1.8      {d3[0]}, [r6]
 
-12:
+9:
         VPOP        {d8-d13}
         POP         {r4, r5, r6, r7, r8, r9, r10, r11}
         BX          lr
+
 
 END_FUNCTION xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55
 #endif  // __APPLE__
