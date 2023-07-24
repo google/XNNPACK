@@ -58,15 +58,15 @@ static void GEMMEnd2EndBenchmark(
     return;
   }
 
-  struct xnn_gemm_config* gemm2_config = xnn_init_f32_gemm2_config();
-  if (gemm2_config == nullptr) {
+  struct xnn_gemm_config* gemm_nr2_config = xnn_init_f32_gemm_nr2_config();
+  if (gemm_nr2_config == nullptr) {
     state.SkipWithError("hardware does not support F32 gemm");
     return;
   }
 
   // Override microkernels chosen in xnn_initialize
   std::memset(gemm_config, 0, sizeof(struct xnn_gemm_config));
-  std::memset(gemm2_config, 0, sizeof(struct xnn_gemm_config));
+  std::memset(gemm_nr2_config, 0, sizeof(struct xnn_gemm_config));
   gemm_config->minmax.gemm[mr-1] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm_minmax));
   gemm_config->minmax.igemm[mr-1] = xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn(igemm_minmax));
   gemm_config->minmax.gemm[0] = xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn(gemm1_minmax));
