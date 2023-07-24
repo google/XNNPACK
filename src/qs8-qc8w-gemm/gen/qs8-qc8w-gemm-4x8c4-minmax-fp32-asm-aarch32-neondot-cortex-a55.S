@@ -49,7 +49,7 @@
 
 BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55
         # Push 80 bytes
-        PUSH        {r4, r5, r6, r7, r8, r9, r10, r11}  // 32
+        PUSH        {r4, r5, r6, r7, r8, r9, r10, r11}      // 32
         VPUSH       {d8-d13}                            // +48 = 80
 
         LDR         r7, [sp, 80]            // a_stride
@@ -82,6 +82,7 @@ BEGIN_FUNCTION xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x8c4__asm_aarch32_neondot_
         # Load params values
         VLD1.32     {d13[]}, [r5]           // QC8 params
         LDR         r7, [sp, 96]               // cn_stride
+
 
         .p2align    3
 0:
