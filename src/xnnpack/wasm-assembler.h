@@ -120,18 +120,26 @@ inline bool operator==(const FuncType& lhs, const FuncType& rhs) {
 }
 
 struct Code {
-  constexpr explicit Code(byte* begin) : begin(begin), end(begin) {}
+  constexpr explicit Code(byte* begin, byte* capacity_end)
+      : begin(begin), end(begin), capacity_end(capacity_end) {}
 
-  void store(byte b) { *end++ = b; }
+  void store(byte b) {
+    if (end == capacity_end) {
+      error = Error::kOutOfMemory;
+    }
+    *end++ = b;
+  }
 
   size_t size() const { return end - begin; }
 
   byte* begin;
   byte* end;
+  byte* capacity_end;
+  Error error = Error::kNoError;
 };
 
 struct Function {
-  constexpr Function() : Function(nullptr, 0, 0, 0, {}, Code(nullptr)) {}
+  constexpr Function() : Function(nullptr, 0, 0, 0, {}, Code(nullptr, nullptr)) {}
   constexpr Function(const char* name, size_t function_index,
                      uint32_t type_index,
                      const ValTypesToInt& locals_declaration, Code body)
@@ -704,30 +712,15 @@ class LocalWasmOps : public LocalsManager {
 inline static auto MakeStoreToCode(Code& out) {
   return [&out](uint8_t b) { out.store(b); };
 }
-
-class WasmOps : public LocalWasmOps<WasmOps>,
-                public I32WasmOps<WasmOps>,
-                public F32WasmOps<WasmOps>,
-                public V128WasmOps<WasmOps>,
-                public MemoryWasmOps<WasmOps>,
-                public ControlFlowWasmOps<WasmOps> {
- public:
-  WasmOps() = default;
-  void SetOut(Code* out) { out_ = out; }
-  void Emit8(byte b) const { out_->store(b); }
-  void EmitEncodedS32(int32_t value) const {
-    StoreEncodedS32(value, MakeStoreToCode(*out_));
-  }
-  void EmitEncodedU32(uint32_t value) const {
-    StoreEncodedU32(value, MakeStoreToCode(*out_));
-  }
-
- private:
-  Code* out_ = nullptr;
-};
 }  // namespace internal
 
-class WasmAssembler : public AssemblerBase, public internal::WasmOps {
+class WasmAssembler : public AssemblerBase,
+                      public internal::LocalWasmOps<WasmAssembler>,
+                      public internal::I32WasmOps<WasmAssembler>,
+                      public internal::F32WasmOps<WasmAssembler>,
+                      public internal::V128WasmOps<WasmAssembler>,
+                      public internal::MemoryWasmOps<WasmAssembler>,
+                      public internal::ControlFlowWasmOps<WasmAssembler> {
  private:
   using Function = internal::Function;
   using Params = internal::Params;
@@ -757,7 +750,7 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
       error_ = Error::kMaxNumberOfFunctionsExceeded;
       return;
     }
-    Code code(next_func_body_begin_);
+    Code code(next_func_body_begin_, top_);
     SetOut(&code);
     ResetLocalsManager(InSize, locals_declaration_count);
     std::array<Local, InSize> input_locals{};
@@ -767,6 +760,11 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
     }
     internal::ArrayApply(std::move(input_locals), std::forward<Body>(body));
     end();
+
+    error_ = code.error;
+    if (error_ != Error::kNoError) {
+      return;
+    }
     RegisterFunction(result, name,
                      Params(params, internal::kPlaceholderValType),
                      locals_declaration_count, code);
@@ -782,6 +780,15 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
     assert(code_size_in_bytes() < kInitialCodeOffset &&
            "Initial code offset is insufficient");
     EmitCodeSection();
+  }
+
+  void SetOut(Code* out) { out_ = out; }
+  void Emit8(byte b) const { out_->store(b); }
+  void EmitEncodedS32(int32_t value) const {
+    StoreEncodedS32(value, MakeStoreToCode(*out_));
+  }
+  void EmitEncodedU32(uint32_t value) const {
+    StoreEncodedU32(value, MakeStoreToCode(*out_));
   }
 
  private:
@@ -849,6 +856,7 @@ class WasmAssembler : public AssemblerBase, public internal::WasmOps {
   internal::ArrayPrefix<Function, kMaxNumFuncs> functions_{0};
   internal::ArrayPrefix<FuncType, kMaxNumFuncTypes> func_types_{0};
   byte* next_func_body_begin_;
+  Code* out_ = nullptr;
 };
 
 }  // namespace xnnpack

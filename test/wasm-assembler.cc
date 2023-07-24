@@ -707,6 +707,21 @@ struct ManyFunctionsGenerator : WasmAssembler {
 std::array<std::string, kLargeNumberOfFunctions>
     ManyFunctionsGenerator::function_names = {};
 
+constexpr static size_t kTooLongFunctionLength =
+    XNN_DEFAULT_CODE_BUFFER_SIZE * 2;
+struct LongGet5Generator : WasmAssembler {
+  explicit LongGet5Generator(xnn_code_buffer* buf) : WasmAssembler(buf) {
+    ValTypesToInt one_i32 = {{i32, 1}};
+    AddFunc<0>({i32}, "long_get5", one_i32, [this]() {
+      auto x = MakeLocal(i32);
+      for (size_t i = 0; i < kTooLongFunctionLength; i++) {
+        x = I32Const(5);
+      }
+      i32_const(5);
+    });
+  }
+};
+
 template <typename TestSuite>
 class WasmAssemblerTest : public Test {};
 
@@ -760,6 +775,7 @@ TEST(WasmAssemblerTest, InvalidCode) {
   generator.Emit();
   EXPECT_THAT(generator.finalize(), NotNull());
   EXPECT_THAT(xnn_first_function_ptr(&b), XNN_INVALID_FUNCTION_INDEX);
+  xnn_release_code_memory(&b);
 }
 
 TEST(WasmAssemblerTest, MaxNumberOfFunctionsExceeded) {
@@ -770,6 +786,18 @@ TEST(WasmAssemblerTest, MaxNumberOfFunctionsExceeded) {
   generator.Emit();
   EXPECT_THAT(generator.finalize(), IsNull());
   EXPECT_EQ(generator.error(), Error::kMaxNumberOfFunctionsExceeded);
+  xnn_release_code_memory(&b);
+}
+
+TEST(WasmAssemblerTest, FunctionBodyDidNotFitIntoCodeBuffer) {
+  xnn_code_buffer b;
+  xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE);
+
+  LongGet5Generator generator(&b);
+  generator.Emit();
+  EXPECT_THAT(generator.finalize(), IsNull());
+  EXPECT_EQ(generator.error(), Error::kOutOfMemory);
+  xnn_release_code_memory(&b);
 }
 
 namespace {
