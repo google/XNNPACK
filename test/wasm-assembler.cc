@@ -808,9 +808,9 @@ class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
                     public internal::MemoryWasmOps<WasmOpsTest>,
                     public Test {
  public:
-  MOCK_METHOD(void, Emit8, (byte), (const));
-  MOCK_METHOD(void, EmitEncodedU32, (uint32_t), (const));
-  MOCK_METHOD(void, EmitEncodedS32, (int32_t), (const));
+  MOCK_METHOD(void, Encode8Impl, (byte), (const));
+  MOCK_METHOD(void, EncodeU32Impl, (uint32_t), (const));
+  MOCK_METHOD(void, EncodeS32Impl, (int32_t), (const));
 
  protected:
   template <typename Op>
@@ -820,21 +820,21 @@ class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
     EXPECT_EQ(result.type, v128);
   }
 
-  void Emit8ExpectCall(byte opcode) {
-    EXPECT_CALL(*this, Emit8(opcode)).Times(1).InSequence(sequence_);
+  void ExpectCallEmit8(byte opcode) {
+    EXPECT_CALL(*this, Encode8Impl(opcode)).Times(1).InSequence(sequence_);
   }
 
-  void EmitEncodedU32ExpectCall(uint32_t value) {
-    EXPECT_CALL(*this, EmitEncodedU32(value)).Times(1).InSequence(sequence_);
+  void ExpectCallEncodeU32(uint32_t value) {
+    EXPECT_CALL(*this, EncodeU32Impl(value)).Times(1).InSequence(sequence_);
   }
 
-  void EmitEncodedS32ExpectCall(uint32_t value) {
-    EXPECT_CALL(*this, EmitEncodedS32(value)).Times(1).InSequence(sequence_);
+  void ExpectCallEncodeS32(uint32_t value) {
+    EXPECT_CALL(*this, EncodeS32Impl(value)).Times(1).InSequence(sequence_);
   }
 
   void ExpectEmitSIMDOpcode(uint32_t opcode) {
-    Emit8ExpectCall(0xFD);
-    EmitEncodedU32ExpectCall(opcode);
+    ExpectCallEmit8(0xFD);
+    ExpectCallEncodeU32(opcode);
   }
 
   Sequence sequence_;
@@ -854,9 +854,9 @@ class V128StoreLaneWasmOpTest : public WasmOpsTest {
  protected:
   void SetStoreLaneExpectations(byte expected_opcode) {
     ExpectEmitSIMDOpcode(expected_opcode);
-    EmitEncodedU32ExpectCall(kLogAlignment);
-    EmitEncodedU32ExpectCall(kOffset);
-    Emit8ExpectCall(kLane);
+    ExpectCallEncodeU32(kLogAlignment);
+    ExpectCallEncodeU32(kOffset);
+    ExpectCallEmit8(kLane);
   }
 
   static constexpr uint8_t kLane = 1;
@@ -878,19 +878,19 @@ TEST_F(V128StoreLaneWasmOpTest, 64Lane) {
 }
 
 TEST_F(WasmOpsTest, I32Ne) {
-  Emit8ExpectCall(0x47);
+  ExpectCallEmit8(0x47);
   I32Ne(i32_value_, i32_value_);
 }
 
 TEST_F(WasmOpsTest, I32GeU) {
-  Emit8ExpectCall(0x4F);
+  ExpectCallEmit8(0x4F);
   I32GeU(i32_value_, i32_value_);
 }
 
 TEST_F(WasmOpsTest, V128Load64Splat) {
   ExpectEmitSIMDOpcode(0x0A);
-  EmitEncodedU32ExpectCall(kLogAlignment);
-  EmitEncodedU32ExpectCall(kOffset);
+  ExpectCallEncodeU32(kLogAlignment);
+  ExpectCallEncodeU32(kOffset);
 
   V128Load64Splat(i32_value_, kOffset, kAlignment);
 }
@@ -909,25 +909,25 @@ TEST_F(WasmOpsTest, V128F32x4Splat) {
 }
 
 TEST_F(WasmOpsTest, Return) {
-  Emit8ExpectCall(0x0F);
+  ExpectCallEmit8(0x0F);
   Return();
 }
 
 TEST_F(WasmOpsTest, Tee) {
-  Emit8ExpectCall(0x22);
-  EmitEncodedU32ExpectCall(i32_local_index);
+  ExpectCallEmit8(0x22);
+  ExpectCallEncodeU32(i32_local_index);
   local_tee(i32_local_);
 }
 
 TEST_F(WasmOpsTest, Select) {
-  Emit8ExpectCall(0x1B);
+  ExpectCallEmit8(0x1B);
   Select(i32_value_, i32_value_, i32_value_);
 }
 
 TEST_F(WasmOpsTest, I32NeZ) {
-  Emit8ExpectCall(0x41);
-  EmitEncodedS32ExpectCall(0);
-  Emit8ExpectCall(0x47);
+  ExpectCallEmit8(0x41);
+  ExpectCallEncodeS32(0);
+  ExpectCallEmit8(0x47);
   I32NeZ(i32_value_);
 }
 

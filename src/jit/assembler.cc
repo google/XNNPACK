@@ -20,13 +20,16 @@ AssemblerBase::AssemblerBase(xnn_code_buffer* buf) {
 }
 
 void AssemblerBase::emit32(uint32_t value) {
-  emit<uint32_t>(value);
+  emit<uint32_t>(value, cursor_);
 }
 
 void AssemblerBase::emit8(byte value) {
-  emit<byte>(value);
+  emit<byte>(value, cursor_);
 }
 
+void AssemblerBase::emit8(byte value, byte*& cursor) {
+  emit<byte>(value, cursor);
+}
 
 void* AssemblerBase::finalize() {
   if (error_ != Error::kNoError) {

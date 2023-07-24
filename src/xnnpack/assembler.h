@@ -71,6 +71,8 @@ class AssemblerBase {
   // Write value into the code buffer and advances cursor_.
   void emit32(uint32_t value);
   void emit8(byte value);
+  // Writes value by cursor (which should be a pointer to to the codebuffer) and advances cursor.
+  void emit8(byte value, byte*& cursor);
   // Finish assembly of code, this should be the last function called on an
   // instance of Assembler. Returns a pointer to the start of code region.
   void* finalize();
@@ -101,18 +103,18 @@ class AssemblerBase {
 
  private:
   template <typename Value>
-  void emit(Value value) {
+  void emit(Value value, byte*& cursor) {
     if (error_ != Error::kNoError) {
       return;
     }
 
-    if (cursor_ + sizeof(value) > top_) {
+    if (sizeof(value) > top_ - cursor) {
       error_ = Error::kOutOfMemory;
       return;
     }
 
-    memcpy(cursor_, &value, sizeof(value));
-    cursor_ += sizeof(value);
+    memcpy(cursor, &value, sizeof(value));
+    cursor += sizeof(value);
   }
 };
 
