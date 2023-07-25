@@ -9,7 +9,6 @@
 
 #include <assert.h>
 
-#include <emmintrin.h>
 #include <smmintrin.h>
 
 #include <xnnpack/gemm.h>
@@ -96,25 +95,25 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sse41_dup(
       const __m128 va0 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i *) a0));
       a0 += 2;
 
-      const __m128 va0c00 = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(va0), _MM_SHUFFLE(0, 0, 0, 0)));
+      const __m128 va0c0000 = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(va0), _MM_SHUFFLE(0, 0, 0, 0)));
 
       const __m128i vbi0123c0 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + 0)));
       const __m128i vbi4567c0 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + 4)));
       const __m128 vb0123c0 = _mm_cvtepi32_ps(vbi0123c0);
       const __m128 vb4567c0 = _mm_cvtepi32_ps(vbi4567c0);
 
-      vacc0x0123 = _mm_add_ps(vacc0x0123, _mm_mul_ps(va0c00, vb0123c0));
-      vacc0x4567 = _mm_add_ps(vacc0x4567, _mm_mul_ps(va0c00, vb4567c0));
+      vacc0x0123 = _mm_add_ps(vacc0x0123, _mm_mul_ps(va0c0000, vb0123c0));
+      vacc0x4567 = _mm_add_ps(vacc0x4567, _mm_mul_ps(va0c0000, vb4567c0));
 
-      const __m128 va0c11 = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(va0), _MM_SHUFFLE(1, 1, 1, 1)));
+      const __m128 va0c1111 = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(va0), _MM_SHUFFLE(1, 1, 1, 1)));
 
       const __m128i vbi0123c1 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + 8)));
       const __m128i vbi4567c1 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + 12)));
       const __m128 vb0123c1 = _mm_cvtepi32_ps(vbi0123c1);
       const __m128 vb4567c1 = _mm_cvtepi32_ps(vbi4567c1);
 
-      vacc0x0123 = _mm_add_ps(vacc0x0123, _mm_mul_ps(va0c11, vb0123c1));
-      vacc0x4567 = _mm_add_ps(vacc0x4567, _mm_mul_ps(va0c11, vb4567c1));
+      vacc0x0123 = _mm_add_ps(vacc0x0123, _mm_mul_ps(va0c1111, vb0123c1));
+      vacc0x4567 = _mm_add_ps(vacc0x4567, _mm_mul_ps(va0c1111, vb4567c1));
 
       w = (const int8_t*) w + 16;
       k -= 2 * sizeof(float);

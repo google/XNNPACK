@@ -9,12 +9,10 @@ $if DATATYPE == "QC8" and SSE == 2:
 $else:
   $assert NR % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$SSE_HEADER = {1: "xmmintrin.h", 2: "emmintrin.h", 4: "emmintrin.h"}[SSE]
+$SSE_HEADER = {1: "immintrin.h", 2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
 #include <assert.h>
 
 #include <${SSE_HEADER}>
-$if (DATATYPE == "QC8" or DATATYPE == "QC4") and SSE == 4:
-  #include <smmintrin.h>
 
 #include <xnnpack/gemm.h>
 $if DATATYPE == "QC8" and SSE == 4:
@@ -179,7 +177,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           const __m128 va${M} = _mm_loadl_pi(_mm_undefined_ps(), (const __m64*) a${M});
         a${M} += 2;
       $for L in range(2):
-        $LLLL = str(L) * 2
+        $LLLL = str(L) * 4
 
         $for M in range(MR):
           $if SSE >= 2 and L < 3:

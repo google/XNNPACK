@@ -9,7 +9,7 @@
 
 #include <assert.h>
 
-#include <xmmintrin.h>
+#include <immintrin.h>
 
 #include <xnnpack/gemm.h>
 
@@ -134,33 +134,33 @@ void xnn_f32_gemm_minmax_ukernel_3x8__sse_dup(
       const __m128 va2 = _mm_loadl_pi(_mm_undefined_ps(), (const __m64*) a2);
       a2 += 2;
 
-      const __m128 va0c00 = _mm_shuffle_ps(va0, va0, _MM_SHUFFLE(0, 0, 0, 0));
-      const __m128 va1c00 = _mm_shuffle_ps(va1, va1, _MM_SHUFFLE(0, 0, 0, 0));
-      const __m128 va2c00 = _mm_shuffle_ps(va2, va2, _MM_SHUFFLE(0, 0, 0, 0));
+      const __m128 va0c0000 = _mm_shuffle_ps(va0, va0, _MM_SHUFFLE(0, 0, 0, 0));
+      const __m128 va1c0000 = _mm_shuffle_ps(va1, va1, _MM_SHUFFLE(0, 0, 0, 0));
+      const __m128 va2c0000 = _mm_shuffle_ps(va2, va2, _MM_SHUFFLE(0, 0, 0, 0));
 
       const __m128 vb0123c0 = _mm_load_ps(w + 0);
       const __m128 vb4567c0 = _mm_load_ps(w + 4);
 
-      vacc0x0123 = _mm_add_ps(vacc0x0123, _mm_mul_ps(va0c00, vb0123c0));
-      vacc1x0123 = _mm_add_ps(vacc1x0123, _mm_mul_ps(va1c00, vb0123c0));
-      vacc2x0123 = _mm_add_ps(vacc2x0123, _mm_mul_ps(va2c00, vb0123c0));
-      vacc0x4567 = _mm_add_ps(vacc0x4567, _mm_mul_ps(va0c00, vb4567c0));
-      vacc1x4567 = _mm_add_ps(vacc1x4567, _mm_mul_ps(va1c00, vb4567c0));
-      vacc2x4567 = _mm_add_ps(vacc2x4567, _mm_mul_ps(va2c00, vb4567c0));
+      vacc0x0123 = _mm_add_ps(vacc0x0123, _mm_mul_ps(va0c0000, vb0123c0));
+      vacc1x0123 = _mm_add_ps(vacc1x0123, _mm_mul_ps(va1c0000, vb0123c0));
+      vacc2x0123 = _mm_add_ps(vacc2x0123, _mm_mul_ps(va2c0000, vb0123c0));
+      vacc0x4567 = _mm_add_ps(vacc0x4567, _mm_mul_ps(va0c0000, vb4567c0));
+      vacc1x4567 = _mm_add_ps(vacc1x4567, _mm_mul_ps(va1c0000, vb4567c0));
+      vacc2x4567 = _mm_add_ps(vacc2x4567, _mm_mul_ps(va2c0000, vb4567c0));
 
-      const __m128 va0c11 = _mm_shuffle_ps(va0, va0, _MM_SHUFFLE(1, 1, 1, 1));
-      const __m128 va1c11 = _mm_shuffle_ps(va1, va1, _MM_SHUFFLE(1, 1, 1, 1));
-      const __m128 va2c11 = _mm_shuffle_ps(va2, va2, _MM_SHUFFLE(1, 1, 1, 1));
+      const __m128 va0c1111 = _mm_shuffle_ps(va0, va0, _MM_SHUFFLE(1, 1, 1, 1));
+      const __m128 va1c1111 = _mm_shuffle_ps(va1, va1, _MM_SHUFFLE(1, 1, 1, 1));
+      const __m128 va2c1111 = _mm_shuffle_ps(va2, va2, _MM_SHUFFLE(1, 1, 1, 1));
 
       const __m128 vb0123c1 = _mm_load_ps(w + 8);
       const __m128 vb4567c1 = _mm_load_ps(w + 12);
 
-      vacc0x0123 = _mm_add_ps(vacc0x0123, _mm_mul_ps(va0c11, vb0123c1));
-      vacc1x0123 = _mm_add_ps(vacc1x0123, _mm_mul_ps(va1c11, vb0123c1));
-      vacc2x0123 = _mm_add_ps(vacc2x0123, _mm_mul_ps(va2c11, vb0123c1));
-      vacc0x4567 = _mm_add_ps(vacc0x4567, _mm_mul_ps(va0c11, vb4567c1));
-      vacc1x4567 = _mm_add_ps(vacc1x4567, _mm_mul_ps(va1c11, vb4567c1));
-      vacc2x4567 = _mm_add_ps(vacc2x4567, _mm_mul_ps(va2c11, vb4567c1));
+      vacc0x0123 = _mm_add_ps(vacc0x0123, _mm_mul_ps(va0c1111, vb0123c1));
+      vacc1x0123 = _mm_add_ps(vacc1x0123, _mm_mul_ps(va1c1111, vb0123c1));
+      vacc2x0123 = _mm_add_ps(vacc2x0123, _mm_mul_ps(va2c1111, vb0123c1));
+      vacc0x4567 = _mm_add_ps(vacc0x4567, _mm_mul_ps(va0c1111, vb4567c1));
+      vacc1x4567 = _mm_add_ps(vacc1x4567, _mm_mul_ps(va1c1111, vb4567c1));
+      vacc2x4567 = _mm_add_ps(vacc2x4567, _mm_mul_ps(va2c1111, vb4567c1));
 
       w += 16;
       k -= 2 * sizeof(float);
