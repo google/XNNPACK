@@ -644,6 +644,7 @@ struct xnn_gemm_config {
   union {
     xnn_init_f16_minmax_params_fn f16;
     xnn_init_f32_minmax_params_fn f32;
+    xnn_init_f32_qc4w_minmax_params_fn f32_qc4w;
     xnn_init_qs8_conv_minmax_params_fn qs8;
     xnn_init_qs8_qc8w_conv_minmax_params_fn qs8_qc8w;
     xnn_init_qu8_conv_minmax_params_fn qu8;
@@ -659,6 +660,7 @@ XNN_INTERNAL struct xnn_gemm_config* xnn_init_f16_gemm_config();
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_f32_gemm_config();
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config();
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_f32_qc8w_gemm_config();
+XNN_INTERNAL struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config();
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_qs8_qc8w_gemm_config();
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_qs8_gemm_config();
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_qu8_gemm_config();
