@@ -13,7 +13,7 @@ $SSE_HEADER = {1: "xmmintrin.h", 2: "emmintrin.h", 4: "emmintrin.h"}[SSE]
 #include <assert.h>
 
 #include <${SSE_HEADER}>
-$if DATATYPE == "QC8":
+$if (DATATYPE == "QC8" or DATATYPE == "QC4") and SSE == 4:
   #include <smmintrin.h>
 
 #include <xnnpack/gemm.h>
@@ -21,7 +21,7 @@ $if DATATYPE == "QC8" and SSE == 4:
   #include <xnnpack/unaligned.h>
 
 
-$if DATATYPE == "QC8":
+$if DATATYPE == "QC8" or DATATYPE == "QC4":
   $ISA = {2: "sse2", 4: "sse41"}[SSE]
 $else:
   $ISA = {1: "sse", 2: "sse2"}[SSE]
@@ -79,8 +79,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
       }
   $if DATATYPE == "QC4":
     const __m128i vbias = _mm_load_si128((const __m128i *) params->sse.bias);
-    const __m128i vmask = _mm_set1_epi16(UINT16_C(0xF));
-
+    const __m128i vmask = _mm_load_si128((const __m128i *) params->sse.mask);
   do {
     $if INC:
       $for M in range(MR):
@@ -121,19 +120,32 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
             const __m128 vb${ABC[N:N+4]}c${L} = _mm_load_ps(w + ${L * NR + N});
         $elif DATATYPE == "QC4":
           $if L % 4 == 0:
-            $for N in range(0, NR, 8):
-              __m128i vbi${ABC[N:N+8]}c0123 = _mm_loadu_si128((const __m128i *) ((const int8_t*) w + ${N * 2}));
-            $for N in range(0, NR, 8):
-              __m128i vbwi${ABC[N:N+8]}c01 = _mm_unpacklo_epi8(vbi${ABC[N:N+8]}c0123, vbi${ABC[N:N+8]}c0123);
-              __m128i vbwi${ABC[N:N+8]}c23 = _mm_unpackhi_epi8(vbi${ABC[N:N+8]}c0123, vbi${ABC[N:N+8]}c0123);
-              __m128i vbw${ABC[N:N+8]}c0 = _mm_and_si128(vbwi${ABC[N:N+8]}c01, vmask);
-              __m128i vbw${ABC[N:N+8]}c1 = _mm_srli_epi16(vbwi${ABC[N:N+8]}c01, 12);
-              __m128i vbw${ABC[N:N+8]}c2 = _mm_and_si128(vbwi${ABC[N:N+8]}c23, vmask);
-              __m128i vbw${ABC[N:N+8]}c3 = _mm_srli_epi16(vbwi${ABC[N:N+8]}c23, 12);
+            $if SSE >= 4:
+              $for N in range(0, NR, 8):
+                const __m128i vbwi${ABC[N:N+8]}c01 = _mm_cvtepu8_epi16(_mm_loadl_epi64((const __m128i *) ((const int8_t*) w + ${N * 2})));
+                const __m128i vbwi${ABC[N:N+8]}c23 = _mm_cvtepu8_epi16(_mm_loadl_epi64((const __m128i *) ((const int8_t*) w + ${N * 2 + 8})));
+              $for N in range(0, NR, 8):
+                __m128i vbw${ABC[N:N+8]}c0 = _mm_and_si128(vbwi${ABC[N:N+8]}c01, vmask);
+                __m128i vbw${ABC[N:N+8]}c1 = _mm_srli_epi16(vbwi${ABC[N:N+8]}c01, 4);
+                __m128i vbw${ABC[N:N+8]}c2 = _mm_and_si128(vbwi${ABC[N:N+8]}c23, vmask);
+                __m128i vbw${ABC[N:N+8]}c3 = _mm_srli_epi16(vbwi${ABC[N:N+8]}c23, 4);
+            $else:
+              $for N in range(0, NR, 8):
+                __m128i vbi${ABC[N:N+8]}c0123 = _mm_loadu_si128((const __m128i *) ((const int8_t*) w + ${N * 2}));
+              $for N in range(0, NR, 8):
+                __m128i vbwi${ABC[N:N+8]}c01 = _mm_unpacklo_epi8(vbi${ABC[N:N+8]}c0123, vbi${ABC[N:N+8]}c0123);
+                __m128i vbwi${ABC[N:N+8]}c23 = _mm_unpackhi_epi8(vbi${ABC[N:N+8]}c0123, vbi${ABC[N:N+8]}c0123);
+                __m128i vbw${ABC[N:N+8]}c0 = _mm_and_si128(vbwi${ABC[N:N+8]}c01, vmask);
+                __m128i vbw${ABC[N:N+8]}c1 = _mm_srli_epi16(vbwi${ABC[N:N+8]}c01, 12);
+                __m128i vbw${ABC[N:N+8]}c2 = _mm_and_si128(vbwi${ABC[N:N+8]}c23, vmask);
+                __m128i vbw${ABC[N:N+8]}c3 = _mm_srli_epi16(vbwi${ABC[N:N+8]}c23, 12);
           $for N in range(0, NR, 8):
-            vbw${ABC[N:N+8]}c${L} = _mm_add_epi16(vbw${ABC[N:N+8]}c${L}, vbias);
-            const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, vbw${ABC[N:N+8]}c${L}), 16));
-            const __m128 vb${ABC[N+4:N+8]}c${L} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpackhi_epi16(vbw${ABC[N:N+8]}c${L}, vbw${ABC[N:N+8]}c${L}), 16));
+            __m128i vbi${ABC[N:N+4]}c${L} = _mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, _mm_setzero_si128());
+            __m128i vbi${ABC[N+4:N+8]}c${L} = _mm_unpackhi_epi16(vbw${ABC[N:N+8]}c${L}, _mm_setzero_si128());
+            vbi${ABC[N:N+4]}c${L} = _mm_add_epi32(vbi${ABC[N:N+4]}c${L}, vbias);
+            vbi${ABC[N+4:N+8]}c${L} = _mm_add_epi32(vbi${ABC[N+4:N+8]}c${L}, vbias);
+            const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(vbi${ABC[N:N+4]}c${L});
+            const __m128 vb${ABC[N+4:N+8]}c${L} = _mm_cvtepi32_ps(vbi${ABC[N+4:N+8]}c${L});
         $elif DATATYPE == "QC8":
           $if SSE >= 4:
             $for N in range(0, NR, 4):
@@ -159,105 +171,124 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
       $else:
         w = (const int8_t*) w + ${NR * 4};
     }
-    if XNN_UNLIKELY(k != 0) {
-      if XNN_UNLIKELY(k >= 2 * sizeof(float)) {
-        $for M in range(MR):
+    if XNN_UNLIKELY(k >= 2 * sizeof(float)) {
+      $for M in range(MR):
+        $if SSE >= 2:
           const __m128 va${M} = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i *) a${M}));
-          a${M} += 2;
+        $else:
+          const __m128 va${M} = _mm_loadl_pi(_mm_undefined_ps(), (const __m64*) a${M});
+        a${M} += 2;
+      $for L in range(2):
+        $LLLL = str(L) * 2
 
-        $for L in range(2):
-          $LLLL = str(L) * 2
+        $for M in range(MR):
+          $if SSE >= 2 and L < 3:
+            const __m128 va${M}c${LLLL} = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(va${M}), _MM_SHUFFLE(${L}, ${L}, ${L}, ${L})));
+          $else:
+            const __m128 va${M}c${LLLL} = _mm_shuffle_ps(va${M}, va${M}, _MM_SHUFFLE(${L}, ${L}, ${L}, ${L}));
 
-          $for M in range(MR):
-            $if SSE >= 2 and L < 3:
-              const __m128 va${M}c${LLLL} = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(va${M}), _MM_SHUFFLE(${L}, ${L}, ${L}, ${L})));
+        $if DATATYPE == "F32":
+          $for N in range(0, NR, 4):
+            const __m128 vb${ABC[N:N+4]}c${L} = _mm_load_ps(w + ${L * NR + N});
+        $elif DATATYPE == "QC4":
+          $if L % 2 == 0:
+            $if SSE >= 4:
+              $for N in range(0, NR, 8):
+                const __m128i vbwi${ABC[N:N+8]}c01 = _mm_cvtepu8_epi16(_mm_loadl_epi64((const __m128i *) ((const int8_t*) w + ${N * 2})));
+              $for N in range(0, NR, 8):
+                __m128i vbw${ABC[N:N+8]}c0 = _mm_and_si128(vbwi${ABC[N:N+8]}c01, vmask);
+                __m128i vbw${ABC[N:N+8]}c1 = _mm_srli_epi16(vbwi${ABC[N:N+8]}c01, 4);
             $else:
-              const __m128 va${M}c${LLLL} = _mm_shuffle_ps(va${M}, va${M}, _MM_SHUFFLE(${L}, ${L}, ${L}, ${L}));
-
-          $if DATATYPE == "F32":
-            $for N in range(0, NR, 4):
-              const __m128 vb${ABC[N:N+4]}c${L} = _mm_load_ps(w + ${L * NR + N});
-          $elif DATATYPE == "QC4":
-            $if L % 2 == 0:
               $for N in range(0, NR, 8):
                 __m128i vbi${ABC[N:N+8]}c01 = _mm_loadl_epi64((const __m128i *) ((const int8_t*) w + ${N * 2}));
               $for N in range(0, NR, 8):
                 __m128i vbwi${ABC[N:N+8]}c01 = _mm_unpacklo_epi8(vbi${ABC[N:N+8]}c01, vbi${ABC[N:N+8]}c01);
                 __m128i vbw${ABC[N:N+8]}c0 = _mm_and_si128(vbwi${ABC[N:N+8]}c01, vmask);
                 __m128i vbw${ABC[N:N+8]}c1 = _mm_srli_epi16(vbwi${ABC[N:N+8]}c01, 12);
+          $for N in range(0, NR, 8):
+            __m128i vbi${ABC[N:N+4]}c${L} = _mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, _mm_setzero_si128());
+            __m128i vbi${ABC[N+4:N+8]}c${L} = _mm_unpackhi_epi16(vbw${ABC[N:N+8]}c${L}, _mm_setzero_si128());
+            vbi${ABC[N:N+4]}c${L} = _mm_add_epi32(vbi${ABC[N:N+4]}c${L}, vbias);
+            vbi${ABC[N+4:N+8]}c${L} = _mm_add_epi32(vbi${ABC[N+4:N+8]}c${L}, vbias);
+            const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(vbi${ABC[N:N+4]}c${L});
+            const __m128 vb${ABC[N+4:N+8]}c${L} = _mm_cvtepi32_ps(vbi${ABC[N+4:N+8]}c${L});
+        $elif DATATYPE == "QC8":
+          $if SSE >= 4:
+            $for N in range(0, NR, 4):
+              const __m128i vbi${ABC[N:N+4]}c${L} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${L * NR + N})));
+            $for N in range(0, NR, 4):
+              const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(vbi${ABC[N:N+4]}c${L});
+          $else:
             $for N in range(0, NR, 8):
-              vbw${ABC[N:N+8]}c${L} = _mm_add_epi16(vbw${ABC[N:N+8]}c${L}, vbias);
-              const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, vbw${ABC[N:N+8]}c${L}), 16));
-              const __m128 vb${ABC[N+4:N+8]}c${L} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpackhi_epi16(vbw${ABC[N:N+8]}c${L}, vbw${ABC[N:N+8]}c${L}), 16));
-          $elif DATATYPE == "QC8":
-            $if SSE >= 4:
-              $for N in range(0, NR, 4):
-                const __m128i vbi${ABC[N:N+4]}c${L} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${L * NR + N})));
-              $for N in range(0, NR, 4):
-                const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(vbi${ABC[N:N+4]}c${L});
-            $else:
-              $for N in range(0, NR, 8):
-                const __m128i vb${ABC[N:N+8]}c${L} = _mm_loadl_epi64((const __m128i *) ((const int8_t*) w + ${L * NR + N}));
-              $for N in range(0, NR, 8):
-                const __m128i vbw${ABC[N:N+8]}c${L} = _mm_unpacklo_epi8(vb${ABC[N:N+8]}c${L}, vb${ABC[N:N+8]}c${L});
-                const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, vbw${ABC[N:N+8]}c${L}), 24));
-                const __m128 vb${ABC[N+4:N+8]}c${L} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpackhi_epi16(vbw${ABC[N:N+8]}c${L}, vbw${ABC[N:N+8]}c${L}), 24));
+              const __m128i vb${ABC[N:N+8]}c${L} = _mm_loadl_epi64((const __m128i *) ((const int8_t*) w + ${L * NR + N}));
+            $for N in range(0, NR, 8):
+              const __m128i vbw${ABC[N:N+8]}c${L} = _mm_unpacklo_epi8(vb${ABC[N:N+8]}c${L}, vb${ABC[N:N+8]}c${L});
+              const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, vbw${ABC[N:N+8]}c${L}), 24));
+              const __m128 vb${ABC[N+4:N+8]}c${L} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpackhi_epi16(vbw${ABC[N:N+8]}c${L}, vbw${ABC[N:N+8]}c${L}), 24));
 
-          $for N in range(0, NR, 4):
-            $for M in range(MR):
-              vacc${M}x${ABC[N:N+4]} = _mm_add_ps(vacc${M}x${ABC[N:N+4]}, _mm_mul_ps(va${M}c${LLLL}, vb${ABC[N:N+4]}c${L}));
+        $for N in range(0, NR, 4):
+          $for M in range(MR):
+            vacc${M}x${ABC[N:N+4]} = _mm_add_ps(vacc${M}x${ABC[N:N+4]}, _mm_mul_ps(va${M}c${LLLL}, vb${ABC[N:N+4]}c${L}));
 
-        $if DATATYPE == "F32":
-          w += ${NR * 2};
-        $elif DATATYPE == "QC4":
-          w = (const int8_t*) w + ${NR * 2 // 2};
+      $if DATATYPE == "F32":
+        w += ${NR * 2};
+      $elif DATATYPE == "QC4":
+        w = (const int8_t*) w + ${NR * 2 // 2};
+      $else:
+        w = (const int8_t*) w + ${NR * 2};
+      k -= 2 * sizeof(float);
+    }
+    if XNN_UNLIKELY(k != 0) {
+      $for M in range(MR):
+        const __m128 va${M} = _mm_load1_ps(a${M});
+        a${M} += 1;
+
+      $if DATATYPE == "F32":
+        const __m128 vb${ABC[0:4]} = _mm_load_ps(w);
+        $for N in range(4, NR, 4):
+          const __m128 vb${ABC[N:N+4]} = _mm_load_ps(w + ${N});
+        w += ${NR};
+      $elif DATATYPE == "QC4":
+        $if SSE >= 4:
+          $for N in range(0, NR, 8):
+            const __m128i vbwi${ABC[N:N+8]}c0 = _mm_cvtepu8_epi16(_mm_loadl_epi64((const __m128i *) ((const int8_t*) w + ${N * 2})));
+          $for N in range(0, NR, 8):
+            __m128i vbw${ABC[N:N+8]}c0 = _mm_and_si128(vbwi${ABC[N:N+8]}c0, vmask);
         $else:
-          w = (const int8_t*) w + ${NR * 2};
-        k -= 2 * sizeof(float);
-      }
-      if XNN_UNLIKELY(k != 0) {
-        $for M in range(MR):
-          const __m128 va${M} = _mm_load1_ps(a${M});
-          a${M} += 1;
-
-        $if DATATYPE == "F32":
-          const __m128 vb${ABC[0:4]} = _mm_load_ps(w);
-          $for N in range(4, NR, 4):
-            const __m128 vb${ABC[N:N+4]} = _mm_load_ps(w + ${N});
-          w += ${NR};
-        $elif DATATYPE == "QC4":
           $for N in range(0, NR, 8):
             __m128i vbi${ABC[N:N+8]}c0 = _mm_loadl_epi64((const __m128i *) ((const int8_t*) w + ${N * 2}));
           $for N in range(0, NR, 8):
             __m128i vbwi${ABC[N:N+8]}c0 = _mm_unpacklo_epi8(vbi${ABC[N:N+8]}c0, vbi${ABC[N:N+8]}c0);
             __m128i vbw${ABC[N:N+8]}c0 = _mm_and_si128(vbwi${ABC[N:N+8]}c0, vmask);
+        $for N in range(0, NR, 8):
+          __m128i vbi${ABC[N:N+4]}c0 = _mm_unpacklo_epi16(vbw${ABC[N:N+8]}c0, _mm_setzero_si128());
+          __m128i vbi${ABC[N+4:N+8]}c0 = _mm_unpackhi_epi16(vbw${ABC[N:N+8]}c0, _mm_setzero_si128());
+          vbi${ABC[N:N+4]}c0 = _mm_add_epi32(vbi${ABC[N:N+4]}c0, vbias);
+          vbi${ABC[N+4:N+8]}c0 = _mm_add_epi32(vbi${ABC[N+4:N+8]}c0, vbias);
+          const __m128 vb${ABC[N:N+4]} = _mm_cvtepi32_ps(vbi${ABC[N:N+4]}c0);
+          const __m128 vb${ABC[N+4:N+8]} = _mm_cvtepi32_ps(vbi${ABC[N+4:N+8]}c0);
+        w = (const int8_t*) w + ${NR};
+      $elif DATATYPE == "QC8":
+        $if SSE >= 4:
+          const __m128i vbi${ABC[0:4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const void*) w)));
+          $for N in range(4, NR, 4):
+            const __m128i vbi${ABC[N:N+4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${N})));
+          $for N in range(0, NR, 4):
+            const __m128 vb${ABC[N:N+4]} = _mm_cvtepi32_ps(vbi${ABC[N:N+4]});
+        $else:
           $for N in range(0, NR, 8):
-            vbw${ABC[N:N+8]}c0 = _mm_add_epi16(vbw${ABC[N:N+8]}c0, vbias);
-            const __m128 vb${ABC[N:N+4]} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpacklo_epi16(vbw${ABC[N:N+8]}c0, vbw${ABC[N:N+8]}c0), 16));
-            const __m128 vb${ABC[N+4:N+8]} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpackhi_epi16(vbw${ABC[N:N+8]}c0, vbw${ABC[N:N+8]}c0), 16));
-          w = (const int8_t*) w + ${NR};
-        $elif DATATYPE == "QC8":
-          $if SSE >= 4:
-            const __m128i vbi${ABC[0:4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const void*) w)));
-            $for N in range(4, NR, 4):
-              const __m128i vbi${ABC[N:N+4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32((const int8_t*) w + ${N})));
-            $for N in range(0, NR, 4):
-              const __m128 vb${ABC[N:N+4]} = _mm_cvtepi32_ps(vbi${ABC[N:N+4]});
-          $else:
-            $for N in range(0, NR, 8):
-              const __m128i vb${ABC[N:N+8]} = _mm_loadl_epi64((const __m128i *) ((const int8_t*) w + ${N}));
-            $for N in range(0, NR, 8):
-              const __m128i vbw${ABC[N:N+8]} = _mm_unpacklo_epi8(vb${ABC[N:N+8]}, vb${ABC[N:N+8]});
-              const __m128 vb${ABC[N:N+4]} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpacklo_epi16(vbw${ABC[N:N+8]}, vbw${ABC[N:N+8]}), 24));
-              const __m128 vb${ABC[N+4:N+8]} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpackhi_epi16(vbw${ABC[N:N+8]}, vbw${ABC[N:N+8]}), 24));
-          w = (const int8_t*) w + ${NR};
+            const __m128i vb${ABC[N:N+8]} = _mm_loadl_epi64((const __m128i *) ((const int8_t*) w + ${N}));
+          $for N in range(0, NR, 8):
+            const __m128i vbw${ABC[N:N+8]} = _mm_unpacklo_epi8(vb${ABC[N:N+8]}, vb${ABC[N:N+8]});
+            const __m128 vb${ABC[N:N+4]} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpacklo_epi16(vbw${ABC[N:N+8]}, vbw${ABC[N:N+8]}), 24));
+            const __m128 vb${ABC[N+4:N+8]} = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpackhi_epi16(vbw${ABC[N:N+8]}, vbw${ABC[N:N+8]}), 24));
+        w = (const int8_t*) w + ${NR};
 
-        $for N in range(0, NR, 4):
-          $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = _mm_add_ps(vacc${M}x${ABC[N:N+4]}, _mm_mul_ps(va${M}, vb${ABC[N:N+4]}));
+      $for N in range(0, NR, 4):
+        $for M in range(MR):
+          vacc${M}x${ABC[N:N+4]} = _mm_add_ps(vacc${M}x${ABC[N:N+4]}, _mm_mul_ps(va${M}, vb${ABC[N:N+4]}));
 
-        k -= sizeof(float);
-      }
+      k -= sizeof(float);
     }
 
     $if DATATYPE == "QC8" or DATATYPE == "QC4":

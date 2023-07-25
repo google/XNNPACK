@@ -87,6 +87,10 @@ tools/xngen src/f32-gemm/sse-dup.c.in -D MR=1 -D NR=8 -D INC=0 -D SSE=2 -D DATAT
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=3 -D NR=8 -D INC=0 -D SSE=2 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x8-minmax-sse2-dup.c &
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=4 -D NR=8 -D INC=0 -D SSE=2 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-sse2-dup.c &
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=0 -D SSE=2 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x8-minmax-sse2-dup.c &
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=1 -D NR=8 -D INC=0 -D SSE=4 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-sse41-dup.c &
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=3 -D NR=8 -D INC=0 -D SSE=4 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x8-minmax-sse41-dup.c &
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=4 -D NR=8 -D INC=0 -D SSE=4 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-sse41-dup.c &
+tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=0 -D SSE=4 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x8-minmax-sse41-dup.c &
 
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/f32-qc4w-gemm-minmax.yaml --output test/f32-qc4w-gemm-minmax.cc &

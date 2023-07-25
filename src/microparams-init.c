@@ -1983,9 +1983,10 @@ size_t xnn_init_f32_qc4w_minmax_sse_params(
   for (uint32_t i = 0; i < 4; i++) {
     params->sse.min[i] = output_min;
     params->sse.max[i] = output_max;
+    params->sse.bias[i] = (int32_t) -bias;
   }
   for (uint32_t i = 0; i < 8; i++) {
-    params->sse.bias[i] = -bias;
+    params->sse.mask[i] = (uint16_t) 0xF;
   }
   return sizeof(params->sse);
 }
@@ -1999,9 +2000,10 @@ size_t xnn_init_f32_qc4w_minmax_avx_params(
   for (uint32_t i = 0; i < 8; i++) {
     params->avx.min[i] = output_min;
     params->avx.max[i] = output_max;
+    params->avx.bias[i] = (int32_t) -bias;
   }
   for (uint32_t i = 0; i < 16; i++) {
-    params->avx.bias[i] = -bias;
+    params->avx.mask[i] = (uint16_t) 0xF;
   }
   for (uint32_t i = 0; i < 7; i++) {
     params->avx.mask_table[i] = -1;
@@ -2025,7 +2027,7 @@ size_t xnn_init_f32_qc4w_minmax_wasmsimd_params(
   params->wasmsimd.max[0] = output_max;
   params->wasmsimd.max[1] = output_max;
   for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd.bias[i] = -bias;
+    params->wasmsimd.bias[i] = (int32_t) -bias;
   }
   return sizeof(params->wasmsimd);
 }
