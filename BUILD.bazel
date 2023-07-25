@@ -11293,7 +11293,6 @@ xnnpack_unit_test(
     srcs = [
         "test/jit.cc",
     ],
-    copts = ["-fpic"],
     deps = [
         ":common",
         ":jit_test_mode",
