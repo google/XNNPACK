@@ -420,7 +420,7 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
   if (avgpool_config == NULL) {
     xnn_release_simd_memory(zero_buffer);
     xnn_release_simd_memory(average_pooling_op);
-    xnn_log_error("THIS failed to create %s operator: unsupported hardware configuration",
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f16));
     return xnn_status_unsupported_hardware;
   }
