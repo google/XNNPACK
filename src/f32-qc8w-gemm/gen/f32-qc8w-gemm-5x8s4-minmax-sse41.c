@@ -9,7 +9,6 @@
 
 #include <assert.h>
 
-#include <xmmintrin.h>
 #include <smmintrin.h>
 
 #include <xnnpack/gemm.h>
@@ -78,7 +77,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_5x8s4__sse41(
     w = (const float*) w + 8;
 
     size_t k = kc;
-    while (k >= 4 * sizeof(float)) {
+    for (; k >= 4 * sizeof(float); k -= 4 * sizeof(float)) {
       __m128 va0 = _mm_loadu_ps(a0);
       a0 += 4;
       __m128 va1 = _mm_loadu_ps(a1);
@@ -171,7 +170,6 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_5x8s4__sse41(
 
 
       w = (const int8_t*) w + 32;
-      k -= 4 * sizeof(float);
     }
     if XNN_UNLIKELY(k != 0) {
       __m128 va0 = _mm_loadu_ps(a0);

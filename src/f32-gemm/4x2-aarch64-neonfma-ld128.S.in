@@ -159,7 +159,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
 
 2:
 
-        $if DATATYPE == "QC8" or DATATYPE == "QC4":
+        $if DATATYPE in ["QC8", "QC4"]:
           # Scale
           LDR         d20, [x5], 8
           FMUL        v24.2s, v24.2s, v20.2s

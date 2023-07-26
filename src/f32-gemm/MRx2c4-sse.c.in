@@ -3,25 +3,26 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert DATATYPE in ["F32", "QC8"]
+$assert DATATYPE in ["F32", "QC4", "QC8"]
 $assert NR == 2
 $assert MR % 2 == 0
 #include <assert.h>
 
-#include <xmmintrin.h>
-$if DATATYPE == "QC8":
+$if DATATYPE in ["QC8", "QC4"]:
   #include <smmintrin.h>
+$else:
+  #include <xmmintrin.h>
 
 #include <xnnpack/gemm.h>
 $if DATATYPE == "QC8":
   #include <xnnpack/unaligned.h>
 
 
-$if DATATYPE == "QC8":
+$if DATATYPE in ["QC8", "QC4"]:
   $ISA = {2: "sse2", 4: "sse41"}[SSE]
 $else:
   $ISA = "sse"
-$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
+$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC4": "f32_qc4w"}[DATATYPE]
 void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}c4__${ISA}(
     size_t mr,
     size_t nc,
@@ -35,7 +36,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}c4__${ISA}(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    $if DATATYPE == "QC4":
+      const union xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    $else:
+      const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -153,7 +157,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}c4__${ISA}(
     $for M in range(0, MR, 2):
       __m128 vacc${M}${M+1}x01 = _mm_add_ps(_mm_movelh_ps(vacc${M}x01c2, vacc${M+1}x01c2), _mm_movehl_ps(vacc${M+1}x01c2, vacc${M}x01c2));
 
-    $if DATATYPE == "QC8":
+    $if DATATYPE in ["QC8", "QC4"]:
       const __m128 vscalex01 = _mm_castsi128_ps(_mm_loadl_epi64((const __m128i*) w));
       const __m128 vscale2x01 = _mm_movelh_ps(vscalex01, vscalex01);
       w = (const float*) w + 2;

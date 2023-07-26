@@ -37,6 +37,7 @@ void xnn_f32_gemm_minmax_ukernel_1x8__sse_dup(
 
   const float* a0 = a;
   float* c0 = c;
+
   do {
     __m128 vacc0x0123 = _mm_load_ps(w + 0);
     __m128 vacc0x4567 = _mm_load_ps(w + 4);

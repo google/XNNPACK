@@ -61,6 +61,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_5x8__sse2_dup(
     a4 = a3;
     c4 = c3;
   }
+
   do {
     __m128 vacc0x0123 = _mm_loadu_ps((const float*) w + 0);
     __m128 vacc0x4567 = _mm_loadu_ps((const float*) w + 4);

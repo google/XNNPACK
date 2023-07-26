@@ -9,10 +9,9 @@
 
 #include <assert.h>
 
-#include <xmmintrin.h>
+#include <immintrin.h>
 
 #include <xnnpack/gemm.h>
-
 
 void xnn_f32_gemm_minmax_ukernel_3x8__sse_load1(
     size_t mr,

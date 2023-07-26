@@ -62,7 +62,7 @@ void xnn_f32_gemminc_minmax_ukernel_3x8s4__sse(
     acc += 24;
 
     size_t k = kc;
-    while (k >= 4 * sizeof(float)) {
+    for (; k >= 4 * sizeof(float); k -= 4 * sizeof(float)) {
       __m128 va0 = _mm_loadu_ps(a0);
       a0 += 4;
       __m128 va1 = _mm_loadu_ps(a1);
@@ -121,7 +121,6 @@ void xnn_f32_gemminc_minmax_ukernel_3x8s4__sse(
 
 
       w += 32;
-      k -= 4 * sizeof(float);
     }
     if XNN_UNLIKELY(k != 0) {
       __m128 va0 = _mm_loadu_ps(a0);

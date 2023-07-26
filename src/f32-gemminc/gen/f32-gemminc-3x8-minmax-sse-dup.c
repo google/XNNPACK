@@ -51,6 +51,7 @@ void xnn_f32_gemminc_minmax_ukernel_3x8__sse_dup(
     a2 = a1;
     c2 = c1;
   }
+
   do {
     __m128 vacc0x0123 = _mm_load_ps(acc + 0);
     __m128 vacc0x4567 = _mm_load_ps(acc + 4);

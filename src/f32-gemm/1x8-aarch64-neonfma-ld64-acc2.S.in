@@ -115,12 +115,12 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_1
         TBNZ        x0, 2, 3f
 
 2:
-        $if DATATYPE == "QC8" or DATATYPE == "QC4":
+        $if DATATYPE in ["QC8", "QC4"]:
           # Load Scale
           LDP         q24, q25, [x5], 32
         FADD        v16.4s, v16.4s, v18.4s
         FADD        v17.4s, v17.4s, v19.4s
-        $if DATATYPE == "QC8" or DATATYPE == "QC4":
+        $if DATATYPE in ["QC8", "QC4"]:
           # Scale
           FMUL        v16.4s, v16.4s, v24.4s
           FMUL        v17.4s, v17.4s, v25.4s

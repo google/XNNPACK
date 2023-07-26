@@ -149,7 +149,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"_goi" if GOI else ""}_minmax_ukernel_
         TBNZ        x0, 2, 5f
 
 2:
-        $if DATATYPE == "QC8" or DATATYPE == "QC4":
+        $if DATATYPE in ["QC8", "QC4"]:
           # Scale
           LDP         q22, q26, [x5], 32
           FMUL        v16.4s, v16.4s, v22.4s

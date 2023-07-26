@@ -441,7 +441,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         SCVTF       v31.4s, v31.4s
         LDP         q0, q1, [x5], 32        // kernel_scale
         LDP         q2, q3, [x5], 32
-        FMUL        v4.4s, v0.4s, v13.s[0] // kernel_scale * scale
+        FMUL        v4.4s, v0.4s, v13.s[0]  // kernel_scale * scale
         FMUL        v5.4s, v1.4s, v13.s[0]
         FMUL        v6.4s, v2.4s, v13.s[0]
         FMUL        v7.4s, v3.4s, v13.s[0]

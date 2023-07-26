@@ -154,7 +154,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
         B.NE        3f
 
 2:
-        $if DATATYPE == "QC8" or DATATYPE == "QC4":
+        $if DATATYPE in ["QC8", "QC4"]:
           # Scale
           LDR         s20, [x5], 4
           FMUL        s24, s24, v20.s[0]

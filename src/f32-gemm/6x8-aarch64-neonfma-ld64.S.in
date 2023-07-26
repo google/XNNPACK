@@ -215,7 +215,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_6
         # Is there a remainder?- 1 float of A (4 bytes)
         TBNZ        x0, 2, 3f
 2:
-        $if DATATYPE == "QC8" or DATATYPE == "QC4":
+        $if DATATYPE in ["QC8", "QC4"]:
           # Scale
           LDP         q16, q17, [x5], 32
           FMUL        v20.4s, v20.4s, v16.4s

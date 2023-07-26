@@ -63,6 +63,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_5x8__sse41_dup(
   }
   const __m128i vbias = _mm_load_si128((const __m128i *) params->sse.bias);
   const __m128i vmask = _mm_load_si128((const __m128i *) params->sse.mask);
+
   do {
     __m128 vacc0x0123 = _mm_loadu_ps((const float*) w + 0);
     __m128 vacc0x4567 = _mm_loadu_ps((const float*) w + 4);

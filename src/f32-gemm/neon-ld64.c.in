@@ -164,7 +164,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         $for M in range(MR):
           vacc${M}x${ABC[N:N+4]} = ${VMULADDQ_F32}(vacc${M}x${ABC[N:N+4]}, va${M}, vb${ABC[N:N+4]});
     }
-    $if DATATYPE == "QC8" or DATATYPE == "QC4":
+    $if DATATYPE in ["QC8", "QC4"]:
       $for N in range(0, NR, 4):
         const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
         $for M in range(MR):

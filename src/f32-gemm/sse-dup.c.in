@@ -6,6 +6,8 @@
 $assert DATATYPE in ["F32", "QC4", "QC8"]
 $if DATATYPE == "QC8" and SSE == 2:
   $assert NR % 8 == 0
+$elif DATATYPE == "QC4":
+  $assert NR == 8
 $else:
   $assert NR % 4 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -19,10 +21,7 @@ $if DATATYPE == "QC8" and SSE == 4:
   #include <xnnpack/unaligned.h>
 
 
-$if DATATYPE == "QC8" or DATATYPE == "QC4":
-  $ISA = {2: "sse2", 4: "sse41"}[SSE]
-$else:
-  $ISA = {1: "sse", 2: "sse2"}[SSE]
+$ISA = {1: "sse", 2: "sse2", 4: "sse41"}[SSE]
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC4": "f32_qc4w"}[DATATYPE]
 void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_dup(
     size_t mr,
@@ -78,6 +77,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
   $if DATATYPE == "QC4":
     const __m128i vbias = _mm_load_si128((const __m128i *) params->sse.bias);
     const __m128i vmask = _mm_load_si128((const __m128i *) params->sse.mask);
+
   do {
     $if INC:
       $for M in range(MR):
@@ -289,7 +289,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
       k -= sizeof(float);
     }
 
-    $if DATATYPE == "QC8" or DATATYPE == "QC4":
+    $if DATATYPE in ["QC8", "QC4"]:
       $for N in range(0, NR, 4):
         const __m128 vscale${ABC[N:N+4]} = _mm_loadu_ps((const float*) w + ${N});
         $for M in range(MR):

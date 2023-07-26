@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert DATATYPE in ["F32", "QC4", "QC8"]
-$assert ACTIVATION == "MINMAX" or DATATYPE != "QC4"
 $assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
 $assert ACTIVATION != "LINEAR" or not WASM
 $if DATATYPE == "QC4":
@@ -14,7 +13,7 @@ $if DATATYPE == "QC4":
 
 #include <xnnpack/gemm.h>
 #include <xnnpack/math.h>
-$if (DATATYPE == "QC8" and NR % 4 != 0) or (DATATYPE == "QC4" and NR % 4 != 0):
+$if DATATYPE in ["QC4", "QC8"] and NR % 4 != 0:
   #include <xnnpack/unaligned.h>
 
 
@@ -94,7 +93,7 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
         w += ${NR};
       $else:
         $for N in range(NR):
-          $if (DATATYPE == "QC8" and NR % 4 == 0) or (DATATYPE == "QC4" and NR % 4 == 0):
+          $if NR % 4 == 0:
             float vacc0${N} = ((const float*)w)[${N}];
           $else:
             float vacc0${N} = unaligned_indexed_load_f32(w, ${N});
@@ -160,9 +159,9 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
         k -= sizeof(float);
       } while (k != 0);
 
-    $if DATATYPE == "QC8" or DATATYPE == "QC4":
+    $if DATATYPE in ["QC8", "QC4"]:
       $for N in range(NR):
-        $if (DATATYPE == "QC8" and NR % 4 == 0) or (DATATYPE == "QC4" and NR % 4 == 0):
+        $if NR % 4 == 0:
           const float vscale${N} = ((const float*)w)[${N}];
         $else:
           const float vscale${N} = unaligned_indexed_load_f32(w, ${N});
