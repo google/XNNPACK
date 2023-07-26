@@ -40,6 +40,7 @@ static struct xnn_gemm_config qu8_gemm_config = {0};
   static INIT_ONCE init_guard_f16_gemm = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_gemm = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_gemm_nr2 = INIT_ONCE_STATIC_INIT;
+  static INIT_ONCE init_guard_f32_qc4w_gemm = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_f32_qc8w_gemm = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qs8_qc8w_gemm = INIT_ONCE_STATIC_INIT;
   static INIT_ONCE init_guard_qs8_gemm = INIT_ONCE_STATIC_INIT;
@@ -48,6 +49,7 @@ static struct xnn_gemm_config qu8_gemm_config = {0};
   static pthread_once_t init_guard_f16_gemm = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_gemm = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_gemm_nr2 = PTHREAD_ONCE_INIT;
+  static pthread_once_t init_guard_f32_qc4w_gemm = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_f32_qc8w_gemm = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qs8_qc8w_gemm = PTHREAD_ONCE_INIT;
   static pthread_once_t init_guard_qs8_gemm = PTHREAD_ONCE_INIT;
@@ -2922,9 +2924,9 @@ struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config() {
     return NULL;
   }
   #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_qc8w_gemm, &init_f32_qc4w_gemm_config_windows, NULL, NULL);
+    InitOnceExecuteOnce(&init_guard_f32_qc4w_gemm, &init_f32_qc4w_gemm_config_windows, NULL, NULL);
   #else
-    pthread_once(&init_guard_f32_qc8w_gemm, &init_f32_qc4w_gemm_config);
+    pthread_once(&init_guard_f32_qc4w_gemm, &init_f32_qc4w_gemm_config);
   #endif
   return &f32_qc4w_gemm_config;
 }
