@@ -17,7 +17,7 @@ $assert MR <= 4
 #include <xnnpack/math.h>
 
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qs8w", "QS8": "qs8", "QU8": "qu8"}[DATATYPE]
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QS8": "qs8", "QU8": "qu8"}[DATATYPE]
 $REQUANTIZATION_SPEC = "" if DATATYPE == "QD8" else "_" + REQUANTIZATION.lower()
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx512"
@@ -169,10 +169,14 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
       $for M in range(MR):
         __m512 vout${M}x0123456789ABCDEF = _mm512_permutexvar_ps(_mm512_set_epi32(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0), vscaled${M}x084C195D2A6E3B7F);
 
-      __m512 vbias0123456789ABCDEF = _mm512_load_ps((const float*) w);
+      const __m512 vbscale0123456789ABCDEF = _mm512_load_ps((const float*) w);
+      $for M in range(MR):
+        const __m512 vscale${M}x0123456789ABCDEF = _mm512_mul_ps(vbscale0123456789ABCDEF, vinput_scale${M});
+      w = (const float*) w + 16;
+      const __m512 vbias0123456789ABCDEF = _mm512_load_ps((const float*) w);
       w = (const float*) w + 16;
       $for M in range(MR):
-        vout${M}x0123456789ABCDEF = _mm512_fmadd_ps(vout${M}x0123456789ABCDEF, vinput_scale${M}, vbias0123456789ABCDEF);
+        vout${M}x0123456789ABCDEF = _mm512_fmadd_ps(vout${M}x0123456789ABCDEF, vscale${M}x0123456789ABCDEF, vbias0123456789ABCDEF);
 
       $for M in range(MR):
         vout${M}x0123456789ABCDEF = _mm512_max_ps(vout${M}x0123456789ABCDEF, voutput_min);

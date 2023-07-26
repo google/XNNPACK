@@ -210,7 +210,7 @@ typedef void (*xnn_qs8_gemm_minmax_ukernel_fn)(
     size_t cn_stride,
     const union xnn_qs8_conv_minmax_params* params);
 
-typedef void (*xnn_qd8_f32_qs8w_gemm_ukernel_fn)(
+typedef void (*xnn_qd8_f32_qc8w_gemm_ukernel_fn)(
     size_t mr,
     size_t nr,
     size_t k,

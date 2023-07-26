@@ -510,7 +510,7 @@ void GemmMicrokernelTester::Test(
 }
 
 void GemmMicrokernelTester::Test(
-  xnn_qd8_f32_qs8w_gemm_ukernel_fn gemm,
+  xnn_qd8_f32_qc8w_gemm_ukernel_fn gemm,
   xnn_init_f32_minmax_params_fn init_params) const
 {
   ASSERT_LE(m(), mr());
@@ -518,6 +518,7 @@ void GemmMicrokernelTester::Test(
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.f, 1.f), std::ref(rng));
+  auto scalerng = std::bind(std::uniform_real_distribution<float>(0.5f, 2.f), std::ref(rng));
   auto w8rng = std::bind(
       std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max()),
       std::ref(rng));
@@ -527,7 +528,9 @@ void GemmMicrokernelTester::Test(
   std::vector<xnn_qd8_quantization_params> quantization_params(mr());
   std::vector<int8_t> b(n() * k());
   std::vector<float> bias(n());
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(float) * 2);
+  std::vector<float> kernel_scale(n());
+  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k()
+                                                             + packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
   std::vector<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
   std::vector<float> c_ref(m() * n(), 0);
@@ -553,22 +556,32 @@ void GemmMicrokernelTester::Test(
     } while (b.size() > 1 && *std::max_element(b.cbegin(), b.cend()) == *std::min_element(b.cbegin(), b.cend()));
 
     std::generate(bias.begin(), bias.end(), std::ref(f32rng));
+    std::generate(kernel_scale.begin(), kernel_scale.end(), std::ref(scalerng));
     std::fill(c.begin(), c.end(), nanf(""));
 
     std::fill(packed_w.begin(), packed_w.end(), 0);
-    // Row sums are multiplied by input zero point, since we don';t know it
+    // Row sums are multiplied by input zero point, since we don't know it
     // until runtime, set it to 1.
     const xnn_qs8_packing_params packing_params = { /*input_zero_point=*/1 };
     xnn_pack_qs8_gemm_goi_w(1, n(), k(), nr(), kr(), sr(),
-                            b.data(), nullptr, packed_w.data(), sizeof(float) * nr(), &packing_params);
+                            b.data(), nullptr, packed_w.data(), 2 * sizeof(float) * nr(), &packing_params);
+    // Fill in packed kernel scale
+    xnn_init_qs8_qc8w_scale_fp32_params(
+      n(), nr(), nr(),
+      nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)),
+      nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)),
+      0,
+      kernel_scale.data(),
+      (void*) ((uintptr_t) packed_w.data() + nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(float))));
+
     // Fill in packed bias
     xnn_init_qs8_qc8w_scale_fp32_params(
       n(), nr(), nr(),
-      nr() * (ks() * packed_k() * sizeof(int8_t) + (sizeof(float) + sizeof(float))),
-      nr() * (ks() * packed_k() * sizeof(int8_t) + (sizeof(float) + sizeof(float))),
+      nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)),
+      nr() * (ks() * packed_k() * sizeof(int8_t) + 3 * sizeof(float)),
       0,
       bias.data(),
-      (void*) ((uintptr_t) packed_w.data() + nr() * (ks() * packed_k() * sizeof(int8_t) + sizeof(float))));
+      (void*) ((uintptr_t) packed_w.data() + nr() * (ks() * packed_k() * sizeof(int8_t) + 2 * sizeof(float))));
 
     // Compute 32-bit results and output quantization arguments.
     std::fill(c_ref.begin(), c_ref.end(), 0);
@@ -582,7 +595,7 @@ void GemmMicrokernelTester::Test(
               int32_t(b[n_index * k() + k_index]);
         }
         c_ref[m_index * n() + n_index] -= (quantization_params[m_index].zero_point * ksum);
-        c_ref[m_index * n() + n_index] *= quantization_params[m_index].inv_scale;
+        c_ref[m_index * n() + n_index] *= quantization_params[m_index].inv_scale * kernel_scale[n_index];
         c_ref[m_index * n() + n_index] += bias[n_index];
       }
     }
