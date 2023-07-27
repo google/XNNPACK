@@ -161,8 +161,9 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
 
   const size_t n_stride = round_up(n, nr);
   const size_t k_stride = round_up_po2(k, kr * sr);
+  const size_t input2_batch_stride = (n_stride * bias_element_size + ((n_stride * k_stride) << log2_input2_element_size));
 
-  *workspace_size = batch_size * (n_stride * bias_element_size + ((n_stride * k_stride) << log2_input2_element_size));
+  *workspace_size = batch_size * input2_batch_stride;
   *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
 
   uint32_t mr = batch_matrix_multiply_op->ukernel.gemm.mr;
@@ -177,16 +178,18 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
 
   assert(batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi != NULL);
   batch_matrix_multiply_op->context.packw_gemm_goi = (struct packw_gemm_goi_context) {
-    .g = batch_size,
     .kc = k,
     .nr = nr,
     .kr = kr,
     .sr = sr,
-    .k_stride = k << log2_input1_element_size,
+    .k_stride = k << log2_input2_element_size,
     .bias = NULL,
     .b_stride = bias_element_size,
-    .w_stride = bias_element_size + (k_stride << log2_input1_element_size),
+    .w_stride = bias_element_size + (k_stride << log2_input2_element_size),
     .packw_gemm_goi = batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi,
+    .gk_stride = n * (k << log2_input2_element_size),
+    .gb_stride = n * bias_element_size,
+    .gc_stride = input2_batch_stride,
   };
 
   size_t w_stride = bias_element_size + (round_up_po2(k, kr * sr) << log2_input1_element_size);
@@ -205,13 +208,13 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
   memcpy(&batch_matrix_multiply_op->context.gemm.params, params, params_size);
   batch_matrix_multiply_op->context.gemm.fused_params = &batch_matrix_multiply_op->context.gemm.params;
 
-  batch_matrix_multiply_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-  batch_matrix_multiply_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_packw_gemm_goi;
+  batch_matrix_multiply_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
+  batch_matrix_multiply_op->compute[0].task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_batched_packw_gemm_goi;
   batch_matrix_multiply_op->compute[0].context_offset =
     offsetof(struct xnn_operator, context.packw_gemm_goi) - offsetof(struct xnn_operator, context);
-  batch_matrix_multiply_op->compute[0].range[0] = n;
-  // TODO(zhin): figure out if we can parallelize this packing.
-  batch_matrix_multiply_op->compute[0].tile[0] = n;
+  batch_matrix_multiply_op->compute[0].range[0] = batch_size;
+  batch_matrix_multiply_op->compute[0].range[1] = n;
+  batch_matrix_multiply_op->compute[0].tile[0] = nr;
 
   #if XNN_TEST_MODE
     const size_t nc = nr;

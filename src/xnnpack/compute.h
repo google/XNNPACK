@@ -174,8 +174,6 @@ XNN_PRIVATE void xnn_compute_transposev_6d(
 // Context for Packing Weights (packw) for GEMM microkernels in Group-OutputChannels-InputChannels layout.
 // Kernel has shape GxNxK, bias has shape GxN.
 struct packw_gemm_goi_context {
-  // Number of groups, used for grouped convolutions.
-  size_t g;
   // Number of input channels.
   size_t kc;
   // Number of output channels the GEMM is optimized for.
@@ -194,6 +192,15 @@ struct packw_gemm_goi_context {
   void* packed_weights;
   // Stride, in bytes, between each packed kernel and bias.
   size_t w_stride;
+
+  // Strides used for batched packw.
+  // Stride, in bytes, between each group of kernel
+  size_t gk_stride;
+  // Stride, in bytes, between each group of bias.
+  size_t gb_stride;
+  // Stride, in bytes, between each group of packed weights.
+  size_t gc_stride;
+
   // Microkernel to preform packing.
   xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
 };
@@ -201,6 +208,11 @@ struct packw_gemm_goi_context {
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_packw_gemm_goi(
       const struct packw_gemm_goi_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t n_block_start,
+      size_t n_block_size);
+  XNN_PRIVATE void xnn_compute_batched_packw_gemm_goi(
+      const struct packw_gemm_goi_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
       size_t n_block_start,
       size_t n_block_size);
 #endif

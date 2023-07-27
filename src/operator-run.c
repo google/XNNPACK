@@ -309,7 +309,30 @@ void xnn_compute_packw_gemm_goi(
   void* packed_weights = (void*) ((uintptr_t) context->packed_weights + context->w_stride * n_block_start);
 
   context->packw_gemm_goi(
-    context->g, n_block_size, context->kc,
+    1, n_block_size, context->kc,
+    context->nr, context->kr, context->sr,
+    kernel, bias, packed_weights,
+    /*extra_bytes=*/0, /*params=*/NULL);
+}
+
+void xnn_compute_batched_packw_gemm_goi(
+    const struct packw_gemm_goi_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index,
+    size_t n_block_start,
+    size_t n_block_size)
+{
+  const void* kernel = (const void*) ((uintptr_t) context->kernel + context->k_stride * n_block_start +
+                                      batch_index * context->gk_stride);
+  const void* bias = context->bias;
+  if (bias != NULL) {
+    bias = (const void*) ((uintptr_t) bias + n_block_start * context->b_stride +
+                          batch_index * context->gb_stride);
+  }
+  void* packed_weights = (void*) ((uintptr_t) context->packed_weights + context->w_stride * n_block_start +
+                                  batch_index * context->gc_stride);
+
+  context->packw_gemm_goi(
+    1, n_block_size, context->kc,
     context->nr, context->kr, context->sr,
     kernel, bias, packed_weights,
     /*extra_bytes=*/0, /*params=*/NULL);
