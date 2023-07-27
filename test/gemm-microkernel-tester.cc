@@ -1474,7 +1474,7 @@ void GemmMicrokernelTester::Test(xnn_f32_qc4w_gemm_minmax_ukernel_fn gemm_minmax
           ASSERT_LE(n(), packed_n());
           ASSERT_LT(m_index * n() + n_index, c_ref.size());
           const size_t nb_index = n_index * k_stride + k_index / 2;
-          const int16_t bv = int16_t((k_index % 2 == 0) ? (b[nb_index] & 15) : (b[nb_index] >> 4)) - qc4w_zero_point();
+          const int16_t bv = int16_t((k_index % 2 == 0) ? (b[nb_index] & 15) : (b[nb_index] >> 4)) - b_zero_point();
 
           c_ref[m_index * n() + n_index] +=
             double(a[m_index * a_stride() + k_index]) *
@@ -1495,7 +1495,7 @@ void GemmMicrokernelTester::Test(xnn_f32_qc4w_gemm_minmax_ukernel_fn gemm_minmax
 
     // Prepare parameters.
     xnn_f32_qc4w_minmax_params params;
-    init_params(&params, c_min, c_max, qc4w_zero_point());
+    init_params(&params, c_min, c_max, b_zero_point());
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {

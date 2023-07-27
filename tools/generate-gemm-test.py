@@ -30,7 +30,6 @@ parser.add_argument(
     help="Output (C++ source) file(s)")
 parser.set_defaults(defines=list())
 
-
 def split_ukernel_name(name):
   common_name, target_name = name.split("__", 1)
   common_parts = common_name.split("_")
@@ -846,6 +845,26 @@ $if DATATYPE == "qu8":
     }
   }
 
+$if DATATYPE == "f32_qc4w":
+  TEST(${TEST_NAME}, zero_point) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t z = 0; z <= 15; ++z) {
+      GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
+        .mr(${MR})
+        .nr(${NR})
+        .kr(${KR})
+        .sr(${SR})
+        .m(${MR})
+        .n(${NR})
+        .k(${KBLOCK})
+        .b_zero_point(z)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+
 $if TEST_NAME.startswith('GENERATE') and (DATATYPE == 'f32' or DATATYPE == 'f16'):
   TEST(${TEST_NAME}, subtile_m_upto_mr) {
     $if ISA_CHECK:
@@ -967,10 +986,12 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
     activation = None
   else:
     _, datatype, ukernel_type, activation, _ = ukernel.split("_", 4)
-
+    if datatype == "f32" and ukernel_type in ["qc8w", "qc4w"]:
+      _, datatype, weighttype, ukernel_type, activation, _ = ukernel.split("_", 5)
+      datatype = datatype + "_" + weighttype
   if activation == "ukernel":
     activation = "linear"
-  if activation == "qs8w":
+  if activation in ["qs8w"]:
     _, _, _, _, _, activation, _ = ukernel.split("_", 6)
   test_args = [ukernel]
   if init_fn:

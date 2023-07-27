@@ -145,15 +145,6 @@ class GemmMicrokernelTester {
     return this->b_zero_point_;
   }
 
-  inline GemmMicrokernelTester& qc4w_zero_point(int16_t qc4w_zero_point) {
-    this->qc4w_zero_point_ = qc4w_zero_point;
-    return *this;
-  }
-
-  inline int16_t qc4w_zero_point() const {
-    return this->qc4w_zero_point_;
-  }
-
   inline GemmMicrokernelTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
@@ -343,7 +334,6 @@ class GemmMicrokernelTester {
   size_t cn_stride_{0};
   uint8_t a_zero_point_{127};
   uint8_t b_zero_point_{127};
-  int16_t qc4w_zero_point_{0};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
   size_t a_offset_{0};
