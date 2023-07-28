@@ -113,6 +113,10 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-7x8-minmax-avx-broadcast.c
   src/f32-prelu/gen/f32-prelu-avx-2x8.c
   src/f32-prelu/gen/f32-prelu-avx-2x16.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-avx-dup.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x8-minmax-avx-dup.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-avx-dup.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x8-minmax-avx-dup.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx-x8.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx-x16.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx-x24.c
