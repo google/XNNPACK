@@ -31,7 +31,7 @@ TEST(PACK_F32_GEMM_GIO_W, g_eq_1) {
   std::iota(k.begin(), k.end(), static_cast<float>(b.size())); // k = [2, 3, 4, 5]
   std::vector<float> packed_weights(g * round_up(nc, nr) * (1 + round_up_po2(kc, kr * sr)));
   xnn_pack_f32_gemm_gio_w(
-      g, nc, kc, nr, kr, sr, k.data(), b.data(), packed_weights.data(), /*extra_bytes=*/0, nullptr);
+      g, nc, kc, nr, kr, sr, nc, k.data(), b.data(), packed_weights.data(), /*extra_bytes=*/0, nullptr);
 
   const std::vector<float> expected = {
     0.0f,
@@ -56,7 +56,7 @@ TEST(PACK_F32_GEMM_GIO_W, g_eq_1_nr_gt_1_kr_gt_1) {
   std::iota(k.begin(), k.end(), static_cast<float>(b.size())); // k = [3, 4, 5, 6, 7, 8, 9, 10, 11]
   std::vector<float> packed_weights(g * round_up(nc, nr) * (1 + round_up_po2(kc, kr * sr)));
   xnn_pack_f32_gemm_gio_w(
-      g, nc, kc, nr, kr, sr, k.data(), b.data(), packed_weights.data(), /*extra_bytes=*/0, nullptr);
+      g, nc, kc, nr, kr, sr, nc, k.data(), b.data(), packed_weights.data(), /*extra_bytes=*/0, nullptr);
 
   const std::vector<float> expected = {
     0.0f, 1.0f,
@@ -83,7 +83,7 @@ TEST(PACK_F32_GEMM_GIO_W, g_gt_1) {
   std::iota(k.begin(), k.end(), static_cast<float>(b.size())); // k = [6,7,8,9,10,11,12,13,14,15,16,17]
   std::vector<float> packed_weights(g * round_up(nc, nr) * (1 + round_up_po2(kc, kr * sr)));
   xnn_pack_f32_gemm_gio_w(
-      g, nc, kc, nr, kr, sr, k.data(), b.data(), packed_weights.data(), /*extra_bytes=*/0, nullptr);
+      g, nc, kc, nr, kr, sr, nc, k.data(), b.data(), packed_weights.data(), /*extra_bytes=*/0, nullptr);
 
   const std::vector<float> expected = {
     0.0f,
@@ -120,7 +120,7 @@ TEST(PACK_F32_GEMM_GIO_W, g_gt_1_nr_gt_1_kr_gt_1) {
                                                                // ]
   std::vector<float> packed_weights(g * round_up(nc, nr) * (1 + round_up_po2(kc, kr * sr)));
   xnn_pack_f32_gemm_gio_w(
-      g, nc, kc, nr, kr, sr, k.data(), b.data(), packed_weights.data(), /*extra_bytes=*/0, nullptr);
+      g, nc, kc, nr, kr, sr, nc, k.data(), b.data(), packed_weights.data(), /*extra_bytes=*/0, nullptr);
 
   const std::vector<float> expected = {
     // Group 1.

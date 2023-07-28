@@ -134,6 +134,7 @@ static enum xnn_status create_fully_connected_nc(
     pack_gemm_gio_w(
       1, output_channels, input_channels,
       nr, kr, sr,
+      output_channels,
       kernel, bias,
       weights_ptr,
       gemm_parameters->nr * extra_weights_bytes,

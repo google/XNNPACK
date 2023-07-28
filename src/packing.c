@@ -499,6 +499,7 @@ void xnn_pack_f32_gemm_gio_w(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t k_stride,
   const float* k,
   const float* b,
   float* packed_weights,
@@ -526,7 +527,7 @@ void xnn_pack_f32_gemm_gio_w(
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
             const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
             if (kc_idx < kc) {
-              packed_weights[kr_block_offset] = k[kc_idx * nc + nr_block_start + nr_block_offset];
+              packed_weights[kr_block_offset] = k[kc_idx * k_stride + nr_block_start + nr_block_offset];
             }
           }
           packed_weights += kr;
@@ -549,6 +550,7 @@ void xnn_pack_f16_gemm_gio_w(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t k_stride,
   const uint16_t* k,
   const uint16_t* b,
   uint16_t* packed_weights,
@@ -576,7 +578,7 @@ void xnn_pack_f16_gemm_gio_w(
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
             const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
             if (kc_idx < kc) {
-              packed_weights[kr_block_offset] = k[kc_idx * nc + nr_block_start + nr_block_offset];
+              packed_weights[kr_block_offset] = k[kc_idx * k_stride + nr_block_start + nr_block_offset];
             }
           }
           packed_weights += kr;
@@ -599,6 +601,7 @@ void xnn_pack_f32_to_f16_gemm_gio_w(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t k_stride,
   const float* k,
   const float* b,
   uint16_t* packed_weights,
@@ -626,7 +629,7 @@ void xnn_pack_f32_to_f16_gemm_gio_w(
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
             const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
             if (kc_idx < kc) {
-              packed_weights[kr_block_offset] = fp16_ieee_from_fp32_value(k[kc_idx * nc + nr_block_start + nr_block_offset]);
+              packed_weights[kr_block_offset] = fp16_ieee_from_fp32_value(k[kc_idx * k_stride + nr_block_start + nr_block_offset]);
             }
           }
           packed_weights += kr;
@@ -649,6 +652,7 @@ void xnn_pack_qu8_gemm_gio_w(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t k_stride,
   const uint8_t* k,
   const int32_t* b,
   void* packed_weights,
@@ -687,7 +691,7 @@ void xnn_pack_qu8_gemm_gio_w(
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
             const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
             if (kc_idx < kc) {
-              const uint8_t kv = k[kc_idx * nc + (nr_block_start + nr_block_offset)];
+              const uint8_t kv = k[kc_idx * k_stride + (nr_block_start + nr_block_offset)];
               ksum += (int32_t) kv;
               ((uint8_t*) packed_weights)[kr_block_offset] = kv;
             }
@@ -713,6 +717,7 @@ void xnn_pack_qs8_gemm_gio_w(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t k_stride,
   const int8_t* k,
   const int32_t* b,
   void* packed_weights,
@@ -750,7 +755,7 @@ void xnn_pack_qs8_gemm_gio_w(
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
             const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
             if (kc_idx < kc) {
-              const int8_t kv = k[kc_idx * nc + (nr_block_start + nr_block_offset)];
+              const int8_t kv = k[kc_idx * k_stride + (nr_block_start + nr_block_offset)];
               ksum += (uint32_t) kv;
               ((int8_t*) packed_weights)[kr_block_offset] = kv;
             }
@@ -776,6 +781,7 @@ void xnn_pack_f32_qs8w_gemm_gio_w(
   size_t nr,
   size_t kr,
   size_t sr,
+  size_t k_stride,
   const int8_t* k,
   const float* bias,
   void* packed_weights,
@@ -811,7 +817,7 @@ void xnn_pack_f32_qs8w_gemm_gio_w(
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
             const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
             if (kc_idx < kc) {
-              const int8_t kv = k[kc_idx * nc + (nr_block_start + nr_block_offset)];
+              const int8_t kv = k[kc_idx * k_stride + (nr_block_start + nr_block_offset)];
               ((int8_t*) packed_weights)[kr_block_offset] = kv;
             }
           }
