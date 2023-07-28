@@ -148,7 +148,7 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api)
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
-  const xnn_status status = xnn_create_batch_matrix_multiply_nc_f32(/*flags=*/0, &op);
+  const xnn_status status = xnn_create_batch_matrix_multiply_nc_f32(/*flags=*/XNN_FLAG_TRANSPOSE_B, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -201,7 +201,7 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api)
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id, output_id, /*flags=*/0));
+    xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id, output_id, /*flags=*/XNN_FLAG_TRANSPOSE_B));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -254,7 +254,7 @@ void DefineBatchMatrixMultiplySubgraph(
                           /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
-  *status_out = xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id, output_id, /*flags=*/0);
+  *status_out = xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id, output_id, /*flags=*/XNN_FLAG_TRANSPOSE_B);
 }
 }  // namespace
 

@@ -217,6 +217,50 @@ struct packw_gemm_goi_context {
       size_t n_block_size);
 #endif
 
+// Context for Packing Weights (packw) for GEMM microkernels in Groups-InputChannels-OutputChannels layout.
+// Kernel has shape GxKxN, bias has shape GxN.
+struct packw_gemm_gio_context {
+  // Number of input channels.
+  size_t kc;
+  // Number of output channels the GEMM is optimized for.
+  size_t nr;
+  size_t kr;
+  size_t sr;
+  // Pointer to kernel.
+  const void* kernel;
+  // Pointer to bias.
+  const void* bias;
+  // Stride, in bytes, between each bias.
+  size_t b_stride;
+  // Output pointer to write packed kernel and bias.
+  void* packed_weights;
+  // Stride, in bytes, between each packed kernel and bias.
+  size_t w_stride;
+  // Stride, in number of elements, between each k of the kernel.
+  size_t k_stride_elements;
+  // Stride, in bytes, between each n of the kernel.
+  size_t n_stride;
+
+  // Strides used for batched packw.
+  // Stride, in bytes, between each group of kernel
+  size_t gk_stride;
+  // Stride, in bytes, between each group of bias.
+  size_t gb_stride;
+  // Stride, in bytes, between each group of of packed weights.
+  size_t gc_stride;
+
+  // Microkernel to preform packing.
+  xnn_packw_gemm_gio_ukernel_fn packw_gemm_gio;
+};
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_batched_packw_gemm_gio(
+      const struct packw_gemm_gio_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
+      size_t n_block_start,
+      size_t n_block_size);
+#endif
+
 // Context for Dense Matrix Multiplication.
 // C [GxMxN] := A [GxMxK] * B[GxKxN] + bias [GxN]
 // Where B and bias have been packed into packed_w.

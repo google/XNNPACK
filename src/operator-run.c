@@ -296,6 +296,30 @@ void xnn_compute_transposev_6d(
       tile_n);
 }
 
+void xnn_compute_batched_packw_gemm_gio(
+    const struct packw_gemm_gio_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index,
+    size_t n_block_start,
+    size_t n_block_size)
+{
+  const void* kernel = (const void*) ((uintptr_t) context->kernel + n_block_start * context->n_stride +
+                                      batch_index * context->gk_stride);
+  const void* bias = context->bias;
+  if (bias != NULL) {
+    bias = (const void*) ((uintptr_t) bias + n_block_start * context->b_stride +
+                          batch_index * context->gb_stride);
+  }
+  void* packed_weights = (void*) ((uintptr_t) context->packed_weights + n_block_start * context->w_stride +
+                                  batch_index * context->gc_stride);
+
+  context->packw_gemm_gio(
+    1, n_block_size, context->kc,
+    context->nr, context->kr, context->sr,
+    context->k_stride_elements,
+    kernel, bias, packed_weights,
+    /*extra_bytes=*/0, /*params=*/NULL);
+}
+
 void xnn_compute_packw_gemm_goi(
     const struct packw_gemm_goi_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t n_block_start,

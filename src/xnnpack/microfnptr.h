@@ -1252,6 +1252,7 @@ typedef void (*xnn_x32_zerob_gemm_ukernel_fn)(
     const union xnn_x32_packb_params* params);
 
 // PACKW: PACK W (weights) for GEMM matrix multiplication
+// Weights in GOI layout: Groups, Output channels, Input channels.
 
 typedef void (*xnn_packw_gemm_goi_ukernel_fn)(
     size_t g,
@@ -1304,6 +1305,25 @@ typedef void (*xnn_x32_packw_gemm_goi_ukernel_fn)(
     uint32_t* packed_weights,
     size_t extra_bytes,
     const void* params);
+
+// Weights in GIO layout: Groups, Input channels, Output channels.
+typedef void (*xnn_packw_gemm_gio_ukernel_fn)(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  // We tile packing by output channels, in GIO layout, the k (row) index needs to be able to skip by the actual number
+  // of output channels, and not just the argument nc. E.g. if weights is 1x3x5, and nr is 2, we tile the packing by
+  // output channels, 2 + 2 + 1, with 3 calls to this packing function. In the first call nc == nr == 2, but to address
+  // the second row of k, we need to skip by 5 elements, not 2 (nc). So k_stride should be set to 5.
+  size_t k_stride,
+  const void* k,
+  const void* b,
+  void* packed_weights,
+  size_t extra_bytes,
+  const void* params);
 
 // PACKX: PACK X (input) tensor for pre-packed matrix multiplication
 

@@ -58,7 +58,10 @@ struct xnn_ukernel_dwconv2d {
 
 struct xnn_ukernel_gemm {
   struct xnn_hmp_gemm_ukernel gemm_cases[XNN_MAX_MR];
-  xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
+  union {
+    xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
+    xnn_packw_gemm_gio_ukernel_fn packw_gemm_gio;
+  };
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;
@@ -366,7 +369,10 @@ struct xnn_operator {
     // PACKW GEMM GOI + GEMM are used together in Dynamic Fully Connected.
     struct {
       struct gemm_context gemm;
-      struct packw_gemm_goi_context packw_gemm_goi;
+      union {
+        struct packw_gemm_goi_context packw_gemm_goi;
+        struct packw_gemm_gio_context packw_gemm_gio;
+      };
     };
     struct global_average_pooling_nwc_context global_average_pooling_nwc;
     struct global_average_pooling_ncw_context global_average_pooling_ncw;

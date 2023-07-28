@@ -63,6 +63,12 @@ extern "C" {
 /// Match "SAME" padding in TensorFlow. Exact padding values are computed dynamically depending on input size.
 #define XNN_FLAG_TENSORFLOW_SAME_PADDING 0x00000004
 
+/// Assume transposed weights in a batch matrix multiply operator.
+#define XNN_FLAG_TRANSPOSE_B XNN_FLAG_TRANSPOSE_WEIGHTS
+
+/// Assume transposed input in a batch matrix multiply operator.
+#define XNN_FLAG_TRANSPOSE_A 0x00000002
+
 /// Implicitly flatten and reshape input of a Fully Connected operator into a 2D tensor.
 #define XNN_FLAG_TENSORFLOW_RESHAPE_2D 0x00000004
 
