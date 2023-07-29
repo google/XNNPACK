@@ -21,7 +21,7 @@ $if DATATYPE == "QC8" and SSE == 4:
   #include <xnnpack/unaligned.h>
 
 
-$ISA = "avx" if AVX else {1: "sse", 2: "sse2", 4: "sse41"}[SSE]
+$ISA = {0: "avx", 3: "fma3"}[FMA] if AVX else {1: "sse", 2: "sse2", 4: "sse41"}[SSE]
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC4": "f32_qc4w"}[DATATYPE]
 void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_dup(
     size_t mr,
@@ -162,7 +162,11 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
 
         $for N in range(0, NR, 4):
           $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = _mm_add_ps(vacc${M}x${ABC[N:N+4]}, _mm_mul_ps(va${M}c${LLLL}, vb${ABC[N:N+4]}c${L}));
+            $if FMA == 3:
+              vacc${M}x${ABC[N:N+4]} = _mm_fmadd_ps(va${M}c${LLLL}, vb${ABC[N:N+4]}c${L}, vacc${M}x${ABC[N:N+4]});
+            $else:
+              vacc${M}x${ABC[N:N+4]} = _mm_add_ps(vacc${M}x${ABC[N:N+4]}, _mm_mul_ps(va${M}c${LLLL}, vb${ABC[N:N+4]}c${L}));
+
 
       $if DATATYPE == "F32":
         w += ${NR * 4};
@@ -230,7 +234,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
 
         $for N in range(0, NR, 4):
           $for M in range(MR):
-            vacc${M}x${ABC[N:N+4]} = _mm_add_ps(vacc${M}x${ABC[N:N+4]}, _mm_mul_ps(va${M}c${LLLL}, vb${ABC[N:N+4]}c${L}));
+            $if FMA == 3:
+              vacc${M}x${ABC[N:N+4]} = _mm_fmadd_ps(va${M}c${LLLL}, vb${ABC[N:N+4]}c${L}, vacc${M}x${ABC[N:N+4]});
+            $else:
+              vacc${M}x${ABC[N:N+4]} = _mm_add_ps(vacc${M}x${ABC[N:N+4]}, _mm_mul_ps(va${M}c${LLLL}, vb${ABC[N:N+4]}c${L}));
 
       $if DATATYPE == "F32":
         w += ${NR * 2};
@@ -288,7 +295,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
 
       $for N in range(0, NR, 4):
         $for M in range(MR):
-          vacc${M}x${ABC[N:N+4]} = _mm_add_ps(vacc${M}x${ABC[N:N+4]}, _mm_mul_ps(va${M}, vb${ABC[N:N+4]}));
+          $if FMA == 3:
+            vacc${M}x${ABC[N:N+4]} = _mm_fmadd_ps(va${M}, vb${ABC[N:N+4]}, vacc${M}x${ABC[N:N+4]});
+          $else:
+            vacc${M}x${ABC[N:N+4]} = _mm_add_ps(vacc${M}x${ABC[N:N+4]}, _mm_mul_ps(va${M}, vb${ABC[N:N+4]}));
 
       k -= sizeof(float);
     }

@@ -133,6 +133,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_3x8__sse2_dup(
       vacc1x4567 = _mm_add_ps(vacc1x4567, _mm_mul_ps(va1c3333, vb4567c3));
       vacc2x4567 = _mm_add_ps(vacc2x4567, _mm_mul_ps(va2c3333, vb4567c3));
 
+
       w = (const int8_t*) w + 32;
     }
     if XNN_UNLIKELY(k >= 2 * sizeof(float)) {

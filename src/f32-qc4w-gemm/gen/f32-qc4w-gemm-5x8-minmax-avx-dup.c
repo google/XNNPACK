@@ -193,6 +193,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_5x8__avx_dup(
       vacc3x4567 = _mm_add_ps(vacc3x4567, _mm_mul_ps(va3c3333, vb4567c3));
       vacc4x4567 = _mm_add_ps(vacc4x4567, _mm_mul_ps(va4c3333, vb4567c3));
 
+
       w = (const int8_t*) w + 16;
     }
     if XNN_UNLIKELY(k >= 2 * sizeof(float)) {
