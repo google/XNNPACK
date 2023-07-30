@@ -17,8 +17,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/vmulcaddc.h>
 
 
-$WASM_F32X4_MIN={"ARM": "wasm_f32x4_min", "X86": "wasm_f32x4_pmin", "RELAXED": "__builtin_wasm_relaxed_min_f32x4"}[ARCH]
-$WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "__builtin_wasm_relaxed_max_f32x4"}[ARCH]
+$WASM_F32X4_MIN={"ARM": "wasm_f32x4_min", "X86": "wasm_f32x4_pmin", "RELAXED": "wasm_f32x4_relaxed_min"}[ARCH]
+$WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "wasm_f32x4_relaxed_max"}[ARCH]
 $ISA = "wasmsimd" if ARCH != "RELAXED" else "wasmrelaxedsimd"
 $ARCH_SUFFIX = "" if ARCH == "RELAXED" and not FMA else "_" + ("fma" if FMA else ARCH.lower())
 void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__${ISA}${ARCH_SUFFIX}_${ROW_TILE}x(
@@ -78,7 +78,7 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__${ISA}${ARCH_SUFFIX}_${R
       $for M in range(ROW_TILE):
         $for C in range(0, CHANNEL_TILE, 4):
           $if FMA:
-            vacc${M}x${ABC[C:C+4]} = __builtin_wasm_relaxed_madd_f32x4(vscale${ABC[C:C+4]}, vacc${M}x${ABC[C:C+4]}, vbias${ABC[C:C+4]});
+            vacc${M}x${ABC[C:C+4]} = wasm_f32x4_relaxed_madd(vscale${ABC[C:C+4]}, vacc${M}x${ABC[C:C+4]}, vbias${ABC[C:C+4]});
           $else:
             vacc${M}x${ABC[C:C+4]} = wasm_f32x4_add(wasm_f32x4_mul(vscale${ABC[C:C+4]}, vacc${M}x${ABC[C:C+4]}), vbias${ABC[C:C+4]});
 
@@ -110,7 +110,7 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__${ISA}${ARCH_SUFFIX}_${R
 
         $for M in range(ROW_TILE):
           $if FMA:
-            vacc${M} = __builtin_wasm_relaxed_madd_f32x4(vscale, vacc${M}, vbias);
+            vacc${M} = wasm_f32x4_relaxed_madd(vscale, vacc${M}, vbias);
           $else:
             vacc${M} = wasm_f32x4_add(wasm_f32x4_mul(vscale, vacc${M}), vbias);
 
@@ -137,7 +137,7 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__${ISA}${ARCH_SUFFIX}_${R
 
       $for M in range(ROW_TILE):
         $if FMA:
-          vacc${M} = __builtin_wasm_relaxed_madd_f32x4(vscale, vacc${M}, vbias);
+          vacc${M} = wasm_f32x4_relaxed_madd(vscale, vacc${M}, vbias);
         $else:
           vacc${M} = wasm_f32x4_add(wasm_f32x4_mul(vscale, vacc${M}), vbias);
 

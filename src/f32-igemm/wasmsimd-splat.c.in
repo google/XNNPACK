@@ -16,8 +16,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
 $if ACTIVATION == "MINMAX":
-$  WASM_F32X4_MIN={"ARM": "wasm_f32x4_min", "X86": "wasm_f32x4_pmin", "RELAXED": "__builtin_wasm_relaxed_min_f32x4"}[ARCH]
-$  WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "__builtin_wasm_relaxed_max_f32x4"}[ARCH]
+$  WASM_F32X4_MIN={"ARM": "wasm_f32x4_min", "X86": "wasm_f32x4_pmin", "RELAXED": "wasm_f32x4_relaxed_min"}[ARCH]
+$  WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "wasm_f32x4_relaxed_max"}[ARCH]
 $ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
 $ISA = "wasmsimd" if not FMA and (ACTIVATION in ["LINEAR", "RELU"] or ARCH != "RELAXED") else "wasmrelaxedsimd"
 $ARCH_SUFFIX = "" if not FMA and (ACTIVATION in ["LINEAR", "RELU"] or ARCH == "RELAXED") else "_" + ("fma" if FMA else ARCH.lower())
@@ -102,7 +102,7 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__${ISA}${ARCH_SUFFIX}
           $for N in range(0, NR, 4):
             $for M in range(MR):
               $if FMA:
-                vacc${M}x${ABC[N:N+4]} = __builtin_wasm_relaxed_madd_f32x4(va${M}c${L}, vb${ABC[N:N+4]}c${L}, vacc${M}x${ABC[N:N+4]});
+                vacc${M}x${ABC[N:N+4]} = wasm_f32x4_relaxed_madd(va${M}c${L}, vb${ABC[N:N+4]}c${L}, vacc${M}x${ABC[N:N+4]});
               $else:
                 vacc${M}x${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(va${M}c${L}, vb${ABC[N:N+4]}c${L}), vacc${M}x${ABC[N:N+4]});
 
@@ -123,7 +123,7 @@ void xnn_f32_igemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}__${ISA}${ARCH_SUFFIX}
           $for M in range(MR):
             $for N in range(0, NR, 4):
               $if FMA:
-                vacc${M}x${ABC[N:N+4]} = __builtin_wasm_relaxed_madd_f32x4(va${M}, vb${ABC[N:N+4]}, vacc${M}x${ABC[N:N+4]});
+                vacc${M}x${ABC[N:N+4]} = wasm_f32x4_relaxed_madd(va${M}, vb${ABC[N:N+4]}, vacc${M}x${ABC[N:N+4]});
               $else:
                 vacc${M}x${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(va${M}, vb${ABC[N:N+4]}), vacc${M}x${ABC[N:N+4]});
           k -= sizeof(float);

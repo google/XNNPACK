@@ -65,39 +65,39 @@ void xnn_x8_lut_ukernel__wasmpshufb_x16(
     v128_t vx = wasm_v128_load(input);
     input += 16;
 
-    v128_t vy = __builtin_wasm_relaxed_swizzle_i8x16(vtable0, vx);
+    v128_t vy = wasm_i8x16_relaxed_swizzle(vtable0, vx);
 
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable1, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable1, vx));
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable2, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable2, vx));
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable3, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable3, vx));
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable4, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable4, vx));
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable5, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable5, vx));
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable6, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable6, vx));
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable7, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable7, vx));
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable8, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable8, vx));
 
     vx = wasm_i8x16_sub_sat(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable9, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable9, vx));
     vx = wasm_i8x16_sub_sat(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableA, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtableA, vx));
     vx = wasm_i8x16_sub_sat(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableB, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtableB, vx));
     vx = wasm_i8x16_sub_sat(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableC, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtableC, vx));
     vx = wasm_i8x16_sub_sat(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableD, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtableD, vx));
     vx = wasm_i8x16_sub_sat(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableE, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtableE, vx));
     vx = wasm_i8x16_sub_sat(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableF, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtableF, vx));
 
     wasm_v128_store(output, vy);
     output += 16;
@@ -105,39 +105,39 @@ void xnn_x8_lut_ukernel__wasmpshufb_x16(
   if XNN_UNLIKELY(batch != 0) {
     v128_t vx = wasm_v128_load((const v128_t*) input);
 
-    v128_t vy = __builtin_wasm_relaxed_swizzle_i8x16(vtable0, vx);
+    v128_t vy = wasm_i8x16_relaxed_swizzle(vtable0, vx);
 
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable1, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable1, vx));
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable2, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable2, vx));
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable3, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable3, vx));
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable4, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable4, vx));
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable5, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable5, vx));
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable6, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable6, vx));
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable7, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable7, vx));
     vx = wasm_i8x16_sub(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable8, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable8, vx));
 
     vx = wasm_i8x16_sub_sat(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtable9, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtable9, vx));
     vx = wasm_i8x16_sub_sat(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableA, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtableA, vx));
     vx = wasm_i8x16_sub_sat(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableB, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtableB, vx));
     vx = wasm_i8x16_sub_sat(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableC, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtableC, vx));
     vx = wasm_i8x16_sub_sat(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableD, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtableD, vx));
     vx = wasm_i8x16_sub_sat(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableE, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtableE, vx));
     vx = wasm_i8x16_sub_sat(vx, voffset);
-    vy = wasm_v128_xor(vy, __builtin_wasm_relaxed_swizzle_i8x16(vtableF, vx));
+    vy = wasm_v128_xor(vy, wasm_i8x16_relaxed_swizzle(vtableF, vx));
 
     if (batch & (8 * sizeof(uint8_t))) {
       wasm_v128_store64_lane(output, vy, 0);

@@ -52,8 +52,8 @@ void xnn_f32_gemm_relu_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat(
       const v128_t vb4567 = wasm_v128_load(w + 4);
       w += 8;
 
-      vacc0x0123 = __builtin_wasm_relaxed_madd_f32x4(va0, vb0123, vacc0x0123);
-      vacc0x4567 = __builtin_wasm_relaxed_madd_f32x4(va0, vb4567, vacc0x4567);
+      vacc0x0123 = wasm_f32x4_relaxed_madd(va0, vb0123, vacc0x0123);
+      vacc0x4567 = wasm_f32x4_relaxed_madd(va0, vb4567, vacc0x4567);
 
       k -= sizeof(float);
     } while (k != 0);

@@ -17,7 +17,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $WASM_X16X8_LOAD8X8 = {"QS8": "wasm_i16x8_load8x8", "QU8": "wasm_u16x8_load8x8"}[DATATYPE]
-$WASM_I16X8_Q15MULR = "__builtin_wasm_relaxed_q15mulr_s_i16x8" if RELAXED else "wasm_i16x8_q15mulr_sat"
+$WASM_I16X8_Q15MULR = "wasm_i16x8_relaxed_q15mulr" if RELAXED else "wasm_i16x8_q15mulr_sat"
 $WASM_X8X16_NARROW_I16X8 = {"QS8": "wasm_i8x16_narrow_i16x8", "QU8": "wasm_u8x16_narrow_i16x8"}[DATATYPE]
 $ISA = "wasmrelaxedsimd" if RELAXED else "wasmsimd"
 void xnn_${DATATYPE.lower()}_vcvt_ukernel__${ISA}_x${BATCH_TILE}(

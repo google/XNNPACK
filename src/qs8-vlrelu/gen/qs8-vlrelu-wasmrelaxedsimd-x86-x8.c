@@ -37,7 +37,7 @@ void xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_x86_x8(
     vmultiplier = wasm_v128_and(vmultiplier, vmultiplier_diff);
     vacc = wasm_i16x8_shl(vacc, 7);
     vmultiplier = wasm_v128_xor(vmultiplier, vmultiplier_base);
-    vacc = __builtin_wasm_relaxed_q15mulr_s_i16x8(vacc, vmultiplier);
+    vacc = wasm_i16x8_relaxed_q15mulr(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
     input += 8;
 
@@ -55,7 +55,7 @@ void xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_x86_x8(
     vmultiplier = wasm_v128_and(vmultiplier, vmultiplier_diff);
     vacc = wasm_i16x8_shl(vacc, 7);
     vmultiplier = wasm_v128_xor(vmultiplier, vmultiplier_base);
-    vacc = __builtin_wasm_relaxed_q15mulr_s_i16x8(vacc, vmultiplier);
+    vacc = wasm_i16x8_relaxed_q15mulr(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
 
     v128_t vy = wasm_i8x16_narrow_i16x8(vacc, vacc);

@@ -16,8 +16,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/common.h>
 
 
-$WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "__builtin_wasm_relaxed_max_f32x4"}[ARCH]
-$WASM_V32X4_LANESELECT="__builtin_wasm_relaxed_laneselect_i32x4" if ARCH == "RELAXED" else "wasm_v128_bitselect"
+$WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "wasm_f32x4_relaxed_max"}[ARCH]
+$WASM_V32X4_LANESELECT="wasm_i32x4_relaxed_laneselect" if ARCH == "RELAXED" else "wasm_v128_bitselect"
 $ISA = "wasmsimd" if ARCH != "RELAXED" else "wasmrelaxedsimd"
 $ARCH_SUFFIX = "" if ARCH == "RELAXED" and not FMA else "_" + ("fma" if FMA else ARCH.lower())
 void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p6_x${BATCH_TILE}(
@@ -58,7 +58,7 @@ void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p6_x${BATCH_TILE}(
 
       $for N in range(0, BATCH_TILE, 4):
         $if FMA:
-          v128_t vn${ABC[N:N+4]} = __builtin_wasm_relaxed_madd_f32x4(vz${ABC[N:N+4]}, vlog2e, vmagic_bias);
+          v128_t vn${ABC[N:N+4]} = wasm_f32x4_relaxed_madd(vz${ABC[N:N+4]}, vlog2e, vmagic_bias);
         $else:
           v128_t vn${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(vz${ABC[N:N+4]}, vlog2e), vmagic_bias);
 
@@ -70,37 +70,37 @@ void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p6_x${BATCH_TILE}(
 
       $for N in range(0, BATCH_TILE, 4):
         $if FMA:
-          v128_t vt${ABC[N:N+4]} = __builtin_wasm_relaxed_madd_f32x4(vn${ABC[N:N+4]}, vminus_ln2_hi, vz${ABC[N:N+4]});
+          v128_t vt${ABC[N:N+4]} = wasm_f32x4_relaxed_madd(vn${ABC[N:N+4]}, vminus_ln2_hi, vz${ABC[N:N+4]});
         $else:
           v128_t vt${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_hi), vz${ABC[N:N+4]});
 
       $for N in range(0, BATCH_TILE, 4):
         $if FMA:
-          vt${ABC[N:N+4]} = __builtin_wasm_relaxed_madd_f32x4(vn${ABC[N:N+4]}, vminus_ln2_lo, vt${ABC[N:N+4]});
+          vt${ABC[N:N+4]} = wasm_f32x4_relaxed_madd(vn${ABC[N:N+4]}, vminus_ln2_lo, vt${ABC[N:N+4]});
         $else:
           vt${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(vn${ABC[N:N+4]}, vminus_ln2_lo), vt${ABC[N:N+4]});
 
       $for N in range(0, BATCH_TILE, 4):
         $if FMA:
-          v128_t vp${ABC[N:N+4]} = __builtin_wasm_relaxed_madd_f32x4(vc6, vt${ABC[N:N+4]}, vc5);
+          v128_t vp${ABC[N:N+4]} = wasm_f32x4_relaxed_madd(vc6, vt${ABC[N:N+4]}, vc5);
         $else:
           v128_t vp${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(vc6, vt${ABC[N:N+4]}), vc5);
 
       $for N in range(0, BATCH_TILE, 4):
         $if FMA:
-          vp${ABC[N:N+4]} = __builtin_wasm_relaxed_madd_f32x4(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}, vc4);
+          vp${ABC[N:N+4]} = wasm_f32x4_relaxed_madd(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}, vc4);
         $else:
           vp${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}), vc4);
 
       $for N in range(0, BATCH_TILE, 4):
         $if FMA:
-          vp${ABC[N:N+4]} = __builtin_wasm_relaxed_madd_f32x4(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}, vc3);
+          vp${ABC[N:N+4]} = wasm_f32x4_relaxed_madd(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}, vc3);
         $else:
           vp${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}), vc3);
 
       $for N in range(0, BATCH_TILE, 4):
         $if FMA:
-          vp${ABC[N:N+4]} = __builtin_wasm_relaxed_madd_f32x4(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}, vc2);
+          vp${ABC[N:N+4]} = wasm_f32x4_relaxed_madd(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}, vc2);
         $else:
           vp${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}), vc2);
 
@@ -113,7 +113,7 @@ void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p6_x${BATCH_TILE}(
 
       $for N in range(0, BATCH_TILE, 4):
         $if FMA:
-          vp${ABC[N:N+4]} = __builtin_wasm_relaxed_madd_f32x4(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}, vt${ABC[N:N+4]});
+          vp${ABC[N:N+4]} = wasm_f32x4_relaxed_madd(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}, vt${ABC[N:N+4]});
         $else:
           vp${ABC[N:N+4]} = wasm_f32x4_add(wasm_f32x4_mul(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}), vt${ABC[N:N+4]});
 
@@ -139,24 +139,24 @@ void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p6_x${BATCH_TILE}(
     const v128_t vz = ${WASM_F32X4_MAX}(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
 
     $if FMA:
-      v128_t vn = __builtin_wasm_relaxed_madd_f32x4(vz, vlog2e, vmagic_bias);
+      v128_t vn = wasm_f32x4_relaxed_madd(vz, vlog2e, vmagic_bias);
     $else:
       v128_t vn = wasm_f32x4_add(wasm_f32x4_mul(vz, vlog2e), vmagic_bias);
     v128_t vs = wasm_i32x4_shl(vn, 23);
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
     $if FMA:
-      v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vn, vminus_ln2_hi, vz);
-      vt = __builtin_wasm_relaxed_madd_f32x4(vn, vminus_ln2_lo, vt);
+      v128_t vt = wasm_f32x4_relaxed_madd(vn, vminus_ln2_hi, vz);
+      vt = wasm_f32x4_relaxed_madd(vn, vminus_ln2_lo, vt);
     $else:
       v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_hi), vz);
       vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_lo), vt);
 
     $if FMA:
-      v128_t vp = __builtin_wasm_relaxed_madd_f32x4(vc6, vt, vc5);
-      vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vc4);
-      vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vc3);
-      vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vc2);
+      v128_t vp = wasm_f32x4_relaxed_madd(vc6, vt, vc5);
+      vp = wasm_f32x4_relaxed_madd(vp, vt, vc4);
+      vp = wasm_f32x4_relaxed_madd(vp, vt, vc3);
+      vp = wasm_f32x4_relaxed_madd(vp, vt, vc2);
     $else:
       v128_t vp = wasm_f32x4_add(wasm_f32x4_mul(vc6, vt), vc5);
       vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc4);
@@ -167,7 +167,7 @@ void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p6_x${BATCH_TILE}(
     vt = wasm_f32x4_mul(vt, vs);
     vs = wasm_f32x4_sub(vs, vone);
     $if FMA:
-      vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vt);
+      vp = wasm_f32x4_relaxed_madd(vp, vt, vt);
     $else:
       vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vt);
     const v128_t ve = wasm_f32x4_mul(wasm_f32x4_add(vp, vs), valpha);
@@ -185,24 +185,24 @@ void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p6_x${BATCH_TILE}(
     const v128_t vz = ${WASM_F32X4_MAX}(wasm_f32x4_mul(vx, vprescale), vsat_cutoff);
 
     $if FMA:
-      v128_t vn = __builtin_wasm_relaxed_madd_f32x4(vz, vlog2e, vmagic_bias);
+      v128_t vn = wasm_f32x4_relaxed_madd(vz, vlog2e, vmagic_bias);
     $else:
       v128_t vn = wasm_f32x4_add(wasm_f32x4_mul(vz, vlog2e), vmagic_bias);
     v128_t vs = wasm_i32x4_shl(vn, 23);
     vn = wasm_f32x4_sub(vn, vmagic_bias);
 
     $if FMA:
-      v128_t vt = __builtin_wasm_relaxed_madd_f32x4(vn, vminus_ln2_hi, vz);
-      vt = __builtin_wasm_relaxed_madd_f32x4(vn, vminus_ln2_lo, vt);
+      v128_t vt = wasm_f32x4_relaxed_madd(vn, vminus_ln2_hi, vz);
+      vt = wasm_f32x4_relaxed_madd(vn, vminus_ln2_lo, vt);
     $else:
       v128_t vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_hi), vz);
       vt = wasm_f32x4_add(wasm_f32x4_mul(vn, vminus_ln2_lo), vt);
 
     $if FMA:
-      v128_t vp = __builtin_wasm_relaxed_madd_f32x4(vc6, vt, vc5);
-      vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vc4);
-      vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vc3);
-      vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vc2);
+      v128_t vp = wasm_f32x4_relaxed_madd(vc6, vt, vc5);
+      vp = wasm_f32x4_relaxed_madd(vp, vt, vc4);
+      vp = wasm_f32x4_relaxed_madd(vp, vt, vc3);
+      vp = wasm_f32x4_relaxed_madd(vp, vt, vc2);
     $else:
       v128_t vp = wasm_f32x4_add(wasm_f32x4_mul(vc6, vt), vc5);
       vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vc4);
@@ -213,7 +213,7 @@ void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p6_x${BATCH_TILE}(
     vt = wasm_f32x4_mul(vt, vs);
     vs = wasm_f32x4_sub(vs, vone);
     $if FMA:
-      vp = __builtin_wasm_relaxed_madd_f32x4(vp, vt, vt);
+      vp = wasm_f32x4_relaxed_madd(vp, vt, vt);
     $else:
       vp = wasm_f32x4_add(wasm_f32x4_mul(vp, vt), vt);
     const v128_t ve = wasm_f32x4_mul(wasm_f32x4_add(vp, vs), valpha);

@@ -49,11 +49,11 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x20(
     v128_t vxGHIJ = wasm_v128_load(input + 16);
     input += 20;
 
-    const v128_t vz0123 = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vx0123, vprescale));
-    const v128_t vz4567 = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vx4567, vprescale));
-    const v128_t vz89AB = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vx89AB, vprescale));
-    const v128_t vzCDEF = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vxCDEF, vprescale));
-    const v128_t vzGHIJ = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vxGHIJ, vprescale));
+    const v128_t vz0123 = wasm_f32x4_relaxed_max(vsat_cutoff, wasm_f32x4_mul(vx0123, vprescale));
+    const v128_t vz4567 = wasm_f32x4_relaxed_max(vsat_cutoff, wasm_f32x4_mul(vx4567, vprescale));
+    const v128_t vz89AB = wasm_f32x4_relaxed_max(vsat_cutoff, wasm_f32x4_mul(vx89AB, vprescale));
+    const v128_t vzCDEF = wasm_f32x4_relaxed_max(vsat_cutoff, wasm_f32x4_mul(vxCDEF, vprescale));
+    const v128_t vzGHIJ = wasm_f32x4_relaxed_max(vsat_cutoff, wasm_f32x4_mul(vxGHIJ, vprescale));
 
     v128_t vn0123 = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz0123, vlog2e));
     v128_t vn4567 = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz4567, vlog2e));
@@ -183,11 +183,11 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x20(
     const v128_t vsignmGHIJ = wasm_i32x4_shr(vxGHIJ, 31);
     vxGHIJ = wasm_f32x4_mul(vxGHIJ, vbeta);
 
-    const v128_t vy0123 = __builtin_wasm_relaxed_laneselect_i32x4(ve0123, vx0123, vsignm0123);
-    const v128_t vy4567 = __builtin_wasm_relaxed_laneselect_i32x4(ve4567, vx4567, vsignm4567);
-    const v128_t vy89AB = __builtin_wasm_relaxed_laneselect_i32x4(ve89AB, vx89AB, vsignm89AB);
-    const v128_t vyCDEF = __builtin_wasm_relaxed_laneselect_i32x4(veCDEF, vxCDEF, vsignmCDEF);
-    const v128_t vyGHIJ = __builtin_wasm_relaxed_laneselect_i32x4(veGHIJ, vxGHIJ, vsignmGHIJ);
+    const v128_t vy0123 = wasm_i32x4_relaxed_laneselect(ve0123, vx0123, vsignm0123);
+    const v128_t vy4567 = wasm_i32x4_relaxed_laneselect(ve4567, vx4567, vsignm4567);
+    const v128_t vy89AB = wasm_i32x4_relaxed_laneselect(ve89AB, vx89AB, vsignm89AB);
+    const v128_t vyCDEF = wasm_i32x4_relaxed_laneselect(veCDEF, vxCDEF, vsignmCDEF);
+    const v128_t vyGHIJ = wasm_i32x4_relaxed_laneselect(veGHIJ, vxGHIJ, vsignmGHIJ);
 
     wasm_v128_store(output, vy0123);
     wasm_v128_store(output + 4, vy4567);
@@ -200,7 +200,7 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x20(
     v128_t vx = wasm_v128_load(input);
     input += 4;
 
-    const v128_t vz = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
+    const v128_t vz = wasm_f32x4_relaxed_max(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
 
     v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz, vlog2e));
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
@@ -234,7 +234,7 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x20(
 
     const v128_t vsignm = wasm_i32x4_shr(vx, 31);
     vx = wasm_f32x4_mul(vx, vbeta);
-    const v128_t vy = __builtin_wasm_relaxed_laneselect_i32x4(ve, vx, vsignm);
+    const v128_t vy = wasm_i32x4_relaxed_laneselect(ve, vx, vsignm);
 
     wasm_v128_store(output, vy);
     output += 4;
@@ -242,7 +242,7 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x20(
   if XNN_UNLIKELY(batch != 0) {
     v128_t vx = wasm_v128_load(input);
 
-    const v128_t vz = __builtin_wasm_relaxed_max_f32x4(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
+    const v128_t vz = wasm_f32x4_relaxed_max(vsat_cutoff, wasm_f32x4_mul(vx, vprescale));
 
     v128_t vn = wasm_f32x4_add(vmagic_bias, wasm_f32x4_mul(vz, vlog2e));
     const v128_t vidx = wasm_i32x4_shl(wasm_v128_and(vn, vindex_mask), 2);
@@ -276,7 +276,7 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x20(
 
     const v128_t vsignm = wasm_i32x4_shr(vx, 31);
     vx = wasm_f32x4_mul(vx, vbeta);
-    v128_t vy = __builtin_wasm_relaxed_laneselect_i32x4(ve, vx, vsignm);
+    v128_t vy = wasm_i32x4_relaxed_laneselect(ve, vx, vsignm);
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vy, 0);

@@ -55,29 +55,29 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_splat(
       const v128_t vb0123c0 = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w + 0))));
       const v128_t vb4567c0 = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w + 4))));
 
-      vacc0x0123 = __builtin_wasm_relaxed_madd_f32x4(va0c0, vb0123c0, vacc0x0123);
-      vacc0x4567 = __builtin_wasm_relaxed_madd_f32x4(va0c0, vb4567c0, vacc0x4567);
+      vacc0x0123 = wasm_f32x4_relaxed_madd(va0c0, vb0123c0, vacc0x0123);
+      vacc0x4567 = wasm_f32x4_relaxed_madd(va0c0, vb4567c0, vacc0x4567);
       const v128_t va0c1 = wasm_v32x4_shuffle(va0, va0, 1, 1, 1, 1);
 
       const v128_t vb0123c1 = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w + 8))));
       const v128_t vb4567c1 = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w + 12))));
 
-      vacc0x0123 = __builtin_wasm_relaxed_madd_f32x4(va0c1, vb0123c1, vacc0x0123);
-      vacc0x4567 = __builtin_wasm_relaxed_madd_f32x4(va0c1, vb4567c1, vacc0x4567);
+      vacc0x0123 = wasm_f32x4_relaxed_madd(va0c1, vb0123c1, vacc0x0123);
+      vacc0x4567 = wasm_f32x4_relaxed_madd(va0c1, vb4567c1, vacc0x4567);
       const v128_t va0c2 = wasm_v32x4_shuffle(va0, va0, 2, 2, 2, 2);
 
       const v128_t vb0123c2 = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w + 16))));
       const v128_t vb4567c2 = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w + 20))));
 
-      vacc0x0123 = __builtin_wasm_relaxed_madd_f32x4(va0c2, vb0123c2, vacc0x0123);
-      vacc0x4567 = __builtin_wasm_relaxed_madd_f32x4(va0c2, vb4567c2, vacc0x4567);
+      vacc0x0123 = wasm_f32x4_relaxed_madd(va0c2, vb0123c2, vacc0x0123);
+      vacc0x4567 = wasm_f32x4_relaxed_madd(va0c2, vb4567c2, vacc0x4567);
       const v128_t va0c3 = wasm_v32x4_shuffle(va0, va0, 3, 3, 3, 3);
 
       const v128_t vb0123c3 = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w + 24))));
       const v128_t vb4567c3 = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w + 28))));
 
-      vacc0x0123 = __builtin_wasm_relaxed_madd_f32x4(va0c3, vb0123c3, vacc0x0123);
-      vacc0x4567 = __builtin_wasm_relaxed_madd_f32x4(va0c3, vb4567c3, vacc0x4567);
+      vacc0x0123 = wasm_f32x4_relaxed_madd(va0c3, vb0123c3, vacc0x0123);
+      vacc0x4567 = wasm_f32x4_relaxed_madd(va0c3, vb4567c3, vacc0x4567);
       w = (const int8_t*) w + 32;
       k -= 4 * sizeof(float);
     }
@@ -90,8 +90,8 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_splat(
         const v128_t vb4567 = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w + 4))));
         w = (const int8_t*) w + 8;
 
-        vacc0x0123 = __builtin_wasm_relaxed_madd_f32x4(va0, vb0123, vacc0x0123);
-        vacc0x4567 = __builtin_wasm_relaxed_madd_f32x4(va0, vb4567, vacc0x4567);
+        vacc0x0123 = wasm_f32x4_relaxed_madd(va0, vb0123, vacc0x0123);
+        vacc0x4567 = wasm_f32x4_relaxed_madd(va0, vb4567, vacc0x4567);
 
         k -= sizeof(float);
       } while (k != 0);
@@ -102,11 +102,11 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_fma_splat(
     const v128_t vscale4567 = wasm_v128_load((const float*) w + 4);
     vacc0x4567 = wasm_f32x4_mul(vacc0x4567, vscale4567);
     w = (const float*) w + 8;
-    vacc0x0123 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc0x0123);
-    vacc0x4567 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc0x4567);
+    vacc0x0123 = wasm_f32x4_relaxed_max(vmin, vacc0x0123);
+    vacc0x4567 = wasm_f32x4_relaxed_max(vmin, vacc0x4567);
 
-    vacc0x0123 = __builtin_wasm_relaxed_min_f32x4(vmax, vacc0x0123);
-    vacc0x4567 = __builtin_wasm_relaxed_min_f32x4(vmax, vacc0x4567);
+    vacc0x0123 = wasm_f32x4_relaxed_min(vmax, vacc0x0123);
+    vacc0x4567 = wasm_f32x4_relaxed_min(vmax, vacc0x4567);
 
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c0, vacc0x0123);

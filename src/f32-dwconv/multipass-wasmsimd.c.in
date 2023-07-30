@@ -26,8 +26,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
 $if ACTIVATION == "MINMAX":
-$  WASM_F32X4_MIN={"ARM": "wasm_f32x4_min", "X86": "wasm_f32x4_pmin", "RELAXED": "__builtin_wasm_relaxed_min_f32x4"}[ARCH]
-$  WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "__builtin_wasm_relaxed_max_f32x4"}[ARCH]
+$  WASM_F32X4_MIN={"ARM": "wasm_f32x4_min", "X86": "wasm_f32x4_pmin", "RELAXED": "wasm_f32x4_relaxed_min"}[ARCH]
+$  WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "wasm_f32x4_relaxed_max"}[ARCH]
 $ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
 $ISA = "wasmsimd" if not FMA and (ACTIVATION in ["LINEAR", "RELU"] or ARCH != "RELAXED") else "wasmrelaxedsimd"
 $ARCH_SUFFIX = "" if not FMA and (ACTIVATION in ["LINEAR", "RELU"] or ARCH == "RELAXED") else "_" + ("fma" if FMA else ARCH.lower())
@@ -84,7 +84,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS
             $if 1 <= K < ACCUMULATORS:
               v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
             $elif FMA:
-              vacc0p${K % ACCUMULATORS} = __builtin_wasm_relaxed_madd_f32x4(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
+              vacc0p${K % ACCUMULATORS} = wasm_f32x4_relaxed_madd(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
             $else:
               vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(wasm_f32x4_mul(vi${K}x0123, vk${K}x0123), vacc0p${K % ACCUMULATORS});
 
@@ -126,7 +126,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS
               $if 1 <= K < ACCUMULATORS:
                 v128_t vacc${ABC[C:C+4]}p${K} = wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]});
               $elif FMA:
-                vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = __builtin_wasm_relaxed_madd_f32x4(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}, vacc${ABC[C:C+4]}p${K % ACCUMULATORS});
+                vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = wasm_f32x4_relaxed_madd(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}, vacc${ABC[C:C+4]}p${K % ACCUMULATORS});
               $else:
                 vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = wasm_f32x4_add(wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}), vacc${ABC[C:C+4]}p${K % ACCUMULATORS});
 
@@ -163,7 +163,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS
               $if 1 <= K < ACCUMULATORS:
                 v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
               $elif FMA:
-                vacc0p${K % ACCUMULATORS} = __builtin_wasm_relaxed_madd_f32x4(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
+                vacc0p${K % ACCUMULATORS} = wasm_f32x4_relaxed_madd(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
               $else:
                 vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(wasm_f32x4_mul(vi${K}x0123, vk${K}x0123), vacc0p${K % ACCUMULATORS});
 
@@ -194,7 +194,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS
               $if 1 <= K < ACCUMULATORS:
                 v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
               $elif FMA:
-                vacc0p${K % ACCUMULATORS} = __builtin_wasm_relaxed_madd_f32x4(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
+                vacc0p${K % ACCUMULATORS} = wasm_f32x4_relaxed_madd(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
               $else:
                 vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(wasm_f32x4_mul(vi${K}x0123, vk${K}x0123), vacc0p${K % ACCUMULATORS});
 
@@ -242,7 +242,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS
             $if 1 <= K < ACCUMULATORS:
               v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
             $elif FMA:
-              vacc0p${K % ACCUMULATORS} = __builtin_wasm_relaxed_madd_f32x4(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
+              vacc0p${K % ACCUMULATORS} = wasm_f32x4_relaxed_madd(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
             $else:
               vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(wasm_f32x4_mul(vi${K}x0123, vk${K}x0123), vacc0p${K % ACCUMULATORS});
 
@@ -287,7 +287,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS
               $if 1 <= K < ACCUMULATORS:
                 v128_t vacc${ABC[C:C+4]}p${K} = wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]});
               $elif FMA:
-                vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = __builtin_wasm_relaxed_madd_f32x4(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}, vacc${ABC[C:C+4]}p${K % ACCUMULATORS});
+                vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = wasm_f32x4_relaxed_madd(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}, vacc${ABC[C:C+4]}p${K % ACCUMULATORS});
               $else:
                 vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = wasm_f32x4_add(wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}), vacc${ABC[C:C+4]}p${K % ACCUMULATORS});
 
@@ -327,7 +327,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS
               $if 1 <= K < ACCUMULATORS:
                 v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
               $elif FMA:
-                vacc0p${K % ACCUMULATORS} = __builtin_wasm_relaxed_madd_f32x4(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
+                vacc0p${K % ACCUMULATORS} = wasm_f32x4_relaxed_madd(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
               $else:
                 vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(wasm_f32x4_mul(vi${K}x0123, vk${K}x0123), vacc0p${K % ACCUMULATORS});
 
@@ -361,7 +361,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS
               $if 1 <= K < ACCUMULATORS:
                 v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
               $elif FMA:
-                vacc0p${K % ACCUMULATORS} = __builtin_wasm_relaxed_madd_f32x4(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
+                vacc0p${K % ACCUMULATORS} = wasm_f32x4_relaxed_madd(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
               $else:
                 vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(wasm_f32x4_mul(vi${K}x0123, vk${K}x0123), vacc0p${K % ACCUMULATORS});
 
@@ -420,7 +420,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS
               $if 1 <= K < ACCUMULATORS:
                 v128_t vacc${ABC[C:C+4]}p${K} = wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]});
               $elif FMA:
-                vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = __builtin_wasm_relaxed_madd_f32x4(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}, vacc${ABC[C:C+4]}p${K % ACCUMULATORS});
+                vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = wasm_f32x4_relaxed_madd(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}, vacc${ABC[C:C+4]}p${K % ACCUMULATORS});
               $else:
                 vacc${ABC[C:C+4]}p${K % ACCUMULATORS} = wasm_f32x4_add(wasm_f32x4_mul(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}), vacc${ABC[C:C+4]}p${K % ACCUMULATORS});
 
@@ -475,7 +475,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS
           $if 1 <= K < ACCUMULATORS:
             v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
           $elif FMA:
-            vacc0p${K % ACCUMULATORS} = __builtin_wasm_relaxed_madd_f32x4(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
+            vacc0p${K % ACCUMULATORS} = wasm_f32x4_relaxed_madd(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
           $else:
             vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(wasm_f32x4_mul(vi${K}x0123, vk${K}x0123), vacc0p${K % ACCUMULATORS});
 
@@ -519,7 +519,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS
           $if 1 <= K < ACCUMULATORS:
             v128_t vacc0p${K} = wasm_f32x4_mul(vi${K}x0123, vk${K}x0123);
           $elif FMA:
-            vacc0p${K % ACCUMULATORS} = __builtin_wasm_relaxed_madd_f32x4(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
+            vacc0p${K % ACCUMULATORS} = wasm_f32x4_relaxed_madd(vi${K}x0123, vk${K}x0123, vacc0p${K % ACCUMULATORS});
           $else:
             vacc0p${K % ACCUMULATORS} = wasm_f32x4_add(wasm_f32x4_mul(vi${K}x0123, vk${K}x0123), vacc0p${K % ACCUMULATORS});
 

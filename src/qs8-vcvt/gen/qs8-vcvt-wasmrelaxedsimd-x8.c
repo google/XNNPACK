@@ -33,7 +33,7 @@ void xnn_qs8_vcvt_ukernel__wasmrelaxedsimd_x8(
     v128_t vacc = wasm_i16x8_load8x8(input);
     vacc = wasm_i16x8_sub(vinput_zero_point, vacc);
     vacc = wasm_i16x8_shl(vacc, 7);
-    vacc = __builtin_wasm_relaxed_q15mulr_s_i16x8(vacc, vmultiplier);
+    vacc = wasm_i16x8_relaxed_q15mulr(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
     input += 8;
 
@@ -48,7 +48,7 @@ void xnn_qs8_vcvt_ukernel__wasmrelaxedsimd_x8(
     v128_t vacc = wasm_i16x8_load8x8(input);
     vacc = wasm_i16x8_sub(vinput_zero_point, vacc);
     vacc = wasm_i16x8_shl(vacc, 7);
-    vacc = __builtin_wasm_relaxed_q15mulr_s_i16x8(vacc, vmultiplier);
+    vacc = wasm_i16x8_relaxed_q15mulr(vacc, vmultiplier);
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
 
     v128_t vy = wasm_i8x16_narrow_i16x8(vacc, vacc);

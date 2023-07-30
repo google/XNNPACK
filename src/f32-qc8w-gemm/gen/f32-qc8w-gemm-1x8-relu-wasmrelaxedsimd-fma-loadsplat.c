@@ -52,8 +52,8 @@ void xnn_f32_qc8w_gemm_relu_ukernel_1x8__wasmrelaxedsimd_fma_loadsplat(
       const v128_t vb4567 = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w + 4))));
       w = (const int8_t*) w + 8;
 
-      vacc0x0123 = __builtin_wasm_relaxed_madd_f32x4(va0, vb0123, vacc0x0123);
-      vacc0x4567 = __builtin_wasm_relaxed_madd_f32x4(va0, vb4567, vacc0x4567);
+      vacc0x0123 = wasm_f32x4_relaxed_madd(va0, vb0123, vacc0x0123);
+      vacc0x4567 = wasm_f32x4_relaxed_madd(va0, vb4567, vacc0x4567);
 
       k -= sizeof(float);
     } while (k != 0);

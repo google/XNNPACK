@@ -63,7 +63,7 @@ void xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x4(
     v128_t vf = wasm_f32x4_div(ve, vd);
     vf = wasm_v128_andnot(vf, wasm_f32x4_gt(vz, vdenorm_cutoff));
     const v128_t vcf = wasm_f32x4_sub(vone, vf);
-    vf = __builtin_wasm_relaxed_laneselect_i32x4(vf, vcf, vx);
+    vf = wasm_i32x4_relaxed_laneselect(vf, vcf, vx);
 
     wasm_v128_store(output, vf);
     output += 4;
@@ -92,7 +92,7 @@ void xnn_f32_vsigmoid_ukernel__wasmblendvps_rr2_p5_div_x4(
     v128_t vf = wasm_f32x4_div(ve, vd);
     vf = wasm_v128_andnot(vf, wasm_f32x4_gt(vz, vdenorm_cutoff));
     const v128_t vcf = wasm_f32x4_sub(vone, vf);
-    vf = __builtin_wasm_relaxed_laneselect_i32x4(vf, vcf, vx);
+    vf = wasm_i32x4_relaxed_laneselect(vf, vcf, vx);
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vf, 0);

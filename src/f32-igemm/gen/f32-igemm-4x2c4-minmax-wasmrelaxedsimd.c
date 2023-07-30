@@ -161,11 +161,11 @@ void xnn_f32_igemm_minmax_ukernel_4x2c4__wasmrelaxedsimd(
       wasm_v32x4_shuffle(vacc2x01c2, vacc3x01c2, 0, 1, 4, 5),
       wasm_v32x4_shuffle(vacc2x01c2, vacc3x01c2, 2, 3, 6, 7));
 
-    vacc01x01 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc01x01);
-    vacc23x01 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc23x01);
+    vacc01x01 = wasm_f32x4_relaxed_max(vmin, vacc01x01);
+    vacc23x01 = wasm_f32x4_relaxed_max(vmin, vacc23x01);
 
-    vacc01x01 = __builtin_wasm_relaxed_min_f32x4(vmax, vacc01x01);
-    vacc23x01 = __builtin_wasm_relaxed_min_f32x4(vmax, vacc23x01);
+    vacc01x01 = wasm_f32x4_relaxed_min(vmax, vacc01x01);
+    vacc23x01 = wasm_f32x4_relaxed_min(vmax, vacc23x01);
 
     if XNN_LIKELY(nc >= 2) {
       wasm_v128_store64_lane(c3, vacc23x01, 1);

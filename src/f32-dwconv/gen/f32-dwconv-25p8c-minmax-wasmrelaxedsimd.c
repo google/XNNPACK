@@ -394,11 +394,11 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd(
       w += 208;
 
 
-      v128_t vacc0123 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc0123p0);
-      v128_t vacc4567 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc4567p0);
+      v128_t vacc0123 = wasm_f32x4_relaxed_max(vmin, vacc0123p0);
+      v128_t vacc4567 = wasm_f32x4_relaxed_max(vmin, vacc4567p0);
 
-      vacc0123 = __builtin_wasm_relaxed_min_f32x4(vmax, vacc0123);
-      vacc4567 = __builtin_wasm_relaxed_min_f32x4(vmax, vacc4567);
+      vacc0123 = wasm_f32x4_relaxed_min(vmax, vacc0123);
+      vacc4567 = wasm_f32x4_relaxed_min(vmax, vacc4567);
 
       wasm_v128_store(output, vacc0123);
       wasm_v128_store(output + 4, vacc4567);
@@ -560,8 +560,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd(
       w += 4;
 
 
-      v128_t vacc0123 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc0123p0);
-      vacc0123 = __builtin_wasm_relaxed_min_f32x4(vmax, vacc0123);
+      v128_t vacc0123 = wasm_f32x4_relaxed_max(vmin, vacc0123p0);
+      vacc0123 = wasm_f32x4_relaxed_min(vmax, vacc0123);
 
       wasm_v128_store(output, vacc0123);
       output += 4;
@@ -670,8 +670,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd(
       vacc0123p0 = wasm_f32x4_add(wasm_f32x4_mul(vi24x0123, vk24x0123), vacc0123p0);
 
 
-      v128_t vacc0123 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc0123p0);
-      vacc0123 = __builtin_wasm_relaxed_min_f32x4(vmax, vacc0123);
+      v128_t vacc0123 = wasm_f32x4_relaxed_max(vmin, vacc0123p0);
+      vacc0123 = wasm_f32x4_relaxed_min(vmax, vacc0123);
 
       if (c & 2) {
         wasm_v128_store64_lane(output, vacc0123, 0);

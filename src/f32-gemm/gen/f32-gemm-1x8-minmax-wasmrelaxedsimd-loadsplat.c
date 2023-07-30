@@ -60,11 +60,11 @@ void xnn_f32_gemm_minmax_ukernel_1x8__wasmrelaxedsimd_loadsplat(
       k -= sizeof(float);
     } while (k != 0);
 
-    vacc0x0123 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc0x0123);
-    vacc0x4567 = __builtin_wasm_relaxed_max_f32x4(vmin, vacc0x4567);
+    vacc0x0123 = wasm_f32x4_relaxed_max(vmin, vacc0x0123);
+    vacc0x4567 = wasm_f32x4_relaxed_max(vmin, vacc0x4567);
 
-    vacc0x0123 = __builtin_wasm_relaxed_min_f32x4(vmax, vacc0x0123);
-    vacc0x4567 = __builtin_wasm_relaxed_min_f32x4(vmax, vacc0x4567);
+    vacc0x0123 = wasm_f32x4_relaxed_min(vmax, vacc0x0123);
+    vacc0x4567 = wasm_f32x4_relaxed_min(vmax, vacc0x4567);
 
     if XNN_LIKELY(nc >= 8) {
       wasm_v128_store(c0, vacc0x0123);
