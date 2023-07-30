@@ -15,7 +15,6 @@
 #include <xnnpack/math.h>
 
 
-
 void xnn_qs8_gemm_minmax_fp32_ukernel_2x4c2s4__wasmsimd_dot16x2_ld64(
     size_t mr,
     size_t nc,
@@ -50,7 +49,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_2x4c2s4__wasmsimd_dot16x2_ld64(
   do {
     v128_t vacc0x0123 = wasm_v128_load(w);
     v128_t vacc1x0123 = vacc0x0123;
-    w = (const void*) ((const int32_t*) w + 4);
+    w = (const int32_t*) w + 4;
 
     size_t k = kc;
     do {
@@ -107,14 +106,14 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_2x4c2s4__wasmsimd_dot16x2_ld64(
 
     v128_t vacc01x0123 = wasm_i16x8_narrow_i32x4(vacc0x0123, vacc1x0123);
 
-    v128_t vout = wasm_i8x16_narrow_i16x8(vacc01x0123, vacc01x0123);
+    v128_t vacc = wasm_i8x16_narrow_i16x8(vacc01x0123, vacc01x0123);
 
-    const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
-    vout = wasm_i8x16_min(vout, voutput_max);
+    const v128_t vaccput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
+    vacc = wasm_i8x16_min(vacc, vaccput_max);
 
-    if (nc >= 4) {
-      wasm_v128_store32_lane(c0, vout, 0);
-      wasm_v128_store32_lane(c1, vout, 1);
+    if XNN_LIKELY(nc >= 4) {
+      wasm_v128_store32_lane(c0, vacc, 0);
+      wasm_v128_store32_lane(c1, vacc, 1);
 
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
@@ -125,16 +124,16 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_2x4c2s4__wasmsimd_dot16x2_ld64(
       nc -= 4;
     } else {
       if (nc & 2) {
-        wasm_v128_store16_lane(c0, vout, 0);
+        wasm_v128_store16_lane(c0, vacc, 0);
         c0 += 2;
-        wasm_v128_store16_lane(c1, vout, 2);
+        wasm_v128_store16_lane(c1, vacc, 2);
         c1 += 2;
 
-        vout = wasm_u32x4_shr(vout, 16);
+        vacc = wasm_u32x4_shr(vacc, 16);
       }
       if (nc & 1) {
-        wasm_v128_store8_lane(c0, vout, 0);
-        wasm_v128_store8_lane(c1, vout, 4);
+        wasm_v128_store8_lane(c0, vacc, 0);
+        wasm_v128_store8_lane(c1, vacc, 4);
       }
 
       nc = 0;
