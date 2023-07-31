@@ -10,6 +10,25 @@
 namespace xnnpack {
 namespace internal {
 
+template <typename Generator>
+xnn_status generate_gemm_or_igemm(xnn_code_buffer* b, const char* name, size_t max_mr, size_t kc,
+                                  size_t loop_unroll_iters, bool full_unroll, const void* params) {
+  size_t iters = kc / sizeof(float);
+  assert(!full_unroll || (iters == loop_unroll_iters));
+  Generator generator(b);
+
+  generator.generate(name, max_mr, iters, loop_unroll_iters, full_unroll, static_cast<const jit_gemm_params*>(params));
+  generator.Emit();
+  auto finalized = generator.finalize();
+  if (generator.error() == xnnpack::Error::kOutOfMemory) {
+    return xnn_status_out_of_memory;
+  }
+  if (finalized == nullptr || generator.error() != xnnpack::Error::kNoError) {
+    return xnn_status_uninitialized;
+  }
+  return xnn_status_success;
+}
+
 class PostOps : public WasmAssembler {
  public:
   using WasmAssembler::WasmAssembler;
@@ -124,8 +143,8 @@ class GemmIGemmLoadsplatCommons : public PostOps {
     std::for_each(std::next(std::begin(vaccs)), std::end(vaccs), [&](auto& vacc) { vacc = vaccs[0]; });
   }
 
-  void InnerLoop(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& w, Local& kc, size_t max_mr,
-                 size_t loop_unroll_iters) {
+  void InnerLoopPartialUnroll(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& w, Local& kc,
+                              size_t max_mr, size_t loop_unroll_iters) {
     Local k = MakeLocal(kc);
     InnerLoopMainPart(as, vacc0123, vacc4567, w, k, max_mr, loop_unroll_iters);
 
@@ -141,6 +160,21 @@ class GemmIGemmLoadsplatCommons : public PostOps {
              mask >>= 1;
            }
          });
+    }
+  }
+
+  void InnerLoopFullUnroll(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& w, Local& kc,
+                           size_t max_mr, size_t iters) {
+    Local k = MakeLocal(kc);
+    InnerLoopMainPart(as, vacc0123, vacc4567, w, k, max_mr, iters);
+  }
+
+  void InnerLoop(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& w, Local& kc, size_t max_mr,
+                 size_t loop_unroll_iters, size_t iters, bool full_unroll) {
+    if (full_unroll) {
+      InnerLoopFullUnroll(as, vacc0123, vacc4567, w, kc, max_mr, iters);
+    } else {
+      InnerLoopPartialUnroll(as, vacc0123, vacc4567, w, kc, max_mr, loop_unroll_iters);
     }
   }
 
