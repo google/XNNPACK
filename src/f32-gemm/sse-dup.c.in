@@ -140,7 +140,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
                 __m128i vbw${ABC[N:N+8]}c2 = _mm_and_si128(vbwi${ABC[N:N+8]}c23, vmask);
                 __m128i vbw${ABC[N:N+8]}c3 = _mm_srli_epi16(vbwi${ABC[N:N+8]}c23, 12);
           $for N in range(0, NR, 8):
-            __m128i vbi${ABC[N:N+4]}c${L} = _mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, _mm_setzero_si128());
+            $if SSE >= 4:
+              __m128i vbi${ABC[N:N+4]}c${L} = _mm_cvtepu16_epi32(vbw${ABC[N:N+8]}c${L});
+            $else:
+              __m128i vbi${ABC[N:N+4]}c${L} = _mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, _mm_setzero_si128());
             __m128i vbi${ABC[N+4:N+8]}c${L} = _mm_unpackhi_epi16(vbw${ABC[N:N+8]}c${L}, _mm_setzero_si128());
             vbi${ABC[N:N+4]}c${L} = _mm_add_epi32(vbi${ABC[N:N+4]}c${L}, vbias);
             vbi${ABC[N+4:N+8]}c${L} = _mm_add_epi32(vbi${ABC[N+4:N+8]}c${L}, vbias);
@@ -212,7 +215,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
                 __m128i vbw${ABC[N:N+8]}c0 = _mm_and_si128(vbwi${ABC[N:N+8]}c01, vmask);
                 __m128i vbw${ABC[N:N+8]}c1 = _mm_srli_epi16(vbwi${ABC[N:N+8]}c01, 12);
           $for N in range(0, NR, 8):
-            __m128i vbi${ABC[N:N+4]}c${L} = _mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, _mm_setzero_si128());
+            $if SSE >= 4:
+              __m128i vbi${ABC[N:N+4]}c${L} = _mm_cvtepu16_epi32(vbw${ABC[N:N+8]}c${L});
+            $else:
+              __m128i vbi${ABC[N:N+4]}c${L} = _mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, _mm_setzero_si128());
             __m128i vbi${ABC[N+4:N+8]}c${L} = _mm_unpackhi_epi16(vbw${ABC[N:N+8]}c${L}, _mm_setzero_si128());
             vbi${ABC[N:N+4]}c${L} = _mm_add_epi32(vbi${ABC[N:N+4]}c${L}, vbias);
             vbi${ABC[N+4:N+8]}c${L} = _mm_add_epi32(vbi${ABC[N+4:N+8]}c${L}, vbias);
@@ -270,7 +276,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
             __m128i vbwi${ABC[N:N+8]}c0 = _mm_unpacklo_epi8(vbi${ABC[N:N+8]}c0, vbi${ABC[N:N+8]}c0);
             __m128i vbw${ABC[N:N+8]}c0 = _mm_and_si128(vbwi${ABC[N:N+8]}c0, vmask);
         $for N in range(0, NR, 8):
-          __m128i vbi${ABC[N:N+4]}c0 = _mm_unpacklo_epi16(vbw${ABC[N:N+8]}c0, _mm_setzero_si128());
+          $if SSE >= 4:
+            __m128i vbi${ABC[N:N+4]}c0 = _mm_cvtepu16_epi32(vbw${ABC[N:N+8]}c0);
+          $else:
+            __m128i vbi${ABC[N:N+4]}c0 = _mm_unpacklo_epi16(vbw${ABC[N:N+8]}c0, _mm_setzero_si128());
           __m128i vbi${ABC[N+4:N+8]}c0 = _mm_unpackhi_epi16(vbw${ABC[N:N+8]}c0, _mm_setzero_si128());
           vbi${ABC[N:N+4]}c0 = _mm_add_epi32(vbi${ABC[N:N+4]}c0, vbias);
           vbi${ABC[N+4:N+8]}c0 = _mm_add_epi32(vbi${ABC[N+4:N+8]}c0, vbias);

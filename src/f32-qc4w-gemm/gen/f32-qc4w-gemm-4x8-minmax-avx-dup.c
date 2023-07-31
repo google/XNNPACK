@@ -92,7 +92,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x8__avx_dup(
       __m128i vbw01234567c1 = _mm_srli_epi16(vbwi01234567c01, 4);
       __m128i vbw01234567c2 = _mm_and_si128(vbwi01234567c23, vmask);
       __m128i vbw01234567c3 = _mm_srli_epi16(vbwi01234567c23, 4);
-      __m128i vbi0123c0 = _mm_unpacklo_epi16(vbw01234567c0, _mm_setzero_si128());
+      __m128i vbi0123c0 = _mm_cvtepu16_epi32(vbw01234567c0);
       __m128i vbi4567c0 = _mm_unpackhi_epi16(vbw01234567c0, _mm_setzero_si128());
       vbi0123c0 = _mm_add_epi32(vbi0123c0, vbias);
       vbi4567c0 = _mm_add_epi32(vbi4567c0, vbias);
@@ -113,7 +113,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x8__avx_dup(
       const __m128 va2c1111 = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(va2), _MM_SHUFFLE(1, 1, 1, 1)));
       const __m128 va3c1111 = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(va3), _MM_SHUFFLE(1, 1, 1, 1)));
 
-      __m128i vbi0123c1 = _mm_unpacklo_epi16(vbw01234567c1, _mm_setzero_si128());
+      __m128i vbi0123c1 = _mm_cvtepu16_epi32(vbw01234567c1);
       __m128i vbi4567c1 = _mm_unpackhi_epi16(vbw01234567c1, _mm_setzero_si128());
       vbi0123c1 = _mm_add_epi32(vbi0123c1, vbias);
       vbi4567c1 = _mm_add_epi32(vbi4567c1, vbias);
@@ -134,7 +134,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x8__avx_dup(
       const __m128 va2c2222 = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(va2), _MM_SHUFFLE(2, 2, 2, 2)));
       const __m128 va3c2222 = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(va3), _MM_SHUFFLE(2, 2, 2, 2)));
 
-      __m128i vbi0123c2 = _mm_unpacklo_epi16(vbw01234567c2, _mm_setzero_si128());
+      __m128i vbi0123c2 = _mm_cvtepu16_epi32(vbw01234567c2);
       __m128i vbi4567c2 = _mm_unpackhi_epi16(vbw01234567c2, _mm_setzero_si128());
       vbi0123c2 = _mm_add_epi32(vbi0123c2, vbias);
       vbi4567c2 = _mm_add_epi32(vbi4567c2, vbias);
@@ -155,7 +155,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x8__avx_dup(
       const __m128 va2c3333 = _mm_permute_ps(va2, _MM_SHUFFLE(3, 3, 3, 3));
       const __m128 va3c3333 = _mm_permute_ps(va3, _MM_SHUFFLE(3, 3, 3, 3));
 
-      __m128i vbi0123c3 = _mm_unpacklo_epi16(vbw01234567c3, _mm_setzero_si128());
+      __m128i vbi0123c3 = _mm_cvtepu16_epi32(vbw01234567c3);
       __m128i vbi4567c3 = _mm_unpackhi_epi16(vbw01234567c3, _mm_setzero_si128());
       vbi0123c3 = _mm_add_epi32(vbi0123c3, vbias);
       vbi4567c3 = _mm_add_epi32(vbi4567c3, vbias);
@@ -192,7 +192,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x8__avx_dup(
       const __m128i vbwi01234567c01 = _mm_cvtepu8_epi16(_mm_loadl_epi64((const __m128i *) ((const int8_t*) w + 0)));
       __m128i vbw01234567c0 = _mm_and_si128(vbwi01234567c01, vmask);
       __m128i vbw01234567c1 = _mm_srli_epi16(vbwi01234567c01, 4);
-      __m128i vbi0123c0 = _mm_unpacklo_epi16(vbw01234567c0, _mm_setzero_si128());
+      __m128i vbi0123c0 = _mm_cvtepu16_epi32(vbw01234567c0);
       __m128i vbi4567c0 = _mm_unpackhi_epi16(vbw01234567c0, _mm_setzero_si128());
       vbi0123c0 = _mm_add_epi32(vbi0123c0, vbias);
       vbi4567c0 = _mm_add_epi32(vbi4567c0, vbias);
@@ -213,7 +213,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x8__avx_dup(
       const __m128 va2c1111 = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(va2), _MM_SHUFFLE(1, 1, 1, 1)));
       const __m128 va3c1111 = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(va3), _MM_SHUFFLE(1, 1, 1, 1)));
 
-      __m128i vbi0123c1 = _mm_unpacklo_epi16(vbw01234567c1, _mm_setzero_si128());
+      __m128i vbi0123c1 = _mm_cvtepu16_epi32(vbw01234567c1);
       __m128i vbi4567c1 = _mm_unpackhi_epi16(vbw01234567c1, _mm_setzero_si128());
       vbi0123c1 = _mm_add_epi32(vbi0123c1, vbias);
       vbi4567c1 = _mm_add_epi32(vbi4567c1, vbias);
@@ -244,7 +244,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x8__avx_dup(
 
       const __m128i vbwi01234567c0 = _mm_cvtepu8_epi16(_mm_loadl_epi64((const __m128i *) ((const int8_t*) w + 0)));
       __m128i vbw01234567c0 = _mm_and_si128(vbwi01234567c0, vmask);
-      __m128i vbi0123c0 = _mm_unpacklo_epi16(vbw01234567c0, _mm_setzero_si128());
+      __m128i vbi0123c0 = _mm_cvtepu16_epi32(vbw01234567c0);
       __m128i vbi4567c0 = _mm_unpackhi_epi16(vbw01234567c0, _mm_setzero_si128());
       vbi0123c0 = _mm_add_epi32(vbi0123c0, vbias);
       vbi4567c0 = _mm_add_epi32(vbi4567c0, vbias);
