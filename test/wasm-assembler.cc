@@ -903,6 +903,14 @@ TEST_F(WasmOpsTest, V128F32x4Pmin) {
   TestV128BinaryOp(0xEA, &WasmOpsTest::F32x4Pmin);
 }
 
+TEST_F(WasmOpsTest, V128F32x4Eq) {
+  TestV128BinaryOp(0x41, &WasmOpsTest::F32x4Eq);
+}
+
+TEST_F(WasmOpsTest, V128Andnot) {
+  TestV128BinaryOp(0x4F, &WasmOpsTest::V128Andnot);
+}
+
 TEST_F(WasmOpsTest, V128F32x4Splat) {
   ExpectEmitSIMDOpcode(0x13);
   F32x4Splat(f32_value_);
