@@ -120,18 +120,17 @@ inline bool operator==(const FuncType& lhs, const FuncType& rhs) {
 }
 
 struct Code {
-  constexpr explicit Code(byte* begin, byte* capacity_end)
-      : begin(begin), end(begin) {}
+  constexpr explicit Code(size_t begin_offset)
+      : begin_offset(begin_offset), end_offset(begin_offset) {}
 
-  size_t size() const { return end - begin; }
+  size_t size() const { return end_offset - begin_offset; }
 
-  byte* begin;
-  byte* end;
+  size_t begin_offset;
+  size_t end_offset;
 };
 
 struct Function {
-  constexpr Function()
-      : Function(nullptr, 0, 0, 0, {}, Code(nullptr, nullptr)) {}
+  constexpr Function() : Function(nullptr, 0, 0, 0, {}, Code(0)) {}
   constexpr Function(const char* name, size_t function_index,
                      uint32_t type_index,
                      const ValTypesToInt& locals_declaration, Code body)
@@ -380,8 +379,10 @@ std::array<uint8_t, 16> MakeLanesForI8x16Shuffle(const uint8_t* lanes,
                                                  size_t num_lanes);
 
 template <typename Derived>
-class LocalWasmOps : public LocalsManager, public WasmOpsBase<Derived, LocalWasmOps<Derived>> {
+class LocalWasmOps : public LocalsManager,
+                     public WasmOpsBase<Derived, LocalWasmOps<Derived>> {
   using WasmOpsBase<Derived, LocalWasmOps<Derived>>::GetDerived;
+
  public:
   class Local;
 
@@ -707,13 +708,13 @@ class WasmAssembler : public AssemblerBase,
   using Code = internal::Code;
 
   auto MakeStoreToCode(Code& out) {
-    return [&](uint8_t b) { emit8(b, out.end); };
+    return [&](uint8_t b) { emit8(b, &out.end_offset); };
   }
 
  public:
   explicit WasmAssembler(xnn_code_buffer* buf)
       : AssemblerBase(buf),
-        next_func_body_begin_(cursor_ + kInitialCodeOffset) {}
+        next_func_body_begin_(code_size_in_bytes() + kInitialCodeOffset) {}
 
   template <size_t InSize, typename Body>
   void AddFunc(const ResultType& result, const char* name,
@@ -731,7 +732,7 @@ class WasmAssembler : public AssemblerBase,
       error_ = Error::kMaxNumberOfFunctionsExceeded;
       return;
     }
-    Code code(next_func_body_begin_, top_);
+    Code code(next_func_body_begin_);
     SetOut(&code);
     ResetLocalsManager(InSize, locals_declaration_count);
     std::array<Local, InSize> input_locals{};
@@ -748,7 +749,7 @@ class WasmAssembler : public AssemblerBase,
     RegisterFunction(result, name,
                      Params(params, internal::kPlaceholderValType),
                      locals_declaration_count, code);
-    next_func_body_begin_ = code.end;
+    next_func_body_begin_ = code.end_offset;
   }
 
   void Emit() {
@@ -763,7 +764,7 @@ class WasmAssembler : public AssemblerBase,
   }
 
   void SetOut(Code* out) { out_ = out; }
-  void Encode8Impl(byte b) { emit8(b, out_->end); }
+  void Encode8Impl(byte b) { emit8(b, &out_->end_offset); }
   void EncodeS32Impl(int32_t value) {
     internal::StoreEncodedS32(value, MakeStoreToCode(*out_));
   }
@@ -835,7 +836,7 @@ class WasmAssembler : public AssemblerBase,
 
   internal::ArrayPrefix<Function, kMaxNumFuncs> functions_{0};
   internal::ArrayPrefix<FuncType, kMaxNumFuncTypes> func_types_{0};
-  byte* next_func_body_begin_;
+  size_t next_func_body_begin_;
   Code* out_ = nullptr;
 };
 

@@ -180,8 +180,7 @@ void WasmAssembler::EmitFunction(const Function& func) {
     EmitEncodedU32(type_to_count.value);
     emit8(type_to_count.type.code);
   }
-  std::memmove(cursor_, func.body.begin, func.body.size());
-  cursor_ += func.body.size();
+  move_emitted(func.body.begin_offset, func.body.size());
 }
 
 void WasmAssembler::EmitCodeSection() {

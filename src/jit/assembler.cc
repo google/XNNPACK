@@ -19,16 +19,24 @@ AssemblerBase::AssemblerBase(xnn_code_buffer* buf) {
   xnn_buffer = buf;
 }
 
+uint32_t AssemblerBase::get32(size_t offset) const {
+  return get<uint32_t>(offset);
+}
+
 void AssemblerBase::emit32(uint32_t value) {
   emit<uint32_t>(value, cursor_);
+}
+
+void AssemblerBase::emit32(uint32_t value, size_t* offset) {
+  emit<uint32_t>(value, offset);
 }
 
 void AssemblerBase::emit8(byte value) {
   emit<byte>(value, cursor_);
 }
 
-void AssemblerBase::emit8(byte value, byte*& cursor) {
-  emit<byte>(value, cursor);
+void AssemblerBase::emit8(byte value, size_t* offset) {
+  emit<byte>(value, offset);
 }
 
 void* AssemblerBase::finalize() {
@@ -44,5 +52,4 @@ void AssemblerBase::reset() {
   cursor_ = buffer_;
   error_ = Error::kNoError;
 }
-
 }  // namespace xnnpack

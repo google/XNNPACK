@@ -104,7 +104,7 @@ void Assembler::and_(CoreRegister rd, CoreRegister rn, uint8_t imm) {
 void Assembler::b(Condition c, Label& l) {
   if (l.bound) {
     // Offset is relative to after this b instruction + kPCDelta.
-    const ptrdiff_t offset = l.offset - cursor_ - kPCDelta;
+    const ptrdiff_t offset = l.offset - code_size_in_bytes() - kPCDelta;
     if (!branch_offset_valid(offset)) {
       error_ = Error::kLabelOffsetOutOfBounds;
       return;
@@ -113,7 +113,7 @@ void Assembler::b(Condition c, Label& l) {
     // No need to shift by 2 since our offset is already in terms of uint32_t.
     emit32(c | 0xA << 24 | ((offset >> kInstructionSizeInBytesLog2) & 0x00FFFFFF));
   } else {
-    if (!l.add_use(cursor_)) {
+    if (!l.add_use(code_size_in_bytes())) {
       error_ = Error::kLabelHasTooManyUsers;
       return;
     }
@@ -133,20 +133,19 @@ void Assembler::bind(Label& l) {
   }
 
   l.bound = true;
-  l.offset = cursor_;
+  l.offset = code_size_in_bytes();
 
   // Patch all users.
   for (size_t i = 0; i < l.num_users; i++) {
-    byte* user = l.users[i];
-    const ptrdiff_t offset = l.offset - user - kPCDelta;
-    uint32_t* instr = reinterpret_cast<uint32_t*>(user);
+    const ptrdiff_t offset = l.offset - l.users[i] - kPCDelta;
+    size_t user = l.users[i];
+    const uint32_t instr = get32(user);
 
     if (!branch_offset_valid(offset)) {
       error_ = Error::kLabelOffsetOutOfBounds;
       return;
     }
-
-    *instr |= (offset >> kInstructionSizeInBytesLog2) & 0x00FFFFFF;
+    emit32(instr | ((offset >> kInstructionSizeInBytesLog2) & 0x00FFFFFF), &user);
   }
 }
 
@@ -677,7 +676,7 @@ void Assembler::align(uint8_t n) {
     return;
   }
 
-  uintptr_t cursor = reinterpret_cast<uintptr_t>(cursor_);
+  uintptr_t cursor = reinterpret_cast<uintptr_t>(offset());
   const uintptr_t target = round_up_po2(cursor, n);
   while (cursor < target) {
     nop();

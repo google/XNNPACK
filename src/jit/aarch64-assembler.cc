@@ -813,7 +813,7 @@ void Assembler::align(uint8_t n, AlignInstruction instr) {
     return;
   }
 
-  uintptr_t cursor = reinterpret_cast<uintptr_t>(cursor_);
+  uintptr_t cursor = reinterpret_cast<uintptr_t>(offset());
   const uintptr_t target = round_up_po2(cursor, n);
   while (cursor < target) {
     switch (instr) {
@@ -841,21 +841,21 @@ void Assembler::bind(Label& l) {
   }
 
   l.bound = true;
-  l.offset = cursor_;
+  l.offset = code_size_in_bytes();
 
   // Patch all users.
   for (size_t i = 0; i < l.num_users; i++) {
-    byte* user = l.users[i];
-    const ptrdiff_t offset = l.offset - user;
-    uint32_t* instr = reinterpret_cast<uint32_t*>(user);
+    const ptrdiff_t offset = l.offset - l.users[i];
+    size_t user = l.users[i];
+    const uint32_t instr = get32(user);
 
-    const BranchType bt = instruction_branch_type(*instr);
+    const BranchType bt = instruction_branch_type(instr);
     if (!branch_offset_valid(offset, bt)) {
       error_ = Error::kLabelOffsetOutOfBounds;
       return;
     }
 
-    *instr |= branch_imm(offset, bt);
+    emit32(instr | branch_imm(offset, bt), &user);
   }
 }
 
@@ -865,14 +865,14 @@ void Assembler::b(Condition c, Label& l) {
 
 void Assembler::branch_to_label(uint32_t opcode, BranchType bt, Label& l) {
   if (l.bound) {
-    const ptrdiff_t offset = l.offset - cursor_;
+    const ptrdiff_t offset = l.offset - code_size_in_bytes();
     if (!branch_offset_valid(offset, bt)) {
       error_ = Error::kLabelOffsetOutOfBounds;
       return;
     }
     emit32(opcode | branch_imm(offset, bt));
   } else {
-    if (!l.add_use(cursor_)) {
+    if (!l.add_use(code_size_in_bytes())) {
       error_ = Error::kLabelHasTooManyUsers;
       return;
     }
