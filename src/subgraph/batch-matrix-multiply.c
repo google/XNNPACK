@@ -34,13 +34,15 @@ static enum xnn_status create_batch_matrix_multiply_operator(
 
   assert(node->num_outputs == 1);
 
-  // input1: b x m x k
-  // input2: b x n x k
+  const bool transpose_b = (node->flags & XNN_FLAG_TRANSPOSE_B) != 0;
+
   const struct xnn_value* input1 = values + input1_id;
   const struct xnn_value* input2 = values + input2_id;
+  // input1: [B, M, K]
+  // input2: [B, K, N] or [B, N, K] (transpose_b)
   const size_t m = input1->shape.dim[input1->shape.num_dims - 2];
   const size_t k = input1->shape.dim[input1->shape.num_dims - 1];
-  const size_t n = input2->shape.dim[input2->shape.num_dims - 2];
+  const size_t n = input2->shape.dim[transpose_b ? input2->shape.num_dims - 2 : input2->shape.num_dims - 1];
   const size_t batch_size = xnn_shape_multiply_batch_dims(&input1->shape, 2);
 
   enum xnn_status status;
@@ -277,17 +279,21 @@ enum xnn_status xnn_define_batch_matrix_multiply(
     }
   }
 
-  // Check that last dimension matches.
-  size_t last_dimension = input1_value->shape.num_dims - 1;
-  if (input1_value->shape.dim[last_dimension] != input2_value->shape.dim[last_dimension]) {
+  const bool transpose_b = (flags & XNN_FLAG_TRANSPOSE_B) != 0;
+  // Check that K dimension matches.
+  const size_t input1_k = input1_value->shape.num_dims - 1;
+  const size_t input2_k = transpose_b ? input2_value->shape.num_dims - 1 : input2_value->shape.num_dims - 2;
+  if (input1_value->shape.dim[input1_k] != input2_value->shape.dim[input2_k]) {
     xnn_log_error(
         "failed to define %s operator with input1 ID #%" PRIu32 " and input2 ID #%" PRIu32
         ": mismatch at last dimension (%zu != %zu)",
         xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply), input1_id, input2_id,
-        input1_value->shape.dim[last_dimension], input2_value->shape.dim[last_dimension]);
+        input1_value->shape.dim[input1_k], input2_value->shape.dim[input2_k]);
     return xnn_status_invalid_parameter;
   }
 
+  const size_t last_dimension = input1_value->shape.num_dims - 1;
+  const size_t input2_n = transpose_b ? input2_value->shape.num_dims - 2 : input2_value->shape.num_dims - 1;
   // Check that output is [M x N].
   if (output_value->shape.dim[last_dimension - 1] != input1_value->shape.dim[last_dimension - 1]) {
     xnn_log_error(
@@ -297,7 +303,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(
         output_value->shape.dim[last_dimension - 1], input1_value->shape.dim[last_dimension - 1]);
     return xnn_status_invalid_parameter;
   }
-  if (output_value->shape.dim[last_dimension] != input2_value->shape.dim[last_dimension - 1]) {
+  if (output_value->shape.dim[last_dimension] != input2_value->shape.dim[input2_n]) {
     xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 " and input2 ID #%" PRIu32
         ": mismatch at last dimension of output (%zu != %zu)",
