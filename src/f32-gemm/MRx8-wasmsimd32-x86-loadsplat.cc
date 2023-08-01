@@ -87,11 +87,6 @@ class F32GemmLoadsplatGenerator : public internal::GemmIGemmLoadsplatCommons {
   }
 
  private:
-  void InitAccumulators(LocalsArray& vaccs, const Local& w, size_t offset) {
-    vaccs[0] = V128Load(w, offset);
-    std::for_each(std::next(std::begin(vaccs)), std::end(vaccs), [&](auto& vacc) { vacc = vaccs[0]; });
-  }
-
   void ClampAsAndCs(LocalsArray& as, LocalsArray& cs, const Local& mr, const Local& a, const Local& c,
                     const Local& a_stride, const Local& cm_stride) {
     as[0] = a;
