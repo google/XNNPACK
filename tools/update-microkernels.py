@@ -110,6 +110,7 @@ def main(args):
   ignore_roots = {
     src_dir,
     os.path.join(src_dir, 'amalgam', 'gen'),
+    os.path.join(src_dir, 'configs'),
     os.path.join(src_dir, 'enums'),
     os.path.join(src_dir, 'jit'),
     os.path.join(src_dir, 'operators'),
