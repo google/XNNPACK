@@ -282,36 +282,36 @@ SET(LOGGING_SRCS
   src/log.c)
 
 SET(XNNPACK_SRCS
-  src/argmaxpool-config.c
-  src/avgpool-config.c
-  src/binary-elementwise-config.c
-  src/cmul-config.c
-  src/conv-hwc2chw-config.c
-  src/dwconv-config.c
-  src/dwconv2d-chw-config.c
-  src/gavgpool-config.c
-  src/gavgpool-cw-config.c
-  src/gemm-config.c
-  src/ibilinear-chw-config.c
-  src/ibilinear-config.c
+  src/configs/argmaxpool-config.c
+  src/configs/avgpool-config.c
+  src/configs/binary-elementwise-config.c
+  src/configs/cmul-config.c
+  src/configs/conv-hwc2chw-config.c
+  src/configs/dwconv-config.c
+  src/configs/dwconv2d-chw-config.c
+  src/configs/gavgpool-config.c
+  src/configs/gavgpool-cw-config.c
+  src/configs/gemm-config.c
+  src/configs/ibilinear-chw-config.c
+  src/configs/ibilinear-config.c
+  src/configs/lut32norm-config.c
+  src/configs/maxpool-config.c
+  src/configs/pavgpool-config.c
+  src/configs/prelu-config.c
+  src/configs/raddstoreexpminusmax-config.c
+  src/configs/reduce-config.c
+  src/configs/rmax-config.c
+  src/configs/spmm-config.c
+  src/configs/transpose-config.c
+  src/configs/unary-elementwise-config.c
+  src/configs/unpool-config.c
+  src/configs/vmulcaddc-config.c
+  src/configs/xx-fill-config.c
+  src/configs/xx-pad-config.c
+  src/configs/x8-lut-config.c
+  src/configs/zip-config.c
   src/init.c
-  src/lut32norm-config.c
-  src/maxpool-config.c
-  src/params.c
-  src/pavgpool-config.c
-  src/prelu-config.c
-  src/raddstoreexpminusmax-config.c
-  src/reduce-config.c
-  src/rmax-config.c
-  src/spmm-config.c
-  src/transpose-config.c
-  src/unary-elementwise-config.c
-  src/unpool-config.c
-  src/vmulcaddc-config.c
-  src/xx-fill-config.c
-  src/xx-pad-config.c
-  src/x8-lut-config.c
-  src/zip-config.c)
+  src/params.c)
 
 SET(TABLE_SRCS
   src/tables/exp2-k-over-64.c
@@ -471,7 +471,7 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
 ENDIF()
 ADD_LIBRARY(microkernels-all OBJECT ${ALL_MICROKERNEL_SRCS} ${TABLE_SRCS})
 ADD_LIBRARY(microkernels-prod OBJECT ${PROD_MICROKERNEL_SRCS} ${TABLE_SRCS})
-ADD_LIBRARY(hardware-config OBJECT src/hardware-config.c)
+ADD_LIBRARY(hardware-config OBJECT src/configs/hardware-config.c)
 ADD_LIBRARY(indirection OBJECT src/indirection.c)
 ADD_LIBRARY(jit OBJECT ${JIT_SRCS})
 ADD_LIBRARY(logging OBJECT ${LOGGING_SRCS})
