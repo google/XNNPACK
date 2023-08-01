@@ -429,7 +429,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   xnn_init_code_cache(&code_cache);
   code_cache_ptr = &code_cache;
 #endif
-  std::array<xnn_post_operation, 1 + XNN_EXTRA_BYTES / sizeof(float)> post_ops {xnn_post_operation{xnn_post_operation_type_hardswish}};
+  std::array<xnn_post_operation, 1> post_ops {xnn_post_operation{xnn_post_operation_type_hardswish}};
 
   xnn_operator_t op0 = nullptr;
   status = xnn_create_fused_convolution2d_nhwc_f32(
