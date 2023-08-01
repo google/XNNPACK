@@ -514,7 +514,7 @@ TEST_F(DepthwiseConvolutionTestQC8, matches_operator_api)
   xnn_operator_t op = nullptr;
 
   // Call operator API.
-  const xnn_status status = xnn_create_convolution2d_nhwc_qc8(
+  const xnn_status status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, kernel_height, kernel_width,
     subsampling_height, subsampling_width, dilation_height, dilation_width,
     /*groups=*/input_channels, /*group_input_channels=*/1,
@@ -531,11 +531,11 @@ TEST_F(DepthwiseConvolutionTestQC8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_convolution2d_nhwc_qc8(
+    xnn_status_success, xnn_reshape_convolution2d_nhwc_qs8_qc8w(
                           op, batch_size, input_height, input_width,
                           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
                           /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qc8(op, input.data(), operator_output.data()));
+  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8_qc8w(op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

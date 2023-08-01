@@ -207,7 +207,7 @@ static enum xnn_status create_convolution_operator(
         const int32_t output_zero_point = values[output_id].quantization.zero_point;
         const int8_t output_min = xnn_qs8_quantize(node->activation.output_min, output_scale, output_zero_point);
         const int8_t output_max = xnn_qs8_quantize(node->activation.output_max, output_scale, output_zero_point);
-        status = xnn_create_convolution2d_nhwc_qc8(
+        status = xnn_create_convolution2d_nhwc_qs8_qc8w(
           node->params.convolution_2d.input_padding_top,
           node->params.convolution_2d.input_padding_right,
           node->params.convolution_2d.input_padding_bottom,
@@ -328,7 +328,7 @@ static enum xnn_status reshape_convolution_operator(
         threadpool);
       break;
     case xnn_operator_type_convolution_nhwc_qc8:
-      return xnn_reshape_convolution2d_nhwc_qc8(
+      return xnn_reshape_convolution2d_nhwc_qs8_qc8w(
         opdata->operator_objects[0],
         opdata->batch_size,
         opdata->input_height,
@@ -407,7 +407,7 @@ static enum xnn_status setup_convolution_operator(
         output_data);
       break;
     case xnn_operator_type_convolution_nhwc_qc8:
-      return xnn_setup_convolution2d_nhwc_qc8(
+      return xnn_setup_convolution2d_nhwc_qs8_qc8w(
         opdata->operator_objects[0],
         input_data,
         output_data);

@@ -478,7 +478,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   xnn_status status;
 
   xnn_operator_t op0 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 0 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -503,7 +503,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op0, xnn_delete_operator);
 
   xnn_operator_t op1 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     1 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 1 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -528,7 +528,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op1, xnn_delete_operator);
 
   xnn_operator_t op2 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -553,7 +553,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op2, xnn_delete_operator);
 
   xnn_operator_t op3 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -578,7 +578,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op3, xnn_delete_operator);
 
   xnn_operator_t op4 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 0 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -603,7 +603,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op4, xnn_delete_operator);
 
   xnn_operator_t op5 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -628,7 +628,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op5, xnn_delete_operator);
 
   xnn_operator_t op6 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -653,7 +653,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op6, xnn_delete_operator);
 
   xnn_operator_t op7 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     1 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 1 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -678,7 +678,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op7, xnn_delete_operator);
 
   xnn_operator_t op8 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -716,7 +716,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op9, xnn_delete_operator);
 
   xnn_operator_t op10 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -741,7 +741,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op10, xnn_delete_operator);
 
   xnn_operator_t op11 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 0 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -766,7 +766,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op11, xnn_delete_operator);
 
   xnn_operator_t op12 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -791,7 +791,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op12, xnn_delete_operator);
 
   xnn_operator_t op13 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -816,7 +816,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op13, xnn_delete_operator);
 
   xnn_operator_t op14 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     1 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 1 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -841,7 +841,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op14, xnn_delete_operator);
 
   xnn_operator_t op15 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -879,7 +879,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op16, xnn_delete_operator);
 
   xnn_operator_t op17 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -904,7 +904,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op17, xnn_delete_operator);
 
   xnn_operator_t op18 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     1 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 1 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -929,7 +929,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op18, xnn_delete_operator);
 
   xnn_operator_t op19 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -967,7 +967,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op20, xnn_delete_operator);
 
   xnn_operator_t op21 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -992,7 +992,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op21, xnn_delete_operator);
 
   xnn_operator_t op22 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 0 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -1017,7 +1017,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op22, xnn_delete_operator);
 
   xnn_operator_t op23 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1042,7 +1042,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op23, xnn_delete_operator);
 
   xnn_operator_t op24 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1067,7 +1067,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op24, xnn_delete_operator);
 
   xnn_operator_t op25 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     1 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 1 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -1092,7 +1092,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op25, xnn_delete_operator);
 
   xnn_operator_t op26 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1130,7 +1130,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op27, xnn_delete_operator);
 
   xnn_operator_t op28 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1155,7 +1155,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op28, xnn_delete_operator);
 
   xnn_operator_t op29 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     1 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 1 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -1180,7 +1180,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op29, xnn_delete_operator);
 
   xnn_operator_t op30 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1218,7 +1218,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op31, xnn_delete_operator);
 
   xnn_operator_t op32 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1243,7 +1243,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op32, xnn_delete_operator);
 
   xnn_operator_t op33 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     1 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 1 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -1268,7 +1268,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op33, xnn_delete_operator);
 
   xnn_operator_t op34 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1306,7 +1306,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op35, xnn_delete_operator);
 
   xnn_operator_t op36 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1331,7 +1331,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op36, xnn_delete_operator);
 
   xnn_operator_t op37 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     1 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 1 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -1356,7 +1356,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op37, xnn_delete_operator);
 
   xnn_operator_t op38 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1381,7 +1381,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op38, xnn_delete_operator);
 
   xnn_operator_t op39 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1406,7 +1406,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op39, xnn_delete_operator);
 
   xnn_operator_t op40 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     1 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 1 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -1431,7 +1431,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op40, xnn_delete_operator);
 
   xnn_operator_t op41 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1469,7 +1469,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op42, xnn_delete_operator);
 
   xnn_operator_t op43 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1494,7 +1494,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op43, xnn_delete_operator);
 
   xnn_operator_t op44 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     1 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 1 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -1519,7 +1519,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op44, xnn_delete_operator);
 
   xnn_operator_t op45 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1557,7 +1557,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op46, xnn_delete_operator);
 
   xnn_operator_t op47 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1582,7 +1582,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op47, xnn_delete_operator);
 
   xnn_operator_t op48 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 0 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -1607,7 +1607,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op48, xnn_delete_operator);
 
   xnn_operator_t op49 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1632,7 +1632,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op49, xnn_delete_operator);
 
   xnn_operator_t op50 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1657,7 +1657,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op50, xnn_delete_operator);
 
   xnn_operator_t op51 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     1 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 1 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -1682,7 +1682,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op51, xnn_delete_operator);
 
   xnn_operator_t op52 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1720,7 +1720,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op53, xnn_delete_operator);
 
   xnn_operator_t op54 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1745,7 +1745,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op54, xnn_delete_operator);
 
   xnn_operator_t op55 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     1 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 1 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -1770,7 +1770,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op55, xnn_delete_operator);
 
   xnn_operator_t op56 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1808,7 +1808,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op57, xnn_delete_operator);
 
   xnn_operator_t op58 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1833,7 +1833,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op58, xnn_delete_operator);
 
   xnn_operator_t op59 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     1 /* top padding */, 1 /* right padding */,
     1 /* bottom padding */, 1 /* left padding */,
     3 /* kernel height */, 3 /* kernel width */,
@@ -1858,7 +1858,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op59, xnn_delete_operator);
 
   xnn_operator_t op60 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1883,7 +1883,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op60, xnn_delete_operator);
 
   xnn_operator_t op61 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1921,7 +1921,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   operators.emplace_back(op62, xnn_delete_operator);
 
   xnn_operator_t op63 = nullptr;
-  status = xnn_create_convolution2d_nhwc_qc8(
+  status = xnn_create_convolution2d_nhwc_qs8_qc8w(
     0 /* top padding */, 0 /* right padding */,
     0 /* bottom padding */, 0 /* left padding */,
     1 /* kernel height */, 1 /* kernel width */,
@@ -1945,7 +1945,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
   }
   operators.emplace_back(op63, xnn_delete_operator);
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op0,
     /*batch_size=*/1, /*input_height=*/224, /*input_width=*/224,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -1955,7 +1955,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op1,
     /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -1965,7 +1965,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op2,
     /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -1975,7 +1975,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op3,
     /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -1985,7 +1985,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op4,
     /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -1995,7 +1995,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op5,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2005,7 +2005,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op6,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2015,7 +2015,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op7,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2025,7 +2025,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op8,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2048,7 +2048,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op10,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2058,7 +2058,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op11,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2068,7 +2068,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op12,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2078,7 +2078,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op13,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2088,7 +2088,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op14,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2098,7 +2098,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op15,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2121,7 +2121,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op17,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2131,7 +2131,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op18,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2141,7 +2141,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op19,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2164,7 +2164,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op21,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2174,7 +2174,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op22,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2184,7 +2184,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op23,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2194,7 +2194,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op24,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2204,7 +2204,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op25,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2214,7 +2214,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op26,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2237,7 +2237,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op28,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2247,7 +2247,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op29,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2257,7 +2257,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op30,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2280,7 +2280,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op32,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2290,7 +2290,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op33,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2300,7 +2300,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op34,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2323,7 +2323,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op36,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2333,7 +2333,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op37,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2343,7 +2343,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op38,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2353,7 +2353,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op39,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2363,7 +2363,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op40,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2373,7 +2373,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op41,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2396,7 +2396,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op43,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2406,7 +2406,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op44,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2416,7 +2416,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op45,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2439,7 +2439,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op47,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2449,7 +2449,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op48,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2459,7 +2459,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op49,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2469,7 +2469,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op50,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2479,7 +2479,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op51,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2489,7 +2489,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op52,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2512,7 +2512,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op54,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2522,7 +2522,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op55,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2532,7 +2532,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op56,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2555,7 +2555,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op58,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2565,7 +2565,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op59,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2575,7 +2575,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op60,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2585,7 +2585,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op61,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2604,7 +2604,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_reshape_convolution2d_nhwc_qc8(
+  status = xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     op63,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
@@ -2614,7 +2614,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op0,
     /*input=*/v0.data(), /*output=*/v1.data());
   if (status != xnn_status_success) {
@@ -2622,7 +2622,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op1,
     /*input=*/v1.data(), /*output=*/v2.data());
   if (status != xnn_status_success) {
@@ -2630,7 +2630,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op2,
     /*input=*/v2.data(), /*output=*/v3.data());
   if (status != xnn_status_success) {
@@ -2638,7 +2638,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op3,
     /*input=*/v3.data(), /*output=*/v4.data());
   if (status != xnn_status_success) {
@@ -2646,7 +2646,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op4,
     /*input=*/v4.data(), /*output=*/v5.data());
   if (status != xnn_status_success) {
@@ -2654,7 +2654,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op5,
     /*input=*/v5.data(), /*output=*/v6.data());
   if (status != xnn_status_success) {
@@ -2662,7 +2662,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op6,
     /*input=*/v6.data(), /*output=*/v7.data());
   if (status != xnn_status_success) {
@@ -2670,7 +2670,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op7,
     /*input=*/v7.data(), /*output=*/v8.data());
   if (status != xnn_status_success) {
@@ -2678,7 +2678,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op8,
     /*input=*/v8.data(), /*output=*/v9.data());
   if (status != xnn_status_success) {
@@ -2694,7 +2694,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op10,
     /*input=*/v10.data(), /*output=*/v11.data());
   if (status != xnn_status_success) {
@@ -2702,7 +2702,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op11,
     /*input=*/v11.data(), /*output=*/v12.data());
   if (status != xnn_status_success) {
@@ -2710,7 +2710,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op12,
     /*input=*/v12.data(), /*output=*/v13.data());
   if (status != xnn_status_success) {
@@ -2718,7 +2718,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op13,
     /*input=*/v13.data(), /*output=*/v14.data());
   if (status != xnn_status_success) {
@@ -2726,7 +2726,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op14,
     /*input=*/v14.data(), /*output=*/v15.data());
   if (status != xnn_status_success) {
@@ -2734,7 +2734,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op15,
     /*input=*/v15.data(), /*output=*/v16.data());
   if (status != xnn_status_success) {
@@ -2750,7 +2750,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op17,
     /*input=*/v17.data(), /*output=*/v18.data());
   if (status != xnn_status_success) {
@@ -2758,7 +2758,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op18,
     /*input=*/v18.data(), /*output=*/v19.data());
   if (status != xnn_status_success) {
@@ -2766,7 +2766,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op19,
     /*input=*/v19.data(), /*output=*/v20.data());
   if (status != xnn_status_success) {
@@ -2782,7 +2782,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op21,
     /*input=*/v21.data(), /*output=*/v22.data());
   if (status != xnn_status_success) {
@@ -2790,7 +2790,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op22,
     /*input=*/v22.data(), /*output=*/v23.data());
   if (status != xnn_status_success) {
@@ -2798,7 +2798,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op23,
     /*input=*/v23.data(), /*output=*/v24.data());
   if (status != xnn_status_success) {
@@ -2806,7 +2806,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op24,
     /*input=*/v24.data(), /*output=*/v25.data());
   if (status != xnn_status_success) {
@@ -2814,7 +2814,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op25,
     /*input=*/v25.data(), /*output=*/v26.data());
   if (status != xnn_status_success) {
@@ -2822,7 +2822,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op26,
     /*input=*/v26.data(), /*output=*/v27.data());
   if (status != xnn_status_success) {
@@ -2838,7 +2838,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op28,
     /*input=*/v28.data(), /*output=*/v29.data());
   if (status != xnn_status_success) {
@@ -2846,7 +2846,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op29,
     /*input=*/v29.data(), /*output=*/v30.data());
   if (status != xnn_status_success) {
@@ -2854,7 +2854,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op30,
     /*input=*/v30.data(), /*output=*/v31.data());
   if (status != xnn_status_success) {
@@ -2870,7 +2870,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op32,
     /*input=*/v32.data(), /*output=*/v33.data());
   if (status != xnn_status_success) {
@@ -2878,7 +2878,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op33,
     /*input=*/v33.data(), /*output=*/v34.data());
   if (status != xnn_status_success) {
@@ -2886,7 +2886,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op34,
     /*input=*/v34.data(), /*output=*/v35.data());
   if (status != xnn_status_success) {
@@ -2902,7 +2902,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op36,
     /*input=*/v36.data(), /*output=*/v37.data());
   if (status != xnn_status_success) {
@@ -2910,7 +2910,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op37,
     /*input=*/v37.data(), /*output=*/v38.data());
   if (status != xnn_status_success) {
@@ -2918,7 +2918,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op38,
     /*input=*/v38.data(), /*output=*/v39.data());
   if (status != xnn_status_success) {
@@ -2926,7 +2926,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op39,
     /*input=*/v39.data(), /*output=*/v40.data());
   if (status != xnn_status_success) {
@@ -2934,7 +2934,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op40,
     /*input=*/v40.data(), /*output=*/v41.data());
   if (status != xnn_status_success) {
@@ -2942,7 +2942,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op41,
     /*input=*/v41.data(), /*output=*/v42.data());
   if (status != xnn_status_success) {
@@ -2958,7 +2958,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op43,
     /*input=*/v43.data(), /*output=*/v44.data());
   if (status != xnn_status_success) {
@@ -2966,7 +2966,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op44,
     /*input=*/v44.data(), /*output=*/v45.data());
   if (status != xnn_status_success) {
@@ -2974,7 +2974,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op45,
     /*input=*/v45.data(), /*output=*/v46.data());
   if (status != xnn_status_success) {
@@ -2990,7 +2990,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op47,
     /*input=*/v47.data(), /*output=*/v48.data());
   if (status != xnn_status_success) {
@@ -2998,7 +2998,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op48,
     /*input=*/v48.data(), /*output=*/v49.data());
   if (status != xnn_status_success) {
@@ -3006,7 +3006,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op49,
     /*input=*/v49.data(), /*output=*/v50.data());
   if (status != xnn_status_success) {
@@ -3014,7 +3014,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op50,
     /*input=*/v50.data(), /*output=*/v51.data());
   if (status != xnn_status_success) {
@@ -3022,7 +3022,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op51,
     /*input=*/v51.data(), /*output=*/v52.data());
   if (status != xnn_status_success) {
@@ -3030,7 +3030,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op52,
     /*input=*/v52.data(), /*output=*/v53.data());
   if (status != xnn_status_success) {
@@ -3046,7 +3046,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op54,
     /*input=*/v54.data(), /*output=*/v55.data());
   if (status != xnn_status_success) {
@@ -3054,7 +3054,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op55,
     /*input=*/v55.data(), /*output=*/v56.data());
   if (status != xnn_status_success) {
@@ -3062,7 +3062,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op56,
     /*input=*/v56.data(), /*output=*/v57.data());
   if (status != xnn_status_success) {
@@ -3078,7 +3078,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op58,
     /*input=*/v58.data(), /*output=*/v59.data());
   if (status != xnn_status_success) {
@@ -3086,7 +3086,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op59,
     /*input=*/v59.data(), /*output=*/v60.data());
   if (status != xnn_status_success) {
@@ -3094,7 +3094,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op60,
     /*input=*/v60.data(), /*output=*/v61.data());
   if (status != xnn_status_success) {
@@ -3102,7 +3102,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op61,
     /*input=*/v61.data(), /*output=*/v62.data());
   if (status != xnn_status_success) {
@@ -3118,7 +3118,7 @@ ExecutionPlan QC8MobileNetV2(pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
-  status = xnn_setup_convolution2d_nhwc_qc8(
+  status = xnn_setup_convolution2d_nhwc_qs8_qc8w(
     op63,
     /*input=*/v63.data(), /*output=*/v64.data());
   if (status != xnn_status_success) {

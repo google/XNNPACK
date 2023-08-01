@@ -980,7 +980,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qs8(
     convolution_op_out);
 }
 
-enum xnn_status xnn_create_convolution2d_nhwc_qc8(
+enum xnn_status xnn_create_convolution2d_nhwc_qs8_qc8w(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
     uint32_t input_padding_bottom,
@@ -2151,7 +2151,7 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qs8(
     /*num_threads=*/pthreadpool_get_threads_count(threadpool));
 }
 
-enum xnn_status xnn_reshape_convolution2d_nhwc_qc8(
+enum xnn_status xnn_reshape_convolution2d_nhwc_qs8_qc8w(
     xnn_operator_t convolution_op,
     size_t batch_size,
     size_t input_height,
@@ -2342,7 +2342,7 @@ enum xnn_status xnn_setup_convolution2d_nhwc_qs8(
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T);
 }
 
-enum xnn_status xnn_setup_convolution2d_nhwc_qc8(
+enum xnn_status xnn_setup_convolution2d_nhwc_qs8_qc8w(
     xnn_operator_t convolution_op,
     const int8_t* input,
     int8_t* output)
