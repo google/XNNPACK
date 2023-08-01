@@ -50,7 +50,7 @@ static enum xnn_status create_fully_connected_nc(
     const float* scale_params,
     const void* params,
     size_t params_size,
-    const struct xnn_gemm_config* gemm_parameters,
+    const struct xnn_gemm_config* gemm_config,
     const struct gemm_fused_ukernels* gemm_ukernels,
     const struct jit_gemm_params *jit_gemm_params,
     enum xnn_operator_type operator_type,
@@ -112,9 +112,9 @@ static enum xnn_status create_fully_connected_nc(
   fully_connected_op->weights_cache = weights_cache;
   fully_connected_op->code_cache = code_cache;
 
-  const uint32_t nr = gemm_parameters->nr;
-  const uint32_t kr = UINT32_C(1) << gemm_parameters->log2_kr;
-  const uint32_t sr = UINT32_C(1) << gemm_parameters->log2_sr;
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 
   const size_t n_stride = round_up(output_channels, nr);
   size_t k_stride = round_up_po2(input_channels, kr * sr);
@@ -144,7 +144,7 @@ static enum xnn_status create_fully_connected_nc(
       output_channels,
       kernel, bias,
       weights_ptr,
-      gemm_parameters->nr * extra_weights_bytes,
+      gemm_config->nr * extra_weights_bytes,
       packing_params);
   } else {
     pack_gemm_goi_w(
@@ -152,18 +152,18 @@ static enum xnn_status create_fully_connected_nc(
       nr, kr, sr,
       kernel, bias,
       weights_ptr,
-      gemm_parameters->nr * extra_weights_bytes,
+      gemm_config->nr * extra_weights_bytes,
       packing_params);
   }
 
   if (scale_params != NULL) {
     assert(init_scale_params != NULL);
     void* weights = (void*) ((uintptr_t) weights_ptr +
-      gemm_parameters->nr * ((k_stride << log2_filter_element_size) + bias_element_size));
+      gemm_config->nr * ((k_stride << log2_filter_element_size) + bias_element_size));
     const size_t weights_stride = (k_stride << log2_filter_element_size) + bias_element_size + extra_weights_bytes;
     init_scale_params(
-        output_channels, gemm_parameters->nr, gemm_parameters->nr,
-        gemm_parameters->nr * weights_stride, gemm_parameters->nr * weights_stride, 0,
+        output_channels, gemm_config->nr, gemm_config->nr,
+        gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
         scale_params, weights);
   }
 
@@ -181,7 +181,7 @@ static enum xnn_status create_fully_connected_nc(
   fully_connected_op->type = operator_type;
   fully_connected_op->flags = flags;
 
-  const size_t mr = gemm_parameters->mr;
+  const size_t mr = gemm_config->mr;
   fully_connected_op->ukernel.type = xnn_microkernel_type_gemm;
   fully_connected_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
     .mr = mr,
@@ -197,7 +197,7 @@ static enum xnn_status create_fully_connected_nc(
 
   #if XNN_PLATFORM_JIT
     xnn_generate_gemms_up_to_max_mr(
-      mr, gemm_parameters->generator, jit_gemm_params, output_channels, nr,
+      mr, gemm_config->generator, jit_gemm_params, output_channels, nr,
       input_channels << log2_input_element_size, fully_connected_op);
   #endif  // XNN_PLATFORM_JIT
 
@@ -261,7 +261,7 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
   if XNN_LIKELY(gemm_config->init.f16 != NULL) {
     gemm_config->init.f16(&params, fp16_output_min, fp16_output_max);
   }
-  xnn_packw_gemm_gio_ukernel_fn pack_gemm_gio_w = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f16_gemm_gio_w;
+  xnn_packw_gemm_gio_ukernel_fn pack_gemm_gio_w = (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio;
   xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi_w = (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi;
   if (flags & XNN_FLAG_FP32_STATIC_WEIGHTS) {
     pack_gemm_gio_w = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_to_f16_gemm_gio_w;
@@ -366,7 +366,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*filter_is_nibble=*/false,
     /*bias_element_size=*/sizeof(float),
-    (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w,
+    (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     /*packing_params=*/NULL,
     /*packed_weights_padding_byte=*/0,
@@ -550,7 +550,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc8w(
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*filter_is_nibble=*/false,
     /*bias_element_size=*/sizeof(float),
-    (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_qs8w_gemm_gio_w,
+    (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
     /*packing_params=*/NULL,
     /*packed_weights_padding_byte=*/0,
