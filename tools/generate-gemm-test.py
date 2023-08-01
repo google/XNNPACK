@@ -825,6 +825,25 @@ $if DATATYPE == "qu8":
     }
   }
 
+  TEST(${TEST_NAME}, b_zero_point) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (uint16_t b_zero_point = 0; b_zero_point <= 255; ++b_zero_point) {
+      GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
+        .mr(${MR})
+        .nr(${NR})
+        .kr(${KR})
+        .sr(${SR})
+        .m(${MR})
+        .n(${NR})
+        .k(${KBLOCK})
+        .b_zero_point(b_zero_point)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+
   TEST(${TEST_NAME}, no_zero_point) {
     $if ISA_CHECK:
       ${ISA_CHECK};
