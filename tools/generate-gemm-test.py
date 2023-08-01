@@ -69,6 +69,8 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}) {
     .m(${MR})
     .n(${NR})
     .k(${KBLOCK})
+    $if DATATYPE == 'f32_qc4w':
+      .b_zero_point(7)
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -86,6 +88,8 @@ TEST(${TEST_NAME}, strided_cn) {
     .n(${NR})
     .k(${KBLOCK})
     .cn_stride(${next_prime(NR + 1)})
+    $if DATATYPE == 'f32_qc4w':
+      .b_zero_point(7)
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -104,6 +108,8 @@ $if UKERNEL_TYPE != "IGEMM":
       .n(${NR})
       .k(${KBLOCK})
       .a_stride(${next_prime(KBLOCK + 1)})
+      $if DATATYPE == 'f32_qc4w':
+        .b_zero_point(7)
       .Test(${", ".join(TEST_ARGS)});
   }
 
@@ -123,6 +129,8 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile) {
         .n(n)
         .k(${KBLOCK})
         .iterations(1)
+        $if DATATYPE == 'f32_qc4w':
+          .b_zero_point(7)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -143,6 +151,8 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile_m) {
       .n(${NR})
       .k(${KBLOCK})
       .iterations(1)
+      $if DATATYPE == 'f32_qc4w':
+        .b_zero_point(7)
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -163,6 +173,8 @@ TEST(${TEST_NAME}, k_eq_${KBLOCK}_subtile_n) {
       .n(n)
       .k(${KBLOCK})
       .iterations(1)
+      $if DATATYPE == 'f32_qc4w':
+        .b_zero_point(7)
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -181,6 +193,8 @@ $if IS_PIPELINED:
       .m(${MR})
       .n(${NR})
       .k(${KBLOCK * 2})
+      $if DATATYPE == 'f32_qc4w':
+        .b_zero_point(7)
       .Test(${", ".join(TEST_ARGS)});
   }
 
@@ -199,6 +213,8 @@ $if IS_PIPELINED:
         .n(${NR})
         .k(${KBLOCK * 2})
         .a_stride(${next_prime(KBLOCK * 2 + 1)})
+        $if DATATYPE == 'f32_qc4w':
+          .b_zero_point(7)
         .Test(${", ".join(TEST_ARGS)});
     }
 
@@ -218,6 +234,8 @@ $if IS_PIPELINED:
           .n(n)
           .k(${KBLOCK * 2})
           .iterations(1)
+          $if DATATYPE == 'f32_qc4w':
+            .b_zero_point(7)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -238,6 +256,8 @@ $if KBLOCK > 1:
         .m(${MR})
         .n(${NR})
         .k(k)
+        $if DATATYPE == 'f32_qc4w':
+          .b_zero_point(7)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -258,6 +278,8 @@ $if KBLOCK > 1:
           .n(${NR})
           .k(k)
           .a_stride(${next_prime(ADJKBLOCK + 1)})
+          $if DATATYPE == 'f32_qc4w':
+            .b_zero_point(7)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -279,6 +301,8 @@ $if KBLOCK > 1:
             .n(n)
             .k(k)
             .iterations(1)
+            $if DATATYPE == 'f32_qc4w':
+              .b_zero_point(7)
             .Test(${", ".join(TEST_ARGS)});
         }
       }
@@ -299,6 +323,8 @@ TEST(${TEST_NAME}, k_gt_${ADJKBLOCK}) {
       .m(${MR})
       .n(${NR})
       .k(k)
+      $if DATATYPE == 'f32_qc4w':
+        .b_zero_point(7)
       .Test(${", ".join(TEST_ARGS)});
   }
 }
@@ -319,6 +345,8 @@ $if UKERNEL_TYPE.startswith("GEMM"):
         .n(${NR})
         .k(k)
         .a_stride(${next_prime(10 if ADJKBLOCK == 1 else ADJKBLOCK * 2 + 1)})
+        $if DATATYPE == 'f32_qc4w':
+          .b_zero_point(7)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -340,6 +368,8 @@ TEST(${TEST_NAME}, k_gt_${ADJKBLOCK}_subtile) {
           .n(n)
           .k(k)
           .iterations(1)
+          $if DATATYPE == 'f32_qc4w':
+            .b_zero_point(7)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -361,6 +391,8 @@ $if KBLOCK > 1:
         .m(${MR})
         .n(${NR})
         .k(k)
+        $if DATATYPE == 'f32_qc4w':
+          .b_zero_point(7)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -381,6 +413,8 @@ $if KBLOCK > 1:
           .n(${NR})
           .k(k)
           .a_stride(${next_prime(KBLOCK * 10 + 1)})
+          $if DATATYPE == 'f32_qc4w':
+            .b_zero_point(7)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -402,6 +436,8 @@ $if KBLOCK > 1:
             .n(n)
             .k(k)
             .iterations(1)
+            $if DATATYPE == 'f32_qc4w':
+              .b_zero_point(7)
             .Test(${", ".join(TEST_ARGS)});
         }
       }
@@ -423,6 +459,8 @@ TEST(${TEST_NAME}, n_gt_${NR}) {
         .m(${MR})
         .n(n)
         .k(k)
+        $if DATATYPE == 'f32_qc4w':
+          .b_zero_point(7)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -444,6 +482,8 @@ TEST(${TEST_NAME}, n_gt_${NR}_strided_cn) {
         .n(n)
         .k(k)
         .cn_stride(${next_prime(NR + 1)})
+        $if DATATYPE == 'f32_qc4w':
+          .b_zero_point(7)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -466,6 +506,8 @@ $if UKERNEL_TYPE != "IGEMM":
           .n(n)
           .k(k)
           .a_stride(${next_prime(KBLOCK * 5 + 1)})
+          $if DATATYPE == 'f32_qc4w':
+            .b_zero_point(7)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -488,6 +530,8 @@ TEST(${TEST_NAME}, n_gt_${NR}_subtile) {
           .n(n)
           .k(k)
           .iterations(1)
+          $if DATATYPE == 'f32_qc4w':
+            .b_zero_point(7)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -509,6 +553,8 @@ TEST(${TEST_NAME}, n_div_${NR}) {
         .m(${MR})
         .n(n)
         .k(k)
+        $if DATATYPE == 'f32_qc4w':
+          .b_zero_point(7)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -530,6 +576,8 @@ TEST(${TEST_NAME}, n_div_${NR}_strided_cn) {
         .n(n)
         .k(k)
         .cn_stride(${next_prime(NR + 1)})
+        $if DATATYPE == 'f32_qc4w':
+          .b_zero_point(7)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -552,6 +600,8 @@ $if UKERNEL_TYPE != "IGEMM":
           .n(n)
           .k(k)
           .a_stride(${next_prime(KBLOCK * 5 + 1)})
+          $if DATATYPE == 'f32_qc4w':
+            .b_zero_point(7)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -574,6 +624,8 @@ TEST(${TEST_NAME}, n_div_${NR}_subtile) {
           .n(n)
           .k(k)
           .iterations(1)
+          $if DATATYPE == 'f32_qc4w':
+            .b_zero_point(7)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -596,6 +648,8 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
         .n(${NR})
         .k(k)
         .ks(3)
+        $if DATATYPE == 'f32_qc4w':
+          .b_zero_point(7)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -618,6 +672,8 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
             .k(k)
             .ks(3)
             .iterations(1)
+            $if DATATYPE == 'f32_qc4w':
+              .b_zero_point(7)
             .Test(${", ".join(TEST_ARGS)});
         }
       }
@@ -640,6 +696,8 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
           .n(n)
           .k(k)
           .ks(3)
+          $if DATATYPE == 'f32_qc4w':
+            .b_zero_point(7)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -661,6 +719,8 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
           .n(n)
           .k(k)
           .ks(3)
+          $if DATATYPE == 'f32_qc4w':
+            .b_zero_point(7)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -684,6 +744,8 @@ TEST(${TEST_NAME}, strided_cm_subtile) {
           .k(k)
           .cm_stride(${next_prime(NR + 1)})
           .iterations(1)
+          $if DATATYPE == 'f32_qc4w':
+            .b_zero_point(7)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -707,6 +769,8 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
         .k(k)
         .ks(3)
         .a_offset(${next_prime(MR * KBLOCK * 5 + 1)})
+        $if DATATYPE == 'f32_qc4w':
+          .b_zero_point(7)
         .Test(${", ".join(TEST_ARGS)});
     }
   }
@@ -729,6 +793,8 @@ $if UKERNEL_TYPE.startswith("IGEMM"):
           .ks(3)
           .a_offset(${next_prime(MR * KBLOCK * 5 + 1)})
           .zero_index(mz)
+          $if DATATYPE == 'f32_qc4w':
+            .b_zero_point(7)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
@@ -749,6 +815,8 @@ $if ACTIVATION == "MINMAX":
       .n(${NR})
       .k(${KBLOCK})
       .qmin(128)
+      $if DATATYPE == 'f32_qc4w':
+        .b_zero_point(7)
       .Test(${", ".join(TEST_ARGS)});
   }
 
@@ -766,6 +834,8 @@ $if ACTIVATION == "MINMAX":
       .n(${NR})
       .k(${KBLOCK})
       .qmax(128)
+      $if DATATYPE == 'f32_qc4w':
+        .b_zero_point(7)
       .Test(${", ".join(TEST_ARGS)});
   }
 
@@ -783,6 +853,8 @@ TEST(${TEST_NAME}, strided_cm) {
     .n(${NR})
     .k(${KBLOCK})
     .cm_stride(${next_prime(NR + 1)})
+    $if DATATYPE == 'f32_qc4w':
+      .b_zero_point(7)
     .Test(${", ".join(TEST_ARGS)});
 }
 
@@ -806,6 +878,7 @@ $if DATATYPE == "qu8":
     }
   }
 
+$if DATATYPE in ["qu8", "f32_qc4w"]:
   TEST(${TEST_NAME}, no_b_zero_point) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -825,6 +898,7 @@ $if DATATYPE == "qu8":
     }
   }
 
+$if DATATYPE == "qu8":
   TEST(${TEST_NAME}, b_zero_point) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -844,6 +918,27 @@ $if DATATYPE == "qu8":
     }
   }
 
+$if DATATYPE == "f32_qc4w":
+  TEST(${TEST_NAME}, b_zero_point) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (uint8_t b_zero_point = 0; b_zero_point <= 15; ++b_zero_point) {
+      GemmMicrokernelTester()
+        $if EXTENDED_WEIGHTS:
+          .extended_weights(true)
+        .mr(${MR})
+        .nr(${NR})
+        .kr(${KR})
+        .sr(${SR})
+        .m(${MR})
+        .n(${NR})
+        .k(${KBLOCK})
+        .b_zero_point(b_zero_point)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  }
+
+$if DATATYPE == "qu8":
   TEST(${TEST_NAME}, no_zero_point) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -864,27 +959,7 @@ $if DATATYPE == "qu8":
     }
   }
 
-$if DATATYPE == "f32_qc4w":
-  TEST(${TEST_NAME}, zero_point) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t z = 0; z <= 15; ++z) {
-      GemmMicrokernelTester()
-        $if EXTENDED_WEIGHTS:
-          .extended_weights(true)
-        .mr(${MR})
-        .nr(${NR})
-        .kr(${KR})
-        .sr(${SR})
-        .m(${MR})
-        .n(${NR})
-        .k(${KBLOCK})
-        .b_zero_point(z)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-$if TEST_NAME.startswith('GENERATE') and (DATATYPE == 'f32' or DATATYPE == 'f16'):
+$if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16']:
   TEST(${TEST_NAME}, subtile_m_upto_mr) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -902,6 +977,8 @@ $if TEST_NAME.startswith('GENERATE') and (DATATYPE == 'f32' or DATATYPE == 'f16'
             .n(${NR})
             .k(k)
             .iterations(1)
+            $if DATATYPE == 'f32_qc4w':
+              .b_zero_point(7)
             .Test(${", ".join(TEST_ARGS)});
         }
       }
