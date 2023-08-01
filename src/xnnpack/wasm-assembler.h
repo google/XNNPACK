@@ -596,6 +596,14 @@ class LocalWasmOps : public LocalsManager,
     });
   }
 
+  ValueOnStack I32x4Shuffle(const ValueOnStack& a, const ValueOnStack& b,
+                            const std::array<uint8_t, 4>& lanes) {
+    return BinaryOp(a, b, [&](Derived* derived) {
+      derived->i8x16_shuffle(
+          MakeLanesForI8x16Shuffle(lanes.data(), lanes.size()));
+    });
+  }
+
   ValueOnStack F32x4Splat(const ValueOnStack& a) {
     assert(a.type == f32);
     GetDerived()->f32x4_splat();

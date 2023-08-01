@@ -916,6 +916,15 @@ TEST_F(WasmOpsTest, V128F32x4Splat) {
   F32x4Splat(f32_value_);
 }
 
+TEST_F(WasmOpsTest, I32x4Shuffle) {
+  static constexpr std::array<uint8_t, 4> kLanes = {1,2,3,4};
+  ExpectEmitSIMDOpcode(0x0D);
+  for (auto lane : internal::MakeLanesForI8x16Shuffle(kLanes.data(), kLanes.size())) {
+    ExpectCallEmit8(lane);
+  }
+  I32x4Shuffle(v128_value_, v128_value_, kLanes);
+}
+
 TEST_F(WasmOpsTest, Return) {
   ExpectCallEmit8(0x0F);
   Return();
