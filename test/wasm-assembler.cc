@@ -815,12 +815,12 @@ class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
  protected:
   template <typename Op>
   void TestV128BinaryOp(uint32_t opcode, Op&& op) {
-    ExpectEmitSIMDOpcode(opcode);
+    ExpectEncodeVectorOpcode(opcode);
     auto result = std::mem_fn(op)(*this, v128_value_, v128_value_);
     EXPECT_EQ(result.type, v128);
   }
 
-  void ExpectCallEmit8(byte opcode) {
+  void ExpectCallEncode8(byte opcode) {
     EXPECT_CALL(*this, Encode8Impl(opcode)).Times(1).InSequence(sequence_);
   }
 
@@ -832,8 +832,8 @@ class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
     EXPECT_CALL(*this, EncodeS32Impl(value)).Times(1).InSequence(sequence_);
   }
 
-  void ExpectEmitSIMDOpcode(uint32_t opcode) {
-    ExpectCallEmit8(0xFD);
+  void ExpectEncodeVectorOpcode(uint32_t opcode) {
+    ExpectCallEncode8(0xFD);
     ExpectCallEncodeU32(opcode);
   }
 
@@ -853,10 +853,10 @@ class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
 class V128StoreLaneWasmOpTest : public WasmOpsTest {
  protected:
   void SetStoreLaneExpectations(byte expected_opcode) {
-    ExpectEmitSIMDOpcode(expected_opcode);
+    ExpectEncodeVectorOpcode(expected_opcode);
     ExpectCallEncodeU32(kLogAlignment);
     ExpectCallEncodeU32(kOffset);
-    ExpectCallEmit8(kLane);
+    ExpectCallEncode8(kLane);
   }
 
   static constexpr uint8_t kLane = 1;
@@ -878,17 +878,17 @@ TEST_F(V128StoreLaneWasmOpTest, 64Lane) {
 }
 
 TEST_F(WasmOpsTest, I32Ne) {
-  ExpectCallEmit8(0x47);
+  ExpectCallEncode8(0x47);
   I32Ne(i32_value_, i32_value_);
 }
 
 TEST_F(WasmOpsTest, I32GeU) {
-  ExpectCallEmit8(0x4F);
+  ExpectCallEncode8(0x4F);
   I32GeU(i32_value_, i32_value_);
 }
 
 TEST_F(WasmOpsTest, V128Load64Splat) {
-  ExpectEmitSIMDOpcode(0x0A);
+  ExpectEncodeVectorOpcode(0x0A);
   ExpectCallEncodeU32(kLogAlignment);
   ExpectCallEncodeU32(kOffset);
 
@@ -912,39 +912,39 @@ TEST_F(WasmOpsTest, V128Andnot) {
 }
 
 TEST_F(WasmOpsTest, V128F32x4Splat) {
-  ExpectEmitSIMDOpcode(0x13);
+  ExpectEncodeVectorOpcode(0x13);
   F32x4Splat(f32_value_);
 }
 
 TEST_F(WasmOpsTest, I32x4Shuffle) {
   static constexpr std::array<uint8_t, 4> kLanes = {1,2,3,4};
-  ExpectEmitSIMDOpcode(0x0D);
+  ExpectEncodeVectorOpcode(0x0D);
   for (auto lane : internal::MakeLanesForI8x16Shuffle(kLanes.data(), kLanes.size())) {
-    ExpectCallEmit8(lane);
+    ExpectCallEncode8(lane);
   }
   I32x4Shuffle(v128_value_, v128_value_, kLanes);
 }
 
 TEST_F(WasmOpsTest, Return) {
-  ExpectCallEmit8(0x0F);
+  ExpectCallEncode8(0x0F);
   Return();
 }
 
 TEST_F(WasmOpsTest, Tee) {
-  ExpectCallEmit8(0x22);
+  ExpectCallEncode8(0x22);
   ExpectCallEncodeU32(i32_local_index);
   local_tee(i32_local_);
 }
 
 TEST_F(WasmOpsTest, Select) {
-  ExpectCallEmit8(0x1B);
+  ExpectCallEncode8(0x1B);
   Select(i32_value_, i32_value_, i32_value_);
 }
 
 TEST_F(WasmOpsTest, I32NeZ) {
-  ExpectCallEmit8(0x41);
+  ExpectCallEncode8(0x41);
   ExpectCallEncodeS32(0);
-  ExpectCallEmit8(0x47);
+  ExpectCallEncode8(0x47);
   I32NeZ(i32_value_);
 }
 
