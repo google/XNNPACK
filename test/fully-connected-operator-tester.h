@@ -93,6 +93,16 @@ class FullyConnectedOperatorTester {
     }
   }
 
+  inline FullyConnectedOperatorTester& kernel_zero_point(size_t kernel_zero_point) {
+    assert(kernel_zero_point >= 1);
+    this->kernel_zero_point_ = kernel_zero_point;
+    return *this;
+  }
+
+  inline size_t kernel_zero_point() const {
+    return this->kernel_zero_point_;
+  }
+
   inline FullyConnectedOperatorTester& qmin(uint8_t qmin) {
     this->qmin_ = qmin;
     return *this;
@@ -740,6 +750,210 @@ class FullyConnectedOperatorTester {
     }
   }
 
+  void TestF32QC4W() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
+    std::random_device random_device;
+    auto rng = std::mt19937(random_device());
+    std::uniform_real_distribution<float> f32idist(0.1f, 1.0f);
+    std::uniform_real_distribution<float> f32wdist(-1.0f, 1.0f);
+    std::uniform_int_distribution<uint32_t> i8wdist(-1, std::numeric_limits<uint8_t>::max());
+
+    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+      (batch_size() - 1) * input_stride() + input_channels());
+    std::vector<uint8_t> kernel(output_channels() * ((input_channels() + 1) / 2));
+    const size_t kernel_stride = (input_channels() + 1) / 2;
+    std::vector<float> bias(output_channels());
+    std::vector<float> output((batch_size() - 1) * output_stride() + output_channels());
+    std::vector<float> output_ref(batch_size() * output_channels());
+    std::vector<float> scale(output_channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return f32idist(rng); });
+      std::generate(kernel.begin(), kernel.end(), [&]() { return i8wdist(rng); });
+      std::generate(bias.begin(), bias.end(), [&]() { return f32wdist(rng); });
+      std::generate(scale.begin(), scale.end(), [&]() { return f32idist(rng); });
+      std::fill(output.begin(), output.end(), std::nanf(""));
+
+      if (input_channels() % 2 == 1) {
+        // For odd number of input channels, ensure that last nibble is padded with 0.
+        for (size_t oc = 0; oc < output_channels(); oc++) {
+          const size_t nb_index = oc * kernel_stride + kernel_stride - 1;
+          kernel[nb_index] &= 0xF;
+        }
+      }
+
+      // Compute reference results.
+      if (has_bias()) {
+        for (size_t i = 0; i < batch_size(); i++) {
+          for (size_t oc = 0; oc < output_channels(); oc++) {
+            output_ref[i * output_channels() + oc] = bias[oc];
+          }
+        }
+      } else {
+        std::fill(output_ref.begin(), output_ref.end(), 0.0f);
+      }
+
+      ASSERT_FALSE(transpose_weights()) << "F32-QC4W does not support transposed weights";
+
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t oc = 0; oc < output_channels(); oc++) {
+          for (size_t ic = 0; ic < input_channels(); ic++) {
+            const size_t kernel_index = oc * kernel_stride + (ic / 2);
+            const int8_t kernel_value =
+              int8_t((ic % 2 == 0) ? (kernel[kernel_index] & 15) : (kernel[kernel_index] >> 4)) - kernel_zero_point();
+
+            output_ref[i * output_channels() + oc] +=
+              input[i * input_stride() + ic] * static_cast<float>(static_cast<int32_t>(kernel_value));
+          }
+          output_ref[i * output_channels() + oc] *= scale[oc];
+        }
+      }
+
+      // Compute clamping parameters.
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
+
+      const float output_min = qmin() == 0 ? -std::numeric_limits<float>::infinity() :
+        accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin());
+      const float output_max = qmax() == 255 ? std::numeric_limits<float>::infinity() :
+        accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
+
+      // Clamp reference results.
+      for (float& value : output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
+      }
+
+      // Create, setup, run, and destroy Fully Connected operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t fully_connected_op = nullptr;
+
+      std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_code_cache(
+          nullptr, xnn_release_code_cache);
+      #if XNN_PLATFORM_JIT
+        xnn_code_cache code_cache;
+        if (use_jit()) {
+          xnn_init_code_cache(&code_cache);
+          auto_code_cache.reset(&code_cache);
+        }
+      #endif
+      xnn_weights_cache weights_cache;
+      std::unique_ptr<xnn_weights_cache, decltype(&xnn_release_weights_cache)> auto_weights_cache(
+        nullptr, xnn_release_weights_cache);
+      if (use_weights_cache()) {
+        xnn_init_weights_cache(&weights_cache);
+        auto_weights_cache.reset(&weights_cache);
+      }
+
+      const xnn_status status = xnn_create_fully_connected_nc_f32_qc4w(
+          input_channels(), output_channels(),
+          input_stride(), output_stride(),
+          scale.data(),
+          kernel.data(),
+          kernel_zero_point(),
+          has_bias() ? bias.data() : nullptr,
+          output_min, output_max,
+          transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
+          auto_code_cache.get(), auto_weights_cache.get(),
+          &fully_connected_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, fully_connected_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(&weights_cache, xnn_weights_cache_finalization_kind_soft));
+      }
+
+      // Smart pointer to automatically delete fully_connected_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op, xnn_delete_operator);
+
+      #if XNN_PLATFORM_JIT
+        if (use_jit()) {
+          // Check that we actually generated code.
+          ASSERT_GT(code_cache.cache.code.size, 0);
+          xnn_finalize_code_memory(&code_cache.cache.code);
+        }
+      #endif
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_reshape_fully_connected_nc_f32_qc4w(
+          fully_connected_op,
+          batch_size(),
+          nullptr /* thread pool */));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_setup_fully_connected_nc_f32_qc4w(
+          fully_connected_op,
+          input.data(), output.data()));
+
+      ASSERT_EQ(xnn_status_success,
+        xnn_run_operator(fully_connected_op, nullptr /* thread pool */));
+
+      VerifyF32(output, output_ref, output_max, output_min);
+
+      if (use_weights_cache()) {
+        // We already finalized the code cache, so create a new code cache if we are testing JIT.
+        std::unique_ptr<xnn_code_cache, decltype(&xnn_release_code_cache)> auto_inner_code_cache(
+            nullptr, xnn_release_code_cache);
+        #if XNN_PLATFORM_JIT
+          xnn_code_cache inner_code_cache;
+          if (use_jit()) {
+            xnn_init_code_cache(&inner_code_cache);
+            auto_inner_code_cache.reset(&inner_code_cache);
+          }
+        #endif
+        // Create another operator with the same weights cache.
+        xnn_operator_t fully_connected_op2 = nullptr;
+        size_t old_weights_cache_size = weights_cache.cache.weights.size;
+        ASSERT_EQ(xnn_status_success,
+                  xnn_create_fully_connected_nc_f32_qc4w(
+                      input_channels(), output_channels(),
+                      input_stride(), output_stride(),
+                      scale.data(),
+                      kernel.data(),
+                      kernel_zero_point(),
+                      has_bias() ? bias.data() : nullptr,
+                      output_min,
+                      output_max,
+                      transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
+                      auto_inner_code_cache.get(), auto_weights_cache.get(),
+                      &fully_connected_op2));
+        ASSERT_NE(nullptr, fully_connected_op2);
+
+        #if XNN_PLATFORM_JIT
+          if (use_jit()) {
+            // Check that we actually generated code.
+            ASSERT_GT(inner_code_cache.cache.code.size, 0);
+            xnn_finalize_code_memory(&inner_code_cache.cache.code);
+          }
+        #endif
+
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op2, xnn_delete_operator);
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_reshape_fully_connected_nc_f32_qc4w(
+                      fully_connected_op2,
+                      batch_size(),
+                      nullptr /* thread pool */));
+
+        std::vector<float> output2(output.size(), nanf(""));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_fully_connected_nc_f32_qc4w(
+                      fully_connected_op2,
+                      input.data(), output2.data()));
+
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_operator(fully_connected_op2, nullptr /* thread pool */));
+        VerifyWeightsCache(weights_cache, old_weights_cache_size);
+
+        VerifyF32(output, output_ref, output_max, output_min);
+      }
+    }
+  }
+
   void TestF32QC8W() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
@@ -1163,6 +1377,7 @@ class FullyConnectedOperatorTester {
   size_t output_channels_{1};
   size_t output_stride_{0};
   size_t batch_size_{1};
+  uint8_t kernel_zero_point_{127};
   uint8_t qmin_{0};
   uint8_t qmax_{255};
   bool transpose_weights_{false};
