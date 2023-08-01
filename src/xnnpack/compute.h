@@ -254,6 +254,10 @@ struct packw_gemm_gio_context {
 };
 
 #ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_packw_gemm_gio(
+      const struct packw_gemm_gio_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t n_block_start,
+      size_t n_block_size);
   XNN_PRIVATE void xnn_compute_batched_packw_gemm_gio(
       const struct packw_gemm_gio_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,

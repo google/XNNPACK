@@ -17,6 +17,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/log.h>
 #include <xnnpack/math.h>
+#include <xnnpack/microfnptr.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/operator-utils.h>
 #include <xnnpack/pack.h>
@@ -75,7 +76,11 @@ static enum xnn_status create_dynamic_fully_connected_nc(
   for (size_t i = 0; i < mr; i++) {
     dynamic_fully_connected_op->ukernel.gemm.gemm_cases[i] = gemm_ukernels->gemm[i];
   }
-  dynamic_fully_connected_op->ukernel.gemm.packw_gemm_goi = gemm_config->pack_gemm_goi;
+  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    dynamic_fully_connected_op->ukernel.gemm.packw_gemm_gio = gemm_config->pack_gemm_gio;
+  } else {
+    dynamic_fully_connected_op->ukernel.gemm.packw_gemm_goi = gemm_config->pack_gemm_goi;
+  }
 
   if (gemm_nr2_config != NULL) {
     dynamic_fully_connected_op->ukernel.gemm_nr2 = (struct xnn_ukernel_gemm) {
@@ -88,7 +93,11 @@ static enum xnn_status create_dynamic_fully_connected_nc(
     for (size_t i = 0; i < gemm_nr2_config->mr; i++) {
       dynamic_fully_connected_op->ukernel.gemm_nr2.gemm_cases[i] = gemm_nr2_ukernels->gemm[i];
     }
-    dynamic_fully_connected_op->ukernel.gemm_nr2.packw_gemm_goi = gemm_nr2_config->pack_gemm_goi;
+    if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+      dynamic_fully_connected_op->ukernel.gemm_nr2.packw_gemm_gio = gemm_nr2_config->pack_gemm_gio;
+    } else {
+      dynamic_fully_connected_op->ukernel.gemm_nr2.packw_gemm_goi = gemm_nr2_config->pack_gemm_goi;
+    }
   }
 
   dynamic_fully_connected_op->state = xnn_run_state_invalid;
@@ -325,17 +334,46 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
   *workspace_size = n_stride * bias_element_size + ((n_stride * k_stride) << log2_filter_element_size);
   *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
 
-  assert(ukernel->packw_gemm_goi != NULL);
-  dynamic_fully_connected_op->context.packw_gemm_goi = (struct packw_gemm_goi_context) {
-    .kc = input_channels,
-    .nr = nr,
-    .kr = kr,
-    .sr = sr,
-    .k_stride = input_channels << log2_input_element_size,
-    .b_stride = bias_element_size,
-    .w_stride = bias_element_size + (k_stride << log2_input_element_size),
-    .packw_gemm_goi = ukernel->packw_gemm_goi,
-  };
+  if (dynamic_fully_connected_op->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    assert(ukernel->packw_gemm_gio != NULL);
+    dynamic_fully_connected_op->context.packw_gemm_gio = (struct packw_gemm_gio_context) {
+      .kc = input_channels,
+      .nr = nr,
+      .kr = kr,
+      .sr = sr,
+      .k_stride_elements = output_channels,
+      .n_stride = 1 << log2_filter_element_size,
+      .b_stride = bias_element_size,
+      .w_stride = bias_element_size + (k_stride << log2_input_element_size),
+      .packw_gemm_gio = ukernel->packw_gemm_gio,
+    };
+
+    dynamic_fully_connected_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
+    dynamic_fully_connected_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_packw_gemm_gio;
+    dynamic_fully_connected_op->compute[0].context_offset = offsetof(struct xnn_operator, context.packw_gemm_gio) - offsetof(struct xnn_operator, context);
+    dynamic_fully_connected_op->compute[0].range[0] = output_channels;
+    dynamic_fully_connected_op->compute[0].tile[0] = nr;
+  } else {
+    assert(ukernel->packw_gemm_goi != NULL);
+    dynamic_fully_connected_op->context.packw_gemm_goi = (struct packw_gemm_goi_context) {
+      .kc = input_channels,
+      .nr = nr,
+      .kr = kr,
+      .sr = sr,
+      .k_stride = input_channels << log2_input_element_size,
+      .b_stride = bias_element_size,
+      .w_stride = bias_element_size + (k_stride << log2_input_element_size),
+      .packw_gemm_goi = ukernel->packw_gemm_goi,
+    };
+
+    dynamic_fully_connected_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
+    dynamic_fully_connected_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_packw_gemm_goi;
+    dynamic_fully_connected_op->compute[0].context_offset = offsetof(struct xnn_operator, context.packw_gemm_goi) - offsetof(struct xnn_operator, context);
+    dynamic_fully_connected_op->compute[0].range[0] = output_channels;
+    dynamic_fully_connected_op->compute[0].tile[0] = nr;
+  }
+
+
   dynamic_fully_connected_op->context.gemm = (struct gemm_context){
     .k_scaled = input_channels << log2_input_element_size,
     .w_stride = bias_element_size + (round_up_po2(input_channels, kr * sr) << log2_input_element_size),
@@ -351,12 +389,6 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
     memcpy(&dynamic_fully_connected_op->context.gemm.params, params2, params2_size);
   }
   dynamic_fully_connected_op->context.gemm.fused_params = &dynamic_fully_connected_op->context.gemm.params;
-
-  dynamic_fully_connected_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-  dynamic_fully_connected_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_packw_gemm_goi;
-  dynamic_fully_connected_op->compute[0].context_offset = offsetof(struct xnn_operator, context.packw_gemm_goi) - offsetof(struct xnn_operator, context);
-  dynamic_fully_connected_op->compute[0].range[0] = output_channels;
-  dynamic_fully_connected_op->compute[0].tile[0] = nr;
 
   #if XNN_TEST_MODE
     const size_t nc = nr;
@@ -475,9 +507,16 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
       break;
   }
 
-  dynamic_fully_connected_op->context.packw_gemm_goi.kernel = kernel;
-  dynamic_fully_connected_op->context.packw_gemm_goi.bias = bias;
-  dynamic_fully_connected_op->context.packw_gemm_goi.packed_weights = workspace;
+  if (dynamic_fully_connected_op->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    dynamic_fully_connected_op->context.packw_gemm_gio.kernel = kernel;
+    dynamic_fully_connected_op->context.packw_gemm_gio.bias = bias;
+    dynamic_fully_connected_op->context.packw_gemm_gio.packed_weights = workspace;
+  } else {
+    dynamic_fully_connected_op->context.packw_gemm_goi.kernel = kernel;
+    dynamic_fully_connected_op->context.packw_gemm_goi.bias = bias;
+    dynamic_fully_connected_op->context.packw_gemm_goi.packed_weights = workspace;
+  }
+
   dynamic_fully_connected_op->context.gemm.a = input;
   dynamic_fully_connected_op->context.gemm.packed_w = workspace;
   dynamic_fully_connected_op->context.gemm.c = output;
