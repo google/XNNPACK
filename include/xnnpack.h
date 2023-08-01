@@ -1339,7 +1339,7 @@ enum xnn_status xnn_define_bankers_rounding(
 /// @param output_id - Value ID for the output tensor. The output tensor must be an N-dimensional tensor defined in the
 ///                    @a subgraph. It must be at least 3D. The first N-2 dimensions must match the first and second
 ///                    input tensors . The last 2 dimensions must be [M, N].
-/// @param flags - binary features of the Batch Matrix Multiply Node. The only currently supported values already
+/// @param flags - binary features of the Batch Matrix Multiply Node. The only currently supported value is
 ///                XNN_FLAG_TRANSPOSE_B.
 enum xnn_status xnn_define_batch_matrix_multiply(
   xnn_subgraph_t subgraph,
