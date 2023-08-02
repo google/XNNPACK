@@ -147,7 +147,22 @@
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_6x8__sse41_dup
   init: xnn_init_f32_qc4w_minmax_sse_params
   k-block: 4
-
+# x86 AVX2
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_1x16__avx2_broadcast
+  init: xnn_init_f32_qc4w_minmax_avx_params
+  k-block: 1
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_3x16__avx2_broadcast
+  init: xnn_init_f32_qc4w_minmax_avx_params
+  k-block: 1
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_4x16__avx2_broadcast
+  init: xnn_init_f32_qc4w_minmax_avx_params
+  k-block: 1
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_5x16__avx2_broadcast
+  init: xnn_init_f32_qc4w_minmax_avx_params
+  k-block: 1
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_6x16__avx2_broadcast
+  init: xnn_init_f32_qc4w_minmax_avx_params
+  k-block: 1
 # WAsm
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x4__wasm
   init: xnn_init_f32_qc4w_minmax_scalar_params

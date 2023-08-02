@@ -110,6 +110,14 @@ tools/xngen src/f32-gemm/sse-dup.c.in -D MR=4 -D NR=8 -D INC=0 -D SSE=4 -D AVX=1
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=0 -D SSE=4 -D AVX=1 -D FMA=3 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x8-minmax-fma3-dup.c &
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=6 -D NR=8 -D INC=0 -D SSE=4 -D AVX=1 -D FMA=3 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x8-minmax-fma3-dup.c &
 
+################################### x86 AVX ###################################
+### FMA3+BROADCAST micro-kernels
+tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=1 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x16-minmax-avx2-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x16-minmax-avx2-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-avx2-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-avx2-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=6 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x16-minmax-avx2-broadcast.c &
+
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/f32-qc4w-gemm-minmax.yaml --output test/f32-qc4w-gemm-minmax.cc &
 
