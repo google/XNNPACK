@@ -440,6 +440,7 @@ struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph);
 
 enum xnn_status xnn_subgraph_add_nodes(xnn_subgraph_t subgraph, size_t num_nodes);
 
+// Get size of the tensor in bytes (based on dimensions of tensor).
 size_t xnn_tensor_get_size(const struct xnn_value* value);
 
 size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id);

@@ -213,6 +213,8 @@ enum xnn_datatype {
   xnn_datatype_qcint8 = 6,
   /// Quantized 32-bit signed integer with shared per-channel quantization parameters.
   xnn_datatype_qcint32 = 7,
+  /// Quantized 4-bit signed integer with shared per-channel quantization parameters.
+  xnn_datatype_qcint4 = 8,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
@@ -273,10 +275,23 @@ enum xnn_status xnn_define_quantized_tensor_value(
   uint32_t flags,
   uint32_t* id_out);
 
+enum xnn_status xnn_define_channelwise_quantized_tensor_value(
+  xnn_subgraph_t subgraph,
+  enum xnn_datatype datatype,
+  const float* scale,
+  size_t num_dims,
+  size_t channel_dim,
+  const size_t* dims,
+  const void* data,
+  uint32_t external_id,
+  uint32_t flags,
+  uint32_t* id_out);
+
 /// Define a channelwise quantized tensor-type Value and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Value.
 /// @param datatype - type of the tensor elements.
+/// @param zero_point - offset from zero to subtract from the quantized elements in the Value.
 /// @param scale - per-channel multiplication factors to convert quantized elements to real representation.
 /// @param num_dims - number of dimensions in the shape.
 /// @param channel_dim - index of the channel dimension in the tensor with per-channel quantization parameters.
@@ -295,9 +310,10 @@ enum xnn_status xnn_define_quantized_tensor_value(
 ///                and XNN_VALUE_FLAG_EXTERNAL_OUTPUT.
 /// @param id_out - pointer to the variable that will be initialized with the Value ID upon successful return. If a
 ///                 valid @a external_id was provided, the variable will be initialized with the @a external_id value.
-enum xnn_status xnn_define_channelwise_quantized_tensor_value(
+enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
   xnn_subgraph_t subgraph,
   enum xnn_datatype datatype,
+  int32_t zero_point,
   const float* scale,
   size_t num_dims,
   size_t channel_dim,
