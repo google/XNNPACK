@@ -607,6 +607,7 @@ enum xnn_status xnn_setup_runtime(
     const uint32_t value_id = external_value->id;
     struct xnn_value* value = &runtime->values[value_id];
     value->data = external_value->data;
+    value->quantization.quantization_params = external_value->quantization_params;
   }
 
   for (size_t i = 0; i < runtime->num_ops; i++) {

@@ -12,6 +12,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/cache.h>
 #include <xnnpack/node-type.h>
+#include <xnnpack/quantization.h>
 
 #if defined(EMSCRIPTEN)
 #include <emscripten/emscripten.h>
@@ -91,6 +92,7 @@ struct xnn_value {
         /// Index of the channel dimension with per-channel quantization parameters.
         size_t channel_dimension;
       };
+      struct xnn_qd8_quantization_params* quantization_params;
     };
   } quantization;
   /// Tensor shape.
@@ -199,6 +201,7 @@ enum xnn_compute_type {
   xnn_compute_type_qs8,
   xnn_compute_type_qu8,
   xnn_compute_type_fp32_to_fp16,
+  xnn_compute_type_fp32_to_qd8,
   xnn_compute_type_fp32_to_qs8,
   xnn_compute_type_fp32_to_qu8,
   xnn_compute_type_fp16_to_fp32,

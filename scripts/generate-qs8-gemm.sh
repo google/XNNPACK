@@ -124,6 +124,14 @@ tools/xngen src/qs8-gemm/scalar.c.in -D MR=3 -D NR=4 -D REQUANTIZATION=RNDNU -D 
 tools/xngen src/qs8-gemm/scalar.c.in -D MR=4 -D NR=4 -D REQUANTIZATION=RNDNU -D VARIANT=      -D DATATYPE=QU8 -D WASM=0 -o src/qu8-gemm/gen/qu8-gemm-4x4-minmax-rndnu-scalar.c &
 
 ##################################### WAsm ####################################
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=2 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x2-minmax-wasm.c &
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=4 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x4-minmax-wasm.c &
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=8 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8-minmax-wasm.c &
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=2 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x2-minmax-wasm.c &
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=4 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x4-minmax-wasm.c &
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=8 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8-minmax-wasm.c &
+tools/xngen src/qs8-gemm/scalar.c.in -D MR=4 -D NR=4 -D REQUANTIZATION= -D VARIANT= -D DATATYPE=QD8 -D WASM=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x4-minmax-wasm.c &
+
 tools/xngen src/qs8-gemm/scalar.c.in -D MR=1 -D NR=2 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x2-minmax-fp32-wasm-fmagic.c &
 tools/xngen src/qs8-gemm/scalar.c.in -D MR=2 -D NR=2 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x2-minmax-fp32-wasm-fmagic.c &
 tools/xngen src/qs8-gemm/scalar.c.in -D MR=3 -D NR=2 -D REQUANTIZATION=FP32 -D VARIANT=FMAGIC -D DATATYPE=QC8 -D WASM=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x2-minmax-fp32-wasm-fmagic.c &

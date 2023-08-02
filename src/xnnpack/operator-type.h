@@ -84,6 +84,7 @@ enum xnn_operator_type {
   xnn_operator_type_fully_connected_nc_f32,
   xnn_operator_type_fully_connected_nc_f32_qc4w,
   xnn_operator_type_fully_connected_nc_f32_qc8w,
+  xnn_operator_type_fully_connected_nc_qd8_f32_qc8w,
   xnn_operator_type_fully_connected_nc_qs8,
   xnn_operator_type_fully_connected_nc_qu8,
   xnn_operator_type_global_average_pooling_ncw_f16,

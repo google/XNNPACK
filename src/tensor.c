@@ -202,6 +202,65 @@ enum xnn_status xnn_define_quantized_tensor_value(
   return xnn_status_success;
 }
 
+enum xnn_status xnn_define_dynamically_quantized_tensor_value(
+    xnn_subgraph_t subgraph,
+    enum xnn_datatype datatype,
+    size_t num_dims,
+    const size_t* dims,
+    const void* data,
+    uint32_t external_id,
+    uint32_t flags,
+    uint32_t* id_out)
+{
+  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+    xnn_log_error("failed to create Dynamically Quantized Dense Tensor value: XNNPACK is not initialized");
+    return xnn_status_uninitialized;
+  }
+
+  if (external_id != XNN_INVALID_VALUE_ID && external_id >= subgraph->external_value_ids) {
+    xnn_log_error(
+      "failed to create Dynamically Quantized Dense Tensor value: "
+      "external ID %" PRIu32 " exceeds the number of reserved external IDs in subgraph (%" PRIu32 ")",
+      external_id, subgraph->external_value_ids);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (num_dims > XNN_MAX_TENSOR_DIMS) {
+    xnn_log_error(
+      "failed to create Dynamically Quantized Dense Tensor value: num of dimensions exceeds XNNPACK limit (%d)",
+      XNN_MAX_TENSOR_DIMS);
+    return xnn_status_unsupported_parameter;
+  }
+
+  switch (datatype) {
+    case xnn_datatype_qdint8:
+      break;
+    default:
+      xnn_log_error("failed to create Dynamically Quantized Dense Tensor value: unsupported datatype %s (%d)",
+        xnn_datatype_to_string(datatype), datatype);
+      return xnn_status_unsupported_parameter;
+  }
+
+  struct xnn_value* value = subgraph->values + external_id;
+  if (external_id == XNN_INVALID_VALUE_ID) {
+    value = xnn_subgraph_new_internal_value(subgraph);
+    if (value == NULL) {
+      return xnn_status_out_of_memory;
+    }
+  }
+  value->type = xnn_value_type_dense_tensor;
+  value->datatype = datatype;
+  value->shape.num_dims = num_dims;
+  memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+  value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
+  value->flags = flags;
+  value->data = (void*) (uintptr_t) data;
+  set_allocation_type(value);
+
+  *id_out = value->id;
+  return xnn_status_success;
+}
+
 enum xnn_status xnn_define_channelwise_quantized_tensor_value(
     xnn_subgraph_t subgraph,
     enum xnn_datatype datatype,
@@ -364,6 +423,7 @@ size_t xnn_tensor_get_size(const struct xnn_value* value)
       size = 4;
       break;
     case xnn_datatype_qcint4:
+    case xnn_datatype_qdint8:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
     case xnn_datatype_qcint8:

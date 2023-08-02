@@ -46,6 +46,12 @@ static enum xnn_status create_convert_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
+    case xnn_compute_type_fp32_to_qd8:
+      status = xnn_create_convert_nc_f32_qd8(
+        channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
     case xnn_compute_type_fp32_to_qs8:
       status = xnn_create_convert_nc_f32_qs8(
         channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
@@ -127,6 +133,11 @@ static enum xnn_status reshape_convert_operator(
         opdata->operator_objects[0],
         opdata->batch_size,
         threadpool);
+    case xnn_operator_type_convert_nc_f32_qd8:
+      return xnn_reshape_convert_nc_f32_qd8(
+        opdata->operator_objects[0],
+        opdata->batch_size,
+        threadpool);
     case xnn_operator_type_convert_nc_f32_qs8:
       return xnn_reshape_convert_nc_f32_qs8(
         opdata->operator_objects[0],
@@ -188,6 +199,7 @@ static enum xnn_status setup_convert_operator(
   const struct xnn_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
+  void* quantization_params = output_value->quantization.quantization_params;
 
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_convert_nc_f32_f16:
@@ -195,6 +207,12 @@ static enum xnn_status setup_convert_operator(
         opdata->operator_objects[0],
         input_data,
         output_data);
+    case xnn_operator_type_convert_nc_f32_qd8:
+      return xnn_setup_convert_nc_f32_qd8(
+        opdata->operator_objects[0],
+        input_data,
+        output_data,
+        quantization_params);
     case xnn_operator_type_convert_nc_f32_qs8:
       return xnn_setup_convert_nc_f32_qs8(
         opdata->operator_objects[0],
@@ -244,6 +262,8 @@ static inline enum xnn_compute_type validate_datatypes(
       switch (output_datatype) {
         case xnn_datatype_fp16:
           return xnn_compute_type_fp32_to_fp16;
+        case xnn_datatype_qdint8:
+          return xnn_compute_type_fp32_to_qd8;
         case xnn_datatype_qint8:
           return xnn_compute_type_fp32_to_qs8;
         case xnn_datatype_quint8:
@@ -358,6 +378,7 @@ enum xnn_status xnn_define_convert(
   switch (output_value->datatype) {
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
+    case xnn_datatype_qdint8:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
       break;

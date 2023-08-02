@@ -215,6 +215,8 @@ enum xnn_datatype {
   xnn_datatype_qcint32 = 7,
   /// Quantized 4-bit signed integer with shared per-channel quantization parameters.
   xnn_datatype_qcint4 = 8,
+  /// Dynamically quantized 8-bit signed integer with per-batch quantization parameters.
+  xnn_datatype_qdint8 = 9,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
@@ -323,6 +325,32 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
   uint32_t flags,
   uint32_t* id_out);
 
+/// Define a dynamically quantized tensor-type Value and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Value.
+/// @param datatype - type of the tensor elements.
+/// @param num_dims - number of dimensions in the shape.
+/// @param dims - pointer to an array of @a num_dims shape dimensions. If num_dims is 0, this pointer can be NULL.
+///               XNNPACK does not keep any pointers to this array after the function returns.
+/// @param data - pointer to static data used for tensor initialization. If the tensor is not statically initialized,
+///               this pointer must be is NULL. If non-NULL, the life-time of the static data must exceed the life-time
+///               of the Subgraph object, and of any Runtime objects created from the Subgraph.
+/// @param external_id - external ID for the Value. The ID must be within the range of reversed Value IDs specified on
+///                      the Subgraph creation. If the external ID is XNN_INVALID_VALUE_ID, an internal ID will be
+///                      created for the Value.
+/// @param flags - binary features of the Value. Supported value is XNN_VALUE_FLAG_EXTERNAL_INPUT.
+/// @param id_out - pointer to the variable that will be initialized with the Value ID upon successful return. If a
+///                 valid @a external_id was provided, the variable will be initialized with the @a external_id value.
+
+enum xnn_status xnn_define_dynamically_quantized_tensor_value(
+  xnn_subgraph_t subgraph,
+  enum xnn_datatype datatype,
+  size_t num_dims,
+  const size_t* dims,
+  const void* data,
+  uint32_t external_id,
+  uint32_t flags,
+  uint32_t* id_out);
 /// Define a Convert Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
@@ -1715,6 +1743,7 @@ enum xnn_status xnn_create_runtime(
 struct xnn_external_value {
   uint32_t id;
   void* data;
+  void* quantization_params;
 };
 
 /// Setup data pointers for external inputs and outputs in a Runtime object.
@@ -2200,6 +2229,21 @@ enum xnn_status xnn_run_floor_nc_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc8w(
+  size_t input_channels,
+  size_t output_channels,
+  size_t input_stride,
+  size_t output_stride,
+  const float* kernel_scale,
+  const int8_t* kernel,
+  const float* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* fully_connected_op_out);
+
 enum xnn_status xnn_create_fully_connected_nc_f32(
   size_t input_channels,
   size_t output_channels,
@@ -2218,6 +2262,17 @@ enum xnn_status xnn_reshape_fully_connected_nc_f32(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
   pthreadpool_t threadpool);
+
+struct xnn_dynamic_quantization_params {
+  int32_t zero_point;
+  float scale;
+};
+
+enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc8w(
+  xnn_operator_t fully_connected_op,
+  const int8_t* input,
+  float* output,
+  const struct xnn_dynamic_quantization_params* quantization_params);
 
 enum xnn_status xnn_setup_fully_connected_nc_f32(
   xnn_operator_t fully_connected_op,
@@ -4255,6 +4310,11 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* fully_connected_op_out);
 
+enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc8w(
+  xnn_operator_t fully_connected_op,
+  size_t batch_size,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_reshape_fully_connected_nc_qs8(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
@@ -5148,11 +5208,6 @@ enum xnn_status xnn_run_transpose_nd_x8(
     const size_t* output_perm,
     uint32_t flags,
     pthreadpool_t threadpool);
-
-struct xnn_dynamic_quantization_params {
-  int32_t zero_point;
-  float scale;
-};
 
 enum xnn_status xnn_create_convert_nc_f32_qd8(
   size_t channels,

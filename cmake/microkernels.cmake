@@ -7205,6 +7205,13 @@ SET(ALL_WASM_MICROKERNEL_SRCS
   src/f32-vtanh/gen/f32-vtanh-wasm-expm1minus-rr1-p6h5ts-div-x4.c
   src/math/gen/f32-tanh-wasm-expm1minus-rr1-lut8-p4h3ps-div.c
   src/math/gen/f32-tanh-wasm-expm1minus-rr1-p6h5ts-div.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x2-minmax-wasm.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x4-minmax-wasm.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8-minmax-wasm.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x2-minmax-wasm.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x4-minmax-wasm.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8-minmax-wasm.c
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x4-minmax-wasm.c
   src/qs8-dwconv/gen/qs8-dwconv-5f5m5l1c1s1r-minmax-fp32-wasm-fmagic.c
   src/qs8-dwconv/gen/qs8-dwconv-5f5m5l2c1s1r-minmax-fp32-wasm-fmagic.c
   src/qs8-dwconv/gen/qs8-dwconv-5f5m5l4c1s1r-minmax-fp32-wasm-fmagic.c
