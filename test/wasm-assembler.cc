@@ -45,6 +45,8 @@ constexpr int32_t kPositive = 5;
 constexpr int32_t kNegative = -5;
 constexpr int32_t kA = 55;
 constexpr int32_t kAPlusFive = kA + kExpectedGet5ReturnValue;
+constexpr int32_t kAPlusFiveSizeofFloat =
+    kA + kExpectedGet5ReturnValue * sizeof(float);
 constexpr int32_t kB = 42;
 constexpr int32_t kExpectedSum = kA + kB;
 constexpr int32_t kExpectedSumTwice = 2 * kExpectedSum;
@@ -230,11 +232,45 @@ struct Add5CodeGenerator : WasmAssembler {
   }
 };
 
-struct Add5TestSuite : GeneratorTestSuite<Add5CodeGenerator, Add5Ptr> {
+template <typename G, size_t expected_value>
+struct AddGeneratorTestSuite : GeneratorTestSuite<G, Add5Ptr> {
   static void ExpectFuncCorrect(Add5Ptr add_five) {
-    EXPECT_EQ(add_five(kA), kAPlusFive);
+    EXPECT_EQ(add_five(kA), expected_value);
   }
 };
+
+struct Add5TestSuite : AddGeneratorTestSuite<Add5CodeGenerator, kAPlusFive> {};
+
+struct AdvanceBy5FloatPtrCodeGenerator : WasmAssembler {
+  explicit AdvanceBy5FloatPtrCodeGenerator(xnn_code_buffer* buf)
+      : WasmAssembler(buf) {
+    ValTypesToInt no_locals = {};
+    AddFunc<1>({i32}, "advance5_float_ptr", {i32}, no_locals,
+               [this](Ptr<float> ptr) {
+                 ptr.Advance(5);
+                 local_get(ptr.GetLocal());
+               });
+  }
+};
+
+struct AdvanceBy5FloatPtrCodeGeneratorTestSuite
+    : AddGeneratorTestSuite<AdvanceBy5FloatPtrCodeGenerator,
+                            kAPlusFiveSizeofFloat> {};
+
+struct AdvanceBy5BytesFloatPtrCodeGenerator : WasmAssembler {
+  explicit AdvanceBy5BytesFloatPtrCodeGenerator(xnn_code_buffer* buf)
+      : WasmAssembler(buf) {
+    ValTypesToInt no_locals = {};
+    AddFunc<1>({i32}, "advance5bytes_float_ptr", {i32}, no_locals,
+               [this](Ptr<float> ptr) {
+                 ptr.AdvanceBytes(5);
+                 local_get(ptr.GetLocal());
+               });
+  }
+};
+
+struct AdvanceBy5BytesFloatPtrCodeGeneratorTestSuite
+    : AddGeneratorTestSuite<AdvanceBy5BytesFloatPtrCodeGenerator, kAPlusFive> {};
 
 struct MaxCodeGenerator : WasmAssembler {
   explicit MaxCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
@@ -756,8 +792,10 @@ using WasmAssemblerTestSuits =
     testing::Types<Get5TestSuite, AddTestSuite, Get5AndAddTestSuite,
                    AddWithLocalTestSuite, AddTwiceTestSuite,
                    AddTwiceDeclareInitTestSuite, AddTwiceWithScopesTestSuite,
-                   Add5TestSuite, MaxTestSuite, MaxIncompleteIfTestSuite,
-                   SumUntilTestSuite, SumUntilLocalsArrayWithIterator,
+                   Add5TestSuite, AdvanceBy5FloatPtrCodeGeneratorTestSuite,
+                   AdvanceBy5BytesFloatPtrCodeGeneratorTestSuite, MaxTestSuite,
+                   MaxIncompleteIfTestSuite, SumUntilTestSuite,
+                   SumUntilLocalsArrayWithIterator,
                    SumUntilLocalsArrayWithIndexTestSuite, DoWhileTestSuite,
                    SumArrayTestSuite, MemCpyTestSuite, AddDelayedInitTestSuite,
                    ManyLocalsGeneratorTestSuite, V128AddGeneratorTestSuite,

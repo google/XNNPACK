@@ -8,6 +8,7 @@
 #include <xnnpack/array-helpers.h>
 #include <xnnpack/assembler.h>
 #include <xnnpack/leb128.h>
+#include <xnnpack/tuple-helpers.h>
 
 #include <algorithm>
 #include <array>
@@ -19,6 +20,7 @@
 #include <functional>
 #include <initializer_list>
 #include <numeric>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 
@@ -388,11 +390,16 @@ class LocalWasmOps : public LocalsManager,
  public:
   class Local;
 
+  template <typename Value>
+  class Ptr;
+
   struct ValueOnStack {
     ValueOnStack(const ValType type, Derived* ops) : type(type), ops(ops) {}
     ValueOnStack(const Local& local) : type(local.type_), ops(local.ops_) {
       ops->local_get(local);
     }
+    template <typename Ptr>
+    ValueOnStack(const Ptr& ptr) : ValueOnStack(ptr.GetLocal()) {}
     ValType type;
     Derived* ops;
   };
@@ -462,6 +469,9 @@ class LocalWasmOps : public LocalsManager,
 
   using LocalsArray = ArrayPrefix<Local, kMaxLocalsSize>;
 
+  template <typename Value>
+  using PtrsArray = ArrayPrefix<Ptr<Value>, kMaxLocalsSize>;
+
   Local MakeLocal(ValType type) {
     return Local{type, GetNewLocalIndex(type), /*is_managed=*/true,
                  GetDerived()};
@@ -477,6 +487,13 @@ class LocalWasmOps : public LocalsManager,
     LocalsArray locals(size);
     for (auto& local : locals) local = MakeLocal(type);
     return locals;
+  }
+
+  template <typename Value>
+  PtrsArray<Value> MakePtrsArray(size_t size, ValType type) {
+    PtrsArray<Value> ptrs(size);
+    for (auto& ptr : ptrs) ptr = Ptr<Value>{MakeLocal(type)};
+    return ptrs;
   }
 
   void local_get(uint32_t index) { Encode8AndU32(0x20, index); }
@@ -668,6 +685,48 @@ class LocalWasmOps : public LocalsManager,
   static constexpr ValType f32{0x7D};
   static constexpr ValType v128{0x7B};
 
+  template <typename Value>
+  class Ptr {
+   public:
+    constexpr Ptr() = default;
+    Ptr(Ptr&& other) = default;
+    Ptr(const Ptr& other) = delete;
+    explicit Ptr(Local local) : local_(std::move(local)) {
+      assert(local.type_ == i32);
+    }
+    auto& operator=(const ValueOnStack& value_on_stack) {
+      local_ = value_on_stack;
+      return *this;
+    }
+    auto& operator=(const Ptr& other) {
+      local_ = other.local_;
+      return *this;
+    }
+    auto& operator=(Ptr&& other) {
+      local_ = std::move(other.local_);
+      return *this;
+    }
+
+    void AdvanceBytes(const Local& n) {
+      local_ = local_.ops_->I32Add(local_, n);
+    }
+
+    void BackBytes(const Local& n) { local_ = local_.ops_->I32Sub(local_, n); }
+
+    void AdvanceBytes(int32_t n) {
+      local_ = local_.ops_->I32Add(local_, local_.ops_->I32Const(n));
+    }
+
+    void Advance(int32_t n) { AdvanceBytes(n * sizeof(Value)); }
+
+    const Local& GetLocal() const { return local_; }
+
+    void operator++(int) { Advance(1); }
+
+   private:
+    Local local_;
+  };
+
  private:
   template <typename Op>
   ValueOnStack BinaryOp(const ValueOnStack& a, const ValueOnStack& b, Op&& op) {
@@ -742,9 +801,10 @@ class WasmAssembler : public AssemblerBase,
                     std::forward<Body>(body));
   }
 
-  template <size_t InSize, typename Body>
+  template <size_t InSize, typename Body,
+            typename BodyArgsTuple = internal::ArgsT<Body>>
   void AddFunc(const ResultType& result, const char* name,
-               const std::array<ValType, InSize>& params,
+               const std::array<ValType, InSize>& param_types,
                const ValTypesToInt& locals_declaration_count, Body&& body) {
     if (functions_.size() == kMaxNumFuncs) {
       error_ = Error::kMaxNumberOfFunctionsExceeded;
@@ -753,19 +813,15 @@ class WasmAssembler : public AssemblerBase,
     Code code(next_func_body_begin_);
     SetOut(&code);
     ResetLocalsManager(InSize, locals_declaration_count);
-    std::array<Local, InSize> input_locals{};
-    for (uint32_t index = 0; index < InSize; index++) {
-      input_locals[index] =
-          Local{params[index], index, /*is_managed=*/false, this};
-    }
-    internal::ArrayApply(std::move(input_locals), std::forward<Body>(body));
+    BodyArgsTuple args = MakeArgs<BodyArgsTuple>(param_types);
+    internal::TupleApply(std::move(args), std::forward<Body>(body));
     end();
 
     if (error_ != Error::kNoError) {
       return;
     }
     RegisterFunction(result, name,
-                     Params(params, internal::kPlaceholderValType),
+                     Params(param_types, internal::kPlaceholderValType),
                      locals_declaration_count, code);
     next_func_body_begin_ = code.end_offset;
   }
@@ -802,6 +858,34 @@ class WasmAssembler : public AssemblerBase,
   constexpr static byte kFunctionExportCode = 0x0;
   constexpr static byte kExportsSectionCode = 0x07;
   constexpr static byte kCodeSectionCode = 0x0A;
+
+  template <typename ArgsTuple, size_t... Index>
+  auto MakeArgsImpl(const std::array<ValType, sizeof...(Index)>& params,
+                    std::index_sequence<Index...>) {
+    return std::make_tuple(MakeParam<std::tuple_element_t<Index, ArgsTuple>>(
+        params[Index], Index)...);
+  }
+
+  template <typename ArgsTuple, size_t Size>
+  auto MakeArgs(const std::array<ValType, Size>& param_types) {
+    return MakeArgsImpl<ArgsTuple>(param_types, std::make_index_sequence<Size>{});
+  }
+
+  template <typename ParamType,
+            typename ParamTypeDecayed = std::decay_t<ParamType>,
+            typename =
+                std::enable_if_t<!std::is_same<ParamTypeDecayed, Local>::value>>
+  auto MakeParam(const ValType& param_type, size_t index) {
+    return ParamType{MakeParam<Local>(param_type, index)};
+  }
+
+  template <
+      typename ParamType, typename ParamTypeDecayed = std::decay_t<ParamType>,
+      typename = std::enable_if_t<std::is_same<ParamTypeDecayed, Local>::value>>
+  Local MakeParam(const ValType& param_type, size_t index) {
+    return Local{param_type, static_cast<uint32_t>(index), /*is_managed=*/false,
+                 this};
+  }
 
   void RegisterFunction(const ResultType& result, const char* name,
                         const Params& params,
