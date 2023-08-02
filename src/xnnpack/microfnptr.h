@@ -2362,7 +2362,7 @@ typedef size_t (*xnn_init_f32_qc4w_minmax_params_fn)(
   union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float min,
   float max,
-  int16_t bias);
+  uint8_t kernel_zero_point);
 
 typedef size_t (*xnn_init_s8_minmax_params_fn)(
   union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],

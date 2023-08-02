@@ -159,19 +159,19 @@ union xnn_f32_qc4w_minmax_params {
   struct {
     float min;
     float max;
-    int16_t bias[2];
+    int16_t minus_kernel_zero_point[2];
   } scalar;
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float min[4];
     XNN_ALIGN(16) float max[4];
-    XNN_ALIGN(16) int32_t bias[4];
+    XNN_ALIGN(16) int32_t minus_kernel_zero_point[4];
     XNN_ALIGN(16) uint16_t mask[8];
   } sse;
   struct {
     XNN_ALIGN(32) float min[8];
     XNN_ALIGN(32) float max[8];
-    XNN_ALIGN(32) int32_t bias[8];
+    XNN_ALIGN(32) int32_t minus_kernel_zero_point[8];
     XNN_ALIGN(16) uint16_t mask[16];
     int32_t mask_table[14];
   } avx;
@@ -180,7 +180,7 @@ union xnn_f32_qc4w_minmax_params {
   struct {
     XNN_ALIGN(8) float min[2];
     XNN_ALIGN(8) float max[2];
-    XNN_ALIGN(8) int32_t bias[2];
+    XNN_ALIGN(8) int32_t minus_kernel_zero_point[2];
   } wasmsimd;
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 };

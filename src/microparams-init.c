@@ -1978,12 +1978,13 @@ size_t xnn_init_f32_qc4w_minmax_sse_params(
   union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
   float output_max,
-  int16_t bias)
+  uint8_t kernel_zero_point)
 {
+  assert(kernel_zero_point <= 15);
   for (uint32_t i = 0; i < 4; i++) {
     params->sse.min[i] = output_min;
     params->sse.max[i] = output_max;
-    params->sse.bias[i] = (int32_t) -bias;
+    params->sse.minus_kernel_zero_point[i] = -(int32_t) kernel_zero_point;
   }
   for (uint32_t i = 0; i < 8; i++) {
     params->sse.mask[i] = (uint16_t) 0xF;
@@ -1995,12 +1996,13 @@ size_t xnn_init_f32_qc4w_minmax_avx_params(
   union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
   float output_max,
-  int16_t bias)
+  uint8_t kernel_zero_point)
 {
+  assert(kernel_zero_point <= 15);
   for (uint32_t i = 0; i < 8; i++) {
     params->avx.min[i] = output_min;
     params->avx.max[i] = output_max;
-    params->avx.bias[i] = (int32_t) -bias;
+    params->avx.minus_kernel_zero_point[i] = -(int32_t) kernel_zero_point;
   }
   for (uint32_t i = 0; i < 16; i++) {
     params->avx.mask[i] = (uint16_t) 0xF;
@@ -2020,14 +2022,15 @@ size_t xnn_init_f32_qc4w_minmax_wasmsimd_params(
   union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
   float output_max,
-  int16_t bias)
+  uint8_t kernel_zero_point)
 {
+  assert(kernel_zero_point <= 15);
   params->wasmsimd.min[0] = output_min;
   params->wasmsimd.min[1] = output_min;
   params->wasmsimd.max[0] = output_max;
   params->wasmsimd.max[1] = output_max;
   for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd.bias[i] = (int32_t) -bias;
+    params->wasmsimd.minus_kernel_zero_point[i] = -(int32_t) kernel_zero_point;
   }
   return sizeof(params->wasmsimd);
 }
@@ -2037,12 +2040,13 @@ size_t xnn_init_f32_qc4w_minmax_scalar_params(
   union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
   float output_max,
-  int16_t bias)
+  uint8_t kernel_zero_point)
 {
+  assert(kernel_zero_point <= 15);
   params->scalar.min = output_min;
   params->scalar.max = output_max;
   for (uint32_t i = 0; i < 2; i++) {
-    params->scalar.bias[i] = -bias;
+    params->scalar.minus_kernel_zero_point[i] = -(int16_t) kernel_zero_point;
   }
   return sizeof(params->scalar);
 }

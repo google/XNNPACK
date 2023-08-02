@@ -387,7 +387,7 @@ DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_scalar_params)
     union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)], \
     float output_min,                                             \
     float output_max,                                             \
-    int16_t bias);
+    uint8_t kernel_zero_point);
 DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_scalar_params)
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F32_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f32_qc4w_minmax_sse_params)

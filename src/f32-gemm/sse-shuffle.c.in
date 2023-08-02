@@ -75,7 +75,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         c${M} = c${M-1};
       }
   $if DATATYPE == "QC4":
-    const __m128i vbias = _mm_load_si128((const __m128i *) params->sse.bias);
+    const __m128i vminus_kernel_zero_point = _mm_load_si128((const __m128i *) params->sse.minus_kernel_zero_point);
     const __m128i vmask = _mm_load_si128((const __m128i *) params->sse.mask);
 
   do {
@@ -132,8 +132,8 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           $for N in range(0, NR, 8):
             __m128i vbi${ABC[N:N+4]}c${L} = _mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, _mm_setzero_si128());
             __m128i vbi${ABC[N+4:N+8]}c${L} = _mm_unpackhi_epi16(vbw${ABC[N:N+8]}c${L}, _mm_setzero_si128());
-            vbi${ABC[N:N+4]}c${L} = _mm_add_epi32(vbi${ABC[N:N+4]}c${L}, vbias);
-            vbi${ABC[N+4:N+8]}c${L} = _mm_add_epi32(vbi${ABC[N+4:N+8]}c${L}, vbias);
+            vbi${ABC[N:N+4]}c${L} = _mm_add_epi32(vbi${ABC[N:N+4]}c${L}, vminus_kernel_zero_point);
+            vbi${ABC[N+4:N+8]}c${L} = _mm_add_epi32(vbi${ABC[N+4:N+8]}c${L}, vminus_kernel_zero_point);
             const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(vbi${ABC[N:N+4]}c${L});
             const __m128 vb${ABC[N+4:N+8]}c${L} = _mm_cvtepi32_ps(vbi${ABC[N+4:N+8]}c${L});
         $elif DATATYPE == "QC8":
@@ -198,8 +198,8 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           $for N in range(0, NR, 8):
             __m128i vbi${ABC[N:N+4]}c${L} = _mm_unpacklo_epi16(vbw${ABC[N:N+8]}c${L}, _mm_setzero_si128());
             __m128i vbi${ABC[N+4:N+8]}c${L} = _mm_unpackhi_epi16(vbw${ABC[N:N+8]}c${L}, _mm_setzero_si128());
-            vbi${ABC[N:N+4]}c${L} = _mm_add_epi32(vbi${ABC[N:N+4]}c${L}, vbias);
-            vbi${ABC[N+4:N+8]}c${L} = _mm_add_epi32(vbi${ABC[N+4:N+8]}c${L}, vbias);
+            vbi${ABC[N:N+4]}c${L} = _mm_add_epi32(vbi${ABC[N:N+4]}c${L}, vminus_kernel_zero_point);
+            vbi${ABC[N+4:N+8]}c${L} = _mm_add_epi32(vbi${ABC[N+4:N+8]}c${L}, vminus_kernel_zero_point);
             const __m128 vb${ABC[N:N+4]}c${L} = _mm_cvtepi32_ps(vbi${ABC[N:N+4]}c${L});
             const __m128 vb${ABC[N+4:N+8]}c${L} = _mm_cvtepi32_ps(vbi${ABC[N+4:N+8]}c${L});
         $elif DATATYPE == "QC8":

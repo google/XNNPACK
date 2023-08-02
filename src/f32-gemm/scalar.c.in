@@ -79,7 +79,7 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
     const float vmin = params->scalar.min;
     const float vmax = params->scalar.max;
   $if DATATYPE == "QC4":
-    const int32_t vbias = params->scalar.bias[0];
+    const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point[0];
   do {
     $if INC:
       $for M in range(MR):
@@ -112,9 +112,9 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
         $for N in range(NR):
           const uint8_t vbi${N} = ((const uint8_t*) w)[${N}];
         $for N in range(NR):
-          const float vb${N}0 = (float) ((int32_t) (vbi${N} & 0xF) + vbias);
+          const float vb${N}0 = (float) ((int32_t) (vbi${N} & 0xF) + vminus_kernel_zero_point);
         $for N in range(NR):
-          const float vb${N}1 = (float) ((int32_t) (vbi${N} >> 4) + vbias);
+          const float vb${N}1 = (float) ((int32_t) (vbi${N} >> 4) + vminus_kernel_zero_point);
         w = (const int8_t*) w + ${NR};
 
         $for M in range(MR):
@@ -131,7 +131,7 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
         $for N in range(NR):
           const uint8_t vbi${N} = ((const uint8_t*) w)[${N}];
         $for N in range(NR):
-          const float vb${N} = (float) ((int32_t) vbi${N} + vbias);
+          const float vb${N} = (float) ((int32_t) vbi${N} + vminus_kernel_zero_point);
         w = (const int8_t*) w + ${NR};
 
         $for M in range(MR):

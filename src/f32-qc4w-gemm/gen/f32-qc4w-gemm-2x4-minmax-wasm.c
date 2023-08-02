@@ -45,7 +45,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_2x4__wasm(
 
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
-  const int32_t vbias = params->scalar.bias[0];
+  const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point[0];
   do {
     float vacc00 = ((const float*)w)[0];
     float vacc01 = ((const float*)w)[1];
@@ -68,14 +68,14 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_2x4__wasm(
       const uint8_t vbi1 = ((const uint8_t*) w)[1];
       const uint8_t vbi2 = ((const uint8_t*) w)[2];
       const uint8_t vbi3 = ((const uint8_t*) w)[3];
-      const float vb00 = (float) ((int32_t) (vbi0 & 0xF) + vbias);
-      const float vb10 = (float) ((int32_t) (vbi1 & 0xF) + vbias);
-      const float vb20 = (float) ((int32_t) (vbi2 & 0xF) + vbias);
-      const float vb30 = (float) ((int32_t) (vbi3 & 0xF) + vbias);
-      const float vb01 = (float) ((int32_t) (vbi0 >> 4) + vbias);
-      const float vb11 = (float) ((int32_t) (vbi1 >> 4) + vbias);
-      const float vb21 = (float) ((int32_t) (vbi2 >> 4) + vbias);
-      const float vb31 = (float) ((int32_t) (vbi3 >> 4) + vbias);
+      const float vb00 = (float) ((int32_t) (vbi0 & 0xF) + vminus_kernel_zero_point);
+      const float vb10 = (float) ((int32_t) (vbi1 & 0xF) + vminus_kernel_zero_point);
+      const float vb20 = (float) ((int32_t) (vbi2 & 0xF) + vminus_kernel_zero_point);
+      const float vb30 = (float) ((int32_t) (vbi3 & 0xF) + vminus_kernel_zero_point);
+      const float vb01 = (float) ((int32_t) (vbi0 >> 4) + vminus_kernel_zero_point);
+      const float vb11 = (float) ((int32_t) (vbi1 >> 4) + vminus_kernel_zero_point);
+      const float vb21 = (float) ((int32_t) (vbi2 >> 4) + vminus_kernel_zero_point);
+      const float vb31 = (float) ((int32_t) (vbi3 >> 4) + vminus_kernel_zero_point);
       w = (const int8_t*) w + 4;
 
       vacc00 = math_muladd_f32(va00, vb00, vacc00);
@@ -103,10 +103,10 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_2x4__wasm(
       const uint8_t vbi1 = ((const uint8_t*) w)[1];
       const uint8_t vbi2 = ((const uint8_t*) w)[2];
       const uint8_t vbi3 = ((const uint8_t*) w)[3];
-      const float vb0 = (float) ((int32_t) vbi0 + vbias);
-      const float vb1 = (float) ((int32_t) vbi1 + vbias);
-      const float vb2 = (float) ((int32_t) vbi2 + vbias);
-      const float vb3 = (float) ((int32_t) vbi3 + vbias);
+      const float vb0 = (float) ((int32_t) vbi0 + vminus_kernel_zero_point);
+      const float vb1 = (float) ((int32_t) vbi1 + vminus_kernel_zero_point);
+      const float vb2 = (float) ((int32_t) vbi2 + vminus_kernel_zero_point);
+      const float vb3 = (float) ((int32_t) vbi3 + vminus_kernel_zero_point);
       w = (const int8_t*) w + 4;
 
       vacc00 = math_muladd_f32(va0, vb0, vacc00);
