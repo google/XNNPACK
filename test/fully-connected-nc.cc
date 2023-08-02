@@ -517,6 +517,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, unit_batch) {
     .batch_size(1)
     .input_channels(23)
     .output_channels(19)
+    .kernel_zero_point(7)
     .iterations(3)
     .TestF32QC4W();
 }
@@ -527,6 +528,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, unit_batch_with_qmin) {
     .input_channels(23)
     .output_channels(19)
     .qmin(128)
+    .kernel_zero_point(7)
     .iterations(3)
     .TestF32QC4W();
 }
@@ -537,6 +539,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, unit_batch_with_qmax) {
     .input_channels(23)
     .output_channels(19)
     .qmax(128)
+    .kernel_zero_point(7)
     .iterations(3)
     .TestF32QC4W();
 }
@@ -547,6 +550,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, unit_batch_with_input_stride) {
     .input_channels(23)
     .input_stride(28)
     .output_channels(19)
+    .kernel_zero_point(7)
     .iterations(3)
     .TestF32QC4W();
 }
@@ -557,6 +561,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, unit_batch_with_output_stride) {
     .input_channels(23)
     .output_channels(19)
     .output_stride(29)
+    .kernel_zero_point(7)
     .iterations(3)
     .TestF32QC4W();
 }
@@ -577,6 +582,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, unit_batch_without_bias) {
     .batch_size(1)
     .input_channels(23)
     .output_channels(19)
+    .kernel_zero_point(7)
     .iterations(3)
     .TestF32QC4W();
 }
@@ -586,6 +592,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, small_batch) {
     .batch_size(12)
     .input_channels(23)
     .output_channels(19)
+    .kernel_zero_point(7)
     .iterations(3)
     .TestF32QC4W();
 }
@@ -596,6 +603,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, small_batch_with_qmin) {
     .input_channels(23)
     .output_channels(19)
     .qmin(128)
+    .kernel_zero_point(7)
     .iterations(3)
     .TestF32QC4W();
 }
@@ -606,6 +614,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, small_batch_with_qmax) {
     .input_channels(23)
     .output_channels(19)
     .qmax(128)
+    .kernel_zero_point(7)
     .iterations(3)
     .TestF32QC4W();
 }
@@ -616,6 +625,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, small_batch_with_input_stride) {
     .input_channels(23)
     .input_stride(28)
     .output_channels(19)
+    .kernel_zero_point(7)
     .iterations(3)
     .TestF32QC4W();
 }
@@ -626,6 +636,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, small_batch_with_output_stride) {
     .input_channels(23)
     .output_channels(19)
     .output_stride(29)
+    .kernel_zero_point(7)
     .iterations(3)
     .TestF32QC4W();
 }
@@ -636,6 +647,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, small_batch_with_kernel_zero_point) {
     .input_channels(23)
     .output_channels(19)
     .kernel_zero_point(15)
+    .kernel_zero_point(7)
     .iterations(3)
     .TestF32QC4W();
 }
@@ -646,6 +658,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, small_batch_without_bias) {
     .batch_size(12)
     .input_channels(23)
     .output_channels(19)
+    .kernel_zero_point(7)
     .iterations(3)
     .TestF32QC4W();
 }
@@ -656,6 +669,7 @@ TEST(FULLY_CONNECTED_NC_F32_QC4W, weights_cache_unit_batch) {
     .input_channels(23)
     .output_channels(19)
     .use_weights_cache(true)
+    .kernel_zero_point(7)
     .iterations(3)
     .TestF32QC4W();
 }

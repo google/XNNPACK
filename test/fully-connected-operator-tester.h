@@ -1377,7 +1377,7 @@ class FullyConnectedOperatorTester {
   size_t output_channels_{1};
   size_t output_stride_{0};
   size_t batch_size_{1};
-  uint8_t kernel_zero_point_{127};
+  uint8_t kernel_zero_point_{127};  // set qc4w kernel zero point to invalid
   uint8_t qmin_{0};
   uint8_t qmax_{255};
   bool transpose_weights_{false};
