@@ -1,7 +1,4 @@
-#include <algorithm>
-#include <cstdint>
-#include <iterator>
-#include <limits>
+#include <cstddef>
 
 #include <xnnpack/assembler.h>
 #include <xnnpack/microparams.h>
@@ -20,11 +17,11 @@ class F32IGemmLoadsplatGenerator : public internal::GemmIGemmLoadsplatCommons {
                 const jit_gemm_params* jit_gemm_params) {
     ValTypesToInt locals_declaration = {{i32, max_mr * 2 + 5}, {v128, max_mr * 3 + 8}};
     AddFunc<12>({}, name, locals_declaration,
-                [&](auto mr, auto nc, auto kc, const auto ks, auto a, auto w, auto c, auto cm_stride, auto cn_stride,
-                    auto a_offset, auto zero, auto params) {
+                [&](Local mr, Local nc, Local kc, const Local ks, Ptr<float**> a, Ptr<v128_t> w, Ptr<float> c,
+                    Local cm_stride, Local cn_stride, Local a_offset, Ptr<float> zero, Local params) {
                   InitPostOps(jit_gemm_params, params);
 
-                  LocalsArray cs = MakeLocalsArray(max_mr, i32);
+                  PtrsArray<float> cs = MakePtrsArray<float>(max_mr, i32);
                   ClampCs(cs, mr, c, cm_stride);
 
                   LocalsArray vacc0123 = MakeLocalsArray(max_mr, v128);
@@ -35,13 +32,13 @@ class F32IGemmLoadsplatGenerator : public internal::GemmIGemmLoadsplatCommons {
                       InitAccumulators(vacc0123, w, /*offset=*/0);
                       InitAccumulators(vacc4567, w, /*offset=*/sizeof(v128_t));
 
-                      w = I32Add(w, I32Const(8 * sizeof(float)));
+                      w.Advance(2);
 
                       Local p = MakeLocal(ks);
 
                       DoWhile(
                         [&] {
-                          LocalsArray as = MakeLocalsArray(max_mr, i32);
+                          PtrsArray<float> as = MakePtrsArray<float>(max_mr, i32);
                           for (size_t i = 0; i < max_mr; i++) {
                             as[i] = I32Load(a, /*offset=*/i * sizeof(void*));
                             as[i] = Select(I32Add(as[i], a_offset), as[i], I32Ne(as[i], zero));
@@ -49,7 +46,7 @@ class F32IGemmLoadsplatGenerator : public internal::GemmIGemmLoadsplatCommons {
 
                           InnerLoop(as, vacc0123, vacc4567, w, kc, max_mr, loop_unroll_iters, iters, full_unroll);
 
-                          a = I32Add(a, I32Const(max_mr * sizeof(void*)));
+                          a.Advance(max_mr);
                           p = I32Sub(p, I32Const(max_mr * sizeof(void*)));
                         },
                         [&] { I32NeZ(p); });
@@ -62,9 +59,9 @@ class F32IGemmLoadsplatGenerator : public internal::GemmIGemmLoadsplatCommons {
                                for (int i = max_mr - 1; i >= 0; i--) {
                                  V128Store(cs[i], vacc0123[i]);
                                  V128Store(cs[i], vacc4567[i], /*offset=*/sizeof(v128_t));
-                                 cs[i] = I32Add(cs[i], cn_stride);
+                                 cs[i].AdvanceBytes(cn_stride);
                                }
-                               a = I32Sub(a, ks);
+                               a.BackBytes(ks);
                                nc = I32Sub(nc, I32Const(8));
                              },
                              [&] {
@@ -73,7 +70,7 @@ class F32IGemmLoadsplatGenerator : public internal::GemmIGemmLoadsplatCommons {
                                     for (int i = max_mr - 1; i >= 0; i--) {
                                       V128Store(cs[i], vacc0123[i]);
                                       vacc0123[i] = vacc4567[i];
-                                      cs[i] = I32Add(cs[i], I32Const(sizeof(v128_t)));
+                                      cs[i].Advance(4);
                                     }
                                   });
                                If([&] { I32And(nc, I32Const(2)); },
@@ -81,7 +78,7 @@ class F32IGemmLoadsplatGenerator : public internal::GemmIGemmLoadsplatCommons {
                                     for (int i = max_mr - 1; i >= 0; i--) {
                                       V128Store64Lane(cs[i], vacc0123[i], 0);
                                       vacc0123[i] = I64x2Shuffle(vacc0123[i], vacc0123[i], {1, 1});
-                                      cs[i] = I32Add(cs[i], I32Const(2 * sizeof(float)));
+                                      cs[i].Advance(2);
                                     }
                                   });
                                If([&] { I32And(nc, I32Const(1)); },
@@ -98,7 +95,7 @@ class F32IGemmLoadsplatGenerator : public internal::GemmIGemmLoadsplatCommons {
   }
 
  private:
-  void ClampCs(LocalsArray& cs, const Local& mr, const Local& c, const Local& cm_stride) {
+  void ClampCs(PtrsArray<float>& cs, const Local& mr, const Ptr<float>& c, const Local& cm_stride) {
     cs[0] = c;
     for (size_t i = 1; i < cs.size(); i++) {
       cs[i] = Select(cs[i - 1], I32Add(cs[i - 1], cm_stride), I32GeU(I32Const(i), mr));

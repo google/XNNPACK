@@ -138,12 +138,12 @@ class GemmIGemmLoadsplatCommons : public PostOps {
  public:
   using PostOps::PostOps;
 
-  void InitAccumulators(LocalsArray& vaccs, const Local& w, size_t offset) {
+  void InitAccumulators(LocalsArray& vaccs, const Ptr<v128_t>& w, size_t offset) {
     vaccs[0] = V128Load(w, offset);
     std::for_each(std::next(std::begin(vaccs)), std::end(vaccs), [&](auto& vacc) { vacc = vaccs[0]; });
   }
 
-  void InnerLoopPartialUnroll(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& w, Local& kc,
+  void InnerLoopPartialUnroll(PtrsArray<float>& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Ptr<v128_t>& w, Local& kc,
                               size_t max_mr, size_t loop_unroll_iters) {
     Local k = MakeLocal(kc);
     InnerLoopMainPart(as, vacc0123, vacc4567, w, k, max_mr, loop_unroll_iters);
@@ -163,13 +163,13 @@ class GemmIGemmLoadsplatCommons : public PostOps {
     }
   }
 
-  void InnerLoopFullUnroll(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& w, Local& kc,
+  void InnerLoopFullUnroll(PtrsArray<float>& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Ptr<v128_t>& w, Local& kc,
                            size_t max_mr, size_t iters) {
     Local k = MakeLocal(kc);
     InnerLoopMainPart(as, vacc0123, vacc4567, w, k, max_mr, iters);
   }
 
-  void InnerLoop(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& w, Local& kc, size_t max_mr,
+  void InnerLoop(PtrsArray<float>& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Ptr<v128_t>& w, Local& kc, size_t max_mr,
                  size_t loop_unroll_iters, size_t iters, bool full_unroll) {
     if (full_unroll) {
       InnerLoopFullUnroll(as, vacc0123, vacc4567, w, kc, max_mr, iters);
@@ -179,7 +179,7 @@ class GemmIGemmLoadsplatCommons : public PostOps {
   }
 
  private:
-  void InnerLoopBody(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& w, Local& k, size_t max_mr,
+  void InnerLoopBody(PtrsArray<float>& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Ptr<v128_t>& w, Local& k, size_t max_mr,
                      size_t loop_unroll_iters) {
     for (size_t unrolled_iter = 0; unrolled_iter < loop_unroll_iters; unrolled_iter++) {
       const auto vb0123 = MakeLocal(V128Load(w, /*offset=*/(2 * unrolled_iter) * sizeof(v128_t)));
@@ -188,14 +188,14 @@ class GemmIGemmLoadsplatCommons : public PostOps {
         const auto va = MakeLocal(V128Load32Splat(as[i]));
         vacc0123[i] = F32x4Add(vacc0123[i], F32x4Mul(va, vb0123));
         vacc4567[i] = F32x4Add(vacc4567[i], F32x4Mul(va, vb4567));
-        as[i] = I32Add(as[i], I32Const(sizeof(float)));
+        as[i]++;
       }
     }
-    w = I32Add(w, I32Const(8 * loop_unroll_iters * sizeof(float)));
+    w.Advance(2 * loop_unroll_iters);
     k = I32Sub(k, I32Const(loop_unroll_iters * sizeof(float)));
   }
 
-  void InnerLoopMainPart(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& w, Local& k,
+  void InnerLoopMainPart(PtrsArray<float>& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Ptr<v128_t>& w, Local& k,
                          size_t max_mr, size_t loop_unroll_iters) {
     const auto body = [&] { InnerLoopBody(as, vacc0123, vacc4567, w, k, max_mr, loop_unroll_iters); };
     if (loop_unroll_iters == 1) {
