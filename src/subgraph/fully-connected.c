@@ -70,14 +70,14 @@ static enum xnn_status create_fully_connected_operator(
         status = xnn_create_dynamic_fully_connected_nc_f16(
           node->activation.output_min,
           node->activation.output_max,
-          node->flags /* flags */,
+          /*flags=*/node->flags,
           &opdata->operator_objects[0]);
       } else {
         status = xnn_create_fully_connected_nc_f16(
           input_channels,
           output_channels,
-          input_channels /* input stride */,
-          output_channels /* output stride */,
+          /*input_stride=*/input_channels,
+          /*output_stride=*/output_channels,
           kernel_data,
           bias_data,
           node->activation.output_min,
@@ -93,7 +93,7 @@ static enum xnn_status create_fully_connected_operator(
         status = xnn_create_dynamic_fully_connected_nc_f32(
           node->activation.output_min,
           node->activation.output_max,
-          node->flags /* flags */,
+          /*flags=*/node->flags,
           &opdata->operator_objects[0]);
       } else {
         switch (values[filter_id].datatype) {
@@ -101,14 +101,14 @@ static enum xnn_status create_fully_connected_operator(
             status = xnn_create_fully_connected_nc_f32_qc8w(
               input_channels,
               output_channels,
-              input_channels /* input stride */,
-              output_channels /* output stride */,
+              /*input_stride=*/input_channels,
+              /*output_stride=*/output_channels,
               values[filter_id].quantization.channelwise_scale,
               kernel_data,
               bias_data,
               node->activation.output_min,
               node->activation.output_max,
-              node->flags /* flags */,
+              /*flags=*/node->flags,
               code_cache,
               weights_cache,
               &opdata->operator_objects[0]);
@@ -117,13 +117,13 @@ static enum xnn_status create_fully_connected_operator(
             status = xnn_create_fully_connected_nc_f32(
               input_channels,
               output_channels,
-              input_channels /* input stride */,
-              output_channels /* output stride */,
+              /*input_stride=*/input_channels,
+              /*output_stride=*/output_channels,
               kernel_data,
               bias_data,
               node->activation.output_min,
               node->activation.output_max,
-              node->flags /* flags */,
+              /*flags=*/node->flags,
               code_cache,
               weights_cache,
               &opdata->operator_objects[0]);
@@ -144,8 +144,8 @@ static enum xnn_status create_fully_connected_operator(
       status = xnn_create_fully_connected_nc_qs8(
         input_channels,
         output_channels,
-        input_channels /* input stride */,
-        output_channels /* output stride */,
+        /*input_stride=*/input_channels,
+        /*output_stride=*/output_channels,
         (int8_t) values[input_id].quantization.zero_point,
         values[input_id].quantization.scale,
         values[filter_id].quantization.scale,
@@ -153,7 +153,7 @@ static enum xnn_status create_fully_connected_operator(
         bias_data,
         (int8_t) output_zero_point,
         output_scale, output_min, output_max,
-        node->flags /* flags */,
+        /*flags=*/node->flags,
         code_cache,
         weights_cache,
         &opdata->operator_objects[0]);
@@ -170,8 +170,8 @@ static enum xnn_status create_fully_connected_operator(
       status = xnn_create_fully_connected_nc_qu8(
         input_channels,
         output_channels,
-        input_channels /* input stride */,
-        output_channels /* output stride */,
+        /*input_stride=*/input_channels,
+        /*output_stride=*/output_channels,
         (uint8_t) values[input_id].quantization.zero_point,
         values[input_id].quantization.scale,
         (uint8_t) values[filter_id].quantization.zero_point,
@@ -180,7 +180,7 @@ static enum xnn_status create_fully_connected_operator(
         bias_data,
         (uint8_t) output_zero_point,
         output_scale, output_min, output_max,
-        node->flags /* flags */,
+        /*flags=*/node->flags,
         code_cache,
         weights_cache,
         &opdata->operator_objects[0]);
