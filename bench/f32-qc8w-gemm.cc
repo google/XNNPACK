@@ -481,6 +481,20 @@ static void GEMMBenchmark(benchmark::State& state,
       /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512SKX);
   }
+  static void f32_qc8w_gemm_2x16__avx512skx_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_qc8w_gemm_minmax_ukernel_2x16__avx512skx_broadcast,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/2, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckAVX512SKX);
+  }
+  static void f32_qc8w_gemm_3x16__avx512skx_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_qc8w_gemm_minmax_ukernel_3x16__avx512skx_broadcast,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/3, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckAVX512SKX);
+  }
   static void f32_qc8w_gemm_4x16__avx512skx_broadcast(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_qc8w_gemm_minmax_ukernel_4x16__avx512skx_broadcast,
@@ -565,11 +579,18 @@ static void GEMMBenchmark(benchmark::State& state,
       /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX2);
   }
+  static void f32_qc8w_gemm_2x16__avx2_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_qc8w_gemm_minmax_ukernel_2x16__avx2_broadcast,
+      xnn_init_f32_minmax_avx_params,
+      /*mr=*/2, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckAVX2);
+  }
   static void f32_qc8w_gemm_3x16__avx2_broadcast(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_qc8w_gemm_minmax_ukernel_3x16__avx2_broadcast,
       xnn_init_f32_minmax_avx_params,
-      /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      /*mr=*/3, /*nr=*/16, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX2);
   }
   static void f32_qc8w_gemm_4x16__avx2_broadcast(benchmark::State& state, const char* net) {
@@ -600,11 +621,18 @@ static void GEMMBenchmark(benchmark::State& state,
       /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/4,
       benchmark::utils::CheckAVX2);
   }
+  static void f32_qc8w_gemm_2x16s4__avx2_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_qc8w_gemm_minmax_ukernel_2x16s4__avx2_broadcast,
+      xnn_init_f32_minmax_avx_params,
+      /*mr=*/2, /*nr=*/16, /*kr=*/1, /*sr=*/4,
+      benchmark::utils::CheckAVX2);
+  }
   static void f32_qc8w_gemm_3x16s4__avx2_broadcast(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_qc8w_gemm_minmax_ukernel_3x16s4__avx2_broadcast,
       xnn_init_f32_minmax_avx_params,
-      /*mr=*/4, /*nr=*/16, /*kr=*/1, /*sr=*/4,
+      /*mr=*/3, /*nr=*/16, /*kr=*/1, /*sr=*/4,
       benchmark::utils::CheckAVX2);
   }
   static void f32_qc8w_gemm_4x16s4__avx2_broadcast(benchmark::State& state, const char* net) {
@@ -895,6 +923,8 @@ static void GEMMBenchmark(benchmark::State& state,
   }
 
   BENCHMARK_GEMM(f32_qc8w_gemm_1x16__avx512skx_broadcast)
+  BENCHMARK_GEMM(f32_qc8w_gemm_2x16__avx512skx_broadcast)
+  BENCHMARK_GEMM(f32_qc8w_gemm_3x16__avx512skx_broadcast)
   BENCHMARK_GEMM(f32_qc8w_gemm_4x16__avx512skx_broadcast)
   BENCHMARK_GEMM(f32_qc8w_gemm_5x16__avx512skx_broadcast)
   BENCHMARK_GEMM(f32_qc8w_gemm_6x16__avx512skx_broadcast)
@@ -908,12 +938,14 @@ static void GEMMBenchmark(benchmark::State& state,
   BENCHMARK_GEMM(f32_qc8w_gemm_7x8__avx2_broadcast)
   BENCHMARK_GEMM(f32_qc8w_gemm_8x8__avx2_broadcast)
   BENCHMARK_GEMM(f32_qc8w_gemm_1x16__avx2_broadcast)
+  BENCHMARK_GEMM(f32_qc8w_gemm_2x16__avx2_broadcast)
   BENCHMARK_GEMM(f32_qc8w_gemm_3x16__avx2_broadcast)
   BENCHMARK_GEMM(f32_qc8w_gemm_4x16__avx2_broadcast)
   BENCHMARK_GEMM(f32_qc8w_gemm_5x16__avx2_broadcast)
   BENCHMARK_GEMM(f32_qc8w_gemm_6x16__avx2_broadcast)
 
   BENCHMARK_GEMM(f32_qc8w_gemm_1x16s4__avx2_broadcast)
+  BENCHMARK_GEMM(f32_qc8w_gemm_2x16s4__avx2_broadcast)
   BENCHMARK_GEMM(f32_qc8w_gemm_3x16s4__avx2_broadcast)
   BENCHMARK_GEMM(f32_qc8w_gemm_4x16s4__avx2_broadcast)
   BENCHMARK_GEMM(f32_qc8w_gemm_5x16s4__avx2_broadcast)

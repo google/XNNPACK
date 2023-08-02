@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2023 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -21,10 +21,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
     size_t kc,
     const float* restrict a,
     size_t a_stride,
-    $if DATATYPE == "F32":
-      const float* restrict w,
-    $else:
-      const void* restrict w,
+    const void* restrict w,
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
@@ -64,17 +61,11 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
 
   do {
     $for N in range(0, NR, 8):
-      $if DATATYPE == "F32":
-        __m256 vacc0x${ABC[N:N+8]} = _mm256_load_ps(w + ${N});
-      $else:
-        __m256 vacc0x${ABC[N:N+8]} = _mm256_loadu_ps((const float*) w + ${N});
+      __m256 vacc0x${ABC[N:N+8]} = _mm256_loadu_ps((const float*) w + ${N});
     $for M in range(1, MR):
       $for N in range(0, NR, 8):
         __m256 vacc${M}x${ABC[N:N+8]} = vacc0x${ABC[N:N+8]};
-    $if DATATYPE == "F32":
-      w += ${NR};
-    $else:
-      w = (const float*) w + ${NR};
+    w = (const float*) w + ${NR};
 
     size_t k = kc;
     for (; k >= 2 * sizeof(float); k -= sizeof(float) * 2) {
