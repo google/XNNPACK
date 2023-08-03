@@ -2480,6 +2480,7 @@ void GemmMicrokernelTester::Test(
       c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
       post_operation_params);
 
+    xnn_release_memory(post_operation_params);
     ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
 
     // Validate micro-kernel outputs.
@@ -2759,6 +2760,7 @@ void GemmMicrokernelTester::Test(
       a_offset() * sizeof(float), zero_pointer,
       post_operation_params);
 
+    xnn_release_memory(post_operation_params);
     ASSERT_EQ(xnn_status_success, xnn_release_code_memory(&code_buffer));
 
     for (size_t i = 0; i < m(); i++) {
