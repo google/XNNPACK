@@ -57,16 +57,16 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x2__scalar(
       k -= sizeof(int8_t);
     } while (k != 0);
 
-    float vout0x0 = (float) vacc0x0;
-    float vout0x1 = (float) vacc0x1;
-
     const float vascale0 = quantization_params[0].inv_scale;
+    float vout0x0 = (float) vacc0x0 * vascale0;
+    float vout0x1 = (float) vacc0x1 * vascale0;
+
     const float vbscale0 = unaligned_indexed_load_f32(w, 0);
     const float vbscale1 = unaligned_indexed_load_f32(w, 1);
     const float vbias0 = unaligned_indexed_load_f32(w, 2);
-    vout0x0 = math_muladd_f32(vout0x0, vascale0 * vbscale0, vbias0);
+    vout0x0 = math_muladd_f32(vout0x0, vbscale0, vbias0);
     const float vbias1 = unaligned_indexed_load_f32(w, 3);
-    vout0x1 = math_muladd_f32(vout0x1, vascale0 * vbscale1, vbias1);
+    vout0x1 = math_muladd_f32(vout0x1, vbscale1, vbias1);
 
     w = (const float*) w + 4;
 

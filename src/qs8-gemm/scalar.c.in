@@ -117,11 +117,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
 
     $if DATATYPE == "QD8":
       $for M in range(MR):
+        const float vascale${M} = quantization_params[${M}].inv_scale;
         $for N in range(NR):
-          float vout${M}x${N} = (float) vacc${M}x${N};
+          float vout${M}x${N} = (float) vacc${M}x${N} * vascale${M};
 
       $for M in range(MR):
-        const float vascale${M} = quantization_params[${M}].inv_scale;
         $for N in range(NR):
           $if M == 0:
             $if NR % 4 != 0:
@@ -134,7 +134,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
               const float vbias${N} = unaligned_indexed_load_f32(w, ${NR + N});
             $else:
               const float vbias${N} = ((const float*) w)[${NR + N}];
-          vout${M}x${N} = math_muladd_f32(vout${M}x${N}, vascale${M} * vbscale${N}, vbias${N});
+          vout${M}x${N} = math_muladd_f32(vout${M}x${N}, vbscale${N}, vbias${N});
 
       w = (const float*) w + ${NR * 2};
 

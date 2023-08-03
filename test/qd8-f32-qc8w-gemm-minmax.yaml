@@ -26,6 +26,29 @@
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 
+# WAsm
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x2__wasm
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4__wasm
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8__wasm
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x2__wasm
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4__wasm
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x8__wasm
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4__wasm
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+
 # AArch32 assembly
 - name: xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x8c4__asm_aarch32_neondot_cortex_a55
   init: xnn_init_f32_minmax_scalar_params

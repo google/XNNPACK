@@ -13,7 +13,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4__scalar(
+void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4__wasm(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -86,16 +86,16 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4__scalar(
     w = (const float*) w + 8;
 
     const float voutput_min = params->scalar.min;
-    vout0x0 = math_max_f32(vout0x0, voutput_min);
-    vout0x1 = math_max_f32(vout0x1, voutput_min);
-    vout0x2 = math_max_f32(vout0x2, voutput_min);
-    vout0x3 = math_max_f32(vout0x3, voutput_min);
+    vout0x0 = __builtin_wasm_max_f32(vout0x0, voutput_min);
+    vout0x1 = __builtin_wasm_max_f32(vout0x1, voutput_min);
+    vout0x2 = __builtin_wasm_max_f32(vout0x2, voutput_min);
+    vout0x3 = __builtin_wasm_max_f32(vout0x3, voutput_min);
 
     const float voutput_max = params->scalar.max;
-    vout0x0 = math_min_f32(vout0x0, voutput_max);
-    vout0x1 = math_min_f32(vout0x1, voutput_max);
-    vout0x2 = math_min_f32(vout0x2, voutput_max);
-    vout0x3 = math_min_f32(vout0x3, voutput_max);
+    vout0x0 = __builtin_wasm_min_f32(vout0x0, voutput_max);
+    vout0x1 = __builtin_wasm_min_f32(vout0x1, voutput_max);
+    vout0x2 = __builtin_wasm_min_f32(vout0x2, voutput_max);
+    vout0x3 = __builtin_wasm_min_f32(vout0x3, voutput_max);
 
     if XNN_LIKELY(nc >= 4) {
       c0[0] = vout0x0;
