@@ -57,6 +57,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         LDP         x12, x11, [sp]          // cn_stride, params
 
         LDR         x16, [sp, 16]           // &quantization_params[0].zero_point
+        STP         d8,  d9, [sp, -16]!
+        STP         d10,  d11, [sp, -16]!
         STP         d12,  d13, [sp, -16]!
         LDP         q12, q13, [x16]         // v12 & v13 interleaved zero_point & scale
 
@@ -143,107 +145,107 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         TBNZ        x0, 2, 3f
 
 2:
-        SCVTF       v16.4s, v16.4s
-        SCVTF       v17.4s, v17.4s
-        SCVTF       v18.4s, v18.4s
-        SCVTF       v19.4s, v19.4s
-        SCVTF       v20.4s, v20.4s
-        SCVTF       v21.4s, v21.4s
-        SCVTF       v22.4s, v22.4s
-        SCVTF       v23.4s, v23.4s
-        SCVTF       v24.4s, v24.4s
-        SCVTF       v25.4s, v25.4s
-        SCVTF       v26.4s, v26.4s
-        SCVTF       v27.4s, v27.4s
-        SCVTF       v28.4s, v28.4s
-        SCVTF       v29.4s, v29.4s
-        SCVTF       v30.4s, v30.4s
-        SCVTF       v31.4s, v31.4s
-        LDP         q0, q1, [x5], 32        // kernel_zero_point
+        LDP         q0, q1, [x5], 32        // kernel_scale
         LDP         q2, q3, [x5], 32
-        FMUL        v4.4s, v0.4s, v12.s[1]  // kernel_scale * scale
-        FMUL        v5.4s, v1.4s, v12.s[1]
-        FMUL        v6.4s, v2.4s, v12.s[1]
-        FMUL        v7.4s, v3.4s, v12.s[1]
-        FMUL        v8.4s, v0.4s, v12.s[3]
-        FMUL        v9.4s, v1.4s, v12.s[3]
-        FMUL        v10.4s, v2.4s, v12.s[3]
-        FMUL        v11.4s, v3.4s, v12.s[3]
-        FMUL        v16.4s, v16.4s, v4.4s
-        FMUL        v20.4s, v20.4s, v5.4s
-        FMUL        v24.4s, v24.4s, v6.4s
-        FMUL        v28.4s, v28.4s, v7.4s
-        FMUL        v17.4s, v17.4s, v8.4s
-        FMUL        v21.4s, v21.4s, v9.4s
-        FMUL        v25.4s, v25.4s, v10.4s
-        FMUL        v29.4s, v29.4s, v11.4s
+        SCVTF       v19.4s, v19.4s
+        SCVTF       v23.4s, v23.4s
+        SCVTF       v27.4s, v27.4s
+        SCVTF       v31.4s, v31.4s
+        SCVTF       v18.4s, v18.4s
+        SCVTF       v22.4s, v22.4s
+        SCVTF       v26.4s, v26.4s
+        FMUL        v8.4s, v0.4s, v13.s[3] // kernel_scale * scale
+        FMUL        v9.4s, v1.4s, v13.s[3]
+        FMUL        v10.4s, v2.4s, v13.s[3]
+        FMUL        v11.4s, v3.4s, v13.s[3]
         FMUL        v4.4s, v0.4s, v13.s[1]
         FMUL        v5.4s, v1.4s, v13.s[1]
         FMUL        v6.4s, v2.4s, v13.s[1]
         FMUL        v7.4s, v3.4s, v13.s[1]
-        FMUL        v8.4s, v0.4s, v13.s[3]
-        FMUL        v9.4s, v1.4s, v13.s[3]
-        FMUL        v10.4s, v2.4s, v13.s[3]
-        FMUL        v11.4s, v3.4s, v13.s[3]
-        FMUL        v18.4s, v18.4s, v4.4s
-        FMUL        v22.4s, v22.4s, v5.4s
-        FMUL        v26.4s, v26.4s, v6.4s
-        FMUL        v30.4s, v30.4s, v7.4s
+        SCVTF       v30.4s, v30.4s
+        SCVTF       v17.4s, v17.4s
+        SCVTF       v21.4s, v21.4s
+        SCVTF       v25.4s, v25.4s
+        SCVTF       v29.4s, v29.4s
+        SCVTF       v16.4s, v16.4s
+        SCVTF       v20.4s, v20.4s
+        SCVTF       v24.4s, v24.4s
+        SCVTF       v28.4s, v28.4s
         FMUL        v19.4s, v19.4s, v8.4s
+        FMUL        v8.4s, v0.4s, v12.s[3]
         FMUL        v23.4s, v23.4s, v9.4s
+        FMUL        v9.4s, v1.4s, v12.s[3]
         FMUL        v27.4s, v27.4s, v10.4s
+        FMUL        v10.4s, v2.4s, v12.s[3]
         FMUL        v31.4s, v31.4s, v11.4s
+        FMUL        v11.4s, v3.4s, v12.s[3]
+        FMUL        v18.4s, v18.4s, v4.4s
+        FMUL        v4.4s, v0.4s, v12.s[1]
+        FMUL        v22.4s, v22.4s, v5.4s
+        FMUL        v5.4s, v1.4s, v12.s[1]
+        FMUL        v26.4s, v26.4s, v6.4s
+        FMUL        v6.4s, v2.4s, v12.s[1]
+        FMUL        v30.4s, v30.4s, v7.4s
+        FMUL        v7.4s, v3.4s, v12.s[1]
         LDP         q0, q1, [x5], 32        // bias
         LDP         q2, q3, [x5], 32
+        FMUL        v17.4s, v17.4s, v8.4s
+        FMUL        v21.4s, v21.4s, v9.4s
+        FMUL        v25.4s, v25.4s, v10.4s
+        FMUL        v29.4s, v29.4s, v11.4s
+        FMUL        v16.4s, v16.4s, v4.4s
+        FMUL        v20.4s, v20.4s, v5.4s
+        FMUL        v24.4s, v24.4s, v6.4s
+        FMUL        v28.4s, v28.4s, v7.4s
         LD2R        {v4.4s, v5.4s}, [x11]       // min max
-        FADD        v16.4s, v16.4s, v0.4s
-        FADD        v17.4s, v17.4s, v0.4s
-        FADD        v18.4s, v18.4s, v0.4s
         FADD        v19.4s, v19.4s, v0.4s
-        FADD        v20.4s, v20.4s, v1.4s
-        FADD        v21.4s, v21.4s, v1.4s
-        FADD        v22.4s, v22.4s, v1.4s
         FADD        v23.4s, v23.4s, v1.4s
-        FADD        v24.4s, v24.4s, v2.4s
-        FADD        v25.4s, v25.4s, v2.4s
-        FADD        v26.4s, v26.4s, v2.4s
         FADD        v27.4s, v27.4s, v2.4s
-        FADD        v28.4s, v28.4s, v3.4s
-        FADD        v29.4s, v29.4s, v3.4s
-        FADD        v30.4s, v30.4s, v3.4s
         FADD        v31.4s, v31.4s, v3.4s
-        FMAX        v16.4s, v16.4s, v4.4s
-        FMAX        v17.4s, v17.4s, v4.4s
-        FMAX        v18.4s, v18.4s, v4.4s
+        FADD        v18.4s, v18.4s, v0.4s
+        FADD        v22.4s, v22.4s, v1.4s
+        FADD        v26.4s, v26.4s, v2.4s
+        FADD        v30.4s, v30.4s, v3.4s
+        FADD        v17.4s, v17.4s, v0.4s
+        FADD        v21.4s, v21.4s, v1.4s
+        FADD        v25.4s, v25.4s, v2.4s
+        FADD        v29.4s, v29.4s, v3.4s
+        FADD        v16.4s, v16.4s, v0.4s
+        FADD        v20.4s, v20.4s, v1.4s
+        FADD        v24.4s, v24.4s, v2.4s
+        FADD        v28.4s, v28.4s, v3.4s
         FMAX        v19.4s, v19.4s, v4.4s
-        FMAX        v20.4s, v20.4s, v4.4s
-        FMAX        v21.4s, v21.4s, v4.4s
-        FMAX        v22.4s, v22.4s, v4.4s
         FMAX        v23.4s, v23.4s, v4.4s
-        FMAX        v24.4s, v24.4s, v4.4s
-        FMAX        v25.4s, v25.4s, v4.4s
-        FMAX        v26.4s, v26.4s, v4.4s
         FMAX        v27.4s, v27.4s, v4.4s
-        FMAX        v28.4s, v28.4s, v4.4s
-        FMAX        v29.4s, v29.4s, v4.4s
-        FMAX        v30.4s, v30.4s, v4.4s
         FMAX        v31.4s, v31.4s, v4.4s
-        FMIN        v16.4s, v16.4s, v5.4s
-        FMIN        v17.4s, v17.4s, v5.4s
-        FMIN        v18.4s, v18.4s, v5.4s
+        FMAX        v18.4s, v18.4s, v4.4s
+        FMAX        v22.4s, v22.4s, v4.4s
+        FMAX        v26.4s, v26.4s, v4.4s
+        FMAX        v30.4s, v30.4s, v4.4s
+        FMAX        v17.4s, v17.4s, v4.4s
+        FMAX        v21.4s, v21.4s, v4.4s
+        FMAX        v25.4s, v25.4s, v4.4s
+        FMAX        v29.4s, v29.4s, v4.4s
+        FMAX        v16.4s, v16.4s, v4.4s
+        FMAX        v20.4s, v20.4s, v4.4s
+        FMAX        v24.4s, v24.4s, v4.4s
+        FMAX        v28.4s, v28.4s, v4.4s
         FMIN        v19.4s, v19.4s, v5.4s
-        FMIN        v20.4s, v20.4s, v5.4s
-        FMIN        v21.4s, v21.4s, v5.4s
-        FMIN        v22.4s, v22.4s, v5.4s
         FMIN        v23.4s, v23.4s, v5.4s
-        FMIN        v24.4s, v24.4s, v5.4s
-        FMIN        v25.4s, v25.4s, v5.4s
-        FMIN        v26.4s, v26.4s, v5.4s
         FMIN        v27.4s, v27.4s, v5.4s
-        FMIN        v28.4s, v28.4s, v5.4s
-        FMIN        v29.4s, v29.4s, v5.4s
-        FMIN        v30.4s, v30.4s, v5.4s
         FMIN        v31.4s, v31.4s, v5.4s
+        FMIN        v18.4s, v18.4s, v5.4s
+        FMIN        v22.4s, v22.4s, v5.4s
+        FMIN        v26.4s, v26.4s, v5.4s
+        FMIN        v30.4s, v30.4s, v5.4s
+        FMIN        v17.4s, v17.4s, v5.4s
+        FMIN        v21.4s, v21.4s, v5.4s
+        FMIN        v25.4s, v25.4s, v5.4s
+        FMIN        v29.4s, v29.4s, v5.4s
+        FMIN        v16.4s, v16.4s, v5.4s
+        FMIN        v20.4s, v20.4s, v5.4s
+        FMIN        v24.4s, v24.4s, v5.4s
+        FMIN        v28.4s, v28.4s, v5.4s
         SUBS        x1, x1, 16
         B.LO        4f
         STP         q19, q23, [x7]
@@ -264,8 +266,10 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         SUB         x4,  x4, x2             // a3 -= kc
         B.NE        0b
 
-        # Restore d12-d13 from stack
+        # Restore d8-d13 from stack
         LDP         d12, d13, [sp], 16
+        LDP         d10,  d11, [sp], 16
+        LDP         d8,  d9, [sp], 16
         RET
 
         # Remainder- 4 bytes of A
@@ -347,8 +351,10 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         STR         s17, [x8]
         STR         s16, [x6]
 8:
-        # Restore d12-d13 from stack
+        # Restore d8-d13 from stack
         LDP         d12, d13, [sp], 16
+        LDP         d10,  d11, [sp], 16
+        LDP         d8,  d9, [sp], 16
         RET
 
 END_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_ld64
