@@ -253,7 +253,7 @@ AARCH32_POST_OP = """void Generator::perform_post_operations(
         break;
       }
       default:
-        XNN_UNREACHABLE;
+        XNN_LOG_UNREACHABLE("unsupported post operation: %u", post_operations[i].op_type);
     }
   }
 }"""
@@ -284,7 +284,7 @@ AARCH32_POST_OP_RELOAD = """void Generator::perform_post_operations(
         break;
       }
       default:
-        XNN_UNREACHABLE;
+        XNN_LOG_UNREACHABLE("unsupported post operation: %u", post_operations[i].op_type);
     }
   }
 }"""
@@ -315,7 +315,7 @@ AARCH64_POST_OP = """void Generator::perform_post_operations(
         break;
       }
       default:
-        XNN_UNREACHABLE;
+        XNN_LOG_UNREACHABLE("unsupported post operation: %u", post_operations[i].op_type);
     }
   }
 }"""
@@ -469,6 +469,8 @@ def parse_prologue(input_file: str, lines: List[str], arch: str, minmax: bool,
         prologue.append('#include <xnnpack/gemm.h>')
       else:
         prologue.append('#include <xnnpack/igemm.h>')
+      if post_op:
+        prologue.append('#include <xnnpack/log.h>')
       prologue.append('#include <xnnpack/memory.h>')
       prologue.append('#include <xnnpack/microparams.h>')
       prologue.append('#include <xnnpack/post-operation.h>')

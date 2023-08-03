@@ -14,6 +14,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
+#include <xnnpack/common.h>
 
 #ifndef XNN_LOG_LEVEL
   #error "Undefined XNN_LOG_LEVEL"
@@ -121,3 +122,9 @@ XNN_LOG_ARGUMENTS_FORMAT inline static void xnn_log_fatal(const char* format, ..
   #endif
   abort();
 }
+
+#if XNN_LOG_LEVEL >= XNN_LOG_DEBUG
+  #define XNN_LOG_UNREACHABLE(...) do { xnn_log_fatal(__VA_ARGS__); } while (0)
+#else
+  #define XNN_LOG_UNREACHABLE(...) XNN_UNREACHABLE
+#endif

@@ -2,6 +2,7 @@
 
 #include <wasm_simd128.h>
 
+#include <xnnpack/log.h>
 #include <xnnpack/microparams.h>
 #include <xnnpack/post-operation.h>
 #include <xnnpack/wasm-assembler.h>
@@ -71,7 +72,7 @@ class PostOps : public WasmAssembler {
           hswish_consts_.vzero = MakeLocal(F32x4Splat(F32Const(0)));
           break;
         default:
-          XNN_UNREACHABLE;
+          XNN_LOG_UNREACHABLE("unsupported post operation: %u", ops[i].op_type);
       }
       params = I32Add(params, I32Const(6 * sizeof(float)));
     }
@@ -97,7 +98,7 @@ class PostOps : public WasmAssembler {
           Hswish(v);
           break;
         default:
-          XNN_UNREACHABLE;
+          XNN_LOG_UNREACHABLE("unsupported post operation: %u", ops_[i].op_type);
       }
     }
   }

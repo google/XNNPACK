@@ -5,6 +5,7 @@
 
 #include <xnnpack/allocator.h>
 #include <xnnpack/config.h>
+#include <xnnpack/log.h>
 #include <xnnpack/microparams.h>
 #include <xnnpack/params.h>
 #include <xnnpack/post-operation.h>
@@ -31,7 +32,7 @@ char* allocate_and_initialize_post_operation_params(
         break;
       }
       default:
-        XNN_UNREACHABLE;
+        XNN_LOG_UNREACHABLE("unsupported post operation: %u", post_op.op_type);
     }
   }
   // Copy all params compactly into post_operation_params.
@@ -51,7 +52,7 @@ char* allocate_and_initialize_post_operation_params(
         break;
       }
       default:
-        XNN_UNREACHABLE;
+        XNN_LOG_UNREACHABLE("unsupported post operation: %u", post_op.op_type);
     }
   }
   return post_operation_params;

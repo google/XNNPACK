@@ -2405,7 +2405,7 @@ static void PerformUnaryOperation(std::vector<float>& v, const std::vector<xnn_p
         break;
       }
       default:
-        FAIL() << "Unsupport post operation: " << (op.op_type);
+        FAIL() << "Unsupported post operation: " << (op.op_type);
     }
   }
 }
