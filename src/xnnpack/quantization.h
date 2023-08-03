@@ -33,7 +33,7 @@ static inline struct xnn_qd8_quantization_params xnn_f32_qd8_asymmetric_quantiza
   zero_point = math_min_f32(zero_point, qmax);
   assert(zero_point >= INT8_MIN);
   assert(zero_point <= INT8_MAX);
-  const int8_t nudged_zero_point = ((int8_t) rintf(zero_point));
+  const int8_t nudged_zero_point = (int8_t) lrintf(zero_point);
   quantization_params.inv_scale = 1.f / scale;
   quantization_params.zero_point = nudged_zero_point;
   return quantization_params;
