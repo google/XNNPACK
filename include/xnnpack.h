@@ -84,6 +84,17 @@ extern "C" {
 /// Yield worker threads of the thread pool to the system scheduler after the inference.
 #define XNN_FLAG_YIELD_WORKERS 0x00000010
 
+/// The number of entries in an array of xnn_dynamic_quantization_params that XNNPACK may read beyond array bounds.
+/// The caller must allocate at least this many extra xnn_dynamic_quantization_params before passing the array to XNNPACK.
+///
+/// Note: XNNPACK reads, but never writes beyond array bounds.
+#define XNN_EXTRA_QUANTIZATION_PARAMS 8
+
+struct xnn_dynamic_quantization_params {
+  int32_t zero_point;
+  float scale;
+};
+
 /// Status code for any XNNPACK function call.
 enum xnn_status {
   /// The call succeeded, and all output arguments now contain valid data.
@@ -2198,6 +2209,32 @@ enum xnn_status xnn_run_floor_nc_f32(
   const float* input,
   float* output,
   uint32_t flags,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc8w(
+  size_t input_channels,
+  size_t output_channels,
+  size_t input_stride,
+  size_t output_stride,
+  const float* kernel_scale,
+  const int8_t* kernel,
+  const float* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc8w(
+  xnn_operator_t fully_connected_op,
+  const int8_t* input,
+  float* output,
+  const struct xnn_dynamic_quantization_params* quantization_params);
+
+enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc8w(
+  xnn_operator_t fully_connected_op,
+  size_t batch_size,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_fully_connected_nc_f32(
@@ -5149,11 +5186,6 @@ enum xnn_status xnn_run_transpose_nd_x8(
     uint32_t flags,
     pthreadpool_t threadpool);
 
-struct xnn_dynamic_quantization_params {
-  int32_t zero_point;
-  float scale;
-};
-
 enum xnn_status xnn_create_convert_nc_f32_qd8(
   size_t channels,
   size_t input_stride,
@@ -5166,6 +5198,7 @@ enum xnn_status xnn_reshape_convert_nc_f32_qd8(
   size_t batch_size,
   pthreadpool_t threadpool);
 
+// quantization_params must be padded with at least XNN_EXTRA_QUANTIZATION_PARAMS entries.
 enum xnn_status xnn_setup_convert_nc_f32_qd8(
   xnn_operator_t convert_op,
   const float* input,
