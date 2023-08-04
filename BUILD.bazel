@@ -1261,6 +1261,8 @@ PROD_AVX2_MICROKERNEL_SRCS = [
     "src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-x56.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-div-x40.c",
     "src/f32-vtanh/gen/f32-vtanh-avx2-expm1minus-rr1-lut4-p4h3ts-perm-div-x32.c",
+    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-avx2.c",
+    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-avx2.c",
     "src/qs8-dwconv/gen/qs8-dwconv-9p16c-minmax-fp32-avx2-mul32.c",
     "src/qs8-dwconv/gen/qs8-dwconv-25p16c-minmax-fp32-avx2-mul32.c",
     "src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx2-x16.c",

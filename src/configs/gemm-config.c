@@ -1689,11 +1689,20 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
       qd8_f32_qc8w_gemm_config.mr = 4;
       qd8_f32_qc8w_gemm_config.nr = 16;
       qd8_f32_qc8w_gemm_config.log2_kr = 3;
+    } else if (hardware_config->use_x86_avx2) {
+      qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x8c8__avx2);
+      qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__avx2);
+      qd8_f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_avx_params;
+      qd8_f32_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
+      qd8_f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
+      qd8_f32_qc8w_gemm_config.mr = 3;
+      qd8_f32_qc8w_gemm_config.nr = 8;
+      qd8_f32_qc8w_gemm_config.log2_kr = 3;
     } else if (hardware_config->use_x86_xop) {
       // XOP should be checked before AVX2: AMD Excavator supports both, but performs better with XOP microkernels
       qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(2)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c8__xop_ld64);
       qd8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c8__xop_ld64);
-      qd8_f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      qd8_f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_sse_params;
       qd8_f32_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
       qd8_f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
       qd8_f32_qc8w_gemm_config.mr = 2;
