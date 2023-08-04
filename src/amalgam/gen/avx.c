@@ -6654,10 +6654,13 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c8__avx_ld128(
 
     const __m128 vinput_scale0 = _mm_broadcast_ss(&quantization_params[0].inv_scale);
 
-    const __m128 vbscale0123 = _mm_load_ps(w); w = (const float*) w + 4;
-    vout0x0123 = _mm_mul_ps(vout0x0123, _mm_mul_ps(vinput_scale0, vbscale0123));
+    vout0x0123 = _mm_mul_ps(vout0x0123, vinput_scale0);
 
-    const __m128 vbias0123 = _mm_load_ps(w); w = (const float*) w + 4;
+    const __m128 vfilter_output_scale0123 = _mm_load_ps((const float*) w);
+    vout0x0123 = _mm_mul_ps(vout0x0123, vfilter_output_scale0123);
+
+    const __m128 vbias0123 = _mm_load_ps((const float*) w + 4);
+    w = (const float*) w + 8;
     vout0x0123 = _mm_add_ps(vout0x0123, vbias0123);
 
     const __m128 vmin = _mm_load_ps(params->sse.min);
@@ -6781,11 +6784,15 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c8__avx_ld128(
     const __m128 vinput_scale0 = _mm_broadcast_ss(&quantization_params[0].inv_scale);
     const __m128 vinput_scale1 = _mm_broadcast_ss(&quantization_params[1].inv_scale);
 
-    const __m128 vbscale0123 = _mm_load_ps(w); w = (const float*) w + 4;
-    vout0x0123 = _mm_mul_ps(vout0x0123, _mm_mul_ps(vinput_scale0, vbscale0123));
-    vout1x0123 = _mm_mul_ps(vout1x0123, _mm_mul_ps(vinput_scale1, vbscale0123));
+    vout0x0123 = _mm_mul_ps(vout0x0123, vinput_scale0);
+    vout1x0123 = _mm_mul_ps(vout1x0123, vinput_scale1);
 
-    const __m128 vbias0123 = _mm_load_ps(w); w = (const float*) w + 4;
+    const __m128 vfilter_output_scale0123 = _mm_load_ps((const float*) w);
+    vout0x0123 = _mm_mul_ps(vout0x0123, vfilter_output_scale0123);
+    vout1x0123 = _mm_mul_ps(vout1x0123, vfilter_output_scale0123);
+
+    const __m128 vbias0123 = _mm_load_ps((const float*) w + 4);
+    w = (const float*) w + 8;
     vout0x0123 = _mm_add_ps(vout0x0123, vbias0123);
     vout1x0123 = _mm_add_ps(vout1x0123, vbias0123);
 

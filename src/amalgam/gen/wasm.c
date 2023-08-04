@@ -19,6 +19,7 @@
 #include <xnnpack/microparams.h>
 #include <xnnpack/pavgpool.h>
 #include <xnnpack/prelu.h>
+#include <xnnpack/reduce.h>
 #include <xnnpack/unaligned.h>
 #include <xnnpack/vbinary.h>
 #include <xnnpack/vcvt.h>
@@ -4254,6 +4255,60 @@ void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_x4(
   }
 }
 
+void xnn_f32_rminmax_ukernel__wasm_x4_acc4(
+    size_t batch,
+    const float* input,
+    float* output,
+    const union xnn_f32_default_params* params)
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  float vmin0 = *input;
+  float vmax0 = *input;
+  float vmin1 = vmin0;
+  float vmax1 = vmax0;
+  float vmin2 = vmin0;
+  float vmax2 = vmax0;
+  float vmin3 = vmin0;
+  float vmax3 = vmax0;
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const float vt0 = input[0];
+    const float vt1 = input[1];
+    const float vt2 = input[2];
+    const float vt3 = input[3];
+    input += 4;
+
+    vmin0 = __builtin_wasm_min_f32(vmin0, vt0);
+    vmax0 = __builtin_wasm_max_f32(vmax0, vt0);
+    vmin1 = __builtin_wasm_min_f32(vmin1, vt1);
+    vmax1 = __builtin_wasm_max_f32(vmax1, vt1);
+    vmin2 = __builtin_wasm_min_f32(vmin2, vt2);
+    vmax2 = __builtin_wasm_max_f32(vmax2, vt2);
+    vmin3 = __builtin_wasm_min_f32(vmin3, vt3);
+    vmax3 = __builtin_wasm_max_f32(vmax3, vt3);
+  }
+  vmin0 = __builtin_wasm_min_f32(vmin0, vmin1);
+  vmax0 = __builtin_wasm_max_f32(vmax0, vmax1);
+  vmin2 = __builtin_wasm_min_f32(vmin2, vmin3);
+  vmax2 = __builtin_wasm_max_f32(vmax2, vmax3);
+  vmin0 = __builtin_wasm_min_f32(vmin0, vmin2);
+  vmax0 = __builtin_wasm_max_f32(vmax0, vmax2);
+
+  if XNN_UNLIKELY(batch != 0) {
+    do {
+      const float vt = *input++;
+      vmin0 = __builtin_wasm_min_f32(vmin0, vt);
+      vmax0 = __builtin_wasm_max_f32(vmax0, vt);
+      batch -= sizeof(float);
+    } while (batch != 0);
+  }
+  output[0] = vmin0;
+  output[1] = vmax0;
+}
+
 void xnn_f32_vadd_minmax_ukernel__wasm_x8(
     size_t batch,
     const float* input_a,
@@ -6098,24 +6153,34 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4__wasm(
       k -= sizeof(int8_t);
     } while (k != 0);
 
-    const float vascale0 = quantization_params[0].inv_scale;
-    float vout0x0 = (float) vacc0x0 * vascale0;
-    float vout0x1 = (float) vacc0x1 * vascale0;
-    float vout0x2 = (float) vacc0x2 * vascale0;
-    float vout0x3 = (float) vacc0x3 * vascale0;
+    float vout0x0 = (float) vacc0x0;
+    float vout0x1 = (float) vacc0x1;
+    float vout0x2 = (float) vacc0x2;
+    float vout0x3 = (float) vacc0x3;
 
-    const float vbscale0 = ((const float*) w)[0];
-    const float vbscale1 = ((const float*) w)[1];
-    const float vbscale2 = ((const float*) w)[2];
-    const float vbscale3 = ((const float*) w)[3];
+    const float vinput_scale0 = quantization_params[0].inv_scale;
+    vout0x0 *= vinput_scale0;
+    vout0x1 *= vinput_scale0;
+    vout0x2 *= vinput_scale0;
+    vout0x3 *= vinput_scale0;
+
+    const float vfilter_output_scale0 = ((const float*) w)[0];
+    vout0x0 *= vfilter_output_scale0;
+    const float vfilter_output_scale1 = ((const float*) w)[1];
+    vout0x1 *= vfilter_output_scale1;
+    const float vfilter_output_scale2 = ((const float*) w)[2];
+    vout0x2 *= vfilter_output_scale2;
+    const float vfilter_output_scale3 = ((const float*) w)[3];
+    vout0x3 *= vfilter_output_scale3;
+
     const float vbias0 = ((const float*) w)[4];
-    vout0x0 = math_muladd_f32(vout0x0, vbscale0, vbias0);
+    vout0x0 += vbias0;
     const float vbias1 = ((const float*) w)[5];
-    vout0x1 = math_muladd_f32(vout0x1, vbscale1, vbias1);
+    vout0x1 += vbias1;
     const float vbias2 = ((const float*) w)[6];
-    vout0x2 = math_muladd_f32(vout0x2, vbscale2, vbias2);
+    vout0x2 += vbias2;
     const float vbias3 = ((const float*) w)[7];
-    vout0x3 = math_muladd_f32(vout0x3, vbscale3, vbias3);
+    vout0x3 += vbias3;
 
     w = (const float*) w + 8;
 
@@ -6257,51 +6322,85 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4__wasm(
       k -= sizeof(int8_t);
     } while (k != 0);
 
-    const float vascale0 = quantization_params[0].inv_scale;
-    float vout0x0 = (float) vacc0x0 * vascale0;
-    float vout0x1 = (float) vacc0x1 * vascale0;
-    float vout0x2 = (float) vacc0x2 * vascale0;
-    float vout0x3 = (float) vacc0x3 * vascale0;
-    const float vascale1 = quantization_params[1].inv_scale;
-    float vout1x0 = (float) vacc1x0 * vascale1;
-    float vout1x1 = (float) vacc1x1 * vascale1;
-    float vout1x2 = (float) vacc1x2 * vascale1;
-    float vout1x3 = (float) vacc1x3 * vascale1;
-    const float vascale2 = quantization_params[2].inv_scale;
-    float vout2x0 = (float) vacc2x0 * vascale2;
-    float vout2x1 = (float) vacc2x1 * vascale2;
-    float vout2x2 = (float) vacc2x2 * vascale2;
-    float vout2x3 = (float) vacc2x3 * vascale2;
-    const float vascale3 = quantization_params[3].inv_scale;
-    float vout3x0 = (float) vacc3x0 * vascale3;
-    float vout3x1 = (float) vacc3x1 * vascale3;
-    float vout3x2 = (float) vacc3x2 * vascale3;
-    float vout3x3 = (float) vacc3x3 * vascale3;
+    float vout0x0 = (float) vacc0x0;
+    float vout0x1 = (float) vacc0x1;
+    float vout0x2 = (float) vacc0x2;
+    float vout0x3 = (float) vacc0x3;
+    float vout1x0 = (float) vacc1x0;
+    float vout1x1 = (float) vacc1x1;
+    float vout1x2 = (float) vacc1x2;
+    float vout1x3 = (float) vacc1x3;
+    float vout2x0 = (float) vacc2x0;
+    float vout2x1 = (float) vacc2x1;
+    float vout2x2 = (float) vacc2x2;
+    float vout2x3 = (float) vacc2x3;
+    float vout3x0 = (float) vacc3x0;
+    float vout3x1 = (float) vacc3x1;
+    float vout3x2 = (float) vacc3x2;
+    float vout3x3 = (float) vacc3x3;
 
-    const float vbscale0 = ((const float*) w)[0];
-    const float vbscale1 = ((const float*) w)[1];
-    const float vbscale2 = ((const float*) w)[2];
-    const float vbscale3 = ((const float*) w)[3];
+    const float vinput_scale0 = quantization_params[0].inv_scale;
+    vout0x0 *= vinput_scale0;
+    vout0x1 *= vinput_scale0;
+    vout0x2 *= vinput_scale0;
+    vout0x3 *= vinput_scale0;
+    const float vinput_scale1 = quantization_params[1].inv_scale;
+    vout1x0 *= vinput_scale1;
+    vout1x1 *= vinput_scale1;
+    vout1x2 *= vinput_scale1;
+    vout1x3 *= vinput_scale1;
+    const float vinput_scale2 = quantization_params[2].inv_scale;
+    vout2x0 *= vinput_scale2;
+    vout2x1 *= vinput_scale2;
+    vout2x2 *= vinput_scale2;
+    vout2x3 *= vinput_scale2;
+    const float vinput_scale3 = quantization_params[3].inv_scale;
+    vout3x0 *= vinput_scale3;
+    vout3x1 *= vinput_scale3;
+    vout3x2 *= vinput_scale3;
+    vout3x3 *= vinput_scale3;
+
+    const float vfilter_output_scale0 = ((const float*) w)[0];
+    vout0x0 *= vfilter_output_scale0;
+    vout1x0 *= vfilter_output_scale0;
+    vout2x0 *= vfilter_output_scale0;
+    vout3x0 *= vfilter_output_scale0;
+    const float vfilter_output_scale1 = ((const float*) w)[1];
+    vout0x1 *= vfilter_output_scale1;
+    vout1x1 *= vfilter_output_scale1;
+    vout2x1 *= vfilter_output_scale1;
+    vout3x1 *= vfilter_output_scale1;
+    const float vfilter_output_scale2 = ((const float*) w)[2];
+    vout0x2 *= vfilter_output_scale2;
+    vout1x2 *= vfilter_output_scale2;
+    vout2x2 *= vfilter_output_scale2;
+    vout3x2 *= vfilter_output_scale2;
+    const float vfilter_output_scale3 = ((const float*) w)[3];
+    vout0x3 *= vfilter_output_scale3;
+    vout1x3 *= vfilter_output_scale3;
+    vout2x3 *= vfilter_output_scale3;
+    vout3x3 *= vfilter_output_scale3;
+
     const float vbias0 = ((const float*) w)[4];
-    vout0x0 = math_muladd_f32(vout0x0, vbscale0, vbias0);
+    vout0x0 += vbias0;
+    vout1x0 += vbias0;
+    vout2x0 += vbias0;
+    vout3x0 += vbias0;
     const float vbias1 = ((const float*) w)[5];
-    vout0x1 = math_muladd_f32(vout0x1, vbscale1, vbias1);
+    vout0x1 += vbias1;
+    vout1x1 += vbias1;
+    vout2x1 += vbias1;
+    vout3x1 += vbias1;
     const float vbias2 = ((const float*) w)[6];
-    vout0x2 = math_muladd_f32(vout0x2, vbscale2, vbias2);
+    vout0x2 += vbias2;
+    vout1x2 += vbias2;
+    vout2x2 += vbias2;
+    vout3x2 += vbias2;
     const float vbias3 = ((const float*) w)[7];
-    vout0x3 = math_muladd_f32(vout0x3, vbscale3, vbias3);
-    vout1x0 = math_muladd_f32(vout1x0, vbscale0, vbias0);
-    vout1x1 = math_muladd_f32(vout1x1, vbscale1, vbias1);
-    vout1x2 = math_muladd_f32(vout1x2, vbscale2, vbias2);
-    vout1x3 = math_muladd_f32(vout1x3, vbscale3, vbias3);
-    vout2x0 = math_muladd_f32(vout2x0, vbscale0, vbias0);
-    vout2x1 = math_muladd_f32(vout2x1, vbscale1, vbias1);
-    vout2x2 = math_muladd_f32(vout2x2, vbscale2, vbias2);
-    vout2x3 = math_muladd_f32(vout2x3, vbscale3, vbias3);
-    vout3x0 = math_muladd_f32(vout3x0, vbscale0, vbias0);
-    vout3x1 = math_muladd_f32(vout3x1, vbscale1, vbias1);
-    vout3x2 = math_muladd_f32(vout3x2, vbscale2, vbias2);
-    vout3x3 = math_muladd_f32(vout3x3, vbscale3, vbias3);
+    vout0x3 += vbias3;
+    vout1x3 += vbias3;
+    vout2x3 += vbias3;
+    vout3x3 += vbias3;
 
     w = (const float*) w + 8;
 

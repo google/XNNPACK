@@ -1413,6 +1413,7 @@ PROD_WASM_MICROKERNEL_SRCS = [
     "src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x4-minmax-wasm.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-wasm-fmagic-x4.c",
     "src/f32-qu8-vcvt/gen/f32-qu8-vcvt-wasm-fmagic-x4.c",
+    "src/f32-rminmax/gen/f32-rminmax-wasm-x4-acc4.c",
     "src/f32-vbinary/gen/f32-vadd-minmax-wasm-x8.c",
     "src/f32-vbinary/gen/f32-vaddc-minmax-wasm-x8.c",
     "src/f32-vbinary/gen/f32-vdiv-minmax-wasm-x8.c",
