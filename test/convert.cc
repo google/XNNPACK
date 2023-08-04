@@ -10,6 +10,7 @@
 #include <limits>
 #include <memory>
 #include <random>
+#include <vector>
 
 #include <xnnpack.h>
 #include <xnnpack/node-type.h>
@@ -19,6 +20,7 @@
 #include "subgraph-unary-tester.h"
 #include <gtest/gtest.h>
 
+using ConvertTestF32ToQD8 = UnaryTest<float, int8_t, /*min_dim=*/1>;
 using ConvertTestF32ToQS8 = UnaryTest<float, int8_t>;
 using ConvertTestF32ToQU8 = UnaryTest<float, uint8_t>;
 using ConvertTestQS8ToQS8 = UnaryTest<int8_t, int8_t>;
@@ -609,4 +611,39 @@ TEST_F(ConvertTestQU8ToQU8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   ASSERT_EQ(subgraph_output, operator_output);
+}
+
+TEST_F(ConvertTestF32ToQD8, define)
+{
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+
+  input_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, 0,
+                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_dynamically_quantized_tensor_value(
+                          subgraph, xnn_datatype_qdint8, dims.size(), /*num_nonbatch_dims=*/1,  dims.data(),
+                          /*external_id=*/1, /*flags=*/0, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+
+  ASSERT_EQ(xnn_status_success, xnn_define_convert(subgraph, input_id, output_id, /*flags=*/0));
+
+  ASSERT_EQ(subgraph->num_nodes, 1);
+  const struct xnn_node* node = &subgraph->nodes[0];
+  ASSERT_EQ(node->type, xnn_node_type_convert);
+  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32_to_qd8);
+  ASSERT_EQ(node->num_inputs, 1);
+  ASSERT_EQ(node->inputs[0], input_id);
+  ASSERT_EQ(node->num_outputs, 1);
+  ASSERT_EQ(node->outputs[0], output_id);
+  ASSERT_EQ(node->flags, 0);
 }

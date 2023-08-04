@@ -12,6 +12,7 @@
 #include <xnnpack/common.h>
 #include <xnnpack/cache.h>
 #include <xnnpack/node-type.h>
+#include <xnnpack/quantization.h>
 
 #if defined(EMSCRIPTEN)
 #include <emscripten/emscripten.h>
@@ -90,6 +91,12 @@ struct xnn_value {
         const float* channelwise_scale;
         /// Index of the channel dimension with per-channel quantization parameters.
         size_t channel_dimension;
+      };
+      struct {
+        /// Number of non-batch dimensions. 1 for FC, 3 for Conv2D.
+        size_t num_nonbatch_dims;
+        /// Per-batch quantization parameters factor to convert quantized elements to real representation.
+        struct xnn_dynamic_quantization_params* dynamic_params;
       };
     };
   } quantization;
@@ -196,9 +203,11 @@ enum xnn_compute_type {
   xnn_compute_type_fp32,
   xnn_compute_type_fp16,
   xnn_compute_type_qc8,
+  xnn_compute_type_qd8_to_fp32,
   xnn_compute_type_qs8,
   xnn_compute_type_qu8,
   xnn_compute_type_fp32_to_fp16,
+  xnn_compute_type_fp32_to_qd8,
   xnn_compute_type_fp32_to_qs8,
   xnn_compute_type_fp32_to_qu8,
   xnn_compute_type_fp16_to_fp32,

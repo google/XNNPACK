@@ -226,6 +226,8 @@ enum xnn_datatype {
   xnn_datatype_qcint32 = 7,
   /// Quantized 4-bit signed integer with shared per-channel quantization parameters.
   xnn_datatype_qcint4 = 8,
+  /// Dynamically quantized 8-bit signed integer with per-batch quantization parameters.
+  xnn_datatype_qdint8 = 9,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
@@ -330,6 +332,32 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
   size_t channel_dim,
   const size_t* dims,
   const void* data,
+  uint32_t external_id,
+  uint32_t flags,
+  uint32_t* id_out);
+
+/// Define a dynamically quantized tensor-type Value and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Value.
+/// @param datatype - type of the tensor elements.
+/// @param num_dims - number of dimensions in the shape.
+/// @param num_non_batch_dims - number of non-batch dimensions in the shape. The leading (num_dims - num_non_batch_dims)
+///                             dimensions will be flattened and treated as batch size. A set of quantization parameters
+///                             will be calculated for each batch element.
+/// @param dims - pointer to an array of @a num_dims shape dimensions. If num_dims is 0, this pointer can be NULL.
+///               XNNPACK does not keep any pointers to this array after the function returns.
+/// @param external_id - external ID for the Value. The ID must be within the range of reversed Value IDs specified on
+///                      the Subgraph creation. If the external ID is XNN_INVALID_VALUE_ID, an internal ID will be
+///                      created for the Value.
+/// @param flags - binary features of the Value. No supported flags are currently defined.
+/// @param id_out - pointer to the variable that will be initialized with the Value ID upon successful return. If a
+///                 valid @a external_id was provided, the variable will be initialized with the @a external_id value.
+enum xnn_status xnn_define_dynamically_quantized_tensor_value(
+  xnn_subgraph_t subgraph,
+  enum xnn_datatype datatype,
+  size_t num_dims,
+  size_t num_nonbatch_dims,
+  const size_t* dims,
   uint32_t external_id,
   uint32_t flags,
   uint32_t* id_out);

@@ -5,10 +5,13 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <limits>
 #include <memory>
+#include <random>
 #include <vector>
 
 #include <xnnpack.h>
@@ -795,4 +798,84 @@ TEST(WORKSPACE, persistent_tensors_values_copied_when_workspace_grows)
   for (size_t i = 0; i < 2 * 2 * 2 * 3; i++) {
     EXPECT_EQ(expected[i], actual[i]);
   }
+}
+
+TEST(WORKSPACE, internally_allocated_dynamic_quantization_parameters)
+{
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/4, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+  uint32_t input_id = XNN_INVALID_NODE_ID;
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+  auto scalerng = std::bind(std::uniform_real_distribution<float>(0.5f, 2.f), std::ref(rng));
+  const size_t batch_size = 3;
+  const size_t input_channels = 4;
+  const size_t output_channels = 5;
+  std::vector<size_t> input_dims{batch_size, input_channels};
+  std::vector<size_t> kernel_dims{output_channels, input_channels};
+  std::vector<size_t> bias_dims{output_channels};
+  std::vector<float> input(batch_size * input_channels + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float> subgraph_output(batch_size * output_channels);
+  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
+  std::vector<xnn_dynamic_quantization_params> quantization_params(3 + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<float> kernel_scale(output_channels);
+  std::vector<float> bias(output_channels);
+  std::vector<int8_t> kernel(input_channels * output_channels);
+  std::vector<size_t> output_dims{batch_size, output_channels};
+  std::generate(kernel_scale.begin(), kernel_scale.end(), std::ref(scalerng));
+
+  const float output_min = -std::numeric_limits<float>::infinity();
+  const float output_max = std::numeric_limits<float>::infinity();
+
+  // Call subgraph API.
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr, /*external_id=*/0,
+                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  uint32_t dq_quantized_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_dynamically_quantized_tensor_value(
+                          subgraph, xnn_datatype_qdint8, input_dims.size(), /*num_nonbatch_dims=*/1, input_dims.data(),
+                          XNN_INVALID_VALUE_ID, /*flags=*/0, &dq_quantized_id));
+  ASSERT_NE(dq_quantized_id, XNN_INVALID_NODE_ID);
+  uint32_t kernel_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_channelwise_quantized_tensor_value(
+                          subgraph, xnn_datatype_qcint8, kernel_scale.data(), kernel_dims.size(), /*channel_dim=*/0,
+                          kernel_dims.data(), kernel.data(), /*external_id=*/1, /*flags=*/0, &kernel_id));
+
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
+                          /*external_id=*/2, /*flags=*/0, &bias_id));
+  uint32_t output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, /*external_id=*/3,
+                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_define_convert(subgraph, input_id, dq_quantized_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_fully_connected(subgraph, output_min, output_max, dq_quantized_id, kernel_id, bias_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::array<xnn_external_value, 2> external = {
+    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+
+  size_t dq_tensors = 0;
+  for (size_t i = 0; i < runtime->num_values; i++) {
+    const xnn_value* value = &runtime->values[i];
+    if (value->datatype == xnn_datatype_qdint8) {
+      ++dq_tensors;
+      ASSERT_NE(value->quantization.dynamic_params, nullptr);
+    }
+  }
+  ASSERT_EQ(dq_tensors, 1);
 }
