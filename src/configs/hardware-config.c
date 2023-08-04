@@ -80,6 +80,9 @@ static void init_hardware_config(void) {
       hardware_config.use_arm_neon_dot = cpuinfo_has_arm_neon_dot();
     #endif
   #endif
+  #if XNN_ARCH_ARM64
+    hardware_config.use_arm_neon_i8mm = cpuinfo_has_arm_i8mm();
+  #endif
 
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     hardware_config.use_x86_ssse3 = cpuinfo_has_x86_ssse3();

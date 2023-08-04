@@ -264,6 +264,18 @@
   #define TEST_REQUIRES_ARM_NEON_DOT
 #endif
 
+#if  XNN_ARCH_ARM64
+  #define TEST_REQUIRES_ARM_NEON_I8MM \
+    do { \
+      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config(); \
+      if (hardware_config == nullptr || !hardware_config->use_arm_neon_i8mm) { \
+        GTEST_SKIP(); \
+      } \
+    } while (0)
+#else
+  #define TEST_REQUIRES_ARM_NEON_I8MM
+#endif
+
 #if XNN_ARCH_RISCV
   #define TEST_REQUIRES_RISCV_VECTOR \
     do { \

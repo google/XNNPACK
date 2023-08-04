@@ -975,6 +975,47 @@ tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=1 -
 tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mull.S.in                          -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mull.S &
 tools/xngen src/qs8-gemm/2x8c16-aarch64-neon-mlal.S.in                         -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c16-minmax-fp32-asm-aarch64-neon-mlal.S &
 
+### NEON I8MM C4 micro-kernels
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=2 -D NR=4 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x4c8-minmax-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=2 -D NR=8 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=2 -D NR=16 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x16c8-minmax-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=4 -D NR=4 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x4c8-minmax-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=4 -D NR=8 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=4 -D NR=16 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x16c8-minmax-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=6 -D NR=4 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x4c8-minmax-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=6 -D NR=8 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x8c8-minmax-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=6 -D NR=16 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x16c8-minmax-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=8 -D NR=4 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x4c8-minmax-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=8 -D NR=8 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x8c8-minmax-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=8 -D NR=16 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x16c8-minmax-neoni8mm.c &
+
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=2 -D NR=8 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=2 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x16c8-minmax-fp32-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=4 -D NR=8 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=4 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c8-minmax-fp32-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=6 -D NR=8 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x8c8-minmax-fp32-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=6 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-6x16c8-minmax-fp32-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=8 -D NR=8 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x8c8-minmax-fp32-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=8 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o  src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-8x16c8-minmax-fp32-neoni8mm.c &
+
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=2 -D NR=8 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-fp32-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=2 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-2x16c8-minmax-fp32-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=4 -D NR=8 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-4x8c8-minmax-fp32-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=4 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-4x16c8-minmax-fp32-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=6 -D NR=8 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-6x8c8-minmax-fp32-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=6 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-6x16c8-minmax-fp32-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=8 -D NR=8 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-8x8c8-minmax-fp32-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=8 -D NR=16 -D REQUANTIZATION=FP32 -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-8x16c8-minmax-fp32-neoni8mm.c &
+
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=2 -D NR=8 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-2x8c8-minmax-rndnu-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=2 -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-2x16c8-minmax-rndnu-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=4 -D NR=8 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-4x8c8-minmax-rndnu-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=4 -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-4x16c8-minmax-rndnu-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=6 -D NR=8 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-6x8c8-minmax-rndnu-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=6 -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-6x16c8-minmax-rndnu-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=8 -D NR=8 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-8x8c8-minmax-rndnu-neoni8mm.c &
+tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=8 -D NR=16 -D REQUANTIZATION=RNDNU -D DATATYPE=QS8 -o  src/qs8-gemm/gen/qs8-gemm-8x16c8-minmax-rndnu-neoni8mm.c &
+
 ################################### x86 SSE ###################################
 ### C2 micro-kernels
 tools/xngen src/qs8-gemm/MRx4c2-sse.c.in -D MR=1 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -D VARIANT=LD64     -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x4c2-minmax-fp32-sse2-ld64.c &
@@ -1473,7 +1514,7 @@ tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=3 -D VARIANT=LD256 -D DATA
 tools/xngen src/qs8-gemm/MRx16c8-avx512skx.c.in -D MR=4 -D VARIANT=LD256 -D DATATYPE=QD8 -D REQUANTIZATION=     -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x16c8-minmax-avx512skx.c &
 
 ################################## Unit tests #################################
-tools/generate-gemm-test.py --spec test/qd8-f32-qc8w-gemm-minmax.yaml --output test/qd8-f32-qc8w-gemm-minmax.cc
+tools/generate-gemm-test.py --spec test/qd8-f32-qc8w-gemm-minmax.yaml --output test/qd8-f32-qc8w-gemm-minmax.cc &
 tools/generate-gemm-test.py --spec test/qs8-qc8w-gemm-minmax-fp32.yaml --output test/qs8-qc8w-gemm-minmax-fp32.cc --output test/qs8-qc8w-gemm-minmax-fp32-2.cc --output test/qs8-qc8w-gemm-minmax-fp32-3.cc &
 tools/generate-gemm-test.py --spec test/qs8-gemm-minmax-fp32.yaml --output test/qs8-gemm-minmax-fp32.cc --output test/qs8-gemm-minmax-fp32-2.cc &
 tools/generate-gemm-test.py --spec test/qu8-gemm-minmax-fp32.yaml --output test/qu8-gemm-minmax-fp32.cc --output test/qu8-gemm-minmax-fp32-2.cc &

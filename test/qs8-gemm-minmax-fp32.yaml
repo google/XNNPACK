@@ -899,3 +899,27 @@
 - name: xnn_qs8_gemm_minmax_fp32_ukernel_4x4__scalar_lrintf
   init: xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params
   k-block: 1
+- name: xnn_qs8_gemm_minmax_fp32_ukernel_2x8c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_fp32_ukernel_2x16c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_fp32_ukernel_4x8c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_fp32_ukernel_4x16c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_fp32_ukernel_6x8c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_fp32_ukernel_6x16c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_fp32_ukernel_8x8c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_fp32_ukernel_8x16c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_fp32_neonv8_params
+  k-block: 8

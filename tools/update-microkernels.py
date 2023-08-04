@@ -28,6 +28,7 @@ ISA_LIST = frozenset({
   'neon',
   'neonbf16',
   'neondot',
+  'neoni8mm',
   'neonfma',
   'neonfp16',
   'neonfp16arith',

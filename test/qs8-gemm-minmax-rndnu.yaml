@@ -741,3 +741,27 @@
 - name: xnn_qs8_gemm_minmax_rndnu_ukernel_4x4__scalar
   init: xnn_init_qs8_conv_minmax_rndnu_scalar_params
   k-block: 1
+- name: xnn_qs8_gemm_minmax_rndnu_ukernel_2x8c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_rndnu_ukernel_2x16c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_rndnu_ukernel_6x8c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_rndnu_ukernel_6x16c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_rndnu_ukernel_8x8c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+  k-block: 8
+- name: xnn_qs8_gemm_minmax_rndnu_ukernel_8x16c8__neoni8mm
+  init: xnn_init_qs8_conv_minmax_rndnu_neon_params
+  k-block: 8

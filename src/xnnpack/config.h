@@ -32,6 +32,7 @@ struct xnn_hardware_config {
   bool use_arm_neon_fp16_arith;
   bool use_arm_neon_bf16;
   bool use_arm_neon_dot;
+  bool use_arm_neon_i8mm;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   bool use_x86_ssse3;

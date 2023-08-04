@@ -9,7 +9,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load(":build_defs.bzl", "xnnpack_aggregate_library", "xnnpack_benchmark", "xnnpack_binary", "xnnpack_cc_library", "xnnpack_gcc_std_copts", "xnnpack_min_size_copts", "xnnpack_msvc_std_copts", "xnnpack_optional_dnnl_copts", "xnnpack_optional_dnnl_deps", "xnnpack_optional_gemmlowp_copts", "xnnpack_optional_gemmlowp_deps", "xnnpack_optional_ruy_copts", "xnnpack_optional_ruy_deps", "xnnpack_optional_tflite_copts", "xnnpack_optional_tflite_deps", "xnnpack_std_cxxopts", "xnnpack_unit_test", "xnnpack_visibility")
-load(":microkernels.bzl", "AARCH32_ASM_MICROKERNEL_SRCS", "AARCH32_JIT_MICROKERNEL_SRCS", "AARCH64_ASM_MICROKERNEL_SRCS", "AARCH64_JIT_MICROKERNEL_SRCS", "ALL_ARMSIMD32_MICROKERNEL_SRCS", "ALL_AVX2_MICROKERNEL_SRCS", "ALL_AVX512F_MICROKERNEL_SRCS", "ALL_AVX512SKX_MICROKERNEL_SRCS", "ALL_AVX512VBMI_MICROKERNEL_SRCS", "ALL_AVX_MICROKERNEL_SRCS", "ALL_F16C_MICROKERNEL_SRCS", "ALL_FMA3_MICROKERNEL_SRCS", "ALL_FMA_MICROKERNEL_SRCS", "ALL_FP16ARITH_MICROKERNEL_SRCS", "ALL_HEXAGON_MICROKERNEL_SRCS", "ALL_NEONBF16_AARCH64_MICROKERNEL_SRCS", "ALL_NEONBF16_MICROKERNEL_SRCS", "ALL_NEONDOT_MICROKERNEL_SRCS", "ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS", "ALL_NEONFMA_MICROKERNEL_SRCS", "ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS", "ALL_NEONFP16ARITH_MICROKERNEL_SRCS", "ALL_NEONFP16_MICROKERNEL_SRCS", "ALL_NEONV8_MICROKERNEL_SRCS", "ALL_NEON_AARCH64_MICROKERNEL_SRCS", "ALL_NEON_MICROKERNEL_SRCS", "ALL_RVV_MICROKERNEL_SRCS", "ALL_SCALAR_MICROKERNEL_SRCS", "ALL_SSE2_MICROKERNEL_SRCS", "ALL_SSE41_MICROKERNEL_SRCS", "ALL_SSE_MICROKERNEL_SRCS", "ALL_SSSE3_MICROKERNEL_SRCS", "ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS", "ALL_WASMSIMD_MICROKERNEL_SRCS", "ALL_WASM_MICROKERNEL_SRCS", "ALL_XOP_MICROKERNEL_SRCS", "WASM32_ASM_MICROKERNEL_SRCS", "WASM32_JIT_MICROKERNEL_SRCS", "WASMRELAXEDSIMD32_JIT_MICROKERNEL_SRCS", "WASMSIMD32_JIT_MICROKERNEL_SRCS")
+load(":microkernels.bzl", "AARCH32_ASM_MICROKERNEL_SRCS", "AARCH32_JIT_MICROKERNEL_SRCS", "AARCH64_ASM_MICROKERNEL_SRCS", "AARCH64_JIT_MICROKERNEL_SRCS", "ALL_ARMSIMD32_MICROKERNEL_SRCS", "ALL_AVX2_MICROKERNEL_SRCS", "ALL_AVX512F_MICROKERNEL_SRCS", "ALL_AVX512SKX_MICROKERNEL_SRCS", "ALL_AVX512VBMI_MICROKERNEL_SRCS", "ALL_AVX_MICROKERNEL_SRCS", "ALL_F16C_MICROKERNEL_SRCS", "ALL_FMA3_MICROKERNEL_SRCS", "ALL_FMA_MICROKERNEL_SRCS", "ALL_FP16ARITH_MICROKERNEL_SRCS", "ALL_HEXAGON_MICROKERNEL_SRCS", "ALL_NEONBF16_AARCH64_MICROKERNEL_SRCS", "ALL_NEONBF16_MICROKERNEL_SRCS", "ALL_NEONDOT_MICROKERNEL_SRCS", "ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS", "ALL_NEONFMA_MICROKERNEL_SRCS", "ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS", "ALL_NEONFP16ARITH_MICROKERNEL_SRCS", "ALL_NEONFP16_MICROKERNEL_SRCS", "ALL_NEONI8MM_MICROKERNEL_SRCS", "ALL_NEONV8_MICROKERNEL_SRCS", "ALL_NEON_AARCH64_MICROKERNEL_SRCS", "ALL_NEON_MICROKERNEL_SRCS", "ALL_RVV_MICROKERNEL_SRCS", "ALL_SCALAR_MICROKERNEL_SRCS", "ALL_SSE2_MICROKERNEL_SRCS", "ALL_SSE41_MICROKERNEL_SRCS", "ALL_SSE_MICROKERNEL_SRCS", "ALL_SSSE3_MICROKERNEL_SRCS", "ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS", "ALL_WASMSIMD_MICROKERNEL_SRCS", "ALL_WASM_MICROKERNEL_SRCS", "ALL_XOP_MICROKERNEL_SRCS", "WASM32_ASM_MICROKERNEL_SRCS", "WASM32_JIT_MICROKERNEL_SRCS", "WASMRELAXEDSIMD32_JIT_MICROKERNEL_SRCS", "WASMSIMD32_JIT_MICROKERNEL_SRCS")
 
 licenses(["notice"])
 
@@ -3258,6 +3258,46 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "neoni8mm_bench_microkernels",
+    aarch64_copts = [
+        "-march=armv8.6-a+i8mm",
+    ],
+    aarch64_srcs = ALL_NEONI8MM_MICROKERNEL_SRCS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":prefetch",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "neoni8mm_test_microkernels",
+    aarch64_copts = ["-march=armv8.6-a+i8mm"],
+    aarch64_srcs = ALL_NEONI8MM_MICROKERNEL_SRCS,
+    copts = [
+        "-UNDEBUG",
+        "-DXNN_TEST_MODE=1",
+    ],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":prefetch",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
     name = "sse2_amalgam_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
     gcc_x86_copts = ["-msse2"],
@@ -4369,6 +4409,9 @@ xnnpack_aggregate_library(
     }) + select({
         ":arm_dotprod_enabled": ["XNN_ENABLE_ARM_DOTPROD=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_DOTPROD=0"],
+    }) + select({
+        ":arm_i8mm_enabled": ["XNN_ENABLE_ARM_I8MM=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_I8MM=0"],
     }),
     generic_deps = [
         ":scalar_amalgam_microkernels",
@@ -4442,6 +4485,9 @@ xnnpack_aggregate_library(
         ":arm_dotprod_enabled": ["XNN_ENABLE_ARM_DOTPROD=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_DOTPROD=0"],
     }) + select({
+        ":arm_i8mm_enabled": ["XNN_ENABLE_ARM_I8MM=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_I8MM=0"],
+    }) + select({
         ":riscv_vector_enabled": ["XNN_ENABLE_RISCV_VECTOR=1"],
         "//conditions:default": ["XNN_ENABLE_RISCV_VECTOR=0"],
     }),
@@ -4458,6 +4504,9 @@ xnnpack_aggregate_library(
         "//conditions:default": [],
     }) + select({
         ":arm_dotprod_enabled": [":neondot_bench_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":arm_i8mm_enabled": [":neoni8mm_bench_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":riscv_vector_enabled": [":rvv_bench_microkernels"],
@@ -4519,6 +4568,9 @@ xnnpack_aggregate_library(
     }) + select({
         ":arm_dotprod_enabled": ["XNN_ENABLE_ARM_DOTPROD=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_DOTPROD=0"],
+    }) + select({
+        ":arm_i8mm_enabled": ["XNN_ENABLE_ARM_I8MM=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_I8MM=0"],
     }),
     generic_deps = [
         ":scalar_prod_microkernels",
@@ -4592,6 +4644,9 @@ xnnpack_aggregate_library(
         ":arm_dotprod_enabled": ["XNN_ENABLE_ARM_DOTPROD=1"],
         "//conditions:default": ["XNN_ENABLE_ARM_DOTPROD=0"],
     }) + select({
+        ":arm_i8mm_enabled": ["XNN_ENABLE_ARM_I8MM=1"],
+        "//conditions:default": ["XNN_ENABLE_ARM_I8MM=0"],
+    }) + select({
         ":riscv_vector_enabled": ["XNN_ENABLE_RISCV_VECTOR=1"],
         "//conditions:default": ["XNN_ENABLE_RISCV_VECTOR=0"],
     }),
@@ -4608,6 +4663,9 @@ xnnpack_aggregate_library(
         "//conditions:default": [],
     }) + select({
         ":arm_dotprod_enabled": [":neondot_test_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":arm_i8mm_enabled": [":neoni8mm_test_microkernels"],
         "//conditions:default": [],
     }) + select({
         ":riscv_vector_enabled": [":rvv_test_microkernels"],
@@ -11256,6 +11314,18 @@ config_setting(
     define_values = {"xnn_enable_arm_dotprod": "false"},
 )
 
+# Enables usage of ARM I8MM (8-bit integer matrix multiply accumulate) kernels.
+config_setting(
+    name = "xnn_enable_arm_i8mm_explicit_true",
+    define_values = {"xnn_enable_arm_i8mm": "true"},
+)
+
+# Disables usage of ARM I8MM (8-bit integer matrix multiply accumulate) kernels.
+config_setting(
+    name = "xnn_enable_arm_i8mm_explicit_false",
+    define_values = {"xnn_enable_arm_i8mm": "false"},
+)
+
 # Enables usage of RISC-V Vector kernels.
 config_setting(
     name = "xnn_enable_riscv_vector_explicit_true",
@@ -11771,6 +11841,22 @@ alias(
         ":xnn_enable_arm_dotprod_explicit_true": ":xnn_enable_arm_dotprod_explicit_true",
         ":xnn_enable_arm_dotprod_explicit_false": ":xnn_enable_arm_dotprod_explicit_true",
         "//conditions:default": ":arm_dotprod_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "arm_i8mm_enabled_by_default",
+    match_any = [
+        ":aarch64",
+    ],
+)
+
+alias(
+    name = "arm_i8mm_enabled",
+    actual = select({
+        ":xnn_enable_arm_i8mm_explicit_true": ":xnn_enable_arm_i8mm_explicit_true",
+        ":xnn_enable_arm_i8mm_explicit_false": ":xnn_enable_arm_i8mm_explicit_true",
+        "//conditions:default": ":arm_i8mm_enabled_by_default",
     }),
 )
 
