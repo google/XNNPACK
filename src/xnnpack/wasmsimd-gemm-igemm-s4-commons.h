@@ -31,17 +31,16 @@ class GemmIGemmS4Commons : public GemmIGemmCommons {
             w = I32Add(w, I32Const(32 * sizeof(float)));
             k = I32Sub(k, I32Const(4 * sizeof(float)));
           });
-    If([&] { I32Ne(k, I32Const(0)); },
-       [&] {
-         auto vas = MakeLocalsArray(max_mr, v128);
-         for (size_t i = 0; i < max_mr; i++) {
-           vas[i] = V128Load(as[i]);
-           as[i] = I32Add(as[i], k);
-         }
+    if (iters % 4 != 0) {
+      auto vas = MakeLocalsArray(max_mr, v128);
+      for (size_t i = 0; i < max_mr; i++) {
+        vas[i] = V128Load(as[i]);
+        as[i] = I32Add(as[i], k);
+      }
 
-         LoopComputation(vas, vacc0123, vacc4567, w, max_mr, /*is_remainder=*/true);
-         w = I32Add(w, I32Const(32 * sizeof(float)));
-       });
+      LoopComputation(vas, vacc0123, vacc4567, w, max_mr, /*is_remainder=*/true);
+      w = I32Add(w, I32Const(32 * sizeof(float)));
+    }
   }
 
  private:
