@@ -44,7 +44,6 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx(
 
   const __mmask16 vbias_mask = _cvtu32_mask16(0x1111);
   const __m512i vinput_zero_point0 = _mm512_set1_epi32((int) quantization_params[0].zero_point);
-  const __m512 vinput_scale0 = _mm512_set1_ps(quantization_params[0].inv_scale);
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
   do {
@@ -91,12 +90,12 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx(
 
     __m512 vout0x0123456789ABCDEF = _mm512_permutexvar_ps(_mm512_set_epi32(15, 11, 7, 3, 13, 9, 5, 1, 14, 10, 6, 2, 12, 8, 4, 0), vscaled0x084C195D2A6E3B7F);
 
-    const __m512 vbscale0123456789ABCDEF = _mm512_load_ps((const float*) w);
-    const __m512 vscale0x0123456789ABCDEF = _mm512_mul_ps(vbscale0123456789ABCDEF, vinput_scale0);
-    w = (const float*) w + 16;
-    const __m512 vbias0123456789ABCDEF = _mm512_load_ps((const float*) w);
-    w = (const float*) w + 16;
-    vout0x0123456789ABCDEF = _mm512_fmadd_ps(vout0x0123456789ABCDEF, vscale0x0123456789ABCDEF, vbias0123456789ABCDEF);
+    vout0x0123456789ABCDEF = _mm512_mul_ps(vout0x0123456789ABCDEF, _mm512_set1_ps(quantization_params[0].inv_scale));
+
+    const __m512 vfilter_output_scale0123456789ABCDEF = _mm512_load_ps((const float*) w);
+    const __m512 vbias0123456789ABCDEF = _mm512_load_ps((const float*) w + 16);
+    w = (const float*) w + 32;
+    vout0x0123456789ABCDEF = _mm512_fmadd_ps(vout0x0123456789ABCDEF, vfilter_output_scale0123456789ABCDEF, vbias0123456789ABCDEF);
 
     vout0x0123456789ABCDEF = _mm512_max_ps(vout0x0123456789ABCDEF, voutput_min);
 

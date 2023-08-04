@@ -117,24 +117,29 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
 
     $if DATATYPE == "QD8":
       $for M in range(MR):
-        const float vascale${M} = quantization_params[${M}].inv_scale;
         $for N in range(NR):
-          float vout${M}x${N} = (float) vacc${M}x${N} * vascale${M};
+          float vout${M}x${N} = (float) vacc${M}x${N};
 
       $for M in range(MR):
+        const float vinput_scale${M} = quantization_params[${M}].inv_scale;
         $for N in range(NR):
-          $if M == 0:
-            $if NR % 4 != 0:
-              const float vbscale${N} = unaligned_indexed_load_f32(w, ${N});
-            $else:
-              const float vbscale${N} = ((const float*) w)[${N}];
-        $for N in range(NR):
-          $if M == 0:
-            $if NR % 4 != 0:
-              const float vbias${N} = unaligned_indexed_load_f32(w, ${NR + N});
-            $else:
-              const float vbias${N} = ((const float*) w)[${NR + N}];
-          vout${M}x${N} = math_muladd_f32(vout${M}x${N}, vbscale${N}, vbias${N});
+          vout${M}x${N} *= vinput_scale${M};
+
+      $for N in range(NR):
+        $if NR % 4 != 0:
+          const float vfilter_output_scale${N} = unaligned_indexed_load_f32(w, ${N});
+        $else:
+          const float vfilter_output_scale${N} = ((const float*) w)[${N}];
+        $for M in range(MR):
+          vout${M}x${N} *= vfilter_output_scale${N};
+
+      $for N in range(NR):
+        $if NR % 4 != 0:
+          const float vbias${N} = unaligned_indexed_load_f32(w, ${NR + N});
+        $else:
+          const float vbias${N} = ((const float*) w)[${NR + N}];
+        $for M in range(MR):
+          vout${M}x${N} += vbias${N};
 
       w = (const float*) w + ${NR * 2};
 

@@ -144,34 +144,25 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         $if M + 1 == MR:
           const float32x4_t vinput_scale${M} = vld1q_dup_f32(&quantization_params[${M}].inv_scale);
           $for N in range(0, NR, 4):
-            $if M == 0:
-              const float32x4_t vbscale${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
-            const float32x4_t vscale${M}x${ABC[N:N+4]} = vmulq_f32(vinput_scale${M}, vbscale${ABC[N:N+4]});
-          $for N in range(0, NR, 4):
-            $if M == 0:
-              const float32x4_t vbias${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
-            #if XNN_ARCH_ARM64
-              vout${M}x${ABC[N:N+4]} = vfmaq_f32(vbias${ABC[N:N+4]}, vout${M}x${ABC[N:N+4]}, vscale${M}x${ABC[N:N+4]});
-            #else
-              vout${M}x${ABC[N:N+4]} = vmlaq_f32(vbias${ABC[N:N+4]}, vout${M}x${ABC[N:N+4]}, vscale${M}x${ABC[N:N+4]});
-            #endif
+            vout${M}x${ABC[N:N+4]} = vmulq_f32(vout${M}x${ABC[N:N+4]}, vinput_scale${M});
         $else:
           const float32x4_t vinput_scale${ABC[M:M+2]} = vreinterpretq_f32_s32(vld1q_s32(&quantization_params[${M}].zero_point));
           $for N in range(0, NR, 4):
-            $if M == 0:
-              const float32x4_t vbscale${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
-            const float32x4_t vscale${M}x${ABC[N:N+4]} = vmulq_lane_f32(vbscale${ABC[N:N+4]}, vget_low_f32(vinput_scale${ABC[M:M+2]}), 1);
-            const float32x4_t vscale${M+1}x${ABC[N:N+4]} = vmulq_lane_f32(vbscale${ABC[N:N+4]}, vget_high_f32(vinput_scale${ABC[M:M+2]}), 1);
-          $for N in range(0, NR, 4):
-            $if M == 0:
-              const float32x4_t vbias${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
-            #if XNN_ARCH_ARM64
-              vout${M}x${ABC[N:N+4]} = vfmaq_f32(vbias${ABC[N:N+4]}, vout${M}x${ABC[N:N+4]}, vscale${M}x${ABC[N:N+4]});
-              vout${M+1}x${ABC[N:N+4]} = vfmaq_f32(vbias${ABC[N:N+4]}, vout${M+1}x${ABC[N:N+4]}, vscale${M+1}x${ABC[N:N+4]});
-            #else
-              vout${M}x${ABC[N:N+4]} = vmlaq_f32(vbias${ABC[N:N+4]}, vout${M}x${ABC[N:N+4]}, vscale${M}x${ABC[N:N+4]});
-              vout${M+1}x${ABC[N:N+4]} = vmlaq_f32(vbias${ABC[N:N+4]}, vout${M+1}x${ABC[N:N+4]}, vscale${M+1}x${ABC[N:N+4]});
-            #endif
+            vout${M}x${ABC[N:N+4]} = vmulq_lane_f32(vout${M}x${ABC[N:N+4]}, vget_low_f32(vinput_scale${ABC[M:M+2]}), 1);
+            vout${M+1}x${ABC[N:N+4]} = vmulq_lane_f32(vout${M+1}x${ABC[N:N+4]}, vget_high_f32(vinput_scale${ABC[M:M+2]}), 1);
+
+      $for N in range(0, NR, 4):
+        const float32x4_t vfilter_output_scale${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
+
+      $for N in range(0, NR, 4):
+        const float32x4_t vbias${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
+        #if XNN_ARCH_ARM64
+          $for M in range(MR):
+            vout${M}x${ABC[N:N+4]} = vfmaq_f32(vbias${ABC[N:N+4]}, vout${M}x${ABC[N:N+4]}, vfilter_output_scale${ABC[N:N+4]});
+        #else
+          $for M in range(MR):
+            vout${M}x${ABC[N:N+4]} = vmlaq_f32(vbias${ABC[N:N+4]}, vout${M}x${ABC[N:N+4]}, vfilter_output_scale${ABC[N:N+4]});
+        #endif
 
       const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
       $for M in range(0, MR):

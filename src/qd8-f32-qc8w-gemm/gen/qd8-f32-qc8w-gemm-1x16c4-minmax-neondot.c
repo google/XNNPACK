@@ -108,37 +108,39 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__neondot(
     float32x4_t vout0xCDEF = vcvtq_f32_s32(vacc0xCDEF);
 
     const float32x4_t vinput_scale0 = vld1q_dup_f32(&quantization_params[0].inv_scale);
-    const float32x4_t vbscale0123 = vld1q_f32(w); w = (const float*) w + 4;
-    const float32x4_t vscale0x0123 = vmulq_f32(vinput_scale0, vbscale0123);
-    const float32x4_t vbscale4567 = vld1q_f32(w); w = (const float*) w + 4;
-    const float32x4_t vscale0x4567 = vmulq_f32(vinput_scale0, vbscale4567);
-    const float32x4_t vbscale89AB = vld1q_f32(w); w = (const float*) w + 4;
-    const float32x4_t vscale0x89AB = vmulq_f32(vinput_scale0, vbscale89AB);
-    const float32x4_t vbscaleCDEF = vld1q_f32(w); w = (const float*) w + 4;
-    const float32x4_t vscale0xCDEF = vmulq_f32(vinput_scale0, vbscaleCDEF);
+    vout0x0123 = vmulq_f32(vout0x0123, vinput_scale0);
+    vout0x4567 = vmulq_f32(vout0x4567, vinput_scale0);
+    vout0x89AB = vmulq_f32(vout0x89AB, vinput_scale0);
+    vout0xCDEF = vmulq_f32(vout0xCDEF, vinput_scale0);
+
+    const float32x4_t vfilter_output_scale0123 = vld1q_f32(w); w = (const float*) w + 4;
+    const float32x4_t vfilter_output_scale4567 = vld1q_f32(w); w = (const float*) w + 4;
+    const float32x4_t vfilter_output_scale89AB = vld1q_f32(w); w = (const float*) w + 4;
+    const float32x4_t vfilter_output_scaleCDEF = vld1q_f32(w); w = (const float*) w + 4;
+
     const float32x4_t vbias0123 = vld1q_f32(w); w = (const float*) w + 4;
     #if XNN_ARCH_ARM64
-      vout0x0123 = vfmaq_f32(vbias0123, vout0x0123, vscale0x0123);
+      vout0x0123 = vfmaq_f32(vbias0123, vout0x0123, vfilter_output_scale0123);
     #else
-      vout0x0123 = vmlaq_f32(vbias0123, vout0x0123, vscale0x0123);
+      vout0x0123 = vmlaq_f32(vbias0123, vout0x0123, vfilter_output_scale0123);
     #endif
     const float32x4_t vbias4567 = vld1q_f32(w); w = (const float*) w + 4;
     #if XNN_ARCH_ARM64
-      vout0x4567 = vfmaq_f32(vbias4567, vout0x4567, vscale0x4567);
+      vout0x4567 = vfmaq_f32(vbias4567, vout0x4567, vfilter_output_scale4567);
     #else
-      vout0x4567 = vmlaq_f32(vbias4567, vout0x4567, vscale0x4567);
+      vout0x4567 = vmlaq_f32(vbias4567, vout0x4567, vfilter_output_scale4567);
     #endif
     const float32x4_t vbias89AB = vld1q_f32(w); w = (const float*) w + 4;
     #if XNN_ARCH_ARM64
-      vout0x89AB = vfmaq_f32(vbias89AB, vout0x89AB, vscale0x89AB);
+      vout0x89AB = vfmaq_f32(vbias89AB, vout0x89AB, vfilter_output_scale89AB);
     #else
-      vout0x89AB = vmlaq_f32(vbias89AB, vout0x89AB, vscale0x89AB);
+      vout0x89AB = vmlaq_f32(vbias89AB, vout0x89AB, vfilter_output_scale89AB);
     #endif
     const float32x4_t vbiasCDEF = vld1q_f32(w); w = (const float*) w + 4;
     #if XNN_ARCH_ARM64
-      vout0xCDEF = vfmaq_f32(vbiasCDEF, vout0xCDEF, vscale0xCDEF);
+      vout0xCDEF = vfmaq_f32(vbiasCDEF, vout0xCDEF, vfilter_output_scaleCDEF);
     #else
-      vout0xCDEF = vmlaq_f32(vbiasCDEF, vout0xCDEF, vscale0xCDEF);
+      vout0xCDEF = vmlaq_f32(vbiasCDEF, vout0xCDEF, vfilter_output_scaleCDEF);
     #endif
 
     const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
