@@ -1773,6 +1773,48 @@ static void GEMMBenchmark(benchmark::State& state,
   BENCHMARK_GEMM(f32_gemm_4x8__jit_wasmsimd32_x86_loadsplat_xinf)
   BENCHMARK_GEMM(f32_gemm_5x8__jit_wasmsimd32_x86_loadsplat_xinf)
   BENCHMARK_GEMM(f32_gemm_6x8__jit_wasmsimd32_x86_loadsplat_xinf)
+
+
+  static void f32_gemm_1x8s4__jit_wasmsimd32_x86_x1(benchmark::State& state, const char* net)
+  {
+    GEMMBenchmark(state,
+      xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x1,
+      xnn_init_f32_minmax_wasmsimd_params,
+      /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  }
+  static void f32_gemm_3x8s4__jit_wasmsimd32_x86_x1(benchmark::State& state, const char* net)
+  {
+    GEMMBenchmark(state,
+      xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x1,
+      xnn_init_f32_minmax_wasmsimd_params,
+      /*mr=*/3, /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  }
+  static void f32_gemm_4x8s4__jit_wasmsimd32_x86_x1(benchmark::State& state, const char* net)
+  {
+    GEMMBenchmark(state,
+      xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x1,
+      xnn_init_f32_minmax_wasmsimd_params,
+      /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  }
+  static void f32_gemm_5x8s4__jit_wasmsimd32_x86_x1(benchmark::State& state, const char* net)
+  {
+    GEMMBenchmark(state,
+      xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x1,
+      xnn_init_f32_minmax_wasmsimd_params,
+      /*mr=*/5, /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  }
+  static void f32_gemm_6x8s4__jit_wasmsimd32_x86_x1(benchmark::State& state, const char* net)
+  {
+    GEMMBenchmark(state,
+      xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x1,
+      xnn_init_f32_minmax_wasmsimd_params,
+      /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1);
+  }
+  BENCHMARK_GEMM(f32_gemm_1x8s4__jit_wasmsimd32_x86_x1)
+  BENCHMARK_GEMM(f32_gemm_3x8s4__jit_wasmsimd32_x86_x1)
+  BENCHMARK_GEMM(f32_gemm_4x8s4__jit_wasmsimd32_x86_x1)
+  BENCHMARK_GEMM(f32_gemm_5x8s4__jit_wasmsimd32_x86_x1)
+  BENCHMARK_GEMM(f32_gemm_6x8s4__jit_wasmsimd32_x86_x1)
 #endif // XNN_ARCH_WASMSIMD && XNN_PLATFORM_JIT
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
