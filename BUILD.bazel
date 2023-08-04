@@ -4823,6 +4823,7 @@ xnnpack_cc_library(
     ],
     deps = [
         ":allocator",
+        ":logging",
         ":microkernel_configs",
         ":microparams",
         ":params",
@@ -4846,6 +4847,7 @@ xnnpack_cc_library(
     }),
     deps = [
         ":allocator",
+        ":logging",
         ":microkernel_configs_test_mode",
         ":microparams",
         ":params",
