@@ -9,3 +9,4 @@
 - name: xnn_x8_packw_gemm_goi_ukernel_x4__scalar_int_x4
 - name: xnn_x8_packw_gemm_goi_ukernel_x8__scalar_int_x4
 - name: xnn_x8_packw_gemm_goi_ukernel_x16__scalar_int_x4
+- name: xnn_x8_packw_gemm_goi_ukernel_x32__scalar_int_x4

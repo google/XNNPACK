@@ -5780,6 +5780,7 @@ ALL_SCALAR_MICROKERNEL_SRCS = [
     "src/x8-packw/gen/x8-packw-x4-gemm-goi-scalar-int-x4.c",
     "src/x8-packw/gen/x8-packw-x8-gemm-goi-scalar-int-x4.c",
     "src/x8-packw/gen/x8-packw-x16-gemm-goi-scalar-int-x4.c",
+    "src/x8-packw/gen/x8-packw-x32-gemm-goi-scalar-int-x4.c",
     "src/x8-transposec/gen/x8-transposec-1x2-scalar-int.c",
     "src/x8-transposec/gen/x8-transposec-1x4-scalar-int.c",
     "src/x8-transposec/gen/x8-transposec-2x1-scalar-int.c",

@@ -102,11 +102,16 @@ static void x8_packw_x16__scalar_int_x4(benchmark::State& state, const char* net
     xnn_x8_packw_gemm_goi_ukernel_x16__scalar_int_x4,
     /*nr=*/16, /*kr=*/1, /*sr=*/1);
 }
-
+static void x8_packw_x32__scalar_int_x4(benchmark::State& state, const char* net) {
+  x8_packw(state,
+    xnn_x8_packw_gemm_goi_ukernel_x32__scalar_int_x4,
+    /*nr=*/32, /*kr=*/1, /*sr=*/1);
+}
 BENCHMARK_BGEMM(x8_packw_x2__scalar_int_x4)
 BENCHMARK_BGEMM(x8_packw_x4__scalar_int_x4)
 BENCHMARK_BGEMM(x8_packw_x8__scalar_int_x4)
 BENCHMARK_BGEMM(x8_packw_x16__scalar_int_x4)
+BENCHMARK_BGEMM(x8_packw_x32__scalar_int_x4)
 
 void x8_packw__reference(
   size_t batch,
@@ -148,11 +153,16 @@ static void x8_packw_x16__reference(benchmark::State& state, const char* net) {
     x8_packw__reference,
     /*nr=*/16, /*kr=*/1, /*sr=*/1);
 }
-
+static void x8_packw_x32__reference(benchmark::State& state, const char* net) {
+  x8_packw(state,
+    x8_packw__reference,
+    /*nr=*/32, /*kr=*/1, /*sr=*/1);
+}
 BENCHMARK_BGEMM(x8_packw_x2__reference)
 BENCHMARK_BGEMM(x8_packw_x4__reference)
 BENCHMARK_BGEMM(x8_packw_x8__reference)
 BENCHMARK_BGEMM(x8_packw_x16__reference)
+BENCHMARK_BGEMM(x8_packw_x32__reference)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

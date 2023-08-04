@@ -200,7 +200,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
         SCVTF       v18.4s, v18.4s
         SCVTF       v22.4s, v22.4s
         SCVTF       v26.4s, v26.4s
-        FMUL        v8.4s, v0.4s, v13.s[3]   // kernel_scale * scale
+        FMUL        v8.4s, v0.4s, v13.s[3]      // kernel_scale * scale
         FMUL        v9.4s, v1.4s, v13.s[3]
         FMUL        v10.4s, v2.4s, v13.s[3]
         FMUL        v11.4s, v3.4s, v13.s[3]
