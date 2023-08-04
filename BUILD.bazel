@@ -3263,7 +3263,7 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "neoni8mm_bench_microkernels",
     aarch64_copts = [
-        "-march=armv8.6-a+i8mm",
+        "-march=armv8.2-a+i8mm",
     ],
     aarch64_srcs = ALL_NEONI8MM_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -3281,7 +3281,7 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "neoni8mm_test_microkernels",
-    aarch64_copts = ["-march=armv8.6-a+i8mm"],
+    aarch64_copts = ["-march=armv8.2-a+i8mm"],
     aarch64_srcs = ALL_NEONI8MM_MICROKERNEL_SRCS,
     copts = [
         "-UNDEBUG",
