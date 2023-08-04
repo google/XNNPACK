@@ -40,10 +40,16 @@ parser.add_argument(
     metavar='NAME',
     required=True,
     help='Name of the enum variable')
+parser.add_argument(
+    '-d',
+    '--debug',
+    action='store_true',
+    default=False,
+    help='Define enum-to-string fuction only when debug logging is enabled')
 parser.set_defaults(defines=list())
 
 
-def generate_source(enum_name, spec_path, output_path, header_path):
+def generate_source(enum_name, spec_path, output_path, header_path, debug_only):
   with codecs.open(spec_path, 'r', encoding='utf-8') as spec_file:
     spec_yaml = yaml.safe_load(spec_file)
     if not isinstance(spec_yaml, list):
@@ -96,6 +102,8 @@ def generate_source(enum_name, spec_path, output_path, header_path):
 
       pos += len(enum_item_string) + 1
 
+    if debug_only:
+      output += '#if XNN_LOG_LEVEL > 0\n'
     output += offset_declaration
     output += '\n\n'
     output += string_declaration
@@ -107,6 +115,8 @@ const char* {enum_name}_to_string(enum {enum_name} {arg_name}) {{
   assert({arg_name} <= {spec_yaml[-1]['name']});
   return &data[offset[{arg_name}]];
 }}\n"""
+    if debug_only:
+      output += '#endif  // XNN_LOG_LEVEL > 0\n'
 
     txt_changed = True
     if os.path.exists(output_path):
@@ -117,7 +127,7 @@ const char* {enum_name}_to_string(enum {enum_name} {arg_name}) {{
       with codecs.open(output_path, 'w', encoding='utf-8') as output_file:
         output_file.write(output)
 
-def generate_header(enum_name, spec_path, output_path):
+def generate_header(enum_name, spec_path, output_path, debug_only):
   with codecs.open(spec_path, 'r', encoding='utf-8') as spec_file:
     spec_yaml = yaml.safe_load(spec_file)
     if not isinstance(spec_yaml, list):
@@ -153,15 +163,27 @@ enum {enum_name} {{\n"""
       output += '  ' + enum_item_name + ',\n'
 
     arg_name = enum_name[len("xnn_"):]
-    output += f"""}};
+    output += '};\n\n'
 
-XNN_INTERNAL const char* {enum_name}_to_string(enum {enum_name} {arg_name});
-
-#ifdef __cplusplus
-}}  // extern "C"
+    if debug_only:
+      output += f"""\
+#if XNN_LOG_LEVEL <= 0
+  XNN_INLINE static const char* {enum_name}_to_string(enum {enum_name} type) {{
+    return "<unknown>";
+  }}
+#else
+  XNN_INTERNAL const char* {enum_name}_to_string(enum {enum_name} type);
 #endif
 """
-
+    else:
+      output += f"""\
+XNN_INTERNAL const char* {enum_name}_to_string(enum {enum_name} {arg_name});
+"""
+    output += """
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+"""
 
     txt_changed = True
     if os.path.exists(output_path):
@@ -174,11 +196,12 @@ XNN_INTERNAL const char* {enum_name}_to_string(enum {enum_name} {arg_name});
 
 def main(args):
   options = parser.parse_args(args)
-  generate_header(options.enum, options.spec, options.output_hdr)
+  generate_header(options.enum, options.spec, options.output_hdr, options.debug)
 
   assert options.enum.startswith('xnn_')
   header_path = 'xnnpack/' + options.enum[len('xnn_'):].replace('_', '-') + '.h'
-  generate_source(options.enum, options.spec, options.output_src, header_path)
+  generate_source(options.enum, options.spec, options.output_src, header_path,
+                  options.debug)
 
 if __name__ == '__main__':
   main(sys.argv[1:])
