@@ -269,7 +269,6 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_8x32__avx512skx_broadcast(
       if (nc & 15) {
         // Prepare mask for valid 32-bit elements (depends on nc).
         const __mmask16 vmask = _cvtu32_mask16((uint16_t) ((uint32_t) (UINT32_C(1) << (nc & 15)) - UINT32_C(1)));
-
         _mm512_mask_storeu_ps(c7, vmask, vacc7x0123456789ABCDEF);
         _mm512_mask_storeu_ps(c6, vmask, vacc6x0123456789ABCDEF);
         _mm512_mask_storeu_ps(c5, vmask, vacc5x0123456789ABCDEF);
@@ -279,7 +278,6 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_8x32__avx512skx_broadcast(
         _mm512_mask_storeu_ps(c1, vmask, vacc1x0123456789ABCDEF);
         _mm512_mask_storeu_ps(c0, vmask, vacc0x0123456789ABCDEF);
       }
-
       nc = 0;
     }
   } while (nc != 0);
