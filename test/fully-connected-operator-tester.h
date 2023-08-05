@@ -1018,9 +1018,7 @@ class FullyConnectedOperatorTester {
       const xnn_status status = xnn_create_fully_connected_nc_f32_qc4w(
           input_channels(), output_channels(),
           input_stride(), output_stride(),
-          scale.data(),
-          kernel.data(),
-          kernel_zero_point(),
+          kernel_zero_point(), scale.data(), kernel.data(),
           has_bias() ? bias.data() : nullptr,
           output_min, output_max,
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
@@ -1081,9 +1079,7 @@ class FullyConnectedOperatorTester {
                   xnn_create_fully_connected_nc_f32_qc4w(
                       input_channels(), output_channels(),
                       input_stride(), output_stride(),
-                      scale.data(),
-                      kernel.data(),
-                      kernel_zero_point(),
+                      kernel_zero_point(), scale.data(), kernel.data(),
                       has_bias() ? bias.data() : nullptr,
                       output_min,
                       output_max,

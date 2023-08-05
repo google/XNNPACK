@@ -866,7 +866,7 @@ TEST_F(FullyConnectedTestF32QC4W, matches_operator_api)
   // Call operator API.
   const xnn_status status = xnn_create_fully_connected_nc_f32_qc4w(
     input_channels, output_channels, input_channels, output_channels,
-    requantization_scales.data(), kernel.data(), kernel_zero_point, bias.data(),
+    kernel_zero_point, requantization_scales.data(), kernel.data(), bias.data(),
     output_min, output_max,
     /*flags=*/0, nullptr, nullptr, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
@@ -952,7 +952,7 @@ TEST_F(FullyConnectedTestF32QC4W, matches_operator_api_without_bias)
   // Call operator API.
   const xnn_status status = xnn_create_fully_connected_nc_f32_qc4w(
     input_channels, output_channels, input_channels, output_channels,
-    requantization_scales.data(), kernel.data(), kernel_zero_point, nullptr,
+    kernel_zero_point, requantization_scales.data(), kernel.data(), nullptr,
     output_min, output_max,
     /*flags=*/0, nullptr, nullptr, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
