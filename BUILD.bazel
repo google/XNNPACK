@@ -1346,8 +1346,8 @@ PROD_AVX512F_MICROKERNEL_SRCS = [
 PROD_AVX512SKX_MICROKERNEL_SRCS = [
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-avx512skx-x16.c",
     "src/f32-f16-vcvt/gen/f32-f16-vcvt-avx512skx-x16.c",
-    "src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x16-minmax-avx512skx-broadcast.c",
-    "src/f32-qc8w-gemm/gen/f32-qc8w-gemm-7x16-minmax-avx512skx-broadcast.c",
+    "src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x32-minmax-avx512skx-broadcast.c",
+    "src/f32-qc8w-gemm/gen/f32-qc8w-gemm-7x32-minmax-avx512skx-broadcast.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx512skx-x128.c",
     "src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx512skx-x128.c",
     "src/f32-vtanh/gen/f32-vtanh-avx512skx-expm1minus-rr1-lut4-p4h3ts-perm-div-x64.c",
@@ -1379,6 +1379,7 @@ PROD_AVX512SKX_MICROKERNEL_SRCS = [
     "src/qu8-vadd/gen/qu8-vadd-minmax-avx512skx-mul32-ld128-x16.c",
     "src/qu8-vaddc/gen/qu8-vaddc-minmax-avx512skx-mul32-ld128-x16.c",
     "src/x8-lut/gen/x8-lut-avx512skx-vpshufb-x64.c",
+    "src/x8-packw/gen/x8-packw-x32-gemm-goi-scalar-int-x4.c",
 ]
 
 PROD_AVX512VBMI_MICROKERNEL_SRCS = [

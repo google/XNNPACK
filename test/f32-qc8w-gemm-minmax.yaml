@@ -336,25 +336,49 @@
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_1x16__avx512skx_broadcast
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_1x32__avx512skx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_2x16__avx512skx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_2x32__avx512skx_broadcast
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_3x16__avx512skx_broadcast
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_3x32__avx512skx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_4x16__avx512skx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_4x32__avx512skx_broadcast
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_5x16__avx512skx_broadcast
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_5x32__avx512skx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_6x16__avx512skx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_6x32__avx512skx_broadcast
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_7x16__avx512skx_broadcast
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_7x32__avx512skx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
 - name: xnn_f32_qc8w_gemm_minmax_ukernel_8x16__avx512skx_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  k-block: 1
+- name: xnn_f32_qc8w_gemm_minmax_ukernel_8x32__avx512skx_broadcast
   init: xnn_init_f32_minmax_scalar_params
   k-block: 1
 # WAsm SIMD

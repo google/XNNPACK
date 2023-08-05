@@ -1424,13 +1424,21 @@ SET(ALL_AVX512SKX_MICROKERNEL_SRCS
   src/f32-f16-vcvt/gen/f32-f16-vcvt-avx512skx-x16.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-avx512skx-x32.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x16-minmax-avx512skx-broadcast.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x32-minmax-avx512skx-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-2x16-minmax-avx512skx-broadcast.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-2x32-minmax-avx512skx-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x16-minmax-avx512skx-broadcast.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x32-minmax-avx512skx-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x16-minmax-avx512skx-broadcast.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x32-minmax-avx512skx-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x16-minmax-avx512skx-broadcast.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x32-minmax-avx512skx-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x16-minmax-avx512skx-broadcast.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x32-minmax-avx512skx-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-7x16-minmax-avx512skx-broadcast.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-7x32-minmax-avx512skx-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-8x16-minmax-avx512skx-broadcast.c
+  src/f32-qc8w-gemm/gen/f32-qc8w-gemm-8x32-minmax-avx512skx-broadcast.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx512skx-x32.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx512skx-x64.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx512skx-x96.c
