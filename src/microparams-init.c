@@ -1999,20 +1999,10 @@ size_t xnn_init_f32_qc4w_minmax_avx_params(
   uint8_t kernel_zero_point)
 {
   assert(kernel_zero_point <= 15);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.min[i] = output_min;
-    params->avx.max[i] = output_max;
-    params->avx.minus_kernel_zero_point[i] = -(int32_t) kernel_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx.mask[i] = (uint16_t) 0xF;
-  }
-  for (uint32_t i = 0; i < 7; i++) {
-    params->avx.mask_table[i] = -1;
-  }
-  for (uint32_t i = 7; i < 14; i++) {
-    params->avx.mask_table[i] = 0;
-  }
+  params->avx.min = output_min;
+  params->avx.max = output_max;
+  params->avx.kernel_zero_point = (int32_t) kernel_zero_point;
+  params->avx.mask = 0xF;
   return sizeof(params->avx);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

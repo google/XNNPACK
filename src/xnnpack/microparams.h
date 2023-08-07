@@ -169,11 +169,10 @@ union xnn_f32_qc4w_minmax_params {
     XNN_ALIGN(16) uint16_t mask[8];
   } sse;
   struct {
-    XNN_ALIGN(32) float min[8];
-    XNN_ALIGN(32) float max[8];
-    XNN_ALIGN(32) int32_t minus_kernel_zero_point[8];
-    XNN_ALIGN(16) uint16_t mask[16];
-    int32_t mask_table[14];
+    float min;
+    float max;
+    int32_t kernel_zero_point;
+    uint32_t mask;
   } avx;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

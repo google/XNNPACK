@@ -166,6 +166,12 @@
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_6x16__avx2_broadcast
   init: xnn_init_f32_qc4w_minmax_avx_params
   k-block: 2
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_7x16__avx2_broadcast
+  init: xnn_init_f32_qc4w_minmax_avx_params
+  k-block: 2
+- name: xnn_f32_qc4w_gemm_minmax_ukernel_8x16__avx2_broadcast
+  init: xnn_init_f32_qc4w_minmax_avx_params
+  k-block: 2
 # WAsm
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x4__wasm
   init: xnn_init_f32_qc4w_minmax_scalar_params

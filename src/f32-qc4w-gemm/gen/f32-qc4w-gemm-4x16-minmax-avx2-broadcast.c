@@ -55,8 +55,8 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x16__avx2_broadcast(
     a3 = a2;
     c3 = c2;
   }
-  const __m256i vminus_kernel_zero_point = _mm256_load_si256((const __m256i *) params->avx.minus_kernel_zero_point);
-  const __m256i vmask = _mm256_load_si256((const __m256i *) params->avx.mask);
+  const __m256i vkernel_zero_point = _mm256_set1_epi32(params->avx.kernel_zero_point);
+  const __m256i vmask = _mm256_set1_epi16((int16_t) params->avx.mask);
 
   do {
     __m256 vacc0x01234567 = _mm256_loadu_ps((const float*) w + 0);
@@ -86,8 +86,8 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x16__avx2_broadcast(
       const __m128i vbw89ABCDEFc0 = _mm256_extracti128_si256(vbw0123456789ABCDEFc0, 1);
       __m256i vbi01234567c0 = _mm256_cvtepu16_epi32(_mm256_castsi256_si128(vbw0123456789ABCDEFc0));
       __m256i vbi89ABCDEFc0 = _mm256_cvtepu16_epi32(vbw89ABCDEFc0);
-      vbi01234567c0 = _mm256_add_epi32(vbi01234567c0, vminus_kernel_zero_point);
-      vbi89ABCDEFc0 = _mm256_add_epi32(vbi89ABCDEFc0, vminus_kernel_zero_point);
+      vbi01234567c0 = _mm256_sub_epi32(vbi01234567c0, vkernel_zero_point);
+      vbi89ABCDEFc0 = _mm256_sub_epi32(vbi89ABCDEFc0, vkernel_zero_point);
       const __m256 vb01234567c0 = _mm256_cvtepi32_ps(vbi01234567c0);
       const __m256 vb89ABCDEFc0 = _mm256_cvtepi32_ps(vbi89ABCDEFc0);
 
@@ -112,8 +112,8 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x16__avx2_broadcast(
       const __m128i vbw89ABCDEFc1 = _mm256_extracti128_si256(vbw0123456789ABCDEFc1, 1);
       __m256i vbi01234567c1 = _mm256_cvtepu16_epi32(_mm256_castsi256_si128(vbw0123456789ABCDEFc1));
       __m256i vbi89ABCDEFc1 = _mm256_cvtepu16_epi32(vbw89ABCDEFc1);
-      vbi01234567c1 = _mm256_add_epi32(vbi01234567c1, vminus_kernel_zero_point);
-      vbi89ABCDEFc1 = _mm256_add_epi32(vbi89ABCDEFc1, vminus_kernel_zero_point);
+      vbi01234567c1 = _mm256_sub_epi32(vbi01234567c1, vkernel_zero_point);
+      vbi89ABCDEFc1 = _mm256_sub_epi32(vbi89ABCDEFc1, vkernel_zero_point);
       const __m256 vb01234567c1 = _mm256_cvtepi32_ps(vbi01234567c1);
       const __m256 vb89ABCDEFc1 = _mm256_cvtepi32_ps(vbi89ABCDEFc1);
 
@@ -137,14 +137,13 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x16__avx2_broadcast(
       const __m256 va3 = _mm256_broadcast_ss(a3);
       a3 += 1;
 
-      const __m256i vbwi0123456789ABCDEFc01 = _mm256_cvtepu8_epi16(_mm_load_si128((const __m128i *) ((const int8_t*) w + 0)));
+      const __m256i vbw0123456789ABCDEF = _mm256_cvtepu8_epi16(_mm_load_si128((const __m128i *) ((const int8_t*) w + 0)));
       w = (const int8_t*) w + 16;
-      const __m256i vbw0123456789ABCDEF = _mm256_and_si256(vbwi0123456789ABCDEFc01, vmask);
       const __m128i vbw$89ABCDEF = _mm256_extracti128_si256(vbw0123456789ABCDEF, 1);
       __m256i vbi01234567 = _mm256_cvtepu16_epi32(_mm256_castsi256_si128(vbw0123456789ABCDEF));
       __m256i vbi89ABCDEF = _mm256_cvtepu16_epi32(vbw$89ABCDEF);
-      vbi01234567 = _mm256_add_epi32(vbi01234567, vminus_kernel_zero_point);
-      vbi89ABCDEF = _mm256_add_epi32(vbi89ABCDEF, vminus_kernel_zero_point);
+      vbi01234567 = _mm256_sub_epi32(vbi01234567, vkernel_zero_point);
+      vbi89ABCDEF = _mm256_sub_epi32(vbi89ABCDEF, vkernel_zero_point);
       const __m256 vb01234567 = _mm256_cvtepi32_ps(vbi01234567);
       const __m256 vb89ABCDEF = _mm256_cvtepi32_ps(vbi89ABCDEF);
 
@@ -169,7 +168,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x16__avx2_broadcast(
     vacc2x89ABCDEF = _mm256_mul_ps(vacc2x89ABCDEF, vscale89ABCDEF);
     vacc3x89ABCDEF = _mm256_mul_ps(vacc3x89ABCDEF, vscale89ABCDEF);
     w = (const float*) w + 16;
-    const __m256 vmin = _mm256_load_ps(params->avx.min);
+    const __m256 vmin = _mm256_set1_ps(params->avx.min);
     vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
     vacc1x01234567 = _mm256_max_ps(vmin, vacc1x01234567);
     vacc2x01234567 = _mm256_max_ps(vmin, vacc2x01234567);
@@ -179,7 +178,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x16__avx2_broadcast(
     vacc2x89ABCDEF = _mm256_max_ps(vmin, vacc2x89ABCDEF);
     vacc3x89ABCDEF = _mm256_max_ps(vmin, vacc3x89ABCDEF);
 
-    const __m256 vmax = _mm256_load_ps(params->avx.max);
+    const __m256 vmax = _mm256_set1_ps(params->avx.max);
     vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
     vacc1x01234567 = _mm256_min_ps(vmax, vacc1x01234567);
     vacc2x01234567 = _mm256_min_ps(vmax, vacc2x01234567);

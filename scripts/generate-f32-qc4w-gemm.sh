@@ -118,6 +118,8 @@ tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D FMA=3 -D I
 tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-avx2-broadcast.c &
 tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-avx2-broadcast.c &
 tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=6 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x16-minmax-avx2-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=7 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-7x16-minmax-avx2-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=8 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-8x16-minmax-avx2-broadcast.c &
 
 ################################## Unit tests #################################
 tools/generate-gemm-test.py --spec test/f32-qc4w-gemm-minmax.yaml --output test/f32-qc4w-gemm-minmax.cc &

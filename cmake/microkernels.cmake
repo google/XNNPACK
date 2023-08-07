@@ -682,6 +682,8 @@ SET(ALL_AVX2_MICROKERNEL_SRCS
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-avx2-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-avx2-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x16-minmax-avx2-broadcast.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-7x16-minmax-avx2-broadcast.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-8x16-minmax-avx2-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-avx2-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x16-minmax-avx2-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x16s4-minmax-avx2-broadcast.c
