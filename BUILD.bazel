@@ -4883,45 +4883,6 @@ xnnpack_cc_library(
     ],
 )
 
-xnnpack_cc_library(
-    name = "post_operation",
-    srcs = [
-        "src/operators/post-operation.c",
-    ],
-    hdrs = [
-        "src/xnnpack/post-operation.h",
-    ],
-    deps = [
-        ":allocator",
-        ":microkernel_configs",
-        ":microparams",
-        ":params",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "post_operation_test_mode",
-    srcs = [
-        "src/operators/post-operation.c",
-    ],
-    hdrs = [
-        "src/xnnpack/post-operation.h",
-    ],
-    copts = [
-        "-UNDEBUG",
-        "-DXNN_TEST_MODE=1",
-    ] + select({
-        ":debug_build": [],
-        "//conditions:default": xnnpack_min_size_copts(),
-    }),
-    deps = [
-        ":allocator",
-        ":microkernel_configs_test_mode",
-        ":microparams",
-        ":params",
-    ],
-)
-
 # Define a library with just the header to remove circular dependencies:
 # indirection <-> operators.
 xnnpack_cc_library(
@@ -4992,7 +4953,6 @@ xnnpack_cc_library(
         ":operator_utils",
         ":packing",
         ":params",
-        ":post_operation",
         ":xnnpack_h",
         "@FP16",
         "@pthreadpool",
@@ -5036,7 +4996,6 @@ xnnpack_cc_library(
         ":operator_utils",
         ":packing_test_mode",
         ":params",
-        ":post_operation_test_mode",
         ":xnnpack_h",
         "@FP16",
         "@pthreadpool",
@@ -5049,6 +5008,7 @@ xnnpack_cc_library(
         "src/jit/aarch32-assembler.cc",
         "src/jit/aarch64-assembler.cc",
         "src/jit/assembler.cc",
+        "src/jit/post-operation.c",
         "src/jit/wasm-assembler.cc",
     ],
     hdrs = [
@@ -5057,6 +5017,7 @@ xnnpack_cc_library(
         "src/xnnpack/array-helpers.h",
         "src/xnnpack/assembler.h",
         "src/xnnpack/leb128.h",
+        "src/xnnpack/post-operation.h",
         "src/xnnpack/wasm-assembler.h",
     ],
     aarch32_srcs = AARCH32_JIT_MICROKERNEL_SRCS,
@@ -5070,13 +5031,14 @@ xnnpack_cc_library(
     wasmrelaxedsimd_srcs = JIT_WASMRELAXEDSIMD32_SRCS,
     wasmsimd_srcs = JIT_WASMSIMD32_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":logging",
         ":math",
         ":memory",
+        ":microkernel_configs",
         ":microkernels_h",
         ":microparams",
-        ":post_operation",
         ":xnnpack_h",
     ],
 )
@@ -5087,6 +5049,7 @@ xnnpack_cc_library(
         "src/jit/aarch32-assembler.cc",
         "src/jit/aarch64-assembler.cc",
         "src/jit/assembler.cc",
+        "src/jit/post-operation.c",
         "src/jit/wasm-assembler.cc",
     ],
     hdrs = [
@@ -5095,6 +5058,7 @@ xnnpack_cc_library(
         "src/xnnpack/array-helpers.h",
         "src/xnnpack/assembler.h",
         "src/xnnpack/leb128.h",
+        "src/xnnpack/post-operation.h",
         "src/xnnpack/wasm-assembler.h",
     ],
     aarch32_srcs = AARCH32_JIT_MICROKERNEL_SRCS,
@@ -5112,13 +5076,14 @@ xnnpack_cc_library(
     wasmrelaxedsimd_srcs = JIT_WASMRELAXEDSIMD32_SRCS,
     wasmsimd_srcs = JIT_WASMSIMD32_SRCS,
     deps = [
+        ":allocator",
         ":common",
         ":logging",
         ":math",
         ":memory",
+        ":microkernel_configs_test_mode",
         ":microkernels_h",
         ":microparams",
-        ":post_operation_test_mode",
         ":xnnpack_h",
     ],
 )
@@ -6714,7 +6679,7 @@ xnnpack_cc_library(
     deps = [
         ":XNNPACK",
         ":cache",
-        ":post_operation",
+        ":jit",
         "@pthreadpool",
     ],
 )
@@ -7187,6 +7152,7 @@ xnnpack_cc_library(
     hdrs = ["test/gemm-microkernel-tester.h"],
     deps = MICROKERNEL_TEST_DEPS + [
         ":XNNPACK_test_mode",
+        ":jit_test_mode",
         ":packing",
         "@com_google_googletest//:gtest_main",
     ],
