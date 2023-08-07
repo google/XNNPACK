@@ -2001,8 +2001,12 @@ size_t xnn_init_f32_qc4w_minmax_avx_params(
   assert(kernel_zero_point <= 15);
   params->avx.min = output_min;
   params->avx.max = output_max;
-  params->avx.kernel_zero_point = kernel_zero_point;
-  params->avx.mask = 0xF;
+  params->avx.magic_bias_c0 = 0x4B0000F0;
+  params->avx.magic_bias_c1 = 0x4900000F;
+  params->avx.magic_bias_plus_kernel_zero_point_c0 = 0x1.0001E0p+23f + (float) kernel_zero_point;
+  params->avx.magic_bias_plus_kernel_zero_point_c1 = 0x1.00001Ep+19f + (float) kernel_zero_point;
+  assert((double)params->avx.magic_bias_plus_kernel_zero_point_c0 == (0x1.0001E0p+23 + (double) kernel_zero_point));
+  assert((double)params->avx.magic_bias_plus_kernel_zero_point_c1 == (0x1.00001Ep+19 + (double) kernel_zero_point));
   return sizeof(params->avx);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

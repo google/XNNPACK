@@ -171,8 +171,10 @@ union xnn_f32_qc4w_minmax_params {
   struct {
     float min;
     float max;
-    int32_t kernel_zero_point;
-    uint32_t mask;
+    uint32_t magic_bias_c0;
+    uint32_t magic_bias_c1;
+    float magic_bias_plus_kernel_zero_point_c0;
+    float magic_bias_plus_kernel_zero_point_c1;
   } avx;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

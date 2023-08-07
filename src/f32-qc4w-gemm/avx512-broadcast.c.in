@@ -67,8 +67,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         a${M} = a${M-1};
         c${M} = c${M-1};
       }
-  const __m512i vkernel_zero_point = _mm512_set1_epi32(params->avx.kernel_zero_point);
-  const __m512i vmask = _mm512_set1_epi32(params->avx.mask);
+  const __m512i vmagic_bias_c0 = _mm512_set1_epi32(params->avx.magic_bias_c0);
+  const __m512i vmagic_bias_c1 = _mm512_set1_epi32(params->avx.magic_bias_c1);
+  const __m512 vmagic_bias_plus_kernel_zero_point_c0 = _mm512_set1_ps(params->avx.magic_bias_plus_kernel_zero_point_c0);
+  const __m512 vmagic_bias_plus_kernel_zero_point_c1 = _mm512_set1_ps(params->avx.magic_bias_plus_kernel_zero_point_c1);
 
   do {
     $for N in range(0, NR, 16):
@@ -85,20 +87,18 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           const __m512 va${M}c${L} = _mm512_set1_ps(*a${M});
           a${M} += 1;
 
-      $for N in range(0, NR, 16):
-        const __m512i vbi${ABC[N:N+16]}c01 = _mm512_cvtepu8_epi32(_mm_lddqu_si128((const void *) ((const int8_t*) w + ${N})));
+      const __m512i vbi${ABC[0:16]}c01 = _mm512_cvtepu8_epi32(_mm_loadu_epi32((const void*) w));
+      $for N in range(16, NR, 16):
+        const __m512i vbi${ABC[N:N+16]}c01 = _mm512_cvtepu8_epi32(_mm_loadu_epi32((const void*) ((const int8_t*) w + ${N})));
       w = (const int8_t*) w + ${NR};
 
-      $for N in range(0, NR, 16):
-        const __m512i vbm${ABC[N:N+16]}c0 =  _mm512_and_si512(vbi${ABC[N:N+16]}c01, vmask);
-      $for N in range(0, NR, 16):
-        const __m512i vbm${ABC[N:N+16]}c1 =  _mm512_srli_epi32(vbi${ABC[N:N+16]}c01, 4);
       $for L in range(2):
         $for N in range(0, NR, 16):
-          const __m512i vbi${ABC[N:N+16]}c${L} = _mm512_sub_epi32(vbm${ABC[N:N+16]}c${L}, vkernel_zero_point);
+          const __m512 vbm${ABC[N:N+16]}c${L} =  _mm512_castsi512_ps(_mm512_or_si512(vbi${ABC[N:N+16]}c01, vmagic_bias_c${L}));
+
       $for L in range(2):
         $for N in range(0, NR, 16):
-          const __m512 vb${ABC[N:N+16]}c${L} = _mm512_cvtepi32_ps(vbi${ABC[N:N+16]}c${L});
+          const __m512 vb${ABC[N:N+16]}c${L} = _mm512_sub_ps(vbm${ABC[N:N+16]}c${L}, vmagic_bias_plus_kernel_zero_point_c${L});
 
       $for L in range(2):
         $for N in range(0, NR, 16):
@@ -111,25 +111,28 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         const __m512 va${M} = _mm512_set1_ps(*a${M});
         a${M} += 1;
 
-      $for N in range(0, NR, 16):
-        const __m512i vbi${ABC[N:N+16]}c01 = _mm512_cvtepu8_epi32(_mm_lddqu_si128((const void *) ((const int8_t*) w + ${N})));
+      const __m512i vbi${ABC[0:16]} = _mm512_cvtepu8_epi32(_mm_loadu_epi32((const void*) w));
+      $for N in range(16, NR, 16):
+        const __m512i vbi${ABC[N:N+16]} = _mm512_cvtepu8_epi32(_mm_loadu_epi32((const void*) ((const int8_t*) w + ${N})));
       w = (const int8_t*) w + ${NR};
 
       $for N in range(0, NR, 16):
-        const __m512i vbi${ABC[N:N+16]} = _mm512_sub_epi32(vbi${ABC[N:N+16]}c01, vkernel_zero_point);
+        const __m512 vbm${ABC[N:N+16]} =  _mm512_castsi512_ps(_mm512_or_si512(vbi${ABC[N:N+16]}, vmagic_bias_c0));
+
       $for N in range(0, NR, 16):
-        const __m512 vb${ABC[N:N+16]} = _mm512_cvtepi32_ps(vbi${ABC[N:N+16]});
+        const __m512 vb${ABC[N:N+16]} = _mm512_sub_ps(vbm${ABC[N:N+16]}, vmagic_bias_plus_kernel_zero_point_c0);
 
       $for N in range(0, NR, 16):
         $for M in range(MR):
           vacc${M}x${ABC[N:N+16]} = _mm512_fmadd_ps(va${M}, vb${ABC[N:N+16]}, vacc${M}x${ABC[N:N+16]});
     }
 
-    $for N in range(0, NR, 16):
-      const __m512 vscale${ABC[N:N+16]} = _mm512_loadu_ps((const float*) w + ${N});
-      $for M in range(MR):
-        vacc${M}x${ABC[N:N+16]} = _mm512_mul_ps(vacc${M}x${ABC[N:N+16]}, vscale${ABC[N:N+16]});
-    w = (const float*) w + ${NR};
+    $if DATATYPE in ["QC8", "QC4"]:
+      $for N in range(0, NR, 16):
+        const __m512 vscale${ABC[N:N+16]} = _mm512_loadu_ps((const float*) w + ${N});
+        $for M in range(MR):
+          vacc${M}x${ABC[N:N+16]} = _mm512_mul_ps(vacc${M}x${ABC[N:N+16]}, vscale${ABC[N:N+16]});
+      w = (const float*) w + ${NR};
     const __m512 vmin = _mm512_set1_ps(params->scalar.min);
     $for N in range(0, NR, 16):
       $for M in range(MR):
