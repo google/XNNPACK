@@ -170,6 +170,13 @@ class GemmIGemmCommons : public PostOps {
       i_local = I32Add(i_local, I32Const(1));
     }
   }
+
+  void ClampCs(LocalsArray& cs, const Local& mr, const Local& c, const Local& cm_stride) {
+    cs[0] = c;
+    for (size_t i = 1; i < cs.size(); i++) {
+      cs[i] = Select(cs[i - 1], I32Add(cs[i - 1], cm_stride), I32GeU(I32Const(i), mr));
+    }
+  }
 };
 
 }

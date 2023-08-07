@@ -9750,4 +9750,5 @@ WASMSIMD32_JIT_MICROKERNEL_SRCS = [
     "src/f32-gemm/MRx8-wasmsimd32-x86-loadsplat.cc",
     "src/f32-gemm/MRx8s4-wasmsimd32-x86.cc",
     "src/f32-igemm/MRx8-wasmsimd32-x86-loadsplat.cc",
+    "src/f32-igemm/MRx8s4-wasmsimd32-x86.cc",
 ]

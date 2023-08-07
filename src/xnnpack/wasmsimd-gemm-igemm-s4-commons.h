@@ -20,11 +20,7 @@ class GemmIGemmS4Commons : public GemmIGemmCommons {
     Local k = MakeLocal(kc);
     While([&] { I32GeU(k, I32Const(4 * sizeof(float))); },
           [&] {
-            auto vas = MakeLocalsArray(max_mr, v128);
-            for (size_t i = 0; i < max_mr; i++) {
-              vas[i] = V128Load(as[i]);
-              as[i] = I32Add(as[i], I32Const(4 * sizeof(float)));
-            }
+            auto vas = MakeVas(as, max_mr, /*k=*/nullptr);
 
             LoopComputation(vas, vacc0123, vacc4567, w, max_mr, /*is_remainder=*/false);
 
@@ -32,18 +28,24 @@ class GemmIGemmS4Commons : public GemmIGemmCommons {
             k = I32Sub(k, I32Const(4 * sizeof(float)));
           });
     if (iters % 4 != 0) {
-      auto vas = MakeLocalsArray(max_mr, v128);
-      for (size_t i = 0; i < max_mr; i++) {
-        vas[i] = V128Load(as[i]);
-        as[i] = I32Add(as[i], k);
-      }
+      auto vas = MakeVas(as, max_mr, &k);
 
       LoopComputation(vas, vacc0123, vacc4567, w, max_mr, /*is_remainder=*/true);
+
       w = I32Add(w, I32Const(32 * sizeof(float)));
     }
   }
 
  private:
+  LocalsArray MakeVas(LocalsArray& as, size_t max_mr, const Local* k) {
+    auto vas = MakeLocalsArray(max_mr, v128);
+    for (size_t i = 0; i < max_mr; i++) {
+      vas[i] = V128Load(as[i]);
+      as[i] = I32Add(as[i], (k == nullptr) ? I32Const(4 * sizeof(float)) : *k);
+    }
+    return vas;
+  }
+
   void LoadVbs(Local& vb0123, Local& vb4567, const Local& w, size_t c) {
     vb0123 = V128Load(w, /*offset=*/(c * 8) * sizeof(float));
     vb4567 = V128Load(w, /*offset=*/(c * 8 + 4) * sizeof(float));
