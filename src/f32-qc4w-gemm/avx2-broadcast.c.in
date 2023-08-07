@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert DATATYPE == "QC4"
-$assert NR % 16 == 0
+$assert NR % 8 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 

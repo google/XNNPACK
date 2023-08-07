@@ -2001,7 +2001,7 @@ size_t xnn_init_f32_qc4w_minmax_avx_params(
   assert(kernel_zero_point <= 15);
   params->avx.min = output_min;
   params->avx.max = output_max;
-  params->avx.kernel_zero_point = (int32_t) kernel_zero_point;
+  params->avx.kernel_zero_point = kernel_zero_point;
   params->avx.mask = 0xF;
   return sizeof(params->avx);
 }
