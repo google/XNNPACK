@@ -4,6 +4,7 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
+#include <utility>
 
 namespace xnnpack {
 namespace internal {
@@ -43,7 +44,7 @@ class ArrayPrefix {
   }
 
   template <typename Array,
-            typename = std::enable_if_t<!std::is_integral_v<Array>>>
+            typename = decltype(std::declval<Array>().begin())>
   explicit constexpr ArrayPrefix(Array&& array, T placeholder)
       : ArrayPrefix(0, placeholder) {
     for (const auto& v : array) {
