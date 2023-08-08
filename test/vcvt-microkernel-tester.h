@@ -13,6 +13,8 @@
 #include <cstddef>
 #include <cstdlib>
 #include <functional>
+#include <iomanip>
+#include <ios>
 #include <limits>
 #include <random>
 #include <vector>

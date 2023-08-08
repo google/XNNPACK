@@ -6,6 +6,8 @@
 #pragma once
 
 #include <algorithm>
+#include <iomanip>
+#include <ios>
 
 // clang-format off
 #define EXPECT_INSTR(expected, actual)                                                                        \
