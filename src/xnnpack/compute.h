@@ -12,7 +12,10 @@
 #include <xnnpack.h>
 #include <xnnpack/common.h>
 #include <xnnpack/math.h>
-#include <xnnpack/params.h>
+#include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams.h>
+
+#include <pthreadpool.h>
 
 
 enum xnn_parallelization_type {
