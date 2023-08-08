@@ -174,28 +174,28 @@
   k-block: 2
 # x86 AVX512
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx_params
+  init: xnn_init_f32_qc4w_minmax_avx512_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_2x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx_params
+  init: xnn_init_f32_qc4w_minmax_avx512_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_3x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx_params
+  init: xnn_init_f32_qc4w_minmax_avx512_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_4x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx_params
+  init: xnn_init_f32_qc4w_minmax_avx512_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_5x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx_params
+  init: xnn_init_f32_qc4w_minmax_avx512_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_6x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx_params
+  init: xnn_init_f32_qc4w_minmax_avx512_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_7x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx_params
+  init: xnn_init_f32_qc4w_minmax_avx512_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_8x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx_params
+  init: xnn_init_f32_qc4w_minmax_avx512_params
   k-block: 2
 # WAsm
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x4__wasm

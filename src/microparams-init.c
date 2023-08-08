@@ -1999,15 +1999,31 @@ size_t xnn_init_f32_qc4w_minmax_avx_params(
   uint8_t kernel_zero_point)
 {
   assert(kernel_zero_point <= 15);
-  params->avx.min = output_min;
-  params->avx.max = output_max;
-  params->avx.magic_bias_c0 = 0x4B0000F0;
-  params->avx.magic_bias_c1 = 0x4900000F;
-  params->avx.magic_bias_plus_kernel_zero_point_c0 = 0x1.0001E0p+23f + (float) kernel_zero_point;
-  params->avx.magic_bias_plus_kernel_zero_point_c1 = 0x1.00001Ep+19f + (float) kernel_zero_point;
-  assert((double)params->avx.magic_bias_plus_kernel_zero_point_c0 == (0x1.0001E0p+23 + (double) kernel_zero_point));
-  assert((double)params->avx.magic_bias_plus_kernel_zero_point_c1 == (0x1.00001Ep+19 + (double) kernel_zero_point));
+  for (uint32_t i = 0; i < 8; i++) {
+    params->avx.min[i] = output_min;
+    params->avx.max[i] = output_max;
+    params->avx.magic_bias_c0[i] = 0x4B0000F0;
+    params->avx.magic_bias_c1[i] = 0x4900000F;
+    params->avx.magic_bias_plus_kernel_zero_point_c0[i] = 0x1.0001E0p+23f + (float) kernel_zero_point;
+    params->avx.magic_bias_plus_kernel_zero_point_c1[i] = 0x1.00001Ep+19f + (float) kernel_zero_point;
+  }
   return sizeof(params->avx);
+}
+
+size_t xnn_init_f32_qc4w_minmax_avx512_params(
+  union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float output_min,
+  float output_max,
+  uint8_t kernel_zero_point)
+{
+  assert(kernel_zero_point <= 15);
+  params->avx512.min = output_min;
+  params->avx512.max = output_max;
+  params->avx512.magic_bias_c0 = 0x4B0000F0;
+  params->avx512.magic_bias_c1 = 0x4900000F;
+  params->avx512.magic_bias_plus_kernel_zero_point_c0 = 0x1.0001E0p+23f + (float) kernel_zero_point;
+  params->avx512.magic_bias_plus_kernel_zero_point_c1 = 0x1.00001Ep+19f + (float) kernel_zero_point;
+  return sizeof(params->avx512);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 

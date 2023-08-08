@@ -55,10 +55,10 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x16__avx2_broadcast(
     a3 = a2;
     c3 = c2;
   }
-  const __m256i vmagic_bias_c0 = _mm256_set1_epi32(params->avx.magic_bias_c0);
-  const __m256i vmagic_bias_c1 = _mm256_set1_epi32(params->avx.magic_bias_c1);
-  const __m256 vmagic_bias_plus_kernel_zero_point_c0 = _mm256_set1_ps(params->avx.magic_bias_plus_kernel_zero_point_c0);
-  const __m256 vmagic_bias_plus_kernel_zero_point_c1 = _mm256_set1_ps(params->avx.magic_bias_plus_kernel_zero_point_c1);
+  const __m256i vmagic_bias_c0 = _mm256_load_si256((const __m256i*) params->avx.magic_bias_c0);
+  const __m256i vmagic_bias_c1 = _mm256_load_si256((const __m256i*) params->avx.magic_bias_c1);
+  const __m256 vmagic_bias_plus_kernel_zero_point_c0 = _mm256_load_ps(params->avx.magic_bias_plus_kernel_zero_point_c0);
+  const __m256 vmagic_bias_plus_kernel_zero_point_c1 = _mm256_load_ps(params->avx.magic_bias_plus_kernel_zero_point_c1);
 
   do {
     __m256 vacc0x01234567 = _mm256_loadu_ps((const float*) w + 0);
@@ -163,7 +163,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x16__avx2_broadcast(
     vacc2x89ABCDEF = _mm256_mul_ps(vacc2x89ABCDEF, vscale89ABCDEF);
     vacc3x89ABCDEF = _mm256_mul_ps(vacc3x89ABCDEF, vscale89ABCDEF);
     w = (const float*) w + 16;
-    const __m256 vmin = _mm256_set1_ps(params->avx.min);
+    const __m256 vmin = _mm256_load_ps(params->avx.min);
     vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
     vacc1x01234567 = _mm256_max_ps(vmin, vacc1x01234567);
     vacc2x01234567 = _mm256_max_ps(vmin, vacc2x01234567);
@@ -173,7 +173,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x16__avx2_broadcast(
     vacc2x89ABCDEF = _mm256_max_ps(vmin, vacc2x89ABCDEF);
     vacc3x89ABCDEF = _mm256_max_ps(vmin, vacc3x89ABCDEF);
 
-    const __m256 vmax = _mm256_set1_ps(params->avx.max);
+    const __m256 vmax = _mm256_load_ps(params->avx.max);
     vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
     vacc1x01234567 = _mm256_min_ps(vmax, vacc1x01234567);
     vacc2x01234567 = _mm256_min_ps(vmax, vacc2x01234567);
