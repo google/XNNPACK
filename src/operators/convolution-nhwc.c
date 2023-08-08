@@ -590,8 +590,7 @@ static enum xnn_status create_convolution2d_nhwc(
   const bool unit_subsampling = (subsampling_width | subsampling_height) == 1;
   if (group_input_channels == 1 && group_output_channels == 1 && kernel_size == 1 && unit_subsampling && !any_padding && vmulcaddc_config != NULL) {
     ukernel_type = xnn_microkernel_type_vmulcaddc;
-  } else if (group_input_channels == 1 && group_output_channels == 1 && dwconv_ukernel != NULL)
-  {
+  } else if (group_input_channels == 1 && group_output_channels == 1 && dwconv_ukernel != NULL) {
     ukernel_type = xnn_microkernel_type_dwconv;
   } else if (kernel_size == 1 && unit_subsampling && !any_padding) {
     ukernel_type = xnn_microkernel_type_gemm;
