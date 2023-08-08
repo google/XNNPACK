@@ -76,9 +76,9 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           const __m256 va${M}c${L} = _mm256_broadcast_ss(a${M});
           a${M} += 1;
 
-      const __m256i vbi${ABC[0:8]}c01 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const void*) w));
+      const __m256i vbi${ABC[0:8]}c01 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) w));
       $for N in range(8, NR, 8):
-        const __m256i vbi${ABC[N:N+8]}c01 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + ${N})));
+        const __m256i vbi${ABC[N:N+8]}c01 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) ((const int8_t*) w + ${N})));
       w = (const int8_t*) w + ${NR};
 
       $for L in range(2):
@@ -100,9 +100,9 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         const __m256 va${M} = _mm256_broadcast_ss(a${M});
         a${M} += 1;
 
-      const __m256i vbi${ABC[0:8]} = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const void*) w));
+      const __m256i vbi${ABC[0:8]} = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) w));
       $for N in range(8, NR, 8):
-        const __m256i vbi${ABC[N:N+8]} = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + ${N})));
+        const __m256i vbi${ABC[N:N+8]} = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) ((const int8_t*) w + ${N})));
       w = (const int8_t*) w + ${NR};
 
       $for N in range(0, NR, 8):

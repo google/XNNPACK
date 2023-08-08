@@ -1644,8 +1644,8 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_1x16__avx2_broadcast(
       const __m256 va0c1 = _mm256_broadcast_ss(a0);
       a0 += 1;
 
-      const __m256i vbi01234567c01 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const void*) w));
-      const __m256i vbi89ABCDEFc01 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 8)));
+      const __m256i vbi01234567c01 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) w));
+      const __m256i vbi89ABCDEFc01 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 8)));
       w = (const int8_t*) w + 16;
 
       const __m256 vbm01234567c0 =  _mm256_castsi256_ps(_mm256_or_si256(vbi01234567c01, vmagic_bias_c0));
@@ -1668,8 +1668,8 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_1x16__avx2_broadcast(
       const __m256 va0 = _mm256_broadcast_ss(a0);
       a0 += 1;
 
-      const __m256i vbi01234567 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const void*) w));
-      const __m256i vbi89ABCDEF = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 8)));
+      const __m256i vbi01234567 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) w));
+      const __m256i vbi89ABCDEF = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 8)));
       w = (const int8_t*) w + 16;
 
       const __m256 vbm01234567 =  _mm256_castsi256_ps(_mm256_or_si256(vbi01234567, vmagic_bias_c0));
@@ -1799,8 +1799,8 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_3x16__avx2_broadcast(
       const __m256 va2c1 = _mm256_broadcast_ss(a2);
       a2 += 1;
 
-      const __m256i vbi01234567c01 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const void*) w));
-      const __m256i vbi89ABCDEFc01 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 8)));
+      const __m256i vbi01234567c01 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) w));
+      const __m256i vbi89ABCDEFc01 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 8)));
       w = (const int8_t*) w + 16;
 
       const __m256 vbm01234567c0 =  _mm256_castsi256_ps(_mm256_or_si256(vbi01234567c01, vmagic_bias_c0));
@@ -1835,8 +1835,8 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_3x16__avx2_broadcast(
       const __m256 va2 = _mm256_broadcast_ss(a2);
       a2 += 1;
 
-      const __m256i vbi01234567 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const void*) w));
-      const __m256i vbi89ABCDEF = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 8)));
+      const __m256i vbi01234567 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) w));
+      const __m256i vbi89ABCDEF = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 8)));
       w = (const int8_t*) w + 16;
 
       const __m256 vbm01234567 =  _mm256_castsi256_ps(_mm256_or_si256(vbi01234567, vmagic_bias_c0));
@@ -1982,8 +1982,8 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x16__avx2_broadcast(
       const __m256 va0 = _mm256_broadcast_ss(a0);
       a0 += 1;
 
-      const __m256i vbi01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) w));
-      const __m256i vbi89ABCDEF = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 8)));
+      const __m256i vbi01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) w));
+      const __m256i vbi89ABCDEF = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 8)));
       const __m256 vb01234567 = _mm256_cvtepi32_ps(vbi01234567);
       const __m256 vb89ABCDEF = _mm256_cvtepi32_ps(vbi89ABCDEF);
       w = (const int8_t*) w + 16;
@@ -2121,8 +2121,8 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_5x16__avx2_broadcast(
       const __m256 va4 = _mm256_broadcast_ss(a4);
       a4 += 1;
 
-      const __m256i vbi01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) w));
-      const __m256i vbi89ABCDEF = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const void*) ((const int8_t*) w + 8)));
+      const __m256i vbi01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) w));
+      const __m256i vbi89ABCDEF = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 8)));
       const __m256 vb01234567 = _mm256_cvtepi32_ps(vbi01234567);
       const __m256 vb89ABCDEF = _mm256_cvtepi32_ps(vbi89ABCDEF);
       w = (const int8_t*) w + 16;
