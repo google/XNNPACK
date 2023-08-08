@@ -7755,6 +7755,7 @@ xnnpack_unit_test(
     srcs = [
         "test/f32-igemm-jit.cc",
     ],
+    browser_test = False,  # TODO(b/294957424)
     shard_count = 10,
     tags = ["not_run:arm"],
     deps = MICROKERNEL_TEST_DEPS + [
