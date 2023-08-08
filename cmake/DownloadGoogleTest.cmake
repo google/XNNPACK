@@ -10,6 +10,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.5 FATAL_ERROR)
 
 PROJECT(googletest-download NONE)
 
+# LINT.IfChange
 INCLUDE(ExternalProject)
 ExternalProject_Add(googletest
   URL https://github.com/google/googletest/archive/e23cdb78e9fef1f69a9ef917f447add5638daf2a.zip
@@ -21,3 +22,4 @@ ExternalProject_Add(googletest
   INSTALL_COMMAND ""
   TEST_COMMAND ""
 )
+# LINT.ThenChange(../WORKSPACE.bazel)

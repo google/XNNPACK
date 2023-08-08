@@ -54,13 +54,15 @@ http_archive(
     urls = ["https://github.com/Maratyszcza/FXdiv/archive/b408327ac2a15ec3e43352421954f5b1967701d1.zip"],
 )
 
+# LINT.IfChange
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    sha256 = "e6370550a1abf1503daf3c2c196e0a1c2b253440c39e1a57740ff49af2d8bedf",
-    strip_prefix = "pthreadpool-43edadc654d6283b4b6e45ba09a853181ae8e850",
-    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/43edadc654d6283b4b6e45ba09a853181ae8e850.zip"],
+    sha256 = "5cb522f1427558c6df572d6d0e1bf0fd076428633d080e88ad5312be0b6a8859",
+    strip_prefix = "pthreadpool-e23cdb78e9fef1f69a9ef917f447add5638daf2a",
+    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/e23cdb78e9fef1f69a9ef917f447add5638daf2a.zip"],
 )
+# LINT.ThenChange(cmake/DownloadGoogleTest.cmake)
 
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
