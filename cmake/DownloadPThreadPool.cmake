@@ -10,6 +10,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.5 FATAL_ERROR)
 
 PROJECT(pthreadpool-download NONE)
 
+# LINT.IfChange
 INCLUDE(ExternalProject)
 ExternalProject_Add(pthreadpool
   URL https://github.com/Maratyszcza/pthreadpool/archive/18513c20da253e25f3caa82bf872f43d36b99af6.zip
@@ -21,3 +22,4 @@ ExternalProject_Add(pthreadpool
   INSTALL_COMMAND ""
   TEST_COMMAND ""
 )
+# LINT.ThenChange(../WORKSPACE.bazel)
