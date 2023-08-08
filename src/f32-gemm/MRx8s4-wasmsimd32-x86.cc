@@ -18,7 +18,7 @@ class F32GemmS4Generator : public internal::GemmIGemmS4Commons {
  public:
   using GemmIGemmS4Commons::GemmIGemmS4Commons;
 
-  void generate(const char* name, size_t max_mr, size_t iters, size_t loop_unroll_iters, size_t full_unroll,
+  void generate(const char* name, size_t max_mr, size_t k_const, size_t k_per_iteration, bool full_unroll,
                 const jit_gemm_params* jit_gemm_params) {
     ValTypesToInt locals_declaration = {{i32, max_mr * 2 + 2}, {v128, max_mr * 3 + 8}};
     AddFunc<10>({}, name, locals_declaration,
@@ -40,7 +40,7 @@ class F32GemmS4Generator : public internal::GemmIGemmS4Commons {
 
                       w = I32Add(w, I32Const(8 * sizeof(float)));
 
-                      InnerLoop(as, vacc0123, vacc4567, w, kc, max_mr, 1, iters, false);
+                      InnerLoop(as, vacc0123, vacc4567, w, kc, max_mr, k_per_iteration, k_const, full_unroll);
 
                       ApplyPostOps(vacc0123);
                       ApplyPostOps(vacc4567);
@@ -100,6 +100,28 @@ xnn_status_t xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x1(xnn_code_buf
                                                                     size_t kc, const void* params) {
   static const char* kFunctionName = "xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd_x86_x1";
   assert(max_mr <= 6);
-  return xnnpack::generate(b, kFunctionName, max_mr, kc, /*loop_unroll_iters=*/1, /*full_unroll=*/false, params);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, /*k_per_iteration=*/4, /*full_unroll=*/false, params);
+}
+
+xnn_status_t xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x2(xnn_code_buffer* b, size_t max_mr, size_t nc_mod_nr,
+                                                                    size_t kc, const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd_x86_x2";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, /*k_per_iteration=*/8, /*full_unroll=*/false, params);
+}
+
+xnn_status_t xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x4(xnn_code_buffer* b, size_t max_mr, size_t nc_mod_nr,
+                                                                    size_t kc, const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd_x86_x4";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, /*k_per_iteration=*/16, /*full_unroll=*/false, params);
+}
+
+xnn_status_t xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_xinf(xnn_code_buffer* b, size_t max_mr,
+                                                                      size_t nc_mod_nr, size_t kc, const void* params) {
+  static const char* kFunctionName = "xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd_x86_xinf";
+  assert(max_mr <= 6);
+  return xnnpack::generate(b, kFunctionName, max_mr, kc, /*k_per_iteration=*/kc / sizeof(float), /*full_unroll=*/true,
+                           params);
 }
 }
