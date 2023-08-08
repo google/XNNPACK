@@ -68,6 +68,7 @@ def xnnpack_cc_library(
         wasm_srcs = [],
         wasmsimd_srcs = [],
         wasmrelaxedsimd_srcs = [],
+        linkopts = [],
         copts = [],
         gcc_copts = [],
         msvc_copts = [],

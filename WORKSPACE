@@ -84,6 +84,19 @@ http_archive(
     ],
 )
 
+RULES_ANDROID_NDK_COMMIT = "72ca32741f27c3de69fdcb7a1aaf3ca59919ad8c"
+
+RULES_ANDROID_NDK_SHA = "73eac2cf5f2fd009e8fb197346a2ca39f320b786985658de63a1dff0f12c53d5"
+
+http_archive(
+    name = "rules_android_ndk",
+    sha256 = RULES_ANDROID_NDK_SHA,
+    strip_prefix = "rules_android_ndk-%s" % RULES_ANDROID_NDK_COMMIT,
+    url = "https://github.com/bazelbuild/rules_android_ndk/archive/%s.zip" % RULES_ANDROID_NDK_COMMIT,
+)
+
+load("@rules_android_ndk//:rules.bzl", "android_ndk_repository")
+
 # Android NDK location and version is auto-detected from $ANDROID_NDK_HOME environment variable
 android_ndk_repository(name = "androidndk")
 
