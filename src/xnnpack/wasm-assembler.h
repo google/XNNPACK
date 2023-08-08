@@ -248,8 +248,8 @@ class ControlFlowWasmOps
     end();
   }
 
-  template <typename Cond, typename If>
-  void If(Cond&& cond, If&& if_block) {
+  template <typename Cond, typename IfBlock>
+  void If(Cond&& cond, IfBlock&& if_block) {
     cond();
     this->Encode8(kIfCode);
     this->Encode8(kEpsilonCode);  // Fallthru elements are not supported
