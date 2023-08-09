@@ -3,7 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert DATATYPE in ["F32", "QC4", "QC8"]
+$assert DATATYPE in ["F32", "QC8"]
+$assert AVX in [1, 2]
+$assert FMA in [0, 3]
 $assert NR % 8 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
@@ -11,13 +13,12 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <immintrin.h>
 
 #include <xnnpack/gemm.h>
+$if AVX == 1 and DATATYPE == "QC8":
+  #include <xnnpack/unaligned.h>
 
 
-$if DATATYPE in ["QC8", "QC4"]:
-  $ISA = "avx2"
-$else:
-  $ISA = {0: "avx", 3: "fma3"}[FMA]
-$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC4": "f32_qc4w"}[DATATYPE]
+$ISA = {0: "avx", 3: "fma3"}[FMA] if AVX == 1 else "avx2"
+$DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
 void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_broadcast(
     size_t mr,
     size_t nc,
@@ -33,10 +34,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
     size_t cn_stride,
     $if INC:
       const float* restrict acc,
-    $if DATATYPE == "QC4":
-      const union xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
-    $else:
-      const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= ${MR});
@@ -69,9 +67,6 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         a${M} = a${M-1};
         c${M} = c${M-1};
       }
-  $if DATATYPE == "QC4":
-    const __m128i vminus_kernel_zero_point = _mm_load_si128((const __m128i *) params->sse.minus_kernel_zero_point);
-    const __m128i vmask = _mm_load_si128((const __m128i *) params->sse.mask);
 
   do {
     $if INC:
@@ -105,12 +100,19 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           const __m256 vb${ABC[N:N+8]} = _mm256_load_ps(w + ${N});
         w += ${NR};
       $else:
-        const __m256i vbi${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) w));
-        $for N in range(8, NR, 8):
-          const __m256i vbi${ABC[N:N+8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) ((const int8_t*) w + ${N})));
+        $if AVX >= 2:
+          const __m256i vbi${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) w));
+          $for N in range(8, NR, 8):
+            const __m256i vbi${ABC[N:N+8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) ((const int8_t*) w + ${N})));
+        $else:
+          const __m128i vbi${ABC[0:4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w)));
+          $for N in range(4, NR, 4):
+            const __m128i vbi${ABC[N:N+4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + ${N})));
+          $for N in range(0, NR, 8):
+            const __m256i vbi${ABC[N:N+8]} = _mm256_castps_si256(_mm256_insertf128_ps(_mm256_castsi256_ps(_mm256_castsi128_si256(vbi${ABC[N:N+4]})), _mm_castsi128_ps(vbi${ABC[N+4:N+8]}), 1));
+        w = (const int8_t*) w + ${NR};
         $for N in range(0, NR, 8):
           const __m256 vb${ABC[N:N+8]} = _mm256_cvtepi32_ps(vbi${ABC[N:N+8]});
-        w = (const int8_t*) w + ${NR};
 
       $for N in range(0, NR, 8):
         $for M in range(MR):
@@ -122,7 +124,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
       k -= sizeof(float);
     } while (k != 0);
 
-    $if DATATYPE in ["QC8", "QC4"]:
+    $if DATATYPE == "QC8":
       $for N in range(0, NR, 8):
         const __m256 vscale${ABC[N:N+8]} = _mm256_loadu_ps((const float*) w + ${N});
         $for M in range(MR):

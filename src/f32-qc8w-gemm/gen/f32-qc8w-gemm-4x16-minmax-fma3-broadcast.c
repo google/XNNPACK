@@ -12,9 +12,10 @@
 #include <immintrin.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/unaligned.h>
 
 
-void xnn_f32_qc8w_gemm_minmax_ukernel_4x16__avx2_broadcast(
+void xnn_f32_qc8w_gemm_minmax_ukernel_4x16__fma3_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -78,8 +79,12 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x16__avx2_broadcast(
       const __m256 va3 = _mm256_broadcast_ss(a3);
       a3 += 1;
 
-      const __m256i vbi01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) w));
-      const __m256i vbi89ABCDEF = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) ((const int8_t*) w + 8)));
+      const __m128i vbi0123 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w)));
+      const __m128i vbi4567 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 4)));
+      const __m128i vbi89AB = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 8)));
+      const __m128i vbiCDEF = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 12)));
+      const __m256i vbi01234567 = _mm256_castps_si256(_mm256_insertf128_ps(_mm256_castsi256_ps(_mm256_castsi128_si256(vbi0123)), _mm_castsi128_ps(vbi4567), 1));
+      const __m256i vbi89ABCDEF = _mm256_castps_si256(_mm256_insertf128_ps(_mm256_castsi256_ps(_mm256_castsi128_si256(vbi89AB)), _mm_castsi128_ps(vbiCDEF), 1));
       w = (const int8_t*) w + 16;
       const __m256 vb01234567 = _mm256_cvtepi32_ps(vbi01234567);
       const __m256 vb89ABCDEF = _mm256_cvtepi32_ps(vbi89ABCDEF);

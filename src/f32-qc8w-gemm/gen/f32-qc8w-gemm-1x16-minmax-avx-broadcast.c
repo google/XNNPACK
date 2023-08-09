@@ -12,9 +12,10 @@
 #include <immintrin.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/unaligned.h>
 
 
-void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__avx2_broadcast(
+void xnn_f32_qc8w_gemm_minmax_ukernel_1x16__avx_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -40,39 +41,59 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__avx2_broadcast(
 
   do {
     __m256 vacc0x01234567 = _mm256_loadu_ps((const float*) w + 0);
-    w = (const float*) w + 8;
+    __m256 vacc0x89ABCDEF = _mm256_loadu_ps((const float*) w + 8);
+    w = (const float*) w + 16;
 
     size_t k = kc;
     do {
       const __m256 va0 = _mm256_broadcast_ss(a0);
       a0 += 1;
 
-      const __m256i vbi01234567 = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) w));
-      w = (const int8_t*) w + 8;
+      const __m128i vbi0123 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w)));
+      const __m128i vbi4567 = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 4)));
+      const __m128i vbi89AB = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 8)));
+      const __m128i vbiCDEF = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + 12)));
+      const __m256i vbi01234567 = _mm256_castps_si256(_mm256_insertf128_ps(_mm256_castsi256_ps(_mm256_castsi128_si256(vbi0123)), _mm_castsi128_ps(vbi4567), 1));
+      const __m256i vbi89ABCDEF = _mm256_castps_si256(_mm256_insertf128_ps(_mm256_castsi256_ps(_mm256_castsi128_si256(vbi89AB)), _mm_castsi128_ps(vbiCDEF), 1));
+      w = (const int8_t*) w + 16;
       const __m256 vb01234567 = _mm256_cvtepi32_ps(vbi01234567);
+      const __m256 vb89ABCDEF = _mm256_cvtepi32_ps(vbi89ABCDEF);
 
-      vacc0x01234567 = _mm256_fmadd_ps(va0, vb01234567, vacc0x01234567);
+      vacc0x01234567 = _mm256_add_ps(vacc0x01234567, _mm256_mul_ps(va0, vb01234567));
+      vacc0x89ABCDEF = _mm256_add_ps(vacc0x89ABCDEF, _mm256_mul_ps(va0, vb89ABCDEF));
 
       k -= sizeof(float);
     } while (k != 0);
 
     const __m256 vscale01234567 = _mm256_loadu_ps((const float*) w + 0);
     vacc0x01234567 = _mm256_mul_ps(vacc0x01234567, vscale01234567);
-    w = (const float*) w + 8;
+    const __m256 vscale89ABCDEF = _mm256_loadu_ps((const float*) w + 8);
+    vacc0x89ABCDEF = _mm256_mul_ps(vacc0x89ABCDEF, vscale89ABCDEF);
+    w = (const float*) w + 16;
     const __m256 vmin = _mm256_load_ps(params->avx.min);
     vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
+    vacc0x89ABCDEF = _mm256_max_ps(vmin, vacc0x89ABCDEF);
 
     const __m256 vmax = _mm256_load_ps(params->avx.max);
     vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
+    vacc0x89ABCDEF = _mm256_min_ps(vmax, vacc0x89ABCDEF);
 
-    if XNN_LIKELY(nc >= 8) {
+    if XNN_LIKELY(nc >= 16) {
       _mm256_storeu_ps(c0, vacc0x01234567);
+      _mm256_storeu_ps(c0 + 8, vacc0x89ABCDEF);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
 
       a0 = (const float*) ((uintptr_t) a0 - kc);
 
-      nc -= 8;
+      nc -= 16;
     } else {
+      if (nc & 8) {
+        _mm256_storeu_ps(c0, vacc0x01234567);
+
+        vacc0x01234567 = vacc0x89ABCDEF;
+
+        c0 += 8;
+      }
       __m128 vacc0x0123 = _mm256_castps256_ps128(vacc0x01234567);
       if (nc & 4) {
         _mm_storeu_ps(c0, vacc0x0123);
