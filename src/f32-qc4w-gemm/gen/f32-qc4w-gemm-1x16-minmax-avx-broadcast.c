@@ -12,9 +12,10 @@
 #include <immintrin.h>
 
 #include <xnnpack/gemm.h>
+#include <xnnpack/unaligned.h>
 
 
-void xnn_f32_qc4w_gemm_minmax_ukernel_1x16__avx2_broadcast(
+void xnn_f32_qc4w_gemm_minmax_ukernel_1x16__avx_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -54,42 +55,50 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_1x16__avx2_broadcast(
       const __m256 va0c1 = _mm256_broadcast_ss(a0);
       a0 += 1;
 
-      const __m256i vbi01234567c01 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) w));
-      const __m256i vbi89ABCDEFc01 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) ((const uint8_t*) w + 8)));
+      const __m128i vbi0123c01 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const uint8_t*) w)));
+      const __m128i vbi4567c01 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const uint8_t*) w + 4)));
+      const __m128i vbi89ABc01 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const uint8_t*) w + 8)));
+      const __m128i vbiCDEFc01 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const uint8_t*) w + 12)));
+      const __m256 vbi01234567c01 = _mm256_insertf128_ps(_mm256_castsi256_ps(_mm256_castsi128_si256(vbi0123c01)), _mm_castsi128_ps(vbi4567c01), 1);
+      const __m256 vbi89ABCDEFc01 = _mm256_insertf128_ps(_mm256_castsi256_ps(_mm256_castsi128_si256(vbi89ABc01)), _mm_castsi128_ps(vbiCDEFc01), 1);
       w = (const uint8_t*) w + 16;
 
-      const __m256 vbm01234567c0 = _mm256_castsi256_ps(_mm256_or_si256(vbi01234567c01, vmagic_bias_c0));
-      const __m256 vbm89ABCDEFc0 = _mm256_castsi256_ps(_mm256_or_si256(vbi89ABCDEFc01, vmagic_bias_c0));
-      const __m256 vbm01234567c1 = _mm256_castsi256_ps(_mm256_or_si256(vbi01234567c01, vmagic_bias_c1));
-      const __m256 vbm89ABCDEFc1 = _mm256_castsi256_ps(_mm256_or_si256(vbi89ABCDEFc01, vmagic_bias_c1));
+      const __m256 vbm01234567c0 = _mm256_or_ps(vbi01234567c01, _mm256_castsi256_ps(vmagic_bias_c0));
+      const __m256 vbm89ABCDEFc0 = _mm256_or_ps(vbi89ABCDEFc01, _mm256_castsi256_ps(vmagic_bias_c0));
+      const __m256 vbm01234567c1 = _mm256_or_ps(vbi01234567c01, _mm256_castsi256_ps(vmagic_bias_c1));
+      const __m256 vbm89ABCDEFc1 = _mm256_or_ps(vbi89ABCDEFc01, _mm256_castsi256_ps(vmagic_bias_c1));
 
       const __m256 vb01234567c0 = _mm256_sub_ps(vbm01234567c0, vmagic_bias_plus_kernel_zero_point_c0);
       const __m256 vb89ABCDEFc0 = _mm256_sub_ps(vbm89ABCDEFc0, vmagic_bias_plus_kernel_zero_point_c0);
       const __m256 vb01234567c1 = _mm256_sub_ps(vbm01234567c1, vmagic_bias_plus_kernel_zero_point_c1);
       const __m256 vb89ABCDEFc1 = _mm256_sub_ps(vbm89ABCDEFc1, vmagic_bias_plus_kernel_zero_point_c1);
 
-      vacc0x01234567 = _mm256_fmadd_ps(va0c0, vb01234567c0, vacc0x01234567);
-      vacc0x89ABCDEF = _mm256_fmadd_ps(va0c0, vb89ABCDEFc0, vacc0x89ABCDEF);
-      vacc0x01234567 = _mm256_fmadd_ps(va0c1, vb01234567c1, vacc0x01234567);
-      vacc0x89ABCDEF = _mm256_fmadd_ps(va0c1, vb89ABCDEFc1, vacc0x89ABCDEF);
+      vacc0x01234567 = _mm256_add_ps(vacc0x01234567, _mm256_mul_ps(va0c0, vb01234567c0));
+      vacc0x89ABCDEF = _mm256_add_ps(vacc0x89ABCDEF, _mm256_mul_ps(va0c0, vb89ABCDEFc0));
+      vacc0x01234567 = _mm256_add_ps(vacc0x01234567, _mm256_mul_ps(va0c1, vb01234567c1));
+      vacc0x89ABCDEF = _mm256_add_ps(vacc0x89ABCDEF, _mm256_mul_ps(va0c1, vb89ABCDEFc1));
     }
 
     if XNN_UNLIKELY(k != 0) {
       const __m256 va0 = _mm256_broadcast_ss(a0);
       a0 += 1;
 
-      const __m256i vbi01234567 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) w));
-      const __m256i vbi89ABCDEF = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) ((const uint8_t*) w + 8)));
+      const __m128i vbi0123 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const uint8_t*) w)));
+      const __m128i vbi4567 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const uint8_t*) w + 4)));
+      const __m128i vbi89AB = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const uint8_t*) w + 8)));
+      const __m128i vbiCDEF = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const uint8_t*) w + 12)));
+      const __m256 vbi01234567 = _mm256_insertf128_ps(_mm256_castsi256_ps(_mm256_castsi128_si256(vbi0123)), _mm_castsi128_ps(vbi4567), 1);
+      const __m256 vbi89ABCDEF = _mm256_insertf128_ps(_mm256_castsi256_ps(_mm256_castsi128_si256(vbi89AB)), _mm_castsi128_ps(vbiCDEF), 1);
       w = (const uint8_t*) w + 16;
 
-      const __m256 vbm01234567 = _mm256_castsi256_ps(_mm256_or_si256(vbi01234567, vmagic_bias_c0));
-      const __m256 vbm89ABCDEF = _mm256_castsi256_ps(_mm256_or_si256(vbi89ABCDEF, vmagic_bias_c0));
+      const __m256 vbm01234567 = _mm256_or_ps(vbi01234567, _mm256_castsi256_ps(vmagic_bias_c0));
+      const __m256 vbm89ABCDEF = _mm256_or_ps(vbi89ABCDEF, _mm256_castsi256_ps(vmagic_bias_c0));
 
       const __m256 vb01234567 = _mm256_sub_ps(vbm01234567, vmagic_bias_plus_kernel_zero_point_c0);
       const __m256 vb89ABCDEF = _mm256_sub_ps(vbm89ABCDEF, vmagic_bias_plus_kernel_zero_point_c0);
 
-      vacc0x01234567 = _mm256_fmadd_ps(va0, vb01234567, vacc0x01234567);
-      vacc0x89ABCDEF = _mm256_fmadd_ps(va0, vb89ABCDEF, vacc0x89ABCDEF);
+      vacc0x01234567 = _mm256_add_ps(vacc0x01234567, _mm256_mul_ps(va0, vb01234567));
+      vacc0x89ABCDEF = _mm256_add_ps(vacc0x89ABCDEF, _mm256_mul_ps(va0, vb89ABCDEF));
     }
 
     const __m256 vscale01234567 = _mm256_loadu_ps((const float*) w + 0);

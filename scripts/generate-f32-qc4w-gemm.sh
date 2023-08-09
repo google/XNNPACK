@@ -99,6 +99,7 @@ tools/xngen src/f32-gemm/sse-dup.c.in -D MR=3 -D NR=8 -D INC=0 -D SSE=4 -D AVX=0
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=4 -D NR=8 -D INC=0 -D SSE=4 -D AVX=0 -D FMA=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-sse41-dup.c &
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=0 -D SSE=4 -D AVX=0 -D FMA=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x8-minmax-sse41-dup.c &
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=6 -D NR=8 -D INC=0 -D SSE=4 -D AVX=0 -D FMA=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x8-minmax-sse41-dup.c &
+
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=1 -D NR=8 -D INC=0 -D SSE=4 -D AVX=1 -D FMA=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-avx-dup.c &
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=3 -D NR=8 -D INC=0 -D SSE=4 -D AVX=1 -D FMA=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x8-minmax-avx-dup.c &
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=4 -D NR=8 -D INC=0 -D SSE=4 -D AVX=1 -D FMA=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-avx-dup.c &
@@ -111,15 +112,35 @@ tools/xngen src/f32-gemm/sse-dup.c.in -D MR=5 -D NR=8 -D INC=0 -D SSE=4 -D AVX=1
 tools/xngen src/f32-gemm/sse-dup.c.in -D MR=6 -D NR=8 -D INC=0 -D SSE=4 -D AVX=1 -D FMA=3 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x8-minmax-fma3-dup.c &
 
 ################################### x86 AVX ###################################
-### FMA3+BROADCAST micro-kernels
-tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=1 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x16-minmax-avx2-broadcast.c &
-tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=2 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-2x16-minmax-avx2-broadcast.c &
-tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=3 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x16-minmax-avx2-broadcast.c &
-tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=4 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-avx2-broadcast.c &
-tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=5 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-avx2-broadcast.c &
-tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=6 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x16-minmax-avx2-broadcast.c &
-tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=7 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-7x16-minmax-avx2-broadcast.c &
-tools/xngen src/f32-qc4w-gemm/avx2-broadcast.c.in -D MR=8 -D NR=16 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-8x16-minmax-avx2-broadcast.c &
+### AVX BROADCAST micro-kernels
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=1 -D NR=16 -D AVX=1 -D FMA=0 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x16-minmax-avx-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=2 -D NR=16 -D AVX=1 -D FMA=0 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-2x16-minmax-avx-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=3 -D NR=16 -D AVX=1 -D FMA=0 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x16-minmax-avx-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=4 -D NR=16 -D AVX=1 -D FMA=0 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-avx-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=5 -D NR=16 -D AVX=1 -D FMA=0 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-avx-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=6 -D NR=16 -D AVX=1 -D FMA=0 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x16-minmax-avx-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=7 -D NR=16 -D AVX=1 -D FMA=0 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-7x16-minmax-avx-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=8 -D NR=16 -D AVX=1 -D FMA=0 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-8x16-minmax-avx-broadcast.c &
+
+### AVX FMA3+BROADCAST micro-kernels
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=1 -D NR=16 -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x16-minmax-fma3-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=2 -D NR=16 -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-2x16-minmax-fma3-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=3 -D NR=16 -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x16-minmax-fma3-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=4 -D NR=16 -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-fma3-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=5 -D NR=16 -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-fma3-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=6 -D NR=16 -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x16-minmax-fma3-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=7 -D NR=16 -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-7x16-minmax-fma3-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=8 -D NR=16 -D AVX=1 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-8x16-minmax-fma3-broadcast.c &
+
+### AVX2 FMA3+BROADCAST micro-kernels
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=1 -D NR=16 -D AVX=2 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x16-minmax-avx2-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=2 -D NR=16 -D AVX=2 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-2x16-minmax-avx2-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=3 -D NR=16 -D AVX=2 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x16-minmax-avx2-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=4 -D NR=16 -D AVX=2 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-avx2-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=5 -D NR=16 -D AVX=2 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-avx2-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=6 -D NR=16 -D AVX=2 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x16-minmax-avx2-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=7 -D NR=16 -D AVX=2 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-7x16-minmax-avx2-broadcast.c &
+tools/xngen src/f32-qc4w-gemm/avx-broadcast.c.in -D MR=8 -D NR=16 -D AVX=2 -D FMA=3 -D INC=0 -D DATATYPE=QC4 -o src/f32-qc4w-gemm/gen/f32-qc4w-gemm-8x16-minmax-avx2-broadcast.c &
 
 ################################# x86 AVX-512 #################################
 ### AVX512SKX+BROADCAST micro-kernels

@@ -117,10 +117,18 @@ SET(ALL_AVX_MICROKERNEL_SRCS
   src/f32-prelu/gen/f32-prelu-avx-2x8.c
   src/f32-prelu/gen/f32-prelu-avx-2x16.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-avx-dup.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x16-minmax-avx-broadcast.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-2x16-minmax-avx-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x8-minmax-avx-dup.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x16-minmax-avx-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-avx-dup.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-avx-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x8-minmax-avx-dup.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-avx-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x8-minmax-avx-dup.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x16-minmax-avx-broadcast.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-7x16-minmax-avx-broadcast.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-8x16-minmax-avx-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-avx-dup.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8-minmax-avx-dup.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-avx-dup.c
@@ -1983,10 +1991,18 @@ SET(ALL_FMA3_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-7x8-minmax-fma3-broadcast.c
   src/f32-igemm/gen/f32-igemm-8x8-minmax-fma3-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-fma3-dup.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x16-minmax-fma3-broadcast.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-2x16-minmax-fma3-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x8-minmax-fma3-dup.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x16-minmax-fma3-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-fma3-dup.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-fma3-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x8-minmax-fma3-dup.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-fma3-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x8-minmax-fma3-dup.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x16-minmax-fma3-broadcast.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-7x16-minmax-fma3-broadcast.c
+  src/f32-qc4w-gemm/gen/f32-qc4w-gemm-8x16-minmax-fma3-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-fma3-dup.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-3x8-minmax-fma3-dup.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-fma3-dup.c
