@@ -2406,6 +2406,35 @@ BENCHMARK_FP32_END2END_JIT(f32_gemm_6x8_6x8__jit_aarch64_neonfma_cortex_a75_prfm
         xnn_init_f32_minmax_scalar_params, 8 /* nr */);
   }
 
+  static void f32_gemm_3x8s4__jit_wasmsimd32_x86(
+      benchmark::State &state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(
+        state, model,
+        {{3, xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x1, xnn_generate_f32_igemm_ukernel_6x8s4__wasmsimd32_x86_x1}},
+        xnn_init_f32_minmax_scalar_params, 8 /* nr */, 0 /* log2_kr */, 2 /* log2_sr */);
+  }
+  static void f32_gemm_4x8s4__jit_wasmsimd32_x86(
+      benchmark::State &state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(
+        state, model,
+        {{4, xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x1, xnn_generate_f32_igemm_ukernel_6x8s4__wasmsimd32_x86_x1}},
+        xnn_init_f32_minmax_scalar_params, 8 /* nr */, 0 /* log2_kr */, 2 /* log2_sr */);
+  }
+  static void f32_gemm_5x8s4__jit_wasmsimd32_x86(
+      benchmark::State &state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(
+        state, model,
+        {{5, xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x1, xnn_generate_f32_igemm_ukernel_6x8s4__wasmsimd32_x86_x1}},
+        xnn_init_f32_minmax_scalar_params, 8 /* nr */, 0 /* log2_kr */, 2 /* log2_sr */);
+  }
+  static void f32_gemm_6x8s4__jit_wasmsimd32_x86(
+      benchmark::State &state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(
+        state, model,
+        {{6, xnn_generate_f32_gemm_ukernel_6x8s4__wasmsimd32_x86_x1, xnn_generate_f32_igemm_ukernel_6x8s4__wasmsimd32_x86_x1}},
+        xnn_init_f32_minmax_scalar_params, 8 /* nr */, 0 /* log2_kr */, 2 /* log2_sr */);
+  }
+
   BENCHMARK_FP32_END2END(f32_gemm_3x8__wasmsimd_arm_loadsplat);
   BENCHMARK_FP32_END2END(f32_gemm_4x8__wasmsimd_arm_loadsplat);
   BENCHMARK_FP32_END2END(f32_gemm_5x8__wasmsimd_arm_loadsplat);
@@ -2445,6 +2474,11 @@ BENCHMARK_FP32_END2END_JIT(f32_gemm_6x8_6x8__jit_aarch64_neonfma_cortex_a75_prfm
   BENCHMARK_FP32_END2END_JIT(f32_gemm_4x8__jit_wasmsimd32_x86_loadsplat_unroll);
   BENCHMARK_FP32_END2END_JIT(f32_gemm_5x8__jit_wasmsimd32_x86_loadsplat_unroll);
   BENCHMARK_FP32_END2END_JIT(f32_gemm_6x8__jit_wasmsimd32_x86_loadsplat_unroll);
+
+  BENCHMARK_FP32_END2END_JIT(f32_gemm_3x8s4__jit_wasmsimd32_x86);
+  BENCHMARK_FP32_END2END_JIT(f32_gemm_4x8s4__jit_wasmsimd32_x86);
+  BENCHMARK_FP32_END2END_JIT(f32_gemm_5x8s4__jit_wasmsimd32_x86);
+  BENCHMARK_FP32_END2END_JIT(f32_gemm_6x8s4__jit_wasmsimd32_x86);
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
