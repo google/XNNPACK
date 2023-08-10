@@ -145,7 +145,7 @@ enum xnn_status xnn_create_scaled_dot_attention_ntc_f32(
                   xnn_operator_type_to_string(operator_type), cap_tanh_params->cap);
       goto error;
     }
-    memcpy(&attention_op->attention.cap_params2, cap_params, sizeof(cap_params));
+    memcpy(&attention_op->attention.cap_params, cap_tanh_params, sizeof(struct xnn_attention_logits_cap_tanh_params));
   }
 
   attention_op->attention.raddstoreexpminusmax_config = raddstoreexpminusmax_config;
@@ -340,8 +340,8 @@ enum xnn_status xnn_reshape_scaled_dot_attention_ntc_f32(
 
   if (attention_op->attention.cap_type == xnn_attention_logits_cap_type_tanh) {
     attention_op->context.attention.logits_cap.type = xnn_attention_logits_cap_type_tanh;
-    attention_op->context.attention.logits_cap.cap.f32 = attention_op->attention.cap_params2.cap;
-    attention_op->context.attention.logits_cap.cap_reciprocal.f32 = 1 / attention_op->attention.cap_params2.cap;
+    attention_op->context.attention.logits_cap.cap.f32 = attention_op->attention.cap_params.cap;
+    attention_op->context.attention.logits_cap.cap_reciprocal.f32 = 1 / attention_op->attention.cap_params.cap;
   }
 
   #if XNN_MAX_UARCH_TYPES > 1

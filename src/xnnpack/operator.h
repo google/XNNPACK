@@ -368,7 +368,7 @@ struct xnn_operator {
       const struct xnn_binary_elementwise_config* vmul_config;
       const struct xnn_unary_elementwise_config* vtanh_config;
       enum xnn_attention_logits_cap_type cap_type;
-      struct xnn_attention_logits_cap_tanh_params cap_params2;
+      struct xnn_attention_logits_cap_tanh_params cap_params;
     } attention;  // For attention operator.
   };
 
