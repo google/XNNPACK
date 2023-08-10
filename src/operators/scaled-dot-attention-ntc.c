@@ -332,7 +332,7 @@ enum xnn_status xnn_reshape_scaled_dot_attention_ntc_f32(
     .gemm_ukernel = gemm_ukernel,
     .compute_reciprocal = (xnn_compute_reciprocal_fn) compute_reciprocal_f32,
     .raddstoreexpminusmax_ukernel = attention_op->attention.raddstoreexpminusmax_config->ukernel,
-    .rmax_ukernel = attention_op->attention.rmax_config->rmax.f32,
+    .rmax_ukernel = attention_op->attention.rmax_config->ukernel,
     .vadd_ukernel = attention_op->attention.vadd_config->minmax.op_ukernel,
     .vmul_ukernel = attention_op->attention.vmul_config->minmax.op_ukernel,
     .vmulc_ukernel = attention_op->attention.vmul_config->minmax.opc_ukernel,
