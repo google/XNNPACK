@@ -1109,6 +1109,140 @@ void xnn_compute_pad_5d(
   }
 }
 
+void xnn_compute_scaled_dot_attention(
+  const struct scaled_dot_attention_context* context,
+  size_t batch_index,
+  size_t tokens_start,
+  size_t tokens_block_size)
+{
+  const size_t scaled_channels = context->scaled_channels;
+  const size_t query_tile_offset = batch_index * context->query_batch_stride + tokens_start * scaled_channels;
+  const size_t key_value_tokens_scaled = context->key_value_tokens_scaled;
+  const size_t key_value_tokens_start_scaled = tokens_start * key_value_tokens_scaled;
+  const size_t cn_stride = context->cn_stride;
+  const void* scaled_query = (void*) ((uintptr_t) context->scaled_query + query_tile_offset);
+  const void* minmax_params = &context->minmax_params;
+
+  {
+    uintptr_t query = (uintptr_t) context->query + query_tile_offset;
+    uintptr_t query_scaled_current = (uintptr_t) scaled_query;
+    // Q_scaled = Q * Scale (along channels). Q and Q_scaled have dimensions [tokens_block_size, query_tokens].
+    size_t i = tokens_block_size;
+    do {
+      context->vmul_ukernel(
+        /*batch=*/scaled_channels,
+        /*input_x=*/(const void*) query,
+        /*input_y=*/context->scale,
+        /*output=*/(void*) query_scaled_current,
+        /*params=*/minmax_params);
+      query += scaled_channels;
+      query_scaled_current += scaled_channels;
+    } while (--i != 0);
+  }
+
+  void* buffer = (void*) context->logits_buffer;
+
+  const size_t logits_batch_offset = batch_index * context->logits_batch_stride;
+  void* logits = (void*) (((uintptr_t) buffer + logits_batch_offset + key_value_tokens_start_scaled));
+
+  // S = Gemm(Q_scaled, K^t). S is [tokens_block_size, key_value_tokens].
+  context->gemm_ukernel.function[XNN_UARCH_DEFAULT](
+    /*mr=*/tokens_block_size,
+    /*nr=*/context->key_value_tokens,
+    /*k=*/scaled_channels,
+    /*a=*/scaled_query,
+    /*a_stride=*/scaled_channels,
+    /*w=*/(void*) ((uintptr_t) context->key + batch_index * context->key_batch_stride),
+    /*c=*/(void*) (uintptr_t) logits,
+    /*cm_stride=*/key_value_tokens_scaled,
+    /*cn_stride=*/cn_stride,
+    /*params=*/minmax_params);
+
+  {
+    const size_t tokens_block_size_scaled = tokens_block_size * key_value_tokens_scaled;
+    struct attention_logits_cap logits_cap = context->logits_cap;
+    if (logits_cap.type == xnn_attention_logits_cap_type_tanh) {
+      // (Optional) S = TanH(S/Cap) * Cap. Overwrites buffer.
+      context->vmulc_ukernel(
+        /*batch=*/tokens_block_size_scaled,
+        /*input_x=*/logits,
+        /*input_y=*/&logits_cap.cap_reciprocal,
+        /*output=*/logits,
+        /*params=*/minmax_params);
+      context->vtanh_ukernel(
+        /*batch=*/tokens_block_size_scaled,
+        /*input=*/logits,
+        /*output=*/logits,
+        /*params=*/&context->tanh_params);
+      context->vmulc_ukernel(
+        /*batch=*/tokens_block_size_scaled,
+        /*input_x=*/logits,
+        /*input_y=*/&logits_cap.cap,
+        /*output=*/logits,
+        /*params=*/minmax_params);
+    }
+
+    // S = S + Mask. Mask has dimensions [query_tokens, key_value_tokens].
+    // Mask. Overwrites buffer.
+    context->vadd_ukernel(
+      /*batch=*/tokens_block_size_scaled,
+      /*input_x=*/logits,
+      /*input_y=*/(void*) ((uintptr_t) context->mask + key_value_tokens_start_scaled),
+      /*output=*/logits,
+      /*params=*/minmax_params);
+  }
+
+  // P = Softmax(S). P has dimensions [tokens_block_size, key_value_tokens].
+  {
+    void* logits_row = logits;
+    size_t i = tokens_block_size;
+    do {
+      // Skip initialization of locals as they will be written to immediately.
+      float rowmax;
+      context->rmax_ukernel(
+        /*batch=*/key_value_tokens_scaled,
+        /*input=*/logits_row,
+        /*output=*/&rowmax);
+
+      float rowsum;
+      context->raddstoreexpminusmax_ukernel(
+        /*batch=*/key_value_tokens_scaled,
+        /*input=*/logits_row,
+        /*max=*/&rowmax,
+        /*output=*/logits_row,
+        /*sum=*/&rowsum,
+        /*params=*/&context->expminus_params);
+
+      float rowscale;
+      context->compute_reciprocal(
+        /*input=*/&rowsum,
+        /*output=*/&rowscale);
+
+      context->vmulc_ukernel(
+        /*batch=*/key_value_tokens_scaled,
+        /*input_x=*/logits_row,
+        /*input_y=*/&rowscale,
+        /*output=*/logits_row,
+        /*params=*/minmax_params);
+
+      logits_row = (void*) ((uintptr_t) logits_row + key_value_tokens_scaled);
+    } while (--i != 0);
+  }
+
+  // O = Gemm(P, V). O has dimension [tokens_block_size, channels].
+  context->gemm_ukernel.function[XNN_UARCH_DEFAULT](
+      /*mr=*/tokens_block_size,
+      /*nc=*/context->channels,
+      /*kc=*/key_value_tokens_scaled,
+      /*a=*/(void*) ((uintptr_t) buffer + logits_batch_offset + key_value_tokens_start_scaled),
+      /*a_stride=*/key_value_tokens_scaled,
+      /*w=*/(void*) ((uintptr_t) context->value + batch_index * context->value_batch_stride),
+      /*c=*/(void*) ((uintptr_t) context->output + query_tile_offset),
+      /*cm_stride=*/scaled_channels,
+      /*cn_stride=*/cn_stride,
+      /*params=*/minmax_params);
+}
+
 void xnn_compute_slice_1d(
     const struct slice_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t i)
@@ -1616,8 +1750,142 @@ void xnn_compute_rope(
         context->zero,
         &context->params);
   }
-#endif  // XNN_MAX_UARCH_TYPES > 1
 
+void xnn_compute_hmp_scaled_dot_attention(
+  const struct scaled_dot_attention_context* context,
+  uint32_t uarch_index,
+  size_t batch_index,
+  size_t tokens_start,
+  size_t tokens_block_size)
+{
+  const size_t scaled_channels = context->scaled_channels;
+  const size_t query_tile_offset = batch_index * context->query_batch_stride + tokens_start * scaled_channels;
+  const size_t key_value_tokens_scaled = context->key_value_tokens_scaled;
+  const size_t key_value_tokens_start_scaled = tokens_start * key_value_tokens_scaled;
+  const size_t cn_stride = context->cn_stride;
+  const void* scaled_query = (void*) ((uintptr_t) context->scaled_query + query_tile_offset);
+  const void* minmax_params = &context->minmax_params;
+
+  {
+    uintptr_t query = (uintptr_t) context->query + query_tile_offset;
+    uintptr_t query_scaled_current = (uintptr_t) scaled_query;
+    // Q_scaled = Q * Scale (along channels). Q and Q_scaled have dimensions [tokens_block_size, query_tokens].
+    size_t i = tokens_block_size;
+    do {
+      context->vmul_ukernel(
+        /*batch=*/scaled_channels,
+        /*input_x=*/(const void*) query,
+        /*input_y=*/context->scale,
+        /*output=*/(void*) query_scaled_current,
+        /*params=*/minmax_params);
+      query += scaled_channels;
+      query_scaled_current += scaled_channels;
+    } while (--i != 0);
+  }
+
+  void* buffer = (void*) context->logits_buffer;
+
+  const size_t logits_batch_offset = batch_index * context->logits_batch_stride;
+  void* logits = (void*) (((uintptr_t) buffer + logits_batch_offset + key_value_tokens_start_scaled));
+
+  // S = Gemm(Q_scaled, K^t). S is [tokens_block_size, key_value_tokens].
+  context->gemm_ukernel.function[uarch_index](
+    /*mr=*/tokens_block_size,
+    /*nr=*/context->key_value_tokens,
+    /*k=*/scaled_channels,
+    /*a=*/scaled_query,
+    /*a_stride=*/scaled_channels,
+    /*w=*/(void*) ((uintptr_t) context->key + batch_index * context->key_batch_stride),
+    /*c=*/(void*) (uintptr_t) logits,
+    /*cm_stride=*/key_value_tokens_scaled,
+    /*cn_stride=*/cn_stride,
+    /*params=*/minmax_params);
+
+  {
+    const size_t tokens_block_size_scaled = tokens_block_size * key_value_tokens_scaled;
+    struct attention_logits_cap logits_cap = context->logits_cap;
+    if (logits_cap.type == xnn_attention_logits_cap_type_tanh) {
+      // (Optional) S = TanH(S/Cap) * Cap. Overwrites buffer.
+      context->vmulc_ukernel(
+        /*batch=*/tokens_block_size_scaled,
+        /*input_x=*/logits,
+        /*input_y=*/&logits_cap.cap_reciprocal,
+        /*output=*/logits,
+        /*params=*/minmax_params);
+      context->vtanh_ukernel(
+        /*batch=*/tokens_block_size_scaled,
+        /*input=*/logits,
+        /*output=*/logits,
+        /*params=*/&context->tanh_params);
+      context->vmulc_ukernel(
+        /*batch=*/tokens_block_size_scaled,
+        /*input_x=*/logits,
+        /*input_y=*/&logits_cap.cap,
+        /*output=*/logits,
+        /*params=*/minmax_params);
+    }
+
+    // S = S + Mask. Mask has dimensions [query_tokens, key_value_tokens].
+    // Mask. Overwrites buffer.
+    context->vadd_ukernel(
+      /*batch=*/tokens_block_size_scaled,
+      /*input_x=*/logits,
+      /*input_y=*/(void*) ((uintptr_t) context->mask + key_value_tokens_start_scaled),
+      /*output=*/logits,
+      /*params=*/minmax_params);
+  }
+
+  // P = Softmax(S). P has dimensions [tokens_block_size, key_value_tokens].
+  {
+    void* logits_row = logits;
+    size_t i = tokens_block_size;
+    do {
+      // Skip initialization of locals as they will be written to immediately.
+      float rowmax;
+      context->rmax_ukernel(
+        /*batch=*/key_value_tokens_scaled,
+        /*input=*/logits_row,
+        /*output=*/&rowmax);
+
+      float rowsum;
+      context->raddstoreexpminusmax_ukernel(
+        /*batch=*/key_value_tokens_scaled,
+        /*input=*/logits_row,
+        /*max=*/&rowmax,
+        /*output=*/logits_row,
+        /*sum=*/&rowsum,
+        /*params=*/&context->expminus_params);
+
+      float rowscale;
+      context->compute_reciprocal(
+        /*input=*/&rowsum,
+        /*output=*/&rowscale);
+
+      context->vmulc_ukernel(
+        /*batch=*/key_value_tokens_scaled,
+        /*input_x=*/logits_row,
+        /*input_y=*/&rowscale,
+        /*output=*/logits_row,
+        /*params=*/minmax_params);
+
+      logits_row = (void*) ((uintptr_t) logits_row + key_value_tokens_scaled);
+    } while (--i != 0);
+  }
+
+  // O = Gemm(P, V). O has dimension [tokens_block_size, channels].
+  context->gemm_ukernel.function[uarch_index](
+      /*mr=*/tokens_block_size,
+      /*nc=*/context->channels,
+      /*kc=*/key_value_tokens_scaled,
+      /*a=*/(void*) ((uintptr_t) buffer + logits_batch_offset + key_value_tokens_start_scaled),
+      /*a_stride=*/key_value_tokens_scaled,
+      /*w=*/(void*) ((uintptr_t) context->value + batch_index * context->value_batch_stride),
+      /*c=*/(void*) ((uintptr_t) context->output + query_tile_offset),
+      /*cm_stride=*/scaled_channels,
+      /*cn_stride=*/cn_stride,
+      /*params=*/minmax_params);
+}
+#endif  // XNN_MAX_UARCH_TYPES > 1
 
 enum xnn_status xnn_run_operator(xnn_operator_t op, pthreadpool_t threadpool)
 {
@@ -1818,6 +2086,19 @@ enum xnn_status xnn_run_operator_with_index(
             flags);
         break;
   #if XNN_MAX_UARCH_TYPES > 1
+      case xnn_parallelization_type_2d_tile_1d_with_uarch:
+        assert(op->compute[i].range[0] != 0);
+        assert(op->compute[i].range[1] != 0);
+        assert(op->compute[i].tile[0] != 0);
+        pthreadpool_parallelize_2d_tile_1d_with_uarch(
+            threadpool,
+            op->compute[i].task_2d_tile_1d_with_id,
+            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
+            op->compute[i].range[0], op->compute[i].range[1],
+            op->compute[i].tile[0],
+            flags);
+        break;
       case xnn_parallelization_type_2d_tile_2d_with_uarch:
         assert(op->compute[i].range[0] != 0);
         assert(op->compute[i].range[1] != 0);

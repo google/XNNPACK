@@ -1319,6 +1319,7 @@ typedef void (*xnn_x32_packw_gemm_goi_ukernel_fn)(
     size_t extra_bytes,
     const void* params);
 
+// PACKW: PACK W (weights) for GEMM matrix multiplication
 // Weights in GIO layout: Groups, Input channels, Output channels.
 typedef void (*xnn_packw_gemm_gio_ukernel_fn)(
   size_t g,

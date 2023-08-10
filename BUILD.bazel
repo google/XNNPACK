@@ -106,6 +106,7 @@ OPERATOR_SRCS = [
     "src/operators/resize-bilinear-nchw.c",
     "src/operators/resize-bilinear-nhwc.c",
     "src/operators/rope-nthc.c",
+    "src/operators/scaled-dot-attention-ntc.c",
     "src/operators/slice-nd.c",
     "src/operators/softmax-nc.c",
     "src/operators/transpose-nd.c",
@@ -10087,6 +10088,18 @@ xnnpack_unit_test(
         "test/rope-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
+    name = "scaled_dot_attention_ntc_test",
+    timeout = "moderate",
+    srcs = [
+        "test/attention-operator-tester.h",
+        "test/scaled-dot-attention-ntc.cc",
+    ],
+    deps = OPERATOR_TEST_DEPS + [
+        ":aligned_allocator",
+    ],
 )
 
 xnnpack_unit_test(

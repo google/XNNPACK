@@ -5490,6 +5490,54 @@ enum xnn_status xnn_run_convert_nc_qu8_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
+// Cap operations applied to logits (Q * K) of attention operator.
+enum xnn_attention_logits_cap_type {
+  // No capping.
+  xnn_attention_logits_cap_type_none = 0,
+  // Cap the absolute values of logits by tanh: tanh(logits / cap) * cap
+  xnn_attention_logits_cap_type_tanh
+};
+
+// Params when the cap type is xnn_attention_logits_cap_type_tanh.
+struct xnn_attention_logits_cap_tanh_params {
+  float cap;
+};
+
+// N: batch size (number of heads is flatted into batch size)
+// T: tokens (sequence length)
+// C: channels (head dimension)
+enum xnn_status xnn_create_scaled_dot_attention_ntc_f32(
+  enum xnn_attention_logits_cap_type cap_type,
+  const void* cap_params,
+  uint32_t flags,
+  xnn_operator_t* attention_op_out);
+
+enum xnn_status xnn_reshape_scaled_dot_attention_ntc_f32(
+  xnn_operator_t attention_op,
+  size_t batch_size,
+  // Number of tokens in query.
+  size_t query_tokens,
+  // Number of tokens in key/value. For self-attention, this is same as tokens.
+  size_t key_value_tokens,
+  size_t channels,
+  size_t* workspace_size,
+  size_t* workspace_alignment,
+  pthreadpool_t threadpool);
+
+// Query is of dimension [batch_size, query_tokens, channels].
+// Key and value are of dimension [batch_size, key_value_tokens, channels].
+// Scale is of dimension [channels].
+// Mask is of dimension [query_tokens, key_value_tokens].
+enum xnn_status xnn_setup_scaled_dot_attention_ntc_f32(
+  xnn_operator_t attention_op,
+  void* workspace,
+  const float* query,
+  const float* key,
+  const float* value,
+  const float* scale,
+  const float* mask,
+  float* output);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

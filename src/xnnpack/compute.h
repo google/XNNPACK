@@ -11,8 +11,8 @@
 
 #include <xnnpack.h>
 #include <xnnpack/common.h>
+#include <xnnpack/config.h>
 #include <xnnpack/math.h>
-#include <xnnpack/params.h>
 
 
 enum xnn_parallelization_type {
@@ -30,6 +30,7 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_5d_tile_2d,
   xnn_parallelization_type_6d_tile_2d,
 #if XNN_MAX_UARCH_TYPES > 1
+  xnn_parallelization_type_2d_tile_1d_with_uarch,
   xnn_parallelization_type_2d_tile_2d_with_uarch,
   xnn_parallelization_type_3d_tile_2d_with_uarch,
   xnn_parallelization_type_4d_tile_2d_with_uarch,
@@ -52,6 +53,7 @@ struct compute_parameters {
     pthreadpool_task_5d_tile_2d_t task_5d_tile_2d;
     pthreadpool_task_6d_tile_2d_t task_6d_tile_2d;
 #if XNN_MAX_UARCH_TYPES > 1
+    pthreadpool_task_2d_tile_1d_with_id_t task_2d_tile_1d_with_id;
     pthreadpool_task_2d_tile_2d_with_id_t task_2d_tile_2d_with_id;
     pthreadpool_task_3d_tile_2d_with_id_t task_3d_tile_2d_with_id;
     pthreadpool_task_4d_tile_2d_with_id_t task_4d_tile_2d_with_id;
@@ -1375,4 +1377,103 @@ struct rope_context {
       size_t batch_index,
       size_t head_index,
       size_t sequence_index);
+#endif
+
+struct attention_logits_cap {
+  enum xnn_attention_logits_cap_type type;
+  union {
+    float f32;
+  } cap;
+  union {
+    float f32;
+  } cap_reciprocal;
+};
+
+struct scaled_dot_attention_context {
+  // Pointer to query.
+  const void* query;
+  // Pointer to packed key.
+  const void* key;
+  // Pointer to packed value.
+  const void* value;
+  // Pointer to scale for query.
+  const void* scale;
+  // Pointer to mask.
+  const void* mask;
+  // Pointer to write output of attention.
+  void* output;
+
+  // Pointer to where we can write the output of Q scaled.
+  void* scaled_query;
+  // Pointer to where we can write the output of Q*K.
+  void* logits_buffer;
+
+  // Cap for logits (Q * K).
+  struct attention_logits_cap logits_cap;
+
+  // Channels (head dimension).
+  size_t channels;
+  // Channels (head dimension) in bytes.
+  size_t scaled_channels;
+  // Tokens length for key/value.
+  size_t key_value_tokens;
+  // Tokens length for key/value, in bytes.
+  size_t key_value_tokens_scaled;
+  // Stride, in bytes, between columns of logits and final attention output.
+  size_t cn_stride;
+
+  // Stride, in bytes, between each batch of query.
+  size_t query_batch_stride;
+  // Strid, in bytes,  between each batch of key.
+  size_t key_batch_stride;
+  // Strid, in bytes,  between each batch of value.
+  size_t value_batch_stride;
+  // Strid, in bytes,  between each batch of logits (Q*K).
+  size_t logits_batch_stride;
+
+  struct xnn_hmp_gemm_ukernel gemm_ukernel;
+  xnn_compute_reciprocal_fn compute_reciprocal;
+  xnn_rmax_ukernel_fn rmax_ukernel;
+  xnn_raddstoreexpminusmax_ukernel_fn raddstoreexpminusmax_ukernel;
+  xnn_vbinary_ukernel_fn vmulc_ukernel;
+  xnn_vbinary_ukernel_fn vmul_ukernel;
+  xnn_vbinary_ukernel_fn vdivc_ukernel;
+  xnn_vbinary_ukernel_fn vadd_ukernel;
+  xnn_vunary_ukernel_fn vtanh_ukernel;
+
+  union {
+    union xnn_f32_expminus_params f32;
+  } expminus_params;
+  union {
+    union xnn_f32_minmax_params f32;
+  } minmax_params;
+  union {
+    union xnn_f32_tanh_params f32;
+  } tanh_params;
+
+  // Attention uses a single workspace for multiple intermediates:
+  // - scaled query
+  // - packed keys
+  // - packed values
+  // - output of Q * K (known as logits)
+  // These are the offsets into the workspace that can be used to read/write the intermediates.
+  // These are set during reshape, and then used during setup.
+  size_t scaled_query_offset;
+  size_t packed_k_offset;
+  size_t packed_v_offset;
+  size_t logits_offset;
+};
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_scaled_dot_attention(
+      const struct scaled_dot_attention_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
+      size_t tokens_start,
+      size_t tokens_block_size);
+  XNN_PRIVATE void xnn_compute_hmp_scaled_dot_attention(
+      const struct scaled_dot_attention_context context[restrict XNN_MIN_ELEMENTS(1)],
+      uint32_t uarch_index,
+      size_t batch_index,
+      size_t tokens_start,
+      size_t tokens_block_size);
 #endif
