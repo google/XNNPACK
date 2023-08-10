@@ -30815,6 +30815,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar_float_x4(
   size_t sr,
   const uint32_t* weights,
   const uint32_t* bias,
+  const void* scale,
   uint32_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -30936,6 +30937,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x4__scalar_float_x4(
   size_t sr,
   const uint32_t* weights,
   const uint32_t* bias,
+  const void* scale,
   uint32_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -31469,6 +31471,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x4__scalar_int_x4(
   size_t sr,
   const int8_t* weights,
   const uint32_t* bias,
+  const void* scale,
   int8_t* packed_weights,
   size_t extra_bytes,
   const void* params)

@@ -73,7 +73,7 @@ static void f32_gemm(benchmark::State& state,
 
   for (auto _ : state) {
     packw(batch, dim_n, dim_k, nr, kr, sr,
-      reinterpret_cast<const uint32_t*>(b.data()), /*bias=*/nullptr,
+      reinterpret_cast<const uint32_t*>(b.data()), /*bias=*/nullptr, /*scale=*/nullptr,
       reinterpret_cast<uint32_t*>(w.data()),
       /*extra_bytes=*/0, nullptr);
 
@@ -143,7 +143,7 @@ static void f32_ppmm1p(benchmark::State& state,
 
   for (auto _ : state) {
     packw(batch, dim_n, dim_k, nr, kr, sr,
-      reinterpret_cast<const uint32_t*>(b.data()), /*bias=*/nullptr,
+      reinterpret_cast<const uint32_t*>(b.data()), /*bias=*/nullptr, /*scale=*/nullptr,
       reinterpret_cast<uint32_t*>(w.data()),
       /*extra_bytes=*/0, nullptr);
 
@@ -215,9 +215,9 @@ static void f32_ppmm2p(benchmark::State& state,
 
   for (auto _ : state) {
     packw(batch, dim_n, dim_k, nr, kr, sr,
-      reinterpret_cast<const uint32_t*>(b.data()), /*bias=*/nullptr,
+      reinterpret_cast<const uint32_t*>(b.data()), /*bias=*/nullptr, /*scale=*/nullptr,
       reinterpret_cast<uint32_t*>(w.data()),
-      /*extra_bytes=*/0, nullptr);
+      /*extra_bytes=*/0, /*params=*/nullptr);
 
     for (size_t i = 0; i < batch; i++) {
       for (size_t m = 0; m < dim_m; m += mr) {

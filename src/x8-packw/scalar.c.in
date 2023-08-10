@@ -28,6 +28,7 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_int_x${KBLOCK}(
   size_t sr,
   const ${WTYPE}* weights,
   const ${BTYPE}* bias,
+  const void* scale,
   ${WTYPE}* packed_weights,
   size_t extra_bytes,
   const void* params)

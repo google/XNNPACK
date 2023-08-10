@@ -205,7 +205,7 @@ static enum xnn_status create_dwconv_path(
         kernel_height, kernel_width,
         groups,
         dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
-        kernel, bias, weights_ptr,
+        kernel, bias, /*scale=*/NULL, weights_ptr,
         dwconv_ukernel->channel_tile * extra_weights_bytes,
         dwconv_ukernel->channel_subtile * extra_weights_bytes,
         packing_params);
@@ -217,7 +217,7 @@ static enum xnn_status create_dwconv_path(
         kernel_height, kernel_width,
         groups,
         dwconv_ukernel->channel_tile, dwconv_ukernel->channel_subtile, dwconv_ukernel->channel_round,
-        kernel, bias, weights_ptr,
+        kernel, bias, /*scale=*/NULL, weights_ptr,
         dwconv_ukernel->channel_tile * extra_weights_bytes,
         dwconv_ukernel->channel_subtile * extra_weights_bytes,
         packing_params);
@@ -339,7 +339,7 @@ static enum xnn_status create_gemm_or_igemm(
       pack_gemm_goi_w(
           groups, group_output_channels, group_input_channels,
           nr, kr, sr,
-          kernel, bias, weights_ptr, gemm_config->nr * extra_weights_bytes, packing_params);
+          kernel, bias, /*scale=*/NULL, weights_ptr, gemm_config->nr * extra_weights_bytes, packing_params);
       convolution_op->ukernel.gemm = (struct xnn_ukernel_gemm) {
         .mr = mr,
         .nr = nr,
@@ -364,12 +364,12 @@ static enum xnn_status create_gemm_or_igemm(
         pack_conv_kgo_w(
             groups, group_output_channels, kernel_size,
             nr, kr, sr,
-            kernel, bias, weights_ptr, gemm_config->nr * extra_weights_bytes, packing_params);
+            kernel, bias, /*scale=*/NULL, weights_ptr, gemm_config->nr * extra_weights_bytes, packing_params);
       } else {
         pack_conv_goki_w(
             groups, group_output_channels, kernel_size, group_input_channels,
             nr, kr, sr,
-            kernel, bias, weights_ptr, gemm_config->nr * extra_weights_bytes, packing_params);
+            kernel, bias, /*scale=*/NULL, weights_ptr, gemm_config->nr * extra_weights_bytes, packing_params);
       }
       convolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
         .mr = mr,

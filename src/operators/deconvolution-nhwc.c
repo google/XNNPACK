@@ -210,8 +210,8 @@ static enum xnn_status create_deconvolution2d_nhwc(
       pack_conv_goki_w(
         groups, group_output_channels, kernel_size, group_input_channels,
         nr, kr, sr,
-        kernel, bias, weights_ptr,
-        0 /* extra bytes */,
+        kernel, bias, /*scale=*/NULL, weights_ptr,
+        /*extra_bytes=*/0,
         packing_params);
       break;
     case xnn_microkernel_type_subconv2d:
@@ -219,7 +219,7 @@ static enum xnn_status create_deconvolution2d_nhwc(
         groups, group_output_channels, kernel_height, kernel_width, group_input_channels,
         stride_height, stride_width,
         nr, kr, sr,
-        kernel, bias, weights_ptr, deconvolution_op->subconvolution_buffer,
+        kernel, bias, /*scale=*/NULL, weights_ptr, deconvolution_op->subconvolution_buffer,
         packing_params);
       // We assume that the first subconvolution param weights point to the start of the weights, this is used to check
       // if the weights cache has moved.

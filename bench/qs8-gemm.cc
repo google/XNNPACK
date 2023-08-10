@@ -70,9 +70,11 @@ static void GEMMBenchmark(benchmark::State& state,
   std::fill(w.begin(), w.end(), 0);
   const xnn_qs8_packing_params packing_params = { 127 };
   if (extended_weights) {
-    xnn_pack_qs8_gemm_xw_goi_w(1 /* groups */, nc, kc, nr, kr, sr, k.data(), b.data(), w.data(), 0, &packing_params);
+    xnn_pack_qs8_gemm_xw_goi_w(/*groups=*/1, nc, kc, nr, kr, sr,
+      k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, &packing_params);
   } else {
-    xnn_pack_qs8_gemm_goi_w(1 /* groups */, nc, kc, nr, kr, sr, k.data(), b.data(), w.data(), 0, &packing_params);
+    xnn_pack_qs8_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr,
+      k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, &packing_params);
   }
   std::vector<int8_t> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), 0xA5);

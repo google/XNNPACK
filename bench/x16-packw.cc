@@ -61,7 +61,7 @@ static void x16_packw(benchmark::State& state,
 
     packw(batch, dim_n, dim_k, nr, kr, sr,
       reinterpret_cast<uint16_t*>(weights.data() + buffer_index * batch * dim_n * dim_k),
-       /*bias=*/nullptr,
+      /*bias=*/nullptr, /*scale=*/nullptr,
       reinterpret_cast<uint16_t*>(packed_weights.data() + buffer_index * batch * (rounded_n * rounded_k + rounded_n)),
       /*extra_bytes=*/0, /*params=*/nullptr);
   }
@@ -246,15 +246,13 @@ void x16_packw__reference(
   size_t sr,
   const uint16_t* weights,
   const uint16_t* bias,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
 {
   xnn_pack_f16_gemm_goi_w(batch, dim_n, dim_k, nr, kr, sr,
-     weights,
-     bias,
-     packed_weights,
-     extra_bytes, params);
+     weights, bias, scale, packed_weights, extra_bytes, params);
 }
 
 static void x16_packw_x8__reference(benchmark::State& state, const char* net) {

@@ -90,7 +90,7 @@ static void f32_dwconv(benchmark::State& state,
   std::fill(w.begin(), w.end(), 0.0f);
   xnn_pack_f32_dwconv_ghw_w(primary_tile, 0, 0, kernel_height, kernel_width, channels,
                             channel_tile, channel_tile, /*channel_round=*/1,
-                            k.data(), b.data(), w.data(),
+                            k.data(), b.data(), /*scale=*/nullptr, w.data(),
                             /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
@@ -233,8 +233,8 @@ static void f32_dwconv(
   xnn_pack_f32_dwconv_ghw_w(first_pass_tile, middle_pass_tile, last_pass_tile,
                             kernel_height, kernel_width,
                             channels, channel_tile, channel_subtile, channel_round,
-                            k.data(), b.data(), w.data(),
-                            /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, nullptr);
+                            k.data(), b.data(), /*scale=*/nullptr, w.data(),
+                            /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, /*params=*/nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
   }

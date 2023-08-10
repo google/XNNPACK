@@ -9274,6 +9274,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16_prfm(
   size_t sr,
   const uint16_t* weights,
   const uint16_t* bias,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -10852,6 +10853,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16(
   size_t sr,
   const uint16_t* weights,
   const uint16_t* bias,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -12336,6 +12338,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16_prfm(
   size_t sr,
   const uint16_t* weights,
   const uint16_t* bias,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -13222,6 +13225,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16(
   size_t sr,
   const uint16_t* weights,
   const uint16_t* bias,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)

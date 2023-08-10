@@ -96,7 +96,7 @@ static void DWConvBenchmark(benchmark::State& state,
   packing_params.input_zero_point = 0;
   xnn_pack_qs8_dwconv_ghw_w(primary_tile, 0, 0, kernel_height, kernel_width, channels,
                             channel_tile, channel_tile, /*channel_round=*/1,
-                            k.data(), b.data(), w.data(),
+                            k.data(), b.data(), /*scale=*/nullptr, w.data(),
                             /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, &packing_params);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_size, w.begin() + n * w_size);
@@ -247,7 +247,7 @@ static void DWConvBenchmark(benchmark::State& state,
   xnn_pack_qs8_dwconv_ghw_w(first_pass_tile, middle_pass_tile, last_pass_tile,
                             kernel_height, kernel_width,
                             channels, channel_tile, channel_tile, channel_round,
-                            k.data(), b.data(), w.data(),
+                            k.data(), b.data(), /*scale=*/nullptr, w.data(),
                             /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, &packing_params);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_size, w.begin() + n * w_size);

@@ -75,7 +75,8 @@ static void GEMMBenchmark(benchmark::State& state,
   std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0);
   const xnn_qu8_packing_params packing_params = { 127, 127 };
-  xnn_pack_qu8_gemm_goi_w(1 /* groups */, nc, kc, nr, kr, sr, k.data(), b.data(), w.data(), 0, &packing_params);
+  xnn_pack_qu8_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr,
+    k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, &packing_params);
   std::vector<uint8_t> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), 0xA5);
 

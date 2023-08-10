@@ -309,10 +309,10 @@ void xnn_compute_packw_gemm_gio(
   void* packed_weights = (void*) ((uintptr_t) context->packed_weights + n_block_start * context->w_stride);
 
   context->packw_gemm_gio(
-    1, n_block_size, context->kc,
+    /*groups=*/1, n_block_size, context->kc,
     context->nr, context->kr, context->sr,
     context->k_stride_elements,
-    kernel, bias, packed_weights,
+    kernel, bias, /*scale=*/NULL, packed_weights,
     /*extra_bytes=*/0, /*params=*/NULL);
 }
 
@@ -333,10 +333,10 @@ void xnn_compute_batched_packw_gemm_gio(
                                   batch_index * context->gc_stride);
 
   context->packw_gemm_gio(
-    1, n_block_size, context->kc,
+    /*groups=*/1, n_block_size, context->kc,
     context->nr, context->kr, context->sr,
     context->k_stride_elements,
-    kernel, bias, packed_weights,
+    kernel, bias, /*scale=*/NULL, packed_weights,
     /*extra_bytes=*/0, /*params=*/NULL);
 }
 
@@ -353,9 +353,9 @@ void xnn_compute_packw_gemm_goi(
   void* packed_weights = (void*) ((uintptr_t) context->packed_weights + context->w_stride * n_block_start);
 
   context->packw_gemm_goi(
-    1, n_block_size, context->kc,
+    /*groups=*/1, n_block_size, context->kc,
     context->nr, context->kr, context->sr,
-    kernel, bias, packed_weights,
+    kernel, bias, /*scale=*/NULL, packed_weights,
     /*extra_bytes=*/0, /*params=*/NULL);
 }
 
@@ -376,9 +376,9 @@ void xnn_compute_batched_packw_gemm_goi(
                                   batch_index * context->gc_stride);
 
   context->packw_gemm_goi(
-    1, n_block_size, context->kc,
+    /*groups=*/1, n_block_size, context->kc,
     context->nr, context->kr, context->sr,
-    kernel, bias, packed_weights,
+    kernel, bias, /*scale=*/NULL, packed_weights,
     /*extra_bytes=*/0, /*params=*/NULL);
 }
 

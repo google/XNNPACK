@@ -141,18 +141,18 @@ static enum xnn_status create_fully_connected_nc(
 
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     pack_gemm_gio_w(
-      1, output_channels, input_channels,
+      /*groups=*/1, output_channels, input_channels,
       nr, kr, sr,
       output_channels,
-      kernel, bias,
+      kernel, bias, /*scale=*/NULL,
       weights_ptr,
       gemm_config->nr * extra_weights_bytes,
       packing_params);
   } else {
     pack_gemm_goi_w(
-      1, output_channels, input_channels,
+      /*groups=*/1, output_channels, input_channels,
       nr, kr, sr,
-      kernel, bias,
+      kernel, bias, /*scale=*/NULL,
       weights_ptr,
       gemm_config->nr * extra_weights_bytes,
       packing_params);

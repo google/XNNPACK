@@ -27005,6 +27005,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8_prfm(
   size_t sr,
   const uint16_t* weights,
   const uint16_t* bias,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -27600,6 +27601,7 @@ void xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8_prfm(
   size_t sr,
   const uint16_t* weights,
   const uint16_t* bias,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -28296,6 +28298,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__neon_ld2lane_x2_prfm(
   size_t sr,
   const uint32_t* weights,
   const uint32_t* bias,
+  const void* scale,
   uint32_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -28385,6 +28388,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4_prfm(
   size_t sr,
   const uint32_t* weights,
   const uint32_t* bias,
+  const void* scale,
   uint32_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -28718,6 +28722,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__neon_ld4lane_x4_prfm(
   size_t sr,
   const uint32_t* weights,
   const uint32_t* bias,
+  const void* scale,
   uint32_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -29851,6 +29856,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x8__scalar_int_x4(
   size_t sr,
   const int8_t* weights,
   const uint32_t* bias,
+  const void* scale,
   int8_t* packed_weights,
   size_t extra_bytes,
   const void* params)

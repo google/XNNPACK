@@ -26,6 +26,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4(
   size_t sr,
   const uint32_t* weights,
   const uint32_t* bias,
+  const void* scale,
   uint32_t* packed_weights,
   size_t extra_bytes,
   const void* params)

@@ -112,15 +112,20 @@ class PackWMicrokernelTester {
     const xnn_qs8_packing_params packing_params = { 127 };
 
     // Compute reference results.
-    xnn_pack_f32_qs8w_gemm_goi_w(1, n(), k(), nr(), 1 /* kr */, sr(),
-      reinterpret_cast<const int8_t *>(weights.data()), reinterpret_cast<const float *>(bias_data), reinterpret_cast<void *>(packed_w_ref.data()), 0, &packing_params);
+    xnn_pack_f32_qs8w_gemm_goi_w(/*groups=*/1, n(), k(), nr(), /*kr=*/1, sr(),
+      reinterpret_cast<const int8_t *>(weights.data()),
+      reinterpret_cast<const float *>(bias_data),
+      /*scale=*/nullptr,
+      reinterpret_cast<void *>(packed_w_ref.data()),
+      /*extra_bytes=*/0, &packing_params);
 
     // Call optimized micro-kernel.
-    packw(1, n(), k(), nr(), 1 /* kr */, sr(), weights.data(), bias_data, packed_w.data(), 0, &packing_params);
+    packw(/*groups=*/1, n(), k(), nr(), /*kr=*/1, sr(),
+      weights.data(), bias_data, /*scale=*/nullptr, packed_w.data(), /*extra_bytes=*/0, &packing_params);
 
     // Verify results.
     for (size_t i = 0; i < (packed_n() * k() + packed_n() * sizeof(int32_t)); i++) {
-      if (packed_w_ref[i] !=  INT8_C(0x7B)) {  // Allow pad to differ
+      if (packed_w_ref[i] != INT8_C(0x7B)) {  // Allow pad to differ
         EXPECT_EQ((int32_t) packed_w[i], (int32_t) packed_w_ref[i])
             << "at n " << i << " of " << (int32_t) (packed_n() * k() + packed_n());
       }
@@ -156,12 +161,13 @@ class PackWMicrokernelTester {
     xnn_pack_f16_gemm_goi_w(g(), n(), packed_k(), nr(), kr(), sr(),
       reinterpret_cast<const uint16_t*>(padded_weights.data()),
       reinterpret_cast<const uint16_t*>(bias_data),
+      /*scale=*/nullptr,
       reinterpret_cast<uint16_t*>(packed_w_ref.data()),
       /*extra_bytes=*/0, /*params=*/nullptr);
 
     // Call optimized micro-kernel.
     packw(g(), n(), k(), nr(), kr(), sr(),
-      weights.data(), bias_data, packed_w.data(),
+      weights.data(), bias_data, /*scale=*/nullptr, packed_w.data(),
       /*extra_bytes=*/0, /*params=*/nullptr);
 
     // Verify results.
@@ -204,12 +210,13 @@ class PackWMicrokernelTester {
     xnn_pack_f32_gemm_goi_w(g(), n(), packed_k(), nr(), kr(), sr(),
       reinterpret_cast<const float*>(padded_weights.data()),
       reinterpret_cast<const float*>(bias_data),
+      /*scale=*/nullptr,
       reinterpret_cast<float*>(packed_w_ref.data()),
       /*extra_bytes=*/0, /*params=*/nullptr);
 
     // Call optimized micro-kernel.
     packw(g(), n(), k(), nr(), kr(), sr(),
-      weights.data(), bias_data, packed_w.data(),
+      weights.data(), bias_data, /*scale=*/nullptr, packed_w.data(),
       /*extra_bytes=*/0, /*params=*/nullptr);
 
     // Verify results.

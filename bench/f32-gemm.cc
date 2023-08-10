@@ -71,7 +71,8 @@ static void GEMMBenchmark(benchmark::State& state,
 
   std::vector<float, AlignedAllocator<float, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0.0f);
-  xnn_pack_f32_gemm_goi_w(1 /* groups */, nc, kc, nr, kr, sr, k.data(), b.data(), w.data(), 0, nullptr);
+  xnn_pack_f32_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr,
+    k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
@@ -215,7 +216,8 @@ static void PPMM1PBenchmark(benchmark::State& state,
 
   std::vector<float, AlignedAllocator<float, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0.0f);
-  xnn_pack_f32_gemm_goi_w(1 /* groups */, nc, kc, nr, 1 /* kr */, 1 /* sr */, k.data(), b.data(), w.data(), 0, nullptr);
+  xnn_pack_f32_gemm_goi_w(/*groups=*/1, nc, kc, nr, /*kr=*/1, /*sr=*/1,
+    k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
@@ -294,7 +296,8 @@ static void PPMM2PBenchmark(benchmark::State& state,
 
   std::vector<float, AlignedAllocator<float, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0.0f);
-  xnn_pack_f32_gemm_goi_w(1 /* groups */, nc, kc, nr, 1 /* kr */, 1 /* sr */, k.data(), b.data(), w.data(), 0, nullptr);
+  xnn_pack_f32_gemm_goi_w(/*groups=*/1, nc, kc, nr, /*kr=*/1, /*sr=*/1,
+    k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
@@ -463,7 +466,8 @@ static void GEMMBenchmark(benchmark::State& state,
 
   std::vector<float, AlignedAllocator<float, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0.0f);
-  xnn_pack_f32_gemm_goi_w(1 /* groups */, nc, kc, nr, kr, sr, k.data(), b.data(), w.data(), 0, nullptr);
+  xnn_pack_f32_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr,
+    k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
   std::vector<float> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 

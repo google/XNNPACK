@@ -23,8 +23,9 @@ extern "C" {
       size_t nr,                                            \
       size_t kr,                                            \
       size_t sr,                                            \
-      const int8_t* k,                                      \
-      const uint32_t* b,                                    \
+      const int8_t* weights,                                \
+      const uint32_t* bias,                                 \
+      const void* scale,                                    \
       int8_t* packed_weights,                               \
       size_t extra_bytes,                                   \
       const void* params);                                  \
@@ -43,8 +44,9 @@ DECLARE_X8_PACKW_GEMM_GOI_UKERNEL_FUNCTION(xnn_x8_packw_gemm_goi_ukernel_x32__sc
       size_t nr,                                             \
       size_t kr,                                             \
       size_t sr,                                             \
-      const uint16_t* k,                                     \
-      const uint16_t* b,                                     \
+      const uint16_t* weights,                               \
+      const uint16_t* bias,                                  \
+      const void* scale,                                     \
       uint16_t* packed_weights,                              \
       size_t extra_bytes,                                    \
       const void* params);                                   \
@@ -82,8 +84,9 @@ DECLARE_X16_PACKW_GEMM_GOI_UKERNEL_FUNCTION(xnn_x16_packw_gemm_goi_ukernel_x16__
       size_t nr,                                             \
       size_t kr,                                             \
       size_t sr,                                             \
-      const uint32_t* k,                                     \
-      const uint32_t* b,                                     \
+      const uint32_t* weights,                               \
+      const uint32_t* bias,                                  \
+      const void* scale,                                     \
       uint32_t* packed_weights,                              \
       size_t extra_bytes,                                    \
       const void* params);                                   \

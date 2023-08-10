@@ -28,6 +28,7 @@ void xnn_pack_f32_gemm_goi_w(
   size_t sr,
   const float* k,
   const float* b,
+  const void* scale,
   float* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -82,6 +83,7 @@ void xnn_pack_f16_gemm_goi_w(
   size_t sr,
   const uint16_t* k,
   const uint16_t* b,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -136,6 +138,7 @@ void xnn_pack_f32_to_f16_gemm_goi_w(
   size_t sr,
   const float* k,
   const float* b,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -190,6 +193,7 @@ void xnn_pack_qu8_gemm_goi_w(
   size_t sr,
   const uint8_t* k,
   const int32_t* b,
+  const void* scale,
   void* packed_weights,
   size_t extra_bytes,
   const struct xnn_qu8_packing_params* params)
@@ -254,6 +258,7 @@ void xnn_pack_qs8_gemm_goi_w(
   size_t sr,
   const int8_t* k,
   const int32_t* b,
+  const float* scale,
   void* packed_weights,
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
@@ -317,6 +322,7 @@ void xnn_pack_f32_qs8w_gemm_goi_w(
   size_t sr,
   const int8_t* k,
   const float* bias,
+  const float* scale,
   void* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -378,6 +384,7 @@ void xnn_pack_f32_qc4w_gemm_goi_w(
   size_t sr,
   const void* k,  // 4 bit values
   const float* bias,
+  const float* scale,
   void* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -438,6 +445,7 @@ void xnn_pack_qs8_gemm_xw_goi_w(
   size_t sr,
   const int8_t* k,
   const int32_t* b,
+  const void* scale,
   void* packed_weights,
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
@@ -502,6 +510,7 @@ void xnn_pack_f32_gemm_gio_w(
   size_t k_stride,
   const float* k,
   const float* b,
+  const void* scale,
   float* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -557,6 +566,7 @@ void xnn_pack_f16_gemm_gio_w(
   size_t k_stride,
   const uint16_t* k,
   const uint16_t* b,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -612,6 +622,7 @@ void xnn_pack_f32_to_f16_gemm_gio_w(
   size_t k_stride,
   const float* k,
   const float* b,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -667,6 +678,7 @@ void xnn_pack_qu8_gemm_gio_w(
   size_t k_stride,
   const uint8_t* k,
   const int32_t* b,
+  const void* scale,
   void* packed_weights,
   size_t extra_bytes,
   const struct xnn_qu8_packing_params* params)
@@ -732,6 +744,7 @@ void xnn_pack_qs8_gemm_gio_w(
   size_t k_stride,
   const int8_t* k,
   const int32_t* b,
+  const float* scale,
   void* packed_weights,
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
@@ -796,6 +809,7 @@ void xnn_pack_f32_qs8w_gemm_gio_w(
   size_t k_stride,
   const int8_t* k,
   const float* bias,
+  const float* scale,
   void* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -856,6 +870,7 @@ void xnn_pack_f32_conv_goki_w(
   size_t sr,
   const float* k,
   const float* b,
+  const void* scale,
   float* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -909,6 +924,7 @@ void xnn_pack_f16_conv_goki_w(
   size_t sr,
   const uint16_t* k,
   const uint16_t* b,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -962,6 +978,7 @@ void xnn_pack_f32_to_f16_conv_goki_w(
   size_t sr,
   const float* k,
   const float* b,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -1015,6 +1032,7 @@ void xnn_pack_qu8_conv_goki_w(
   size_t sr,
   const uint8_t* k,
   const int32_t* b,
+  const void* scale,
   void* packed_weights,
   size_t extra_bytes,
   const struct xnn_qu8_packing_params* params)
@@ -1082,6 +1100,7 @@ void xnn_pack_qs8_conv_goki_w(
   size_t sr,
   const int8_t* k,
   const int32_t* b,
+  const float* scale,
   void* packed_weights,
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
@@ -1147,6 +1166,7 @@ void xnn_pack_f32_conv_kgo_w(
   size_t sr,
   const float* k,
   const float* b,
+  const void* scale,
   float* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -1192,6 +1212,7 @@ void xnn_pack_f16_conv_kgo_w(
   size_t sr,
   const uint16_t* k,
   const uint16_t* b,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -1237,6 +1258,7 @@ void xnn_pack_f32_to_f16_conv_kgo_w(
   size_t sr,
   const float* k,
   const float* b,
+  const void* scale,
   uint16_t* packed_weights,
   size_t extra_bytes,
   const void* params)
@@ -1282,6 +1304,7 @@ void xnn_pack_qu8_conv_kgo_w(
   size_t sr,
   const uint8_t* k,
   const int32_t* b,
+  const void* scale,
   void* packed_weights,
   size_t extra_bytes,
   const struct xnn_qu8_packing_params* params)
@@ -1339,6 +1362,7 @@ void xnn_pack_qs8_conv_kgo_w(
   size_t sr,
   const int8_t* k,
   const int32_t* b,
+  const float* scale,
   void* packed_weights,
   size_t extra_bytes,
   const struct xnn_qs8_packing_params* params)
@@ -1399,6 +1423,7 @@ void xnn_pack_f32_deconv_goki_w(
   size_t sr,
   const float* k,
   const float* b,
+  const void* scale,
   float* packed_weights,
   struct subconvolution_params* subconv_params,
   const void* params)
@@ -1462,6 +1487,7 @@ void xnn_pack_f16_deconv_goki_w(
   size_t sr,
   const uint16_t* k,
   const uint16_t* b,
+  const void* scale,
   uint16_t* packed_weights,
   struct subconvolution_params* subconv_params,
   const void* params)
@@ -1525,6 +1551,7 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
   size_t sr,
   const float* k,
   const float* b,
+  const void* scale,
   uint16_t* packed_weights,
   struct subconvolution_params* subconv_params,
   const void* params)
@@ -1588,6 +1615,7 @@ void xnn_pack_qs8_deconv_goki_w(
   size_t sr,
   const int8_t* k,
   const int32_t* b,
+  const float* scale,
   void* packed_weights,
   struct subconvolution_params* subconv_params,
   const struct xnn_qs8_packing_params* params)
@@ -1664,6 +1692,7 @@ void xnn_pack_qu8_deconv_goki_w(
   size_t sr,
   const uint8_t* k,
   const int32_t* b,
+  const void* scale,
   void* packed_weights,
   struct subconvolution_params* subconv_params,
   const struct xnn_qu8_packing_params* params)
@@ -1749,6 +1778,7 @@ void xnn_pack_f32_dwconv_ghw_w(
   size_t channel_round,
   const float* k,
   const float* b,
+  const void* scale,
   float* packed_weights,
   size_t per_tile_extra_bytes,
   size_t per_subtile_extra_bytes,
@@ -1934,6 +1964,7 @@ void xnn_pack_f16_dwconv_ghw_w(
   size_t channel_round,
   const uint16_t* k,
   const uint16_t* b,
+  const void* scale,
   uint16_t* packed_weights,
   size_t per_tile_extra_bytes,
   size_t per_subtile_extra_bytes,
@@ -2119,6 +2150,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
   size_t channel_round,
   const float* k,
   const float* b,
+  const void* scale,
   uint16_t* packed_weights,
   size_t per_tile_extra_bytes,
   size_t per_subtile_extra_bytes,
@@ -2305,6 +2337,7 @@ void xnn_pack_qu8_dwconv_ghw_w(
   size_t channel_round,
   const uint8_t* k,
   const int32_t* b,
+  const void* scale,
   void* packed_weights,
   size_t per_tile_extra_bytes,
   size_t per_subtile_extra_bytes,
@@ -2527,6 +2560,7 @@ void xnn_pack_qs8_dwconv_ghw_w(
   size_t channel_round,
   const int8_t* k,
   const int32_t* b,
+  const float* scale,
   void* packed_weights,
   size_t per_tile_extra_bytes,
   size_t per_subtile_extra_bytes,
@@ -2756,6 +2790,7 @@ void xnn_pack_f32_dwconv_hwg_w(
   size_t channel_round,
   const float* k,
   const float* b,
+  const void* scale,
   float* packed_weights,
   size_t per_tile_extra_bytes,
   size_t per_subtile_extra_bytes,
@@ -2956,6 +2991,7 @@ void xnn_pack_f16_dwconv_hwg_w(
   size_t channel_round,
   const uint16_t* k,
   const uint16_t* b,
+  const void* scale,
   uint16_t* packed_weights,
   size_t per_tile_extra_bytes,
   size_t per_subtile_extra_bytes,
@@ -3156,6 +3192,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
   size_t channel_round,
   const float* k,
   const float* b,
+  const void* scale,
   uint16_t* packed_weights,
   size_t per_tile_extra_bytes,
   size_t per_subtile_extra_bytes,
@@ -3356,6 +3393,7 @@ void xnn_pack_qu8_dwconv_hwg_w(
   size_t channel_round,
   const uint8_t* k,
   const int32_t* b,
+  const void* scale,
   void* packed_weights,
   size_t per_tile_extra_bytes,
   size_t per_subtile_extra_bytes,
@@ -3578,6 +3616,7 @@ void xnn_pack_qs8_dwconv_hwg_w(
   size_t channel_round,
   const int8_t* k,
   const int32_t* b,
+  const float* scale,
   void* packed_weights,
   size_t per_tile_extra_bytes,
   size_t per_subtile_extra_bytes,
