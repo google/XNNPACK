@@ -1126,7 +1126,7 @@ void xnn_compute_scaled_dot_attention(
   {
     uintptr_t query = (uintptr_t) context->query + query_tile_offset;
     uintptr_t query_scaled_current = (uintptr_t) scaled_query;
-    // Q_scaled = Q * Scale (along channels). Q and Q_scaled have dimensions [tokens_block_size, query_tokens].
+    // Q_scaled = Q * Scale (along channels). Q and Q_scaled have dimensions [tokens_block_size, channels].
     size_t i = tokens_block_size;
     do {
       context->vmul_ukernel(
