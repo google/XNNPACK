@@ -58,10 +58,9 @@ struct xnn_ukernel_dwconv2d {
 
 struct xnn_ukernel_gemm {
   struct xnn_hmp_gemm_ukernel gemm_cases[XNN_MAX_MR];
-  union {
-    xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
-    xnn_packw_gemm_gio_ukernel_fn packw_gemm_gio;
-  };
+  // Attention operator uses both types of packing.
+  xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
+  xnn_packw_gemm_gio_ukernel_fn packw_gemm_gio;
   uint8_t mr;
   uint8_t nr;
   uint8_t kr;

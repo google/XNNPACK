@@ -74,6 +74,7 @@ enum xnn_status xnn_create_scaled_dot_attention_ntc_f32(
     attention_op->ukernel.gemm.gemm_cases[i] = gemm_config->minmax.gemm[i];
   }
   attention_op->ukernel.gemm.packw_gemm_goi = gemm_config->pack_gemm_goi;
+  attention_op->ukernel.gemm.packw_gemm_gio = gemm_config->pack_gemm_gio;
 
   union xnn_f32_minmax_params minmax_params;
   if XNN_LIKELY(gemm_config->init.f32 != NULL) {
@@ -303,7 +304,7 @@ enum xnn_status xnn_reshape_scaled_dot_attention_ntc_f32(
     .k_stride_elements = channels,
     // b_stride and gb_stride not needed because we do not have bias.
     .w_stride = element_size + (value_k_stride << log2_element_size),
-    .packw_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f32_gemm_gio_w,
+    .packw_gemm_gio = attention_op->ukernel.gemm.packw_gemm_gio,
     .gk_stride = key_value_tokens * (channels << log2_element_size),
     .gb_stride = channels * element_size,
     .gc_stride = value_batch_stride,
