@@ -168,7 +168,7 @@ static enum xnn_status initialize_workspace_values(
   // Allocates larger workspace here if needed.
   if (runtime->workspace->size < mem_arena_size) {
     void* old_workspace_data = runtime->workspace->data;
-    void* new_workspace_data = xnn_allocate_simd_memory(mem_arena_size);
+    void* new_workspace_data = xnn_allocate_zero_simd_memory(mem_arena_size);
     if (new_workspace_data == NULL) {
       xnn_log_error("failed to allocate %zu bytes for runtime workspace", mem_arena_size);
       return xnn_status_out_of_memory;
