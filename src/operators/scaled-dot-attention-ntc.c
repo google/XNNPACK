@@ -6,6 +6,8 @@
 #include <assert.h>
 #include <math.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 
 #include <xnnpack.h>
 #include <xnnpack/allocator.h>
@@ -23,14 +25,25 @@
 #include <xnnpack/pack.h>
 
 
-enum xnn_status xnn_create_scaled_dot_attention_ntc_f32(
+static enum xnn_status create_scaled_dot_attention_ntc(
   enum xnn_attention_logits_cap_type cap_type,
   const void* cap_params,
+  enum xnn_operator_type operator_type,
+  const struct xnn_gemm_config* gemm_config,
+  const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config,
+  const struct xnn_rmax_config* rmax_config,
+  const struct xnn_binary_elementwise_config* vadd_config,
+  const struct xnn_binary_elementwise_config* vmul_config,
+  const struct xnn_unary_elementwise_config* vtanh_config,
+  const void* minmax_params,
+  size_t minmax_params_size,
+  const void* expminus_params,
+  size_t expminus_params_size,
+  const void* tanh_params,
+  size_t tanh_params_size,
   uint32_t flags,
   xnn_operator_t* attention_op_out)
 {
-  const enum xnn_operator_type operator_type = xnn_operator_type_scaled_dot_attention_ntc_f32;
-
   xnn_operator_t attention_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
@@ -47,15 +60,6 @@ enum xnn_status xnn_create_scaled_dot_attention_ntc_f32(
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
       sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
-    goto error;
-  }
-
-  status = xnn_status_unsupported_hardware;
-
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
-  if (gemm_config == NULL) {
-    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-                  xnn_operator_type_to_string(operator_type));
     goto error;
   }
 
@@ -76,12 +80,56 @@ enum xnn_status xnn_create_scaled_dot_attention_ntc_f32(
   attention_op->ukernel.gemm.packw_gemm_goi = gemm_config->pack_gemm_goi;
   attention_op->ukernel.gemm.packw_gemm_gio = gemm_config->pack_gemm_gio;
 
+  memcpy(&attention_op->params, minmax_params, minmax_params_size);
+  memcpy(&attention_op->params2, expminus_params, expminus_params_size);
+  memcpy(&attention_op->params3, tanh_params, tanh_params_size);
+
+  if (cap_type == xnn_attention_logits_cap_type_tanh) {
+    const struct xnn_attention_logits_cap_tanh_params* cap_tanh_params =
+      (const struct xnn_attention_logits_cap_tanh_params*) cap_params;
+    memcpy(&attention_op->attention.cap_params, cap_tanh_params, sizeof(struct xnn_attention_logits_cap_tanh_params));
+  }
+
+  attention_op->attention.raddstoreexpminusmax_config = raddstoreexpminusmax_config;
+  attention_op->attention.rmax_config = rmax_config;
+  attention_op->attention.vadd_config = vadd_config;
+  attention_op->attention.vmul_config = vmul_config;
+  attention_op->attention.vtanh_config = vtanh_config;
+  attention_op->attention.cap_type = cap_type;
+
+  attention_op->state = xnn_run_state_invalid;
+  attention_op->type = operator_type;
+  attention_op->flags = flags;
+
+  *attention_op_out = attention_op;
+
+  return xnn_status_success;
+
+error:
+  xnn_delete_operator(attention_op);
+  return status;
+}
+
+enum xnn_status xnn_create_scaled_dot_attention_ntc_f32(
+  enum xnn_attention_logits_cap_type cap_type,
+  const void* cap_params,
+  uint32_t flags,
+  xnn_operator_t* attention_op_out)
+{
+  const enum xnn_operator_type operator_type = xnn_operator_type_scaled_dot_attention_ntc_f32;
+  enum xnn_status status = xnn_status_unsupported_hardware;
+
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(operator_type));
+    goto error;
+  }
+
   union xnn_f32_minmax_params minmax_params;
   if XNN_LIKELY(gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&minmax_params, -INFINITY , INFINITY);
   }
-
-  memcpy(&attention_op->params, &minmax_params, sizeof(minmax_params));
 
   const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config =
     xnn_init_f32_raddstoreexpminusmax_config();
@@ -96,7 +144,6 @@ enum xnn_status xnn_create_scaled_dot_attention_ntc_f32(
   if (raddstoreexpminusmax_config->init.f32 != NULL) {
     raddstoreexpminusmax_config->init.f32(&expminus_params);
   }
-  memcpy(&attention_op->params2, &expminus_params, sizeof(expminus_params));
 
   const struct xnn_rmax_config* rmax_config = xnn_init_f32_rmax_config();
   if (rmax_config == NULL) {
@@ -134,7 +181,6 @@ enum xnn_status xnn_create_scaled_dot_attention_ntc_f32(
   if XNN_LIKELY(vtanh_config->init.f32_tanh != NULL) {
     vtanh_config->init.f32_tanh(&tanh_params);
   }
-  memcpy(&attention_op->params3, &tanh_params, sizeof(tanh_params));
 
   status = xnn_status_invalid_parameter;
 
@@ -146,26 +192,24 @@ enum xnn_status xnn_create_scaled_dot_attention_ntc_f32(
                   xnn_operator_type_to_string(operator_type), cap_tanh_params->cap);
       goto error;
     }
-    memcpy(&attention_op->attention.cap_params, cap_tanh_params, sizeof(struct xnn_attention_logits_cap_tanh_params));
   }
 
-  attention_op->attention.raddstoreexpminusmax_config = raddstoreexpminusmax_config;
-  attention_op->attention.rmax_config = rmax_config;
-  attention_op->attention.vadd_config = vadd_config;
-  attention_op->attention.vmul_config = vmul_config;
-  attention_op->attention.vtanh_config = vtanh_config;
-  attention_op->attention.cap_type = cap_type;
-
-  attention_op->state = xnn_run_state_invalid;
-  attention_op->type = operator_type;
-  attention_op->flags = flags;
-
-  *attention_op_out = attention_op;
-
-  return xnn_status_success;
+  return create_scaled_dot_attention_ntc(
+    cap_type, cap_params,
+    operator_type,
+    gemm_config,
+    raddstoreexpminusmax_config,
+    rmax_config,
+    vadd_config,
+    vmul_config,
+    vtanh_config,
+    &minmax_params, sizeof(minmax_params),
+    &expminus_params, sizeof(expminus_params),
+    &tanh_params, sizeof(tanh_params),
+    flags,
+    attention_op_out);
 
 error:
-  xnn_delete_operator(attention_op);
   return status;
 }
 
@@ -176,17 +220,29 @@ static void compute_reciprocal_f32(
   *output = 1.0f / *input;
 }
 
-enum xnn_status xnn_reshape_scaled_dot_attention_ntc_f32(
+static enum xnn_status reshape_scaled_dot_attention_ntc(
   xnn_operator_t attention_op,
+  enum xnn_operator_type expected_operator_type,
   size_t batch_size,
   size_t query_tokens,
   size_t key_value_tokens,
   size_t channels,
   size_t* workspace_size,
   size_t* workspace_alignment,
+  size_t log2_element_size,
+  size_t element_size,
+  xnn_compute_reciprocal_fn compute_reciprocal,
+  void* cap,
+  void* cap_reciprocal,
+  size_t cap_size,
+  const void* minmax_params,
+  size_t minmax_params_size,
+  const void* expminus_params,
+  size_t expminus_params_size,
+  const void* tanh_params,
+  size_t tanh_params_size,
   pthreadpool_t threadpool)
 {
-  const enum xnn_operator_type expected_operator_type = xnn_operator_type_scaled_dot_attention_ntc_f32;
   if (attention_op->type != expected_operator_type) {
     xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
       xnn_operator_type_to_string(expected_operator_type),
@@ -228,9 +284,6 @@ enum xnn_status xnn_reshape_scaled_dot_attention_ntc_f32(
       xnn_operator_type_to_string(expected_operator_type), channels);
     return xnn_status_invalid_parameter;
   }
-
-  const size_t log2_element_size = XNN_LOG2_SIZEOF_FLOAT;
-  const size_t element_size = sizeof(float);
 
   const uint32_t mr = attention_op->ukernel.gemm.mr;
   const uint32_t nr = attention_op->ukernel.gemm.nr;
@@ -330,7 +383,7 @@ enum xnn_status xnn_reshape_scaled_dot_attention_ntc_f32(
     .value_batch_stride = value_batch_stride,
     .logits_batch_stride = query_tokens * key_value_tokens * element_size,
     .gemm_ukernel = gemm_ukernel,
-    .compute_reciprocal = (xnn_compute_reciprocal_fn) compute_reciprocal_f32,
+    .compute_reciprocal = compute_reciprocal,
     .raddstoreexpminusmax_ukernel = attention_op->attention.raddstoreexpminusmax_config->ukernel,
     .rmax_ukernel = attention_op->attention.rmax_config->ukernel,
     .vadd_ukernel = attention_op->attention.vadd_config->minmax.op_ukernel,
@@ -341,8 +394,8 @@ enum xnn_status xnn_reshape_scaled_dot_attention_ntc_f32(
 
   if (attention_op->attention.cap_type == xnn_attention_logits_cap_type_tanh) {
     attention_op->context.attention.logits_cap.type = xnn_attention_logits_cap_type_tanh;
-    attention_op->context.attention.logits_cap.cap.f32 = attention_op->attention.cap_params.cap;
-    attention_op->context.attention.logits_cap.cap_reciprocal.f32 = 1 / attention_op->attention.cap_params.cap;
+    memcpy(&attention_op->context.attention.logits_cap.cap, cap, cap_size);
+    memcpy(&attention_op->context.attention.logits_cap.cap_reciprocal, cap_reciprocal, cap_size);
   }
 
   #if XNN_MAX_UARCH_TYPES > 1
@@ -364,30 +417,53 @@ enum xnn_status xnn_reshape_scaled_dot_attention_ntc_f32(
 
   attention_op->context.attention.scaled_query_offset = 0;
   attention_op->context.attention.packed_k_offset = q_scaled_size;
-  attention_op->context.attention.packed_v_offset =
-      q_scaled_size + packed_key_size;
-  attention_op->context.attention.logits_offset =
-      q_scaled_size + packed_key_size + packed_value_size;
+  attention_op->context.attention.packed_v_offset = q_scaled_size + packed_key_size;
+  attention_op->context.attention.logits_offset = q_scaled_size + packed_key_size + packed_value_size;
 
-  memcpy(&attention_op->context.attention.minmax_params,
-         &attention_op->params.f32_minmax,
-         sizeof(attention_op->params.f32_minmax));
-
-  memcpy(&attention_op->context.attention.expminus_params,
-         &attention_op->params2.f32_expminus_params,
-         sizeof(attention_op->params2.f32_expminus_params));
-
-  memcpy(&attention_op->context.attention.tanh_params,
-         &attention_op->params3.f32_tanh,
-         sizeof(attention_op->params3.f32_tanh));
+  memcpy(&attention_op->context.attention.minmax_params, minmax_params, minmax_params_size);
+  memcpy(&attention_op->context.attention.expminus_params, expminus_params, expminus_params_size);
+  memcpy(&attention_op->context.attention.tanh_params, tanh_params, tanh_params_size);
 
   attention_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;
+
 }
 
-enum xnn_status xnn_setup_scaled_dot_attention_ntc_f32(
+enum xnn_status xnn_reshape_scaled_dot_attention_ntc_f32(
   xnn_operator_t attention_op,
+  size_t batch_size,
+  size_t query_tokens,
+  size_t key_value_tokens,
+  size_t channels,
+  size_t* workspace_size,
+  size_t* workspace_alignment,
+  pthreadpool_t threadpool)
+{
+  float cap = attention_op->attention.cap_params.cap;
+  float cap_reciprocal = 1 / attention_op->attention.cap_params.cap;
+
+  return reshape_scaled_dot_attention_ntc(
+    attention_op,
+    xnn_operator_type_scaled_dot_attention_ntc_f32,
+    batch_size,
+    query_tokens,
+    key_value_tokens,
+    channels,
+    workspace_size, workspace_alignment,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /*element_size=*/sizeof(float),
+    (xnn_compute_reciprocal_fn) compute_reciprocal_f32,
+    &cap, &cap_reciprocal, sizeof(float),
+    &attention_op->params.f32_minmax, sizeof(attention_op->params.f32_minmax),
+    &attention_op->params2.f32_expminus_params, sizeof(attention_op->params2.f32_expminus_params),
+    &attention_op->params3.f32_tanh, sizeof(attention_op->params3.f32_tanh),
+    threadpool);
+}
+
+static enum xnn_status setup_scaled_dot_attention_ntc(
+  xnn_operator_t attention_op,
+  enum xnn_operator_type expected_operator_type,
   void* workspace,
   const float* query,
   const float* key,
@@ -396,7 +472,6 @@ enum xnn_status xnn_setup_scaled_dot_attention_ntc_f32(
   const float* mask,
   float* output)
 {
-  enum xnn_operator_type expected_operator_type = xnn_operator_type_scaled_dot_attention_ntc_f32;
   if (attention_op->type != expected_operator_type) {
     xnn_log_error(
         "failed to setup operator: operator type mismatch (expected %s, got %s)",
@@ -443,4 +518,22 @@ enum xnn_status xnn_setup_scaled_dot_attention_ntc_f32(
   attention_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
+}
+
+enum xnn_status xnn_setup_scaled_dot_attention_ntc_f32(
+  xnn_operator_t attention_op,
+  void* workspace,
+  const float* query,
+  const float* key,
+  const float* value,
+  const float* scale,
+  const float* mask,
+  float* output)
+{
+  return setup_scaled_dot_attention_ntc(
+    attention_op, xnn_operator_type_scaled_dot_attention_ntc_f32,
+    workspace,
+    query, key, value,
+    scale, mask,
+    output);
 }
