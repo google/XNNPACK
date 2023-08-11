@@ -412,6 +412,89 @@ static enum xnn_status setup_fully_connected_operator(
   }
 }
 
+static enum xnn_shape_inference_status infer_shape_forward(
+  const struct xnn_node* node,
+  struct xnn_value* values)
+{
+  // Assert that filter tensor has static shape.
+  const uint32_t filter_id = node->inputs[1];
+  const struct xnn_value* filter = &values[filter_id];
+  assert(xnn_tensor_shape_is_static(filter));
+
+  enum xnn_shape_inference_status status = xnn_shape_inference_status_no_change;
+
+  // Infer output channels.
+  const uint32_t output_channel_index = (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? 1 : 0;
+  const uint32_t output_id = node->outputs[0];
+  struct xnn_value* output = &values[output_id];
+  status = xnn_tensor_propagate_dimension(output, output->shape.num_dims - 1, filter, output_channel_index);
+  if (status == xnn_shape_inference_status_error) {
+    return status;
+  }
+
+  if (node->flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) {
+    // No inference for input/output shape possible.
+    return status;
+  }
+
+  // Propagate input shape to output.
+  const struct xnn_value* input = &values[node->inputs[0]];
+  for (size_t cur_dim = 0; cur_dim < input->shape.num_dims - 1; cur_dim++) {
+    const enum xnn_shape_inference_status changed = xnn_tensor_propagate_dimension(output, cur_dim, input, cur_dim);
+    if (changed == xnn_shape_inference_status_error) {
+      return changed;
+    } else if (changed == xnn_shape_inference_status_changed) {
+      // Only overwrite status if inference on this dimension changed. We could have changed something above, and not
+      // changed anything here, then overwriting status to be no_change will be incorrect.
+      status = changed;
+    }
+  }
+
+  return status;
+}
+
+static enum xnn_shape_inference_status infer_shape_backward(
+  const struct xnn_node* node,
+  struct xnn_value* values)
+{
+  // Assert that filter tensor has static shape.
+  const uint32_t filter_id = node->inputs[1];
+  const struct xnn_value* filter = &values[filter_id];
+  assert(xnn_tensor_shape_is_static(filter));
+
+  enum xnn_shape_inference_status status = xnn_shape_inference_status_no_change;
+
+  // Infer input channels.
+  const uint32_t input_channel_index = (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) ? 0 : 1;
+  const uint32_t input_id = node->inputs[0];
+  struct xnn_value* input = &values[input_id];
+  status = xnn_tensor_propagate_dimension(input, input->shape.num_dims - 1, filter, input_channel_index);
+  if (status == xnn_shape_inference_status_error) {
+    return status;
+  }
+
+  if (node->flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) {
+    // No inference for input/output shape possible.
+    return status;
+  }
+
+  // Propagate output shape to input.
+  const struct xnn_value* output = &values[node->outputs[0]];
+  for (size_t cur_dim = 0; cur_dim < output->shape.num_dims - 1; cur_dim++) {
+    const enum xnn_shape_inference_status changed =
+      xnn_tensor_propagate_dimension(input, cur_dim, output, cur_dim);
+    if (changed == xnn_shape_inference_status_error) {
+      return changed;
+    } else if (changed == xnn_shape_inference_status_changed) {
+      // Only overwrite status if inference on this dimension changed. We could have changed something above, and not
+      // changed anything here, then overwriting status to be no_change will be incorrect.
+      status = changed;
+    }
+  }
+
+  return status;
+}
+
 static inline enum xnn_compute_type validate_datatypes_with_bias(
   enum xnn_datatype input_datatype,
   enum xnn_datatype kernel_datatype,
@@ -565,6 +648,14 @@ enum xnn_status xnn_define_fully_connected(
     return xnn_status_invalid_parameter;
   }
 
+  // Check that filter shape is fully known.
+  if (!xnn_tensor_shape_is_static(kernel_value)) {
+    xnn_log_error(
+      "failed to define %s operator with filter ID #%" PRIu32 ": filter must have static dimensions.",
+      xnn_node_type_to_string(xnn_node_type_fully_connected), filter_id);
+    return xnn_status_invalid_parameter;
+  }
+
   // Non-static kernel is supported, but only for some data types
   switch (kernel_value->datatype) {
     case xnn_datatype_fp32:
@@ -631,6 +722,14 @@ enum xnn_status xnn_define_fully_connected(
       xnn_log_error(
         "failed to define %s operator with bias ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
         xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id, bias_value->type);
+      return xnn_status_invalid_parameter;
+    }
+
+    // Check that bias shape is fully known.
+    if (!xnn_tensor_shape_is_static(bias_value)) {
+      xnn_log_error(
+        "failed to define %s operator with bias ID #%" PRIu32 ": bias must have static dimensions.",
+        xnn_node_type_to_string(xnn_node_type_fully_connected), bias_id);
       return xnn_status_invalid_parameter;
     }
 
@@ -741,6 +840,8 @@ enum xnn_status xnn_define_fully_connected(
   node->create = create_fully_connected_operator;
   node->reshape = reshape_fully_connected_operator;
   node->setup = setup_fully_connected_operator;
+  node->infer_shape_forward = infer_shape_forward;
+  node->infer_shape_backward = infer_shape_backward;
 
   return xnn_status_success;
 }

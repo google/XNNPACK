@@ -10,6 +10,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <cstdint>
 #include <unordered_map>
 #include <numeric>
 #include <random>
@@ -104,6 +105,25 @@ class SubgraphTester {
     return *this;
   }
 
+  inline SubgraphTester& AddDynamicTensorQS8(
+    int32_t zero_point,
+    float scale,
+    const std::vector<size_t>& dims,
+    uint32_t external_id,
+    uint32_t flags = 0)
+  {
+    uint32_t id_out = 0;
+    const xnn_status status =
+        xnn_define_quantized_tensor_value(subgraph_.get(), xnn_datatype_qint8,
+                                          zero_point, scale,
+                                          dims.size(),
+                                dims.data(), nullptr, external_id, flags, &id_out);
+    EXPECT_EQ(status, xnn_status_success);
+    EXPECT_EQ(id_out, external_id);
+
+    return *this;
+  }
+
   inline SubgraphTester& AddStaticTensorF32(const std::vector<size_t>& dims,
                                             TensorType tensor_type,
                                             uint32_t external_id,
@@ -138,6 +158,17 @@ class SubgraphTester {
 
   inline SubgraphTester& AddInputTensorF32(const std::vector<size_t>& dims, uint32_t external_id) {
     AddDynamicTensorF32(dims, external_id, XNN_VALUE_FLAG_EXTERNAL_INPUT);
+    size_t num_elements = NumElements(dims);
+    auto input = std::vector<char>(num_elements * sizeof(float) + XNN_EXTRA_BYTES * sizeof(char));
+    float* data = reinterpret_cast<float*>(input.data());
+    std::generate(data, data + num_elements, [&]() { return f32dist(rng_); });
+    auto it = external_tensors_.insert({external_id, input});
+    EXPECT_TRUE(it.second);
+    return *this;
+  }
+
+  inline SubgraphTester& AddInputTensorQS8(int32_t zero_point, float scale, const std::vector<size_t>& dims, uint32_t external_id) {
+    AddDynamicTensorQS8(zero_point, scale, dims, external_id, XNN_VALUE_FLAG_EXTERNAL_INPUT);
     size_t num_elements = NumElements(dims);
     auto input = std::vector<char>(num_elements * sizeof(float) + XNN_EXTRA_BYTES * sizeof(char));
     float* data = reinterpret_cast<float*>(input.data());
@@ -324,12 +355,12 @@ class SubgraphTester {
   }
 
   inline SubgraphTester& AddFullyConnected(
-      uint32_t input_id, uint32_t filter_id, uint32_t bias_id, uint32_t output_id) {
+      uint32_t input_id, uint32_t filter_id, uint32_t bias_id, uint32_t output_id, uint32_t flags = 0) {
     const xnn_status status = xnn_define_fully_connected(
         subgraph_.get(),
         -std::numeric_limits<float>::infinity(),
         std::numeric_limits<float>::infinity(), input_id, filter_id, bias_id,
-        output_id, 0 /* flags */);
+        output_id, flags);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -414,6 +445,13 @@ class SubgraphTester {
 
   inline SubgraphTester& Optimize() {
     const xnn_status status = xnn_subgraph_optimize(subgraph_.get(), 0 /* flags */);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
+  }
+
+  inline SubgraphTester& InferShape() {
+    const xnn_status status = xnn_subgraph_infer_shape(subgraph_.get(), /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;

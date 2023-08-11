@@ -4,7 +4,9 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <inttypes.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -26,6 +28,23 @@ static void set_allocation_type(struct xnn_value* value)
     value->allocation_type = xnn_allocation_type_persistent;
   } else {
     value->allocation_type = xnn_allocation_type_workspace;
+  }
+}
+
+static void set_shape(struct xnn_value* value, size_t num_dims, const size_t* dims)
+{
+  value->shape.num_dims = num_dims;
+  memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+  for (size_t i = 0; i < num_dims; i++) {
+    const size_t original_dim = value->shape.dim[i];
+    if (original_dim == 0) {
+      // Dimension of 0 implies an unknown dimension.
+      value->shape.minimum_dim[i] = 0;
+      value->shape.maximum_dim[i] = SIZE_MAX;
+    } else {
+      value->shape.minimum_dim[i] = original_dim;
+      value->shape.maximum_dim[i] = original_dim;
+    }
   }
 }
 
@@ -125,8 +144,7 @@ enum xnn_status xnn_define_tensor_value(
   }
   value->type = xnn_value_type_dense_tensor;
   value->datatype = datatype;
-  value->shape.num_dims = num_dims;
-  memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+  set_shape(value, num_dims, dims);
   value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
   value->flags = flags;
   value->data = (void*) (uintptr_t) data;
@@ -191,8 +209,7 @@ enum xnn_status xnn_define_quantized_tensor_value(
   value->datatype = datatype;
   value->quantization.zero_point = zero_point;
   value->quantization.scale = scale;
-  value->shape.num_dims = num_dims;
-  memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+  set_shape(value, num_dims, dims);
   value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
   value->flags = flags;
   value->data = (void*) (uintptr_t) data;
@@ -266,8 +283,7 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
   value->type = xnn_value_type_dense_tensor;
   value->datatype = datatype;
   value->quantization.num_nonbatch_dims = num_nonbatch_dims;
-  value->shape.num_dims = num_dims;
-  memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+  set_shape(value, num_dims, dims);
   value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
   value->flags = flags;
   value->data = NULL;
@@ -383,8 +399,7 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
   value->quantization.zero_point = zero_point;
   value->quantization.channelwise_scale = scale;
   value->quantization.channel_dimension = channel_dim;
-  value->shape.num_dims = num_dims;
-  memcpy(value->shape.dim, dims, num_dims * sizeof(size_t));
+  set_shape(value, num_dims, dims);
   value->size = xnn_tensor_get_size_by_id(subgraph, value->id);
   value->flags = flags;
   value->data = (void*) (uintptr_t) data;
@@ -469,4 +484,55 @@ size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id)
 
   const struct xnn_value* value = subgraph->values + value_id;
   return xnn_tensor_get_size(value);
+}
+
+static bool tensor_dim_is_static(const struct xnn_value* value, uint32_t dim_index)
+{
+  return (value->shape.dim[dim_index] == value->shape.minimum_dim[dim_index] &&
+          value->shape.dim[dim_index] == value->shape.maximum_dim[dim_index]);
+}
+
+bool xnn_tensor_shape_is_static(const struct xnn_value* value)
+{
+  for (size_t i = 0; i < value->shape.num_dims; i++) {
+    if (!tensor_dim_is_static(value, i)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+enum xnn_shape_inference_status xnn_tensor_propagate_dimension(
+  struct xnn_value* to,
+  uint32_t to_dim,
+  const struct xnn_value* from,
+  uint32_t from_dim)
+{
+  assert(to_dim < to->shape.num_dims);
+  assert(from_dim < from->shape.num_dims);
+  size_t inferred_dim = from->shape.dim[from_dim];
+
+  // If inferred_dim is dynamic, then we don't have useful information to propagate.
+  if (to->shape.dim[to_dim] == inferred_dim || inferred_dim == 0) {
+    return xnn_shape_inference_status_no_change;
+  }
+
+  if (inferred_dim < to->shape.minimum_dim[to_dim]) {
+    xnn_log_error(
+      "failed to infer dimension of tensor id %" PRIu32 ": inferred dimension (%zu) from tensor id %" PRIu32
+      " is less than minimum dimension (%zu)", to->id, inferred_dim, from->id, to->shape.minimum_dim[to_dim]);
+    return xnn_shape_inference_status_error;
+  }
+
+  if (inferred_dim > to->shape.maximum_dim[to_dim]) {
+    xnn_log_error(
+      "failed to infer dimension of tensor id %" PRIu32 ": inferred dimension (%zu) from tensor id %" PRIu32
+      " is more than maximum dimension (%zu)", to->id, inferred_dim, from->id, to->shape.maximum_dim[to_dim]);
+    return xnn_shape_inference_status_error;
+  }
+
+  to->shape.dim[to_dim] = inferred_dim;
+  to->shape.minimum_dim[to_dim] = from->shape.minimum_dim[from_dim];
+  to->shape.maximum_dim[to_dim] = from->shape.maximum_dim[from_dim];
+  return xnn_shape_inference_status_changed;
 }

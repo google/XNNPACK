@@ -11118,6 +11118,19 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "subgraph_shape_inference_test",
+    srcs = [
+        "test/runtime-tester.h",
+        "test/subgraph-shape-inference.cc",
+        "test/subgraph-tester.h",
+    ],
+    deps = [
+        ":XNNPACK",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
     name = "memory_planner_test",
     srcs = [
         "test/memory-planner-test.cc",
