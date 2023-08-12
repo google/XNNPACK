@@ -37,5 +37,6 @@ tools/amalgamate-microkernels.py -i arm_neon.h -s PROD_NEONV8_MICROKERNEL_SRCS -
 tools/amalgamate-microkernels.py -i arm_neon.h -s PROD_NEONFP16ARITH_MICROKERNEL_SRCS -o src/amalgam/gen/neonfp16arith.c &
 tools/amalgamate-microkernels.py -i arm_neon.h -s PROD_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS -o src/amalgam/gen/neonfp16arith-aarch64.c &
 tools/amalgamate-microkernels.py -i arm_neon.h -s PROD_NEONDOT_MICROKERNEL_SRCS -o src/amalgam/gen/neondot.c &
+tools/amalgamate-microkernels.py -i arm_neon.h -s PROD_NEONI8MM_MICROKERNEL_SRCS -o src/amalgam/gen/neoni8mm.c &
 
 wait

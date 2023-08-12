@@ -804,6 +804,7 @@ PROD_NEONBF16_AARCH64_MICROKERNEL_SRCS = [
 PROD_NEONDOT_MICROKERNEL_SRCS = [
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c4-minmax-neondot.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x16c4-minmax-neondot.c",
+    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x16c8-minmax-neondot.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x16c4-minmax-neondot.c",
     "src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neondot.c",
     "src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neondot.c",
@@ -829,6 +830,10 @@ PROD_NEONDOT_MICROKERNEL_SRCS = [
     "src/qu8-igemm/gen/qu8-igemm-1x16c4-minmax-rndnu-neondot.c",
     "src/qu8-igemm/gen/qu8-igemm-4x8c4-minmax-rndnu-neondot.c",
     "src/qu8-igemm/gen/qu8-igemm-4x16c4-minmax-rndnu-neondot.c",
+]
+
+PROD_NEONI8MM_MICROKERNEL_SRCS = [
+    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x16c8-minmax-neoni8mm.c",
 ]
 
 PROD_SSE_MICROKERNEL_SRCS = [
@@ -3265,11 +3270,45 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "neoni8mm_amalgam_microkernels",
+    aarch64_copts = ["-march=armv8.2-a+i8mm"],
+    aarch64_srcs = ["src/amalgam/gen/neoni8mm.c"],
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":prefetch",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
     name = "neoni8mm_bench_microkernels",
     aarch64_copts = [
         "-march=armv8.2-a+i8mm",
     ],
     aarch64_srcs = ALL_NEONI8MM_MICROKERNEL_SRCS,
+    gcc_copts = xnnpack_gcc_std_copts(),
+    msvc_copts = xnnpack_msvc_std_copts(),
+    deps = [
+        ":common",
+        ":math",
+        ":microkernels_h",
+        ":microparams",
+        ":prefetch",
+        ":tables",
+        ":unaligned",
+    ],
+)
+
+xnnpack_cc_library(
+    name = "neoni8mm_prod_microkernels",
+    aarch64_copts = ["-march=armv8.2-a+i8mm"],
+    aarch64_srcs = PROD_NEONI8MM_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -4434,6 +4473,9 @@ xnnpack_aggregate_library(
     }) + select({
         ":arm_dotprod_enabled": [":neondot_amalgam_microkernels"],
         "//conditions:default": [],
+    }) + select({
+        ":arm_i8mm_enabled": [":neoni8mm_amalgam_microkernels"],
+        "//conditions:default": [],
     }),
     wasm_deps = [
         ":wasm_amalgam_microkernels",
@@ -4592,6 +4634,9 @@ xnnpack_aggregate_library(
         "//conditions:default": [],
     }) + select({
         ":arm_dotprod_enabled": [":neondot_prod_microkernels"],
+        "//conditions:default": [],
+    }) + select({
+        ":arm_i8mm_enabled": [":neoni8mm_prod_microkernels"],
         "//conditions:default": [],
     }),
     wasm_deps = [
