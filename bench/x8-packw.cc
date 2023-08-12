@@ -81,7 +81,31 @@ static void x8_packw(benchmark::State& state,
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-
+static void x8_packw_x2__scalar_int_x2(benchmark::State& state, const char* net) {
+  x8_packw(state,
+    xnn_x8_packw_gemm_goi_ukernel_x2__scalar_int_x2,
+    /*nr=*/2, /*kr=*/1, /*sr=*/1);
+}
+static void x8_packw_x4__scalar_int_x2(benchmark::State& state, const char* net) {
+  x8_packw(state,
+    xnn_x8_packw_gemm_goi_ukernel_x4__scalar_int_x2,
+    /*nr=*/4, /*kr=*/1, /*sr=*/1);
+}
+static void x8_packw_x8__scalar_int_x2(benchmark::State& state, const char* net) {
+  x8_packw(state,
+    xnn_x8_packw_gemm_goi_ukernel_x8__scalar_int_x2,
+    /*nr=*/8, /*kr=*/1, /*sr=*/1);
+}
+static void x8_packw_x16__scalar_int_x2(benchmark::State& state, const char* net) {
+  x8_packw(state,
+    xnn_x8_packw_gemm_goi_ukernel_x16__scalar_int_x2,
+    /*nr=*/16, /*kr=*/1, /*sr=*/1);
+}
+static void x8_packw_x32__scalar_int_x2(benchmark::State& state, const char* net) {
+  x8_packw(state,
+    xnn_x8_packw_gemm_goi_ukernel_x32__scalar_int_x2,
+    /*nr=*/32, /*kr=*/1, /*sr=*/1);
+}
 static void x8_packw_x2__scalar_int_x4(benchmark::State& state, const char* net) {
   x8_packw(state,
     xnn_x8_packw_gemm_goi_ukernel_x2__scalar_int_x4,
@@ -107,6 +131,13 @@ static void x8_packw_x32__scalar_int_x4(benchmark::State& state, const char* net
     xnn_x8_packw_gemm_goi_ukernel_x32__scalar_int_x4,
     /*nr=*/32, /*kr=*/1, /*sr=*/1);
 }
+
+BENCHMARK_BGEMM(x8_packw_x2__scalar_int_x2)
+BENCHMARK_BGEMM(x8_packw_x4__scalar_int_x2)
+BENCHMARK_BGEMM(x8_packw_x8__scalar_int_x2)
+BENCHMARK_BGEMM(x8_packw_x16__scalar_int_x2)
+BENCHMARK_BGEMM(x8_packw_x32__scalar_int_x2)
+
 BENCHMARK_BGEMM(x8_packw_x2__scalar_int_x4)
 BENCHMARK_BGEMM(x8_packw_x4__scalar_int_x4)
 BENCHMARK_BGEMM(x8_packw_x8__scalar_int_x4)
