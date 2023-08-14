@@ -18,9 +18,26 @@ TEST(ATTENTION_NHTC_F32, unit_batch) {
       .TestF32();
 }
 
+TEST(ATTENTION_NHTC_F32, multi_head) {
+  AttentionOperatorTester()
+      .heads(13)
+      .query_tokens(41)
+      .channels(137)
+      .TestF32();
+}
+
 TEST(ATTENTION_NHTC_F32, batch_size) {
   AttentionOperatorTester()
       .batch_size(13)
+      .query_tokens(41)
+      .channels(137)
+      .TestF32();
+}
+
+TEST(ATTENTION_NHTC_F32, batch_size_multi_head) {
+  AttentionOperatorTester()
+      .batch_size(13)
+      .heads(17)
       .query_tokens(41)
       .channels(137)
       .TestF32();

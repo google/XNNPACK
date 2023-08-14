@@ -19,9 +19,10 @@
 
 void xnnpack_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
-  const size_t query_tokens = state.range(1);
-  const size_t key_value_tokens = state.range(2);
-  const size_t channels = state.range(3);
+  const size_t heads = state.range(1);
+  const size_t query_tokens = state.range(2);
+  const size_t key_value_tokens = state.range(3);
+  const size_t channels = state.range(4);
   const float cap_value = 30.0f;
 
   std::random_device random_device;
@@ -29,15 +30,15 @@ void xnnpack_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::State& state, 
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
   std::uniform_real_distribution<float> scaledist(0.2f, 2.0f);
 
-  std::vector<float> query(XNN_EXTRA_BYTES / sizeof(float) + batch_size * query_tokens * channels);
-  std::vector<float> key(XNN_EXTRA_BYTES / sizeof(float) + batch_size * key_value_tokens * channels);
-  std::vector<float> value(XNN_EXTRA_BYTES / sizeof(float) + batch_size * key_value_tokens * channels);
+  std::vector<float> query(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * query_tokens * channels);
+  std::vector<float> key(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * key_value_tokens * channels);
+  std::vector<float> value(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * key_value_tokens * channels);
   std::vector<float> scale(XNN_EXTRA_BYTES / sizeof(float) + channels);
   std::vector<float> mask(XNN_EXTRA_BYTES / sizeof(float) + query_tokens * key_value_tokens);
-  std::vector<float> output(batch_size * query_tokens * channels);
+  std::vector<float> output(batch_size * heads * query_tokens * channels);
 
-  std::vector<float> query_scaled(XNN_EXTRA_BYTES / sizeof(float) + batch_size * query_tokens * channels);
-  std::vector<float> logits(XNN_EXTRA_BYTES / sizeof(float) + batch_size * query_tokens * key_value_tokens);
+  std::vector<float> query_scaled(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * query_tokens * channels);
+  std::vector<float> logits(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * query_tokens * key_value_tokens);
 
   std::generate(query.begin(), query.end(), [&]() { return f32dist(rng); });
   // Use a different distribution to avoid divide by 0.
@@ -103,7 +104,7 @@ void xnnpack_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::State& state, 
     state.SkipWithError("failed to create Batch Matrix Multiply operator");
   }
 
-  std::array<size_t, 3> query_dims = {batch_size, query_tokens, channels};
+  std::array<size_t, 4> query_dims = {batch_size, heads, query_tokens, channels};
   std::array<size_t, 1> scale_dims = {channels};
   status = xnn_reshape_multiply_nd_f32(
     q_scale_mul_op, query_dims.size(), query_dims.data(), scale_dims.size(), scale_dims.data(), /*threadpool=*/nullptr);
@@ -114,13 +115,13 @@ void xnnpack_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::State& state, 
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
   status = xnn_reshape_batch_matrix_multiply_nc_f32(
-    qk_bmm_op, batch_size, query_tokens, channels, key_value_tokens,
+    qk_bmm_op, batch_size * heads, query_tokens, channels, key_value_tokens,
     &workspace_size, &workspace_alignment, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Batch Matrix Multiply operator");
   }
 
-  std::array<size_t, 3> logits_dims = {batch_size, query_tokens, key_value_tokens};
+  std::array<size_t, 4> logits_dims = {batch_size, heads, query_tokens, key_value_tokens};
   std::array<size_t, 1> cap_tanh_dims = {1};
 
   status = xnn_reshape_divide_nd_f32(
@@ -128,7 +129,7 @@ void xnnpack_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::State& state, 
       cap_tanh_dims.size(), cap_tanh_dims.data(), /*threadpool=*/nullptr);
 
   status = xnn_reshape_tanh_nc_f32(
-      tanh_op, batch_size * query_tokens, /*threadpool=*/nullptr);
+      tanh_op, batch_size * heads * query_tokens, /*threadpool=*/nullptr);
 
   status = xnn_reshape_multiply_nd_f32(
       mul_cap_op, logits_dims.size(), logits_dims.data(), cap_tanh_dims.size(), cap_tanh_dims.data(), /*threadpool=*/nullptr);
@@ -142,7 +143,7 @@ void xnnpack_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::State& state, 
   }
 
   status = xnn_reshape_softmax_nc_f32(
-    softmax_op, batch_size * query_tokens, /*threadpool=*/nullptr);
+    softmax_op, batch_size * heads * query_tokens, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Softmax operator");
   }
@@ -150,7 +151,7 @@ void xnnpack_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::State& state, 
   size_t workspace_size2 = 0;
   size_t workspace_alignment2 = 0;
   status = xnn_reshape_batch_matrix_multiply_nc_f32(
-    attn_value_bmm_op, batch_size, query_tokens, key_value_tokens, channels,
+    attn_value_bmm_op, batch_size * heads, query_tokens, key_value_tokens, channels,
     &workspace_size2, &workspace_alignment2, /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Batch Matrix Multiply operator");
@@ -277,15 +278,16 @@ void xnnpack_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::State& state, 
   // See comment in xnnpack_scaled_dot_attention_cap_tanh_f32 for derivation of this.
   state.counters["FLOPS"] = benchmark::Counter(
     uint64_t(state.iterations()) *
-      batch_size * query_tokens * (channels + key_value_tokens * (channels * 2 + 5)),
+      batch_size * heads * query_tokens * (channels + key_value_tokens * (channels * 2 + 5)),
     benchmark::Counter::kIsRate);
 }
 
 void xnnpack_scaled_dot_attention_cap_tanh_f32(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
-  const size_t query_tokens = state.range(1);
-  const size_t key_value_tokens = state.range(2);
-  const size_t channels = state.range(3);
+  const size_t heads = state.range(1);
+  const size_t query_tokens = state.range(2);
+  const size_t key_value_tokens = state.range(3);
+  const size_t channels = state.range(4);
   const xnn_attention_logits_cap_type cap_type = xnn_attention_logits_cap_type_tanh;
   const float cap_value = 30.0f;
 
@@ -294,12 +296,12 @@ void xnnpack_scaled_dot_attention_cap_tanh_f32(benchmark::State& state, const ch
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
   std::uniform_real_distribution<float> scaledist(0.2f, 2.0f);
 
-  std::vector<float> query(XNN_EXTRA_BYTES / sizeof(float) + batch_size * query_tokens * channels);
-  std::vector<float> key(XNN_EXTRA_BYTES / sizeof(float) + batch_size * key_value_tokens * channels);
-  std::vector<float> value(XNN_EXTRA_BYTES / sizeof(float) + batch_size * key_value_tokens * channels);
+  std::vector<float> query(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * query_tokens * channels);
+  std::vector<float> key(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * key_value_tokens * channels);
+  std::vector<float> value(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * key_value_tokens * channels);
   std::vector<float> scale(XNN_EXTRA_BYTES / sizeof(float) + channels);
   std::vector<float> mask(XNN_EXTRA_BYTES / sizeof(float) + query_tokens * key_value_tokens);
-  std::vector<float> output(batch_size * query_tokens * channels);
+  std::vector<float> output(batch_size * heads * query_tokens * channels);
 
   std::generate(query.begin(), query.end(), [&]() { return f32dist(rng); });
   // Use a different distribution to avoid divide by 0.
@@ -316,7 +318,7 @@ void xnnpack_scaled_dot_attention_cap_tanh_f32(benchmark::State& state, const ch
 
   xnn_operator_t attention_op = nullptr;
   xnn_attention_logits_cap_tanh_params cap_tanh_params = {cap_value};
-  status = xnn_create_scaled_dot_attention_ntc_f32(
+  status = xnn_create_scaled_dot_attention_nhtc_f32(
       cap_type,
       &cap_tanh_params,
       /*flags=*/0,
@@ -328,9 +330,9 @@ void xnnpack_scaled_dot_attention_cap_tanh_f32(benchmark::State& state, const ch
 
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
-  status = xnn_reshape_scaled_dot_attention_ntc_f32(
+  status = xnn_reshape_scaled_dot_attention_nhtc_f32(
             attention_op,
-            batch_size, query_tokens, key_value_tokens, channels,
+            batch_size, heads, query_tokens, key_value_tokens, channels,
             &workspace_size, &workspace_alignment,
             /*threadpool=*/nullptr);
 
@@ -340,7 +342,7 @@ void xnnpack_scaled_dot_attention_cap_tanh_f32(benchmark::State& state, const ch
 
   std::vector<char> workspace(workspace_size, 0);
 
-  status = xnn_setup_scaled_dot_attention_ntc_f32(
+  status = xnn_setup_scaled_dot_attention_nhtc_f32(
             attention_op,
             workspace.data(), query.data(), key.data(), value.data(),
             scale.data(), mask.data(), output.data());
@@ -366,24 +368,32 @@ void xnnpack_scaled_dot_attention_cap_tanh_f32(benchmark::State& state, const ch
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  // Q * Scale  : batch_size * query_tokens * channels
-  // Q * K      : batch_size * query_tokens * key_value_tokens * channels
-  // CapTanH    : batch_size * query_tokens * key_value_tokens * 3
-  // Mask       : batch_size * query_tokens * key_value_tokens
-  // Softmax    : batch_size * query_tokens * key_value_tokens (roughly)
-  // Logits * V : batch_size * query_tokens * key_value_tokens * channels
-  // Total      : batch_size * query_tokens * (channels + key_value_tokens * (channels * 2 + 5))
+  // Q * Scale  : batch_size * heads * query_tokens * channels
+  // Q * K      : batch_size * heads * query_tokens * key_value_tokens * channels
+  // CapTanH    : batch_size * heads * query_tokens * key_value_tokens * 3
+  // Mask       : batch_size * heads * query_tokens * key_value_tokens
+  // Softmax    : batch_size * heads * query_tokens * key_value_tokens (roughly)
+  // Logits * V : batch_size * heads * query_tokens * key_value_tokens * channels
+  // Total      : batch_size * heads * query_tokens * (channels + key_value_tokens * (channels * 2 + 5))
 
   state.counters["FLOPS"] = benchmark::Counter(
     uint64_t(state.iterations()) *
-      batch_size * query_tokens * (channels + key_value_tokens * (channels * 2 + 5)),
+      batch_size * heads * query_tokens * (channels + key_value_tokens * (channels * 2 + 5)),
     benchmark::Counter::kIsRate);
 }
 
 static void Bert(benchmark::internal::Benchmark* b) {
-  b->ArgNames({"BatchSize", "QueryTokens", "KeyValueTokens", "Channels"});
-  b->Args({1, 128, 128, 128});
-  b->Args({1, 384, 512, 768});
+  b->ArgNames({"BatchSize", "Heads", "QueryTokens", "KeyValueTokens", "Channels"});
+  // Smaller BERT, number of heads = h/64
+  // "Well-Read Students Learn Better: On the Importance of Pre-training Compact Models."
+  // https://arxiv.org/abs/1908.08962
+  b->Args({1, 2, 128, 128, 64});
+  b->Args({1, 4, 128, 128, 64});
+  b->Args({1, 8, 128, 128, 64});
+
+  // Original BERT.
+  b->Args({1, 12, 128, 128, 64});
+  b->Args({1, 16, 128, 128, 64});
 }
 
 BENCHMARK_CAPTURE(xnnpack_scaled_dot_attention_cap_tanh_f32, bert, "BERT")->Apply(Bert)->UseRealTime();
