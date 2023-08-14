@@ -415,7 +415,7 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/xx-transposev/xx-transposev-1x1-scalar-memcpy.c",
     "src/x8-lut/gen/x8-lut-scalar-x1.c",
     "src/x8-lut/gen/x8-lut-scalar-x4.c",
-    "src/x8-packw/gen/x8-packw-x4-gemm-goi-scalar-int-x4.c",
+    "src/x8-packw/gen/x8-packw-x4-gemm-goi-scalar-int-x2.c",
     "src/x8-transposec/gen/x8-transposec-2x4-scalar-int.c",
     "src/x8-zip/x8-zip-xm-scalar.c",
     "src/x8-zip/x8-zip-x2-scalar.c",
@@ -611,7 +611,7 @@ PROD_NEON_MICROKERNEL_SRCS = [
     "src/u8-vclamp/u8-vclamp-neon-x64.c",
     "src/xx-fill/xx-fill-neon-x64.c",
     "src/xx-pad/xx-pad-neon.c",
-    "src/x8-packw/gen/x8-packw-x8-gemm-goi-scalar-int-x4.c",
+    "src/x8-packw/gen/x8-packw-x8-gemm-goi-scalar-int-x2.c",
     "src/x8-transposec/gen/x8-transposec-16x16-reuse-dec-zip-neon.c",
     "src/x8-zip/x8-zip-xm-neon.c",
     "src/x8-zip/x8-zip-x2-neon.c",
@@ -892,7 +892,7 @@ PROD_SSE_MICROKERNEL_SRCS = [
     "src/f32-vunary/gen/f32-vabs-sse-x8.c",
     "src/f32-vunary/gen/f32-vneg-sse-x8.c",
     "src/f32-vunary/gen/f32-vsqr-sse-x8.c",
-    "src/x8-packw/gen/x8-packw-x8-gemm-goi-scalar-int-x4.c",
+    "src/x8-packw/gen/x8-packw-x8-gemm-goi-scalar-int-x2.c",
     "src/x32-packx/x32-packx-4x-sse.c",
     "src/x32-transposec/x32-transposec-4x4-sse.c",
 ]
@@ -1057,7 +1057,7 @@ PROD_SSE41_MICROKERNEL_SRCS = [
     "src/s8-maxpool/s8-maxpool-9p8x-minmax-sse41-c16.c",
     "src/s8-vclamp/s8-vclamp-sse41-x64.c",
     "src/u8-ibilinear/gen/u8-ibilinear-sse41-c16.c",
-    "src/x8-packw/gen/x8-packw-x16-gemm-goi-scalar-int-x4.c",
+    "src/x8-packw/gen/x8-packw-x16-gemm-goi-scalar-int-x2.c",
 ]
 
 PROD_AVX_MICROKERNEL_SRCS = [
@@ -1387,7 +1387,7 @@ PROD_AVX512SKX_MICROKERNEL_SRCS = [
     "src/qu8-vadd/gen/qu8-vadd-minmax-avx512skx-mul32-ld128-x16.c",
     "src/qu8-vaddc/gen/qu8-vaddc-minmax-avx512skx-mul32-ld128-x16.c",
     "src/x8-lut/gen/x8-lut-avx512skx-vpshufb-x64.c",
-    "src/x8-packw/gen/x8-packw-x32-gemm-goi-scalar-int-x4.c",
+    "src/x8-packw/gen/x8-packw-x32-gemm-goi-scalar-int-x2.c",
 ]
 
 PROD_AVX512VBMI_MICROKERNEL_SRCS = [
@@ -1683,7 +1683,7 @@ PROD_WASMSIMD_MICROKERNEL_SRCS = [
     "src/xx-fill/xx-fill-wasmsimd-x64.c",
     "src/xx-pad/xx-pad-wasmsimd.c",
     "src/x8-lut/gen/x8-lut-wasmsimd-x32.c",
-    "src/x8-packw/gen/x8-packw-x8-gemm-goi-scalar-int-x4.c",
+    "src/x8-packw/gen/x8-packw-x8-gemm-goi-scalar-int-x2.c",
     "src/x8-transposec/gen/x8-transposec-16x16-reuse-mov-wasmsimd.c",
     "src/x16-transposec/gen/x16-transposec-8x8-reuse-mov-wasmsimd.c",
     "src/x32-packw/gen/x32-packw-x2c4-gemm-goi-wasmsimd-x4.c",

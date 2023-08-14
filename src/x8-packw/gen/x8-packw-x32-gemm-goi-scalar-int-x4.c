@@ -16,7 +16,6 @@
 #include <xnnpack/packw.h>
 
 
-
 void xnn_x8_packw_gemm_goi_ukernel_x32__scalar_int_x4(
   size_t g,
   size_t nc,

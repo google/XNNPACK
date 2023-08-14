@@ -14,11 +14,10 @@ $assert TYPE in ["int8_t"]
 #include <xnnpack/math.h>
 #include <xnnpack/packw.h>
 
+
 $BITS = {"int8_t": 8}[TYPE]
 $BTYPE = {"int8_t": "uint32_t"}[TYPE]
 $WTYPE = {"int8_t": "int8_t"}[TYPE]
-
-
 void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_int_x${KBLOCK}(
   size_t g,
   size_t nc,

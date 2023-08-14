@@ -31462,7 +31462,7 @@ void xnn_x8_lut_ukernel__scalar_x4(
   }
 }
 
-void xnn_x8_packw_gemm_goi_ukernel_x4__scalar_int_x4(
+void xnn_x8_packw_gemm_goi_ukernel_x4__scalar_int_x2(
   size_t g,
   size_t nc,
   size_t kc,
@@ -31511,29 +31511,21 @@ void xnn_x8_packw_gemm_goi_ukernel_x4__scalar_int_x4(
       const int8_t* w2 = w1 + kc;
       const int8_t* w3 = w2 + kc;
 
-      // KC main loop multiple of 4x4
+      // KC main loop multiple of 4x2
       size_t k = kc;
-      for (; k >= 4; k -= 4) {
+      for (; k >= 2; k -= 2) {
         const int8_t v00 = w0[0];
         const int8_t v01 = w0[1];
-        const int8_t v02 = w0[2];
-        const int8_t v03 = w0[3];
-        w0 += 4;
+        w0 += 2;
         const int8_t v10 = w1[0];
         const int8_t v11 = w1[1];
-        const int8_t v12 = w1[2];
-        const int8_t v13 = w1[3];
-        w1 += 4;
+        w1 += 2;
         const int8_t v20 = w2[0];
         const int8_t v21 = w2[1];
-        const int8_t v22 = w2[2];
-        const int8_t v23 = w2[3];
-        w2 += 4;
+        w2 += 2;
         const int8_t v30 = w3[0];
         const int8_t v31 = w3[1];
-        const int8_t v32 = w3[2];
-        const int8_t v33 = w3[3];
-        w3 += 4;
+        w3 += 2;
         out[0] = v00;
         out[1] = v10;
         out[2] = v20;
@@ -31542,15 +31534,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x4__scalar_int_x4(
         out[5] = v11;
         out[6] = v21;
         out[7] = v31;
-        out[8] = v02;
-        out[9] = v12;
-        out[10] = v22;
-        out[11] = v32;
-        out[12] = v03;
-        out[13] = v13;
-        out[14] = v23;
-        out[15] = v33;
-        out += 16;
+        out += 8;
       }
 
       // KC remainder
@@ -31596,40 +31580,28 @@ void xnn_x8_packw_gemm_goi_ukernel_x4__scalar_int_x4(
         w2 = w1;
       }
 
-      // KC main loop multiple of 4x4
+      // KC main loop multiple of 4x2
       size_t k = kc;
-      for (; k >= 4; k -= 4) {
+      for (; k >= 2; k -= 2) {
         const int8_t v00 = w0[0];
         const int8_t v01 = w0[1];
-        const int8_t v02 = w0[2];
-        const int8_t v03 = w0[3];
-        w0 += 4;
+        w0 += 2;
         const int8_t v10 = w1[0];
         const int8_t v11 = w1[1];
-        const int8_t v12 = w1[2];
-        const int8_t v13 = w1[3];
-        w1 += 4;
+        w1 += 2;
         const int8_t v20 = w2[0];
         const int8_t v21 = w2[1];
-        const int8_t v22 = w2[2];
-        const int8_t v23 = w2[3];
-        w2 += 4;
+        w2 += 2;
         out[0] = v00;
         out[1] = v10;
         out[2] = v20;
         out[4] = v01;
         out[5] = v11;
         out[6] = v21;
-        out[8] = v02;
-        out[9] = v12;
-        out[10] = v22;
-        out[12] = v03;
-        out[13] = v13;
-        out[14] = v23;
-        out += 16;
+        out += 8;
       }
 
-      // KC remainder of 1..3
+      // KC remainder of 1..1
       for (; k != 0; --k) {
         const int8_t v0 = *w0++;
         out[0] = v0;
