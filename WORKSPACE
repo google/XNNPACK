@@ -58,11 +58,11 @@ http_archive(
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    sha256 = "2ec0855a671fbf939e7c081697dffb0f6727b0bba0049da1922d8784328da8b4",
-    strip_prefix = "pthreadpool-18513c20da253e25f3caa82bf872f43d36b99af6",
-    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/18513c20da253e25f3caa82bf872f43d36b99af6.zip"],
+    sha256 = "3e326efdfce5758bc90300d874ac415b791cb715a4230e662c690c6048725da1",
+    strip_prefix = "pthreadpool-5f685cb0780a46e8d4da500f9b34ee6ae2bd437f",
+    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/5f685cb0780a46e8d4da500f9b34ee6ae2bd437f.zip"],
 )
-# LINT.ThenChange(cmake/DownloadGoogleTest.cmake)
+# LINT.ThenChange(cmake/DownloadPThreadPool.cmake)
 
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
