@@ -10,6 +10,7 @@
 #include <xnnpack.h>
 #include <xnnpack/aarch64-assembler.h>
 #include <xnnpack/gemm.h>
+#include <xnnpack/log.h>
 #include <xnnpack/memory.h>
 #include <xnnpack/microparams.h>
 #include <xnnpack/post-operation.h>
@@ -1374,7 +1375,7 @@ void Generator::perform_post_operations(
         break;
       }
       default:
-        XNN_UNREACHABLE;
+        XNN_LOG_UNREACHABLE("unsupported post operation: %u", post_operations[i].op_type);
     }
   }
 }
