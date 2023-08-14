@@ -100,13 +100,22 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     // Inner accumulation loop along the ${NR} columns.
     size_t k = kc;
     // 2x partial unrolled loop to load 8 bytes at a time.
+
+    $for M in range(0, MR, 2):
+      uint64x2x2_t va${M}${M+1}x${ABC[0:16]};
+      va${M}${M+1}x${ABC[0:16]}.val[0] = vdupq_n_u64(0);
+      va${M}${M+1}x${ABC[0:16]}.val[1] = vdupq_n_u64(0);
+
     while (k >= 16 * sizeof(int8_t)) {
       // Load a ${MR}x16 block of activations.
-      $for M in range(MR):
-        const int8x16_t va${M}x${ABC[0:16]} = vld1q_s8(a${M}); a${M} += 16;
       $for M in range(0, MR, 2):
-        const int8x16_t va${M}${M+1}x${ABC[0:8]} = vreinterpretq_s8_u64(vtrn1q_u64(vreinterpretq_u64_s8(va${M}x${ABC[0:16]}), vreinterpretq_u64_s8(va${M+1}x${ABC[0:16]})));
-        const int8x16_t va${M}${M+1}x${ABC[8:16]} = vreinterpretq_s8_u64(vtrn2q_u64(vreinterpretq_u64_s8(va${M}x${ABC[0:16]}), vreinterpretq_u64_s8(va${M+1}x${ABC[0:16]})));
+        va${M}${M+1}x${ABC[0:16]} = vld2q_lane_u64((const void*) a${M}, va${M}${M+1}x${ABC[0:16]}, 0); a${M} += 16;
+      $for M in range(0, MR, 2):
+        va${M}${M+1}x${ABC[0:16]} = vld2q_lane_u64((const void*) a${M+1}, va${M}${M+1}x${ABC[0:16]}, 1); a${M+1} += 16;
+
+      $for M in range(0, MR, 2):
+        const int8x16_t va${M}${M+1}x${ABC[0:8]} = vreinterpretq_s8_u64(va${M}${M+1}x${ABC[0:16]}.val[0]);
+        const int8x16_t va${M}${M+1}x${ABC[8:16]} = vreinterpretq_s8_u64(va${M}${M+1}x${ABC[0:16]}.val[1]);
 
       // Load a 16x${NR} block of weights.
       $for N in range(0, NR, 2):
@@ -128,10 +137,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     if XNN_UNLIKELY(k != 0) {
       do {
         // Load a ${MR}x8 block of activations.
-        $for M in range(MR):
-          const int8x8_t va${M}x${ABC[0:8]} = vld1_s8(a${M}); a${M} += 8;
         $for M in range(0, MR, 2):
-          int8x16_t va${M}${M+1}x${ABC[0:8]} = vcombine_s8(va${M}x${ABC[0:8]}, va${M+1}x${ABC[0:8]});
+          va${M}${M+1}x${ABC[0:16]}.val[0] = vld1q_lane_u64((const void*) a${M}, va${M}${M+1}x${ABC[0:16]}.val[0], 0); a${M} += 8;
+          va${M}${M+1}x${ABC[0:16]}.val[0] = vld1q_lane_u64((const void*) a${M+1}, va${M}${M+1}x${ABC[0:16]}.val[0], 1); a${M+1} += 8;
+          const int8x16_t va${M}${M+1}x${ABC[0:8]} = vreinterpretq_s8_u64(va${M}${M+1}x${ABC[0:16]}.val[0]);
 
         // Load a 16x${NR} block of weights.
         $for N in range(0, NR, 2):

@@ -66,12 +66,18 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_2x16c8__neoni8mm(
     // Inner accumulation loop along the 16 columns.
     size_t k = kc;
     // 2x partial unrolled loop to load 8 bytes at a time.
+
+    uint64x2x2_t va01x0123456789ABCDEF;
+    va01x0123456789ABCDEF.val[0] = vdupq_n_u64(0);
+    va01x0123456789ABCDEF.val[1] = vdupq_n_u64(0);
+
     while (k >= 16 * sizeof(int8_t)) {
       // Load a 2x16 block of activations.
-      const int8x16_t va0x0123456789ABCDEF = vld1q_s8(a0); a0 += 16;
-      const int8x16_t va1x0123456789ABCDEF = vld1q_s8(a1); a1 += 16;
-      const int8x16_t va01x01234567 = vreinterpretq_s8_u64(vtrn1q_u64(vreinterpretq_u64_s8(va0x0123456789ABCDEF), vreinterpretq_u64_s8(va1x0123456789ABCDEF)));
-      const int8x16_t va01x89ABCDEF = vreinterpretq_s8_u64(vtrn2q_u64(vreinterpretq_u64_s8(va0x0123456789ABCDEF), vreinterpretq_u64_s8(va1x0123456789ABCDEF)));
+      va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a0, va01x0123456789ABCDEF, 0); a0 += 16;
+      va01x0123456789ABCDEF = vld2q_lane_u64((const void*) a1, va01x0123456789ABCDEF, 1); a1 += 16;
+
+      const int8x16_t va01x01234567 = vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[0]);
+      const int8x16_t va01x89ABCDEF = vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[1]);
 
       // Load a 16x16 block of weights.
       const int8x16_t vb01x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
@@ -115,9 +121,9 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_2x16c8__neoni8mm(
     if XNN_UNLIKELY(k != 0) {
       do {
         // Load a 2x8 block of activations.
-        const int8x8_t va0x01234567 = vld1_s8(a0); a0 += 8;
-        const int8x8_t va1x01234567 = vld1_s8(a1); a1 += 8;
-        int8x16_t va01x01234567 = vcombine_s8(va0x01234567, va1x01234567);
+        va01x0123456789ABCDEF.val[0] = vld1q_lane_u64((const void*) a0, va01x0123456789ABCDEF.val[0], 0); a0 += 8;
+        va01x0123456789ABCDEF.val[0] = vld1q_lane_u64((const void*) a1, va01x0123456789ABCDEF.val[0], 1); a1 += 8;
+        const int8x16_t va01x01234567 = vreinterpretq_s8_u64(va01x0123456789ABCDEF.val[0]);
 
         // Load a 16x16 block of weights.
         const int8x16_t vb01x01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
