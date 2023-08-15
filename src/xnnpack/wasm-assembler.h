@@ -5,10 +5,6 @@
 
 #pragma once
 
-#include <xnnpack/array-helpers.h>
-#include <xnnpack/assembler.h>
-#include <xnnpack/leb128.h>
-
 #include <algorithm>
 #include <array>
 #include <bitset>
@@ -21,6 +17,11 @@
 #include <numeric>
 #include <type_traits>
 #include <utility>
+
+#include <xnnpack/array-helpers.h>
+#include <xnnpack/assembler.h>
+#include <xnnpack/leb128.h>
+
 
 namespace xnnpack {
 
@@ -54,8 +55,7 @@ static constexpr uint32_t kI32DefaultAlignment = 1;
 static constexpr uint32_t kV128DefaultAlignment = 1;
 static constexpr size_t kMaxNumTypes = 5;
 
-class ValTypesToInt
-    : public internal::ArrayPrefix<internal::ValTypeToInt, kMaxNumTypes> {
+class ValTypesToInt : public internal::ArrayPrefix<internal::ValTypeToInt, kMaxNumTypes> {
  public:
   using ArrayPrefix::ArrayPrefix;
   constexpr ValTypesToInt() : ArrayPrefix(0, {ValType(0), 0}) {}
@@ -63,13 +63,12 @@ class ValTypesToInt
 
 namespace internal {
 template <typename Array, typename ElementEncodingLength>
-static uint32_t VectorEncodingLength(
-    Array&& array, ElementEncodingLength&& element_encoding_length) {
+static uint32_t VectorEncodingLength(Array&& array, ElementEncodingLength&& element_encoding_length) {
   const auto add_encoding_length = [&](uint32_t acc, const auto& element) {
     return acc + element_encoding_length(element);
   };
-  const uint32_t total_length_of_element_encodings = std::accumulate(
-      array.begin(), array.end(), uint32_t{0}, add_encoding_length);
+  const uint32_t total_length_of_element_encodings =
+    std::accumulate(array.begin(), array.end(), uint32_t{0}, add_encoding_length);
   return WidthEncodedU32(array.size()) + total_length_of_element_encodings;
 }
 
@@ -107,21 +106,18 @@ struct Params : ArrayPrefix<ValType, kMaxParamsCount> {
 
 struct FuncType {
   constexpr FuncType() = default;
-  constexpr FuncType(const Params& params, ResultType result)
-      : params(params), result(result) {}
+  constexpr FuncType(const Params& params, ResultType result) : params(params), result(result) {}
   Params params;
   ResultType result;
 };
 
 inline bool operator==(const FuncType& lhs, const FuncType& rhs) {
   return lhs.result == rhs.result &&
-         std::equal(lhs.params.begin(), lhs.params.end(), rhs.params.begin(),
-                    rhs.params.end());
+         std::equal(lhs.params.begin(), lhs.params.end(), rhs.params.begin(), rhs.params.end());
 }
 
 struct Code {
-  constexpr explicit Code(size_t begin_offset)
-      : begin_offset(begin_offset), end_offset(begin_offset) {}
+  constexpr explicit Code(size_t begin_offset) : begin_offset(begin_offset), end_offset(begin_offset) {}
 
   size_t size() const { return end_offset - begin_offset; }
 
@@ -131,13 +127,10 @@ struct Code {
 
 struct Function {
   constexpr Function() : Function(nullptr, 0, 0, 0, {}, Code(0)) {}
-  constexpr Function(const char* name, size_t function_index,
-                     uint32_t type_index,
+  constexpr Function(const char* name, size_t function_index, uint32_t type_index,
                      const ValTypesToInt& locals_declaration, Code body)
-      : Function(name, strlen(name), function_index, type_index,
-                 locals_declaration, body) {}
-  constexpr Function(const char* name, size_t name_length,
-                     size_t function_index, uint32_t type_index,
+      : Function(name, strlen(name), function_index, type_index, locals_declaration, body) {}
+  constexpr Function(const char* name, size_t name_length, size_t function_index, uint32_t type_index,
                      const ValTypesToInt& locals_declaration, Code body)
       : name(name),
         name_length(name_length),
@@ -234,8 +227,7 @@ class V128WasmOps : public WasmOpsBase<Derived, V128WasmOps<Derived>> {
 };
 
 template <typename Derived>
-class ControlFlowWasmOps
-    : public WasmOpsBase<Derived, ControlFlowWasmOps<Derived>> {
+class ControlFlowWasmOps : public WasmOpsBase<Derived, ControlFlowWasmOps<Derived>> {
  public:
   template <typename Cond, typename If, typename Else>
   void IfElse(Cond&& cond, If&& if_block, Else&& else_block) {
@@ -287,43 +279,35 @@ class ControlFlowWasmOps
 template <typename Derived>
 class MemoryWasmOps : public WasmOpsBase<Derived, MemoryWasmOps<Derived>> {
  public:
-  void i32_load(uint32_t offset = 0,
-                uint32_t alignment = kI32DefaultAlignment) {
+  void i32_load(uint32_t offset = 0, uint32_t alignment = kI32DefaultAlignment) {
     load_or_store(0x28, offset, alignment);
   }
 
-  void i32_store(uint32_t offset = 0,
-                 uint32_t alignment = kI32DefaultAlignment) {
+  void i32_store(uint32_t offset = 0, uint32_t alignment = kI32DefaultAlignment) {
     load_or_store(0x36, offset, alignment);
   }
 
-  void v128_load(uint32_t offset = 0,
-                 uint32_t alignment = kV128DefaultAlignment) {
+  void v128_load(uint32_t offset = 0, uint32_t alignment = kV128DefaultAlignment) {
     vector_load_or_store(0x00, offset, alignment);
   }
 
-  void v128_load32_splat(uint32_t offset = 0,
-                         uint32_t alignment = kV128DefaultAlignment) {
+  void v128_load32_splat(uint32_t offset = 0, uint32_t alignment = kV128DefaultAlignment) {
     vector_load_or_store(0x09, offset, alignment);
   }
 
-  void v128_load64_splat(uint32_t offset = 0,
-                         uint32_t alignment = kV128DefaultAlignment) {
+  void v128_load64_splat(uint32_t offset = 0, uint32_t alignment = kV128DefaultAlignment) {
     vector_load_or_store(0x0A, offset, alignment);
   }
 
-  void v128_store(uint32_t offset = 0,
-                  uint32_t alignment = kV128DefaultAlignment) {
+  void v128_store(uint32_t offset = 0, uint32_t alignment = kV128DefaultAlignment) {
     vector_load_or_store(0x0B, offset, alignment);
   }
 
-  void v128_store64_lane(uint8_t lane, uint32_t offset = 0,
-                         uint32_t alignment = kV128DefaultAlignment) {
+  void v128_store64_lane(uint8_t lane, uint32_t offset = 0, uint32_t alignment = kV128DefaultAlignment) {
     v128_store_lane(0x5B, lane, /*max_lane=*/4, offset, alignment);
   }
 
-  void v128_store32_lane(uint8_t lane, uint32_t offset = 0,
-                         uint32_t alignment = kV128DefaultAlignment) {
+  void v128_store32_lane(uint8_t lane, uint32_t offset = 0, uint32_t alignment = kV128DefaultAlignment) {
     v128_store_lane(0x5A, lane, /*max_lane=*/8, offset, alignment);
   }
 
@@ -339,8 +323,7 @@ class MemoryWasmOps : public WasmOpsBase<Derived, MemoryWasmOps<Derived>> {
     load_or_store(opcode, offset, alignment);
   }
 
-  void v128_store_lane(byte opcode, uint8_t lane, uint8_t max_lane,
-                       uint32_t offset, uint32_t alignment) {
+  void v128_store_lane(byte opcode, uint8_t lane, uint8_t max_lane, uint32_t offset, uint32_t alignment) {
     assert(lane < max_lane);
     vector_load_or_store(opcode, offset, alignment);
     this->Encode8(lane);
@@ -349,8 +332,7 @@ class MemoryWasmOps : public WasmOpsBase<Derived, MemoryWasmOps<Derived>> {
 
 class LocalsManager {
  public:
-  void ResetLocalsManager(uint32_t parameters_count,
-                          const ValTypesToInt& locals_declaration_count);
+  void ResetLocalsManager(uint32_t parameters_count, const ValTypesToInt& locals_declaration_count);
 
   uint32_t GetNewLocalIndex(ValType type);
 
@@ -374,15 +356,13 @@ class LocalsManager {
   };
 
   std::array<ValTypeIndices, kMaxNumTypes> indices_ =
-      MakeArray<kMaxNumTypes>(ValTypeIndices{kPlaceholderValType, 0, 0});
+    MakeArray<kMaxNumTypes>(ValTypeIndices{kPlaceholderValType, 0, 0});
 };
 
-std::array<uint8_t, 16> MakeLanesForI8x16Shuffle(const uint8_t* lanes,
-                                                 size_t num_lanes);
+std::array<uint8_t, 16> MakeLanesForI8x16Shuffle(const uint8_t* lanes, size_t num_lanes);
 
 template <typename Derived>
-class LocalWasmOps : public LocalsManager,
-                     public WasmOpsBase<Derived, LocalWasmOps<Derived>> {
+class LocalWasmOps : public LocalsManager, public WasmOpsBase<Derived, LocalWasmOps<Derived>> {
   using WasmOpsBase<Derived, LocalWasmOps<Derived>>::GetDerived;
 
  public:
@@ -390,9 +370,7 @@ class LocalWasmOps : public LocalsManager,
 
   struct ValueOnStack {
     ValueOnStack(const ValType type, Derived* ops) : type(type), ops(ops) {}
-    ValueOnStack(const Local& local) : type(local.type_), ops(local.ops_) {
-      ops->local_get(local);
-    }
+    ValueOnStack(const Local& local) : type(local.type_), ops(local.ops_) { ops->local_get(local); } // NOLINT
     ValType type;
     Derived* ops;
   };
@@ -406,17 +384,12 @@ class LocalWasmOps : public LocalsManager,
 
     Local(const Local& other) = delete;
 
-    Local(Local&& other)
-        : type_(other.type_),
-          index_(other.index_),
-          ops_(other.ops_),
-          is_managed_(other.is_managed_) {
+    Local(Local&& other) : type_(other.type_), index_(other.index_), ops_(other.ops_), is_managed_(other.is_managed_) {
       other.index_ = kInvalidIndex;
     }
 
     Local& operator=(const Local& other) {
-      assert((type_ == other.type_) &&
-             "Assignment of locals of different type");
+      assert((type_ == other.type_) && "Assignment of locals of different type");
       ops_ = other.ops_;
       ops_->local_get(other.index_);
       ops_->local_set(index_);
@@ -424,8 +397,7 @@ class LocalWasmOps : public LocalsManager,
     }
 
     Local& operator=(Local&& other) {
-      assert((index_ == kInvalidIndex) &&
-             "The local already binds to something");
+      assert((index_ == kInvalidIndex) && "The local already binds to something");
       type_ = other.type_;
       index_ = other.index_;
       other.index_ = kInvalidIndex;
@@ -445,8 +417,7 @@ class LocalWasmOps : public LocalsManager,
     }
 
     ~Local() {
-      if (is_managed_ && index_ != kInvalidIndex)
-        ops_->DestructLocal(type_, index_);
+      if (is_managed_ && index_ != kInvalidIndex) ops_->DestructLocal(type_, index_);
     }
 
     ValType type_{0};
@@ -462,10 +433,7 @@ class LocalWasmOps : public LocalsManager,
 
   using LocalsArray = ArrayPrefix<Local, kMaxLocalsSize>;
 
-  Local MakeLocal(ValType type) {
-    return Local{type, GetNewLocalIndex(type), /*is_managed=*/true,
-                 GetDerived()};
-  }
+  Local MakeLocal(ValType type) { return Local{type, GetNewLocalIndex(type), /*is_managed=*/true, GetDerived()}; }
 
   Local MakeLocal(const ValueOnStack& rhs) {
     auto result = MakeLocal(rhs.type);
@@ -491,44 +459,27 @@ class LocalWasmOps : public LocalsManager,
 
   void local_tee(const Local& local) { local_tee(local.index_); }
 
-  ValueOnStack I32Add(const ValueOnStack& a, const ValueOnStack& b) {
-    return BinaryOp(a, b, &Derived::i32_add);
-  }
+  ValueOnStack I32Add(const ValueOnStack& a, const ValueOnStack& b) { return BinaryOp(a, b, &Derived::i32_add); }
 
-  ValueOnStack I32Sub(const ValueOnStack& a, const ValueOnStack& b) {
-    return BinaryOp(a, b, &Derived::i32_sub);
-  }
+  ValueOnStack I32Sub(const ValueOnStack& a, const ValueOnStack& b) { return BinaryOp(a, b, &Derived::i32_sub); }
 
-  ValueOnStack I32And(const ValueOnStack& a, const ValueOnStack& b) {
-    return BinaryOp(a, b, &Derived::i32_and);
-  }
+  ValueOnStack I32And(const ValueOnStack& a, const ValueOnStack& b) { return BinaryOp(a, b, &Derived::i32_and); }
 
-  ValueOnStack I32LtS(const ValueOnStack& a, const ValueOnStack& b) {
-    return BinaryOp(a, b, &Derived::i32_lt_s);
-  }
+  ValueOnStack I32LtS(const ValueOnStack& a, const ValueOnStack& b) { return BinaryOp(a, b, &Derived::i32_lt_s); }
 
-  ValueOnStack I32LeS(const ValueOnStack& a, const ValueOnStack& b) {
-    return BinaryOp(a, b, &Derived::i32_le_s);
-  }
+  ValueOnStack I32LeS(const ValueOnStack& a, const ValueOnStack& b) { return BinaryOp(a, b, &Derived::i32_le_s); }
 
-  ValueOnStack I32GeU(const ValueOnStack& a, const ValueOnStack& b) {
-    return BinaryOp(a, b, &Derived::i32_ge_u);
-  }
+  ValueOnStack I32GeU(const ValueOnStack& a, const ValueOnStack& b) { return BinaryOp(a, b, &Derived::i32_ge_u); }
 
   ValueOnStack I32Shl(const ValueOnStack& value, const ValueOnStack& bits_num) {
     return BinaryOp(value, bits_num, &Derived::i32_shl);
   }
 
-  ValueOnStack I32Ne(const ValueOnStack& lhs, const ValueOnStack& rhs) {
-    return BinaryOp(lhs, rhs, &Derived::i32_ne);
-  }
+  ValueOnStack I32Ne(const ValueOnStack& lhs, const ValueOnStack& rhs) { return BinaryOp(lhs, rhs, &Derived::i32_ne); }
 
-  ValueOnStack I32NeZ(const ValueOnStack& value) {
-    return I32Ne(value, I32Const(0));
-  }
+  ValueOnStack I32NeZ(const ValueOnStack& value) { return I32Ne(value, I32Const(0)); }
 
-  ValueOnStack I32ShrU(const ValueOnStack& value,
-                       const ValueOnStack& bits_num) {
+  ValueOnStack I32ShrU(const ValueOnStack& value, const ValueOnStack& bits_num) {
     return BinaryOp(value, bits_num, &Derived::i32_shr_u);
   }
 
@@ -542,66 +493,45 @@ class LocalWasmOps : public LocalsManager,
     return MakeValueOnStack(f32);
   }
 
-  ValueOnStack I32Load(const ValueOnStack& address, uint32_t offset = 0,
-                       uint32_t alignment = kI32DefaultAlignment) {
+  ValueOnStack I32Load(const ValueOnStack& address, uint32_t offset = 0, uint32_t alignment = kI32DefaultAlignment) {
     return LoadOp(i32, offset, alignment, &Derived::i32_load);
   }
 
-  ValueOnStack I32Load(const ValueOnStack& base,
-                       const ValueOnStack& dynamic_offset,
-                       uint32_t static_offset = 0,
+  ValueOnStack I32Load(const ValueOnStack& base, const ValueOnStack& dynamic_offset, uint32_t static_offset = 0,
                        uint32_t alignment = kI32DefaultAlignment) {
-    return I32Load(I32Add(base, I32Shl(dynamic_offset, I32Const(2))),
-                   static_offset, alignment);
+    return I32Load(I32Add(base, I32Shl(dynamic_offset, I32Const(2))), static_offset, alignment);
   }
 
-  void I32Store(const ValueOnStack& address, const ValueOnStack& value,
-                uint32_t offset = 0,
+  void I32Store(const ValueOnStack& address, const ValueOnStack& value, uint32_t offset = 0,
                 uint32_t alignment = kI32DefaultAlignment) {
     GetDerived()->i32_store(offset, alignment);
   }
 
-  void I32Store(const ValueOnStack& base, const ValueOnStack& dynamic_offset,
-                const Local& value, uint32_t static_offset = 0,
-                uint32_t alignment = kI32DefaultAlignment) {
-    I32Store(I32Add(base, I32Shl(dynamic_offset, I32Const(2))), value,
-             static_offset, alignment);
+  void I32Store(const ValueOnStack& base, const ValueOnStack& dynamic_offset, const Local& value,
+                uint32_t static_offset = 0, uint32_t alignment = kI32DefaultAlignment) {
+    I32Store(I32Add(base, I32Shl(dynamic_offset, I32Const(2))), value, static_offset, alignment);
   }
 
-  ValueOnStack F32x4Add(const ValueOnStack& a, const ValueOnStack& b) {
-    return BinaryOp(a, b, &Derived::f32x4_add);
-  }
+  ValueOnStack F32x4Add(const ValueOnStack& a, const ValueOnStack& b) { return BinaryOp(a, b, &Derived::f32x4_add); }
 
-  ValueOnStack F32x4Pmax(const ValueOnStack& a, const ValueOnStack& b) {
-    return BinaryOp(a, b, &Derived::f32x4_pmax);
-  }
+  ValueOnStack F32x4Pmax(const ValueOnStack& a, const ValueOnStack& b) { return BinaryOp(a, b, &Derived::f32x4_pmax); }
 
-  ValueOnStack F32x4Pmin(const ValueOnStack& a, const ValueOnStack& b) {
-    return BinaryOp(a, b, &Derived::f32x4_pmin);
-  }
+  ValueOnStack F32x4Pmin(const ValueOnStack& a, const ValueOnStack& b) { return BinaryOp(a, b, &Derived::f32x4_pmin); }
 
-  ValueOnStack F32x4Eq(const ValueOnStack& a, const ValueOnStack& b) {
-    return BinaryOp(a, b, &Derived::f32x4_eq);
-  }
+  ValueOnStack F32x4Eq(const ValueOnStack& a, const ValueOnStack& b) { return BinaryOp(a, b, &Derived::f32x4_eq); }
 
   ValueOnStack V128Andnot(const ValueOnStack& a, const ValueOnStack& b) {
     return BinaryOp(a, b, &Derived::v128_andnot);
   }
 
-  ValueOnStack I64x2Shuffle(const ValueOnStack& a, const ValueOnStack& b,
-                            const std::array<uint8_t, 2>& lanes) {
-    return BinaryOp(a, b, [&](Derived* derived) {
-      derived->i8x16_shuffle(
-          MakeLanesForI8x16Shuffle(lanes.data(), lanes.size()));
-    });
+  ValueOnStack I64x2Shuffle(const ValueOnStack& a, const ValueOnStack& b, const std::array<uint8_t, 2>& lanes) {
+    return BinaryOp(
+      a, b, [&](Derived* derived) { derived->i8x16_shuffle(MakeLanesForI8x16Shuffle(lanes.data(), lanes.size())); });
   }
 
-  ValueOnStack I32x4Shuffle(const ValueOnStack& a, const ValueOnStack& b,
-                            const std::array<uint8_t, 4>& lanes) {
-    return BinaryOp(a, b, [&](Derived* derived) {
-      derived->i8x16_shuffle(
-          MakeLanesForI8x16Shuffle(lanes.data(), lanes.size()));
-    });
+  ValueOnStack I32x4Shuffle(const ValueOnStack& a, const ValueOnStack& b, const std::array<uint8_t, 4>& lanes) {
+    return BinaryOp(
+      a, b, [&](Derived* derived) { derived->i8x16_shuffle(MakeLanesForI8x16Shuffle(lanes.data(), lanes.size())); });
   }
 
   ValueOnStack F32x4Splat(const ValueOnStack& a) {
@@ -610,23 +540,19 @@ class LocalWasmOps : public LocalsManager,
     return MakeValueOnStack(v128);
   }
 
-  ValueOnStack F32x4Mul(const ValueOnStack& a, const ValueOnStack& b) {
-    return BinaryOp(a, b, &Derived::f32x4_mul);
-  }
+  ValueOnStack F32x4Mul(const ValueOnStack& a, const ValueOnStack& b) { return BinaryOp(a, b, &Derived::f32x4_mul); }
 
   ValueOnStack V128Const(float value) {
     const uint8_t* value_int = reinterpret_cast<uint8_t*>(&value);
     std::array<byte, 16> values;
     for (size_t offset = 0; offset < 16 / sizeof(float); offset++) {
-      std::copy(value_int, value_int + sizeof(float),
-                values.data() + offset * sizeof(float));
+      std::copy(value_int, value_int + sizeof(float), values.data() + offset * sizeof(float));
     }
     GetDerived()->v128_const(values);
     return MakeValueOnStack(v128);
   }
 
-  ValueOnStack V128Load(const ValueOnStack& address, uint32_t offset = 0,
-                        uint32_t alignment = kV128DefaultAlignment) {
+  ValueOnStack V128Load(const ValueOnStack& address, uint32_t offset = 0, uint32_t alignment = kV128DefaultAlignment) {
     return LoadOp(v128, offset, alignment, &Derived::v128_load);
   }
 
@@ -640,26 +566,22 @@ class LocalWasmOps : public LocalsManager,
     return LoadOp(v128, offset, alignment, &Derived::v128_load64_splat);
   }
 
-  void V128Store(const ValueOnStack& address, const ValueOnStack& value,
-                 uint32_t offset = 0,
+  void V128Store(const ValueOnStack& address, const ValueOnStack& value, uint32_t offset = 0,
                  uint32_t alignment = kV128DefaultAlignment) {
     GetDerived()->v128_store(offset, alignment);
   }
 
-  void V128Store64Lane(const ValueOnStack& address, const ValueOnStack& value,
-                       uint8_t lane, uint32_t offset = 0,
+  void V128Store64Lane(const ValueOnStack& address, const ValueOnStack& value, uint8_t lane, uint32_t offset = 0,
                        uint32_t alignment = kV128DefaultAlignment) {
     GetDerived()->v128_store64_lane(lane, offset, alignment);
   }
 
-  void V128Store32Lane(const ValueOnStack& address, const ValueOnStack& value,
-                       uint8_t lane, uint32_t offset = 0,
+  void V128Store32Lane(const ValueOnStack& address, const ValueOnStack& value, uint8_t lane, uint32_t offset = 0,
                        uint32_t alignment = kV128DefaultAlignment) {
     GetDerived()->v128_store32_lane(lane, offset, alignment);
   }
 
-  ValueOnStack Select(const ValueOnStack& if_true, const ValueOnStack& if_false,
-                      const ValueOnStack& cond) {
+  ValueOnStack Select(const ValueOnStack& if_true, const ValueOnStack& if_false, const ValueOnStack& cond) {
     this->Encode8(0x1B);
     return MakeValueOnStack(if_true.type);
   }
@@ -671,29 +593,23 @@ class LocalWasmOps : public LocalsManager,
  private:
   template <typename Op>
   ValueOnStack BinaryOp(const ValueOnStack& a, const ValueOnStack& b, Op&& op) {
-    assert((a.type == b.type) &&
-           "Binary operation on locals of different types");
+    assert((a.type == b.type) && "Binary operation on locals of different types");
     CallOnDerived(std::forward<Op>(op));
     return MakeValueOnStack(a.type);
   }
 
-  template <typename Op, typename = std::enable_if_t<
-                             std::is_member_function_pointer<Op>::value>>
+  template <typename Op, typename = std::enable_if_t<std::is_member_function_pointer<Op>::value>>
   void CallOnDerived(Op&& op) {
     std::mem_fn(std::forward<Op>(op))(*GetDerived());
   }
 
-  template <
-      typename Op,
-      typename = std::enable_if_t<!std::is_member_function_pointer<Op>::value>,
-      typename = void>
+  template <typename Op, typename = std::enable_if_t<!std::is_member_function_pointer<Op>::value>, typename = void>
   void CallOnDerived(Op&& op) {
     op(GetDerived());
   }
 
   template <typename Op>
-  ValueOnStack LoadOp(const ValType& type, uint32_t offset, uint32_t alignment,
-                      Op&& op) {
+  ValueOnStack LoadOp(const ValType& type, uint32_t offset, uint32_t alignment, Op&& op) {
     std::mem_fn(op)(*GetDerived(), offset, alignment);
     return MakeValueOnStack(type);
   }
@@ -703,9 +619,7 @@ class LocalWasmOps : public LocalsManager,
     this->EncodeU32(value);
   }
 
-  ValueOnStack MakeValueOnStack(const ValType& type) {
-    return {type, GetDerived()};
-  }
+  ValueOnStack MakeValueOnStack(const ValType& type) { return {type, GetDerived()}; }
 };
 
 }  // namespace internal
@@ -731,20 +645,16 @@ class WasmAssembler : public AssemblerBase,
 
  public:
   explicit WasmAssembler(xnn_code_buffer* buf)
-      : AssemblerBase(buf),
-        next_func_body_begin_(code_size_in_bytes() + kInitialCodeOffset) {}
+      : AssemblerBase(buf), next_func_body_begin_(code_size_in_bytes() + kInitialCodeOffset) {}
 
   template <size_t InSize, typename Body>
-  void AddFunc(const ResultType& result, const char* name,
-               ValTypesToInt locals_declaration_count, Body&& body) {
+  void AddFunc(const ResultType& result, const char* name, ValTypesToInt locals_declaration_count, Body&& body) {
     const auto params = internal::MakeArray<InSize>(i32);
-    AddFunc<InSize>(result, name, params, locals_declaration_count,
-                    std::forward<Body>(body));
+    AddFunc<InSize>(result, name, params, locals_declaration_count, std::forward<Body>(body));
   }
 
   template <size_t InSize, typename Body>
-  void AddFunc(const ResultType& result, const char* name,
-               const std::array<ValType, InSize>& params,
+  void AddFunc(const ResultType& result, const char* name, const std::array<ValType, InSize>& params,
                const ValTypesToInt& locals_declaration_count, Body&& body) {
     if (functions_.size() == kMaxNumFuncs) {
       error_ = Error::kMaxNumberOfFunctionsExceeded;
@@ -755,8 +665,7 @@ class WasmAssembler : public AssemblerBase,
     ResetLocalsManager(InSize, locals_declaration_count);
     std::array<Local, InSize> input_locals{};
     for (uint32_t index = 0; index < InSize; index++) {
-      input_locals[index] =
-          Local{params[index], index, /*is_managed=*/false, this};
+      input_locals[index] = Local{params[index], index, /*is_managed=*/false, this};
     }
     internal::ArrayApply(std::move(input_locals), std::forward<Body>(body));
     end();
@@ -764,9 +673,7 @@ class WasmAssembler : public AssemblerBase,
     if (error_ != Error::kNoError) {
       return;
     }
-    RegisterFunction(result, name,
-                     Params(params, internal::kPlaceholderValType),
-                     locals_declaration_count, code);
+    RegisterFunction(result, name, Params(params, internal::kPlaceholderValType), locals_declaration_count, code);
     next_func_body_begin_ = code.end_offset;
   }
 
@@ -776,26 +683,20 @@ class WasmAssembler : public AssemblerBase,
     EmitImportSection();
     EmitFunctionSection();
     EmitExportsSection();
-    assert(code_size_in_bytes() < kInitialCodeOffset &&
-           "Initial code offset is insufficient");
+    assert(code_size_in_bytes() < kInitialCodeOffset && "Initial code offset is insufficient");
     EmitCodeSection();
   }
 
   void SetOut(Code* out) { out_ = out; }
   void Encode8Impl(byte b) { emit8(b, &out_->end_offset); }
-  void EncodeS32Impl(int32_t value) {
-    internal::StoreEncodedS32(value, MakeStoreToCode(*out_));
-  }
-  void EncodeU32Impl(uint32_t value) {
-    internal::StoreEncodedU32(value, MakeStoreToCode(*out_));
-  }
+  void EncodeS32Impl(int32_t value) { internal::StoreEncodedS32(value, MakeStoreToCode(*out_)); }
+  void EncodeU32Impl(uint32_t value) { internal::StoreEncodedU32(value, MakeStoreToCode(*out_)); }
 
  private:
   static constexpr std::array<byte, 4> kMagic = {0x00, 0x61, 0x73, 0x6D};
   static constexpr std::array<byte, 4> kVersion = {0x01, 0x00, 0x00, 0x00};
-  static constexpr std::array<byte, 17> kImportSection = {
-      0x02, 0x0F, 0x01, 0x03, 0x65, 0x6E, 0x76, 0x06, 0x6D,
-      0x65, 0x6D, 0x6F, 0x72, 0x79, 0x02, 0x00, 0x00};
+  static constexpr std::array<byte, 17> kImportSection = {0x02, 0x0F, 0x01, 0x03, 0x65, 0x6E, 0x76, 0x06, 0x6D,
+                                                          0x65, 0x6D, 0x6F, 0x72, 0x79, 0x02, 0x00, 0x00};
 
   constexpr static byte kTypeSectionCode = 0x01;
   constexpr static byte kFunctionSectionCode = 0x03;
@@ -803,10 +704,8 @@ class WasmAssembler : public AssemblerBase,
   constexpr static byte kExportsSectionCode = 0x07;
   constexpr static byte kCodeSectionCode = 0x0A;
 
-  void RegisterFunction(const ResultType& result, const char* name,
-                        const Params& params,
-                        const ValTypesToInt& locals_declaration_count,
-                        Code code);
+  void RegisterFunction(const ResultType& result, const char* name, const Params& params,
+                        const ValTypesToInt& locals_declaration_count, Code code);
   uint32_t FindOrAddFuncType(const FuncType& type);
 
   template <typename Array>
@@ -817,12 +716,9 @@ class WasmAssembler : public AssemblerBase,
   }
 
   template <typename Array, typename SizeCalculator, typename EmitElement>
-  void EmitSection(byte section_code, Array&& array,
-                   SizeCalculator&& size_calculator,
-                   EmitElement&& emit_element) {
+  void EmitSection(byte section_code, Array&& array, SizeCalculator&& size_calculator, EmitElement&& emit_element) {
     emit8(section_code);
-    EmitEncodedU32(VectorEncodingLength(
-        array, std::forward<SizeCalculator>(size_calculator)));
+    EmitEncodedU32(VectorEncodingLength(array, std::forward<SizeCalculator>(size_calculator)));
     EmitEncodedU32(array.size());
     for (const auto& element : array) emit_element(element);
   }

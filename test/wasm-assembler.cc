@@ -68,14 +68,12 @@ struct GeneratorTestSuite {
   using Func = F;
 };
 
-template <typename ValueType, const ValueType& expected_value, typename G,
-          typename F>
+template <typename ValueType, const ValueType& expected_value, typename G, typename F>
 struct GetValueTestSuite : GeneratorTestSuite<G, F> {
   static void ExpectFuncCorrect(F f) { EXPECT_EQ(f(), expected_value); }
 };
 
-struct Get5TestSuite : GetValueTestSuite<int32_t, kExpectedGet5ReturnValue,
-                                         Get5Generator, GetIntPtr> {};
+struct Get5TestSuite : GetValueTestSuite<int32_t, kExpectedGet5ReturnValue, Get5Generator, GetIntPtr> {};
 
 struct AddGenerator : WasmAssembler {
   explicit AddGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
@@ -113,112 +111,100 @@ struct Get5AndAddGenerator : WasmAssembler {
   void GenerateAdd() {
     ValTypesToInt no_locals;
     const std::string& name = kFunctionNames[count++];
-    AddFunc<2>({i32}, name.c_str(), {i32, i32}, no_locals,
-               [this](Local a, Local b) {
-                 local_get(a);
-                 local_get(b);
-                 i32_add();
-               });
+    AddFunc<2>({i32}, name.c_str(), {i32, i32}, no_locals, [this](Local a, Local b) {
+      local_get(a);
+      local_get(b);
+      i32_add();
+    });
   }
 
   const std::array<std::string, 4> kFunctionNames = {
-      std::string("get5_1"),
-      std::string("add_1"),
-      std::string("get5_2"),
-      std::string("add_2"),
+    std::string("get5_1"),
+    std::string("add_1"),
+    std::string("get5_2"),
+    std::string("add_2"),
   };
 
   int count = 0;
 };
 
-struct Get5AndAddTestSuite
-    : GeneratorTestSuite<Get5AndAddGenerator, GetIntPtr> {
+struct Get5AndAddTestSuite : GeneratorTestSuite<Get5AndAddGenerator, GetIntPtr> {
   static void ExpectFuncCorrect(GetIntPtr get5) {
-    int first = (int)get5;
-    Get5TestSuite::ExpectFuncCorrect((GetIntPtr)(first + 0));
-    AddTestSuite::ExpectFuncCorrect((AddPtr)(first + 1));
-    Get5TestSuite::ExpectFuncCorrect((GetIntPtr)(first + 2));
-    AddTestSuite::ExpectFuncCorrect((AddPtr)(first + 3));
+    int first = (int) get5;
+    Get5TestSuite::ExpectFuncCorrect((GetIntPtr) (first + 0));
+    AddTestSuite::ExpectFuncCorrect((AddPtr) (first + 1));
+    Get5TestSuite::ExpectFuncCorrect((GetIntPtr) (first + 2));
+    AddTestSuite::ExpectFuncCorrect((AddPtr) (first + 3));
   }
 };
 
 struct AddWithLocalGenerator : WasmAssembler {
   explicit AddWithLocalGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt single_local_int = {{i32, 1}};
-    AddFunc<2>({i32}, "add_with_local", single_local_int,
-               [this](Local a, Local b) {
-                 auto sum = MakeLocal(i32);
-                 sum = I32Add(a, b);
-                 local_get(sum);
-               });
+    AddFunc<2>({i32}, "add_with_local", single_local_int, [this](Local a, Local b) {
+      auto sum = MakeLocal(i32);
+      sum = I32Add(a, b);
+      local_get(sum);
+    });
   }
 };
 
-struct AddWithLocalTestSuite
-    : AddTestSuiteTmpl<AddWithLocalGenerator, kExpectedSum> {};
+struct AddWithLocalTestSuite : AddTestSuiteTmpl<AddWithLocalGenerator, kExpectedSum> {};
 
 struct AddTwiceGenerator : WasmAssembler {
   explicit AddTwiceGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt two_local_ints = {{i32, 2}};
-    AddFunc<2>({i32}, "add_twice", {i32, i32}, two_local_ints,
-               [this](Local a, Local b) {
-                 auto first = MakeLocal(i32);
-                 auto second = MakeLocal(i32);
-                 first = I32Add(a, b);
-                 second = first;
-                 second = I32Add(second, a);
-                 second = I32Add(second, b);
-                 local_get(second);
-               });
+    AddFunc<2>({i32}, "add_twice", {i32, i32}, two_local_ints, [this](Local a, Local b) {
+      auto first = MakeLocal(i32);
+      auto second = MakeLocal(i32);
+      first = I32Add(a, b);
+      second = first;
+      second = I32Add(second, a);
+      second = I32Add(second, b);
+      local_get(second);
+    });
   }
 };
 
-struct AddTwiceTestSuite
-    : AddTestSuiteTmpl<AddTwiceGenerator, kExpectedSumTwice> {};
+struct AddTwiceTestSuite : AddTestSuiteTmpl<AddTwiceGenerator, kExpectedSumTwice> {};
 
 struct AddTwiceDeclareInitGenerator : WasmAssembler {
-  explicit AddTwiceDeclareInitGenerator(xnn_code_buffer* buf)
-      : WasmAssembler(buf) {
+  explicit AddTwiceDeclareInitGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt two_local_ints = {{i32, 2}};
-    AddFunc<2>({i32}, "add_twice_declare_init", {i32, i32}, two_local_ints,
-               [this](Local a, Local b) {
-                 auto first = MakeLocal(I32Add(a, b));
-                 auto second = MakeLocal(first);
-                 second = first;
-                 second = I32Add(second, a);
-                 second = I32Add(second, b);
-                 local_get(second);
-               });
+    AddFunc<2>({i32}, "add_twice_declare_init", {i32, i32}, two_local_ints, [this](Local a, Local b) {
+      auto first = MakeLocal(I32Add(a, b));
+      auto second = MakeLocal(first);
+      second = first;
+      second = I32Add(second, a);
+      second = I32Add(second, b);
+      local_get(second);
+    });
   }
 };
 
-struct AddTwiceDeclareInitTestSuite
-    : AddTestSuiteTmpl<AddTwiceDeclareInitGenerator, kExpectedSumTwice> {};
+struct AddTwiceDeclareInitTestSuite : AddTestSuiteTmpl<AddTwiceDeclareInitGenerator, kExpectedSumTwice> {};
 
 struct AddTwiceWithScopesGenerator : WasmAssembler {
-  explicit AddTwiceWithScopesGenerator(xnn_code_buffer* buf)
-      : WasmAssembler(buf) {
+  explicit AddTwiceWithScopesGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt two_local_ints = {{i32, 2}};
-    AddFunc<2>({i32}, "add_twice_with_scopes", {i32, i32}, two_local_ints,
-               [this](Local a, Local b) {
-                 auto first = MakeLocal(i32);
-                 {
-                   auto sum = MakeLocal(i32);
-                   sum = I32Add(a, b);
-                   first = sum;
-                 }
-                 {
-                   auto sum = MakeLocal(i32);
-                   sum = I32Add(a, b);
-                   first = I32Add(first, sum);
-                 }
-                 local_get(first);
-               });
+    AddFunc<2>({i32}, "add_twice_with_scopes", {i32, i32}, two_local_ints, [this](Local a, Local b) {
+      auto first = MakeLocal(i32);
+      {
+        auto sum = MakeLocal(i32);
+        sum = I32Add(a, b);
+        first = sum;
+      }
+      {
+        auto sum = MakeLocal(i32);
+        sum = I32Add(a, b);
+        first = I32Add(first, sum);
+      }
+      local_get(first);
+    });
   }
 };
 
-struct AddTwiceWithScopesTestSuite
-    : AddTestSuiteTmpl<AddTwiceWithScopesGenerator, kExpectedSumTwice> {};
+struct AddTwiceWithScopesTestSuite : AddTestSuiteTmpl<AddTwiceWithScopesGenerator, kExpectedSumTwice> {};
 
 struct Add5CodeGenerator : WasmAssembler {
   explicit Add5CodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
@@ -231,21 +217,17 @@ struct Add5CodeGenerator : WasmAssembler {
 };
 
 struct Add5TestSuite : GeneratorTestSuite<Add5CodeGenerator, Add5Ptr> {
-  static void ExpectFuncCorrect(Add5Ptr add_five) {
-    EXPECT_EQ(add_five(kA), kAPlusFive);
-  }
+  static void ExpectFuncCorrect(Add5Ptr add_five) { EXPECT_EQ(add_five(kA), kAPlusFive); }
 };
 
 struct MaxCodeGenerator : WasmAssembler {
   explicit MaxCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt single_local_int = {{i32, 1}};
-    AddFunc<2>({i32}, "max", {i32, i32}, single_local_int,
-               [this](Local a, Local b) {
-                 auto result = MakeLocal(i32);
-                 IfElse([&] { I32LtS(a, b); }, [&] { result = b; },
-                        [&] { result = a; });
-                 local_get(result);
-               });
+    AddFunc<2>({i32}, "max", {i32, i32}, single_local_int, [this](Local a, Local b) {
+      auto result = MakeLocal(i32);
+      IfElse([&] { I32LtS(a, b); }, [&] { result = b; }, [&] { result = a; });
+      local_get(result);
+    });
   }
 };
 
@@ -260,19 +242,16 @@ struct GenericMaxTestSuite : GeneratorTestSuite<G, MaxPtr> {
 struct MaxTestSuite : GenericMaxTestSuite<MaxCodeGenerator> {};
 
 struct MaxIncompleteIfCodeGenerator : WasmAssembler {
-  explicit MaxIncompleteIfCodeGenerator(xnn_code_buffer* buf)
-      : WasmAssembler(buf) {
+  explicit MaxIncompleteIfCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt no_locals = {};
-    AddFunc<2>({i32}, "max_incomplete_if", {i32, i32}, no_locals,
-               [this](Local a, Local b) {
-                 If([&] { I32LtS(a, b); }, [&] { a = b; });
-                 local_get(a);
-               });
+    AddFunc<2>({i32}, "max_incomplete_if", {i32, i32}, no_locals, [this](Local a, Local b) {
+      If([&] { I32LtS(a, b); }, [&] { a = b; });
+      local_get(a);
+    });
   }
 };
 
-struct MaxIncompleteIfTestSuite
-    : GenericMaxTestSuite<MaxIncompleteIfCodeGenerator> {};
+struct MaxIncompleteIfTestSuite : GenericMaxTestSuite<MaxIncompleteIfCodeGenerator> {};
 
 struct SumUntilCodeGenerator : WasmAssembler {
   explicit SumUntilCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
@@ -371,40 +350,30 @@ struct SumUntilLocalsArrayWithIteratorCodeGenerator
       CanGenerateSumUntil<SumUntilLocalsArrayWithIteratorCodeGenerator>,
       CanSumWithIterator<SumUntilLocalsArrayWithIteratorCodeGenerator>,
       CanInitWithIterator<SumUntilLocalsArrayWithIteratorCodeGenerator> {
-  explicit SumUntilLocalsArrayWithIteratorCodeGenerator(xnn_code_buffer* buf)
-      : WasmAssembler(buf) {
+  explicit SumUntilLocalsArrayWithIteratorCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt local_ints_decl = {{i32, kNSmall + 1}};
-    AddFunc<0>({i32}, "SumUntilN", {}, local_ints_decl,
-               [&] { this->GenerateFunctionBody(); });
+    AddFunc<0>({i32}, "SumUntilN", {}, local_ints_decl, [&] { this->GenerateFunctionBody(); });
   }
 };
 
 template <typename G>
 struct SumUntilLocalsArrayTestSuite : GeneratorTestSuite<G, GetIntPtr> {
-  static void ExpectFuncCorrect(GetIntPtr sum_until_n) {
-    EXPECT_EQ(sum_until_n(), ReferenceSumUntil(kNSmall));
-  }
+  static void ExpectFuncCorrect(GetIntPtr sum_until_n) { EXPECT_EQ(sum_until_n(), ReferenceSumUntil(kNSmall)); }
 };
 
-struct SumUntilLocalsArrayWithIterator
-    : SumUntilLocalsArrayTestSuite<
-          SumUntilLocalsArrayWithIteratorCodeGenerator> {};
+struct SumUntilLocalsArrayWithIterator : SumUntilLocalsArrayTestSuite<SumUntilLocalsArrayWithIteratorCodeGenerator> {};
 
-struct SumUntilLocalsArrayWithIndexCodeGenerator
-    : WasmAssembler,
-      CanGenerateSumUntil<SumUntilLocalsArrayWithIndexCodeGenerator>,
-      CanSumWithIndex<SumUntilLocalsArrayWithIndexCodeGenerator>,
-      CanInitWithIndex<SumUntilLocalsArrayWithIndexCodeGenerator> {
-  explicit SumUntilLocalsArrayWithIndexCodeGenerator(xnn_code_buffer* buf)
-      : WasmAssembler(buf) {
+struct SumUntilLocalsArrayWithIndexCodeGenerator : WasmAssembler,
+                                                   CanGenerateSumUntil<SumUntilLocalsArrayWithIndexCodeGenerator>,
+                                                   CanSumWithIndex<SumUntilLocalsArrayWithIndexCodeGenerator>,
+                                                   CanInitWithIndex<SumUntilLocalsArrayWithIndexCodeGenerator> {
+  explicit SumUntilLocalsArrayWithIndexCodeGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt local_ints_decl = {{i32, kNSmall + 1}};
-    AddFunc<0>({i32}, "SumUntilN", {}, local_ints_decl,
-               [&] { this->GenerateFunctionBody(); });
+    AddFunc<0>({i32}, "SumUntilN", {}, local_ints_decl, [&] { this->GenerateFunctionBody(); });
   }
 };
 
-struct SumUntilLocalsArrayWithIndexTestSuite
-    : SumUntilLocalsArrayTestSuite<SumUntilLocalsArrayWithIndexCodeGenerator> {
+struct SumUntilLocalsArrayWithIndexTestSuite : SumUntilLocalsArrayTestSuite<SumUntilLocalsArrayWithIndexCodeGenerator> {
 };
 
 struct DoWhileCodeGenerator : WasmAssembler {
@@ -415,11 +384,11 @@ struct DoWhileCodeGenerator : WasmAssembler {
       auto result = MakeLocal(i32);
       result = I32Const(kPositive);
       DoWhile(
-          [&] {
-            result = I32Add(result, result);
-            i = I32Add(i, I32Const(1));
-          },
-          [&] { I32LtS(i, n); });
+        [&] {
+          result = I32Add(result, result);
+          i = I32Add(i, I32Const(1));
+        },
+        [&] { I32LtS(i, n); });
       local_get(result);
     });
   }
@@ -445,17 +414,16 @@ struct DoWhileTestSuite : GeneratorTestSuite<DoWhileCodeGenerator, DoWhile> {
 struct SumArrayMemory : WasmAssembler {
   explicit SumArrayMemory(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt two_local_ints = {{i32, 2}};
-    AddFunc<2>({i32}, "SumArray", {i32, i32}, two_local_ints,
-               [&](Local array, Local n) {
-                 auto i = MakeLocal(i32);
-                 auto result = MakeLocal(i32);
-                 While([&] { I32LtS(i, n); },
-                       [&] {
-                         result = I32Add(result, I32Load(array, i));
-                         i = I32Add(i, I32Const(1));
-                       });
-                 local_get(result);
-               });
+    AddFunc<2>({i32}, "SumArray", {i32, i32}, two_local_ints, [&](Local array, Local n) {
+      auto i = MakeLocal(i32);
+      auto result = MakeLocal(i32);
+      While([&] { I32LtS(i, n); },
+            [&] {
+              result = I32Add(result, I32Load(array, i));
+              i = I32Add(i, I32Const(1));
+            });
+      local_get(result);
+    });
   }
 };
 
@@ -468,18 +436,17 @@ struct SumArrayTestSuite : GeneratorTestSuite<SumArrayMemory, SumArray> {
 struct MemCpyGenerator : WasmAssembler {
   explicit MemCpyGenerator(xnn_code_buffer* bf) : WasmAssembler(bf) {
     ValTypesToInt two_local_ints = {{i32, 2}};
-    AddFunc<3>({}, "mymemcpy", {i32, i32, i32}, two_local_ints,
-               [&](Local dst, Local src, Local n) {
-                 auto i = MakeLocal(i32);
-                 auto value = MakeLocal(i32);
+    AddFunc<3>({}, "mymemcpy", {i32, i32, i32}, two_local_ints, [&](Local dst, Local src, Local n) {
+      auto i = MakeLocal(i32);
+      auto value = MakeLocal(i32);
 
-                 While([&] { I32LtS(i, n); },
-                       [&] {
-                         value = I32Load(src, i);
-                         I32Store(dst, i, value);
-                         i = I32Add(i, I32Const(1));
-                       });
-               });
+      While([&] { I32LtS(i, n); },
+            [&] {
+              value = I32Load(src, i);
+              I32Store(dst, i, value);
+              i = I32Add(i, I32Const(1));
+            });
+    });
   }
 };
 
@@ -492,28 +459,25 @@ struct MemCpyTestSuite : GeneratorTestSuite<MemCpyGenerator, MemCpy> {
 };
 
 struct AddDelayedInitLocalsGenerator : WasmAssembler {
-  explicit AddDelayedInitLocalsGenerator(xnn_code_buffer* b)
-      : WasmAssembler(b) {
+  explicit AddDelayedInitLocalsGenerator(xnn_code_buffer* b) : WasmAssembler(b) {
     ValTypesToInt three_ints = {{i32, 3}};
-    AddFunc<2>({i32}, "add_delayed_init", {i32, i32}, three_ints,
-               [this](Local a, Local b) {
-                 Local c;
-                 c = MakeLocal(i32);
-                 Local d;
-                 d = MakeLocal(i32);
-                 Local sum;
-                 c = I32Add(c, a);
-                 d = I32Add(c, b);
-                 sum = MakeLocal(i32);
-                 sum = I32Add(a, sum);
-                 sum = I32Add(b, sum);
-                 local_get(sum);
-               });
+    AddFunc<2>({i32}, "add_delayed_init", {i32, i32}, three_ints, [this](Local a, Local b) {
+      Local c;
+      c = MakeLocal(i32);
+      Local d;
+      d = MakeLocal(i32);
+      Local sum;
+      c = I32Add(c, a);
+      d = I32Add(c, b);
+      sum = MakeLocal(i32);
+      sum = I32Add(a, sum);
+      sum = I32Add(b, sum);
+      local_get(sum);
+    });
   }
 };
 
-struct AddDelayedInitTestSuite
-    : AddTestSuiteTmpl<AddDelayedInitLocalsGenerator, kExpectedSum> {};
+struct AddDelayedInitTestSuite : AddTestSuiteTmpl<AddDelayedInitLocalsGenerator, kExpectedSum> {};
 
 struct ManyLocalsGenerator : WasmAssembler {
   explicit ManyLocalsGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
@@ -534,8 +498,7 @@ struct ManyLocalsGenerator : WasmAssembler {
   }
 };
 
-struct ManyLocalsGeneratorTestSuite
-    : GeneratorTestSuite<ManyLocalsGenerator, SumUntilManyLocals> {
+struct ManyLocalsGeneratorTestSuite : GeneratorTestSuite<ManyLocalsGenerator, SumUntilManyLocals> {
   static void ExpectFuncCorrect(SumUntilManyLocals sum_until) {
     EXPECT_EQ(sum_until(), ReferenceSumUntil(kLargeNumberOfLocals));
   }
@@ -544,20 +507,18 @@ struct ManyLocalsGeneratorTestSuite
 struct V128AddGenerator : WasmAssembler {
   explicit V128AddGenerator(xnn_code_buffer* bf) : WasmAssembler(bf) {
     ValTypesToInt two_v128 = {{v128, 2}};
-    AddFunc<2>({}, "v128_add", {i32, i32}, two_v128,
-               [this](Local src, Local dst) {
-                 auto a = MakeLocal(v128);
-                 auto b = MakeLocal(v128);
-                 a = V128Load(src);
-                 b = V128Load(src, /*offset=*/16);
-                 a = F32x4Add(a, b);
-                 V128Store(dst, a);
-               });
+    AddFunc<2>({}, "v128_add", {i32, i32}, two_v128, [this](Local src, Local dst) {
+      auto a = MakeLocal(v128);
+      auto b = MakeLocal(v128);
+      a = V128Load(src);
+      b = V128Load(src, /*offset=*/16);
+      a = F32x4Add(a, b);
+      V128Store(dst, a);
+    });
   }
 };
 
-struct V128AddGeneratorTestSuite
-    : GeneratorTestSuite<V128AddGenerator, V128Add> {
+struct V128AddGeneratorTestSuite : GeneratorTestSuite<V128AddGenerator, V128Add> {
   static void ExpectFuncCorrect(V128Add v128_add) {
     static constexpr std::array<float, 8> kIn = {1, 2, 3, 4, 10, 20, 30, 40};
     static constexpr std::array<float, 4> kExpectedOut = {11, 22, 33, 44};
@@ -570,20 +531,18 @@ struct V128AddGeneratorTestSuite
 struct V128AddConstGenerator : WasmAssembler {
   explicit V128AddConstGenerator(xnn_code_buffer* bf) : WasmAssembler(bf) {
     ValTypesToInt two_v128 = {{v128, 2}};
-    AddFunc<2>({}, "v128_add_const", {i32, i32}, two_v128,
-               [this](Local src, Local dst) {
-                 auto a = MakeLocal(v128);
-                 auto b = MakeLocal(v128);
-                 a = V128Load(src);
-                 b = V128Load32Splat(src, /*offset=*/16);
-                 a = F32x4Add(a, b);
-                 V128Store(dst, a);
-               });
+    AddFunc<2>({}, "v128_add_const", {i32, i32}, two_v128, [this](Local src, Local dst) {
+      auto a = MakeLocal(v128);
+      auto b = MakeLocal(v128);
+      a = V128Load(src);
+      b = V128Load32Splat(src, /*offset=*/16);
+      a = F32x4Add(a, b);
+      V128Store(dst, a);
+    });
   }
 };
 
-struct V128AddConstGeneratorTestSuite
-    : GeneratorTestSuite<V128AddConstGenerator, V128AddConst> {
+struct V128AddConstGeneratorTestSuite : GeneratorTestSuite<V128AddConstGenerator, V128AddConst> {
   static void ExpectFuncCorrect(V128AddConst v128_add_const) {
     static constexpr std::array<float, 5> kIn = {1, 2, 3, 4, 5};
     static constexpr std::array<float, 4> kExpectedOut = {6, 7, 8, 9};
@@ -596,20 +555,18 @@ struct V128AddConstGeneratorTestSuite
 struct V128AddPiGenerator : WasmAssembler {
   explicit V128AddPiGenerator(xnn_code_buffer* bf) : WasmAssembler(bf) {
     ValTypesToInt two_v128 = {{v128, 2}};
-    AddFunc<2>({}, "v128_add_pi", {i32, i32}, two_v128,
-               [this](Local src, Local dst) {
-                 auto a = MakeLocal(v128);
-                 auto b = MakeLocal(v128);
-                 a = V128Load(src);
-                 b = V128Const(kPi);
-                 a = F32x4Add(a, b);
-                 V128Store(dst, a);
-               });
+    AddFunc<2>({}, "v128_add_pi", {i32, i32}, two_v128, [this](Local src, Local dst) {
+      auto a = MakeLocal(v128);
+      auto b = MakeLocal(v128);
+      a = V128Load(src);
+      b = V128Const(kPi);
+      a = F32x4Add(a, b);
+      V128Store(dst, a);
+    });
   }
 };
 
-struct V128AddPiGeneratorTestSuite
-    : GeneratorTestSuite<V128AddPiGenerator, V128AddConst> {
+struct V128AddPiGeneratorTestSuite : GeneratorTestSuite<V128AddPiGenerator, V128AddConst> {
   static void ExpectFuncCorrect(V128AddConst v128_add_const) {
     static constexpr std::array<float, 5> kIn = {1, 2, 3, 4, 5};
 
@@ -625,25 +582,22 @@ struct V128AddPiGeneratorTestSuite
 struct I64x2ShuffleGenerator : WasmAssembler {
   explicit I64x2ShuffleGenerator(xnn_code_buffer* bf) : WasmAssembler(bf) {
     ValTypesToInt two_v128 = {{v128, 2}};
-    AddFunc<2>({}, "i64x2_shuffle", {i32, i32}, two_v128,
-               [this](Local src, Local dst) {
-                 auto a = MakeLocal(v128);
-                 auto b = MakeLocal(v128);
-                 a = V128Load(src);
-                 b = V128Load(src, /*offset=*/16);
-                 V128Store(dst, I64x2Shuffle(a, b, {0, 0}), /*offset=*/0);
-                 V128Store(dst, I64x2Shuffle(a, b, {3, 1}), /*offset=*/16);
-                 V128Store(dst, I64x2Shuffle(a, b, {0, 2}), /*offset=*/32);
-               });
+    AddFunc<2>({}, "i64x2_shuffle", {i32, i32}, two_v128, [this](Local src, Local dst) {
+      auto a = MakeLocal(v128);
+      auto b = MakeLocal(v128);
+      a = V128Load(src);
+      b = V128Load(src, /*offset=*/16);
+      V128Store(dst, I64x2Shuffle(a, b, {0, 0}), /*offset=*/0);
+      V128Store(dst, I64x2Shuffle(a, b, {3, 1}), /*offset=*/16);
+      V128Store(dst, I64x2Shuffle(a, b, {0, 2}), /*offset=*/32);
+    });
   }
 };
 
-struct I64x2ShuffleGeneratorTestSuite
-    : GeneratorTestSuite<I64x2ShuffleGenerator, V128Shuffle> {
+struct I64x2ShuffleGeneratorTestSuite : GeneratorTestSuite<I64x2ShuffleGenerator, V128Shuffle> {
   static void ExpectFuncCorrect(V128Shuffle v128_shuffle) {
     static constexpr std::array<float, 8> kIn = {1, 2, 3, 4, 5, 6, 7, 8};
-    static constexpr std::array<float, 12> kExpectedOut = {1, 2, 1, 2, 7, 8,
-                                                           3, 4, 1, 2, 5, 6};
+    static constexpr std::array<float, 12> kExpectedOut = {1, 2, 1, 2, 7, 8, 3, 4, 1, 2, 5, 6};
     std::array<float, 12> out;
     v128_shuffle(kIn.data(), out.data());
     EXPECT_THAT(out, ElementsAreArray(kExpectedOut));
@@ -657,12 +611,10 @@ struct GetPiGenerator : WasmAssembler {
   }
 };
 
-struct GetPiTestSuite
-    : GetValueTestSuite<float, kPi, GetPiGenerator, GetPiPtr> {};
+struct GetPiTestSuite : GetValueTestSuite<float, kPi, GetPiGenerator, GetPiPtr> {};
 
 struct Get5TrickyLifetimeGenerator : WasmAssembler {
-  explicit Get5TrickyLifetimeGenerator(xnn_code_buffer* bf)
-      : WasmAssembler(bf) {
+  explicit Get5TrickyLifetimeGenerator(xnn_code_buffer* bf) : WasmAssembler(bf) {
     ValTypesToInt two_locals = {{i32, 2}};
     AddFunc<0>({i32}, "get5", {}, two_locals, [&] {
       Local a;
@@ -677,8 +629,7 @@ struct Get5TrickyLifetimeGenerator : WasmAssembler {
 };
 
 struct Get5TrickyTestSuite
-    : GetValueTestSuite<int32_t, kExpectedGet5ReturnValue,
-                        Get5TrickyLifetimeGenerator, GetIntPtr> {};
+    : GetValueTestSuite<int32_t, kExpectedGet5ReturnValue, Get5TrickyLifetimeGenerator, GetIntPtr> {};
 
 struct InvalidCodeGenerator : WasmAssembler {
   ValTypesToInt no_locals;
@@ -689,8 +640,7 @@ struct InvalidCodeGenerator : WasmAssembler {
 
 struct ManyFunctionsGenerator : WasmAssembler {
   explicit ManyFunctionsGenerator(xnn_code_buffer* buf) : WasmAssembler(buf) {
-    for (uint32_t func_index = 0; func_index < kLargeNumberOfFunctions;
-         func_index++) {
+    for (uint32_t func_index = 0; func_index < kLargeNumberOfFunctions; func_index++) {
       AddGet5(func_index);
     }
   }
@@ -699,16 +649,13 @@ struct ManyFunctionsGenerator : WasmAssembler {
   void AddGet5(uint32_t index) {
     function_names[index] = "get5_" + std::to_string(index);
     ValTypesToInt no_locals;
-    AddFunc<0>({i32}, function_names[index].c_str(), {}, no_locals,
-               [this]() { i32_const(5); });
+    AddFunc<0>({i32}, function_names[index].c_str(), {}, no_locals, [this]() { i32_const(5); });
   }
   static std::array<std::string, kLargeNumberOfFunctions> function_names;
 };
-std::array<std::string, kLargeNumberOfFunctions>
-    ManyFunctionsGenerator::function_names = {};
+std::array<std::string, kLargeNumberOfFunctions> ManyFunctionsGenerator::function_names = {};
 
-constexpr static size_t kTooLongFunctionLength =
-    XNN_DEFAULT_CODE_BUFFER_SIZE * 2;
+constexpr static size_t kTooLongFunctionLength = XNN_DEFAULT_CODE_BUFFER_SIZE * 2;
 struct LongGet5Generator : WasmAssembler {
   explicit LongGet5Generator(xnn_code_buffer* buf) : WasmAssembler(buf) {
     ValTypesToInt one_i32 = {{i32, 1}};
@@ -744,7 +691,7 @@ TYPED_TEST_P(WasmAssemblerTest, ValidCode) {
 
   ASSERT_EQ(xnn_finalize_code_memory(&b), xnn_status_success);
   ASSERT_EQ(Error::kNoError, generator.error());
-  auto func = (Func)xnn_first_function_ptr(&b);
+  auto func = (Func) xnn_first_function_ptr(&b);
   TestSuite::ExpectFuncCorrect(func);
 
   ASSERT_EQ(xnn_release_code_memory(&b), xnn_status_success);
@@ -753,19 +700,14 @@ TYPED_TEST_P(WasmAssemblerTest, ValidCode) {
 REGISTER_TYPED_TEST_SUITE_P(WasmAssemblerTest, ValidCode);
 
 using WasmAssemblerTestSuits =
-    testing::Types<Get5TestSuite, AddTestSuite, Get5AndAddTestSuite,
-                   AddWithLocalTestSuite, AddTwiceTestSuite,
-                   AddTwiceDeclareInitTestSuite, AddTwiceWithScopesTestSuite,
-                   Add5TestSuite, MaxTestSuite, MaxIncompleteIfTestSuite,
-                   SumUntilTestSuite, SumUntilLocalsArrayWithIterator,
-                   SumUntilLocalsArrayWithIndexTestSuite, DoWhileTestSuite,
-                   SumArrayTestSuite, MemCpyTestSuite, AddDelayedInitTestSuite,
-                   ManyLocalsGeneratorTestSuite, V128AddGeneratorTestSuite,
-                   V128AddPiGeneratorTestSuite, V128AddConstGeneratorTestSuite,
-                   I64x2ShuffleGeneratorTestSuite, GetPiTestSuite,
-                   Get5TrickyTestSuite>;
-INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest,
-                               WasmAssemblerTestSuits);
+  testing::Types<Get5TestSuite, AddTestSuite, Get5AndAddTestSuite, AddWithLocalTestSuite, AddTwiceTestSuite,
+                 AddTwiceDeclareInitTestSuite, AddTwiceWithScopesTestSuite, Add5TestSuite, MaxTestSuite,
+                 MaxIncompleteIfTestSuite, SumUntilTestSuite, SumUntilLocalsArrayWithIterator,
+                 SumUntilLocalsArrayWithIndexTestSuite, DoWhileTestSuite, SumArrayTestSuite, MemCpyTestSuite,
+                 AddDelayedInitTestSuite, ManyLocalsGeneratorTestSuite, V128AddGeneratorTestSuite,
+                 V128AddPiGeneratorTestSuite, V128AddConstGeneratorTestSuite, I64x2ShuffleGeneratorTestSuite,
+                 GetPiTestSuite, Get5TrickyTestSuite>;
+INSTANTIATE_TYPED_TEST_SUITE_P(WasmAssemblerTestSuits, WasmAssemblerTest, WasmAssemblerTestSuits);
 
 TEST(WasmAssemblerTest, InvalidCode) {
   xnn_code_buffer b;
@@ -820,17 +762,11 @@ class WasmOpsTest : public internal::V128WasmOps<WasmOpsTest>,
     EXPECT_EQ(result.type, v128);
   }
 
-  void ExpectCallEncode8(byte opcode) {
-    EXPECT_CALL(*this, Encode8Impl(opcode)).Times(1).InSequence(sequence_);
-  }
+  void ExpectCallEncode8(byte opcode) { EXPECT_CALL(*this, Encode8Impl(opcode)).Times(1).InSequence(sequence_); }
 
-  void ExpectCallEncodeU32(uint32_t value) {
-    EXPECT_CALL(*this, EncodeU32Impl(value)).Times(1).InSequence(sequence_);
-  }
+  void ExpectCallEncodeU32(uint32_t value) { EXPECT_CALL(*this, EncodeU32Impl(value)).Times(1).InSequence(sequence_); }
 
-  void ExpectCallEncodeS32(uint32_t value) {
-    EXPECT_CALL(*this, EncodeS32Impl(value)).Times(1).InSequence(sequence_);
-  }
+  void ExpectCallEncodeS32(uint32_t value) { EXPECT_CALL(*this, EncodeS32Impl(value)).Times(1).InSequence(sequence_); }
 
   void ExpectEncodeVectorOpcode(uint32_t opcode) {
     ExpectCallEncode8(0xFD);
@@ -917,7 +853,7 @@ TEST_F(WasmOpsTest, V128F32x4Splat) {
 }
 
 TEST_F(WasmOpsTest, I32x4Shuffle) {
-  static constexpr std::array<uint8_t, 4> kLanes = {1,2,3,4};
+  static constexpr std::array<uint8_t, 4> kLanes = {1, 2, 3, 4};
   ExpectEncodeVectorOpcode(0x0D);
   for (auto lane : internal::MakeLanesForI8x16Shuffle(kLanes.data(), kLanes.size())) {
     ExpectCallEncode8(lane);
