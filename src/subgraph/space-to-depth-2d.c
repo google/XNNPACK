@@ -72,13 +72,6 @@ static enum xnn_status create_space_to_depth_operator(
       XNN_UNREACHABLE;
   }
 
-  if (status == xnn_status_success) {
-    opdata->batch_size = values[input_id].shape.dim[0];
-    opdata->input_height = values[input_id].shape.dim[1];
-    opdata->input_width = values[input_id].shape.dim[2];
-    opdata->output_height = values[output_id].shape.dim[1];
-    opdata->output_width = values[output_id].shape.dim[2];
-  }
   return status;
 }
 
@@ -88,13 +81,18 @@ static enum xnn_status reshape_space_to_depth_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id < num_values);
+  const size_t batch_size = values[input_id].shape.dim[0];
+  const size_t input_height = values[input_id].shape.dim[1];
+  const size_t input_width = values[input_id].shape.dim[2];
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_space_to_depth_nhwc_x16:
       return xnn_reshape_space_to_depth_nhwc_x16(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
+          batch_size,
+          input_height,
+          input_width,
           /*output_height_out=*/NULL,
           /*output_width_out=*/NULL,
           /*output_channels_out=*/NULL,
@@ -102,9 +100,9 @@ static enum xnn_status reshape_space_to_depth_operator(
     case xnn_operator_type_space_to_depth_nhwc_x32:
       return xnn_reshape_space_to_depth_nhwc_x32(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
+          batch_size,
+          input_height,
+          input_width,
           /*output_height_out=*/NULL,
           /*output_width_out=*/NULL,
           /*output_channels_out=*/NULL,
@@ -112,9 +110,9 @@ static enum xnn_status reshape_space_to_depth_operator(
     case xnn_operator_type_space_to_depth_nhwc_x8:
       return xnn_reshape_space_to_depth_nhwc_x8(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
+          batch_size,
+          input_height,
+          input_width,
           /*output_height_out=*/NULL,
           /*output_width_out=*/NULL,
           /*output_channels_out=*/NULL,

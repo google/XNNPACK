@@ -41,7 +41,6 @@ static enum xnn_status create_fully_connected_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const size_t num_input_elements = xnn_shape_multiply_all_dims(&values[node->inputs[0]].shape);
   size_t output_channels, input_channels;
   if (node->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     input_channels = values[node->inputs[1]].shape.dim[0];
@@ -227,11 +226,6 @@ static enum xnn_status create_fully_connected_operator(
     default:
       XNN_UNREACHABLE;
   }
-  if (status == xnn_status_success) {
-    opdata->batch_size = num_input_elements / input_channels;
-    opdata->input_channels = input_channels;
-    opdata->output_channels = output_channels;
-  }
   return status;
 }
 
@@ -241,57 +235,72 @@ static enum xnn_status reshape_fully_connected_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id < num_values);
+  const uint32_t filter_id = opdata->inputs[1];
+  assert(filter_id < num_values);
+  const size_t num_input_elements = xnn_shape_multiply_all_dims(&values[input_id].shape);
+  size_t output_channels, input_channels;
+  if (opdata->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    input_channels = values[filter_id].shape.dim[0];
+    output_channels = values[filter_id].shape.dim[1];
+  } else {
+    output_channels = values[filter_id].shape.dim[0];
+    input_channels = values[filter_id].shape.dim[1];
+  }
+  const size_t batch_size = num_input_elements / input_channels;
+
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_dynamic_fully_connected_nc_f16:
       return xnn_reshape_dynamic_fully_connected_nc_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_channels, opdata->output_channels,
-        opdata->input_channels, opdata->output_channels,
+        batch_size,
+        input_channels, output_channels,
+        input_channels, output_channels,
         &opdata->workspace_size, &opdata->workspace_alignment,
         threadpool);
     case xnn_operator_type_dynamic_fully_connected_nc_f32:
       return xnn_reshape_dynamic_fully_connected_nc_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_channels, opdata->output_channels,
-        opdata->input_channels, opdata->output_channels,
+        batch_size,
+        input_channels, output_channels,
+        input_channels, output_channels,
         &opdata->workspace_size, &opdata->workspace_alignment,
         threadpool);
     case xnn_operator_type_fully_connected_nc_f16:
       return xnn_reshape_fully_connected_nc_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
+        batch_size,
         threadpool);
     case xnn_operator_type_fully_connected_nc_f32:
       return xnn_reshape_fully_connected_nc_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
+        batch_size,
         threadpool);
     case xnn_operator_type_fully_connected_nc_f32_qc4w:
       return xnn_reshape_fully_connected_nc_f32_qc4w(
         opdata->operator_objects[0],
-        opdata->batch_size,
+        batch_size,
         threadpool);
     case xnn_operator_type_fully_connected_nc_f32_qc8w:
       return xnn_reshape_fully_connected_nc_f32_qc8w(
         opdata->operator_objects[0],
-        opdata->batch_size,
+        batch_size,
         threadpool);
     case xnn_operator_type_fully_connected_nc_qd8_f32_qc8w:
       return xnn_reshape_fully_connected_nc_qd8_f32_qc8w(
         opdata->operator_objects[0],
-        opdata->batch_size,
+        batch_size,
         threadpool);
     case xnn_operator_type_fully_connected_nc_qs8:
       return xnn_reshape_fully_connected_nc_qs8(
         opdata->operator_objects[0],
-        opdata->batch_size,
+        batch_size,
         threadpool);
     case xnn_operator_type_fully_connected_nc_qu8:
       return xnn_reshape_fully_connected_nc_qu8(
         opdata->operator_objects[0],
-        opdata->batch_size,
+        batch_size,
         threadpool);
     default:
       XNN_UNREACHABLE;

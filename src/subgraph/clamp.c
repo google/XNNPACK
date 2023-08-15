@@ -87,9 +87,6 @@ static enum xnn_status create_clamp_operator(
     default:
       XNN_UNREACHABLE;
   }
-  if (status == xnn_status_success) {
-    opdata->batch_size = xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
-  }
   return status;
 }
 
@@ -99,26 +96,29 @@ static enum xnn_status reshape_clamp_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id < num_values);
+  const size_t batch_size = xnn_shape_multiply_non_channel_dims(&values[input_id].shape);
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_clamp_nc_f16:
       return xnn_reshape_clamp_nc_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
+        batch_size,
         threadpool);
     case xnn_operator_type_clamp_nc_f32:
       return xnn_reshape_clamp_nc_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
+        batch_size,
         threadpool);
     case xnn_operator_type_clamp_nc_s8:
       return xnn_reshape_clamp_nc_s8(
         opdata->operator_objects[0],
-        opdata->batch_size,
+        batch_size,
         threadpool);
     case xnn_operator_type_clamp_nc_u8:
       return xnn_reshape_clamp_nc_u8(
         opdata->operator_objects[0],
-        opdata->batch_size,
+        batch_size,
         threadpool);
       break;
     default:

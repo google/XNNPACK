@@ -33,6 +33,7 @@ static enum xnn_status create_resize_bilinear_operator(
   const uint32_t output_id = node->outputs[0];
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
+  (void) output_id;  // Silence unused warning, only use in asserts.
 
   const size_t channel_dim = values[input_id].shape.dim[3];
   assert(channel_dim == values[node->outputs[0]].shape.dim[3]);
@@ -87,13 +88,6 @@ static enum xnn_status create_resize_bilinear_operator(
         XNN_UNREACHABLE;
     }
   }
-  if (status == xnn_status_success) {
-    opdata->batch_size = values[input_id].shape.dim[0];
-    opdata->input_height = values[input_id].shape.dim[1];
-    opdata->input_width = values[input_id].shape.dim[2];
-    opdata->output_height = values[output_id].shape.dim[1];
-    opdata->output_width = values[output_id].shape.dim[2];
-  }
   return status;
 }
 
@@ -103,65 +97,74 @@ static enum xnn_status reshape_resize_bilinear_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id < num_values);
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id < num_values);
+  const size_t batch_size = values[input_id].shape.dim[0];
+  const size_t input_height = values[input_id].shape.dim[1];
+  const size_t input_width = values[input_id].shape.dim[2];
+  const size_t output_height = values[output_id].shape.dim[1];
+  const size_t output_width = values[output_id].shape.dim[2];
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_resize_bilinear_nchw_f16:
       return xnn_reshape_resize_bilinear2d_nchw_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
-        opdata->output_height,
-        opdata->output_width,
+        batch_size,
+        input_height,
+        input_width,
+        output_height,
+        output_width,
         threadpool);
       break;
     case xnn_operator_type_resize_bilinear_nchw_f32:
       return xnn_reshape_resize_bilinear2d_nchw_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
-        opdata->output_height,
-        opdata->output_width,
+        batch_size,
+        input_height,
+        input_width,
+        output_height,
+        output_width,
         threadpool);
       break;
     case xnn_operator_type_resize_bilinear_nhwc_f16:
       return xnn_reshape_resize_bilinear2d_nhwc_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
-        opdata->output_height,
-        opdata->output_width,
+        batch_size,
+        input_height,
+        input_width,
+        output_height,
+        output_width,
         threadpool);
       break;
     case xnn_operator_type_resize_bilinear_nhwc_f32:
       return xnn_reshape_resize_bilinear2d_nhwc_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
-        opdata->output_height,
-        opdata->output_width,
+        batch_size,
+        input_height,
+        input_width,
+        output_height,
+        output_width,
         threadpool);
       break;
     case xnn_operator_type_resize_bilinear_nhwc_s8:
       return xnn_reshape_resize_bilinear2d_nhwc_s8(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
-        opdata->output_height,
-        opdata->output_width,
+        batch_size,
+        input_height,
+        input_width,
+        output_height,
+        output_width,
         threadpool);
       break;
     case xnn_operator_type_resize_bilinear_nhwc_u8:
       return xnn_reshape_resize_bilinear2d_nhwc_u8(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height,
-        opdata->input_width,
-        opdata->output_height,
-        opdata->output_width,
+        batch_size,
+        input_height,
+        input_width,
+        output_height,
+        output_width,
         threadpool);
       break;
     default:

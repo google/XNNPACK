@@ -34,9 +34,6 @@ static enum xnn_status create_rope_operator(
   assert(weights_id < num_values);
 
   assert(node->num_outputs == 1);
-  const uint32_t output_id = node->outputs[0];
-  assert(output_id != XNN_INVALID_VALUE_ID);
-  assert(output_id < num_values);
 
   const size_t num_input_dims = values[input_id].shape.num_dims;
 
@@ -49,14 +46,6 @@ static enum xnn_status create_rope_operator(
     weights_data,
     /*flags=*/0,
     &opdata->operator_objects[0]);
-  if (status == xnn_status_success) {
-    opdata->batch_size = xnn_shape_multiply_batch_dims(&values[input_id].shape, 3);
-    opdata->sequence_size = values[input_id].shape.dim[num_input_dims - 3];
-    opdata->heads = values[input_id].shape.dim[num_input_dims - 2];
-    opdata->inputs[0] = input_id;
-    opdata->inputs[1] = weights_id;
-    opdata->outputs[0] = output_id;
-  }
   return status;
 }
 
@@ -66,12 +55,18 @@ static enum xnn_status reshape_rope_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id < num_values);
+  const size_t num_input_dims = values[input_id].shape.num_dims;
+  const size_t batch_size = xnn_shape_multiply_batch_dims(&values[input_id].shape, 3);
+  const size_t sequence_size = values[input_id].shape.dim[num_input_dims - 3];
+  const size_t heads = values[input_id].shape.dim[num_input_dims - 2];
   assert(opdata->operator_objects[0]->type == xnn_operator_type_rope_nthc_f32);
   return xnn_reshape_rope_nthc_f32(
     opdata->operator_objects[0],
-    opdata->batch_size,
-    opdata->sequence_size,
-    opdata->heads,
+    batch_size,
+    sequence_size,
+    heads,
     threadpool);
 }
 

@@ -187,9 +187,6 @@ static enum xnn_status create_deconvolution_operator(
       XNN_UNREACHABLE;
   }
   if (status == xnn_status_success) {
-    opdata->batch_size = values[input_id].shape.dim[0];
-    opdata->input_height = values[input_id].shape.dim[1];
-    opdata->input_width = values[input_id].shape.dim[2];
     opdata->adjustment_height = node->params.deconvolution_2d.adjustment_height;
     opdata->adjustment_width = node->params.deconvolution_2d.adjustment_width;
   }
@@ -202,13 +199,18 @@ static enum xnn_status reshape_deconvolution_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id < num_values);
+  const size_t batch_size = values[input_id].shape.dim[0];
+  const size_t input_height = values[input_id].shape.dim[1];
+  const size_t input_width = values[input_id].shape.dim[2];
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_deconvolution_nhwc_f16:
       return xnn_reshape_deconvolution2d_nhwc_f16(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
+          batch_size,
+          input_height,
+          input_width,
           opdata->adjustment_height,
           opdata->adjustment_width,
           /*output_height_out=*/NULL,
@@ -218,9 +220,9 @@ static enum xnn_status reshape_deconvolution_operator(
     case xnn_operator_type_deconvolution_nhwc_f32:
       return xnn_reshape_deconvolution2d_nhwc_f32(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
+          batch_size,
+          input_height,
+          input_width,
           opdata->adjustment_height,
           opdata->adjustment_width,
           /*output_height_out=*/NULL,
@@ -230,9 +232,9 @@ static enum xnn_status reshape_deconvolution_operator(
     case xnn_operator_type_deconvolution_nhwc_qs8:
       return xnn_reshape_deconvolution2d_nhwc_qs8(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
+          batch_size,
+          input_height,
+          input_width,
           opdata->adjustment_height,
           opdata->adjustment_width,
           /*output_height_out=*/NULL,
@@ -242,9 +244,9 @@ static enum xnn_status reshape_deconvolution_operator(
     case xnn_operator_type_deconvolution_nhwc_qu8:
       return xnn_reshape_deconvolution2d_nhwc_qu8(
           opdata->operator_objects[0],
-          opdata->batch_size,
-          opdata->input_height,
-          opdata->input_width,
+          batch_size,
+          input_height,
+          input_width,
           opdata->adjustment_height,
           opdata->adjustment_width,
           /*output_height_out=*/NULL,

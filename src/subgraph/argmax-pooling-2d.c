@@ -47,11 +47,6 @@ static enum xnn_status create_argmax_pooling_operator(
     channel_dim /* channels */, channel_dim /* input stride */, channel_dim /* output stride */,
     node->flags,
     &opdata->operator_objects[0]);
-  if (status == xnn_status_success) {
-    opdata->batch_size = values[input_id].shape.dim[0];
-    opdata->input_height = values[input_id].shape.dim[1];
-    opdata->input_width = values[input_id].shape.dim[2];
-  }
   return status;
 }
 
@@ -61,11 +56,16 @@ static enum xnn_status reshape_argmax_pooling_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id < num_values);
+  const size_t batch_size = values[input_id].shape.dim[0];
+  const size_t input_height = values[input_id].shape.dim[1];
+  const size_t input_width = values[input_id].shape.dim[2];
   return xnn_reshape_argmax_pooling2d_nhwc_f32(
     opdata->operator_objects[0],
-    opdata->batch_size,
-    opdata->input_height,
-    opdata->input_width,
+    batch_size,
+    input_height,
+    input_width,
     threadpool);
 }
 

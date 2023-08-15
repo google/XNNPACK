@@ -110,10 +110,6 @@ static enum xnn_status create_fully_connected_operator(
     default:
       XNN_UNREACHABLE;
   }
-  if (status == xnn_status_success) {
-    const size_t num_input_elements = xnn_shape_multiply_all_dims(&values[node->inputs[0]].shape);
-    opdata->batch_size = num_input_elements / input_channels;
-  }
   return status;
 }
 
@@ -123,17 +119,24 @@ static enum xnn_status reshape_fully_connected_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id < num_values);
+  const uint32_t filter_id = opdata->inputs[0];
+  assert(filter_id < num_values);
+  const size_t input_channels = values[filter_id].shape.dim[1];
+  const size_t num_input_elements = xnn_shape_multiply_all_dims(&values[input_id].shape);
+  const size_t batch_size = num_input_elements / input_channels;
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_convolution_nchw_f16:
       return xnn_reshape_convolution2d_nchw_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
+        batch_size,
         1, 1, NULL, NULL,
         threadpool);
     case xnn_operator_type_convolution_nchw_f32:
       return xnn_reshape_convolution2d_nchw_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
+        batch_size,
         1, 1, NULL, NULL,
         threadpool);
     default:

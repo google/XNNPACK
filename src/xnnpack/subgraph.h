@@ -419,6 +419,7 @@ struct xnn_operator_data {
   void* workspace;
   size_t workspace_size;
   size_t workspace_alignment;
+  uint32_t flags;
 };
 
 struct xnn_subgraph {

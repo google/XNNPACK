@@ -463,6 +463,7 @@ enum xnn_status xnn_create_runtime_v4(
 
     // Initialize common fields we need for analysis.
     runtime->opdata[i].type = node->type;
+    runtime->opdata[i].flags = node->flags;
     runtime->opdata[i].id = node->id;
     runtime->opdata[i].num_inputs = node->num_inputs;
     runtime->opdata[i].num_outputs = node->num_outputs;

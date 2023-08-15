@@ -25,25 +25,7 @@ static enum xnn_status create_batch_matrix_multiply_operator(
   struct xnn_weights_cache* weights_cache)
 {
   assert(node->num_inputs == 2);
-  const uint32_t input1_id = node->inputs[0];
-  assert(input1_id != XNN_INVALID_VALUE_ID);
-  assert(input1_id < num_values);
-  const uint32_t input2_id = node->inputs[1];
-  assert(input2_id != XNN_INVALID_VALUE_ID);
-  assert(input2_id < num_values);
-
   assert(node->num_outputs == 1);
-
-  const bool transpose_b = (node->flags & XNN_FLAG_TRANSPOSE_B) != 0;
-
-  const struct xnn_value* input1 = values + input1_id;
-  const struct xnn_value* input2 = values + input2_id;
-  // input1: [B, M, K]
-  // input2: [B, K, N] or [B, N, K] (transpose_b)
-  const size_t m = input1->shape.dim[input1->shape.num_dims - 2];
-  const size_t k = input1->shape.dim[input1->shape.num_dims - 1];
-  const size_t n = input2->shape.dim[transpose_b ? input2->shape.num_dims - 2 : input2->shape.num_dims - 1];
-  const size_t batch_size = xnn_shape_multiply_batch_dims(&input1->shape, 2);
 
   enum xnn_status status;
   switch (node->compute_type) {
@@ -52,12 +34,6 @@ static enum xnn_status create_batch_matrix_multiply_operator(
       break;
     default:
       XNN_UNREACHABLE;
-  }
-  if (status == xnn_status_success) {
-    opdata->batch_size = batch_size;
-    opdata->input_height = m;
-    opdata->input_width = k;
-    opdata->output_channels = n;
   }
   return status;
 }
@@ -68,12 +44,29 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
+  const uint32_t input1_id = opdata->inputs[0];
+  assert(input1_id != XNN_INVALID_VALUE_ID);
+  assert(input1_id < num_values);
+  const uint32_t input2_id = opdata->inputs[1];
+  assert(input2_id != XNN_INVALID_VALUE_ID);
+  assert(input2_id < num_values);
+
+  const struct xnn_value* input1 = values + input1_id;
+  const struct xnn_value* input2 = values + input2_id;
+  // input1: [B, M, K]
+  // input2: [B, K, N] or [B, N, K] (transpose_b)
+  const size_t m = input1->shape.dim[input1->shape.num_dims - 2];
+  const size_t k = input1->shape.dim[input1->shape.num_dims - 1];
+  const bool transpose_b = (opdata->flags & XNN_FLAG_TRANSPOSE_B) != 0;
+  const size_t n = input2->shape.dim[transpose_b ? input2->shape.num_dims - 2 : input2->shape.num_dims - 1];
+  const size_t batch_size = xnn_shape_multiply_batch_dims(&input1->shape, 2);
+
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_batch_matrix_multiply_nc_f32:
       return xnn_reshape_batch_matrix_multiply_nc_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_height, opdata->input_width, opdata->output_channels,
+        batch_size,
+        m, k, n,
         &opdata->workspace_size, &opdata->workspace_alignment,
         threadpool);
     default:

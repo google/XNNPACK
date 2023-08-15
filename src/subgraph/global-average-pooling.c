@@ -118,20 +118,6 @@ static enum xnn_status create_global_average_pooling_operator(
         XNN_UNREACHABLE;
     }
   }
-  if (status == xnn_status_success) {
-    switch (node->type) {
-      case xnn_node_type_global_average_pooling_1d:
-        opdata->batch_size = xnn_shape_multiply_batch_dims(&values[input_id].shape, 2);
-        opdata->input_width = values[input_id].shape.dim[num_input_dims - 2];
-        break;
-      case xnn_node_type_global_average_pooling_2d:
-        opdata->batch_size = xnn_shape_multiply_batch_dims(&values[input_id].shape, 3);
-        opdata->input_width = values[input_id].shape.dim[num_input_dims - 3] * values[input_id].shape.dim[num_input_dims - 2];
-        break;
-      default:
-        XNN_UNREACHABLE;
-    }
-  }
   return status;
 }
 
@@ -141,47 +127,63 @@ static enum xnn_status reshape_global_average_pooling_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id < num_values);
+  const size_t num_input_dims = values[input_id].shape.num_dims;
+  size_t batch_size, input_width;
+  switch (opdata->type) {
+    case xnn_node_type_global_average_pooling_1d:
+      batch_size = xnn_shape_multiply_batch_dims(&values[input_id].shape, 2);
+      input_width = values[input_id].shape.dim[num_input_dims - 2];
+      break;
+    case xnn_node_type_global_average_pooling_2d:
+      batch_size = xnn_shape_multiply_batch_dims(&values[input_id].shape, 3);
+      input_width = values[input_id].shape.dim[num_input_dims - 3] * values[input_id].shape.dim[num_input_dims - 2];
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_global_average_pooling_ncw_f32:
       return xnn_reshape_global_average_pooling_ncw_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_width,
+        batch_size,
+        input_width,
         threadpool);
       break;
     case xnn_operator_type_global_average_pooling_ncw_f16:
       return xnn_reshape_global_average_pooling_ncw_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_width,
+        batch_size,
+        input_width,
         threadpool);
       break;
     case xnn_operator_type_global_average_pooling_nwc_f32:
       return xnn_reshape_global_average_pooling_nwc_f32(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_width,
+        batch_size,
+        input_width,
         threadpool);
       break;
     case xnn_operator_type_global_average_pooling_nwc_f16:
       return xnn_reshape_global_average_pooling_nwc_f16(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_width,
+        batch_size,
+        input_width,
         threadpool);
       break;
     case xnn_operator_type_global_average_pooling_nwc_qs8:
       return xnn_reshape_global_average_pooling_nwc_qs8(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_width,
+        batch_size,
+        input_width,
         threadpool);
       break;
     case xnn_operator_type_global_average_pooling_nwc_qu8:
       return xnn_reshape_global_average_pooling_nwc_qu8(
         opdata->operator_objects[0],
-        opdata->batch_size,
-        opdata->input_width,
+        batch_size,
+        input_width,
         threadpool);
       break;
     default:
