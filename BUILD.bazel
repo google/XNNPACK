@@ -4846,26 +4846,23 @@ xnnpack_cc_library(
 cc_library(
     name = "enable_assembly",
     defines = select({
-        ":xnn_enable_assembly_explicit_true": ["XNN_ENABLE_ASSEMBLY=1"],
-        ":xnn_enable_assembly_explicit_false": ["XNN_ENABLE_ASSEMBLY=0"],
-        "//conditions:default": ["XNN_ENABLE_ASSEMBLY=1"],
+        ":assembly_enabled": ["XNN_ENABLE_ASSEMBLY=1"],
+        "//conditions:default": ["XNN_ENABLE_ASSEMBLY=0"],
     }),
 )
 
 cc_library(
     name = "enable_sparse",
     defines = select({
-        ":xnn_enable_sparse_explicit_true": ["XNN_ENABLE_SPARSE=1"],
-        ":xnn_enable_sparse_explicit_false": ["XNN_ENABLE_SPARSE=0"],
-        "//conditions:default": ["XNN_ENABLE_SPARSE=1"],
+        ":sparse_enabled": ["XNN_ENABLE_SPARSE=1"],
+        "//conditions:default": ["XNN_ENABLE_SPARSE=0"],
     }),
 )
 
 cc_library(
     name = "enable_jit",
     defines = select({
-        ":xnn_enable_jit_explicit_true": ["XNN_ENABLE_JIT=1"],
-        ":xnn_enable_jit_explicit_false": ["XNN_ENABLE_JIT=0"],
+        ":jit_enabled": ["XNN_ENABLE_JIT=1"],
         "//conditions:default": ["XNN_ENABLE_JIT=0"],
     }),
 )
@@ -4873,17 +4870,15 @@ cc_library(
 cc_library(
     name = "enable_gemm_m_specialization",
     defines = select({
-        ":xnn_enable_gemm_m_specialization_explicit_true": ["XNN_ENABLE_GEMM_M_SPECIALIZATION=1"],
-        ":xnn_enable_gemm_m_specialization_explicit_false": ["XNN_ENABLE_GEMM_M_SPECIALIZATION=0"],
-        "//conditions:default": ["XNN_ENABLE_GEMM_M_SPECIALIZATION=1"],
+        ":gemm_m_specialization_enabled": ["XNN_ENABLE_GEMM_M_SPECIALIZATION=1"],
+        "//conditions:default": ["XNN_ENABLE_GEMM_M_SPECIALIZATION=0"],
     }),
 )
 
 cc_library(
     name = "enable_dwconv_multipass",
     defines = select({
-        ":xnn_enable_dwconv_multipass_explicit_true": ["XNN_ENABLE_DWCONV_MULTIPASS=1"],
-        ":xnn_enable_dwconv_multipass_explicit_false": ["XNN_ENABLE_DWCONV_MULTIPASS=0"],
+        ":dwconv_multipass_enabled": ["XNN_ENABLE_DWCONV_MULTIPASS=1"],
         "//conditions:default": ["XNN_ENABLE_DWCONV_MULTIPASS=0"],
     }),
 )
@@ -4893,8 +4888,8 @@ cc_library(
     defines = select({
         ":xnn_platform_jit_explicit_true": ["XNN_PLATFORM_JIT=1"],
         ":xnn_platform_jit_explicit_false": ["XNN_PLATFORM_JIT=0"],
-        # A constant that is ignored and not used anywhere so that by default we set XNN_PLATFORM_JIT based on actual platform values.
-        "//conditions:default": ["XNN_IGNORED_PLATFORM_JIT=0"],
+        # Auto-detect JIT compatibility based on platform macros and set XNN_PLATFORM_JIT in xnnpack/common.h
+        "//conditions:default": [],
     }),
 )
 
@@ -5193,8 +5188,7 @@ xnnpack_cc_library(
         "src/xnnpack/subgraph-validation.h",
     ],
     defines = select({
-        ":xnn_enable_memopt_explicit_true": ["XNN_ENABLE_MEMOPT=1"],
-        ":xnn_enable_memopt_explicit_false": ["XNN_ENABLE_MEMOPT=0"],
+        ":memopt_enabled": ["XNN_ENABLE_MEMOPT=1"],
         "//conditions:default": ["XNN_ENABLE_MEMOPT=1"],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -5229,8 +5223,7 @@ xnnpack_cc_library(
         "-DXNN_TEST_MODE=1",
     ],
     defines = select({
-        ":xnn_enable_memopt_explicit_true": ["XNN_ENABLE_MEMOPT=1"],
-        ":xnn_enable_memopt_explicit_false": ["XNN_ENABLE_MEMOPT=0"],
+        ":memopt_enabled": ["XNN_ENABLE_MEMOPT=1"],
         "//conditions:default": ["XNN_ENABLE_MEMOPT=1"],
     }),
     gcc_copts = xnnpack_gcc_std_copts(),
@@ -11881,14 +11874,6 @@ selects.config_setting_group(
     ],
 )
 
-selects.config_setting_group(
-    name = "arm_fp16_vector_enabled_by_default",
-    match_any = [
-        ":aarch32",
-        ":aarch64",
-    ],
-)
-
 alias(
     name = "arm_fp16_scalar_enabled",
     actual = select({
@@ -11896,6 +11881,14 @@ alias(
         ":xnn_enable_arm_fp16_scalar_explicit_false": ":xnn_enable_arm_fp16_scalar_explicit_true",
         "//conditions:default": ":arm_fp16_scalar_enabled_by_default",
     }),
+)
+
+selects.config_setting_group(
+    name = "arm_fp16_vector_enabled_by_default",
+    match_any = [
+        ":aarch32",
+        ":aarch64",
+    ],
 )
 
 alias(
@@ -11969,6 +11962,104 @@ alias(
         ":xnn_enable_riscv_vector_explicit_true": ":xnn_enable_riscv_vector_explicit_true",
         ":xnn_enable_riscv_vector_explicit_false": ":xnn_enable_riscv_vector_explicit_true",
         "//conditions:default": ":riscv_vector_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "assembly_enabled_by_default",
+    match_any = [
+        "//conditions:default",
+    ],
+)
+
+alias(
+    name = "assembly_enabled",
+    actual = select({
+        ":xnn_enable_assembly_explicit_true": ":xnn_enable_assembly_explicit_true",
+        ":xnn_enable_assembly_explicit_false": ":xnn_enable_assembly_explicit_true",
+        "//conditions:default": ":assembly_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "sparse_enabled_by_default",
+    match_any = [
+        "//conditions:default",
+    ],
+)
+
+alias(
+    name = "sparse_enabled",
+    actual = select({
+        ":xnn_enable_sparse_explicit_true": ":xnn_enable_sparse_explicit_true",
+        ":xnn_enable_sparse_explicit_false": ":xnn_enable_sparse_explicit_true",
+        "//conditions:default": ":sparse_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "memopt_enabled_by_default",
+    match_any = [
+        "//conditions:default",
+    ],
+)
+
+alias(
+    name = "memopt_enabled",
+    actual = select({
+        ":xnn_enable_memopt_explicit_true": ":xnn_enable_memopt_explicit_true",
+        ":xnn_enable_memopt_explicit_false": ":xnn_enable_memopt_explicit_true",
+        "//conditions:default": ":memopt_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "jit_enabled_by_default",
+    match_any = [
+        # Disabled by default, only enabled explicitly
+        ":xnn_enable_jit_explicit_true",
+    ],
+)
+
+alias(
+    name = "jit_enabled",
+    actual = select({
+        ":xnn_enable_jit_explicit_true": ":xnn_enable_jit_explicit_true",
+        ":xnn_enable_jit_explicit_false": ":xnn_enable_jit_explicit_true",
+        "//conditions:default": ":jit_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "gemm_m_specialization_enabled_by_default",
+    match_any = [
+        "//conditions:default",
+    ],
+)
+
+alias(
+    name = "gemm_m_specialization_enabled",
+    actual = select({
+        ":xnn_enable_gemm_m_specialization_explicit_true": ":xnn_enable_gemm_m_specialization_explicit_true",
+        ":xnn_enable_gemm_m_specialization_explicit_false": ":xnn_enable_gemm_m_specialization_explicit_true",
+        "//conditions:default": ":gemm_m_specialization_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "dwconv_multipass_enabled_by_default",
+    match_any = [
+        # Disabled by default, only enabled explicitly
+        ":xnn_enable_dwconv_multipass_explicit_true",
+    ],
+)
+
+alias(
+    name = "dwconv_multipass_enabled",
+    actual = select({
+        ":xnn_enable_dwconv_multipass_explicit_true": ":xnn_enable_dwconv_multipass_explicit_true",
+        ":xnn_enable_dwconv_multipass_explicit_false": ":xnn_enable_dwconv_multipass_explicit_true",
+        "//conditions:default": ":dwconv_multipass_enabled_by_default",
     }),
 )
 
