@@ -985,7 +985,7 @@ tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mlal.S.in            -D PREFETCH=1 -
 tools/xngen src/qs8-gemm/2x8c8-aarch64-neon-mull.S.in                          -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-asm-aarch64-neon-mull.S &
 tools/xngen src/qs8-gemm/2x8c16-aarch64-neon-mlal.S.in                         -D REQUANTIZATION=FP32  -D DATATYPE=QC8 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c16-minmax-fp32-asm-aarch64-neon-mlal.S &
 
-### NEON I8MM C4 micro-kernels
+### NEON I8MM C8 micro-kernels
 tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=2 -D NR=4 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x4c8-minmax-neoni8mm.c &
 tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=2 -D NR=8 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-neoni8mm.c &
 tools/xngen src/qs8-gemm/c8-neoni8mm.c.in -D MR=2 -D NR=16 -D REQUANTIZATION= -D DATATYPE=QD8 -o  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x16c8-minmax-neoni8mm.c &
