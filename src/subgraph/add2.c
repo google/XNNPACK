@@ -90,30 +90,6 @@ static enum xnn_status create_add_operator(
     default:
       XNN_UNREACHABLE;
   }
-  if (status == xnn_status_success) {
-    opdata->shape1.num_dims = values[input1_id].shape.num_dims;
-    opdata->shape2.num_dims = values[input2_id].shape.num_dims;
-    if (values[output_id].layout == xnn_layout_type_nchw) {
-      assert(values[input1_id].layout == xnn_layout_type_nchw);
-      assert(values[input2_id].layout == xnn_layout_type_nchw);
-      opdata->shape1.dim[0] = values[input1_id].shape.dim[0];
-      opdata->shape1.dim[1] = values[input1_id].shape.dim[values[input1_id].shape.num_dims - 1];
-      if (values[input1_id].shape.num_dims > 2) {
-        memcpy(&opdata->shape1.dim[2], &values[input1_id].shape.dim[1], (values[input1_id].shape.num_dims - 2) * sizeof(size_t));
-      }
-      opdata->shape2.dim[0] = values[input2_id].shape.dim[0];
-      opdata->shape2.dim[1] = values[input2_id].shape.dim[values[input2_id].shape.num_dims - 1];
-      if (values[input1_id].shape.num_dims > 2) {
-        memcpy(&opdata->shape2.dim[2], &values[input2_id].shape.dim[1], (values[input2_id].shape.num_dims - 2) * sizeof(size_t));
-      }
-    } else {
-      assert(values[output_id].layout == xnn_layout_type_nhwc);
-      assert(values[input1_id].layout == xnn_layout_type_nhwc);
-      assert(values[input2_id].layout == xnn_layout_type_nhwc);
-      memcpy(opdata->shape1.dim, values[input1_id].shape.dim, values[input1_id].shape.num_dims * sizeof(size_t));
-      memcpy(opdata->shape2.dim, values[input2_id].shape.dim, values[input2_id].shape.num_dims * sizeof(size_t));
-    }
-  }
   return status;
 }
 
@@ -123,6 +99,36 @@ static enum xnn_status reshape_add_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
+  const uint32_t input1_id = opdata->inputs[0];
+  assert(input1_id < num_values);
+  const uint32_t input2_id = opdata->inputs[1];
+  assert(input2_id < num_values);
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id < num_values);
+
+  opdata->shape1.num_dims = values[input1_id].shape.num_dims;
+  opdata->shape2.num_dims = values[input2_id].shape.num_dims;
+  if (values[output_id].layout == xnn_layout_type_nchw) {
+    assert(values[input1_id].layout == xnn_layout_type_nchw);
+    assert(values[input2_id].layout == xnn_layout_type_nchw);
+    opdata->shape1.dim[0] = values[input1_id].shape.dim[0];
+    opdata->shape1.dim[1] = values[input1_id].shape.dim[values[input1_id].shape.num_dims - 1];
+    if (values[input1_id].shape.num_dims > 2) {
+      memcpy(&opdata->shape1.dim[2], &values[input1_id].shape.dim[1], (values[input1_id].shape.num_dims - 2) * sizeof(size_t));
+    }
+    opdata->shape2.dim[0] = values[input2_id].shape.dim[0];
+    opdata->shape2.dim[1] = values[input2_id].shape.dim[values[input2_id].shape.num_dims - 1];
+    if (values[input1_id].shape.num_dims > 2) {
+      memcpy(&opdata->shape2.dim[2], &values[input2_id].shape.dim[1], (values[input2_id].shape.num_dims - 2) * sizeof(size_t));
+    }
+  } else {
+    assert(values[output_id].layout == xnn_layout_type_nhwc);
+    assert(values[input1_id].layout == xnn_layout_type_nhwc);
+    assert(values[input2_id].layout == xnn_layout_type_nhwc);
+    memcpy(opdata->shape1.dim, values[input1_id].shape.dim, values[input1_id].shape.num_dims * sizeof(size_t));
+    memcpy(opdata->shape2.dim, values[input2_id].shape.dim, values[input2_id].shape.num_dims * sizeof(size_t));
+  }
+
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_add_nd_f32:
       return xnn_reshape_add_nd_f32(
