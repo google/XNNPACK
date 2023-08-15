@@ -20,7 +20,17 @@ TEST(ATTENTION_NHTC_F32, unit_batch) {
 
 TEST(ATTENTION_NHTC_F32, multi_head) {
   AttentionOperatorTester()
-      .heads(13)
+      .query_heads(13)
+      .key_value_heads(13)
+      .query_tokens(41)
+      .channels(137)
+      .TestF32();
+}
+
+TEST(ATTENTION_NHTC_F32, multi_query) {
+  AttentionOperatorTester()
+      .query_heads(13)
+      .key_value_heads(1)
       .query_tokens(41)
       .channels(137)
       .TestF32();
@@ -37,7 +47,18 @@ TEST(ATTENTION_NHTC_F32, batch_size) {
 TEST(ATTENTION_NHTC_F32, batch_size_multi_head) {
   AttentionOperatorTester()
       .batch_size(13)
-      .heads(17)
+      .query_heads(17)
+      .key_value_heads(17)
+      .query_tokens(41)
+      .channels(137)
+      .TestF32();
+}
+
+TEST(ATTENTION_NHTC_F32, batch_size_multi_query) {
+  AttentionOperatorTester()
+      .batch_size(13)
+      .query_heads(17)
+      .key_value_heads(1)
       .query_tokens(41)
       .channels(137)
       .TestF32();
@@ -59,16 +80,60 @@ TEST(ATTENTION_NHTC_F32, self_attention_with_cap) {
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, cross_attention_key_value_tokens_lt_query_tokens) {
+TEST(ATTENTION_NHTC_F32, multi_head_self_attention_with_cap) {
   AttentionOperatorTester()
+      .query_heads(17)
+      .key_value_heads(17)
+      .cap_tanh(20.0f)
+      .query_tokens(41)
+      .channels(137)
+      .TestF32();
+}
+
+TEST(ATTENTION_NHTC_F32, multi_query_self_attention_with_cap) {
+  AttentionOperatorTester()
+      .query_heads(17)
+      .key_value_heads(1)
+      .cap_tanh(20.0f)
+      .query_tokens(41)
+      .channels(137)
+      .TestF32();
+}
+
+TEST(ATTENTION_NHTC_F32, multi_head_cross_attention_key_value_tokens_lt_query_tokens) {
+  AttentionOperatorTester()
+      .query_heads(17)
+      .key_value_heads(17)
       .query_tokens(41)
       .key_value_tokens(29)
       .channels(137)
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, cross_attention_key_value_tokens_gt_query_tokens) {
+TEST(ATTENTION_NHTC_F32, multi_head_cross_attention_key_value_tokens_gt_query_tokens) {
   AttentionOperatorTester()
+      .query_heads(17)
+      .key_value_heads(17)
+      .query_tokens(29)
+      .key_value_tokens(41)
+      .channels(137)
+      .TestF32();
+}
+
+TEST(ATTENTION_NHTC_F32, multi_query_cross_attention_key_value_tokens_lt_query_tokens) {
+  AttentionOperatorTester()
+      .query_heads(17)
+      .key_value_heads(1)
+      .query_tokens(41)
+      .key_value_tokens(29)
+      .channels(137)
+      .TestF32();
+}
+
+TEST(ATTENTION_NHTC_F32, multi_query_cross_attention_key_value_tokens_gt_query_tokens) {
+  AttentionOperatorTester()
+      .query_heads(17)
+      .key_value_heads(1)
       .query_tokens(29)
       .key_value_tokens(41)
       .channels(137)

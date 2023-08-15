@@ -17,7 +17,7 @@
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
 
-void xnnpack_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::State& state, const char* net) {
+void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
   const size_t heads = state.range(1);
   const size_t query_tokens = state.range(2);
@@ -275,14 +275,14 @@ void xnnpack_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::State& state, 
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  // See comment in xnnpack_scaled_dot_attention_cap_tanh_f32 for derivation of this.
+  // See comment in xnnpack_multihead_scaled_dot_attention_cap_tanh_f32 for derivation of this.
   state.counters["FLOPS"] = benchmark::Counter(
     uint64_t(state.iterations()) *
       batch_size * heads * query_tokens * (channels + key_value_tokens * (channels * 2 + 5)),
     benchmark::Counter::kIsRate);
 }
 
-void xnnpack_scaled_dot_attention_cap_tanh_f32(benchmark::State& state, const char* net) {
+void xnnpack_multihead_scaled_dot_attention_cap_tanh_f32(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
   const size_t heads = state.range(1);
   const size_t query_tokens = state.range(2);
@@ -332,7 +332,7 @@ void xnnpack_scaled_dot_attention_cap_tanh_f32(benchmark::State& state, const ch
   size_t workspace_alignment = 0;
   status = xnn_reshape_scaled_dot_attention_nhtc_f32(
             attention_op,
-            batch_size, heads, query_tokens, key_value_tokens, channels,
+            batch_size, heads, query_tokens, heads, key_value_tokens, channels,
             &workspace_size, &workspace_alignment,
             /*threadpool=*/nullptr);
 
@@ -396,8 +396,8 @@ static void Bert(benchmark::internal::Benchmark* b) {
   b->Args({1, 16, 128, 128, 64});
 }
 
-BENCHMARK_CAPTURE(xnnpack_scaled_dot_attention_cap_tanh_f32, bert, "BERT")->Apply(Bert)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_scaled_batch_matrix_multiply_cap_tanh_f32, bert, "BERT")->Apply(Bert)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_multihead_scaled_dot_attention_cap_tanh_f32, bert, "BERT")->Apply(Bert)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32, bert, "BERT")->Apply(Bert)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();

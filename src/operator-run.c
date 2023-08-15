@@ -1112,11 +1112,14 @@ void xnn_compute_pad_5d(
 void xnn_compute_scaled_dot_attention(
   const struct scaled_dot_attention_context* context,
   size_t batch_index,
+  size_t head_index,
   size_t tokens_start,
   size_t tokens_block_size)
 {
   const size_t scaled_channels = context->scaled_channels;
-  const size_t query_tile_offset = batch_index * context->query_batch_stride + tokens_start * scaled_channels;
+  const size_t query_tile_offset =
+    batch_index * context->query_batch_stride + head_index * context->query_head_stride +
+    tokens_start * scaled_channels;
   const size_t key_value_tokens_scaled = context->key_value_tokens_scaled;
   const size_t key_value_tokens_start_scaled = tokens_start * key_value_tokens_scaled;
   const size_t cn_stride = context->cn_stride;
@@ -1142,21 +1145,27 @@ void xnn_compute_scaled_dot_attention(
 
   void* buffer = (void*) context->logits_buffer;
 
-  const size_t logits_batch_offset = batch_index * context->logits_batch_stride;
-  void* logits = (void*) (((uintptr_t) buffer + logits_batch_offset + key_value_tokens_start_scaled));
+  const size_t logits_batch_offset =
+      batch_index * context->logits_batch_stride + head_index * context->logits_head_stride;
+  void* const logits = (void*) (((uintptr_t) buffer + logits_batch_offset + key_value_tokens_start_scaled));
 
-  // S = Gemm(Q_scaled, K^t). S is [tokens_block_size, key_value_tokens].
-  context->gemm_ukernel.function[XNN_UARCH_DEFAULT](
-    /*mr=*/tokens_block_size,
-    /*nr=*/context->key_value_tokens,
-    /*k=*/scaled_channels,
-    /*a=*/scaled_query,
-    /*a_stride=*/scaled_channels,
-    /*w=*/(void*) ((uintptr_t) context->key + batch_index * context->key_batch_stride),
-    /*c=*/(void*) (uintptr_t) logits,
-    /*cm_stride=*/key_value_tokens_scaled,
-    /*cn_stride=*/cn_stride,
-    /*params=*/minmax_params);
+  {
+    void* key = (void*) ((uintptr_t) context->key +
+                         batch_index * context->key_batch_stride +
+                         head_index * context->key_head_stride);
+    // S = Gemm(Q_scaled, K^t). S is [tokens_block_size, key_value_tokens].
+    context->gemm_ukernel.function[XNN_UARCH_DEFAULT](
+      /*mr=*/tokens_block_size,
+      /*nr=*/context->key_value_tokens,
+      /*k=*/scaled_channels,
+      /*a=*/scaled_query,
+      /*a_stride=*/scaled_channels,
+      /*w=*/(void*) key,
+      /*c=*/(void*) (uintptr_t) logits,
+      /*cm_stride=*/key_value_tokens_scaled,
+      /*cn_stride=*/cn_stride,
+      /*params=*/minmax_params);
+  }
 
   {
     const size_t tokens_block_size_scaled = tokens_block_size * key_value_tokens_scaled;
@@ -1229,18 +1238,23 @@ void xnn_compute_scaled_dot_attention(
     } while (--i != 0);
   }
 
-  // O = Gemm(P, V). O has dimension [tokens_block_size, channels].
-  context->gemm_ukernel.function[XNN_UARCH_DEFAULT](
-      /*mr=*/tokens_block_size,
-      /*nc=*/context->channels,
-      /*kc=*/key_value_tokens_scaled,
-      /*a=*/(void*) ((uintptr_t) buffer + logits_batch_offset + key_value_tokens_start_scaled),
-      /*a_stride=*/key_value_tokens_scaled,
-      /*w=*/(void*) ((uintptr_t) context->value + batch_index * context->value_batch_stride),
-      /*c=*/(void*) ((uintptr_t) context->output + query_tile_offset),
-      /*cm_stride=*/scaled_channels,
-      /*cn_stride=*/cn_stride,
-      /*params=*/minmax_params);
+  {
+    void* value = (void*) ((uintptr_t) context->value +
+                           batch_index * context->value_batch_stride +
+                           head_index * context->value_head_stride);
+    // O = Gemm(P, V). O has dimension [tokens_block_size, channels].
+    context->gemm_ukernel.function[XNN_UARCH_DEFAULT](
+        /*mr=*/tokens_block_size,
+        /*nc=*/context->channels,
+        /*kc=*/key_value_tokens_scaled,
+        /*a=*/logits,
+        /*a_stride=*/key_value_tokens_scaled,
+        /*w=*/value,
+        /*c=*/(void*) ((uintptr_t) context->output + query_tile_offset),
+        /*cm_stride=*/scaled_channels,
+        /*cn_stride=*/cn_stride,
+        /*params=*/minmax_params);
+  }
 }
 
 void xnn_compute_slice_1d(
@@ -1755,11 +1769,14 @@ void xnn_compute_hmp_scaled_dot_attention(
   const struct scaled_dot_attention_context* context,
   uint32_t uarch_index,
   size_t batch_index,
+  size_t head_index,
   size_t tokens_start,
   size_t tokens_block_size)
 {
   const size_t scaled_channels = context->scaled_channels;
-  const size_t query_tile_offset = batch_index * context->query_batch_stride + tokens_start * scaled_channels;
+  const size_t query_tile_offset =
+    batch_index * context->query_batch_stride + head_index * context->query_head_stride +
+    tokens_start * scaled_channels;
   const size_t key_value_tokens_scaled = context->key_value_tokens_scaled;
   const size_t key_value_tokens_start_scaled = tokens_start * key_value_tokens_scaled;
   const size_t cn_stride = context->cn_stride;
@@ -1769,7 +1786,7 @@ void xnn_compute_hmp_scaled_dot_attention(
   {
     uintptr_t query = (uintptr_t) context->query + query_tile_offset;
     uintptr_t query_scaled_current = (uintptr_t) scaled_query;
-    // Q_scaled = Q * Scale (along channels). Q and Q_scaled have dimensions [tokens_block_size, query_tokens].
+    // Q_scaled = Q * Scale (along channels). Q and Q_scaled have dimensions [tokens_block_size, channels].
     size_t i = tokens_block_size;
     do {
       context->vmul_ukernel(
@@ -1785,21 +1802,27 @@ void xnn_compute_hmp_scaled_dot_attention(
 
   void* buffer = (void*) context->logits_buffer;
 
-  const size_t logits_batch_offset = batch_index * context->logits_batch_stride;
-  void* logits = (void*) (((uintptr_t) buffer + logits_batch_offset + key_value_tokens_start_scaled));
+  const size_t logits_batch_offset =
+      batch_index * context->logits_batch_stride + head_index * context->logits_head_stride;
+  void* const logits = (void*) (((uintptr_t) buffer + logits_batch_offset + key_value_tokens_start_scaled));
 
-  // S = Gemm(Q_scaled, K^t). S is [tokens_block_size, key_value_tokens].
-  context->gemm_ukernel.function[uarch_index](
-    /*mr=*/tokens_block_size,
-    /*nr=*/context->key_value_tokens,
-    /*k=*/scaled_channels,
-    /*a=*/scaled_query,
-    /*a_stride=*/scaled_channels,
-    /*w=*/(void*) ((uintptr_t) context->key + batch_index * context->key_batch_stride),
-    /*c=*/(void*) (uintptr_t) logits,
-    /*cm_stride=*/key_value_tokens_scaled,
-    /*cn_stride=*/cn_stride,
-    /*params=*/minmax_params);
+  {
+    void* key = (void*) ((uintptr_t) context->key +
+                         batch_index * context->key_batch_stride +
+                         head_index * context->key_head_stride);
+    // S = Gemm(Q_scaled, K^t). S is [tokens_block_size, key_value_tokens].
+    context->gemm_ukernel.function[XNN_UARCH_DEFAULT](
+      /*mr=*/tokens_block_size,
+      /*nr=*/context->key_value_tokens,
+      /*k=*/scaled_channels,
+      /*a=*/scaled_query,
+      /*a_stride=*/scaled_channels,
+      /*w=*/(void*) key,
+      /*c=*/(void*) (uintptr_t) logits,
+      /*cm_stride=*/key_value_tokens_scaled,
+      /*cn_stride=*/cn_stride,
+      /*params=*/minmax_params);
+  }
 
   {
     const size_t tokens_block_size_scaled = tokens_block_size * key_value_tokens_scaled;
@@ -1872,18 +1895,23 @@ void xnn_compute_hmp_scaled_dot_attention(
     } while (--i != 0);
   }
 
-  // O = Gemm(P, V). O has dimension [tokens_block_size, channels].
-  context->gemm_ukernel.function[uarch_index](
-      /*mr=*/tokens_block_size,
-      /*nc=*/context->channels,
-      /*kc=*/key_value_tokens_scaled,
-      /*a=*/(void*) ((uintptr_t) buffer + logits_batch_offset + key_value_tokens_start_scaled),
-      /*a_stride=*/key_value_tokens_scaled,
-      /*w=*/(void*) ((uintptr_t) context->value + batch_index * context->value_batch_stride),
-      /*c=*/(void*) ((uintptr_t) context->output + query_tile_offset),
-      /*cm_stride=*/scaled_channels,
-      /*cn_stride=*/cn_stride,
-      /*params=*/minmax_params);
+  {
+    void* value = (void*) ((uintptr_t) context->value +
+                           batch_index * context->value_batch_stride +
+                           head_index * context->value_head_stride);
+    // O = Gemm(P, V). O has dimension [tokens_block_size, channels].
+    context->gemm_ukernel.function[XNN_UARCH_DEFAULT](
+        /*mr=*/tokens_block_size,
+        /*nc=*/context->channels,
+        /*kc=*/key_value_tokens_scaled,
+        /*a=*/logits,
+        /*a_stride=*/key_value_tokens_scaled,
+        /*w=*/value,
+        /*c=*/(void*) ((uintptr_t) context->output + query_tile_offset),
+        /*cm_stride=*/scaled_channels,
+        /*cn_stride=*/cn_stride,
+        /*params=*/minmax_params);
+  }
 }
 #endif  // XNN_MAX_UARCH_TYPES > 1
 
@@ -1993,6 +2021,19 @@ enum xnn_status xnn_run_operator_with_index(
             op->compute[i].task_3d,
             (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2],
+            flags);
+        break;
+      case xnn_parallelization_type_3d_tile_1d:
+        assert(op->compute[i].range[0] != 0);
+        assert(op->compute[i].range[1] != 0);
+        assert(op->compute[i].range[2] != 0);
+        assert(op->compute[i].tile[0] != 0);
+        pthreadpool_parallelize_3d_tile_1d(
+            threadpool,
+            op->compute[i].task_3d_tile_1d,
+            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2],
+            op->compute[i].tile[0],
             flags);
         break;
       case xnn_parallelization_type_3d_tile_2d:
@@ -2111,6 +2152,20 @@ enum xnn_status xnn_run_operator_with_index(
             0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
             op->compute[i].range[0], op->compute[i].range[1],
             op->compute[i].tile[0], op->compute[i].tile[1],
+            flags);
+        break;
+      case xnn_parallelization_type_3d_tile_1d_with_uarch:
+        assert(op->compute[i].range[0] != 0);
+        assert(op->compute[i].range[1] != 0);
+        assert(op->compute[i].range[2] != 0);
+        assert(op->compute[i].tile[0] != 0);
+        pthreadpool_parallelize_3d_tile_1d_with_uarch(
+            threadpool,
+            op->compute[i].task_3d_tile_1d_with_id,
+            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
+            op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2],
+            op->compute[i].tile[0],
             flags);
         break;
       case xnn_parallelization_type_3d_tile_2d_with_uarch:

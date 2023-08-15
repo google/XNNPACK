@@ -224,8 +224,9 @@ static enum xnn_status reshape_scaled_dot_attention_nhtc(
   xnn_operator_t attention_op,
   enum xnn_operator_type expected_operator_type,
   size_t batch_size,
-  size_t heads,
+  size_t query_heads,
   size_t query_tokens,
+  size_t key_value_heads,
   size_t key_value_tokens,
   size_t channels,
   size_t* workspace_size,
@@ -265,10 +266,24 @@ static enum xnn_status reshape_scaled_dot_attention_nhtc(
     return xnn_status_invalid_parameter;
   }
 
-  if (heads == 0) {
+  if (query_heads == 0) {
     xnn_log_error(
-      "failed to create %s operator with number of heads %zu: number of heads must be non-zero",
-      xnn_operator_type_to_string(expected_operator_type), heads);
+      "failed to create %s operator with number of query heads %zu: number of query heads must be non-zero",
+      xnn_operator_type_to_string(expected_operator_type), query_heads);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (key_value_heads == 0) {
+    xnn_log_error(
+      "failed to create %s operator with number of key/value heads %zu: number of key/value heads must be non-zero",
+      xnn_operator_type_to_string(expected_operator_type), key_value_heads);
+    return xnn_status_invalid_parameter;
+  }
+
+  if (key_value_heads != 1 && key_value_heads != query_heads) {
+    xnn_log_error(
+      "failed to create %s operator with number of key/value heads %zu: number of key/value heads must be either 1 or "
+      "equal to number of query heads", xnn_operator_type_to_string(expected_operator_type), key_value_heads);
     return xnn_status_invalid_parameter;
   }
 
@@ -303,28 +318,28 @@ static enum xnn_status reshape_scaled_dot_attention_nhtc(
   // TODO(zhin): change this to num_threads * channels when pthreadpool can pass thread id.
   const size_t q_scaled_size =
       round_up_po2(
-        (batch_size * heads * query_tokens * channels) << log2_element_size,
+        (batch_size * query_heads * query_tokens * channels) << log2_element_size,
         XNN_ALLOCATION_ALIGNMENT);
 
   // Key is [key_value_tokens (output channel), channels (input channel)].
   const size_t key_n_stride = round_up(key_value_tokens, nr);
   const size_t key_k_stride = round_up_po2(channels, kr * sr);
-  const size_t key_batch_stride = key_n_stride * (element_size + (key_k_stride << log2_element_size));
+  const size_t key_head_stride = key_n_stride * (element_size + (key_k_stride << log2_element_size));
   // 2. Workspace for packed key.
-  const size_t packed_key_size = round_up_po2(batch_size * heads * key_batch_stride, XNN_ALLOCATION_ALIGNMENT);
+  const size_t packed_key_size = round_up_po2(batch_size * key_value_heads * key_head_stride, XNN_ALLOCATION_ALIGNMENT);
 
   // Value is [key_value_tokens (input channel), channels (output channel)].
   const size_t value_n_stride = round_up(channels, nr);
   const size_t value_k_stride = round_up_po2(key_value_tokens, kr * sr);
-  const size_t value_batch_stride = value_n_stride * (element_size + (value_k_stride << log2_element_size));
+  const size_t value_head_stride = value_n_stride * (element_size + (value_k_stride << log2_element_size));
   // 3. Workspace for packed key.
-  const size_t packed_value_size = round_up_po2(batch_size * heads * value_batch_stride, XNN_ALLOCATION_ALIGNMENT);
+  const size_t packed_value_size = round_up_po2(batch_size * key_value_heads * value_head_stride, XNN_ALLOCATION_ALIGNMENT);
 
   // 4. Workspace for logits (Q*K), of dimension query_tokens * key_value_tokens.
   // TODO(zhin): change this to be num_threads * key_value_tokens when pthreadpool can pass thread id.
   // BxNxN buffer for temporary storage of QK.
   const size_t logits_size =
-      round_up_po2(XNN_EXTRA_BYTES + batch_size * heads * query_tokens * key_value_tokens * element_size,
+      round_up_po2(XNN_EXTRA_BYTES + batch_size * query_heads * query_tokens * key_value_tokens * element_size,
                    XNN_ALLOCATION_ALIGNMENT);
 
   const size_t total_workspace_size = q_scaled_size + packed_key_size + packed_value_size + logits_size;
@@ -343,13 +358,13 @@ static enum xnn_status reshape_scaled_dot_attention_nhtc(
     .w_stride = element_size + (key_k_stride << log2_element_size),
     .packw_gemm_goi = attention_op->ukernel.gemm.packw_gemm_goi,
     .gk_stride = key_value_tokens * (channels << log2_element_size),
-    .gc_stride = key_batch_stride,
+    .gc_stride = key_head_stride,
   };
   attention_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
   attention_op->compute[0].task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_batched_packw_gemm_goi;
   attention_op->compute[0].context_offset =
     offsetof(struct xnn_operator, context.packw_gemm_goi) - offsetof(struct xnn_operator, context);
-  attention_op->compute[0].range[0] = batch_size * heads;
+  attention_op->compute[0].range[0] = batch_size * key_value_heads;
   attention_op->compute[0].range[1] = key_value_tokens;
   // We cannot tile key_value_tokens because we compute complete rows of Q*K,
   // rather than MRxNR (where NR < key_value_tokens) tiles of Q*K.
@@ -368,13 +383,13 @@ static enum xnn_status reshape_scaled_dot_attention_nhtc(
     .packw_gemm_gio = attention_op->ukernel.gemm.packw_gemm_gio,
     .gk_stride = key_value_tokens * (channels << log2_element_size),
     .gb_stride = channels * element_size,
-    .gc_stride = value_batch_stride,
+    .gc_stride = value_head_stride,
   };
   attention_op->compute[1].type = xnn_parallelization_type_2d_tile_1d;
   attention_op->compute[1].task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_batched_packw_gemm_gio;
   attention_op->compute[1].context_offset =
     offsetof(struct xnn_operator, context.packw_gemm_gio) - offsetof(struct xnn_operator, context);
-  attention_op->compute[1].range[0] = batch_size * heads;
+  attention_op->compute[1].range[0] = batch_size * key_value_heads;
   attention_op->compute[1].range[1] = channels;
   attention_op->compute[1].tile[0] = channels;
 
@@ -386,10 +401,14 @@ static enum xnn_status reshape_scaled_dot_attention_nhtc(
     .key_value_tokens = key_value_tokens,
     .key_value_tokens_scaled = key_value_tokens * element_size,
     .cn_stride = nr << log2_element_size,
-    .query_batch_stride = query_tokens * channels * element_size,
-    .key_batch_stride = key_batch_stride,
-    .value_batch_stride = value_batch_stride,
-    .logits_batch_stride = query_tokens * key_value_tokens * element_size,
+    .query_batch_stride = query_heads * query_tokens * channels * element_size,
+    .query_head_stride = query_tokens * channels * element_size,
+    .key_batch_stride = key_value_heads * key_head_stride,
+    .key_head_stride = key_value_heads == 1 ? 0 : key_head_stride,
+    .value_batch_stride = key_value_heads * value_head_stride,
+    .value_head_stride = key_value_heads == 1 ? 0 : value_head_stride,
+    .logits_batch_stride = query_heads * query_tokens * key_value_tokens * element_size,
+    .logits_head_stride = query_tokens * key_value_tokens * element_size,
     .gemm_ukernel = gemm_ukernel,
     .compute_reciprocal = compute_reciprocal,
     .raddstoreexpminusmax_ukernel = attention_op->attention.raddstoreexpminusmax_config->ukernel,
@@ -408,19 +427,20 @@ static enum xnn_status reshape_scaled_dot_attention_nhtc(
 
   #if XNN_MAX_UARCH_TYPES > 1
   if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
-    attention_op->compute[2].type = xnn_parallelization_type_2d_tile_1d_with_uarch;
-    attention_op->compute[2].task_2d_tile_1d_with_id = (pthreadpool_task_2d_tile_1d_with_id_t) xnn_compute_hmp_scaled_dot_attention;
+    attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d_with_uarch;
+    attention_op->compute[2].task_3d_tile_1d_with_id = (pthreadpool_task_3d_tile_1d_with_id_t) xnn_compute_hmp_scaled_dot_attention;
   } else {
-    attention_op->compute[2].type = xnn_parallelization_type_2d_tile_1d;
-    attention_op->compute[2].task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_scaled_dot_attention;
+    attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d;
+    attention_op->compute[2].task_3d_tile_1d = (pthreadpool_task_3d_tile_1d_t) xnn_compute_scaled_dot_attention;
   }
   #else
-    attention_op->compute[2].type = xnn_parallelization_type_2d_tile_1d;
-    attention_op->compute[2].task_2d_tile_1d = (pthreadpool_task_2d_tile_1d_t) xnn_compute_scaled_dot_attention;
+    attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d;
+    attention_op->compute[2].task_3d_tile_1d = (pthreadpool_task_3d_tile_1d_t) xnn_compute_scaled_dot_attention;
   #endif  // XNN_MAX_UARCH_TYPES > 1
 
-  attention_op->compute[2].range[0] = batch_size * heads;
-  attention_op->compute[2].range[1] = query_tokens;
+  attention_op->compute[2].range[0] = batch_size;
+  attention_op->compute[2].range[1] = query_heads;
+  attention_op->compute[2].range[2] = query_tokens;
   attention_op->compute[2].tile[0] = mr;
 
   attention_op->context.attention.scaled_query_offset = 0;
@@ -441,8 +461,9 @@ static enum xnn_status reshape_scaled_dot_attention_nhtc(
 enum xnn_status xnn_reshape_scaled_dot_attention_nhtc_f32(
   xnn_operator_t attention_op,
   size_t batch_size,
-  size_t heads,
+  size_t query_heads,
   size_t query_tokens,
+  size_t key_value_heads,
   size_t key_value_tokens,
   size_t channels,
   size_t* workspace_size,
@@ -456,8 +477,9 @@ enum xnn_status xnn_reshape_scaled_dot_attention_nhtc_f32(
     attention_op,
     xnn_operator_type_scaled_dot_attention_nhtc_f32,
     batch_size,
-    heads,
+    query_heads,
     query_tokens,
+    key_value_heads,
     key_value_tokens,
     channels,
     workspace_size, workspace_alignment,

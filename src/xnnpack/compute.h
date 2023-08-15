@@ -23,6 +23,7 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_2d_tile_1d,
   xnn_parallelization_type_2d_tile_2d,
   xnn_parallelization_type_3d,
+  xnn_parallelization_type_3d_tile_1d,
   xnn_parallelization_type_3d_tile_2d,
   xnn_parallelization_type_4d,
   xnn_parallelization_type_4d_tile_2d,
@@ -32,6 +33,7 @@ enum xnn_parallelization_type {
 #if XNN_MAX_UARCH_TYPES > 1
   xnn_parallelization_type_2d_tile_1d_with_uarch,
   xnn_parallelization_type_2d_tile_2d_with_uarch,
+  xnn_parallelization_type_3d_tile_1d_with_uarch,
   xnn_parallelization_type_3d_tile_2d_with_uarch,
   xnn_parallelization_type_4d_tile_2d_with_uarch,
 #endif  // XNN_MAX_UARCH_TYPES > 1
@@ -46,6 +48,7 @@ struct compute_parameters {
     pthreadpool_task_2d_tile_1d_t task_2d_tile_1d;
     pthreadpool_task_2d_tile_2d_t task_2d_tile_2d;
     pthreadpool_task_3d_t task_3d;
+    pthreadpool_task_3d_tile_1d_t task_3d_tile_1d;
     pthreadpool_task_3d_tile_2d_t task_3d_tile_2d;
     pthreadpool_task_4d_t task_4d;
     pthreadpool_task_4d_tile_2d_t task_4d_tile_2d;
@@ -55,6 +58,7 @@ struct compute_parameters {
 #if XNN_MAX_UARCH_TYPES > 1
     pthreadpool_task_2d_tile_1d_with_id_t task_2d_tile_1d_with_id;
     pthreadpool_task_2d_tile_2d_with_id_t task_2d_tile_2d_with_id;
+    pthreadpool_task_3d_tile_1d_with_id_t task_3d_tile_1d_with_id;
     pthreadpool_task_3d_tile_2d_with_id_t task_3d_tile_2d_with_id;
     pthreadpool_task_4d_tile_2d_with_id_t task_4d_tile_2d_with_id;
 #endif  // XNN_MAX_UARCH_TYPES > 1
@@ -1424,12 +1428,20 @@ struct scaled_dot_attention_context {
 
   // Stride, in bytes, between each batch of query.
   size_t query_batch_stride;
-  // Strid, in bytes,  between each batch of key.
+  // Stride, in bytes, between each head of query.
+  size_t query_head_stride;
+  // Stride, in bytes,  between each batch of key.
   size_t key_batch_stride;
-  // Strid, in bytes,  between each batch of value.
+  // Stride, in bytes,  between each head of key.
+  size_t key_head_stride;
+  // Stride, in bytes,  between each batch of value.
   size_t value_batch_stride;
-  // Strid, in bytes,  between each batch of logits (Q*K).
+  // Stride, in bytes,  between each head of value.
+  size_t value_head_stride;
+  // Stride, in bytes,  between each batch of logits (Q*K).
   size_t logits_batch_stride;
+  // Stride, in bytes,  between each head of logits (Q*K).
+  size_t logits_head_stride;
 
   struct xnn_hmp_gemm_ukernel gemm_ukernel;
   xnn_compute_reciprocal_fn compute_reciprocal;
@@ -1468,12 +1480,14 @@ struct scaled_dot_attention_context {
   XNN_PRIVATE void xnn_compute_scaled_dot_attention(
       const struct scaled_dot_attention_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
+      size_t head_index,
       size_t tokens_start,
       size_t tokens_block_size);
   XNN_PRIVATE void xnn_compute_hmp_scaled_dot_attention(
       const struct scaled_dot_attention_context context[restrict XNN_MIN_ELEMENTS(1)],
       uint32_t uarch_index,
       size_t batch_index,
+      size_t head_index,
       size_t tokens_start,
       size_t tokens_block_size);
 #endif

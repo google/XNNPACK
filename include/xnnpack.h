@@ -5516,9 +5516,10 @@ enum xnn_status xnn_create_scaled_dot_attention_nhtc_f32(
 enum xnn_status xnn_reshape_scaled_dot_attention_nhtc_f32(
   xnn_operator_t attention_op,
   size_t batch_size,
-  size_t heads,
+  size_t query_heads,
   // Number of tokens in query.
   size_t query_tokens,
+  size_t key_value_heads,
   // Number of tokens in key/value. For self-attention, this is same as tokens.
   size_t key_value_tokens,
   size_t channels,
@@ -5526,8 +5527,8 @@ enum xnn_status xnn_reshape_scaled_dot_attention_nhtc_f32(
   size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
-// Query is of dimension [batch_size, heads, query_tokens, channels].
-// Key and value are of dimension [batch_size, heads, key_value_tokens, channels].
+// Query is of dimension [batch_size, query_heads, query_tokens, channels].
+// Key and value are of dimension [batch_size, key_value_heads, key_value_tokens, channels].
 // Scale is of dimension [channels].
 // Mask is of dimension [query_tokens, key_value_tokens].
 enum xnn_status xnn_setup_scaled_dot_attention_nhtc_f32(
