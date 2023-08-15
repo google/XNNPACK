@@ -60,7 +60,7 @@ static void f32_vlrelu(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-#if XNN_ARCH_ARM64 || XNN_ARCH_ARM64
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(f32_vlrelu, neon_x4,
                     xnn_f32_vlrelu_ukernel__neon_x4,
                     xnn_init_f32_lrelu_scalar_params,
@@ -73,41 +73,19 @@ static void f32_vlrelu(
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-#endif  // XNN_ARCH_ARM64 || XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(f32_vlrelu, sse_x4,
-                    xnn_f32_vlrelu_ukernel__sse_x4,
-                    xnn_init_f32_lrelu_sse_params)
+  BENCHMARK_CAPTURE(f32_vlrelu, avx512f_x16,
+                    xnn_f32_vlrelu_ukernel__avx512f_x16,
+                    xnn_init_f32_lrelu_scalar_params,
+                    benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vlrelu, sse_x8,
-                    xnn_f32_vlrelu_ukernel__sse_x8,
-                    xnn_init_f32_lrelu_sse_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_vlrelu, sse2_x4,
-                    xnn_f32_vlrelu_ukernel__sse2_x4,
-                    xnn_init_f32_lrelu_sse_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vlrelu, sse2_x8,
-                    xnn_f32_vlrelu_ukernel__sse2_x8,
-                    xnn_init_f32_lrelu_sse_params)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-
-  BENCHMARK_CAPTURE(f32_vlrelu, sse41_x4,
-                    xnn_f32_vlrelu_ukernel__sse41_x4,
-                    xnn_init_f32_lrelu_sse_params,
-                    benchmark::utils::CheckSSE41)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vlrelu, sse41_x8,
-                    xnn_f32_vlrelu_ukernel__sse41_x8,
-                    xnn_init_f32_lrelu_sse_params,
-                    benchmark::utils::CheckSSE41)
+  BENCHMARK_CAPTURE(f32_vlrelu, avx512f_x32,
+                    xnn_f32_vlrelu_ukernel__avx512f_x32,
+                    xnn_init_f32_lrelu_scalar_params,
+                    benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
@@ -124,16 +102,38 @@ static void f32_vlrelu(
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vlrelu, avx512f_x16,
-                    xnn_f32_vlrelu_ukernel__avx512f_x16,
-                    xnn_init_f32_lrelu_scalar_params,
-                    benchmark::utils::CheckAVX512F)
+  BENCHMARK_CAPTURE(f32_vlrelu, sse41_x4,
+                    xnn_f32_vlrelu_ukernel__sse41_x4,
+                    xnn_init_f32_lrelu_sse_params,
+                    benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vlrelu, avx512f_x32,
-                    xnn_f32_vlrelu_ukernel__avx512f_x32,
-                    xnn_init_f32_lrelu_scalar_params,
-                    benchmark::utils::CheckAVX512F)
+  BENCHMARK_CAPTURE(f32_vlrelu, sse41_x8,
+                    xnn_f32_vlrelu_ukernel__sse41_x8,
+                    xnn_init_f32_lrelu_sse_params,
+                    benchmark::utils::CheckSSE41)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vlrelu, sse2_x4,
+                    xnn_f32_vlrelu_ukernel__sse2_x4,
+                    xnn_init_f32_lrelu_sse_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vlrelu, sse2_x8,
+                    xnn_f32_vlrelu_ukernel__sse2_x8,
+                    xnn_init_f32_lrelu_sse_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_vlrelu, sse_x4,
+                    xnn_f32_vlrelu_ukernel__sse_x4,
+                    xnn_init_f32_lrelu_sse_params)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_vlrelu, sse_x8,
+                    xnn_f32_vlrelu_ukernel__sse_x8,
+                    xnn_init_f32_lrelu_sse_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
