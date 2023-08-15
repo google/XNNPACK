@@ -6063,6 +6063,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_round_bench",
+    srcs = [
+        "bench/f32-round.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_rsum_bench",
     srcs = [
         "bench/f32-rsum.cc",
@@ -6186,14 +6194,6 @@ xnnpack_benchmark(
         ":im2col",
         ":math",
     ],
-)
-
-xnnpack_benchmark(
-    name = "rounding_bench",
-    srcs = [
-        "bench/rounding.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
 xnnpack_benchmark(

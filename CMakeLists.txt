@@ -3678,6 +3678,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-rmin-bench PRIVATE benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(f32-rmin-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
+  ADD_EXECUTABLE(f32-round-bench bench/f32-round.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-round-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-round-bench PRIVATE benchmark cpuinfo pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-round-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
   ADD_EXECUTABLE(f32-rsum-bench bench/f32-rsum.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-rsum-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-rsum-bench PRIVATE benchmark pthreadpool)
@@ -3844,11 +3849,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_INCLUDE_DIRECTORIES(qu8-vmulc-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(qu8-vmulc-bench PRIVATE benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(qu8-vmulc-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(rounding-bench bench/rounding.cc)
-  TARGET_INCLUDE_DIRECTORIES(rounding-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(rounding-bench PRIVATE benchmark cpuinfo pthreadpool)
-  TARGET_LINK_LIBRARIES(rounding-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
   ADD_EXECUTABLE(s16-rmaxabs-bench bench/s16-rmaxabs.cc)
   TARGET_INCLUDE_DIRECTORIES(s16-rmaxabs-bench PRIVATE . include src)
