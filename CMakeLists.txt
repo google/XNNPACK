@@ -3723,6 +3723,26 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-vrelu-bench PRIVATE benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(f32-vrelu-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
+  ADD_EXECUTABLE(f32-vrndd-bench bench/f32-vrndd.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vrndd-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-vrndd-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-vrndd-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
+  ADD_EXECUTABLE(f32-vrndne-bench bench/f32-vrndne.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vrndne-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-vrndne-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-vrndne-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
+  ADD_EXECUTABLE(f32-vrndu-bench bench/f32-vrndu.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vrndu-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-vrndu-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-vrndu-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
+  ADD_EXECUTABLE(f32-vrndz-bench bench/f32-vrndz.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vrndz-bench PRIVATE . include src)
+  TARGET_LINK_LIBRARIES(f32-vrndz-bench PRIVATE benchmark pthreadpool)
+  TARGET_LINK_LIBRARIES(f32-vrndz-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
+
   ADD_EXECUTABLE(f32-vsigmoid-bench bench/f32-vsigmoid.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-vsigmoid-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f32-vsigmoid-bench PRIVATE benchmark pthreadpool)

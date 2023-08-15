@@ -6139,6 +6139,38 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "f32_vrndd_bench",
+    srcs = [
+        "bench/f32-vrndd.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_vrndne_bench",
+    srcs = [
+        "bench/f32-vrndne.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_vrndu_bench",
+    srcs = [
+        "bench/f32-vrndu.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
+    name = "f32_vrndz_bench",
+    srcs = [
+        "bench/f32-vrndz.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "f32_vscaleexpminusmax_bench",
     srcs = [
         "bench/f32-vscaleexpminusmax.cc",
