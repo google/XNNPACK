@@ -286,6 +286,24 @@
     }
   }
 
+  TEST(GENERATE_QC8_GEMM_FP32_4X8__AARCH32_NEONV8_MLAL_LANE_LD64, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_qc8_gemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64, xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
   TEST(GENERATE_QC8_GEMM_FP32_4X8__AARCH32_NEONV8_MLAL_LANE_LD64, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t n = 9; n < 16; n++) {
@@ -742,6 +760,24 @@
     }
   }
 
+  TEST(GENERATE_QC8_GEMM_FP32_4X8__AARCH32_NEONV8_MLAL_LANE_LD64_PRFM, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_V8;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_qc8_gemm_fp32_ukernel_4x8__aarch32_neonv8_mlal_lane_ld64_prfm, xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
   TEST(GENERATE_QC8_GEMM_FP32_4X8__AARCH32_NEONV8_MLAL_LANE_LD64_PRFM, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON_V8;
     for (uint32_t n = 9; n < 16; n++) {
@@ -1193,6 +1229,24 @@
           .m(4)
           .n(n)
           .k(k)
+          .Test(xnn_generate_qc8_gemm_fp32_ukernel_4x8c4__aarch32_neondot_ld64, xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(GENERATE_QC8_GEMM_FP32_4X8C4__AARCH32_NEONDOT_LD64, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_DOT;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(4)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
           .Test(xnn_generate_qc8_gemm_fp32_ukernel_4x8c4__aarch32_neondot_ld64, xnn_init_qs8_qc8w_conv_minmax_fp32_neonv8_params, xnn_qs8_requantize_fp32);
       }
     }

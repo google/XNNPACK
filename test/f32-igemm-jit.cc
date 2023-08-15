@@ -224,6 +224,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_1X8__AARCH32_NEON_CORTEX_A53, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 10; k += 3) {
+        GemmMicrokernelTester()
+          .mr(1)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(1)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_1x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_1X8__AARCH32_NEON_CORTEX_A53, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
@@ -745,6 +763,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_1X8__AARCH32_NEON_CORTEX_A53_PRFM, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 10; k += 3) {
+        GemmMicrokernelTester()
+          .mr(1)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(1)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_1x8__aarch32_neon_cortex_a53_prfm, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_1X8__AARCH32_NEON_CORTEX_A53_PRFM, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
@@ -1261,6 +1297,24 @@
           .m(4)
           .n(n)
           .k(k)
+          .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A7, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 10; k += 3) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
           .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a7, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -1835,6 +1889,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A53, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a53, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A53, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
@@ -2399,6 +2471,24 @@
           .m(4)
           .n(n)
           .k(k)
+          .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a53_prfm, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A53_PRFM, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
           .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a53_prfm, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -2973,6 +3063,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A55, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a55, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A55, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
@@ -3537,6 +3645,24 @@
           .m(4)
           .n(n)
           .k(k)
+          .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A75, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
           .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -4111,6 +4237,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A75_PRFM, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_cortex_a75_prfm, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_CORTEX_A75_PRFM, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON;
     for (uint32_t n = 9; n < 16; n++) {
@@ -4644,6 +4788,24 @@
           .m(4)
           .n(n)
           .k(k)
+          .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(GENERATE_F32_IGEMM_4X8__AARCH32_NEON_LD64, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 10; k += 3) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
           .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch32_neon_ld64, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -5218,6 +5380,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_CORTEX_A53, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(1)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(1)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_CORTEX_A53, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
@@ -5765,6 +5945,24 @@
           .m(1)
           .n(n)
           .k(k)
+          .Test(xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53_prfm, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_CORTEX_A53_PRFM, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(1)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(1)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
           .Test(xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a53_prfm, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -6322,6 +6520,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_CORTEX_A75, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(1)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(1)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_CORTEX_A75, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
@@ -6874,6 +7090,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_CORTEX_A75_PRFM, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(1)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(1)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_1x8__aarch64_neonfma_cortex_a75_prfm, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_1X8__AARCH64_NEONFMA_CORTEX_A75_PRFM, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
@@ -7421,6 +7655,24 @@
           .m(4)
           .n(n)
           .k(k)
+          .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_CORTEX_A53, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
           .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -7995,6 +8247,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_CORTEX_A53_PRFM, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a53_prfm, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_CORTEX_A53_PRFM, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
@@ -8564,6 +8834,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_CORTEX_A55, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_CORTEX_A55, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
@@ -9095,6 +9383,24 @@
           .m(4)
           .n(n)
           .k(k)
+          .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_CORTEX_A75, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
           .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -9669,6 +9975,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_CORTEX_A75_PRFM, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_cortex_a75_prfm, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_CORTEX_A75_PRFM, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
@@ -10202,6 +10526,24 @@
           .m(4)
           .n(n)
           .k(k)
+          .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_ld128, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(GENERATE_F32_IGEMM_4X8__AARCH64_NEONFMA_LD128, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(4)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(4)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
           .Test(xnn_generate_f32_igemm_ukernel_4x8__aarch64_neonfma_ld128, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -10743,6 +11085,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A53, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(6)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A53, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
@@ -11279,6 +11639,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A53_PRFM, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(6)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a53_prfm, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A53_PRFM, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
@@ -11810,6 +12188,24 @@
           .m(6)
           .n(n)
           .k(k)
+          .Test(xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A55, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(6)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
           .Test(xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a55, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -12384,6 +12780,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A75, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(6)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a75, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A75, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
@@ -12953,6 +13367,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A75_PRFM, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 40; k += 9) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(6)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_cortex_a75_prfm, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_CORTEX_A75_PRFM, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
@@ -13491,6 +13923,24 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_LD128, unknown_nc_mod_nr) {
+    TEST_REQUIRES_ARM_NEON_FMA;
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(6)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_6x8__aarch64_neonfma_ld128, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_6X8__AARCH64_NEONFMA_LD128, n_gt_8_strided_cn) {
     TEST_REQUIRES_ARM_NEON_FMA;
     for (uint32_t n = 9; n < 16; n++) {
@@ -13951,6 +14401,23 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_6X8__WASMSIMD32_X86_LOADSPLAT_XINF, unknown_nc_mod_nr) {
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(6)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_xinf, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_6X8__WASMSIMD32_X86_LOADSPLAT_XINF, n_gt_8_strided_cn) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
@@ -14371,6 +14838,23 @@
           .m(6)
           .n(n)
           .k(k)
+          .Test(xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(GENERATE_F32_IGEMM_6X8__WASMSIMD32_X86_LOADSPLAT_X1, unknown_nc_mod_nr) {
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(6)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
           .Test(xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x1, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -14801,6 +15285,23 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_6X8__WASMSIMD32_X86_LOADSPLAT_X2, unknown_nc_mod_nr) {
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(6)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x2, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_6X8__WASMSIMD32_X86_LOADSPLAT_X2, n_gt_8_strided_cn) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 5; k += 2) {
@@ -15221,6 +15722,23 @@
           .m(6)
           .n(n)
           .k(k)
+          .Test(xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x4, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(GENERATE_F32_IGEMM_6X8__WASMSIMD32_X86_LOADSPLAT_X4, unknown_nc_mod_nr) {
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 5; k += 2) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(1)
+          .m(6)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
           .Test(xnn_generate_f32_igemm_ukernel_6x8__wasmsimd32_x86_loadsplat_x4, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -15717,6 +16235,23 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_6X8S4__WASMSIMD32_X86_XINF, unknown_nc_mod_nr) {
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(4)
+          .m(6)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_6x8s4__wasmsimd32_x86_xinf, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_6X8S4__WASMSIMD32_X86_XINF, n_gt_8_strided_cn) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
@@ -16203,6 +16738,23 @@
           .m(6)
           .n(n)
           .k(k)
+          .Test(xnn_generate_f32_igemm_ukernel_6x8s4__wasmsimd32_x86_x1, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(GENERATE_F32_IGEMM_6X8S4__WASMSIMD32_X86_X1, unknown_nc_mod_nr) {
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(4)
+          .m(6)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
           .Test(xnn_generate_f32_igemm_ukernel_6x8s4__wasmsimd32_x86_x1, xnn_init_f32_minmax_scalar_params);
       }
     }
@@ -16699,6 +17251,23 @@
     }
   }
 
+  TEST(GENERATE_F32_IGEMM_6X8S4__WASMSIMD32_X86_X2, unknown_nc_mod_nr) {
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(4)
+          .m(6)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          .Test(xnn_generate_f32_igemm_ukernel_6x8s4__wasmsimd32_x86_x2, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
   TEST(GENERATE_F32_IGEMM_6X8S4__WASMSIMD32_X86_X2, n_gt_8_strided_cn) {
     for (uint32_t n = 9; n < 16; n++) {
       for (size_t k = 1; k <= 20; k += 5) {
@@ -17185,6 +17754,23 @@
           .m(6)
           .n(n)
           .k(k)
+          .Test(xnn_generate_f32_igemm_ukernel_6x8s4__wasmsimd32_x86_x4, xnn_init_f32_minmax_scalar_params);
+      }
+    }
+  }
+
+  TEST(GENERATE_F32_IGEMM_6X8S4__WASMSIMD32_X86_X4, unknown_nc_mod_nr) {
+    for (uint32_t n = 1; n < 16; n++) {
+      for (size_t k = 1; k <= 20; k += 5) {
+        GemmMicrokernelTester()
+          .mr(6)
+          .nr(8)
+          .kr(1)
+          .sr(4)
+          .m(6)
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
           .Test(xnn_generate_f32_igemm_ukernel_6x8s4__wasmsimd32_x86_x4, xnn_init_f32_minmax_scalar_params);
       }
     }

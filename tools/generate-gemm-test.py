@@ -466,6 +466,30 @@ TEST(${TEST_NAME}, n_gt_${NR}) {
   }
 }
 
+$if JIT:
+  TEST(${TEST_NAME}, unknown_nc_mod_nr) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (uint32_t n = 1; n < ${NR * 2}; n++) {
+      for (size_t k = 1; k <= ${KBLOCK * 5}; k += ${KBLOCK + 1}) {
+        GemmMicrokernelTester()
+          $if EXTENDED_WEIGHTS:
+            .extended_weights(true)
+          .mr(${MR})
+          .nr(${NR})
+          .kr(${KR})
+          .sr(${SR})
+          .m(${MR})
+          .n(n)
+          .k(k)
+          .known_nc_mod_nr(false)
+          $if DATATYPE == 'f32_qc4w':
+            .b_zero_point(7)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  }
+
 TEST(${TEST_NAME}, n_gt_${NR}_strided_cn) {
   $if ISA_CHECK:
     ${ISA_CHECK};
@@ -1120,6 +1144,7 @@ def generate_test_cases(ukernel, mr, nr, kr, sr, xw, k_block, init_fn,
           "next_prime": next_prime,
           "POST_OP": post_op,
           "PROTOTYPE": prototype,
+          "JIT": jit,
       })
 
 

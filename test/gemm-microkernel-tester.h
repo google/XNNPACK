@@ -199,6 +199,19 @@ class GemmMicrokernelTester {
     return this->iterations_;
   }
 
+  GemmMicrokernelTester& known_nc_mod_nr(bool known_nc_mod_nr) {
+    this->known_nc_mod_nr_ = known_nc_mod_nr;
+    return *this;
+  }
+
+  bool known_nc_mod_nr() const {
+    return known_nc_mod_nr_;
+  }
+
+  size_t nc_mod_nr() const {
+    return known_nc_mod_nr() ? n() % nr() : SIZE_MAX;
+  }
+
   void Test(
     xnn_qu8_gemm_minmax_ukernel_fn gemm,
     xnn_init_qu8_conv_minmax_params_fn init_params,
@@ -340,4 +353,5 @@ class GemmMicrokernelTester {
   size_t zero_index_{SIZE_MAX};
   bool extended_weights_{false};
   size_t iterations_{15};
+  bool known_nc_mod_nr_{true};
 };

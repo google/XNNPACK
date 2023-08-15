@@ -58,7 +58,7 @@ class Generator : public MacroAssembler {
 // Converted from: src/qc8-gemm/gen/4x8-minmax-fp32-aarch32-neonv8-mlal-lane-ld64-prfm.S
 void Generator::generate(bool prefetch, size_t max_mr, size_t nc_mod_nr, size_t kc, const void* params)
 {
-  assert(nc_mod_nr < 8);
+  assert(nc_mod_nr < 8 || nc_mod_nr == SIZE_MAX);
   assert(kc != 0);
 
   Label l0, l1, l2, l3, l4, l5, l6, l7;

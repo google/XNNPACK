@@ -1267,7 +1267,7 @@ def convert(input_file: str, post_op: bool, reload_params: bool, debug: bool, fo
 
   labels_str = ', '.join(f'l{l}' for l in labels)
   output.append(f'  assert(max_mr <= {mr});')
-  output.append(f'  assert(nc_mod_nr < {nr});')
+  output.append(f'  assert(nc_mod_nr < {nr} || nc_mod_nr == SIZE_MAX);')
   output.append('  assert(kc != 0);')
   output.append(f'  assert(kc % sizeof({ctype}) == 0);')
   if kernel_type == IGEMM:

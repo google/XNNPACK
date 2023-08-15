@@ -50,7 +50,7 @@ class Generator : public MacroAssembler {
 void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, const jit_gemm_params* jit_gemm_params)
 {
   assert(max_mr <= 1);
-  assert(nc_mod_nr < 16);
+  assert(nc_mod_nr < 16 || nc_mod_nr == SIZE_MAX);
   assert(kc != 0);
   assert(kc % sizeof(uint16_t) == 0);
 

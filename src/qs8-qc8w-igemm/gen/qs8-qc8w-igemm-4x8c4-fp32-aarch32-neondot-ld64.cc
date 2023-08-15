@@ -59,7 +59,7 @@ class Generator : public MacroAssembler {
 
 void Generator::generate(size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const void* params)
 {
-  assert(nc_mod_nr < 8);
+  assert(nc_mod_nr < 8 || nc_mod_nr == SIZE_MAX);
   assert(kc != 0);
   assert(ks != 0);
 
