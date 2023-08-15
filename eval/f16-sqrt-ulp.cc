@@ -12,7 +12,9 @@
 #include <random>
 #include <vector>
 
-#include <cpuinfo.h>
+#if XNN_ENABLE_CPUINFO
+  #include <cpuinfo.h>
+#endif  // XNN_ENABLE_CPUINFO
 #include <pthreadpool.h>
 
 #include <benchmark/benchmark.h>
@@ -52,10 +54,6 @@ static void SqrtError(benchmark::State& state,
   xnn_f16_unary_math_fn sqrt,
   benchmark::utils::IsaCheckFunction isa_check = nullptr)
 {
-  if (!cpuinfo_initialize()) {
-    state.SkipWithError("failed cpuinfo init");
-    return;
-  }
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
@@ -68,13 +66,19 @@ static void SqrtError(benchmark::State& state,
   // Number of elements in one parallelization tile. Worker threads process this many elements in each task.
   const size_t tile_size = 64;
 
-  uint32_t num_threads = cpuinfo_get_cores_count();
-  #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-    // Use all cores except for the least performant cluster
-    if (cpuinfo_get_clusters_count() > 1) {
-      num_threads -= cpuinfo_get_cluster(cpuinfo_get_clusters_count() - 1)->core_count;
+  // Default: as many as logical processors in the system
+  size_t num_threads = 0;
+  #if XNN_ENABLE_CPUINFO
+    if (cpuinfo_initialize()) {
+      num_threads = cpuinfo_get_processors_count();
+      #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+        // Use all cores except for the least performant cluster
+        if (cpuinfo_get_clusters_count() > 1) {
+          num_threads -= cpuinfo_get_cluster(cpuinfo_get_clusters_count() - 1)->core_count;
+        }
+      #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
     }
-  #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+  #endif  // XNN_ENABLE_CPUINFO
 
   std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> threadpool(
     pthreadpool_create(num_threads), pthreadpool_destroy);

@@ -46,7 +46,6 @@ ACCURACY_EVAL_DEPS = [
     ":math",
     ":math_stubs",
     "@FP16",
-    "@cpuinfo",
     "@pthreadpool",
 ]
 
@@ -6978,7 +6977,14 @@ xnnpack_benchmark(
     srcs = [
         "eval/f16-exp-ulp.cc",
     ],
-    deps = ACCURACY_EVAL_DEPS,
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    deps = ACCURACY_EVAL_DEPS + select({
+        ":cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_benchmark(
@@ -6986,7 +6992,14 @@ xnnpack_benchmark(
     srcs = [
         "eval/f16-expminus-ulp.cc",
     ],
-    deps = ACCURACY_EVAL_DEPS,
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    deps = ACCURACY_EVAL_DEPS + select({
+        ":cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_benchmark(
@@ -6994,7 +7007,14 @@ xnnpack_benchmark(
     srcs = [
         "eval/f16-expm1minus-ulp.cc",
     ],
-    deps = ACCURACY_EVAL_DEPS,
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    deps = ACCURACY_EVAL_DEPS + select({
+        ":cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_benchmark(
@@ -7002,7 +7022,14 @@ xnnpack_benchmark(
     srcs = [
         "eval/f16-sigmoid-ulp.cc",
     ],
-    deps = ACCURACY_EVAL_DEPS,
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    deps = ACCURACY_EVAL_DEPS + select({
+        ":cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_benchmark(
@@ -7010,7 +7037,14 @@ xnnpack_benchmark(
     srcs = [
         "eval/f16-sqrt-ulp.cc",
     ],
-    deps = ACCURACY_EVAL_DEPS,
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    deps = ACCURACY_EVAL_DEPS + select({
+        ":cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_benchmark(
@@ -7018,7 +7052,14 @@ xnnpack_benchmark(
     srcs = [
         "eval/f16-tanh-ulp.cc",
     ],
-    deps = ACCURACY_EVAL_DEPS,
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    deps = ACCURACY_EVAL_DEPS + select({
+        ":cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_benchmark(
@@ -7026,7 +7067,14 @@ xnnpack_benchmark(
     srcs = [
         "eval/f32-exp-ulp.cc",
     ],
-    deps = ACCURACY_EVAL_DEPS,
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    deps = ACCURACY_EVAL_DEPS + select({
+        ":cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_benchmark(
@@ -7034,7 +7082,14 @@ xnnpack_benchmark(
     srcs = [
         "eval/f32-expminus-ulp.cc",
     ],
-    deps = ACCURACY_EVAL_DEPS,
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    deps = ACCURACY_EVAL_DEPS + select({
+        ":cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_benchmark(
@@ -7042,7 +7097,14 @@ xnnpack_benchmark(
     srcs = [
         "eval/f32-expm1minus-ulp.cc",
     ],
-    deps = ACCURACY_EVAL_DEPS,
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    deps = ACCURACY_EVAL_DEPS + select({
+        ":cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_benchmark(
@@ -7050,7 +7112,14 @@ xnnpack_benchmark(
     srcs = [
         "eval/f32-extexp-ulp.cc",
     ],
-    deps = ACCURACY_EVAL_DEPS,
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    deps = ACCURACY_EVAL_DEPS + select({
+        ":cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_benchmark(
@@ -7058,7 +7127,14 @@ xnnpack_benchmark(
     srcs = [
         "eval/f32-sigmoid-ulp.cc",
     ],
-    deps = ACCURACY_EVAL_DEPS,
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    deps = ACCURACY_EVAL_DEPS + select({
+        ":cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_benchmark(
@@ -7066,7 +7142,14 @@ xnnpack_benchmark(
     srcs = [
         "eval/f32-sqrt-ulp.cc",
     ],
-    deps = ACCURACY_EVAL_DEPS,
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    deps = ACCURACY_EVAL_DEPS + select({
+        ":cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_benchmark(
@@ -7074,7 +7157,14 @@ xnnpack_benchmark(
     srcs = [
         "eval/f32-tanh-ulp.cc",
     ],
-    deps = ACCURACY_EVAL_DEPS,
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
+    deps = ACCURACY_EVAL_DEPS + select({
+        ":cpuinfo_enabled": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 ############################### Other benchmarks ###############################
@@ -11451,6 +11541,18 @@ config_setting(
     define_values = {"xnn_enable_riscv_vector": "false"},
 )
 
+# Enables usage of cpuinfo library.
+config_setting(
+    name = "xnn_enable_cpuinfo_explicit_true",
+    define_values = {"xnn_enable_cpuinfo": "true"},
+)
+
+# Disables usage of cpuinfo library.
+config_setting(
+    name = "xnn_enable_cpuinfo_explicit_false",
+    define_values = {"xnn_enable_cpuinfo": "false"},
+)
+
 # Enables usage of assembly kernels.
 config_setting(
     name = "xnn_enable_assembly_explicit_true",
@@ -11962,6 +12064,24 @@ alias(
         ":xnn_enable_riscv_vector_explicit_true": ":xnn_enable_riscv_vector_explicit_true",
         ":xnn_enable_riscv_vector_explicit_false": ":xnn_enable_riscv_vector_explicit_true",
         "//conditions:default": ":riscv_vector_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "cpuinfo_enabled_by_default",
+    match_any = [
+        ":aarch32",
+        ":aarch64",
+        ":x86",
+    ],
+)
+
+alias(
+    name = "cpuinfo_enabled",
+    actual = select({
+        ":xnn_enable_cpuinfo_explicit_true": ":xnn_enable_cpuinfo_explicit_true",
+        ":xnn_enable_cpuinfo_explicit_false": ":xnn_enable_cpuinfo_explicit_true",
+        "//conditions:default": ":cpuinfo_enabled_by_default",
     }),
 )
 
