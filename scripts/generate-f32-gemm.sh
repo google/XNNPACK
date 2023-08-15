@@ -619,6 +619,9 @@ wait # JIT requires the assembly files to be generated first.
 scripts/convert-assembly-to-jit.py --force-prfm --reload-params -i src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a7.S     -o src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a7.cc &
 scripts/convert-assembly-to-jit.py --reload-params              -i src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-ld64.S          -o src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-ld64.cc &
 scripts/convert-assembly-to-jit.py --force-prfm                 -i src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a55.S    -o src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a55.cc &
+scripts/convert-assembly-to-jit.py --reload-params              -i src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch32-neon-cortex-a53-prfm.S  -o src/f32-gemm/gen/f32-gemm-1x8-aarch32-neon-cortex-a53.cc
+scripts/convert-assembly-to-jit.py                              -i src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a53-prfm.S  -o src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a53.cc
+scripts/convert-assembly-to-jit.py                              -i src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-cortex-a75-prfm.S -o src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a75.cc
 # AArch64
 scripts/convert-assembly-to-jit.py                              -i src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch64-neonfma-ld64.S            -o src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-ld64.cc &
 scripts/convert-assembly-to-jit.py                              -i src/f32-gemm/gen/f32-gemm-1x8-minmax-asm-aarch64-neonfma-cortex-a53-prfm.S -o src/f32-gemm/gen/f32-gemm-1x8-aarch64-neonfma-cortex-a53.cc
