@@ -30,14 +30,12 @@ extern "C" {
 /// Allow sparse inference in a Runtime.
 ///
 /// Note: this flag hints XNNPACK to consider sparse inference, but does not guarantee it.
-#define XNN_FLAG_SPARSE_INFERENCE 0x00000001
-#define XNN_FLAG_HINT_SPARSE_INFERENCE XNN_FLAG_SPARSE_INFERENCE
+#define XNN_FLAG_HINT_SPARSE_INFERENCE 0x00000001
 
 /// Allow IEEE FP16 inference in a Runtime.
 ///
 /// Note: this flag hints XNNPACK to consider IEEE FP16 inference, but does not guarantee it.
-#define XNN_FLAG_FP16_INFERENCE 0x00000002
-#define XNN_FLAG_HINT_FP16_INFERENCE XNN_FLAG_FP16_INFERENCE
+#define XNN_FLAG_HINT_FP16_INFERENCE 0x00000002
 
 /// Force IEEE FP16 inference in a Runtime, and fail if FP16 inference is not possible.
 ///
