@@ -18,7 +18,7 @@
   #include <pthread.h>
 #endif
 
-#if !XNN_PLATFORM_WEB
+#if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
   #include <cpuinfo.h>
 #endif
 

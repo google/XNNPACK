@@ -8,6 +8,8 @@
 #include <cstring>
 #include <mutex>
 
+#include <xnnpack/common.h>
+
 #ifdef __linux__
   #include <sched.h>
 #endif
@@ -18,10 +20,11 @@
   #include <xmmintrin.h>
 #endif
 
-#include <cpuinfo.h>
+#if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
+  #include <cpuinfo.h>
+#endif
 
 #include <xnnpack.h>
-#include <xnnpack/common.h>
 #include <xnnpack/allocator.h>
 #include <xnnpack/config.h>
 
@@ -35,9 +38,11 @@ static std::once_flag wipe_buffer_guard;
 static void InitWipeBuffer() {
   // Default: the largest know cache size (128 MB Intel Crystalwell L4 cache).
   wipe_buffer_size = 128 * 1024 * 1024;
+#if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
   if (cpuinfo_initialize()) {
     wipe_buffer_size = benchmark::utils::GetMaxCacheSize();
   }
+#endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
 #if defined(_WIN32)
   wipe_buffer = _aligned_malloc(wipe_buffer_size, 128);
 #elif defined(__ANDROID__) || defined(__CYGWIN__)
@@ -56,9 +61,11 @@ namespace utils {
 
 uint32_t PrefetchToL1(const void* ptr, size_t size) {
   uint32_t step = 16;
+#if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
   if (cpuinfo_initialize()) {
     step = cpuinfo_get_l1d_cache(0)->line_size;
   }
+#endif
   const uint8_t* u8_ptr = static_cast<const uint8_t*>(ptr);
   // Compute and return sum of data to prevent compiler from removing data reads.
   uint32_t sum = 0;
@@ -128,16 +135,19 @@ uint64_t GetCurrentCpuFrequency() {
 }
 
 size_t GetMaxCacheSize() {
-  if (!cpuinfo_initialize()) {
-    #if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
-      // DynamIQ max: 4 MB
-      return 4 * 1024 * 1024;
-    #else
-      // Intel eDRAM max: 128 MB
-      return 128 * 1024 * 1024;
-    #endif
-  }
-  return cpuinfo_get_max_cache_size();
+  #if CPUINFO_ARCH_ARM || CPUINFO_ARCH_ARM64
+    // DynamIQ max: 4 MB
+    size_t max_cache_size = 4 * 1024 * 1024;
+  #else
+    // Intel eDRAM max: 128 MB
+    size_t max_cache_size = 128 * 1024 * 1024;
+  #endif
+  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
+    if (cpuinfo_initialize()) {
+      max_cache_size = cpuinfo_get_max_cache_size();
+    }
+  #endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
+  return max_cache_size;
 }
 
 void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
@@ -146,7 +156,7 @@ void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
   // Disabled thread pool (execution on the caller thread only).
   benchmark->Arg(1);
 
-  #if !XNN_PLATFORM_WINDOWS || !(XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  #if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !(XNN_PLATFORM_WINDOWS && (XNN_ARCH_ARM || XNN_ARCH_ARM64))
     if (cpuinfo_initialize()) {
       // All cores except the little ones.
       uint32_t max_cores = cpuinfo_get_cores_count();
@@ -167,7 +177,7 @@ void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
         benchmark->Arg(cpuinfo_get_processors_count());
       }
     }
-  #endif  // !XNN_PLATFORM_WINDOWS || !(XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  #endif  // !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV && !(XNN_PLATFORM_WINDOWS && (XNN_ARCH_ARM || XNN_ARCH_ARM64))
 }
 
 #if XNN_ARCH_ARM

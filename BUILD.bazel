@@ -35,7 +35,6 @@ MICROKERNEL_BENCHMARK_DEPS = [
     ":microparams_init",
     ":xnnpack_h",
     "@FP16",
-    "@cpuinfo",
 ]
 
 ACCURACY_EVAL_DEPS = [
@@ -1916,8 +1915,10 @@ xnnpack_cc_library(
         ":common",
         ":logging",
     ] + select({
-        ":emscripten": [],
-        "//conditions:default": ["@cpuinfo"],
+        ":aarch32": ["@cpuinfo"],
+        ":aarch64": ["@cpuinfo"],
+        ":x86": ["@cpuinfo"],
+        "//conditions:default": [],
     }),
 )
 
@@ -1939,8 +1940,10 @@ xnnpack_cc_library(
         ":common",
         ":logging",
     ] + select({
-        ":emscripten": [],
-        "//conditions:default": ["@cpuinfo"],
+        ":aarch32": ["@cpuinfo"],
+        ":aarch64": ["@cpuinfo"],
+        ":x86": ["@cpuinfo"],
+        "//conditions:default": [],
     }),
 )
 
@@ -1995,7 +1998,12 @@ xnnpack_cc_library(
         ":microkernels_h",
         ":microparams_init",
         ":packing",
-    ],
+    ] + select({
+        ":aarch32": ["@cpuinfo"],
+        ":aarch64": ["@cpuinfo"],
+        ":x86": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_cc_library(
@@ -2053,7 +2061,12 @@ xnnpack_cc_library(
         ":microparams_init",
         ":packing",
         ":test_microkernels",
-    ],
+    ] + select({
+        ":aarch32": ["@cpuinfo"],
+        ":aarch64": ["@cpuinfo"],
+        ":x86": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 xnnpack_cc_library(
@@ -5338,10 +5351,7 @@ xnnpack_cc_library(
         ":params",
         ":prod_microkernels",
         ":subgraph",
-    ] + select({
-        ":emscripten": [],
-        "//conditions:default": ["@cpuinfo"],
-    }),
+    ],
 )
 
 xnnpack_cc_library(
@@ -5376,10 +5386,7 @@ xnnpack_cc_library(
         ":params",
         ":subgraph_test_mode",
         ":test_microkernels",
-    ] + select({
-        ":emscripten": [],
-        "//conditions:default": ["@cpuinfo"],
-    }),
+    ],
 )
 
 # Specialized XNNPACK version for TensorFlow Lite. Excludes operators currently
@@ -5412,13 +5419,7 @@ xnnpack_cc_library(
         ":operators",
         ":params",
         ":subgraph",
-    ] + select({
-        ":emscripten": [],
-        "//conditions:default": [
-            "@cpuinfo",
-            "@pthreadpool",
-        ],
-    }),
+    ],
 )
 
 # Specialized XNNPACK version for TensorFlow.js. Excludes operators currently
@@ -5450,10 +5451,7 @@ xnnpack_cc_library(
         ":operators",
         ":params",
         ":prod_microkernels",
-    ] + select({
-        ":emscripten": [],
-        "//conditions:default": ["@cpuinfo"],
-    }),
+    ],
 )
 
 xnnpack_cc_library(
@@ -5466,8 +5464,12 @@ xnnpack_cc_library(
         ":common",
         ":params",
         "@com_google_benchmark//:benchmark",
-        "@cpuinfo",
-    ],
+    ] + select({
+        ":aarch32": ["@cpuinfo"],
+        ":aarch64": ["@cpuinfo"],
+        ":x86": ["@cpuinfo"],
+        "//conditions:default": [],
+    }),
 )
 
 ######################### Benchmarks for micro-kernels #########################
