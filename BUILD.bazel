@@ -11500,30 +11500,6 @@ config_setting(
     define_values = {"xnn_enable_memopt": "false"},
 )
 
-# Enable QS8 inference in TFLite-specific version
-config_setting(
-    name = "xnn_enable_qs8_explicit_true",
-    define_values = {"xnn_enable_qs8": "true"},
-)
-
-# Disable QS8 inference in TFLite-specific version
-config_setting(
-    name = "xnn_enable_qs8_explicit_false",
-    define_values = {"xnn_enable_qs8": "false"},
-)
-
-# Enable QU8 inference in TFLite-specific version
-config_setting(
-    name = "xnn_enable_qu8_explicit_true",
-    define_values = {"xnn_enable_qu8": "true"},
-)
-
-# Disable QU8 inference in TFLite-specific version
-config_setting(
-    name = "xnn_enable_qu8_explicit_false",
-    define_values = {"xnn_enable_qu8": "false"},
-)
-
 # Enables usage of JIT kernels.
 config_setting(
     name = "xnn_enable_jit_explicit_true",
