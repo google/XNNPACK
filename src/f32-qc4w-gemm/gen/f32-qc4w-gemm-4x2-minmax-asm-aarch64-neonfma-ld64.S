@@ -34,7 +34,7 @@
 # C2  x10 v28 v29
 # C3  x7  v30 v31
 # Clamp v4 v5
-# zerop/mask v6 v7
+# ZeroPoint v6
 
 BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_ld64
 
@@ -50,7 +50,6 @@ BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_ld64
 
         # Load min/max/zerop values
         LD3R        {v4.2s, v5.2s, v6.2s}, [x8]
-        MOVI        v7.8b, 15
 
         ADD         x12, x11, x4            // a2 = a1 + a_stride
         ADD         x10, x9, x7             // c2 = c1 + cm_stride

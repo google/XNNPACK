@@ -79,7 +79,7 @@ void xnn_${DATATYPE_SPEC}_${KERNEL}${SUFFIX}_ukernel_${MR}x${NR}__${"wasm" if WA
     const float vmin = params->scalar.min;
     const float vmax = params->scalar.max;
   $if DATATYPE == "QC4":
-    const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point[0];
+    const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
   do {
     $if INC:
       $for M in range(MR):

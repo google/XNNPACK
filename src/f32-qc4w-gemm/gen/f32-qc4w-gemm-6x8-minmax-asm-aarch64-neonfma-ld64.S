@@ -38,7 +38,7 @@
 # C4    x13 v28 v29
 # C5     x7 v30 v31
 # Clamp  v6 v7
-# Zerop/mask v8 v9
+# ZeroPoint v8
 # Unused v10 v11 v12 v13 v14 v15
 
 BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
@@ -56,7 +56,6 @@ BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         STP         d8,  d9, [sp, -16]!     // Save d8-d9 on stack
         # Load min/max/zerop values
         LD3R        {v6.4s, v7.4s, v8.4s}, [x8]
-        MOVI        v9.16b, 15
 
         ADD         x10, x9, x4             // a2 = a1 + a_stride
         ADD         x17, x16, x7            // c2 = c1 + cm_stride
@@ -116,14 +115,13 @@ BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
 1:
         LDR         d0,  [x3], 8
         LDR         d18, [x5], 8            // 16 QC4 weights
-        AND         v17.8b, v18.8b, v9.8b   // first set of 8 weights
-        USHR        v19.8b, v18.8b, 4       // second set of 8 weights
-        SADDW       v17.8h, v8.8h, v17.8b
-        SADDW       v19.8h, v8.8h, v19.8b
-        SXTL        v16.4s, v17.4h
-        SXTL2       v17.4s, v17.8h
-        SXTL        v18.4s, v19.4h
-        SXTL2       v19.4s, v19.8h
+        UXTL        v17.8h, v18.8b
+        USHR        v19.8h, v17.8h, 4       // second set of 8 weights
+        BIC         v17.8h, 0xF0            // first set of 8 weights
+        SADDW       v16.4s, v8.4s, v17.4h
+        SADDW2      v17.4s, v8.4s, v17.8h
+        SADDW       v18.4s, v8.4s, v19.4h
+        SADDW2      v19.4s, v8.4s, v19.8h
         SCVTF       v16.4s, v16.4s
         SCVTF       v17.4s, v17.4s
         SCVTF       v18.4s, v18.4s
@@ -231,9 +229,9 @@ BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         # Remainder- 1 float of A (4 bytes)
         LDR         s0,  [x3], 4
         LDR         d18, [x5], 8            // 8 QC4 weights
-        SADDW       v17.8h, v8.8h, v18.8b
-        SXTL        v16.4s, v17.4h
-        SXTL2       v17.4s, v17.8h
+        UXTL        v17.8h, v18.8b
+        SADDW       v16.4s, v8.4s, v17.4h
+        SADDW2      v17.4s, v8.4s, v17.8h
         SCVTF       v16.4s, v16.4s
         SCVTF       v17.4s, v17.4s
         LDR         s1,  [x9], 4

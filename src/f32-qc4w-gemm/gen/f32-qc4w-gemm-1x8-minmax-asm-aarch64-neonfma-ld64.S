@@ -28,7 +28,7 @@
 # B   x5 v20 v21 v22 v23
 # C0  x6 v16 v17
 # Clamp v4 v5
-# zerop/mask v6 v7
+# ZeroPoint v6
 
 BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
 
@@ -37,7 +37,6 @@ BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
 
         # Load min/max/zerop values
         LD3R        {v4.4s, v5.4s, v6.4s}, [x8]
-        MOVI        v7.8b, 15
 0:
         # Load initial bias from w into accumulators
         LDP         q16, q17, [x5], 32
@@ -48,15 +47,14 @@ BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
         # Main loop - 2 floats of A (8 bytes)
 1:
         LDR         d0, [x3], 8
-        LDR         d22, [x5], 8            // 16 QC4 weights
-        AND         v21.8b, v22.8b, v7.8b   // first set of 8 weights
-        USHR        v23.8b, v22.8b, 4       // second set of 8 weights
-        SADDW       v21.8h, v6.8h, v21.8b
-        SADDW       v23.8h, v6.8h, v23.8b
-        SXTL        v20.4s, v21.4h
-        SXTL        v22.4s, v23.4h
-        SXTL2       v21.4s, v21.8h
-        SXTL2       v23.4s, v23.8h
+        LDR         d20, [x5], 8            // 16 QC4 weights
+        UXTL        v21.8h, v20.8b
+        USHR        v23.8h, v21.8h, 4       // second set of 8 weights
+        BIC         v21.8h, 0xF0            // first set of 8 weights
+        SADDW       v20.4s, v6.4s, v21.4h
+        SADDW2      v21.4s, v6.4s, v21.8h
+        SADDW       v22.4s, v6.4s, v23.4h
+        SADDW2      v23.4s, v6.4s, v23.8h
         SCVTF       v20.4s, v20.4s
         SCVTF       v21.4s, v21.4s
         SCVTF       v22.4s, v22.4s
@@ -97,10 +95,10 @@ BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
 3:
         # Remainder- 1 float of A (4 bytes)
         LDR         s0, [x3], 4
-         LDR         d21, [x5], 8            // 8 QC4 weights
-         SADDW       v21.8h, v6.8h, v21.8b
-         SXTL        v20.4s, v21.4h
-         SXTL2       v21.4s, v21.8h
+         LDR         d20, [x5], 8            // 8 QC4 weights
+         SXTL        v21.8h, v20.8b
+         SADDW       v20.4s, v6.4s, v21.4h
+         SADDW2      v21.4s, v6.4s, v21.8h
          SCVTF       v20.4s, v20.4s
          SCVTF       v21.4s, v21.4s
         FMLA        v16.4s, v20.4s, v0.s[0]

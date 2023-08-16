@@ -39,7 +39,7 @@ $else:
 # C3  x7  v30
 # Clamp v4 v5
 $if DATATYPE == "QC4":
-  # zerop/mask v6 v7
+  # ZeroPoint v6
   # temp v21
 
 BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4x1__asm_aarch64_neonfma_ld64
@@ -63,7 +63,6 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
         $if DATATYPE == "QC4":
           # Load min/max/zerop values
           LD3R        {v4.2s, v5.2s, v6.2s}, [x8]
-          MOVI        v7.8b, 15
         $else:
           # Load min/max values
           LD2R        {v4.2s, v5.2s}, [x8]

@@ -70,8 +70,8 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         c${M} = c${M-1};
       }
   $if DATATYPE == "QC4":
-    const int16x8_t vminus_kernel_zero_point = vld1q_dup_s16(&params->scalar.minus_kernel_zero_point[0]);
-    const uint8x8_t vmask = vmov_n_u8(UINT8_C(0xF));
+    const int32x4_t vminus_kernel_zero_point = vld1q_dup_s32(&params->scalar.minus_kernel_zero_point);
+    const uint16x8_t vmask = vmovq_n_u16(UINT16_C(0xF));
 
   do {
     $if INC:
@@ -100,13 +100,13 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
       $elif DATATYPE == "QC4":
         $for N in range(0, NR, 8):
           const uint8x8_t vw${ABC[N:N+8]}c01 = vld1_u8(w); w = (const uint8_t*) w + 8;
-          const uint8x8_t vw${ABC[N:N+8]}c0 = vand_u8(vw${ABC[N:N+8]}c01, vmask);
-          const uint8x8_t vw${ABC[N:N+8]}c1 = vshr_n_u8(vw${ABC[N:N+8]}c01, 4);
+          const uint16x8_t vxw${ABC[N:N+8]}c01 = vmovl_u8(vw${ABC[N:N+8]}c01);
+          const uint16x8_t vxw${ABC[N:N+8]}c0 = vandq_u16(vxw${ABC[N:N+8]}c01, vmask);
+          const uint16x8_t vxw${ABC[N:N+8]}c1 = vshrq_n_u16(vxw${ABC[N:N+8]}c01, 4);
+        $for N in range(0, NR, 8):
           $for L in range(2):
-            const int16x8_t vxw${ABC[N:N+8]}c${L} = vaddw_s8(vminus_kernel_zero_point, vreinterpret_s8_u8(vw${ABC[N:N+8]}c${L}));
-          $for L in range(2):
-            const int32x4_t vxw${ABC[N:N+4]}c${L} = vmovl_s16(vget_low_s16(vxw${ABC[N:N+8]}c${L}));
-            const int32x4_t vxw${ABC[N+4:N+8]}c${L} = vmovl_s16(vget_high_s16(vxw${ABC[N:N+8]}c${L}));
+            const int32x4_t vxw${ABC[N:N+4]}c${L} = vaddw_s16(vminus_kernel_zero_point, vreinterpret_s16_u16(vget_low_u16(vxw${ABC[N:N+8]}c${L})));
+            const int32x4_t vxw${ABC[N+4:N+8]}c${L} = vaddw_s16(vminus_kernel_zero_point, vreinterpret_s16_u16(vget_high_u16(vxw${ABC[N:N+8]}c${L})));
         $for N in range(0, NR, 4):
           $for L in range(2):
             const float32x4_t vb${ABC[N:N+4]}c${L} = vcvtq_f32_s32(vxw${ABC[N:N+4]}c${L});
@@ -114,8 +114,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         $for N in range(0, NR, 8):
           $for L in range(2):
             const int8x8_t vw${ABC[N:N+8]}c${L} = vld1_s8(w); w = (const int8_t*) w + 8;
+        $for N in range(0, NR, 8):
           $for L in range(2):
             const int16x8_t vxw${ABC[N:N+8]}c${L} = vmovl_s8(vw${ABC[N:N+8]}c${L});
+        $for N in range(0, NR, 8):
           $for L in range(2):
             const int32x4_t vxw${ABC[N:N+4]}c${L} = vmovl_s16(vget_low_s16(vxw${ABC[N:N+8]}c${L}));
             const int32x4_t vxw${ABC[N+4:N+8]}c${L} = vmovl_s16(vget_high_s16(vxw${ABC[N:N+8]}c${L}));
@@ -145,9 +147,9 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
       $elif DATATYPE == "QC4":
         $for N in range(0, NR, 8):
           const uint8x8_t vw${ABC[N:N+8]} = vld1_u8(w); w = (const uint8_t*) w + 8;
-          const int16x8_t vxw${ABC[N:N+8]} = vaddw_s8(vminus_kernel_zero_point, vreinterpret_s8_u8(vw${ABC[N:N+8]}));
-          const int32x4_t vxw${ABC[N:N+4]} = vmovl_s16(vget_low_s16(vxw${ABC[N:N+8]}));
-          const int32x4_t vxw${ABC[N+4:N+8]} = vmovl_s16(vget_high_s16(vxw${ABC[N:N+8]}));
+          const uint16x8_t vxw${ABC[N:N+8]} = vmovl_u8(vw${ABC[N:N+8]});
+          const int32x4_t vxw${ABC[N:N+4]} = vaddw_s16(vminus_kernel_zero_point, vreinterpret_s16_u16(vget_low_u16(vxw${ABC[N:N+8]})));
+          const int32x4_t vxw${ABC[N+4:N+8]} = vaddw_s16(vminus_kernel_zero_point, vreinterpret_s16_u16(vget_high_u16(vxw${ABC[N:N+8]})));
         $for N in range(0, NR, 4):
           const float32x4_t vb${ABC[N:N+4]} = vcvtq_f32_s32(vxw${ABC[N:N+4]});
       $elif DATATYPE == "QC8":

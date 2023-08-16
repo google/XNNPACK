@@ -58,7 +58,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x2__scalar(
 
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
-  const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point[0];
+  const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
   do {
     float vacc00 = unaligned_indexed_load_f32(w, 0);
     float vacc01 = unaligned_indexed_load_f32(w, 1);

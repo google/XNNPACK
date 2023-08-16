@@ -2055,9 +2055,7 @@ size_t xnn_init_f32_qc4w_minmax_scalar_params(
   assert(kernel_zero_point <= 15);
   params->scalar.min = output_min;
   params->scalar.max = output_max;
-  for (uint32_t i = 0; i < 2; i++) {
-    params->scalar.minus_kernel_zero_point[i] = -(int16_t) kernel_zero_point;
-  }
+  params->scalar.minus_kernel_zero_point = -(int32_t) kernel_zero_point;
   return sizeof(params->scalar);
 }
 
