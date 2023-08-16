@@ -6,18 +6,17 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include <xnnpack/common.h>
-
-#if XNN_PLATFORM_WINDOWS
+#if _WIN32
   #include <windows.h>
 #else
   #include <pthread.h>
 #endif
 
-#if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
+#if XNN_ENABLE_CPUINFO
   #include <cpuinfo.h>
-#endif
+#endif  // XNN_ENABLE_CPUINFO
 
+#include <xnnpack/common.h>
 #include <xnnpack/config.h>
 #include <xnnpack/microparams-init.h>
 #include <xnnpack/dwconv.h>

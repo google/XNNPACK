@@ -8,7 +8,7 @@
 
 #include <xnnpack/common.h>
 
-#if XNN_PLATFORM_WINDOWS
+#if _WIN32
   #include <windows.h>
 
   #ifndef PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE
@@ -18,9 +18,9 @@
   #include <pthread.h>
 #endif
 
-#if !XNN_PLATFORM_WEB && !XNN_ARCH_RISCV
+#if XNN_ENABLE_CPUINFO
   #include <cpuinfo.h>
-#endif
+#endif  // XNN_ENABLE_CPUINFO
 
 #if XNN_ARCH_RISCV
   #include <sys/auxv.h>

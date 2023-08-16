@@ -1908,15 +1908,17 @@ xnnpack_cc_library(
         "src/xnnpack/microfnptr.h",
         "src/xnnpack/microparams.h",
     ],
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":logging",
     ] + select({
-        ":aarch32": ["@cpuinfo"],
-        ":aarch64": ["@cpuinfo"],
-        ":x86": ["@cpuinfo"],
+        ":cpuinfo_enabled": ["@cpuinfo"],
         "//conditions:default": [],
     }),
 )
@@ -1932,16 +1934,17 @@ xnnpack_cc_library(
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
-    ],
+    ] + select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":logging",
     ] + select({
-        ":aarch32": ["@cpuinfo"],
-        ":aarch64": ["@cpuinfo"],
-        ":x86": ["@cpuinfo"],
+        ":cpuinfo_enabled": ["@cpuinfo"],
         "//conditions:default": [],
     }),
 )
@@ -1983,6 +1986,10 @@ xnnpack_cc_library(
         "src/xnnpack/microfnptr.h",
         "src/xnnpack/microparams.h",
     ],
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -1998,9 +2005,7 @@ xnnpack_cc_library(
         ":microparams_init",
         ":packing",
     ] + select({
-        ":aarch32": ["@cpuinfo"],
-        ":aarch64": ["@cpuinfo"],
-        ":x86": ["@cpuinfo"],
+        ":cpuinfo_enabled": ["@cpuinfo"],
         "//conditions:default": [],
     }),
 )
@@ -2045,7 +2050,10 @@ xnnpack_cc_library(
     copts = [
         "-UNDEBUG",
         "-DXNN_TEST_MODE=1",
-    ],
+    ] + select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -2061,9 +2069,7 @@ xnnpack_cc_library(
         ":packing",
         ":test_microkernels",
     ] + select({
-        ":aarch32": ["@cpuinfo"],
-        ":aarch64": ["@cpuinfo"],
-        ":x86": ["@cpuinfo"],
+        ":cpuinfo_enabled": ["@cpuinfo"],
         "//conditions:default": [],
     }),
 )
@@ -5450,6 +5456,10 @@ xnnpack_cc_library(
     name = "bench_utils",
     srcs = ["bench/utils.cc"],
     hdrs = ["bench/utils.h"],
+    copts = select({
+        ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
+        "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
+    }),
     deps = [
         ":XNNPACK",
         ":allocator",
@@ -5457,9 +5467,7 @@ xnnpack_cc_library(
         ":params",
         "@com_google_benchmark//:benchmark",
     ] + select({
-        ":aarch32": ["@cpuinfo"],
-        ":aarch64": ["@cpuinfo"],
-        ":x86": ["@cpuinfo"],
+        ":cpuinfo_enabled": ["@cpuinfo"],
         "//conditions:default": [],
     }),
 )
