@@ -87,13 +87,22 @@ class AttentionOperatorTester {
     return this->key_value_tokens_;
   }
 
-  inline AttentionOperatorTester& channels(size_t channels) {
-    this->channels_ = channels;
+  inline AttentionOperatorTester& query_key_channels(size_t query_key_channels) {
+    this->query_key_channels_ = query_key_channels;
     return *this;
   }
 
-  inline size_t channels() const {
-    return this->channels_;
+  inline size_t query_key_channels() const {
+    return this->query_key_channels_;
+  }
+
+  inline AttentionOperatorTester& value_channels(size_t value_channels) {
+    this->value_channels_ = value_channels;
+    return *this;
+  }
+
+  inline size_t value_channels() const {
+    return this->value_channels_;
   }
 
   inline AttentionOperatorTester& iterations(size_t iterations) {
@@ -111,13 +120,13 @@ class AttentionOperatorTester {
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
     std::uniform_real_distribution<float> scaledist(0.2f, 2.0f);
 
-    std::vector<float> query(XNN_EXTRA_BYTES / sizeof(float) + batch_size() * query_heads() * query_tokens() * channels());
-    std::vector<float> key(XNN_EXTRA_BYTES / sizeof(float) + batch_size() * key_value_heads() * key_value_tokens() * channels());
-    std::vector<float> value(XNN_EXTRA_BYTES / sizeof(float) + batch_size() * key_value_heads() * key_value_tokens() * channels());
-    std::vector<float> scale(XNN_EXTRA_BYTES / sizeof(float) + channels());
+    std::vector<float> query(XNN_EXTRA_BYTES / sizeof(float) + batch_size() * query_heads() * query_tokens() * query_key_channels());
+    std::vector<float> key(XNN_EXTRA_BYTES / sizeof(float) + batch_size() * key_value_heads() * key_value_tokens() * query_key_channels());
+    std::vector<float> value(XNN_EXTRA_BYTES / sizeof(float) + batch_size() * key_value_heads() * key_value_tokens() * value_channels());
+    std::vector<float> scale(XNN_EXTRA_BYTES / sizeof(float) + query_key_channels());
     std::vector<float> mask(XNN_EXTRA_BYTES / sizeof(float) + query_tokens() * key_value_tokens());
-    std::vector<float> output(batch_size() * query_heads() * query_tokens() * channels());
-    std::vector<float> output_ref(batch_size() * query_heads() * query_tokens() * channels());
+    std::vector<float> output(batch_size() * query_heads() * query_tokens() * value_channels());
+    std::vector<float> output_ref(batch_size() * query_heads() * query_tokens() * value_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(query.begin(), query.end(), [&]() { return f32dist(rng); });
@@ -128,30 +137,34 @@ class AttentionOperatorTester {
       std::generate(mask.begin(), mask.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), std::nanf(""));
 
-      const size_t query_batch_stride = query_heads() *  query_tokens() * channels();
-      const size_t query_head_stride = query_tokens() * channels();
-      const size_t key_value_batch_stride = key_value_heads() *  key_value_tokens() * channels();
+      const size_t query_batch_stride = query_heads() *  query_tokens() * query_key_channels();
+      const size_t query_head_stride = query_tokens() * query_key_channels();
+      const size_t output_batch_stride = query_heads() *  query_tokens() * value_channels();
+      const size_t output_head_stride = query_tokens() * value_channels();
+      const size_t key_batch_stride = key_value_heads() *  key_value_tokens() * query_key_channels();
+      const size_t value_batch_stride = key_value_heads() *  key_value_tokens() * value_channels();
       // For multi-query, key/value only has single head, so don't advance along head dimension.
-      const size_t key_value_head_stride = key_value_heads() == 1 ? 0 : key_value_tokens() * channels();
+      const size_t key_head_stride = key_value_heads() == 1 ? 0 : key_value_tokens() * query_key_channels();
+      const size_t value_head_stride = key_value_heads() == 1 ? 0 : key_value_tokens() * value_channels();
 
       for (size_t b = 0; b < batch_size(); b++) {
         for (size_t h = 0; h < query_heads(); h++) {
           // Compute reference results.
-          std::vector<float> q_scaled(query_tokens() * channels());
+          std::vector<float> q_scaled(query_tokens() * query_key_channels());
           for (size_t n = 0; n < query_tokens(); n++) {
-            for (size_t k = 0; k < channels(); k++) {
-              q_scaled[n * channels() + k] =
-                  query[b * query_batch_stride + h * query_head_stride + n * channels() + k] * scale[k];
+            for (size_t k = 0; k < query_key_channels(); k++) {
+              q_scaled[n * query_key_channels() + k] =
+                  query[b * query_batch_stride + h * query_head_stride + n * query_key_channels() + k] * scale[k];
             }
           }
 
           std::vector<float> logits(query_tokens() * key_value_tokens(), 0);
           for (size_t n_0 = 0; n_0 < query_tokens(); n_0++) {
             for (size_t n_1 = 0; n_1 < key_value_tokens(); n_1++) {
-              for (size_t ki = 0; ki < channels(); ki++) {
+              for (size_t ki = 0; ki < query_key_channels(); ki++) {
                 logits[n_0 * key_value_tokens() + n_1] +=
-                    q_scaled[n_0 * channels() + ki] *
-                    key[b * key_value_batch_stride + h * key_value_head_stride + n_1 * channels() + ki];
+                    q_scaled[n_0 * query_key_channels() + ki] *
+                    key[b * key_batch_stride + h * key_head_stride + n_1 * query_key_channels() + ki];
               }
               if (cap_type() == xnn_attention_logits_cap_type_tanh) {
                 // Cap and tanh.
@@ -182,10 +195,10 @@ class AttentionOperatorTester {
           // Output = Weights * Value
           for (size_t ni = 0; ni < query_tokens(); ni++) {
             for (size_t nj = 0; nj < key_value_tokens(); nj++) {
-              for (size_t di = 0; di < channels(); di++) {
-                output_ref[b * query_batch_stride + h * query_head_stride + ni * channels() + di] +=
+              for (size_t di = 0; di < value_channels(); di++) {
+                output_ref[b * output_batch_stride + h * output_head_stride + ni * value_channels() + di] +=
                     weights[ni * key_value_tokens() + nj] *
-                    value[b * key_value_batch_stride + h * key_value_head_stride + nj * channels() + di];
+                    value[b * value_batch_stride + h * value_head_stride + nj * value_channels() + di];
               }
             }
           }
@@ -215,7 +228,8 @@ class AttentionOperatorTester {
       ASSERT_EQ(xnn_status_success,
                 xnn_reshape_scaled_dot_attention_nhtc_f32(
                   attention_op,
-                  batch_size(), query_heads(), query_tokens(), key_value_heads(), key_value_tokens(), channels(),
+                  batch_size(), query_heads(), query_tokens(), key_value_heads(), key_value_tokens(),
+                    query_key_channels(), value_channels(),
                   &workspace_size, &workspace_alignment,
                   /*threadpool=*/nullptr));
 
@@ -234,14 +248,14 @@ class AttentionOperatorTester {
       for (size_t b = 0; b < batch_size(); b++) {
         for (size_t h = 0; h < query_heads(); h++) {
           for (size_t i = 0; i < query_tokens(); i++) {
-            for (size_t j = 0; j < channels(); j++) {
-              EXPECT_NEAR(output_ref[(b * query_heads() + h) * query_tokens() * channels() + i * channels() + j],
-                          output[(b * query_heads() + h) * query_tokens() * channels() + i * channels() + j],
+            for (size_t j = 0; j < value_channels(); j++) {
+              EXPECT_NEAR(output_ref[(b * query_heads() + h) * query_tokens() * value_channels() + i * value_channels() + j],
+                          output[(b * query_heads() + h) * query_tokens() * value_channels() + i * value_channels() + j],
                           1e-4)
                   << " batch : " << b << " / "  << batch_size()
                   << " head : " << h << " / "  << query_heads()
                   << " token : " << i << " / " << query_tokens()
-                  << " channel : " << j << " / " << channels();
+                  << " channel : " << j << " / " << value_channels();
             }
           }
         }
@@ -255,7 +269,8 @@ class AttentionOperatorTester {
   size_t batch_size_{1};
   size_t query_heads_{1};
   size_t key_value_heads_{1};
-  size_t channels_{1};
+  size_t query_key_channels_{1};
+  size_t value_channels_{1};
   size_t query_tokens_{1};
   size_t key_value_tokens_{0};
   size_t iterations_{1};

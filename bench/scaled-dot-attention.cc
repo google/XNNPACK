@@ -332,7 +332,8 @@ void xnnpack_multihead_scaled_dot_attention_cap_tanh_f32(benchmark::State& state
   size_t workspace_alignment = 0;
   status = xnn_reshape_scaled_dot_attention_nhtc_f32(
             attention_op,
-            batch_size, heads, query_tokens, heads, key_value_tokens, channels,
+            batch_size, heads, query_tokens, heads, key_value_tokens,
+            channels, channels,
             &workspace_size, &workspace_alignment,
             /*threadpool=*/nullptr);
 
