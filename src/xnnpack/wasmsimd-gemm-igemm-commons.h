@@ -148,6 +148,19 @@ class PostOps : public WasmAssembler {
 class GemmIGemmCommons : public PostOps {
  public:
   using PostOps::PostOps;
+ protected:
+  struct StoreArgs {
+    StoreArgs(LocalsArray* cs, LocalsArray* vacc0123, LocalsArray* vacc4567, LocalsArray* as, Local* cn_stride, Local* kc, Local* nc):
+      cs(*cs), vacc0123(*vacc0123), vacc4567(*vacc4567), as(*as), cn_stride(*cn_stride), kc(*kc), nc(*nc), max_mr(as->size()) {}
+    LocalsArray& cs;
+    LocalsArray& vacc0123;
+    LocalsArray& vacc4567;
+    LocalsArray& as;
+    Local& cn_stride;
+    Local& kc;
+    Local& nc;
+    size_t max_mr;
+  };
 
   void InitAccumulators(LocalsArray& vaccs, const Local& w, size_t offset) {
     vaccs[0] = V128Load(w, offset);
@@ -175,6 +188,17 @@ class GemmIGemmCommons : public PostOps {
     cs[0] = c;
     for (size_t i = 1; i < cs.size(); i++) {
       cs[i] = Select(cs[i - 1], I32Add(cs[i - 1], cm_stride), I32GeU(I32Const(i), mr));
+    }
+  }
+
+  void LoadVbs(Local& vb0123, Local& vb4567, const Local& w, uint32_t offset, size_t c = 0) {
+    vb0123 = V128Load(w, /*offset=*/offset + (c * 8) * sizeof(float));
+    vb4567 = V128Load(w, /*offset=*/offset + (c * 8 + 4) * sizeof(float));
+  }
+
+  void MulAdd(LocalsArray& vaccs, const LocalsArray& vas, const Local& vb, size_t max_mr) {
+    for (size_t i = 0; i < max_mr; i++) {
+      vaccs[i] = F32x4Add(F32x4Mul(vas[i], vb), vaccs[i]);
     }
   }
 };

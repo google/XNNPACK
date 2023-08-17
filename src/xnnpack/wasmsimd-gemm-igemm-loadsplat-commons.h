@@ -57,8 +57,9 @@ class GemmIGemmLoadsplatCommons : public GemmIGemmCommons {
   void InnerLoopBody(LocalsArray& as, LocalsArray& vacc0123, LocalsArray& vacc4567, Local& w, Local& k, size_t max_mr,
                      size_t loop_unroll_iters) {
     for (size_t unrolled_iter = 0; unrolled_iter < loop_unroll_iters; unrolled_iter++) {
-      const auto vb0123 = MakeLocal(V128Load(w, /*offset=*/(2 * unrolled_iter) * sizeof(v128_t)));
-      const auto vb4567 = MakeLocal(V128Load(w, /*offset=*/(2 * unrolled_iter + 1) * sizeof(v128_t)));
+      auto vb0123 = MakeLocal(v128);
+      auto vb4567 = MakeLocal(v128);
+      LoadVbs(vb0123, vb4567, w, /*offset=*/(2 * unrolled_iter) * sizeof(v128_t));
       for (size_t i = 0; i < max_mr; i++) {
         const auto va = MakeLocal(V128Load32Splat(as[i]));
         vacc0123[i] = F32x4Add(vacc0123[i], F32x4Mul(va, vb0123));

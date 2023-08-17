@@ -91,17 +91,6 @@ class GemmIGemmS4Commons : public GemmIGemmCommons {
     return vas;
   }
 
-  void LoadVbs(Local& vb0123, Local& vb4567, const Local& w, size_t c, uint32_t offset) {
-    vb0123 = V128Load(w, /*offset=*/offset + (c * 8) * sizeof(float));
-    vb4567 = V128Load(w, /*offset=*/offset + (c * 8 + 4) * sizeof(float));
-  }
-
-  void MulAdd(LocalsArray& vaccs, const LocalsArray& vas, const Local& vb, size_t max_mr) {
-    for (size_t i = 0; i < max_mr; i++) {
-      vaccs[i] = F32x4Add(F32x4Mul(vas[i], vb), vaccs[i]);
-    }
-  }
-
   void MulAddCond(LocalsArray& vaccs, const LocalsArray& vas, const Local& vb, const Local& vzero, size_t max_mr) {
     for (size_t i = 0; i < max_mr; i++) {
       vaccs[i] = F32x4Add(F32x4Mul(V128Andnot(vas[i], F32x4Eq(vb, vzero)), vb), vaccs[i]);
@@ -123,7 +112,7 @@ class GemmIGemmS4Commons : public GemmIGemmCommons {
       vzero = MakeLocal(F32x4Splat(F32Const(0)));
     }
     for (int c = 0; c < 4; c++) {
-      LoadVbs(vb0123, vb4567, w, c, w_offset);
+      LoadVbs(vb0123, vb4567, w, w_offset, c);
       if (is_remainder) {
         MulAddCond(vacc0123, vas, vb0123, vzero, max_mr);
         MulAddCond(vacc4567, vas, vb4567, vzero, max_mr);

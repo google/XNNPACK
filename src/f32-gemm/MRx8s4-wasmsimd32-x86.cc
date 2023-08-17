@@ -15,18 +15,6 @@
 namespace xnnpack {
 namespace {
 class F32GemmS4Generator : public internal::GemmIGemmS4Commons {
-  struct StoreArgs {
-    StoreArgs(LocalsArray* cs, LocalsArray* vacc0123, LocalsArray* vacc4567, LocalsArray* as, Local* cn_stride, Local* kc, Local* nc):
-      cs(*cs), vacc0123(*vacc0123), vacc4567(*vacc4567), as(*as), cn_stride(*cn_stride), kc(*kc), nc(*nc), max_mr(as->size()) {}
-    LocalsArray& cs;
-    LocalsArray& vacc0123;
-    LocalsArray& vacc4567;
-    LocalsArray& as;
-    Local& cn_stride;
-    Local& kc;
-    Local& nc;
-    size_t max_mr;
-  };
  public:
   using GemmIGemmS4Commons::GemmIGemmS4Commons;
 
