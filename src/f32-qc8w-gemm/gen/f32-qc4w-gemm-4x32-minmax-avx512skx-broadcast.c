@@ -56,10 +56,10 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x32__avx512skx_broadcast(
     a3 = a2;
     c3 = c2;
   }
-  const __m512i vmagic_bias_c0 = _mm512_set1_epi32(params->avx512.magic_bias_c0);
-  const __m512i vmagic_bias_c1 = _mm512_set1_epi32(params->avx512.magic_bias_c1);
-  const __m512 vmagic_bias_plus_kernel_zero_point_c0 = _mm512_set1_ps(params->avx512.magic_bias_plus_kernel_zero_point_c0);
-  const __m512 vmagic_bias_plus_kernel_zero_point_c1 = _mm512_set1_ps(params->avx512.magic_bias_plus_kernel_zero_point_c1);
+  const __m512i vmagic_bias_c0 = _mm512_set1_epi32(params->scalar_magic.magic_bias_c0);
+  const __m512i vmagic_bias_c1 = _mm512_set1_epi32(params->scalar_magic.magic_bias_c1);
+  const __m512 vmagic_bias_plus_kernel_zero_point_c0 = _mm512_set1_ps(params->scalar_magic.magic_bias_plus_kernel_zero_point_c0);
+  const __m512 vmagic_bias_plus_kernel_zero_point_c1 = _mm512_set1_ps(params->scalar_magic.magic_bias_plus_kernel_zero_point_c1);
 
   do {
     __m512 vacc0x0123456789ABCDEF = _mm512_loadu_ps((const float*) w + 0);
@@ -164,7 +164,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x32__avx512skx_broadcast(
     vacc2xGHIJKLMNOPQRSTUV = _mm512_mul_ps(vacc2xGHIJKLMNOPQRSTUV, vscaleGHIJKLMNOPQRSTUV);
     vacc3xGHIJKLMNOPQRSTUV = _mm512_mul_ps(vacc3xGHIJKLMNOPQRSTUV, vscaleGHIJKLMNOPQRSTUV);
     w = (const float*) w + 32;
-    const __m512 vmin = _mm512_set1_ps(params->scalar.min);
+    const __m512 vmin = _mm512_set1_ps(params->scalar_cvt.min);
     vacc0x0123456789ABCDEF = _mm512_max_ps(vmin, vacc0x0123456789ABCDEF);
     vacc1x0123456789ABCDEF = _mm512_max_ps(vmin, vacc1x0123456789ABCDEF);
     vacc2x0123456789ABCDEF = _mm512_max_ps(vmin, vacc2x0123456789ABCDEF);
@@ -174,7 +174,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x32__avx512skx_broadcast(
     vacc2xGHIJKLMNOPQRSTUV = _mm512_max_ps(vmin, vacc2xGHIJKLMNOPQRSTUV);
     vacc3xGHIJKLMNOPQRSTUV = _mm512_max_ps(vmin, vacc3xGHIJKLMNOPQRSTUV);
 
-    const __m512 vmax = _mm512_set1_ps(params->scalar.max);
+    const __m512 vmax = _mm512_set1_ps(params->scalar_cvt.max);
     vacc0x0123456789ABCDEF = _mm512_min_ps(vmax, vacc0x0123456789ABCDEF);
     vacc1x0123456789ABCDEF = _mm512_min_ps(vmax, vacc1x0123456789ABCDEF);
     vacc2x0123456789ABCDEF = _mm512_min_ps(vmax, vacc2x0123456789ABCDEF);

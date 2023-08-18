@@ -70,7 +70,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         c${M} = c${M-1};
       }
   $if DATATYPE == "QC4":
-    const int32x4_t vminus_kernel_zero_point = vld1q_dup_s32(&params->scalar.minus_kernel_zero_point);
+    const int32x4_t vminus_kernel_zero_point = vld1q_dup_s32(&params->scalar_cvt.minus_kernel_zero_point);
     const uint16x8_t vmask = vmovq_n_u16(UINT16_C(0xF));
 
   do {
@@ -171,12 +171,12 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         const float32x4_t vscale${ABC[N:N+4]} = vld1q_f32(w); w = (const float*) w + 4;
         $for M in range(MR):
           vacc${M}x${ABC[N:N+4]} = vmulq_f32(vacc${M}x${ABC[N:N+4]}, vscale${ABC[N:N+4]});
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t vmax = vld1q_dup_f32(&params->scalar_cvt.max);
     $for N in range(0, NR, 4):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+4]} = vminq_f32(vacc${M}x${ABC[N:N+4]}, vmax);
 
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vld1q_dup_f32(&params->scalar_cvt.min);
     $for N in range(0, NR, 4):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+4]} = vmaxq_f32(vacc${M}x${ABC[N:N+4]}, vmin);

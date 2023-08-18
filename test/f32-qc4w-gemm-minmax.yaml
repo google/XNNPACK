@@ -5,80 +5,80 @@
 
 # AArch64 assembly
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc2
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc2_prfm
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 4
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_acc4_prfm
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 4
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64_prfm
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_4x8__asm_aarch64_neonfma_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 # ARM NEON
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x8__aarch64_neonfma_lane_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x8__aarch64_neonfma_lane_ld128
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 4
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x8__neon_dup_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x8__neon_lane_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x8__neonfma_dup_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_4x8__aarch64_neonfma_lane_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_4x8__aarch64_neonfma_lane_ld128
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 4
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_4x8__neon_dup_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_4x8__neon_lane_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_4x8__neonfma_dup_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_5x8__aarch64_neonfma_lane_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_5x8__neon_lane_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_6x8__aarch64_neonfma_lane_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_6x8__aarch64_neonfma_lane_ld128
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 4
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_6x8__neon_dup_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_6x8__neon_lane_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_6x8__neonfma_dup_ld64
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 # x86 SSE
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x8__avx_dup
@@ -218,52 +218,52 @@
   k-block: 2
 # x86 AVX512
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx512_params
+  init: xnn_init_f32_qc4w_minmax_scalar_magic_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_2x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx512_params
+  init: xnn_init_f32_qc4w_minmax_scalar_magic_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_3x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx512_params
+  init: xnn_init_f32_qc4w_minmax_scalar_magic_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_4x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx512_params
+  init: xnn_init_f32_qc4w_minmax_scalar_magic_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_5x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx512_params
+  init: xnn_init_f32_qc4w_minmax_scalar_magic_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_6x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx512_params
+  init: xnn_init_f32_qc4w_minmax_scalar_magic_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_7x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx512_params
+  init: xnn_init_f32_qc4w_minmax_scalar_magic_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_8x32__avx512skx_broadcast
-  init: xnn_init_f32_qc4w_minmax_avx512_params
+  init: xnn_init_f32_qc4w_minmax_scalar_magic_params
   k-block: 2
 # WAsm
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x4__wasm
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_2x4__wasm
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_4x2__wasm
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_4x4__wasm
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 # Scalar
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_1x4__scalar
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_2x4__scalar
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_4x2__scalar
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2
 - name: xnn_f32_qc4w_gemm_minmax_ukernel_4x4__scalar
-  init: xnn_init_f32_qc4w_minmax_scalar_params
+  init: xnn_init_f32_qc4w_minmax_scalar_cvt_params
   k-block: 2

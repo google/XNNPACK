@@ -66,11 +66,11 @@ void xnn_f32_gemm_minmax_ukernel_1x8__neon_lane_ld64(
       vacc0x0123 = vmlaq_f32(vacc0x0123, va0, vb0123);
       vacc0x4567 = vmlaq_f32(vacc0x4567, va0, vb4567);
     }
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t vmax = vld1q_dup_f32(&params->scalar_cvt.max);
     vacc0x0123 = vminq_f32(vacc0x0123, vmax);
     vacc0x4567 = vminq_f32(vacc0x4567, vmax);
 
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vld1q_dup_f32(&params->scalar_cvt.min);
     vacc0x0123 = vmaxq_f32(vacc0x0123, vmin);
     vacc0x4567 = vmaxq_f32(vacc0x4567, vmin);
 

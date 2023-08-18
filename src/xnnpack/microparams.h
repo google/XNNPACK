@@ -160,7 +160,22 @@ union xnn_f32_qc4w_minmax_params {
     float min;
     float max;
     int32_t minus_kernel_zero_point;
-  } scalar;
+  } scalar_cvt;
+  struct {
+    float min;
+    float max;
+    uint32_t magic_bias_c0;
+    uint32_t magic_bias_c1;
+    float magic_bias_plus_kernel_zero_point_c0;
+    float magic_bias_plus_kernel_zero_point_c1;
+  } scalar_magic;
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  struct {
+    float min;
+    float max;
+    uint8_t kernel_zero_point[4];
+  } neon;
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     XNN_ALIGN(16) float min[4];
@@ -169,6 +184,14 @@ union xnn_f32_qc4w_minmax_params {
     XNN_ALIGN(16) uint16_t mask[8];
   } sse;
   struct {
+    XNN_ALIGN(16) float min[4];
+    XNN_ALIGN(16) float max[4];
+    XNN_ALIGN(16) uint32_t magic_bias_c0[4];
+    XNN_ALIGN(16) uint32_t magic_bias_c1[4];
+    XNN_ALIGN(16) float magic_bias_plus_kernel_zero_point_c0[4];
+    XNN_ALIGN(16) float magic_bias_plus_kernel_zero_point_c1[4];
+  } sse4;
+  struct {
     XNN_ALIGN(32) float min[8];
     XNN_ALIGN(32) float max[8];
     XNN_ALIGN(32) uint32_t magic_bias_c0[8];
@@ -176,14 +199,6 @@ union xnn_f32_qc4w_minmax_params {
     XNN_ALIGN(32) float magic_bias_plus_kernel_zero_point_c0[8];
     XNN_ALIGN(32) float magic_bias_plus_kernel_zero_point_c1[8];
   } avx;
-  struct {
-    float min;
-    float max;
-    uint32_t magic_bias_c0;
-    uint32_t magic_bias_c1;
-    float magic_bias_plus_kernel_zero_point_c0;
-    float magic_bias_plus_kernel_zero_point_c1;
-  } avx512;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   struct {

@@ -56,7 +56,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x8__neon_dup_ld64(
     a3 = a2;
     c3 = c2;
   }
-  const int32x4_t vminus_kernel_zero_point = vld1q_dup_s32(&params->scalar.minus_kernel_zero_point);
+  const int32x4_t vminus_kernel_zero_point = vld1q_dup_s32(&params->scalar_cvt.minus_kernel_zero_point);
   const uint16x8_t vmask = vmovq_n_u16(UINT16_C(0xF));
 
   do {
@@ -146,7 +146,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x8__neon_dup_ld64(
     vacc1x4567 = vmulq_f32(vacc1x4567, vscale4567);
     vacc2x4567 = vmulq_f32(vacc2x4567, vscale4567);
     vacc3x4567 = vmulq_f32(vacc3x4567, vscale4567);
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t vmax = vld1q_dup_f32(&params->scalar_cvt.max);
     vacc0x0123 = vminq_f32(vacc0x0123, vmax);
     vacc1x0123 = vminq_f32(vacc1x0123, vmax);
     vacc2x0123 = vminq_f32(vacc2x0123, vmax);
@@ -156,7 +156,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x8__neon_dup_ld64(
     vacc2x4567 = vminq_f32(vacc2x4567, vmax);
     vacc3x4567 = vminq_f32(vacc3x4567, vmax);
 
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vld1q_dup_f32(&params->scalar_cvt.min);
     vacc0x0123 = vmaxq_f32(vacc0x0123, vmin);
     vacc1x0123 = vmaxq_f32(vacc1x0123, vmin);
     vacc2x0123 = vmaxq_f32(vacc2x0123, vmin);

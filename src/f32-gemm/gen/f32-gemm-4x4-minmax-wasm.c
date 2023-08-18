@@ -55,8 +55,8 @@ void xnn_f32_gemm_minmax_ukernel_4x4__wasm(
     c3 = c2;
   }
 
-  const float vmin = params->scalar.min;
-  const float vmax = params->scalar.max;
+  const float vmin = params->scalar_cvt.min;
+  const float vmax = params->scalar_cvt.max;
   do {
     float vacc00 = w[0];
     float vacc01 = w[1];

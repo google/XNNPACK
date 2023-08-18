@@ -56,8 +56,8 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x2__wasm(
     c3 = c2;
   }
 
-  const float vmin = params->scalar.min;
-  const float vmax = params->scalar.max;
+  const float vmin = params->scalar_cvt.min;
+  const float vmax = params->scalar_cvt.max;
   do {
     float vacc00 = unaligned_indexed_load_f32(w, 0);
     float vacc01 = unaligned_indexed_load_f32(w, 1);

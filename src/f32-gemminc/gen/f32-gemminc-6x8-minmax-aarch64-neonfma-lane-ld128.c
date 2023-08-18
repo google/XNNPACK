@@ -230,7 +230,7 @@ void xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_lane_ld128(
         vacc5x4567 = vfmaq_f32(vacc5x4567, va5, vb4567);
       }
     }
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t vmax = vld1q_dup_f32(&params->scalar_cvt.max);
     vacc0x0123 = vminq_f32(vacc0x0123, vmax);
     vacc1x0123 = vminq_f32(vacc1x0123, vmax);
     vacc2x0123 = vminq_f32(vacc2x0123, vmax);
@@ -244,7 +244,7 @@ void xnn_f32_gemminc_minmax_ukernel_6x8__aarch64_neonfma_lane_ld128(
     vacc4x4567 = vminq_f32(vacc4x4567, vmax);
     vacc5x4567 = vminq_f32(vacc5x4567, vmax);
 
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vld1q_dup_f32(&params->scalar_cvt.min);
     vacc0x0123 = vmaxq_f32(vacc0x0123, vmin);
     vacc1x0123 = vmaxq_f32(vacc1x0123, vmin);
     vacc2x0123 = vmaxq_f32(vacc2x0123, vmin);

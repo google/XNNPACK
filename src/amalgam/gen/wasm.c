@@ -1360,8 +1360,8 @@ void xnn_f32_gemm_minmax_ukernel_1x4__wasm(
   const float* a0 = a;
   float* c0 = c;
 
-  const float vmin = params->scalar.min;
-  const float vmax = params->scalar.max;
+  const float vmin = params->scalar_cvt.min;
+  const float vmax = params->scalar_cvt.max;
   do {
     float vacc00 = w[0];
     float vacc01 = w[1];
@@ -1545,8 +1545,8 @@ void xnn_f32_gemm_minmax_ukernel_4x2__wasm(
     c3 = c2;
   }
 
-  const float vmin = params->scalar.min;
-  const float vmax = params->scalar.max;
+  const float vmin = params->scalar_cvt.min;
+  const float vmax = params->scalar_cvt.max;
   do {
     float vacc00 = w[0];
     float vacc01 = w[1];
@@ -1674,8 +1674,8 @@ void xnn_f32_gemm_minmax_ukernel_4x4__wasm(
     c3 = c2;
   }
 
-  const float vmin = params->scalar.min;
-  const float vmax = params->scalar.max;
+  const float vmin = params->scalar_cvt.min;
+  const float vmax = params->scalar_cvt.max;
   do {
     float vacc00 = w[0];
     float vacc01 = w[1];
@@ -3421,9 +3421,9 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_1x4__wasm(
   const float* a0 = a;
   float* c0 = c;
 
-  const float vmin = params->scalar.min;
-  const float vmax = params->scalar.max;
-  const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
+  const float vmin = params->scalar_cvt.min;
+  const float vmax = params->scalar_cvt.max;
+  const int32_t vminus_kernel_zero_point = params->scalar_cvt.minus_kernel_zero_point;
   do {
     float vacc00 = ((const float*)w)[0];
     float vacc01 = ((const float*)w)[1];
@@ -3565,9 +3565,9 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x4__wasm(
     c3 = c2;
   }
 
-  const float vmin = params->scalar.min;
-  const float vmax = params->scalar.max;
-  const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
+  const float vmin = params->scalar_cvt.min;
+  const float vmax = params->scalar_cvt.max;
+  const int32_t vminus_kernel_zero_point = params->scalar_cvt.minus_kernel_zero_point;
   do {
     float vacc00 = ((const float*)w)[0];
     float vacc01 = ((const float*)w)[1];
@@ -3817,8 +3817,8 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x4__wasm(
   const float* a0 = a;
   float* c0 = c;
 
-  const float vmin = params->scalar.min;
-  const float vmax = params->scalar.max;
+  const float vmin = params->scalar_cvt.min;
+  const float vmax = params->scalar_cvt.max;
   do {
     float vacc00 = ((const float*)w)[0];
     float vacc01 = ((const float*)w)[1];
@@ -3931,8 +3931,8 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x4__wasm(
     c3 = c2;
   }
 
-  const float vmin = params->scalar.min;
-  const float vmax = params->scalar.max;
+  const float vmin = params->scalar_cvt.min;
+  const float vmax = params->scalar_cvt.max;
   do {
     float vacc00 = ((const float*)w)[0];
     float vacc01 = ((const float*)w)[1];

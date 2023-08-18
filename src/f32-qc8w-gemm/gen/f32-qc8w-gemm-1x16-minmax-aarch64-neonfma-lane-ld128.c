@@ -197,13 +197,13 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x16__aarch64_neonfma_lane_ld128(
     vacc0x4567 = vmulq_f32(vacc0x4567, vscale4567);
     vacc0x89AB = vmulq_f32(vacc0x89AB, vscale89AB);
     vacc0xCDEF = vmulq_f32(vacc0xCDEF, vscaleCDEF);
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t vmax = vld1q_dup_f32(&params->scalar_cvt.max);
     vacc0x0123 = vminq_f32(vacc0x0123, vmax);
     vacc0x4567 = vminq_f32(vacc0x4567, vmax);
     vacc0x89AB = vminq_f32(vacc0x89AB, vmax);
     vacc0xCDEF = vminq_f32(vacc0xCDEF, vmax);
 
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vld1q_dup_f32(&params->scalar_cvt.min);
     vacc0x0123 = vmaxq_f32(vacc0x0123, vmin);
     vacc0x4567 = vmaxq_f32(vacc0x4567, vmin);
     vacc0x89AB = vmaxq_f32(vacc0x89AB, vmin);

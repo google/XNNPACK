@@ -39,8 +39,8 @@ void xnn_f32_gemminc_minmax_ukernel_1x4__wasm(
   const float* a0 = a;
   float* c0 = c;
 
-  const float vmin = params->scalar.min;
-  const float vmax = params->scalar.max;
+  const float vmin = params->scalar_cvt.min;
+  const float vmax = params->scalar_cvt.max;
   do {
     float vacc00 = acc[0];
     float vacc01 = acc[1];
