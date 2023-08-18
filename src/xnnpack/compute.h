@@ -1386,9 +1386,11 @@ struct rope_context {
 struct attention_logits_cap {
   enum xnn_attention_logits_cap_type type;
   union {
+    uint16_t f16;
     float f32;
   } cap;
   union {
+    uint16_t f16;
     float f32;
   } cap_reciprocal;
 };

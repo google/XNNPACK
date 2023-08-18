@@ -309,11 +309,13 @@ struct xnn_operator {
   // Second set of params. Operators like Dynamic Fully Connected only decides on the specific config to use during
   // reshape, so it needs to keep two sets of params around. Configs can have different initialization functions.
   union {
+    union xnn_f16_expminus_params f16_expminus_params;
     union xnn_f32_minmax_params f32_minmax;
     union xnn_f32_expminus_params f32_expminus_params;
   } params2;
   // Third set of params. Used by scaled dot attention operator.
   union {
+    union xnn_f16_tanh_params f16_tanh;
     union xnn_f32_tanh_params f32_tanh;
   } params3;
   size_t num_post_operation_params;
