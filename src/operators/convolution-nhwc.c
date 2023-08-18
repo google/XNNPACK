@@ -1743,7 +1743,20 @@ static enum xnn_status reshape_igemm(
     convolution_op->last_input_height = convolution_op->input_height;
     convolution_op->last_input_width = convolution_op->input_width;
 
-    xnn_indirection_init_conv2d(convolution_op, mr, log2_input_element_size);
+    xnn_indirection_init_conv2d(
+      /*output_tile_size=*/mr,
+      /*output_start=*/0,
+      /*output_end=*/tiled_output_size,
+      convolution_op->indirection_buffer,
+      convolution_op->input,
+      convolution_op->zero_buffer,
+      convolution_op->input_pixel_stride << log2_input_element_size,
+      convolution_op->input_height, convolution_op->input_width,
+      convolution_op->output_height, convolution_op->output_width,
+      convolution_op->kernel_height, convolution_op->kernel_width,
+      convolution_op->stride_height, convolution_op->stride_width,
+      convolution_op->dilation_height, convolution_op->dilation_width,
+      convolution_op->padding_top, convolution_op->padding_left);
   }
 
 

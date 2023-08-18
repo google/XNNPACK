@@ -112,7 +112,21 @@ static void f16_igemm(benchmark::State& state,
   convolution_op.dilation_width       = dilation;
   convolution_op.padding_top          = padding_top;
   convolution_op.padding_left         = padding_left;
-  xnn_indirection_init_conv2d(&convolution_op, mr, XNN_LOG2_SIZEOF_HALF);
+  const size_t tiled_output_size = round_up(output_size, mr);
+  xnn_indirection_init_conv2d(
+      /*output_tile_size=*/mr,
+      /*output_start=*/0,
+      /*output_end=*/tiled_output_size,
+      convolution_op.indirection_buffer,
+      convolution_op.input,
+      convolution_op.zero_buffer,
+      convolution_op.input_pixel_stride << XNN_LOG2_SIZEOF_HALF,
+      convolution_op.input_height, convolution_op.input_width,
+      convolution_op.output_height, convolution_op.output_width,
+      convolution_op.kernel_height, convolution_op.kernel_width,
+      convolution_op.stride_height, convolution_op.stride_width,
+      convolution_op.dilation_height, convolution_op.dilation_width,
+      convolution_op.padding_top, convolution_op.padding_left);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
   }
@@ -245,7 +259,21 @@ static void f16_igemm(benchmark::State& state,
   convolution_op.dilation_width       = dilation;
   convolution_op.padding_top          = padding_top;
   convolution_op.padding_left         = padding_left;
-  xnn_indirection_init_conv2d(&convolution_op, mr, XNN_LOG2_SIZEOF_HALF);
+  const size_t tiled_output_size = round_up(output_size, mr);
+  xnn_indirection_init_conv2d(
+      /*output_tile_size=*/mr,
+      /*output_start=*/0,
+      /*output_end=*/tiled_output_size,
+      convolution_op.indirection_buffer,
+      convolution_op.input,
+      convolution_op.zero_buffer,
+      convolution_op.input_pixel_stride << XNN_LOG2_SIZEOF_HALF,
+      convolution_op.input_height, convolution_op.input_width,
+      convolution_op.output_height, convolution_op.output_width,
+      convolution_op.kernel_height, convolution_op.kernel_width,
+      convolution_op.stride_height, convolution_op.stride_width,
+      convolution_op.dilation_height, convolution_op.dilation_width,
+      convolution_op.padding_top, convolution_op.padding_left);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
   }
