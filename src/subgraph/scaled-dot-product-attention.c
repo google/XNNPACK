@@ -40,6 +40,15 @@ static enum xnn_status create_scaled_dot_product_attention_operator(
         &opdata->operator_objects[0]);
       break;
     }
+    case xnn_compute_type_fp16:
+    {
+      status = xnn_create_scaled_dot_product_attention_nhtc_f16(
+        node->params.scaled_dot_product_attention.cap_type,
+        &node->params.scaled_dot_product_attention.cap_tanh_params,
+        /*flags=*/0,
+        &opdata->operator_objects[0]);
+      break;
+    }
     default:
       XNN_UNREACHABLE;
   }
@@ -242,6 +251,19 @@ static enum xnn_status reshape_scaled_dot_product_attention_operator(
         &opdata->workspace_size,
         &opdata->workspace_alignment,
         threadpool);
+    case xnn_operator_type_scaled_dot_product_attention_nhtc_f16:
+      return xnn_reshape_scaled_dot_product_attention_nhtc_f16(
+        opdata->operator_objects[0],
+        batch_size,
+        query_heads,
+        query_tokens,
+        key_heads,
+        key_tokens,
+        query_channels,
+        value_channels,
+        &opdata->workspace_size,
+        &opdata->workspace_alignment,
+        threadpool);
     default:
       XNN_UNREACHABLE;
   }
@@ -298,6 +320,16 @@ static enum xnn_status setup_scaled_dot_product_attention_operator(
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_scaled_dot_product_attention_nhtc_f32:
       return xnn_setup_scaled_dot_product_attention_nhtc_f32(
+        opdata->operator_objects[0],
+        opdata->workspace,
+        query_data,
+        key_data,
+        attention_value_data,
+        scale_data,
+        mask_data,
+        output_data);
+    case xnn_operator_type_scaled_dot_product_attention_nhtc_f16:
+      return xnn_setup_scaled_dot_product_attention_nhtc_f16(
         opdata->operator_objects[0],
         opdata->workspace,
         query_data,
