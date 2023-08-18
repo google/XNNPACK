@@ -831,7 +831,7 @@ PROD_NEONDOT_MICROKERNEL_SRCS = [
 ]
 
 PROD_NEONI8MM_MICROKERNEL_SRCS = [
-    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x16c8-minmax-neoni8mm.c",
+    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x16c8-minmax-neoni8mm.c",
 ]
 
 PROD_SSE_MICROKERNEL_SRCS = [
