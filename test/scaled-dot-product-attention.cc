@@ -208,8 +208,8 @@ TEST_F(ScaledDotProductAttentionTestF32, define) {
   EXPECT_EQ(node->inputs[4], mask_id);
   EXPECT_EQ(node->num_outputs, 1);
   EXPECT_EQ(node->outputs[0], output_id);
-  EXPECT_EQ(node->params.scaled_dot_attention.cap_type, cap_type);
-  EXPECT_EQ(node->params.scaled_dot_attention.cap_tanh_params.cap, cap_params.cap);
+  EXPECT_EQ(node->params.scaled_dot_product_attention.cap_type, cap_type);
+  EXPECT_EQ(node->params.scaled_dot_product_attention.cap_tanh_params.cap, cap_params.cap);
   EXPECT_EQ(node->flags, 0);
 }
 
@@ -226,7 +226,7 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api) {
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
-  const xnn_status status = xnn_create_scaled_dot_attention_nhtc_f32(cap_type, &cap_params, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_scaled_dot_product_attention_nhtc_f32(cap_type, &cap_params, /*flags=*/0, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -239,7 +239,7 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api) {
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
   ASSERT_EQ(
-    xnn_status_success, xnn_reshape_scaled_dot_attention_nhtc_f32(
+    xnn_status_success, xnn_reshape_scaled_dot_product_attention_nhtc_f32(
                           op, batch_size, query_heads, query_tokens, key_value_heads, key_value_tokens,
                           channels, value_channels,
                           &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
@@ -249,8 +249,8 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api) {
   std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_scaled_dot_attention_nhtc_f32(op, workspace.data(), query.data(), key.data(), value.data(), scale.data(),
-                                            mask.data(), operator_output.data()));
+    xnn_setup_scaled_dot_product_attention_nhtc_f32(op, workspace.data(), query.data(), key.data(), value.data(),
+                                                    scale.data(), mask.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

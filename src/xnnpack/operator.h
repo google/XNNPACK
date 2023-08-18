@@ -386,7 +386,7 @@ struct xnn_operator {
     struct {
       union {
         struct gemm_context gemm;
-        struct scaled_dot_attention_context attention;
+        struct scaled_dot_product_attention_context attention;
       };
       struct packw_gemm_goi_context packw_gemm_goi;
       struct packw_gemm_gio_context packw_gemm_gio;

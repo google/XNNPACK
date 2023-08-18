@@ -7,19 +7,19 @@
 
 #include <gtest/gtest.h>
 
-#include "attention-operator-tester.h"
+#include "scaled-dot-product-attention-operator-tester.h"
 
 
-TEST(ATTENTION_NHTC_F16, unit_batch) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, unit_batch) {
+  ScaledDotProductAttentionOperatorTester()
       .batch_size(1)
       .query_tokens(41)
       .query_key_channels(137)
       .TestF16();
 }
 
-TEST(ATTENTION_NHTC_F16, multi_head) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(13)
       .key_value_heads(13)
       .query_tokens(41)
@@ -27,8 +27,8 @@ TEST(ATTENTION_NHTC_F16, multi_head) {
       .TestF16();
 }
 
-TEST(ATTENTION_NHTC_F16, multi_query) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_query) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(13)
       .key_value_heads(1)
       .query_tokens(41)
@@ -36,16 +36,16 @@ TEST(ATTENTION_NHTC_F16, multi_query) {
       .TestF16();
 }
 
-TEST(ATTENTION_NHTC_F16, batch_size) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, batch_size) {
+  ScaledDotProductAttentionOperatorTester()
       .batch_size(13)
       .query_tokens(41)
       .query_key_channels(137)
       .TestF16();
 }
 
-TEST(ATTENTION_NHTC_F16, batch_size_multi_head) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, batch_size_multi_head) {
+  ScaledDotProductAttentionOperatorTester()
       .batch_size(13)
       .query_heads(17)
       .key_value_heads(17)
@@ -54,8 +54,8 @@ TEST(ATTENTION_NHTC_F16, batch_size_multi_head) {
       .TestF16();
 }
 
-TEST(ATTENTION_NHTC_F16, batch_size_multi_query) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, batch_size_multi_query) {
+  ScaledDotProductAttentionOperatorTester()
       .batch_size(13)
       .query_heads(17)
       .key_value_heads(1)
@@ -64,8 +64,8 @@ TEST(ATTENTION_NHTC_F16, batch_size_multi_query) {
       .TestF16();
 }
 
-TEST(ATTENTION_NHTC_F16, different_channels) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, different_channels) {
+  ScaledDotProductAttentionOperatorTester()
       .batch_size(3)
       .query_heads(5)
       .key_value_heads(5)
@@ -76,16 +76,16 @@ TEST(ATTENTION_NHTC_F16, different_channels) {
       .TestF16();
 }
 
-TEST(ATTENTION_NHTC_F16, self_attention_with_cap) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, self_attention_with_cap) {
+  ScaledDotProductAttentionOperatorTester()
       .cap_tanh(20.0f)
       .query_tokens(41)
       .query_key_channels(137)
       .TestF16();
 }
 
-TEST(ATTENTION_NHTC_F16, multi_head_self_attention_with_cap) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_self_attention_with_cap) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(17)
       .cap_tanh(20.0f)
@@ -94,8 +94,8 @@ TEST(ATTENTION_NHTC_F16, multi_head_self_attention_with_cap) {
       .TestF16();
 }
 
-TEST(ATTENTION_NHTC_F16, multi_query_self_attention_with_cap) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_query_self_attention_with_cap) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(1)
       .cap_tanh(20.0f)
@@ -104,8 +104,8 @@ TEST(ATTENTION_NHTC_F16, multi_query_self_attention_with_cap) {
       .TestF16();
 }
 
-TEST(ATTENTION_NHTC_F16, multi_head_cross_attention_key_value_tokens_lt_query_tokens) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_key_value_tokens_lt_query_tokens) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(17)
       .query_tokens(41)
@@ -114,8 +114,8 @@ TEST(ATTENTION_NHTC_F16, multi_head_cross_attention_key_value_tokens_lt_query_to
       .TestF16();
 }
 
-TEST(ATTENTION_NHTC_F16, multi_head_cross_attention_key_value_tokens_gt_query_tokens) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_key_value_tokens_gt_query_tokens) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(17)
       .query_tokens(29)
@@ -124,8 +124,8 @@ TEST(ATTENTION_NHTC_F16, multi_head_cross_attention_key_value_tokens_gt_query_to
       .TestF16();
 }
 
-TEST(ATTENTION_NHTC_F16, multi_query_cross_attention_key_value_tokens_lt_query_tokens) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_query_cross_attention_key_value_tokens_lt_query_tokens) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(1)
       .query_tokens(41)
@@ -134,8 +134,8 @@ TEST(ATTENTION_NHTC_F16, multi_query_cross_attention_key_value_tokens_lt_query_t
       .TestF16();
 }
 
-TEST(ATTENTION_NHTC_F16, multi_query_cross_attention_key_value_tokens_gt_query_tokens) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_query_cross_attention_key_value_tokens_gt_query_tokens) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(1)
       .query_tokens(29)
@@ -144,16 +144,16 @@ TEST(ATTENTION_NHTC_F16, multi_query_cross_attention_key_value_tokens_gt_query_t
       .TestF16();
 }
 
-TEST(ATTENTION_NHTC_F32, unit_batch) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, unit_batch) {
+  ScaledDotProductAttentionOperatorTester()
       .batch_size(1)
       .query_tokens(41)
       .query_key_channels(137)
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, multi_head) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(13)
       .key_value_heads(13)
       .query_tokens(41)
@@ -161,8 +161,8 @@ TEST(ATTENTION_NHTC_F32, multi_head) {
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, multi_query) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_query) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(13)
       .key_value_heads(1)
       .query_tokens(41)
@@ -170,16 +170,16 @@ TEST(ATTENTION_NHTC_F32, multi_query) {
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, batch_size) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, batch_size) {
+  ScaledDotProductAttentionOperatorTester()
       .batch_size(13)
       .query_tokens(41)
       .query_key_channels(137)
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, batch_size_multi_head) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, batch_size_multi_head) {
+  ScaledDotProductAttentionOperatorTester()
       .batch_size(13)
       .query_heads(17)
       .key_value_heads(17)
@@ -188,8 +188,8 @@ TEST(ATTENTION_NHTC_F32, batch_size_multi_head) {
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, batch_size_multi_query) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, batch_size_multi_query) {
+  ScaledDotProductAttentionOperatorTester()
       .batch_size(13)
       .query_heads(17)
       .key_value_heads(1)
@@ -198,16 +198,16 @@ TEST(ATTENTION_NHTC_F32, batch_size_multi_query) {
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, large_channels) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, large_channels) {
+  ScaledDotProductAttentionOperatorTester()
       .batch_size(1)
       .query_tokens(41)
       .query_key_channels(1543)
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, different_channels) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, different_channels) {
+  ScaledDotProductAttentionOperatorTester()
       .batch_size(3)
       .query_heads(5)
       .key_value_heads(5)
@@ -218,16 +218,16 @@ TEST(ATTENTION_NHTC_F32, different_channels) {
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, self_attention_with_cap) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, self_attention_with_cap) {
+  ScaledDotProductAttentionOperatorTester()
       .cap_tanh(20.0f)
       .query_tokens(41)
       .query_key_channels(137)
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, multi_head_self_attention_with_cap) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_self_attention_with_cap) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(17)
       .cap_tanh(20.0f)
@@ -236,8 +236,8 @@ TEST(ATTENTION_NHTC_F32, multi_head_self_attention_with_cap) {
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, multi_query_self_attention_with_cap) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_query_self_attention_with_cap) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(1)
       .cap_tanh(20.0f)
@@ -246,8 +246,8 @@ TEST(ATTENTION_NHTC_F32, multi_query_self_attention_with_cap) {
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, multi_head_cross_attention_key_value_tokens_lt_query_tokens) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_key_value_tokens_lt_query_tokens) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(17)
       .query_tokens(41)
@@ -256,8 +256,8 @@ TEST(ATTENTION_NHTC_F32, multi_head_cross_attention_key_value_tokens_lt_query_to
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, multi_head_cross_attention_key_value_tokens_gt_query_tokens) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_key_value_tokens_gt_query_tokens) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(17)
       .query_tokens(29)
@@ -266,8 +266,8 @@ TEST(ATTENTION_NHTC_F32, multi_head_cross_attention_key_value_tokens_gt_query_to
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, multi_query_cross_attention_key_value_tokens_lt_query_tokens) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_query_cross_attention_key_value_tokens_lt_query_tokens) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(1)
       .query_tokens(41)
@@ -276,8 +276,8 @@ TEST(ATTENTION_NHTC_F32, multi_query_cross_attention_key_value_tokens_lt_query_t
       .TestF32();
 }
 
-TEST(ATTENTION_NHTC_F32, multi_query_cross_attention_key_value_tokens_gt_query_tokens) {
-  AttentionOperatorTester()
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_query_cross_attention_key_value_tokens_gt_query_tokens) {
+  ScaledDotProductAttentionOperatorTester()
       .query_heads(17)
       .key_value_heads(1)
       .query_tokens(29)

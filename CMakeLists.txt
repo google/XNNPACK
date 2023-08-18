@@ -218,7 +218,7 @@ SET(OPERATOR_SRCS
   src/operators/resize-bilinear-nchw.c
   src/operators/resize-bilinear-nhwc.c
   src/operators/rope-nthc.c
-  src/operators/scaled-dot-attention-nhtc.c
+  src/operators/scaled-dot-product-attention-nhtc.c
   src/operators/slice-nd.c
   src/operators/softmax-nc.c
   src/operators/transpose-nd.c
@@ -1230,10 +1230,10 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(rope-nthc-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME rope-nthc-test COMMAND rope-nthc-test)
 
-    ADD_EXECUTABLE(scaled-dot-attention-nhtc-test test/scaled-dot-attention-nhtc.cc)
-    TARGET_INCLUDE_DIRECTORIES(scaled-dot-attention-nhtc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(scaled-dot-attention-nhtc-test PRIVATE XNNPACK fp16 gtest gtest_main)
-    ADD_TEST(NAME scaled-dot-attention-nhtc-test COMMAND scaled-dot-attention-nhtc-test)
+    ADD_EXECUTABLE(scaled-dot-product-attention-nhtc-test test/scaled-dot-product-attention-nhtc.cc)
+    TARGET_INCLUDE_DIRECTORIES(scaled-dot-product-attention-nhtc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(scaled-dot-product-attention-nhtc-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME scaled-dot-product-attention-nhtc-test COMMAND scaled-dot-product-attention-nhtc-test)
 
     ADD_EXECUTABLE(sigmoid-nc-test test/sigmoid-nc.cc)
     TARGET_INCLUDE_DIRECTORIES(sigmoid-nc-test PRIVATE src test)

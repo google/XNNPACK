@@ -1109,8 +1109,8 @@ void xnn_compute_pad_5d(
   }
 }
 
-void xnn_compute_scaled_dot_attention(
-  const struct scaled_dot_attention_context* context,
+void xnn_compute_scaled_dot_product_attention(
+  const struct scaled_dot_product_attention_context* context,
   size_t batch_index,
   size_t head_index,
   size_t tokens_start,
@@ -1768,8 +1768,8 @@ void xnn_compute_rope(
         &context->params);
   }
 
-void xnn_compute_hmp_scaled_dot_attention(
-  const struct scaled_dot_attention_context* context,
+void xnn_compute_hmp_scaled_dot_product_attention(
+  const struct scaled_dot_product_attention_context* context,
   uint32_t uarch_index,
   size_t batch_index,
   size_t head_index,

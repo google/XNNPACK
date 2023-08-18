@@ -33,9 +33,9 @@ static enum xnn_status create_scaled_dot_product_attention_operator(
   switch (node->compute_type) {
     case xnn_compute_type_fp32:
     {
-      status = xnn_create_scaled_dot_attention_nhtc_f32(
-        node->params.scaled_dot_attention.cap_type,
-        &node->params.scaled_dot_attention.cap_tanh_params,
+      status = xnn_create_scaled_dot_product_attention_nhtc_f32(
+        node->params.scaled_dot_product_attention.cap_type,
+        &node->params.scaled_dot_product_attention.cap_tanh_params,
         /*flags=*/0,
         &opdata->operator_objects[0]);
       break;
@@ -229,8 +229,8 @@ static enum xnn_status reshape_scaled_dot_product_attention_operator(
 
   const size_t key_heads = is_multi_query ? 1 : key->shape.dim[key_num_dims - 3];
   switch (opdata->operator_objects[0]->type) {
-    case xnn_operator_type_scaled_dot_attention_nhtc_f32:
-      return xnn_reshape_scaled_dot_attention_nhtc_f32(
+    case xnn_operator_type_scaled_dot_product_attention_nhtc_f32:
+      return xnn_reshape_scaled_dot_product_attention_nhtc_f32(
         opdata->operator_objects[0],
         batch_size,
         query_heads,
@@ -296,8 +296,8 @@ static enum xnn_status setup_scaled_dot_product_attention_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
-    case xnn_operator_type_scaled_dot_attention_nhtc_f32:
-      return xnn_setup_scaled_dot_attention_nhtc_f32(
+    case xnn_operator_type_scaled_dot_product_attention_nhtc_f32:
+      return xnn_setup_scaled_dot_product_attention_nhtc_f32(
         opdata->operator_objects[0],
         opdata->workspace,
         query_data,
@@ -628,12 +628,11 @@ enum xnn_status xnn_define_scaled_dot_product_attention(
 
   node->type = node_type;
   node->compute_type = compute_type;
-  node->params.scaled_dot_attention.cap_type = cap_type;
+  node->params.scaled_dot_product_attention.cap_type = cap_type;
   if (cap_type == xnn_attention_logits_cap_type_tanh) {
-    memcpy(&node->params.scaled_dot_attention.cap_tanh_params, cap_params,
+    memcpy(&node->params.scaled_dot_product_attention.cap_tanh_params, cap_params,
            sizeof(struct xnn_attention_logits_cap_tanh_params));
   }
-  // node->params.scaled_dot_attention.cap_params = cap_params;
   node->num_inputs = 5;
   node->inputs[0] = query_id;
   node->inputs[1] = key_id;

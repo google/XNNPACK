@@ -27,7 +27,7 @@
 #include <xnnpack/pack.h>
 
 
-static enum xnn_status create_scaled_dot_attention_nhtc(
+static enum xnn_status create_scaled_dot_product_attention_nhtc(
   enum xnn_attention_logits_cap_type cap_type,
   const void* cap_params,
   enum xnn_operator_type operator_type,
@@ -112,13 +112,13 @@ error:
   return status;
 }
 
-enum xnn_status xnn_create_scaled_dot_attention_nhtc_f16(
+enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f16(
   enum xnn_attention_logits_cap_type cap_type,
   const void* cap_params,
   uint32_t flags,
   xnn_operator_t* attention_op_out)
 {
-  const enum xnn_operator_type operator_type = xnn_operator_type_scaled_dot_attention_nhtc_f16;
+  const enum xnn_operator_type operator_type = xnn_operator_type_scaled_dot_product_attention_nhtc_f16;
   enum xnn_status status = xnn_status_unsupported_hardware;
 
   const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
@@ -197,7 +197,7 @@ enum xnn_status xnn_create_scaled_dot_attention_nhtc_f16(
     }
   }
 
-  return create_scaled_dot_attention_nhtc(
+  return create_scaled_dot_product_attention_nhtc(
     cap_type, cap_params,
     operator_type,
     gemm_config,
@@ -216,13 +216,13 @@ error:
   return status;
 }
 
-enum xnn_status xnn_create_scaled_dot_attention_nhtc_f32(
+enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f32(
   enum xnn_attention_logits_cap_type cap_type,
   const void* cap_params,
   uint32_t flags,
   xnn_operator_t* attention_op_out)
 {
-  const enum xnn_operator_type operator_type = xnn_operator_type_scaled_dot_attention_nhtc_f32;
+  const enum xnn_operator_type operator_type = xnn_operator_type_scaled_dot_product_attention_nhtc_f32;
   enum xnn_status status = xnn_status_unsupported_hardware;
 
   const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
@@ -301,7 +301,7 @@ enum xnn_status xnn_create_scaled_dot_attention_nhtc_f32(
     }
   }
 
-  return create_scaled_dot_attention_nhtc(
+  return create_scaled_dot_product_attention_nhtc(
     cap_type, cap_params,
     operator_type,
     gemm_config,
@@ -334,7 +334,7 @@ static void compute_reciprocal_f32(
   *output = 1.0f / *input;
 }
 
-static enum xnn_status reshape_scaled_dot_attention_nhtc(
+static enum xnn_status reshape_scaled_dot_product_attention_nhtc(
   xnn_operator_t attention_op,
   enum xnn_operator_type expected_operator_type,
   size_t batch_size,
@@ -517,7 +517,7 @@ static enum xnn_status reshape_scaled_dot_attention_nhtc(
 
   struct xnn_hmp_gemm_ukernel gemm_ukernel = attention_op->ukernel.gemm.gemm_cases[mr - 1];
 
-  attention_op->context.attention = (struct scaled_dot_attention_context){
+  attention_op->context.attention = (struct scaled_dot_product_attention_context){
     .key_value_tokens = key_value_tokens,
     .key_value_tokens_scaled = key_value_tokens * element_size,
     .query_key_channels = query_key_channels,
@@ -554,14 +554,14 @@ static enum xnn_status reshape_scaled_dot_attention_nhtc(
   #if XNN_MAX_UARCH_TYPES > 1
   if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
     attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d_with_uarch;
-    attention_op->compute[2].task_3d_tile_1d_with_id = (pthreadpool_task_3d_tile_1d_with_id_t) xnn_compute_hmp_scaled_dot_attention;
+    attention_op->compute[2].task_3d_tile_1d_with_id = (pthreadpool_task_3d_tile_1d_with_id_t) xnn_compute_hmp_scaled_dot_product_attention;
   } else {
     attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d;
-    attention_op->compute[2].task_3d_tile_1d = (pthreadpool_task_3d_tile_1d_t) xnn_compute_scaled_dot_attention;
+    attention_op->compute[2].task_3d_tile_1d = (pthreadpool_task_3d_tile_1d_t) xnn_compute_scaled_dot_product_attention;
   }
   #else
     attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d;
-    attention_op->compute[2].task_3d_tile_1d = (pthreadpool_task_3d_tile_1d_t) xnn_compute_scaled_dot_attention;
+    attention_op->compute[2].task_3d_tile_1d = (pthreadpool_task_3d_tile_1d_t) xnn_compute_scaled_dot_product_attention;
   #endif  // XNN_MAX_UARCH_TYPES > 1
 
   attention_op->compute[2].range[0] = batch_size;
@@ -584,7 +584,7 @@ static enum xnn_status reshape_scaled_dot_attention_nhtc(
 
 }
 
-enum xnn_status xnn_reshape_scaled_dot_attention_nhtc_f16(
+enum xnn_status xnn_reshape_scaled_dot_product_attention_nhtc_f16(
   xnn_operator_t attention_op,
   size_t batch_size,
   size_t heads,
@@ -600,9 +600,9 @@ enum xnn_status xnn_reshape_scaled_dot_attention_nhtc_f16(
   uint16_t cap = fp16_ieee_from_fp32_value(attention_op->attention.cap_params.cap);
   uint16_t cap_reciprocal = fp16_ieee_from_fp32_value(1.0f / attention_op->attention.cap_params.cap);
 
-  return reshape_scaled_dot_attention_nhtc(
+  return reshape_scaled_dot_product_attention_nhtc(
     attention_op,
-    xnn_operator_type_scaled_dot_attention_nhtc_f16,
+    xnn_operator_type_scaled_dot_product_attention_nhtc_f16,
     batch_size,
     heads,
     query_tokens,
@@ -621,7 +621,7 @@ enum xnn_status xnn_reshape_scaled_dot_attention_nhtc_f16(
     threadpool);
 }
 
-enum xnn_status xnn_reshape_scaled_dot_attention_nhtc_f32(
+enum xnn_status xnn_reshape_scaled_dot_product_attention_nhtc_f32(
   xnn_operator_t attention_op,
   size_t batch_size,
   size_t query_heads,
@@ -637,9 +637,9 @@ enum xnn_status xnn_reshape_scaled_dot_attention_nhtc_f32(
   float cap = attention_op->attention.cap_params.cap;
   float cap_reciprocal = 1 / attention_op->attention.cap_params.cap;
 
-  return reshape_scaled_dot_attention_nhtc(
+  return reshape_scaled_dot_product_attention_nhtc(
     attention_op,
-    xnn_operator_type_scaled_dot_attention_nhtc_f32,
+    xnn_operator_type_scaled_dot_product_attention_nhtc_f32,
     batch_size,
     query_heads,
     query_tokens,
@@ -658,7 +658,7 @@ enum xnn_status xnn_reshape_scaled_dot_attention_nhtc_f32(
     threadpool);
 }
 
-static enum xnn_status setup_scaled_dot_attention_nhtc(
+static enum xnn_status setup_scaled_dot_product_attention_nhtc(
   xnn_operator_t attention_op,
   enum xnn_operator_type expected_operator_type,
   void* workspace,
@@ -717,7 +717,7 @@ static enum xnn_status setup_scaled_dot_attention_nhtc(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_setup_scaled_dot_attention_nhtc_f16(
+enum xnn_status xnn_setup_scaled_dot_product_attention_nhtc_f16(
   xnn_operator_t attention_op,
   void* workspace,
   const void* query,
@@ -727,15 +727,15 @@ enum xnn_status xnn_setup_scaled_dot_attention_nhtc_f16(
   const void* mask,
   void* output)
 {
-  return setup_scaled_dot_attention_nhtc(
-    attention_op, xnn_operator_type_scaled_dot_attention_nhtc_f16,
+  return setup_scaled_dot_product_attention_nhtc(
+    attention_op, xnn_operator_type_scaled_dot_product_attention_nhtc_f16,
     workspace,
     query, key, value,
     scale, mask,
     output);
 }
 
-enum xnn_status xnn_setup_scaled_dot_attention_nhtc_f32(
+enum xnn_status xnn_setup_scaled_dot_product_attention_nhtc_f32(
   xnn_operator_t attention_op,
   void* workspace,
   const float* query,
@@ -745,8 +745,8 @@ enum xnn_status xnn_setup_scaled_dot_attention_nhtc_f32(
   const float* mask,
   float* output)
 {
-  return setup_scaled_dot_attention_nhtc(
-    attention_op, xnn_operator_type_scaled_dot_attention_nhtc_f32,
+  return setup_scaled_dot_product_attention_nhtc(
+    attention_op, xnn_operator_type_scaled_dot_product_attention_nhtc_f32,
     workspace,
     query, key, value,
     scale, mask,

@@ -1395,7 +1395,7 @@ struct attention_logits_cap {
   } cap_reciprocal;
 };
 
-struct scaled_dot_attention_context {
+struct scaled_dot_product_attention_context {
   // Pointer to query.
   const void* query;
   // Pointer to packed key.
@@ -1487,14 +1487,14 @@ struct scaled_dot_attention_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_scaled_dot_attention(
-      const struct scaled_dot_attention_context context[restrict XNN_MIN_ELEMENTS(1)],
+  XNN_PRIVATE void xnn_compute_scaled_dot_product_attention(
+      const struct scaled_dot_product_attention_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t head_index,
       size_t tokens_start,
       size_t tokens_block_size);
-  XNN_PRIVATE void xnn_compute_hmp_scaled_dot_attention(
-      const struct scaled_dot_attention_context context[restrict XNN_MIN_ELEMENTS(1)],
+  XNN_PRIVATE void xnn_compute_hmp_scaled_dot_product_attention(
+      const struct scaled_dot_product_attention_context context[restrict XNN_MIN_ELEMENTS(1)],
       uint32_t uarch_index,
       size_t batch_index,
       size_t head_index,

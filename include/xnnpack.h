@@ -3242,13 +3242,13 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
 // H: number of heads
 // T: tokens (sequence length)
 // C: channels (head dimension)
-enum xnn_status xnn_create_scaled_dot_attention_nhtc_f32(
+enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f32(
   enum xnn_attention_logits_cap_type cap_type,
   const void* cap_params,
   uint32_t flags,
   xnn_operator_t* attention_op_out);
 
-enum xnn_status xnn_reshape_scaled_dot_attention_nhtc_f32(
+enum xnn_status xnn_reshape_scaled_dot_product_attention_nhtc_f32(
   xnn_operator_t attention_op,
   size_t batch_size,
   size_t query_heads,
@@ -3268,7 +3268,7 @@ enum xnn_status xnn_reshape_scaled_dot_attention_nhtc_f32(
 // Scale is of dimension [query_key_channels].
 // Mask is of dimension [query_tokens, key_value_tokens].
 // Output is of dimension [batch_size, query_heads, query_tokens, value_channels].
-enum xnn_status xnn_setup_scaled_dot_attention_nhtc_f32(
+enum xnn_status xnn_setup_scaled_dot_product_attention_nhtc_f32(
   xnn_operator_t attention_op,
   void* workspace,
   const float* query,
@@ -4201,13 +4201,13 @@ enum xnn_status xnn_run_transpose_nd_x16(
 // H: number of heads
 // T: tokens (sequence length)
 // C: channels (head dimension)
-enum xnn_status xnn_create_scaled_dot_attention_nhtc_f16(
+enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f16(
   enum xnn_attention_logits_cap_type cap_type,
   const void* cap_params,
   uint32_t flags,
   xnn_operator_t* attention_op_out);
 
-enum xnn_status xnn_reshape_scaled_dot_attention_nhtc_f16(
+enum xnn_status xnn_reshape_scaled_dot_product_attention_nhtc_f16(
   xnn_operator_t attention_op,
   size_t batch_size,
   size_t query_heads,
@@ -4226,7 +4226,7 @@ enum xnn_status xnn_reshape_scaled_dot_attention_nhtc_f16(
 // Key and value are of dimension [batch_size, key_value_heads, key_value_tokens, channels].
 // Scale is of dimension [channels].
 // Mask is of dimension [query_tokens, key_value_tokens].
-enum xnn_status xnn_setup_scaled_dot_attention_nhtc_f16(
+enum xnn_status xnn_setup_scaled_dot_product_attention_nhtc_f16(
   xnn_operator_t attention_op,
   void* workspace,
   const void* query,

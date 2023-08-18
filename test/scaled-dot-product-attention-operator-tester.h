@@ -24,9 +24,9 @@
 #include <gtest/gtest.h>
 
 
-class AttentionOperatorTester {
+class ScaledDotProductAttentionOperatorTester {
  public:
-  inline AttentionOperatorTester& batch_size(size_t batch_size) {
+  inline ScaledDotProductAttentionOperatorTester& batch_size(size_t batch_size) {
     assert(batch_size != 0);
     this->batch_size_ = batch_size;
     return *this;
@@ -36,7 +36,7 @@ class AttentionOperatorTester {
     return this->batch_size_;
   }
 
-  inline AttentionOperatorTester& query_heads(size_t query_heads) {
+  inline ScaledDotProductAttentionOperatorTester& query_heads(size_t query_heads) {
     assert(query_heads != 0);
     this->query_heads_ = query_heads;
     return *this;
@@ -46,7 +46,7 @@ class AttentionOperatorTester {
     return this->query_heads_;
   }
 
-  inline AttentionOperatorTester& key_value_heads(size_t key_value_heads) {
+  inline ScaledDotProductAttentionOperatorTester& key_value_heads(size_t key_value_heads) {
     assert(key_value_heads == 1 || key_value_heads == query_heads());
     this->key_value_heads_ = key_value_heads;
     return *this;
@@ -56,7 +56,7 @@ class AttentionOperatorTester {
     return this->key_value_heads_;
   }
 
-  inline AttentionOperatorTester& cap_tanh(float cap) {
+  inline ScaledDotProductAttentionOperatorTester& cap_tanh(float cap) {
     this->cap_type_ = xnn_attention_logits_cap_type_tanh;
     this->cap_value_ = cap;
     return *this;
@@ -70,7 +70,7 @@ class AttentionOperatorTester {
     return this->cap_value_;
   }
 
-  inline AttentionOperatorTester& query_tokens(size_t query_tokens) {
+  inline ScaledDotProductAttentionOperatorTester& query_tokens(size_t query_tokens) {
     this->query_tokens_ = query_tokens;
     return *this;
   }
@@ -79,7 +79,7 @@ class AttentionOperatorTester {
     return this->query_tokens_;
   }
 
-  inline AttentionOperatorTester& key_value_tokens(size_t key_value_tokens) {
+  inline ScaledDotProductAttentionOperatorTester& key_value_tokens(size_t key_value_tokens) {
     this->key_value_tokens_ = key_value_tokens;
     return *this;
   }
@@ -89,7 +89,7 @@ class AttentionOperatorTester {
     return this->key_value_tokens_;
   }
 
-  inline AttentionOperatorTester& query_key_channels(size_t query_key_channels) {
+  inline ScaledDotProductAttentionOperatorTester& query_key_channels(size_t query_key_channels) {
     this->query_key_channels_ = query_key_channels;
     return *this;
   }
@@ -98,7 +98,7 @@ class AttentionOperatorTester {
     return this->query_key_channels_;
   }
 
-  inline AttentionOperatorTester& value_channels(size_t value_channels) {
+  inline ScaledDotProductAttentionOperatorTester& value_channels(size_t value_channels) {
     this->value_channels_ = value_channels;
     return *this;
   }
@@ -107,7 +107,7 @@ class AttentionOperatorTester {
     return this->value_channels_;
   }
 
-  inline AttentionOperatorTester& iterations(size_t iterations) {
+  inline ScaledDotProductAttentionOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
   }
@@ -218,7 +218,7 @@ class AttentionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t attention_op = nullptr;
       xnn_attention_logits_cap_tanh_params cap_tanh_params = {cap_value()};
-      const xnn_status status = xnn_create_scaled_dot_attention_nhtc_f16(
+      const xnn_status status = xnn_create_scaled_dot_product_attention_nhtc_f16(
           cap_type(),
           &cap_tanh_params,
           /*flags=*/0,
@@ -235,7 +235,7 @@ class AttentionOperatorTester {
       size_t workspace_size = 0;
       size_t workspace_alignment = 0;
       ASSERT_EQ(xnn_status_success,
-                xnn_reshape_scaled_dot_attention_nhtc_f16(
+                xnn_reshape_scaled_dot_product_attention_nhtc_f16(
                   attention_op,
                   batch_size(), query_heads(), query_tokens(),
                   key_value_heads(), key_value_tokens(),
@@ -248,7 +248,7 @@ class AttentionOperatorTester {
       std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size, 0);
 
       ASSERT_EQ(xnn_status_success,
-                xnn_setup_scaled_dot_attention_nhtc_f16(
+                xnn_setup_scaled_dot_product_attention_nhtc_f16(
                   attention_op,
                   workspace.data(), query.data(), key.data(), value.data(),
                   scale.data(), mask.data(), output.data()));
@@ -368,7 +368,7 @@ class AttentionOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t attention_op = nullptr;
       xnn_attention_logits_cap_tanh_params cap_tanh_params = {cap_value()};
-      const xnn_status status = xnn_create_scaled_dot_attention_nhtc_f32(
+      const xnn_status status = xnn_create_scaled_dot_product_attention_nhtc_f32(
           cap_type(),
           &cap_tanh_params,
           /*flags=*/0,
@@ -385,7 +385,7 @@ class AttentionOperatorTester {
       size_t workspace_size = 0;
       size_t workspace_alignment = 0;
       ASSERT_EQ(xnn_status_success,
-                xnn_reshape_scaled_dot_attention_nhtc_f32(
+                xnn_reshape_scaled_dot_product_attention_nhtc_f32(
                   attention_op,
                   batch_size(), query_heads(), query_tokens(), key_value_heads(), key_value_tokens(),
                     query_key_channels(), value_channels(),
@@ -397,7 +397,7 @@ class AttentionOperatorTester {
       std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size, 0);
 
       ASSERT_EQ(xnn_status_success,
-                xnn_setup_scaled_dot_attention_nhtc_f32(
+                xnn_setup_scaled_dot_product_attention_nhtc_f32(
                   attention_op,
                   workspace.data(), query.data(), key.data(), value.data(),
                   scale.data(), mask.data(), output.data()));

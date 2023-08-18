@@ -275,14 +275,14 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  // See comment in xnnpack_multihead_scaled_dot_attention_cap_tanh_f32 for derivation of this.
+  // See comment in xnnpack_multihead_scaled_dot_product_attention_cap_tanh_f32 for derivation of this.
   state.counters["FLOPS"] = benchmark::Counter(
     uint64_t(state.iterations()) *
       batch_size * heads * query_tokens * (channels + key_value_tokens * (channels * 2 + 5)),
     benchmark::Counter::kIsRate);
 }
 
-void xnnpack_multihead_scaled_dot_attention_cap_tanh_f32(benchmark::State& state, const char* net) {
+void xnnpack_multihead_scaled_dot_product_attention_cap_tanh_f32(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
   const size_t heads = state.range(1);
   const size_t query_tokens = state.range(2);
@@ -318,7 +318,7 @@ void xnnpack_multihead_scaled_dot_attention_cap_tanh_f32(benchmark::State& state
 
   xnn_operator_t attention_op = nullptr;
   xnn_attention_logits_cap_tanh_params cap_tanh_params = {cap_value};
-  status = xnn_create_scaled_dot_attention_nhtc_f32(
+  status = xnn_create_scaled_dot_product_attention_nhtc_f32(
       cap_type,
       &cap_tanh_params,
       /*flags=*/0,
@@ -330,7 +330,7 @@ void xnnpack_multihead_scaled_dot_attention_cap_tanh_f32(benchmark::State& state
 
   size_t workspace_size = 0;
   size_t workspace_alignment = 0;
-  status = xnn_reshape_scaled_dot_attention_nhtc_f32(
+  status = xnn_reshape_scaled_dot_product_attention_nhtc_f32(
             attention_op,
             batch_size, heads, query_tokens, heads, key_value_tokens,
             channels, channels,
@@ -343,7 +343,7 @@ void xnnpack_multihead_scaled_dot_attention_cap_tanh_f32(benchmark::State& state
 
   std::vector<char> workspace(workspace_size, 0);
 
-  status = xnn_setup_scaled_dot_attention_nhtc_f32(
+  status = xnn_setup_scaled_dot_product_attention_nhtc_f32(
             attention_op,
             workspace.data(), query.data(), key.data(), value.data(),
             scale.data(), mask.data(), output.data());
@@ -397,7 +397,7 @@ static void Bert(benchmark::internal::Benchmark* b) {
   b->Args({1, 16, 128, 128, 64});
 }
 
-BENCHMARK_CAPTURE(xnnpack_multihead_scaled_dot_attention_cap_tanh_f32, bert, "BERT")->Apply(Bert)->UseRealTime();
+BENCHMARK_CAPTURE(xnnpack_multihead_scaled_dot_product_attention_cap_tanh_f32, bert, "BERT")->Apply(Bert)->UseRealTime();
 BENCHMARK_CAPTURE(xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32, bert, "BERT")->Apply(Bert)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

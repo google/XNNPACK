@@ -343,7 +343,7 @@ struct xnn_node {
     struct {
       enum xnn_attention_logits_cap_type cap_type;
       struct xnn_attention_logits_cap_tanh_params cap_tanh_params;
-    } scaled_dot_attention;
+    } scaled_dot_product_attention;
   } params;
   struct {
     float output_min;
