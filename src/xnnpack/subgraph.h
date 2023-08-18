@@ -25,9 +25,6 @@
 #define XNN_MAX_INPUTS 5
 #define XNN_MAX_OUTPUTS 4
 
-#define XNN_MAX_RUNTIME_INPUTS 5
-#define XNN_MAX_RUNTIME_OUTPUTS 4
-
 #define XNN_INVALID_NODE_ID UINT32_MAX
 
 #define XNN_MAX_OPERATOR_OBJECTS 4
@@ -416,9 +413,9 @@ struct xnn_operator_data {
   uint32_t adjustment_height;
   uint32_t adjustment_width;
   uint32_t num_inputs;
-  uint32_t inputs[XNN_MAX_RUNTIME_INPUTS];
+  uint32_t inputs[XNN_MAX_INPUTS];
   uint32_t num_outputs;
-  uint32_t outputs[XNN_MAX_RUNTIME_OUTPUTS];
+  uint32_t outputs[XNN_MAX_OUTPUTS];
   xnn_timestamp end_ts[XNN_MAX_OPERATOR_OBJECTS];
   void* workspace;
   size_t workspace_size;
