@@ -82,6 +82,9 @@ extern "C" {
 /// Yield worker threads of the thread pool to the system scheduler after the inference.
 #define XNN_FLAG_YIELD_WORKERS 0x00000010
 
+/// Use transient indirection buffer to reduce memory footprint
+#define XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER 0x00000020
+
 /// The number of entries in an array of xnn_dynamic_quantization_params that XNNPACK may read beyond array bounds.
 /// The caller must allocate at least this many extra xnn_dynamic_quantization_params before passing the array to XNNPACK.
 ///
