@@ -22,10 +22,10 @@
 #include <time.h>
 #endif
 
-#define XNN_MAX_INPUTS 4
+#define XNN_MAX_INPUTS 5
 #define XNN_MAX_OUTPUTS 4
 
-#define XNN_MAX_RUNTIME_INPUTS 4
+#define XNN_MAX_RUNTIME_INPUTS 5
 #define XNN_MAX_RUNTIME_OUTPUTS 4
 
 #define XNN_INVALID_NODE_ID UINT32_MAX
@@ -343,6 +343,10 @@ struct xnn_node {
       size_t perm[XNN_MAX_TENSOR_DIMS];
       size_t num_dims;
     } transpose;
+    struct {
+      enum xnn_attention_logits_cap_type cap_type;
+      struct xnn_attention_logits_cap_tanh_params cap_tanh_params;
+    } scaled_dot_attention;
   } params;
   struct {
     float output_min;

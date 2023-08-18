@@ -260,6 +260,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/multiply2.c
   src/subgraph/negate.c
   src/subgraph/prelu.c
+  src/subgraph/scaled-dot-product-attention.c
   src/subgraph/sigmoid.c
   src/subgraph/softmax.c
   src/subgraph/space-to-depth-2d.c
@@ -1553,6 +1554,12 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(prelu-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(prelu-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
     ADD_TEST(NAME prelu-test COMMAND prelu-test)
+
+    ADD_EXECUTABLE(scaled-dot-product-attention-test test/scaled-dot-product-attention.cc)
+    SET_TARGET_PROPERTIES(scaled-dot-product-attention-test PROPERTIES CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(scaled-dot-product-attention-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(scaled-dot-product-attention-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+    ADD_TEST(NAME scaled-dot-product-attention-test COMMAND scaled-dot-product-attention-test)
 
     ADD_EXECUTABLE(sigmoid-test test/sigmoid.cc)
     SET_TARGET_PROPERTIES(sigmoid-test PROPERTIES CXX_EXTENSIONS YES)

@@ -148,6 +148,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/negate.c",
     "src/subgraph/prelu.c",
     "src/subgraph/rope.c",
+    "src/subgraph/scaled-dot-product-attention.c",
     "src/subgraph/sigmoid.c",
     "src/subgraph/softmax.c",
     "src/subgraph/space-to-depth-2d.c",
@@ -11044,6 +11045,21 @@ xnnpack_unit_test(
         ":node_type",
         ":operators_test_mode",
         ":requantization",
+        ":subgraph_test_mode",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "scaled_dot_product_attention_test",
+    srcs = [
+        "test/scaled-dot-product-attention.cc",
+    ],
+    deps = [
+        ":XNNPACK_test_mode",
+        ":aligned_allocator",
+        ":common",
+        ":node_type",
+        ":operators_test_mode",
         ":subgraph_test_mode",
     ],
 )

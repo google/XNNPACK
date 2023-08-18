@@ -83,6 +83,8 @@
   string: "PReLU"
 - name: xnn_node_type_rope
   string: "RoPE"
+- name: xnn_node_type_scaled_dot_product_attention
+  string: "Scaled Dot Product Attention"
 - name: xnn_node_type_sigmoid
   string: "Sigmoid"
 - name: xnn_node_type_softmax

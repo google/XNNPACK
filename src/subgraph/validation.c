@@ -8,6 +8,7 @@
 
 #include <xnnpack.h>
 #include <xnnpack/log.h>
+#include <xnnpack/node-type.h>
 #include <xnnpack/params.h>
 #include <xnnpack/subgraph.h>
 #include <xnnpack/subgraph-validation.h>
@@ -224,6 +225,40 @@ enum xnn_status xnn_subgraph_check_all_dims_match(
       xnn_log_error(
           "failed to define %s operator input ID #%" PRIu32 " and output ID #%" PRIu32
           ": mismatch size of dimension %zu across input (%zu) and output (%zu)",
+          xnn_node_type_to_string(node_type), tensor1_id, tensor2_id, i, tensor1_value->shape.dim[i],
+          tensor2_value->shape.dim[i]);
+      return xnn_status_invalid_parameter;
+    }
+  }
+
+  return xnn_status_success;
+}
+
+enum xnn_status xnn_subgraph_check_batch_dims_match(
+  enum xnn_node_type node_type,
+  uint32_t tensor1_id,
+  const struct xnn_value* tensor1_value,
+  uint32_t tensor2_id,
+  const struct xnn_value* tensor2_value,
+  size_t num_batch_dims)
+{
+  if (tensor1_value->shape.num_dims < num_batch_dims) {
+    xnn_log_error(
+      "failed to define %s operator with value ID #%" PRIu32 ": number of dimensions of value (%zu) must "
+      "be at least %zu", xnn_node_type_to_string(node_type), tensor1_id, tensor1_value->shape.num_dims, num_batch_dims);
+  }
+
+  if (tensor2_value->shape.num_dims < num_batch_dims) {
+    xnn_log_error(
+      "failed to define %s operator with value ID #%" PRIu32 ": number of dimensions of value (%zu) must "
+      "be at least %zu", xnn_node_type_to_string(node_type), tensor2_id, tensor2_value->shape.num_dims, num_batch_dims);
+  }
+
+  for (size_t i = 0; i < num_batch_dims; i++) {
+    if (tensor1_value->shape.dim[i] != tensor2_value->shape.dim[i]) {
+      xnn_log_error(
+          "failed to define %s operator with value IDs #%" PRIu32 " and #%" PRIu32
+          ": mismatch batch size at dimension %zu across first (%zu) and second (%zu) values",
           xnn_node_type_to_string(node_type), tensor1_id, tensor2_id, i, tensor1_value->shape.dim[i],
           tensor2_value->shape.dim[i]);
       return xnn_status_invalid_parameter;
