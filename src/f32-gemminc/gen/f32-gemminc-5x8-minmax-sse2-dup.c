@@ -171,7 +171,6 @@ void xnn_f32_gemminc_minmax_ukernel_5x8__sse2_dup(
       vacc3x4567 = _mm_add_ps(vacc3x4567, _mm_mul_ps(va3c3333, vb4567c3));
       vacc4x4567 = _mm_add_ps(vacc4x4567, _mm_mul_ps(va4c3333, vb4567c3));
 
-
       w += 32;
     }
     if XNN_UNLIKELY(k >= 2 * sizeof(float)) {
