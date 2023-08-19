@@ -519,7 +519,7 @@ ExecutionPlan FP16MobileNetV3Large(bool use_jit, pthreadpool_t threadpool) {
   if (use_jit) {
     status = xnn_init_code_cache(&code_cache);
     if (status != xnn_status_success) {
-      std::cerr << "failed to initailize code cache" << std::endl;
+      std::cerr << "failed to initialize code cache" << std::endl;
       return ExecutionPlan();
     }
     code_cache_ptr = &code_cache;
