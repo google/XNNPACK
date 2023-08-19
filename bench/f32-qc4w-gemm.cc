@@ -628,76 +628,6 @@ static void GEMMBenchmark(benchmark::State& state,
       /*mr=*/8, /*nr=*/32, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckAVX512SKX);
   }
-  static void f32_qc4w_gemm_1x8__fma3_dup(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_f32_qc4w_gemm_minmax_ukernel_1x8__fma3_dup,
-      xnn_init_f32_qc4w_minmax_sse_params,
-      /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckFMA3);
-  }
-  static void f32_qc4w_gemm_3x8__fma3_dup(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_f32_qc4w_gemm_minmax_ukernel_3x8__fma3_dup,
-      xnn_init_f32_qc4w_minmax_sse_params,
-      /*mr=*/3, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckFMA3);
-  }
-  static void f32_qc4w_gemm_4x8__fma3_dup(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_f32_qc4w_gemm_minmax_ukernel_4x8__fma3_dup,
-      xnn_init_f32_qc4w_minmax_sse_params,
-      /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckFMA3);
-  }
-  static void f32_qc4w_gemm_5x8__fma3_dup(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_f32_qc4w_gemm_minmax_ukernel_5x8__fma3_dup,
-      xnn_init_f32_qc4w_minmax_sse_params,
-      /*mr=*/5, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckFMA3);
-  }
-  static void f32_qc4w_gemm_6x8__fma3_dup(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_f32_qc4w_gemm_minmax_ukernel_6x8__fma3_dup,
-      xnn_init_f32_qc4w_minmax_sse_params,
-      /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckFMA3);
-  }
-  static void f32_qc4w_gemm_1x8__avx_dup(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_f32_qc4w_gemm_minmax_ukernel_1x8__avx_dup,
-      xnn_init_f32_qc4w_minmax_sse_params,
-      /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckAVX);
-  }
-  static void f32_qc4w_gemm_3x8__avx_dup(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_f32_qc4w_gemm_minmax_ukernel_3x8__avx_dup,
-      xnn_init_f32_qc4w_minmax_sse_params,
-      /*mr=*/3, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckAVX);
-  }
-  static void f32_qc4w_gemm_4x8__avx_dup(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_f32_qc4w_gemm_minmax_ukernel_4x8__avx_dup,
-      xnn_init_f32_qc4w_minmax_sse_params,
-      /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckAVX);
-  }
-  static void f32_qc4w_gemm_5x8__avx_dup(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_f32_qc4w_gemm_minmax_ukernel_5x8__avx_dup,
-      xnn_init_f32_qc4w_minmax_sse_params,
-      /*mr=*/5, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckAVX);
-  }
-  static void f32_qc4w_gemm_6x8__avx_dup(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_f32_qc4w_gemm_minmax_ukernel_6x8__avx_dup,
-      xnn_init_f32_qc4w_minmax_sse_params,
-      /*mr=*/6, /*nr=*/8, /*kr=*/1, /*sr=*/1,
-      benchmark::utils::CheckAVX);
-  }
   static void f32_qc4w_gemm_1x8__sse41_dup(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_qc4w_gemm_minmax_ukernel_1x8__sse41_dup,
@@ -796,16 +726,6 @@ static void GEMMBenchmark(benchmark::State& state,
   BENCHMARK_GEMM(f32_qc4w_gemm_6x16__avx_broadcast)
   BENCHMARK_GEMM(f32_qc4w_gemm_7x16__avx_broadcast)
   BENCHMARK_GEMM(f32_qc4w_gemm_8x16__avx_broadcast)
-  BENCHMARK_GEMM(f32_qc4w_gemm_1x8__fma3_dup)
-  BENCHMARK_GEMM(f32_qc4w_gemm_3x8__fma3_dup)
-  BENCHMARK_GEMM(f32_qc4w_gemm_4x8__fma3_dup)
-  BENCHMARK_GEMM(f32_qc4w_gemm_5x8__fma3_dup)
-  BENCHMARK_GEMM(f32_qc4w_gemm_6x8__fma3_dup)
-  BENCHMARK_GEMM(f32_qc4w_gemm_1x8__avx_dup)
-  BENCHMARK_GEMM(f32_qc4w_gemm_3x8__avx_dup)
-  BENCHMARK_GEMM(f32_qc4w_gemm_4x8__avx_dup)
-  BENCHMARK_GEMM(f32_qc4w_gemm_5x8__avx_dup)
-  BENCHMARK_GEMM(f32_qc4w_gemm_6x8__avx_dup)
   BENCHMARK_GEMM(f32_qc4w_gemm_1x8__sse41_dup)
   BENCHMARK_GEMM(f32_qc4w_gemm_3x8__sse41_dup)
   BENCHMARK_GEMM(f32_qc4w_gemm_4x8__sse41_dup)
