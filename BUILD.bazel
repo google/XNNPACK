@@ -3365,7 +3365,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "sse2_amalgam_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-msse2"],
+    gcc_x86_copts = [
+        "-msse2",
+        "-mno-sse3",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = [
@@ -3386,7 +3389,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "sse2_bench_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-msse2"],
+    gcc_x86_copts = [
+        "-msse2",
+        "-mno-sse3",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS,
@@ -3404,7 +3410,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "sse2_prod_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-msse2"],
+    gcc_x86_copts = [
+        "-msse2",
+        "-mno-sse3",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = PROD_SSE_MICROKERNEL_SRCS + PROD_SSE2_MICROKERNEL_SRCS,
@@ -3426,7 +3435,10 @@ xnnpack_cc_library(
         "-DXNN_TEST_MODE=1",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-msse2"],
+    gcc_x86_copts = [
+        "-msse2",
+        "-mno-sse3",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS,
@@ -3444,7 +3456,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "ssse3_amalgam_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mssse3"],
+    gcc_x86_copts = [
+        "-mssse3",
+        "-mno-sse4.1",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ["src/amalgam/gen/ssse3.c"],
@@ -3462,7 +3477,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "ssse3_bench_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mssse3"],
+    gcc_x86_copts = [
+        "-mssse3",
+        "-mno-sse4.1",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSSE3_MICROKERNEL_SRCS,
@@ -3480,7 +3498,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "ssse3_prod_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mssse3"],
+    gcc_x86_copts = [
+        "-mssse3",
+        "-mno-sse4.1",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = PROD_SSSE3_MICROKERNEL_SRCS,
@@ -3502,7 +3523,10 @@ xnnpack_cc_library(
         "-DXNN_TEST_MODE=1",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mssse3"],
+    gcc_x86_copts = [
+        "-mssse3",
+        "-mno-sse4.1",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSSE3_MICROKERNEL_SRCS,
@@ -3520,7 +3544,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "sse41_amalgam_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-msse4.1"],
+    gcc_x86_copts = [
+        "-msse4.1",
+        "-mno-sse4.2",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ["src/amalgam/gen/sse41.c"],
@@ -3538,7 +3565,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "sse41_bench_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-msse4.1"],
+    gcc_x86_copts = [
+        "-msse4.1",
+        "-mno-sse4.2",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE41_MICROKERNEL_SRCS,
@@ -3556,7 +3586,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "sse41_prod_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-msse4.1"],
+    gcc_x86_copts = [
+        "-msse4.1",
+        "-mno-sse4.2",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = PROD_SSE41_MICROKERNEL_SRCS,
@@ -3578,7 +3611,10 @@ xnnpack_cc_library(
         "-DXNN_TEST_MODE=1",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-msse4.1"],
+    gcc_x86_copts = [
+        "-msse4.1",
+        "-mno-sse4.2",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:SSE2"],
     x86_srcs = ALL_SSE41_MICROKERNEL_SRCS,
@@ -3596,7 +3632,12 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "avx_amalgam_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mavx"],
+    gcc_x86_copts = [
+        "-mavx",
+        "-mno-avx2",
+        "-mno-f16c",
+        "-mno-fma",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -3615,7 +3656,12 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "avx_bench_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mavx"],
+    gcc_x86_copts = [
+        "-mavx",
+        "-mno-avx2",
+        "-mno-f16c",
+        "-mno-fma",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -3634,7 +3680,12 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "avx_prod_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mavx"],
+    gcc_x86_copts = [
+        "-mavx",
+        "-mno-avx2",
+        "-mno-f16c",
+        "-mno-fma",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -3657,7 +3708,12 @@ xnnpack_cc_library(
         "-DXNN_TEST_MODE=1",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mavx"],
+    gcc_x86_copts = [
+        "-mavx",
+        "-mno-avx2",
+        "-mno-f16c",
+        "-mno-fma",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -3676,7 +3732,11 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "f16c_amalgam_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mf16c"],
+    gcc_x86_copts = [
+        "-mf16c",
+        "-mno-avx2",
+        "-mno-fma",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -3693,7 +3753,11 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "f16c_bench_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mf16c"],
+    gcc_x86_copts = [
+        "-mf16c",
+        "-mno-avx2",
+        "-mno-fma",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -3710,7 +3774,11 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "f16c_prod_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mf16c"],
+    gcc_x86_copts = [
+        "-mf16c",
+        "-mno-avx2",
+        "-mno-fma",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -3731,7 +3799,11 @@ xnnpack_cc_library(
         "-DXNN_TEST_MODE=1",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mf16c"],
+    gcc_x86_copts = [
+        "-mf16c",
+        "-mno-avx2",
+        "-mno-fma",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -3748,7 +3820,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "xop_amalgam_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mxop"],
+    gcc_x86_copts = [
+        "-mxop",
+        "-mno-avx2",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -3767,7 +3842,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "xop_bench_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mxop"],
+    gcc_x86_copts = [
+        "-mxop",
+        "-mno-avx2",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -3786,7 +3864,10 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "xop_prod_microkernels",
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mxop"],
+    gcc_x86_copts = [
+        "-mxop",
+        "-mno-avx2",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -3809,7 +3890,10 @@ xnnpack_cc_library(
         "-DXNN_TEST_MODE=1",
     ],
     gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mxop"],
+    gcc_x86_copts = [
+        "-mxop",
+        "-mno-avx2",
+    ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
     msvc_x86_64_copts = ["/arch:AVX"],
@@ -3831,6 +3915,7 @@ xnnpack_cc_library(
     gcc_x86_copts = [
         "-mf16c",
         "-mfma",
+        "-mno-avx2",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
@@ -3853,6 +3938,7 @@ xnnpack_cc_library(
     gcc_x86_copts = [
         "-mf16c",
         "-mfma",
+        "-mno-avx2",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
@@ -3875,6 +3961,7 @@ xnnpack_cc_library(
     gcc_x86_copts = [
         "-mf16c",
         "-mfma",
+        "-mno-avx2",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
@@ -3901,6 +3988,7 @@ xnnpack_cc_library(
     gcc_x86_copts = [
         "-mf16c",
         "-mfma",
+        "-mno-avx2",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX"],
