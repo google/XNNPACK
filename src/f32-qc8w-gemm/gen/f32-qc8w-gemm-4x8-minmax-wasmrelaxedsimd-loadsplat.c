@@ -80,8 +80,11 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x8__wasmrelaxedsimd_loadsplat(
       const v128_t va3 = wasm_v128_load32_splat(a3);
       a3 += 1;
 
-      const v128_t vb0123 = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w))));
-      const v128_t vb4567 = wasm_f32x4_convert_i32x4(wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(wasm_v128_load32_splat((const int8_t*) w + 4))));
+      const v128_t vb01234567 = wasm_i16x8_load8x8((const int8_t*) w + 0);
+      const v128_t vbi0123 = wasm_i32x4_extend_low_i16x8(vb01234567);
+      const v128_t vbi4567 = wasm_i32x4_extend_high_i16x8(vb01234567);
+      const v128_t vb0123 = wasm_f32x4_convert_i32x4(vbi0123);
+      const v128_t vb4567 = wasm_f32x4_convert_i32x4(vbi4567);
       w = (const int8_t*) w + 8;
 
       vacc0x0123 = wasm_f32x4_add(vacc0x0123, wasm_f32x4_mul(va0, vb0123));
