@@ -77,9 +77,9 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
     $else:
       $for N in range(0, NR, 8):
         $if DATATYPE == "F32":
-          __m256 vacc0x${ABC[N:N+8]} = _mm256_load_ps(w + ${N});
+          __m256 vacc0x${ABC[N:N+8]} = _mm256_load_ps(w${"" if N == 0 else " + " + str(N)});
         $else:
-          __m256 vacc0x${ABC[N:N+8]} = _mm256_loadu_ps((const float*) w + ${N});
+          __m256 vacc0x${ABC[N:N+8]} = _mm256_loadu_ps((const float*) w${"" if N == 0 else " + " + str(N)});
       $for M in range(1, MR):
         $for N in range(0, NR, 8):
           __m256 vacc${M}x${ABC[N:N+8]} = vacc0x${ABC[N:N+8]};
@@ -95,19 +95,16 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         a${M} += 1;
 
       $if DATATYPE == "F32":
-        const __m256 vb${ABC[0:8]} = _mm256_load_ps(w);
-        $for N in range(8, NR, 8):
-          const __m256 vb${ABC[N:N+8]} = _mm256_load_ps(w + ${N});
+        $for N in range(0, NR, 8):
+          const __m256 vb${ABC[N:N+8]} = _mm256_load_ps(w${"" if N == 0 else " + " + str(N)});
         w += ${NR};
       $else:
         $if AVX >= 2:
-          const __m256i vbi${ABC[0:8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) w));
-          $for N in range(8, NR, 8):
-            const __m256i vbi${ABC[N:N+8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) ((const int8_t*) w + ${N})));
+          $for N in range(0, NR, 8):
+            const __m256i vbi${ABC[N:N+8]} = _mm256_cvtepi8_epi32(_mm_loadl_epi64((const __m128i*) ((const int8_t*) w${"" if N == 0 else " + " + str(N)})));
         $else:
-          const __m128i vbi${ABC[0:4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w)));
-          $for N in range(4, NR, 4):
-            const __m128i vbi${ABC[N:N+4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w + ${N})));
+          $for N in range(0, NR, 4):
+            const __m128i vbi${ABC[N:N+4]} = _mm_cvtepi8_epi32(_mm_cvtsi32_si128((int) unaligned_load_u32((const int8_t*) w${"" if N == 0 else " + " + str(N)})));
           $for N in range(0, NR, 8):
             const __m256i vbi${ABC[N:N+8]} = _mm256_castps_si256(_mm256_insertf128_ps(_mm256_castsi256_ps(_mm256_castsi128_si256(vbi${ABC[N:N+4]})), _mm_castsi128_ps(vbi${ABC[N+4:N+8]}), 1));
         w = (const int8_t*) w + ${NR};
@@ -126,7 +123,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
 
     $if DATATYPE == "QC8":
       $for N in range(0, NR, 8):
-        const __m256 vscale${ABC[N:N+8]} = _mm256_loadu_ps((const float*) w + ${N});
+        const __m256 vscale${ABC[N:N+8]} = _mm256_loadu_ps((const float*) w${"" if N == 0 else " + " + str(N)});
         $for M in range(MR):
           vacc${M}x${ABC[N:N+8]} = _mm256_mul_ps(vacc${M}x${ABC[N:N+8]}, vscale${ABC[N:N+8]});
       w = (const float*) w + ${NR};
@@ -142,9 +139,8 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in reversed(range(MR)):
-        _mm256_storeu_ps(c${M}, vacc${M}x${ABC[0:8]});
-        $for N in range(8, NR, 8):
-          _mm256_storeu_ps(c${M} + ${N}, vacc${M}x${ABC[N:N+8]});
+        $for N in range(0, NR, 8):
+          _mm256_storeu_ps(c${M}${"" if N == 0 else " + " + str(N)}, vacc${M}x${ABC[N:N+8]});
         c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
 
       $for M in reversed(range(MR)):

@@ -3000,7 +3000,7 @@ void xnn_f32_gemm_minmax_ukernel_1x16__fma3_broadcast(
   float* c0 = c;
 
   do {
-    __m256 vacc0x01234567 = _mm256_load_ps(w + 0);
+    __m256 vacc0x01234567 = _mm256_load_ps(w);
     __m256 vacc0x89ABCDEF = _mm256_load_ps(w + 8);
     w += 16;
 
@@ -3573,7 +3573,7 @@ void xnn_f32_gemm_minmax_ukernel_5x16__fma3_broadcast(
   }
 
   do {
-    __m256 vacc0x01234567 = _mm256_load_ps(w + 0);
+    __m256 vacc0x01234567 = _mm256_load_ps(w);
     __m256 vacc0x89ABCDEF = _mm256_load_ps(w + 8);
     __m256 vacc1x01234567 = vacc0x01234567;
     __m256 vacc1x89ABCDEF = vacc0x89ABCDEF;
@@ -4975,7 +4975,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x16__fma3_broadcast(
   float* c0 = c;
 
   do {
-    __m256 vacc0x01234567 = _mm256_loadu_ps((const float*) w + 0);
+    __m256 vacc0x01234567 = _mm256_loadu_ps((const float*) w);
     __m256 vacc0x89ABCDEF = _mm256_loadu_ps((const float*) w + 8);
     w = (const float*) w + 16;
 
@@ -5000,7 +5000,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x16__fma3_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    const __m256 vscale01234567 = _mm256_loadu_ps((const float*) w + 0);
+    const __m256 vscale01234567 = _mm256_loadu_ps((const float*) w);
     vacc0x01234567 = _mm256_mul_ps(vacc0x01234567, vscale01234567);
     const __m256 vscale89ABCDEF = _mm256_loadu_ps((const float*) w + 8);
     vacc0x89ABCDEF = _mm256_mul_ps(vacc0x89ABCDEF, vscale89ABCDEF);
@@ -5102,7 +5102,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_5x16__fma3_broadcast(
   }
 
   do {
-    __m256 vacc0x01234567 = _mm256_loadu_ps((const float*) w + 0);
+    __m256 vacc0x01234567 = _mm256_loadu_ps((const float*) w);
     __m256 vacc0x89ABCDEF = _mm256_loadu_ps((const float*) w + 8);
     __m256 vacc1x01234567 = vacc0x01234567;
     __m256 vacc1x89ABCDEF = vacc0x89ABCDEF;
@@ -5151,7 +5151,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_5x16__fma3_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    const __m256 vscale01234567 = _mm256_loadu_ps((const float*) w + 0);
+    const __m256 vscale01234567 = _mm256_loadu_ps((const float*) w);
     vacc0x01234567 = _mm256_mul_ps(vacc0x01234567, vscale01234567);
     vacc1x01234567 = _mm256_mul_ps(vacc1x01234567, vscale01234567);
     vacc2x01234567 = _mm256_mul_ps(vacc2x01234567, vscale01234567);
