@@ -121,7 +121,18 @@ static void DWConvBenchmark(benchmark::State& state,
   convolution_op.padding_top        = padding_top;
   convolution_op.padding_left       = padding_left;
 
-  xnn_indirection_init_dwconv2d(&convolution_op, step_height, step_width, primary_tile, XNN_LOG2_SIZEOF_INT8_T);
+  xnn_indirection_init_dwconv2d(
+    convolution_op.indirection_buffer,
+    convolution_op.input,
+    convolution_op.input_pixel_stride << XNN_LOG2_SIZEOF_INT8_T,
+    convolution_op.zero_buffer,
+    convolution_op.input_height, convolution_op.input_width,
+    convolution_op.output_height, convolution_op.output_width,
+    convolution_op.kernel_height, convolution_op.kernel_width,
+    convolution_op.stride_height, convolution_op.stride_width,
+    convolution_op.dilation_height, convolution_op.dilation_width,
+    convolution_op.padding_top, convolution_op.padding_left,
+    step_height, step_width, primary_tile);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
   }
@@ -272,7 +283,18 @@ static void DWConvBenchmark(benchmark::State& state,
   convolution_op.padding_top        = padding_top;
   convolution_op.padding_left       = padding_left;
 
-  xnn_indirection_init_dwconv2d(&convolution_op, step_height, step_width, tile_size, XNN_LOG2_SIZEOF_INT8_T);
+  xnn_indirection_init_dwconv2d(
+    convolution_op.indirection_buffer,
+    convolution_op.input,
+    convolution_op.input_pixel_stride << XNN_LOG2_SIZEOF_INT8_T,
+    convolution_op.zero_buffer,
+    convolution_op.input_height, convolution_op.input_width,
+    convolution_op.output_height, convolution_op.output_width,
+    convolution_op.kernel_height, convolution_op.kernel_width,
+    convolution_op.stride_height, convolution_op.stride_width,
+    convolution_op.dilation_height, convolution_op.dilation_width,
+    convolution_op.padding_top, convolution_op.padding_left,
+    step_height, step_width, tile_size);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
   }

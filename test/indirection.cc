@@ -120,7 +120,18 @@ class IndirectionTester {
     op.dilation_width = dilation_;
     op.padding_top = padding_height_ / 2;
     op.padding_left = padding_width_ / 2;
-    xnn_indirection_init_dwconv2d(&op, step_height, step_width, primary_tile_, /*log2_element_size*/2);
+    xnn_indirection_init_dwconv2d(
+      op.indirection_buffer,
+      op.input,
+      op.input_pixel_stride << /*log2_input_element_size=*/2,
+      op.zero_buffer,
+      op.input_height, op.input_width,
+      op.output_height, op.output_width,
+      op.kernel_height, op.kernel_width,
+      op.stride_height, op.stride_width,
+      op.dilation_height, op.dilation_width,
+      op.padding_top, op.padding_left,
+      step_height, step_width, primary_tile_);
   }
 
   // Set by tests using setter functions.

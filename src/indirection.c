@@ -197,29 +197,26 @@ void xnn_indirection_init_subconv2d(
 }
 
 void xnn_indirection_init_dwconv2d(
-  xnn_operator_t op,
+  const void** indirection_buffer,
+  const void* input,
+  size_t input_pixel_stride,
+  const void* zero_buffer,
+  size_t input_height,
+  size_t input_width,
+  size_t output_height,
+  size_t output_width,
+  size_t kernel_height,
+  size_t kernel_width,
+  size_t stride_height,
+  size_t stride_width,
+  size_t dilation_height,
+  size_t dilation_width,
+  size_t input_padding_top,
+  size_t input_padding_left,
   size_t step_height,
   size_t step_width,
-  size_t primary_tile,
-  uint32_t log2_element_size)
+  size_t primary_tile)
 {
-  const void** indirection_buffer = op->indirection_buffer;
-  const void* input               = op->input;
-  const size_t input_pixel_stride = op->input_pixel_stride << log2_element_size;
-  const void* zero                = op->zero_buffer;
-  const size_t input_height       = op->input_height;
-  const size_t input_width        = op->input_width;
-  const size_t output_height      = op->output_height;
-  const size_t output_width       = op->output_width;
-  const size_t kernel_height      = op->kernel_height;
-  const size_t kernel_width       = op->kernel_width;
-  const size_t stride_height      = op->stride_height;
-  const size_t stride_width       = op->stride_width;
-  const size_t dilation_height    = op->dilation_height;
-  const size_t dilation_width     = op->dilation_width;
-  const size_t input_padding_top  = op->padding_top;
-  const size_t input_padding_left = op->padding_left;
-
   for (size_t output_y = 0; output_y < output_height; output_y++) {
     for (size_t kernel_y = 0; kernel_y < kernel_height; kernel_y++) {
       const size_t input_y = output_y * stride_height + kernel_y * dilation_height - input_padding_top;
@@ -232,7 +229,7 @@ void xnn_indirection_init_dwconv2d(
               indirection_buffer[index] =
                 (const void*) ((uintptr_t) input + (input_y * input_width + input_x) * input_pixel_stride);
             } else {
-              indirection_buffer[index] = zero;
+              indirection_buffer[index] = zero_buffer;
             }
           }
         }
@@ -240,7 +237,7 @@ void xnn_indirection_init_dwconv2d(
         for (size_t output_x = 0; output_x < output_width; output_x++) {
           for (size_t kernel_x = 0; kernel_x < kernel_width; kernel_x++) {
             const size_t index = output_y * step_height + output_x * step_width * kernel_height + kernel_x * kernel_height + kernel_y;
-            indirection_buffer[index] = zero;
+            indirection_buffer[index] = zero_buffer;
           }
         }
       }

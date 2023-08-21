@@ -808,7 +808,18 @@ static enum xnn_status reshape_average_pooling2d(
       // This offset must be aligned properly because inputs and input offsets need to be aligned.
       average_pooling_op->input = (void*) ((uintptr_t) average_pooling_op->zero_buffer + XNN_ALLOCATION_ALIGNMENT);
       average_pooling_op->last_input = average_pooling_op->input;
-      xnn_indirection_init_dwconv2d(average_pooling_op, step_height, step_width, primary_tile, log2_data_element_size);
+      xnn_indirection_init_dwconv2d(
+        average_pooling_op->indirection_buffer,
+        average_pooling_op->input,
+        average_pooling_op->input_pixel_stride << log2_data_element_size,
+        average_pooling_op->zero_buffer,
+        average_pooling_op->input_height, average_pooling_op->input_width,
+        average_pooling_op->output_height, average_pooling_op->output_width,
+        average_pooling_op->kernel_height, average_pooling_op->kernel_width,
+        average_pooling_op->stride_height, average_pooling_op->stride_width,
+        average_pooling_op->dilation_height, average_pooling_op->dilation_width,
+        average_pooling_op->padding_top, average_pooling_op->padding_left,
+        step_height, step_width, primary_tile);
 
       average_pooling_op->last_input_height = input_height;
       average_pooling_op->last_input_width = input_width;
