@@ -902,10 +902,12 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
   }
 #endif  // XNN_PLATFORM_JIT
 
+  size_t workspace_size, workspace_alignment;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op0,
     /*batch_size=*/1, /*input_height=*/224, /*input_width=*/224,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #0" << std::endl;
@@ -916,6 +918,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op1,
     /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #1" << std::endl;
@@ -926,6 +929,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op2,
     /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #2" << std::endl;
@@ -936,6 +940,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op3,
     /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #3" << std::endl;
@@ -946,6 +951,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op4,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #4" << std::endl;
@@ -956,6 +962,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op5,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #5" << std::endl;
@@ -966,6 +973,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op6,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #6" << std::endl;
@@ -976,6 +984,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op7,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #7" << std::endl;
@@ -986,6 +995,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op8,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #8" << std::endl;
@@ -996,6 +1006,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op9,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #9" << std::endl;
@@ -1006,6 +1017,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op10,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #10" << std::endl;
@@ -1016,6 +1028,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op11,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #11" << std::endl;
@@ -1026,6 +1039,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op12,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #12" << std::endl;
@@ -1036,6 +1050,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op13,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #13" << std::endl;
@@ -1046,6 +1061,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op14,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #14" << std::endl;
@@ -1056,6 +1072,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op15,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #15" << std::endl;
@@ -1066,6 +1083,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op16,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #16" << std::endl;
@@ -1076,6 +1094,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op17,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #17" << std::endl;
@@ -1086,6 +1105,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op18,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #18" << std::endl;
@@ -1096,6 +1116,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op19,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #19" << std::endl;
@@ -1106,6 +1127,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op20,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #20" << std::endl;
@@ -1116,6 +1138,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op21,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #21" << std::endl;
@@ -1126,6 +1149,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op22,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #22" << std::endl;
@@ -1136,6 +1160,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op23,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #23" << std::endl;
@@ -1146,6 +1171,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op24,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #24" << std::endl;
@@ -1156,6 +1182,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op25,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #25" << std::endl;
@@ -1166,6 +1193,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op26,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #26" << std::endl;
@@ -1185,6 +1213,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
     op28,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #28" << std::endl;
@@ -1193,7 +1222,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op0,
-    /*input=*/v0.data(), /*output=*/v1.data());
+    /*workspace=*/nullptr, /*input=*/v0.data(), /*output=*/v1.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #0" << std::endl;
     return ExecutionPlan();
@@ -1201,7 +1230,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op1,
-    /*input=*/v1.data(), /*output=*/v2.data());
+    /*workspace=*/nullptr, /*input=*/v1.data(), /*output=*/v2.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #1" << std::endl;
     return ExecutionPlan();
@@ -1209,7 +1238,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op2,
-    /*input=*/v2.data(), /*output=*/v3.data());
+    /*workspace=*/nullptr, /*input=*/v2.data(), /*output=*/v3.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #2" << std::endl;
     return ExecutionPlan();
@@ -1217,7 +1246,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op3,
-    /*input=*/v3.data(), /*output=*/v4.data());
+    /*workspace=*/nullptr, /*input=*/v3.data(), /*output=*/v4.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #3" << std::endl;
     return ExecutionPlan();
@@ -1225,7 +1254,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op4,
-    /*input=*/v4.data(), /*output=*/v5.data());
+    /*workspace=*/nullptr, /*input=*/v4.data(), /*output=*/v5.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #4" << std::endl;
     return ExecutionPlan();
@@ -1233,7 +1262,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op5,
-    /*input=*/v5.data(), /*output=*/v6.data());
+    /*workspace=*/nullptr, /*input=*/v5.data(), /*output=*/v6.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #5" << std::endl;
     return ExecutionPlan();
@@ -1241,7 +1270,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op6,
-    /*input=*/v6.data(), /*output=*/v7.data());
+    /*workspace=*/nullptr, /*input=*/v6.data(), /*output=*/v7.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #6" << std::endl;
     return ExecutionPlan();
@@ -1249,7 +1278,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op7,
-    /*input=*/v7.data(), /*output=*/v8.data());
+    /*workspace=*/nullptr, /*input=*/v7.data(), /*output=*/v8.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #7" << std::endl;
     return ExecutionPlan();
@@ -1257,7 +1286,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op8,
-    /*input=*/v8.data(), /*output=*/v9.data());
+    /*workspace=*/nullptr, /*input=*/v8.data(), /*output=*/v9.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #8" << std::endl;
     return ExecutionPlan();
@@ -1265,7 +1294,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op9,
-    /*input=*/v9.data(), /*output=*/v10.data());
+    /*workspace=*/nullptr, /*input=*/v9.data(), /*output=*/v10.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #9" << std::endl;
     return ExecutionPlan();
@@ -1273,7 +1302,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op10,
-    /*input=*/v10.data(), /*output=*/v11.data());
+    /*workspace=*/nullptr, /*input=*/v10.data(), /*output=*/v11.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #10" << std::endl;
     return ExecutionPlan();
@@ -1281,7 +1310,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op11,
-    /*input=*/v11.data(), /*output=*/v12.data());
+    /*workspace=*/nullptr, /*input=*/v11.data(), /*output=*/v12.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #11" << std::endl;
     return ExecutionPlan();
@@ -1289,7 +1318,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op12,
-    /*input=*/v12.data(), /*output=*/v13.data());
+    /*workspace=*/nullptr, /*input=*/v12.data(), /*output=*/v13.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #12" << std::endl;
     return ExecutionPlan();
@@ -1297,7 +1326,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op13,
-    /*input=*/v13.data(), /*output=*/v14.data());
+    /*workspace=*/nullptr, /*input=*/v13.data(), /*output=*/v14.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #13" << std::endl;
     return ExecutionPlan();
@@ -1305,7 +1334,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op14,
-    /*input=*/v14.data(), /*output=*/v15.data());
+    /*workspace=*/nullptr, /*input=*/v14.data(), /*output=*/v15.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #14" << std::endl;
     return ExecutionPlan();
@@ -1313,7 +1342,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op15,
-    /*input=*/v15.data(), /*output=*/v16.data());
+    /*workspace=*/nullptr, /*input=*/v15.data(), /*output=*/v16.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #15" << std::endl;
     return ExecutionPlan();
@@ -1321,7 +1350,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op16,
-    /*input=*/v16.data(), /*output=*/v17.data());
+    /*workspace=*/nullptr, /*input=*/v16.data(), /*output=*/v17.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #16" << std::endl;
     return ExecutionPlan();
@@ -1329,7 +1358,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op17,
-    /*input=*/v17.data(), /*output=*/v18.data());
+    /*workspace=*/nullptr, /*input=*/v17.data(), /*output=*/v18.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #17" << std::endl;
     return ExecutionPlan();
@@ -1337,7 +1366,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op18,
-    /*input=*/v18.data(), /*output=*/v19.data());
+    /*workspace=*/nullptr, /*input=*/v18.data(), /*output=*/v19.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #18" << std::endl;
     return ExecutionPlan();
@@ -1345,7 +1374,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op19,
-    /*input=*/v19.data(), /*output=*/v20.data());
+    /*workspace=*/nullptr, /*input=*/v19.data(), /*output=*/v20.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #19" << std::endl;
     return ExecutionPlan();
@@ -1353,7 +1382,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op20,
-    /*input=*/v20.data(), /*output=*/v21.data());
+    /*workspace=*/nullptr, /*input=*/v20.data(), /*output=*/v21.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #20" << std::endl;
     return ExecutionPlan();
@@ -1361,7 +1390,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op21,
-    /*input=*/v21.data(), /*output=*/v22.data());
+    /*workspace=*/nullptr, /*input=*/v21.data(), /*output=*/v22.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #21" << std::endl;
     return ExecutionPlan();
@@ -1369,7 +1398,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op22,
-    /*input=*/v22.data(), /*output=*/v23.data());
+    /*workspace=*/nullptr, /*input=*/v22.data(), /*output=*/v23.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #22" << std::endl;
     return ExecutionPlan();
@@ -1377,7 +1406,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op23,
-    /*input=*/v23.data(), /*output=*/v24.data());
+    /*workspace=*/nullptr, /*input=*/v23.data(), /*output=*/v24.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #23" << std::endl;
     return ExecutionPlan();
@@ -1385,7 +1414,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op24,
-    /*input=*/v24.data(), /*output=*/v25.data());
+    /*workspace=*/nullptr, /*input=*/v24.data(), /*output=*/v25.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #24" << std::endl;
     return ExecutionPlan();
@@ -1393,7 +1422,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op25,
-    /*input=*/v25.data(), /*output=*/v26.data());
+    /*workspace=*/nullptr, /*input=*/v25.data(), /*output=*/v26.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #25" << std::endl;
     return ExecutionPlan();
@@ -1401,7 +1430,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op26,
-    /*input=*/v26.data(), /*output=*/v27.data());
+    /*workspace=*/nullptr, /*input=*/v26.data(), /*output=*/v27.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #26" << std::endl;
     return ExecutionPlan();
@@ -1417,7 +1446,7 @@ ExecutionPlan FP32MobileNetV1(bool use_jit, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op28,
-    /*input=*/v28.data(), /*output=*/v29.data());
+    /*workspace=*/nullptr, /*input=*/v28.data(), /*output=*/v29.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #28" << std::endl;
     return ExecutionPlan();

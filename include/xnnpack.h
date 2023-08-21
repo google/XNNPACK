@@ -2139,10 +2139,13 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_f32(
   size_t input_width,
   size_t* output_height_out,
   size_t* output_width_out,
+  size_t* workspace_size,
+  size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_convolution2d_nhwc_f32(
   xnn_operator_t convolution_op,
+  void* workspace,
   const float* input,
   float* output);
 
@@ -3434,10 +3437,13 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_f16(
   size_t input_width,
   size_t* output_height_out,
   size_t* output_width_out,
+  size_t* workspace_size,
+  size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_convolution2d_nhwc_f16(
   xnn_operator_t convolution_op,
+  void* workspace,
   const void* input,
   void* output);
 
@@ -4276,10 +4282,13 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qs8_qc8w(
   size_t input_width,
   size_t* output_height_out,
   size_t* output_width_out,
+  size_t* workspace_size,
+  size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_convolution2d_nhwc_qs8_qc8w(
   xnn_operator_t convolution_op,
+  void* workspace,
   const int8_t* input,
   int8_t* output);
 
@@ -4365,10 +4374,13 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qs8(
   size_t input_width,
   size_t* output_height_out,
   size_t* output_width_out,
+  size_t* workspace_size,
+  size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_convolution2d_nhwc_qs8(
   xnn_operator_t convolution_op,
+  void* workspace,
   const int8_t* input,
   int8_t* output);
 
@@ -4771,10 +4783,13 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qu8(
   size_t input_width,
   size_t* output_height_out,
   size_t* output_width_out,
+  size_t* workspace_size,
+  size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_convolution2d_nhwc_qu8(
   xnn_operator_t convolution_op,
+  void* workspace,
   const uint8_t* input,
   uint8_t* output);
 

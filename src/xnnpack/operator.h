@@ -393,7 +393,10 @@ struct xnn_operator {
     };
     struct global_average_pooling_nwc_context global_average_pooling_nwc;
     struct global_average_pooling_ncw_context global_average_pooling_ncw;
-    struct igemm_context igemm;
+    struct {
+      struct igemm_context igemm;
+      struct conv2d_igemm_indirection_init_context conv2d_igemm_indirection_init;
+    };
     struct lut_contiguous_context lut_contiguous;
     struct lut_strided_context lut_strided;
     struct max_pooling_context max_pooling;

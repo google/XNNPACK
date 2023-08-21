@@ -10794,6 +10794,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK_test_mode",
+        ":aligned_allocator",
         ":convolution_test_helpers",
         ":operator_utils",
         ":operators_test_mode",

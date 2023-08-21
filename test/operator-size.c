@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
       break;
     case 10:
       xnn_setup_convolution2d_nhwc_f32(
-        op, NULL, NULL);
+        op, NULL, NULL, NULL);
       break;
     case 11:
       xnn_create_deconvolution2d_nhwc_f32(

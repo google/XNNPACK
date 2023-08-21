@@ -20,6 +20,7 @@
 #include <xnnpack/microkernel-type.h>
 #include <xnnpack/params.h>
 #include <xnnpack/compute.h>
+#include <xnnpack/indirection.h>
 #include <xnnpack/quantization.h>
 
 
@@ -574,6 +575,28 @@ void xnn_compute_igemm(
       context->a_offset,
       context->zero,
       &context->params);
+}
+
+// `output_tile_start` should be a multiple of igemm.mr (tile size).
+void xnn_compute_conv2d_igemm_indirection(
+    const struct conv2d_igemm_indirection_init_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t output_tile_start,
+    size_t output_tile_size)
+{
+  xnn_indirection_init_conv2d(
+    output_tile_size,
+    output_tile_start,
+    output_tile_start + output_tile_size,
+    context->indirection_buffer,
+    context->input,
+    context->zero_buffer,
+    context->input_pixel_stride,
+    context->input_height, context->input_width,
+    context->output_height, context->output_width,
+    context->kernel_height, context->kernel_width,
+    context->stride_height, context->stride_width,
+    context->dilation_height, context->dilation_width,
+    context->input_padding_top, context->input_padding_left);
 }
 
 void xnn_compute_grouped_subgemm2d(

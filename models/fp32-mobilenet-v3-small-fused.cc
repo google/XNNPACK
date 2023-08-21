@@ -2132,10 +2132,12 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
   xnn_finalize_code_memory(&code_cache.cache.code);
 #endif
 
+  size_t workspace_size, workspace_alignment;
   status = xnn_reshape_convolution2d_nhwc_f32(
     op0,
     /*batch_size=*/1, /*input_height=*/224, /*input_width=*/224,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #0" << std::endl;
@@ -2146,6 +2148,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op2,
     /*batch_size=*/1, /*input_height=*/112, /*input_width=*/112,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #2" << std::endl;
@@ -2165,6 +2168,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op4,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #4" << std::endl;
@@ -2175,6 +2179,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op5,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #5" << std::endl;
@@ -2198,6 +2203,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op7,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #7" << std::endl;
@@ -2208,6 +2214,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op8,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #8" << std::endl;
@@ -2218,6 +2225,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op9,
     /*batch_size=*/1, /*input_height=*/56, /*input_width=*/56,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #9" << std::endl;
@@ -2228,6 +2236,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op10,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #10" << std::endl;
@@ -2238,6 +2247,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op11,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #11" << std::endl;
@@ -2248,6 +2258,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op12,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #12" << std::endl;
@@ -2258,6 +2269,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op13,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #13" << std::endl;
@@ -2281,6 +2293,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op15,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #15" << std::endl;
@@ -2291,6 +2304,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op17,
     /*batch_size=*/1, /*input_height=*/28, /*input_width=*/28,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #17" << std::endl;
@@ -2319,6 +2333,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op20,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #20" << std::endl;
@@ -2329,6 +2344,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op21,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #21" << std::endl;
@@ -2352,6 +2368,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op23,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #23" << std::endl;
@@ -2362,6 +2379,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op24,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #24" << std::endl;
@@ -2372,6 +2390,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op26,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #26" << std::endl;
@@ -2400,6 +2419,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op29,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #29" << std::endl;
@@ -2410,6 +2430,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op30,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #30" << std::endl;
@@ -2433,6 +2454,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op32,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #32" << std::endl;
@@ -2456,6 +2478,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op34,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #34" << std::endl;
@@ -2466,6 +2489,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op36,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #36" << std::endl;
@@ -2494,6 +2518,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op39,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #39" << std::endl;
@@ -2504,6 +2529,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op40,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #40" << std::endl;
@@ -2527,6 +2553,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op42,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #42" << std::endl;
@@ -2550,6 +2577,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op44,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #44" << std::endl;
@@ -2560,6 +2588,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op46,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #46" << std::endl;
@@ -2588,6 +2617,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op49,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #49" << std::endl;
@@ -2598,6 +2628,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op50,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #50" << std::endl;
@@ -2621,6 +2652,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op52,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #52" << std::endl;
@@ -2631,6 +2663,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op53,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #53" << std::endl;
@@ -2641,6 +2674,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op55,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #55" << std::endl;
@@ -2669,6 +2703,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op58,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #58" << std::endl;
@@ -2679,6 +2714,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op59,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #59" << std::endl;
@@ -2702,6 +2738,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op61,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #61" << std::endl;
@@ -2725,6 +2762,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op63,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #63" << std::endl;
@@ -2735,6 +2773,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op65,
     /*batch_size=*/1, /*input_height=*/14, /*input_width=*/14,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #65" << std::endl;
@@ -2763,6 +2802,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op68,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #68" << std::endl;
@@ -2773,6 +2813,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op69,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #69" << std::endl;
@@ -2796,6 +2837,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op71,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #71" << std::endl;
@@ -2806,6 +2848,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op72,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #72" << std::endl;
@@ -2816,6 +2859,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op74,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #74" << std::endl;
@@ -2844,6 +2888,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op77,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #77" << std::endl;
@@ -2854,6 +2899,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op78,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #78" << std::endl;
@@ -2877,6 +2923,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op80,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #80" << std::endl;
@@ -2900,6 +2947,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op82,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #82" << std::endl;
@@ -2910,6 +2958,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op84,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #84" << std::endl;
@@ -2938,6 +2987,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op87,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #87" << std::endl;
@@ -2948,6 +2998,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op88,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #88" << std::endl;
@@ -2971,6 +3022,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op90,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #90" << std::endl;
@@ -2994,6 +3046,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op92,
     /*batch_size=*/1, /*input_height=*/7, /*input_width=*/7,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #92" << std::endl;
@@ -3013,6 +3066,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op95,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #95" << std::endl;
@@ -3032,6 +3086,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
     op98,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #98" << std::endl;
@@ -3040,7 +3095,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op0,
-    /*input=*/v0.data(), /*output=*/v2.data());
+    /*workspace=*/nullptr, /*input=*/v0.data(), /*output=*/v2.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #0" << std::endl;
     return ExecutionPlan();
@@ -3048,7 +3103,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op2,
-    /*input=*/v2.data(), /*output=*/v3.data());
+    /*workspace=*/nullptr, /*input=*/v2.data(), /*output=*/v3.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #2" << std::endl;
     return ExecutionPlan();
@@ -3064,7 +3119,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op4,
-    /*input=*/v4.data(), /*output=*/v5.data());
+    /*workspace=*/nullptr, /*input=*/v4.data(), /*output=*/v5.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #4" << std::endl;
     return ExecutionPlan();
@@ -3072,7 +3127,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op5,
-    /*input=*/v5.data(), /*output=*/v6.data());
+    /*workspace=*/nullptr, /*input=*/v5.data(), /*output=*/v6.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #5" << std::endl;
     return ExecutionPlan();
@@ -3088,7 +3143,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op7,
-    /*input=*/v7.data(), /*output=*/v8.data());
+    /*workspace=*/nullptr, /*input=*/v7.data(), /*output=*/v8.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #7" << std::endl;
     return ExecutionPlan();
@@ -3096,7 +3151,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op8,
-    /*input=*/v8.data(), /*output=*/v9.data());
+    /*workspace=*/nullptr, /*input=*/v8.data(), /*output=*/v9.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #8" << std::endl;
     return ExecutionPlan();
@@ -3104,7 +3159,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op9,
-    /*input=*/v9.data(), /*output=*/v10.data());
+    /*workspace=*/nullptr, /*input=*/v9.data(), /*output=*/v10.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #9" << std::endl;
     return ExecutionPlan();
@@ -3112,7 +3167,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op10,
-    /*input=*/v10.data(), /*output=*/v11.data());
+    /*workspace=*/nullptr, /*input=*/v10.data(), /*output=*/v11.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #10" << std::endl;
     return ExecutionPlan();
@@ -3120,7 +3175,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op11,
-    /*input=*/v11.data(), /*output=*/v12.data());
+    /*workspace=*/nullptr, /*input=*/v11.data(), /*output=*/v12.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #11" << std::endl;
     return ExecutionPlan();
@@ -3128,7 +3183,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op12,
-    /*input=*/v12.data(), /*output=*/v13.data());
+    /*workspace=*/nullptr, /*input=*/v12.data(), /*output=*/v13.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #12" << std::endl;
     return ExecutionPlan();
@@ -3136,7 +3191,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op13,
-    /*input=*/v13.data(), /*output=*/v14.data());
+    /*workspace=*/nullptr, /*input=*/v13.data(), /*output=*/v14.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #13" << std::endl;
     return ExecutionPlan();
@@ -3152,7 +3207,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op15,
-    /*input=*/v15.data(), /*output=*/v17.data());
+    /*workspace=*/nullptr, /*input=*/v15.data(), /*output=*/v17.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #15" << std::endl;
     return ExecutionPlan();
@@ -3160,7 +3215,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op17,
-    /*input=*/v17.data(), /*output=*/v18.data());
+    /*workspace=*/nullptr, /*input=*/v17.data(), /*output=*/v18.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #17" << std::endl;
     return ExecutionPlan();
@@ -3184,7 +3239,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op20,
-    /*input=*/v20.data(), /*output=*/v21.data());
+    /*workspace=*/nullptr, /*input=*/v20.data(), /*output=*/v21.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #20" << std::endl;
     return ExecutionPlan();
@@ -3192,7 +3247,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op21,
-    /*input=*/v21.data(), /*output=*/v22.data());
+    /*workspace=*/nullptr, /*input=*/v21.data(), /*output=*/v22.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #21" << std::endl;
     return ExecutionPlan();
@@ -3208,7 +3263,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op23,
-    /*input=*/v23.data(), /*output=*/v24.data());
+    /*workspace=*/nullptr, /*input=*/v23.data(), /*output=*/v24.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #23" << std::endl;
     return ExecutionPlan();
@@ -3216,7 +3271,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op24,
-    /*input=*/v24.data(), /*output=*/v26.data());
+    /*workspace=*/nullptr, /*input=*/v24.data(), /*output=*/v26.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #24" << std::endl;
     return ExecutionPlan();
@@ -3224,7 +3279,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op26,
-    /*input=*/v26.data(), /*output=*/v27.data());
+    /*workspace=*/nullptr, /*input=*/v26.data(), /*output=*/v27.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #26" << std::endl;
     return ExecutionPlan();
@@ -3248,7 +3303,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op29,
-    /*input=*/v29.data(), /*output=*/v30.data());
+    /*workspace=*/nullptr, /*input=*/v29.data(), /*output=*/v30.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #29" << std::endl;
     return ExecutionPlan();
@@ -3256,7 +3311,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op30,
-    /*input=*/v30.data(), /*output=*/v31.data());
+    /*workspace=*/nullptr, /*input=*/v30.data(), /*output=*/v31.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #30" << std::endl;
     return ExecutionPlan();
@@ -3272,7 +3327,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op32,
-    /*input=*/v32.data(), /*output=*/v33.data());
+    /*workspace=*/nullptr, /*input=*/v32.data(), /*output=*/v33.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #32" << std::endl;
     return ExecutionPlan();
@@ -3288,7 +3343,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op34,
-    /*input=*/v34.data(), /*output=*/v36.data());
+    /*workspace=*/nullptr, /*input=*/v34.data(), /*output=*/v36.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #34" << std::endl;
     return ExecutionPlan();
@@ -3296,7 +3351,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op36,
-    /*input=*/v36.data(), /*output=*/v37.data());
+    /*workspace=*/nullptr, /*input=*/v36.data(), /*output=*/v37.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #36" << std::endl;
     return ExecutionPlan();
@@ -3320,7 +3375,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op39,
-    /*input=*/v39.data(), /*output=*/v40.data());
+    /*workspace=*/nullptr, /*input=*/v39.data(), /*output=*/v40.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #39" << std::endl;
     return ExecutionPlan();
@@ -3328,7 +3383,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op40,
-    /*input=*/v40.data(), /*output=*/v41.data());
+    /*workspace=*/nullptr, /*input=*/v40.data(), /*output=*/v41.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #40" << std::endl;
     return ExecutionPlan();
@@ -3344,7 +3399,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op42,
-    /*input=*/v42.data(), /*output=*/v43.data());
+    /*workspace=*/nullptr, /*input=*/v42.data(), /*output=*/v43.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #42" << std::endl;
     return ExecutionPlan();
@@ -3360,7 +3415,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op44,
-    /*input=*/v44.data(), /*output=*/v46.data());
+    /*workspace=*/nullptr, /*input=*/v44.data(), /*output=*/v46.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #44" << std::endl;
     return ExecutionPlan();
@@ -3368,7 +3423,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op46,
-    /*input=*/v46.data(), /*output=*/v47.data());
+    /*workspace=*/nullptr, /*input=*/v46.data(), /*output=*/v47.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #46" << std::endl;
     return ExecutionPlan();
@@ -3392,7 +3447,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op49,
-    /*input=*/v49.data(), /*output=*/v50.data());
+    /*workspace=*/nullptr, /*input=*/v49.data(), /*output=*/v50.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #49" << std::endl;
     return ExecutionPlan();
@@ -3400,7 +3455,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op50,
-    /*input=*/v50.data(), /*output=*/v51.data());
+    /*workspace=*/nullptr, /*input=*/v50.data(), /*output=*/v51.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #50" << std::endl;
     return ExecutionPlan();
@@ -3416,7 +3471,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op52,
-    /*input=*/v52.data(), /*output=*/v53.data());
+    /*workspace=*/nullptr, /*input=*/v52.data(), /*output=*/v53.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #52" << std::endl;
     return ExecutionPlan();
@@ -3424,7 +3479,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op53,
-    /*input=*/v53.data(), /*output=*/v55.data());
+    /*workspace=*/nullptr, /*input=*/v53.data(), /*output=*/v55.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #53" << std::endl;
     return ExecutionPlan();
@@ -3432,7 +3487,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op55,
-    /*input=*/v55.data(), /*output=*/v56.data());
+    /*workspace=*/nullptr, /*input=*/v55.data(), /*output=*/v56.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #55" << std::endl;
     return ExecutionPlan();
@@ -3456,7 +3511,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op58,
-    /*input=*/v58.data(), /*output=*/v59.data());
+    /*workspace=*/nullptr, /*input=*/v58.data(), /*output=*/v59.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #58" << std::endl;
     return ExecutionPlan();
@@ -3464,7 +3519,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op59,
-    /*input=*/v59.data(), /*output=*/v60.data());
+    /*workspace=*/nullptr, /*input=*/v59.data(), /*output=*/v60.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #59" << std::endl;
     return ExecutionPlan();
@@ -3480,7 +3535,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op61,
-    /*input=*/v61.data(), /*output=*/v62.data());
+    /*workspace=*/nullptr, /*input=*/v61.data(), /*output=*/v62.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #61" << std::endl;
     return ExecutionPlan();
@@ -3496,7 +3551,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op63,
-    /*input=*/v63.data(), /*output=*/v65.data());
+    /*workspace=*/nullptr, /*input=*/v63.data(), /*output=*/v65.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #63" << std::endl;
     return ExecutionPlan();
@@ -3504,7 +3559,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op65,
-    /*input=*/v65.data(), /*output=*/v66.data());
+    /*workspace=*/nullptr, /*input=*/v65.data(), /*output=*/v66.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #65" << std::endl;
     return ExecutionPlan();
@@ -3528,7 +3583,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op68,
-    /*input=*/v68.data(), /*output=*/v69.data());
+    /*workspace=*/nullptr, /*input=*/v68.data(), /*output=*/v69.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #68" << std::endl;
     return ExecutionPlan();
@@ -3536,7 +3591,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op69,
-    /*input=*/v69.data(), /*output=*/v70.data());
+    /*workspace=*/nullptr, /*input=*/v69.data(), /*output=*/v70.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #69" << std::endl;
     return ExecutionPlan();
@@ -3552,7 +3607,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op71,
-    /*input=*/v71.data(), /*output=*/v72.data());
+    /*workspace=*/nullptr, /*input=*/v71.data(), /*output=*/v72.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #71" << std::endl;
     return ExecutionPlan();
@@ -3560,7 +3615,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op72,
-    /*input=*/v72.data(), /*output=*/v74.data());
+    /*workspace=*/nullptr, /*input=*/v72.data(), /*output=*/v74.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #72" << std::endl;
     return ExecutionPlan();
@@ -3568,7 +3623,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op74,
-    /*input=*/v74.data(), /*output=*/v75.data());
+    /*workspace=*/nullptr, /*input=*/v74.data(), /*output=*/v75.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #74" << std::endl;
     return ExecutionPlan();
@@ -3592,7 +3647,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op77,
-    /*input=*/v77.data(), /*output=*/v78.data());
+    /*workspace=*/nullptr, /*input=*/v77.data(), /*output=*/v78.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #77" << std::endl;
     return ExecutionPlan();
@@ -3600,7 +3655,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op78,
-    /*input=*/v78.data(), /*output=*/v79.data());
+    /*workspace=*/nullptr, /*input=*/v78.data(), /*output=*/v79.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #78" << std::endl;
     return ExecutionPlan();
@@ -3616,7 +3671,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op80,
-    /*input=*/v80.data(), /*output=*/v81.data());
+    /*workspace=*/nullptr, /*input=*/v80.data(), /*output=*/v81.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #80" << std::endl;
     return ExecutionPlan();
@@ -3632,7 +3687,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op82,
-    /*input=*/v82.data(), /*output=*/v84.data());
+    /*workspace=*/nullptr, /*input=*/v82.data(), /*output=*/v84.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #82" << std::endl;
     return ExecutionPlan();
@@ -3640,7 +3695,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op84,
-    /*input=*/v84.data(), /*output=*/v85.data());
+    /*workspace=*/nullptr, /*input=*/v84.data(), /*output=*/v85.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #84" << std::endl;
     return ExecutionPlan();
@@ -3664,7 +3719,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op87,
-    /*input=*/v87.data(), /*output=*/v88.data());
+    /*workspace=*/nullptr, /*input=*/v87.data(), /*output=*/v88.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #87" << std::endl;
     return ExecutionPlan();
@@ -3672,7 +3727,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op88,
-    /*input=*/v88.data(), /*output=*/v89.data());
+    /*workspace=*/nullptr, /*input=*/v88.data(), /*output=*/v89.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #88" << std::endl;
     return ExecutionPlan();
@@ -3688,7 +3743,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op90,
-    /*input=*/v90.data(), /*output=*/v91.data());
+    /*workspace=*/nullptr, /*input=*/v90.data(), /*output=*/v91.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #90" << std::endl;
     return ExecutionPlan();
@@ -3704,7 +3759,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op92,
-    /*input=*/v92.data(), /*output=*/v94.data());
+    /*workspace=*/nullptr, /*input=*/v92.data(), /*output=*/v94.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #92" << std::endl;
     return ExecutionPlan();
@@ -3720,7 +3775,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op95,
-    /*input=*/v95.data(), /*output=*/v97.data());
+    /*workspace=*/nullptr, /*input=*/v95.data(), /*output=*/v97.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #95" << std::endl;
     return ExecutionPlan();
@@ -3736,7 +3791,7 @@ ExecutionPlan FP32MobileNetV3SmallFused(pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f32(
     op98,
-    /*input=*/v98.data(), /*output=*/v99.data());
+    /*workspace=*/nullptr, /*input=*/v98.data(), /*output=*/v99.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #98" << std::endl;
     return ExecutionPlan();

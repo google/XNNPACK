@@ -1190,10 +1190,12 @@ ExecutionPlan FP16SparseMobileNetV1(float sparsity, pthreadpool_t threadpool) {
     return ExecutionPlan();
   }
 
+  size_t workspace_size, workspace_alignment;
   status = xnn_reshape_convolution2d_nhwc_f16(
     op28,
     /*batch_size=*/1, /*input_height=*/1, /*input_width=*/1,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+    &workspace_size, &workspace_alignment,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #28" << std::endl;
@@ -1426,7 +1428,7 @@ ExecutionPlan FP16SparseMobileNetV1(float sparsity, pthreadpool_t threadpool) {
 
   status = xnn_setup_convolution2d_nhwc_f16(
     op28,
-    /*input=*/v28.data(), /*output=*/v29.data());
+    /*workspace=*/nullptr, /*input=*/v28.data(), /*output=*/v29.data());
   if (status != xnn_status_success) {
     std::cerr << "failed to setup operation #28" << std::endl;
     return ExecutionPlan();

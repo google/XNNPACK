@@ -14,6 +14,7 @@
 #include <vector>     // For std::vector.
 
 #include <xnnpack.h>
+#include <xnnpack/aligned-allocator.h>
 #include <xnnpack/operator.h>
 #include <xnnpack/operator-utils.h>
 #include <xnnpack/requantization.h>
@@ -500,12 +501,17 @@ TEST_F(ConvolutionTestQC8, matches_operator_api)
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
-  ASSERT_EQ(
+  size_t workspace_size = SIZE_MAX;
+  size_t workspace_alignment = SIZE_MAX;
+   ASSERT_EQ(
     xnn_status_success, xnn_reshape_convolution2d_nhwc_qs8_qc8w(
                           op, batch_size, input_height, input_width,
                           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                          &workspace_size, &workspace_alignment,
                           /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8_qc8w(op, input.data(), operator_output.data()));
+  ASSERT_EQ(workspace_size, 0);
+  ASSERT_EQ(workspace_alignment, 1);
+  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8_qc8w(op, /*workspace=*/nullptr, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -631,12 +637,17 @@ TEST_F(ConvolutionTestQS8, matches_operator_api)
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
+  size_t workspace_size = SIZE_MAX;
+  size_t workspace_alignment = SIZE_MAX;
   ASSERT_EQ(
     xnn_status_success, xnn_reshape_convolution2d_nhwc_qs8(
                           op, batch_size, input_height, input_width,
                           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                          &workspace_size, &workspace_alignment,
                           /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(op, input.data(), operator_output.data()));
+  ASSERT_EQ(workspace_size, 0);
+  ASSERT_EQ(workspace_alignment, 1);
+  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(op, /*workspace=*/nullptr, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -765,12 +776,17 @@ TEST_F(ConvolutionTestQU8, matches_operator_api)
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
+  size_t workspace_size = SIZE_MAX;
+  size_t workspace_alignment = SIZE_MAX;
   ASSERT_EQ(
     xnn_status_success, xnn_reshape_convolution2d_nhwc_qu8(
                           op, batch_size, input_height, input_width,
                           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                          &workspace_size, &workspace_alignment,
                           /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(op, input.data(), operator_output.data()));
+  ASSERT_EQ(workspace_size, 0);
+  ASSERT_EQ(workspace_alignment, 1);
+  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(op, /*workspace=*/nullptr, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -854,12 +870,17 @@ TEST_F(ConvolutionTestF32, matches_operator_api)
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
+  size_t workspace_size = SIZE_MAX;
+  size_t workspace_alignment = SIZE_MAX;
   ASSERT_EQ(
     xnn_status_success, xnn_reshape_convolution2d_nhwc_f32(
                           op, batch_size, input_height, input_width,
                           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                          &workspace_size, &workspace_alignment,
                           /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(op, input.data(), operator_output.data()));
+  ASSERT_EQ(workspace_size, 0);
+  ASSERT_EQ(workspace_alignment, 1);
+  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(op, /*workspace=*/nullptr, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -900,6 +921,101 @@ TEST_F(ConvolutionTestF32, matches_operator_api)
       kernel_width, subsampling_height, subsampling_width, dilation_height, dilation_width, groups,
       group_input_channels, group_output_channels, output_min, output_max, input_id, filter_id, bias_id, output_id,
       /*flags=*/0));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::array<xnn_external_value, 2> external = {
+    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  // Check outputs match.
+  for (size_t i = 0; i < operator_output.size(); i++) {
+    ASSERT_EQ(subgraph_output[i], operator_output[i]);
+  }
+}
+
+TEST_F(ConvolutionTestF32, transient_indirection_buffer)
+{
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  xnn_operator_t op = nullptr;
+
+  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+  std::generate(filter.begin(), filter.end(), [&]() { return f32dist(rng); });
+  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
+
+  // Call operator API.
+  const xnn_status status = xnn_create_convolution2d_nhwc_f32(
+    input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, kernel_height, kernel_width,
+    subsampling_height, subsampling_width, dilation_height, dilation_width, groups, group_input_channels,
+    group_output_channels, groups * group_input_channels, groups * group_output_channels, filter.data(), bias.data(),
+    output_min, output_max,
+    /*flags=*/XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER, nullptr, nullptr, &op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, op);
+  size_t workspace_size = 0;
+  size_t workspace_alignment = 1;
+  ASSERT_EQ(
+    xnn_status_success, xnn_reshape_convolution2d_nhwc_f32(
+                          op, batch_size, input_height, input_width,
+                          /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
+                          &workspace_size, &workspace_alignment,
+                          /*threadpool=*/nullptr));
+  ASSERT_NE(workspace_size, 0);
+  ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(op, workspace.data(), input.data(), operator_output.data()));
+
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
+
+  // Call subgraph API.
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
+                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
+
+  uint32_t filter_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, filter_dims.size(), filter_dims.data(), filter.data(),
+                          /*external_id=*/1, /*flags=*/0, &filter_id));
+
+  uint32_t bias_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
+                          /*external_id=*/2, /*flags=*/0, &bias_id));
+
+  uint32_t output_id = XNN_INVALID_NODE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
+                          /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_define_convolution_2d(
+      subgraph, input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, kernel_height,
+      kernel_width, subsampling_height, subsampling_width, dilation_height, dilation_width, groups,
+      group_input_channels, group_output_channels, output_min, output_max, input_id, filter_id, bias_id, output_id,
+      /*flags=*/XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
