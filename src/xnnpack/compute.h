@@ -24,6 +24,7 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_2d_tile_2d,
   xnn_parallelization_type_3d,
   xnn_parallelization_type_3d_tile_1d,
+  xnn_parallelization_type_3d_tile_1d_with_thread,
   xnn_parallelization_type_3d_tile_2d,
   xnn_parallelization_type_4d,
   xnn_parallelization_type_4d_tile_2d,
@@ -34,6 +35,7 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_2d_tile_1d_with_uarch,
   xnn_parallelization_type_2d_tile_2d_with_uarch,
   xnn_parallelization_type_3d_tile_1d_with_uarch,
+  xnn_parallelization_type_3d_tile_1d_with_uarch_with_thread,
   xnn_parallelization_type_3d_tile_2d_with_uarch,
   xnn_parallelization_type_4d_tile_2d_with_uarch,
 #endif  // XNN_MAX_UARCH_TYPES > 1
@@ -49,6 +51,7 @@ struct compute_parameters {
     pthreadpool_task_2d_tile_2d_t task_2d_tile_2d;
     pthreadpool_task_3d_t task_3d;
     pthreadpool_task_3d_tile_1d_t task_3d_tile_1d;
+    pthreadpool_task_3d_tile_1d_with_thread_t task_3d_tile_1d_with_thread;
     pthreadpool_task_3d_tile_2d_t task_3d_tile_2d;
     pthreadpool_task_4d_t task_4d;
     pthreadpool_task_4d_tile_2d_t task_4d_tile_2d;
@@ -59,6 +62,7 @@ struct compute_parameters {
     pthreadpool_task_2d_tile_1d_with_id_t task_2d_tile_1d_with_id;
     pthreadpool_task_2d_tile_2d_with_id_t task_2d_tile_2d_with_id;
     pthreadpool_task_3d_tile_1d_with_id_t task_3d_tile_1d_with_id;
+    pthreadpool_task_3d_tile_1d_with_id_with_thread_t task_3d_tile_1d_with_id_with_thread;
     pthreadpool_task_3d_tile_2d_with_id_t task_3d_tile_2d_with_id;
     pthreadpool_task_4d_tile_2d_with_id_t task_4d_tile_2d_with_id;
 #endif  // XNN_MAX_UARCH_TYPES > 1
@@ -1489,6 +1493,7 @@ struct scaled_dot_product_attention_context {
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_scaled_dot_product_attention(
       const struct scaled_dot_product_attention_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t thread_index,
       size_t batch_index,
       size_t head_index,
       size_t tokens_start,
@@ -1496,6 +1501,7 @@ struct scaled_dot_product_attention_context {
   XNN_PRIVATE void xnn_compute_hmp_scaled_dot_product_attention(
       const struct scaled_dot_product_attention_context context[restrict XNN_MIN_ELEMENTS(1)],
       uint32_t uarch_index,
+      size_t thread_index,
       size_t batch_index,
       size_t head_index,
       size_t tokens_start,

@@ -1111,6 +1111,7 @@ void xnn_compute_pad_5d(
 
 void xnn_compute_scaled_dot_product_attention(
   const struct scaled_dot_product_attention_context* context,
+  size_t thread_index,
   size_t batch_index,
   size_t head_index,
   size_t tokens_start,
@@ -1771,6 +1772,7 @@ void xnn_compute_rope(
 void xnn_compute_hmp_scaled_dot_product_attention(
   const struct scaled_dot_product_attention_context* context,
   uint32_t uarch_index,
+  size_t thread_index,
   size_t batch_index,
   size_t head_index,
   size_t tokens_start,
@@ -2042,6 +2044,19 @@ enum xnn_status xnn_run_operator_with_index(
             op->compute[i].tile[0],
             flags);
         break;
+      case xnn_parallelization_type_3d_tile_1d_with_thread:
+        assert(op->compute[i].range[0] != 0);
+        assert(op->compute[i].range[1] != 0);
+        assert(op->compute[i].range[2] != 0);
+        assert(op->compute[i].tile[0] != 0);
+        pthreadpool_parallelize_3d_tile_1d_with_thread(
+            threadpool,
+            op->compute[i].task_3d_tile_1d_with_thread,
+            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2],
+            op->compute[i].tile[0],
+            flags);
+        break;
       case xnn_parallelization_type_3d_tile_2d:
         assert(op->compute[i].range[0] != 0);
         assert(op->compute[i].range[1] != 0);
@@ -2168,6 +2183,20 @@ enum xnn_status xnn_run_operator_with_index(
         pthreadpool_parallelize_3d_tile_1d_with_uarch(
             threadpool,
             op->compute[i].task_3d_tile_1d_with_id,
+            (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
+            0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
+            op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2],
+            op->compute[i].tile[0],
+            flags);
+        break;
+      case xnn_parallelization_type_3d_tile_1d_with_uarch_with_thread:
+        assert(op->compute[i].range[0] != 0);
+        assert(op->compute[i].range[1] != 0);
+        assert(op->compute[i].range[2] != 0);
+        assert(op->compute[i].tile[0] != 0);
+        pthreadpool_parallelize_3d_tile_1d_with_uarch_with_thread(
+            threadpool,
+            op->compute[i].task_3d_tile_1d_with_id_with_thread,
             (void*) ((uintptr_t) &op->context + op->compute[i].context_offset),
             0 /* default uarch index */, XNN_MAX_UARCH_TYPES - 1,
             op->compute[i].range[0], op->compute[i].range[1], op->compute[i].range[2],

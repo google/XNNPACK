@@ -553,15 +553,18 @@ static enum xnn_status reshape_scaled_dot_product_attention_nhtc(
 
   #if XNN_MAX_UARCH_TYPES > 1
   if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
-    attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d_with_uarch;
-    attention_op->compute[2].task_3d_tile_1d_with_id = (pthreadpool_task_3d_tile_1d_with_id_t) xnn_compute_hmp_scaled_dot_product_attention;
+    attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d_with_uarch_with_thread;
+    attention_op->compute[2].task_3d_tile_1d_with_id_with_thread =
+      (pthreadpool_task_3d_tile_1d_with_id_with_thread_t) xnn_compute_hmp_scaled_dot_product_attention;
   } else {
-    attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d;
-    attention_op->compute[2].task_3d_tile_1d = (pthreadpool_task_3d_tile_1d_t) xnn_compute_scaled_dot_product_attention;
+    attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d_with_thread;
+    attention_op->compute[2].task_3d_tile_1d_with_thread =
+      (pthreadpool_task_3d_tile_1d_with_thread_t) xnn_compute_scaled_dot_product_attention;
   }
   #else
-    attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d;
-    attention_op->compute[2].task_3d_tile_1d = (pthreadpool_task_3d_tile_1d_t) xnn_compute_scaled_dot_product_attention;
+    attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d_with_thread;
+    attention_op->compute[2].task_3d_tile_1d_with_thread =
+      (pthreadpool_task_3d_tile_1d_with_thread_t) xnn_compute_scaled_dot_product_attention;
   #endif  // XNN_MAX_UARCH_TYPES > 1
 
   attention_op->compute[2].range[0] = batch_size;
