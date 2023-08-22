@@ -8,6 +8,7 @@
 #include "truncation-operator-tester.h"
 
 
+#ifndef XNN_EXCLUDE_F16_TESTS
 TEST(TRUNCATION_NC_F16, unit_batch) {
   for (size_t channels = 1; channels < 100; channels++) {
     TruncationOperatorTester()
@@ -61,6 +62,7 @@ TEST(TRUNCATION_NC_F16, small_batch_with_input_and_output_stride) {
       .TestF16();
   }
 }
+#endif  // XNN_EXCLUDE_F16_TESTS
 
 
 TEST(TRUNCATION_NC_F32, unit_batch) {

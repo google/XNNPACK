@@ -10,6 +10,7 @@
 #include "prelu-operator-tester.h"
 
 
+#ifndef XNN_EXCLUDE_F16_TESTS
 TEST(PRELU_NC_F16, unit_batch) {
   const struct xnn_prelu_config* prelu_config = xnn_init_f16_prelu_config();
   if (prelu_config == nullptr) {
@@ -193,6 +194,8 @@ TEST(PRELU_NC_F16, weights_cache_fp32_weights) {
       .TestF16();
   }
 }
+#endif  // XNN_EXCLUDE_F16_TESTS
+
 
 TEST(PRELU_NC_F32, unit_batch) {
   const struct xnn_prelu_config* prelu_config = xnn_init_f32_prelu_config();

@@ -13,6 +13,7 @@
 #include "leaky-relu-operator-tester.h"
 
 
+#ifndef XNN_EXCLUDE_F16_TESTS
 TEST(LEAKY_RELU_NC_F16, unit_batch) {
   for (size_t channels = 1; channels < 100; channels++) {
     LeakyReLUOperatorTester()
@@ -81,6 +82,7 @@ TEST(LEAKY_RELU_NC_F16, small_batch_with_negative_slope) {
     }
   }
 }
+#endif  // XNN_EXCLUDE_F16_TESTS
 
 
 TEST(LEAKY_RELU_NC_F32, unit_batch) {

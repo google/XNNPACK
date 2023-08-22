@@ -8,6 +8,7 @@
 #include "tanh-operator-tester.h"
 
 
+#ifndef XNN_EXCLUDE_F16_TESTS
 TEST(TANH_NC_F16, unit_batch) {
   for (size_t channels = 1; channels < 100; channels += 15) {
     TanhOperatorTester()
@@ -61,6 +62,7 @@ TEST(TANH_NC_F16, strided_batch) {
       .TestF16();
   }
 }
+#endif  // XNN_EXCLUDE_F16_TESTS
 
 
 TEST(TANH_NC_F32, unit_batch) {

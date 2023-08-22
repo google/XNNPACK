@@ -8,6 +8,7 @@
 #include "elu-operator-tester.h"
 
 
+#ifndef XNN_EXCLUDE_F16_TESTS
 TEST(ELU_NC_F16, unit_batch) {
   for (size_t channels = 1; channels < 100; channels++) {
     ELUOperatorTester()
@@ -76,6 +77,7 @@ TEST(ELU_NC_F16, small_batch_with_alpha) {
     }
   }
 }
+#endif  // XNN_EXCLUDE_F16_TESTS
 
 
 TEST(ELU_NC_F32, unit_batch) {
