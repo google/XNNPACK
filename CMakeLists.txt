@@ -242,7 +242,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/convolution-2d.c
   src/subgraph/copy.c
   src/subgraph/deconvolution-2d.c
-  src/subgraph/depth-to-space.c
+  src/subgraph/depth-to-space-2d.c
   src/subgraph/depthwise-convolution-2d.c
   src/subgraph/divide.c
   src/subgraph/elu.c
@@ -1454,10 +1454,10 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(deconvolution-2d-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph convolution-test-helpers)
     ADD_TEST(NAME deconvolution-2d-test COMMAND deconvolution-2d-test)
 
-    ADD_EXECUTABLE(depth-to-space-test test/depth-to-space.cc)
-    TARGET_INCLUDE_DIRECTORIES(depth-to-space-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(depth-to-space-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
-    ADD_TEST(NAME depth-to-space-test COMMAND depth-to-space-test)
+    ADD_EXECUTABLE(depth-to-space-2d-test test/depth-to-space-2d.cc)
+    TARGET_INCLUDE_DIRECTORIES(depth-to-space-2d-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(depth-to-space-2d-test PRIVATE XNNPACK fp16 gtest gtest_main subgraph)
+    ADD_TEST(NAME depth-to-space-2d-test COMMAND depth-to-space-2d-test)
 
     ADD_EXECUTABLE(depthwise-convolution-2d-test test/depthwise-convolution-2d.cc)
     SET_TARGET_PROPERTIES(depthwise-convolution-2d-test PROPERTIES CXX_EXTENSIONS YES)

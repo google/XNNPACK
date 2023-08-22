@@ -543,20 +543,27 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   uint32_t output_id,
   uint32_t flags);
 
-/// Define a Depth To Space Node and add it to a Subgraph.
+/// Define a Depth To Space Node 2D and add it to a Subgraph.
 ///
-/// The Depth To Space Node rearranges data from depth into blocks of spatial data (a reverse transform to
+/// The Depth To Space 2D Node rearranges data from depth into blocks of spatial data (a reverse transform to
 /// Space To Depth). For a given input pixel, an output square of pixels with side @a block_size is formed from values
 /// in the corresponding number of its channels. The output depth is therefore @a block_size x @a block_size times
 /// smaller than that of the input.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
+/// @param block_size - the size of the spatial block.
 /// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
 ///                   with [N, IH, IW, OC * block_size * block_size] dimensions.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
 ///                    with [N, IH * block_size, IW * block_size, OC] dimensions.
-/// @param block_size - the size of the spatial block.
 /// @param flags - binary features of the input_channels Node. No supported flags are currently defined.
+enum xnn_status xnn_define_depth_to_space_2d(
+  xnn_subgraph_t subgraph,
+  uint32_t block_size,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 enum xnn_status xnn_define_depth_to_space(
   xnn_subgraph_t subgraph,
   uint32_t input_id,

@@ -121,11 +121,11 @@ TEST_F(DepthToSpaceTestQS8, define)
                           output_dims.data(), nullptr, 1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
-  ASSERT_EQ(xnn_status_success, xnn_define_depth_to_space(subgraph, input_id, output_id, block_size, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_depth_to_space_2d(subgraph, block_size, input_id, output_id, /*flags=*/0));
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_depth_to_space);
+  ASSERT_EQ(node->type, xnn_node_type_depth_to_space_2d);
   ASSERT_EQ(node->compute_type, xnn_compute_type_qs8);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
@@ -162,11 +162,11 @@ TEST_F(DepthToSpaceTestQU8, define)
                           output_dims.data(), nullptr, 1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
-  ASSERT_EQ(xnn_status_success, xnn_define_depth_to_space(subgraph, input_id, output_id, block_size, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_depth_to_space_2d(subgraph, block_size, input_id, output_id, /*flags=*/0));
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_depth_to_space);
+  ASSERT_EQ(node->type, xnn_node_type_depth_to_space_2d);
   ASSERT_EQ(node->compute_type, xnn_compute_type_qu8);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
@@ -199,11 +199,11 @@ TEST_F(DepthToSpaceTestF32, define)
                           /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
-  ASSERT_EQ(xnn_status_success, xnn_define_depth_to_space(subgraph, input_id, output_id, block_size, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_depth_to_space_2d(subgraph, block_size, input_id, output_id, /*flags=*/0));
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_depth_to_space);
+  ASSERT_EQ(node->type, xnn_node_type_depth_to_space_2d);
   ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
@@ -263,7 +263,7 @@ TEST_F(DepthToSpaceTestQS8, matches_operator_api)
       /*external_id=*/1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
-  ASSERT_EQ(xnn_status_success, xnn_define_depth_to_space(subgraph, input_id, output_id, block_size, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_depth_to_space_2d(subgraph, block_size, input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -329,7 +329,7 @@ TEST_F(DepthToSpaceTestQU8, matches_operator_api)
       /*external_id=*/1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
-  ASSERT_EQ(xnn_status_success, xnn_define_depth_to_space(subgraph, input_id, output_id, block_size, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_depth_to_space_2d(subgraph, block_size, input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -394,7 +394,7 @@ TEST_F(DepthToSpaceTestF32, matches_operator_api)
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_define_depth_to_space(subgraph, input_id, output_id, block_size, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_depth_to_space_2d(subgraph, block_size, input_id, output_id, /*flags=*/0));
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);

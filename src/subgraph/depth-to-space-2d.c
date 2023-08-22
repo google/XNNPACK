@@ -45,7 +45,7 @@ static enum xnn_status create_depth_to_space_operator(
             output_channel_dim /* output channels */,
             input_channel_dim /* input stride */,
             output_channel_dim /* output stride */,
-            node->params.depth_to_space.block_size,
+            node->params.depth_to_space_2d.block_size,
             node->flags,
             &opdata->operator_objects[0]);
         break;
@@ -54,7 +54,7 @@ static enum xnn_status create_depth_to_space_operator(
             output_channel_dim /* output channels */,
             input_channel_dim /* input stride */,
             output_channel_dim /* output stride */,
-            node->params.depth_to_space.block_size,
+            node->params.depth_to_space_2d.block_size,
             node->flags,
             &opdata->operator_objects[0]);
         break;
@@ -70,7 +70,7 @@ static enum xnn_status create_depth_to_space_operator(
             output_channel_dim /* output channels */,
             input_channel_dim /* input stride */,
             output_channel_dim /* output stride */,
-            node->params.depth_to_space.block_size,
+            node->params.depth_to_space_2d.block_size,
             node->flags,
             &opdata->operator_objects[0]);
         break;
@@ -79,7 +79,7 @@ static enum xnn_status create_depth_to_space_operator(
             output_channel_dim /* output channels */,
             input_channel_dim /* input stride */,
             output_channel_dim /* output stride */,
-            node->params.depth_to_space.block_size,
+            node->params.depth_to_space_2d.block_size,
             node->flags,
             &opdata->operator_objects[0]);
         break;
@@ -89,7 +89,7 @@ static enum xnn_status create_depth_to_space_operator(
             output_channel_dim /* output channels */,
             input_channel_dim /* input stride */,
             output_channel_dim /* output stride */,
-            node->params.depth_to_space.block_size,
+            node->params.depth_to_space_2d.block_size,
             node->flags,
             &opdata->operator_objects[0]);
         break;
@@ -220,25 +220,25 @@ static enum xnn_status setup_depth_to_space_operator(
   }
 }
 
-enum xnn_status xnn_define_depth_to_space(
+enum xnn_status xnn_define_depth_to_space_2d(
   xnn_subgraph_t subgraph,
+  uint32_t block_size,
   uint32_t input_id,
   uint32_t output_id,
-  uint32_t block_size,
   uint32_t flags)
 {
   enum xnn_status status;
-  if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_depth_to_space)) != xnn_status_success) {
+  if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_depth_to_space_2d)) != xnn_status_success) {
     return status;
   }
 
-  if ((status = xnn_subgraph_check_input_node_id(xnn_node_type_depth_to_space, input_id, subgraph->num_values)) !=
+  if ((status = xnn_subgraph_check_input_node_id(xnn_node_type_depth_to_space_2d, input_id, subgraph->num_values)) !=
       xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* input_value = &subgraph->values[input_id];
-  status = xnn_subgraph_check_input_type_dense(xnn_node_type_depth_to_space, input_id, input_value);
+  status = xnn_subgraph_check_input_type_dense(xnn_node_type_depth_to_space_2d, input_id, input_value);
   if (status != xnn_status_success) {
     return status;
   }
@@ -251,18 +251,18 @@ enum xnn_status xnn_define_depth_to_space(
     default:
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_depth_to_space), input_id,
+        xnn_node_type_to_string(xnn_node_type_depth_to_space_2d), input_id,
         xnn_datatype_to_string(input_value->datatype), input_value->datatype);
       return xnn_status_invalid_parameter;
   }
 
-  status = xnn_subgraph_check_output_node_id(xnn_node_type_depth_to_space, output_id, subgraph->num_values);
+  status = xnn_subgraph_check_output_node_id(xnn_node_type_depth_to_space_2d, output_id, subgraph->num_values);
   if (status != xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* output_value = &subgraph->values[output_id];
-  status = xnn_subgraph_check_output_type_dense(xnn_node_type_depth_to_space, output_id, output_value);
+  status = xnn_subgraph_check_output_type_dense(xnn_node_type_depth_to_space_2d, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
@@ -281,20 +281,20 @@ enum xnn_status xnn_define_depth_to_space(
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_depth_to_space), output_id,
+        xnn_node_type_to_string(xnn_node_type_depth_to_space_2d), output_id,
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
       return xnn_status_invalid_parameter;
   }
   assert(compute_type != xnn_compute_type_invalid);
 
   status = xnn_subgraph_check_datatype_matches(
-    xnn_node_type_depth_to_space, input_id, input_value, output_id, output_value);
+    xnn_node_type_depth_to_space_2d, input_id, input_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
 
   status = xnn_subgraph_check_quantization_parameter_matches(
-      xnn_node_type_depth_to_space, input_id, input_value, output_id, output_value);
+      xnn_node_type_depth_to_space_2d, input_id, input_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
@@ -302,7 +302,7 @@ enum xnn_status xnn_define_depth_to_space(
   if (block_size < 2) {
     xnn_log_error(
       "failed to define %s operator with block size #%" PRIu32 ": invalid block_size",
-      xnn_node_type_to_string(xnn_node_type_depth_to_space), block_size);
+      xnn_node_type_to_string(xnn_node_type_depth_to_space_2d), block_size);
     return xnn_status_invalid_parameter;
   }
 
@@ -311,13 +311,13 @@ enum xnn_status xnn_define_depth_to_space(
     return xnn_status_out_of_memory;
   }
 
-  node->type = xnn_node_type_depth_to_space;
+  node->type = xnn_node_type_depth_to_space_2d;
   node->compute_type = compute_type;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
   node->num_outputs = 1;
   node->outputs[0] = output_id;
-  node->params.depth_to_space.block_size = block_size;
+  node->params.depth_to_space_2d.block_size = block_size;
   node->flags = flags;
 
   node->create = create_depth_to_space_operator;
@@ -325,4 +325,14 @@ enum xnn_status xnn_define_depth_to_space(
   node->setup = setup_depth_to_space_operator;
 
   return xnn_status_success;
+}
+
+enum xnn_status xnn_define_depth_to_space(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t block_size,
+  uint32_t flags)
+{
+  return xnn_define_depth_to_space_2d(subgraph, block_size, input_id, output_id, flags);
 }

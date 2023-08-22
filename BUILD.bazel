@@ -129,7 +129,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/convolution-2d.c",
     "src/subgraph/copy.c",
     "src/subgraph/deconvolution-2d.c",
-    "src/subgraph/depth-to-space.c",
+    "src/subgraph/depth-to-space-2d.c",
     "src/subgraph/depthwise-convolution-2d.c",
     "src/subgraph/divide.c",
     "src/subgraph/elu.c",
@@ -10840,9 +10840,9 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "depth_to_space_test",
+    name = "depth_to_space_2d_test",
     srcs = [
-        "test/depth-to-space.cc",
+        "test/depth-to-space-2d.cc",
     ],
     deps = [
         ":XNNPACK_test_mode",

@@ -37,8 +37,8 @@
   string: "Copy"
 - name: xnn_node_type_deconvolution_2d
   string: "Deconvolution 2D"
-- name: xnn_node_type_depth_to_space
-  string: "Depth To Space"
+- name: xnn_node_type_depth_to_space_2d
+  string: "Depth To Space 2D"
 - name: xnn_node_type_depthwise_convolution_2d
   string: "Depthwise Convolution 2D"
 - name: xnn_node_type_divide

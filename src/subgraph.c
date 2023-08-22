@@ -406,7 +406,7 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
         default:
           return 0;
       }
-    case xnn_node_type_depth_to_space:
+    case xnn_node_type_depth_to_space_2d:
       return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC;
     case xnn_node_type_global_average_pooling_2d:
       return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW | XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC;
@@ -749,7 +749,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_convolution_2d:
       case xnn_node_type_deconvolution_2d:
       case xnn_node_type_depthwise_convolution_2d:
-      case xnn_node_type_depth_to_space:
+      case xnn_node_type_depth_to_space_2d:
       case xnn_node_type_elu:
       case xnn_node_type_even_split2:
       case xnn_node_type_even_split3:
