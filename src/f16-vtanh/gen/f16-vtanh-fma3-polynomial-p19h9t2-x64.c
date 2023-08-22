@@ -210,7 +210,7 @@ void xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x64(
     o += 8;
   }
   if (batch != 0) {
-    __m256 vx = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) i));
+    __m256 vx = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
 
     vx = _mm256_max_ps(vneg_sat_cutoff, vx);
     vx = _mm256_min_ps(vpos_sat_cutoff, vx);
