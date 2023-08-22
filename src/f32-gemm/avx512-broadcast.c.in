@@ -105,9 +105,9 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           const __m512 vb${ABC[N:N+16]} = _mm512_loadu_ps(w + ${N});
         w += ${NR};
       $else:
-        const __m512i vbi${ABC[0:16]} = _mm512_cvtepi8_epi32(_mm_loadu_epi8(w));
+        const __m512i vbi${ABC[0:16]} = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) w));
         $for N in range(16, NR, 16):
-          const __m512i vbi${ABC[N:N+16]}  = _mm512_cvtepi8_epi32(_mm_loadu_epi8((const int8_t*) w + ${N}));
+          const __m512i vbi${ABC[N:N+16]}  = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) ((const int8_t*) w + ${N})));
         $for N in range(0, NR, 16):
           const __m512 vb${ABC[N:N+16]}  = _mm512_cvtepi32_ps(vbi${ABC[N:N+16]});
         w = (const int8_t*) w + ${NR};
