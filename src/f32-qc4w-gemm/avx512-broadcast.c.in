@@ -87,9 +87,9 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           const __m512 va${M}c${L} = _mm512_set1_ps(*a${M});
           a${M} += 1;
 
-      const __m512i vbi${ABC[0:16]}c01 = _mm512_cvtepu8_epi32(_mm_loadu_epi32((const void*) w));
+      const __m512i vbi${ABC[0:16]}c01 = _mm512_cvtepu8_epi32(_mm_loadu_si128((const __m128i*) w));
       $for N in range(16, NR, 16):
-        const __m512i vbi${ABC[N:N+16]}c01 = _mm512_cvtepu8_epi32(_mm_loadu_epi32((const void*) ((const int8_t*) w + ${N})));
+        const __m512i vbi${ABC[N:N+16]}c01 = _mm512_cvtepu8_epi32(_mm_loadu_si128((const __m128i*) ((const int8_t*) w + ${N})));
       w = (const int8_t*) w + ${NR};
 
       $for L in range(2):
@@ -111,9 +111,9 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         const __m512 va${M} = _mm512_set1_ps(*a${M});
         a${M} += 1;
 
-      const __m512i vbi${ABC[0:16]} = _mm512_cvtepu8_epi32(_mm_loadu_epi32((const void*) w));
+      const __m512i vbi${ABC[0:16]} = _mm512_cvtepu8_epi32(_mm_loadu_si128((const __m128i*) w));
       $for N in range(16, NR, 16):
-        const __m512i vbi${ABC[N:N+16]} = _mm512_cvtepu8_epi32(_mm_loadu_epi32((const void*) ((const int8_t*) w + ${N})));
+        const __m512i vbi${ABC[N:N+16]} = _mm512_cvtepu8_epi32(_mm_loadu_si128((const __m128i*) ((const int8_t*) w + ${N})));
       w = (const int8_t*) w + ${NR};
 
       $for N in range(0, NR, 16):
