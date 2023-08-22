@@ -121,6 +121,7 @@ class IndirectionTester {
     op.padding_top = padding_height_ / 2;
     op.padding_left = padding_width_ / 2;
     xnn_indirection_init_dwconv2d(
+      /*output_y_start=*/0, /*output_y_end=*/output_height,
       op.indirection_buffer,
       op.input,
       op.input_pixel_stride << /*log2_input_element_size=*/2,

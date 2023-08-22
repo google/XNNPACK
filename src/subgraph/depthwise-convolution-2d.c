@@ -585,7 +585,7 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
     return status;
   }
 
-  const uint32_t supported_flags = XNN_FLAG_TENSORFLOW_SAME_PADDING;
+  const uint32_t supported_flags = XNN_FLAG_TENSORFLOW_SAME_PADDING | XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
   const uint32_t invalid_flags = flags & ~supported_flags;
   if (invalid_flags != 0) {
     xnn_log_error(

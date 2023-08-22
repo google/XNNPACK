@@ -116,6 +116,7 @@ static void f32_dwconv(benchmark::State& state,
   convolution_op.padding_left       = padding_left;
 
   xnn_indirection_init_dwconv2d(
+    /*output_y_start=*/0, /*output_y_end=*/convolution_op.output_height,
     convolution_op.indirection_buffer,
     convolution_op.input,
     convolution_op.input_pixel_stride << XNN_LOG2_SIZEOF_FLOAT,
@@ -270,6 +271,7 @@ static void f32_dwconv(
   convolution_op.padding_left       = padding_left;
 
   xnn_indirection_init_dwconv2d(
+    /*output_y_start=*/0, /*output_y_end=*/convolution_op.output_height,
     convolution_op.indirection_buffer,
     convolution_op.input,
     convolution_op.input_pixel_stride << XNN_LOG2_SIZEOF_FLOAT,

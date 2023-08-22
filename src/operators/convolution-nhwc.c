@@ -1944,45 +1944,91 @@ static enum xnn_status reshape_dwconv(
   const bool is_unipass = dwconv_ukernel.last_tile == 0;
   const size_t tile_size = dwconv_ukernel.tile_size;
 
-  if (input_size_changed(convolution_op)) {
-    // Micro-kernel will read (tile_size - kernel_size) elements after the end of indirection buffer.
-    const size_t indirection_buffer_size =
-      sizeof(void*) * (tile_size - kernel_size + output_height * step_height);
+  // Micro-kernel will read (tile_size - kernel_size) elements after the end of indirection buffer.
+  const size_t indirection_buffer_size =
+    sizeof(void*) * (tile_size - kernel_size + output_height * step_height);
+  size_t dwconv_compute_index;
+  if (convolution_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) {
+    *workspace_size = indirection_buffer_size;
+    *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
+    dwconv_compute_index = 1;
 
-    const void** indirection_buffer =
-      (const void**) xnn_reallocate_memory(convolution_op->indirection_buffer, indirection_buffer_size);
-    if (indirection_buffer == NULL) {
-      xnn_log_error("failed to allocate %zu bytes for %s operator indirection buffer",
-        indirection_buffer_size, xnn_operator_type_to_string(convolution_op->type));
-      return xnn_status_out_of_memory;
-    }
-    convolution_op->indirection_buffer = indirection_buffer;
-    xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
-      indirection_buffer_size, xnn_operator_type_to_string(convolution_op->type));
+    convolution_op->context.dwconv_indirection_init = (struct dwconv_indirection_init_context) {
+      .zero_buffer = convolution_op->zero_buffer,
+      .input_pixel_stride = convolution_op->input_pixel_stride << log2_input_element_size,
+      .input_height = input_height,
+      .input_width = input_width,
+      .output_height = output_height,
+      .output_width = output_width,
+      .kernel_height = kernel_height,
+      .kernel_width = kernel_width,
+      .stride_height = convolution_op->stride_height,
+      .stride_width = convolution_op->stride_width,
+      .dilation_height = convolution_op->dilation_height,
+      .dilation_width = convolution_op->dilation_width,
+      .input_padding_top = convolution_op->padding_top,
+      .input_padding_left = convolution_op->padding_left,
+      .step_height = step_height,
+      .step_width = step_width,
+      .tile_size = tile_size,
+    };
 
+    convolution_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
+    convolution_op->compute[0].context_offset = offsetof(struct xnn_operator, context.dwconv_indirection_init) - offsetof(struct xnn_operator, context);
+    convolution_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_dwconv_indirection;
+    convolution_op->compute[0].range[0] = output_height;
     #if XNN_TEST_MODE
-      memset(convolution_op->indirection_buffer, 0, indirection_buffer_size);
+      convolution_op->compute[0].tile[0] = output_height;
+    #else
+      if (num_threads > 1) {
+        const size_t target_tiles_per_thread = 5;
+        convolution_op->compute[0].tile[0] = divide_round_up(output_height, num_threads * target_tiles_per_thread);
+      } else {
+        convolution_op->compute[0].tile[0] = output_height;
+      }
     #endif
+  } else {
+    *workspace_size = 0;
+    *workspace_alignment = 1;
+    dwconv_compute_index = 0;
 
-    // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
-    // This offset must be aligned properly because inputs and input offsets need to be aligned.
-    convolution_op->input = (void* ) ((uintptr_t) convolution_op->zero_buffer + XNN_ALLOCATION_ALIGNMENT);
-    convolution_op->last_input = convolution_op->input;
-    convolution_op->last_input_height = convolution_op->input_height;
-    convolution_op->last_input_width = convolution_op->input_width;
+    if (input_size_changed(convolution_op)) {
+      const void** indirection_buffer =
+        (const void**) xnn_reallocate_memory(convolution_op->indirection_buffer, indirection_buffer_size);
+      if (indirection_buffer == NULL) {
+        xnn_log_error("failed to allocate %zu bytes for %s operator indirection buffer",
+          indirection_buffer_size, xnn_operator_type_to_string(convolution_op->type));
+        return xnn_status_out_of_memory;
+      }
+      convolution_op->indirection_buffer = indirection_buffer;
+      xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
+        indirection_buffer_size, xnn_operator_type_to_string(convolution_op->type));
 
-    xnn_indirection_init_dwconv2d(
-      convolution_op->indirection_buffer,
-      convolution_op->input,
-      convolution_op->input_pixel_stride << log2_input_element_size,
-      convolution_op->zero_buffer,
-      convolution_op->input_height, convolution_op->input_width,
-      convolution_op->output_height, convolution_op->output_width,
-      convolution_op->kernel_height, convolution_op->kernel_width,
-      convolution_op->stride_height, convolution_op->stride_width,
-      convolution_op->dilation_height, convolution_op->dilation_width,
-      convolution_op->padding_top, convolution_op->padding_left,
-      step_height, step_width, tile_size);
+      #if XNN_TEST_MODE
+        memset(convolution_op->indirection_buffer, 0, indirection_buffer_size);
+      #endif
+
+      // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
+      // This offset must be aligned properly because inputs and input offsets need to be aligned.
+      convolution_op->input = (void* ) ((uintptr_t) convolution_op->zero_buffer + XNN_ALLOCATION_ALIGNMENT);
+      convolution_op->last_input = convolution_op->input;
+      convolution_op->last_input_height = convolution_op->input_height;
+      convolution_op->last_input_width = convolution_op->input_width;
+
+      xnn_indirection_init_dwconv2d(
+        /*output_y_start=*/0, /*output_y_end=*/convolution_op->output_height,
+        convolution_op->indirection_buffer,
+        convolution_op->input,
+        convolution_op->input_pixel_stride << log2_input_element_size,
+        convolution_op->zero_buffer,
+        convolution_op->input_height, convolution_op->input_width,
+        convolution_op->output_height, convolution_op->output_width,
+        convolution_op->kernel_height, convolution_op->kernel_width,
+        convolution_op->stride_height, convolution_op->stride_width,
+        convolution_op->dilation_height, convolution_op->dilation_width,
+        convolution_op->padding_top, convolution_op->padding_left,
+        step_height, step_width, tile_size);
+    }
   }
 
   const size_t groups = convolution_op->groups;
@@ -2003,23 +2049,20 @@ static enum xnn_status reshape_dwconv(
   };
   memcpy(&convolution_op->context.dwconv.params, &convolution_op->params, sizeof(convolution_op->context.dwconv.params));
 
-  convolution_op->compute[0].type = xnn_parallelization_type_2d;
-  convolution_op->compute[0].range[0] = convolution_op->batch_size;
-  convolution_op->compute[0].range[1] = output_height;
+  convolution_op->compute[dwconv_compute_index].type = xnn_parallelization_type_2d;
+  convolution_op->compute[dwconv_compute_index].range[0] = convolution_op->batch_size;
+  convolution_op->compute[dwconv_compute_index].range[1] = output_height;
   convolution_op->state = xnn_run_state_needs_setup;
 
   if (is_unipass) {
-    convolution_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_unipass;
+    convolution_op->compute[dwconv_compute_index].task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_unipass;
     convolution_op->context.dwconv.unipass_ukernel = convolution_op->ukernel.dwconv.unipass_fn;
   } else {
-    convolution_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_multipass;
+    convolution_op->compute[dwconv_compute_index].task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_multipass;
     convolution_op->context.dwconv.multipass_ukernel = convolution_op->ukernel.dwconv.multipass_fn;
     convolution_op->context.dwconv.buffer_size =
       (groups + (XNN_MULTIPASS_EXTRA_BYTES >> log2_input_element_size)) << log2_accumulator_element_size;
   }
-
-  *workspace_size = 0;
-  *workspace_alignment = 1;
 
   return xnn_status_success;
 }
@@ -2334,29 +2377,41 @@ static enum xnn_status setup_igemm(
 
 static enum xnn_status setup_dwconv(
     xnn_operator_t convolution_op,
+    void* workspace,
     uint32_t log2_input_element_size)
 {
   #if XNN_TEST_MODE
-    const size_t kernel_height = convolution_op->kernel_height;
-    const size_t kernel_width = convolution_op->kernel_width;
-    const size_t kernel_size = kernel_height * kernel_width;
-    const size_t output_width = convolution_op->output_width;
-    const size_t step_width = convolution_op->dilation_width == 1 ?
-        min(convolution_op->stride_width, kernel_width) : kernel_width;
-    const size_t step_height = kernel_size + (output_width - 1) * step_width * kernel_height;
-    const struct xnn_ukernel_dwconv dwconv_ukernel = convolution_op->ukernel.dwconv;
-    const size_t tile_size = dwconv_ukernel.tile_size;
-    const size_t indirection_buffer_size =
-      sizeof(void*) * (tile_size - kernel_size + convolution_op->output_height * step_height);
+    // indirection buffer is only set at this time if it is persistent.
+    if (!(convolution_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER)) {
+      const size_t kernel_height = convolution_op->kernel_height;
+      const size_t kernel_width = convolution_op->kernel_width;
+      const size_t kernel_size = kernel_height * kernel_width;
+      const size_t output_width = convolution_op->output_width;
+      const size_t step_width = convolution_op->dilation_width == 1 ?
+          min(convolution_op->stride_width, kernel_width) : kernel_width;
+      const size_t step_height = kernel_size + (output_width - 1) * step_width * kernel_height;
+      const struct xnn_ukernel_dwconv dwconv_ukernel = convolution_op->ukernel.dwconv;
+      const size_t tile_size = dwconv_ukernel.tile_size;
+      const size_t indirection_buffer_size =
+        sizeof(void*) * (tile_size - kernel_size + convolution_op->output_height * step_height);
 
-    // TODO(zhin): store step_height and step_width, this is already computed in create.
-    for (size_t i = 0; i < indirection_buffer_size / sizeof(void*); i++) {
-      // Indirection initialization should have set all indirection pointers, make sure none of them are NULL.
-      assert(convolution_op->indirection_buffer[i] != NULL);
+      // TODO(zhin): store step_height and step_width, this is already computed in create.
+      for (size_t i = 0; i < indirection_buffer_size / sizeof(void*); i++) {
+        // Indirection initialization should have set all indirection pointers, make sure none of them are NULL.
+        assert(convolution_op->indirection_buffer[i] != NULL);
+      }
     }
   #endif
 
-  convolution_op->context.dwconv.input_offset = (size_t) ((uintptr_t) convolution_op->input - (uintptr_t) convolution_op->last_input);
+  if (convolution_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) {
+    convolution_op->context.dwconv.input_offset = (size_t) 0;
+    convolution_op->context.dwconv.indirect_input = (const void**) workspace;
+    convolution_op->context.dwconv_indirection_init.input = convolution_op->input;
+    convolution_op->context.dwconv_indirection_init.indirection_buffer = (const void**) workspace;
+  } else {
+    convolution_op->context.dwconv.input_offset = (size_t) ((uintptr_t) convolution_op->input - (uintptr_t) convolution_op->last_input);
+  }
+
   convolution_op->context.dwconv.output = convolution_op->output;
   convolution_op->state = xnn_run_state_ready;
 
@@ -2411,7 +2466,7 @@ static enum xnn_status setup_convolution2d_nhwc(
     case xnn_microkernel_type_igemm:
       return setup_igemm(convolution_op, workspace, log2_input_element_size);
     case xnn_microkernel_type_dwconv:
-      return setup_dwconv(convolution_op, log2_input_element_size);
+      return setup_dwconv(convolution_op, workspace, log2_input_element_size);
     case xnn_microkernel_type_vmulcaddc:
       return setup_vmulcaddc(convolution_op);
     default:

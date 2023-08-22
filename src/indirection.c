@@ -197,6 +197,8 @@ void xnn_indirection_init_subconv2d(
 }
 
 void xnn_indirection_init_dwconv2d(
+  size_t output_y_start,
+  size_t output_y_end,
   const void** indirection_buffer,
   const void* input,
   size_t input_pixel_stride,
@@ -217,7 +219,9 @@ void xnn_indirection_init_dwconv2d(
   size_t step_width,
   size_t primary_tile)
 {
-  for (size_t output_y = 0; output_y < output_height; output_y++) {
+  assert(output_y_end <= output_height);
+
+  for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
     for (size_t kernel_y = 0; kernel_y < kernel_height; kernel_y++) {
       const size_t input_y = output_y * stride_height + kernel_y * dilation_height - input_padding_top;
       if (input_y < input_height) {
@@ -244,10 +248,12 @@ void xnn_indirection_init_dwconv2d(
     }
   }
 
-  const void* last_output_pixel = indirection_buffer[output_height * step_height - 1];
-  const size_t last_kernel_index = output_height * step_height - (kernel_height * kernel_width);
-  for (size_t tile_index = kernel_height * kernel_width; tile_index < primary_tile; tile_index++) {
-    indirection_buffer[last_kernel_index + tile_index] = last_output_pixel;
+  if (output_y_end == output_height) {
+    const void* last_output_pixel = indirection_buffer[output_height * step_height - 1];
+    const size_t last_kernel_index = output_height * step_height - (kernel_height * kernel_width);
+    for (size_t tile_index = kernel_height * kernel_width; tile_index < primary_tile; tile_index++) {
+      indirection_buffer[last_kernel_index + tile_index] = last_output_pixel;
+    }
   }
 }
 

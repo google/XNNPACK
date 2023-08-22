@@ -380,7 +380,10 @@ struct xnn_operator {
     struct channel_shuffle_context channel_shuffle;
     struct conv2d_context conv2d;
     struct dwconv2d_context dwconv2d;
-    struct dwconv_context dwconv;
+    struct {
+      struct dwconv_context dwconv;
+      struct dwconv_indirection_init_context dwconv_indirection_init;
+    };
     struct elementwise_binary_context elementwise_binary;
     // PACKW GEMM GOI + GEMM are used together in Dynamic Fully Connected.
     struct {

@@ -773,6 +773,27 @@ void xnn_compute_conv2d_hwc2chw(
       &context->params);
 }
 
+void xnn_compute_dwconv_indirection(
+  const struct dwconv_indirection_init_context context[restrict XNN_MIN_ELEMENTS(1)],
+  size_t output_y_start,
+  size_t output_y_tile)
+{
+  xnn_indirection_init_dwconv2d(
+    output_y_start,
+    output_y_start + output_y_tile,
+    context->indirection_buffer,
+    context->input,
+    context->input_pixel_stride,
+    context->zero_buffer,
+    context->input_height, context->input_width,
+    context->output_height, context->output_width,
+    context->kernel_height, context->kernel_width,
+    context->stride_height, context->stride_width,
+    context->dilation_height, context->dilation_width,
+    context->input_padding_top, context->input_padding_left,
+    context->step_height, context->step_width, context->tile_size);
+}
+
 void xnn_compute_dwconv_unipass(
     const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,

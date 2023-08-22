@@ -809,6 +809,7 @@ static enum xnn_status reshape_average_pooling2d(
       average_pooling_op->input = (void*) ((uintptr_t) average_pooling_op->zero_buffer + XNN_ALLOCATION_ALIGNMENT);
       average_pooling_op->last_input = average_pooling_op->input;
       xnn_indirection_init_dwconv2d(
+        /*output_y_start=*/0, /*output_y_end=*/average_pooling_op->output_height,
         average_pooling_op->indirection_buffer,
         average_pooling_op->input,
         average_pooling_op->input_pixel_stride << log2_data_element_size,

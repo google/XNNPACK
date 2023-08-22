@@ -343,6 +343,19 @@ TEST(CONVOLUTION_NHWC_QC8, grouped_3x3) {
     .TestNHWCxQC8();
 }
 
+TEST(CONVOLUTION_NHWC_QC8, grouped_3x3_transient_indirection) {
+  ConvolutionOperatorTester()
+    .input_size(10, 11)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(14)
+    .group_output_channels(13)
+    .transient_indirection_buffer(true)
+    .iterations(3)
+    .TestNHWCxQC8();
+}
+
 TEST(CONVOLUTION_NHWC_QC8, grouped_3x3_without_padding) {
   ConvolutionOperatorTester()
     .input_size(13, 12)
@@ -600,6 +613,17 @@ TEST(CONVOLUTION_NHWC_QC8, depthwise_3x3) {
     .padding(1, 1)
     .kernel_size(3, 3)
     .groups(27)
+    .iterations(3)
+    .TestNHWCxQC8();
+}
+
+TEST(CONVOLUTION_NHWC_QC8, depthwise_3x3_transient_indirection) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(3, 3)
+    .groups(27)
+    .transient_indirection_buffer(true)
     .iterations(3)
     .TestNHWCxQC8();
 }
@@ -1634,6 +1658,19 @@ TEST(CONVOLUTION_NHWC_QS8, grouped_3x3) {
     .TestNHWCxQS8();
 }
 
+TEST(CONVOLUTION_NHWC_QS8, grouped_3x3_transient_indirection) {
+  ConvolutionOperatorTester()
+    .input_size(10, 11)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(14)
+    .group_output_channels(13)
+    .transient_indirection_buffer(true)
+    .iterations(3)
+    .TestNHWCxQS8();
+}
+
 TEST(CONVOLUTION_NHWC_QS8, grouped_3x3_without_padding) {
   ConvolutionOperatorTester()
     .input_size(13, 12)
@@ -1891,6 +1928,17 @@ TEST(CONVOLUTION_NHWC_QS8, depthwise_3x3) {
     .padding(1, 1)
     .kernel_size(3, 3)
     .groups(27)
+    .iterations(3)
+    .TestNHWCxQS8();
+}
+
+TEST(CONVOLUTION_NHWC_QS8, depthwise_3x3_transient_indirection) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(3, 3)
+    .groups(27)
+    .transient_indirection_buffer(true)
     .iterations(3)
     .TestNHWCxQS8();
 }
@@ -2924,6 +2972,19 @@ TEST(CONVOLUTION_NHWC_QU8, grouped_3x3) {
     .TestNHWCxQU8();
 }
 
+TEST(CONVOLUTION_NHWC_QU8, grouped_3x3_transient_indirection) {
+  ConvolutionOperatorTester()
+    .input_size(10, 11)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(14)
+    .group_output_channels(13)
+    .transient_indirection_buffer(true)
+    .iterations(3)
+    .TestNHWCxQU8();
+}
+
 TEST(CONVOLUTION_NHWC_QU8, grouped_3x3_without_padding) {
   ConvolutionOperatorTester()
     .input_size(13, 12)
@@ -3181,6 +3242,17 @@ TEST(CONVOLUTION_NHWC_QU8, depthwise_3x3) {
     .padding(1, 1)
     .kernel_size(3, 3)
     .groups(27)
+    .iterations(3)
+    .TestNHWCxQU8();
+}
+
+TEST(CONVOLUTION_NHWC_QU8, depthwise_3x3_transient_indirection) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(3, 3)
+    .groups(27)
+    .transient_indirection_buffer(true)
     .iterations(3)
     .TestNHWCxQU8();
 }
@@ -4327,6 +4399,19 @@ TEST(CONVOLUTION_NHWC_F32, grouped_3x3) {
     .TestNHWCxF32();
 }
 
+TEST(CONVOLUTION_NHWC_F32, grouped_3x3_transient_indirection) {
+  ConvolutionOperatorTester()
+    .input_size(10, 11)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(14)
+    .group_output_channels(13)
+    .transient_indirection_buffer(true)
+    .iterations(3)
+    .TestNHWCxF32();
+}
+
 TEST(CONVOLUTION_NHWC_F32, grouped_3x3_without_padding) {
   ConvolutionOperatorTester()
     .input_size(13, 12)
@@ -4813,6 +4898,17 @@ TEST(CONVOLUTION_NHWC_F32, depthwise_3x3) {
     .padding(1, 1)
     .kernel_size(3, 3)
     .groups(24)
+    .iterations(3)
+    .TestNHWCxF32();
+}
+
+TEST(CONVOLUTION_NHWC_F32, depthwise_3x3_transient_indirection) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(3, 3)
+    .groups(24)
+    .transient_indirection_buffer(true)
     .iterations(3)
     .TestNHWCxF32();
 }
@@ -7316,6 +7412,19 @@ TEST(CONVOLUTION_NHWC_F16, grouped_3x3) {
     .TestNHWCxF16();
 }
 
+TEST(CONVOLUTION_NHWC_F16, grouped_3x3_transient_indirection) {
+  ConvolutionOperatorTester()
+    .input_size(10, 11)
+    .padding(1)
+    .kernel_size(3, 3)
+    .groups(2)
+    .group_input_channels(14)
+    .group_output_channels(13)
+    .transient_indirection_buffer(true)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
 TEST(CONVOLUTION_NHWC_F16, grouped_3x3_with_fp32_weights) {
   ConvolutionOperatorTester()
     .weights_type(ConvolutionOperatorTester::WeightsType::FP32)
@@ -7825,6 +7934,17 @@ TEST(CONVOLUTION_NHWC_F16, depthwise_3x3) {
     .padding(1, 1)
     .kernel_size(3, 3)
     .groups(24)
+    .iterations(3)
+    .TestNHWCxF16();
+}
+
+TEST(CONVOLUTION_NHWC_F16, depthwise_3x3_transient_indirection) {
+  ConvolutionOperatorTester()
+    .input_size(15, 14)
+    .padding(1, 1)
+    .kernel_size(3, 3)
+    .groups(24)
+    .transient_indirection_buffer(true)
     .iterations(3)
     .TestNHWCxF16();
 }

@@ -41,6 +41,8 @@ XNN_INTERNAL void xnn_indirection_init_conv2d(
   size_t input_padding_left);
 
 XNN_INTERNAL void xnn_indirection_init_dwconv2d(
+  size_t output_y_start,
+  size_t output_y_end,
   const void** indirection_buffer,
   const void* input,
   size_t input_pixel_stride,

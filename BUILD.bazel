@@ -10000,6 +10000,7 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
+        ":aligned_allocator",
         ":convolution_test_helpers",
     ],
 )
@@ -10012,6 +10013,7 @@ xnnpack_unit_test(
         "test/convolution-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS + [
+        ":aligned_allocator",
         ":convolution_test_helpers",
     ],
 )
@@ -10043,6 +10045,7 @@ xnnpack_unit_test(
     ],
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
+        ":aligned_allocator",
         ":convolution_test_helpers",
     ],
 )
@@ -10859,6 +10862,7 @@ xnnpack_unit_test(
     ],
     deps = [
         ":XNNPACK_test_mode",
+        ":aligned_allocator",
         ":convolution_test_helpers",
         ":operator_utils",
         ":operators_test_mode",
