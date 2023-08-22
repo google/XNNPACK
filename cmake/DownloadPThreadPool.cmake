@@ -13,8 +13,8 @@ PROJECT(pthreadpool-download NONE)
 # LINT.IfChange
 INCLUDE(ExternalProject)
 ExternalProject_Add(pthreadpool
-  URL https://github.com/Maratyszcza/pthreadpool/archive/b1b6536539d5ec04416d41a04af636f50a2f2b7a.zip
-  URL_HASH SHA256=30cb30fb77cd903eda901651e63be8db5e2e33b1d06e4bbdd3f90a9a4432ae9a
+  URL https://github.com/Maratyszcza/pthreadpool/archive/0a4b81c950fa4fb08037ceeaa54d008efdf4e739.zip
+  URL_HASH SHA256=2b4bd93beb478e1919ca81262e9f4998ceaa798bac1c3185ee64be907be1babd
   SOURCE_DIR "${CMAKE_BINARY_DIR}/pthreadpool-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/pthreadpool"
   CONFIGURE_COMMAND ""

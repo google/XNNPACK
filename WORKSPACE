@@ -58,9 +58,9 @@ http_archive(
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    sha256 = "30cb30fb77cd903eda901651e63be8db5e2e33b1d06e4bbdd3f90a9a4432ae9a",
-    strip_prefix = "pthreadpool-b1b6536539d5ec04416d41a04af636f50a2f2b7a",
-    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/b1b6536539d5ec04416d41a04af636f50a2f2b7a.zip"],
+    sha256 = "2b4bd93beb478e1919ca81262e9f4998ceaa798bac1c3185ee64be907be1babd",
+    strip_prefix = "pthreadpool-0a4b81c950fa4fb08037ceeaa54d008efdf4e739",
+    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/0a4b81c950fa4fb08037ceeaa54d008efdf4e739.zip"],
 )
 # LINT.ThenChange(cmake/DownloadPThreadPool.cmake)
 
