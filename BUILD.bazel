@@ -803,7 +803,6 @@ PROD_NEONBF16_AARCH64_MICROKERNEL_SRCS = [
 PROD_NEONDOT_MICROKERNEL_SRCS = [
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c4-minmax-neondot.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x16c4-minmax-neondot.c",
-    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x16c8-minmax-neondot-ld64.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x16c4-minmax-neondot.c",
     "src/qs8-gemm/gen/qs8-gemm-1x8c4-minmax-rndnu-neondot.c",
     "src/qs8-gemm/gen/qs8-gemm-1x16c4-minmax-rndnu-neondot.c",
@@ -829,6 +828,10 @@ PROD_NEONDOT_MICROKERNEL_SRCS = [
     "src/qu8-igemm/gen/qu8-igemm-1x16c4-minmax-rndnu-neondot.c",
     "src/qu8-igemm/gen/qu8-igemm-4x8c4-minmax-rndnu-neondot.c",
     "src/qu8-igemm/gen/qu8-igemm-4x16c4-minmax-rndnu-neondot.c",
+]
+
+PROD_NEONDOT_AARCH64_MICROKERNEL_SRCS = [
+    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x16c8-minmax-aarch64-neondot-ld128.c",
 ]
 
 PROD_NEONI8MM_MICROKERNEL_SRCS = [
@@ -3201,7 +3204,10 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = ["src/amalgam/gen/neondot.c"],
     aarch64_copts = ["-march=armv8.2-a+dotprod"],
-    aarch64_srcs = ["src/amalgam/gen/neondot.c"],
+    aarch64_srcs = [
+        "src/amalgam/gen/neondot-aarch64.c",
+        "src/amalgam/gen/neondot.c",
+    ],
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
@@ -3247,7 +3253,7 @@ xnnpack_cc_library(
     ],
     aarch32_srcs = PROD_NEONDOT_MICROKERNEL_SRCS,
     aarch64_copts = ["-march=armv8.2-a+dotprod"],
-    aarch64_srcs = PROD_NEONDOT_MICROKERNEL_SRCS,
+    aarch64_srcs = PROD_NEONDOT_MICROKERNEL_SRCS + PROD_NEONDOT_AARCH64_MICROKERNEL_SRCS,
     gcc_copts = xnnpack_gcc_std_copts(),
     msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
