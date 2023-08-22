@@ -31,6 +31,18 @@ void _mm_storeu_si16(void* address, __m128i v) {
 #endif  // GCC pre-11, Clang pre-8, Android NDK Clang pre-8.0.7, Apple Clang pre-11, and ICC pre-16
 #endif  // SSE2
 
+#ifdef __AVX__
+#include <immintrin.h>
+
+// GCC pre-10
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ < 10)
+static XNN_INTRINSIC __m256 _mm256_zextps128_ps256(__m128 v) {
+  return _mm256_insertf128_ps(_mm256_setzero_ps(), v, 0);
+}
+#endif  // GCC pre-10
+
+#endif  // __AVX__
+
 #ifdef __AVX512F__
 #include <immintrin.h>
 
@@ -97,6 +109,7 @@ float _mm512_reduce_max_ps(__m512 v) {
 
 #endif  // GCC pre-7, Clang pre-4, and ICC pre-18
 
+// GCC pre-9
 #if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ < 9)
 static XNN_INTRINSIC
 __m512i _mm512_set_epi8(
@@ -129,6 +142,13 @@ __m512i _mm512_set_epi8(
   };
 }
 #endif  // GCC pre-9
+
+// GCC pre-10
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ < 10)
+static XNN_INTRINSIC __m512 _mm512_zextps128_ps512(__m128 v) {
+  return _mm512_insertf32x4(_mm512_setzero_ps(), v, 0);
+}
+#endif  // GCC pre-10
 
 #endif  // __AVX512F__
 

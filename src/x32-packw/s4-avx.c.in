@@ -14,7 +14,6 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <stdint.h>
 
 #include <immintrin.h>
-#include <xmmintrin.h>
 
 #include <xnnpack/packw.h>
 $if PREFETCH:

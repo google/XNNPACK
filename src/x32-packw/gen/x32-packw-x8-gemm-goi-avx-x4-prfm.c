@@ -13,8 +13,8 @@
 #include <stdint.h>
 
 #include <immintrin.h>
-#include <xmmintrin.h>
 
+#include <xnnpack/intrinsics-polyfill.h>
 #include <xnnpack/packw.h>
 #include <xnnpack/prefetch.h>
 
