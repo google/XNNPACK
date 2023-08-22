@@ -25,7 +25,9 @@ $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if REQUANTIZATION == "FP32" else "neon")
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QS8": "xnn_qs8_conv_minmax_params"}[DATATYPE]
 $OUT_T = "float" if DATATYPE == "QD8" else "int8_t"
-void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c8__neondot(
+$LD_SPEC = "ld128" if LD128 else "ld64"
+$ISA = "aarch64_neondot" if LD128 else "neondot"
+void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c8__${ISA}_${LD_SPEC}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -103,19 +105,52 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           int32x4_t vacc${M}x${ABC[N:N+2]} = vacc0x${ABC[N:N+2]};
 
     size_t k = kc;
-    do {
-      $for M in range(MR):
-        const int8x16_t va${M}c01234567 = vreinterpretq_s8_u64(vld1q_dup_u64((const void*) a${M})); a${M} += 8;
+    $if LD128:
+      for (; k >= 16 * sizeof(int8_t); k -= 16 * sizeof(int8_t)) {
+        $for M in range(MR):
+          const uint64x2x2_t va${M}c0123456789ABCDEF = vld2q_dup_u64((const void*) a${M}); a${M} += 16;
 
-      $for N in range(0, NR, 2):
-        const int8x16_t vb${ABC[N:N+2]}c01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
-
-      $for M in range(MR):
         $for N in range(0, NR, 2):
-          vacc${M}x${ABC[N:N+2]} = vdotq_s32(vacc${M}x${ABC[N:N+2]}, vb${ABC[N:N+2]}c01234567, va${M}c01234567);
+          const int8x16_t vb${ABC[N:N+2]}c01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
 
-      k -= 8 * sizeof(int8_t);
-    } while (k != 0);
+        $for M in range(MR):
+          $for N in range(0, NR, 2):
+            vacc${M}x${ABC[N:N+2]} = vdotq_s32(vacc${M}x${ABC[N:N+2]}, vb${ABC[N:N+2]}c01234567, vreinterpretq_s8_u64(va${M}c0123456789ABCDEF.val[0]));
+
+        $for N in range(0, NR, 2):
+          const int8x16_t vb${ABC[N:N+2]}c89ABCDEF = vld1q_s8(w); w = (const int8_t*) w + 16;
+
+        $for M in range(MR):
+          $for N in range(0, NR, 2):
+            vacc${M}x${ABC[N:N+2]} = vdotq_s32(vacc${M}x${ABC[N:N+2]}, vb${ABC[N:N+2]}c89ABCDEF, vreinterpretq_s8_u64(va${M}c0123456789ABCDEF.val[1]));
+      }
+      if XNN_LIKELY(k != 0) {
+        assert(k == 8 * sizeof(int8_t));
+
+        $for M in range(MR):
+          const int8x16_t va${M}c01234567 = vreinterpretq_s8_u64(vld1q_dup_u64((const void*) a${M})); a${M} += 8;
+
+        $for N in range(0, NR, 2):
+          const int8x16_t vb${ABC[N:N+2]}c01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+
+        $for M in range(MR):
+          $for N in range(0, NR, 2):
+            vacc${M}x${ABC[N:N+2]} = vdotq_s32(vacc${M}x${ABC[N:N+2]}, vb${ABC[N:N+2]}c01234567, va${M}c01234567);
+      }
+    $else:
+      do {
+        $for M in range(MR):
+          const int8x16_t va${M}c01234567 = vreinterpretq_s8_u64(vld1q_dup_u64((const void*) a${M})); a${M} += 8;
+
+        $for N in range(0, NR, 2):
+          const int8x16_t vb${ABC[N:N+2]}c01234567 = vld1q_s8(w); w = (const int8_t*) w + 16;
+
+        $for M in range(MR):
+          $for N in range(0, NR, 2):
+            vacc${M}x${ABC[N:N+2]} = vdotq_s32(vacc${M}x${ABC[N:N+2]}, vb${ABC[N:N+2]}c01234567, va${M}c01234567);
+
+        k -= 8 * sizeof(int8_t);
+      } while (k != 0);
 
     #if XNN_ARCH_ARM64
       $for M in range(MR):

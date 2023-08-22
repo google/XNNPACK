@@ -523,90 +523,6 @@ static void ruy_st(benchmark::State& state, const char* net)
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
 
 
-#if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  static void qs8_gemm_1x8c4__neondot(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c4__neondot,
-      xnn_init_qs8_conv_minmax_rndnu_neon_params,
-      /*mr=*/1, /*nr=*/8, /*kr=*/4, /*sr=*/1,
-      benchmark::utils::CheckNEONDOT);
-  }
-  static void qs8_gemm_1x8c8__neondot(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__neondot,
-      xnn_init_qs8_conv_minmax_rndnu_neon_params,
-      /*mr=*/1, /*nr=*/8, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckNEONDOT);
-  }
-  static void qs8_gemm_4x8c4__neondot(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__neondot,
-      xnn_init_qs8_conv_minmax_rndnu_neon_params,
-      /*mr=*/4, /*nr=*/8, /*kr=*/4, /*sr=*/1,
-      benchmark::utils::CheckNEONDOT);
-  }
-  static void qs8_gemm_6x8c4__neondot(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qs8_gemm_minmax_rndnu_ukernel_6x8c4__neondot,
-      xnn_init_qs8_conv_minmax_rndnu_neon_params,
-      /*mr=*/6, /*nr=*/8, /*kr=*/4, /*sr=*/1,
-      benchmark::utils::CheckNEONDOT);
-  }
-  static void qs8_gemm_8x8c4__neondot(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qs8_gemm_minmax_rndnu_ukernel_8x8c4__neondot,
-      xnn_init_qs8_conv_minmax_rndnu_neon_params,
-      /*mr=*/8, /*nr=*/8, /*kr=*/4, /*sr=*/1,
-      benchmark::utils::CheckNEONDOT);
-  }
-  static void qs8_gemm_1x16c4__neondot(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c4__neondot,
-      xnn_init_qs8_conv_minmax_rndnu_neon_params,
-      /*mr=*/1, /*nr=*/16, /*kr=*/4, /*sr=*/1,
-      benchmark::utils::CheckNEONDOT);
-  }
-  static void qs8_gemm_1x16c8__neondot(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c8__neondot,
-      xnn_init_qs8_conv_minmax_rndnu_neon_params,
-      /*mr=*/1, /*nr=*/16, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckNEONDOT);
-  }
-  static void qs8_gemm_4x16c4__neondot(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__neondot,
-      xnn_init_qs8_conv_minmax_rndnu_neon_params,
-      /*mr=*/4, /*nr=*/16, /*kr=*/4, /*sr=*/1,
-      benchmark::utils::CheckNEONDOT);
-  }
-  static void qs8_gemm_6x16c4__neondot(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qs8_gemm_minmax_rndnu_ukernel_6x16c4__neondot,
-      xnn_init_qs8_conv_minmax_rndnu_neon_params,
-      /*mr=*/6, /*nr=*/16, /*kr=*/4, /*sr=*/1,
-      benchmark::utils::CheckNEONDOT);
-  }
-  static void qs8_gemm_8x16c4__neondot(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qs8_gemm_minmax_rndnu_ukernel_8x16c4__neondot,
-      xnn_init_qs8_conv_minmax_rndnu_neon_params,
-      /*mr=*/8, /*nr=*/16, /*kr=*/4, /*sr=*/1,
-      benchmark::utils::CheckNEONDOT);
-  }
-
-  BENCHMARK_GEMM(qs8_gemm_1x8c4__neondot)
-  BENCHMARK_GEMM(qs8_gemm_1x8c8__neondot)
-  BENCHMARK_GEMM(qs8_gemm_4x8c4__neondot)
-  BENCHMARK_GEMM(qs8_gemm_6x8c4__neondot)
-  BENCHMARK_GEMM(qs8_gemm_8x8c4__neondot)
-  BENCHMARK_GEMM(qs8_gemm_1x16c4__neondot)
-  BENCHMARK_GEMM(qs8_gemm_1x16c8__neondot)
-  BENCHMARK_GEMM(qs8_gemm_4x16c4__neondot)
-  BENCHMARK_GEMM(qs8_gemm_6x16c4__neondot)
-  BENCHMARK_GEMM(qs8_gemm_8x16c4__neondot)
-#endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-
 #if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
   static void qs8_gemm_2x8c8__neoni8mm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
@@ -674,6 +590,110 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(qs8_gemm_6x16c8__neoni8mm)
   BENCHMARK_GEMM(qs8_gemm_8x16c8__neoni8mm)
 #endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+
+#if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64
+  static void qs8_gemm_1x8c8__aarch64_neondot_ld128(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__aarch64_neondot_ld128,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/1, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+  static void qs8_gemm_1x16c8__aarch64_neondot_ld128(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c8__aarch64_neondot_ld128,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/1, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+
+  BENCHMARK_GEMM(qs8_gemm_1x8c8__aarch64_neondot_ld128)
+  BENCHMARK_GEMM(qs8_gemm_1x16c8__aarch64_neondot_ld128)
+#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64
+
+#if XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+  static void qs8_gemm_1x8c4__neondot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c4__neondot,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/1, /*nr=*/8, /*kr=*/4, /*sr=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+  static void qs8_gemm_1x8c8__neondot_ld64(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x8c8__neondot_ld64,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/1, /*nr=*/8, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+  static void qs8_gemm_4x8c4__neondot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_4x8c4__neondot,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/4, /*nr=*/8, /*kr=*/4, /*sr=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+  static void qs8_gemm_6x8c4__neondot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_6x8c4__neondot,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/6, /*nr=*/8, /*kr=*/4, /*sr=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+  static void qs8_gemm_8x8c4__neondot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_8x8c4__neondot,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/8, /*nr=*/8, /*kr=*/4, /*sr=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+  static void qs8_gemm_1x16c4__neondot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c4__neondot,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/1, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+  static void qs8_gemm_1x16c8__neondot_ld64(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_1x16c8__neondot_ld64,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/1, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+  static void qs8_gemm_4x16c4__neondot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_4x16c4__neondot,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/4, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+  static void qs8_gemm_6x16c4__neondot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_6x16c4__neondot,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/6, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+  static void qs8_gemm_8x16c4__neondot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qs8_gemm_minmax_rndnu_ukernel_8x16c4__neondot,
+      xnn_init_qs8_conv_minmax_rndnu_neon_params,
+      /*mr=*/8, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+
+  BENCHMARK_GEMM(qs8_gemm_1x8c4__neondot)
+  BENCHMARK_GEMM(qs8_gemm_1x8c8__neondot_ld64)
+  BENCHMARK_GEMM(qs8_gemm_4x8c4__neondot)
+  BENCHMARK_GEMM(qs8_gemm_6x8c4__neondot)
+  BENCHMARK_GEMM(qs8_gemm_8x8c4__neondot)
+  BENCHMARK_GEMM(qs8_gemm_1x16c4__neondot)
+  BENCHMARK_GEMM(qs8_gemm_1x16c8__neondot_ld64)
+  BENCHMARK_GEMM(qs8_gemm_4x16c4__neondot)
+  BENCHMARK_GEMM(qs8_gemm_6x16c4__neondot)
+  BENCHMARK_GEMM(qs8_gemm_8x16c4__neondot)
+#endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   static void qs8_gemm_1x8__neon_mlal_lane(benchmark::State& state, const char* net) {

@@ -15,7 +15,7 @@
 #include <xnnpack/math.h>
 
 
-void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__neondot(
+void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__neondot_ld64(
     size_t mr,
     size_t nc,
     size_t kc,

@@ -121,6 +121,7 @@ def main(args):
   }
   c_microkernels_per_isa = {isa: [] for isa in ISA_LIST if isa not in ISA_MAP}
   c_microkernels_per_isa['neon_aarch64'] = list()
+  c_microkernels_per_isa['neondot_aarch64'] = list()
   c_microkernels_per_isa['neonfma_aarch64'] = list()
   c_microkernels_per_isa['neonfp16arith_aarch64'] = list()
   c_microkernels_per_isa['neonbf16_aarch64'] = list()
