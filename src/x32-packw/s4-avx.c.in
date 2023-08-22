@@ -86,17 +86,9 @@ void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__avx_x${KBLOCK}${"_prfm" if PREFETC
         // Load first 4 rows of N into low part of each register
         $for N in range(0,NR,8):
           $for L in range(4):
-            $if (N+L+4)==(NR-1):
-              // castps leaves upper 128 bits undefined, so zero them.
-              __m256 v${N+L}x0123 = _mm256_zextps128_ps256(_mm_loadu_ps(w${N+L}));
-            $else:
-              __m256 v${N+L}x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w${N+L}));
+            __m256 v${N+L}x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w${N+L}));
             $for K in range(4,KBLOCK,4):
-              $if (N+L+4)==(NR-1):
-                // castps leaves upper 128 bits undefined, so zero them.
-                __m256 v${N+L}x${ABC[K:K+4]} = _mm256_zextps128_ps256(_mm_loadu_ps(w${N+L} + ${K}));
-              $else:
-                __m256 v${N+L}x${ABC[K:K+4]} = _mm256_castps128_ps256(_mm_loadu_ps(w${N+L} + ${K}));
+              __m256 v${N+L}x${ABC[K:K+4]} = _mm256_castps128_ps256(_mm_loadu_ps(w${N+L} + ${K}));
             w${N+L} += ${KBLOCK};
         // Load next 4 rows of N into the high part of each register
         $for N in range(0,NR,8):

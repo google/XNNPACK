@@ -99,8 +99,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x8s4__avx_x4_prfm(
         w1 += 4;
         __m256 v2x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w2));
         w2 += 4;
-        // castps leaves upper 128 bits undefined, so zero them.
-        __m256 v3x0123 = _mm256_zextps128_ps256(_mm_loadu_ps(w3));
+        __m256 v3x0123 = _mm256_castps128_ps256(_mm_loadu_ps(w3));
         w3 += 4;
         // Load next 4 rows of N into the high part of each register
         v0x0123 = _mm256_insertf128_ps(v0x0123, _mm_loadu_ps(w4), 1);
