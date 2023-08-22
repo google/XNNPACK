@@ -244,8 +244,8 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
       $else:
         v128_t vacc = ${WASM_X8X16_NARROW_I16X8}(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
 
-      const v128_t vaccput_max = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.output_max);
-      vacc = ${WASM_X8X16_MIN}(vacc, vaccput_max);
+      const v128_t voutput_max = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.output_max);
+      vacc = ${WASM_X8X16_MIN}(vacc, voutput_max);
 
       if XNN_LIKELY(nc >= 4) {
         $for M in range(MR):

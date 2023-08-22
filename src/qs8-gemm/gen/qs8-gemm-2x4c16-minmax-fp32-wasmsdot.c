@@ -114,14 +114,14 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_2x4c16__wasmsdot(
 
     v128_t vacc01x0123 = wasm_i16x8_narrow_i32x4(vacc0x0123, vacc1x0123);
 
-    v128_t vout = wasm_i8x16_narrow_i16x8(vacc01x0123, vacc01x0123);
+    v128_t vacc = wasm_i8x16_narrow_i16x8(vacc01x0123, vacc01x0123);
 
     const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
-    vout = wasm_i8x16_min(vout, voutput_max);
+    vacc = wasm_i8x16_min(vacc, voutput_max);
 
-    if (nc >= 4) {
-      wasm_v128_store32_lane(c0, vout, 0);
-      wasm_v128_store32_lane(c1, vout, 1);
+    if XNN_LIKELY(nc >= 4) {
+      wasm_v128_store32_lane(c0, vacc, 0);
+      wasm_v128_store32_lane(c1, vacc, 1);
 
       c0 = (int8_t*) ((uintptr_t) c0 + cn_stride);
       c1 = (int8_t*) ((uintptr_t) c1 + cn_stride);
@@ -132,16 +132,16 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_2x4c16__wasmsdot(
       nc -= 4;
     } else {
       if (nc & 2) {
-        wasm_v128_store16_lane(c0, vout, 0);
+        wasm_v128_store16_lane(c0, vacc, 0);
         c0 += 2;
-        wasm_v128_store16_lane(c1, vout, 2);
+        wasm_v128_store16_lane(c1, vacc, 2);
         c1 += 2;
 
-        vout = wasm_u32x4_shr(vout, 16);
+        vacc = wasm_u32x4_shr(vacc, 16);
       }
       if (nc & 1) {
-        wasm_v128_store8_lane(c0, vout, 0);
-        wasm_v128_store8_lane(c1, vout, 4);
+        wasm_v128_store8_lane(c0, vacc, 0);
+        wasm_v128_store8_lane(c1, vacc, 4);
       }
 
       nc = 0;

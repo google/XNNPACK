@@ -87,8 +87,8 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_1x4c2s4__wasmsimd_dot16x2_ld64(
 
     v128_t vacc = wasm_i8x16_narrow_i16x8(vacc00x0123, vacc00x0123);
 
-    const v128_t vaccput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
-    vacc = wasm_i8x16_min(vacc, vaccput_max);
+    const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
+    vacc = wasm_i8x16_min(vacc, voutput_max);
 
     if XNN_LIKELY(nc >= 4) {
       wasm_v128_store32_lane(c0, vacc, 0);
