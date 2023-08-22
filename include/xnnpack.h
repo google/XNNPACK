@@ -1789,9 +1789,12 @@ enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
 /// @param threadpool - the thread pool to be used for parallelisation of computations in the runtime. If the thread
 ///                     pool is NULL, the computation would run on the caller thread without parallelization.
 /// @param flags - binary features of the runtime. The only currently supported values are
-///                XNN_FLAG_HINT_SPARSE_INFERENCE, XNN_FLAG_HINT_FP16_INFERENCE, XNN_FLAG_FORCE_FP16_INFERENCE, and
-///                XNN_FLAG_YIELD_WORKERS. If XNN_FLAG_YIELD_WORKERS is specified, worker threads would be yielded to
-///                the system scheduler after processing the last operator in the Runtime.
+///                XNN_FLAG_HINT_SPARSE_INFERENCE, XNN_FLAG_HINT_FP16_INFERENCE, XNN_FLAG_FORCE_FP16_INFERENCE,
+///                XNN_FLAG_YIELD_WORKERS, and XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER. If XNN_FLAG_YIELD_WORKERS is
+///                specified, worker threads would be yielded to the system scheduler after processing the last operator
+///                in the Runtime. If XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER is specified, convolution operators will
+///                initialize indirection buffers on each inference run using temporary memory in the workspace, instead
+///                of initializing persistent indirection buffers once.
 /// @param runtime_out - pointer to the variable that will be initialized with a handle to the Runtime object upon
 ///                      successful return. Once constructed, the Runtime object is independent of the Subgraph object
 ///                      used to create it.

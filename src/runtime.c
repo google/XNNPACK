@@ -423,6 +423,20 @@ enum xnn_status xnn_create_runtime_v4(
     }
   }
 
+  if (flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) {
+    for (size_t i = 0; i < subgraph->num_nodes; i++) {
+      struct xnn_node* node = subgraph->nodes + i;
+      switch (node->type) {
+        case xnn_node_type_convolution_2d:
+        case xnn_node_type_depthwise_convolution_2d:
+          node->flags |= XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
   struct xnn_code_cache* code_cache = NULL;
   #if XNN_PLATFORM_JIT
     if (flags & XNN_FLAG_JIT) {
