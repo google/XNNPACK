@@ -1403,13 +1403,13 @@ enum xnn_status xnn_define_prelu(
 /// Define a RoPE (Rotary Positional Embeddings) Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param max_sequence_size - maximum possible sequence length of the input/output tensors.
+/// @param max_tokens - maximum possible number of tokens (maximum sequence length) of the input/output tensors.
 /// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
-///                   with [batch, sequence_length, heads, channels] dimensions.
+///                   with [batch, tokens, heads, channels] dimensions.
 /// @param weights_id - Value ID for the weights tensor. The weights tensor must be a 2D tensor defined in the
-///                     @a subgraph with [max_sequence_length, channels] dimensions.
+///                     @a subgraph with [max_tokens, channels] dimensions.
 /// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
-///                    with [batch, sequence_length, heads, channels] dimensions.
+///                    with [batch, tokens, heads, channels] dimensions.
 /// @param flags - binary features of the RoPE Node. No supported flags are currently defined.
 enum xnn_status xnn_define_rope(
   xnn_subgraph_t subgraph,

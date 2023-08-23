@@ -322,7 +322,7 @@ struct xnn_node {
       size_t new_width;
     } static_resize;
     struct {
-      size_t max_sequence_size;
+      size_t max_tokens;
     } rope;
     struct {
       size_t num_dims;
