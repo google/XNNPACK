@@ -160,6 +160,7 @@ def xnnpack_cc_library(
             "//:linux_armv7a": aarch32_copts,
             "//:linux_arm64": aarch64_copts,
             "//:macos_x86_64": gcc_x86_copts,
+            "//:macos_x86_64_legacy": gcc_x86_copts,
             "//:macos_arm64": aarch64_copts,
             "//:windows_x86_64_clang": ["/clang:" + opt for opt in gcc_x86_copts],
             "//:windows_x86_64_mingw": mingw_copts + gcc_x86_copts,
