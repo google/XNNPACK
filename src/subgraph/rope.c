@@ -25,25 +25,11 @@ static enum xnn_status create_rope_operator(
   struct xnn_weights_cache* weights_cache)
 {
   assert(node->num_inputs == 2);
-  const uint32_t input_id = node->inputs[0];
-  assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_values);
-
-  const uint32_t weights_id = node->inputs[1];
-  assert(weights_id != XNN_INVALID_VALUE_ID);
-  assert(weights_id < num_values);
-
   assert(node->num_outputs == 1);
-
-  const size_t num_input_dims = values[input_id].shape.num_dims;
-
-  const void* weights_data = values[weights_id].fp32_data != NULL ? values[weights_id].fp32_data : values[weights_id].data;
 
   assert(node->compute_type == xnn_compute_type_fp32);
   const enum xnn_status status = xnn_create_rope_nthc_f32(
     node->params.rope.max_sequence_size,
-    values[input_id].shape.dim[num_input_dims - 1],
-    weights_data,
     /*flags=*/0,
     &opdata->operator_objects[0]);
   return status;
@@ -57,16 +43,20 @@ static enum xnn_status reshape_rope_operator(
 {
   const uint32_t input_id = opdata->inputs[0];
   assert(input_id < num_values);
+
   const size_t num_input_dims = values[input_id].shape.num_dims;
   const size_t batch_size = xnn_shape_multiply_batch_dims(&values[input_id].shape, 3);
-  const size_t sequence_size = values[input_id].shape.dim[num_input_dims - 3];
+  const size_t tokens = values[input_id].shape.dim[num_input_dims - 3];
   const size_t heads = values[input_id].shape.dim[num_input_dims - 2];
+  const size_t channels = values[input_id].shape.dim[num_input_dims - 1];
+
   assert(opdata->operator_objects[0]->type == xnn_operator_type_rope_nthc_f32);
   return xnn_reshape_rope_nthc_f32(
     opdata->operator_objects[0],
     batch_size,
-    sequence_size,
+    tokens,
     heads,
+    channels,
     threadpool);
 }
 
@@ -80,6 +70,10 @@ static enum xnn_status setup_rope_operator(
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
 
+  const uint32_t weights_id = opdata->inputs[1];
+  assert(weights_id != XNN_INVALID_VALUE_ID);
+  assert(weights_id < num_values);
+
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
@@ -87,6 +81,10 @@ static enum xnn_status setup_rope_operator(
   const struct xnn_value* input_value = values + input_id;
   const void* input_data = input_value->data;
   assert(input_data != NULL);
+
+  const struct xnn_value* weights_value = values + weights_id;
+  const void* weights_data = weights_value->data;
+  assert(weights_data != NULL);
 
   const struct xnn_value* output_value = values + output_id;
   void* output_data = output_value->data;
@@ -96,6 +94,7 @@ static enum xnn_status setup_rope_operator(
   return xnn_setup_rope_nthc_f32(
     opdata->operator_objects[0],
     input_data,
+    weights_data,
     output_data);
 }
 

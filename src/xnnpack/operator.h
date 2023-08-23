@@ -161,7 +161,7 @@ struct xnn_operator {
   size_t group_input_channels;
   size_t group_output_channels;
   size_t channels;
-  size_t max_sequence_size;
+  size_t max_tokens;
 
   uint32_t pad_value;
 
@@ -169,7 +169,6 @@ struct xnn_operator {
   size_t input_width;
   size_t input_pixel_stride;
   const void* input;
-  const void* input2;
   const void** indirection_buffer;
 
   size_t output_height;

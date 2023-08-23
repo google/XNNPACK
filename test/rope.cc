@@ -119,7 +119,7 @@ TEST_F(RoPETestF32, matches_operator_api)
   std::fill(operator_output.begin(), operator_output.end(), nanf(""));
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
-  const xnn_status status = xnn_create_rope_nthc_f32(max_sequence_size, channels, weights.data(), /*flags=*/0, &op);
+  const xnn_status status = xnn_create_rope_nthc_f32(max_sequence_size, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -130,12 +130,12 @@ TEST_F(RoPETestF32, matches_operator_api)
 
   ASSERT_EQ(xnn_status_success,
     xnn_reshape_rope_nthc_f32(op,
-      batch_size, sequence_size, heads,
+      batch_size, sequence_size, heads, channels,
       /*threadpool=*/nullptr));
 
   ASSERT_EQ(xnn_status_success,
     xnn_setup_rope_nthc_f32(op,
-      input.data(), operator_output.data()));
+      input.data(), weights.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

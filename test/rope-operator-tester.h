@@ -142,8 +142,7 @@ class RoPEOperatorTester {
       xnn_operator_t rope_op = nullptr;
 
       const xnn_status status = xnn_create_rope_nthc_f32(
-        tokens(), channels(), weights.data(),
-        /*flags=*/0, &rope_op);
+        /*max_tokens=*/tokens(), /*flags=*/0, &rope_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -156,13 +155,13 @@ class RoPEOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_reshape_rope_nthc_f32(
           rope_op,
-          batch_size(), tokens(), heads(),
+          batch_size(), tokens(), heads(), channels(),
           /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_rope_nthc_f32(
           rope_op,
-          input.data(), output.data()));
+          input.data(), weights.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(rope_op, /*threadpool=*/nullptr));
