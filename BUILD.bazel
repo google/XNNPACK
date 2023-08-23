@@ -103,7 +103,7 @@ OPERATOR_SRCS = [
     "src/operators/reduce-nd.c",
     "src/operators/resize-bilinear-nchw.c",
     "src/operators/resize-bilinear-nhwc.c",
-    "src/operators/rope-nthc.c",
+    "src/operators/rope-ntc.c",
     "src/operators/scaled-dot-product-attention-nhtc.c",
     "src/operators/slice-nd.c",
     "src/operators/softmax-nc.c",
@@ -10360,9 +10360,9 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "rope_nthc_test",
+    name = "rope_ntc_test",
     srcs = [
-        "test/rope-nthc.cc",
+        "test/rope-ntc.cc",
         "test/rope-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS,

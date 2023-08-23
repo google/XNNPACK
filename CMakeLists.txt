@@ -217,7 +217,7 @@ SET(OPERATOR_SRCS
   src/operators/reduce-nd.c
   src/operators/resize-bilinear-nchw.c
   src/operators/resize-bilinear-nhwc.c
-  src/operators/rope-nthc.c
+  src/operators/rope-ntc.c
   src/operators/scaled-dot-product-attention-nhtc.c
   src/operators/slice-nd.c
   src/operators/softmax-nc.c
@@ -1230,10 +1230,10 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(resize-bilinear-nchw-test PRIVATE XNNPACK fp16 gtest gtest_main)
     ADD_TEST(NAME resize-bilinear-nchw-test COMMAND resize-bilinear-nchw-test)
 
-    ADD_EXECUTABLE(rope-nthc-test test/rope-nthc.cc)
-    TARGET_INCLUDE_DIRECTORIES(rope-nthc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(rope-nthc-test PRIVATE XNNPACK fp16 gtest gtest_main)
-    ADD_TEST(NAME rope-nthc-test COMMAND rope-nthc-test)
+    ADD_EXECUTABLE(rope-ntc-test test/rope-ntc.cc)
+    TARGET_INCLUDE_DIRECTORIES(rope-ntc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(rope-ntc-test PRIVATE XNNPACK fp16 gtest gtest_main)
+    ADD_TEST(NAME rope-ntc-test COMMAND rope-ntc-test)
 
     ADD_EXECUTABLE(scaled-dot-product-attention-nhtc-test test/scaled-dot-product-attention-nhtc.cc)
     TARGET_INCLUDE_DIRECTORIES(scaled-dot-product-attention-nhtc-test PRIVATE src test)

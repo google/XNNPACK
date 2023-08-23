@@ -23,7 +23,7 @@
 #include <xnnpack/indirection.h>
 
 
-static enum xnn_status create_rope_nthc(
+static enum xnn_status create_rope_ntc(
     size_t max_tokens,
     uint32_t flags,
     enum xnn_operator_type operator_type,
@@ -74,7 +74,7 @@ error:
   return status;
 }
 
-enum xnn_status xnn_create_rope_nthc_f32(
+enum xnn_status xnn_create_rope_ntc_f32(
   size_t max_tokens,
   uint32_t flags,
   xnn_operator_t* rope_op_out)
@@ -82,24 +82,23 @@ enum xnn_status xnn_create_rope_nthc_f32(
   const struct xnn_cmul_config* config = xnn_init_f32_cmul_config();
   if (config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-                  xnn_operator_type_to_string(xnn_operator_type_rope_nthc_f32));
+                  xnn_operator_type_to_string(xnn_operator_type_rope_ntc_f32));
     return xnn_status_unsupported_hardware;
   }
 
-  return create_rope_nthc(
+  return create_rope_ntc(
     max_tokens,
     flags,
-    xnn_operator_type_rope_nthc_f32,
+    xnn_operator_type_rope_ntc_f32,
     config,
     rope_op_out);
 }
 
-static enum xnn_status reshape_rope_nthc(
+static enum xnn_status reshape_rope_ntc(
     xnn_operator_t rope_op,
     enum xnn_operator_type expected_operator_type,
     size_t batch_size,
     size_t tokens,
-    size_t heads,
     size_t channels,
     uint32_t log2_data_element_size,
     uint32_t log2_weight_element_size,
@@ -127,13 +126,6 @@ static enum xnn_status reshape_rope_nthc(
     return xnn_status_invalid_parameter;
   }
 
-  if (heads == 0) {
-    xnn_log_error(
-      "failed to reshape %s operator with %zu heads: number of heads must be non-zero",
-      xnn_operator_type_to_string(rope_op->type), heads);
-    return xnn_status_invalid_parameter;
-  }
-
   if (channels == 0) {
     xnn_log_error(
       "failed to reshape %s operator with %zu channels: number of channels must be non-zero",
@@ -157,39 +149,36 @@ static enum xnn_status reshape_rope_nthc(
 
   rope_op->context.rope = (struct rope_context) {
     .scaled_channels = (channels / 2) << log2_data_element_size,
-    .batch_stride = (tokens * heads * channels) << log2_data_element_size,
-    .head_stride = channels << log2_data_element_size,
-    .sequence_stride = (heads * channels) << log2_data_element_size,
+    .batch_stride = (tokens * channels) << log2_data_element_size,
+    .token_stride = channels << log2_data_element_size,
     .vcmul = config->ukernel,
   };
 
-  rope_op->compute[0].type = xnn_parallelization_type_3d;
-  rope_op->compute[0].task_3d = (pthreadpool_task_3d_t) xnn_compute_rope;
+  rope_op->compute[0].type = xnn_parallelization_type_2d;
+  rope_op->compute[0].task_2d = (pthreadpool_task_2d_t) xnn_compute_rope;
   rope_op->compute[0].range[0] = batch_size;
-  rope_op->compute[0].range[1] = heads;
-  rope_op->compute[0].range[2] = tokens;
+  rope_op->compute[0].range[1] = tokens;
   rope_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;
 }
 
-enum xnn_status xnn_reshape_rope_nthc_f32(
+enum xnn_status xnn_reshape_rope_ntc_f32(
     xnn_operator_t rope_op,
     size_t batch_size,
     size_t tokens,
-    size_t heads,
     size_t channels,
     pthreadpool_t threadpool)
 {
-  return reshape_rope_nthc(
-    rope_op, xnn_operator_type_rope_nthc_f32,
-    batch_size, tokens, heads, channels,
+  return reshape_rope_ntc(
+    rope_op, xnn_operator_type_rope_ntc_f32,
+    batch_size, tokens, channels,
     /*log2_data_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     pthreadpool_get_threads_count(threadpool));
 }
 
-static enum xnn_status setup_rope_nthc(
+static enum xnn_status setup_rope_ntc(
     xnn_operator_t rope_op,
     enum xnn_operator_type expected_operator_type,
     const void* input,
@@ -226,13 +215,13 @@ static enum xnn_status setup_rope_nthc(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_setup_rope_nthc_f32(
+enum xnn_status xnn_setup_rope_ntc_f32(
   xnn_operator_t rope_op,
   const float* input,
   const float* weights,
   float* output)
 {
-  return setup_rope_nthc(
-    rope_op, xnn_operator_type_rope_nthc_f32,
+  return setup_rope_ntc(
+    rope_op, xnn_operator_type_rope_ntc_f32,
     input, weights, output);
 }

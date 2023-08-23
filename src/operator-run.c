@@ -1614,13 +1614,12 @@ void xnn_compute_vmulcaddc(
 void xnn_compute_rope(
     const struct rope_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
-    size_t head_index,
-    size_t sequence_index)
+    size_t token_index)
 {
   const size_t scaled_channels = context->scaled_channels;
-  const size_t offset = batch_index * context->batch_stride + head_index * context->head_stride + sequence_index * context->sequence_stride;
+  const size_t offset = batch_index * context->batch_stride + token_index * context->token_stride;
   const void* input = (const void*) ((uintptr_t) context->input + offset);
-  const void* weights = (const void*) ((uintptr_t) context->weights + sequence_index * (scaled_channels + scaled_channels));
+  const void* weights = (const void*) ((uintptr_t) context->weights + token_index * (scaled_channels + scaled_channels));
   void* output = (void*) ((uintptr_t) context->output + offset);
 
   context->vcmul(

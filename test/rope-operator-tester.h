@@ -40,16 +40,6 @@ class RoPEOperatorTester {
     return this->channels_;
   }
 
-  inline RoPEOperatorTester& heads(size_t heads) {
-    assert(heads >= 1);
-    this->heads_ = heads;
-    return *this;
-  }
-
-  inline size_t heads() const {
-    return this->heads_;
-  }
-
   inline RoPEOperatorTester& tokens(size_t tokens) {
     assert(tokens >= 1);
     this->tokens_ = tokens;
@@ -88,22 +78,20 @@ class RoPEOperatorTester {
     std::uniform_real_distribution<float> f32idist(0.01f, 0.1f);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-      batch_size() * tokens() * heads() * channels());
+      batch_size() * tokens() * channels());
     std::vector<float> weights(XNN_EXTRA_BYTES / sizeof(float) + tokens() * channels());
-    std::vector<float> output(batch_size() * tokens() * heads() * channels());
-    std::vector<double> output_ref(batch_size() * tokens() * heads() * channels());
+    std::vector<float> output(batch_size() * tokens() * channels());
+    std::vector<double> output_ref(batch_size() * tokens() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       for (size_t n = 0; n < batch_size(); n++) {
         for (size_t t = 0; t < tokens(); t++) {
-          for (size_t h = 0; h < heads(); h++) {
-            std::generate_n(input.begin() + ((n * tokens() + t) * heads() + h) * channels(),
-                            channels() / 2,
-                            [&]() { return f32rdist(rng); });
-            std::generate_n(input.begin() + (((n * tokens() + t) * heads() + h) * channels() + channels() / 2),
-                            channels() / 2,
-                            [&]() { return f32idist(rng); });
-          }
+          std::generate_n(input.begin() + (n * tokens() + t) * channels(),
+                          channels() / 2,
+                          [&]() { return f32rdist(rng); });
+          std::generate_n(input.begin() + ((n * tokens() + t) * channels() + channels() / 2),
+                          channels() / 2,
+                          [&]() { return f32idist(rng); });
         }
       }
       for (size_t t = 0; t < tokens(); t++) {
@@ -120,19 +108,17 @@ class RoPEOperatorTester {
       // Compute reference results
       for (size_t n = 0; n < batch_size(); n++) {
         for (size_t t = 0; t < tokens(); t++) {
-          for (size_t h = 0; h < heads(); h++) {
-            for (size_t c = 0; c < channels() / 2; c++) {
-              output_ref[((n * tokens() + t) * heads() + h) * channels() + c] =
-                double(input[((n * tokens() + t) * heads() + h) * channels() + c]) *
-                  double(weights[t * channels() + c]) -
-                double(input[((n * tokens() + t) * heads() + h) * channels() + (c + channels() / 2)]) *
-                  double(weights[t * channels() + (c + channels() / 2)]);
-              output_ref[((n * tokens() + t) * heads() + h) * channels() + (c + channels() / 2)] =
-                double(input[((n * tokens() + t) * heads() + h) * channels() + c]) *
-                  double(weights[t * channels() + (c + channels() / 2)]) +
-                double(input[((n * tokens() + t) * heads() + h) * channels() + (c + channels() / 2)]) *
-                  double(weights[t * channels() + c]);
-            }
+          for (size_t c = 0; c < channels() / 2; c++) {
+            output_ref[(n * tokens() + t) * channels() + c] =
+              double(input[(n * tokens() + t) * channels() + c]) *
+                double(weights[t * channels() + c]) -
+              double(input[(n * tokens() + t) * channels() + (c + channels() / 2)]) *
+                double(weights[t * channels() + (c + channels() / 2)]);
+            output_ref[(n * tokens() + t) * channels() + (c + channels() / 2)] =
+              double(input[(n * tokens() + t) * channels() + c]) *
+                double(weights[t * channels() + (c + channels() / 2)]) +
+              double(input[(n * tokens() + t) * channels() + (c + channels() / 2)]) *
+                double(weights[t * channels() + c]);
           }
         }
       }
@@ -141,7 +127,7 @@ class RoPEOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t rope_op = nullptr;
 
-      const xnn_status status = xnn_create_rope_nthc_f32(
+      const xnn_status status = xnn_create_rope_ntc_f32(
         /*max_tokens=*/tokens(), /*flags=*/0, &rope_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -153,13 +139,13 @@ class RoPEOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_rope_op(rope_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_rope_nthc_f32(
+        xnn_reshape_rope_ntc_f32(
           rope_op,
-          batch_size(), tokens(), heads(), channels(),
+          batch_size(), tokens(), channels(),
           /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_rope_nthc_f32(
+        xnn_setup_rope_ntc_f32(
           rope_op,
           input.data(), weights.data(), output.data()));
 
@@ -169,16 +155,13 @@ class RoPEOperatorTester {
       // Verify results.
       for (size_t n = 0; n < batch_size(); n++) {
         for (size_t t = 0; t < tokens(); t++) {
-          for (size_t h = 0; h < heads(); h++) {
-            for (size_t c = 0; c < channels(); c++) {
-              ASSERT_NEAR(output_ref[((n * tokens() + t) * heads() + h) * channels() + c],
-                          output[((n * tokens() + t) * heads() + h) * channels() + c],
-                          1.0e-4 * std::abs(output_ref[((n * tokens() + t) * heads() + h) * channels() + c]))
-                  << "batch " << n << " / " << batch_size()
-                  << ", token " << t << " / " << tokens()
-                  << ", head " << h << " / " << heads()
-                  << ", channel " << c << " / " << channels();
-            }
+          for (size_t c = 0; c < channels(); c++) {
+            ASSERT_NEAR(output_ref[(n * tokens() + t) * channels() + c],
+                        output[(n * tokens() + t) * channels() + c],
+                        1.0e-4 * std::abs(output_ref[(n * tokens() + t) * channels() + c]))
+                << "batch " << n << " / " << batch_size()
+                << ", token " << t << " / " << tokens()
+                << ", channel " << c << " / " << channels();
           }
         }
       }
@@ -187,7 +170,6 @@ class RoPEOperatorTester {
 
  private:
   size_t channels_{1};
-  size_t heads_{1};
   size_t tokens_{1};
   size_t batch_size_{1};
   size_t iterations_{3};

@@ -28,7 +28,7 @@ static enum xnn_status create_rope_operator(
   assert(node->num_outputs == 1);
 
   assert(node->compute_type == xnn_compute_type_fp32);
-  const enum xnn_status status = xnn_create_rope_nthc_f32(
+  const enum xnn_status status = xnn_create_rope_ntc_f32(
     node->params.rope.max_tokens,
     /*flags=*/0,
     &opdata->operator_objects[0]);
@@ -45,17 +45,15 @@ static enum xnn_status reshape_rope_operator(
   assert(input_id < num_values);
 
   const size_t num_input_dims = values[input_id].shape.num_dims;
-  const size_t batch_size = xnn_shape_multiply_batch_dims(&values[input_id].shape, 3);
-  const size_t tokens = values[input_id].shape.dim[num_input_dims - 3];
-  const size_t heads = values[input_id].shape.dim[num_input_dims - 2];
+  const size_t batch_size = xnn_shape_multiply_batch_dims(&values[input_id].shape, 2);
+  const size_t tokens = values[input_id].shape.dim[num_input_dims - 2];
   const size_t channels = values[input_id].shape.dim[num_input_dims - 1];
 
-  assert(opdata->operator_objects[0]->type == xnn_operator_type_rope_nthc_f32);
-  return xnn_reshape_rope_nthc_f32(
+  assert(opdata->operator_objects[0]->type == xnn_operator_type_rope_ntc_f32);
+  return xnn_reshape_rope_ntc_f32(
     opdata->operator_objects[0],
     batch_size,
     tokens,
-    heads,
     channels,
     threadpool);
 }
@@ -90,8 +88,8 @@ static enum xnn_status setup_rope_operator(
   void* output_data = output_value->data;
   assert(output_data != NULL);
 
-  assert(opdata->operator_objects[0]->type == xnn_operator_type_rope_nthc_f32);
-  return xnn_setup_rope_nthc_f32(
+  assert(opdata->operator_objects[0]->type == xnn_operator_type_rope_ntc_f32);
+  return xnn_setup_rope_ntc_f32(
     opdata->operator_objects[0],
     input_data,
     weights_data,
