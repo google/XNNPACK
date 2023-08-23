@@ -28,7 +28,7 @@ $  "SQRDIFF": lambda x, y: "_mm256_sub_ps(%s, %s)" % (x, y),
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "xnn_f16_default_params", "MINMAX": "xnn_f16_minmax_params"}[ACTIVATION]
-void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__f16c_x${BATCH_TILE}(
+void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__f16c_u${BATCH_TILE}(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,

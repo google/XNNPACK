@@ -7465,7 +7465,7 @@ void xnn_f16_prelu_ukernel__neonfp16arith_2x16(
   } while (rows != 0);
 }
 
-void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x32(
+void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u32(
     size_t batch,
     const void* input,
     const void* max,
@@ -7630,7 +7630,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x32(
   vst1_lane_u16(sum, vreinterpret_u16_f16(vacc_lo), 0);
 }
 
-void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x40(
+void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40(
     size_t batch,
     const void* input,
     const void* max,
@@ -8089,7 +8089,7 @@ void xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_pipelined(
   }
 }
 
-void xnn_f16_vadd_minmax_ukernel__neonfp16arith_x16(
+void xnn_f16_vadd_minmax_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -8162,7 +8162,7 @@ void xnn_f16_vadd_minmax_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vaddc_minmax_ukernel__neonfp16arith_x16(
+void xnn_f16_vaddc_minmax_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -8232,7 +8232,7 @@ void xnn_f16_vaddc_minmax_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vmax_ukernel__neonfp16arith_x16(
+void xnn_f16_vmax_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -8294,7 +8294,7 @@ void xnn_f16_vmax_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vmaxc_ukernel__neonfp16arith_x16(
+void xnn_f16_vmaxc_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -8353,7 +8353,7 @@ void xnn_f16_vmaxc_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vmin_ukernel__neonfp16arith_x16(
+void xnn_f16_vmin_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -8415,7 +8415,7 @@ void xnn_f16_vmin_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vminc_ukernel__neonfp16arith_x16(
+void xnn_f16_vminc_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -8474,7 +8474,7 @@ void xnn_f16_vminc_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vmul_minmax_ukernel__neonfp16arith_x16(
+void xnn_f16_vmul_minmax_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -8547,7 +8547,7 @@ void xnn_f16_vmul_minmax_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vmulc_minmax_ukernel__neonfp16arith_x16(
+void xnn_f16_vmulc_minmax_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -8617,7 +8617,7 @@ void xnn_f16_vmulc_minmax_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vrsubc_minmax_ukernel__neonfp16arith_x16(
+void xnn_f16_vrsubc_minmax_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -8687,7 +8687,7 @@ void xnn_f16_vrsubc_minmax_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vsqrdiff_ukernel__neonfp16arith_x16(
+void xnn_f16_vsqrdiff_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -8753,7 +8753,7 @@ void xnn_f16_vsqrdiff_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vsqrdiffc_ukernel__neonfp16arith_x16(
+void xnn_f16_vsqrdiffc_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -8816,7 +8816,7 @@ void xnn_f16_vsqrdiffc_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vsub_minmax_ukernel__neonfp16arith_x16(
+void xnn_f16_vsub_minmax_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -8889,7 +8889,7 @@ void xnn_f16_vsub_minmax_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vsubc_minmax_ukernel__neonfp16arith_x16(
+void xnn_f16_vsubc_minmax_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -8959,7 +8959,7 @@ void xnn_f16_vsubc_minmax_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vclamp_ukernel__neonfp16arith_x16(
+void xnn_f16_vclamp_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input,
     void* restrict output,
@@ -9015,7 +9015,7 @@ void xnn_f16_vclamp_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x16(
+void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_u16(
     size_t batch,
     const void* input,
     void* output,
@@ -9143,7 +9143,7 @@ void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x16(
   }
 }
 
-void xnn_f16_vhswish_ukernel__neonfp16arith_x16(
+void xnn_f16_vhswish_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* restrict input,
     void* restrict output,
@@ -9215,7 +9215,7 @@ void xnn_f16_vhswish_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vlrelu_ukernel__neonfp16arith_x16(
+void xnn_f16_vlrelu_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* input,
     void* output,
@@ -9371,7 +9371,7 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x(
   } while (rows != 0);
 }
 
-void xnn_f16_vrndd_ukernel__neonfp16arith_x16(
+void xnn_f16_vrndd_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* input,
     void* output,
@@ -9417,7 +9417,7 @@ void xnn_f16_vrndd_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vrndne_ukernel__neonfp16arith_x16(
+void xnn_f16_vrndne_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* input,
     void* output,
@@ -9463,7 +9463,7 @@ void xnn_f16_vrndne_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vrndu_ukernel__neonfp16arith_x16(
+void xnn_f16_vrndu_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* input,
     void* output,
@@ -9509,7 +9509,7 @@ void xnn_f16_vrndu_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vrndz_ukernel__neonfp16arith_x16(
+void xnn_f16_vrndz_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* input,
     void* output,
@@ -9555,7 +9555,7 @@ void xnn_f16_vrndz_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x40(
+void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_u40(
     size_t batch,
     const void* input,
     void* output,
@@ -9761,7 +9761,7 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1fma_x40(
   }
 }
 
-void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x16(
+void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_u16(
     size_t batch,
     const void* input,
     void* output,
@@ -9910,7 +9910,7 @@ void xnn_f16_vsigmoid_ukernel__neonfp16arith_rr2_p2_nr1recps_x16(
   }
 }
 
-void xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x8(
+void xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_u8(
     size_t batch,
     const void* input,
     void* output,
@@ -10006,7 +10006,7 @@ void xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x8(
   }
 }
 
-void xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2ts_nr1fma_x32(
+void xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2ts_nr1fma_u32(
     size_t n,
     const void* input,
     void* output,
@@ -10190,7 +10190,7 @@ void xnn_f16_vtanh_ukernel__neonfp16arith_expm1minus_rr1_p3h2ts_nr1fma_x32(
   }
 }
 
-void xnn_f16_vabs_ukernel__neonfp16arith_x16(
+void xnn_f16_vabs_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* input,
     void* output,
@@ -10236,7 +10236,7 @@ void xnn_f16_vabs_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vneg_ukernel__neonfp16arith_x16(
+void xnn_f16_vneg_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* input,
     void* output,
@@ -10282,7 +10282,7 @@ void xnn_f16_vneg_ukernel__neonfp16arith_x16(
   }
 }
 
-void xnn_f16_vsqr_ukernel__neonfp16arith_x16(
+void xnn_f16_vsqr_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* input,
     void* output,

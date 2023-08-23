@@ -4,13 +4,13 @@
 # LICENSE file in the root directory of this source tree.
 
 # ARM NEON+FP16ARITH
-- name: xnn_f16_rsum_ukernel__neonfp16arith_x8
+- name: xnn_f16_rsum_ukernel__neonfp16arith_u8
   init: xnn_init_f16_scale_fp16arith_params
-- name: xnn_f16_rsum_ukernel__neonfp16arith_x16_acc2
+- name: xnn_f16_rsum_ukernel__neonfp16arith_u16_acc2
   init: xnn_init_f16_scale_fp16arith_params
-- name: xnn_f16_rsum_ukernel__neonfp16arith_x24_acc3
+- name: xnn_f16_rsum_ukernel__neonfp16arith_u24_acc3
   init: xnn_init_f16_scale_fp16arith_params
-- name: xnn_f16_rsum_ukernel__neonfp16arith_x32_acc2
+- name: xnn_f16_rsum_ukernel__neonfp16arith_u32_acc2
   init: xnn_init_f16_scale_fp16arith_params
-- name: xnn_f16_rsum_ukernel__neonfp16arith_x32_acc4
+- name: xnn_f16_rsum_ukernel__neonfp16arith_u32_acc4
   init: xnn_init_f16_scale_fp16arith_params

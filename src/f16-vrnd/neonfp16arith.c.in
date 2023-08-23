@@ -23,7 +23,7 @@ $  "RNDZ": "vrndq_f16",
 $  "RNDU": "vrndpq_f16",
 $  "RNDD": "vrndmq_f16",
 $}[OP]
-void xnn_f16_v${OP.lower()}_ukernel__neonfp16arith_x${BATCH_TILE}(
+void xnn_f16_v${OP.lower()}_ukernel__neonfp16arith_u${BATCH_TILE}(
     size_t batch,
     const void* input,
     void* output,

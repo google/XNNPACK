@@ -26,7 +26,7 @@ $POLY_SUFFIX = "p%dh%d%s" % (P, H, "ps" if PS else "ts")
 $DIV_SUFFIX = DIV.lower()
 $PARAMS_STRUCT = "avx_expm1minus_rr1_" + ("p%dh%d" % (P, H))
 $ISA = "avx2" if AVX == 2 else "fma3" if FMA == 3 else "f16c"
-void xnn_f16_vtanh_ukernel__${ISA}_expm1minus_rr1_${POLY_SUFFIX}_${DIV_SUFFIX}_x${BATCH_TILE}(
+void xnn_f16_vtanh_ukernel__${ISA}_expm1minus_rr1_${POLY_SUFFIX}_${DIV_SUFFIX}_u${BATCH_TILE}(
     size_t batch,
     const void* input,
     void* output,

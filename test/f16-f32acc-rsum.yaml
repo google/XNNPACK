@@ -4,27 +4,27 @@
 # LICENSE file in the root directory of this source tree.
 
 # ARM NEONFP16
-- name: xnn_f16_f32acc_rsum_ukernel__neonfp16_x4
+- name: xnn_f16_f32acc_rsum_ukernel__neonfp16_u4
   init: xnn_init_f16_f32acc_scale_scalar_params
-- name: xnn_f16_f32acc_rsum_ukernel__neonfp16_x8
+- name: xnn_f16_f32acc_rsum_ukernel__neonfp16_u8
   init: xnn_init_f16_f32acc_scale_scalar_params
-- name: xnn_f16_f32acc_rsum_ukernel__neonfp16_x16_acc2
+- name: xnn_f16_f32acc_rsum_ukernel__neonfp16_u16_acc2
   init: xnn_init_f16_f32acc_scale_scalar_params
-- name: xnn_f16_f32acc_rsum_ukernel__neonfp16_x24_acc3
+- name: xnn_f16_f32acc_rsum_ukernel__neonfp16_u24_acc3
   init: xnn_init_f16_f32acc_scale_scalar_params
-- name: xnn_f16_f32acc_rsum_ukernel__neonfp16_x32_acc2
+- name: xnn_f16_f32acc_rsum_ukernel__neonfp16_u32_acc2
   init: xnn_init_f16_f32acc_scale_scalar_params
-- name: xnn_f16_f32acc_rsum_ukernel__neonfp16_x32_acc4
+- name: xnn_f16_f32acc_rsum_ukernel__neonfp16_u32_acc4
   init: xnn_init_f16_f32acc_scale_scalar_params
 
 # x86 F16C
-- name: xnn_f16_f32acc_rsum_ukernel__f16c_x8
+- name: xnn_f16_f32acc_rsum_ukernel__f16c_u8
   init: xnn_init_f16_f32acc_scale_avx_params
-- name: xnn_f16_f32acc_rsum_ukernel__f16c_x16_acc2
+- name: xnn_f16_f32acc_rsum_ukernel__f16c_u16_acc2
   init: xnn_init_f16_f32acc_scale_avx_params
-- name: xnn_f16_f32acc_rsum_ukernel__f16c_x24_acc3
+- name: xnn_f16_f32acc_rsum_ukernel__f16c_u24_acc3
   init: xnn_init_f16_f32acc_scale_avx_params
-- name: xnn_f16_f32acc_rsum_ukernel__f16c_x32_acc2
+- name: xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc2
   init: xnn_init_f16_f32acc_scale_avx_params
-- name: xnn_f16_f32acc_rsum_ukernel__f16c_x32_acc4
+- name: xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc4
   init: xnn_init_f16_f32acc_scale_avx_params

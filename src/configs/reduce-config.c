@@ -38,7 +38,7 @@ static void init_f16_f32acc_rsum_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_f32acc_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__neonfp16_x32_acc4,
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__neonfp16_u32_acc4,
         .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_scalar_params,
         .element_tile = 32,
       };
@@ -48,7 +48,7 @@ static void init_f16_f32acc_rsum_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_f32acc_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__neonfp16_x32_acc4,
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__neonfp16_u32_acc4,
         .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_scalar_params,
         .element_tile = 32,
       };
@@ -58,7 +58,7 @@ static void init_f16_f32acc_rsum_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_f16c) {
       f16_f32acc_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__f16c_x32_acc4,
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc4,
         .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_avx_params,
         .element_tile = 32,
       };

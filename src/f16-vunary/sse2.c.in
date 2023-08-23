@@ -26,7 +26,7 @@ $PARAMS = {
 $  "ABS": "xnn_f16_abs_params",
 $  "NEG": "xnn_f16_neg_params",
 $}[OP]
-void xnn_f16_v${OP.lower()}_ukernel__sse2_x${BATCH_TILE}(
+void xnn_f16_v${OP.lower()}_ukernel__sse2_u${BATCH_TILE}(
     size_t batch,
     const void* input,
     void* output,

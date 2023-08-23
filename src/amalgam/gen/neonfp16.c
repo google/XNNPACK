@@ -68,7 +68,7 @@ void xnn_f16_f32_vcvt_ukernel__neonfp16_x16(
   }
 }
 
-void xnn_f16_f32acc_rsum_ukernel__neonfp16_x32_acc4(
+void xnn_f16_f32acc_rsum_ukernel__neonfp16_u32_acc4(
     size_t batch,
     const void* input,
     void* output,

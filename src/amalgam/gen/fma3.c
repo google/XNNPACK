@@ -1352,7 +1352,7 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c8__fma3_2x(
   } while (rows != 0);
 }
 
-void xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_x32(
+void xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_u32(
     size_t batch,
     const void* input,
     void* output,

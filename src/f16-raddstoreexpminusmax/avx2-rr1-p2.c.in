@@ -15,7 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/raddstoreexpminusmax.h>
 
 
-void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_x${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t batch,
     const void* input,
     const void* max,

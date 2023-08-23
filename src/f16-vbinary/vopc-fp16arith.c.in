@@ -32,7 +32,7 @@ $  "SQRDIFF": lambda x: "vsubh_f16(%s, vb)" % x,
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "xnn_f16_default_params", "MINMAX": "xnn_f16_minmax_params"}[ACTIVATION]
-void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__fp16arith_x${BATCH_TILE}(
+void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__fp16arith_u${BATCH_TILE}(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,

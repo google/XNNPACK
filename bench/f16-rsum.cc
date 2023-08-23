@@ -64,32 +64,32 @@ static void f16_rsum(
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_x8,
-                    xnn_f16_rsum_ukernel__neonfp16arith_x8,
+  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_u8,
+                    xnn_f16_rsum_ukernel__neonfp16arith_u8,
                     xnn_init_f16_scale_fp16arith_params,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_x16_acc2,
-                    xnn_f16_rsum_ukernel__neonfp16arith_x16_acc2,
+  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_u16_acc2,
+                    xnn_f16_rsum_ukernel__neonfp16arith_u16_acc2,
                     xnn_init_f16_scale_fp16arith_params,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_x24_acc3,
-                    xnn_f16_rsum_ukernel__neonfp16arith_x24_acc3,
+  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_u24_acc3,
+                    xnn_f16_rsum_ukernel__neonfp16arith_u24_acc3,
                     xnn_init_f16_scale_fp16arith_params,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_x32_acc2,
-                    xnn_f16_rsum_ukernel__neonfp16arith_x32_acc2,
+  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_u32_acc2,
+                    xnn_f16_rsum_ukernel__neonfp16arith_u32_acc2,
                     xnn_init_f16_scale_fp16arith_params,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::ReductionParameters<uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_x32_acc4,
-                    xnn_f16_rsum_ukernel__neonfp16arith_x32_acc4,
+  BENCHMARK_CAPTURE(f16_rsum, neonfp16arith_u32_acc4,
+                    xnn_f16_rsum_ukernel__neonfp16arith_u32_acc4,
                     xnn_init_f16_scale_fp16arith_params,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::ReductionParameters<uint16_t>)

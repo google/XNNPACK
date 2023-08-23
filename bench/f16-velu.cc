@@ -68,14 +68,14 @@ static void f16_velu(
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  BENCHMARK_CAPTURE(f16_velu, neonfp16arith_rr1_p3_x8,
-                    xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x8,
+  BENCHMARK_CAPTURE(f16_velu, neonfp16arith_rr1_p3_u8,
+                    xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_u8,
                     xnn_init_f16_elu_fp16arith_rr1_p3_params,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_velu, neonfp16arith_rr1_p3_x16,
-                    xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_x16,
+  BENCHMARK_CAPTURE(f16_velu, neonfp16arith_rr1_p3_u16,
+                    xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_u16,
                     xnn_init_f16_elu_fp16arith_rr1_p3_params,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
@@ -84,14 +84,14 @@ static void f16_velu(
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(f16_velu, avx2_rr1_p3_x8,
-                    xnn_f16_velu_ukernel__avx2_rr1_p3_x8,
+  BENCHMARK_CAPTURE(f16_velu, avx2_rr1_p3_u8,
+                    xnn_f16_velu_ukernel__avx2_rr1_p3_u8,
                     xnn_init_f16_elu_avx2_rr1_p3_params,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_velu, avx2_rr1_p3_x16,
-                    xnn_f16_velu_ukernel__avx2_rr1_p3_x16,
+  BENCHMARK_CAPTURE(f16_velu, avx2_rr1_p3_u16,
+                    xnn_f16_velu_ukernel__avx2_rr1_p3_u16,
                     xnn_init_f16_elu_avx2_rr1_p3_params,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)

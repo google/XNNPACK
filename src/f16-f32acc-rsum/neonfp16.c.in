@@ -17,7 +17,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
-void xnn_f16_f32acc_rsum_ukernel__neonfp16_x${BATCH_TILE}${ACC_SUFFIX}(
+void xnn_f16_f32acc_rsum_ukernel__neonfp16_u${BATCH_TILE}${ACC_SUFFIX}(
     size_t batch,
     const void* input,
     void* output,

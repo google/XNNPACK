@@ -35,7 +35,7 @@ static void init_f16_raddstoreexpminusmax_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_raddstoreexpminusmax_config.ukernel =
-        (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x32;
+        (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u32;
       f16_raddstoreexpminusmax_config.init.f16 = xnn_init_f16_expminus_fp16arith_rr2_p2_params;
       f16_raddstoreexpminusmax_config.element_tile = 32;
     }
@@ -44,7 +44,7 @@ static void init_f16_raddstoreexpminusmax_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_raddstoreexpminusmax_config.ukernel =
-        (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_x40;
+        (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u40;
       f16_raddstoreexpminusmax_config.init.f16 = xnn_init_f16_expminus_fp16arith_rr2_p2_params;
       f16_raddstoreexpminusmax_config.element_tile = 40;
     }
@@ -53,7 +53,7 @@ static void init_f16_raddstoreexpminusmax_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
       f16_raddstoreexpminusmax_config.ukernel =
-        (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_x40;
+        (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u40;
       f16_raddstoreexpminusmax_config.init.f16 = xnn_init_f16_expminus_avx2_rr1_p2_params;
       f16_raddstoreexpminusmax_config.element_tile = 40;
     }

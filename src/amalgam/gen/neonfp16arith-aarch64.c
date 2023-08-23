@@ -13,7 +13,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f16_vdiv_minmax_ukernel__aarch64_neonfp16arith_x8(
+void xnn_f16_vdiv_minmax_ukernel__aarch64_neonfp16arith_u8(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -67,7 +67,7 @@ void xnn_f16_vdiv_minmax_ukernel__aarch64_neonfp16arith_x8(
   }
 }
 
-void xnn_f16_vdivc_minmax_ukernel__aarch64_neonfp16arith_x8(
+void xnn_f16_vdivc_minmax_ukernel__aarch64_neonfp16arith_u8(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -120,7 +120,7 @@ void xnn_f16_vdivc_minmax_ukernel__aarch64_neonfp16arith_x8(
   }
 }
 
-void xnn_f16_vrdivc_minmax_ukernel__aarch64_neonfp16arith_x8(
+void xnn_f16_vrdivc_minmax_ukernel__aarch64_neonfp16arith_u8(
     size_t batch,
     const void* restrict input_a,
     const void* restrict input_b,
@@ -173,7 +173,7 @@ void xnn_f16_vrdivc_minmax_ukernel__aarch64_neonfp16arith_x8(
   }
 }
 
-void xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x8(
+void xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_u8(
     size_t batch,
     const void* input,
     void* output,
@@ -208,7 +208,7 @@ void xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x8(
   }
 }
 
-void xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2ts_div_x32(
+void xnn_f16_vtanh_ukernel__aarch64_neonfp16arith_expm1minus_rr1_p3h2ts_div_u32(
     size_t n,
     const void* input,
     void* output,

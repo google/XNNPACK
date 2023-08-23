@@ -214,7 +214,7 @@ void xnn_f16_f32_vcvt_ukernel__sse2_int16_x32(
   }
 }
 
-void xnn_f16_vabs_ukernel__sse2_x16(
+void xnn_f16_vabs_ukernel__sse2_u16(
     size_t batch,
     const void* input,
     void* output,
@@ -266,7 +266,7 @@ void xnn_f16_vabs_ukernel__sse2_x16(
   }
 }
 
-void xnn_f16_vneg_ukernel__sse2_x16(
+void xnn_f16_vneg_ukernel__sse2_u16(
     size_t batch,
     const void* input,
     void* output,

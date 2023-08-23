@@ -62,54 +62,54 @@ static void f16_vsqrt(
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f16_vsqrt, aarch64_neonfp16arith_sqrt_x8,
-                    xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x8,
+  BENCHMARK_CAPTURE(f16_vsqrt, aarch64_neonfp16arith_sqrt_u8,
+                    xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_u8,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_vsqrt, aarch64_neonfp16arith_sqrt_x16,
-                    xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_x16,
+  BENCHMARK_CAPTURE(f16_vsqrt, aarch64_neonfp16arith_sqrt_u16,
+                    xnn_f16_vsqrt_ukernel__aarch64_neonfp16arith_sqrt_u16,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM64
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  BENCHMARK_CAPTURE(f16_vsqrt, neonfp16arith_nr1fma1adj_x8,
-                    xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x8,
+  BENCHMARK_CAPTURE(f16_vsqrt, neonfp16arith_nr1fma1adj_u8,
+                    xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_u8,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_vsqrt, neonfp16arith_nr1fma1adj_x16,
-                    xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x16,
+  BENCHMARK_CAPTURE(f16_vsqrt, neonfp16arith_nr1fma1adj_u16,
+                    xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_u16,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_vsqrt, neonfp16arith_nr1fma1adj_x24,
-                    xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x24,
+  BENCHMARK_CAPTURE(f16_vsqrt, neonfp16arith_nr1fma1adj_u24,
+                    xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_u24,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_vsqrt, neonfp16arith_nr1fma1adj_x32,
-                    xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_x32,
+  BENCHMARK_CAPTURE(f16_vsqrt, neonfp16arith_nr1fma1adj_u32,
+                    xnn_f16_vsqrt_ukernel__neonfp16arith_nr1fma1adj_u32,
                     benchmark::utils::CheckNEONFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ENABLE_ARM_FP16_SCALAR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  BENCHMARK_CAPTURE(f16_vsqrt, fp16arith_sqrt_x1,
-                    xnn_f16_vsqrt_ukernel__fp16arith_sqrt_x1,
+  BENCHMARK_CAPTURE(f16_vsqrt, fp16arith_sqrt_u1,
+                    xnn_f16_vsqrt_ukernel__fp16arith_sqrt_u1,
                     benchmark::utils::CheckFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_vsqrt, fp16arith_sqrt_x2,
-                    xnn_f16_vsqrt_ukernel__fp16arith_sqrt_x2,
+  BENCHMARK_CAPTURE(f16_vsqrt, fp16arith_sqrt_u2,
+                    xnn_f16_vsqrt_ukernel__fp16arith_sqrt_u2,
                     benchmark::utils::CheckFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_vsqrt, fp16arith_sqrt_x4,
-                    xnn_f16_vsqrt_ukernel__fp16arith_sqrt_x4,
+  BENCHMARK_CAPTURE(f16_vsqrt, fp16arith_sqrt_u4,
+                    xnn_f16_vsqrt_ukernel__fp16arith_sqrt_u4,
                     benchmark::utils::CheckFP16ARITH)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();

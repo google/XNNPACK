@@ -1132,7 +1132,7 @@ void xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8(
   } while (--output_pixels != 0);
 }
 
-void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_x40(
+void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u40(
     size_t batch,
     const void* input,
     const void* max,
@@ -1308,7 +1308,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_x40(
   _mm256_zeroupper();
 }
 
-void xnn_f16_velu_ukernel__avx2_rr1_p3_x16(
+void xnn_f16_velu_ukernel__avx2_rr1_p3_u16(
     size_t batch,
     const void* input,
     void* output,
@@ -1437,7 +1437,7 @@ void xnn_f16_velu_ukernel__avx2_rr1_p3_x16(
   }
 }
 
-void xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_x32(
+void xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_rcp_u32(
     size_t batch,
     const void* input,
     void* output,
