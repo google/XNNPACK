@@ -278,6 +278,7 @@ static enum xnn_status reshape_resize_bilinear2d_nhwc(
     // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
     void* dummy_input = (void*) XNN_ALLOCATION_ALIGNMENT;
     indirection_init(
+      /*output_y_start=*/0, /*output_y_end=*/output_height,
       input_pixel_stride_in_bytes,
       input_height, input_width,
       output_height, output_width,

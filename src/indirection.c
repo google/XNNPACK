@@ -336,6 +336,8 @@ void xnn_indirection_init_maxpool2d(
 }
 
 void xnn_indirection_init_resize_bilinear2d_hwc_f16(
+  size_t output_y_start,
+  size_t output_y_end,
   size_t input_pixel_stride,
   size_t input_height,
   size_t input_width,
@@ -367,7 +369,7 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f16(
   const uint32_t input_y_max = (uint32_t) input_height - 1;
   const uint32_t input_x_max = (uint32_t) input_width - 1;
   if (tensorflow_legacy || align_corners) {
-    for (size_t output_y = 0; output_y < output_height; output_y++) {
+    for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
       const float input_y = (float) (int32_t) output_y * height_scale;
       assert(input_y >= 0.0f);
       assert(input_y < (float) input_height);
@@ -400,7 +402,7 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f16(
   } else {
     const float height_offset = 0.5f * height_scale - 0.5f;
     const float width_offset = 0.5f * width_scale - 0.5f;
-    for (size_t output_y = 0; output_y < output_height; output_y++) {
+    for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
       float input_y = (float) (int32_t) output_y * height_scale + height_offset;
       input_y = math_min_f32(math_max_f32(input_y, 0.0f), (float) input_y_max);
       const uint32_t input_y_top = (uint32_t) (int32_t) input_y;
@@ -432,6 +434,8 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f16(
 }
 
 void xnn_indirection_init_resize_bilinear2d_hwc_f32(
+  size_t output_y_start,
+  size_t output_y_end,
   size_t input_pixel_stride,
   size_t input_height,
   size_t input_width,
@@ -462,7 +466,7 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f32(
   const uint32_t input_y_max = (uint32_t) input_height - 1;
   const uint32_t input_x_max = (uint32_t) input_width - 1;
   if (tensorflow_legacy || align_corners) {
-    for (size_t output_y = 0; output_y < output_height; output_y++) {
+    for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
       const float input_y = (float) (int32_t) output_y * height_scale;
       assert(input_y >= 0.0f);
       assert(input_y < (float) input_height);
@@ -495,7 +499,7 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f32(
   } else {
     const float height_offset = 0.5f * height_scale - 0.5f;
     const float width_offset = 0.5f * width_scale - 0.5f;
-    for (size_t output_y = 0; output_y < output_height; output_y++) {
+    for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
       float input_y = (float) (int32_t) output_y * height_scale + height_offset;
       input_y = math_min_f32(math_max_f32(input_y, 0.0f), (float) input_y_max);
       const uint32_t input_y_top = (uint32_t) (int32_t) input_y;
@@ -527,6 +531,8 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f32(
 }
 
 void xnn_indirection_init_resize_bilinear2d_hwc_q11(
+  size_t output_y_start,
+  size_t output_y_end,
   size_t input_pixel_stride,
   size_t input_height,
   size_t input_width,
@@ -557,7 +563,7 @@ void xnn_indirection_init_resize_bilinear2d_hwc_q11(
   const uint32_t input_y_max = (uint32_t) input_height - 1;
   const uint32_t input_x_max = (uint32_t) input_width - 1;
   if (tensorflow_legacy || align_corners) {
-    for (size_t output_y = 0; output_y < output_height; output_y++) {
+    for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
       const float input_y = (float) (int32_t) output_y * height_scale;
       assert(input_y >= 0.0f);
       assert(input_y < (float) input_height);
@@ -590,7 +596,7 @@ void xnn_indirection_init_resize_bilinear2d_hwc_q11(
   } else {
     const float height_offset = 0.5f * height_scale - 0.5f;
     const float width_offset = 0.5f * width_scale - 0.5f;
-    for (size_t output_y = 0; output_y < output_height; output_y++) {
+    for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
       float input_y = (float) (int32_t) output_y * height_scale + height_offset;
       input_y = math_min_f32(math_max_f32(input_y, 0.0f), (float) input_y_max);
       const uint32_t input_y_top = (uint32_t) (int32_t) input_y;

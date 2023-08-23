@@ -80,6 +80,8 @@ XNN_INTERNAL void xnn_indirection_init_maxpool2d(
   uint32_t log2_element_size);
 
 typedef void (*xnn_indirection_init_resize_bilinear2d_hwc_fn)(
+  size_t output_y_start,
+  size_t output_y_end,
   size_t input_pixel_stride,
   size_t input_height,
   size_t input_width,
@@ -92,6 +94,8 @@ typedef void (*xnn_indirection_init_resize_bilinear2d_hwc_fn)(
   bool tensorflow_legacy);
 
 XNN_INTERNAL void xnn_indirection_init_resize_bilinear2d_hwc_f16(
+  size_t output_y_start,
+  size_t output_y_end,
   size_t input_pixel_stride,
   size_t input_height,
   size_t input_width,
@@ -104,6 +108,8 @@ XNN_INTERNAL void xnn_indirection_init_resize_bilinear2d_hwc_f16(
   bool tensorflow_legacy);
 
 XNN_INTERNAL void xnn_indirection_init_resize_bilinear2d_hwc_f32(
+  size_t output_y_start,
+  size_t output_y_end,
   size_t input_pixel_stride,
   size_t input_height,
   size_t input_width,
@@ -116,6 +122,8 @@ XNN_INTERNAL void xnn_indirection_init_resize_bilinear2d_hwc_f32(
   bool tensorflow_legacy);
 
 XNN_INTERNAL void xnn_indirection_init_resize_bilinear2d_hwc_q11(
+  size_t output_y_start,
+  size_t output_y_end,
   size_t input_pixel_stride,
   size_t input_height,
   size_t input_width,
