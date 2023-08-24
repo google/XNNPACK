@@ -193,7 +193,7 @@ int main(int argc, char** argv) {
       break;
     case 32:
       xnn_setup_resize_bilinear2d_nhwc_f32(
-        op, NULL, NULL);
+        op, NULL, NULL, NULL);
       break;
     case 33:
       xnn_create_sigmoid_nc_f32(

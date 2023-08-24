@@ -47,6 +47,20 @@ TEST(RESIZE_BILINEAR_NHWC_F16, aligned_centers_upscale) {
   }
 }
 
+TEST(RESIZE_BILINEAR_NHWC_F16, aligned_centers_upscale_transient_indirection) {
+  for (size_t output_height = 3; output_height <= 5; output_height += 2) {
+    for (size_t output_width = 3; output_width <= 5; output_width += 2) {
+      ResizeBilinearOperatorTester()
+        .input_size(2, 2)
+        .output_size(output_height, output_width)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
+        .TestNHWCxF16();
+    }
+  }
+}
+
 TEST(RESIZE_BILINEAR_NHWC_F16, aligned_centers_downscale_y) {
   for (size_t output_height = 1; output_height <= 3; output_height++) {
     for (size_t input_height = output_height + 1; input_height < 15; input_height *= 3) {
@@ -81,6 +95,20 @@ TEST(RESIZE_BILINEAR_NHWC_F16, aligned_centers_downscale) {
         .output_size(2, 2)
         .channels(17)
         .iterations(3)
+        .TestNHWCxF16();
+    }
+  }
+}
+
+TEST(RESIZE_BILINEAR_NHWC_F16, aligned_centers_downscale_transient_indirection) {
+  for (size_t input_height = 3; input_height <= 5; input_height += 2) {
+    for (size_t input_width = 3; input_width <= 5; input_width += 2) {
+      ResizeBilinearOperatorTester()
+        .input_size(input_height, input_width)
+        .output_size(2, 2)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
         .TestNHWCxF16();
     }
   }
@@ -203,6 +231,21 @@ TEST(RESIZE_BILINEAR_NHWC_F16, aligned_corners_upscale) {
   }
 }
 
+TEST(RESIZE_BILINEAR_NHWC_F16, aligned_corners_upscale_transient_indirection) {
+  for (size_t output_height = 3; output_height <= 5; output_height += 2) {
+    for (size_t output_width = 3; output_width <= 5; output_width += 2) {
+      ResizeBilinearOperatorTester()
+        .align_corners(true)
+        .input_size(2, 2)
+        .output_size(output_height, output_width)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
+        .TestNHWCxF16();
+    }
+  }
+}
+
 TEST(RESIZE_BILINEAR_NHWC_F16, aligned_corners_downscale_y) {
   for (size_t output_height = 2; output_height <= 3; output_height++) {
     for (size_t input_height = output_height + 1; input_height < 15; input_height *= 3) {
@@ -237,6 +280,20 @@ TEST(RESIZE_BILINEAR_NHWC_F16, aligned_corners_downscale) {
         .output_size(2, 2)
         .channels(17)
         .iterations(3)
+        .TestNHWCxF16();
+    }
+  }
+}
+
+TEST(RESIZE_BILINEAR_NHWC_F16, aligned_corners_downscale_transient_indirection) {
+  for (size_t input_height = 3; input_height <= 5; input_height += 2) {
+    for (size_t input_width = 3; input_width <= 5; input_width += 2) {
+      ResizeBilinearOperatorTester()
+        .input_size(input_height, input_width)
+        .output_size(2, 2)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
         .TestNHWCxF16();
     }
   }
@@ -364,6 +421,21 @@ TEST(RESIZE_BILINEAR_NHWC_F16, tf_mode_aligned_centers_upscale) {
   }
 }
 
+TEST(RESIZE_BILINEAR_NHWC_F16, tf_mode_aligned_centers_upscale_transient_indirection) {
+  for (size_t output_height = 3; output_height <= 5; output_height += 2) {
+    for (size_t output_width = 3; output_width <= 5; output_width += 2) {
+      ResizeBilinearOperatorTester()
+        .tf_legacy_mode(true)
+        .input_size(2, 2)
+        .output_size(output_height, output_width)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
+        .TestNHWCxF16();
+    }
+  }
+}
+
 TEST(RESIZE_BILINEAR_NHWC_F16, tf_mode_aligned_centers_downscale_y) {
   for (size_t output_height = 1; output_height <= 3; output_height++) {
     for (size_t input_height = output_height + 1; input_height < 15; input_height *= 3) {
@@ -387,6 +459,21 @@ TEST(RESIZE_BILINEAR_NHWC_F16, tf_mode_aligned_centers_downscale_x) {
         .output_size(1, output_width)
         .channels(17)
         .iterations(3)
+        .TestNHWCxF16();
+    }
+  }
+}
+
+TEST(RESIZE_BILINEAR_NHWC_F16, tf_mode_aligned_centers_downscale_transient_indirection) {
+  for (size_t input_height = 3; input_height <= 5; input_height += 2) {
+    for (size_t input_width = 3; input_width <= 5; input_width += 2) {
+      ResizeBilinearOperatorTester()
+        .tf_legacy_mode(true)
+        .input_size(input_height, input_width)
+        .output_size(2, 2)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
         .TestNHWCxF16();
     }
   }
@@ -526,6 +613,20 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_upscale) {
   }
 }
 
+TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_upscale_transient_indirection) {
+  for (size_t output_height = 3; output_height <= 5; output_height += 2) {
+    for (size_t output_width = 3; output_width <= 5; output_width += 2) {
+      ResizeBilinearOperatorTester()
+        .input_size(2, 2)
+        .output_size(output_height, output_width)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
+        .TestNHWCxF32();
+    }
+  }
+}
+
 TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_downscale_y) {
   for (size_t output_height = 1; output_height <= 3; output_height++) {
     for (size_t input_height = output_height + 1; input_height < 15; input_height *= 3) {
@@ -560,6 +661,20 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_downscale) {
         .output_size(2, 2)
         .channels(17)
         .iterations(3)
+        .TestNHWCxF32();
+    }
+  }
+}
+
+TEST(RESIZE_BILINEAR_NHWC_F32, aligned_centers_downscale_transient_indirection) {
+  for (size_t input_height = 3; input_height <= 5; input_height += 2) {
+    for (size_t input_width = 3; input_width <= 5; input_width += 2) {
+      ResizeBilinearOperatorTester()
+        .input_size(input_height, input_width)
+        .output_size(2, 2)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
         .TestNHWCxF32();
     }
   }
@@ -682,6 +797,21 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_upscale) {
   }
 }
 
+TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_upscale_transient_indirection) {
+  for (size_t output_height = 3; output_height <= 5; output_height += 2) {
+    for (size_t output_width = 3; output_width <= 5; output_width += 2) {
+      ResizeBilinearOperatorTester()
+        .align_corners(true)
+        .input_size(2, 2)
+        .output_size(output_height, output_width)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
+        .TestNHWCxF32();
+    }
+  }
+}
+
 TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_downscale_y) {
   for (size_t output_height = 2; output_height <= 3; output_height++) {
     for (size_t input_height = output_height + 1; input_height < 15; input_height *= 3) {
@@ -716,6 +846,20 @@ TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_downscale) {
         .output_size(2, 2)
         .channels(17)
         .iterations(3)
+        .TestNHWCxF32();
+    }
+  }
+}
+
+TEST(RESIZE_BILINEAR_NHWC_F32, aligned_corners_downscale_transient_indirection) {
+  for (size_t input_height = 3; input_height <= 5; input_height += 2) {
+    for (size_t input_width = 3; input_width <= 5; input_width += 2) {
+      ResizeBilinearOperatorTester()
+        .input_size(input_height, input_width)
+        .output_size(2, 2)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
         .TestNHWCxF32();
     }
   }
@@ -843,6 +987,21 @@ TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_upscale) {
   }
 }
 
+TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_upscale_transient_indirection) {
+  for (size_t output_height = 3; output_height <= 5; output_height += 2) {
+    for (size_t output_width = 3; output_width <= 5; output_width += 2) {
+      ResizeBilinearOperatorTester()
+        .tf_legacy_mode(true)
+        .input_size(2, 2)
+        .output_size(output_height, output_width)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
+        .TestNHWCxF32();
+    }
+  }
+}
+
 TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_downscale_y) {
   for (size_t output_height = 1; output_height <= 3; output_height++) {
     for (size_t input_height = output_height + 1; input_height < 15; input_height *= 3) {
@@ -880,6 +1039,21 @@ TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_downscale) {
         .output_size(2, 2)
         .channels(17)
         .iterations(3)
+        .TestNHWCxF32();
+    }
+  }
+}
+
+TEST(RESIZE_BILINEAR_NHWC_F32, tf_mode_aligned_centers_downscale_transient_indirection) {
+  for (size_t input_height = 3; input_height <= 5; input_height += 2) {
+    for (size_t input_width = 3; input_width <= 5; input_width += 2) {
+      ResizeBilinearOperatorTester()
+        .tf_legacy_mode(true)
+        .input_size(input_height, input_width)
+        .output_size(2, 2)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
         .TestNHWCxF32();
     }
   }
@@ -1005,6 +1179,20 @@ TEST(RESIZE_BILINEAR_NHWC_S8, aligned_centers_upscale) {
   }
 }
 
+TEST(RESIZE_BILINEAR_NHWC_S8, aligned_centers_upscale_transient_indirection) {
+  for (size_t output_height = 3; output_height <= 5; output_height += 2) {
+    for (size_t output_width = 3; output_width <= 5; output_width += 2) {
+      ResizeBilinearOperatorTester()
+        .input_size(2, 2)
+        .output_size(output_height, output_width)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
+        .TestNHWCxS8();
+    }
+  }
+}
+
 TEST(RESIZE_BILINEAR_NHWC_S8, aligned_centers_downscale_y) {
   for (size_t output_height = 1; output_height <= 3; output_height++) {
     for (size_t input_height = output_height + 1; input_height < 15; input_height *= 3) {
@@ -1039,6 +1227,20 @@ TEST(RESIZE_BILINEAR_NHWC_S8, aligned_centers_downscale) {
         .output_size(2, 2)
         .channels(17)
         .iterations(3)
+        .TestNHWCxS8();
+    }
+  }
+}
+
+TEST(RESIZE_BILINEAR_NHWC_S8, aligned_centers_downscale_transient_indirection) {
+  for (size_t input_height = 3; input_height <= 5; input_height += 2) {
+    for (size_t input_width = 3; input_width <= 5; input_width += 2) {
+      ResizeBilinearOperatorTester()
+        .input_size(input_height, input_width)
+        .output_size(2, 2)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
         .TestNHWCxS8();
     }
   }
@@ -1161,6 +1363,21 @@ TEST(RESIZE_BILINEAR_NHWC_S8, aligned_corners_upscale) {
   }
 }
 
+TEST(RESIZE_BILINEAR_NHWC_S8, aligned_corners_upscale_transient_indirection) {
+  for (size_t output_height = 3; output_height <= 5; output_height += 2) {
+    for (size_t output_width = 3; output_width <= 5; output_width += 2) {
+      ResizeBilinearOperatorTester()
+        .align_corners(true)
+        .input_size(2, 2)
+        .output_size(output_height, output_width)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
+        .TestNHWCxS8();
+    }
+  }
+}
+
 TEST(RESIZE_BILINEAR_NHWC_S8, aligned_corners_downscale_y) {
   for (size_t output_height = 2; output_height <= 3; output_height++) {
     for (size_t input_height = output_height + 1; input_height < 15; input_height *= 3) {
@@ -1195,6 +1412,20 @@ TEST(RESIZE_BILINEAR_NHWC_S8, aligned_corners_downscale) {
         .output_size(2, 2)
         .channels(17)
         .iterations(3)
+        .TestNHWCxS8();
+    }
+  }
+}
+
+TEST(RESIZE_BILINEAR_NHWC_S8, aligned_corners_downscale_transient_indirection) {
+  for (size_t input_height = 3; input_height <= 5; input_height += 2) {
+    for (size_t input_width = 3; input_width <= 5; input_width += 2) {
+      ResizeBilinearOperatorTester()
+        .input_size(input_height, input_width)
+        .output_size(2, 2)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
         .TestNHWCxS8();
     }
   }
@@ -1322,6 +1553,21 @@ TEST(RESIZE_BILINEAR_NHWC_S8, tf_mode_aligned_centers_upscale) {
   }
 }
 
+TEST(RESIZE_BILINEAR_NHWC_S8, tf_mode_aligned_centers_upscale_transient_indirection) {
+  for (size_t output_height = 3; output_height <= 5; output_height += 2) {
+    for (size_t output_width = 3; output_width <= 5; output_width += 2) {
+      ResizeBilinearOperatorTester()
+        .tf_legacy_mode(true)
+        .input_size(2, 2)
+        .output_size(output_height, output_width)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
+        .TestNHWCxS8();
+    }
+  }
+}
+
 TEST(RESIZE_BILINEAR_NHWC_S8, tf_mode_aligned_centers_downscale_y) {
   for (size_t output_height = 1; output_height <= 3; output_height++) {
     for (size_t input_height = output_height + 1; input_height < 15; input_height *= 3) {
@@ -1359,6 +1605,21 @@ TEST(RESIZE_BILINEAR_NHWC_S8, tf_mode_aligned_centers_downscale) {
         .output_size(2, 2)
         .channels(17)
         .iterations(3)
+        .TestNHWCxS8();
+    }
+  }
+}
+
+TEST(RESIZE_BILINEAR_NHWC_S8, tf_mode_aligned_centers_downscale_transient_indirection) {
+  for (size_t input_height = 3; input_height <= 5; input_height += 2) {
+    for (size_t input_width = 3; input_width <= 5; input_width += 2) {
+      ResizeBilinearOperatorTester()
+        .tf_legacy_mode(true)
+        .input_size(input_height, input_width)
+        .output_size(2, 2)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
         .TestNHWCxS8();
     }
   }
@@ -1484,6 +1745,20 @@ TEST(RESIZE_BILINEAR_NHWC_U8, aligned_centers_upscale) {
   }
 }
 
+TEST(RESIZE_BILINEAR_NHWC_U8, aligned_centers_upscale_transient_indirection) {
+  for (size_t output_height = 3; output_height <= 5; output_height += 2) {
+    for (size_t output_width = 3; output_width <= 5; output_width += 2) {
+      ResizeBilinearOperatorTester()
+        .input_size(2, 2)
+        .output_size(output_height, output_width)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
+        .TestNHWCxU8();
+    }
+  }
+}
+
 TEST(RESIZE_BILINEAR_NHWC_U8, aligned_centers_downscale_y) {
   for (size_t output_height = 1; output_height <= 3; output_height++) {
     for (size_t input_height = output_height + 1; input_height < 15; input_height *= 3) {
@@ -1518,6 +1793,20 @@ TEST(RESIZE_BILINEAR_NHWC_U8, aligned_centers_downscale) {
         .output_size(2, 2)
         .channels(17)
         .iterations(3)
+        .TestNHWCxU8();
+    }
+  }
+}
+
+TEST(RESIZE_BILINEAR_NHWC_U8, aligned_centers_downscale_transient_indirection) {
+  for (size_t input_height = 3; input_height <= 5; input_height += 2) {
+    for (size_t input_width = 3; input_width <= 5; input_width += 2) {
+      ResizeBilinearOperatorTester()
+        .input_size(input_height, input_width)
+        .output_size(2, 2)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
         .TestNHWCxU8();
     }
   }
@@ -1640,6 +1929,21 @@ TEST(RESIZE_BILINEAR_NHWC_U8, aligned_corners_upscale) {
   }
 }
 
+TEST(RESIZE_BILINEAR_NHWC_U8, aligned_corners_upscale_transient_indirection) {
+  for (size_t output_height = 3; output_height <= 5; output_height += 2) {
+    for (size_t output_width = 3; output_width <= 5; output_width += 2) {
+      ResizeBilinearOperatorTester()
+        .align_corners(true)
+        .input_size(2, 2)
+        .output_size(output_height, output_width)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
+        .TestNHWCxU8();
+    }
+  }
+}
+
 TEST(RESIZE_BILINEAR_NHWC_U8, aligned_corners_downscale_y) {
   for (size_t output_height = 2; output_height <= 3; output_height++) {
     for (size_t input_height = output_height + 1; input_height < 15; input_height *= 3) {
@@ -1674,6 +1978,20 @@ TEST(RESIZE_BILINEAR_NHWC_U8, aligned_corners_downscale) {
         .output_size(2, 2)
         .channels(17)
         .iterations(3)
+        .TestNHWCxU8();
+    }
+  }
+}
+
+TEST(RESIZE_BILINEAR_NHWC_U8, aligned_corners_downscale_transient_indirection) {
+  for (size_t input_height = 3; input_height <= 5; input_height += 2) {
+    for (size_t input_width = 3; input_width <= 5; input_width += 2) {
+      ResizeBilinearOperatorTester()
+        .input_size(input_height, input_width)
+        .output_size(2, 2)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
         .TestNHWCxU8();
     }
   }
@@ -1801,6 +2119,21 @@ TEST(RESIZE_BILINEAR_NHWC_U8, tf_mode_aligned_centers_upscale) {
   }
 }
 
+TEST(RESIZE_BILINEAR_NHWC_U8, tf_mode_aligned_centers_upscale_transient_indirection) {
+  for (size_t output_height = 3; output_height <= 5; output_height += 2) {
+    for (size_t output_width = 3; output_width <= 5; output_width += 2) {
+      ResizeBilinearOperatorTester()
+        .tf_legacy_mode(true)
+        .input_size(2, 2)
+        .output_size(output_height, output_width)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
+        .TestNHWCxU8();
+    }
+  }
+}
+
 TEST(RESIZE_BILINEAR_NHWC_U8, tf_mode_aligned_centers_downscale_y) {
   for (size_t output_height = 1; output_height <= 3; output_height++) {
     for (size_t input_height = output_height + 1; input_height < 15; input_height *= 3) {
@@ -1838,6 +2171,21 @@ TEST(RESIZE_BILINEAR_NHWC_U8, tf_mode_aligned_centers_downscale) {
         .output_size(2, 2)
         .channels(17)
         .iterations(3)
+        .TestNHWCxU8();
+    }
+  }
+}
+
+TEST(RESIZE_BILINEAR_NHWC_U8, tf_mode_aligned_centers_downscale_transient_indirection) {
+  for (size_t input_height = 3; input_height <= 5; input_height += 2) {
+    for (size_t input_width = 3; input_width <= 5; input_width += 2) {
+      ResizeBilinearOperatorTester()
+        .tf_legacy_mode(true)
+        .input_size(input_height, input_width)
+        .output_size(2, 2)
+        .channels(17)
+        .iterations(3)
+        .transient_indirection_buffer(true)
         .TestNHWCxU8();
     }
   }

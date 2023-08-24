@@ -406,7 +406,10 @@ struct xnn_operator {
     struct pixelwise_average_pooling_context pixelwise_average_pooling;
     struct prelu_context prelu;
     struct reduce_context reduce;
-    struct resize_bilinear_context resize_bilinear;
+    struct {
+      struct resize_bilinear_context resize_bilinear;
+      struct resize_bilinear_nhwc_indirection_init_context resize_nhwc_indirection_init;
+    };
     struct resize_bilinear_chw_context resize_bilinear_chw;
     struct slice_context slice;
     struct spmm_context spmm;

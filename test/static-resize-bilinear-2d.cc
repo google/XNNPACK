@@ -222,11 +222,16 @@ TEST_F(StaticResizeBilinear2DTestQS8, matches_operator_api)
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
+  size_t workspace_size = SIZE_MAX;
+  size_t workspace_alignment = SIZE_MAX;
   ASSERT_EQ(
     xnn_status_success,
     xnn_reshape_resize_bilinear2d_nhwc_s8(
-      op, batch_size, input_height, input_width, output_height, output_width, /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_resize_bilinear2d_nhwc_s8(op, input.data(), operator_output.data()));
+      op, batch_size, input_height, input_width, output_height, output_width,
+      &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+  ASSERT_EQ(workspace_size, 0);
+  ASSERT_EQ(workspace_alignment, 1);
+  ASSERT_EQ(xnn_status_success, xnn_setup_resize_bilinear2d_nhwc_s8(op, /*workspace=*/nullptr, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -286,11 +291,16 @@ TEST_F(StaticResizeBilinear2DTestQU8, matches_operator_api)
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
+  size_t workspace_size = SIZE_MAX;
+  size_t workspace_alignment = SIZE_MAX;
   ASSERT_EQ(
     xnn_status_success,
     xnn_reshape_resize_bilinear2d_nhwc_u8(
-      op, batch_size, input_height, input_width, output_height, output_width, /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_resize_bilinear2d_nhwc_u8(op, input.data(), operator_output.data()));
+      op, batch_size, input_height, input_width, output_height, output_width,
+      &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+  ASSERT_EQ(workspace_size, 0);
+  ASSERT_EQ(workspace_alignment, 1);
+  ASSERT_EQ(xnn_status_success, xnn_setup_resize_bilinear2d_nhwc_u8(op, /*workspace=*/nullptr, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -346,11 +356,16 @@ TEST_F(StaticResizeBilinear2DTestF32, matches_operator_api)
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
+  size_t workspace_size = SIZE_MAX;
+  size_t workspace_alignment = SIZE_MAX;
   ASSERT_EQ(
     xnn_status_success,
     xnn_reshape_resize_bilinear2d_nhwc_f32(
-      op, batch_size, input_height, input_width, output_height, output_width, /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_resize_bilinear2d_nhwc_f32(op, input.data(), operator_output.data()));
+      op, batch_size, input_height, input_width, output_height, output_width,
+      &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
+  ASSERT_EQ(workspace_size, 0);
+  ASSERT_EQ(workspace_alignment, 1);
+  ASSERT_EQ(xnn_status_success, xnn_setup_resize_bilinear2d_nhwc_f32(op, /*workspace=*/nullptr, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 

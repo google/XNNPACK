@@ -366,6 +366,9 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f16(
     (float) ((int32_t) input_height - height_adjustment) / (float) ((int32_t) output_height - height_adjustment);
 
   uint16_t* w = (uint16_t*) packed_weights;
+  indirection_buffer += 4 * output_y_start * output_width;
+  w += 2 * output_y_start * output_width;
+
   const uint32_t input_y_max = (uint32_t) input_height - 1;
   const uint32_t input_x_max = (uint32_t) input_width - 1;
   if (tensorflow_legacy || align_corners) {
@@ -465,6 +468,10 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f32(
 
   const uint32_t input_y_max = (uint32_t) input_height - 1;
   const uint32_t input_x_max = (uint32_t) input_width - 1;
+
+  indirection_buffer += 4 * output_y_start * output_width;
+  packed_weights += 2 * output_y_start * output_width;
+
   if (tensorflow_legacy || align_corners) {
     for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
       const float input_y = (float) (int32_t) output_y * height_scale;
@@ -562,6 +569,10 @@ void xnn_indirection_init_resize_bilinear2d_hwc_q11(
 
   const uint32_t input_y_max = (uint32_t) input_height - 1;
   const uint32_t input_x_max = (uint32_t) input_width - 1;
+
+  indirection_buffer += 4 * output_y_start * output_width;
+  packed_weights += 2 * output_y_start * output_width;
+
   if (tensorflow_legacy || align_corners) {
     for (size_t output_y = output_y_start; output_y < output_y_end; output_y++) {
       const float input_y = (float) (int32_t) output_y * height_scale;

@@ -2522,3 +2522,17 @@ typedef size_t (*xnn_init_x32_transpose_params_fn)(
 typedef size_t (*xnn_init_x64_transpose_params_fn)(
   union xnn_x64_transpose_params params[XNN_MIN_ELEMENTS(1)]
 );
+
+typedef void (*xnn_indirection_init_resize_bilinear2d_hwc_fn)(
+  size_t output_y_start,
+  size_t output_y_end,
+  size_t input_pixel_stride,
+  size_t input_height,
+  size_t input_width,
+  size_t output_height,
+  size_t output_width,
+  const void* input,
+  const void** indirection_buffer,
+  void* packed_weights,
+  bool align_corners,
+  bool tensorflow_legacy);

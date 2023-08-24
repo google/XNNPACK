@@ -1067,6 +1067,25 @@ void xnn_compute_global_average_pooling_ncw(
     &context->params);
 }
 
+void xnn_compute_resize_bilinear_indirection(
+    const struct resize_bilinear_nhwc_indirection_init_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t output_y_start,
+    size_t output_y_tile)
+{
+  void* buffer = context->buffer;
+
+  context->indirection_init(
+    output_y_start,
+    output_y_start + output_y_tile,
+    context->input_pixel_stride,
+    context->input_height, context->input_width,
+    context->output_height, context->output_width,
+    context->input,
+    /*indirection_buffer==*/(const void**) ((uintptr_t) buffer + context->packed_weight_size),
+    /*packed_weights=*/(void*) buffer,
+    context->align_corners, context->tensorflow_legacy_mode);
+}
+
 void xnn_compute_resize_bilinear(
     const struct resize_bilinear_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,

@@ -135,6 +135,8 @@ static enum xnn_status reshape_resize_bilinear_operator(
         input_width,
         output_height,
         output_width,
+        &opdata->workspace_size,
+        &opdata->workspace_alignment,
         threadpool);
       break;
     case xnn_operator_type_resize_bilinear_nhwc_f32:
@@ -145,6 +147,8 @@ static enum xnn_status reshape_resize_bilinear_operator(
         input_width,
         output_height,
         output_width,
+        &opdata->workspace_size,
+        &opdata->workspace_alignment,
         threadpool);
       break;
     case xnn_operator_type_resize_bilinear_nhwc_s8:
@@ -155,6 +159,8 @@ static enum xnn_status reshape_resize_bilinear_operator(
         input_width,
         output_height,
         output_width,
+        &opdata->workspace_size,
+        &opdata->workspace_alignment,
         threadpool);
       break;
     case xnn_operator_type_resize_bilinear_nhwc_u8:
@@ -165,6 +171,8 @@ static enum xnn_status reshape_resize_bilinear_operator(
         input_width,
         output_height,
         output_width,
+        &opdata->workspace_size,
+        &opdata->workspace_alignment,
         threadpool);
       break;
     default:
@@ -210,24 +218,28 @@ static enum xnn_status setup_resize_bilinear_operator(
     case xnn_operator_type_resize_bilinear_nhwc_f16:
       return xnn_setup_resize_bilinear2d_nhwc_f16(
         opdata->operator_objects[0],
+        opdata->workspace,
         input_data,
         output_data);
       break;
     case xnn_operator_type_resize_bilinear_nhwc_f32:
       return xnn_setup_resize_bilinear2d_nhwc_f32(
         opdata->operator_objects[0],
+        opdata->workspace,
         input_data,
         output_data);
       break;
     case xnn_operator_type_resize_bilinear_nhwc_s8:
       return xnn_setup_resize_bilinear2d_nhwc_s8(
         opdata->operator_objects[0],
+        opdata->workspace,
         input_data,
         output_data);
       break;
     case xnn_operator_type_resize_bilinear_nhwc_u8:
       return xnn_setup_resize_bilinear2d_nhwc_u8(
         opdata->operator_objects[0],
+        opdata->workspace,
         input_data,
         output_data);
       break;
@@ -263,7 +275,9 @@ enum xnn_status xnn_define_static_resize_bilinear_2d(
     return xnn_status_unsupported_parameter;
   }
 
-  const uint32_t supported_flags = XNN_FLAG_TENSORFLOW_LEGACY_MODE | XNN_FLAG_ALIGN_CORNERS;
+  const uint32_t supported_flags = XNN_FLAG_TENSORFLOW_LEGACY_MODE |
+                                   XNN_FLAG_ALIGN_CORNERS |
+                                   XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
   const uint32_t invalid_flags = flags & ~supported_flags;
   if (invalid_flags != 0) {
     xnn_log_error(
