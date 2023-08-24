@@ -15,7 +15,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vsqr_ukernel__rvv_x8v(
+void xnn_f32_vsqr_ukernel__rvv_u8v(
     size_t batch,
     const float* input,
     float* output,

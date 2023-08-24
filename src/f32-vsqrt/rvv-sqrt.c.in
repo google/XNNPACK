@@ -13,7 +13,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vsqrt_ukernel__rvv_sqrt_x${LMUL}v(
+void xnn_f32_vsqrt_ukernel__rvv_sqrt_u${LMUL}v(
     size_t batch,
     const float* input,
     float* output,
