@@ -46,7 +46,7 @@
 #include <xnnpack/zip.h>
 
 
-void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_x16(
+void xnn_f16_f32_vcvt_ukernel__wasmsimd_int16_u16(
     size_t batch,
     const void* input,
     float* output,
@@ -9816,7 +9816,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__wasmsimd_x86_splat_1x4_acc2(
   } while (output_height != 0);
 }
 
-void xnn_f32_f16_vcvt_ukernel__wasmsimd_x24(
+void xnn_f32_f16_vcvt_ukernel__wasmsimd_u24(
     size_t batch,
     const float* input,
     void* output,
@@ -20405,7 +20405,7 @@ void xnn_f32_qc8w_gemm_ukernel_5x8__wasmsimd_splat(
   } while (nc != 0);
 }
 
-void xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_x32(
+void xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_u32(
     size_t batch,
     const float* input,
     int8_t* output,
@@ -20547,7 +20547,7 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_x32(
   }
 }
 
-void xnn_f32_qu8_vcvt_ukernel__wasmsimd_magic_x32(
+void xnn_f32_qu8_vcvt_ukernel__wasmsimd_magic_u32(
     size_t batch,
     const float* input,
     uint8_t* output,
@@ -26863,7 +26863,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4c2s4__wasmsimd_dot16x2_ld128(
   } while (nc != 0);
 }
 
-void xnn_qs16_qs8_vcvt_ukernel__wasmsimd_x16(
+void xnn_qs16_qs8_vcvt_ukernel__wasmsimd_u16(
     size_t batch,
     const int16_t* input,
     int8_t* output,
@@ -28094,7 +28094,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__wasmsimd_mul16_add16(
   } while (--output_width != 0);
 }
 
-void xnn_qs8_f32_vcvt_ukernel__wasmsimd_x32(
+void xnn_qs8_f32_vcvt_ukernel__wasmsimd_u32(
     size_t batch,
     const int8_t* input,
     float* output,
@@ -33032,7 +33032,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__wasmsimd_mul16(
   } while (--output_width != 0);
 }
 
-void xnn_qu8_f32_vcvt_ukernel__wasmsimd_x32(
+void xnn_qu8_f32_vcvt_ukernel__wasmsimd_u32(
     size_t batch,
     const uint8_t* input,
     float* output,
@@ -35343,7 +35343,7 @@ void xnn_s8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16(
   } while (--output_pixels != 0);
 }
 
-void xnn_s8_vclamp_ukernel__wasmsimd_x64(
+void xnn_s8_vclamp_ukernel__wasmsimd_u64(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -35792,7 +35792,7 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16(
   } while (--output_pixels != 0);
 }
 
-void xnn_u8_vclamp_ukernel__wasmsimd_x64(
+void xnn_u8_vclamp_ukernel__wasmsimd_u64(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

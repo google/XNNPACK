@@ -19,7 +19,7 @@ $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $WASM_X8X16_NARROW_I16X8 = {"QS8": "wasm_i8x16_narrow_i16x8", "QU8": "wasm_u8x16_narrow_i16x8"}[DATATYPE]
 $WASM_X8X16_MIN = {"QS8": "wasm_i8x16_min", "QU8": "wasm_u8x16_min"}[DATATYPE]
 $WASM_X8X16_MAX = {"QS8": "wasm_i8x16_max", "QU8": "wasm_u8x16_max"}[DATATYPE]
-void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_cvt_x${BATCH_TILE}(
+void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_cvt_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     ${XINT8_T}* output,

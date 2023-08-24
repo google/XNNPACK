@@ -33,7 +33,7 @@ $VMAXQ_X8 = {"QS8": "vmaxq_s8", "QU8": "vmaxq_u8"}[DATATYPE]
 $VMAX_X8 = {"QS8": "vmax_s8", "QU8": "vmax_u8"}[DATATYPE]
 $VMINQ_X8 = {"QS8": "vminq_s8", "QU8": "vminq_u8"}[DATATYPE]
 $VMIN_X8 = {"QS8": "vmin_s8", "QU8": "vmin_u8"}[DATATYPE]
-void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_x${BATCH_TILE}(
+void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     ${XINT8_T}* output,

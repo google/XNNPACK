@@ -4099,7 +4099,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x4__wasm(
   } while (nc != 0);
 }
 
-void xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_x4(
+void xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_u4(
     size_t batch,
     const float* input,
     int8_t* output,
@@ -4177,7 +4177,7 @@ void xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_x4(
   }
 }
 
-void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_x4(
+void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_u4(
     size_t batch,
     const float* input,
     uint8_t* output,

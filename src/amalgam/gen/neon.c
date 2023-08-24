@@ -47,7 +47,7 @@
 #include <xnnpack/zip.h>
 
 
-void xnn_f16_f32_vcvt_ukernel__neon_int16_x16(
+void xnn_f16_f32_vcvt_ukernel__neon_int16_u16(
     size_t batch,
     const void* input,
     float* output,
@@ -4432,7 +4432,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_1x4(
   } while (output_height != 0);
 }
 
-void xnn_f32_f16_vcvt_ukernel__neon_x8(
+void xnn_f32_f16_vcvt_ukernel__neon_u8(
     size_t batch,
     const float* input,
     void* output,
@@ -7972,7 +7972,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x8__neon_lane_ld64(
   } while (nc != 0);
 }
 
-void xnn_f32_qs8_vcvt_ukernel__neon_x32(
+void xnn_f32_qs8_vcvt_ukernel__neon_u32(
     size_t batch,
     const float* input,
     int8_t* output,
@@ -8098,7 +8098,7 @@ void xnn_f32_qs8_vcvt_ukernel__neon_x32(
   }
 }
 
-void xnn_f32_qu8_vcvt_ukernel__neon_x32(
+void xnn_f32_qu8_vcvt_ukernel__neon_u32(
     size_t batch,
     const float* input,
     uint8_t* output,
@@ -11640,7 +11640,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x8c2s4__neon_mlal(
   } while (nc != 0);
 }
 
-void xnn_qs16_qs8_vcvt_ukernel__neon_x32(
+void xnn_qs16_qs8_vcvt_ukernel__neon_u32(
     size_t batch,
     const int16_t* input,
     int8_t* output,
@@ -13232,7 +13232,7 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_9p16c__neon_mla8_ld64(
   } while (--output_width != 0);
 }
 
-void xnn_qs8_f32_vcvt_ukernel__neon_x32(
+void xnn_qs8_f32_vcvt_ukernel__neon_u32(
     size_t batch,
     const int8_t* input,
     float* output,
@@ -21027,7 +21027,7 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_9p16c__neon_mul8(
   } while (--output_width != 0);
 }
 
-void xnn_qu8_f32_vcvt_ukernel__neon_x32(
+void xnn_qu8_f32_vcvt_ukernel__neon_u32(
     size_t batch,
     const uint8_t* input,
     float* output,
@@ -25781,7 +25781,7 @@ void xnn_s8_maxpool_minmax_ukernel_9p8x__neon_c16(
   } while (--output_pixels != 0);
 }
 
-void xnn_s8_vclamp_ukernel__neon_x64(
+void xnn_s8_vclamp_ukernel__neon_u64(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -26424,7 +26424,7 @@ void xnn_u8_rmax_ukernel__neon(
   }
 }
 
-void xnn_u8_vclamp_ukernel__neon_x64(
+void xnn_u8_vclamp_ukernel__neon_u64(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

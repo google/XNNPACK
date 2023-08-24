@@ -20,7 +20,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 $ISA = "avx" if AVX else {2: "sse2", 4: "sse41"}[SSE]
-void xnn_f32_f16_vcvt_ukernel__${ISA}_x${BATCH_TILE}(
+void xnn_f32_f16_vcvt_ukernel__${ISA}_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     void* output,

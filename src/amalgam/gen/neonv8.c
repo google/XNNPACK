@@ -18,7 +18,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_qs8_vcvt_ukernel__neonv8_x32(
+void xnn_f32_qs8_vcvt_ukernel__neonv8_u32(
     size_t batch,
     const float* input,
     int8_t* output,
@@ -135,7 +135,7 @@ void xnn_f32_qs8_vcvt_ukernel__neonv8_x32(
   }
 }
 
-void xnn_f32_qu8_vcvt_ukernel__neonv8_x32(
+void xnn_f32_qu8_vcvt_ukernel__neonv8_u32(
     size_t batch,
     const float* input,
     uint8_t* output,

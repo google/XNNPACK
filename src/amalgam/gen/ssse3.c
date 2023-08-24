@@ -233,7 +233,7 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__ssse3_2x4_acc2(
   } while (output_height != 0);
 }
 
-void xnn_qs16_qs8_vcvt_ukernel__ssse3_x16(
+void xnn_qs16_qs8_vcvt_ukernel__ssse3_u16(
     size_t batch,
     const int16_t* input,
     int8_t* output,

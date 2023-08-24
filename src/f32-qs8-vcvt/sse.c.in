@@ -22,7 +22,7 @@ $ISA = {2: "sse2", 4: "sse41"}[SSE]
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $_MM_PACKXS_EPI16 = {"QS8": "_mm_packs_epi16", "QU8": "_mm_packus_epi16"}[DATATYPE]
 $_MM_MAX_EPX8 = {"QS8": "_mm_max_epi8", "QU8": "_mm_max_epu8"}[DATATYPE]
-void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__${ISA}_x${BATCH_TILE}(
+void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__${ISA}_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     ${XINT8_T}* output,

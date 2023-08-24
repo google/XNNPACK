@@ -29,7 +29,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f16_f32_vcvt_ukernel__sse41_int16_x16(
+void xnn_f16_f32_vcvt_ukernel__sse41_int16_u16(
     size_t batch,
     const void* input,
     float* output,
@@ -161,7 +161,7 @@ void xnn_f16_f32_vcvt_ukernel__sse41_int16_x16(
   }
 }
 
-void xnn_f32_f16_vcvt_ukernel__sse41_x8(
+void xnn_f32_f16_vcvt_ukernel__sse41_u8(
     size_t batch,
     const float* input,
     void* output,
@@ -1405,7 +1405,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x8__sse41_dup(
   } while (nc != 0);
 }
 
-void xnn_f32_qs8_vcvt_ukernel__sse41_x32(
+void xnn_f32_qs8_vcvt_ukernel__sse41_u32(
     size_t batch,
     const float* input,
     int8_t* output,
@@ -2638,7 +2638,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x4c8__sse41_ld64(
   } while (nc != 0);
 }
 
-void xnn_qs16_qs8_vcvt_ukernel__sse41_x16(
+void xnn_qs16_qs8_vcvt_ukernel__sse41_u16(
     size_t batch,
     const int16_t* input,
     int8_t* output,
@@ -3840,7 +3840,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__sse41_mul16_add16(
   } while (--output_width != 0);
 }
 
-void xnn_qs8_f32_vcvt_ukernel__sse41_x16(
+void xnn_qs8_f32_vcvt_ukernel__sse41_u16(
     size_t batch,
     const int8_t* input,
     float* output,
@@ -8705,7 +8705,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__sse41_mul16(
   } while (--output_width != 0);
 }
 
-void xnn_qu8_f32_vcvt_ukernel__sse41_x16(
+void xnn_qu8_f32_vcvt_ukernel__sse41_u16(
     size_t batch,
     const uint8_t* input,
     float* output,
@@ -10825,7 +10825,7 @@ void xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16(
   } while (--output_pixels != 0);
 }
 
-void xnn_s8_vclamp_ukernel__sse41_x64(
+void xnn_s8_vclamp_ukernel__sse41_u64(
     size_t batch,
     const int8_t* input,
     int8_t* output,

@@ -30,7 +30,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f16_f32_vcvt_ukernel__avx_int16_x16(
+void xnn_f16_f32_vcvt_ukernel__avx_int16_u16(
     size_t batch,
     const void* input,
     float* output,
@@ -1698,7 +1698,7 @@ void xnn_f32_dwconv_minmax_ukernel_9p16c__avx(
   } while (--output_width != 0);
 }
 
-void xnn_f32_f16_vcvt_ukernel__avx_x24(
+void xnn_f32_f16_vcvt_ukernel__avx_u24(
     size_t batch,
     const float* input,
     void* output,
@@ -3444,7 +3444,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_5x16__avx_broadcast(
   } while (nc != 0);
 }
 
-void xnn_f32_qs8_vcvt_ukernel__avx_x32(
+void xnn_f32_qs8_vcvt_ukernel__avx_u32(
     size_t batch,
     const float* input,
     int8_t* output,
@@ -3550,7 +3550,7 @@ void xnn_f32_qs8_vcvt_ukernel__avx_x32(
   }
 }
 
-void xnn_f32_qu8_vcvt_ukernel__avx_x32(
+void xnn_f32_qu8_vcvt_ukernel__avx_u32(
     size_t batch,
     const float* input,
     uint8_t* output,
@@ -6507,7 +6507,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x4c8__avx_ld128(
   } while (nc != 0);
 }
 
-void xnn_qs16_qs8_vcvt_ukernel__avx_x16(
+void xnn_qs16_qs8_vcvt_ukernel__avx_u16(
     size_t batch,
     const int16_t* input,
     int8_t* output,
@@ -7991,7 +7991,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx_mul16_add16(
   } while (--output_width != 0);
 }
 
-void xnn_qs8_f32_vcvt_ukernel__avx_x32(
+void xnn_qs8_f32_vcvt_ukernel__avx_u32(
     size_t batch,
     const int8_t* input,
     float* output,
@@ -12857,7 +12857,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx_mul16(
   } while (--output_width != 0);
 }
 
-void xnn_qu8_f32_vcvt_ukernel__avx_x32(
+void xnn_qu8_f32_vcvt_ukernel__avx_u32(
     size_t batch,
     const uint8_t* input,
     float* output,

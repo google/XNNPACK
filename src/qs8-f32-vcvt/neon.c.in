@@ -19,7 +19,7 @@ $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $XINT8X8_T = {"QS8": "int8x8_t", "QU8": "uint8x8_t"}[DATATYPE]
 $VLD1_X8 = {"QS8": "vld1_s8", "QU8": "vld1_u8"}[DATATYPE]
 $VLD1_X16 = {"QS8": "vld1_s16", "QU8": "vld1_u16"}[DATATYPE]
-void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__neon_x${BATCH_TILE}(
+void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__neon_u${BATCH_TILE}(
     size_t batch,
     const ${XINT8_T}* input,
     float* output,

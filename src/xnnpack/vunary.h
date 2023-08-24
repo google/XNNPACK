@@ -1733,11 +1733,11 @@ DECLARE_F32_VTANH_UKERNEL_FUNCTION(xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr
       int8_t* y,                                    \
       const union xnn_s8_minmax_params* params);
 
-DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__neon_x64)
-DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__scalar_x4)
-DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__sse2_x64)
-DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__sse41_x64)
-DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__wasmsimd_x64)
+DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__neon_u64)
+DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__scalar_u4)
+DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__sse2_u64)
+DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__sse41_u64)
+DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__wasmsimd_u64)
 
 
 #define DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(fn_name) \
@@ -1747,10 +1747,10 @@ DECLARE_S8_VCLAMP_UKERNEL_FUNCTION(xnn_s8_vclamp_ukernel__wasmsimd_x64)
       uint8_t* y,                                   \
       const union xnn_u8_minmax_params* params);
 
-DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__neon_x64)
-DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__scalar_x4)
-DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__sse2_x64)
-DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__wasmsimd_x64)
+DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__neon_u64)
+DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__scalar_u4)
+DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__sse2_u64)
+DECLARE_U8_VCLAMP_UKERNEL_FUNCTION(xnn_u8_vclamp_ukernel__wasmsimd_u64)
 
 
 #define DECLARE_U64_U32_VSQRTSHIFT_UKERNEL_FUNCTION(fn_name) \

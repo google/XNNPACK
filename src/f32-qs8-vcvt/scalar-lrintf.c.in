@@ -15,7 +15,7 @@ $assert BATCH_TILE >= 1
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__${"wasm" if WASM else "scalar"}_lrintf_x${BATCH_TILE}(
+void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__${"wasm" if WASM else "scalar"}_lrintf_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     ${XINT8_T}* output,

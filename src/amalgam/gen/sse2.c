@@ -38,7 +38,7 @@
 #include <xnnpack/zip.h>
 
 
-void xnn_f16_f32_vcvt_ukernel__sse2_int16_x32(
+void xnn_f16_f32_vcvt_ukernel__sse2_int16_u32(
     size_t batch,
     const void* input,
     float* output,
@@ -996,7 +996,7 @@ void xnn_f32_argmaxpool_ukernel_9x__sse2_c4(
   } while (--output_pixels != 0);
 }
 
-void xnn_f32_f16_vcvt_ukernel__sse2_x16(
+void xnn_f32_f16_vcvt_ukernel__sse2_u16(
     size_t batch,
     const float* input,
     void* output,
@@ -2356,7 +2356,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x8__sse2_dup(
   } while (nc != 0);
 }
 
-void xnn_f32_qs8_vcvt_ukernel__sse2_x32(
+void xnn_f32_qs8_vcvt_ukernel__sse2_u32(
     size_t batch,
     const float* input,
     int8_t* output,
@@ -2493,7 +2493,7 @@ void xnn_f32_qs8_vcvt_ukernel__sse2_x32(
   }
 }
 
-void xnn_f32_qu8_vcvt_ukernel__sse2_x32(
+void xnn_f32_qu8_vcvt_ukernel__sse2_u32(
     size_t batch,
     const float* input,
     uint8_t* output,
@@ -4416,7 +4416,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x4c8__sse2_ld64(
   } while (nc != 0);
 }
 
-void xnn_qs16_qs8_vcvt_ukernel__sse2_x16(
+void xnn_qs16_qs8_vcvt_ukernel__sse2_u16(
     size_t batch,
     const int16_t* input,
     int8_t* output,
@@ -5677,7 +5677,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__sse2_mul16_add16(
   } while (--output_width != 0);
 }
 
-void xnn_qs8_f32_vcvt_ukernel__sse2_x32(
+void xnn_qs8_f32_vcvt_ukernel__sse2_u32(
     size_t batch,
     const int8_t* input,
     float* output,
@@ -11506,7 +11506,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p8c__sse2_mul16(
   } while (--output_width != 0);
 }
 
-void xnn_qu8_f32_vcvt_ukernel__sse2_x32(
+void xnn_qu8_f32_vcvt_ukernel__sse2_u32(
     size_t batch,
     const uint8_t* input,
     float* output,
@@ -13869,7 +13869,7 @@ void xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16(
   } while (--output_pixels != 0);
 }
 
-void xnn_s8_vclamp_ukernel__sse2_x64(
+void xnn_s8_vclamp_ukernel__sse2_u64(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -14374,7 +14374,7 @@ void xnn_u8_rmax_ukernel__sse2(
   }
 }
 
-void xnn_u8_vclamp_ukernel__sse2_x64(
+void xnn_u8_vclamp_ukernel__sse2_u64(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

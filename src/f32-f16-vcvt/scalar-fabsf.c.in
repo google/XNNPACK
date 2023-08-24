@@ -12,7 +12,7 @@ $assert BATCH_TILE >= 1
 #include <xnnpack/vcvt.h>
 
 
-void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x${BATCH_TILE}(
+void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     void* output,

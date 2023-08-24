@@ -46,7 +46,7 @@
 #include <xnnpack/zip.h>
 
 
-void xnn_f16_f32_vcvt_ukernel__scalar_x1(
+void xnn_f16_f32_vcvt_ukernel__scalar_u1(
     size_t batch,
     const void* input,
     float* output,
@@ -82,7 +82,7 @@ void xnn_f16_f32_vcvt_ukernel__scalar_x1(
   } while (batch != 0);
 }
 
-void xnn_f16_f32_vcvt_ukernel__scalar_x4(
+void xnn_f16_f32_vcvt_ukernel__scalar_u4(
     size_t batch,
     const void* input,
     float* output,
@@ -6230,7 +6230,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__scalar_2x1_acc2(
   } while (output_height != 0);
 }
 
-void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x4(
+void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_u4(
     size_t batch,
     const float* input,
     void* output,
@@ -6383,7 +6383,7 @@ void xnn_f32_f16_vcvt_ukernel__scalar_bitcast_x4(
   }
 }
 
-void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_x2(
+void xnn_f32_f16_vcvt_ukernel__scalar_fabsf_u2(
     size_t batch,
     const float* input,
     void* output,
@@ -11144,7 +11144,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x4__scalar(
   } while (nc != 0);
 }
 
-void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x1(
+void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u1(
     size_t batch,
     const float* input,
     int8_t* output,
@@ -11177,7 +11177,7 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x1(
   } while (batch != 0);
 }
 
-void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x4(
+void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u4(
     size_t batch,
     const float* input,
     int8_t* output,
@@ -11255,7 +11255,7 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_imagic_x4(
   }
 }
 
-void xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_x4(
+void xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_u4(
     size_t batch,
     const float* input,
     int8_t* output,
@@ -11326,7 +11326,7 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_x4(
   }
 }
 
-void xnn_f32_qu8_vcvt_ukernel__scalar_imagic_x1(
+void xnn_f32_qu8_vcvt_ukernel__scalar_imagic_u1(
     size_t batch,
     const float* input,
     uint8_t* output,
@@ -11359,7 +11359,7 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_imagic_x1(
   } while (batch != 0);
 }
 
-void xnn_f32_qu8_vcvt_ukernel__scalar_imagic_x4(
+void xnn_f32_qu8_vcvt_ukernel__scalar_imagic_u4(
     size_t batch,
     const float* input,
     uint8_t* output,
@@ -11437,7 +11437,7 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_imagic_x4(
   }
 }
 
-void xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_x4(
+void xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_u4(
     size_t batch,
     const float* input,
     uint8_t* output,
@@ -16677,7 +16677,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4__scalar(
   } while (nc != 0);
 }
 
-void xnn_qs16_qs8_vcvt_ukernel__scalar_x4(
+void xnn_qs16_qs8_vcvt_ukernel__scalar_u4(
     size_t batch,
     const int16_t* input,
     int8_t* output,
@@ -18334,7 +18334,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_9p2c__scalar_lrintf(
   } while (--output_width != 0);
 }
 
-void xnn_qs8_f32_vcvt_ukernel__scalar_x1(
+void xnn_qs8_f32_vcvt_ukernel__scalar_u1(
     size_t batch,
     const int8_t* input,
     float* output,
@@ -18360,7 +18360,7 @@ void xnn_qs8_f32_vcvt_ukernel__scalar_x1(
   } while (batch != 0);
 }
 
-void xnn_qs8_f32_vcvt_ukernel__scalar_x4(
+void xnn_qs8_f32_vcvt_ukernel__scalar_u4(
     size_t batch,
     const int8_t* input,
     float* output,
@@ -26810,7 +26810,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p2c__scalar_lrintf(
   } while (--output_width != 0);
 }
 
-void xnn_qu8_f32_vcvt_ukernel__scalar_x1(
+void xnn_qu8_f32_vcvt_ukernel__scalar_u1(
     size_t batch,
     const uint8_t* input,
     float* output,
@@ -26836,7 +26836,7 @@ void xnn_qu8_f32_vcvt_ukernel__scalar_x1(
   } while (batch != 0);
 }
 
-void xnn_qu8_f32_vcvt_ukernel__scalar_x4(
+void xnn_qu8_f32_vcvt_ukernel__scalar_u4(
     size_t batch,
     const uint8_t* input,
     float* output,
@@ -30024,7 +30024,7 @@ void xnn_s8_maxpool_minmax_ukernel_9p8x__scalar_c1(
   } while (--output_pixels != 0);
 }
 
-void xnn_s8_vclamp_ukernel__scalar_x4(
+void xnn_s8_vclamp_ukernel__scalar_u4(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -30357,7 +30357,7 @@ void xnn_u8_rmax_ukernel__scalar(
   *output = vmax;
 }
 
-void xnn_u8_vclamp_ukernel__scalar_x4(
+void xnn_u8_vclamp_ukernel__scalar_u4(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

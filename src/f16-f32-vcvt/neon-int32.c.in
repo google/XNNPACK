@@ -15,7 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/vcvt.h>
 
 
-void xnn_f16_f32_vcvt_ukernel__neon_int32_x${BATCH_TILE}(
+void xnn_f16_f32_vcvt_ukernel__neon_int32_u${BATCH_TILE}(
     size_t batch,
     const void* input,
     float* output,

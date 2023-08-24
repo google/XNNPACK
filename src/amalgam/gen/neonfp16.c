@@ -12,7 +12,7 @@
 #include <xnnpack/vcvt.h>
 
 
-void xnn_f16_f32_vcvt_ukernel__neonfp16_x16(
+void xnn_f16_f32_vcvt_ukernel__neonfp16_u16(
     size_t batch,
     const void* input,
     float* output,
@@ -135,7 +135,7 @@ void xnn_f16_f32acc_rsum_ukernel__neonfp16_u32_acc4(
   vst1_lane_u16(o, vreinterpret_u16_f16(vout), 0);
 }
 
-void xnn_f32_f16_vcvt_ukernel__neonfp16_x16(
+void xnn_f32_f16_vcvt_ukernel__neonfp16_u16(
     size_t batch,
     const float* input,
     void* output,

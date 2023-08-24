@@ -15,7 +15,7 @@ $SIMD_TILE = BATCH_TILE // 16
 #include <xnnpack/vcvt.h>
 
 
-void xnn_f32_f16_vcvt_ukernel__avx512skx_x${BATCH_TILE}(
+void xnn_f32_f16_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     void* output,

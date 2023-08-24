@@ -17,7 +17,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $_MM_CVTEPX8_EPI32 = {"QS8": "_mm_cvtepi8_epi32", "QU8": "_mm_cvtepu8_epi32"}[DATATYPE]
-void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__sse41_x${BATCH_TILE}(
+void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__sse41_u${BATCH_TILE}(
     size_t batch,
     const ${XINT8_T}* input,
     float* output,

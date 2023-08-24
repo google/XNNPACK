@@ -534,7 +534,7 @@ void xnn_f16_avgpool_minmax_ukernel_9x__f16c_c8(
   } while (--output_pixels != 0);
 }
 
-void xnn_f16_f32_vcvt_ukernel__f16c_x16(
+void xnn_f16_f32_vcvt_ukernel__f16c_u16(
     size_t batch,
     const void* input,
     float* output,
@@ -3405,7 +3405,7 @@ void xnn_f16_vsqr_ukernel__f16c_u16(
   }
 }
 
-void xnn_f32_f16_vcvt_ukernel__f16c_x16(
+void xnn_f32_f16_vcvt_ukernel__f16c_u16(
     size_t batch,
     const float* input,
     void* output,

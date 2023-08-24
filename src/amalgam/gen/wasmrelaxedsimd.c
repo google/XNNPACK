@@ -23,7 +23,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f16_f32_vcvt_ukernel__wasmrelaxedsimd_int16_x16(
+void xnn_f16_f32_vcvt_ukernel__wasmrelaxedsimd_int16_u16(
     size_t batch,
     const void* input,
     float* output,
@@ -3304,7 +3304,7 @@ void xnn_f32_dwconv_ukernel_9p8c__wasmrelaxedsimd_fma(
   } while (--output_width != 0);
 }
 
-void xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_x24(
+void xnn_f32_f16_vcvt_ukernel__wasmrelaxedsimd_u24(
     size_t batch,
     const float* input,
     void* output,
