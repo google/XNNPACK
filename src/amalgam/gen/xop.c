@@ -4288,7 +4288,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x4c8__xop_ld64(
   } while (nc != 0);
 }
 
-void xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_x8(
+void xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_u8(
     size_t batch,
     const int8_t* input_a,
     const int8_t* input_b,
@@ -4376,7 +4376,7 @@ void xnn_qs8_vadd_minmax_ukernel__xop_mul32_ld32_x8(
   }
 }
 
-void xnn_qs8_vaddc_minmax_ukernel__xop_mul32_ld32_x8(
+void xnn_qs8_vaddc_minmax_ukernel__xop_mul32_ld32_u8(
     size_t batch,
     const int8_t* input_a,
     const int8_t* input_b,
@@ -6024,7 +6024,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x4c8__xop_ld64(
   } while (nc != 0);
 }
 
-void xnn_qu8_vadd_minmax_ukernel__xop_mul32_ld32_x8(
+void xnn_qu8_vadd_minmax_ukernel__xop_mul32_ld32_u8(
     size_t batch,
     const uint8_t* input_a,
     const uint8_t* input_b,
@@ -6112,7 +6112,7 @@ void xnn_qu8_vadd_minmax_ukernel__xop_mul32_ld32_x8(
   }
 }
 
-void xnn_qu8_vaddc_minmax_ukernel__xop_mul32_ld32_x8(
+void xnn_qu8_vaddc_minmax_ukernel__xop_mul32_ld32_u8(
     size_t batch,
     const uint8_t* input_a,
     const uint8_t* input_b,

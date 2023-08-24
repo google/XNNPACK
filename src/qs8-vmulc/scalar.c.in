@@ -13,7 +13,7 @@ $assert BATCH_TILE >= 1
 
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
-void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__scalar_x${BATCH_TILE}(
+void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__scalar_u${BATCH_TILE}(
     size_t batch,
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,

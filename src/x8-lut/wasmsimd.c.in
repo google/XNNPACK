@@ -16,7 +16,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/common.h>
 
 
-void xnn_x8_lut_ukernel__wasmsimd_x${BATCH_TILE}(
+void xnn_x8_lut_ukernel__wasmsimd_u${BATCH_TILE}(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

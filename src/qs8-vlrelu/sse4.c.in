@@ -20,7 +20,7 @@ $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $_MM_CVTEPX8_EPI16 = {"QS8": "_mm_cvtepi8_epi16", "QU8": "_mm_cvtepu8_epi16"}[DATATYPE]
 $_MM_PACKXS_EPI16 = {"QS8": "_mm_packs_epi16", "QU8": "_mm_packus_epi16"}[DATATYPE]
 $ISA = "avx" if AVX else "sse41"
-void xnn_${DATATYPE.lower()}_vlrelu_ukernel__${ISA}_x${BATCH_TILE}(
+void xnn_${DATATYPE.lower()}_vlrelu_ukernel__${ISA}_u${BATCH_TILE}(
     size_t batch,
     const ${XINT8_T}* input,
     ${XINT8_T}* output,

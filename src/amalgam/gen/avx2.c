@@ -6916,7 +6916,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_3x8c8__avx2(
   } while (nc != 0);
 }
 
-void xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_x16(
+void xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_u16(
     size_t batch,
     const int8_t* input_a,
     const int8_t* input_b,
@@ -7007,7 +7007,7 @@ void xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_x16(
   }
 }
 
-void xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16(
+void xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16(
     size_t batch,
     const int8_t* input_a,
     const int8_t* input_b,
@@ -7089,7 +7089,7 @@ void xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16(
   }
 }
 
-void xnn_qs8_vcvt_ukernel__avx2_x32(
+void xnn_qs8_vcvt_ukernel__avx2_u32(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -7173,7 +7173,7 @@ void xnn_qs8_vcvt_ukernel__avx2_x32(
   }
 }
 
-void xnn_qs8_vlrelu_ukernel__avx2_x32(
+void xnn_qs8_vlrelu_ukernel__avx2_u32(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -8915,7 +8915,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2(
   } while (nc != 0);
 }
 
-void xnn_qu8_vadd_minmax_ukernel__avx2_mul32_ld64_x16(
+void xnn_qu8_vadd_minmax_ukernel__avx2_mul32_ld64_u16(
     size_t batch,
     const uint8_t* input_a,
     const uint8_t* input_b,
@@ -9006,7 +9006,7 @@ void xnn_qu8_vadd_minmax_ukernel__avx2_mul32_ld64_x16(
   }
 }
 
-void xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16(
+void xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16(
     size_t batch,
     const uint8_t* input_a,
     const uint8_t* input_b,
@@ -9088,7 +9088,7 @@ void xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_x16(
   }
 }
 
-void xnn_qu8_vcvt_ukernel__avx2_x32(
+void xnn_qu8_vcvt_ukernel__avx2_u32(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,
@@ -9172,7 +9172,7 @@ void xnn_qu8_vcvt_ukernel__avx2_x32(
   }
 }
 
-void xnn_qu8_vlrelu_ukernel__avx2_x32(
+void xnn_qu8_vlrelu_ukernel__avx2_u32(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,
@@ -14672,7 +14672,7 @@ void xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2(
   } while (block_width != 0);
 }
 
-void xnn_x8_lut_ukernel__avx2_x128(
+void xnn_x8_lut_ukernel__avx2_u128(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

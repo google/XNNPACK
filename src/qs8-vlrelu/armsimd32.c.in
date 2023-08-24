@@ -23,7 +23,7 @@ $XINT16X2_T = {"QS8": "int16x2_t", "QU8": "uint16x2_t"}[DATATYPE]
 $__XXTB16 = {"QS8": "__sxtb16", "QU8": "__uxtb16"}[DATATYPE]
 $__XSUB16 = {"QS8": "__ssub16", "QU8": "__usub16"}[DATATYPE]
 $__XSAT = {"QS8": "__ssat", "QU8": "__usat"}[DATATYPE]
-void xnn_${DATATYPE.lower()}_vlrelu_ukernel__armsimd32_x${BATCH_TILE}(
+void xnn_${DATATYPE.lower()}_vlrelu_ukernel__armsimd32_u${BATCH_TILE}(
     size_t batch,
     const ${XINT8_T}* input,
     ${XINT8_T}* output,

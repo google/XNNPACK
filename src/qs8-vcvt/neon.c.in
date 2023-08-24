@@ -32,7 +32,7 @@ $VEXT_X8 = {"QS8": "vext_s8", "QU8": "vext_u8"}[DATATYPE]
 $VST1_X8 = {"QS8": "vst1_s8", "QU8": "vst1_u8"}[DATATYPE]
 $VST1Q_X8 = {"QS8": "vst1q_s8", "QU8": "vst1q_u8"}[DATATYPE]
 $VST1_LANE_X8 = {"QS8": "vst1_lane_s8", "QU8": "vst1_lane_u8"}[DATATYPE]
-void xnn_${DATATYPE.lower()}_vcvt_ukernel__neon_x${BATCH_TILE}(
+void xnn_${DATATYPE.lower()}_vcvt_ukernel__neon_u${BATCH_TILE}(
     size_t batch,
     const ${XINT8_T}* input,
     ${XINT8_T}* output,

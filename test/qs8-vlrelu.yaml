@@ -4,95 +4,95 @@
 # LICENSE file in the root directory of this source tree.
 
 # ARM NEON
-- name: xnn_qs8_vlrelu_ukernel__neon_x8
+- name: xnn_qs8_vlrelu_ukernel__neon_u8
   init: xnn_init_qs8_lrelu_neon_params
-- name: xnn_qs8_vlrelu_ukernel__neon_x16
+- name: xnn_qs8_vlrelu_ukernel__neon_u16
   init: xnn_init_qs8_lrelu_neon_params
-- name: xnn_qs8_vlrelu_ukernel__neon_x32
+- name: xnn_qs8_vlrelu_ukernel__neon_u32
   init: xnn_init_qs8_lrelu_neon_params
 
 # x86 SSE2
-- name: xnn_qs8_vlrelu_ukernel__sse2_x16
+- name: xnn_qs8_vlrelu_ukernel__sse2_u16
   init: xnn_init_qs8_lrelu_sse2_params
-- name: xnn_qs8_vlrelu_ukernel__sse2_x32
+- name: xnn_qs8_vlrelu_ukernel__sse2_u32
   init: xnn_init_qs8_lrelu_sse2_params
 
 # x86 SSSE3
-- name: xnn_qs8_vlrelu_ukernel__ssse3_x16
+- name: xnn_qs8_vlrelu_ukernel__ssse3_u16
   init: xnn_init_qs8_lrelu_sse2_params
-- name: xnn_qs8_vlrelu_ukernel__ssse3_x32
+- name: xnn_qs8_vlrelu_ukernel__ssse3_u32
   init: xnn_init_qs8_lrelu_sse2_params
 
 # x86 SSE4.1
-- name: xnn_qs8_vlrelu_ukernel__sse41_x8
+- name: xnn_qs8_vlrelu_ukernel__sse41_u8
   init: xnn_init_qs8_lrelu_sse2_params
-- name: xnn_qs8_vlrelu_ukernel__sse41_x16
+- name: xnn_qs8_vlrelu_ukernel__sse41_u16
   init: xnn_init_qs8_lrelu_sse2_params
-- name: xnn_qs8_vlrelu_ukernel__sse41_x32
+- name: xnn_qs8_vlrelu_ukernel__sse41_u32
   init: xnn_init_qs8_lrelu_sse2_params
 
 # x86 AVX
-- name: xnn_qs8_vlrelu_ukernel__avx_x8
+- name: xnn_qs8_vlrelu_ukernel__avx_u8
   init: xnn_init_qs8_lrelu_avx_params
-- name: xnn_qs8_vlrelu_ukernel__avx_x16
+- name: xnn_qs8_vlrelu_ukernel__avx_u16
   init: xnn_init_qs8_lrelu_avx_params
-- name: xnn_qs8_vlrelu_ukernel__avx_x32
+- name: xnn_qs8_vlrelu_ukernel__avx_u32
   init: xnn_init_qs8_lrelu_avx_params
 
 # x86 AVX2
-- name: xnn_qs8_vlrelu_ukernel__avx2_x16
+- name: xnn_qs8_vlrelu_ukernel__avx2_u16
   init: xnn_init_qs8_lrelu_avx2_params
-- name: xnn_qs8_vlrelu_ukernel__avx2_x32
+- name: xnn_qs8_vlrelu_ukernel__avx2_u32
   init: xnn_init_qs8_lrelu_avx2_params
-- name: xnn_qs8_vlrelu_ukernel__avx2_x64
+- name: xnn_qs8_vlrelu_ukernel__avx2_u64
   init: xnn_init_qs8_lrelu_avx2_params
 
 # WAsm SIMD (ARM-optimized)
-- name: xnn_qs8_vlrelu_ukernel__wasmsimd_arm_x16
+- name: xnn_qs8_vlrelu_ukernel__wasmsimd_arm_u16
   init: xnn_init_qs8_lrelu_wasmsimd_arm_params
-- name: xnn_qs8_vlrelu_ukernel__wasmsimd_arm_x32
+- name: xnn_qs8_vlrelu_ukernel__wasmsimd_arm_u32
   init: xnn_init_qs8_lrelu_wasmsimd_arm_params
 
 # WAsm SIMD (x86-optimized)
-- name: xnn_qs8_vlrelu_ukernel__wasmsimd_x86_x8
+- name: xnn_qs8_vlrelu_ukernel__wasmsimd_x86_u8
   init: xnn_init_qs8_lrelu_wasmsimd_x86_params
-- name: xnn_qs8_vlrelu_ukernel__wasmsimd_x86_x16
+- name: xnn_qs8_vlrelu_ukernel__wasmsimd_x86_u16
   init: xnn_init_qs8_lrelu_wasmsimd_x86_params
-- name: xnn_qs8_vlrelu_ukernel__wasmsimd_x86_x32
+- name: xnn_qs8_vlrelu_ukernel__wasmsimd_x86_u32
   init: xnn_init_qs8_lrelu_wasmsimd_x86_params
 
 # WAsm Relaxed SIMD (ARM-optimized)
-- name: xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_arm_x16
+- name: xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_arm_u16
   init: xnn_init_qs8_lrelu_wasmsimd_arm_params
-- name: xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_arm_x32
+- name: xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_arm_u32
   init: xnn_init_qs8_lrelu_wasmsimd_arm_params
 
 # WAsm Relaxed SIMD (x86-optimized)
-- name: xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_x86_x8
+- name: xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_x86_u8
   init: xnn_init_qs8_lrelu_wasmsimd_x86_params
-- name: xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_x86_x16
+- name: xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_x86_u16
   init: xnn_init_qs8_lrelu_wasmsimd_x86_params
-- name: xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_x86_x32
+- name: xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_x86_u32
   init: xnn_init_qs8_lrelu_wasmsimd_x86_params
 
 # ARMv6 SIMD
-- name: xnn_qs8_vlrelu_ukernel__armsimd32_x4
+- name: xnn_qs8_vlrelu_ukernel__armsimd32_u4
   init: xnn_init_qs8_lrelu_armsimd32_params
-- name: xnn_qs8_vlrelu_ukernel__armsimd32_x8
+- name: xnn_qs8_vlrelu_ukernel__armsimd32_u8
   init: xnn_init_qs8_lrelu_armsimd32_params
 
 # Scalar (select)
-- name: xnn_qs8_vlrelu_ukernel__scalar_select_x1
+- name: xnn_qs8_vlrelu_ukernel__scalar_select_u1
   init: xnn_init_qs8_lrelu_scalar_select_params
-- name: xnn_qs8_vlrelu_ukernel__scalar_select_x2
+- name: xnn_qs8_vlrelu_ukernel__scalar_select_u2
   init: xnn_init_qs8_lrelu_scalar_select_params
-- name: xnn_qs8_vlrelu_ukernel__scalar_select_x4
+- name: xnn_qs8_vlrelu_ukernel__scalar_select_u4
   init: xnn_init_qs8_lrelu_scalar_select_params
 
 # Scalar (and+xor)
-- name: xnn_qs8_vlrelu_ukernel__scalar_andxor_x1
+- name: xnn_qs8_vlrelu_ukernel__scalar_andxor_u1
   init: xnn_init_qs8_lrelu_scalar_andxor_params
-- name: xnn_qs8_vlrelu_ukernel__scalar_andxor_x2
+- name: xnn_qs8_vlrelu_ukernel__scalar_andxor_u2
   init: xnn_init_qs8_lrelu_scalar_andxor_params
-- name: xnn_qs8_vlrelu_ukernel__scalar_andxor_x4
+- name: xnn_qs8_vlrelu_ukernel__scalar_andxor_u4
   init: xnn_init_qs8_lrelu_scalar_andxor_params

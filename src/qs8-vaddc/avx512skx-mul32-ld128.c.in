@@ -23,7 +23,7 @@ $_MM256_MIN_EPX8 = {"QS8": "_mm256_min_epi8", "QU8": "_mm256_min_epu8"}[DATATYPE
 $_MM256_MAX_EPX8 = {"QS8": "_mm256_max_epi8", "QU8": "_mm256_max_epu8"}[DATATYPE]
 $_MM_MIN_EPX8 = {"QS8": "_mm_min_epi8", "QU8": "_mm_min_epu8"}[DATATYPE]
 $_MM_MAX_EPX8 = {"QS8": "_mm_max_epi8", "QU8": "_mm_max_epu8"}[DATATYPE]
-void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__avx512skx_mul32_ld128_x${BATCH_TILE}(
+void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__avx512skx_mul32_ld128_u${BATCH_TILE}(
     size_t batch,
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,

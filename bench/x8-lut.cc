@@ -61,177 +61,177 @@ static void x8_lut(
 }
 
 #if XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(x8_lut, aarch64_neon_tbx128x4_x16,
-                    xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_x16)
+  BENCHMARK_CAPTURE(x8_lut, aarch64_neon_tbx128x4_u16,
+                    xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_u16)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, aarch64_neon_tbx128x4_x32,
-                    xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_x32)
+  BENCHMARK_CAPTURE(x8_lut, aarch64_neon_tbx128x4_u32,
+                    xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_u32)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, aarch64_neon_tbx128x4_x48,
-                    xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_x48)
+  BENCHMARK_CAPTURE(x8_lut, aarch64_neon_tbx128x4_u48,
+                    xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_u48)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, aarch64_neon_tbx128x4_x64,
-                    xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_x64)
+  BENCHMARK_CAPTURE(x8_lut, aarch64_neon_tbx128x4_u64,
+                    xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_u64)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(x8_lut, avx512vbmi_vpermx2b_x64,
-                    xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_x64,
+  BENCHMARK_CAPTURE(x8_lut, avx512vbmi_vpermx2b_u64,
+                    xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_u64,
                     benchmark::utils::CheckAVX512VBMI)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, avx512vbmi_vpermx2b_x128,
-                    xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_x128,
+  BENCHMARK_CAPTURE(x8_lut, avx512vbmi_vpermx2b_u128,
+                    xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_u128,
                     benchmark::utils::CheckAVX512VBMI)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, avx512vbmi_vpermx2b_x192,
-                    xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_x192,
+  BENCHMARK_CAPTURE(x8_lut, avx512vbmi_vpermx2b_u192,
+                    xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_u192,
                     benchmark::utils::CheckAVX512VBMI)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, avx512vbmi_vpermx2b_x256,
-                    xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_x256,
+  BENCHMARK_CAPTURE(x8_lut, avx512vbmi_vpermx2b_u256,
+                    xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_u256,
                     benchmark::utils::CheckAVX512VBMI)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(x8_lut, avx512skx_vpshufb_x64,
-                    xnn_x8_lut_ukernel__avx512skx_vpshufb_x64,
+  BENCHMARK_CAPTURE(x8_lut, avx512skx_vpshufb_u64,
+                    xnn_x8_lut_ukernel__avx512skx_vpshufb_u64,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, avx512skx_vpshufb_x128,
-                    xnn_x8_lut_ukernel__avx512skx_vpshufb_x128,
+  BENCHMARK_CAPTURE(x8_lut, avx512skx_vpshufb_u128,
+                    xnn_x8_lut_ukernel__avx512skx_vpshufb_u128,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, avx512skx_vpshufb_x192,
-                    xnn_x8_lut_ukernel__avx512skx_vpshufb_x192,
+  BENCHMARK_CAPTURE(x8_lut, avx512skx_vpshufb_u192,
+                    xnn_x8_lut_ukernel__avx512skx_vpshufb_u192,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, avx512skx_vpshufb_x256,
-                    xnn_x8_lut_ukernel__avx512skx_vpshufb_x256,
+  BENCHMARK_CAPTURE(x8_lut, avx512skx_vpshufb_u256,
+                    xnn_x8_lut_ukernel__avx512skx_vpshufb_u256,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(x8_lut, avx2_x32,
-                    xnn_x8_lut_ukernel__avx2_x32,
+  BENCHMARK_CAPTURE(x8_lut, avx2_u32,
+                    xnn_x8_lut_ukernel__avx2_u32,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, avx2_x64,
-                    xnn_x8_lut_ukernel__avx2_x64,
+  BENCHMARK_CAPTURE(x8_lut, avx2_u64,
+                    xnn_x8_lut_ukernel__avx2_u64,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, avx2_x96,
-                    xnn_x8_lut_ukernel__avx2_x96,
+  BENCHMARK_CAPTURE(x8_lut, avx2_u96,
+                    xnn_x8_lut_ukernel__avx2_u96,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, avx2_x128,
-                    xnn_x8_lut_ukernel__avx2_x128,
+  BENCHMARK_CAPTURE(x8_lut, avx2_u128,
+                    xnn_x8_lut_ukernel__avx2_u128,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(x8_lut, avx_x16,
-                    xnn_x8_lut_ukernel__avx_x16,
+  BENCHMARK_CAPTURE(x8_lut, avx_u16,
+                    xnn_x8_lut_ukernel__avx_u16,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, avx_x32,
-                    xnn_x8_lut_ukernel__avx_x32,
+  BENCHMARK_CAPTURE(x8_lut, avx_u32,
+                    xnn_x8_lut_ukernel__avx_u32,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, avx_x48,
-                    xnn_x8_lut_ukernel__avx_x48,
+  BENCHMARK_CAPTURE(x8_lut, avx_u48,
+                    xnn_x8_lut_ukernel__avx_u48,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, avx_x64,
-                    xnn_x8_lut_ukernel__avx_x64,
+  BENCHMARK_CAPTURE(x8_lut, avx_u64,
+                    xnn_x8_lut_ukernel__avx_u64,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(x8_lut, ssse3_x16,
-                    xnn_x8_lut_ukernel__ssse3_x16,
+  BENCHMARK_CAPTURE(x8_lut, ssse3_u16,
+                    xnn_x8_lut_ukernel__ssse3_u16,
                     benchmark::utils::CheckSSSE3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, ssse3_x32,
-                    xnn_x8_lut_ukernel__ssse3_x32,
+  BENCHMARK_CAPTURE(x8_lut, ssse3_u32,
+                    xnn_x8_lut_ukernel__ssse3_u32,
                     benchmark::utils::CheckSSSE3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(x8_lut, wasmpshufb_x16,
-                    xnn_x8_lut_ukernel__wasmpshufb_x16)
+  BENCHMARK_CAPTURE(x8_lut, wasmpshufb_u16,
+                    xnn_x8_lut_ukernel__wasmpshufb_u16)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, wasmpshufb_x32,
-                    xnn_x8_lut_ukernel__wasmpshufb_x32)
+  BENCHMARK_CAPTURE(x8_lut, wasmpshufb_u32,
+                    xnn_x8_lut_ukernel__wasmpshufb_u32)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, wasmpshufb_x48,
-                    xnn_x8_lut_ukernel__wasmpshufb_x48)
+  BENCHMARK_CAPTURE(x8_lut, wasmpshufb_u48,
+                    xnn_x8_lut_ukernel__wasmpshufb_u48)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, wasmpshufb_x64,
-                    xnn_x8_lut_ukernel__wasmpshufb_x64)
+  BENCHMARK_CAPTURE(x8_lut, wasmpshufb_u64,
+                    xnn_x8_lut_ukernel__wasmpshufb_u64)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(x8_lut, wasmsimd_x16,
-                    xnn_x8_lut_ukernel__wasmsimd_x16)
+  BENCHMARK_CAPTURE(x8_lut, wasmsimd_u16,
+                    xnn_x8_lut_ukernel__wasmsimd_u16)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, wasmsimd_x32,
-                    xnn_x8_lut_ukernel__wasmsimd_x32)
+  BENCHMARK_CAPTURE(x8_lut, wasmsimd_u32,
+                    xnn_x8_lut_ukernel__wasmsimd_u32)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, wasmsimd_x48,
-                    xnn_x8_lut_ukernel__wasmsimd_x48)
+  BENCHMARK_CAPTURE(x8_lut, wasmsimd_u48,
+                    xnn_x8_lut_ukernel__wasmsimd_u48)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(x8_lut, wasmsimd_x64,
-                    xnn_x8_lut_ukernel__wasmsimd_x64)
+  BENCHMARK_CAPTURE(x8_lut, wasmsimd_u64,
+                    xnn_x8_lut_ukernel__wasmsimd_u64)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-BENCHMARK_CAPTURE(x8_lut, scalar_x1,
-                  xnn_x8_lut_ukernel__scalar_x1)
+BENCHMARK_CAPTURE(x8_lut, scalar_u1,
+                  xnn_x8_lut_ukernel__scalar_u1)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(x8_lut, scalar_x2,
-                  xnn_x8_lut_ukernel__scalar_x2)
+BENCHMARK_CAPTURE(x8_lut, scalar_u2,
+                  xnn_x8_lut_ukernel__scalar_u2)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(x8_lut, scalar_x4,
-                  xnn_x8_lut_ukernel__scalar_x4)
+BENCHMARK_CAPTURE(x8_lut, scalar_u4,
+                  xnn_x8_lut_ukernel__scalar_u4)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(x8_lut, scalar_x8,
-                  xnn_x8_lut_ukernel__scalar_x8)
+BENCHMARK_CAPTURE(x8_lut, scalar_u8,
+                  xnn_x8_lut_ukernel__scalar_u8)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(x8_lut, scalar_x16,
-                  xnn_x8_lut_ukernel__scalar_x16)
+BENCHMARK_CAPTURE(x8_lut, scalar_u16,
+                  xnn_x8_lut_ukernel__scalar_u16)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
   ->UseRealTime();
 

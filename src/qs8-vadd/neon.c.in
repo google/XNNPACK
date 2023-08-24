@@ -34,7 +34,7 @@ $VGET_LOW_X8 = {"QS8": "vget_low_s8", "QU8": "vget_low_u8"}[DATATYPE]
 $VCOMBINE_X8 = {"QS8": "vcombine_s8", "QU8": "vcombine_u8"}[DATATYPE]
 $VREINTERPRET_U32_X8 = {"QS8": "vreinterpret_u32_s8", "QU8": "vreinterpret_u32_u8"}[DATATYPE]
 $VREINTERPRET_U16_X8 = {"QS8": "vreinterpret_u16_s8", "QU8": "vreinterpret_u16_u8"}[DATATYPE]
-void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__neon_${"ld128" if LD128 else "ld64"}_x${BATCH_TILE}(
+void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__neon_${"ld128" if LD128 else "ld64"}_u${BATCH_TILE}(
     size_t batch,
     const ${XINT8_T}* input_a,
     const ${XINT8_T}* input_b,

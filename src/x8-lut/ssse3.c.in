@@ -22,7 +22,7 @@ $if not AVX:
   #include <xnnpack/unaligned.h>
 
 
-void xnn_x8_lut_ukernel__${"avx" if AVX else "ssse3"}_x${BATCH_TILE}(
+void xnn_x8_lut_ukernel__${"avx" if AVX else "ssse3"}_u${BATCH_TILE}(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

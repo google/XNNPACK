@@ -13339,7 +13339,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4c16__wasmsdot(
   } while (nc != 0);
 }
 
-void xnn_qs8_vcvt_ukernel__wasmrelaxedsimd_x32(
+void xnn_qs8_vcvt_ukernel__wasmrelaxedsimd_u32(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -13426,7 +13426,7 @@ void xnn_qs8_vcvt_ukernel__wasmrelaxedsimd_x32(
   }
 }
 
-void xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_arm_x32(
+void xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_arm_u32(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -13524,7 +13524,7 @@ void xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_arm_x32(
   }
 }
 
-void xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_x86_x32(
+void xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_x86_u32(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -13630,7 +13630,7 @@ void xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_x86_x32(
   }
 }
 
-void xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x32(
+void xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_u32(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,
@@ -13717,7 +13717,7 @@ void xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_x32(
   }
 }
 
-void xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_arm_x32(
+void xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_arm_u32(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,
@@ -13815,7 +13815,7 @@ void xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_arm_x32(
   }
 }
 
-void xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_x86_x32(
+void xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_x86_u32(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,
@@ -13921,7 +13921,7 @@ void xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_x86_x32(
   }
 }
 
-void xnn_x8_lut_ukernel__wasmpshufb_x32(
+void xnn_x8_lut_ukernel__wasmpshufb_u32(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(qs8|qu8)_vlrelu_ukernel__(.+)_x(\d+)", name)
+  match = re.fullmatch(r"xnn_(qs8|qu8)_vlrelu_ukernel__(.+)_u(\d+)", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 

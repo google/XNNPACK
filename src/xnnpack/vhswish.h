@@ -23,13 +23,13 @@ extern "C" {
       int8_t* output,                                 \
       const union xnn_qs8_hswish_params* params);
 
-DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__neon_x8)
-DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__neon_x16)
-DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__neon_x32)
+DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__neon_u8)
+DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__neon_u16)
+DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__neon_u32)
 
-DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__scalar_x1)
-DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__scalar_x2)
-DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__scalar_x4)
+DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__scalar_u1)
+DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__scalar_u2)
+DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__scalar_u4)
 
 #define DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                          \
@@ -38,13 +38,13 @@ DECLARE_QS8_VHSWISH_UKERNEL_FUNCTION(xnn_qs8_vhswish_ukernel__scalar_x4)
       uint8_t* output,                                 \
       const union xnn_qu8_hswish_params* params);
 
-DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__neon_x8)
-DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__neon_x16)
-DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__neon_x32)
+DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__neon_u8)
+DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__neon_u16)
+DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__neon_u32)
 
-DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__scalar_x1)
-DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__scalar_x2)
-DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__scalar_x4)
+DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__scalar_u1)
+DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__scalar_u2)
+DECLARE_QU8_VHSWISH_UKERNEL_FUNCTION(xnn_qu8_vhswish_ukernel__scalar_u4)
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -15,7 +15,7 @@
 #include <xnnpack/vhswish.h>
 
 
-void xnn_qu8_vhswish_ukernel__neon_x16(
+void xnn_qu8_vhswish_ukernel__neon_u16(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

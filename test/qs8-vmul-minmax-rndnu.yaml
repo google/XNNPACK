@@ -4,9 +4,9 @@
 # LICENSE file in the root directory of this source tree.
 
 # ARM NEON
-- name: xnn_qs8_vmul_minmax_rndnu_ukernel__neon_ld64_x8
+- name: xnn_qs8_vmul_minmax_rndnu_ukernel__neon_ld64_u8
   init: xnn_init_qs8_mul_minmax_rndnu_neon_params
-- name: xnn_qs8_vmul_minmax_rndnu_ukernel__neon_ld64_x16
+- name: xnn_qs8_vmul_minmax_rndnu_ukernel__neon_ld64_u16
   init: xnn_init_qs8_mul_minmax_rndnu_neon_params
-- name: xnn_qs8_vmul_minmax_rndnu_ukernel__neon_ld128_x16
+- name: xnn_qs8_vmul_minmax_rndnu_ukernel__neon_ld128_u16
   init: xnn_init_qs8_mul_minmax_rndnu_neon_params

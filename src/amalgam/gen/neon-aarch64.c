@@ -6756,7 +6756,7 @@ void xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl128(
   } while (block_width != 0);
 }
 
-void xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_x64(
+void xnn_x8_lut_ukernel__aarch64_neon_tbx128x4_u64(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

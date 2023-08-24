@@ -1027,7 +1027,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x2c4__armsimd32(
   } while (nc != 0);
 }
 
-void xnn_qs8_vcvt_ukernel__armsimd32_x8(
+void xnn_qs8_vcvt_ukernel__armsimd32_u8(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -1127,7 +1127,7 @@ void xnn_qs8_vcvt_ukernel__armsimd32_x8(
   }
 }
 
-void xnn_qs8_vlrelu_ukernel__armsimd32_x4(
+void xnn_qs8_vlrelu_ukernel__armsimd32_u4(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -1706,7 +1706,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_2x2c4__armsimd32(
   } while (nc != 0);
 }
 
-void xnn_qu8_vcvt_ukernel__armsimd32_x8(
+void xnn_qu8_vcvt_ukernel__armsimd32_u8(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,
@@ -1806,7 +1806,7 @@ void xnn_qu8_vcvt_ukernel__armsimd32_x8(
   }
 }
 
-void xnn_qu8_vlrelu_ukernel__armsimd32_x4(
+void xnn_qu8_vlrelu_ukernel__armsimd32_u4(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

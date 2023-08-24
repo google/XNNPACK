@@ -347,7 +347,7 @@ void xnn_qs16_qs8_vcvt_ukernel__ssse3_x16(
   }
 }
 
-void xnn_qs8_vcvt_ukernel__ssse3_x32(
+void xnn_qs8_vcvt_ukernel__ssse3_u32(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -461,7 +461,7 @@ void xnn_qs8_vcvt_ukernel__ssse3_x32(
   }
 }
 
-void xnn_qs8_vlrelu_ukernel__ssse3_x32(
+void xnn_qs8_vlrelu_ukernel__ssse3_u32(
     size_t batch,
     const int8_t* input,
     int8_t* output,
@@ -600,7 +600,7 @@ void xnn_qs8_vlrelu_ukernel__ssse3_x32(
   }
 }
 
-void xnn_qu8_vcvt_ukernel__ssse3_x32(
+void xnn_qu8_vcvt_ukernel__ssse3_u32(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,
@@ -711,7 +711,7 @@ void xnn_qu8_vcvt_ukernel__ssse3_x32(
   }
 }
 
-void xnn_qu8_vlrelu_ukernel__ssse3_x32(
+void xnn_qu8_vlrelu_ukernel__ssse3_u32(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

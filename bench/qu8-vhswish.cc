@@ -64,38 +64,38 @@ static void qu8_vhswish(
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(qu8_vhswish, neon_x8,
-                    xnn_qu8_vhswish_ukernel__neon_x8,
+  BENCHMARK_CAPTURE(qu8_vhswish, neon_u8,
+                    xnn_qu8_vhswish_ukernel__neon_u8,
                     xnn_init_qu8_hswish_neon_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(qu8_vhswish, neon_x16,
-                    xnn_qu8_vhswish_ukernel__neon_x16,
+  BENCHMARK_CAPTURE(qu8_vhswish, neon_u16,
+                    xnn_qu8_vhswish_ukernel__neon_u16,
                     xnn_init_qu8_hswish_neon_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(qu8_vhswish, neon_x32,
-                    xnn_qu8_vhswish_ukernel__neon_x32,
+  BENCHMARK_CAPTURE(qu8_vhswish, neon_u32,
+                    xnn_qu8_vhswish_ukernel__neon_u32,
                     xnn_init_qu8_hswish_neon_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-BENCHMARK_CAPTURE(qu8_vhswish, scalar_x1,
-                  xnn_qu8_vhswish_ukernel__scalar_x1,
+BENCHMARK_CAPTURE(qu8_vhswish, scalar_u1,
+                  xnn_qu8_vhswish_ukernel__scalar_u1,
                   xnn_init_qu8_hswish_scalar_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(qu8_vhswish, scalar_x2,
-                  xnn_qu8_vhswish_ukernel__scalar_x2,
+BENCHMARK_CAPTURE(qu8_vhswish, scalar_u2,
+                  xnn_qu8_vhswish_ukernel__scalar_u2,
                   xnn_init_qu8_hswish_scalar_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(qu8_vhswish, scalar_x4,
-                  xnn_qu8_vhswish_ukernel__scalar_x4,
+BENCHMARK_CAPTURE(qu8_vhswish, scalar_u4,
+                  xnn_qu8_vhswish_ukernel__scalar_u4,
                   xnn_init_qu8_hswish_scalar_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, int8_t>)
   ->UseRealTime();

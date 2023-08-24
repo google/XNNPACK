@@ -12,7 +12,7 @@
 #include <xnnpack/lut.h>
 
 
-void xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_x128(
+void xnn_x8_lut_ukernel__avx512vbmi_vpermx2b_u128(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,

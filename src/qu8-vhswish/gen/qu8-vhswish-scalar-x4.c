@@ -13,7 +13,7 @@
 #include <xnnpack/vhswish.h>
 
 
-void xnn_qu8_vhswish_ukernel__scalar_x4(
+void xnn_qu8_vhswish_ukernel__scalar_u4(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,
