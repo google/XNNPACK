@@ -2009,7 +2009,7 @@ void xnn_f32_prelu_ukernel__avx512f_2x16(
   } while (rows != 0);
 }
 
-void xnn_f32_vadd_minmax_ukernel__avx512f_x32(
+void xnn_f32_vadd_minmax_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2073,7 +2073,7 @@ void xnn_f32_vadd_minmax_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vaddc_minmax_ukernel__avx512f_x32(
+void xnn_f32_vaddc_minmax_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2135,7 +2135,7 @@ void xnn_f32_vaddc_minmax_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vdiv_minmax_ukernel__avx512f_x32(
+void xnn_f32_vdiv_minmax_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2199,7 +2199,7 @@ void xnn_f32_vdiv_minmax_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vdivc_minmax_ukernel__avx512f_x32(
+void xnn_f32_vdivc_minmax_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2261,7 +2261,7 @@ void xnn_f32_vdivc_minmax_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vmax_ukernel__avx512f_x32(
+void xnn_f32_vmax_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2314,7 +2314,7 @@ void xnn_f32_vmax_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vmaxc_ukernel__avx512f_x32(
+void xnn_f32_vmaxc_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2365,7 +2365,7 @@ void xnn_f32_vmaxc_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vmin_ukernel__avx512f_x32(
+void xnn_f32_vmin_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2418,7 +2418,7 @@ void xnn_f32_vmin_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vminc_ukernel__avx512f_x32(
+void xnn_f32_vminc_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2469,7 +2469,7 @@ void xnn_f32_vminc_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vmul_minmax_ukernel__avx512f_x32(
+void xnn_f32_vmul_minmax_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2533,7 +2533,7 @@ void xnn_f32_vmul_minmax_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vmulc_minmax_ukernel__avx512f_x32(
+void xnn_f32_vmulc_minmax_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2595,7 +2595,7 @@ void xnn_f32_vmulc_minmax_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vrdivc_minmax_ukernel__avx512f_x32(
+void xnn_f32_vrdivc_minmax_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2657,7 +2657,7 @@ void xnn_f32_vrdivc_minmax_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vrsubc_minmax_ukernel__avx512f_x32(
+void xnn_f32_vrsubc_minmax_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2719,7 +2719,7 @@ void xnn_f32_vrsubc_minmax_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vsqrdiff_ukernel__avx512f_x32(
+void xnn_f32_vsqrdiff_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2776,7 +2776,7 @@ void xnn_f32_vsqrdiff_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vsqrdiffc_ukernel__avx512f_x32(
+void xnn_f32_vsqrdiffc_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2831,7 +2831,7 @@ void xnn_f32_vsqrdiffc_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vsub_minmax_ukernel__avx512f_x32(
+void xnn_f32_vsub_minmax_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2895,7 +2895,7 @@ void xnn_f32_vsub_minmax_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vsubc_minmax_ukernel__avx512f_x32(
+void xnn_f32_vsubc_minmax_ukernel__avx512f_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -2957,7 +2957,7 @@ void xnn_f32_vsubc_minmax_ukernel__avx512f_x32(
   }
 }
 
-void xnn_f32_vclamp_ukernel__avx512f_x16(
+void xnn_f32_vclamp_ukernel__avx512f_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -2996,7 +2996,7 @@ void xnn_f32_vclamp_ukernel__avx512f_x16(
   }
 }
 
-void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64(
+void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_u64(
     size_t batch,
     const float* input,
     float* output,
@@ -3165,7 +3165,7 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64(
   }
 }
 
-void xnn_f32_vhswish_ukernel__avx512f_x16(
+void xnn_f32_vhswish_ukernel__avx512f_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -3207,7 +3207,7 @@ void xnn_f32_vhswish_ukernel__avx512f_x16(
   }
 }
 
-void xnn_f32_vlrelu_ukernel__avx512f_x16(
+void xnn_f32_vlrelu_ukernel__avx512f_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -3246,7 +3246,7 @@ void xnn_f32_vlrelu_ukernel__avx512f_x16(
   }
 }
 
-void xnn_f32_vrndd_ukernel__avx512f_x16(
+void xnn_f32_vrndd_ukernel__avx512f_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -3279,7 +3279,7 @@ void xnn_f32_vrndd_ukernel__avx512f_x16(
   }
 }
 
-void xnn_f32_vrndne_ukernel__avx512f_x16(
+void xnn_f32_vrndne_ukernel__avx512f_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -3312,7 +3312,7 @@ void xnn_f32_vrndne_ukernel__avx512f_x16(
   }
 }
 
-void xnn_f32_vrndu_ukernel__avx512f_x16(
+void xnn_f32_vrndu_ukernel__avx512f_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -3345,7 +3345,7 @@ void xnn_f32_vrndu_ukernel__avx512f_x16(
   }
 }
 
-void xnn_f32_vrndz_ukernel__avx512f_x16(
+void xnn_f32_vrndz_ukernel__avx512f_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -3378,7 +3378,7 @@ void xnn_f32_vrndz_ukernel__avx512f_x16(
   }
 }
 
-void xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x64(
+void xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_u64(
     size_t batch,
     const float* input,
     float* output,
@@ -3538,7 +3538,7 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_x64(
   }
 }
 
-void xnn_f32_vabs_ukernel__avx512f_x16(
+void xnn_f32_vabs_ukernel__avx512f_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -3572,7 +3572,7 @@ void xnn_f32_vabs_ukernel__avx512f_x16(
   }
 }
 
-void xnn_f32_vneg_ukernel__avx512f_x16(
+void xnn_f32_vneg_ukernel__avx512f_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -3606,7 +3606,7 @@ void xnn_f32_vneg_ukernel__avx512f_x16(
   }
 }
 
-void xnn_f32_vsqr_ukernel__avx512f_x16(
+void xnn_f32_vsqr_ukernel__avx512f_u16(
     size_t batch,
     const float* input,
     float* output,

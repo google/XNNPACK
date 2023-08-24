@@ -22,7 +22,7 @@ $EMIT_MIN = "MIN" in OP
 $EMIT_MAX = "MAX" in OP
 $VMINQ_F32, VMIN_F32, VPMIN_F32 = "vminq_f32", "vmin_f32", "vpmin_f32"
 $VMAXQ_F32, VMAX_F32, VPMAX_F32 = "vmaxq_f32", "vmax_f32", "vpmax_f32"
-void xnn_f32_r${OP.lower()}_ukernel__neon_x${BATCH_TILE}${ACC_SUFFIX}(
+void xnn_f32_r${OP.lower()}_ukernel__neon_u${BATCH_TILE}${ACC_SUFFIX}(
     size_t batch,
     const float* input,
     float* output,

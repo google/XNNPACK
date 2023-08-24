@@ -18,7 +18,7 @@ $SSE_HEADER = {2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
 
 $ISA = {2: "sse2", 4: "sse41"}[SSE]
-void xnn_f32_vsigmoid_ukernel__${ISA}_rr2_lut64_p2_div_x${BATCH_TILE}(
+void xnn_f32_vsigmoid_ukernel__${ISA}_rr2_lut64_p2_div_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

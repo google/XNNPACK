@@ -26,7 +26,7 @@ $  "ABS": "xnn_f32_abs_params",
 $  "NEG": "xnn_f32_neg_params",
 $  "SQR": "xnn_f32_default_params",
 $}[OP]
-void xnn_f32_v${OP.lower()}_ukernel__sse_x${BATCH_TILE}(
+void xnn_f32_v${OP.lower()}_ukernel__sse_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

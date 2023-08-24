@@ -66,26 +66,26 @@ static void f32_vcmul(
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f32_vcmul, neon_x4,
-                    xnn_f32_vcmul_ukernel__neon_x4,
+  BENCHMARK_CAPTURE(f32_vcmul, neon_u4,
+                    xnn_f32_vcmul_ukernel__neon_u4,
                     /*init_params=*/nullptr,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vcmul, neon_x8,
-                    xnn_f32_vcmul_ukernel__neon_x8,
+  BENCHMARK_CAPTURE(f32_vcmul, neon_u8,
+                    xnn_f32_vcmul_ukernel__neon_u8,
                     /*init_params=*/nullptr,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vcmul, neon_x12,
-                    xnn_f32_vcmul_ukernel__neon_x12,
+  BENCHMARK_CAPTURE(f32_vcmul, neon_u12,
+                    xnn_f32_vcmul_ukernel__neon_u12,
                     /*init_params=*/nullptr,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vcmul, neon_x16,
-                    xnn_f32_vcmul_ukernel__neon_x16,
+  BENCHMARK_CAPTURE(f32_vcmul, neon_u16,
+                    xnn_f32_vcmul_ukernel__neon_u16,
                     /*init_params=*/nullptr,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
@@ -93,57 +93,57 @@ static void f32_vcmul(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(f32_vcmul, sse_x4,
-                    xnn_f32_vcmul_ukernel__sse_x4)
+  BENCHMARK_CAPTURE(f32_vcmul, sse_u4,
+                    xnn_f32_vcmul_ukernel__sse_u4)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vcmul, sse_x8,
-                    xnn_f32_vcmul_ukernel__sse_x8)
+  BENCHMARK_CAPTURE(f32_vcmul, sse_u8,
+                    xnn_f32_vcmul_ukernel__sse_u8)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vcmul, sse_x12,
-                    xnn_f32_vcmul_ukernel__sse_x12)
+  BENCHMARK_CAPTURE(f32_vcmul, sse_u12,
+                    xnn_f32_vcmul_ukernel__sse_u12)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vcmul, sse_x16,
-                    xnn_f32_vcmul_ukernel__sse_x16)
+  BENCHMARK_CAPTURE(f32_vcmul, sse_u16,
+                    xnn_f32_vcmul_ukernel__sse_u16)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_vcmul, wasmsimd_x4,
-                    xnn_f32_vcmul_ukernel__wasmsimd_x4)
+  BENCHMARK_CAPTURE(f32_vcmul, wasmsimd_u4,
+                    xnn_f32_vcmul_ukernel__wasmsimd_u4)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vcmul, wasmsimd_x8,
-                    xnn_f32_vcmul_ukernel__wasmsimd_x8)
+  BENCHMARK_CAPTURE(f32_vcmul, wasmsimd_u8,
+                    xnn_f32_vcmul_ukernel__wasmsimd_u8)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vcmul, wasmsimd_x12,
-                    xnn_f32_vcmul_ukernel__wasmsimd_x12)
+  BENCHMARK_CAPTURE(f32_vcmul, wasmsimd_u12,
+                    xnn_f32_vcmul_ukernel__wasmsimd_u12)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vcmul, wasmsimd_x16,
-                    xnn_f32_vcmul_ukernel__wasmsimd_x16)
+  BENCHMARK_CAPTURE(f32_vcmul, wasmsimd_u16,
+                    xnn_f32_vcmul_ukernel__wasmsimd_u16)
     ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-BENCHMARK_CAPTURE(f32_vcmul, scalar_x1,
-                  xnn_f32_vcmul_ukernel__scalar_x1)
+BENCHMARK_CAPTURE(f32_vcmul, scalar_u1,
+                  xnn_f32_vcmul_ukernel__scalar_u1)
   ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vcmul, scalar_x2,
-                  xnn_f32_vcmul_ukernel__scalar_x2)
+BENCHMARK_CAPTURE(f32_vcmul, scalar_u2,
+                  xnn_f32_vcmul_ukernel__scalar_u2)
   ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vcmul, scalar_x4,
-                  xnn_f32_vcmul_ukernel__scalar_x4)
+BENCHMARK_CAPTURE(f32_vcmul, scalar_u4,
+                  xnn_f32_vcmul_ukernel__scalar_u4)
   ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vcmul, scalar_x8,
-                  xnn_f32_vcmul_ukernel__scalar_x8)
+BENCHMARK_CAPTURE(f32_vcmul, scalar_u8,
+                  xnn_f32_vcmul_ukernel__scalar_u8)
   ->Apply(benchmark::utils::BinaryElementwiseParameters<std::complex<float>, std::complex<float>>)
   ->UseRealTime();
 

@@ -16,7 +16,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 $ISA = "wasmrelaxedsimd" if FMA else "wasmsimd"
-void xnn_f32_raddstoreexpminusmax_ukernel__${ISA}_rr2_p5_x${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_f32_raddstoreexpminusmax_ukernel__${ISA}_rr2_p5_u${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t batch,
     const float* input,
     const float* max,

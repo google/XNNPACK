@@ -20,7 +20,7 @@ $WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "
 $WASM_V32X4_LANESELECT="wasm_i32x4_relaxed_laneselect" if ARCH == "RELAXED" else "wasm_v128_bitselect"
 $ISA = "wasmsimd" if ARCH != "RELAXED" else "wasmrelaxedsimd"
 $ARCH_SUFFIX = "" if ARCH == "RELAXED" and not FMA else "_" + ("fma" if FMA else ARCH.lower())
-void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p6_x${BATCH_TILE}(
+void xnn_f32_velu_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p6_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

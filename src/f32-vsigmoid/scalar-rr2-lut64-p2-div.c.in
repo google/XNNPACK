@@ -16,7 +16,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 // Note redefine as uint32[] to avoid redundant bitcasts.
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_64[64];
 
-void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_x${BATCH_TILE}(
+void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

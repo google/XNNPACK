@@ -16,7 +16,7 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 
 
 $PARAMS_STRUCT = "neonfma_rr1_p6" if FMA else "neon_rr2_p6"
-void xnn_f32_velu_ukernel__${"neonfma" if FMA else "neon"}_rr${1 if FMA else 2}_p6_x${BATCH_TILE}(
+void xnn_f32_velu_ukernel__${"neonfma" if FMA else "neon"}_rr${1 if FMA else 2}_p6_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

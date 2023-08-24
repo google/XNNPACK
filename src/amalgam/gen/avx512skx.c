@@ -1089,7 +1089,7 @@ void xnn_f32_qu8_vcvt_ukernel__avx512skx_x128(
   }
 }
 
-void xnn_f32_vtanh_ukernel__avx512skx_expm1minus_rr1_lut4_p4h3ts_perm_div_x64(
+void xnn_f32_vtanh_ukernel__avx512skx_expm1minus_rr1_lut4_p4h3ts_perm_div_u64(
     size_t batch,
     const float* input,
     float* output,

@@ -22,7 +22,7 @@ $  "RNDZ": "wasm_f32x4_trunc",
 $  "RNDU": "wasm_f32x4_ceil",
 $  "RNDD": "wasm_f32x4_floor",
 $}[OP]
-void xnn_f32_v${OP.lower()}_ukernel__wasmsimd_x${BATCH_TILE}(
+void xnn_f32_v${OP.lower()}_ukernel__wasmsimd_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

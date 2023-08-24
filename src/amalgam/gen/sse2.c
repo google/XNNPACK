@@ -2628,7 +2628,7 @@ void xnn_f32_qu8_vcvt_ukernel__sse2_x32(
   }
 }
 
-void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20_acc2(
+void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u20_acc2(
     size_t batch,
     const float* input,
     const float* max,
@@ -2891,7 +2891,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20_acc2(
 
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_16[16];
 
-void xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_x12(
+void xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u12(
     size_t batch,
     const float* input,
     float* output,
@@ -3159,7 +3159,7 @@ void xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_x12(
   }
 }
 
-void xnn_f32_vlrelu_ukernel__sse2_x8(
+void xnn_f32_vlrelu_ukernel__sse2_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -3217,7 +3217,7 @@ void xnn_f32_vlrelu_ukernel__sse2_x8(
   }
 }
 
-void xnn_f32_vrndd_ukernel__sse2_x8(
+void xnn_f32_vrndd_ukernel__sse2_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -3285,7 +3285,7 @@ void xnn_f32_vrndd_ukernel__sse2_x8(
   }
 }
 
-void xnn_f32_vrndne_ukernel__sse2_x8(
+void xnn_f32_vrndne_ukernel__sse2_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -3347,7 +3347,7 @@ void xnn_f32_vrndne_ukernel__sse2_x8(
   }
 }
 
-void xnn_f32_vrndu_ukernel__sse2_x8(
+void xnn_f32_vrndu_ukernel__sse2_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -3425,7 +3425,7 @@ void xnn_f32_vrndu_ukernel__sse2_x8(
   }
 }
 
-void xnn_f32_vrndz_ukernel__sse2_x8(
+void xnn_f32_vrndz_ukernel__sse2_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -3489,7 +3489,7 @@ void xnn_f32_vrndz_ukernel__sse2_x8(
 
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
 
-void xnn_f32_vsigmoid_ukernel__sse2_rr2_lut64_p2_div_x8(
+void xnn_f32_vsigmoid_ukernel__sse2_rr2_lut64_p2_div_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -3713,7 +3713,7 @@ void xnn_f32_vsigmoid_ukernel__sse2_rr2_lut64_p2_div_x8(
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_f32_vtanh_ukernel__sse2_expm1minus_rr1_lut8_p4h3ts_div_x16(
+void xnn_f32_vtanh_ukernel__sse2_expm1minus_rr1_lut8_p4h3ts_div_u16(
     size_t batch,
     const float* input,
     float* output,

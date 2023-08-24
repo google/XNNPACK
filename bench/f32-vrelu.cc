@@ -75,49 +75,49 @@ static void f32_vrelu(
 #endif  // (XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD) && XNN_PLATFORM_JIT
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(f32_vrelu, sse_x4,
-                    xnn_f32_vrelu_ukernel__sse_x4)
+  BENCHMARK_CAPTURE(f32_vrelu, sse_u4,
+                    xnn_f32_vrelu_ukernel__sse_u4)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, sse_x8,
-                    xnn_f32_vrelu_ukernel__sse_x8)
+  BENCHMARK_CAPTURE(f32_vrelu, sse_u8,
+                    xnn_f32_vrelu_ukernel__sse_u8)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, avx_x8,
-                    xnn_f32_vrelu_ukernel__avx_x8,
+  BENCHMARK_CAPTURE(f32_vrelu, avx_u8,
+                    xnn_f32_vrelu_ukernel__avx_u8,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, avx_x16,
-                    xnn_f32_vrelu_ukernel__avx_x16,
+  BENCHMARK_CAPTURE(f32_vrelu, avx_u16,
+                    xnn_f32_vrelu_ukernel__avx_u16,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, avx512f_x16,
-                    xnn_f32_vrelu_ukernel__avx512f_x16,
+  BENCHMARK_CAPTURE(f32_vrelu, avx512f_u16,
+                    xnn_f32_vrelu_ukernel__avx512f_u16,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, avx512f_x32,
-                    xnn_f32_vrelu_ukernel__avx512f_x32,
+  BENCHMARK_CAPTURE(f32_vrelu, avx512f_u32,
+                    xnn_f32_vrelu_ukernel__avx512f_u32,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f32_vrelu, neon_x4,
-                    xnn_f32_vrelu_ukernel__neon_x4,
+  BENCHMARK_CAPTURE(f32_vrelu, neon_u4,
+                    xnn_f32_vrelu_ukernel__neon_u4,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrelu, neon_x8,
-                    xnn_f32_vrelu_ukernel__neon_x8,
+  BENCHMARK_CAPTURE(f32_vrelu, neon_u8,
+                    xnn_f32_vrelu_ukernel__neon_u8,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
@@ -125,118 +125,118 @@ static void f32_vrelu(
 
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_vrelu, wasm_x1,
-                    xnn_f32_vrelu_ukernel__wasm_x1)
+  BENCHMARK_CAPTURE(f32_vrelu, wasm_u1,
+                    xnn_f32_vrelu_ukernel__wasm_u1)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, wasm_x2,
-                    xnn_f32_vrelu_ukernel__wasm_x2)
+  BENCHMARK_CAPTURE(f32_vrelu, wasm_u2,
+                    xnn_f32_vrelu_ukernel__wasm_u2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, wasm_x4,
-                    xnn_f32_vrelu_ukernel__wasm_x4)
+  BENCHMARK_CAPTURE(f32_vrelu, wasm_u4,
+                    xnn_f32_vrelu_ukernel__wasm_u4)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, wasm_x8,
-                    xnn_f32_vrelu_ukernel__wasm_x8)
+  BENCHMARK_CAPTURE(f32_vrelu, wasm_u8,
+                    xnn_f32_vrelu_ukernel__wasm_u8)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, wasm32_shr_x1,
-                    xnn_f32_vrelu_ukernel__wasm32_shr_x1)
+  BENCHMARK_CAPTURE(f32_vrelu, wasm32_shr_u1,
+                    xnn_f32_vrelu_ukernel__wasm32_shr_u1)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, wasm32_shr_x2,
-                    xnn_f32_vrelu_ukernel__wasm32_shr_x2)
+  BENCHMARK_CAPTURE(f32_vrelu, wasm32_shr_u2,
+                    xnn_f32_vrelu_ukernel__wasm32_shr_u2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, wasm32_shr_x4,
-                    xnn_f32_vrelu_ukernel__wasm32_shr_x4)
+  BENCHMARK_CAPTURE(f32_vrelu, wasm32_shr_u4,
+                    xnn_f32_vrelu_ukernel__wasm32_shr_u4)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if (XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD) && XNN_PLATFORM_JIT
-  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_x1,
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_u1,
                     xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 1, false)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_x2,
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_u2,
                     xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 2, false)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_x4,
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_u4,
                     xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 4, false)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_x8,
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_u8,
                     xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 8, false)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_local_x1,
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_local_u1,
                     xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 1, true)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_local_x2,
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_local_u2,
                     xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 2, true)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_local_x4,
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_local_u4,
                     xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 4, true)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_local_x8,
+  BENCHMARK_CAPTURE(f32_vrelu, jit_wasm32_shr_local_u8,
                     xnn_generate_f32_vrelu_ukernel__jit_wasm32_shr, 8, true)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // (XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD) && XNN_PLATFORM_JIT
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_vrelu, wasmsimd_x4,
-                    xnn_f32_vrelu_ukernel__wasmsimd_x4)
+  BENCHMARK_CAPTURE(f32_vrelu, wasmsimd_u4,
+                    xnn_f32_vrelu_ukernel__wasmsimd_u4)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, wasmsimd_x8,
-                    xnn_f32_vrelu_ukernel__wasmsimd_x8)
+  BENCHMARK_CAPTURE(f32_vrelu, wasmsimd_u8,
+                    xnn_f32_vrelu_ukernel__wasmsimd_u8)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vrelu, wasmsimd_x16,
-                    xnn_f32_vrelu_ukernel__wasmsimd_x16)
+  BENCHMARK_CAPTURE(f32_vrelu, wasmsimd_u16,
+                    xnn_f32_vrelu_ukernel__wasmsimd_u16)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-BENCHMARK_CAPTURE(f32_vrelu, scalar_x1,
-                  xnn_f32_vrelu_ukernel__scalar_x1)
+BENCHMARK_CAPTURE(f32_vrelu, scalar_u1,
+                  xnn_f32_vrelu_ukernel__scalar_u1)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
 
-BENCHMARK_CAPTURE(f32_vrelu, scalar_x2,
-                  xnn_f32_vrelu_ukernel__scalar_x2)
+BENCHMARK_CAPTURE(f32_vrelu, scalar_u2,
+                  xnn_f32_vrelu_ukernel__scalar_u2)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
 
-BENCHMARK_CAPTURE(f32_vrelu, scalar_x4,
-                  xnn_f32_vrelu_ukernel__scalar_x4)
+BENCHMARK_CAPTURE(f32_vrelu, scalar_u4,
+                  xnn_f32_vrelu_ukernel__scalar_u4)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
 
-BENCHMARK_CAPTURE(f32_vrelu, scalar_x8,
-                  xnn_f32_vrelu_ukernel__scalar_x8)
+BENCHMARK_CAPTURE(f32_vrelu, scalar_u8,
+                  xnn_f32_vrelu_ukernel__scalar_u8)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
 

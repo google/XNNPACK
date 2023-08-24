@@ -15,7 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_x${BATCH_TILE}(
+void xnn_f32_vsqrt_ukernel__fma3_nr1fma1adj_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

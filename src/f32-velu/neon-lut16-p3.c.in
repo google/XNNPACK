@@ -18,7 +18,7 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 extern XNN_INTERNAL const int32_t xnn_table_exp2minus_k_over_16[16];
 
 $PARAMS_STRUCT = "neonfma_rr1_lut16_p3" if FMA else "neon_rr2_lut16_p3"
-void xnn_f32_velu_ukernel__${"neonfma" if FMA else "neon"}_rr${1 if FMA else 2}_lut16_p3_x${BATCH_TILE}(
+void xnn_f32_velu_ukernel__${"neonfma" if FMA else "neon"}_rr${1 if FMA else 2}_lut16_p3_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

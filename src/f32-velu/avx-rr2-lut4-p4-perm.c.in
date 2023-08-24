@@ -14,7 +14,7 @@ $SIMD_TILE = BATCH_TILE // 8
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x${BATCH_TILE}(
+void xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

@@ -22,7 +22,7 @@ $  "RNDZ": "_MM_FROUND_TO_ZERO",
 $  "RNDU": "_MM_FROUND_TO_POS_INF",
 $  "RNDD": "_MM_FROUND_TO_NEG_INF",
 $}[OP]
-void xnn_f32_v${OP.lower()}_ukernel__sse41_x${BATCH_TILE}(
+void xnn_f32_v${OP.lower()}_ukernel__sse41_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

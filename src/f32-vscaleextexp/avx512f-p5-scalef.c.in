@@ -16,7 +16,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/vscaleextexp.h>
 
 
-void xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_x${BATCH_TILE}(
+void xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

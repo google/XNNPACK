@@ -17,7 +17,7 @@ $SSE_HEADER = {1: "xmmintrin.h", 2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
 
 
 $ISA = {1: "sse", 2: "sse2", 4: "sse41"}[SSE]
-void xnn_f32_vlrelu_ukernel__${ISA}_x${BATCH_TILE}(
+void xnn_f32_vlrelu_ukernel__${ISA}_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

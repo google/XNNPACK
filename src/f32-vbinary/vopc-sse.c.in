@@ -31,7 +31,7 @@ $  "SQRDIFF": lambda x: "_mm_sub_ps(%s, vb)" % x,
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "xnn_f32_default_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
-void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__sse_x${BATCH_TILE}(
+void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__sse_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
     const float* input_b,

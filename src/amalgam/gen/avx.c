@@ -3656,7 +3656,7 @@ void xnn_f32_qu8_vcvt_ukernel__avx_x32(
   }
 }
 
-void xnn_f32_rsum_ukernel__avx_x32_acc4(
+void xnn_f32_rsum_ukernel__avx_u32_acc4(
     size_t batch,
     const float* input,
     float* output,
@@ -3706,7 +3706,7 @@ void xnn_f32_rsum_ukernel__avx_x32_acc4(
   _mm_store_ss(output, vacc);
 }
 
-void xnn_f32_vadd_minmax_ukernel__avx_x16(
+void xnn_f32_vadd_minmax_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -3782,7 +3782,7 @@ void xnn_f32_vadd_minmax_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vaddc_minmax_ukernel__avx_x16(
+void xnn_f32_vaddc_minmax_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -3856,7 +3856,7 @@ void xnn_f32_vaddc_minmax_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vdiv_minmax_ukernel__avx_x16(
+void xnn_f32_vdiv_minmax_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -3932,7 +3932,7 @@ void xnn_f32_vdiv_minmax_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vdivc_minmax_ukernel__avx_x16(
+void xnn_f32_vdivc_minmax_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -4006,7 +4006,7 @@ void xnn_f32_vdivc_minmax_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vmax_ukernel__avx_x16(
+void xnn_f32_vmax_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -4071,7 +4071,7 @@ void xnn_f32_vmax_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vmaxc_ukernel__avx_x16(
+void xnn_f32_vmaxc_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -4134,7 +4134,7 @@ void xnn_f32_vmaxc_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vmin_ukernel__avx_x16(
+void xnn_f32_vmin_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -4199,7 +4199,7 @@ void xnn_f32_vmin_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vminc_ukernel__avx_x16(
+void xnn_f32_vminc_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -4262,7 +4262,7 @@ void xnn_f32_vminc_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vmul_minmax_ukernel__avx_x16(
+void xnn_f32_vmul_minmax_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -4338,7 +4338,7 @@ void xnn_f32_vmul_minmax_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vmulc_minmax_ukernel__avx_x16(
+void xnn_f32_vmulc_minmax_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -4412,7 +4412,7 @@ void xnn_f32_vmulc_minmax_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vrdivc_minmax_ukernel__avx_x16(
+void xnn_f32_vrdivc_minmax_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -4486,7 +4486,7 @@ void xnn_f32_vrdivc_minmax_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vrsubc_minmax_ukernel__avx_x16(
+void xnn_f32_vrsubc_minmax_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -4560,7 +4560,7 @@ void xnn_f32_vrsubc_minmax_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vsqrdiff_ukernel__avx_x16(
+void xnn_f32_vsqrdiff_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -4629,7 +4629,7 @@ void xnn_f32_vsqrdiff_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vsqrdiffc_ukernel__avx_x16(
+void xnn_f32_vsqrdiffc_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -4696,7 +4696,7 @@ void xnn_f32_vsqrdiffc_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vsub_minmax_ukernel__avx_x16(
+void xnn_f32_vsub_minmax_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -4772,7 +4772,7 @@ void xnn_f32_vsub_minmax_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vsubc_minmax_ukernel__avx_x16(
+void xnn_f32_vsubc_minmax_ukernel__avx_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -4846,7 +4846,7 @@ void xnn_f32_vsubc_minmax_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vclamp_ukernel__avx_x16(
+void xnn_f32_vclamp_ukernel__avx_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -4911,7 +4911,7 @@ void xnn_f32_vclamp_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x32(
+void xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_u32(
     size_t batch,
     const float* input,
     float* output,
@@ -5126,7 +5126,7 @@ void xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x32(
   }
 }
 
-void xnn_f32_vhswish_ukernel__avx_x16(
+void xnn_f32_vhswish_ukernel__avx_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -5206,7 +5206,7 @@ void xnn_f32_vhswish_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vlrelu_ukernel__avx_x16(
+void xnn_f32_vlrelu_ukernel__avx_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -5267,7 +5267,7 @@ void xnn_f32_vlrelu_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vrndd_ukernel__avx_x16(
+void xnn_f32_vrndd_ukernel__avx_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -5324,7 +5324,7 @@ void xnn_f32_vrndd_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vrndne_ukernel__avx_x16(
+void xnn_f32_vrndne_ukernel__avx_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -5381,7 +5381,7 @@ void xnn_f32_vrndne_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vrndu_ukernel__avx_x16(
+void xnn_f32_vrndu_ukernel__avx_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -5438,7 +5438,7 @@ void xnn_f32_vrndu_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vrndz_ukernel__avx_x16(
+void xnn_f32_vrndz_ukernel__avx_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -5495,7 +5495,7 @@ void xnn_f32_vrndz_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vsigmoid_ukernel__avx_rr2_p5_nr2_x40(
+void xnn_f32_vsigmoid_ukernel__avx_rr2_p5_nr2_u40(
     size_t batch,
     const float* input,
     float* output,
@@ -5748,7 +5748,7 @@ void xnn_f32_vsigmoid_ukernel__avx_rr2_p5_nr2_x40(
   }
 }
 
-void xnn_f32_vsqrt_ukernel__avx_sqrt_x8(
+void xnn_f32_vsqrt_ukernel__avx_sqrt_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -5791,7 +5791,7 @@ void xnn_f32_vsqrt_ukernel__avx_sqrt_x8(
   }
 }
 
-void xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2ts_perm_div_x48(
+void xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2ts_perm_div_u48(
     size_t batch,
     const float* input,
     float* output,
@@ -6092,7 +6092,7 @@ void xnn_f32_vtanh_ukernel__avx_expm1minus_rr1_lut4_p4h2ts_perm_div_x48(
   }
 }
 
-void xnn_f32_vabs_ukernel__avx_x16(
+void xnn_f32_vabs_ukernel__avx_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -6148,7 +6148,7 @@ void xnn_f32_vabs_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vneg_ukernel__avx_x16(
+void xnn_f32_vneg_ukernel__avx_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -6204,7 +6204,7 @@ void xnn_f32_vneg_ukernel__avx_x16(
   }
 }
 
-void xnn_f32_vsqr_ukernel__avx_x16(
+void xnn_f32_vsqr_ukernel__avx_u16(
     size_t batch,
     const float* input,
     float* output,

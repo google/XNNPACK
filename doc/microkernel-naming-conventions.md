@@ -6,7 +6,7 @@ This documents deciphers XNNPACK's microkernels naming convention.
 
 Microkernel function names follow this convention:
 
-`xnn_<datatype>_<microkernel><activation?>_ukernel_<parameters>__<arch>`
+`xnn_<datatype>_<microkernel><activation?>_ukernel_<parameters>__<arch>_u<unroll>`
 
 Where `<datatype>` can be:
 
@@ -50,6 +50,9 @@ architecture, or processor information:
 -   `wasm`
 -   `avx512`
 -   `avx512skx`
+
+`<unroll>` is the unroll factor, in elements, along the innermost loop of the
+microkernel.
 
 ## GEMM and IGEMM microkernels
 

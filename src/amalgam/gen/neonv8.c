@@ -252,7 +252,7 @@ void xnn_f32_qu8_vcvt_ukernel__neonv8_x32(
   }
 }
 
-void xnn_f32_vrndd_ukernel__neonv8_x8(
+void xnn_f32_vrndd_ukernel__neonv8_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -292,7 +292,7 @@ void xnn_f32_vrndd_ukernel__neonv8_x8(
   }
 }
 
-void xnn_f32_vrndne_ukernel__neonv8_x8(
+void xnn_f32_vrndne_ukernel__neonv8_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -332,7 +332,7 @@ void xnn_f32_vrndne_ukernel__neonv8_x8(
   }
 }
 
-void xnn_f32_vrndu_ukernel__neonv8_x8(
+void xnn_f32_vrndu_ukernel__neonv8_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -372,7 +372,7 @@ void xnn_f32_vrndu_ukernel__neonv8_x8(
   }
 }
 
-void xnn_f32_vrndz_ukernel__neonv8_x8(
+void xnn_f32_vrndz_ukernel__neonv8_u8(
     size_t batch,
     const float* input,
     float* output,

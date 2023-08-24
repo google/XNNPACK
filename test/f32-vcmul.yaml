@@ -4,25 +4,25 @@
 # LICENSE file in the root directory of this source tree.
 
 # Scalar
-- name: xnn_f32_vcmul_ukernel__scalar_x1
-- name: xnn_f32_vcmul_ukernel__scalar_x2
-- name: xnn_f32_vcmul_ukernel__scalar_x4
-- name: xnn_f32_vcmul_ukernel__scalar_x8
+- name: xnn_f32_vcmul_ukernel__scalar_u1
+- name: xnn_f32_vcmul_ukernel__scalar_u2
+- name: xnn_f32_vcmul_ukernel__scalar_u4
+- name: xnn_f32_vcmul_ukernel__scalar_u8
 
 # ARM NEON
-- name: xnn_f32_vcmul_ukernel__neon_x4
-- name: xnn_f32_vcmul_ukernel__neon_x8
-- name: xnn_f32_vcmul_ukernel__neon_x12
-- name: xnn_f32_vcmul_ukernel__neon_x16
+- name: xnn_f32_vcmul_ukernel__neon_u4
+- name: xnn_f32_vcmul_ukernel__neon_u8
+- name: xnn_f32_vcmul_ukernel__neon_u12
+- name: xnn_f32_vcmul_ukernel__neon_u16
 
 # x86 SSE2
-- name: xnn_f32_vcmul_ukernel__sse_x4
-- name: xnn_f32_vcmul_ukernel__sse_x8
-- name: xnn_f32_vcmul_ukernel__sse_x12
-- name: xnn_f32_vcmul_ukernel__sse_x16
+- name: xnn_f32_vcmul_ukernel__sse_u4
+- name: xnn_f32_vcmul_ukernel__sse_u8
+- name: xnn_f32_vcmul_ukernel__sse_u12
+- name: xnn_f32_vcmul_ukernel__sse_u16
 
 # Wasm SIMD
-- name: xnn_f32_vcmul_ukernel__wasmsimd_x4
-- name: xnn_f32_vcmul_ukernel__wasmsimd_x8
-- name: xnn_f32_vcmul_ukernel__wasmsimd_x12
-- name: xnn_f32_vcmul_ukernel__wasmsimd_x16
+- name: xnn_f32_vcmul_ukernel__wasmsimd_u4
+- name: xnn_f32_vcmul_ukernel__wasmsimd_u8
+- name: xnn_f32_vcmul_ukernel__wasmsimd_u12
+- name: xnn_f32_vcmul_ukernel__wasmsimd_u16

@@ -16,7 +16,7 @@ $SIMD_TILE = BATCH_TILE // 8
 
 extern XNN_INTERNAL const int xnn_table_exp2minus_k_over_16[16];
 
-void xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x${BATCH_TILE}(
+void xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

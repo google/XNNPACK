@@ -34,7 +34,7 @@ $POLY_SUFFIX = "p%dh%d%s" % (P, H, "ps" if PS else "ts")
 $DIV_SUFFIX = DIV.lower()
 $PARAMS_STRUCT = "sse_expm1minus_rr1_" + LUT_SUFFIX + ("p%dh%d" % (P, H))
 $ISA = {2: "sse2", 4: "sse41"}[SSE]
-void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_${DIV_SUFFIX}_x${BATCH_TILE}(
+void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_${DIV_SUFFIX}_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

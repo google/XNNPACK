@@ -66,45 +66,45 @@ static void init_f32_raddstoreexpminusmax_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       f32_raddstoreexpminusmax_config.ukernel =
-        (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_lut64_p2_x8;
+        (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_lut64_p2_u8;
       f32_raddstoreexpminusmax_config.init.f32 = xnn_init_f32_expminus_neon_rr2_lut64_p2_params;
       f32_raddstoreexpminusmax_config.element_tile = 8;
     } else if (!XNN_PLATFORM_MOBILE) {
       f32_raddstoreexpminusmax_config.ukernel =
-        (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x4_acc2;
+        (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2;
       f32_raddstoreexpminusmax_config.init.f32 = xnn_init_f32_expminus_scalar_rr2_p5_params;
       f32_raddstoreexpminusmax_config.element_tile = 4;
     }
   #elif XNN_ARCH_ARM64
     f32_raddstoreexpminusmax_config.ukernel =
-      (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__neonfma_rr1_lut64_p2_x16;
+      (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__neonfma_rr1_lut64_p2_u16;
     f32_raddstoreexpminusmax_config.init.f32 = xnn_init_f32_expminus_neonfma_rr1_lut64_p2_params;
     f32_raddstoreexpminusmax_config.element_tile = 16;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     f32_raddstoreexpminusmax_config.ukernel =
-      (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_x20_acc2;
+      (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u20_acc2;
     f32_raddstoreexpminusmax_config.init.f32 = xnn_init_f32_expminus_sse2_rr2_p5_params;
     f32_raddstoreexpminusmax_config.element_tile = 20;
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     #if XNN_ARCH_WASMRELAXEDSIMD
       f32_raddstoreexpminusmax_config.ukernel =
-        (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_x16_acc2;
+        (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_u16_acc2;
       f32_raddstoreexpminusmax_config.init.f32 = xnn_init_f32_expminus_wasmsimd_rr2_p5_params;
       f32_raddstoreexpminusmax_config.element_tile = 16;
     #else
       f32_raddstoreexpminusmax_config.ukernel =
-        (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x16_acc2;
+        (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_u16_acc2;
       f32_raddstoreexpminusmax_config.init.f32 = xnn_init_f32_expminus_wasmsimd_rr2_p5_params;
       f32_raddstoreexpminusmax_config.element_tile = 16;
     #endif
   #elif XNN_ARCH_WASM
     f32_raddstoreexpminusmax_config.ukernel =
-      (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x4_acc2;
+      (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2;
     f32_raddstoreexpminusmax_config.init.f32 = xnn_init_f32_expminus_scalar_rr2_p5_params;
     f32_raddstoreexpminusmax_config.element_tile = 4;
   #elif XNN_ARCH_RISCV
     f32_raddstoreexpminusmax_config.ukernel =
-      (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x4_acc2;
+      (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2;
     f32_raddstoreexpminusmax_config.init.f32 = xnn_init_f32_expminus_scalar_rr2_p5_params;
     f32_raddstoreexpminusmax_config.element_tile = 4;
   #endif

@@ -16,7 +16,7 @@ $SIMD_TILE = BATCH_TILE // 8
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_${DIV_ALGO}_x${BATCH_TILE}(
+void xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_${DIV_ALGO}_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

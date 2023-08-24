@@ -17,7 +17,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-void xnn_f32_vscaleextexp_ukernel__avx2_p5_x${BATCH_TILE}(
+void xnn_f32_vscaleextexp_ukernel__avx2_p5_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

@@ -32,7 +32,7 @@ $POLY_SUFFIX = "p%dh%d%s" % (P, H, "ps" if PS else "ts")
 $PERM_SUFFIX = "" if LOG2LUT == 0 else "_perm" if PERM else "_gather"
 $DIV_SUFFIX = DIV.lower()
 $PARAMS_STRUCT = "avx512_expm1minus_rr1_" + LUT_SUFFIX + ("p%dh%d" % (P, H)) + ("_perm" if PERM else "")
-void xnn_f32_vtanh_ukernel__avx512skx_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}${PERM_SUFFIX}_${DIV_SUFFIX}_x${BATCH_TILE}(
+void xnn_f32_vtanh_ukernel__avx512skx_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}${PERM_SUFFIX}_${DIV_SUFFIX}_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

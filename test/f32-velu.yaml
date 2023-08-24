@@ -4,398 +4,398 @@
 # LICENSE file in the root directory of this source tree.
 
 # ARM NEON
-- name: xnn_f32_velu_ukernel__neon_rr2_lut16_p3_x4
+- name: xnn_f32_velu_ukernel__neon_rr2_lut16_p3_u4
   init: xnn_init_f32_elu_neon_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__neon_rr2_lut16_p3_x8
+- name: xnn_f32_velu_ukernel__neon_rr2_lut16_p3_u8
   init: xnn_init_f32_elu_neon_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__neon_rr2_lut16_p3_x12
+- name: xnn_f32_velu_ukernel__neon_rr2_lut16_p3_u12
   init: xnn_init_f32_elu_neon_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__neon_rr2_lut16_p3_x16
+- name: xnn_f32_velu_ukernel__neon_rr2_lut16_p3_u16
   init: xnn_init_f32_elu_neon_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__neon_rr2_lut16_p3_x20
+- name: xnn_f32_velu_ukernel__neon_rr2_lut16_p3_u20
   init: xnn_init_f32_elu_neon_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__neon_rr2_lut16_p3_x24
+- name: xnn_f32_velu_ukernel__neon_rr2_lut16_p3_u24
   init: xnn_init_f32_elu_neon_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__neon_rr2_p6_x4
+- name: xnn_f32_velu_ukernel__neon_rr2_p6_u4
   init: xnn_init_f32_elu_neon_rr2_p6_params
-- name: xnn_f32_velu_ukernel__neon_rr2_p6_x8
+- name: xnn_f32_velu_ukernel__neon_rr2_p6_u8
   init: xnn_init_f32_elu_neon_rr2_p6_params
-- name: xnn_f32_velu_ukernel__neon_rr2_p6_x12
+- name: xnn_f32_velu_ukernel__neon_rr2_p6_u12
   init: xnn_init_f32_elu_neon_rr2_p6_params
-- name: xnn_f32_velu_ukernel__neon_rr2_p6_x16
+- name: xnn_f32_velu_ukernel__neon_rr2_p6_u16
   init: xnn_init_f32_elu_neon_rr2_p6_params
-- name: xnn_f32_velu_ukernel__neon_rr2_p6_x20
+- name: xnn_f32_velu_ukernel__neon_rr2_p6_u20
   init: xnn_init_f32_elu_neon_rr2_p6_params
-- name: xnn_f32_velu_ukernel__neon_rr2_p6_x24
+- name: xnn_f32_velu_ukernel__neon_rr2_p6_u24
   init: xnn_init_f32_elu_neon_rr2_p6_params
-- name: xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_x4
+- name: xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_u4
   init: xnn_init_f32_elu_neonfma_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_x8
+- name: xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_u8
   init: xnn_init_f32_elu_neonfma_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_x12
+- name: xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_u12
   init: xnn_init_f32_elu_neonfma_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_x16
+- name: xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_u16
   init: xnn_init_f32_elu_neonfma_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_x20
+- name: xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_u20
   init: xnn_init_f32_elu_neonfma_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_x24
+- name: xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_u24
   init: xnn_init_f32_elu_neonfma_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__neonfma_rr1_p6_x4
+- name: xnn_f32_velu_ukernel__neonfma_rr1_p6_u4
   init: xnn_init_f32_elu_neonfma_rr1_p6_params
-- name: xnn_f32_velu_ukernel__neonfma_rr1_p6_x8
+- name: xnn_f32_velu_ukernel__neonfma_rr1_p6_u8
   init: xnn_init_f32_elu_neonfma_rr1_p6_params
-- name: xnn_f32_velu_ukernel__neonfma_rr1_p6_x12
+- name: xnn_f32_velu_ukernel__neonfma_rr1_p6_u12
   init: xnn_init_f32_elu_neonfma_rr1_p6_params
-- name: xnn_f32_velu_ukernel__neonfma_rr1_p6_x16
+- name: xnn_f32_velu_ukernel__neonfma_rr1_p6_u16
   init: xnn_init_f32_elu_neonfma_rr1_p6_params
-- name: xnn_f32_velu_ukernel__neonfma_rr1_p6_x20
+- name: xnn_f32_velu_ukernel__neonfma_rr1_p6_u20
   init: xnn_init_f32_elu_neonfma_rr1_p6_params
-- name: xnn_f32_velu_ukernel__neonfma_rr1_p6_x24
+- name: xnn_f32_velu_ukernel__neonfma_rr1_p6_u24
   init: xnn_init_f32_elu_neonfma_rr1_p6_params
 # x86 SSE
-- name: xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_x4
+- name: xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u4
   init: xnn_init_f32_elu_sse2_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_x8
+- name: xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u8
   init: xnn_init_f32_elu_sse2_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_x12
+- name: xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u12
   init: xnn_init_f32_elu_sse2_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_x16
+- name: xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u16
   init: xnn_init_f32_elu_sse2_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_x20
+- name: xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u20
   init: xnn_init_f32_elu_sse2_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_x24
+- name: xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u24
   init: xnn_init_f32_elu_sse2_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__sse2_rr2_p6_x4
+- name: xnn_f32_velu_ukernel__sse2_rr2_p6_u4
   init: xnn_init_f32_elu_sse2_rr2_p6_params
-- name: xnn_f32_velu_ukernel__sse2_rr2_p6_x8
+- name: xnn_f32_velu_ukernel__sse2_rr2_p6_u8
   init: xnn_init_f32_elu_sse2_rr2_p6_params
-- name: xnn_f32_velu_ukernel__sse2_rr2_p6_x12
+- name: xnn_f32_velu_ukernel__sse2_rr2_p6_u12
   init: xnn_init_f32_elu_sse2_rr2_p6_params
-- name: xnn_f32_velu_ukernel__sse2_rr2_p6_x16
+- name: xnn_f32_velu_ukernel__sse2_rr2_p6_u16
   init: xnn_init_f32_elu_sse2_rr2_p6_params
-- name: xnn_f32_velu_ukernel__sse2_rr2_p6_x20
+- name: xnn_f32_velu_ukernel__sse2_rr2_p6_u20
   init: xnn_init_f32_elu_sse2_rr2_p6_params
-- name: xnn_f32_velu_ukernel__sse2_rr2_p6_x24
+- name: xnn_f32_velu_ukernel__sse2_rr2_p6_u24
   init: xnn_init_f32_elu_sse2_rr2_p6_params
-- name: xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_x4
+- name: xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_u4
   init: xnn_init_f32_elu_sse2_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_x8
+- name: xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_u8
   init: xnn_init_f32_elu_sse2_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_x12
+- name: xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_u12
   init: xnn_init_f32_elu_sse2_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_x16
+- name: xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_u16
   init: xnn_init_f32_elu_sse2_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_x20
+- name: xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_u20
   init: xnn_init_f32_elu_sse2_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_x24
+- name: xnn_f32_velu_ukernel__sse41_rr2_lut16_p3_u24
   init: xnn_init_f32_elu_sse2_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__sse41_rr2_p6_x4
+- name: xnn_f32_velu_ukernel__sse41_rr2_p6_u4
   init: xnn_init_f32_elu_sse2_rr2_p6_params
-- name: xnn_f32_velu_ukernel__sse41_rr2_p6_x8
+- name: xnn_f32_velu_ukernel__sse41_rr2_p6_u8
   init: xnn_init_f32_elu_sse2_rr2_p6_params
-- name: xnn_f32_velu_ukernel__sse41_rr2_p6_x12
+- name: xnn_f32_velu_ukernel__sse41_rr2_p6_u12
   init: xnn_init_f32_elu_sse2_rr2_p6_params
-- name: xnn_f32_velu_ukernel__sse41_rr2_p6_x16
+- name: xnn_f32_velu_ukernel__sse41_rr2_p6_u16
   init: xnn_init_f32_elu_sse2_rr2_p6_params
-- name: xnn_f32_velu_ukernel__sse41_rr2_p6_x20
+- name: xnn_f32_velu_ukernel__sse41_rr2_p6_u20
   init: xnn_init_f32_elu_sse2_rr2_p6_params
-- name: xnn_f32_velu_ukernel__sse41_rr2_p6_x24
+- name: xnn_f32_velu_ukernel__sse41_rr2_p6_u24
   init: xnn_init_f32_elu_sse2_rr2_p6_params
 # x86 AVX
-- name: xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x8
+- name: xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_u8
   init: xnn_init_f32_elu_avx_rr2_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x16
+- name: xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_u16
   init: xnn_init_f32_elu_avx_rr2_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x24
+- name: xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_u24
   init: xnn_init_f32_elu_avx_rr2_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x32
+- name: xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_u32
   init: xnn_init_f32_elu_avx_rr2_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x40
+- name: xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_u40
   init: xnn_init_f32_elu_avx_rr2_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_x48
+- name: xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_u48
   init: xnn_init_f32_elu_avx_rr2_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx_rr2_lut16_p3_x8
+- name: xnn_f32_velu_ukernel__avx_rr2_lut16_p3_u8
   init: xnn_init_f32_elu_avx_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx_rr2_lut16_p3_x16
+- name: xnn_f32_velu_ukernel__avx_rr2_lut16_p3_u16
   init: xnn_init_f32_elu_avx_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx_rr2_lut16_p3_x24
+- name: xnn_f32_velu_ukernel__avx_rr2_lut16_p3_u24
   init: xnn_init_f32_elu_avx_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx_rr2_lut16_p3_x32
+- name: xnn_f32_velu_ukernel__avx_rr2_lut16_p3_u32
   init: xnn_init_f32_elu_avx_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx_rr2_lut16_p3_x40
+- name: xnn_f32_velu_ukernel__avx_rr2_lut16_p3_u40
   init: xnn_init_f32_elu_avx_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx_rr2_lut16_p3_x48
+- name: xnn_f32_velu_ukernel__avx_rr2_lut16_p3_u48
   init: xnn_init_f32_elu_avx_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx_rr2_p6_x8
+- name: xnn_f32_velu_ukernel__avx_rr2_p6_u8
   init: xnn_init_f32_elu_avx_rr2_p6_params
-- name: xnn_f32_velu_ukernel__avx_rr2_p6_x16
+- name: xnn_f32_velu_ukernel__avx_rr2_p6_u16
   init: xnn_init_f32_elu_avx_rr2_p6_params
-- name: xnn_f32_velu_ukernel__avx_rr2_p6_x24
+- name: xnn_f32_velu_ukernel__avx_rr2_p6_u24
   init: xnn_init_f32_elu_avx_rr2_p6_params
-- name: xnn_f32_velu_ukernel__avx_rr2_p6_x32
+- name: xnn_f32_velu_ukernel__avx_rr2_p6_u32
   init: xnn_init_f32_elu_avx_rr2_p6_params
-- name: xnn_f32_velu_ukernel__avx_rr2_p6_x40
+- name: xnn_f32_velu_ukernel__avx_rr2_p6_u40
   init: xnn_init_f32_elu_avx_rr2_p6_params
-- name: xnn_f32_velu_ukernel__avx_rr2_p6_x48
+- name: xnn_f32_velu_ukernel__avx_rr2_p6_u48
   init: xnn_init_f32_elu_avx_rr2_p6_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_x8
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u8
   init: xnn_init_f32_elu_avx2_rr1_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_x16
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u16
   init: xnn_init_f32_elu_avx2_rr1_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_x24
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u24
   init: xnn_init_f32_elu_avx2_rr1_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_x32
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u32
   init: xnn_init_f32_elu_avx2_rr1_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_x40
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u40
   init: xnn_init_f32_elu_avx2_rr1_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_x48
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u48
   init: xnn_init_f32_elu_avx2_rr1_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_x56
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u56
   init: xnn_init_f32_elu_avx2_rr1_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_x64
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u64
   init: xnn_init_f32_elu_avx2_rr1_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_x72
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u72
   init: xnn_init_f32_elu_avx2_rr1_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_x80
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u80
   init: xnn_init_f32_elu_avx2_rr1_lut4_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_x8
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_u8
   init: xnn_init_f32_elu_avx2_rr1_lut8_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_x16
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_u16
   init: xnn_init_f32_elu_avx2_rr1_lut8_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_x24
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_u24
   init: xnn_init_f32_elu_avx2_rr1_lut8_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_x32
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_u32
   init: xnn_init_f32_elu_avx2_rr1_lut8_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_x40
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_u40
   init: xnn_init_f32_elu_avx2_rr1_lut8_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_x48
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_u48
   init: xnn_init_f32_elu_avx2_rr1_lut8_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_x56
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_u56
   init: xnn_init_f32_elu_avx2_rr1_lut8_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_x64
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_u64
   init: xnn_init_f32_elu_avx2_rr1_lut8_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_x72
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_u72
   init: xnn_init_f32_elu_avx2_rr1_lut8_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_x80
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut8_p4_perm_u80
   init: xnn_init_f32_elu_avx2_rr1_lut8_p4_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x8
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u8
   init: xnn_init_f32_elu_avx2_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x16
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u16
   init: xnn_init_f32_elu_avx2_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x24
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u24
   init: xnn_init_f32_elu_avx2_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x32
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u32
   init: xnn_init_f32_elu_avx2_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x40
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u40
   init: xnn_init_f32_elu_avx2_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x48
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u48
   init: xnn_init_f32_elu_avx2_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x56
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u56
   init: xnn_init_f32_elu_avx2_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x64
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u64
   init: xnn_init_f32_elu_avx2_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x72
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u72
   init: xnn_init_f32_elu_avx2_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_x80
+- name: xnn_f32_velu_ukernel__avx2_rr1_lut16_p3_gather_u80
   init: xnn_init_f32_elu_avx2_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_p6_x8
+- name: xnn_f32_velu_ukernel__avx2_rr1_p6_u8
   init: xnn_init_f32_elu_avx2_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_p6_x16
+- name: xnn_f32_velu_ukernel__avx2_rr1_p6_u16
   init: xnn_init_f32_elu_avx2_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_p6_x24
+- name: xnn_f32_velu_ukernel__avx2_rr1_p6_u24
   init: xnn_init_f32_elu_avx2_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_p6_x32
+- name: xnn_f32_velu_ukernel__avx2_rr1_p6_u32
   init: xnn_init_f32_elu_avx2_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_p6_x40
+- name: xnn_f32_velu_ukernel__avx2_rr1_p6_u40
   init: xnn_init_f32_elu_avx2_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_p6_x48
+- name: xnn_f32_velu_ukernel__avx2_rr1_p6_u48
   init: xnn_init_f32_elu_avx2_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_p6_x56
+- name: xnn_f32_velu_ukernel__avx2_rr1_p6_u56
   init: xnn_init_f32_elu_avx2_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_p6_x64
+- name: xnn_f32_velu_ukernel__avx2_rr1_p6_u64
   init: xnn_init_f32_elu_avx2_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_p6_x72
+- name: xnn_f32_velu_ukernel__avx2_rr1_p6_u72
   init: xnn_init_f32_elu_avx2_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx2_rr1_p6_x80
+- name: xnn_f32_velu_ukernel__avx2_rr1_p6_u80
   init: xnn_init_f32_elu_avx2_rr1_p6_params
 # x86 AVX512
-- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x16
+- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_u16
   init: xnn_init_f32_elu_avx512_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x32
+- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_u32
   init: xnn_init_f32_elu_avx512_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x48
+- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_u48
   init: xnn_init_f32_elu_avx512_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x64
+- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_u64
   init: xnn_init_f32_elu_avx512_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x80
+- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_u80
   init: xnn_init_f32_elu_avx512_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x96
+- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_u96
   init: xnn_init_f32_elu_avx512_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x112
+- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_u112
   init: xnn_init_f32_elu_avx512_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_x128
+- name: xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_u128
   init: xnn_init_f32_elu_avx512_rr1_lut16_p3_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_x16
+- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_u16
   init: xnn_init_f32_elu_avx512_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_x32
+- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_u32
   init: xnn_init_f32_elu_avx512_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_x48
+- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_u48
   init: xnn_init_f32_elu_avx512_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_x64
+- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_u64
   init: xnn_init_f32_elu_avx512_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_x80
+- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_u80
   init: xnn_init_f32_elu_avx512_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_x96
+- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_u96
   init: xnn_init_f32_elu_avx512_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_x112
+- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_u112
   init: xnn_init_f32_elu_avx512_rr1_p6_params
-- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_x128
+- name: xnn_f32_velu_ukernel__avx512f_rr1_p6_u128
   init: xnn_init_f32_elu_avx512_rr1_p6_params
 # WAsm SIMD
-- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_x4
+- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_u4
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_x8
+- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_u8
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_x12
+- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_u12
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_x16
+- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_u16
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_x20
+- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_u20
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_x24
+- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_lut16_p3_u24
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_x4
+- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_u4
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_x8
+- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_u8
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_x12
+- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_u12
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_x16
+- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_u16
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_x20
+- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_u20
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_x24
+- name: xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_u24
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x4
+- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_u4
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x8
+- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_u8
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x12
+- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_u12
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x16
+- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_u16
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x20
+- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_u20
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_x24
+- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_lut16_p3_u24
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x4
+- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_u4
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x8
+- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_u8
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x12
+- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_u12
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x16
+- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_u16
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x20
+- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_u20
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x24
+- name: xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_u24
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
 # WAsm Relaxed SIMD
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x4
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_u4
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x8
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_u8
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x12
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_u12
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x16
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_u16
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x20
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_u20
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_x24
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_u24
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_x4
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_u4
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_x8
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_u8
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_x12
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_u12
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_x16
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_u16
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_x20
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_u20
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_x24
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_u24
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_lut16_p3_x4
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_lut16_p3_u4
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_lut16_p3_x8
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_lut16_p3_u8
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_lut16_p3_x12
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_lut16_p3_u12
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_lut16_p3_x16
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_lut16_p3_u16
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_lut16_p3_x20
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_lut16_p3_u20
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_lut16_p3_x24
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_lut16_p3_u24
   init: xnn_init_f32_elu_wasmsimd_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_x4
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_u4
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_x8
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_u8
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_x12
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_u12
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_x16
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_u16
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_x20
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_u20
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_x24
+- name: xnn_f32_velu_ukernel__wasmrelaxedsimd_rr2_p6_u24
   init: xnn_init_f32_elu_wasmsimd_rr2_p6_params
 # WAsm
-- name: xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_x1
+- name: xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_u1
   init: xnn_init_f32_elu_scalar_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_x2
+- name: xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_u2
   init: xnn_init_f32_elu_scalar_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_x3
+- name: xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_u3
   init: xnn_init_f32_elu_scalar_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_x4
+- name: xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_u4
   init: xnn_init_f32_elu_scalar_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_x5
+- name: xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_u5
   init: xnn_init_f32_elu_scalar_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_x6
+- name: xnn_f32_velu_ukernel__wasm_rr2_lut16_p3_u6
   init: xnn_init_f32_elu_scalar_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__wasm_rr2_p6_x1
+- name: xnn_f32_velu_ukernel__wasm_rr2_p6_u1
   init: xnn_init_f32_elu_scalar_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasm_rr2_p6_x2
+- name: xnn_f32_velu_ukernel__wasm_rr2_p6_u2
   init: xnn_init_f32_elu_scalar_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasm_rr2_p6_x3
+- name: xnn_f32_velu_ukernel__wasm_rr2_p6_u3
   init: xnn_init_f32_elu_scalar_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasm_rr2_p6_x4
+- name: xnn_f32_velu_ukernel__wasm_rr2_p6_u4
   init: xnn_init_f32_elu_scalar_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasm_rr2_p6_x5
+- name: xnn_f32_velu_ukernel__wasm_rr2_p6_u5
   init: xnn_init_f32_elu_scalar_rr2_p6_params
-- name: xnn_f32_velu_ukernel__wasm_rr2_p6_x6
+- name: xnn_f32_velu_ukernel__wasm_rr2_p6_u6
   init: xnn_init_f32_elu_scalar_rr2_p6_params
 # Scalar
-- name: xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x1
+- name: xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u1
   init: xnn_init_f32_elu_scalar_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x2
+- name: xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u2
   init: xnn_init_f32_elu_scalar_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x3
+- name: xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u3
   init: xnn_init_f32_elu_scalar_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x4
+- name: xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u4
   init: xnn_init_f32_elu_scalar_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x5
+- name: xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u5
   init: xnn_init_f32_elu_scalar_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x6
+- name: xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u6
   init: xnn_init_f32_elu_scalar_rr2_lut16_p3_params
-- name: xnn_f32_velu_ukernel__scalar_rr2_p6_x1
+- name: xnn_f32_velu_ukernel__scalar_rr2_p6_u1
   init: xnn_init_f32_elu_scalar_rr2_p6_params
-- name: xnn_f32_velu_ukernel__scalar_rr2_p6_x2
+- name: xnn_f32_velu_ukernel__scalar_rr2_p6_u2
   init: xnn_init_f32_elu_scalar_rr2_p6_params
-- name: xnn_f32_velu_ukernel__scalar_rr2_p6_x3
+- name: xnn_f32_velu_ukernel__scalar_rr2_p6_u3
   init: xnn_init_f32_elu_scalar_rr2_p6_params
-- name: xnn_f32_velu_ukernel__scalar_rr2_p6_x4
+- name: xnn_f32_velu_ukernel__scalar_rr2_p6_u4
   init: xnn_init_f32_elu_scalar_rr2_p6_params
-- name: xnn_f32_velu_ukernel__scalar_rr2_p6_x5
+- name: xnn_f32_velu_ukernel__scalar_rr2_p6_u5
   init: xnn_init_f32_elu_scalar_rr2_p6_params
-- name: xnn_f32_velu_ukernel__scalar_rr2_p6_x6
+- name: xnn_f32_velu_ukernel__scalar_rr2_p6_u6
   init: xnn_init_f32_elu_scalar_rr2_p6_params

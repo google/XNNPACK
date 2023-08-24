@@ -24,7 +24,7 @@ $EMIT_MAX = "MAX" in OP
 $WASM_F32X4_MIN = {"MINMAX": "wasm_f32x4_min", "PMINMAX": "wasm_f32x4_pmin"}[MINMAX]
 $WASM_F32X4_MAX = {"MINMAX": "wasm_f32x4_max", "PMINMAX": "wasm_f32x4_pmax"}[MINMAX]
 $MINMAX_SUFFIX = {"MINMAX": "_minmax", "PMINMAX": "_pminmax"}[MINMAX]
-void xnn_f32_r${OP.lower()}_ukernel__wasmsimd${MINMAX_SUFFIX}_x${BATCH_TILE}${ACC_SUFFIX}(
+void xnn_f32_r${OP.lower()}_ukernel__wasmsimd${MINMAX_SUFFIX}_u${BATCH_TILE}${ACC_SUFFIX}(
     size_t batch,
     const float* input,
     float* output,

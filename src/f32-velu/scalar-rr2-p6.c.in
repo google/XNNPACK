@@ -12,7 +12,7 @@ $assert BATCH_TILE >= 1
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_p6_x${BATCH_TILE}(
+void xnn_f32_velu_ukernel__${"wasm" if WASM else "scalar"}_rr2_p6_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

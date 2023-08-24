@@ -20689,7 +20689,7 @@ void xnn_f32_qu8_vcvt_ukernel__wasmsimd_magic_x32(
   }
 }
 
-void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_x16_acc2(
+void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_u16_acc2(
     size_t batch,
     const float* input,
     const float* max,
@@ -20971,7 +20971,7 @@ void xnn_f32_rmax_ukernel__wasmsimd_x86(
   *output = vmax;
 }
 
-void xnn_f32_rminmax_ukernel__wasmsimd_minmax_x16_acc4(
+void xnn_f32_rminmax_ukernel__wasmsimd_minmax_u16_acc4(
     size_t batch,
     const float* input,
     float* output,
@@ -21038,7 +21038,7 @@ void xnn_f32_rminmax_ukernel__wasmsimd_minmax_x16_acc4(
   wasm_v128_store32_lane(output + 1, vmax0, 0);
 }
 
-void xnn_f32_rsum_ukernel__wasmsimd_x16_acc4(
+void xnn_f32_rsum_ukernel__wasmsimd_u16_acc4(
     size_t batch,
     const float* input,
     float* output,
@@ -21588,7 +21588,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__wasmsimd_x86(
   }
 }
 
-void xnn_f32_vadd_minmax_ukernel__wasmsimd_arm_x16(
+void xnn_f32_vadd_minmax_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -21674,7 +21674,7 @@ void xnn_f32_vadd_minmax_ukernel__wasmsimd_arm_x16(
   }
 }
 
-void xnn_f32_vadd_minmax_ukernel__wasmsimd_x86_x16(
+void xnn_f32_vadd_minmax_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -21760,7 +21760,7 @@ void xnn_f32_vadd_minmax_ukernel__wasmsimd_x86_x16(
   }
 }
 
-void xnn_f32_vadd_ukernel__wasmsimd_x16(
+void xnn_f32_vadd_ukernel__wasmsimd_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -21831,7 +21831,7 @@ void xnn_f32_vadd_ukernel__wasmsimd_x16(
   }
 }
 
-void xnn_f32_vaddc_minmax_ukernel__wasmsimd_arm_x16(
+void xnn_f32_vaddc_minmax_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -21908,7 +21908,7 @@ void xnn_f32_vaddc_minmax_ukernel__wasmsimd_arm_x16(
   }
 }
 
-void xnn_f32_vaddc_minmax_ukernel__wasmsimd_x86_x16(
+void xnn_f32_vaddc_minmax_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -21985,7 +21985,7 @@ void xnn_f32_vaddc_minmax_ukernel__wasmsimd_x86_x16(
   }
 }
 
-void xnn_f32_vaddc_ukernel__wasmsimd_x16(
+void xnn_f32_vaddc_ukernel__wasmsimd_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -22047,7 +22047,7 @@ void xnn_f32_vaddc_ukernel__wasmsimd_x16(
   }
 }
 
-void xnn_f32_vdiv_minmax_ukernel__wasmsimd_arm_x16(
+void xnn_f32_vdiv_minmax_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -22133,7 +22133,7 @@ void xnn_f32_vdiv_minmax_ukernel__wasmsimd_arm_x16(
   }
 }
 
-void xnn_f32_vdiv_minmax_ukernel__wasmsimd_x86_x16(
+void xnn_f32_vdiv_minmax_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -22219,7 +22219,7 @@ void xnn_f32_vdiv_minmax_ukernel__wasmsimd_x86_x16(
   }
 }
 
-void xnn_f32_vdiv_ukernel__wasmsimd_x16(
+void xnn_f32_vdiv_ukernel__wasmsimd_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -22290,7 +22290,7 @@ void xnn_f32_vdiv_ukernel__wasmsimd_x16(
   }
 }
 
-void xnn_f32_vdivc_minmax_ukernel__wasmsimd_arm_x16(
+void xnn_f32_vdivc_minmax_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -22367,7 +22367,7 @@ void xnn_f32_vdivc_minmax_ukernel__wasmsimd_arm_x16(
   }
 }
 
-void xnn_f32_vdivc_minmax_ukernel__wasmsimd_x86_x16(
+void xnn_f32_vdivc_minmax_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -22444,7 +22444,7 @@ void xnn_f32_vdivc_minmax_ukernel__wasmsimd_x86_x16(
   }
 }
 
-void xnn_f32_vdivc_ukernel__wasmsimd_x16(
+void xnn_f32_vdivc_ukernel__wasmsimd_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -22506,7 +22506,7 @@ void xnn_f32_vdivc_ukernel__wasmsimd_x16(
   }
 }
 
-void xnn_f32_vmax_ukernel__wasmsimd_arm_x16(
+void xnn_f32_vmax_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -22577,7 +22577,7 @@ void xnn_f32_vmax_ukernel__wasmsimd_arm_x16(
   }
 }
 
-void xnn_f32_vmax_ukernel__wasmsimd_x86_x16(
+void xnn_f32_vmax_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -22648,7 +22648,7 @@ void xnn_f32_vmax_ukernel__wasmsimd_x86_x16(
   }
 }
 
-void xnn_f32_vmaxc_ukernel__wasmsimd_arm_x16(
+void xnn_f32_vmaxc_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -22710,7 +22710,7 @@ void xnn_f32_vmaxc_ukernel__wasmsimd_arm_x16(
   }
 }
 
-void xnn_f32_vmaxc_ukernel__wasmsimd_x86_x16(
+void xnn_f32_vmaxc_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -22772,7 +22772,7 @@ void xnn_f32_vmaxc_ukernel__wasmsimd_x86_x16(
   }
 }
 
-void xnn_f32_vmin_ukernel__wasmsimd_arm_x16(
+void xnn_f32_vmin_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -22843,7 +22843,7 @@ void xnn_f32_vmin_ukernel__wasmsimd_arm_x16(
   }
 }
 
-void xnn_f32_vmin_ukernel__wasmsimd_x86_x16(
+void xnn_f32_vmin_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -22914,7 +22914,7 @@ void xnn_f32_vmin_ukernel__wasmsimd_x86_x16(
   }
 }
 
-void xnn_f32_vminc_ukernel__wasmsimd_arm_x16(
+void xnn_f32_vminc_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -22976,7 +22976,7 @@ void xnn_f32_vminc_ukernel__wasmsimd_arm_x16(
   }
 }
 
-void xnn_f32_vminc_ukernel__wasmsimd_x86_x16(
+void xnn_f32_vminc_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -23038,7 +23038,7 @@ void xnn_f32_vminc_ukernel__wasmsimd_x86_x16(
   }
 }
 
-void xnn_f32_vmul_minmax_ukernel__wasmsimd_arm_x16(
+void xnn_f32_vmul_minmax_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -23124,7 +23124,7 @@ void xnn_f32_vmul_minmax_ukernel__wasmsimd_arm_x16(
   }
 }
 
-void xnn_f32_vmul_minmax_ukernel__wasmsimd_x86_x16(
+void xnn_f32_vmul_minmax_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -23210,7 +23210,7 @@ void xnn_f32_vmul_minmax_ukernel__wasmsimd_x86_x16(
   }
 }
 
-void xnn_f32_vmul_ukernel__wasmsimd_x16(
+void xnn_f32_vmul_ukernel__wasmsimd_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -23281,7 +23281,7 @@ void xnn_f32_vmul_ukernel__wasmsimd_x16(
   }
 }
 
-void xnn_f32_vmulc_minmax_ukernel__wasmsimd_arm_x16(
+void xnn_f32_vmulc_minmax_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -23358,7 +23358,7 @@ void xnn_f32_vmulc_minmax_ukernel__wasmsimd_arm_x16(
   }
 }
 
-void xnn_f32_vmulc_minmax_ukernel__wasmsimd_x86_x16(
+void xnn_f32_vmulc_minmax_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -23435,7 +23435,7 @@ void xnn_f32_vmulc_minmax_ukernel__wasmsimd_x86_x16(
   }
 }
 
-void xnn_f32_vmulc_ukernel__wasmsimd_x16(
+void xnn_f32_vmulc_ukernel__wasmsimd_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -23497,7 +23497,7 @@ void xnn_f32_vmulc_ukernel__wasmsimd_x16(
   }
 }
 
-void xnn_f32_vrdivc_minmax_ukernel__wasmsimd_arm_x16(
+void xnn_f32_vrdivc_minmax_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -23574,7 +23574,7 @@ void xnn_f32_vrdivc_minmax_ukernel__wasmsimd_arm_x16(
   }
 }
 
-void xnn_f32_vrdivc_minmax_ukernel__wasmsimd_x86_x16(
+void xnn_f32_vrdivc_minmax_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -23651,7 +23651,7 @@ void xnn_f32_vrdivc_minmax_ukernel__wasmsimd_x86_x16(
   }
 }
 
-void xnn_f32_vrdivc_ukernel__wasmsimd_x16(
+void xnn_f32_vrdivc_ukernel__wasmsimd_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -23713,7 +23713,7 @@ void xnn_f32_vrdivc_ukernel__wasmsimd_x16(
   }
 }
 
-void xnn_f32_vrsubc_minmax_ukernel__wasmsimd_arm_x16(
+void xnn_f32_vrsubc_minmax_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -23790,7 +23790,7 @@ void xnn_f32_vrsubc_minmax_ukernel__wasmsimd_arm_x16(
   }
 }
 
-void xnn_f32_vrsubc_minmax_ukernel__wasmsimd_x86_x16(
+void xnn_f32_vrsubc_minmax_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -23867,7 +23867,7 @@ void xnn_f32_vrsubc_minmax_ukernel__wasmsimd_x86_x16(
   }
 }
 
-void xnn_f32_vrsubc_ukernel__wasmsimd_x16(
+void xnn_f32_vrsubc_ukernel__wasmsimd_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -23929,7 +23929,7 @@ void xnn_f32_vrsubc_ukernel__wasmsimd_x16(
   }
 }
 
-void xnn_f32_vsqrdiff_ukernel__wasmsimd_x16(
+void xnn_f32_vsqrdiff_ukernel__wasmsimd_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -24006,7 +24006,7 @@ void xnn_f32_vsqrdiff_ukernel__wasmsimd_x16(
   }
 }
 
-void xnn_f32_vsqrdiffc_ukernel__wasmsimd_x16(
+void xnn_f32_vsqrdiffc_ukernel__wasmsimd_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -24074,7 +24074,7 @@ void xnn_f32_vsqrdiffc_ukernel__wasmsimd_x16(
   }
 }
 
-void xnn_f32_vsub_minmax_ukernel__wasmsimd_arm_x16(
+void xnn_f32_vsub_minmax_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -24160,7 +24160,7 @@ void xnn_f32_vsub_minmax_ukernel__wasmsimd_arm_x16(
   }
 }
 
-void xnn_f32_vsub_minmax_ukernel__wasmsimd_x86_x16(
+void xnn_f32_vsub_minmax_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -24246,7 +24246,7 @@ void xnn_f32_vsub_minmax_ukernel__wasmsimd_x86_x16(
   }
 }
 
-void xnn_f32_vsub_ukernel__wasmsimd_x16(
+void xnn_f32_vsub_ukernel__wasmsimd_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -24317,7 +24317,7 @@ void xnn_f32_vsub_ukernel__wasmsimd_x16(
   }
 }
 
-void xnn_f32_vsubc_minmax_ukernel__wasmsimd_arm_x16(
+void xnn_f32_vsubc_minmax_ukernel__wasmsimd_arm_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -24394,7 +24394,7 @@ void xnn_f32_vsubc_minmax_ukernel__wasmsimd_arm_x16(
   }
 }
 
-void xnn_f32_vsubc_minmax_ukernel__wasmsimd_x86_x16(
+void xnn_f32_vsubc_minmax_ukernel__wasmsimd_x86_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -24471,7 +24471,7 @@ void xnn_f32_vsubc_minmax_ukernel__wasmsimd_x86_x16(
   }
 }
 
-void xnn_f32_vsubc_ukernel__wasmsimd_x16(
+void xnn_f32_vsubc_ukernel__wasmsimd_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -24533,7 +24533,7 @@ void xnn_f32_vsubc_ukernel__wasmsimd_x16(
   }
 }
 
-void xnn_f32_vclamp_ukernel__wasmsimd_arm_x8(
+void xnn_f32_vclamp_ukernel__wasmsimd_arm_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -24589,7 +24589,7 @@ void xnn_f32_vclamp_ukernel__wasmsimd_arm_x8(
   }
 }
 
-void xnn_f32_vclamp_ukernel__wasmsimd_x86_x8(
+void xnn_f32_vclamp_ukernel__wasmsimd_x86_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -24645,7 +24645,7 @@ void xnn_f32_vclamp_ukernel__wasmsimd_x86_x8(
   }
 }
 
-void xnn_f32_vcmul_ukernel__wasmsimd_x8(
+void xnn_f32_vcmul_ukernel__wasmsimd_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -24747,7 +24747,7 @@ void xnn_f32_vcmul_ukernel__wasmsimd_x8(
   }
 }
 
-void xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_x20(
+void xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_u20(
     size_t batch,
     const float* input,
     float* output,
@@ -24963,7 +24963,7 @@ void xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_x20(
   }
 }
 
-void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x20(
+void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_u20(
     size_t batch,
     const float* input,
     float* output,
@@ -25179,7 +25179,7 @@ void xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_x20(
   }
 }
 
-void xnn_f32_vhswish_ukernel__wasmsimd_x16(
+void xnn_f32_vhswish_ukernel__wasmsimd_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -25265,7 +25265,7 @@ void xnn_f32_vhswish_ukernel__wasmsimd_x16(
   }
 }
 
-void xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_x8(
+void xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -25321,7 +25321,7 @@ void xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_x8(
   }
 }
 
-void xnn_f32_vlrelu_ukernel__wasmsimd_laneselect_x8(
+void xnn_f32_vlrelu_ukernel__wasmsimd_laneselect_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -25580,7 +25580,7 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_x86_2x(
   } while (rows != 0);
 }
 
-void xnn_f32_vrelu_ukernel__wasmsimd_x16(
+void xnn_f32_vrelu_ukernel__wasmsimd_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -25636,7 +25636,7 @@ void xnn_f32_vrelu_ukernel__wasmsimd_x16(
   }
 }
 
-void xnn_f32_vrndd_ukernel__wasmsimd_x8(
+void xnn_f32_vrndd_ukernel__wasmsimd_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -25677,7 +25677,7 @@ void xnn_f32_vrndd_ukernel__wasmsimd_x8(
   }
 }
 
-void xnn_f32_vrndne_ukernel__wasmsimd_x8(
+void xnn_f32_vrndne_ukernel__wasmsimd_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -25718,7 +25718,7 @@ void xnn_f32_vrndne_ukernel__wasmsimd_x8(
   }
 }
 
-void xnn_f32_vrndu_ukernel__wasmsimd_x8(
+void xnn_f32_vrndu_ukernel__wasmsimd_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -25759,7 +25759,7 @@ void xnn_f32_vrndu_ukernel__wasmsimd_x8(
   }
 }
 
-void xnn_f32_vrndz_ukernel__wasmsimd_x8(
+void xnn_f32_vrndz_ukernel__wasmsimd_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -25800,7 +25800,7 @@ void xnn_f32_vrndz_ukernel__wasmsimd_x8(
   }
 }
 
-void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_x16(
+void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -25988,7 +25988,7 @@ void xnn_f32_vsigmoid_ukernel__wasmsimd_rr2_p5_div_x16(
   }
 }
 
-void xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_x8(
+void xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -26032,7 +26032,7 @@ void xnn_f32_vsqrt_ukernel__wasmsimd_sqrt_x8(
   }
 }
 
-void xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5ts_div_abs_min_x16(
+void xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5ts_div_abs_min_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -26226,7 +26226,7 @@ void xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5ts_div_abs_min_x16(
   }
 }
 
-void xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5ts_div_nabs_pmax_x16(
+void xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5ts_div_nabs_pmax_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -26428,7 +26428,7 @@ void xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_p6h5ts_div_nabs_pmax_x16(
   }
 }
 
-void xnn_f32_vabs_ukernel__wasmsimd_x8(
+void xnn_f32_vabs_ukernel__wasmsimd_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -26475,7 +26475,7 @@ void xnn_f32_vabs_ukernel__wasmsimd_x8(
   }
 }
 
-void xnn_f32_vneg_ukernel__wasmsimd_x8(
+void xnn_f32_vneg_ukernel__wasmsimd_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -26522,7 +26522,7 @@ void xnn_f32_vneg_ukernel__wasmsimd_x8(
   }
 }
 
-void xnn_f32_vsqr_ukernel__wasmsimd_x8(
+void xnn_f32_vsqr_ukernel__wasmsimd_u8(
     size_t batch,
     const float* input,
     float* output,

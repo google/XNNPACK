@@ -27,7 +27,7 @@ $POLY_SUFFIX = "p%dh%d%s" % (P, H, "ps" if PS else "ts")
 $PARAMS_STRUCT = "scalar_expm1minus_rr1_" + LUT_SUFFIX + ("p%dh%d" % (P, H))
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_pmin_f32"
 $ISA = "fma" if FMA else "wasm" if WASM else "scalar"
-void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_div_x${BATCH_TILE}(
+void xnn_f32_vtanh_ukernel__${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_div_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

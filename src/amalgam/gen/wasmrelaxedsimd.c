@@ -10933,7 +10933,7 @@ void xnn_f32_qc8w_gemm_ukernel_6x8__wasmrelaxedsimd_fma_splat(
   } while (nc != 0);
 }
 
-void xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_x16_acc2(
+void xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_u16_acc2(
     size_t batch,
     const float* input,
     const float* max,
@@ -11124,7 +11124,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_x16_acc2(
   *sum = vsum;
 }
 
-void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_x24(
+void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_u24(
     size_t batch,
     const float* input,
     float* output,
@@ -11360,7 +11360,7 @@ void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_x24(
   }
 }
 
-void xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_iminmax_x4(
+void xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_iminmax_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -11399,7 +11399,7 @@ void xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_iminmax_x4(
   }
 }
 
-void xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_laneselect_x4(
+void xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_laneselect_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -11539,7 +11539,7 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmrelaxedsimd_fma_2x(
   } while (rows != 0);
 }
 
-void xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_p5_div_x24(
+void xnn_f32_vsigmoid_ukernel__wasmrelaxedsimd_fma_rr2_p5_div_u24(
     size_t batch,
     const float* input,
     float* output,

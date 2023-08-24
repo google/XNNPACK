@@ -21,7 +21,7 @@ extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
 
 $PARAMS_STRUCT = "neonfma_rr1_lut64_p2" if FMA else "neon_rr2_lut64_p2"
 $ISA = ("aarch64_" if DIV_ALGO == "div" else "") + ("neonfma" if FMA else "neon")
-void xnn_f32_vsigmoid_ukernel__${ISA}_rr${1 if FMA else 2}_lut64_p2_${DIV_ALGO}_x${BATCH_TILE}(
+void xnn_f32_vsigmoid_ukernel__${ISA}_rr${1 if FMA else 2}_lut64_p2_${DIV_ALGO}_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

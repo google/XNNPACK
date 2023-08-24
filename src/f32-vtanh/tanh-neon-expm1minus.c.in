@@ -34,7 +34,7 @@ $PARAMS_STRUCT = "neon_expm1minus_rr1_" + LUT_SUFFIX + ("p%dh%d" % (P, H))
 $ISA_PREFIX = "aarch64_" if DIV == "DIV" else ""
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-void xnn_f32_vtanh_ukernel__${ISA_PREFIX}${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_${DIV_SUFFIX}_x${BATCH_TILE}(
+void xnn_f32_vtanh_ukernel__${ISA_PREFIX}${ISA}_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_${DIV_SUFFIX}_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

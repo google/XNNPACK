@@ -12,7 +12,7 @@
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vhswish_ukernel__rvv_x${LMUL}v(
+void xnn_f32_vhswish_ukernel__rvv_u${LMUL}v(
     size_t batch,
     const float* input,
     float* output,

@@ -31,7 +31,7 @@ $LUT_SUFFIX = "" if LOG2LUT == 0 else "lut%d_" % LUT
 $POLY_SUFFIX = "p%dh%d%s" % (P, H, "ps" if PS else "ts")
 $MINMAX_SUFFIX = {"WASM": "max", "PSEUDO": "pmax"}[MINMAX]
 $PARAMS_STRUCT = "wasmsimd_expm1minus_rr1_" + LUT_SUFFIX + ("p%dh%d" % (P, H)) + "_nabs"
-void xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_div_nabs_${MINMAX_SUFFIX}_x${BATCH_TILE}(
+void xnn_f32_vtanh_ukernel__wasmsimd_expm1minus_rr1_${LUT_SUFFIX}${POLY_SUFFIX}_div_nabs_${MINMAX_SUFFIX}_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

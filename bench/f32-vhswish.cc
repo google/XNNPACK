@@ -61,20 +61,20 @@ static void f32_vhswish(
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f32_vhswish, neon_x4,
-                    xnn_f32_vhswish_ukernel__neon_x4,
+  BENCHMARK_CAPTURE(f32_vhswish, neon_u4,
+                    xnn_f32_vhswish_ukernel__neon_u4,
                     xnn_init_f32_hswish_scalar_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, neon_x8,
-                    xnn_f32_vhswish_ukernel__neon_x8,
+  BENCHMARK_CAPTURE(f32_vhswish, neon_u8,
+                    xnn_f32_vhswish_ukernel__neon_u8,
                     xnn_init_f32_hswish_scalar_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, neon_x16,
-                    xnn_f32_vhswish_ukernel__neon_x16,
+  BENCHMARK_CAPTURE(f32_vhswish, neon_u16,
+                    xnn_f32_vhswish_ukernel__neon_u16,
                     xnn_init_f32_hswish_scalar_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
@@ -82,26 +82,26 @@ static void f32_vhswish(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
-  BENCHMARK_CAPTURE(f32_vhswish, rvv_x1v,
-                    xnn_f32_vhswish_ukernel__rvv_x1v,
+  BENCHMARK_CAPTURE(f32_vhswish, rvv_u1v,
+                    xnn_f32_vhswish_ukernel__rvv_u1v,
                     xnn_init_f32_hswish_scalar_params,
                     benchmark::utils::CheckRVV)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, rvv_x2v,
-                    xnn_f32_vhswish_ukernel__rvv_x2v,
+  BENCHMARK_CAPTURE(f32_vhswish, rvv_u2v,
+                    xnn_f32_vhswish_ukernel__rvv_u2v,
                     xnn_init_f32_hswish_scalar_params,
                     benchmark::utils::CheckRVV)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, rvv_x4v,
-                    xnn_f32_vhswish_ukernel__rvv_x4v,
+  BENCHMARK_CAPTURE(f32_vhswish, rvv_u4v,
+                    xnn_f32_vhswish_ukernel__rvv_u4v,
                     xnn_init_f32_hswish_scalar_params,
                     benchmark::utils::CheckRVV)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, rvv_x8v,
-                    xnn_f32_vhswish_ukernel__rvv_x8v,
+  BENCHMARK_CAPTURE(f32_vhswish, rvv_u8v,
+                    xnn_f32_vhswish_ukernel__rvv_u8v,
                     xnn_init_f32_hswish_scalar_params,
                     benchmark::utils::CheckRVV)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
@@ -109,51 +109,51 @@ static void f32_vhswish(
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(f32_vhswish, sse_x4,
-                    xnn_f32_vhswish_ukernel__sse_x4,
+  BENCHMARK_CAPTURE(f32_vhswish, sse_u4,
+                    xnn_f32_vhswish_ukernel__sse_u4,
                     xnn_init_f32_hswish_sse_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, sse_x8,
-                    xnn_f32_vhswish_ukernel__sse_x8,
+  BENCHMARK_CAPTURE(f32_vhswish, sse_u8,
+                    xnn_f32_vhswish_ukernel__sse_u8,
                     xnn_init_f32_hswish_sse_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vhswish, avx_x8,
-                    xnn_f32_vhswish_ukernel__avx_x8,
+  BENCHMARK_CAPTURE(f32_vhswish, avx_u8,
+                    xnn_f32_vhswish_ukernel__avx_u8,
                     xnn_init_f32_hswish_avx_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, avx_x16,
-                    xnn_f32_vhswish_ukernel__avx_x16,
+  BENCHMARK_CAPTURE(f32_vhswish, avx_u16,
+                    xnn_f32_vhswish_ukernel__avx_u16,
                     xnn_init_f32_hswish_avx_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vhswish, fma3_x8,
-                    xnn_f32_vhswish_ukernel__fma3_x8,
+  BENCHMARK_CAPTURE(f32_vhswish, fma3_u8,
+                    xnn_f32_vhswish_ukernel__fma3_u8,
                     xnn_init_f32_hswish_avx_params,
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, fma3_x16,
-                    xnn_f32_vhswish_ukernel__fma3_x16,
+  BENCHMARK_CAPTURE(f32_vhswish, fma3_u16,
+                    xnn_f32_vhswish_ukernel__fma3_u16,
                     xnn_init_f32_hswish_avx_params,
                     benchmark::utils::CheckFMA3)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 
-  BENCHMARK_CAPTURE(f32_vhswish, avx512f_x16,
-                    xnn_f32_vhswish_ukernel__avx512f_x16,
+  BENCHMARK_CAPTURE(f32_vhswish, avx512f_u16,
+                    xnn_f32_vhswish_ukernel__avx512f_u16,
                     xnn_init_f32_hswish_avx512_params,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, avx512f_x32,
-                    xnn_f32_vhswish_ukernel__avx512f_x32,
+  BENCHMARK_CAPTURE(f32_vhswish, avx512f_u32,
+                    xnn_f32_vhswish_ukernel__avx512f_u32,
                     xnn_init_f32_hswish_avx512_params,
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
@@ -161,53 +161,53 @@ static void f32_vhswish(
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_vhswish, wasmsimd_x4,
-                    xnn_f32_vhswish_ukernel__wasmsimd_x4,
+  BENCHMARK_CAPTURE(f32_vhswish, wasmsimd_u4,
+                    xnn_f32_vhswish_ukernel__wasmsimd_u4,
                     xnn_init_f32_hswish_wasmsimd_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, wasmsimd_x8,
-                    xnn_f32_vhswish_ukernel__wasmsimd_x8,
+  BENCHMARK_CAPTURE(f32_vhswish, wasmsimd_u8,
+                    xnn_f32_vhswish_ukernel__wasmsimd_u8,
                     xnn_init_f32_hswish_wasmsimd_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, wasmsimd_x16,
-                    xnn_f32_vhswish_ukernel__wasmsimd_x16,
+  BENCHMARK_CAPTURE(f32_vhswish, wasmsimd_u16,
+                    xnn_f32_vhswish_ukernel__wasmsimd_u16,
                     xnn_init_f32_hswish_wasmsimd_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_vhswish, wasm_x1,
-                    xnn_f32_vhswish_ukernel__wasm_x1,
+  BENCHMARK_CAPTURE(f32_vhswish, wasm_u1,
+                    xnn_f32_vhswish_ukernel__wasm_u1,
                     xnn_init_f32_hswish_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, wasm_x2,
-                    xnn_f32_vhswish_ukernel__wasm_x2,
+  BENCHMARK_CAPTURE(f32_vhswish, wasm_u2,
+                    xnn_f32_vhswish_ukernel__wasm_u2,
                     xnn_init_f32_hswish_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vhswish, wasm_x4,
-                    xnn_f32_vhswish_ukernel__wasm_x4,
+  BENCHMARK_CAPTURE(f32_vhswish, wasm_u4,
+                    xnn_f32_vhswish_ukernel__wasm_u4,
                     xnn_init_f32_hswish_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-BENCHMARK_CAPTURE(f32_vhswish, scalar_x1,
-                  xnn_f32_vhswish_ukernel__scalar_x1,
+BENCHMARK_CAPTURE(f32_vhswish, scalar_u1,
+                  xnn_f32_vhswish_ukernel__scalar_u1,
                   xnn_init_f32_hswish_scalar_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vhswish, scalar_x2,
-                  xnn_f32_vhswish_ukernel__scalar_x2,
+BENCHMARK_CAPTURE(f32_vhswish, scalar_u2,
+                  xnn_f32_vhswish_ukernel__scalar_u2,
                   xnn_init_f32_hswish_scalar_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vhswish, scalar_x4,
-                  xnn_f32_vhswish_ukernel__scalar_x4,
+BENCHMARK_CAPTURE(f32_vhswish, scalar_u4,
+                  xnn_f32_vhswish_ukernel__scalar_u4,
                   xnn_init_f32_hswish_scalar_params)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
   ->UseRealTime();

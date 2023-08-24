@@ -15,7 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 $ISA = {0: "avx", 3: "fma3"}[FMA]
-void xnn_f32_vhswish_ukernel__${ISA}_x${BATCH_TILE}(
+void xnn_f32_vhswish_ukernel__${ISA}_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

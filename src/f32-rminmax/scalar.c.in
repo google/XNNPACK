@@ -21,7 +21,7 @@ $EMIT_MIN = "MIN" in OP
 $EMIT_MAX = "MAX" in OP
 $ISA = "wasm" if WASM else "scalar"
 $MAX_POS = 1 if OP == "MINMAX" else 0
-void xnn_f32_r${OP.lower()}_ukernel__${ISA}_x${BATCH_TILE}${ACC_SUFFIX}(
+void xnn_f32_r${OP.lower()}_ukernel__${ISA}_u${BATCH_TILE}${ACC_SUFFIX}(
     size_t batch,
     const float* input,
     float* output,

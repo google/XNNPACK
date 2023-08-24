@@ -19,7 +19,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $WASM_V32X4_LANESELECT = "wasm_i32x4_relaxed_laneselect" if RELAXED else "wasm_v128_bitselect"
 $ISA = "wasmblendvps" if BLENDVPS else "wasmrelaxedsimd" if RELAXED else "wasmsimd"
 $ARCH_SUFFIX = "_fma" if FMA else ""
-void xnn_f32_vsigmoid_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p5_div_x${BATCH_TILE}(
+void xnn_f32_vsigmoid_ukernel__${ISA}${ARCH_SUFFIX}_rr2_p5_div_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

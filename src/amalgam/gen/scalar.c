@@ -11509,7 +11509,7 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_x4(
   }
 }
 
-void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_x4_acc2(
+void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2(
     size_t batch,
     const float* input,
     const float* max,
@@ -11747,7 +11747,7 @@ void xnn_f32_rmax_ukernel__scalar(
   *output = vmax;
 }
 
-void xnn_f32_rminmax_ukernel__scalar_x4_acc4(
+void xnn_f32_rminmax_ukernel__scalar_u4_acc4(
     size_t batch,
     const float* input,
     float* output,
@@ -11801,7 +11801,7 @@ void xnn_f32_rminmax_ukernel__scalar_x4_acc4(
   output[1] = vmax0;
 }
 
-void xnn_f32_rsum_ukernel__scalar_x4_acc4(
+void xnn_f32_rsum_ukernel__scalar_u4_acc4(
     size_t batch,
     const float* input,
     float* output,
@@ -13226,7 +13226,7 @@ void xnn_f32_spmm_minmax_ukernel_8x4__scalar(
   }
 }
 
-void xnn_f32_vadd_minmax_ukernel__scalar_x8(
+void xnn_f32_vadd_minmax_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -13314,7 +13314,7 @@ void xnn_f32_vadd_minmax_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vaddc_minmax_ukernel__scalar_x8(
+void xnn_f32_vaddc_minmax_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -13392,7 +13392,7 @@ void xnn_f32_vaddc_minmax_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vdiv_minmax_ukernel__scalar_x2(
+void xnn_f32_vdiv_minmax_ukernel__scalar_u2(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -13442,7 +13442,7 @@ void xnn_f32_vdiv_minmax_ukernel__scalar_x2(
   }
 }
 
-void xnn_f32_vdiv_minmax_ukernel__scalar_x8(
+void xnn_f32_vdiv_minmax_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -13530,7 +13530,7 @@ void xnn_f32_vdiv_minmax_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vdivc_minmax_ukernel__scalar_x2(
+void xnn_f32_vdivc_minmax_ukernel__scalar_u2(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -13576,7 +13576,7 @@ void xnn_f32_vdivc_minmax_ukernel__scalar_x2(
   }
 }
 
-void xnn_f32_vdivc_minmax_ukernel__scalar_x8(
+void xnn_f32_vdivc_minmax_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -13654,7 +13654,7 @@ void xnn_f32_vdivc_minmax_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vmax_ukernel__scalar_x8(
+void xnn_f32_vmax_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -13721,7 +13721,7 @@ void xnn_f32_vmax_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vmaxc_ukernel__scalar_x8(
+void xnn_f32_vmaxc_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -13778,7 +13778,7 @@ void xnn_f32_vmaxc_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vmin_ukernel__scalar_x8(
+void xnn_f32_vmin_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -13845,7 +13845,7 @@ void xnn_f32_vmin_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vminc_ukernel__scalar_x8(
+void xnn_f32_vminc_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -13902,7 +13902,7 @@ void xnn_f32_vminc_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vmul_minmax_ukernel__scalar_x8(
+void xnn_f32_vmul_minmax_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -13990,7 +13990,7 @@ void xnn_f32_vmul_minmax_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vmulc_minmax_ukernel__scalar_x8(
+void xnn_f32_vmulc_minmax_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -14068,7 +14068,7 @@ void xnn_f32_vmulc_minmax_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vrdivc_minmax_ukernel__scalar_x2(
+void xnn_f32_vrdivc_minmax_ukernel__scalar_u2(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -14114,7 +14114,7 @@ void xnn_f32_vrdivc_minmax_ukernel__scalar_x2(
   }
 }
 
-void xnn_f32_vrdivc_minmax_ukernel__scalar_x8(
+void xnn_f32_vrdivc_minmax_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -14192,7 +14192,7 @@ void xnn_f32_vrdivc_minmax_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vrsubc_minmax_ukernel__scalar_x8(
+void xnn_f32_vrsubc_minmax_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -14270,7 +14270,7 @@ void xnn_f32_vrsubc_minmax_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vsqrdiff_ukernel__scalar_x8(
+void xnn_f32_vsqrdiff_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -14346,7 +14346,7 @@ void xnn_f32_vsqrdiff_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vsqrdiffc_ukernel__scalar_x8(
+void xnn_f32_vsqrdiffc_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -14412,7 +14412,7 @@ void xnn_f32_vsqrdiffc_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vsub_minmax_ukernel__scalar_x8(
+void xnn_f32_vsub_minmax_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -14500,7 +14500,7 @@ void xnn_f32_vsub_minmax_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vsubc_minmax_ukernel__scalar_x8(
+void xnn_f32_vsubc_minmax_ukernel__scalar_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -14578,7 +14578,7 @@ void xnn_f32_vsubc_minmax_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vclamp_ukernel__scalar_x4(
+void xnn_f32_vclamp_ukernel__scalar_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -14626,7 +14626,7 @@ void xnn_f32_vclamp_ukernel__scalar_x4(
   }
 }
 
-void xnn_f32_vcmul_ukernel__scalar_x4(
+void xnn_f32_vcmul_ukernel__scalar_u4(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -14709,7 +14709,7 @@ void xnn_f32_vcmul_ukernel__scalar_x4(
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
 
-void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x2(
+void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u2(
     size_t batch,
     const float* input,
     float* output,
@@ -14835,7 +14835,7 @@ void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x2(
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
 
-void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x4(
+void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -15011,7 +15011,7 @@ void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_x4(
   }
 }
 
-void xnn_f32_vhswish_ukernel__scalar_x4(
+void xnn_f32_vhswish_ukernel__scalar_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -15080,7 +15080,7 @@ void xnn_f32_vhswish_ukernel__scalar_x4(
   }
 }
 
-void xnn_f32_vlrelu_ukernel__scalar_x4(
+void xnn_f32_vlrelu_ukernel__scalar_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -15190,7 +15190,7 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c1__scalar_2x(
   } while (rows != 0);
 }
 
-void xnn_f32_vrelu_ukernel__scalar_x8(
+void xnn_f32_vrelu_ukernel__scalar_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -15244,7 +15244,7 @@ void xnn_f32_vrelu_ukernel__scalar_x8(
   }
 }
 
-void xnn_f32_vrndd_ukernel__scalar_libm_x1(
+void xnn_f32_vrndd_ukernel__scalar_libm_u1(
     size_t batch,
     const float* input,
     float* output,
@@ -15263,7 +15263,7 @@ void xnn_f32_vrndd_ukernel__scalar_libm_x1(
   } while (batch != 0);
 }
 
-void xnn_f32_vrndd_ukernel__scalar_libm_x4(
+void xnn_f32_vrndd_ukernel__scalar_libm_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -15302,7 +15302,7 @@ void xnn_f32_vrndd_ukernel__scalar_libm_x4(
   }
 }
 
-void xnn_f32_vrndne_ukernel__scalar_libm_x1(
+void xnn_f32_vrndne_ukernel__scalar_libm_u1(
     size_t batch,
     const float* input,
     float* output,
@@ -15321,7 +15321,7 @@ void xnn_f32_vrndne_ukernel__scalar_libm_x1(
   } while (batch != 0);
 }
 
-void xnn_f32_vrndne_ukernel__scalar_libm_x4(
+void xnn_f32_vrndne_ukernel__scalar_libm_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -15360,7 +15360,7 @@ void xnn_f32_vrndne_ukernel__scalar_libm_x4(
   }
 }
 
-void xnn_f32_vrndu_ukernel__scalar_libm_x1(
+void xnn_f32_vrndu_ukernel__scalar_libm_u1(
     size_t batch,
     const float* input,
     float* output,
@@ -15379,7 +15379,7 @@ void xnn_f32_vrndu_ukernel__scalar_libm_x1(
   } while (batch != 0);
 }
 
-void xnn_f32_vrndu_ukernel__scalar_libm_x4(
+void xnn_f32_vrndu_ukernel__scalar_libm_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -15418,7 +15418,7 @@ void xnn_f32_vrndu_ukernel__scalar_libm_x4(
   }
 }
 
-void xnn_f32_vrndz_ukernel__scalar_libm_x1(
+void xnn_f32_vrndz_ukernel__scalar_libm_u1(
     size_t batch,
     const float* input,
     float* output,
@@ -15437,7 +15437,7 @@ void xnn_f32_vrndz_ukernel__scalar_libm_x1(
   } while (batch != 0);
 }
 
-void xnn_f32_vrndz_ukernel__scalar_libm_x4(
+void xnn_f32_vrndz_ukernel__scalar_libm_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -15478,7 +15478,7 @@ void xnn_f32_vrndz_ukernel__scalar_libm_x4(
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_64[64];
 
-void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_x2(
+void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_u2(
     size_t batch,
     const float* input,
     float* output,
@@ -15591,7 +15591,7 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut64_p2_div_x2(
   }
 }
 
-void xnn_f32_vsqrt_ukernel__scalar_sqrt_x1(
+void xnn_f32_vsqrt_ukernel__scalar_sqrt_u1(
     size_t batch,
     const float* input,
     float* output,
@@ -15611,7 +15611,7 @@ void xnn_f32_vsqrt_ukernel__scalar_sqrt_x1(
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3ts_div_x4(
+void xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3ts_div_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -15784,7 +15784,7 @@ void xnn_f32_vtanh_ukernel__fma_expm1minus_rr1_lut8_p4h3ts_div_x4(
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3ts_div_x4(
+void xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3ts_div_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -15955,7 +15955,7 @@ void xnn_f32_vtanh_ukernel__scalar_expm1minus_rr1_lut8_p4h3ts_div_x4(
   }
 }
 
-void xnn_f32_vabs_ukernel__scalar_x4(
+void xnn_f32_vabs_ukernel__scalar_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -15994,7 +15994,7 @@ void xnn_f32_vabs_ukernel__scalar_x4(
   }
 }
 
-void xnn_f32_vneg_ukernel__scalar_x4(
+void xnn_f32_vneg_ukernel__scalar_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -16033,7 +16033,7 @@ void xnn_f32_vneg_ukernel__scalar_x4(
   }
 }
 
-void xnn_f32_vsqr_ukernel__scalar_x4(
+void xnn_f32_vsqr_ukernel__scalar_u4(
     size_t batch,
     const float* input,
     float* output,

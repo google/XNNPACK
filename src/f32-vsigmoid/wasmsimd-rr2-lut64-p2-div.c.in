@@ -20,7 +20,7 @@ extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
 $WASM_V32X4_LANESELECT = "wasm_i32x4_relaxed_laneselect" if RELAXED else "wasm_v128_bitselect"
 $ISA = "wasmrelaxedsimd" if RELAXED else "wasmsimd"
 $ARCH_SUFFIX = "_fma" if FMA else ""
-void xnn_f32_vsigmoid_ukernel__${ISA}${ARCH_SUFFIX}_rr2_lut64_p2_div_x${BATCH_TILE}(
+void xnn_f32_vsigmoid_ukernel__${ISA}${ARCH_SUFFIX}_rr2_lut64_p2_div_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

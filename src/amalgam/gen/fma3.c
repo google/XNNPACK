@@ -5288,7 +5288,7 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_5x16__fma3_broadcast(
   } while (nc != 0);
 }
 
-void xnn_f32_vhswish_ukernel__fma3_x16(
+void xnn_f32_vhswish_ukernel__fma3_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -5363,7 +5363,7 @@ void xnn_f32_vhswish_ukernel__fma3_x16(
   }
 }
 
-void xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3ts_perm_div_x40(
+void xnn_f32_vtanh_ukernel__fma3_expm1minus_rr1_lut4_p4h3ts_perm_div_u40(
     size_t batch,
     const float* input,
     float* output,

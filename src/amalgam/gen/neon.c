@@ -8227,7 +8227,7 @@ void xnn_f32_qu8_vcvt_ukernel__neon_x32(
 
 extern XNN_INTERNAL const float xnn_table_exp2_k_over_64[64];
 
-void xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_lut64_p2_x8(
+void xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_lut64_p2_u8(
     size_t batch,
     const float* input,
     const float* max,
@@ -8467,7 +8467,7 @@ void xnn_f32_rmax_ukernel__neon(
 #endif
 }
 
-void xnn_f32_rminmax_ukernel__neon_x16_acc4(
+void xnn_f32_rminmax_ukernel__neon_u16_acc4(
     size_t batch,
     const float* input,
     float* output,
@@ -8530,7 +8530,7 @@ void xnn_f32_rminmax_ukernel__neon_x16_acc4(
   vst1_lane_f32(output + 1, vmax, 0);
 }
 
-void xnn_f32_rsum_ukernel__neon_x16_acc4(
+void xnn_f32_rsum_ukernel__neon_u16_acc4(
     size_t batch,
     const float* input,
     float* output,
@@ -8833,7 +8833,7 @@ void xnn_f32_spmm_minmax_ukernel_32x1__neon(
   }
 }
 
-void xnn_f32_vadd_minmax_ukernel__neon_x8(
+void xnn_f32_vadd_minmax_ukernel__neon_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -8897,7 +8897,7 @@ void xnn_f32_vadd_minmax_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vaddc_minmax_ukernel__neon_x8(
+void xnn_f32_vaddc_minmax_ukernel__neon_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -8958,7 +8958,7 @@ void xnn_f32_vaddc_minmax_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vmax_ukernel__neon_x8(
+void xnn_f32_vmax_ukernel__neon_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -9011,7 +9011,7 @@ void xnn_f32_vmax_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vmaxc_ukernel__neon_x8(
+void xnn_f32_vmaxc_ukernel__neon_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -9061,7 +9061,7 @@ void xnn_f32_vmaxc_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vmin_ukernel__neon_x8(
+void xnn_f32_vmin_ukernel__neon_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -9114,7 +9114,7 @@ void xnn_f32_vmin_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vminc_ukernel__neon_x8(
+void xnn_f32_vminc_ukernel__neon_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -9164,7 +9164,7 @@ void xnn_f32_vminc_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vmul_minmax_ukernel__neon_x8(
+void xnn_f32_vmul_minmax_ukernel__neon_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -9228,7 +9228,7 @@ void xnn_f32_vmul_minmax_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vmulc_minmax_ukernel__neon_x8(
+void xnn_f32_vmulc_minmax_ukernel__neon_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -9289,7 +9289,7 @@ void xnn_f32_vmulc_minmax_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vrsubc_minmax_ukernel__neon_x8(
+void xnn_f32_vrsubc_minmax_ukernel__neon_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -9350,7 +9350,7 @@ void xnn_f32_vrsubc_minmax_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vsqrdiff_ukernel__neon_x8(
+void xnn_f32_vsqrdiff_ukernel__neon_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -9407,7 +9407,7 @@ void xnn_f32_vsqrdiff_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vsqrdiffc_ukernel__neon_x8(
+void xnn_f32_vsqrdiffc_ukernel__neon_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -9461,7 +9461,7 @@ void xnn_f32_vsqrdiffc_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vsub_minmax_ukernel__neon_x8(
+void xnn_f32_vsub_minmax_ukernel__neon_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -9525,7 +9525,7 @@ void xnn_f32_vsub_minmax_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vsubc_minmax_ukernel__neon_x8(
+void xnn_f32_vsubc_minmax_ukernel__neon_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -9586,7 +9586,7 @@ void xnn_f32_vsubc_minmax_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vclamp_ukernel__neon_x8(
+void xnn_f32_vclamp_ukernel__neon_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -9635,7 +9635,7 @@ void xnn_f32_vclamp_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vcmul_ukernel__neon_x8(
+void xnn_f32_vcmul_ukernel__neon_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -9723,7 +9723,7 @@ void xnn_f32_vcmul_ukernel__neon_x8(
 
 extern XNN_INTERNAL const int32_t xnn_table_exp2minus_k_over_16[16];
 
-void xnn_f32_velu_ukernel__neon_rr2_lut16_p3_x8(
+void xnn_f32_velu_ukernel__neon_rr2_lut16_p3_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -9899,7 +9899,7 @@ void xnn_f32_velu_ukernel__neon_rr2_lut16_p3_x8(
   }
 }
 
-void xnn_f32_vhswish_ukernel__neon_x16(
+void xnn_f32_vhswish_ukernel__neon_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -9978,7 +9978,7 @@ void xnn_f32_vhswish_ukernel__neon_x16(
   }
 }
 
-void xnn_f32_vlrelu_ukernel__neon_x8(
+void xnn_f32_vlrelu_ukernel__neon_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -10127,7 +10127,7 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c4__neon_2x(
   } while (rows != 0);
 }
 
-void xnn_f32_vrndd_ukernel__neon_x8(
+void xnn_f32_vrndd_ukernel__neon_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -10204,7 +10204,7 @@ void xnn_f32_vrndd_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vrndne_ukernel__neon_x8(
+void xnn_f32_vrndne_ukernel__neon_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -10269,7 +10269,7 @@ void xnn_f32_vrndne_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vrndu_ukernel__neon_x8(
+void xnn_f32_vrndu_ukernel__neon_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -10351,7 +10351,7 @@ void xnn_f32_vrndu_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vrndz_ukernel__neon_x8(
+void xnn_f32_vrndz_ukernel__neon_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -10414,7 +10414,7 @@ void xnn_f32_vrndz_ukernel__neon_x8(
 
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
 
-void xnn_f32_vsigmoid_ukernel__neon_rr2_lut64_p2_nr2recps_x8(
+void xnn_f32_vsigmoid_ukernel__neon_rr2_lut64_p2_nr2recps_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -10602,7 +10602,7 @@ void xnn_f32_vsigmoid_ukernel__neon_rr2_lut64_p2_nr2recps_x8(
   }
 }
 
-void xnn_f32_vtanh_ukernel__neon_expm1minus_rr1_p6h5ts_nr2recps_x8(
+void xnn_f32_vtanh_ukernel__neon_expm1minus_rr1_p6h5ts_nr2recps_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -10774,7 +10774,7 @@ void xnn_f32_vtanh_ukernel__neon_expm1minus_rr1_p6h5ts_nr2recps_x8(
   }
 }
 
-void xnn_f32_vabs_ukernel__neon_x8(
+void xnn_f32_vabs_ukernel__neon_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -10814,7 +10814,7 @@ void xnn_f32_vabs_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vneg_ukernel__neon_x8(
+void xnn_f32_vneg_ukernel__neon_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -10854,7 +10854,7 @@ void xnn_f32_vneg_ukernel__neon_x8(
   }
 }
 
-void xnn_f32_vsqr_ukernel__neon_x8(
+void xnn_f32_vsqr_ukernel__neon_u8(
     size_t batch,
     const float* input,
     float* output,

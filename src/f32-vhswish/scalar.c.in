@@ -14,7 +14,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
-void xnn_f32_vhswish_ukernel__${"wasm" if WASM else "scalar"}_x${BATCH_TILE}(
+void xnn_f32_vhswish_ukernel__${"wasm" if WASM else "scalar"}_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

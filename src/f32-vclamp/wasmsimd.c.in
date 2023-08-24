@@ -14,7 +14,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <xnnpack/vunary.h>
 
 
-void xnn_f32_vclamp_ukernel__wasmsimd_${"x86" if X86 else "arm"}_x${BATCH_TILE}(
+void xnn_f32_vclamp_ukernel__wasmsimd_${"x86" if X86 else "arm"}_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     float* output,

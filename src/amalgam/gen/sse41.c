@@ -1537,7 +1537,7 @@ void xnn_f32_qs8_vcvt_ukernel__sse41_x32(
   }
 }
 
-void xnn_f32_vlrelu_ukernel__sse41_x8(
+void xnn_f32_vlrelu_ukernel__sse41_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -1591,7 +1591,7 @@ void xnn_f32_vlrelu_ukernel__sse41_x8(
   }
 }
 
-void xnn_f32_vrndd_ukernel__sse41_x8(
+void xnn_f32_vrndd_ukernel__sse41_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -1637,7 +1637,7 @@ void xnn_f32_vrndd_ukernel__sse41_x8(
   }
 }
 
-void xnn_f32_vrndne_ukernel__sse41_x8(
+void xnn_f32_vrndne_ukernel__sse41_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -1683,7 +1683,7 @@ void xnn_f32_vrndne_ukernel__sse41_x8(
   }
 }
 
-void xnn_f32_vrndu_ukernel__sse41_x8(
+void xnn_f32_vrndu_ukernel__sse41_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -1729,7 +1729,7 @@ void xnn_f32_vrndu_ukernel__sse41_x8(
   }
 }
 
-void xnn_f32_vrndz_ukernel__sse41_x8(
+void xnn_f32_vrndz_ukernel__sse41_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -1777,7 +1777,7 @@ void xnn_f32_vrndz_ukernel__sse41_x8(
 
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
 
-void xnn_f32_vsigmoid_ukernel__sse41_rr2_lut64_p2_div_x8(
+void xnn_f32_vsigmoid_ukernel__sse41_rr2_lut64_p2_div_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -1980,7 +1980,7 @@ void xnn_f32_vsigmoid_ukernel__sse41_rr2_lut64_p2_div_x8(
 
 extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_8[8];
 
-void xnn_f32_vtanh_ukernel__sse41_expm1minus_rr1_lut8_p4h3ts_div_x20(
+void xnn_f32_vtanh_ukernel__sse41_expm1minus_rr1_lut8_p4h3ts_div_u20(
     size_t batch,
     const float* input,
     float* output,
