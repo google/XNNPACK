@@ -144,6 +144,31 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_query_cross_attention_key_valu
       .TestF16();
 }
 
+// Small parallelization terms to test the case where we size workspace using batch size.
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_multithread_small_batch) {
+  ScaledDotProductAttentionOperatorTester()
+      .batch_size(1)
+      .query_heads(1)
+      .key_value_heads(1)
+      .query_tokens(1)
+      .multithread(true)
+      .TestF16();
+}
+
+// Large parallelization terms to test the case where we size workspace using number of threads.
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_multithread) {
+  ScaledDotProductAttentionOperatorTester()
+      .batch_size(31)
+      .query_heads(17)
+      .key_value_heads(17)
+      .query_tokens(29)
+      .key_value_tokens(41)
+      .query_key_channels(137)
+      .value_channels(61)
+      .multithread(true)
+      .TestF16();
+}
+
 TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, unit_batch) {
   ScaledDotProductAttentionOperatorTester()
       .batch_size(1)
@@ -283,5 +308,30 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_query_cross_attention_key_valu
       .query_tokens(29)
       .key_value_tokens(41)
       .query_key_channels(137)
+      .TestF32();
+}
+
+// Small parallelization terms to test the case where we size workspace using batch size.
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_multithread_small_batch) {
+  ScaledDotProductAttentionOperatorTester()
+      .batch_size(1)
+      .query_heads(1)
+      .key_value_heads(1)
+      .query_tokens(1)
+      .multithread(true)
+      .TestF32();
+}
+
+// Large parallelization terms to test the case where we size workspace using number of threads.
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_multithread) {
+  ScaledDotProductAttentionOperatorTester()
+      .batch_size(31)
+      .query_heads(17)
+      .key_value_heads(17)
+      .query_tokens(29)
+      .key_value_tokens(41)
+      .query_key_channels(137)
+      .value_channels(61)
+      .multithread(true)
       .TestF32();
 }

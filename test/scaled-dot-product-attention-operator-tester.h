@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <fp16/fp16.h>
+#include <pthreadpool.h>
 
 #include <xnnpack.h>
 #include <xnnpack/aligned-allocator.h>
@@ -23,6 +24,14 @@
 
 #include <gtest/gtest.h>
 
+
+struct PThreadPool {
+  explicit PThreadPool(size_t t) { threadpool = pthreadpool_create(t); }
+  ~PThreadPool() { pthreadpool_destroy(threadpool); }
+  pthreadpool_t threadpool;
+  PThreadPool(const PThreadPool&) = delete;
+  PThreadPool& operator=(const PThreadPool&) = delete;
+};
 
 class ScaledDotProductAttentionOperatorTester {
  public:
@@ -107,6 +116,19 @@ class ScaledDotProductAttentionOperatorTester {
     return this->value_channels_;
   }
 
+  inline ScaledDotProductAttentionOperatorTester& multithread(bool multithread) {
+    this->multithread_ = multithread;
+    return *this;
+  }
+
+  inline bool multithread() const {
+    return this->multithread_;
+  }
+
+  inline size_t num_threads() const {
+    return multithread() ? 0 : 1;
+  }
+
   inline ScaledDotProductAttentionOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -135,6 +157,11 @@ class ScaledDotProductAttentionOperatorTester {
 
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      PThreadPool auto_threadpool{num_threads()};
+      if (multithread() && pthreadpool_get_threads_count(auto_threadpool.threadpool) <= 1) {
+        GTEST_SKIP();
+      }
+
       std::generate(query.begin(), query.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
       // Use a different distribution to avoid divide by 0.
       std::generate(scale.begin(), scale.end(), [&]() { return fp16_ieee_from_fp32_value(scaledist(rng)); });
@@ -241,7 +268,7 @@ class ScaledDotProductAttentionOperatorTester {
                   key_value_heads(), key_value_tokens(),
                   query_key_channels(), value_channels(),
                   &workspace_size, &workspace_alignment,
-                  /*threadpool=*/nullptr));
+                  auto_threadpool.threadpool));
 
       ASSERT_NE(workspace_size, 0);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
@@ -253,7 +280,7 @@ class ScaledDotProductAttentionOperatorTester {
                   workspace.data(), query.data(), key.data(), value.data(),
                   scale.data(), mask.data(), output.data()));
 
-      ASSERT_EQ(xnn_status_success, xnn_run_operator(attention_op, /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(attention_op, auto_threadpool.threadpool));
 
       for (size_t b = 0; b < batch_size(); b++) {
         for (size_t h = 0; h < query_heads(); h++) {
@@ -288,6 +315,11 @@ class ScaledDotProductAttentionOperatorTester {
     std::vector<float> output_ref(batch_size() * query_heads() * query_tokens() * value_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      PThreadPool auto_threadpool{num_threads()};
+      if (multithread() && pthreadpool_get_threads_count(auto_threadpool.threadpool) <= 1) {
+        GTEST_SKIP();
+      }
+
       std::generate(query.begin(), query.end(), [&]() { return f32dist(rng); });
       // Use a different distribution to avoid divide by 0.
       std::generate(scale.begin(), scale.end(), [&]() { return scaledist(rng); });
@@ -390,7 +422,7 @@ class ScaledDotProductAttentionOperatorTester {
                   batch_size(), query_heads(), query_tokens(), key_value_heads(), key_value_tokens(),
                     query_key_channels(), value_channels(),
                   &workspace_size, &workspace_alignment,
-                  /*threadpool=*/nullptr));
+                  auto_threadpool.threadpool));
 
       ASSERT_NE(workspace_size, 0);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
@@ -402,7 +434,7 @@ class ScaledDotProductAttentionOperatorTester {
                   workspace.data(), query.data(), key.data(), value.data(),
                   scale.data(), mask.data(), output.data()));
 
-      ASSERT_EQ(xnn_status_success, xnn_run_operator(attention_op, /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_run_operator(attention_op, auto_threadpool.threadpool));
 
       for (size_t b = 0; b < batch_size(); b++) {
         for (size_t h = 0; h < query_heads(); h++) {
@@ -432,5 +464,6 @@ class ScaledDotProductAttentionOperatorTester {
   size_t value_channels_{1};
   size_t query_tokens_{1};
   size_t key_value_tokens_{0};
+  bool multithread_{false};
   size_t iterations_{1};
 };

@@ -435,13 +435,15 @@ static enum xnn_status reshape_scaled_dot_product_attention_nhtc(
   const uint32_t kr = attention_op->ukernel.gemm.kr;
   const uint32_t sr = attention_op->ukernel.gemm.sr;
 
+  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
+  const size_t size_using_threads = num_threads * mr;
+  const size_t size_using_batch = batch_size * query_heads * query_tokens;
+  const bool use_threads_workspace_size = size_using_threads < size_using_batch;
+  const size_t workspace_multiplier = use_threads_workspace_size ? size_using_threads : size_using_batch;
   // Calculate size required for workspace.
-  // 1. Workspace for Q scaled, same size as Q.
-  // TODO(zhin): change this to num_threads * channels when pthreadpool can pass thread id.
-  const size_t q_scaled_size =
-      round_up_po2(
-        (batch_size * query_heads * query_tokens * query_key_channels) << log2_element_size,
-        XNN_ALLOCATION_ALIGNMENT);
+  // 1. Workspace for Q scaled, each thread computes a maximum of mr * query_key_channels.
+  const size_t scaled_query_size =
+    round_up_po2(workspace_multiplier * query_key_channels * element_size + XNN_EXTRA_BYTES, XNN_ALLOCATION_ALIGNMENT);
 
   // Key is [key_value_tokens (output channel), channels (input channel)].
   const size_t key_n_stride = round_up(key_value_tokens, nr);
@@ -457,14 +459,11 @@ static enum xnn_status reshape_scaled_dot_product_attention_nhtc(
   // 3. Workspace for packed key.
   const size_t packed_value_size = round_up_po2(batch_size * key_value_heads * value_head_stride, XNN_ALLOCATION_ALIGNMENT);
 
-  // 4. Workspace for logits (Q*K), of dimension query_tokens * key_value_tokens.
-  // TODO(zhin): change this to be num_threads * key_value_tokens when pthreadpool can pass thread id.
-  // BxNxN buffer for temporary storage of QK.
+  // 4. Workspace for logits (Q*K), each thread computes mr * key_value_tokens.
   const size_t logits_size =
-      round_up_po2(XNN_EXTRA_BYTES + batch_size * query_heads * query_tokens * key_value_tokens * element_size,
-                   XNN_ALLOCATION_ALIGNMENT);
+    round_up_po2(workspace_multiplier * key_value_tokens * element_size + XNN_EXTRA_BYTES, XNN_ALLOCATION_ALIGNMENT);
 
-  const size_t total_workspace_size = q_scaled_size + packed_key_size + packed_value_size + logits_size;
+  const size_t total_workspace_size = scaled_query_size + packed_key_size + packed_value_size + logits_size;
 
   *workspace_size = total_workspace_size;
   *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
@@ -535,6 +534,8 @@ static enum xnn_status reshape_scaled_dot_product_attention_nhtc(
     .logits_head_stride = query_tokens * key_value_tokens * element_size,
     .output_batch_stride = query_heads * query_tokens * value_channels * element_size,
     .output_head_stride = query_tokens * value_channels * element_size,
+    .scaled_query_thread_stride = mr * query_key_channels * element_size,
+    .logits_thread_stride = mr * key_value_tokens * element_size,
     .gemm_ukernel = gemm_ukernel,
     .compute_reciprocal = compute_reciprocal,
     .raddstoreexpminusmax_ukernel = attention_op->attention.raddstoreexpminusmax_config->ukernel,
@@ -552,19 +553,37 @@ static enum xnn_status reshape_scaled_dot_product_attention_nhtc(
   }
 
   #if XNN_MAX_UARCH_TYPES > 1
-  if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
-    attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d_with_uarch_with_thread;
-    attention_op->compute[2].task_3d_tile_1d_with_id_with_thread =
-      (pthreadpool_task_3d_tile_1d_with_id_with_thread_t) xnn_compute_hmp_scaled_dot_product_attention;
-  } else {
-    attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d_with_thread;
-    attention_op->compute[2].task_3d_tile_1d_with_thread =
-      (pthreadpool_task_3d_tile_1d_with_thread_t) xnn_compute_scaled_dot_product_attention;
-  }
+    if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
+      if (use_threads_workspace_size) {
+        attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d_with_uarch_with_thread;
+        attention_op->compute[2].task_3d_tile_1d_with_id_with_thread =
+          (pthreadpool_task_3d_tile_1d_with_id_with_thread_t) xnn_compute_hmp_scaled_dot_product_attention_with_thread;
+      } else {
+        attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d_with_uarch;
+        attention_op->compute[2].task_3d_tile_1d_with_id =
+          (pthreadpool_task_3d_tile_1d_with_id_t) xnn_compute_hmp_scaled_dot_product_attention;
+      }
+    } else {
+      if (use_threads_workspace_size) {
+        attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d_with_thread;
+        attention_op->compute[2].task_3d_tile_1d_with_thread =
+          (pthreadpool_task_3d_tile_1d_with_thread_t) xnn_compute_scaled_dot_product_attention_with_thread;
+      } else {
+        attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d;
+        attention_op->compute[2].task_3d_tile_1d =
+          (pthreadpool_task_3d_tile_1d_t) xnn_compute_scaled_dot_product_attention;
+      }
+    }
   #else
-    attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d_with_thread;
-    attention_op->compute[2].task_3d_tile_1d_with_thread =
-      (pthreadpool_task_3d_tile_1d_with_thread_t) xnn_compute_scaled_dot_product_attention;
+    if (use_threads_workspace_size) {
+      attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d_with_thread;
+      attention_op->compute[2].task_3d_tile_1d_with_thread =
+        (pthreadpool_task_3d_tile_1d_with_thread_t) xnn_compute_scaled_dot_product_attention_with_thread;
+    } else {
+      attention_op->compute[2].type = xnn_parallelization_type_3d_tile_1d;
+      attention_op->compute[2].task_3d_tile_1d =
+        (pthreadpool_task_3d_tile_1d_t) xnn_compute_scaled_dot_product_attention;
+    }
   #endif  // XNN_MAX_UARCH_TYPES > 1
 
   attention_op->compute[2].range[0] = batch_size;
@@ -573,9 +592,9 @@ static enum xnn_status reshape_scaled_dot_product_attention_nhtc(
   attention_op->compute[2].tile[0] = mr;
 
   attention_op->context.attention.scaled_query_offset = 0;
-  attention_op->context.attention.packed_k_offset = q_scaled_size;
-  attention_op->context.attention.packed_v_offset = q_scaled_size + packed_key_size;
-  attention_op->context.attention.logits_offset = q_scaled_size + packed_key_size + packed_value_size;
+  attention_op->context.attention.packed_k_offset = scaled_query_size;
+  attention_op->context.attention.packed_v_offset = scaled_query_size + packed_key_size;
+  attention_op->context.attention.logits_offset = scaled_query_size + packed_key_size + packed_value_size;
 
   memcpy(&attention_op->context.attention.minmax_params, minmax_params, minmax_params_size);
   memcpy(&attention_op->context.attention.expminus_params, expminus_params, expminus_params_size);

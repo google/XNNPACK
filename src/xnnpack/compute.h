@@ -1509,6 +1509,11 @@ struct scaled_dot_product_attention_context {
   // Stride, in bytes, between each head of output.
   size_t output_head_stride;
 
+  // Stride, in bytes, between the buffer for each thread to write scaled query.
+  size_t scaled_query_thread_stride;
+  // Stride, in bytes, between the buffer for each thread to write logits.
+  size_t logits_thread_stride;
+
   struct xnn_hmp_gemm_ukernel gemm_ukernel;
   xnn_compute_reciprocal_fn compute_reciprocal;
   xnn_rmax_ukernel_fn rmax_ukernel;
@@ -1543,7 +1548,18 @@ struct scaled_dot_product_attention_context {
 };
 
 #ifndef __cplusplus
+  // We have 4 variations of compute scaled dot product attention:
+  // 1. micro-architecture aware and not micro-architecture aware
+  // 2. whether the workspace size is based on batch_size or number of heads.
+  // The workspace size is chosen based on which one requires a smaller memory allocation for workspace.
+  // Batch size (times query heads and query tokens) is compared to number of threads (times MR).
   XNN_PRIVATE void xnn_compute_scaled_dot_product_attention(
+      const struct scaled_dot_product_attention_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index,
+      size_t head_index,
+      size_t tokens_start,
+      size_t tokens_block_size);
+  XNN_PRIVATE void xnn_compute_scaled_dot_product_attention_with_thread(
       const struct scaled_dot_product_attention_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t thread_index,
       size_t batch_index,
@@ -1551,6 +1567,13 @@ struct scaled_dot_product_attention_context {
       size_t tokens_start,
       size_t tokens_block_size);
   XNN_PRIVATE void xnn_compute_hmp_scaled_dot_product_attention(
+      const struct scaled_dot_product_attention_context context[restrict XNN_MIN_ELEMENTS(1)],
+      uint32_t uarch_index,
+      size_t batch_index,
+      size_t head_index,
+      size_t tokens_start,
+      size_t tokens_block_size);
+  XNN_PRIVATE void xnn_compute_hmp_scaled_dot_product_attention_with_thread(
       const struct scaled_dot_product_attention_context context[restrict XNN_MIN_ELEMENTS(1)],
       uint32_t uarch_index,
       size_t thread_index,
