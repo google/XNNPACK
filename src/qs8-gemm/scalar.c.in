@@ -3,9 +3,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert DATATYPE == "QD8" or REQUANTIZATION in ["FP32", "RNDNU"]
+$assert DATATYPE in ["QD8", "QC4"] or REQUANTIZATION in ["FP32", "RNDNU"]
 $assert REQUANTIZATION != "FP32" or VARIANT in ["FMAGIC", "IMAGIC", "LRINTF"]
-$assert DATATYPE in ["QC8", "QS8", "QU8", "QD8"]
+$assert DATATYPE in ["QC8", "QS8", "QU8", "QD8", "QC4"]
 #include <assert.h>
 $if VARIANT == "LRINTF":
   #include <math.h>
@@ -16,12 +16,12 @@ $if NR % 4 != 0:
   #include <xnnpack/unaligned.h>
 
 
-$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8", "QD8": "qd8_f32_qc8w"}[DATATYPE]
+$DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w"}[DATATYPE]
 $VARIANT_SPEC = "_" + VARIANT.lower() if VARIANT else ""
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" + ("_" + VARIANT.lower() if VARIANT else "")
-$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QD8": "xnn_f32_minmax_params"}[DATATYPE]
-$SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE == "QD8" else ""
+$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QC4": "xnn_f32_qc4w_minmax_params"}[DATATYPE]
+$SCALING_PARAMS = "xnn_qd8_quantization_params" if DATATYPE in ["QD8", "QC4"] else ""
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $OUT_T = XINT8_T if REQUANTIZATION else "float"
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
@@ -36,7 +36,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     ${OUT_T}* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    $if DATATYPE == "QD8":
+    $if DATATYPE in ["QD8", "QC4"]:
       const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
       const struct ${SCALING_PARAMS} quantization_params[restrict XNN_MIN_ELEMENTS(1)])
     $else:
@@ -70,8 +70,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
 
   $if DATATYPE == "QU8":
     const int32_t vb_zero_point = params->${PARAMS_STRUCT}.kernel_zero_point;
+  $elif DATATYPE == "QC4":
+    const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
   do {
-    $if DATATYPE == "QD8":
+    $if DATATYPE in ["QD8", "QC4"]:
       $if NR % 4 != 0:
         $for N in range(NR):
           const int32_t vksum${N} = unaligned_indexed_load_s32(w, ${N});
@@ -94,28 +96,64 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
     w = (const int32_t*) w + ${NR};
 
     size_t k = kc;
-    do {
-      $for M in range(MR):
-        $if DATATYPE == "QU8":
-          const int32_t va${M} = (int32_t) (uint32_t) *a${M}++;
-        $else:
+    $if DATATYPE == "QC4":
+      for (; k >= 2 * sizeof(float); k -= 2 * sizeof(float)) {
+        $for M in range(MR):
+          const int32_t va${M}0 = (int32_t) *a${M}++;
+          const int32_t va${M}1 = (int32_t) *a${M}++;
+
+        $for N in range(NR):
+          const uint32_t vbi${N} = (uint32_t) ((const uint8_t*) w)[${N}];
+        $for N in range(NR):
+          const int32_t vb${N}0 = (int32_t) (vbi${N} & 0xF) + vminus_kernel_zero_point;
+        $for N in range(NR):
+          const int32_t vb${N}1 = (int32_t) (vbi${N} >> 4) + vminus_kernel_zero_point;
+        w = (const int8_t*) w + ${NR};
+
+        $for M in range(MR):
+          $for N in range(NR):
+            vacc${M}x${N} += va${M}0 * vb${N}0;
+        $for M in range(MR):
+          $for N in range(NR):
+            vacc${M}x${N} += va${M}1 * vb${N}1;
+      }
+      if XNN_UNLIKELY(k != 0) {
+        $for M in range(MR):
           const int32_t va${M} = (int32_t) *a${M}++;
 
-      $for N in range(NR):
-        $if DATATYPE == "QU8":
-          const int32_t vb${N} = (int32_t) (uint32_t) ((const uint8_t*) w)[${N}] - vb_zero_point;
-        $else:
-          const int32_t vb${N} = (int32_t) ((const int8_t*) w)[${N}];
-      w = (const ${XINT8_T}*) w + ${NR};
-
-      $for M in range(MR):
         $for N in range(NR):
-          vacc${M}x${N} += va${M} * vb${N};
+          const uint32_t vbi${N} = (uint32_t) ((const uint8_t*) w)[${N}];
+        $for N in range(NR):
+          const int32_t vb${N} = (int32_t) vbi${N} + vminus_kernel_zero_point;
+        w = (const int8_t*) w + ${NR};
 
-      k -= sizeof(${XINT8_T});
-    } while (k != 0);
+        $for M in range(MR):
+          $for N in range(NR):
+            vacc${M}x${N} += va${M} * vb${N};
+      }
+    $else:
+      do {
+        $for M in range(MR):
+          $if DATATYPE == "QU8":
+            const int32_t va${M} = (int32_t) (uint32_t) *a${M}++;
+          $else:
+            const int32_t va${M} = (int32_t) *a${M}++;
 
-    $if DATATYPE == "QD8":
+        $for N in range(NR):
+          $if DATATYPE == "QU8":
+            const int32_t vb${N} = (int32_t) (uint32_t) ((const uint8_t*) w)[${N}] - vb_zero_point;
+          $else:
+            const int32_t vb${N} = (int32_t) ((const int8_t*) w)[${N}];
+        w = (const ${XINT8_T}*) w + ${NR};
+
+        $for M in range(MR):
+          $for N in range(NR):
+            vacc${M}x${N} += va${M} * vb${N};
+
+        k -= sizeof(${XINT8_T});
+      } while (k != 0);
+
+    $if DATATYPE in ["QD8", "QC4"]:
       $for M in range(MR):
         $for N in range(NR):
           float vout${M}x${N} = (float) vacc${M}x${N};
