@@ -7,7 +7,6 @@ $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $SIMD_TILE = BATCH_TILE // 4
 $assert ACCUMULATORS <= SIMD_TILE
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["MAX", "MIN", "MINMAX"]
 $assert MINMAX in ["MINMAX", "PMINMAX"]
 #include <assert.h>

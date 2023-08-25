@@ -16,6 +16,7 @@
 #include <xnnpack/aligned-allocator.h>
 #include <xnnpack/common.h>
 #include <xnnpack/microfnptr.h>
+#include <xnnpack/microparams-init.h>
 #include <xnnpack/reduce.h>
 
 
@@ -63,6 +64,68 @@ static void f32_rmin(
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(f32_rmin, avx512f_u16,
+                    xnn_f32_rmin_ukernel__avx512f_u16,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rmin, avx512f_u32_acc2,
+                    xnn_f32_rmin_ukernel__avx512f_u32_acc2,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rmin, avx512f_u48_acc3,
+                    xnn_f32_rmin_ukernel__avx512f_u48_acc3,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rmin, avx512f_u64_acc2,
+                    xnn_f32_rmin_ukernel__avx512f_u64_acc2,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rmin, avx512f_u64_acc4,
+                    xnn_f32_rmin_ukernel__avx512f_u64_acc4,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX512F)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+
+  BENCHMARK_CAPTURE(f32_rmin, avx_u8,
+                    xnn_f32_rmin_ukernel__avx_u8,
+                    xnn_init_f32_default_avx_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rmin, avx_u16_acc2,
+                    xnn_f32_rmin_ukernel__avx_u16_acc2,
+                    xnn_init_f32_default_avx_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rmin, avx_u24_acc3,
+                    xnn_f32_rmin_ukernel__avx_u24_acc3,
+                    xnn_init_f32_default_avx_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rmin, avx_u32_acc2,
+                    xnn_f32_rmin_ukernel__avx_u32_acc2,
+                    xnn_init_f32_default_avx_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(f32_rmin, avx_u32_acc4,
+                    xnn_f32_rmin_ukernel__avx_u32_acc4,
+                    xnn_init_f32_default_avx_params,
+                    benchmark::utils::CheckAVX)
+    ->Apply(benchmark::utils::ReductionParameters<float>)
+    ->UseRealTime();
+
   BENCHMARK_CAPTURE(f32_rmin, sse_u4,
                     xnn_f32_rmin_ukernel__sse_u4)
     ->Apply(benchmark::utils::ReductionParameters<float>)

@@ -42,6 +42,44 @@ tools/xngen src/f32-rminmax/sse.c.in -D BATCH_TILE=12 -D ACCUMULATORS=3 -D OP=MI
 tools/xngen src/f32-rminmax/sse.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-sse-u16-acc2.c &
 tools/xngen src/f32-rminmax/sse.c.in -D BATCH_TILE=16 -D ACCUMULATORS=4 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-sse-u16-acc4.c &
 
+################################### x86 AVX ###################################
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=8  -D ACCUMULATORS=1 -D OP=MAX -o src/f32-rminmax/gen/f32-rmax-avx-u8.c &
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -D OP=MAX -o src/f32-rminmax/gen/f32-rmax-avx-u16-acc2.c &
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=24 -D ACCUMULATORS=3 -D OP=MAX -o src/f32-rminmax/gen/f32-rmax-avx-u24-acc3.c &
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -D OP=MAX -o src/f32-rminmax/gen/f32-rmax-avx-u32-acc2.c &
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -D OP=MAX -o src/f32-rminmax/gen/f32-rmax-avx-u32-acc4.c &
+
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=8  -D ACCUMULATORS=1 -D OP=MIN -o src/f32-rminmax/gen/f32-rmin-avx-u8.c &
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -D OP=MIN -o src/f32-rminmax/gen/f32-rmin-avx-u16-acc2.c &
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=24 -D ACCUMULATORS=3 -D OP=MIN -o src/f32-rminmax/gen/f32-rmin-avx-u24-acc3.c &
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -D OP=MIN -o src/f32-rminmax/gen/f32-rmin-avx-u32-acc2.c &
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -D OP=MIN -o src/f32-rminmax/gen/f32-rmin-avx-u32-acc4.c &
+
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=8  -D ACCUMULATORS=1 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-avx-u8.c &
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=16 -D ACCUMULATORS=2 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-avx-u16-acc2.c &
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=24 -D ACCUMULATORS=3 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-avx-u24-acc3.c &
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-avx-u32-acc2.c &
+tools/xngen src/f32-rminmax/avx.c.in -D BATCH_TILE=32 -D ACCUMULATORS=4 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-avx-u32-acc4.c &
+
+################################## x86 AVX512 #################################
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=16 -D ACCUMULATORS=1 -D OP=MAX -o src/f32-rminmax/gen/f32-rmax-avx512f-u16.c &
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -D OP=MAX -o src/f32-rminmax/gen/f32-rmax-avx512f-u32-acc2.c &
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=48 -D ACCUMULATORS=3 -D OP=MAX -o src/f32-rminmax/gen/f32-rmax-avx512f-u48-acc3.c &
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -D OP=MAX -o src/f32-rminmax/gen/f32-rmax-avx512f-u64-acc2.c &
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -D OP=MAX -o src/f32-rminmax/gen/f32-rmax-avx512f-u64-acc4.c &
+
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=16 -D ACCUMULATORS=1 -D OP=MIN -o src/f32-rminmax/gen/f32-rmin-avx512f-u16.c &
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -D OP=MIN -o src/f32-rminmax/gen/f32-rmin-avx512f-u32-acc2.c &
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=48 -D ACCUMULATORS=3 -D OP=MIN -o src/f32-rminmax/gen/f32-rmin-avx512f-u48-acc3.c &
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -D OP=MIN -o src/f32-rminmax/gen/f32-rmin-avx512f-u64-acc2.c &
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -D OP=MIN -o src/f32-rminmax/gen/f32-rmin-avx512f-u64-acc4.c &
+
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=16 -D ACCUMULATORS=1 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-avx512f-u16.c &
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=32 -D ACCUMULATORS=2 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-avx512f-u32-acc2.c &
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=48 -D ACCUMULATORS=3 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-avx512f-u48-acc3.c &
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=64 -D ACCUMULATORS=2 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-avx512f-u64-acc2.c &
+tools/xngen src/f32-rminmax/avx512f.c.in -D BATCH_TILE=64 -D ACCUMULATORS=4 -D OP=MINMAX -o src/f32-rminmax/gen/f32-rminmax-avx512f-u64-acc4.c &
+
 ################################## Wasm SIMD ##################################
 tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=4  -D ACCUMULATORS=1 -D OP=MAX -D MINMAX=MINMAX -o src/f32-rminmax/gen/f32-rmax-wasmsimd-minmax-u4.c &
 tools/xngen src/f32-rminmax/wasmsimd.c.in -D BATCH_TILE=8  -D ACCUMULATORS=2 -D OP=MAX -D MINMAX=MINMAX -o src/f32-rminmax/gen/f32-rmax-wasmsimd-minmax-u8-acc2.c &

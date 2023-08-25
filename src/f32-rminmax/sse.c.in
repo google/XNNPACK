@@ -7,7 +7,6 @@ $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $SIMD_TILE = BATCH_TILE // 4
 $assert ACCUMULATORS <= SIMD_TILE
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["MAX", "MIN", "MINMAX"]
 #include <assert.h>
 
@@ -20,8 +19,6 @@ $assert OP in ["MAX", "MIN", "MINMAX"]
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
 $EMIT_MIN = "MIN" in OP
 $EMIT_MAX = "MAX" in OP
-$_MM_MIN_PS, _MM_MIN_SS = "_mm_min_ps", "_mm_min_ss"
-$_MM_MAX_PS, _MM_MAX_SS = "_mm_max_ps", "_mm_max_ss"
 void xnn_f32_r${OP.lower()}_ukernel__sse_u${BATCH_TILE}${ACC_SUFFIX}(
     size_t batch,
     const float* input,
@@ -55,9 +52,9 @@ void xnn_f32_r${OP.lower()}_ukernel__sse_u${BATCH_TILE}${ACC_SUFFIX}(
 
       $for N in range(SIMD_TILE):
         $if EMIT_MIN:
-          vmin${N % ACCUMULATORS} = ${_MM_MIN_PS}(vmin${N % ACCUMULATORS}, vt${N});
+          vmin${N % ACCUMULATORS} = _mm_min_ps(vmin${N % ACCUMULATORS}, vt${N});
         $if EMIT_MAX:
-          vmax${N % ACCUMULATORS} = ${_MM_MAX_PS}(vmax${N % ACCUMULATORS}, vt${N});
+          vmax${N % ACCUMULATORS} = _mm_max_ps(vmax${N % ACCUMULATORS}, vt${N});
     }
     $if ACCUMULATORS > 1:
       $ACC_SLICE = 1
@@ -65,40 +62,42 @@ void xnn_f32_r${OP.lower()}_ukernel__sse_u${BATCH_TILE}${ACC_SUFFIX}(
         $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
           $if A + ACC_SLICE < ACCUMULATORS:
             $if EMIT_MIN:
-              vmin${A} = ${_MM_MIN_PS}(vmin${A}, vmin${A + ACC_SLICE});
+              vmin${A} = _mm_min_ps(vmin${A}, vmin${A + ACC_SLICE});
             $if EMIT_MAX:
-              vmax${A} = ${_MM_MAX_PS}(vmax${A}, vmax${A + ACC_SLICE});
+              vmax${A} = _mm_max_ps(vmax${A}, vmax${A + ACC_SLICE});
         $ACC_SLICE *= 2
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 vt = _mm_loadu_ps(input);
     input += 4;
 
     $if EMIT_MIN:
-      vmin0 = ${_MM_MIN_PS}(vmin0, vt);
+      vmin0 = _mm_min_ps(vmin0, vt);
     $if EMIT_MAX:
-      vmax0 = ${_MM_MAX_PS}(vmax0, vt);
+      vmax0 = _mm_max_ps(vmax0, vt);
   }
   if XNN_UNLIKELY(batch != 0) {
     do {
       const __m128 vt = _mm_load_ss(input);
       input += 1;
       $if EMIT_MIN:
-        vmin0 = ${_MM_MIN_SS}(vmin0, vt);
+        vmin0 = _mm_min_ss(vmin0, vt);
       $if EMIT_MAX:
-        vmax0 = ${_MM_MAX_SS}(vmax0, vt);
+        vmax0 = _mm_max_ss(vmax0, vt);
       batch -= sizeof(float);
     } while (batch != 0);
   }
   $if EMIT_MIN:
-    vmin0 = ${_MM_MIN_PS}(vmin0, _mm_movehl_ps(vmin0, vmin0));
-    vmin0 = ${_MM_MIN_SS}(vmin0, _mm_shuffle_ps(vmin0, vmin0, _MM_SHUFFLE(1, 1, 1, 1)));
+    vmin0 = _mm_min_ps(vmin0, _mm_movehl_ps(vmin0, vmin0));
   $if EMIT_MAX:
-    vmax0 = ${_MM_MAX_PS}(vmax0, _mm_movehl_ps(vmax0, vmax0));
-    vmax0 = ${_MM_MAX_SS}(vmax0, _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(1, 1, 1, 1)));
+    vmax0 = _mm_max_ps(vmax0, _mm_movehl_ps(vmax0, vmax0));
+  $if EMIT_MIN:
+    vmin0 = _mm_min_ss(vmin0, _mm_shuffle_ps(vmin0, vmin0, _MM_SHUFFLE(1, 1, 1, 1)));
+  $if EMIT_MAX:
+    vmax0 = _mm_max_ss(vmax0, _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(1, 1, 1, 1)));
   $if EMIT_MIN:
     _mm_store_ss(output, vmin0);
     $if EMIT_MAX:
-      _mm_store_ss(output + 1 , vmax0);
+      _mm_store_ss(output + 1, vmax0);
   $elif EMIT_MAX:
-    _mm_store_ss(output , vmax0);
+    _mm_store_ss(output, vmax0);
 }
