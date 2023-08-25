@@ -145,18 +145,18 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_query_cross_attention_key_valu
 }
 
 // Small parallelization terms to test the case where we size workspace using batch size.
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_multithread_small_batch) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_multithreaded_small_batch) {
   ScaledDotProductAttentionOperatorTester()
       .batch_size(1)
       .query_heads(1)
       .key_value_heads(1)
       .query_tokens(1)
-      .multithread(true)
+      .multithreaded(true)
       .TestF16();
 }
 
 // Large parallelization terms to test the case where we size workspace using number of threads.
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_multithread) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_multithreaded) {
   ScaledDotProductAttentionOperatorTester()
       .batch_size(31)
       .query_heads(17)
@@ -165,7 +165,7 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F16, multi_head_cross_attention_multithre
       .key_value_tokens(41)
       .query_key_channels(137)
       .value_channels(61)
-      .multithread(true)
+      .multithreaded(true)
       .TestF16();
 }
 
@@ -312,18 +312,18 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_query_cross_attention_key_valu
 }
 
 // Small parallelization terms to test the case where we size workspace using batch size.
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_multithread_small_batch) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_multithreaded_small_batch) {
   ScaledDotProductAttentionOperatorTester()
       .batch_size(1)
       .query_heads(1)
       .key_value_heads(1)
       .query_tokens(1)
-      .multithread(true)
+      .multithreaded(true)
       .TestF32();
 }
 
 // Large parallelization terms to test the case where we size workspace using number of threads.
-TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_multithread) {
+TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_multithreaded) {
   ScaledDotProductAttentionOperatorTester()
       .batch_size(31)
       .query_heads(17)
@@ -332,6 +332,6 @@ TEST(SCALED_DOT_PRODUCT_ATTENTION_NHTC_F32, multi_head_cross_attention_multithre
       .key_value_tokens(41)
       .query_key_channels(137)
       .value_channels(61)
-      .multithread(true)
+      .multithreaded(true)
       .TestF32();
 }
