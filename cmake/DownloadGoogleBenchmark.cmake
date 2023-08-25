@@ -10,6 +10,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.5 FATAL_ERROR)
 
 PROJECT(googlebenchmark-download NONE)
 
+# Set file timestamps to the time of extraction.
+IF(POLICY CMP0135)
+  CMAKE_POLICY(SET CMP0135 NEW)
+ENDIF()
+
 INCLUDE(ExternalProject)
 ExternalProject_Add(googlebenchmark
   URL https://github.com/google/benchmark/archive/d2a8a4ee41b923876c034afb939c4fc03598e622.zip

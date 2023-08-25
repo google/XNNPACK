@@ -10,6 +10,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.5 FATAL_ERROR)
 
 PROJECT(fxdiv-download NONE)
 
+# Set file timestamps to the time of extraction.
+IF(POLICY CMP0135)
+  CMAKE_POLICY(SET CMP0135 NEW)
+ENDIF()
+
 INCLUDE(ExternalProject)
 ExternalProject_Add(fxdiv
   URL https://github.com/Maratyszcza/FXdiv/archive/b408327ac2a15ec3e43352421954f5b1967701d1.zip

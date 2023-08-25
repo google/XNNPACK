@@ -10,6 +10,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.5 FATAL_ERROR)
 
 PROJECT(cpuinfo-download NONE)
 
+# Set file timestamps to the time of extraction.
+IF(POLICY CMP0135)
+  CMAKE_POLICY(SET CMP0135 NEW)
+ENDIF()
+
 INCLUDE(ExternalProject)
 ExternalProject_Add(cpuinfo
   URL https://github.com/pytorch/cpuinfo/archive/87d8234510367db49a65535021af5e1838a65ac2.zip

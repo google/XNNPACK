@@ -10,6 +10,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.5 FATAL_ERROR)
 
 PROJECT(fp16-download NONE)
 
+# Set file timestamps to the time of extraction.
+IF(POLICY CMP0135)
+  CMAKE_POLICY(SET CMP0135 NEW)
+ENDIF()
+
 INCLUDE(ExternalProject)
 ExternalProject_Add(fp16
   URL https://github.com/Maratyszcza/FP16/archive/0a92994d729ff76a58f692d3028ca1b64b145d91.zip
