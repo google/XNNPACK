@@ -25,7 +25,7 @@ static void init_slice_nd(
 {
   slice_op->type = operator_type;
   slice_op->flags = flags;
-  slice_op->copy_config = copy_config;
+  slice_op->unary_elementwise_config = copy_config;
   slice_op->state = xnn_run_state_invalid;
 }
 
@@ -64,11 +64,7 @@ static enum xnn_status create_slice_nd(
     goto error;
   }
 
-  init_slice_nd(
-    flags,
-    operator_type,
-    copy_config,
-    slice_op);
+  init_slice_nd(flags, operator_type, copy_config, slice_op);
 
   *slice_op_out = slice_op;
   return xnn_status_success;
@@ -163,7 +159,7 @@ static enum xnn_status reshape_slice_nd(
       return xnn_status_unsupported_parameter;
     }
   }
-  const struct xnn_unary_elementwise_config* copy_config = slice_op->copy_config;
+  const struct xnn_unary_elementwise_config* copy_config = slice_op->unary_elementwise_config;
   size_t normalized_offsets[XNN_MAX_TENSOR_DIMS];
   size_t normalized_input_shape[XNN_MAX_TENSOR_DIMS];
   size_t normalized_output_shape[XNN_MAX_TENSOR_DIMS];
@@ -391,11 +387,7 @@ static enum xnn_status xnn_run_slice_nd(
     return xnn_status_unsupported_hardware;
   }
 
-  init_slice_nd(
-    flags,
-    operator_type,
-    copy_config,
-    &slice_op);
+  init_slice_nd(flags, operator_type, copy_config, &slice_op);
 
   enum xnn_status status = reshape_slice_nd(
     &slice_op, operator_type,
