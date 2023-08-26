@@ -14,7 +14,8 @@
 void xnn_f16_rmax_ukernel__neonfp16arith(
     size_t batch,
     const void* input,
-    void* output) XNN_OOB_READS
+    void* output,
+    const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);

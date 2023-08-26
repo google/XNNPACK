@@ -56,7 +56,7 @@ static void f32_raddstoreexpminusmax(
   for (auto _ : state) {
     state.PauseTiming();
     float x_max = nanf("");
-    rmax(elements * sizeof(float), x.data(), &x_max);
+    rmax(elements * sizeof(float), x.data(), &x_max, /*params=*/nullptr);
     if (++buffer_index == num_buffers) {
       buffer_index = 0;
     }

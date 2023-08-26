@@ -1421,22 +1421,26 @@ typedef void (*xnn_f32_rsum_ukernel_fn)(
 typedef void (*xnn_rmax_ukernel_fn)(
     size_t batch,
     const void* input,
-    void* output);
+    void* output,
+    const void* params);
 
 typedef void (*xnn_f16_rmax_ukernel_fn)(
     size_t batch,
     const void* input,
-    void* output);
+    void* output,
+    const union xnn_f16_default_params* params);
 
 typedef void (*xnn_f32_rmax_ukernel_fn)(
     size_t batch,
     const float* input,
-    float* output);
+    float* output,
+    const union xnn_f32_default_params* params);
 
 typedef void (*xnn_u8_rmax_ukernel_fn)(
     size_t batch,
     const uint8_t* input,
-    uint8_t* output);
+    uint8_t* output,
+    const void* params);
 
 // RADDSTOREEXPMINUSMAX: Reduce-ADD & STORE EXP(x_i MINUS MAX[x_i])
 

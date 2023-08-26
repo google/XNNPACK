@@ -50,7 +50,7 @@ static void f32_vscaleexpminusmax(
   for (auto _ : state) {
     state.PauseTiming();
     float x_max = nanf("");
-    rmax(elements * sizeof(float), x.data(), &x_max);
+    rmax(elements * sizeof(float), x.data(), &x_max, /*params=*/nullptr);
     float y_sum = nanf("");
     raddexpminusmax(elements * sizeof(float), x.data(), &y_sum, x_max);
     if (++buffer_index == num_buffers) {

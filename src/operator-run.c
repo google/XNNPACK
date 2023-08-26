@@ -1273,7 +1273,8 @@ void xnn_compute_scaled_dot_product_attention(
       context->rmax_ukernel(
         /*batch=*/key_value_tokens_scaled,
         /*input=*/logits_row,
-        /*output=*/&rowmax);
+        /*output=*/&rowmax,
+        /*params=*/NULL);
 
       float rowsum;
       context->raddstoreexpminusmax_ukernel(
@@ -1422,7 +1423,8 @@ void xnn_compute_scaled_dot_product_attention_with_thread(
       context->rmax_ukernel(
         /*batch=*/key_value_tokens_scaled,
         /*input=*/logits_row,
-        /*output=*/&rowmax);
+        /*output=*/&rowmax,
+        /*params=*/NULL);
 
       float rowsum;
       context->raddstoreexpminusmax_ukernel(
@@ -1721,7 +1723,7 @@ void xnn_compute_u8_softmax(
   const size_t n = context->n;
 
   uint8_t x_max = 0;
-  context->rmax_ukernel(n, x, &x_max);
+  context->rmax_ukernel(n, x, &x_max, /*params=*/NULL);
   const size_t adjustment = x_max ^ 255;
   const uint32_t* t = (const uint32_t*) context->t + adjustment;
   context->lut_norm_ukernel(n, x, t, y);
@@ -1740,7 +1742,7 @@ void xnn_compute_floating_point_softmax(
     float as_float;
     uint16_t as_half;
   } x_max;
-  context->rmax_ukernel(n, x, &x_max);
+  context->rmax_ukernel(n, x, &x_max, NULL);
 
   // Second pass: reduce-add & store exp(x-x_max)
   union {
@@ -2082,7 +2084,8 @@ void xnn_compute_hmp_scaled_dot_product_attention(
       context->rmax_ukernel(
         /*batch=*/key_value_tokens_scaled,
         /*input=*/logits_row,
-        /*output=*/&rowmax);
+        /*output=*/&rowmax,
+        /*params=*/NULL);
 
       float rowsum;
       context->raddstoreexpminusmax_ukernel(
@@ -2232,7 +2235,8 @@ void xnn_compute_hmp_scaled_dot_product_attention_with_thread(
       context->rmax_ukernel(
         /*batch=*/key_value_tokens_scaled,
         /*input=*/logits_row,
-        /*output=*/&rowmax);
+        /*output=*/&rowmax,
+        /*params=*/NULL);
 
       float rowsum;
       context->raddstoreexpminusmax_ukernel(

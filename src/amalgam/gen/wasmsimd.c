@@ -20883,7 +20883,8 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_u16_acc2(
 void xnn_f32_rmax_ukernel__wasmsimd_arm(
     size_t batch,
     const float* input,
-    float* output)
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -20927,7 +20928,8 @@ void xnn_f32_rmax_ukernel__wasmsimd_arm(
 void xnn_f32_rmax_ukernel__wasmsimd_x86(
     size_t batch,
     const float* input,
-    float* output)
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

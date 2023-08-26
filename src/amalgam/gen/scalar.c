@@ -11710,7 +11710,8 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_p5_u4_acc2(
 void xnn_f32_rmax_ukernel__scalar(
     size_t batch,
     const float* input,
-    float* output)
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -30332,7 +30333,8 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1(
 void xnn_u8_rmax_ukernel__scalar(
     size_t batch,
     const uint8_t* input,
-    uint8_t* output)
+    uint8_t* output,
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(uint8_t) == 0);

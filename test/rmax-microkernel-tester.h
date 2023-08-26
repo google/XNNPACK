@@ -62,7 +62,7 @@ class RMaxMicrokernelTester {
 
       // Call optimized micro-kernel.
       uint16_t y = UINT16_C(0x7E00) /* NaN */;
-      rmax(n() * sizeof(uint16_t), x.data(), &y);
+      rmax(n() * sizeof(uint16_t), x.data(), &y, /*params=*/nullptr);
 
       // Verify results.
       ASSERT_EQ(fp16_ieee_to_fp32_value(y), y_ref)
@@ -87,7 +87,7 @@ class RMaxMicrokernelTester {
 
       // Call optimized micro-kernel.
       float y = std::nanf("");
-      rmax(n() * sizeof(float), x.data(), &y);
+      rmax(n() * sizeof(float), x.data(), &y, /*params=*/nullptr);
 
       // Verify results.
       ASSERT_EQ(y_ref, y)
@@ -113,7 +113,7 @@ class RMaxMicrokernelTester {
 
       // Call optimized micro-kernel.
       uint8_t y = u8dist(rng);
-      rmax(n() * sizeof(uint8_t), x.data(), &y);
+      rmax(n() * sizeof(uint8_t), x.data(), &y, /*params=*/nullptr);
 
       // Verify results.
       ASSERT_EQ(int32_t(y_ref), int32_t(y))

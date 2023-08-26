@@ -58,7 +58,7 @@ static void f16_raddstoreexpminusmax(
   for (auto _ : state) {
     state.PauseTiming();
     uint16_t x_max = UINT16_C(0x7E00) /* NaN */;
-    rmax(elements * sizeof(uint16_t), x.data(), &x_max);
+    rmax(elements * sizeof(uint16_t), x.data(), &x_max, /*params=*/nullptr);
     if (++buffer_index == num_buffers) {
       buffer_index = 0;
     }

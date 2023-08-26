@@ -7401,7 +7401,8 @@ void xnn_f32_pavgpool_minmax_ukernel_9x__sse_c4(
 void xnn_f32_rmax_ukernel__sse(
     size_t batch,
     const float* input,
-    float* output)
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

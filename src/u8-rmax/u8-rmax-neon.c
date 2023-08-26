@@ -16,7 +16,8 @@
 void xnn_u8_rmax_ukernel__neon(
     size_t batch,
     const uint8_t* input,
-    uint8_t* output)
+    uint8_t* output,
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(uint8_t) == 0);
