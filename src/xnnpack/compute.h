@@ -1383,6 +1383,9 @@ struct f32_qd8_convert_context {
   xnn_reduce_ukernel_fn rminmax_ukernel;
   xnn_vunary_ukernel_fn convert_ukernel;
   xnn_init_f32_qs8_cvt_params_fn init_params;
+  union {
+    union xnn_f32_default_params f32_default;
+  } params;
 };
 
 #ifndef __cplusplus

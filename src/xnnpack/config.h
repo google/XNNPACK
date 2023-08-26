@@ -229,9 +229,6 @@ struct xnn_unary_elementwise_config {
     xnn_init_s8_minmax_params_fn s8_minmax;
     xnn_init_u8_minmax_params_fn u8_minmax;
   } init;
-  #if XNN_PLATFORM_JIT
-    xnn_vrelu_generator_fn generator;
-  #endif
   // Number of elements in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of
   // elements in each call.

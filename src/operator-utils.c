@@ -214,37 +214,6 @@ void xnn_overwrite_igemm_cases_with_generated_code(
     igemm_cases[mr - 1].function[i] = (xnn_igemm_ukernel_fn) gemm_kernel;
   }
 }
-
-void xnn_generate_vunary_ukernel(
-  const struct xnn_unary_elementwise_config* config,
-  xnn_operator_t op)
-{
-  #if XNN_PLATFORM_WEB
-    xnn_vunary_ukernel_fn* jit_ptr = &op->ukernel.vunary.function;
-    if (config->generator != NULL && *jit_ptr == NULL) {
-      struct xnn_code_buffer b;
-      if (xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE) != xnn_status_success) {
-        xnn_log_warning("failed to allocate memory");
-        return;
-      }
-      if (config->generator(&b, config->element_tile, 0) != xnn_status_success) {
-        xnn_log_warning("failed to generate vunary kernel");
-        return;
-      }
-      if (xnn_finalize_code_memory(&b) != xnn_status_success) {
-        xnn_log_warning("failed to finalize vunary kernel code");
-      }
-      const uintptr_t function_index = xnn_first_function_in_chunk_ptr(&b, 0, b.size);
-      if (function_index == XNN_INVALID_FUNCTION_INDEX) {
-        xnn_log_warning("failed to finalize vunary kernel code");
-        return;
-      }
-
-      *jit_ptr = (xnn_vunary_ukernel_fn) function_index;
-      xnn_release_code_memory(&b);
-    }
-  #endif // XNN_PLATFORM_WEB
-}
 #endif  // XNN_PLATFORM_JIT
 
 void* xnn_get_pointer_to_write_weights(

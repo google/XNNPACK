@@ -1699,16 +1699,17 @@ void xnn_compute_f32_qd8_convert(
 {
   const size_t x_stride = context->x_stride;
   const size_t y_stride = context->y_stride;
+  const size_t n        = context->n;
   const void* input = (const void*) ((uintptr_t) context->x + x_stride * batch_index);
   void* output = (void*) ((uintptr_t) context->y + y_stride * batch_index);
 
   float minmax[2];
-  context->rminmax_ukernel(context->n, input, &minmax[0], NULL);
+  context->rminmax_ukernel(n, input, minmax, &context->params);
   context->quantization_params[batch_index] = xnn_f32_qd8_asymmetric_quantization_params(minmax[0], minmax[1]);
 
   union xnn_f32_qs8_cvt_params params;
-  context->init_params(&params, 1.f / context->quantization_params[batch_index].inv_scale, context->quantization_params[batch_index].zero_point, INT8_MIN, INT8_MAX);
-  context->convert_ukernel(context->n, input, output, &params);
+  context->init_params(&params, 1.0f / context->quantization_params[batch_index].inv_scale, context->quantization_params[batch_index].zero_point, INT8_MIN, INT8_MAX);
+  context->convert_ukernel(n, input, output, &params);
 }
 
 void xnn_compute_u8_softmax(

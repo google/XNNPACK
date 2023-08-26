@@ -358,9 +358,9 @@ struct xnn_operator {
     const struct xnn_unary_elementwise_config* copy_config;
     const struct xnn_transpose_config* transpose_config;
     struct {
-      const struct xnn_reduce_config* rminmax_config;
-      const struct xnn_unary_elementwise_config* convert_config;
-    };  // For F32 to QD8 convert operator.
+      const struct xnn_reduce_config* rminmax_config;  // For dynamic quantization convert operator.
+      const struct xnn_unary_elementwise_config* unary_elementwise_config;
+    };  // For unary elementwise operators.
     struct {
       const struct xnn_rmax_config* rmax_config;
       const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config;
