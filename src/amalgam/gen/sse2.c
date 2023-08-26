@@ -14703,7 +14703,7 @@ void xnn_x16_transposec_ukernel__8x8_reuse_multi_sse2(
   } while (block_width != 0);
 }
 
-void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x4(
+void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_u4(
   size_t g,
   size_t nc,
   size_t kc,
@@ -14883,7 +14883,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x2c4__sse2_x4(
   } while (--g != 0);
 }
 
-void xnn_x32_packw_gemm_goi_ukernel_x8__sse2_x4(
+void xnn_x32_packw_gemm_goi_ukernel_x8__sse2_u4(
   size_t g,
   size_t nc,
   size_t kc,

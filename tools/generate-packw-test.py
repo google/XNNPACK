@@ -26,7 +26,7 @@ parser.add_argument("-o", "--output", metavar="FILE", required=True,
 parser.set_defaults(defines=list())
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(x8|x16|x32)_packw_gemm_goi_ukernel_x(\d+)(c(\d+))?(s(\d+))?__(.+)_x(\d+)(_(.+))?", name)
+  match = re.fullmatch(r"xnn_(x8|x16|x32)_packw_gemm_goi_ukernel_x(\d+)(c(\d+))?(s(\d+))?__(.+)_u(\d+)(_(.+))?", name)
   assert match is not None
   nr = int(match.group(2))
   if match.group(3):

@@ -22,7 +22,7 @@ $if PREFETCH:
 
 
 $ISA = "avx" if AVX else "sse2"
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__${ISA}_x${KBLOCK}${"_prfm" if PREFETCH else ""}(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__${ISA}_u${KBLOCK}${"_prfm" if PREFETCH else ""}(
   size_t g,
   size_t nc,
   size_t kc,

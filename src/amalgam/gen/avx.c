@@ -14108,7 +14108,7 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_u16(
   }
 }
 
-void xnn_x32_packw_gemm_goi_ukernel_x16__avx_x4(
+void xnn_x32_packw_gemm_goi_ukernel_x16__avx_u4(
   size_t g,
   size_t nc,
   size_t kc,
@@ -14653,7 +14653,7 @@ void xnn_x32_packw_gemm_goi_ukernel_x16__avx_x4(
   } while (--g != 0);
 }
 
-void xnn_x32_packw_gemm_goi_ukernel_x16s4__avx_x4(
+void xnn_x32_packw_gemm_goi_ukernel_x16s4__avx_u4(
   size_t g,
   size_t nc,
   size_t kc,

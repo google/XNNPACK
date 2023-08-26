@@ -20,7 +20,7 @@ $if PREFETCH:
   #include <xnnpack/prefetch.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__avx_x${KBLOCK}${"_prfm" if PREFETCH else ""}(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}s4__avx_u${KBLOCK}${"_prfm" if PREFETCH else ""}(
   size_t g,
   size_t nc,
   size_t kc,

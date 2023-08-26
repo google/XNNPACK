@@ -17,7 +17,7 @@ $if PREFETCH:
   #include <xnnpack/prefetch.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane_x${KBLOCK}${"_prfm" if PREFETCH else ""}(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}__neon_ld2lane_u${KBLOCK}${"_prfm" if PREFETCH else ""}(
   size_t g,
   size_t nc,
   size_t kc,

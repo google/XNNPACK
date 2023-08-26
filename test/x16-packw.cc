@@ -17,27 +17,27 @@
 #include "packw-microkernel-tester.h"
 
 
-TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, k_eq_4) {
+TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_U4, k_eq_4) {
   PackWMicrokernelTester()
     .n(8)
     .k(4)
     .nr(8)
     .kr(1)
     .sr(1)
-    .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_x4);
+    .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4);
 }
 
-TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, k_div_4) {
+TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_U4, k_div_4) {
   PackWMicrokernelTester()
     .n(8)
     .k(20)
     .nr(8)
     .kr(1)
     .sr(1)
-    .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_x4);
+    .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4);
 }
 
-TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, k_lt_4) {
+TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_U4, k_lt_4) {
   for (size_t k = 1; k < 4; k++) {
     PackWMicrokernelTester()
       .n(8)
@@ -45,11 +45,11 @@ TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, k_lt_4) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_x4);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4);
   }
 }
 
-TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, k_gt_4) {
+TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_U4, k_gt_4) {
   for (size_t k = 5; k < 8; k++) {
     PackWMicrokernelTester()
       .n(8)
@@ -57,11 +57,11 @@ TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, k_gt_4) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_x4);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4);
   }
 }
 
-TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, n_eq_8) {
+TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_U4, n_eq_8) {
   for (size_t k = 1; k < 8; k++) {
     PackWMicrokernelTester()
       .n(8)
@@ -69,11 +69,11 @@ TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, n_eq_8) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_x4);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4);
   }
 }
 
-TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, n_div_8) {
+TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_U4, n_div_8) {
   for (size_t k = 1; k < 8; k++) {
     PackWMicrokernelTester()
       .n(16)
@@ -81,11 +81,11 @@ TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, n_div_8) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_x4);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4);
   }
 }
 
-TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, n_lt_8) {
+TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_U4, n_lt_8) {
   for (size_t k = 1; k < 8; k++) {
     for (size_t n = 1; n < 8; n++) {
       PackWMicrokernelTester()
@@ -94,12 +94,12 @@ TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, n_lt_8) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_x4);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4);
     }
   }
 }
 
-TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, n_gt_8) {
+TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_U4, n_gt_8) {
   for (size_t k = 1; k < 8; k++) {
     for (size_t n = 9; n < 16; n++) {
       PackWMicrokernelTester()
@@ -108,12 +108,12 @@ TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, n_gt_8) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_x4);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4);
     }
   }
 }
 
-TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, g_gt_1) {
+TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_U4, g_gt_1) {
   for (size_t g = 2; g <= 3; g++) {
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 9; n < 16; n++) {
@@ -124,13 +124,13 @@ TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, g_gt_1) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_x4);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4);
       }
     }
   }
 }
 
-TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, null_bias) {
+TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_U4, null_bias) {
   for (size_t g = 2; g <= 3; g++) {
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 9; n < 16; n++) {
@@ -142,34 +142,34 @@ TEST(X16_PACKW_GEMM_GOI_X8__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_x4);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4);
       }
     }
   }
 }
 
 
-TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, k_eq_4) {
+TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_U4, k_eq_4) {
   PackWMicrokernelTester()
     .n(16)
     .k(4)
     .nr(16)
     .kr(1)
     .sr(1)
-    .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_x4);
+    .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4);
 }
 
-TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, k_div_4) {
+TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_U4, k_div_4) {
   PackWMicrokernelTester()
     .n(16)
     .k(20)
     .nr(16)
     .kr(1)
     .sr(1)
-    .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_x4);
+    .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4);
 }
 
-TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, k_lt_4) {
+TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_U4, k_lt_4) {
   for (size_t k = 1; k < 4; k++) {
     PackWMicrokernelTester()
       .n(16)
@@ -177,11 +177,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, k_lt_4) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_x4);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4);
   }
 }
 
-TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, k_gt_4) {
+TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_U4, k_gt_4) {
   for (size_t k = 5; k < 8; k++) {
     PackWMicrokernelTester()
       .n(16)
@@ -189,11 +189,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, k_gt_4) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_x4);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4);
   }
 }
 
-TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, n_eq_16) {
+TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_U4, n_eq_16) {
   for (size_t k = 1; k < 8; k++) {
     PackWMicrokernelTester()
       .n(16)
@@ -201,11 +201,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, n_eq_16) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_x4);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4);
   }
 }
 
-TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, n_div_16) {
+TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_U4, n_div_16) {
   for (size_t k = 1; k < 8; k++) {
     PackWMicrokernelTester()
       .n(32)
@@ -213,11 +213,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, n_div_16) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_x4);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4);
   }
 }
 
-TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, n_lt_16) {
+TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_U4, n_lt_16) {
   for (size_t k = 1; k < 8; k++) {
     for (size_t n = 1; n < 16; n++) {
       PackWMicrokernelTester()
@@ -226,12 +226,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, n_lt_16) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_x4);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4);
     }
   }
 }
 
-TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, n_gt_16) {
+TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_U4, n_gt_16) {
   for (size_t k = 1; k < 8; k++) {
     for (size_t n = 17; n < 32; n++) {
       PackWMicrokernelTester()
@@ -240,12 +240,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, n_gt_16) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_x4);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4);
     }
   }
 }
 
-TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, g_gt_1) {
+TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_U4, g_gt_1) {
   for (size_t g = 2; g <= 3; g++) {
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 17; n < 32; n++) {
@@ -256,13 +256,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, g_gt_1) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_x4);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4);
       }
     }
   }
 }
 
-TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
+TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_U4, null_bias) {
   for (size_t g = 2; g <= 3; g++) {
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 17; n < 32; n++) {
@@ -274,7 +274,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_x4);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4);
       }
     }
   }
@@ -282,7 +282,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4, k_eq_4) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4, k_eq_4) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -290,10 +290,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4, k_div_4) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4, k_div_4) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -301,10 +301,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4, k_lt_4) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4, k_lt_4) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 4; k++) {
       PackWMicrokernelTester()
@@ -313,11 +313,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4, k_gt_4) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4, k_gt_4) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 5; k < 8; k++) {
       PackWMicrokernelTester()
@@ -326,11 +326,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4, n_eq_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4, n_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       PackWMicrokernelTester()
@@ -339,11 +339,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4, n_div_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4, n_div_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       PackWMicrokernelTester()
@@ -352,11 +352,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4, n_lt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4, n_lt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 1; n < 8; n++) {
@@ -366,12 +366,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4, n_gt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4, n_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 9; n < 16; n++) {
@@ -381,12 +381,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 8; k++) {
@@ -398,13 +398,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 8; k++) {
@@ -417,7 +417,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4);
         }
       }
     }
@@ -426,7 +426,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4_PRFM, k_eq_4) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4_PRFM, k_eq_4) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -434,10 +434,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4_PRFM, k_div_4) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4_PRFM, k_div_4) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -445,10 +445,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4_PRFM, k_lt_4) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4_PRFM, k_lt_4) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 4; k++) {
       PackWMicrokernelTester()
@@ -457,11 +457,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4_PRFM, k_gt_4) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4_PRFM, k_gt_4) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 5; k < 8; k++) {
       PackWMicrokernelTester()
@@ -470,11 +470,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4_PRFM, n_eq_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4_PRFM, n_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       PackWMicrokernelTester()
@@ -483,11 +483,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4_PRFM, n_div_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4_PRFM, n_div_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       PackWMicrokernelTester()
@@ -496,11 +496,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4_PRFM, n_lt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4_PRFM, n_lt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 1; n < 8; n++) {
@@ -510,12 +510,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4_PRFM, n_gt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4_PRFM, n_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 9; n < 16; n++) {
@@ -525,12 +525,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4_PRFM, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4_PRFM, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 8; k++) {
@@ -542,13 +542,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4_prfm);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X4_PRFM, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U4_PRFM, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 8; k++) {
@@ -561,7 +561,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4_prfm);
         }
       }
     }
@@ -570,7 +570,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8, k_eq_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8, k_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -578,10 +578,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8, k_div_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8, k_div_8) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -589,10 +589,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8, k_lt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8, k_lt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       PackWMicrokernelTester()
@@ -601,11 +601,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8, k_gt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8, k_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 9; k < 16; k++) {
       PackWMicrokernelTester()
@@ -614,11 +614,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8, n_eq_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8, n_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -627,11 +627,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8, n_div_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8, n_div_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -640,11 +640,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8, n_lt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8, n_lt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       for (size_t n = 1; n < 8; n++) {
@@ -654,12 +654,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8, n_gt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8, n_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       for (size_t n = 9; n < 16; n++) {
@@ -669,12 +669,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 16; k++) {
@@ -686,13 +686,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 16; k++) {
@@ -705,7 +705,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8);
         }
       }
     }
@@ -714,7 +714,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8_PRFM, k_eq_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8_PRFM, k_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -722,10 +722,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8_PRFM, k_div_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8_PRFM, k_div_8) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -733,10 +733,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8_PRFM, k_lt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8_PRFM, k_lt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       PackWMicrokernelTester()
@@ -745,11 +745,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8_PRFM, k_gt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8_PRFM, k_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 9; k < 16; k++) {
       PackWMicrokernelTester()
@@ -758,11 +758,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8_PRFM, n_eq_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8_PRFM, n_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -771,11 +771,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8_PRFM, n_div_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8_PRFM, n_div_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -784,11 +784,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8_PRFM, n_lt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8_PRFM, n_lt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       for (size_t n = 1; n < 8; n++) {
@@ -798,12 +798,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8_PRFM, n_gt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8_PRFM, n_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       for (size_t n = 9; n < 16; n++) {
@@ -813,12 +813,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8_PRFM, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8_PRFM, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 16; k++) {
@@ -830,13 +830,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8_prfm);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X8_PRFM, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U8_PRFM, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 16; k++) {
@@ -849,7 +849,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8_prfm);
         }
       }
     }
@@ -858,7 +858,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12, k_eq_12) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12, k_eq_12) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -866,10 +866,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12, k_div_12) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12, k_div_12) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -877,10 +877,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12, k_lt_12) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12, k_lt_12) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 12; k++) {
       PackWMicrokernelTester()
@@ -889,11 +889,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12, k_gt_12) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12, k_gt_12) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 13; k < 24; k++) {
       PackWMicrokernelTester()
@@ -902,11 +902,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12, n_eq_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12, n_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       PackWMicrokernelTester()
@@ -915,11 +915,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12, n_div_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12, n_div_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       PackWMicrokernelTester()
@@ -928,11 +928,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12, n_lt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12, n_lt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       for (size_t n = 1; n < 8; n++) {
@@ -942,12 +942,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12, n_gt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12, n_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       for (size_t n = 9; n < 16; n++) {
@@ -957,12 +957,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 24; k++) {
@@ -974,13 +974,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 24; k++) {
@@ -993,7 +993,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12);
         }
       }
     }
@@ -1002,7 +1002,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12_PRFM, k_eq_12) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12_PRFM, k_eq_12) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -1010,10 +1010,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12_PRFM, k_div_12) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12_PRFM, k_div_12) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -1021,10 +1021,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12_PRFM, k_lt_12) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12_PRFM, k_lt_12) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 12; k++) {
       PackWMicrokernelTester()
@@ -1033,11 +1033,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12_PRFM, k_gt_12) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12_PRFM, k_gt_12) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 13; k < 24; k++) {
       PackWMicrokernelTester()
@@ -1046,11 +1046,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12_PRFM, n_eq_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12_PRFM, n_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       PackWMicrokernelTester()
@@ -1059,11 +1059,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12_PRFM, n_div_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12_PRFM, n_div_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       PackWMicrokernelTester()
@@ -1072,11 +1072,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12_PRFM, n_lt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12_PRFM, n_lt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       for (size_t n = 1; n < 8; n++) {
@@ -1086,12 +1086,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12_PRFM, n_gt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12_PRFM, n_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       for (size_t n = 9; n < 16; n++) {
@@ -1101,12 +1101,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12_PRFM, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12_PRFM, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 24; k++) {
@@ -1118,13 +1118,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12_prfm);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X12_PRFM, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U12_PRFM, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 24; k++) {
@@ -1137,7 +1137,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12_prfm);
         }
       }
     }
@@ -1146,7 +1146,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16, k_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16, k_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -1154,10 +1154,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16, k_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16, k_div_16) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -1165,10 +1165,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16, k_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16, k_lt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -1177,11 +1177,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16, k_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16, k_gt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 17; k < 32; k++) {
       PackWMicrokernelTester()
@@ -1190,11 +1190,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16, n_eq_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16, n_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -1203,11 +1203,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16, n_div_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16, n_div_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -1216,11 +1216,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16, n_lt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16, n_lt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 1; n < 8; n++) {
@@ -1230,12 +1230,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16, n_gt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16, n_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 9; n < 16; n++) {
@@ -1245,12 +1245,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -1262,13 +1262,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -1281,7 +1281,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16);
         }
       }
     }
@@ -1290,7 +1290,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16_PRFM, k_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16_PRFM, k_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -1298,10 +1298,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16_PRFM, k_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16_PRFM, k_div_16) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(8)
@@ -1309,10 +1309,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16_PRFM, k_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16_PRFM, k_lt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -1321,11 +1321,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16_PRFM, k_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16_PRFM, k_gt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 17; k < 32; k++) {
       PackWMicrokernelTester()
@@ -1334,11 +1334,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16_PRFM, n_eq_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16_PRFM, n_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -1347,11 +1347,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16_PRFM, n_div_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16_PRFM, n_div_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -1360,11 +1360,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16_PRFM, n_lt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16_PRFM, n_lt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 1; n < 8; n++) {
@@ -1374,12 +1374,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16_PRFM, n_gt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16_PRFM, n_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 9; n < 16; n++) {
@@ -1389,12 +1389,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16_PRFM, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16_PRFM, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -1406,13 +1406,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16_prfm);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_X16_PRFM, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X8__NEON_LD4LANE_U16_PRFM, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -1425,7 +1425,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16_prfm);
         }
       }
     }
@@ -1434,7 +1434,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4, k_eq_4) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4, k_eq_4) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -1442,10 +1442,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4, k_div_4) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4, k_div_4) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -1453,10 +1453,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4, k_lt_4) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4, k_lt_4) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 4; k++) {
       PackWMicrokernelTester()
@@ -1465,11 +1465,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4, k_gt_4) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4, k_gt_4) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 5; k < 8; k++) {
       PackWMicrokernelTester()
@@ -1478,11 +1478,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4, n_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4, n_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       PackWMicrokernelTester()
@@ -1491,11 +1491,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4, n_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4, n_div_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       PackWMicrokernelTester()
@@ -1504,11 +1504,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4, n_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4, n_lt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 1; n < 16; n++) {
@@ -1518,12 +1518,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4, n_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4, n_gt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 17; n < 32; n++) {
@@ -1533,12 +1533,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 8; k++) {
@@ -1550,13 +1550,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 8; k++) {
@@ -1569,7 +1569,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4);
         }
       }
     }
@@ -1578,7 +1578,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4_PRFM, k_eq_4) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4_PRFM, k_eq_4) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -1586,10 +1586,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4_PRFM, k_div_4) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4_PRFM, k_div_4) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -1597,10 +1597,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4_PRFM, k_lt_4) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4_PRFM, k_lt_4) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 4; k++) {
       PackWMicrokernelTester()
@@ -1609,11 +1609,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4_PRFM, k_gt_4) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4_PRFM, k_gt_4) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 5; k < 8; k++) {
       PackWMicrokernelTester()
@@ -1622,11 +1622,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4_PRFM, n_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4_PRFM, n_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       PackWMicrokernelTester()
@@ -1635,11 +1635,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4_PRFM, n_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4_PRFM, n_div_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       PackWMicrokernelTester()
@@ -1648,11 +1648,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4_PRFM, n_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4_PRFM, n_lt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 1; n < 16; n++) {
@@ -1662,12 +1662,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4_PRFM, n_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4_PRFM, n_gt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       for (size_t n = 17; n < 32; n++) {
@@ -1677,12 +1677,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4_PRFM, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4_PRFM, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 8; k++) {
@@ -1694,13 +1694,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4_prfm);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X4_PRFM, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U4_PRFM, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 8; k++) {
@@ -1713,7 +1713,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4_prfm);
         }
       }
     }
@@ -1722,7 +1722,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8, k_eq_8) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8, k_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -1730,10 +1730,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8, k_div_8) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8, k_div_8) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -1741,10 +1741,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8, k_lt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8, k_lt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       PackWMicrokernelTester()
@@ -1753,11 +1753,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8, k_gt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8, k_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 9; k < 16; k++) {
       PackWMicrokernelTester()
@@ -1766,11 +1766,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8, n_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8, n_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -1779,11 +1779,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8, n_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8, n_div_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -1792,11 +1792,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8, n_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8, n_lt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       for (size_t n = 1; n < 16; n++) {
@@ -1806,12 +1806,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8, n_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8, n_gt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       for (size_t n = 17; n < 32; n++) {
@@ -1821,12 +1821,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 16; k++) {
@@ -1838,13 +1838,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 16; k++) {
@@ -1857,7 +1857,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8);
         }
       }
     }
@@ -1866,7 +1866,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8_PRFM, k_eq_8) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8_PRFM, k_eq_8) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -1874,10 +1874,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8_PRFM, k_div_8) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8_PRFM, k_div_8) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -1885,10 +1885,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8_PRFM, k_lt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8_PRFM, k_lt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 8; k++) {
       PackWMicrokernelTester()
@@ -1897,11 +1897,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8_PRFM, k_gt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8_PRFM, k_gt_8) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 9; k < 16; k++) {
       PackWMicrokernelTester()
@@ -1910,11 +1910,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8_PRFM, n_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8_PRFM, n_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -1923,11 +1923,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8_PRFM, n_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8_PRFM, n_div_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -1936,11 +1936,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8_PRFM, n_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8_PRFM, n_lt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       for (size_t n = 1; n < 16; n++) {
@@ -1950,12 +1950,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8_PRFM, n_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8_PRFM, n_gt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       for (size_t n = 17; n < 32; n++) {
@@ -1965,12 +1965,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8_PRFM, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8_PRFM, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 16; k++) {
@@ -1982,13 +1982,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8_prfm);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X8_PRFM, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U8_PRFM, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 16; k++) {
@@ -2001,7 +2001,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8_prfm);
         }
       }
     }
@@ -2010,7 +2010,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12, k_eq_12) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12, k_eq_12) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -2018,10 +2018,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12, k_div_12) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12, k_div_12) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -2029,10 +2029,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12, k_lt_12) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12, k_lt_12) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 12; k++) {
       PackWMicrokernelTester()
@@ -2041,11 +2041,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12, k_gt_12) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12, k_gt_12) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 13; k < 24; k++) {
       PackWMicrokernelTester()
@@ -2054,11 +2054,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12, n_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12, n_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       PackWMicrokernelTester()
@@ -2067,11 +2067,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12, n_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12, n_div_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       PackWMicrokernelTester()
@@ -2080,11 +2080,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12, n_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12, n_lt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       for (size_t n = 1; n < 16; n++) {
@@ -2094,12 +2094,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12, n_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12, n_gt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       for (size_t n = 17; n < 32; n++) {
@@ -2109,12 +2109,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 24; k++) {
@@ -2126,13 +2126,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 24; k++) {
@@ -2145,7 +2145,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12);
         }
       }
     }
@@ -2154,7 +2154,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12_PRFM, k_eq_12) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12_PRFM, k_eq_12) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -2162,10 +2162,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12_PRFM, k_div_12) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12_PRFM, k_div_12) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -2173,10 +2173,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12_PRFM, k_lt_12) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12_PRFM, k_lt_12) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 12; k++) {
       PackWMicrokernelTester()
@@ -2185,11 +2185,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12_PRFM, k_gt_12) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12_PRFM, k_gt_12) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 13; k < 24; k++) {
       PackWMicrokernelTester()
@@ -2198,11 +2198,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12_PRFM, n_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12_PRFM, n_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       PackWMicrokernelTester()
@@ -2211,11 +2211,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12_PRFM, n_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12_PRFM, n_div_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       PackWMicrokernelTester()
@@ -2224,11 +2224,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12_PRFM, n_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12_PRFM, n_lt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       for (size_t n = 1; n < 16; n++) {
@@ -2238,12 +2238,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12_PRFM, n_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12_PRFM, n_gt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 24; k++) {
       for (size_t n = 17; n < 32; n++) {
@@ -2253,12 +2253,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12_PRFM, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12_PRFM, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 24; k++) {
@@ -2270,13 +2270,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12_prfm);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X12_PRFM, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U12_PRFM, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 24; k++) {
@@ -2289,7 +2289,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12_prfm);
         }
       }
     }
@@ -2298,7 +2298,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16, k_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16, k_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -2306,10 +2306,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16, k_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16, k_div_16) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -2317,10 +2317,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16, k_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16, k_lt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -2329,11 +2329,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16, k_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16, k_gt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 17; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2342,11 +2342,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16, n_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16, n_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2355,11 +2355,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16, n_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16, n_div_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2368,11 +2368,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16, n_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16, n_lt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 1; n < 16; n++) {
@@ -2382,12 +2382,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16, n_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16, n_gt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 17; n < 32; n++) {
@@ -2397,12 +2397,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -2414,13 +2414,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -2433,7 +2433,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16);
         }
       }
     }
@@ -2442,7 +2442,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16_PRFM, k_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16_PRFM, k_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -2450,10 +2450,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16_PRFM, k_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16_PRFM, k_div_16) {
     TEST_REQUIRES_ARM_NEON;
     PackWMicrokernelTester()
       .n(16)
@@ -2461,10 +2461,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16_PRFM, k_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16_PRFM, k_lt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -2473,11 +2473,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16_PRFM, k_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16_PRFM, k_gt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 17; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2486,11 +2486,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16_PRFM, n_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16_PRFM, n_eq_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2499,11 +2499,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16_PRFM, n_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16_PRFM, n_div_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2512,11 +2512,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16_PRFM, n_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16_PRFM, n_lt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 1; n < 16; n++) {
@@ -2526,12 +2526,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16_PRFM, n_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16_PRFM, n_gt_16) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 17; n < 32; n++) {
@@ -2541,12 +2541,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16_PRFM, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16_PRFM, g_gt_1) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -2558,13 +2558,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16_prfm);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_X16_PRFM, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X16__NEON_LD4LANE_U16_PRFM, null_bias) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -2577,7 +2577,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16_prfm);
         }
       }
     }
@@ -2586,7 +2586,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16, k_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16, k_eq_16) {
     TEST_REQUIRES_X86_AVX2;
     PackWMicrokernelTester()
       .n(8)
@@ -2594,10 +2594,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16, k_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16, k_div_16) {
     TEST_REQUIRES_X86_AVX2;
     PackWMicrokernelTester()
       .n(8)
@@ -2605,10 +2605,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16, k_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16, k_lt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -2617,11 +2617,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16, k_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16, k_gt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 17; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2630,11 +2630,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16, n_eq_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16, n_eq_8) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2643,11 +2643,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16, n_div_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16, n_div_8) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2656,11 +2656,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16, n_lt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16, n_lt_8) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 1; n < 8; n++) {
@@ -2670,12 +2670,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16, n_gt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16, n_gt_8) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 9; n < 16; n++) {
@@ -2685,12 +2685,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16, g_gt_1) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -2702,13 +2702,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16, null_bias) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -2721,7 +2721,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16);
         }
       }
     }
@@ -2730,7 +2730,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16_PRFM, k_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16_PRFM, k_eq_16) {
     TEST_REQUIRES_X86_AVX2;
     PackWMicrokernelTester()
       .n(8)
@@ -2738,10 +2738,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16_PRFM, k_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16_PRFM, k_div_16) {
     TEST_REQUIRES_X86_AVX2;
     PackWMicrokernelTester()
       .n(8)
@@ -2749,10 +2749,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(8)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16_PRFM, k_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16_PRFM, k_lt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -2761,11 +2761,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16_PRFM, k_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16_PRFM, k_gt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 17; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2774,11 +2774,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16_PRFM, n_eq_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16_PRFM, n_eq_8) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2787,11 +2787,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16_PRFM, n_div_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16_PRFM, n_div_8) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2800,11 +2800,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(8)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16_PRFM, n_lt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16_PRFM, n_lt_8) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 1; n < 8; n++) {
@@ -2814,12 +2814,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16_PRFM, n_gt_8) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16_PRFM, n_gt_8) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 9; n < 16; n++) {
@@ -2829,12 +2829,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(8)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16_PRFM, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16_PRFM, g_gt_1) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -2846,13 +2846,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_X16_PRFM, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X8__AVX2_U16_PRFM, null_bias) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -2865,7 +2865,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(8)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm);
         }
       }
     }
@@ -2874,7 +2874,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16, k_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16, k_eq_16) {
     TEST_REQUIRES_X86_AVX2;
     PackWMicrokernelTester()
       .n(16)
@@ -2882,10 +2882,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16, k_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16, k_div_16) {
     TEST_REQUIRES_X86_AVX2;
     PackWMicrokernelTester()
       .n(16)
@@ -2893,10 +2893,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16, k_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16, k_lt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -2905,11 +2905,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16, k_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16, k_gt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 17; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2918,11 +2918,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16, n_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16, n_eq_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2931,11 +2931,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16, n_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16, n_div_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -2944,11 +2944,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16, n_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16, n_lt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 1; n < 16; n++) {
@@ -2958,12 +2958,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16, n_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16, n_gt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 17; n < 32; n++) {
@@ -2973,12 +2973,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16, g_gt_1) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -2990,13 +2990,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16, null_bias) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -3009,7 +3009,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16);
         }
       }
     }
@@ -3018,7 +3018,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16_PRFM, k_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16_PRFM, k_eq_16) {
     TEST_REQUIRES_X86_AVX2;
     PackWMicrokernelTester()
       .n(16)
@@ -3026,10 +3026,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16_PRFM, k_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16_PRFM, k_div_16) {
     TEST_REQUIRES_X86_AVX2;
     PackWMicrokernelTester()
       .n(16)
@@ -3037,10 +3037,10 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
       .nr(16)
       .kr(1)
       .sr(1)
-      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16_prfm);
+      .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm);
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16_PRFM, k_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16_PRFM, k_lt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 16; k++) {
       PackWMicrokernelTester()
@@ -3049,11 +3049,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16_PRFM, k_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16_PRFM, k_gt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 17; k < 32; k++) {
       PackWMicrokernelTester()
@@ -3062,11 +3062,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16_PRFM, n_eq_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16_PRFM, n_eq_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -3075,11 +3075,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16_PRFM, n_div_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16_PRFM, n_div_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       PackWMicrokernelTester()
@@ -3088,11 +3088,11 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
         .nr(16)
         .kr(1)
         .sr(1)
-        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16_prfm);
+        .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm);
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16_PRFM, n_lt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16_PRFM, n_lt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 1; n < 16; n++) {
@@ -3102,12 +3102,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16_PRFM, n_gt_16) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16_PRFM, n_gt_16) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t k = 1; k < 32; k++) {
       for (size_t n = 17; n < 32; n++) {
@@ -3117,12 +3117,12 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
           .nr(16)
           .kr(1)
           .sr(1)
-          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16_prfm);
+          .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm);
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16_PRFM, g_gt_1) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16_PRFM, g_gt_1) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -3134,13 +3134,13 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm);
         }
       }
     }
   }
 
-  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_X16_PRFM, null_bias) {
+  TEST(X16_PACKW_GEMM_GOI_X16__AVX2_U16_PRFM, null_bias) {
     TEST_REQUIRES_X86_AVX2;
     for (size_t g = 2; g <= 3; g++) {
       for (size_t k = 1; k < 32; k++) {
@@ -3153,7 +3153,7 @@ TEST(X16_PACKW_GEMM_GOI_X16__SCALAR_INT_X4, null_bias) {
             .nr(16)
             .kr(1)
             .sr(1)
-            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16_prfm);
+            .Test(xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm);
         }
       }
     }

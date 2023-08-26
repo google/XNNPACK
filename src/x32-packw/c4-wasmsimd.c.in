@@ -15,7 +15,7 @@ $assert KR == 4
 #include <xnnpack/packw.h>
 
 
-void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_x4(
+void xnn_x32_packw_gemm_goi_ukernel_x${NR}c${KR}__wasmsimd_u4(
   size_t g,
   size_t nc,
   size_t kc,

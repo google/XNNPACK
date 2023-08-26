@@ -5,29 +5,29 @@
 
 
 # Scalar
-- name: xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_x4
-- name: xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_x4
+- name: xnn_x16_packw_gemm_goi_ukernel_x8__scalar_int_u4
+- name: xnn_x16_packw_gemm_goi_ukernel_x16__scalar_int_u4
 
 # ARM NEON
-- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4
-- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x4_prfm
-- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8
-- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x8_prfm
-- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12
-- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x12_prfm
-- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16
-- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_x16_prfm
-- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4
-- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x4_prfm
-- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8
-- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x8_prfm
-- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12
-- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x12_prfm
-- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16
-- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_x16_prfm
+- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4
+- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u4_prfm
+- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8
+- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u8_prfm
+- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12
+- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u12_prfm
+- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16
+- name: xnn_x16_packw_gemm_goi_ukernel_x8__neon_ld4lane_u16_prfm
+- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4
+- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u4_prfm
+- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8
+- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u8_prfm
+- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12
+- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u12_prfm
+- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16
+- name: xnn_x16_packw_gemm_goi_ukernel_x16__neon_ld4lane_u16_prfm
 
 # x86 AVX2
-- name: xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16
-- name: xnn_x16_packw_gemm_goi_ukernel_x8__avx2_x16_prfm
-- name: xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16
-- name: xnn_x16_packw_gemm_goi_ukernel_x16__avx2_x16_prfm
+- name: xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16
+- name: xnn_x16_packw_gemm_goi_ukernel_x8__avx2_u16_prfm
+- name: xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16
+- name: xnn_x16_packw_gemm_goi_ukernel_x16__avx2_u16_prfm
