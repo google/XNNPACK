@@ -13,7 +13,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/unaligned.h>
 
-
 void xnn_qu8_gemm_minmax_fp32_ukernel_4x2__wasm_fmagic(
     size_t mr,
     size_t nc,
@@ -53,6 +52,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x2__wasm_fmagic(
   }
 
   const int32_t vb_zero_point = params->fp32_scalar_fmagic.kernel_zero_point;
+
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
     int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
@@ -65,7 +65,72 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x2__wasm_fmagic(
     w = (const int32_t*) w + 2;
 
     size_t k = kc;
-    do {
+    for (; k >= 4 * sizeof(int8_t); k -= 4 * sizeof(int8_t)) {
+      const int32_t va00 = (int32_t) (uint32_t) a0[0];
+      const int32_t va01 = (int32_t) (uint32_t) a0[1];
+      const int32_t va02 = (int32_t) (uint32_t) a0[2];
+      const int32_t va03 = (int32_t) (uint32_t) a0[3];
+      a0 += 4;
+      const int32_t va10 = (int32_t) (uint32_t) a1[0];
+      const int32_t va11 = (int32_t) (uint32_t) a1[1];
+      const int32_t va12 = (int32_t) (uint32_t) a1[2];
+      const int32_t va13 = (int32_t) (uint32_t) a1[3];
+      a1 += 4;
+      const int32_t va20 = (int32_t) (uint32_t) a2[0];
+      const int32_t va21 = (int32_t) (uint32_t) a2[1];
+      const int32_t va22 = (int32_t) (uint32_t) a2[2];
+      const int32_t va23 = (int32_t) (uint32_t) a2[3];
+      a2 += 4;
+      const int32_t va30 = (int32_t) (uint32_t) a3[0];
+      const int32_t va31 = (int32_t) (uint32_t) a3[1];
+      const int32_t va32 = (int32_t) (uint32_t) a3[2];
+      const int32_t va33 = (int32_t) (uint32_t) a3[3];
+      a3 += 4;
+
+      const int32_t vb00 = (int32_t) (uint32_t) ((const uint8_t*) w)[0] - vb_zero_point;
+      const int32_t vb10 = (int32_t) (uint32_t) ((const uint8_t*) w)[1] - vb_zero_point;
+      const int32_t vb01 = (int32_t) (uint32_t) ((const uint8_t*) w)[2] - vb_zero_point;
+      const int32_t vb11 = (int32_t) (uint32_t) ((const uint8_t*) w)[3] - vb_zero_point;
+      const int32_t vb02 = (int32_t) (uint32_t) ((const uint8_t*) w)[4] - vb_zero_point;
+      const int32_t vb12 = (int32_t) (uint32_t) ((const uint8_t*) w)[5] - vb_zero_point;
+      const int32_t vb03 = (int32_t) (uint32_t) ((const uint8_t*) w)[6] - vb_zero_point;
+      const int32_t vb13 = (int32_t) (uint32_t) ((const uint8_t*) w)[7] - vb_zero_point;
+      w = (const uint8_t*) w + 8;
+
+      vacc0x0 += va00 * vb00;
+      vacc0x1 += va00 * vb10;
+      vacc1x0 += va10 * vb00;
+      vacc1x1 += va10 * vb10;
+      vacc2x0 += va20 * vb00;
+      vacc2x1 += va20 * vb10;
+      vacc3x0 += va30 * vb00;
+      vacc3x1 += va30 * vb10;
+      vacc0x0 += va01 * vb01;
+      vacc0x1 += va01 * vb11;
+      vacc1x0 += va11 * vb01;
+      vacc1x1 += va11 * vb11;
+      vacc2x0 += va21 * vb01;
+      vacc2x1 += va21 * vb11;
+      vacc3x0 += va31 * vb01;
+      vacc3x1 += va31 * vb11;
+      vacc0x0 += va02 * vb02;
+      vacc0x1 += va02 * vb12;
+      vacc1x0 += va12 * vb02;
+      vacc1x1 += va12 * vb12;
+      vacc2x0 += va22 * vb02;
+      vacc2x1 += va22 * vb12;
+      vacc3x0 += va32 * vb02;
+      vacc3x1 += va32 * vb12;
+      vacc0x0 += va03 * vb03;
+      vacc0x1 += va03 * vb13;
+      vacc1x0 += va13 * vb03;
+      vacc1x1 += va13 * vb13;
+      vacc2x0 += va23 * vb03;
+      vacc2x1 += va23 * vb13;
+      vacc3x0 += va33 * vb03;
+      vacc3x1 += va33 * vb13;
+    }
+    if XNN_UNLIKELY(k != 0) {
       const int32_t va0 = (int32_t) (uint32_t) *a0++;
       const int32_t va1 = (int32_t) (uint32_t) *a1++;
       const int32_t va2 = (int32_t) (uint32_t) *a2++;
@@ -83,9 +148,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x2__wasm_fmagic(
       vacc2x1 += va2 * vb1;
       vacc3x0 += va3 * vb0;
       vacc3x1 += va3 * vb1;
-
-      k -= sizeof(uint8_t);
-    } while (k != 0);
+    }
 
     float vfpacc0x0 = (float) vacc0x0;
     float vfpacc0x1 = (float) vacc0x1;

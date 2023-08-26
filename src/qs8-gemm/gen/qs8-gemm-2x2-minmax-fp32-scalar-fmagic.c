@@ -13,7 +13,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/unaligned.h>
 
-
 void xnn_qs8_gemm_minmax_fp32_ukernel_2x2__scalar_fmagic(
     size_t mr,
     size_t nc,
@@ -39,6 +38,7 @@ void xnn_qs8_gemm_minmax_fp32_ukernel_2x2__scalar_fmagic(
     a1 = a0;
     c1 = c0;
   }
+
 
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);

@@ -13,7 +13,6 @@
 #include <xnnpack/math.h>
 #include <xnnpack/unaligned.h>
 
-
 void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x2__scalar(
     size_t mr,
     size_t nc,
@@ -36,6 +35,9 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x2__scalar(
   float* c0 = c;
 
   const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
+  assert(vminus_kernel_zero_point >= -15);
+  assert(vminus_kernel_zero_point <= 0);
+
   do {
     const int32_t vksum0 = unaligned_indexed_load_s32(w, 0);
     const int32_t vksum1 = unaligned_indexed_load_s32(w, 1);
@@ -45,16 +47,17 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x2__scalar(
     w = (const int32_t*) w + 2;
 
     size_t k = kc;
-    for (; k >= 2 * sizeof(float); k -= 2 * sizeof(float)) {
-      const int32_t va00 = (int32_t) *a0++;
-      const int32_t va01 = (int32_t) *a0++;
+    for (; k >= 2 * sizeof(int8_t); k -= 2 * sizeof(int8_t)) {
+      const int32_t va00 = (int32_t) a0[0];
+      const int32_t va01 = (int32_t) a0[1];
+      a0 += 2;
 
-      const uint32_t vbi0 = (uint32_t) ((const uint8_t*) w)[0];
-      const uint32_t vbi1 = (uint32_t) ((const uint8_t*) w)[1];
-      const int32_t vb00 = (int32_t) (vbi0 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb10 = (int32_t) (vbi1 & 0xF) + vminus_kernel_zero_point;
-      const int32_t vb01 = (int32_t) (vbi0 >> 4) + vminus_kernel_zero_point;
-      const int32_t vb11 = (int32_t) (vbi1 >> 4) + vminus_kernel_zero_point;
+      const uint32_t vbi00 = (uint32_t) ((const uint8_t*) w)[0];
+      const uint32_t vbi10 = (uint32_t) ((const uint8_t*) w)[1];
+      const int32_t vb00 = (int32_t) (vbi00 & 0xF) + vminus_kernel_zero_point;
+      const int32_t vb10 = (int32_t) (vbi10 & 0xF) + vminus_kernel_zero_point;
+      const int32_t vb01 = (int32_t) (vbi00 >> 4) + vminus_kernel_zero_point;
+      const int32_t vb11 = (int32_t) (vbi10 >> 4) + vminus_kernel_zero_point;
       w = (const int8_t*) w + 2;
 
       vacc0x0 += va00 * vb00;
@@ -65,10 +68,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x2__scalar(
     if XNN_UNLIKELY(k != 0) {
       const int32_t va0 = (int32_t) *a0++;
 
-      const uint32_t vbi0 = (uint32_t) ((const uint8_t*) w)[0];
-      const uint32_t vbi1 = (uint32_t) ((const uint8_t*) w)[1];
-      const int32_t vb0 = (int32_t) vbi0 + vminus_kernel_zero_point;
-      const int32_t vb1 = (int32_t) vbi1 + vminus_kernel_zero_point;
+      const int32_t vb0 = (int32_t) ((const int8_t*) w)[0] + vminus_kernel_zero_point;
+      const int32_t vb1 = (int32_t) ((const int8_t*) w)[1] + vminus_kernel_zero_point;
       w = (const int8_t*) w + 2;
 
       vacc0x0 += va0 * vb0;
